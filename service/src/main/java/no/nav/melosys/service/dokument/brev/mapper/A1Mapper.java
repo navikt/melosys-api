@@ -19,7 +19,7 @@ import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
-import no.nav.melosys.domain.util.LandkoderUtils;
+import no.nav.melosys.domain.util.IsoLandkodeKonverterer;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
@@ -116,7 +116,7 @@ class A1Mapper {
         }
         return statsborgerskap.stream()
             .sorted(Comparator.comparing(Land::getKode))
-            .map(s -> LandkoderUtils.tilIso2(s.getKode())).collect(Collectors.joining(","));
+            .map(s -> IsoLandkodeKonverterer.tilIso2(s.getKode())).collect(Collectors.joining(","));
     }
 
     private LovvalgsperiodeType mapLovvalgsperiode(Lovvalgsperiode lovvalgsperiode) {

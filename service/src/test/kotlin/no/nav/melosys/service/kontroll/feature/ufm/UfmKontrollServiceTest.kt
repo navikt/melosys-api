@@ -122,7 +122,7 @@ class UfmKontrollServiceTest {
             medlemsperiode.add(
                 Medlemsperiode().apply {
                     periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-                    land = "SE"
+                    land = "SWE"
                 }
             )
         }
@@ -164,7 +164,7 @@ class UfmKontrollServiceTest {
             medlemsperiode.add(
                 Medlemsperiode().apply {
                     periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-                    land = "SE"
+                    land = "SWE"
                 }
             )
         }
@@ -199,7 +199,7 @@ class UfmKontrollServiceTest {
             medlemsperiode.add(
                 Medlemsperiode().apply {
                     periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-                    land = "SE"
+                    land = "SWE"
                 }
             )
         }
@@ -241,7 +241,7 @@ class UfmKontrollServiceTest {
             medlemsperiode.add(
                 Medlemsperiode().apply {
                     periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-                    land = "SE"
+                    land = "SWE"
                 }
             )
             personopplysninger
@@ -286,7 +286,7 @@ class UfmKontrollServiceTest {
             medlemsperiode.add(
                 Medlemsperiode().apply {
                     periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-                    land = "SE"
+                    land = "SWE"
                 }
             )
             personopplysninger
@@ -375,13 +375,13 @@ class UfmKontrollServiceTest {
             medlemsperiode.add(
                 Medlemsperiode().apply {
                     periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-                    land = "SE"
+                    land = "SWE"
                 },
             )
             medlemsperiode.add(
                 Medlemsperiode().apply {
                     periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2))
-                    land = "SE"
+                    land = "SWE"
                 },
             )
             personopplysninger
@@ -416,13 +416,13 @@ class UfmKontrollServiceTest {
             medlemsperiode.add(
                 Medlemsperiode().apply {
                     periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-                    land = "SE"
+                    land = "SWE"
                 },
             )
             medlemsperiode.add(
                 Medlemsperiode().apply {
                     periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2))
-                    land = "DK"
+                    land = "DNK"
                 },
             )
             personopplysninger

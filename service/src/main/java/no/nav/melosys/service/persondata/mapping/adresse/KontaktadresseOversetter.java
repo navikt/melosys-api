@@ -4,7 +4,7 @@ import no.nav.melosys.domain.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
-import no.nav.melosys.domain.util.LandkoderUtils;
+import no.nav.melosys.domain.util.IsoLandkodeKonverterer;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.PostadresseIFrittFormat;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Postboksadresse;
@@ -82,7 +82,7 @@ public final class KontaktadresseOversetter {
             null,
             utenlandskAdresseIFrittFormat.postkode(),
             utenlandskAdresseIFrittFormat.byEllerStedsnavn(),
-            LandkoderUtils.tilIso2(utenlandskAdresseIFrittFormat.landkode()));
+            IsoLandkodeKonverterer.tilIso2(utenlandskAdresseIFrittFormat.landkode()));
     }
 }
 

@@ -6,7 +6,7 @@ import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 import org.apache.commons.lang3.StringUtils;
 
 import static no.nav.melosys.domain.eessi.sed.Adressetype.KONTAKTADRESSE;
-import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
+import static no.nav.melosys.domain.util.IsoLandkodeKonverterer.tilIso3;
 
 public class Adresse {
     public static final String IKKE_TILGJENGELIG = "N/A";
