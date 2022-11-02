@@ -35,7 +35,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.dokument.felles.Land.FINLAND;
 import static no.nav.melosys.domain.dokument.felles.Land.SVERIGE;
-import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
+import static no.nav.melosys.domain.util.IsoLandkodeKonverterer.tilIso3;
 import static no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;

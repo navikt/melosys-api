@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_INNGANGSVILKAAR;
-import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
+import static no.nav.melosys.domain.util.IsoLandkodeKonverterer.tilIso3;
 
 @Service
 public class InngangsvilkaarService {

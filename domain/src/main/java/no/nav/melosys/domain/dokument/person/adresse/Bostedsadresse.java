@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.util.LandkoderUtils;
+import no.nav.melosys.domain.util.IsoLandkodeKonverterer;
 import org.apache.commons.lang3.StringUtils;
 
 public class Bostedsadresse {
@@ -85,13 +85,13 @@ public class Bostedsadresse {
             adresse.setGatenavn(gateadresse.getGatenavn());
             adresse.setHusnummerEtasjeLeilighet(Objects.toString(gateadresse.getHusnummer(), ""));
             adresse.setHusnummerEtasjeLeilighet(
-                    adresse.getHusnummerEtasjeLeilighet() + Objects.toString(gateadresse.getHusbokstav(), ""));
+                adresse.getHusnummerEtasjeLeilighet() + Objects.toString(gateadresse.getHusbokstav(), ""));
         }
 
         adresse.setPostnummer(getPostnr());
         adresse.setPoststed(getPoststed());
         if (StringUtils.isNotEmpty(getLand().getKode())) {
-            adresse.setLandkode(LandkoderUtils.tilIso2(getLand().getKode()));
+            adresse.setLandkode(IsoLandkodeKonverterer.tilIso2(getLand().getKode()));
         }
 
         return adresse;
