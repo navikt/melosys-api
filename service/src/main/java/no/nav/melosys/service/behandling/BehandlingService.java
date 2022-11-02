@@ -104,6 +104,8 @@ public class BehandlingService {
         behandling.setStatus(behandlingsstatus);
         behandling.setType(behandlingstype);
         behandling.setTema(behandlingstema);
+        Behandlingsaarsak behandlingsårsak = new Behandlingsaarsak();
+        behandling.setBehandlingsårsak(behandlingsårsak);
         behandling.setInitierendeJournalpostId(initierendeJournalpostId);
         behandling.setInitierendeDokumentId(initierendeDokumentId);
         behandling.setBehandlingsfrist(
