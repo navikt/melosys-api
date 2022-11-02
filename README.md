@@ -8,7 +8,7 @@ Melosys-api er backenden for selve saksbehandlingsløsningen for prosjektet og i
 
 ## Lokal utvikling
 
-Melosys-api kan kjøres opp som en ren Spring-applikasjon med profil `local-mock` ved hjelp av 
+Melosys-api kan kjøres opp som en ren Spring-applikasjon med profil `local-mock` ved hjelp av
  [melosys-docker-compose](https://github.com/navikt/melosys-docker-compose), som spinner opp alle avhenigheter applikajsonen
  har, som database, kafka, ldap, oauth-server samt eksterne integrasjoner. Trenger også [naisdevice](https://doc.nais.io/device/install/index.html)
  for å koble til enkelte eksterne tjenester.
