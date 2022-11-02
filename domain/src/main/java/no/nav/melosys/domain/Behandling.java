@@ -82,9 +82,6 @@ public class Behandling extends RegistreringsInfo {
     private Set<Saksopplysning> saksopplysninger = new HashSet<>(1);
 
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Set<BehandlingHistorikk> behandlingshistorikk = new HashSet<>(1);
-
-    @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Behandlingsnotat> behandlingsnotater = new HashSet<>(1);
 
     @OneToOne(mappedBy = "behandling", cascade = CascadeType.ALL, orphanRemoval = true)
