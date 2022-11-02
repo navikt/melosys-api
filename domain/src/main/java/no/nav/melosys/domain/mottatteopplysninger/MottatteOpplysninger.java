@@ -6,7 +6,7 @@ import javax.persistence.*;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.jpa.MottatteOpplysningerListener;
-import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
+import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper;
 
 @Entity
 @EntityListeners(MottatteOpplysningerListener.class)
@@ -35,7 +35,7 @@ public class MottatteOpplysninger {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
-    private Behandlingsgrunnlagtyper type;
+    private Mottatteopplysningertyper type;
 
     @Lob
     @Column(name = "original_data", updatable = false)
@@ -107,11 +107,11 @@ public class MottatteOpplysninger {
         this.originalData = originalData;
     }
 
-    public Behandlingsgrunnlagtyper getType() {
+    public Mottatteopplysningertyper getType() {
         return type;
     }
 
-    public void setType(Behandlingsgrunnlagtyper type) {
+    public void setType(Mottatteopplysningertyper type) {
         this.type = type;
     }
 
@@ -144,15 +144,15 @@ public class MottatteOpplysninger {
     }
 
     public boolean erSøknadOmA1() {
-        return type == Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS
-            || type == Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS;
+        return type == Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS
+            || type == Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS;
     }
 
     public boolean erSøknadFtrl() {
-        return type == Behandlingsgrunnlagtyper.SØKNAD_FOLKETRYGDEN;
+        return type == Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN;
     }
 
     public boolean erSed() {
-        return this.type == Behandlingsgrunnlagtyper.SED;
+        return this.type == Mottatteopplysningertyper.SED;
     }
 }

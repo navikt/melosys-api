@@ -10,7 +10,7 @@ import java.nio.file.Paths;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.mottatteopplysninger.*;
-import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
+import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -35,7 +35,7 @@ class MottatteOpplysningerListenerTest {
         String json = new String(Files.readAllBytes(Paths.get(søknadURI)));
 
         mottatteOpplysninger.setJsonData(json);
-        mottatteOpplysninger.setType(Behandlingsgrunnlagtyper.SØKNAD_FOLKETRYGDEN);
+        mottatteOpplysninger.setType(Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN);
         mottatteOpplysningerListener.lastMottatteOpplysninger(mottatteOpplysninger);
 
         assertThat(mottatteOpplysninger.getMottatteOpplysningerData()).isNotNull();
@@ -51,7 +51,7 @@ class MottatteOpplysningerListenerTest {
         String json = new String(Files.readAllBytes(Paths.get(søknadURI)));
 
         mottatteOpplysninger.setJsonData(json);
-        mottatteOpplysninger.setType(Behandlingsgrunnlagtyper.SØKNAD_TRYGDEAVTALE);
+        mottatteOpplysninger.setType(Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE);
         mottatteOpplysningerListener.lastMottatteOpplysninger(mottatteOpplysninger);
 
         assertThat(mottatteOpplysninger.getMottatteOpplysningerData()).isNotNull();
@@ -67,7 +67,7 @@ class MottatteOpplysningerListenerTest {
         String json = new String(Files.readAllBytes(Paths.get(søknadURI)));
 
         mottatteOpplysninger.setJsonData(json);
-        mottatteOpplysninger.setType(Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS);
+        mottatteOpplysninger.setType(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS);
         mottatteOpplysningerListener.lastMottatteOpplysninger(mottatteOpplysninger);
 
         MottatteOpplysningerData data = mottatteOpplysninger.getMottatteOpplysningerData();

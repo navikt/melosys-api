@@ -13,7 +13,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.mottatteopplysninger.*;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
-import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
+import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -93,7 +93,7 @@ class MottatteOpplysningerServiceTest {
         assertThat(opprettet.getMottatteOpplysningerData()).isInstanceOf(Soeknad.class);
         assertThat(opprettet.getMottatteOpplysningerData().periode).isEqualTo(periode);
         assertThat(opprettet.getMottatteOpplysningerData().soeknadsland).isEqualTo(soeknadsland);
-        assertThat(opprettet.getType()).isEqualTo(Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS);
+        assertThat(opprettet.getType()).isEqualTo(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS);
         assertThat(opprettet.getBehandling()).isEqualTo(behandling);
         assertThat(opprettet.getMottaksdato()).isNotNull();
     }
@@ -174,7 +174,7 @@ class MottatteOpplysningerServiceTest {
 
         assertThat(opprettet).isNotNull();
         assertThat(opprettet.getMottatteOpplysningerData()).isInstanceOf(SedGrunnlag.class);
-        assertThat(opprettet.getType()).isEqualTo(Behandlingsgrunnlagtyper.SED);
+        assertThat(opprettet.getType()).isEqualTo(Mottatteopplysningertyper.SED);
         assertThat(opprettet.getBehandling()).isEqualTo(behandling);
         assertThat(opprettet.getMottaksdato()).isNotNull();
     }
@@ -194,7 +194,7 @@ class MottatteOpplysningerServiceTest {
 
         assertThat(opprettet).isNotNull();
         assertThat(opprettet.getMottatteOpplysningerData()).isInstanceOf(SoeknadFtrl.class);
-        assertThat(opprettet.getType()).isEqualTo(Behandlingsgrunnlagtyper.SØKNAD_FOLKETRYGDEN);
+        assertThat(opprettet.getType()).isEqualTo(Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN);
         assertThat(opprettet.getBehandling()).isEqualTo(behandling);
         assertThat(opprettet.getMottaksdato()).isNotNull();
     }
@@ -213,7 +213,7 @@ class MottatteOpplysningerServiceTest {
 
         assertThat(opprettet).isNotNull();
         assertThat(opprettet.getMottatteOpplysningerData()).isInstanceOf(SoeknadTrygdeavtale.class);
-        assertThat(opprettet.getType()).isEqualTo(Behandlingsgrunnlagtyper.SØKNAD_TRYGDEAVTALE);
+        assertThat(opprettet.getType()).isEqualTo(Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE);
         assertThat(opprettet.getBehandling()).isEqualTo(behandling);
         assertThat(opprettet.getMottaksdato()).isNotNull();
     }
@@ -241,7 +241,7 @@ class MottatteOpplysningerServiceTest {
 
         assertThat(opprettet).isNotNull();
         assertThat(opprettet.getMottatteOpplysningerData()).isInstanceOf(Soeknad.class);
-        assertThat(opprettet.getType()).isEqualTo(Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS);
+        assertThat(opprettet.getType()).isEqualTo(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS);
         assertThat(opprettet.getBehandling()).isEqualTo(behandling);
         assertThat(opprettet.getMottaksdato()).isNotNull();
     }

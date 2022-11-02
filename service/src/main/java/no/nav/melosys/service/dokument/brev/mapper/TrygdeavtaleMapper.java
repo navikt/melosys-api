@@ -138,7 +138,7 @@ public class TrygdeavtaleMapper {
 
     private Ektefelle tilEktefelle(Map<String, MedfolgendeFamilie> medfølgendeFamilieMap, String uuid, String begrunnelse) {
         var medfølgendeFamilie = Optional.of(medfølgendeFamilieMap.get(uuid))
-            .orElseThrow(() -> finnesIkkeIBehandlingsGrunnlagetException(uuid));
+            .orElseThrow(() -> finnesIkkeIMottatteOpplysningerException(uuid));
 
         IdentType identType = medfølgendeFamilie.utledIdentType();
         return new Ektefelle.Builder()
@@ -167,7 +167,7 @@ public class TrygdeavtaleMapper {
 
     private Barn tilBarn(Map<String, MedfolgendeFamilie> medfølgendeBarnMap, String uuid, String begrunnelse) {
         var medfølgendeBarn = Optional.of(medfølgendeBarnMap.get(uuid))
-            .orElseThrow(() -> finnesIkkeIBehandlingsGrunnlagetException(uuid));
+            .orElseThrow(() -> finnesIkkeIMottatteOpplysningerException(uuid));
         var identType = medfølgendeBarn.utledIdentType();
         return new Barn.Builder()
             .navn(medfølgendeBarn.getNavn())
@@ -267,7 +267,7 @@ public class TrygdeavtaleMapper {
 
     private Person mapFamilieTilPerson(Map<String, MedfolgendeFamilie> medfølgendeFamilieMap, String uuid) {
         var medfølgendeFamilie = Optional.of(medfølgendeFamilieMap.get(uuid))
-            .orElseThrow(() -> finnesIkkeIBehandlingsGrunnlagetException(uuid));
+            .orElseThrow(() -> finnesIkkeIMottatteOpplysningerException(uuid));
         var identType = medfølgendeFamilie.utledIdentType();
 
         return new Person(
@@ -277,7 +277,7 @@ public class TrygdeavtaleMapper {
             identType == DNR ? medfølgendeFamilie.getFnr() : null);
     }
 
-    private FunksjonellException finnesIkkeIBehandlingsGrunnlagetException(String uuid) {
+    private FunksjonellException finnesIkkeIMottatteOpplysningerException(String uuid) {
         return new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i mottatteOpplysningeret");
     }
 

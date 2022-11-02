@@ -5,20 +5,20 @@ import java.util.EnumMap;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
+import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper;
 
 public final class MottatteOpplysningerKonverterer {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    private static final EnumMap<Behandlingsgrunnlagtyper, Class<? extends MottatteOpplysningerData>> mapper = new EnumMap<>(Behandlingsgrunnlagtyper.class);
+    private static final EnumMap<Mottatteopplysningertyper, Class<? extends MottatteOpplysningerData>> mapper = new EnumMap<>(Mottatteopplysningertyper.class);
 
     static {
-        mapper.put(Behandlingsgrunnlagtyper.SØKNAD_FOLKETRYGDEN, SoeknadFtrl.class);
-        mapper.put(Behandlingsgrunnlagtyper.SØKNAD_TRYGDEAVTALE, SoeknadTrygdeavtale.class);
-        mapper.put(Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS, Soeknad.class);
-        mapper.put(Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS, Soeknad.class);
-        mapper.put(Behandlingsgrunnlagtyper.SED, SedGrunnlag.class);
+        mapper.put(Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN, SoeknadFtrl.class);
+        mapper.put(Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE, SoeknadTrygdeavtale.class);
+        mapper.put(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS, Soeknad.class);
+        mapper.put(Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS, Soeknad.class);
+        mapper.put(Mottatteopplysningertyper.SED, SedGrunnlag.class);
         objectMapper.registerModule(new JavaTimeModule());
     }
 
@@ -44,7 +44,7 @@ public final class MottatteOpplysningerKonverterer {
         }
     }
 
-    public static Class<? extends MottatteOpplysningerData> klasseForType(Behandlingsgrunnlagtyper type) {
+    public static Class<? extends MottatteOpplysningerData> klasseForType(Mottatteopplysningertyper type) {
         return mapper.get(type);
     }
 

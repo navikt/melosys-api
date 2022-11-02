@@ -11,7 +11,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.mottatteopplysninger.*;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
-import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
+import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -26,8 +26,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper.SØKNAD_FOLKETRYGDEN;
-import static no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper.SØKNAD_TRYGDEAVTALE;
+import static no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN;
+import static no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE;
 
 @Service
 public class MottatteOpplysningerService {
@@ -69,7 +69,7 @@ public class MottatteOpplysningerService {
 
     public void opprettSedGrunnlag(long behandlingID,
                                    SedGrunnlag sedGrunnlag) {
-        opprettMottatteOpplysninger(behandlingID, sedGrunnlag, Behandlingsgrunnlagtyper.SED, VERSJON_SED_GRUNNLAG);
+        opprettMottatteOpplysninger(behandlingID, sedGrunnlag, Mottatteopplysningertyper.SED, VERSJON_SED_GRUNNLAG);
     }
 
     public void opprettSøknad(Prosessinstans prosessinstans) {
@@ -114,7 +114,7 @@ public class MottatteOpplysningerService {
         Soeknad soeknad = new Soeknad();
         soeknad.periode = periode;
         soeknad.soeknadsland = soeknadsland;
-        opprettMottatteOpplysninger(behandlingID, soeknad, Behandlingsgrunnlagtyper.SØKNAD_A1_YRKESAKTIVE_EØS,
+        opprettMottatteOpplysninger(behandlingID, soeknad, Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS,
             VERSJON_SOEKNAD_GRUNNLAG);
     }
 
@@ -123,7 +123,7 @@ public class MottatteOpplysningerService {
                                                       Soeknad soeknad,
                                                       String eksternReferanseID) {
         opprettMottatteOpplysninger(behandlingID, orginalData, soeknad,
-            Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS, VERSJON_SOEKNAD_GRUNNLAG,
+            Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS, VERSJON_SOEKNAD_GRUNNLAG,
             eksternReferanseID);
     }
 
@@ -139,7 +139,7 @@ public class MottatteOpplysningerService {
 
     private void opprettMottatteOpplysninger(long behandlingID,
                                             MottatteOpplysningerData mottatteOpplysningerData,
-                                            Behandlingsgrunnlagtyper type,
+                                            Mottatteopplysningertyper type,
                                             String versjon) {
 
         opprettMottatteOpplysninger(behandlingID, null, mottatteOpplysningerData, type, versjon, null);
@@ -148,7 +148,7 @@ public class MottatteOpplysningerService {
     private void opprettMottatteOpplysninger(long behandlingID,
                                             String originalData,
                                             MottatteOpplysningerData mottatteOpplysningerData,
-                                            Behandlingsgrunnlagtyper type,
+                                            Mottatteopplysningertyper type,
                                             String versjon,
                                             String eksternReferanseID) {
 
@@ -176,7 +176,7 @@ public class MottatteOpplysningerService {
 
     // Gjør mottaksdato nødvendig for kun folketrygden da nåværende journalpost-oppslag kun støtter inngående
     // dokumenter og fordi mottaksdato ikke er like viktig for andre grunnlagstyper.
-    private LocalDate hentMottaksdato(Behandlingsgrunnlagtyper grunnlagtype, String journalpostID) {
+    private LocalDate hentMottaksdato(Mottatteopplysningertyper grunnlagtype, String journalpostID) {
         if (grunnlagtype == SØKNAD_FOLKETRYGDEN) {
             return finnMottaksdato(journalpostID).orElseThrow(
                 () -> new FunksjonellException("Mottaksdato trenges for " + SØKNAD_FOLKETRYGDEN.getKode()));
