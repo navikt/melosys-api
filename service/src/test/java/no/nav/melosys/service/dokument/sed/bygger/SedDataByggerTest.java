@@ -8,8 +8,8 @@ import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.LuftfartBase;
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.LuftfartBase;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Diskresjonskode;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
@@ -426,7 +426,7 @@ class SedDataByggerTest {
         luftfartBase.hjemmebaseLand = "GB";
 
         SedDataGrunnlagMedSoknad dataGrunnlag = lagGrunnlagMedSøknad();
-        dataGrunnlag.getBehandlingsgrunnlagData().luftfartBaser = List.of(luftfartBase);
+        dataGrunnlag.getMottatteOpplysningerData().luftfartBaser = List.of(luftfartBase);
         SedDataDto sedData = dataBygger.lag(dataGrunnlag, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
 
         assertThat(sedData.getArbeidssteder()).hasSize(2);
@@ -448,7 +448,7 @@ class SedDataByggerTest {
         utenlandskSelvstendigForetak.uuid = "123";
 
         SedDataGrunnlagMedSoknad dataGrunnlag = lagGrunnlagMedSøknad();
-        dataGrunnlag.getBehandlingsgrunnlagData().foretakUtland = List.of(utenlandskSelvstendigForetak);
+        dataGrunnlag.getMottatteOpplysningerData().foretakUtland = List.of(utenlandskSelvstendigForetak);
 
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(Set.of("123"));
 
@@ -554,7 +554,7 @@ class SedDataByggerTest {
     void lag_erBehandlingAvSøknadToggleAv_søknadsperiodeBlirSatt() {
         unleash.disable("melosys.behandle_alle_saker");
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        var søknad = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        var søknad = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         var sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
 
         assertThat(sedData.getSøknadsperiode())
@@ -570,7 +570,7 @@ class SedDataByggerTest {
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);
-        var søknad = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        var søknad = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         var sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
 
         assertThat(sedData.getSøknadsperiode())
@@ -585,7 +585,7 @@ class SedDataByggerTest {
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);
-        var søknad = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        var søknad = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         var sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
 
         assertThat(sedData.getSøknadsperiode()).isNull();
@@ -598,7 +598,7 @@ class SedDataByggerTest {
         behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);
-        var søknad = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        var søknad = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         var sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
 
         assertThat(sedData.getSøknadsperiode()).isNull();
@@ -612,7 +612,7 @@ class SedDataByggerTest {
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setType(Behandlingstyper.HENVENDELSE);
         behandling.setFagsak(fagsak);
-        var søknad = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        var søknad = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         var sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
 
         assertThat(sedData.getSøknadsperiode()).isNull();

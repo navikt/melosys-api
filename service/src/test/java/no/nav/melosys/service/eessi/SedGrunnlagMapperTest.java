@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 import java.util.Objects;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
+import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto;
 import org.junit.jupiter.api.Test;
 

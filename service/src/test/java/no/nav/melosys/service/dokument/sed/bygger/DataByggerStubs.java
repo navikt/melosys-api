@@ -7,18 +7,18 @@ import java.util.Set;
 
 import com.google.common.collect.Lists;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.MaritimtArbeid;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.*;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.*;
+import no.nav.melosys.domain.mottatteopplysninger.data.*;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.adresse.Gateadresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -34,7 +34,7 @@ class DataByggerStubs {
     static Behandling hentBehandlingStub() {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
-        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
 
         Fagsak fagsak = new Fagsak();
         Aktoer myndighet = new Aktoer();
@@ -66,7 +66,7 @@ class DataByggerStubs {
         utenlandskIdent.ident = "439205843";
         utenlandskIdent.landkode = "SE";
         søknadDokument.personOpplysninger.utenlandskIdent.add(utenlandskIdent);
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(søknadDokument);
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(søknadDokument);
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.ARBFORH);
@@ -110,23 +110,23 @@ class DataByggerStubs {
                                                                   boolean arbeidsgivendeForetakUtlandManglerLandkode,
                                                                   boolean selvstendigForetakUtlandManglerLandkode) {
         Behandling behandling = hentBehandlingStub();
-        BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        MottatteOpplysningerData mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
 
-        FysiskArbeidssted fysiskArbeidssted = behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidssteder.remove(0);
+        FysiskArbeidssted fysiskArbeidssted = mottatteOpplysningerData.arbeidPaaLand.fysiskeArbeidssteder.remove(0);
         fysiskArbeidssted.adresse.setPoststed(null);
         if (fysiskArbeidsstedManglerLandkode) {
             fysiskArbeidssted.adresse.setLandkode(null);
         }
-        behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
+        mottatteOpplysningerData.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
 
-        ForetakUtland foretakUtland = behandlingsgrunnlagData.foretakUtland.remove(0);
+        ForetakUtland foretakUtland = mottatteOpplysningerData.foretakUtland.remove(0);
         foretakUtland.adresse.setPostnummer(null);
         foretakUtland.adresse.setPoststed(null);
         if (arbeidsgivendeForetakUtlandManglerLandkode || selvstendigForetakUtlandManglerLandkode) {
             foretakUtland.adresse.setLandkode(null);
         }
         foretakUtland.selvstendigNæringsvirksomhet = selvstendigForetakUtlandManglerLandkode;
-        behandlingsgrunnlagData.foretakUtland.add(foretakUtland);
+        mottatteOpplysningerData.foretakUtland.add(foretakUtland);
 
         return behandling;
     }

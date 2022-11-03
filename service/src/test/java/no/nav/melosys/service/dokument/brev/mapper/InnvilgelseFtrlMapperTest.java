@@ -14,8 +14,8 @@ import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoNorge;
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoUtland;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
@@ -42,8 +42,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
-import static no.nav.melosys.domain.behandlingsgrunnlag.data.IdentType.*;
-import static no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie.tilMedfolgendeFamilie;
+import static no.nav.melosys.domain.mottatteopplysninger.data.IdentType.*;
+import static no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie.tilMedfolgendeFamilie;
 import static no.nav.melosys.domain.kodeverk.Loenn_forhold.LØNN_FRA_NORGE;
 import static no.nav.melosys.domain.kodeverk.Loenn_forhold.LØNN_FRA_UTLANDET;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_NORSK_VIRKSOMHET_IKKE_UTSENDT;
@@ -190,7 +190,7 @@ class InnvilgelseFtrlMapperTest {
         mockHappyCase();
         when(mockTrygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(anyLong())).thenReturn(lagUtenlandskTrygdeAvgiftsgrunnlag());
         Behandlingsresultat behandlingsresultat = lagBehandlingsResultat();
-        behandlingsresultat.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland = new Soeknadsland(List.of("GB"), false);
+        behandlingsresultat.getBehandling().getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland = new Soeknadsland(List.of("GB"), false);
         when(mockDokgenMapperDatahenter.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         InnvilgelseFtrl innvilgelseFtrl = innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling());

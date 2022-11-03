@@ -2,7 +2,7 @@ package no.nav.melosys.service.persondata.mapping.adresse;
 
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.util.LandkoderUtils;
+import no.nav.melosys.domain.util.IsoLandkodeKonverterer;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Matrikkeladresse;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.UtenlandskAdresse;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Vegadresse;
@@ -40,7 +40,7 @@ final class PdlAdresseformatOversetter {
             utenlandskAdresse.postkode(),
             utenlandskAdresse.bySted(),
             utenlandskAdresse.regionDistriktOmraade(),
-            LandkoderUtils.tilIso2(utenlandskAdresse.landkode())
+            IsoLandkodeKonverterer.tilIso2(utenlandskAdresse.landkode())
         );
     }
 

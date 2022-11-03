@@ -1,12 +1,5 @@
 package no.nav.melosys.domain.dokument.person;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.brev.Postadresse;
@@ -19,12 +12,18 @@ import no.nav.melosys.domain.person.Master;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
-import no.nav.melosys.domain.util.LandkoderUtils;
+import no.nav.melosys.domain.util.IsoLandkodeKonverterer;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 /**
  * Representerer svar fra personregisteret (TPS)
- *
  */
 public class PersonDokument implements Persondata {
     private String fnr;
@@ -48,7 +47,7 @@ public class PersonDokument implements Persondata {
     private UstrukturertAdresse postadresse = new UstrukturertAdresse();
     private MidlertidigPostadresse midlertidigPostadresse = new MidlertidigPostadresse();
     private UstrukturertAdresse gjeldendePostadresse = new UstrukturertAdresse();
-    @JsonProperty(defaultValue = "false" )
+    @JsonProperty(defaultValue = "false")
     private boolean erEgenAnsatt;
 
     @Override
@@ -92,7 +91,7 @@ public class PersonDokument implements Persondata {
         }
         return Optional.of(
             new Kontaktadresse(null, lagSemistrukturertAdresse(postadresse), null,
-                null,null ,Master.TPS.name() ,Master.TPS.name(),null,
+                null, null, Master.TPS.name(), Master.TPS.name(), null,
                 false));
     }
 
@@ -145,7 +144,9 @@ public class PersonDokument implements Persondata {
         this.sivilstandGyldighetsperiodeFom = sivilstandGyldighetsperiodeFom;
     }
 
-    /** Kodeverk: Landkoder */
+    /**
+     * Kodeverk: Landkoder
+     */
     public Land getStatsborgerskap() {
         return statsborgerskap;
     }
@@ -154,7 +155,9 @@ public class PersonDokument implements Persondata {
         this.statsborgerskap = statsborgerskap;
     }
 
-    /** Kodeverk: Kjønnstyper */
+    /**
+     * Kodeverk: Kjønnstyper
+     */
     public KjoennsType getKjønn() {
         return kjønn;
     }
@@ -291,7 +294,7 @@ public class PersonDokument implements Persondata {
             gjeldendePostadresse.adresselinje4,
             gjeldendePostadresse.postnr,
             gjeldendePostadresse.poststed,
-            gjeldendePostadresse.land != null ? LandkoderUtils.tilIso2(gjeldendePostadresse.land.getKode()) : null,
+            gjeldendePostadresse.land != null ? IsoLandkodeKonverterer.tilIso2(gjeldendePostadresse.land.getKode()) : null,
             null
         );
     }
@@ -312,7 +315,7 @@ public class PersonDokument implements Persondata {
             ustrukturertAdresse.adresselinje4,
             ustrukturertAdresse.postnr,
             ustrukturertAdresse.poststed,
-            ustrukturertAdresse.land != null ? LandkoderUtils.tilIso2(ustrukturertAdresse.land.getKode()) : null
+            ustrukturertAdresse.land != null ? IsoLandkodeKonverterer.tilIso2(ustrukturertAdresse.land.getKode()) : null
         );
     }
 }

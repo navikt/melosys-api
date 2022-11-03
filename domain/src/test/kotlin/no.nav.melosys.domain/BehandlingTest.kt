@@ -1,7 +1,7 @@
 package no.nav.melosys.domain
 
 import io.kotest.matchers.shouldBe
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -116,7 +116,7 @@ internal class BehandlingTest {
             fagsak = Fagsak().apply {
                 tema = Sakstemaer.MEDLEMSKAP_LOVVALG
             }
-            behandlingsgrunnlag = Behandlingsgrunnlag().apply {
+            mottatteOpplysninger = MottatteOpplysninger().apply {
                 mottaksdato = utgangspunktDato
             }
             tema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
@@ -217,7 +217,7 @@ internal class BehandlingTest {
             fagsak = Fagsak().apply {
                 tema = Sakstemaer.UNNTAK
             }
-            behandlingsgrunnlag = Behandlingsgrunnlag().apply {
+            mottatteOpplysninger = MottatteOpplysninger().apply {
                 mottaksdato = utgangspunktDato
             }
             tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
@@ -227,7 +227,7 @@ internal class BehandlingTest {
             fagsak = Fagsak().apply {
                 tema = Sakstemaer.UNNTAK
             }
-            behandlingsgrunnlag = Behandlingsgrunnlag().apply {
+            mottatteOpplysninger = MottatteOpplysninger().apply {
                 mottaksdato = utgangspunktDato
             }
             tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
