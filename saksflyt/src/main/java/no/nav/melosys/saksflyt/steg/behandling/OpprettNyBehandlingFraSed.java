@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -63,7 +64,7 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
         avsluttTidligereBehandling(fagsak);
         var behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.UNDER_BEHANDLING,
             unleash.isEnabled("melosys.behandle_alle_saker") ? Behandlingstyper.FØRSTEGANG : Behandlingstyper.SED,
-            behandlingstema, eessiMelding.getJournalpostId(), eessiMelding.getDokumentId());
+            behandlingstema, eessiMelding.getJournalpostId(), eessiMelding.getDokumentId(), null, Behandlingsaarsaktyper.SED);
 
         fagsak.getBehandlinger().add(behandling);
         fagsakService.lagre(fagsak);

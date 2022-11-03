@@ -3,6 +3,7 @@ package no.nav.melosys.service.sak;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
@@ -39,6 +40,7 @@ class OpprettBehandlingForSakTest {
     private FagsakService fagsakService;
     @Mock
     private BehandlingsresultatRepository behandlingsresultatRepository;
+    private final FakeUnleash unleash = new FakeUnleash();
 
     private OpprettBehandlingForSak opprettBehandlingForSak;
 
@@ -53,7 +55,8 @@ class OpprettBehandlingForSakTest {
     @BeforeEach
     public void setUp() {
         SaksbehandlingRegler saksbehandlingRegler = new SaksbehandlingRegler(behandlingsresultatRepository);
-        opprettBehandlingForSak = new OpprettBehandlingForSak(fagsakService, prosessinstansService, saksbehandlingRegler);
+        opprettBehandlingForSak = new OpprettBehandlingForSak(fagsakService, prosessinstansService, saksbehandlingRegler, unleash);
+        unleash.resetAll();
     }
 
     @Test
@@ -97,6 +100,7 @@ class OpprettBehandlingForSakTest {
 
     @Test
     void opprettBehandling_utenMottaksdato_feiler() {
+        unleash.enable("melosys.behandle_alle_saker");
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setMottaksdato(null);
 

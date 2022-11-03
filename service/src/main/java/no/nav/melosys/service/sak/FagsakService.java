@@ -1,16 +1,14 @@
 package no.nav.melosys.service.sak;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.FagsakRepository;
@@ -232,11 +230,13 @@ public class FagsakService {
 
         Behandlingstyper behandlingstype = opprettSakRequest.getBehandlingstype();
         Behandlingstema behandlingstema = opprettSakRequest.getBehandlingstema();
+        Behandlingsaarsaktyper behandlingsårsaktype = opprettSakRequest.getBehandlingsårsaktype();
+        LocalDate mottaksdato = opprettSakRequest.getMottaksdato();
         String initierendeJournalpostId = opprettSakRequest.getInitierendeJournalpostId();
         String initierendeDokumentId = opprettSakRequest.getInitierendeDokumentId();
         Behandling behandling = behandlingService.nyBehandling(fagsak,
             Behandlingsstatus.OPPRETTET, behandlingstype, behandlingstema,
-            initierendeJournalpostId, initierendeDokumentId);
+            initierendeJournalpostId, initierendeDokumentId, mottaksdato, behandlingsårsaktype);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
         sakerOpprettet.increment();

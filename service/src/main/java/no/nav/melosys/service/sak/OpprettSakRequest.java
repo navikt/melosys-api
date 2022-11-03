@@ -1,5 +1,6 @@
 package no.nav.melosys.service.sak;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,6 +8,7 @@ import no.nav.melosys.domain.Fullmektig;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import org.apache.commons.collections4.CollectionUtils;
@@ -20,6 +22,8 @@ public class OpprettSakRequest {
     private final List<Kontaktopplysning> kontaktopplysninger;
     private final Behandlingstyper behandlingstype;
     private final Behandlingstema behandlingstema;
+    private final Behandlingsaarsaktyper behandlingsårsaktype;
+    private final LocalDate mottaksdato;
     private final String initierendeJournalpostId;
     private final String initierendeDokumentId;
     private final Sakstyper sakstype;
@@ -34,6 +38,8 @@ public class OpprettSakRequest {
         this.kontaktopplysninger = builder.kontaktopplysninger;
         this.behandlingstype = builder.behandlingstype;
         this.behandlingstema = builder.behandlingstema;
+        this.behandlingsårsaktype = builder.behandlingsårsaktype;
+        this.mottaksdato = builder.mottaksdato;
         this.initierendeJournalpostId = builder.initierendeJournalpostId;
         this.initierendeDokumentId = builder.initierendeDokumentId;
         this.sakstype = builder.sakstype;
@@ -72,6 +78,14 @@ public class OpprettSakRequest {
         return behandlingstema;
     }
 
+    public Behandlingsaarsaktyper getBehandlingsårsaktype() {
+        return behandlingsårsaktype;
+    }
+
+    public LocalDate getMottaksdato() {
+        return mottaksdato;
+    }
+
     public String getInitierendeJournalpostId() {
         return initierendeJournalpostId;
     }
@@ -97,6 +111,8 @@ public class OpprettSakRequest {
         private List<Kontaktopplysning> kontaktopplysninger = new ArrayList<>();
         private Behandlingstyper behandlingstype;
         private Behandlingstema behandlingstema;
+        private Behandlingsaarsaktyper behandlingsårsaktype;
+        private LocalDate mottaksdato;
         private String initierendeJournalpostId;
         private String initierendeDokumentId;
         private Sakstyper sakstype;
@@ -141,6 +157,16 @@ public class OpprettSakRequest {
 
         public Builder medBehandlingstema(Behandlingstema behandlingstema) {
             this.behandlingstema = behandlingstema;
+            return this;
+        }
+
+        public Builder medBehandlingsårsaktype(Behandlingsaarsaktyper behandlingsårsaktype) {
+            this.behandlingsårsaktype = behandlingsårsaktype;
+            return this;
+        }
+
+        public Builder medMottaksdato(LocalDate mottaksdato) {
+            this.mottaksdato = mottaksdato;
             return this;
         }
 

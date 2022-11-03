@@ -7,6 +7,7 @@ import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -97,7 +98,7 @@ class OpprettNyBehandlingFraSedTest {
             .build();
 
         when(fagsakService.hentFagsakFraArkivsakID(gsakSaksnummer)).thenReturn(fagsak);
-        when(behandlingService.nyBehandling(any(), any(), any(), any(), any(), any())).thenReturn(new Behandling());
+        when(behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(new Behandling());
         when(oppgaveFasade.finnÅpenBehandlingsoppgaveMedFagsaksnummer(fagsak.getSaksnummer()))
             .thenReturn(Optional.of(oppgave));
 
@@ -106,8 +107,8 @@ class OpprettNyBehandlingFraSedTest {
         verify(oppgaveFasade).ferdigstillOppgave(oppgave.getOppgaveId());
         verify(behandlingService).avsluttBehandling(behandling.getId());
         verify(behandlingService).nyBehandling(
-            fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.SED, behandlingstema, journalpostID, dokumentID
-        );
+            fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.SED, behandlingstema, journalpostID, dokumentID,
+            null, Behandlingsaarsaktyper.SED);
         assertThat(prosessinstans.getBehandling()).isNotNull();
     }
 
@@ -140,7 +141,7 @@ class OpprettNyBehandlingFraSedTest {
             .build();
 
         when(fagsakService.hentFagsakFraArkivsakID(gsakSaksnummer)).thenReturn(fagsak);
-        when(behandlingService.nyBehandling(any(), any(), any(), any(), any(), any())).thenReturn(new Behandling());
+        when(behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(new Behandling());
         when(oppgaveFasade.finnÅpenBehandlingsoppgaveMedFagsaksnummer(fagsak.getSaksnummer()))
             .thenReturn(Optional.of(oppgave));
 
@@ -149,8 +150,8 @@ class OpprettNyBehandlingFraSedTest {
         verify(oppgaveFasade).ferdigstillOppgave(oppgave.getOppgaveId());
         verify(behandlingService).avsluttBehandling(behandling.getId());
         verify(behandlingService).nyBehandling(
-            fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.FØRSTEGANG, behandlingstema, journalpostID, dokumentID
-        );
+            fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.FØRSTEGANG, behandlingstema, journalpostID, dokumentID,
+            null, Behandlingsaarsaktyper.SED);
         assertThat(prosessinstans.getBehandling()).isNotNull();
     }
 }

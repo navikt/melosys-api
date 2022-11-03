@@ -82,6 +82,8 @@ public class ProsessinstansService {
         prosessinstans.setData(SAKSTEMA, opprettSakDto.getSakstema());
         prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
         prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+        prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakDto.getBehandlingsaarsakType());
+        prosessinstans.setData(BEHANDLINGSÅRSAK_FRIKTEKST, opprettSakDto.getBehandlingsaarsakFritekst());
         prosessinstans.setData(BRUKER_ID, opprettSakDto.getBrukerID());
         prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakDto.getVirksomhetOrgnr());
         prosessinstans.setData(MOTTATT_DATO, opprettSakDto.getMottaksdato());
@@ -99,6 +101,8 @@ public class ProsessinstansService {
         prosessinstans.setData(SAKSNUMMER, saksnummer);
         prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
         prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+        prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakDto.getBehandlingsaarsakType());
+        prosessinstans.setData(BEHANDLINGSÅRSAK_FRIKTEKST, opprettSakDto.getBehandlingsaarsakFritekst());
         prosessinstans.setData(MOTTATT_DATO, opprettSakDto.getMottaksdato());
         prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
 
@@ -112,6 +116,8 @@ public class ProsessinstansService {
         prosessinstans.setData(SAKSNUMMER, saksnummer);
         prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
         prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+        prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakDto.getBehandlingsaarsakType());
+        prosessinstans.setData(BEHANDLINGSÅRSAK_FRIKTEKST, opprettSakDto.getBehandlingsaarsakFritekst());
         prosessinstans.setData(MOTTATT_DATO, opprettSakDto.getMottaksdato());
         prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
 

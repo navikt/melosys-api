@@ -12,10 +12,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerKonverterer;
 import no.nav.melosys.domain.brev.DokumentasjonSvarfrist;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -95,7 +92,9 @@ public class BehandlingService {
                                    Behandlingstyper behandlingstype,
                                    Behandlingstema behandlingstema,
                                    String initierendeJournalpostId,
-                                   String initierendeDokumentId) {
+                                   String initierendeDokumentId,
+                                   LocalDate mottaksdato,
+                                   Behandlingsaarsaktyper årsaktype) {
         Instant nå = Instant.now();
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
@@ -104,8 +103,10 @@ public class BehandlingService {
         behandling.setStatus(behandlingsstatus);
         behandling.setType(behandlingstype);
         behandling.setTema(behandlingstema);
-        Behandlingsaarsak behandlingsårsak = new Behandlingsaarsak();
-        behandling.setBehandlingsårsak(behandlingsårsak);
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            Behandlingsaarsak behandlingsårsak = new Behandlingsaarsak(årsaktype, mottaksdato);
+            behandling.setBehandlingsårsak(behandlingsårsak);
+        }
         behandling.setInitierendeJournalpostId(initierendeJournalpostId);
         behandling.setInitierendeDokumentId(initierendeDokumentId);
         behandling.setBehandlingsfrist(
