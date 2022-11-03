@@ -37,7 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.ART12_1_VESENTLIG_VIRKSOMHET;
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_1;
-import static no.nav.melosys.service.BehandlingsgrunnlagStub.lagBehandlingsgrunnlag;
+import static no.nav.melosys.service.MottatteOpplysningerStub.lagMottatteOpplysninger;
 import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplysninger;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagPersonsaksopplysning;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
@@ -97,7 +97,7 @@ class BrevDataByggerAvslagArbeidsgiverTest {
         saksopplysninger.add(person);
         behandling.setSaksopplysninger(saksopplysninger);
 
-        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(Collections.emptyList(),
+        behandling.setMottatteOpplysninger(lagMottatteOpplysninger(Collections.emptyList(),
             Collections.emptyList(),
             Collections.singletonList("987654321")));
 

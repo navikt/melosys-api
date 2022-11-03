@@ -16,7 +16,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.repository.KontrollresultatRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.kontroll.feature.ufm.data.UfmKontrollData;
 import no.nav.melosys.service.kontroll.feature.ufm.kontroll.UfmKontrollsett;
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
@@ -42,19 +42,19 @@ public class UfmKontrollService {
 
     private final KontrollresultatRepository kontrollresultatRepository;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private final MottatteOpplysningerService mottatteOpplysningerService;
     private final BehandlingService behandlingService;
     private final PersondataFasade persondataFasade;
     private final Unleash unleash;
 
     public UfmKontrollService(KontrollresultatRepository kontrollresultatRepository,
                               BehandlingsresultatService behandlingsresultatService,
-                              BehandlingsgrunnlagService behandlingsgrunnlagService, BehandlingService behandlingService,
+                              MottatteOpplysningerService mottatteOpplysningerService, BehandlingService behandlingService,
                               PersondataFasade persondataFasade,
                               Unleash unleash) {
         this.kontrollresultatRepository = kontrollresultatRepository;
         this.behandlingsresultatService = behandlingsresultatService;
-        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
+        this.mottatteOpplysningerService = mottatteOpplysningerService;
         this.behandlingService = behandlingService;
         this.persondataFasade = persondataFasade;
         this.unleash = unleash;
@@ -84,8 +84,8 @@ public class UfmKontrollService {
         var medlemskapDokument = behandling.hentMedlemskapDokument();
         var inntektDokument = behandling.hentInntektDokument();
         var utbetalingDokument = behandling.finnUtbetalingDokument().orElse(null);
-        var optionalBehandlingsgrunnlagData = behandlingsgrunnlagService.finnBehandlingsgrunnlagdata(behandling.getId());
-        return new UfmKontrollData(sedDokument, persondata, medlemskapDokument, inntektDokument, utbetalingDokument, optionalBehandlingsgrunnlagData);
+        var optionalMottatteOpplysningerData = mottatteOpplysningerService.finnMottatteOpplysningerdata(behandling.getId());
+        return new UfmKontrollData(sedDokument, persondata, medlemskapDokument, inntektDokument, utbetalingDokument, optionalMottatteOpplysningerData);
     }
 
     private List<Kontroll_begrunnelser> utførKontroller(UfmKontrollData kontrollData, SedType sedType) {

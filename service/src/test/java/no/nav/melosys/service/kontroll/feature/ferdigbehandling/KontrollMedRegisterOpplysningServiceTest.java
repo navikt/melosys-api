@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
@@ -51,8 +51,8 @@ class KontrollMedRegisterOpplysningServiceTest {
     private final long behandlingID = 1L;
     private final Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
     private final MedlemskapDokument medlemskapDokument = new MedlemskapDokument();
-    private final BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
-    private final Behandling behandling = lagBehandling(behandlingsgrunnlagData);
+    private final MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
+    private final Behandling behandling = lagBehandling(mottatteOpplysningerData);
     private final FakeUnleash unleash = new FakeUnleash();
 
 

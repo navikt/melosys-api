@@ -6,9 +6,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.MaritimtArbeid;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.AvklarteVirksomheterGrunnlag;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
@@ -19,11 +19,11 @@ import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidsst
 public class ArbeidsstedGrunnlag {
     private final Map<String, AvklartMaritimtArbeid> avklarteMaritimeArbeidEtterSubjekt;
     private final AvklarteVirksomheterGrunnlag avklarteVirksomheterGrunnlag;
-    private final BehandlingsgrunnlagData grunnlagData;
+    private final MottatteOpplysningerData grunnlagData;
 
     public ArbeidsstedGrunnlag(Map<String, AvklartMaritimtArbeid> avklarteMaritimeArbeid,
                         AvklarteVirksomheterGrunnlag avklarteVirksomheterGrunnlag,
-                        BehandlingsgrunnlagData grunnlagData) {
+                        MottatteOpplysningerData grunnlagData) {
         this.avklarteMaritimeArbeidEtterSubjekt = avklarteMaritimeArbeid;
         this.avklarteVirksomheterGrunnlag = avklarteVirksomheterGrunnlag;
         this.grunnlagData = grunnlagData;

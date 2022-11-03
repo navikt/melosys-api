@@ -2,7 +2,7 @@ package no.nav.melosys.domain.eessi.sed;
 
 import java.util.UUID;
 
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
 import org.apache.commons.lang3.StringUtils;
 
 public class Virksomhet {

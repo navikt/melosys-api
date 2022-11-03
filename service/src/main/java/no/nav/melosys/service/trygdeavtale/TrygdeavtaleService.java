@@ -9,7 +9,7 @@ import java.util.stream.Stream;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -48,7 +48,7 @@ public class TrygdeavtaleService {
     }
 
     public Map<String, String> hentVirksomheter(Behandling behandling) {
-        var behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        var mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         var organisasjonDokumenter = behandling.hentOrganisasjonDokumenter();
 
         Map<String, String> orgIdOgNavn = new HashMap<>();
@@ -58,10 +58,10 @@ public class TrygdeavtaleService {
                 .hentArbeidsgiverIDer().stream()
                 .collect(Collectors.toMap(orgnr -> orgnr, orgnr -> finnNavnFraOrganisasjonsdokument(orgnr, organisasjonDokumenter))));
 
-        orgIdOgNavn.putAll(behandlingsgrunnlagData.hentAlleOrganisasjonsnumre().stream()
+        orgIdOgNavn.putAll(mottatteOpplysningerData.hentAlleOrganisasjonsnumre().stream()
             .collect(Collectors.toMap(orgnr -> orgnr, orgnr -> finnNavnFraOrganisasjonsdokument(orgnr, organisasjonDokumenter))));
 
-        orgIdOgNavn.putAll(behandlingsgrunnlagData.hentUtenlandskeArbeidsgivereUuidOgNavn());
+        orgIdOgNavn.putAll(mottatteOpplysningerData.hentUtenlandskeArbeidsgivereUuidOgNavn());
 
         return orgIdOgNavn;
     }
@@ -74,7 +74,7 @@ public class TrygdeavtaleService {
     }
 
     public List<MedfolgendeFamilie> hentFamiliemedlemmer(Behandling behandling) {
-        return behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().personOpplysninger.medfolgendeFamilie;
+        return behandling.getMottatteOpplysninger().getMottatteOpplysningerData().personOpplysninger.medfolgendeFamilie;
     }
 
     public void overførResultat(long behandlingId, TrygdeavtaleResultat trygdeavtaleResultat) {

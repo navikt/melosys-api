@@ -10,32 +10,32 @@ import java.util.stream.Stream;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.*;
+import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.*;
 
 @Service
 public class LandvelgerService {
 
     private final AvklartefaktaService avklartefaktaService;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private final MottatteOpplysningerService mottatteOpplysningerService;
 
     public LandvelgerService(AvklartefaktaService avklartefaktaService,
                              BehandlingsresultatService behandlingsresultatService,
-                             BehandlingsgrunnlagService behandlingsgrunnlagService) {
+                             MottatteOpplysningerService mottatteOpplysningerService) {
         this.avklartefaktaService = avklartefaktaService;
         this.behandlingsresultatService = behandlingsresultatService;
-        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
+        this.mottatteOpplysningerService = mottatteOpplysningerService;
     }
 
     public Land_iso2 hentArbeidsland(long behandlingID) {
@@ -49,9 +49,9 @@ public class LandvelgerService {
     public Collection<Land_iso2> hentAlleArbeidsland(long behandlingID) {
         Collection<Land_iso2> alleArbeidsland = avklartefaktaService.hentAlleAvklarteArbeidsland(behandlingID);
         if (alleArbeidsland.isEmpty() || erArtikkel13(behandlingID)) {
-            Behandlingsgrunnlag behandlingsgrunnlag =  behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID);
-            BehandlingsgrunnlagData grunnlagData = behandlingsgrunnlag.getBehandlingsgrunnlagdata();
-            Behandling behandling = behandlingsgrunnlag.getBehandling();
+            MottatteOpplysninger mottatteOpplysninger =  mottatteOpplysningerService.hentMottatteOpplysninger(behandlingID);
+            MottatteOpplysningerData grunnlagData = mottatteOpplysninger.getMottatteOpplysningerData();
+            Behandling behandling = mottatteOpplysninger.getBehandling();
             var søknadsland = grunnlagData.soeknadsland;
 
             if (behandling.erAnmodningOmUnntak() && søknadsland.landkoder.isEmpty()) {
@@ -65,7 +65,7 @@ public class LandvelgerService {
     }
 
     public boolean erUkjenteEllerAlleEosLand(long behandlingID) {
-        BehandlingsgrunnlagData grunnlagData = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID).getBehandlingsgrunnlagdata();
+        MottatteOpplysningerData grunnlagData = mottatteOpplysningerService.hentMottatteOpplysninger(behandlingID).getMottatteOpplysningerData();
         return hentSøknadsland(grunnlagData).erUkjenteEllerAlleEosLand;
     }
 
@@ -119,11 +119,11 @@ public class LandvelgerService {
     private Collection<Land_iso2> hentUtenlandskTrygdemyndighetslandArtikkel13(Behandlingsresultat behandlingsresultat) {
         final long behandlingID = behandlingsresultat.getId();
         Set<Land_iso2> landkoderMedMarginaltArbeid = avklartefaktaService.hentLandkoderMedMarginaltArbeid(behandlingID);
-        Behandlingsgrunnlag behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID);
+        MottatteOpplysninger mottatteOpplysninger = mottatteOpplysningerService.hentMottatteOpplysninger(behandlingID);
 
         Stream<Land_iso2> marginaleArbeidslandMedUtenlandskArbeid = Stream.concat(
-            behandlingsgrunnlag.getBehandlingsgrunnlagdata().hentUtenlandskeArbeidsstederLandkode().stream(),
-            behandlingsgrunnlag.getBehandlingsgrunnlagdata().hentUtenlandskeArbeidsgivereLandkode().stream()
+            mottatteOpplysninger.getMottatteOpplysningerData().hentUtenlandskeArbeidsstederLandkode().stream(),
+            mottatteOpplysninger.getMottatteOpplysningerData().hentUtenlandskeArbeidsgivereLandkode().stream()
         ).map(Land_iso2::valueOf).filter(landkoderMedMarginaltArbeid::contains);
 
         Stream<Land_iso2> utpektLovvalgsland = behandlingsresultat.getUtpekingsperioder().stream()
@@ -139,7 +139,7 @@ public class LandvelgerService {
 
     private Collection<Land_iso2> hentTrygdemyndighetsland(Behandlingsresultat behandlingsresultat) {
         final long behandlingID = behandlingsresultat.getId();
-        BehandlingsgrunnlagData grunnlagdata = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID).getBehandlingsgrunnlagdata();
+        MottatteOpplysningerData grunnlagdata = mottatteOpplysningerService.hentMottatteOpplysninger(behandlingID).getMottatteOpplysningerData();
 
         if (behandlingsresultat.erInnvilgetArbeidPåSkipOmfattetAvArbeidsland() || erVideresendt(behandlingsresultat)) {
             return Lists.newArrayList(Land_iso2.valueOf(hentBostedsland(behandlingID, grunnlagdata).landkode()));
@@ -149,15 +149,15 @@ public class LandvelgerService {
     }
 
     public Bostedsland hentBostedsland(Behandling behandling) {
-        return hentBostedsland(behandling.getId(), behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata());
+        return hentBostedsland(behandling.getId(), behandling.getMottatteOpplysninger().getMottatteOpplysningerData());
     }
 
-    public Bostedsland hentBostedsland(long behandlingID, BehandlingsgrunnlagData grunnlagData) {
+    public Bostedsland hentBostedsland(long behandlingID, MottatteOpplysningerData grunnlagData) {
         Optional<Bostedsland> bostedslandOppgittAvSaksbehandler = hentBostedslandOppgittAvSaksbehandler(behandlingID, grunnlagData);
         return bostedslandOppgittAvSaksbehandler.orElse(new Bostedsland(Landkoder.NO));
     }
 
-    private Optional<Bostedsland> hentBostedslandOppgittAvSaksbehandler(long behandlingID, BehandlingsgrunnlagData grunnlagData) {
+    private Optional<Bostedsland> hentBostedslandOppgittAvSaksbehandler(long behandlingID, MottatteOpplysningerData grunnlagData) {
         Optional<Bostedsland> bostedsland = avklartefaktaService.hentBostedland(behandlingID);
         if (bostedsland.isPresent()) {
             return bostedsland;

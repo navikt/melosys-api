@@ -18,7 +18,7 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
@@ -83,7 +83,7 @@ public class BrevDataService {
 
         if (mottaker.erBruker()) {
             if (personManglerAdresseFraRegister(behandling.getFagsak().hentBrukersAktørID())) {
-                BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+                MottatteOpplysningerData grunnlagData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
                 StrukturertAdresse oppgittAdresse = grunnlagData.bosted.oppgittAdresse;
                 if (!oppgittAdresse.erTom()) {
                     metadata.berik = false;
@@ -248,7 +248,7 @@ public class BrevDataService {
     }
 
     private void brukOppgittBostedsadresse(Behandling behandling, Mottaker mottaker, String mottakerID) {
-        BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        MottatteOpplysningerData grunnlagData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         StrukturertAdresse oppgittAdresse = grunnlagData.bosted.oppgittAdresse;
         if (oppgittAdresse.erTom()) {
             throw new FunksjonellException(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());

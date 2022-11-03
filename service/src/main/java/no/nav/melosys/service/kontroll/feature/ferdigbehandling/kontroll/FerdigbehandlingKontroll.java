@@ -2,7 +2,7 @@ package no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll;
 
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.PeriodeOmLovvalg;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
+import no.nav.melosys.domain.mottatteopplysninger.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
@@ -71,24 +71,24 @@ final class FerdigbehandlingKontroll {
     }
 
     static Kontrollfeil arbeidsstedManglerFelter(FerdigbehandlingKontrollData kontrollData) {
-        return ArbeidUtlandKontroll.arbeidsstedManglerFelter(kontrollData.behandlingsgrunnlagData());
+        return ArbeidUtlandKontroll.arbeidsstedManglerFelter(kontrollData.mottatteOpplysningerData());
     }
 
     static Kontrollfeil foretakUtlandManglerFelter(FerdigbehandlingKontrollData kontrollData) {
-        return ArbeidUtlandKontroll.foretakUtlandManglerFelter(kontrollData.behandlingsgrunnlagData());
+        return ArbeidUtlandKontroll.foretakUtlandManglerFelter(kontrollData.mottatteOpplysningerData());
     }
 
     static Kontrollfeil representantIUtlandetMangler(FerdigbehandlingKontrollData kontrollData) {
         var lovvalgsperiode = kontrollData.lovvalgsperiode();
-        var behandlingsgrunnlagData = (SoeknadTrygdeavtale) kontrollData.behandlingsgrunnlagData();
+        var mottatteOpplysningerData = (SoeknadTrygdeavtale) kontrollData.mottatteOpplysningerData();
 
         return erBestemmelseDerTrygdeavtaleAttestSendes(lovvalgsperiode.getBestemmelse())
-            && ArbeidsstedRegler.representantIUtlandetMangler(behandlingsgrunnlagData.getRepresentantIUtlandet())
+            && ArbeidsstedRegler.representantIUtlandetMangler(mottatteOpplysningerData.getRepresentantIUtlandet())
             ? new Kontrollfeil(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED) : null;
     }
 
     static Kontrollfeil adresseRegistrert(FerdigbehandlingKontrollData kontrollData) {
-        return PersonRegler.harRegistrertAdresse(kontrollData.persondata(), kontrollData.behandlingsgrunnlagData())
+        return PersonRegler.harRegistrertAdresse(kontrollData.persondata(), kontrollData.mottatteOpplysningerData())
             ? null : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
     }
 

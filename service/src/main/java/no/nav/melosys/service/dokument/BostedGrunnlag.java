@@ -4,20 +4,20 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
-import no.nav.melosys.domain.util.BehandlingsgrunnlagUtils;
+import no.nav.melosys.domain.util.MottatteOpplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.apache.commons.lang3.StringUtils;
 
 public class BostedGrunnlag {
-    private final BehandlingsgrunnlagData grunnlagData;
+    private final MottatteOpplysningerData grunnlagData;
     private final Bostedsadresse bostedsadresseFraRegister;
     private final KodeverkService kodeverkService;
 
 
-    public BostedGrunnlag(BehandlingsgrunnlagData grunnlagData,
+    public BostedGrunnlag(MottatteOpplysningerData grunnlagData,
                           Bostedsadresse bostedsadresseFraRegister,
                           KodeverkService kodeverkService) {
         this.grunnlagData = grunnlagData;
@@ -35,7 +35,7 @@ public class BostedGrunnlag {
     }
 
     private Optional<StrukturertAdresse> finnOppgittBostedsadresse() {
-        return grunnlagData != null ? Optional.ofNullable(BehandlingsgrunnlagUtils.hentBostedsadresse(grunnlagData)) :
+        return grunnlagData != null ? Optional.ofNullable(MottatteOpplysningerUtils.hentBostedsadresse(grunnlagData)) :
             Optional.empty();
     }
 

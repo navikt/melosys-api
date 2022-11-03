@@ -11,7 +11,7 @@ import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.BrukerIdType;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.msm.AltinnDokument;
@@ -145,9 +145,9 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
 
     private Behandling lagBehandling() {
         Behandling behandling = new Behandling();
-        Behandlingsgrunnlag grunnlag = new Behandlingsgrunnlag();
+        MottatteOpplysninger grunnlag = new MottatteOpplysninger();
         grunnlag.setOriginalData("Original Can't Touch This");
-        behandling.setBehandlingsgrunnlag(grunnlag);
+        behandling.setMottatteOpplysninger(grunnlag);
         return behandling;
     }
 }
