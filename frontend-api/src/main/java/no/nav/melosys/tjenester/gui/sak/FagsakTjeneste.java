@@ -15,7 +15,6 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -260,21 +259,17 @@ public class FagsakTjeneste {
 
     private void setPeriodeOpplysninger(Behandling behandling, BehandlingOversiktDto behandlingOversiktDto) {
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            try {
-                Behandlingsresultat behandlingsResultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-                Optional<Lovvalgsperiode> optionalLovvalgsperiode = behandlingsResultat.finnLovvalgsperiode();
+            Behandlingsresultat behandlingsResultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
 
-                optionalLovvalgsperiode.ifPresentOrElse(lovvalgsperiode -> {
-                    var søknadslandDto = SoeknadslandDto.av(lovvalgsperiode.getLovvalgsland());
-                    behandlingOversiktDto.setLand(søknadslandDto);
+            Optional<Lovvalgsperiode> optionalLovvalgsperiode = behandlingsResultat.finnLovvalgsperiode();
 
-                    var søknadsperiodeDto = new PeriodeDto(lovvalgsperiode.getFom(), lovvalgsperiode.getTom());
-                    behandlingOversiktDto.setPeriode(søknadsperiodeDto);
-                }, () -> behandlingOversiktDto.setPeriode(null));
+            optionalLovvalgsperiode.ifPresent(lovvalgsperiode -> {
+                var søknadslandDto = SoeknadslandDto.av(lovvalgsperiode.getLovvalgsland());
+                behandlingOversiktDto.setLand(søknadslandDto);
 
-            } catch (IkkeFunnetException e) {
-                behandlingOversiktDto.setPeriode(null);
-            }
+                var periodeDto = new PeriodeDto(lovvalgsperiode.getFom(), lovvalgsperiode.getTom());
+                behandlingOversiktDto.setPeriode(periodeDto);
+            });
         } else {
             if (behandling.erBehandlingAvSøknadGammel()) {
                 behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId())
