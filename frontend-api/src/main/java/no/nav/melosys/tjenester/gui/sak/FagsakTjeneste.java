@@ -8,6 +8,7 @@ import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -257,27 +258,16 @@ public class FagsakTjeneste {
 
     private void setPeriodeOpplysninger(Behandling behandling, BehandlingOversiktDto behandlingOversiktDto) {
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            var optionalSedDokument = saksopplysningerService.finnSedOpplysninger(behandling.getId());
+            Behandlingsresultat behandlingsResultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
 
-            optionalSedDokument.ifPresentOrElse(sedDokument -> {
-                var søknadslandDto = SoeknadslandDto.av(sedDokument.getLovvalgslandKode());
+            Optional<Lovvalgsperiode> optionalLovvalgsperiode = behandlingsResultat.finnLovvalgsperiode();
+
+            optionalLovvalgsperiode.ifPresent(lovvalgsperiode -> {
+                var søknadslandDto = SoeknadslandDto.av(lovvalgsperiode.getLovvalgsland());
                 behandlingOversiktDto.setLand(søknadslandDto);
 
-                var lovvalgsperiode = sedDokument.getLovvalgsperiode();
-                var søknadsperiodeDto = new PeriodeDto(lovvalgsperiode.getFom(), lovvalgsperiode.getTom());
-                behandlingOversiktDto.setPeriode(søknadsperiodeDto);
-            }, () -> {
-                var mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.getId());
-                if (mottatteOpplysninger.isPresent()) {
-                    var mottatteOpplysningerData = mottatteOpplysninger.get().getMottatteOpplysningerData();
-
-                    var land = SoeknadslandDto.av(hentSøknadsland((mottatteOpplysningerData)));
-                    behandlingOversiktDto.setLand(land);
-
-                    var periode = hentPeriode(mottatteOpplysningerData);
-                    var søknadsperiodeDto = new PeriodeDto(periode.getFom(), periode.getTom());
-                    behandlingOversiktDto.setPeriode(søknadsperiodeDto);
-                }
+                var periodeDto = new PeriodeDto(lovvalgsperiode.getFom(), lovvalgsperiode.getTom());
+                behandlingOversiktDto.setPeriode(periodeDto);
             });
         } else {
             if (behandling.erBehandlingAvSøknadGammel()) {
