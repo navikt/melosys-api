@@ -219,7 +219,7 @@ class MottatteOpplysningerServiceTest {
     }
 
     @Test
-    void opprettSøknad_tomFlyt_behGrunnlagBlirIkkeOpprettet() {
+    void opprettSøknad_tomFlyt_mottatteOpplysningerBlirIkkeOpprettet() {
         Behandling behandling = lagBehandling(Sakstyper.TRYGDEAVTALE, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
 
         mottatteOpplysningerService.opprettSøknad(behandling, null, null);
@@ -229,7 +229,7 @@ class MottatteOpplysningerServiceTest {
     }
 
     @Test
-    void opprettSøknad_behGrunnlagBlirOpprettet() {
+    void opprettSøknad_mottatteOpplysningerBlirOpprettet() {
         Behandling behandling = lagBehandling(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.YRKESAKTIV);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());

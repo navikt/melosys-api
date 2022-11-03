@@ -233,7 +233,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
     }
 
     @Test
-    void hentAvklarteMedfølgendeBarn_medfølgendeIkkeSattIBehandlinggrunnlag_kasterFeil() {
+    void hentAvklarteMedfølgendeBarn_medfølgendeIkkeSattIMottatteOpplysninger_kasterFeil() {
         when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(1L, Avklartefaktatyper.VURDERING_LOVVALG_BARN))
             .thenReturn(Set.of(lagAvklartMedfølgendeBarn(uuidBarn)));
         when(mottatteOpplysningerService.hentMottatteOpplysninger(1L)).thenReturn(lagMottatteOpplysninger(false));
@@ -244,7 +244,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
     }
 
     @Test
-    void hentAvklarteMedfølgendeBarn_ikkeMedfølgendeIkkeSattIBehandlinggrunnlag_kasterFeil() {
+    void hentAvklarteMedfølgendeBarn_ikkeMedfølgendeIkkeSattIMottatteOpplysninger_kasterFeil() {
         when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(1L, Avklartefaktatyper.VURDERING_LOVVALG_BARN))
             .thenReturn(Set.of(lagAvklartIkkeMedfølgendeBarn(uuidBarn2)));
         when(mottatteOpplysningerService.hentMottatteOpplysninger(1L)).thenReturn(lagMottatteOpplysninger(false));
@@ -275,7 +275,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
     }
 
     @Test
-    void hentAvklarteMedfølgendeEktefelle_medfølgendeIkkeSattIBehandlinggrunnlag_kasterFeil() {
+    void hentAvklarteMedfølgendeEktefelle_medfølgendeIkkeSattIMottatteOpplysninger_kasterFeil() {
         when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(1L, Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER))
             .thenReturn(Set.of(lagAvklartMedfølgendeEktefelle(uuidEktefelleSamboer)));
         when(mottatteOpplysningerService.hentMottatteOpplysninger(1L)).thenReturn(lagMottatteOpplysninger(false));
@@ -287,7 +287,7 @@ class AvklarteMedfolgendeFamilieServiceTest {
     }
 
     @Test
-    void hentAvklarteMedfølgendeEktefelle_ikkeMedfølgendeIkkeSattIBehandlinggrunnlag_kasterFeil() {
+    void hentAvklarteMedfølgendeEktefelle_ikkeMedfølgendeIkkeSattIMottatteOpplysninger_kasterFeil() {
         when(avklarteFaktaRepository.findAllByBehandlingsresultatIdAndType(1L, Avklartefaktatyper.VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER))
             .thenReturn(Set.of(lagAvklartIkkeMedfølgendeEktefelle(uuidEktefelleSamboer)));
         when(mottatteOpplysningerService.hentMottatteOpplysninger(1L)).thenReturn(lagMottatteOpplysninger(false));

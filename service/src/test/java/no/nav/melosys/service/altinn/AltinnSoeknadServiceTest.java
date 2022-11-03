@@ -67,7 +67,7 @@ class AltinnSoeknadServiceTest {
     }
 
     @Test
-    void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksistererToggleDisabled_verifiserFagsakBehandlingOgBehandlinggrunnlagOpprettet() {
+    void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksistererToggleDisabled_verifiserFagsakBehandlingOgMottatteOpplysningerOpprettet() {
         unleash.disableAll();
         final Fagsak fagsak = lagFagsak();
         final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
@@ -93,7 +93,7 @@ class AltinnSoeknadServiceTest {
     }
 
     @Test
-    void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksisterer_verifiserFagsakBehandlingOgBehandlinggrunnlagOpprettet() {
+    void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksisterer_verifiserFagsakBehandlingOgMottatteOpplysningerOpprettet() {
         final Fagsak fagsak = lagFagsak();
         final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
 
