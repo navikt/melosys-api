@@ -57,6 +57,7 @@ public class OppfriskSaksopplysningerService {
     @Transactional
     public void oppfriskSaksopplysning(long behandlingID, boolean medFamilierelasjoner) {
         var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
+        var folketrygdenToggleEnabled = unleash.isEnabled("melosys.folketrygden.mvp");
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
         if (behandling.erUtsending() && anmodningsperiodeService.harSendtAnmodningsperiode(behandlingID)) {
@@ -80,7 +81,8 @@ public class OppfriskSaksopplysningerService {
                 behandling.getFagsak().getTema(),
                 behandling.getTema(),
                 behandling.getType(),
-                behandleAlleSakerToggleEnabled))
+                behandleAlleSakerToggleEnabled,
+                folketrygdenToggleEnabled))
             .fnr(brukerID)
             .fom(periode.getFom())
             .tom(periode.getTom())
