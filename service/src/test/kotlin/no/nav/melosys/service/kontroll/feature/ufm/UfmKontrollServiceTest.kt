@@ -30,7 +30,7 @@ import no.nav.melosys.repository.KontrollresultatRepository
 import no.nav.melosys.service.SaksbehandlingDataFactory
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.*
 import org.junit.jupiter.api.BeforeEach
@@ -49,7 +49,7 @@ class UfmKontrollServiceTest {
     lateinit var behandlingsresultatService: BehandlingsresultatService
 
     @MockK
-    lateinit var behandlingsgrunnlagService: BehandlingsgrunnlagService
+    lateinit var mottatteOpplysningerService: MottatteOpplysningerService
 
     @MockK
     lateinit var behandlingService: BehandlingService
@@ -125,7 +125,7 @@ class UfmKontrollServiceTest {
 
         ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
     }
-    
+
     @Test
     fun
         utførKontrollerOgRegistrerFeil_A003_lovvalgslandUtenforNorge_medOverlappendePeriodeUtenMedlemskap_erOpprinnelig_likeLand_ingenYtterligeOpplysninger_ingenKontroll() {
@@ -292,23 +292,28 @@ class UfmKontrollServiceTest {
     }
 
     @Test
-    fun
-        utførKontrollerOgRegistrerFeil_A003_lovvalgslandUtenforNorge_medOverlappendePeriodeUtenMedlemskap_erIkkeOpprinnelig_harLiktLand_ingenYtterligeOpplysninger_feilKontroll() {
+    fun utførKontrollerOgRegistrerFeil_A003_medOverlappendePeriode_harLikMedlLovvalgsland_forventIkkeKontroll() {
         sedDokument.apply {
             sedType = SedType.A003
             lovvalgslandKode = Landkoder.SE
             avsenderLandkode = Landkoder.SE
             lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-            setErEndring(true)
+
         }
         medlemskapDokument.apply {
             medlemsperiode.add(
                 Medlemsperiode().apply {
                     periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
                     land = "SWE"
-                    type = PeriodeType.PERIODE_UTEN_MEDLEMSKAP
-                }
+                },
             )
+            medlemsperiode.add(
+                Medlemsperiode().apply {
+                    periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2))
+                    land = "SWE"
+                },
+            )
+            personopplysninger
         }
         personopplysninger.apply {
             bostedsadresse = Bostedsadresse(
@@ -319,14 +324,7 @@ class UfmKontrollServiceTest {
         }
         every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
             .answers {
-                kontrollresultatSlot.captured.shouldHaveSize(1)
-                    .sortedBy { it.begrunnelse }
-                    .apply {
-                        first().apply {
-                            begrunnelse.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
-                            behandlingsresultat.id.shouldBe(BEHANDLINGSRESULTAT_ID)
-                        }
-                    }
+                kontrollresultatSlot.captured.shouldHaveSize(0).toList()
             }
         setupMockedTestData()
 
@@ -335,26 +333,28 @@ class UfmKontrollServiceTest {
     }
 
     @Test
-    fun
-        utførKontrollerOgRegistrerFeil_A003_lovvalgslandUtenforNorge_medOverlappendePeriodeUtenMedlemskap_erOpprinnelig_harLiktLand_harYtterligeOpplysninger_feilKontroll() {
+    fun utførKontrollerOgRegistrerFeil_A003_medOverlappendePeriode_harLikMedlLovvalgslandIPeriodeUtenomSedEndring_forventIkkeKontroll() {
         sedDokument.apply {
             sedType = SedType.A003
             lovvalgslandKode = Landkoder.SE
             avsenderLandkode = Landkoder.SE
             lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-            setErEndring(false)
+
         }
         medlemskapDokument.apply {
             medlemsperiode.add(
                 Medlemsperiode().apply {
                     periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
                     land = "SWE"
-                    type = PeriodeType.PERIODE_UTEN_MEDLEMSKAP
-                }
+                },
             )
-        }
-        behandlingsgrunnlagData.apply {
-            ytterligereInformasjon = "Vi har ekstra informasjon som en saksbehandler må manuelt behandle :( "
+            medlemsperiode.add(
+                Medlemsperiode().apply {
+                    periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2))
+                    land = "DNK"
+                },
+            )
+            personopplysninger
         }
         personopplysninger.apply {
             bostedsadresse = Bostedsadresse(
@@ -365,20 +365,14 @@ class UfmKontrollServiceTest {
         }
         every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
             .answers {
-                kontrollresultatSlot.captured.shouldHaveSize(1)
-                    .sortedBy { it.begrunnelse }
-                    .apply {
-                        first().apply {
-                            begrunnelse.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
-                            behandlingsresultat.id.shouldBe(BEHANDLINGSRESULTAT_ID)
-                        }
-                    }
+                kontrollresultatSlot.captured.shouldHaveSize(0).toList()
             }
         setupMockedTestData()
 
 
         ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
     }
+
 
     @Test
     fun utførKontrollerOgRegistrerFeil_A003_forventKontroll_bosattINorge() {
@@ -471,7 +465,7 @@ class UfmKontrollServiceTest {
             .apply {
                 id = BEHANDLINGSRESULTAT_ID
             }
-        every { behandlingsgrunnlagService.finnBehandlingsgrunnlagdata(BEHANDLING_ID) } returns
+        every { mottatteOpplysningerService.finnBehandlingsgrunnlagdata(BEHANDLING_ID) } returns
             Optional.of(behandlingsgrunnlagData)
     }
 

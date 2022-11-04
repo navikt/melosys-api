@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.eessi.sed;
 
-import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import org.apache.commons.lang3.StringUtils;
 
 public class Arbeidssted {

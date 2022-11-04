@@ -16,10 +16,10 @@ import no.nav.melosys.domain.adresse.Adresse;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.SelvstendigForetak;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
+import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Periode;
@@ -29,7 +29,7 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdress
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,7 +42,7 @@ import org.mockito.quality.Strictness;
 import org.slf4j.LoggerFactory;
 
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VIRKSOMHET;
-import static no.nav.melosys.service.BehandlingsgrunnlagStub.lagBehandlingsgrunnlag;
+import static no.nav.melosys.service.MottatteOpplysningerStub.lagMottatteOpplysninger;
 import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplysninger;
 import static no.nav.melosys.service.SaksopplysningStubs.lagOrganisasjonDokumenter;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -61,7 +61,7 @@ class AvklarteVirksomheterServiceTest {
     private OrganisasjonOppslagService organisasjonOppslagService;
 
     @Mock
-    private BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private MottatteOpplysningerService mottatteOpplysningerService;
 
     @Mock
     private KodeverkService mockKodeverkService;
@@ -103,7 +103,7 @@ class AvklarteVirksomheterServiceTest {
         List<String> arbeidgivendeEkstraOrgnumre = Arrays.asList(orgnr3, orgnr4);
         Set<Saksopplysning> saksopplysninger = lagArbeidsforholdOpplysninger(Collections.emptyList());
         behandling.setSaksopplysninger(saksopplysninger);
-        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(selvstendigeForetak, foretakUtlandListe, arbeidgivendeEkstraOrgnumre));
+        behandling.setMottatteOpplysninger(lagMottatteOpplysninger(selvstendigeForetak, foretakUtlandListe, arbeidgivendeEkstraOrgnumre));
 
         int antallAvklarteForetak = avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling);
 
@@ -114,7 +114,7 @@ class AvklarteVirksomheterServiceTest {
     void hentUtenlandskeVirksomheter_girListeMedKunAvklarteForetak() {
         ForetakUtland foretak1 = lagForetakUtland("Utland1", uuid1, null);
         ForetakUtland foretak2 = lagForetakUtland("Utland2", uuid2, "SE-123456789");
-        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(Collections.emptyList(), Arrays.asList(foretak1, foretak2), Collections.emptyList()));
+        behandling.setMottatteOpplysninger(lagMottatteOpplysninger(Collections.emptyList(), Arrays.asList(foretak1, foretak2), Collections.emptyList()));
 
         List<AvklartVirksomhet> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling);
         assertThat(avklarteSelvstendigeOrgnumre.stream().map(av -> av.navn)).containsOnly("Utland1");
@@ -123,7 +123,7 @@ class AvklarteVirksomheterServiceTest {
     @Test
     void hentUtenlandskeVirksomheter_girListeAvklartVirksomhetMedOrgnrIkkeUuid() {
         ForetakUtland foretak1 = lagForetakUtland("Utland1", uuid1, "SE-123456789");
-        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(Collections.emptyList(), Collections.singletonList(foretak1), Collections.emptyList()));
+        behandling.setMottatteOpplysninger(lagMottatteOpplysninger(Collections.emptyList(), Collections.singletonList(foretak1), Collections.emptyList()));
 
         List<AvklartVirksomhet> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling);
         assertThat(avklarteSelvstendigeOrgnumre.stream().map(av -> av.orgnr)).containsOnly("SE-123456789");
@@ -140,7 +140,7 @@ class AvklarteVirksomheterServiceTest {
     @Test
     void hentSelvstendigeForetakOrgnumre_girListeMedKunAvklarteOrgnumre() {
         List<String> selvstendigeForetak = Arrays.asList(orgnr1, orgnr2);
-        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(selvstendigeForetak, Collections.emptyList(), Collections.emptyList()));
+        behandling.setMottatteOpplysninger(lagMottatteOpplysninger(selvstendigeForetak, Collections.emptyList(), Collections.emptyList()));
 
         Set<String> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentNorskeSelvstendigeForetakOrgnumre(behandling);
         assertThat(avklarteSelvstendigeOrgnumre).containsOnly(orgnr1);
@@ -152,7 +152,7 @@ class AvklarteVirksomheterServiceTest {
         Set<Saksopplysning> saksopplysninger =
             lagArbeidsforholdOpplysninger(Collections.emptyList());
         behandling.setSaksopplysninger(saksopplysninger);
-        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(Collections.emptyList(), Collections.emptyList(), arbeidgivendeEkstraOrgnumre));
+        behandling.setMottatteOpplysninger(lagMottatteOpplysninger(Collections.emptyList(), Collections.emptyList(), arbeidgivendeEkstraOrgnumre));
 
         Set<String> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling);
         assertThat(avklarteSelvstendigeOrgnumre).containsOnly(orgnr1);
@@ -164,7 +164,7 @@ class AvklarteVirksomheterServiceTest {
         Set<Saksopplysning> saksopplysninger =
             lagArbeidsforholdOpplysninger(arbeidgivendeOrgnumreEkstra);
         behandling.setSaksopplysninger(saksopplysninger);
-        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
+        behandling.setMottatteOpplysninger(lagMottatteOpplysninger(Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
 
         Set<String> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling);
         assertThat(avklarteSelvstendigeOrgnumre).containsOnly(orgnr1);
@@ -179,7 +179,7 @@ class AvklarteVirksomheterServiceTest {
             lagArbeidsforholdOpplysninger(arbeidsgivereRegister);
 
         behandling.setSaksopplysninger(saksopplysninger);
-        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(Collections.emptyList(), Collections.emptyList(), arbeidsgivereEkstra));
+        behandling.setMottatteOpplysninger(lagMottatteOpplysninger(Collections.emptyList(), Collections.emptyList(), arbeidsgivereEkstra));
 
         Set<String> avklarteOrganisasjoner = new HashSet<>(Arrays.asList(orgnr2, orgnr3));
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(avklarteOrganisasjoner);
@@ -206,8 +206,8 @@ class AvklarteVirksomheterServiceTest {
             lagArbeidsforholdOpplysninger(arbeidsgivereRegister);
 
         behandling.setSaksopplysninger(saksopplysninger);
-        Behandlingsgrunnlag behandlingsgrunnlag = lagBehandlingsgrunnlag(arbeidsgivereRegister, Collections.emptyList(), Collections.emptyList());
-        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
+        MottatteOpplysninger mottatteOpplysninger = lagMottatteOpplysninger(arbeidsgivereRegister, Collections.emptyList(), Collections.emptyList());
+        behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
         Set<String> avklarteOrganisasjoner = new HashSet<>(arbeidsgivereRegister);
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(avklarteOrganisasjoner);
@@ -234,7 +234,7 @@ class AvklarteVirksomheterServiceTest {
             lagArbeidsforholdOpplysninger(Collections.emptyList());
 
         behandling.setSaksopplysninger(saksopplysninger);
-        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(selvstendigeForetak, Collections.emptyList(), Collections.emptyList()));
+        behandling.setMottatteOpplysninger(lagMottatteOpplysninger(selvstendigeForetak, Collections.emptyList(), Collections.emptyList()));
 
         Set<String> avklarteOrganisasjoner = new HashSet<>(selvstendigeForetak);
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(avklarteOrganisasjoner);
@@ -358,15 +358,15 @@ class AvklarteVirksomheterServiceTest {
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.ARBFORH);
         saksopplysning.setDokument(arbeidsforholdDokument);
-        BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
-        behandlingsgrunnlagData.foretakUtland.add(foretakUtland);
-        behandlingsgrunnlagData.selvstendigArbeid.selvstendigForetak.add(selvstendigForetak);
-        behandlingsgrunnlagData.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.add(orgnr2);
-        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+        MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
+        mottatteOpplysningerData.foretakUtland.add(foretakUtland);
+        mottatteOpplysningerData.selvstendigArbeid.selvstendigForetak.add(selvstendigForetak);
+        mottatteOpplysningerData.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.add(orgnr2);
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
         Behandling behandling = new Behandling();
         behandling.setSaksopplysninger(Set.of(saksopplysning));
-        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
+        behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
     }

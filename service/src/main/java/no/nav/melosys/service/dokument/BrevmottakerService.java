@@ -180,7 +180,7 @@ public class BrevmottakerService {
     private List<Aktoer> avklarArbeidsgiverFraAlleVirksomheter(Behandling behandling) {
         Set<String> arbeidsgiverOrgnumre = new HashSet<>();
         arbeidsgiverOrgnumre.addAll(behandling.hentArbeidsforholdDokument().hentOrgnumre());
-        arbeidsgiverOrgnumre.addAll(behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().hentAlleOrganisasjonsnumre());
+        arbeidsgiverOrgnumre.addAll(behandling.getMottatteOpplysninger().getMottatteOpplysningerData().hentAlleOrganisasjonsnumre());
         return avklarArbeidsgiver(arbeidsgiverOrgnumre);
     }
 

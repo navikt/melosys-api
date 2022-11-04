@@ -4,8 +4,8 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -19,26 +19,26 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 
 public final class SaksbehandlingDataFactory {
     public static Behandling lagBehandling() {
-        return lagBehandling(lagFagsak(), new BehandlingsgrunnlagData());
+        return lagBehandling(lagFagsak(), new MottatteOpplysningerData());
     }
 
-    public static Behandling lagBehandling(BehandlingsgrunnlagData behandlingsgrunnlagData) {
-        return lagBehandling(lagFagsak(), behandlingsgrunnlagData);
+    public static Behandling lagBehandling(MottatteOpplysningerData mottatteOpplysningerData) {
+        return lagBehandling(lagFagsak(), mottatteOpplysningerData);
     }
 
     public static Behandling lagBehandling(Fagsak fagsak) {
-        return lagBehandling(fagsak, new BehandlingsgrunnlagData());
+        return lagBehandling(fagsak, new MottatteOpplysningerData());
     }
 
-    public static Behandling lagBehandling(Fagsak fagsak, BehandlingsgrunnlagData behandlingsgrunnlagData) {
+    public static Behandling lagBehandling(Fagsak fagsak, MottatteOpplysningerData mottatteOpplysningerData) {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setFagsak(fagsak);
-        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(mottatteOpplysningerData);
         final Instant nå = Instant.now();
         behandling.setRegistrertDato(nå.minus(30, ChronoUnit.DAYS));
         behandling.setEndretDato(nå);

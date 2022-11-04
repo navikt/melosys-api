@@ -95,6 +95,9 @@ final class UfmKontroll {
                 log.debug("Mottatt overlappende medlemsperiode for A003 med en endring");
                 return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
             }
+            var optionalMottatteOpplysningerData = kontrollData.mottatteOpplysningerData();
+            if (optionalMottatteOpplysningerData.isPresent() && !isEmpty(optionalMottatteOpplysningerData.get().ytterligereInformasjon)) {
+                log.debug("Mottatt overlappende medlemsperiode for A003 som har satt ytterligere informasjon");
             var optionalBehandlingsgrunnlagData = kontrollData.behandlingsgrunnlagData();
             if (optionalBehandlingsgrunnlagData.isPresent() && !isEmpty(optionalBehandlingsgrunnlagData.get().ytterligereInformasjon)) {
                 log.debug("Mottatt overlappende medlemsperiode for A003 med ytterligere informasjon");

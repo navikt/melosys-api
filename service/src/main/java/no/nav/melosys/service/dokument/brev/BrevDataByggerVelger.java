@@ -7,7 +7,7 @@ import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.dokument.brev.bygger.*;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
@@ -29,7 +29,7 @@ public class BrevDataByggerVelger {
     private final VilkaarsresultatRepository vilkaarsresultatRepository;
     private final VilkaarsresultatService vilkaarsresultatService;
     private final PersondataFasade persondataFasade;
-    private final BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private final MottatteOpplysningerService mottatteOpplysningerService;
 
     public BrevDataByggerVelger(AnmodningsperiodeService anmodningsperiodeService,
                                 AvklartefaktaService avklartefaktaService,
@@ -42,7 +42,7 @@ public class BrevDataByggerVelger {
                                 VilkaarsresultatRepository vilkaarsresultatRepository,
                                 VilkaarsresultatService vilkaarsresultatService,
                                 PersondataFasade persondataFasade,
-                                BehandlingsgrunnlagService behandlingsgrunnlagService) {
+                                MottatteOpplysningerService mottatteOpplysningerService) {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.avklartefaktaService = avklartefaktaService;
         this.joarkService = joarkService;
@@ -54,7 +54,7 @@ public class BrevDataByggerVelger {
         this.vilkaarsresultatRepository = vilkaarsresultatRepository;
         this.vilkaarsresultatService = vilkaarsresultatService;
         this.persondataFasade = persondataFasade;
-        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
+        this.mottatteOpplysningerService = mottatteOpplysningerService;
     }
 
     public BrevDataBygger hent(Produserbaredokumenter produserbartDokument, BrevbestillingRequest brevbestillingRequest) {
@@ -74,7 +74,7 @@ public class BrevDataByggerVelger {
                 new BrevDataByggerInnvilgelse(avklartefaktaService, landvelgerService, lovvalgsperiodeService,
                     anmodningsperiodeService, brevbestillingRequest,
                     vilkaarsresultatService, persondataFasade,
-                    behandlingsgrunnlagService);
+                    mottatteOpplysningerService);
             case ORIENTERING_UTPEKING_UTLAND ->
                 new BrevDataByggerUtpekingAnnetLand(utpekingService, brevbestillingRequest);
             case ORIENTERING_VIDERESENDT_SOEKNAD ->
@@ -113,7 +113,7 @@ public class BrevDataByggerVelger {
             brevbyggerA1,
             vilkaarsresultatService,
             persondataFasade,
-            behandlingsgrunnlagService);
+            mottatteOpplysningerService);
     }
 
     private BrevDataBygger lagBrevDataByggerInnvilgelseFlereLand(BrevbestillingRequest brevbestillingRequest) {

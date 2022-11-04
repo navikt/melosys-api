@@ -9,10 +9,10 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.SoeknadTrygdeavtale;
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
@@ -53,8 +53,8 @@ class KontrollTest {
     private final long behandlingID = 1L;
     private final Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
     private final MedlemskapDokument medlemskapDokument = new MedlemskapDokument();
-    private final BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
-    private final Behandling behandling = lagBehandling(behandlingsgrunnlagData);
+    private final MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
+    private final Behandling behandling = lagBehandling(mottatteOpplysningerData);
     private final FakeUnleash unleash = new FakeUnleash();
     private Kontroll kontroll;
 
@@ -90,7 +90,7 @@ class KontrollTest {
     @Test
     void utførKontroller_avslagTomFlyt__returnererTomCollection() {
         behandling.setType(Behandlingstyper.HENVENDELSE);
-        behandling.setBehandlingsgrunnlag(null);
+        behandling.setMottatteOpplysninger(null);
         Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
 
         assertThat(resultat).isEmpty();
@@ -186,7 +186,7 @@ class KontrollTest {
         lovvalgsperiode.setTom(LocalDate.now().plusYears(3).plusDays(1));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
 
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new SoeknadTrygdeavtale());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new SoeknadTrygdeavtale());
 
 
         Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.TRYGDEAVTALE, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
@@ -234,7 +234,7 @@ class KontrollTest {
 
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
-        behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidssteder = List.of(new FysiskArbeidssted());
+        mottatteOpplysningerData.arbeidPaaLand.fysiskeArbeidssteder = List.of(new FysiskArbeidssted());
 
 
         Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
@@ -252,7 +252,7 @@ class KontrollTest {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
 
-        behandlingsgrunnlagData.foretakUtland = List.of(new ForetakUtland());
+        mottatteOpplysningerData.foretakUtland = List.of(new ForetakUtland());
 
 
         Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
@@ -269,7 +269,7 @@ class KontrollTest {
 
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
 
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new SoeknadTrygdeavtale());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new SoeknadTrygdeavtale());
 
 
         Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.TRYGDEAVTALE, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);

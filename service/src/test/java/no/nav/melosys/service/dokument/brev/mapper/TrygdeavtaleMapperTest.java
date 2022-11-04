@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
@@ -257,8 +257,8 @@ class TrygdeavtaleMapperTest {
     }
 
     private Behandling medPeriode(Behandling behandling) {
-        var behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
-        behandlingsgrunnlag.setMottaksdato(SOKNADSDATO);
+        var mottatteOpplysninger = behandling.getMottatteOpplysninger();
+        mottatteOpplysninger.setMottaksdato(SOKNADSDATO);
         return behandling;
     }
 

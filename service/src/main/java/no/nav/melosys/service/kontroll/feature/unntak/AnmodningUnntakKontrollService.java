@@ -45,7 +45,7 @@ public class AnmodningUnntakKontrollService {
         final var persondata = persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
         final int antallArbeidsgivere = avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling);
         AnmodningUnntakKontrollData kontrollData = new AnmodningUnntakKontrollData(persondata,
-            behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata(),
+            behandling.getMottatteOpplysninger().getMottatteOpplysningerData(),
             anmodningsperiode,
             antallArbeidsgivere
         );

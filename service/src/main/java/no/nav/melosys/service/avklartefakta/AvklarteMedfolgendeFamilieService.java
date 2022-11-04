@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
@@ -17,7 +17,7 @@ import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import org.apache.cxf.common.util.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,29 +34,29 @@ public class AvklarteMedfolgendeFamilieService {
 
     private final AvklartefaktaService avklartefaktaService;
 
-    private final BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private final MottatteOpplysningerService mottatteOpplysningerService;
 
     public AvklarteMedfolgendeFamilieService(BehandlingService behandlingService,
                                              BehandlingsresultatService behandlingsresultatService,
                                              AvklartefaktaService avklartefaktaService,
-                                             BehandlingsgrunnlagService behandlingsgrunnlagService) {
+                                             MottatteOpplysningerService mottatteOpplysningerService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.avklartefaktaService = avklartefaktaService;
-        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
+        this.mottatteOpplysningerService = mottatteOpplysningerService;
     }
 
     @Transactional
     public void lagreMedfolgendeFamilieSomAvklartefakta(long behandlingID, AvklarteMedfolgendeFamilie medfolgendeFamilie) {
-        Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolleFraBehandlingsgrunnlag =
-            behandlingService.hentBehandling(behandlingID).getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().hentUuidOgRolleMedfølgendeFamilie();
+        Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolleFraMottatteOpplysninger =
+            behandlingService.hentBehandling(behandlingID).getMottatteOpplysninger().getMottatteOpplysningerData().hentUuidOgRolleMedfølgendeFamilie();
 
-        validerMedfolgendeFamilie(medfolgendeFamilie, uuidOgRolleFraBehandlingsgrunnlag);
+        validerMedfolgendeFamilie(medfolgendeFamilie, uuidOgRolleFraMottatteOpplysninger);
 
         avklartefaktaService.slettAvklarteFakta(behandlingID, VURDERING_LOVVALG_BARN);
         avklartefaktaService.slettAvklarteFakta(behandlingID, VURDERING_MEDLEMSKAP_EKTEFELLE_SAMBOER);
 
-        lagreFamilieSomAvklartfakta(behandlingID, medfolgendeFamilie.tilAvklartefakta(uuidOgRolleFraBehandlingsgrunnlag));
+        lagreFamilieSomAvklartfakta(behandlingID, medfolgendeFamilie.tilAvklartefakta(uuidOgRolleFraMottatteOpplysninger));
     }
 
     public AvklarteMedfolgendeFamilie hentAvklarteMedfølgendeBarn(long behandlingId) {
@@ -66,13 +66,13 @@ public class AvklarteMedfolgendeFamilieService {
         avklarteMedfolgendeBarn.getFamilieOmfattetAvNorskTrygd().stream()
             .filter(omfattetBarn -> !medfolgendeBarn.containsKey(omfattetBarn.getUuid()))
             .forEach(omfattetBarn -> {
-                throw new FunksjonellException("Avklart medfølgende barn " + omfattetBarn.getUuid() + " finnes ikke i behandlingsgrunnlaget");
+                throw new FunksjonellException("Avklart medfølgende barn " + omfattetBarn.getUuid() + " finnes ikke i mottatteOpplysningeret");
             });
 
         avklarteMedfolgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd().stream()
             .filter(ikkeOmfattetBarn -> !medfolgendeBarn.containsKey(ikkeOmfattetBarn.getUuid()))
             .forEach(ikkeOmfattetBarn -> {
-                throw new FunksjonellException("Avklart medfølgende barn " + ikkeOmfattetBarn.getUuid() + " finnes ikke i behandlingsgrunnlaget");
+                throw new FunksjonellException("Avklart medfølgende barn " + ikkeOmfattetBarn.getUuid() + " finnes ikke i mottatteOpplysningeret");
             });
 
         return avklarteMedfolgendeBarn;
@@ -85,37 +85,37 @@ public class AvklarteMedfolgendeFamilieService {
         avklarteMedfolgendeEktefelle.getFamilieOmfattetAvNorskTrygd().stream()
             .filter(omfattetEktefelle -> !medfolgendeEktefelle.containsKey(omfattetEktefelle.getUuid()))
             .forEach(omfattetEktefelle -> {
-                throw new FunksjonellException("Avklart medfølgende ektefelle/samboer " + omfattetEktefelle.getUuid() + " finnes ikke i behandlingsgrunnlaget");
+                throw new FunksjonellException("Avklart medfølgende ektefelle/samboer " + omfattetEktefelle.getUuid() + " finnes ikke i mottatteOpplysningeret");
             });
 
         avklarteMedfolgendeEktefelle.getFamilieIkkeOmfattetAvNorskTrygd().stream()
             .filter(ikkeOmfattetEktefelle -> !medfolgendeEktefelle.containsKey(ikkeOmfattetEktefelle.getUuid()))
             .forEach(ikkeOmfattetEktefelle -> {
-                throw new FunksjonellException("Avklart medfølgende ektefelle/samboer " + ikkeOmfattetEktefelle.getUuid() + " finnes ikke i behandlingsgrunnlaget");
+                throw new FunksjonellException("Avklart medfølgende ektefelle/samboer " + ikkeOmfattetEktefelle.getUuid() + " finnes ikke i mottatteOpplysningeret");
             });
 
         return avklarteMedfolgendeEktefelle;
     }
 
     public Map<String, MedfolgendeFamilie> hentMedfølgendeBarn(long behandlingID) {
-        return behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID)
-            .getBehandlingsgrunnlagdata().hentMedfølgendeBarn();
+        return mottatteOpplysningerService.hentMottatteOpplysninger(behandlingID)
+            .getMottatteOpplysningerData().hentMedfølgendeBarn();
     }
 
     public Map<String, MedfolgendeFamilie> hentMedfølgendEktefelle(long behandlingID) {
-        return behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID)
-            .getBehandlingsgrunnlagdata().hentMedfølgendeEktefelle();
+        return mottatteOpplysningerService.hentMottatteOpplysninger(behandlingID)
+            .getMottatteOpplysningerData().hentMedfølgendeEktefelle();
     }
 
-    private void validerMedfolgendeFamilie(AvklarteMedfolgendeFamilie medfolgendeFamilie, Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolleFraBehandlingsgrunnlag) {
-        validerOmfattetFamilie(medfolgendeFamilie.getFamilieOmfattetAvNorskTrygd(), uuidOgRolleFraBehandlingsgrunnlag);
-        validerIkkeOmfattetFamilie(medfolgendeFamilie.getFamilieIkkeOmfattetAvNorskTrygd(), uuidOgRolleFraBehandlingsgrunnlag);
+    private void validerMedfolgendeFamilie(AvklarteMedfolgendeFamilie medfolgendeFamilie, Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolleFraMottatteOpplysninger) {
+        validerOmfattetFamilie(medfolgendeFamilie.getFamilieOmfattetAvNorskTrygd(), uuidOgRolleFraMottatteOpplysninger);
+        validerIkkeOmfattetFamilie(medfolgendeFamilie.getFamilieIkkeOmfattetAvNorskTrygd(), uuidOgRolleFraMottatteOpplysninger);
     }
 
     private void validerOmfattetFamilie(Set<OmfattetFamilie> omfattetFamilieSet, Map<String, MedfolgendeFamilie.Relasjonsrolle> uuidOgRolle) {
         for (OmfattetFamilie omfattetFamilie : omfattetFamilieSet) {
             if (!uuidOgRolle.containsKey(omfattetFamilie.getUuid())) {
-                throw new FunksjonellException("Medfolgende familie som er omfattet av norsk trygd: " + omfattetFamilie.getUuid() + " er ikke lagret i behandlingsgrunnlaget.");
+                throw new FunksjonellException("Medfolgende familie som er omfattet av norsk trygd: " + omfattetFamilie.getUuid() + " er ikke lagret i mottatteOpplysningeret.");
             }
         }
     }
@@ -126,7 +126,7 @@ public class AvklarteMedfolgendeFamilieService {
 
         for (IkkeOmfattetFamilie ikkeOmfattetFamilie : ikkeOmfattetFamilieSet) {
             if (!uuidOgRolle.containsKey(ikkeOmfattetFamilie.getUuid())) {
-                throw new FunksjonellException("Medfolgende familie som ikke er omfattet av norsk trygd: " + ikkeOmfattetFamilie.getUuid() + " er ikke lagret i behandlingsgrunnlaget.");
+                throw new FunksjonellException("Medfolgende familie som ikke er omfattet av norsk trygd: " + ikkeOmfattetFamilie.getUuid() + " er ikke lagret i mottatteOpplysningeret.");
             }
             if (StringUtils.isEmpty(ikkeOmfattetFamilie.getBegrunnelse())) {
                 throw new FunksjonellException("Begrunnelsen til medfolgende familie " + ikkeOmfattetFamilie.getUuid() + ": " + ikkeOmfattetFamilie.getBegrunnelse() + " er ikke satt.");

@@ -6,10 +6,10 @@ import java.util.List;
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
+import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -46,7 +46,7 @@ class VurderInngangsvilkaarTest {
 
         behandling.setId(behandlingID);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
 
         unleash.enableAll();
@@ -54,13 +54,13 @@ class VurderInngangsvilkaarTest {
 
     @Test
     void utfoerSteg_funker() {
-        BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
-        behandlingsgrunnlagData.periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(1L));
-        behandlingsgrunnlagData.soeknadsland.landkoder = List.of(Landkoder.NO.getKode(), Landkoder.SE.getKode());
+        MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
+        mottatteOpplysningerData.periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(1L));
+        mottatteOpplysningerData.soeknadsland.landkoder = List.of(Landkoder.NO.getKode(), Landkoder.SE.getKode());
 
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(mottatteOpplysningerData);
 
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
@@ -73,9 +73,9 @@ class VurderInngangsvilkaarTest {
 
         when(inngangsvilkaarService.vurderOgLagreInngangsvilkår(
             behandlingID,
-            behandlingsgrunnlagData.soeknadsland.landkoder,
+            mottatteOpplysningerData.soeknadsland.landkoder,
             false,
-            behandlingsgrunnlagData.periode
+            mottatteOpplysningerData.periode
         )).thenReturn(true);
 
 
@@ -88,10 +88,10 @@ class VurderInngangsvilkaarTest {
     @Test
     void utfoerSteg_finnerIkkeLandOgPeriode_vurdererIkkeInngangsvilkår() {
         behandling.setType(Behandlingstyper.FØRSTEGANG);
-        var behandlingsgrunnlagData = new BehandlingsgrunnlagData();
-        behandlingsgrunnlagData.periode = new Periode();
-        behandlingsgrunnlagData.soeknadsland = new Soeknadsland();
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+        var mottatteOpplysningerData = new MottatteOpplysningerData();
+        mottatteOpplysningerData.periode = new Periode();
+        mottatteOpplysningerData.soeknadsland = new Soeknadsland();
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(mottatteOpplysningerData);
         var fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
