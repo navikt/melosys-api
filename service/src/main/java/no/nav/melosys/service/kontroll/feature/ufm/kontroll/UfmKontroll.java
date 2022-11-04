@@ -1,15 +1,16 @@
 package no.nav.melosys.service.kontroll.feature.ufm.kontroll;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.service.kontroll.feature.ufm.data.UfmKontrollData;
 import no.nav.melosys.service.kontroll.regler.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderRegler.harOverlappendeMedlemsperiodeMedMedlemskapMerEnn1DagFraSed;
-import static no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderRegler.harOverlappendeMedlemsperiodeUtenMedlemskapMerEnn1DagFraSed;
+import static no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderRegler.*;
 import static org.apache.cxf.common.util.StringUtils.isEmpty;
 
 final class UfmKontroll {
@@ -75,7 +76,7 @@ final class UfmKontroll {
     }
 
     static Kontroll_begrunnelser overlappendeMedlemsperiode(UfmKontrollData kontrollData) {
-        return OverlappendeMedlemskapsperioderRegler.harOverlappendeMedlemsperiodeFraSed(
+        return harOverlappendeMedlemsperiodeFraSed(
             kontrollData.medlemskapDokument(), kontrollData.sedDokument().getLovvalgsperiode()) ?
             Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER : null;
     }
@@ -96,15 +97,11 @@ final class UfmKontroll {
                 return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
             }
             var optionalMottatteOpplysningerData = kontrollData.mottatteOpplysningerData();
-            if (optionalMottatteOpplysningerData.isPresent() && !isEmpty(optionalMottatteOpplysningerData.get().ytterligereInformasjon)) {
-                log.debug("Mottatt overlappende medlemsperiode for A003 som har satt ytterligere informasjon");
-            var optionalBehandlingsgrunnlagData = kontrollData.behandlingsgrunnlagData();
-            if (optionalBehandlingsgrunnlagData.isPresent() && !isEmpty(optionalBehandlingsgrunnlagData.get().ytterligereInformasjon)) {
+            if (harMottatteOpplysningerMedYtterligereInformasjon(optionalMottatteOpplysningerData)) {
                 log.debug("Mottatt overlappende medlemsperiode for A003 med ytterligere informasjon");
                 return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
             }
-            if (OverlappendeMedlemskapsperioderRegler.harOverlappendePerioderMedUlikSedLovvalgslandOgMedlLovvalgsland(
-                sedDokument, medlemskapDokument)) {
+            if (harOverlappendePerioderMedUlikSedLovvalgslandOgMedlLovvalgsland(sedDokument, medlemskapDokument)) {
                 log.debug("Mottatt overlappende medlemsperiode for A003 med ulike lovvalgsland i SED og MEDL");
                 return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
             }
@@ -113,7 +110,7 @@ final class UfmKontroll {
     }
 
     static Kontroll_begrunnelser overlappendeMedlemsperiodeMerEnn1Dag(UfmKontrollData kontrollData) {
-        return OverlappendeMedlemskapsperioderRegler.harOverlappendeMedlemsperiodeMerEnn1DagFraSed(
+        return harOverlappendeMedlemsperiodeMerEnn1DagFraSed(
             kontrollData.medlemskapDokument(), kontrollData.sedDokument().getLovvalgsperiode()) ?
             Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER : null;
     }
@@ -138,5 +135,9 @@ final class UfmKontroll {
     static Kontroll_begrunnelser arbeidssted(UfmKontrollData kontrollData) {
         return ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(kontrollData.sedDokument()) ?
             Kontroll_begrunnelser.ARBEIDSSTED_UTENFOR_EOS : null;
+    }
+
+    private static boolean harMottatteOpplysningerMedYtterligereInformasjon(Optional<MottatteOpplysningerData> optionalMottatteOpplysningerData) {
+        return optionalMottatteOpplysningerData.isPresent() && !isEmpty(optionalMottatteOpplysningerData.get().ytterligereInformasjon);
     }
 }

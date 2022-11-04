@@ -8,11 +8,11 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.mottatteopplysninger.*;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
-import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -43,9 +43,9 @@ public class MottatteOpplysningerService {
     private final Unleash unleash;
 
     public MottatteOpplysningerService(MottatteOpplysningerRepository mottatteOpplysningerRepository,
-                                      BehandlingService behandlingService,
-                                      JoarkFasade joarkFasade,
-                                      Unleash unleash) {
+                                       BehandlingService behandlingService,
+                                       JoarkFasade joarkFasade,
+                                       Unleash unleash) {
         this.mottatteOpplysningerRepository = mottatteOpplysningerRepository;
         this.behandlingService = behandlingService;
         this.joarkFasade = joarkFasade;
@@ -59,7 +59,7 @@ public class MottatteOpplysningerService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<MottatteOpplysningerData> finnMottatteOpplysningerdata(long behandlingID) {
+    public Optional<MottatteOpplysningerData> finnMottatteOpplysningerData(long behandlingID) {
         var mottatteOpplysninger = finnMottatteOpplysninger(behandlingID).orElse(null);
         if (mottatteOpplysninger == null) {
             return Optional.empty();
@@ -138,19 +138,19 @@ public class MottatteOpplysningerService {
     }
 
     private void opprettMottatteOpplysninger(long behandlingID,
-                                            MottatteOpplysningerData mottatteOpplysningerData,
-                                            Mottatteopplysningertyper type,
-                                            String versjon) {
+                                             MottatteOpplysningerData mottatteOpplysningerData,
+                                             Mottatteopplysningertyper type,
+                                             String versjon) {
 
         opprettMottatteOpplysninger(behandlingID, null, mottatteOpplysningerData, type, versjon, null);
     }
 
     private void opprettMottatteOpplysninger(long behandlingID,
-                                            String originalData,
-                                            MottatteOpplysningerData mottatteOpplysningerData,
-                                            Mottatteopplysningertyper type,
-                                            String versjon,
-                                            String eksternReferanseID) {
+                                             String originalData,
+                                             MottatteOpplysningerData mottatteOpplysningerData,
+                                             Mottatteopplysningertyper type,
+                                             String versjon,
+                                             String eksternReferanseID) {
 
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         if (behandling.getMottatteOpplysninger() != null) {

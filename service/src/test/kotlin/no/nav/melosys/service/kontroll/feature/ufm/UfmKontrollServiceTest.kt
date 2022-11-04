@@ -12,7 +12,6 @@ import io.mockk.verify
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.adresse.StrukturertAdresse
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData
 import no.nav.melosys.domain.dokument.SaksopplysningDokument
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
@@ -24,6 +23,7 @@ import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.person.Personopplysninger
 import no.nav.melosys.domain.person.adresse.Bostedsadresse
 import no.nav.melosys.repository.KontrollresultatRepository
@@ -68,7 +68,7 @@ class UfmKontrollServiceTest {
     private var sedDokument: SedDokument = SedDokument()
     private var medlemskapDokument = MedlemskapDokument()
     private var personopplysninger: Personopplysninger = lagPersonopplysninger()
-    private var behandlingsgrunnlagData: BehandlingsgrunnlagData = BehandlingsgrunnlagData()
+    private var mottatteOpplysningerData: MottatteOpplysningerData = MottatteOpplysningerData()
 
     @BeforeEach
     fun setup() {
@@ -76,7 +76,7 @@ class UfmKontrollServiceTest {
         ufmKontrollService = UfmKontrollService(
             kontrollresultatRepository,
             behandlingsresultatService,
-            behandlingsgrunnlagService,
+            mottatteOpplysningerService,
             behandlingService,
             persondataFasade,
             unleash
@@ -465,8 +465,8 @@ class UfmKontrollServiceTest {
             .apply {
                 id = BEHANDLINGSRESULTAT_ID
             }
-        every { mottatteOpplysningerService.finnBehandlingsgrunnlagdata(BEHANDLING_ID) } returns
-            Optional.of(behandlingsgrunnlagData)
+        every { mottatteOpplysningerService.finnMottatteOpplysningerData(BEHANDLING_ID) } returns
+            Optional.of(mottatteOpplysningerData)
     }
 
     private fun lagSaksopplysning(
