@@ -394,13 +394,13 @@ public class JournalfoeringService {
         if (StringUtils.isEmpty(journalfoeringDto.getOppgaveID())) {
             throw new FunksjonellException("OppgaveID mangler");
         }
-        if (StringUtils.isEmpty(journalfoeringDto.getAvsenderID())) {
+        if (journalfoeringDto.getAvsenderType() != null && journalfoeringDto.getAvsenderID() == null) {
             throw new FunksjonellException("AvsenderID mangler");
         }
         if (StringUtils.isEmpty(journalfoeringDto.getAvsenderNavn())) {
             throw new FunksjonellException("AvsenderNavn mangler");
         }
-        if (journalfoeringDto.getAvsenderType() == null) {
+        if (journalfoeringDto.getAvsenderID() != null && journalfoeringDto.getAvsenderType() == null) {
             throw new FunksjonellException("AvsenderType mangler");
         }
         if (StringUtils.isEmpty(journalfoeringDto.getBrukerID()) && StringUtils.isEmpty(journalfoeringDto.getVirksomhetOrgnr())) {
