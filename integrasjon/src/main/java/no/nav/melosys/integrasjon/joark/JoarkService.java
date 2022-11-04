@@ -144,16 +144,18 @@ public class JoarkService implements JoarkFasade {
             }
         }
 
-        if (journalpostOppdatering.getAvsenderType() != null) {
-            AvsenderMottaker avsender = AvsenderMottaker.builder()
-                .id(journalpostOppdatering.getAvsenderID())
-                .land(journalpostOppdatering.getAvsenderLand())
-                .navn(journalpostOppdatering.getAvsenderNavn())
-                .idType(AvsenderMottaker.tilAvsenderMottakerIdType(journalpostOppdatering.getAvsenderType()))
-                .build();
+        AvsenderMottaker avsender = AvsenderMottaker.builder()
+            .id(journalpostOppdatering.getAvsenderID())
+            .land(journalpostOppdatering.getAvsenderLand())
+            .navn(journalpostOppdatering.getAvsenderNavn())
+            .idType(
+                journalpostOppdatering.getAvsenderType() == null && journalpostOppdatering.getAvsenderID() == null
+                    ? null
+                    : AvsenderMottaker.tilAvsenderMottakerIdType(journalpostOppdatering.getAvsenderType()))
+            .build();
 
-            request.medAvsender(avsender);
-        }
+        request.medAvsender(avsender);
+
         journalpostapiConsumer.oppdaterJournalpost(request.build(), journalpostID);
         journalpostapiConsumer.ferdigstillJournalpost(new FerdigstillJournalpostRequest(), journalpostID);
     }
