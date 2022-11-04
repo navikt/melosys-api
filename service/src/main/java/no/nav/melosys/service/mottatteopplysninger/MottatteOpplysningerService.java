@@ -95,6 +95,7 @@ public class MottatteOpplysningerService {
 
     public void opprettSøknad(Behandling behandling, Periode periode, Soeknadsland soeknadsland) {
         long behandlingID = behandling.getId();
+        //TODO Her
         boolean behandleAlleSakerEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
         if (behandleAlleSakerEnabled ? !SaksbehandlingRegler.harTomFlyt(behandling) : behandling.erBehandlingAvSøknadGammel()) {
             Sakstyper sakstype = behandling.getFagsak().getType();
