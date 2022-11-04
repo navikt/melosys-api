@@ -100,7 +100,7 @@ public class MottatteOpplysningerService {
         // Toggle for å opprette søknad for folketrygdloven
         boolean skalOppretteSoknadForFolketrygdloven = unleash.isEnabled("melosys.folketrygden.mvp") && behandling.getFagsak().getType().equals(Sakstyper.FTRL);
 
-        if (behandleAlleSakerEnabled ? !SaksbehandlingRegler.harTomFlyt(behandling) : behandling.erBehandlingAvSøknadGammel()
+        if ((behandleAlleSakerEnabled ? !SaksbehandlingRegler.harTomFlyt(behandling) : behandling.erBehandlingAvSøknadGammel())
             || skalOppretteSoknadForFolketrygdloven) {
             Sakstyper sakstype = behandling.getFagsak().getType();
             switch (sakstype) {
