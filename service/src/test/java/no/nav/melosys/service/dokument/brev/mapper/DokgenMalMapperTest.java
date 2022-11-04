@@ -16,6 +16,7 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner;
@@ -27,9 +28,9 @@ import no.nav.melosys.integrasjon.dokgen.dto.*;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Innvilgelse;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Person;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoVirksomhet;
-import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.attest.*;
-import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.InnvilgelseStorbritannia;
-import no.nav.melosys.integrasjon.dokgen.dto.storbritannia.innvilgelse.Soknad;
+import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.attest.*;
+import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse.InnvilgelseTrygdeavtale;
+import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse.Soknad;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,7 +60,7 @@ class DokgenMalMapperTest {
     @Mock
     private DokgenMapperDatahenter mockDokgenMapperDatahenter;
     @Mock
-    private StorbritanniaMapper mockStorbritanniaMapper;
+    private TrygdeavtaleMapper mockTrygdeavtaleMapper;
 
     private final FakeUnleash unleash = new FakeUnleash();
 
@@ -71,7 +72,7 @@ class DokgenMalMapperTest {
         dokgenMalMapper = new DokgenMalMapper(
             mockDokgenMapperDatahenter,
             mockInnvilgelseFtrlMapper,
-            mockStorbritanniaMapper,
+            mockTrygdeavtaleMapper,
             unleash);
     }
 
@@ -402,7 +403,7 @@ class DokgenMalMapperTest {
     void skalMappeStorbritanniabrev() {
         when(mockDokgenMapperDatahenter.hentPersondata(any(), any())).thenReturn(lagPersondata());
         when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
-        when(mockStorbritanniaMapper.map(any())).thenReturn(lagInnvilgelseOgAttestStorbritannia());
+        when(mockTrygdeavtaleMapper.map(any(), eq(Land_iso2.GB))).thenReturn(lagInnvilgelseOgAttestStorbritannia());
 
         Behandling behandling = lagBehandling(lagFagsak(true));
 
@@ -416,16 +417,16 @@ class DokgenMalMapperTest {
             .build();
 
         DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottaker(BRUKER));
-        assertThat(dokgenDto).isInstanceOf(InnvilgelseOgAttestStorbritannia.class);
+        assertThat(dokgenDto).isInstanceOf(InnvilgelseOgAttestTrygdeavtale.class);
 
-        InnvilgelseStorbritannia innvilgelse = ((InnvilgelseOgAttestStorbritannia) dokgenDto).getInnvilgelse();
-        AttestStorbritannia attest = ((InnvilgelseOgAttestStorbritannia) dokgenDto).getAttest();
+        InnvilgelseTrygdeavtale innvilgelse = ((InnvilgelseOgAttestTrygdeavtale) dokgenDto).getInnvilgelse();
+        AttestTrygdeavtale attest = ((InnvilgelseOgAttestTrygdeavtale) dokgenDto).getAttest();
 
         assertThat(innvilgelse).extracting(
             i -> i.getInnvilgelse().innledningFritekst(),
-            InnvilgelseStorbritannia::getArtikkel,
+            InnvilgelseTrygdeavtale::getArtikkel,
             i -> i.getSoknad().virksomhetsnavn(),
-            InnvilgelseStorbritannia::isVirksomhetArbeidsgiverSkalHaKopi
+            InnvilgelseTrygdeavtale::isVirksomhetArbeidsgiverSkalHaKopi
         ).containsExactly(
             "Innledning",
             Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1,
@@ -454,9 +455,9 @@ class DokgenMalMapperTest {
                 "Mrs. London"
             );
 
-        assertThat(((InnvilgelseOgAttestStorbritannia) dokgenDto).getNyVurderingBakgrunn())
+        assertThat(((InnvilgelseOgAttestTrygdeavtale) dokgenDto).getNyVurderingBakgrunn())
             .isEqualTo(Nyvurderingbakgrunner.NYE_OPPLYSNINGER.getKode());
-        assertThat(((InnvilgelseOgAttestStorbritannia) dokgenDto).isSkalHaInfoOmRettigheter())
+        assertThat(((InnvilgelseOgAttestTrygdeavtale) dokgenDto).isSkalHaInfoOmRettigheter())
             .isFalse();
     }
 
@@ -707,35 +708,36 @@ class DokgenMalMapperTest {
             .build();
     }
 
-    private InnvilgelseOgAttestStorbritannia lagInnvilgelseOgAttestStorbritannia() {
-        return new InnvilgelseOgAttestStorbritannia.Builder(lagInnvilgelseBrevbestilling())
+    private InnvilgelseOgAttestTrygdeavtale lagInnvilgelseOgAttestStorbritannia() {
+        return new InnvilgelseOgAttestTrygdeavtale.Builder(lagInnvilgelseBrevbestilling())
             .innvilgelse(lagInnvilgelseStorbritannia())
             .attest(lagAttestStorbritannia())
             .nyVurderingBakgrunn(Nyvurderingbakgrunner.NYE_OPPLYSNINGER.getKode())
             .build();
     }
 
-    private InnvilgelseStorbritannia lagInnvilgelseStorbritannia() {
-        return new InnvilgelseStorbritannia.Builder()
+    private InnvilgelseTrygdeavtale lagInnvilgelseStorbritannia() {
+        return new InnvilgelseTrygdeavtale.Builder()
             .innvilgelse(Innvilgelse.av(lagInnvilgelseBrevbestilling()))
             .artikkel(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1)
             .soknad(new Soknad(SOKNADSDATO,
                 LOVVALGSPERIODE_FOM,
                 LOVVALGSPERIODE_TOM,
-                "Virksomhetsnavn"
+                "Virksomhetsnavn",
+                Land_iso2.GB.getBeskrivelse()
             ))
             .familie(null)
             .virksomhetArbeidsgiverSkalHaKopi(true)
             .build();
     }
 
-    private AttestStorbritannia lagAttestStorbritannia() {
+    private AttestTrygdeavtale lagAttestStorbritannia() {
         DokgenBrevbestilling dokgenBrevbestillingBuilder = new DokgenBrevbestilling()
             .toBuilder()
             .medBehandling(lagBehandling())
             .medPersonDokument(lagPersondata())
             .build();
-        return new AttestStorbritannia.Builder(dokgenBrevbestillingBuilder)
+        return new AttestTrygdeavtale.Builder(dokgenBrevbestillingBuilder)
             .medfolgendeFamiliemedlemmer(new MedfolgendeFamiliemedlemmer(
                 new Person("Kone",
                     FØDSELSDATO,
@@ -751,7 +753,7 @@ class DokgenMalMapperTest {
                     LocalDate.now().minusDays(20),
                     "01010119901",
                     List.of("Nordmannsveg 200", "Norge")))
-            .representant(new RepresentantStorbritannia(
+            .representant(new RepresentantTrygdeavtale(
                 "Mrs. London",
                 List.of("UK Street 1337"))
             )

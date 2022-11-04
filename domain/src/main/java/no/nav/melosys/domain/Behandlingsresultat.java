@@ -62,7 +62,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<Avklartefakta> avklartefakta = new HashSet<>(1);
 
-    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<Lovvalgsperiode> lovvalgsperioder = new HashSet<>(1);
 
     @OneToMany(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
@@ -363,6 +363,20 @@ public class Behandlingsresultat extends RegistreringsInfo {
             throw new UnsupportedOperationException("Flere enn en utpekingsperiode er ikke støttet");
         }
         return utpekingsperioder.stream().findFirst();
+    }
+
+    public Medlemskapsperiode hentValidertMedlemskapsPeriode() {
+        return finnValidertMedlemskapsPeriode()
+            .orElseThrow(() -> new NoSuchElementException("Ingen medlemskapsPerioder finnes for behandlingsresultat " + id));
+    }
+
+    public Optional<Medlemskapsperiode> finnValidertMedlemskapsPeriode() {
+        Collection<Medlemskapsperiode> medlemskapsPerioder = medlemAvFolketrygden.getMedlemskapsperioder();
+        if (medlemskapsPerioder.size() > 1) {
+            throw new UnsupportedOperationException("Flere enn en medlemskapsPerioder er ikke støttet");
+        }
+
+        return medlemskapsPerioder.stream().findFirst();
     }
 
     public Set<VilkaarBegrunnelse> hentVilkaarbegrunnelser(Vilkaar vilkaarType) {

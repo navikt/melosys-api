@@ -119,8 +119,8 @@ public class OppgaveTjeneste {
         }
         try {
             var oppgaveliste = StringUtils.isNotEmpty(personIdent)
-                ? oppgaveService.finnOppgaverMedPersonIdent(personIdent)
-                : oppgaveService.finnOppgaverMedOrgnr(orgnr);
+                ? oppgaveService.finnBehandlingsoppgaverMedPersonIdent(personIdent)
+                : oppgaveService.finnBehandlingsoppgaverMedOrgnr(orgnr);
             return ResponseEntity.ok(oppgaveliste.stream().map(no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto::av).toList());
         } catch (IkkeFunnetException e) {
             return ResponseEntity.ok(new ArrayList<>());

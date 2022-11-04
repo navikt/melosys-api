@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui.dto.trygdeavtale;
 
-import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
@@ -15,7 +15,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie.*;
+import static no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie.*;
 
 public record TrygdeavtaleResultatDto(
     String virksomhet,

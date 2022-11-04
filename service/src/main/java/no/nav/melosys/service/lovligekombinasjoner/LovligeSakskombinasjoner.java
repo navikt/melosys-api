@@ -1,8 +1,6 @@
 package no.nav.melosys.service.lovligekombinasjoner;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -11,7 +9,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.*;
 import static no.nav.melosys.domain.kodeverk.Sakstyper.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL;
 import static no.nav.melosys.service.lovligekombinasjoner.LovligeBehandlingsKombinasjoner.*;
 
 public class LovligeSakskombinasjoner {
@@ -28,12 +25,28 @@ public class LovligeSakskombinasjoner {
     private static final SakstemaBehandlingsKombinasjon TRYGDEAVTALE_UNNTAK_SAK = new SakstemaBehandlingsKombinasjon(UNNTAK, new LinkedHashSet<>(List.of(TRYGDEAVTALE_UNNTAK_BEHANDLINGS_KOMBINASJON_1, TRYGDEAVTALE_UNNTAK_BEHANDLINGS_KOMBINASJON_2)));
     private static final SakstemaBehandlingsKombinasjon TRYGDEAVTALE_TRYGDEAVGIFT_SAK = new SakstemaBehandlingsKombinasjon(TRYGDEAVGIFT, Set.of(TRYGDEAVTALE_TRYGDEAVGIFT_BEHANDLINGS_KOMBINASJON));
 
+    private static final SakstemaBehandlingsKombinasjon EU_EOS_LOVVALG_MEDLEMSKAP_SAK_VIRKSOMHET = new SakstemaBehandlingsKombinasjon(MEDLEMSKAP_LOVVALG, new LinkedHashSet<>(List.of(EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_VIRKSOMHET)));
+    private static final SakstemaBehandlingsKombinasjon EU_EOS_UNNTAK_SAK_VIRKSOMHET = new SakstemaBehandlingsKombinasjon(UNNTAK, new LinkedHashSet<>(List.of(EU_EOS_UNNTAK_BEHANDLINGS_KOMBINASJON_VIRKSOMHET)));
+    private static final SakstemaBehandlingsKombinasjon EU_EOS_TRYGDEAVGIFT_SAK_VIRKSOMHET = new SakstemaBehandlingsKombinasjon(TRYGDEAVGIFT, new LinkedHashSet<>(List.of(EU_EOS_TRYGDEAVGIFT_BEHANDLINGS_KOMBINASJON_VIRKSOMHET)));
+
+    private static final SakstemaBehandlingsKombinasjon FOLKETRYGDLOVEN_LOVVALG_MEDLEMSKAP_SAK_VIRKSOMHET = new SakstemaBehandlingsKombinasjon(MEDLEMSKAP_LOVVALG, new LinkedHashSet<>(List.of(FOLKETRYGDLOVEN_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_VIRKSOMHET)));
+    private static final SakstemaBehandlingsKombinasjon FOLKETRYGDLOVEN_TRYGDEAVGIFT_SAK_VIRKSOMHET = new SakstemaBehandlingsKombinasjon(TRYGDEAVGIFT, new LinkedHashSet<>(List.of(FOLKETRYGDLOVEN_TRYGDEAVGIFT_BEHANDLINGS_KOMBINASJON_VIRKSOMHET)));
+
+    private static final SakstemaBehandlingsKombinasjon TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_SAK_VIRKSOMHET = new SakstemaBehandlingsKombinasjon(MEDLEMSKAP_LOVVALG, new LinkedHashSet<>(List.of(TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_VIRKSOMHET)));
+    private static final SakstemaBehandlingsKombinasjon TRYGDEAVTALE_UNNTAK_SAK_VIRKSOMHET = new SakstemaBehandlingsKombinasjon(UNNTAK, new LinkedHashSet<>(List.of(TRYGDEAVTALE_UNNTAK_BEHANDLINGS_KOMBINASJON_VIRKSOMHET)));
+    private static final SakstemaBehandlingsKombinasjon TRYGDEAVTALE_TRYGDEAVGIFT_SAK_VIRKSOMHET = new SakstemaBehandlingsKombinasjon(TRYGDEAVGIFT, new LinkedHashSet<>(List.of(TRYGDEAVTALE_TRYGDEAVGIFT_BEHANDLINGS_KOMBINASJON_VIRKSOMHET)));
+
     static final Map<Sakstyper, Set<SakstemaBehandlingsKombinasjon>> muligeSaksKombinasjonerBruker = new EnumMap<>(Sakstyper.class);
+    static final Map<Sakstyper, Set<SakstemaBehandlingsKombinasjon>> muligeSaksKombinasjonerVirksomhet = new EnumMap<>(Sakstyper.class);
 
     static {
         muligeSaksKombinasjonerBruker.put(EU_EOS, new LinkedHashSet<>(List.of(EU_EOS_LOVVALG_MEDLEMSKAP_SAK, EU_EOS_UNNTAK_SAK, EU_EOS_TRYGDEAVGIFT_SAK)));
         muligeSaksKombinasjonerBruker.put(FTRL, new LinkedHashSet<>(List.of(FOLKETRYGDLOVEL_LOVVALG_MEDLEMSKAP_SAK, FOLKETRYGDLOVEL_TRYGDEAVGIFT_SAK)));
         muligeSaksKombinasjonerBruker.put(TRYGDEAVTALE, new LinkedHashSet<>(List.of(TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_SAK, TRYGDEAVTALE_UNNTAK_SAK, TRYGDEAVTALE_TRYGDEAVGIFT_SAK)));
+
+        muligeSaksKombinasjonerVirksomhet.put(EU_EOS, new LinkedHashSet<>(List.of(EU_EOS_LOVVALG_MEDLEMSKAP_SAK_VIRKSOMHET, EU_EOS_UNNTAK_SAK_VIRKSOMHET, EU_EOS_TRYGDEAVGIFT_SAK_VIRKSOMHET)));
+        muligeSaksKombinasjonerVirksomhet.put(FTRL, new LinkedHashSet<>(List.of(FOLKETRYGDLOVEN_LOVVALG_MEDLEMSKAP_SAK_VIRKSOMHET, FOLKETRYGDLOVEN_TRYGDEAVGIFT_SAK_VIRKSOMHET)));
+        muligeSaksKombinasjonerVirksomhet.put(TRYGDEAVTALE, new LinkedHashSet<>(List.of(TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_SAK_VIRKSOMHET, TRYGDEAVTALE_UNNTAK_SAK_VIRKSOMHET, TRYGDEAVTALE_TRYGDEAVGIFT_SAK_VIRKSOMHET)));
     }
 
     private LovligeSakskombinasjoner() {

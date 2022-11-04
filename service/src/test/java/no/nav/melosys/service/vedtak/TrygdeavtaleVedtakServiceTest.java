@@ -7,10 +7,9 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.Vedtakstyper;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.ValideringException;
@@ -277,7 +276,16 @@ class TrygdeavtaleVedtakServiceTest {
         var behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
         behandling.setFagsak(lagFagsak());
+        behandling.setMottatteOpplysninger(lagMottatteOpplysninger());
         return behandling;
+    }
+
+    private MottatteOpplysninger lagMottatteOpplysninger() {
+        MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
+        mottatteOpplysningerData.soeknadsland.landkoder = List.of(Land_iso2.GB.getKode());
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
+        return mottatteOpplysninger;
     }
 
     private Fagsak lagFagsak() {

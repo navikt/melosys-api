@@ -5,9 +5,9 @@ import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.Mottaker;
@@ -180,7 +180,7 @@ class SendVedtaksbrevInnlandTest {
             .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(FO_883_2004_ART13_1A)));
         ForetakUtland arbeidsgiverUtland = new ForetakUtland();
         arbeidsgiverUtland.selvstendigNæringsvirksomhet = false;
-        behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(arbeidsgiverUtland);
+        behandling.getMottatteOpplysninger().getMottatteOpplysningerData().foretakUtland.add(arbeidsgiverUtland);
 
 
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
@@ -198,7 +198,7 @@ class SendVedtaksbrevInnlandTest {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID)).thenReturn(behandlingsresultat);
         ForetakUtland utenlandskSelvstendigVirksomhet = new ForetakUtland();
         utenlandskSelvstendigVirksomhet.selvstendigNæringsvirksomhet = true;
-        behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(utenlandskSelvstendigVirksomhet);
+        behandling.getMottatteOpplysninger().getMottatteOpplysningerData().foretakUtland.add(utenlandskSelvstendigVirksomhet);
 
 
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
@@ -229,7 +229,7 @@ class SendVedtaksbrevInnlandTest {
     void utfør_innvilgelse12_1_senderIkkeBrevTilStatligSkatteoppkreving() {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
             .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(FO_883_2004_ART12_1)));
-        behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().foretakUtland.add(new ForetakUtland());
+        behandling.getMottatteOpplysninger().getMottatteOpplysningerData().foretakUtland.add(new ForetakUtland());
 
 
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
@@ -346,8 +346,8 @@ class SendVedtaksbrevInnlandTest {
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLINGID);
         behandling.setType(Behandlingstyper.SOEKNAD);
-        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new Soeknad());
+        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new Soeknad());
         behandling.setFagsak(lagFagsak());
         return behandling;
     }

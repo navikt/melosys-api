@@ -1,24 +1,25 @@
 package no.nav.melosys.service.kontroll.feature.ufm;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 import io.micrometer.core.instrument.Metrics;
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Kontrollresultat;
-import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
-import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.repository.KontrollresultatRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.feature.ufm.data.UfmKontrollData;
 import no.nav.melosys.service.kontroll.feature.ufm.kontroll.UfmKontrollsett;
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,24 +35,30 @@ import static no.nav.melosys.metrics.MetrikkerNavn.UNNTAKSPERIODE_KONTROLL_TREFF
 public class UfmKontrollService {
     private static final Logger log = LoggerFactory.getLogger(UfmKontrollService.class);
 
-    private final KontrollresultatRepository kontrollresultatRepository;
-    private final BehandlingsresultatService behandlingsresultatService;
-    private final BehandlingService behandlingService;
-    private final PersondataFasade persondataFasade;
-
-    public UfmKontrollService(KontrollresultatRepository kontrollresultatRepository,
-                              BehandlingsresultatService behandlingsresultatService,
-                              BehandlingService behandlingService,
-                              PersondataFasade persondataFasade) {
-        this.kontrollresultatRepository = kontrollresultatRepository;
-        this.behandlingsresultatService = behandlingsresultatService;
-        this.behandlingService = behandlingService;
-        this.persondataFasade = persondataFasade;
-    }
-
     static {
         Arrays.stream(Kontroll_begrunnelser.values())
             .forEach(b -> Metrics.counter(UNNTAKSPERIODE_KONTROLL_TREFF, TAG_BEGRUNNELSE, b.getKode()));
+    }
+
+    private final KontrollresultatRepository kontrollresultatRepository;
+    private final BehandlingsresultatService behandlingsresultatService;
+    private final MottatteOpplysningerService mottatteOpplysningerService;
+    private final BehandlingService behandlingService;
+    private final PersondataFasade persondataFasade;
+    private final Unleash unleash;
+
+    public UfmKontrollService(KontrollresultatRepository kontrollresultatRepository,
+                              BehandlingsresultatService behandlingsresultatService,
+                              MottatteOpplysningerService mottatteOpplysningerService,
+                              BehandlingService behandlingService,
+                              PersondataFasade persondataFasade,
+                              Unleash unleash) {
+        this.kontrollresultatRepository = kontrollresultatRepository;
+        this.behandlingsresultatService = behandlingsresultatService;
+        this.mottatteOpplysningerService = mottatteOpplysningerService;
+        this.behandlingService = behandlingService;
+        this.persondataFasade = persondataFasade;
+        this.unleash = unleash;
     }
 
     @Transactional
@@ -63,23 +70,27 @@ public class UfmKontrollService {
         lagreKontrollresultater(behandlingId, registrerteTreff);
     }
 
-    public List<Kontroll_begrunnelser> utførKontroller(Behandling behandling) {
-        SedDokument sedDokument = behandling.hentSedDokument();
-        if (feilIPeriode(sedDokument)) {
+    List<Kontroll_begrunnelser> utførKontroller(Behandling behandling) {
+        var sedDokument = behandling.hentSedDokument();
+        if (harFeilIPeriode(sedDokument)) {
             return Collections.singletonList(Kontroll_begrunnelser.FEIL_I_PERIODEN);
         }
+        var ufmKontrollData = lagUfmKontrollData(behandling, sedDokument);
+        var sedType = sedDokument.getSedType();
+        return utførKontroller(ufmKontrollData, sedType);
+    }
 
-        Persondata persondata = persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
-        MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();
-        InntektDokument inntektDokument = behandling.hentInntektDokument();
-        UtbetalingDokument utbetalingDokument = behandling.finnUtbetalingDokument().orElse(null);
-        UfmKontrollData kontrollData = new UfmKontrollData(sedDokument, persondata, medlemskapDokument, inntektDokument, utbetalingDokument);
-
-        return utførKontroller(kontrollData, sedDokument.getSedType());
+    private UfmKontrollData lagUfmKontrollData(Behandling behandling, SedDokument sedDokument) {
+        var persondata = persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
+        var medlemskapDokument = behandling.hentMedlemskapDokument();
+        var inntektDokument = behandling.hentInntektDokument();
+        var utbetalingDokument = behandling.finnUtbetalingDokument().orElse(null);
+        var optionalMottatteOpplysningerData = mottatteOpplysningerService.finnMottatteOpplysningerData(behandling.getId());
+        return new UfmKontrollData(sedDokument, persondata, medlemskapDokument, inntektDokument, utbetalingDokument, optionalMottatteOpplysningerData);
     }
 
     private List<Kontroll_begrunnelser> utførKontroller(UfmKontrollData kontrollData, SedType sedType) {
-        return UfmKontrollsett.hentRegelsettForSedType(sedType).stream()
+        return UfmKontrollsett.hentRegelsettForSedType(sedType, unleash).stream()
             .map(f -> f.apply(kontrollData))
             .filter(Objects::nonNull)
             .peek(this::registrerMetrikk) //NOSONAR
@@ -111,7 +122,7 @@ public class UfmKontrollService {
         Metrics.counter(UNNTAKSPERIODE_KONTROLL_TREFF, TAG_BEGRUNNELSE, unntak_periode_begrunnelse.getKode()).increment();
     }
 
-    private boolean feilIPeriode(SedDokument sedDokument) {
+    private boolean harFeilIPeriode(SedDokument sedDokument) {
         return PeriodeRegler.feilIPeriode(
             sedDokument.getLovvalgsperiode().getFom(),
             sedDokument.getLovvalgsperiode().getTom());

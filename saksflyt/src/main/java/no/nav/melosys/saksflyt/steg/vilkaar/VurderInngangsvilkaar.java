@@ -40,7 +40,7 @@ public class VurderInngangsvilkaar implements StegBehandler {
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             if (skalVurdereInngangsvilkår(behandling)) {
                 var søknadsland = behandling.hentSøknadsLand();
-                var erUkjenteEllerAlleEosLand = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand;
+                var erUkjenteEllerAlleEosLand = behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.erUkjenteEllerAlleEosLand;
                 var periode = behandling.hentPeriode();
 
                 boolean kvalifisererForEF_883_2004 = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, erUkjenteEllerAlleEosLand, periode);
@@ -51,7 +51,7 @@ public class VurderInngangsvilkaar implements StegBehandler {
         } else {
             if (behandling.getFagsak().getType() == Sakstyper.EU_EOS && behandling.kanResultereIVedtakGammel()) {
                 var søknadsland = behandling.finnSøknadsLandGammel();
-                var erUkjenteEllerAlleEosLand = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand;
+                var erUkjenteEllerAlleEosLand = behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.erUkjenteEllerAlleEosLand;
                 var periode = behandling.hentPeriodeGammel();
 
                 boolean kvalifisererForEF_883_2004 = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, erUkjenteEllerAlleEosLand, periode);

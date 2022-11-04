@@ -7,11 +7,11 @@ import java.util.List;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.RepresentantIUtlandet;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.SoeknadTrygdeavtale;
+import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.RepresentantIUtlandet;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
@@ -57,7 +57,7 @@ public final class DokgenTestData {
         behandling.setId(1L);
         behandling.setFagsak(fagsak);
         behandling.setType(Behandlingstyper.SOEKNAD);
-        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag());
+        behandling.setMottatteOpplysninger(lagMottatteOpplysninger());
         return behandling;
     }
 
@@ -148,16 +148,16 @@ public final class DokgenTestData {
         return singletonList(behandling);
     }
 
-    private static Behandlingsgrunnlag lagBehandlingsgrunnlag() {
-        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(lagBehandlingsgrunnlagdata());
-        return behandlingsgrunnlag;
+    private static MottatteOpplysninger lagMottatteOpplysninger() {
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        mottatteOpplysninger.setMottatteOpplysningerdata(lagMottatteOpplysningerdata());
+        return mottatteOpplysninger;
     }
 
-    private static BehandlingsgrunnlagData lagBehandlingsgrunnlagdata() {
-        BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
-        behandlingsgrunnlagData.soeknadsland = new Soeknadsland(List.of("AT"), false);
-        return behandlingsgrunnlagData;
+    private static MottatteOpplysningerData lagMottatteOpplysningerdata() {
+        MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
+        mottatteOpplysningerData.soeknadsland = new Soeknadsland(List.of("AT"), false);
+        return mottatteOpplysningerData;
     }
 
     private static OrganisasjonsDetaljer lagOrgDetaljer() {
@@ -181,9 +181,9 @@ public final class DokgenTestData {
 
     public static Behandling lagTrygdeavtaleBehandling(RepresentantIUtlandet representantIUtlandet) {
         Behandling behandling = lagBehandling(lagFagsak());
-        var behandlingsgrunnlagData = new SoeknadTrygdeavtale();
-        behandlingsgrunnlagData.setRepresentantIUtlandet(representantIUtlandet);
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+        var mottatteOpplysningerData = new SoeknadTrygdeavtale();
+        mottatteOpplysningerData.setRepresentantIUtlandet(representantIUtlandet);
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(mottatteOpplysningerData);
         return behandling;
     }
 

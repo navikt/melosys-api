@@ -1,18 +1,17 @@
 package no.nav.melosys.service.vedtak;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -77,16 +76,20 @@ public class TrygdeavtaleVedtakService {
 
         prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling, request);
 
-        BrevbestillingRequest brevbestillingRequest = lagBrevbestilling(request);
+        BrevbestillingRequest brevbestillingRequest = lagBrevbestilling(behandling, request);
         dokgenService.produserOgDistribuerBrev(behandlingID, brevbestillingRequest);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
     }
 
-    private BrevbestillingRequest lagBrevbestilling(FattVedtakRequest request) {
+    private BrevbestillingRequest lagBrevbestilling(Behandling behandling, FattVedtakRequest request) {
         if (request.getBehandlingsresultatTypeKode() == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
             return lagAvslagMangledeOpplysningerBrevbestilling(request);
         }
-        return lagStorbritanniaBrevbestilling(request);
+        Optional<Produserbaredokumenter> produserbaredokumenter = behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.landkoder.stream()
+            .map(Land_iso2::valueOf)
+            .findFirst()
+            .map(this::utledProduserbartTrygdeavtaleDokument);
+        return lagTrygdeavtaleBrevbestilling(request, produserbaredokumenter.get());
     }
 
     private BrevbestillingRequest lagAvslagMangledeOpplysningerBrevbestilling(FattVedtakRequest request) {
@@ -98,9 +101,9 @@ public class TrygdeavtaleVedtakService {
             .build();
     }
 
-    private BrevbestillingRequest lagStorbritanniaBrevbestilling(FattVedtakRequest request) {
+    private BrevbestillingRequest lagTrygdeavtaleBrevbestilling(FattVedtakRequest request, Produserbaredokumenter produserbaredokumenter) {
         return new BrevbestillingRequest.Builder()
-            .medProduserbardokument(Produserbaredokumenter.STORBRITANNIA)
+            .medProduserbardokument(produserbaredokumenter)
             .medMottaker(Aktoersroller.BRUKER)
             .medKopiMottakere(request.getKopiMottakere())
             .medInnledningFritekst(request.getInnledningFritekst())
@@ -110,6 +113,15 @@ public class TrygdeavtaleVedtakService {
             .medBestillersId(request.getBestillersId())
             .medNyVurderingBakgrunn(request.getNyVurderingBakgrunn())
             .build();
+    }
+
+    private Produserbaredokumenter utledProduserbartTrygdeavtaleDokument(Land_iso2 soeknadsland) {
+        return switch (soeknadsland) {
+            case GB -> Produserbaredokumenter.STORBRITANNIA;
+            case US -> Produserbaredokumenter.TRYGDEAVTALE_US;
+            default ->
+                throw new TekniskException("Søknadsland er ikke implementert som produsertbart dokument : " + soeknadsland);
+        };
     }
 
     private void oppdaterBehandlingsresultat(Behandlingsresultat behandlingsresultat, FattVedtakRequest request) throws IkkeFunnetException {

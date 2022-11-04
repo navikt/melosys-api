@@ -3,8 +3,8 @@ package no.nav.melosys.service.dokument.brev.datagrunnlag;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -17,7 +17,7 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 public class BrevDataGrunnlag implements DataGrunnlag {
     private final ArbeidsstedGrunnlag arbeidsstedGrunnlag;
     private final AvklarteVirksomheterGrunnlag avklarteVirksomheterGrunnlag;
-    private final BehandlingsgrunnlagData behandlingsgrunnlagData;
+    private final MottatteOpplysningerData mottatteOpplysningerData;
     private final BostedGrunnlag bostedGrunnlag;
     private final DoksysBrevbestilling brevbestilling;
     private final Persondata person;
@@ -29,17 +29,17 @@ public class BrevDataGrunnlag implements DataGrunnlag {
                             Persondata persondata) {
         this.brevbestilling = brevbestilling;
         final Behandling behandling = brevbestilling.getBehandling();
-        this.behandlingsgrunnlagData = Optional.ofNullable(behandling.getBehandlingsgrunnlag())
-            .map(Behandlingsgrunnlag::getBehandlingsgrunnlagdata)
+        this.mottatteOpplysningerData = Optional.ofNullable(behandling.getMottatteOpplysninger())
+            .map(MottatteOpplysninger::getMottatteOpplysningerData)
             .orElse(null);
         this.person = persondata;
         this.avklarteVirksomheterGrunnlag = new AvklarteVirksomheterGrunnlag(behandling, avklarteVirksomheterService);
-        this.bostedGrunnlag = new BostedGrunnlag(behandlingsgrunnlagData, person.finnBostedsadresse().orElse(null),
+        this.bostedGrunnlag = new BostedGrunnlag(mottatteOpplysningerData, person.finnBostedsadresse().orElse(null),
             kodeverkService);
         this.arbeidsstedGrunnlag = new ArbeidsstedGrunnlag(
             avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(behandling.getId()),
             getAvklarteVirksomheterGrunnlag(),
-            behandlingsgrunnlagData
+            mottatteOpplysningerData
         );
     }
 
@@ -52,8 +52,8 @@ public class BrevDataGrunnlag implements DataGrunnlag {
         return brevbestilling;
     }
 
-    public BehandlingsgrunnlagData getBehandlingsgrunnlagData() {
-        return behandlingsgrunnlagData;
+    public MottatteOpplysningerData getMottatteOpplysningerData() {
+        return mottatteOpplysningerData;
     }
 
     public Persondata getPerson() {

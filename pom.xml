@@ -36,12 +36,11 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>17</java.version>
-
-        <kotlin.version>1.7.0</kotlin.version>
+        <kotlin.version>1.7.20</kotlin.version>
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <!-- Melosys -->
-        <melosys.internt.kodeverk.version>5.15.139</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.15.144</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.124</melosys.brev.version>
 
         <!-- NAV -->

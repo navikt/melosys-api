@@ -61,7 +61,7 @@ public class OppfriskSaksopplysningerService {
 
         if (behandling.erUtsending() && anmodningsperiodeService.harSendtAnmodningsperiode(behandlingID)) {
             throw new FunksjonellException("Anmodning om unntak er sendt for behandling %s. ".formatted(
-                behandlingID) + "Det er ikke lenger mulig å endre behandlingsgrunnlag og saksopplysninger");
+                behandlingID) + "Det er ikke lenger mulig å endre mottatteOpplysninger og saksopplysninger");
         }
 
         String aktørID = behandling.getFagsak().hentBrukersAktørID();
@@ -105,7 +105,7 @@ public class OppfriskSaksopplysningerService {
                 inngangsvilkaarService.vurderOgLagreInngangsvilkår(
                     behandlingID,
                     behandling.hentSøknadsLand(),
-                    behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand,
+                    behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.erUkjenteEllerAlleEosLand,
                     periode
                 );
             }
@@ -116,7 +116,7 @@ public class OppfriskSaksopplysningerService {
                 inngangsvilkaarService.vurderOgLagreInngangsvilkår(
                     behandlingID,
                     behandling.finnSøknadsLandGammel(),
-                    behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand,
+                    behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.erUkjenteEllerAlleEosLand,
                     periode
                 );
             }

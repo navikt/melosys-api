@@ -3,8 +3,8 @@ package no.nav.melosys.service.dokument;
 import java.util.Optional;
 
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Bosted;
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
+import no.nav.melosys.domain.mottatteopplysninger.data.Bosted;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -47,7 +47,8 @@ class BostedGrunnlagTest {
 
     @Test
     void finnBostedsadresse_oppgittAdresseOverstyrerRegister_nårOppgittAdresseISøknad() {
-        bostedGrunnlag = new BostedGrunnlag(soeknad, PersonopplysningerObjectFactory.lagPersonopplysninger().bostedsadresse(), kodeverkService);
+        bostedGrunnlag = new BostedGrunnlag(soeknad,
+            PersonopplysningerObjectFactory.lagPersonopplysninger().getBostedsadresse(), kodeverkService);
         StrukturertAdresse oppgittBosted = new StrukturertAdresse();
         oppgittBosted.setGatenavn("HerBorJegGata");
         oppgittBosted.setHusnummerEtasjeLeilighet("123");
@@ -72,7 +73,8 @@ class BostedGrunnlagTest {
 
     @Test
     void finnBostedsadresse_harBostedsadresseIRegister_forventBostedsadresse() {
-        bostedGrunnlag = new BostedGrunnlag(soeknad, PersonopplysningerObjectFactory.lagPersonopplysninger().bostedsadresse(), kodeverkService);
+        bostedGrunnlag = new BostedGrunnlag(soeknad,
+            PersonopplysningerObjectFactory.lagPersonopplysninger().getBostedsadresse(), kodeverkService);
 
         Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnBostedsadresse();
 
@@ -91,7 +93,7 @@ class BostedGrunnlagTest {
     @Test
     void finnBostedsadresse_bostedsadresseFraPersonOpplysninger_forventBostedsadresse() {
         final var personopplysninger = lagPersonopplysninger();
-        final var bostedGrunnlag = new BostedGrunnlag(null, personopplysninger.bostedsadresse(), kodeverkService);
+        final var bostedGrunnlag = new BostedGrunnlag(null, personopplysninger.getBostedsadresse(), kodeverkService);
 
         Optional<StrukturertAdresse> strukturertAdresse = bostedGrunnlag.finnBostedsadresse();
 

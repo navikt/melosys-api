@@ -31,7 +31,7 @@ import no.nav.melosys.domain.saksflyt.*;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.sak.OpprettSakDto;
@@ -57,7 +57,7 @@ public class ProsessinstansService {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final ProsessinstansRepository prosessinstansRepo;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
-    private final BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private final MottatteOpplysningerService mottatteOpplysningerService;
     private final Unleash unleash;
 
     private final Counter prosessinstanserOpprettet = Metrics.counter(MetrikkerNavn.PROSESSINSTANSER_OPPRETTET);
@@ -65,12 +65,12 @@ public class ProsessinstansService {
     public ProsessinstansService(ApplicationEventPublisher applicationEventPublisher,
                                  ProsessinstansRepository prosessinstansRepo,
                                  UtenlandskMyndighetService utenlandskMyndighetService,
-                                 BehandlingsgrunnlagService behandlingsgrunnlagService,
+                                 MottatteOpplysningerService mottatteOpplysningerService,
                                  Unleash unleash) {
         this.applicationEventPublisher = applicationEventPublisher;
         this.prosessinstansRepo = prosessinstansRepo;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
-        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
+        this.mottatteOpplysningerService = mottatteOpplysningerService;
         this.unleash = unleash;
     }
 
@@ -451,7 +451,7 @@ public class ProsessinstansService {
 
     @Transactional
     public void opprettProsessinstansSøknadMottatt(SoknadMottatt søknadMottatt) {
-        if (behandlingsgrunnlagService.harMottattSøknadMedEksternReferanseID(søknadMottatt.getSoknadID())) {
+        if (mottatteOpplysningerService.harMottattSøknadMedEksternReferanseID(søknadMottatt.getSoknadID())) {
             logger.warn("Søknad med søknadID {} har vært mottatt tidligere.", søknadMottatt.getSoknadID());
         } else {
             Prosessinstans prosessinstans = new ProsessinstansBuilder()

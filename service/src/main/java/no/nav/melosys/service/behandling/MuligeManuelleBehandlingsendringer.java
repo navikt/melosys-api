@@ -24,14 +24,16 @@ public class MuligeManuelleBehandlingsendringer {
         ARBEID_ETT_LAND_ØVRIG,
         ARBEID_TJENESTEPERSON_ELLER_FLY, ARBEID_KUN_NORGE,
         IKKE_YRKESAKTIV, ARBEID_FLERE_LAND);
-
-    private MuligeManuelleBehandlingsendringer() {
-    }
-
     private static final Set<Behandlingsstatus> MULIGE_STATUSER = Set.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING);
     private static final Set<Behandlingstema> TEMAER_SOM_KAN_AVSLUTTES = Set.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM, FORESPØRSEL_TRYGDEMYNDIGHET, TRYGDETID, IKKE_YRKESAKTIV);
     private static final Set<Behandlingstema> TEMAER_SOM_KAN_ENDRE_TYPE = Set.of(UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG);
 
+    @Deprecated(since = "Denne klassen forsvinner når vi tar vekk melosys.behandle_alle_saker toggle, " +
+        "ettersom metodene som er brukt her er gjemt bak toggle")
+    private MuligeManuelleBehandlingsendringer() {
+    }
+
+    @Deprecated(since = "Tas vekk samme med toggle melosys.behandle_alle_saker")
     public static Set<Behandlingsstatus> hentMuligeStatuser(Behandling behandling) {
         if (behandling.erInaktiv()) return Collections.emptySet();
 

@@ -2,7 +2,7 @@ package no.nav.melosys.service.kontroll.regler;
 
 import java.util.List;
 
-import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.RepresentantIUtlandet;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.RepresentantIUtlandet;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.melding.Adresse;
 import no.nav.melosys.domain.eessi.melding.Arbeidssted;

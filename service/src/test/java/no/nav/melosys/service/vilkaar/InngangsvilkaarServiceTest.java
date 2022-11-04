@@ -10,10 +10,10 @@ import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
+import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.inngangsvilkar.Feilmelding;
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse;
@@ -35,7 +35,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.dokument.felles.Land.FINLAND;
 import static no.nav.melosys.domain.dokument.felles.Land.SVERIGE;
-import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
+import static no.nav.melosys.domain.util.IsoLandkodeKonverterer.tilIso3;
 import static no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -66,7 +66,7 @@ class InngangsvilkaarServiceTest {
     @Test
     void vurderOgLagreInngangsvilkår_medFlereGyldigeStatsborgerskap_oppdaterVilkårsresultat() {
         final List<String> søknadsland = List.of("FR", "DK", "NO");
-        final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
+        final var periode = new no.nav.melosys.domain.mottatteopplysninger.data.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
         final String ident = "aktørID";
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         final Set<Statsborgerskap> statsborgerskap = Set.of(
@@ -93,7 +93,7 @@ class InngangsvilkaarServiceTest {
     @Test
     void vurderOgLagreInngangsvilkår_manglerStatsborgerskap_girBegrunnelse() {
         final List<String> landkoder = List.of("FR", "DK", "NO");
-        final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().minusYears(2), LocalDate.now().minusYears(1));
+        final var periode = new no.nav.melosys.domain.mottatteopplysninger.data.Periode(LocalDate.now().minusYears(2), LocalDate.now().minusYears(1));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         when(persondataFasade.hentStatsborgerskap(any())).thenReturn(Collections.emptySet());
 
@@ -105,10 +105,10 @@ class InngangsvilkaarServiceTest {
 
     @Test
     void vurderOgLagreInngangsvilkår_tomDatoErNull_tomDatoSettesTilEttÅrEtterFomDato() {
-        ArgumentCaptor<no.nav.melosys.domain.behandlingsgrunnlag.data.Periode> søknadsperiodeCaptor = ArgumentCaptor.forClass(no.nav.melosys.domain.behandlingsgrunnlag.data.Periode.class);
+        ArgumentCaptor<no.nav.melosys.domain.mottatteopplysninger.data.Periode> søknadsperiodeCaptor = ArgumentCaptor.forClass(no.nav.melosys.domain.mottatteopplysninger.data.Periode.class);
 
         final List<String> landkoder = List.of("FR", "DK", "NO");
-        final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusYears(1), null);
+        final var periode = new no.nav.melosys.domain.mottatteopplysninger.data.Periode(LocalDate.now().plusYears(1), null);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         final Set<Statsborgerskap> statsborgerskap = Set.of(
             new no.nav.melosys.domain.person.Statsborgerskap("FIN", null, LocalDate.parse("1989-11-18"), null, "FREG",
@@ -122,13 +122,13 @@ class InngangsvilkaarServiceTest {
 
         inngangsvilkaarService.vurderOgLagreInngangsvilkår(1L, landkoder, false, periode);
 
-        no.nav.melosys.domain.behandlingsgrunnlag.data.Periode søknadsperiode = søknadsperiodeCaptor.getValue();
+        no.nav.melosys.domain.mottatteopplysninger.data.Periode søknadsperiode = søknadsperiodeCaptor.getValue();
         assertThat(søknadsperiode.getTom()).isEqualTo(LocalDate.now().plusYears(2));
     }
 
     @Test
     void vurderOgLagreInngangsvilkår_ukjenteEllerAlleEosLand() {
-        final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
+        final var periode = new no.nav.melosys.domain.mottatteopplysninger.data.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         final Set<Statsborgerskap> statsborgerskap = Set.of(
             new no.nav.melosys.domain.person.Statsborgerskap("FIN", null, LocalDate.parse("1989-11-18"), null, "FREG",
@@ -150,7 +150,7 @@ class InngangsvilkaarServiceTest {
     @Test
     void vurderOgLagreInngangsvilkår_feil_girBegrunnelse() {
         final List<String> landkoder = List.of("FR", "DK", "NO");
-        final var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
+        final var periode = new no.nav.melosys.domain.mottatteopplysninger.data.Periode(LocalDate.now().plusYears(1), LocalDate.MAX);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling());
         final Set<Statsborgerskap> statsborgerskap = Set.of(
             new no.nav.melosys.domain.person.Statsborgerskap("FIN", null, LocalDate.parse("1989-11-18"), null, "FREG",
@@ -190,7 +190,7 @@ class InngangsvilkaarServiceTest {
                 "EEE", null, null, null,
                 "FREG", "Nully", false)
         );
-        var periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(LocalDate.parse("2020-11-18"), null);
+        var periode = new no.nav.melosys.domain.mottatteopplysninger.data.Periode(LocalDate.parse("2020-11-18"), null);
 
         final Set<Land> statsborgerskap = inngangsvilkaarService.avgjørGyldigeStatsborgerskapForPerioden(statsborgerskapFraPdl,
             periode);
@@ -258,12 +258,12 @@ class InngangsvilkaarServiceTest {
     }
 
     private Behandling lagBehandlingMedPeriodeOgLand() {
-        var behandlingsgrunnlagData = new BehandlingsgrunnlagData();
-        behandlingsgrunnlagData.periode = new Periode(LocalDate.now(), null);
-        behandlingsgrunnlagData.soeknadsland = new Soeknadsland(List.of(Landkoder.BE.getKode()), false);
+        var mottatteOpplysningerData = new MottatteOpplysningerData();
+        mottatteOpplysningerData.periode = new Periode(LocalDate.now(), null);
+        mottatteOpplysningerData.soeknadsland = new Soeknadsland(List.of(Landkoder.BE.getKode()), false);
         var behandling = new Behandling();
-        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(mottatteOpplysningerData);
         return behandling;
     }
 }

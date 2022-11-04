@@ -18,7 +18,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.integrasjon.altinn.SoknadMottakConsumer;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
@@ -44,7 +44,7 @@ class AltinnSoeknadServiceTest {
     @Mock
     private FagsakService fagsakService;
     @Mock
-    private BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private MottatteOpplysningerService mottatteOpplysningerService;
     @Mock
     private PersondataFasade persondataFasade;
     @Mock
@@ -62,12 +62,12 @@ class AltinnSoeknadServiceTest {
     @BeforeEach
     void setup() {
         altinnSoeknadService = new AltinnSoeknadService(soknadMottakConsumer, fagsakService,
-            behandlingsgrunnlagService, persondataFasade, avklarteVirksomheterService, unleash);
+            mottatteOpplysningerService, persondataFasade, avklarteVirksomheterService, unleash);
         unleash.enableAll();
     }
 
     @Test
-    void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksistererToggleDisabled_verifiserFagsakBehandlingOgBehandlinggrunnlagOpprettet() {
+    void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksistererToggleDisabled_verifiserFagsakBehandlingOgMottatteOpplysningerOpprettet() {
         unleash.disableAll();
         final Fagsak fagsak = lagFagsak();
         final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
@@ -88,12 +88,12 @@ class AltinnSoeknadServiceTest {
         assertThat(req.getArbeidsgiver()).isEqualTo(søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer());
         assertThat(req.getAktørID()).isEqualTo(aktørID);
 
-        verify(behandlingsgrunnlagService).opprettSøknadUtsendteArbeidstakereEøs(eq(1L), anyString(), any(),
+        verify(mottatteOpplysningerService).opprettSøknadUtsendteArbeidstakereEøs(eq(1L), anyString(), any(),
             eq(soknadID));
     }
 
     @Test
-    void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksisterer_verifiserFagsakBehandlingOgBehandlinggrunnlagOpprettet() {
+    void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksisterer_verifiserFagsakBehandlingOgMottatteOpplysningerOpprettet() {
         final Fagsak fagsak = lagFagsak();
         final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
 
@@ -113,7 +113,7 @@ class AltinnSoeknadServiceTest {
         assertThat(req.getArbeidsgiver()).isEqualTo(søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer());
         assertThat(req.getAktørID()).isEqualTo(aktørID);
 
-        verify(behandlingsgrunnlagService).opprettSøknadUtsendteArbeidstakereEøs(eq(1L), anyString(), any(),
+        verify(mottatteOpplysningerService).opprettSøknadUtsendteArbeidstakereEøs(eq(1L), anyString(), any(),
             eq(soknadID));
     }
 

@@ -107,18 +107,18 @@ class PersondataServiceTest {
             Informasjonsbehov.MED_FAMILIERELASJONER);
 
 
-        assertThat(persondata.bostedsadresse()).isNotNull();
-        assertThat(persondata.dødsfall()).isEqualTo(new Doedsfall(LocalDate.MAX));
-        assertThat(persondata.fødsel()).isEqualTo(new Foedsel(LocalDate.parse("1970-01-01"), 1970, "NOR", "fødested"));
-        assertThat(persondata.folkeregisteridentifikator()).isEqualTo(lagFolkeregisterIdent("IdNr"));
-        assertThat(persondata.kjønn()).isEqualTo(KjoennType.UKJENT);
-        assertThat(persondata.navn()).isEqualTo(new Navn("fornavn", "mellomnavn", "etternavn"));
-        assertThat(persondata.statsborgerskap()).containsExactlyInAnyOrder(
+        assertThat(persondata.getBostedsadresse()).isNotNull();
+        assertThat(persondata.getDødsfall()).isEqualTo(new Doedsfall(LocalDate.MAX));
+        assertThat(persondata.getFødsel()).isEqualTo(new Foedsel(LocalDate.parse("1970-01-01"), 1970, "NOR", "fødested"));
+        assertThat(persondata.getFolkeregisteridentifikator()).isEqualTo(lagFolkeregisterIdent("IdNr"));
+        assertThat(persondata.getKjønn()).isEqualTo(KjoennType.UKJENT);
+        assertThat(persondata.getNavn()).isEqualTo(new Navn("fornavn", "mellomnavn", "etternavn"));
+        assertThat(persondata.getStatsborgerskap()).containsExactlyInAnyOrder(
             new Statsborgerskap("AIA", null, LocalDate.parse("1979-11-18"),
                 LocalDate.parse("1980-11-18"), "PDL", "Dolly", false),
             new Statsborgerskap("NOR", LocalDate.parse("2021-05-08"), null,
                 null, "PDL", "Dolly", false));
-        assertThat(persondata.familiemedlemmer()).isNotEmpty()
+        assertThat(persondata.getFamiliemedlemmer()).isNotEmpty()
             .anyMatch(Familiemedlem::erBarn)
             .anyMatch(harForventetRelatertVedSivilstandId(forventetRelatertVedSivilstandID))
             .anyMatch(Familiemedlem::erRelatertVedSivilstand);

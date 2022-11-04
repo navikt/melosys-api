@@ -10,10 +10,10 @@ import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.AvklartYrkesgruppeType;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.JuridiskArbeidsgiverNorge;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
+import no.nav.melosys.domain.mottatteopplysninger.data.JuridiskArbeidsgiverNorge;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
@@ -54,7 +54,7 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaDtoKonverterer;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.dokument.brev.*;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerAvslagArbeidsgiver;
 import no.nav.melosys.service.dokument.brev.bygger.BrevDataByggerInnvilgelse;
@@ -281,9 +281,9 @@ final class DokumentServiceTest {
         søknad.juridiskArbeidsgiverNorge.ekstraArbeidsgivere = Collections.singletonList(ORGNR);
         søknad.oppholdUtland.oppholdslandkoder.add("DK");
 
-        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(søknad);
-        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        mottatteOpplysninger.setMottatteOpplysningerdata(søknad);
+        behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
         Saksopplysning personopplysninger = lagSaksopplysning(SaksopplysningType.PERSOPL, lagPersonDokument());
         behandling.setSaksopplysninger(Set.of(personopplysninger));
@@ -317,12 +317,12 @@ final class DokumentServiceTest {
 
     private static BrevDataByggerVelger lagBrevdataByggerVelger(AvklartefaktaService avklartefaktaService) {
         AnmodningsperiodeService anmodningsperiodeService = mock(AnmodningsperiodeService.class);
-        BehandlingsgrunnlagService behandlingsgrunnlagService = mock(BehandlingsgrunnlagService.class);
+        MottatteOpplysningerService mottatteOpplysningerService = mock(MottatteOpplysningerService.class);
         BehandlingsresultatService behandlingsresultatService = mock(BehandlingsresultatService.class);
         JoarkService joarkService = mock(JoarkService.class);
         VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
         LandvelgerService landvelgerService = new LandvelgerService(avklartefaktaService, behandlingsresultatService,
-            behandlingsgrunnlagService);
+            mottatteOpplysningerService);
         LovvalgsperiodeService lovvalgsperiodeService = mock(LovvalgsperiodeService.class);
         SaksopplysningerService saksopplysningerService = mock(SaksopplysningerService.class);
         UtenlandskMyndighetService utenlandskMyndighetService = mock(UtenlandskMyndighetService.class);
@@ -331,7 +331,7 @@ final class DokumentServiceTest {
         PersondataFasade persondataFasade = mock(PersondataFasade.class);
         return new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService, joarkService,
             landvelgerService, lovvalgsperiodeService, saksopplysningerService, utenlandskMyndighetService,
-            utpekingService, vilkaarsresultatRepository, vilkaarsresultatService, persondataFasade, behandlingsgrunnlagService);
+            utpekingService, vilkaarsresultatRepository, vilkaarsresultatService, persondataFasade, mottatteOpplysningerService);
     }
 
     private BrevDataByggerVelger lagBrevdatabyggerVelgerMock() {
