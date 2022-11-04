@@ -44,7 +44,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.STORBRITANNIA;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.TRYGDEAVTALE_GB;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
 import static no.nav.melosys.service.dokument.brev.mapper.DokgenMalMapperTest.SOKNADSDATO;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -264,7 +264,7 @@ class TrygdeavtaleMapperTest {
 
     private InnvilgelseBrevbestilling.Builder lagStorbritanniaBrevbestillingDefaultBuilder(Behandling behandling) {
         return new InnvilgelseBrevbestilling.Builder()
-            .medProduserbartdokument(STORBRITANNIA)
+            .medProduserbartdokument(TRYGDEAVTALE_GB)
             .medPersonDokument(lagPersondata())
             .medBehandling(behandling)
             .medOrg(lagOrg())
