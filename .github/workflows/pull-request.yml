@@ -4,7 +4,7 @@ on: pull_request
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-8-cores
     permissions:
       contents: read
       packages: read
@@ -35,4 +35,4 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.READER_TOKEN }}
       - name: Build and test
-        run: mvn clean verify -B -e -U --settings .github/settings.xml
+        run: mvn clean verify --threads=8 -B -e -U --settings .github/settings.xml
