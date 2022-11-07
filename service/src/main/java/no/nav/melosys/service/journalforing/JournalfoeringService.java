@@ -397,7 +397,7 @@ public class JournalfoeringService {
         if (journalfoeringDto.getAvsenderType() != null && StringUtils.isEmpty(journalfoeringDto.getAvsenderID())) {
             throw new FunksjonellException("AvsenderID er påkrevd når AvsenderType er satt");
         }
-        if (StringUtils.isEmpty(journalfoeringDto.getAvsenderID()) && journalfoeringDto.getAvsenderType() == null) {
+        if (!StringUtils.isEmpty(journalfoeringDto.getAvsenderID()) && journalfoeringDto.getAvsenderType() == null) {
             throw new FunksjonellException("AvsenderType er påkrevd når AvsenderID er satt");
         }
         if (StringUtils.isEmpty(journalfoeringDto.getAvsenderNavn())) {

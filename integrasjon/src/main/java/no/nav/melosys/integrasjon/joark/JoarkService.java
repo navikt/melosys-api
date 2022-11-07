@@ -148,10 +148,7 @@ public class JoarkService implements JoarkFasade {
             .id(journalpostOppdatering.getAvsenderID())
             .land(journalpostOppdatering.getAvsenderLand())
             .navn(journalpostOppdatering.getAvsenderNavn())
-            .idType(
-                journalpostOppdatering.getAvsenderType() == null && journalpostOppdatering.getAvsenderID() == null
-                    ? null
-                    : AvsenderMottaker.tilAvsenderMottakerIdType(journalpostOppdatering.getAvsenderType()))
+            .idType(AvsenderMottaker.tilAvsenderMottakerIdType(journalpostOppdatering.getAvsenderType()))
             .build();
 
         request.medAvsender(avsender);
