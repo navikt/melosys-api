@@ -41,3 +41,7 @@ I db/migration/melosysDB/di_dvh har vi migreringer for Datavarehus, som er ansva
 Vi har besluttet at versjon for en ny migrering i melosysDB skal være siste versjon + 1.
 Ny migrering for Datavarehus skal være siste versjon + desimal, slik at man slippe å titte i mappen di_dvh når man oppretter
 ny migrering i melosysDB.
+
+## Komponent tester
+
+Noen komponenttester er avhengig av oracle databasen. Den kjøres opp automatisk med testcontainer. Men siden det ikke finnes et oracle image som støtter arm arkitektur må de som bruker m1 mac sette en enviroment variabel: `M1_MAC=true`. Da kobler testene seg til en kjørende database på maskinen. Se dokumentajon [her](https://github.com/navikt/melosys-docker-compose) for mer info
