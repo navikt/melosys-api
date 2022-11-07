@@ -22,6 +22,7 @@ public class LovligeBehandlingsKombinasjoner {
     private static final Set<Behandlingstyper> EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGSTYPE_HENVENDELSER = Set.of(HENVENDELSE);
     private static final Set<Behandlingstyper> EU_EOS_UNNTAK_BEHANDLINGSTYPE = Set.of(HENVENDELSE);
     private static final Set<Behandlingstyper> EU_EOS_TRYGDEAVGIFT_BEHANDLINGSTYPE = new LinkedHashSet<>(List.of(FØRSTEGANG, NY_VURDERING, KLAGE, HENVENDELSE));
+
     public static final BehandlingstemaBehandlingstyperKombinasjon EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_SØKNAD = new BehandlingstemaBehandlingstyperKombinasjon(EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGSTEMA_SØKNAD, EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGSTYPE_SØKNAD);
     public static final BehandlingstemaBehandlingstyperKombinasjon EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_HENVENDELSER = new BehandlingstemaBehandlingstyperKombinasjon(EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGSTEMA_HENVENDELSER, EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGSTYPE_HENVENDELSER);
     public static final BehandlingstemaBehandlingstyperKombinasjon EU_EOS_UNNTAK_BEHANDLINGS_KOMBINASJON = new BehandlingstemaBehandlingstyperKombinasjon(EU_EOS_UNNTAK_BEHANDLINGSTEMA, EU_EOS_UNNTAK_BEHANDLINGSTYPE);
@@ -52,8 +53,39 @@ public class LovligeBehandlingsKombinasjoner {
     public static final BehandlingstemaBehandlingstyperKombinasjon TRYGDEAVTALE_UNNTAK_BEHANDLINGS_KOMBINASJON_2 = new BehandlingstemaBehandlingstyperKombinasjon(TRYGDEAVTALE_UNNTAK_BEHANDLINGSTEMA_2, TRYGDEAVTALE_UNNTAK_BEHANDLINGSTYPE_2);
     public static final BehandlingstemaBehandlingstyperKombinasjon TRYGDEAVTALE_TRYGDEAVGIFT_BEHANDLINGS_KOMBINASJON = new BehandlingstemaBehandlingstyperKombinasjon(TRYGDEAVTALE_TRYGDEAVGIFT_BEHANDLINGSTEMA, TRYGDEAVTALE_TRYGDEAVGIFT_BEHANDLINGSTYPE);
 
-    // VIRKSOMHET - har alle behandlingstema på alle sakstema og type
-    public static final Set<Behandlingstyper> BEHANDLINGSTYPER_FOR_VIRKSOMHET = Set.of(HENVENDELSE);
+    //EU_EOS
+    private static final Set<Behandlingstema> EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGSTEMA_VIRKSOMHET = Set.of(VIRKSOMHET);
+    private static final Set<Behandlingstyper> EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGSTYPER_VIRKSOMHET = Set.of(HENVENDELSE);
+    private static final Set<Behandlingstema> EU_EOS_UNNTAK_BEHANDLINGSTEMA_VIRKSOMHET = Set.of(VIRKSOMHET);
+    private static final Set<Behandlingstyper> EU_EOS_UNNTAK_BEHANDLINGSTYPER_VIRKSOMHET = Set.of(HENVENDELSE);
+    private static final Set<Behandlingstema> EU_EOS_TRYGDEAVGIFT_BEHANDLINGSTEMA_VIRKSOMHET = Set.of(YRKESAKTIV);
+    private static final Set<Behandlingstyper> EU_EOS_TRYGDEAVGIFT_BEHANDLINGSTYPER_VIRKSOMHET = Set.of(HENVENDELSE);
 
-    private LovligeBehandlingsKombinasjoner() {}
+    public static final BehandlingstemaBehandlingstyperKombinasjon EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_VIRKSOMHET = new BehandlingstemaBehandlingstyperKombinasjon(EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGSTEMA_VIRKSOMHET, EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGSTYPER_VIRKSOMHET);
+    public static final BehandlingstemaBehandlingstyperKombinasjon EU_EOS_UNNTAK_BEHANDLINGS_KOMBINASJON_VIRKSOMHET = new BehandlingstemaBehandlingstyperKombinasjon(EU_EOS_UNNTAK_BEHANDLINGSTEMA_VIRKSOMHET, EU_EOS_UNNTAK_BEHANDLINGSTYPER_VIRKSOMHET);
+    public static final BehandlingstemaBehandlingstyperKombinasjon EU_EOS_TRYGDEAVGIFT_BEHANDLINGS_KOMBINASJON_VIRKSOMHET = new BehandlingstemaBehandlingstyperKombinasjon(EU_EOS_TRYGDEAVGIFT_BEHANDLINGSTEMA_VIRKSOMHET, EU_EOS_TRYGDEAVGIFT_BEHANDLINGSTYPER_VIRKSOMHET);
+
+    //FOLKETRYGDLOVEN
+    private static final Set<Behandlingstema> FOLKETRYGDLOVEN_LOVVALG_MEDLEMSKAP_BEHANDLINGSTEMA_VIRKSOMHET = Set.of(VIRKSOMHET);
+    private static final Set<Behandlingstyper> FOLKETRYGDLOVEN_LOVVALG_MEDLEMSKAP_BEHANDLINGSTYPER_VIRKSOMHET = Set.of(HENVENDELSE);
+    private static final Set<Behandlingstema> FOLKETRYGDLOVEN_TRYGDEAVGIFT_BEHANDLINGSTEMA_VIRKSOMHET = Set.of(YRKESAKTIV);
+    private static final Set<Behandlingstyper> FOLKETRYGDLOVEN_TRYGDEAVGIFT_BEHANDLINGSTYPER_VIRKSOMHET = Set.of(HENVENDELSE);
+
+    public static final BehandlingstemaBehandlingstyperKombinasjon FOLKETRYGDLOVEN_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_VIRKSOMHET = new BehandlingstemaBehandlingstyperKombinasjon(FOLKETRYGDLOVEN_LOVVALG_MEDLEMSKAP_BEHANDLINGSTEMA_VIRKSOMHET, FOLKETRYGDLOVEN_LOVVALG_MEDLEMSKAP_BEHANDLINGSTYPER_VIRKSOMHET);
+    public static final BehandlingstemaBehandlingstyperKombinasjon FOLKETRYGDLOVEN_TRYGDEAVGIFT_BEHANDLINGS_KOMBINASJON_VIRKSOMHET = new BehandlingstemaBehandlingstyperKombinasjon(FOLKETRYGDLOVEN_TRYGDEAVGIFT_BEHANDLINGSTEMA_VIRKSOMHET, FOLKETRYGDLOVEN_TRYGDEAVGIFT_BEHANDLINGSTYPER_VIRKSOMHET);
+
+    // TRYGDEAVTALE
+    private static final Set<Behandlingstema> TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_BEHANDLINGSTEMA_VIRKSOMHET = Set.of(VIRKSOMHET);
+    private static final Set<Behandlingstyper> TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_BEHANDLINGSTYPER_VIRKSOMHET = Set.of(HENVENDELSE);
+    private static final Set<Behandlingstema> TRYGDEAVTALE_UNNTAK_BEHANDLINGSTEMA_VIRKSOMHET = Set.of(VIRKSOMHET);
+    private static final Set<Behandlingstyper> TRYGDEAVTALE_UNNTAK_BEHANDLINGSTYPER_VIRKSOMHET = Set.of(HENVENDELSE);
+    private static final Set<Behandlingstema> TRYGDEAVTALE_TRYGDEAVGIFT_BEHANDLINGSTEMA_VIRKSOMHET = Set.of(YRKESAKTIV);
+    private static final Set<Behandlingstyper> TRYGDEAVTALE_TRYGDEAVGIFT_BEHANDLINGSTYPER_VIRKSOMHET = Set.of(HENVENDELSE);
+
+    public static final BehandlingstemaBehandlingstyperKombinasjon TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_VIRKSOMHET = new BehandlingstemaBehandlingstyperKombinasjon(TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_BEHANDLINGSTEMA_VIRKSOMHET, TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_BEHANDLINGSTYPER_VIRKSOMHET);
+    public static final BehandlingstemaBehandlingstyperKombinasjon TRYGDEAVTALE_UNNTAK_BEHANDLINGS_KOMBINASJON_VIRKSOMHET = new BehandlingstemaBehandlingstyperKombinasjon(TRYGDEAVTALE_UNNTAK_BEHANDLINGSTEMA_VIRKSOMHET, TRYGDEAVTALE_UNNTAK_BEHANDLINGSTYPER_VIRKSOMHET);
+    public static final BehandlingstemaBehandlingstyperKombinasjon TRYGDEAVTALE_TRYGDEAVGIFT_BEHANDLINGS_KOMBINASJON_VIRKSOMHET = new BehandlingstemaBehandlingstyperKombinasjon(TRYGDEAVTALE_TRYGDEAVGIFT_BEHANDLINGSTEMA_VIRKSOMHET, TRYGDEAVTALE_TRYGDEAVGIFT_BEHANDLINGSTYPER_VIRKSOMHET);
+
+    private LovligeBehandlingsKombinasjoner() {
+    }
 }

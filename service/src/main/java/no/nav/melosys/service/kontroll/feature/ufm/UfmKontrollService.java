@@ -16,10 +16,10 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.repository.KontrollresultatRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.kontroll.feature.ufm.data.UfmKontrollData;
 import no.nav.melosys.service.kontroll.feature.ufm.kontroll.UfmKontrollsett;
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +49,8 @@ public class UfmKontrollService {
 
     public UfmKontrollService(KontrollresultatRepository kontrollresultatRepository,
                               BehandlingsresultatService behandlingsresultatService,
-                              MottatteOpplysningerService mottatteOpplysningerService, BehandlingService behandlingService,
+                              MottatteOpplysningerService mottatteOpplysningerService,
+                              BehandlingService behandlingService,
                               PersondataFasade persondataFasade,
                               Unleash unleash) {
         this.kontrollresultatRepository = kontrollresultatRepository;
@@ -84,7 +85,7 @@ public class UfmKontrollService {
         var medlemskapDokument = behandling.hentMedlemskapDokument();
         var inntektDokument = behandling.hentInntektDokument();
         var utbetalingDokument = behandling.finnUtbetalingDokument().orElse(null);
-        var optionalMottatteOpplysningerData = mottatteOpplysningerService.finnMottatteOpplysningerdata(behandling.getId());
+        var optionalMottatteOpplysningerData = mottatteOpplysningerService.finnMottatteOpplysningerData(behandling.getId());
         return new UfmKontrollData(sedDokument, persondata, medlemskapDokument, inntektDokument, utbetalingDokument, optionalMottatteOpplysningerData);
     }
 
