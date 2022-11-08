@@ -100,8 +100,7 @@ public class MottatteOpplysningerService {
         // Toggle for å opprette søknad for folketrygdloven, fjernes når vi ikke lenger skal ha tom flyt for FTRL
         boolean skalOppretteSoknadForFolketrygdloven = unleash.isEnabled("melosys.folketrygden.mvp") && behandling.getFagsak().getType().equals(Sakstyper.FTRL);
 
-        if ((behandleAlleSakerEnabled ? !SaksbehandlingRegler.harTomFlyt(behandling) : behandling.erBehandlingAvSøknadGammel())
-            || skalOppretteSoknadForFolketrygdloven) {
+        if ((behandleAlleSakerEnabled ? (!SaksbehandlingRegler.harTomFlyt(behandling) || skalOppretteSoknadForFolketrygdloven) : behandling.erBehandlingAvSøknadGammel())) {
             Sakstyper sakstype = behandling.getFagsak().getType();
             switch (sakstype) {
                 case EU_EOS -> opprettSøknadYrkesaktiveEøs(behandlingID, periode, soeknadsland);
