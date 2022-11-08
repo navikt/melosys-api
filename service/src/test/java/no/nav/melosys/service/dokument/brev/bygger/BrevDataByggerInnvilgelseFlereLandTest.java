@@ -4,12 +4,13 @@ import java.util.Collections;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -70,8 +71,8 @@ class BrevDataByggerInnvilgelseFlereLandTest {
         behandling.setId(1L);
         behandling.setFagsak(fagsak);
         behandling.getSaksopplysninger().add(lagPersonsopplysning());
-        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new Soeknad());
+        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new Soeknad());
 
         brevbestillingRequest = new BrevbestillingRequest.Builder()
             .medMottaker(Aktoersroller.BRUKER)
@@ -84,7 +85,7 @@ class BrevDataByggerInnvilgelseFlereLandTest {
         Lovvalgsperiode periode = new Lovvalgsperiode();
         when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(periode);
 
-        when(landvelgerService.hentAlleArbeidsland(anyLong())).thenReturn(Collections.singleton(Landkoder.AT));
+        when(landvelgerService.hentAlleArbeidsland(anyLong())).thenReturn(Collections.singleton(Land_iso2.AT));
         when(landvelgerService.hentBostedsland(anyLong(), any())).thenReturn(new Bostedsland(Landkoder.DE));
 
         brevDataByggerInnvilgelse = new BrevDataByggerInnvilgelseFlereLand(avklartefaktaService,

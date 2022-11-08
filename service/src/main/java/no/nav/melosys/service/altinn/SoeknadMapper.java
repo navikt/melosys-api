@@ -9,21 +9,21 @@ import java.util.stream.Collectors;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.LoennOgGodtgjoerelse;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Utenlandsoppdraget;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.*;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.ArbeidPaaLand;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.LuftfartBase;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.*;
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
+import no.nav.melosys.domain.mottatteopplysninger.data.LoennOgGodtgjoerelse;
+import no.nav.melosys.domain.mottatteopplysninger.data.Utenlandsoppdraget;
+import no.nav.melosys.domain.mottatteopplysninger.data.*;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.ArbeidPaaLand;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.LuftfartBase;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.*;
 import no.nav.melosys.domain.kodeverk.Flyvningstyper;
 import no.nav.melosys.domain.kodeverk.Innretningstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;
 import no.nav.melosys.soknad_altinn.*;
 import org.apache.commons.lang3.StringUtils;
 
-import static no.nav.melosys.domain.util.LandkoderUtils.tilIso2FraEuEosLandnavn;
+import static no.nav.melosys.domain.util.IsoLandkodeKonverterer.tilIso2FraEuEosLandnavn;
 
 public final class SoeknadMapper {
     private SoeknadMapper() {

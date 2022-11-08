@@ -9,8 +9,8 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagKonverterer;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerKonverterer;
 import no.nav.melosys.domain.brev.DokumentasjonSvarfrist;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -21,7 +21,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
+import no.nav.melosys.repository.MottatteOpplysningerRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -44,7 +44,7 @@ public class BehandlingService {
     private final BehandlingRepository behandlingRepository;
     private final TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final BehandlingsgrunnlagRepository behandlingsgrunnlagRepository;
+    private final MottatteOpplysningerRepository mottatteOpplysningerRepository;
     private final OppgaveService oppgaveService;
     private final LovligeKombinasjonerService lovligeKombinasjonerService;
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -63,7 +63,7 @@ public class BehandlingService {
 
     public BehandlingService(BehandlingRepository behandlingRepository,
                              TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository,
-                             BehandlingsgrunnlagRepository behandlingsgrunnlagRepository,
+                             MottatteOpplysningerRepository mottatteOpplysningerRepository,
                              BehandlingsresultatService behandlingsresultatService,
                              @Lazy OppgaveService oppgaveService,
                              LovligeKombinasjonerService lovligeKombinasjonerService,
@@ -71,7 +71,7 @@ public class BehandlingService {
                              Unleash unleash) {
         this.behandlingRepository = behandlingRepository;
         this.tidligereMedlemsperiodeRepository = tidligereMedlemsperiodeRepository;
-        this.behandlingsgrunnlagRepository = behandlingsgrunnlagRepository;
+        this.mottatteOpplysningerRepository = mottatteOpplysningerRepository;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
         this.lovligeKombinasjonerService = lovligeKombinasjonerService;
@@ -97,18 +97,19 @@ public class BehandlingService {
                                    String initierendeJournalpostId,
                                    String initierendeDokumentId) {
         Instant nå = Instant.now();
-
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
         behandling.setRegistrertDato(nå);
         behandling.setEndretDato(nå);
-        behandling.setBehandlingsfrist(Behandling.utledFristForBehandlingstema(behandlingstema));
-
         behandling.setStatus(behandlingsstatus);
         behandling.setType(behandlingstype);
         behandling.setTema(behandlingstema);
         behandling.setInitierendeJournalpostId(initierendeJournalpostId);
         behandling.setInitierendeDokumentId(initierendeDokumentId);
+        behandling.setBehandlingsfrist(
+            unleash.isEnabled("melosys.behandle_alle_saker")
+                ? Behandling.utledBehandlingsfrist(behandling)
+                : Behandling.utledFristForBehandlingtema(behandlingstema));
         behandlingRepository.save(behandling);
 
         behandlingsresultatService.lagreNyttBehandlingsresultat(behandling);
@@ -147,16 +148,16 @@ public class BehandlingService {
     @Transactional
     public void endreBehandlingstemaTilBehandling(long behandlingID, Behandlingstema nyttTema) {
         Behandling behandling = hentBehandling(behandlingID);
-        var behandlingsgrunnlag = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        if (MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandling, behandlingsgrunnlag, unleash.isEnabled("melosys.behandle_alle_saker")).contains(nyttTema)) {
+        var mottatteOpplysninger = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+        if (MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandling, mottatteOpplysninger, unleash.isEnabled("melosys.behandle_alle_saker")).contains(nyttTema)) {
             behandling.setTema(nyttTema);
 
-            tilbakestillBehandlingsgrunnlag(behandling);
+            tilbakestillMottatteOpplysninger(behandling);
             applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
             if (nyttTema != ARBEID_FLERE_LAND) {
-                behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand = false;
-                BehandlingsgrunnlagKonverterer.oppdaterBehandlingsgrunnlag(behandling.getBehandlingsgrunnlag());
-                behandlingsgrunnlagRepository.saveAndFlush(behandling.getBehandlingsgrunnlag());
+                behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.erUkjenteEllerAlleEosLand = false;
+                MottatteOpplysningerKonverterer.oppdaterMottatteOpplysninger(behandling.getMottatteOpplysninger());
+                mottatteOpplysningerRepository.saveAndFlush(behandling.getMottatteOpplysninger());
             }
         } else {
             throw new FunksjonellException("Ikke mulig å endre behandlingstema");
@@ -218,7 +219,7 @@ public class BehandlingService {
         log.info("Endrer behandlingstypen for behandling {} fra {} til {}", behandling.getId(), behandling.getType(), type);
         behandling.setType(type);
         behandlingRepository.save(behandling);
-        tilbakestillBehandlingsgrunnlag(behandling);
+        tilbakestillMottatteOpplysninger(behandling);
         applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
     }
 
@@ -226,7 +227,7 @@ public class BehandlingService {
         log.info("Endrer behandlingstema for behandling {} fra {} til {}", behandling.getId(), behandling.getTema(), tema);
         behandling.setTema(tema);
         behandlingRepository.save(behandling);
-        tilbakestillBehandlingsgrunnlag(behandling);
+        tilbakestillMottatteOpplysninger(behandling);
         applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
     }
 
@@ -249,7 +250,7 @@ public class BehandlingService {
     public Behandling replikerBehandlingMedNyttBehandlingsresultat(Behandling tidligsteInaktiveBehandling, Behandlingstyper behandlingstype) {
         Behandling behandlingsreplika;
         try {
-            behandlingsreplika = replikerBehandlingUtenBehandlingsgrunnlagSaksopplysningerOgResultat(tidligsteInaktiveBehandling, behandlingstype);
+            behandlingsreplika = replikerBehandlingUtenMottatteOpplysningerSaksopplysningerOgResultat(tidligsteInaktiveBehandling, behandlingstype);
             behandlingsresultatService.lagreNyttBehandlingsresultat(behandlingsreplika);
         } catch (InvocationTargetException | NoSuchMethodException | InstantiationException |
                  IllegalAccessException e) {
@@ -259,16 +260,18 @@ public class BehandlingService {
         return behandlingsreplika;
     }
 
-    Behandling replikerBehandlingUtenBehandlingsgrunnlagSaksopplysningerOgResultat(Behandling tidligsteInaktiveBehandling, Behandlingstyper behandlingstype)
+    Behandling replikerBehandlingUtenMottatteOpplysningerSaksopplysningerOgResultat(Behandling tidligsteInaktiveBehandling, Behandlingstyper behandlingstype)
         throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         Behandling behandlingsreplika = (Behandling) BeanUtils.cloneBean(tidligsteInaktiveBehandling);
         behandlingsreplika.setId(null);
         behandlingsreplika.setType(behandlingstype);
         behandlingsreplika.setStatus(OPPRETTET);
         behandlingsreplika.setOpprinneligBehandling(tidligsteInaktiveBehandling);
-        behandlingsreplika.setBehandlingsgrunnlag(null);
+        behandlingsreplika.setMottatteOpplysninger(null);
         behandlingsreplika.setBehandlingsnotater(Collections.emptySet());
-        behandlingsreplika.setBehandlingsfrist(Behandling.utledFristForBehandlingstema(tidligsteInaktiveBehandling.getTema()));
+        behandlingsreplika.setBehandlingsfrist(unleash.isEnabled("melosys.behandle_alle_saker")
+            ? Behandling.utledBehandlingsfrist(tidligsteInaktiveBehandling)
+            : Behandling.utledFristForBehandlingtema(tidligsteInaktiveBehandling.getTema()));
         behandlingsreplika.setSaksopplysninger(new HashSet<>());
         behandlingRepository.save(behandlingsreplika);
 
@@ -293,14 +296,19 @@ public class BehandlingService {
 
     Behandling replikerBehandling(Behandling tidligsteInaktiveBehandling, Behandlingstyper behandlingstype)
         throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+
         Behandling behandlingsreplika = (Behandling) BeanUtils.cloneBean(tidligsteInaktiveBehandling);
+
         behandlingsreplika.setId(null);
         behandlingsreplika.setType(behandlingstype);
         behandlingsreplika.setStatus(OPPRETTET);
         behandlingsreplika.setOpprinneligBehandling(tidligsteInaktiveBehandling);
-        behandlingsreplika.setBehandlingsgrunnlag(replikerBehandlingsgrunnlag(behandlingsreplika, tidligsteInaktiveBehandling.getBehandlingsgrunnlag()));
+        behandlingsreplika.setMottatteOpplysninger(replikerMottatteOpplysninger(behandlingsreplika, tidligsteInaktiveBehandling.getMottatteOpplysninger()));
         behandlingsreplika.setBehandlingsnotater(Collections.emptySet());
-        behandlingsreplika.setBehandlingsfrist(Behandling.utledFristForBehandlingstema(tidligsteInaktiveBehandling.getTema()));
+        behandlingsreplika.setBehandlingsfrist(unleash.isEnabled("melosys.behandle_alle_saker")
+            ? Behandling.utledBehandlingsfrist(tidligsteInaktiveBehandling)
+            : Behandling.utledFristForBehandlingtema(tidligsteInaktiveBehandling.getTema())
+        );
 
         behandlingsreplika.setSaksopplysninger(new HashSet<>());
         for (Saksopplysning saksopplysning : tidligsteInaktiveBehandling.getSaksopplysninger()) {
@@ -327,16 +335,16 @@ public class BehandlingService {
         return kildereplikas;
     }
 
-    private Behandlingsgrunnlag replikerBehandlingsgrunnlag(Behandling behandlingsreplika, Behandlingsgrunnlag opprinneligBehandlingsgrunnlag)
+    private MottatteOpplysninger replikerMottatteOpplysninger(Behandling behandlingsreplika, MottatteOpplysninger opprinneligMottatteOpplysninger)
         throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        if (opprinneligBehandlingsgrunnlag == null) {
+        if (opprinneligMottatteOpplysninger == null) {
             return null;
         }
 
-        Behandlingsgrunnlag replikertBehandlingsgrunnlag = (Behandlingsgrunnlag) BeanUtils.cloneBean(opprinneligBehandlingsgrunnlag);
-        replikertBehandlingsgrunnlag.setId(null);
-        replikertBehandlingsgrunnlag.setBehandling(behandlingsreplika);
-        return replikertBehandlingsgrunnlag;
+        MottatteOpplysninger replikertMottatteOpplysninger = (MottatteOpplysninger) BeanUtils.cloneBean(opprinneligMottatteOpplysninger);
+        replikertMottatteOpplysninger.setId(null);
+        replikertMottatteOpplysninger.setBehandling(behandlingsreplika);
+        return replikertMottatteOpplysninger;
     }
 
     public void avsluttBehandling(long behandlingId) {
@@ -392,18 +400,23 @@ public class BehandlingService {
         applicationEventPublisher.publishEvent(new BehandlingsfristEndretEvent(behandlingId, behandlingsfrist));
     }
 
-    private void tilbakestillBehandlingsgrunnlag(Behandling behandling) {
+    private void tilbakestillMottatteOpplysninger(Behandling behandling) {
         behandlingsresultatService.tømBehandlingsresultat(behandling.getId());
-        if (behandling.getTema() != ARBEID_FLERE_LAND && behandling.getBehandlingsgrunnlag() != null) {
-            behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand = false;
-            BehandlingsgrunnlagKonverterer.oppdaterBehandlingsgrunnlag(behandling.getBehandlingsgrunnlag());
-            behandlingsgrunnlagRepository.saveAndFlush(behandling.getBehandlingsgrunnlag());
+        if (behandling.getTema() != ARBEID_FLERE_LAND && behandling.getMottatteOpplysninger() != null) {
+            behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.erUkjenteEllerAlleEosLand = false;
+            MottatteOpplysningerKonverterer.oppdaterMottatteOpplysninger(behandling.getMottatteOpplysninger());
+            mottatteOpplysningerRepository.saveAndFlush(behandling.getMottatteOpplysninger());
         }
     }
 
     public Set<Behandlingsstatus> hentMuligeStatuser(long behandlingID) {
         var behandling = hentBehandling(behandlingID);
-        return MuligeManuelleBehandlingsendringer.hentMuligeStatuser(behandling);
+        if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
+            return MuligeManuelleBehandlingsendringer.hentMuligeStatuser(behandling);
+        }
+
+        if (behandling.erInaktiv()) return Collections.emptySet();
+        return lovligeKombinasjonerService.hentMuligeBehandlingStatuser();
     }
 
     @Transactional
@@ -433,7 +446,12 @@ public class BehandlingService {
     }
 
     private boolean saksbehandlerKanEndreStatus(Behandling behandling, Behandlingsstatus status) {
-        MuligeManuelleBehandlingsendringer.validerNyStatusMulig(behandling, status);
+        if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
+            MuligeManuelleBehandlingsendringer.validerNyStatusMulig(behandling, status);
+            return true;
+        }
+
+        lovligeKombinasjonerService.validerNyStatusMulig(behandling, status);
         return true;
     }
 

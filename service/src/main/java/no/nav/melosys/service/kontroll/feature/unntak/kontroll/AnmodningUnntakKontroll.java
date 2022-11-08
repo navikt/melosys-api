@@ -11,7 +11,7 @@ public class AnmodningUnntakKontroll {
     }
 
     static Kontrollfeil harRegistrertAdresse(AnmodningUnntakKontrollData kontrollData) {
-        return PersonRegler.harRegistrertAdresse(kontrollData.persondata(), kontrollData.behandlingsgrunnlagData())
+        return PersonRegler.harRegistrertAdresse(kontrollData.persondata(), kontrollData.mottatteOpplysningerData())
             ? null : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
     }
 

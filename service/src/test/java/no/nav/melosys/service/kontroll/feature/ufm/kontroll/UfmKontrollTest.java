@@ -177,6 +177,7 @@ class UfmKontrollTest {
         UtbetalingDokument utbetalingDokument = new UtbetalingDokument();
         utbetalingDokument.utbetalinger = Collections.singletonList(new Utbetaling());
 
-        return new UfmKontrollData(sedDokument, personDokument, medlemskapDokument, inntektDokument, utbetalingDokument);
+        return new UfmKontrollData(sedDokument, personDokument, medlemskapDokument, inntektDokument,
+            utbetalingDokument, null);
     }
 }

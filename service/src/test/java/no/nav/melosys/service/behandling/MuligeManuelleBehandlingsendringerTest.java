@@ -19,11 +19,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class MuligeManuelleBehandlingsendringerTest {
 
-
+    @Deprecated(since = "Tas vekk samtidig som toggle melosys.behandle_alle_saker")
     @Test
-    void hentMuligeStatuser_temaOvrigeSedMed_avsluttetErMulig() {
-        var muligeStatuser = MuligeManuelleBehandlingsendringer.hentMuligeStatuser(behandlingMedTema(Behandlingstema.ØVRIGE_SED_MED));
-        assertThat(muligeStatuser).containsExactlyInAnyOrder(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING, AVSLUTTET);
+    void hentMuligeStatuser_temaOvrigeSedMed_avsluttetErMulig_toggleOff() {
+        var muligeStatuser =
+            MuligeManuelleBehandlingsendringer.hentMuligeStatuser(behandlingMedTema(Behandlingstema.ØVRIGE_SED_MED));
+        assertThat(muligeStatuser).containsExactlyInAnyOrder(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING,
+            AVVENT_FAGLIG_AVKLARING, AVSLUTTET);
     }
 
     @Test
@@ -88,9 +90,9 @@ class MuligeManuelleBehandlingsendringerTest {
     }
 
     @Test
-    void hentMuligeTyper_temaNyVurdering_returnererEndretPeriode() {
+    void hentMuligeTyper_temaNyVurdering_returnererTomListe() {
         var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandlingMedTemaOgType(UTSENDT_SELVSTENDIG, NY_VURDERING));
-        assertThat(muligeTyper).containsExactly(ENDRET_PERIODE);
+        assertThat(muligeTyper).isEmpty();
     }
 
     @Test

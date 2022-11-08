@@ -3,7 +3,7 @@ package no.nav.melosys.tjenester.gui.dto;
 import java.util.Collections;
 import java.util.List;
 
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
+import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 
 public class SoeknadslandDto {

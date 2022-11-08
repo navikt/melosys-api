@@ -13,13 +13,16 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Avsendertyper;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -30,7 +33,7 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
@@ -65,7 +68,7 @@ class ProsessinstansServiceTest {
     @Mock
     private UtenlandskMyndighetService utenlandskMyndighetService;
     @Mock
-    private BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private MottatteOpplysningerService mottatteOpplysningerService;
 
     @Captor
     private ArgumentCaptor<Prosessinstans> piCaptor;
@@ -76,7 +79,7 @@ class ProsessinstansServiceTest {
     @BeforeEach
     public void setUp() {
         prosessinstansService = new ProsessinstansService(applicationEventPublisher,
-            prosessinstansRepo, utenlandskMyndighetService, behandlingsgrunnlagService, unleash);
+            prosessinstansRepo, utenlandskMyndighetService, mottatteOpplysningerService, unleash);
         unleash.enableAll();
     }
 
@@ -205,8 +208,8 @@ class ProsessinstansServiceTest {
         fagsak.setSaksnummer("12354");
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
-        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
+        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new MottatteOpplysningerData());
         return behandling;
     }
 
@@ -347,7 +350,7 @@ class ProsessinstansServiceTest {
         journalfoeringDto.setAvsenderType(Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET);
         journalfoeringDto.setAvsenderID("DK");
         final String institusjonsIdForDk = "ID_FOR_DK";
-        when(utenlandskMyndighetService.lagInstitusjonsId(Landkoder.DK)).thenReturn(institusjonsIdForDk);
+        when(utenlandskMyndighetService.finnInstitusjonID(journalfoeringDto.getAvsenderID())).thenReturn(Optional.of(institusjonsIdForDk));
 
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringDto);
@@ -737,7 +740,7 @@ class ProsessinstansServiceTest {
     @Test
     void opprettProsessinstansSøknadMottatt_finnesFraFør_oppretterIkkeProsessinstans() {
         SoknadMottatt søknadMottatt = new SoknadMottatt("søknadID", ZonedDateTime.now());
-        when(behandlingsgrunnlagService.harMottattSøknadMedEksternReferanseID(søknadMottatt.getSoknadID())).thenReturn(true);
+        when(mottatteOpplysningerService.harMottattSøknadMedEksternReferanseID(søknadMottatt.getSoknadID())).thenReturn(true);
 
 
         prosessinstansService.opprettProsessinstansSøknadMottatt(søknadMottatt);

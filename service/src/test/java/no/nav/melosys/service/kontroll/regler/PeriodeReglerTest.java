@@ -3,7 +3,6 @@ package no.nav.melosys.service.kontroll.regler;
 import java.time.LocalDate;
 import java.time.ZoneId;
 
-import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -152,5 +151,10 @@ class PeriodeReglerTest {
     @Test
     void datoErFørFørsteJuni2012_dato01012012_true() {
         assertThat(PeriodeRegler.datoErFørFørsteJuni2012(LocalDate.of(2012, 1, 1))).isTrue();
+    }
+
+    @Test
+    void periodeOver12Måneder_periode12Måneder_true() {
+        assertThat(PeriodeRegler.periodeOver12Måneder(LocalDate.now(), LocalDate.now().plusMonths(12))).isTrue();
     }
 }

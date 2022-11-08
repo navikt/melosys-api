@@ -93,8 +93,8 @@ class OppgaveTjenesteTest {
             .andExpect(status().isOk());
 
 
-        verify(oppgaveService).finnOppgaverMedPersonIdent("fnr");
-        verify(oppgaveService, never()).finnOppgaverMedOrgnr(anyString());
+        verify(oppgaveService).finnBehandlingsoppgaverMedPersonIdent("fnr");
+        verify(oppgaveService, never()).finnBehandlingsoppgaverMedOrgnr(anyString());
     }
 
     @Test
@@ -105,8 +105,8 @@ class OppgaveTjenesteTest {
             )
             .andExpect(status().isOk());
 
-        verify(oppgaveService).finnOppgaverMedOrgnr("orgnr");
-        verify(oppgaveService, never()).finnOppgaverMedPersonIdent(anyString());
+        verify(oppgaveService).finnBehandlingsoppgaverMedOrgnr("orgnr");
+        verify(oppgaveService, never()).finnBehandlingsoppgaverMedPersonIdent(anyString());
     }
 
     @Test

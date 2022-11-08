@@ -1,18 +1,20 @@
 package no.nav.melosys.service.trygdeavtale;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
+import no.nav.melosys.domain.util.LovvalgBestemmelseUtils;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -46,7 +48,7 @@ public class TrygdeavtaleService {
     }
 
     public Map<String, String> hentVirksomheter(Behandling behandling) {
-        var behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        var mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         var organisasjonDokumenter = behandling.hentOrganisasjonDokumenter();
 
         Map<String, String> orgIdOgNavn = new HashMap<>();
@@ -56,10 +58,10 @@ public class TrygdeavtaleService {
                 .hentArbeidsgiverIDer().stream()
                 .collect(Collectors.toMap(orgnr -> orgnr, orgnr -> finnNavnFraOrganisasjonsdokument(orgnr, organisasjonDokumenter))));
 
-        orgIdOgNavn.putAll(behandlingsgrunnlagData.hentAlleOrganisasjonsnumre().stream()
+        orgIdOgNavn.putAll(mottatteOpplysningerData.hentAlleOrganisasjonsnumre().stream()
             .collect(Collectors.toMap(orgnr -> orgnr, orgnr -> finnNavnFraOrganisasjonsdokument(orgnr, organisasjonDokumenter))));
 
-        orgIdOgNavn.putAll(behandlingsgrunnlagData.hentUtenlandskeArbeidsgivereUuidOgNavn());
+        orgIdOgNavn.putAll(mottatteOpplysningerData.hentUtenlandskeArbeidsgivereUuidOgNavn());
 
         return orgIdOgNavn;
     }
@@ -72,7 +74,7 @@ public class TrygdeavtaleService {
     }
 
     public List<MedfolgendeFamilie> hentFamiliemedlemmer(Behandling behandling) {
-        return behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().personOpplysninger.medfolgendeFamilie;
+        return behandling.getMottatteOpplysninger().getMottatteOpplysningerData().personOpplysninger.medfolgendeFamilie;
     }
 
     public void overførResultat(long behandlingId, TrygdeavtaleResultat trygdeavtaleResultat) {
@@ -130,7 +132,7 @@ public class TrygdeavtaleService {
         lovvalgsperiode.setMedlemskapstype(PLIKTIG);
         lovvalgsperiode.setDekning(FULL_DEKNING_FTRL);
         lovvalgsperiode.setInnvilgelsesresultat(INNVILGET);
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.valueOf(trygdeavtaleResultat.bestemmelse()));
+        lovvalgsperiode.setBestemmelse(LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.bestemmelse()));
         lovvalgsperiode.setLovvalgsland(Landkoder.NO);
 
         return lovvalgsperiode;

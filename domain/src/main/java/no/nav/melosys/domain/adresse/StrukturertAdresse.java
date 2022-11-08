@@ -3,7 +3,7 @@ package no.nav.melosys.domain.adresse;
 import java.util.List;
 import java.util.stream.Stream;
 
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import org.apache.commons.lang3.StringUtils;
 
 import static no.nav.melosys.domain.adresse.Adresse.sammenslå;
@@ -57,7 +57,7 @@ public class StrukturertAdresse implements Adresse {
     public List<String> toList() {
         return Stream.of(tilleggsnavn, sammenslå(gatenavn, husnummerEtasjeLeilighet),
                 postboks, postnummer, poststed, region,
-                landkode != null ? Landkoder.valueOf(landkode).getBeskrivelse() : "")
+                landkode != null ? Land_iso2.valueOf(landkode).getBeskrivelse() : "")
             .filter(StringUtils::isNotEmpty)
             .toList();
     }

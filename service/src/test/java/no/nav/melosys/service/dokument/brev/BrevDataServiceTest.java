@@ -12,12 +12,12 @@ import no.nav.dok.brevdata.felles.v1.simpletypes.Spraakkode;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -86,7 +86,7 @@ class BrevDataServiceTest {
         myndighet.navn = "navn";
         myndighet.gateadresse = "gateadresse 123";
         myndighet.land = "HR";
-        when(utenlandskMyndighetRepository.findByLandkode(Landkoder.HR)).thenReturn(Optional.of(myndighet));
+        when(utenlandskMyndighetRepository.findByLandkode(Land_iso2.HR)).thenReturn(Optional.of(myndighet));
         return myndighet;
     }
 
@@ -124,7 +124,7 @@ class BrevDataServiceTest {
         aktoer.setInstitusjonId("DE:TEST");
         UtenlandskMyndighet tyskMyndighet = new UtenlandskMyndighet();
         tyskMyndighet.institusjonskode = "TEST";
-        when(utenlandskMyndighetRepository.findByLandkode(Landkoder.DE)).thenReturn(Optional.of(tyskMyndighet));
+        when(utenlandskMyndighetRepository.findByLandkode(Land_iso2.DE)).thenReturn(Optional.of(tyskMyndighet));
 
         UtenlandskMyndighet utenlandskMyndighet = service.hentMyndighetFraAktoer(aktoer);
 
@@ -425,7 +425,7 @@ class BrevDataServiceTest {
         mottaker.setRolle(Aktoersroller.BRUKER);
         mottaker.setAktørId(AKTØRID);
 
-        var behandling = lagBehandling(new BehandlingsgrunnlagData());
+        var behandling = lagBehandling(new MottatteOpplysningerData());
 
         var brevMottaker = service.lagMottaker(mottaker, null, behandling);
 
@@ -447,7 +447,7 @@ class BrevDataServiceTest {
         mottaker.setRolle(Aktoersroller.ARBEIDSGIVER);
         mottaker.setOrgnr(ORGNR);
 
-        var behandling = lagBehandling(new BehandlingsgrunnlagData());
+        var behandling = lagBehandling(new MottatteOpplysningerData());
 
         var brevMottaker = service.lagMottaker(mottaker, null, behandling);
 
@@ -465,7 +465,7 @@ class BrevDataServiceTest {
     @Test
     void lagMottaker_trygdemyndighetUtenlandsk_riktigeVerdier() {
         var mottaker = lagAktoerMyndighet();
-        var behandling = lagBehandling(new BehandlingsgrunnlagData());
+        var behandling = lagBehandling(new MottatteOpplysningerData());
 
         var brevMottaker = service.lagMottaker(mottaker, null, behandling);
 
@@ -493,7 +493,7 @@ class BrevDataServiceTest {
         mottaker.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
         mottaker.setOrgnr(ORGNR);
 
-        var behandling = lagBehandling(new BehandlingsgrunnlagData());
+        var behandling = lagBehandling(new MottatteOpplysningerData());
 
         var brevMottaker = service.lagMottaker(mottaker, null, behandling);
 
@@ -515,7 +515,7 @@ class BrevDataServiceTest {
         mottaker.setRolle(Aktoersroller.REPRESENTANT);
         mottaker.setPersonIdent(REP_FNR);
 
-        var behandling = lagBehandling(new BehandlingsgrunnlagData());
+        var behandling = lagBehandling(new MottatteOpplysningerData());
 
         var brevMottaker = service.lagMottaker(mottaker, null, behandling);
 
@@ -537,7 +537,7 @@ class BrevDataServiceTest {
         mottaker.setRolle(Aktoersroller.REPRESENTANT);
         mottaker.setOrgnr(REP_ORGNR);
 
-        var behandling = lagBehandling(new BehandlingsgrunnlagData());
+        var behandling = lagBehandling(new MottatteOpplysningerData());
 
         var brevMottaker = service.lagMottaker(mottaker, null, behandling);
 
@@ -591,7 +591,7 @@ class BrevDataServiceTest {
         return brevDataDto;
     }
 
-    private static Behandling lagBehandling(BehandlingsgrunnlagData behandlingsgrunnlagData) {
+    private static Behandling lagBehandling(MottatteOpplysningerData mottatteOpplysningerData) {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MOCK-1");
         fagsak.setGsakSaksnummer(123L);
@@ -612,8 +612,8 @@ class BrevDataServiceTest {
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setFagsak(fagsak);
 
-        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(mottatteOpplysningerData);
 
         return behandling;
     }

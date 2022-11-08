@@ -1,7 +1,7 @@
 package no.nav.melosys.service.kontroll.regler;
 
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import org.apache.commons.lang.StringUtils;
 
 import static org.apache.commons.lang.StringUtils.isBlank;

@@ -7,18 +7,18 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.*;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.data.*;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
+import no.nav.melosys.domain.util.LovvalgBestemmelseUtils;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
@@ -33,9 +33,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Collections.*;
-import static no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie.Relasjonsrolle.BARN;
-import static no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER;
-import static no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie.tilMedfolgendeFamilie;
+import static no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie.Relasjonsrolle.BARN;
+import static no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER;
+import static no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie.tilMedfolgendeFamilie;
 import static no.nav.melosys.domain.kodeverk.InnvilgelsesResultat.INNVILGET;
 import static no.nav.melosys.domain.kodeverk.Medlemskapstyper.PLIKTIG;
 import static no.nav.melosys.domain.kodeverk.Trygdedekninger.FULL_DEKNING_FTRL;
@@ -129,7 +129,7 @@ class TrygdeavtaleServiceTest {
                 PLIKTIG,
                 FULL_DEKNING_FTRL,
                 INNVILGET,
-                Lovvalgbestemmelser_trygdeavtale_uk.valueOf(trygdeavtaleResultat.bestemmelse()),
+                LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.bestemmelse()),
                 Landkoder.NO,
                 null
             );
@@ -181,7 +181,7 @@ class TrygdeavtaleServiceTest {
                 PLIKTIG,
                 FULL_DEKNING_FTRL,
                 INNVILGET,
-                Lovvalgbestemmelser_trygdeavtale_uk.valueOf(trygdeavtaleResultat.bestemmelse()),
+                LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.bestemmelse()),
                 Landkoder.NO,
                 111L
             );
@@ -258,7 +258,7 @@ class TrygdeavtaleServiceTest {
     }
 
     @Test
-    void hentVirksomheter_fraBehandlingsgrunnlagForetakUtland_mappesKorrekt() {
+    void hentVirksomheter_fraMottatteOpplysningerForetakUtland_mappesKorrekt() {
         var behandling = lagBehandlingMedVirksomheter(
             new SelvstendigArbeid(),
             new JuridiskArbeidsgiverNorge(),
@@ -365,14 +365,14 @@ class TrygdeavtaleServiceTest {
         var personOpplysninger = new OpplysningerOmBrukeren();
         personOpplysninger.medfolgendeFamilie.addAll(familie);
 
-        var behandlingsgrunnlagdata = new BehandlingsgrunnlagData();
-        behandlingsgrunnlagdata.personOpplysninger = personOpplysninger;
+        var mottatteOpplysningerData = new MottatteOpplysningerData();
+        mottatteOpplysningerData.personOpplysninger = personOpplysninger;
 
-        var behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagdata);
+        var mottatteOpplysninger = new MottatteOpplysninger();
+        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
 
         var behandling = new Behandling();
-        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
+        behandling.setMottatteOpplysninger(mottatteOpplysninger);
         return behandling;
     }
 
@@ -380,17 +380,17 @@ class TrygdeavtaleServiceTest {
                                                     JuridiskArbeidsgiverNorge juridiskArbeidsgiverNorge,
                                                     List<ForetakUtland> foretakUtland,
                                                     Set<Saksopplysning> saksopplysninger) {
-        var behandlingsgrunnlagdata = new BehandlingsgrunnlagData();
-        behandlingsgrunnlagdata.selvstendigArbeid = selvstendigArbeid;
-        behandlingsgrunnlagdata.juridiskArbeidsgiverNorge = juridiskArbeidsgiverNorge;
-        behandlingsgrunnlagdata.foretakUtland = foretakUtland;
+        var mottatteOpplysningerData = new MottatteOpplysningerData();
+        mottatteOpplysningerData.selvstendigArbeid = selvstendigArbeid;
+        mottatteOpplysningerData.juridiskArbeidsgiverNorge = juridiskArbeidsgiverNorge;
+        mottatteOpplysningerData.foretakUtland = foretakUtland;
 
-        var behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagdata);
+        var mottatteOpplysninger = new MottatteOpplysninger();
+        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
 
         var behandling = new Behandling();
         behandling.setSaksopplysninger(saksopplysninger);
-        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
+        behandling.setMottatteOpplysninger(mottatteOpplysninger);
         return behandling;
     }
 

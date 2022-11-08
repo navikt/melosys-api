@@ -7,16 +7,13 @@ import java.util.UUID;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Maritimtyper;
-import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
@@ -27,7 +24,7 @@ import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
@@ -73,7 +70,7 @@ class BrevDataByggerInnvilgelseTest {
     @Mock
     PersondataFasade persondataFasade;
     @Mock
-    BehandlingsgrunnlagService behandlingsgrunnlagService;
+    MottatteOpplysningerService mottatteOpplysningerService;
 
     private Behandling behandling;
     private BrevbestillingRequest brevbestillingRequest;
@@ -93,8 +90,8 @@ class BrevDataByggerInnvilgelseTest {
         behandling = new Behandling();
         behandling.setId(1L);
         behandling.setFagsak(fagsak);
-        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
-        behandling.getBehandlingsgrunnlag().setBehandlingsgrunnlagdata(new Soeknad());
+        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new Soeknad());
 
         brevbestillingRequest = new BrevbestillingRequest.Builder()
             .medMottaker(Aktoersroller.BRUKER)
@@ -114,9 +111,9 @@ class BrevDataByggerInnvilgelseTest {
         Lovvalgsperiode periode = new Lovvalgsperiode();
         when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(periode);
 
-        when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Landkoder.AT);
-        when(landvelgerService.hentBostedsland(anyLong(), any(BehandlingsgrunnlagData.class))).thenReturn(new Bostedsland(Landkoder.NO));
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Landkoder.DE));
+        when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Land_iso2.AT);
+        when(landvelgerService.hentBostedsland(anyLong(), any(MottatteOpplysningerData.class))).thenReturn(new Bostedsland(Landkoder.NO));
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Collections.singletonList(Land_iso2.DE));
         when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeFamilie(Collections.emptySet(), Collections.emptySet()));
 
         brevDataByggerInnvilgelse = new BrevDataByggerInnvilgelse(avklartefaktaService,
@@ -127,7 +124,7 @@ class BrevDataByggerInnvilgelseTest {
             brevDataByggerA1,
             vilkaarsresultatService,
             persondataFasade,
-            behandlingsgrunnlagService);
+            mottatteOpplysningerService);
     }
 
     BrevDataGrunnlag lagBrevdataGrunnlag() {
@@ -212,15 +209,15 @@ class BrevDataByggerInnvilgelseTest {
     void lag_medfølgendeBarnHarFnr_henterNavnFraTps() {
         MedfolgendeFamilie barn1 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), "fnr1", null, MedfolgendeFamilie.Relasjonsrolle.BARN);
         MedfolgendeFamilie barn2 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), "fnr2", null, MedfolgendeFamilie.Relasjonsrolle.BARN);
-        BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
-        behandlingsgrunnlagData.personOpplysninger.medfolgendeFamilie.addAll(List.of(barn1, barn2));
-        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+        MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
+        mottatteOpplysningerData.personOpplysninger.medfolgendeFamilie.addAll(List.of(barn1, barn2));
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
 
         when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeFamilie(
             Set.of(new OmfattetFamilie(barn1.getUuid())),
             Set.of(new IkkeOmfattetFamilie(barn2.getUuid(), null, null))));
-        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
+        when(mottatteOpplysningerService.hentMottatteOpplysninger(anyLong())).thenReturn(mottatteOpplysninger);
         when(persondataFasade.hentSammensattNavn(barn1.getFnr())).thenReturn("Navn1");
         when(persondataFasade.hentSammensattNavn(barn2.getFnr())).thenReturn("Navn2");
 
@@ -236,18 +233,18 @@ class BrevDataByggerInnvilgelseTest {
     }
 
     @Test
-    void lag_medfølgendeBarnHarUuid_henterNavnFraBehandlingsgrunnlag() {
+    void lag_medfølgendeBarnHarUuid_henterNavnFraMottatteOpplysninger() {
         MedfolgendeFamilie barn1 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn1", MedfolgendeFamilie.Relasjonsrolle.BARN);
         MedfolgendeFamilie barn2 = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn2", MedfolgendeFamilie.Relasjonsrolle.BARN);
-        BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
-        behandlingsgrunnlagData.personOpplysninger.medfolgendeFamilie.addAll(List.of(barn1, barn2));
-        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
+        MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
+        mottatteOpplysningerData.personOpplysninger.medfolgendeFamilie.addAll(List.of(barn1, barn2));
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
 
         when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeFamilie(
             Set.of(new OmfattetFamilie(barn1.getUuid())),
             Set.of(new IkkeOmfattetFamilie(barn2.getUuid(), null, null))));
-        when(behandlingsgrunnlagService.hentBehandlingsgrunnlag(anyLong())).thenReturn(behandlingsgrunnlag);
+        when(mottatteOpplysningerService.hentMottatteOpplysninger(anyLong())).thenReturn(mottatteOpplysninger);
 
         BrevDataInnvilgelse brevData = (BrevDataInnvilgelse) brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
         assertThat(brevData.avklarteMedfolgendeBarn.getFamilieOmfattetAvNorskTrygd())
@@ -259,7 +256,7 @@ class BrevDataByggerInnvilgelseTest {
     }
 
     @Test
-    void lag_omfattetBarnIkkeIBehandlingsgrunnlag_kasterException() {
+    void lag_omfattetBarnIkkeIMottatteOpplysninger_kasterException() {
         MedfolgendeFamilie barn = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn", MedfolgendeFamilie.Relasjonsrolle.BARN);
         final BrevDataGrunnlag brevDataGrunnlag = lagBrevdataGrunnlag();
 
@@ -268,11 +265,11 @@ class BrevDataByggerInnvilgelseTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> brevDataByggerInnvilgelse.lag(brevDataGrunnlag, saksbehandler))
-            .withMessageContaining("finnes ikke i behandlingsgrunnlaget");
+            .withMessageContaining("finnes ikke i mottatteOpplysningeret");
     }
 
     @Test
-    void lag_ikkeOmfattetBarnIkkeIBehandlingsgrunnlag_kasterException() {
+    void lag_ikkeOmfattetBarnIkkeIMottatteOpplysninger_kasterException() {
         MedfolgendeFamilie barn = MedfolgendeFamilie.tilMedfolgendeFamilie(UUID.randomUUID().toString(), null, "Navn", MedfolgendeFamilie.Relasjonsrolle.BARN);
         final BrevDataGrunnlag brevDataGrunnlag = lagBrevdataGrunnlag();
 
@@ -281,6 +278,6 @@ class BrevDataByggerInnvilgelseTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> brevDataByggerInnvilgelse.lag(brevDataGrunnlag, saksbehandler))
-            .withMessageContaining("finnes ikke i behandlingsgrunnlaget");
+            .withMessageContaining("finnes ikke i mottatteOpplysningeret");
     }
 }

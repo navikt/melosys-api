@@ -12,6 +12,7 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
@@ -36,7 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.ART12_1_VESENTLIG_VIRKSOMHET;
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_ART12_1;
-import static no.nav.melosys.service.BehandlingsgrunnlagStub.lagBehandlingsgrunnlag;
+import static no.nav.melosys.service.MottatteOpplysningerStub.lagMottatteOpplysninger;
 import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplysninger;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagPersonsaksopplysning;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
@@ -65,7 +66,7 @@ class BrevDataByggerAvslagArbeidsgiverTest {
 
     @BeforeEach
     void setUp() {
-        when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Landkoder.AT);
+        when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Land_iso2.AT);
 
         brevDataByggerAvslagArbeidsgiver = new BrevDataByggerAvslagArbeidsgiver(landvelgerService,
             lovvalgsperiodeService,
@@ -96,7 +97,7 @@ class BrevDataByggerAvslagArbeidsgiverTest {
         saksopplysninger.add(person);
         behandling.setSaksopplysninger(saksopplysninger);
 
-        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(Collections.emptyList(),
+        behandling.setMottatteOpplysninger(lagMottatteOpplysninger(Collections.emptyList(),
             Collections.emptyList(),
             Collections.singletonList("987654321")));
 

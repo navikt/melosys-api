@@ -1,11 +1,11 @@
 package no.nav.melosys.saksflyt.steg.sed;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.behandlingsgrunnlag.SedGrunnlag;
+import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,13 +23,13 @@ public class OpprettSedGrunnlagTest {
     private OpprettSedGrunnlag opprettSedGrunnlag;
 
     @Mock
-    private BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private MottatteOpplysningerService mottatteOpplysningerService;
     @Mock
     private EessiService eessiService;
 
     @BeforeEach
     public void setup() {
-        opprettSedGrunnlag = new OpprettSedGrunnlag(behandlingsgrunnlagService, eessiService);
+        opprettSedGrunnlag = new OpprettSedGrunnlag(mottatteOpplysningerService, eessiService);
     }
 
     @Test
@@ -50,7 +50,7 @@ public class OpprettSedGrunnlagTest {
 
         opprettSedGrunnlag.utfør(prosessinstans);
 
-        verify(behandlingsgrunnlagService).opprettSedGrunnlag(eq(behandling.getId()), any(SedGrunnlag.class));
+        verify(mottatteOpplysningerService).opprettSedGrunnlag(eq(behandling.getId()), any(SedGrunnlag.class));
         verify(eessiService).hentSedGrunnlag(eq("123"), eq("abc"));
     }
 }

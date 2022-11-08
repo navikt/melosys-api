@@ -8,12 +8,12 @@ import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.UtenlandskIdent;
+import no.nav.melosys.domain.mottatteopplysninger.data.UtenlandskIdent;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.SvarAnmodningUnntak;
 import no.nav.melosys.domain.eessi.sed.*;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
@@ -109,13 +109,13 @@ public class SedDataBygger {
         sedDataDto.setSelvstendigeVirksomheter(lagSelvstendigeVirksomheter(grunnlagMedSøknad));
         sedDataDto.setArbeidssteder(hentArbeidssteder(grunnlagMedSøknad));
         sedDataDto.setAvklartBostedsland(
-            landvelgerService.hentBostedsland(grunnlagMedSøknad.getBehandling().getId(), grunnlagMedSøknad.getBehandlingsgrunnlagData()).landkode()
+            landvelgerService.hentBostedsland(grunnlagMedSøknad.getBehandling().getId(), grunnlagMedSøknad.getMottatteOpplysningerData()).landkode()
         );
         sedDataDto.setBruker(lagBrukerFraPersondata(grunnlagMedSøknad.getPersondata()));
         sedDataDto.setFamilieMedlem(grunnlagMedSøknad.getPersondata().hentFamiliemedlemmer().stream()
             .filter(Familiemedlem::erForelder)
             .map(SedDataBygger::lagForelder).toList());
-        sedDataDto.setUtenlandskIdent(grunnlagMedSøknad.getBehandlingsgrunnlagData().personOpplysninger.utenlandskIdent.stream()
+        sedDataDto.setUtenlandskIdent(grunnlagMedSøknad.getMottatteOpplysningerData().personOpplysninger.utenlandskIdent.stream()
             .map(SedDataBygger::tilUtenlandskIdentDto).toList());
 
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
@@ -125,15 +125,15 @@ public class SedDataBygger {
                 !SaksbehandlingRegler.harTomFlyt(behandling)
             ) {
                 sedDataDto.setSøknadsperiode(new Periode(
-                    grunnlagMedSøknad.getBehandlingsgrunnlagData().periode.getFom(),
-                    grunnlagMedSøknad.getBehandlingsgrunnlagData().periode.getTom()
+                    grunnlagMedSøknad.getMottatteOpplysningerData().periode.getFom(),
+                    grunnlagMedSøknad.getMottatteOpplysningerData().periode.getTom()
                 ));
             }
         } else {
             if (grunnlagMedSøknad.getBehandling().erBehandlingAvSøknadGammel()) {
                 sedDataDto.setSøknadsperiode(new Periode(
-                    grunnlagMedSøknad.getBehandlingsgrunnlagData().periode.getFom(),
-                    grunnlagMedSøknad.getBehandlingsgrunnlagData().periode.getTom()
+                    grunnlagMedSøknad.getMottatteOpplysningerData().periode.getFom(),
+                    grunnlagMedSøknad.getMottatteOpplysningerData().periode.getTom()
                 ));
             }
         }
@@ -148,7 +148,7 @@ public class SedDataBygger {
         Set<String> arbeidsland = arbeidssteder.stream().map(Arbeidssted::getAdresse).map(Adresse::getLand).collect(Collectors.toSet());
 
         landvelgerService.hentAlleArbeidslandUtenMarginaltArbeid(dataGrunnlag.getBehandling().getId()).stream()
-            .map(Landkoder::getKode)
+            .map(Land_iso2::getKode)
             .distinct()
             .filter(not(arbeidsland::contains))
             .map(Arbeidssted::lagIkkeFastArbeidssted)

@@ -28,7 +28,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning.KORT_OPPDRAG_RETUR_NORSK_AG;
-import static no.nav.melosys.service.BehandlingsgrunnlagStub.lagBehandlingsgrunnlag;
+import static no.nav.melosys.service.MottatteOpplysningerStub.lagMottatteOpplysninger;
 import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplysninger;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -87,12 +87,12 @@ class BrevDataByggerAvslagYrkesaktivTest {
         Set<Saksopplysning> saksopplysninger = lagArbeidsforholdOpplysninger(arbeidsgivereRegister);
         behandling.setSaksopplysninger(saksopplysninger);
         behandling.getSaksopplysninger().add(lagPersonsaksopplysning(new PersonDokument()));
-        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag(selvstendigeForetak, Collections.emptyList(), Collections.emptyList()));
+        behandling.setMottatteOpplysninger(lagMottatteOpplysninger(selvstendigeForetak, Collections.emptyList(), Collections.emptyList()));
 
         Set<String> orgSet = new HashSet<>(Collections.singletonList("987654321"));
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId())).thenReturn(orgSet);
 
-        when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Landkoder.DE);
+        when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Land_iso2.DE);
         OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
         organisasjonDokument.setOrgnummer("999");
         OrganisasjonsDetaljer organisasjonsDetaljer = mock(OrganisasjonsDetaljer.class);

@@ -10,15 +10,17 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.domain.kodeverk.Saksstatuser.*;
+import static no.nav.melosys.domain.kodeverk.Saksstatuser.HENLAGT;
+import static no.nav.melosys.domain.kodeverk.Saksstatuser.HENLAGT_BORTFALT;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.AVSLUTTET;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
-import static no.nav.melosys.service.lovligekombinasjoner.LovligeBehandlingsKombinasjoner.BEHANDLINGSTYPER_FOR_VIRKSOMHET;
 
 @Service
 public class LovligeKombinasjonerService {
@@ -38,8 +40,10 @@ public class LovligeKombinasjonerService {
         return switch (hovedpart) {
             case BRUKER -> LovligeSakskombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
                 .map(SakstemaBehandlingsKombinasjon::sakstema)
-                .collect(Collectors.toCollection( LinkedHashSet::new ));
-            case VIRKSOMHET -> LovligeSakskombinasjoner.ALLE_MULIGE_SAKSTEMAER;
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+            case VIRKSOMHET -> LovligeSakskombinasjoner.muligeSaksKombinasjonerVirksomhet.get(sakstype).stream()
+                .map(SakstemaBehandlingsKombinasjon::sakstema)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
             default -> Collections.emptySet();
         };
     }
@@ -64,7 +68,7 @@ public class LovligeKombinasjonerService {
                     .filter(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.sakstema() == sakstema)
                     .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())
                     .flatMap(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTemaer().stream())
-                    .collect(Collectors.toCollection( LinkedHashSet::new ));
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
 
                 if (sistBehandlingstema != null && Set.of(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
                     REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
@@ -75,9 +79,24 @@ public class LovligeKombinasjonerService {
                 }
                 return behandlingstemaer;
             case VIRKSOMHET:
-                return Set.of(VIRKSOMHET);
+                return LovligeSakskombinasjoner.muligeSaksKombinasjonerVirksomhet.get(sakstype).stream()
+                    .filter(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.sakstema() == sakstema)
+                    .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())
+                    .flatMap(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTemaer().stream())
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
             default:
                 return Collections.emptySet();
+        }
+    }
+
+    public Set<Behandlingsstatus> hentMuligeBehandlingStatuser() {
+        return LovligeBehandlingstatus.ALLE_MULIGE_BEHANDLINGSTATUSER;
+    }
+
+    public void validerNyStatusMulig(Behandling behandling, Behandlingsstatus status) {
+        if (!hentMuligeBehandlingStatuser().contains(status)) {
+            throw new FunksjonellException(String.format("Behandlingen kan ikke endres til status %s. Gyldige statuser for behandling %s er %s",
+                status, behandling.getId(), hentMuligeBehandlingStatuser()));
         }
     }
 
@@ -101,12 +120,10 @@ public class LovligeKombinasjonerService {
         @Nullable Behandling sisteBehandling
     ) {
         Behandlingstema sistBehandlingstema = null;
-        Behandlingstyper sistBehandlingstype = null;
         Saksstatuser sistSaksstatus = null;
 
         if (sisteBehandling != null) {
             sistBehandlingstema = sisteBehandling.getTema();
-            sistBehandlingstype = sisteBehandling.getType();
             sistSaksstatus = sisteBehandling.getFagsak().getStatus();
         }
 
@@ -117,7 +134,7 @@ public class LovligeKombinasjonerService {
                     .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())
                     .filter(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTemaer().contains(behandlingstema))
                     .flatMap(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTyper().stream())
-                    .collect(Collectors.toCollection( LinkedHashSet::new ));
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
 
                 if (sistBehandlingstema != null && Set.of(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
                     REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
@@ -131,19 +148,18 @@ public class LovligeKombinasjonerService {
                     behandlingstyper.remove(FØRSTEGANG);
                 }
 
-                if (sistBehandlingstype == FØRSTEGANG &&
-                    sistBehandlingstema != null && Set.of(UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG).contains(sistBehandlingstema)
-                ) {
-                    behandlingstyper.add(ENDRET_PERIODE);
-                }
-
                 if (sistSaksstatus != null && Set.of(HENLAGT, HENLAGT_BORTFALT, AVSLUTTET).contains(sistSaksstatus)) {
-                    return Set.of(HENVENDELSE);
+                    behandlingstyper = Set.of(HENVENDELSE);
                 }
 
                 return behandlingstyper;
             case VIRKSOMHET:
-                return BEHANDLINGSTYPER_FOR_VIRKSOMHET;
+                return LovligeSakskombinasjoner.muligeSaksKombinasjonerVirksomhet.get(sakstype).stream()
+                    .filter(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.sakstema() == sakstema)
+                    .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())
+                    .filter(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTemaer().contains(behandlingstema))
+                    .flatMap(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTyper().stream())
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
             default:
                 return Collections.emptySet();
         }

@@ -9,6 +9,7 @@ import no.nav.melosys.domain.Bostedsland;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.eessi.BucType;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -73,7 +74,7 @@ public class VideresendSoknadService {
 
         final Set<String> avklarteEessiMottakere = eessiService.validerOgAvklarMottakerInstitusjonerForBuc(
             mottakerinstitusjon != null ? Set.of(mottakerinstitusjon) : Collections.emptySet(),
-            List.of(bostedsland.getLandkodeobjekt()),
+            List.of(Land_iso2.valueOf(bostedsland.landkode())),
             BucType.LA_BUC_03
         );
 
@@ -112,7 +113,7 @@ public class VideresendSoknadService {
     }
 
     private void validerAdresse(Behandling behandling) {
-        if (!PersonRegler.harRegistrertAdresse(hentPersondata(behandling), behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata())) {
+        if (!PersonRegler.harRegistrertAdresse(hentPersondata(behandling), behandling.getMottatteOpplysninger().getMottatteOpplysningerData())) {
             throw new FunksjonellException("Behandlingen mangler adresse!");
         }
     }

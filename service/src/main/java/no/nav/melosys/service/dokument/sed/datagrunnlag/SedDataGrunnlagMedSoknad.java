@@ -1,7 +1,7 @@
 package no.nav.melosys.service.dokument.sed.datagrunnlag;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -14,7 +14,7 @@ public class SedDataGrunnlagMedSoknad implements SedDataGrunnlag {
     private final ArbeidsstedGrunnlag arbeidsstedGrunnlag;
     private final AvklarteVirksomheterGrunnlag avklarteVirksomheterGrunnlag;
     private final Behandling behandling;
-    private final BehandlingsgrunnlagData behandlingsgrunnlagData;
+    private final MottatteOpplysningerData mottatteOpplysningerData;
     private final BostedGrunnlag bostedGrunnlag;
     private final Persondata persondata;
 
@@ -23,14 +23,14 @@ public class SedDataGrunnlagMedSoknad implements SedDataGrunnlag {
                                     AvklartefaktaService avklartefaktaService, Persondata persondata) {
         this.avklarteVirksomheterGrunnlag = new AvklarteVirksomheterGrunnlag(behandling, avklarteVirksomheterService);
         this.behandling = behandling;
-        this.behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        this.mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         this.persondata = persondata;
-        this.bostedGrunnlag = new BostedGrunnlag(behandlingsgrunnlagData,
+        this.bostedGrunnlag = new BostedGrunnlag(mottatteOpplysningerData,
             this.persondata.finnBostedsadresse().orElse(null), kodeverkService);
         this.arbeidsstedGrunnlag = new ArbeidsstedGrunnlag(
             avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(behandling.getId()),
             getAvklarteVirksomheterGrunnlag(),
-            behandlingsgrunnlagData
+            mottatteOpplysningerData
         );
     }
 
@@ -39,8 +39,8 @@ public class SedDataGrunnlagMedSoknad implements SedDataGrunnlag {
         return behandling;
     }
 
-    public BehandlingsgrunnlagData getBehandlingsgrunnlagData() {
-        return behandlingsgrunnlagData;
+    public MottatteOpplysningerData getMottatteOpplysningerData() {
+        return mottatteOpplysningerData;
     }
 
     @Override

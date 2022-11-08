@@ -161,6 +161,7 @@ public class OpprettSak {
         return oppgavetype == Oppgavetyper.BEH_SAK_MK
             || oppgavetype == Oppgavetyper.BEH_SAK
             || oppgavetype == Oppgavetyper.BEH_SED
+            || oppgavetype == Oppgavetyper.VUR
             || oppgavetype == Oppgavetyper.VURD_HENV;
     }
 

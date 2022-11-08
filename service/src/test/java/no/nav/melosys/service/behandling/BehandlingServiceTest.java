@@ -8,9 +8,9 @@ import java.util.*;
 
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
@@ -22,7 +22,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
-import no.nav.melosys.repository.BehandlingsgrunnlagRepository;
+import no.nav.melosys.repository.MottatteOpplysningerRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -60,7 +60,7 @@ class BehandlingServiceTest {
     @Mock
     private TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepo;
     @Mock
-    private BehandlingsgrunnlagRepository behandlingsgrunnlagRepo;
+    private MottatteOpplysningerRepository mottatteOpplysningerRepo;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
@@ -84,7 +84,7 @@ class BehandlingServiceTest {
 
     @BeforeEach
     public void setUp() {
-        behandlingService = new BehandlingService(behandlingRepository, tidligereMedlemsperiodeRepo, behandlingsgrunnlagRepo, behandlingsresultatService, oppgaveService, lovligeKombinasjonerService, applicationEventPublisher, fakeUnleash);
+        behandlingService = new BehandlingService(behandlingRepository, tidligereMedlemsperiodeRepo, mottatteOpplysningerRepo, behandlingsresultatService, oppgaveService, lovligeKombinasjonerService, applicationEventPublisher, fakeUnleash);
 
         behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
@@ -112,7 +112,7 @@ class BehandlingServiceTest {
         behandling.setTema(ARBEID_TJENESTEPERSON_ELLER_FLY);
         behandling.setType(HENVENDELSE);
         behandling.setFagsak(fagsak);
-        behandling.setBehandlingsgrunnlag(opprettBehandlingsgrunnlag());
+        behandling.setMottatteOpplysninger(opprettMottatteOpplysninger());
 
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(BEHANDLINGSRESULTAT);
@@ -153,7 +153,7 @@ class BehandlingServiceTest {
         behandling.setTema(UTSENDT_ARBEIDSTAKER);
         behandling.setType(ENDRET_PERIODE);
         behandling.setFagsak(fagsak);
-        behandling.setBehandlingsgrunnlag(opprettBehandlingsgrunnlag());
+        behandling.setMottatteOpplysninger(opprettMottatteOpplysninger());
 
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(BEHANDLINGSRESULTAT);
@@ -193,7 +193,7 @@ class BehandlingServiceTest {
         behandling.setTema(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         behandling.setType(SOEKNAD);
         behandling.setFagsak(fagsak);
-        behandling.setBehandlingsgrunnlag(opprettBehandlingsgrunnlag());
+        behandling.setMottatteOpplysninger(opprettMottatteOpplysninger());
 
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
@@ -207,7 +207,7 @@ class BehandlingServiceTest {
         behandling.setType(BEHANDLING_TYPE);
         behandling.setStatus(BEHANDLING_STATUS);
         behandling.setBehandlingsfrist(BEHANDLING_FRIST);
-        behandling.setBehandlingsgrunnlag(opprettBehandlingsgrunnlag());
+        behandling.setMottatteOpplysninger(opprettMottatteOpplysninger());
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
         behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, null, null, BEHANDLING_FRIST);
@@ -218,10 +218,10 @@ class BehandlingServiceTest {
 
     @Test
     void endreBehandlingstema_gyldigEndringForSøknad_behandlingLagresBehandlingsresultatTømmesOgOppgaveOppdateres() {
-        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        mottatteOpplysninger.setMottatteOpplysningerdata(new MottatteOpplysningerData());
         behandling.setTema(ARBEID_FLERE_LAND);
-        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
+        behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
         behandlingService.endreTema(behandling, UTSENDT_ARBEIDSTAKER);
 
@@ -235,10 +235,10 @@ class BehandlingServiceTest {
 
     @Test
     void endreBehandlingstema_gyldigEndringForSED_behandlingLagresBehandlingsresultatTømmesOgOppgaveOppdateres() {
-        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(new BehandlingsgrunnlagData());
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        mottatteOpplysninger.setMottatteOpplysningerdata(new MottatteOpplysningerData());
         behandling.setTema(TRYGDETID);
-        behandling.setBehandlingsgrunnlag(behandlingsgrunnlag);
+        behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
         behandlingService.endreTema(behandling, ØVRIGE_SED_MED);
 
@@ -411,6 +411,82 @@ class BehandlingServiceTest {
     }
 
     @Test
+    void nyBehandling_behandlingsfristKriterier_får8UkerBehandlingsfrist() {
+        fakeUnleash.enableAll();
+        String initierendeJournalpostId = "234";
+        String initierendeDokumentId = "221234";
+        Fagsak fagsak = new Fagsak();
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        LocalDate frist8Uker = LocalDate.now().plusWeeks(8);
+        Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, FØRSTEGANG, BESLUTNING_LOVVALG_ANNET_LAND, initierendeJournalpostId, initierendeDokumentId);
+
+        verify(behandlingRepository).save(behandling);
+        verify(behandlingsresultatService).lagreNyttBehandlingsresultat(behandling);
+
+        assertThat(behandling.getBehandlingsfrist()).isEqualTo(frist8Uker);
+        assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.OPPRETTET);
+        assertThat(behandling.getInitierendeJournalpostId()).isEqualTo(initierendeJournalpostId);
+        assertThat(behandling.getInitierendeDokumentId()).isEqualTo(initierendeDokumentId);
+    }
+
+    @Test
+    void nyBehandling_behandlingsfristKriterier_får70DagerBehandlingsfrist() {
+        fakeUnleash.enableAll();
+        String initierendeJournalpostId = "234";
+        String initierendeDokumentId = "221234";
+        Fagsak fagsak = new Fagsak();
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        LocalDate frist70Dager = LocalDate.now().plusDays(70);
+        Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, KLAGE, BESLUTNING_LOVVALG_ANNET_LAND, initierendeJournalpostId, initierendeDokumentId);
+
+        verify(behandlingRepository).save(behandling);
+        verify(behandlingsresultatService).lagreNyttBehandlingsresultat(behandling);
+
+        assertThat(behandling.getBehandlingsfrist()).isEqualTo(frist70Dager);
+        assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.OPPRETTET);
+        assertThat(behandling.getInitierendeJournalpostId()).isEqualTo(initierendeJournalpostId);
+        assertThat(behandling.getInitierendeDokumentId()).isEqualTo(initierendeDokumentId);
+    }
+
+    @Test
+    void nyBehandling_behandlingsfristKriterier_får90DagerBehandlingsfrist() {
+        fakeUnleash.enableAll();
+        String initierendeJournalpostId = "234";
+        String initierendeDokumentId = "221234";
+        Fagsak fagsak = new Fagsak();
+        fagsak.setTema(Sakstemaer.TRYGDEAVGIFT);
+        LocalDate frist90Dager = LocalDate.now().plusDays(90);
+        Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, FØRSTEGANG, ARBEID_KUN_NORGE, initierendeJournalpostId, initierendeDokumentId);
+
+        verify(behandlingRepository).save(behandling);
+        verify(behandlingsresultatService).lagreNyttBehandlingsresultat(behandling);
+
+        assertThat(behandling.getBehandlingsfrist()).isEqualTo(frist90Dager);
+        assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.OPPRETTET);
+        assertThat(behandling.getInitierendeJournalpostId()).isEqualTo(initierendeJournalpostId);
+        assertThat(behandling.getInitierendeDokumentId()).isEqualTo(initierendeDokumentId);
+    }
+
+    @Test
+    void nyBehandling_behandlingsfristKriterier_får180DagerBehandlingsfrist() {
+        fakeUnleash.enableAll();
+        String initierendeJournalpostId = "234";
+        String initierendeDokumentId = "221234";
+        Fagsak fagsak = new Fagsak();
+        fagsak.setTema(Sakstemaer.UNNTAK);
+        LocalDate frist180Dager = LocalDate.now().plusDays(180);
+        Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, FØRSTEGANG, REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, initierendeJournalpostId, initierendeDokumentId);
+
+        verify(behandlingRepository).save(behandling);
+        verify(behandlingsresultatService).lagreNyttBehandlingsresultat(behandling);
+
+        assertThat(behandling.getBehandlingsfrist()).isEqualTo(frist180Dager);
+        assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.OPPRETTET);
+        assertThat(behandling.getInitierendeJournalpostId()).isEqualTo(initierendeJournalpostId);
+        assertThat(behandling.getInitierendeDokumentId()).isEqualTo(initierendeDokumentId);
+    }
+
+    @Test
     void replikerBehandling_replikererObjekterOgCollections() throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
         Behandling tidligsteInaktiveBehandling = opprettBehandlingMedData();
         Behandling replikertBehandling = behandlingService.replikerBehandling(tidligsteInaktiveBehandling, ENDRET_PERIODE);
@@ -432,18 +508,18 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void replikerBehandling_utenBehandlingsgrunnlag_blirReplikert() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    void replikerBehandling_utenMottatteOpplysninger_blirReplikert() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         Behandling tidligsteInaktiveBehandling = opprettBehandlingMedData();
-        tidligsteInaktiveBehandling.setBehandlingsgrunnlag(null);
+        tidligsteInaktiveBehandling.setMottatteOpplysninger(null);
 
         assertThat(behandlingService.replikerBehandling(tidligsteInaktiveBehandling, Behandlingstyper.NY_VURDERING))
-            .extracting(Behandling::getBehandlingsgrunnlag).isNull();
+            .extracting(Behandling::getMottatteOpplysninger).isNull();
     }
 
     @Test
     void replikerBehandlingMedNyttBehandlingsresultat_replikererOgLagrerNyttBehandlingsresultat() {
         Behandling tidligsteInaktiveBehandling = opprettBehandlingMedData();
-        assertThat(tidligsteInaktiveBehandling.getBehandlingsgrunnlag()).isNotNull();
+        assertThat(tidligsteInaktiveBehandling.getMottatteOpplysninger()).isNotNull();
 
         Behandling replikertBehandling = behandlingService.replikerBehandlingMedNyttBehandlingsresultat(tidligsteInaktiveBehandling, NY_VURDERING);
 
@@ -453,7 +529,7 @@ class BehandlingServiceTest {
         assertThat(replikertBehandling.getDokumentasjonSvarfristDato()).isEqualTo(tidligsteInaktiveBehandling.getDokumentasjonSvarfristDato());
         assertThat(replikertBehandling.getInitierendeJournalpostId()).isEqualTo(tidligsteInaktiveBehandling.getInitierendeJournalpostId());
         assertThat(replikertBehandling.getBehandlingsfrist()).isEqualTo(LocalDate.now().plusWeeks(4));
-        assertThat(replikertBehandling.getBehandlingsgrunnlag()).isNull();
+        assertThat(replikertBehandling.getMottatteOpplysninger()).isNull();
         assertThat(replikertBehandling.getSaksopplysninger()).isEmpty();
 
         verify(behandlingRepository).save(replikertBehandling);
@@ -646,7 +722,7 @@ class BehandlingServiceTest {
         behandling.setDokumentasjonSvarfristDato(Instant.parse("2017-12-11T09:37:30.00Z"));
         behandling.setSaksopplysninger(new LinkedHashSet<>());
 
-        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
         behandling.getSaksopplysninger().add(opprettSaksopplysning());
         return behandling;
     }
@@ -674,13 +750,13 @@ class BehandlingServiceTest {
         return behandling;
     }
 
-    private Behandlingsgrunnlag opprettBehandlingsgrunnlag() {
-        var behandlingsgrunnlag = new Behandlingsgrunnlag();
-        var behandlingsgrunnlagdata = new BehandlingsgrunnlagData();
-        behandlingsgrunnlagdata.soeknadsland.landkoder.add(Landkoder.SE.getKode());
-        behandlingsgrunnlagdata.periode = new Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2021, 1, 1));
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagdata);
-        return behandlingsgrunnlag;
+    private MottatteOpplysninger opprettMottatteOpplysninger() {
+        var mottatteOpplysninger = new MottatteOpplysninger();
+        var mottatteOpplysningerData = new MottatteOpplysningerData();
+        mottatteOpplysningerData.soeknadsland.landkoder.add(Landkoder.SE.getKode());
+        mottatteOpplysningerData.periode = new Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2021, 1, 1));
+        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
+        return mottatteOpplysninger;
     }
 
     private Behandling opprettBehandlingUnderBehandling() {

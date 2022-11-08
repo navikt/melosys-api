@@ -11,15 +11,15 @@ import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoNorge;
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoUtland;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Avtaleland;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
@@ -67,8 +67,8 @@ public class InnvilgelseFtrlMapper {
 
         //NOTE Henter i første versjon av FTRL kun en norsk arbeidsgiver og forventer ett registert arbeidsland
         AvklartVirksomhet norskeArbeidsgivere = avklarteVirksomheterService.hentNorskeArbeidsgivere(brevbestilling.getBehandling()).get(0);
-        BehandlingsgrunnlagData behandlingsgrunnlagdata = behandlingsresultat.getBehandling().getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
-        Soeknadsland soeknadsland = behandlingsgrunnlagdata.soeknadsland;
+        MottatteOpplysningerData mottatteOpplysningerData = behandlingsresultat.getBehandling().getMottatteOpplysninger().getMottatteOpplysningerData();
+        Soeknadsland soeknadsland = mottatteOpplysningerData.soeknadsland;
         String arbeidsland = soeknadsland.landkoder.get(0);
 
         Collection<Medlemskapsperiode> medlemskapsperioder = medlemAvFolketrygden.getMedlemskapsperioder();
@@ -139,7 +139,7 @@ public class InnvilgelseFtrlMapper {
 
     private FamiliemedlemInfo tilFamiliemedlemInfo(Map<String, MedfolgendeFamilie> avklartMedfolgende, String uuid) {
         MedfolgendeFamilie medfolgendeFamilie = Optional.of(avklartMedfolgende.get(uuid))
-            .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i behandlingsgrunnlaget"));
+            .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i mottatteOpplysningeret"));
         String sammensattNavn = medfolgendeFamilie.getFnr() != null ? dokgenMapperDatahenter.hentSammensattNavn(medfolgendeFamilie.getFnr()) : medfolgendeFamilie.getNavn();
         return new FamiliemedlemInfo(sammensattNavn, medfolgendeFamilie.getFnr(), medfolgendeFamilie.utledIdentType());
     }
@@ -184,7 +184,7 @@ public class InnvilgelseFtrlMapper {
     }
 
     private boolean harTrygdeavtaleMedArbeidsland(String arbeidsland) {
-        return Arrays.stream(Avtaleland.values()).anyMatch(a -> a.name().equals(arbeidsland));
+        return Arrays.stream(Trygdeavtale_myndighetsland.values()).anyMatch(a -> a.name().equals(arbeidsland));
     }
 
     private String hentRepresentantNavn(String representantNr) {

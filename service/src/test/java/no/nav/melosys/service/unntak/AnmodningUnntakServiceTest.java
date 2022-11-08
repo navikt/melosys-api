@@ -7,14 +7,11 @@ import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
-import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -95,9 +92,9 @@ class AnmodningUnntakServiceTest {
         fagsak.setSaksnummer(SAKSNUMMER);
         behandling.setFagsak(fagsak);
         behandling.getSaksopplysninger().add(lagPersonSaksopplysning());
-        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
         when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(Collections.singletonList(Landkoder.SE));
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(Collections.singletonList(Land_iso2.SE));
 
         anmodningUnntakService.anmodningOmUnntak(BEHANDLING_ID, MOTTAKER_INSTITUSJON, Set.of(dokumentReferanse), FRITEKST_SED);
 
@@ -112,13 +109,13 @@ class AnmodningUnntakServiceTest {
     @Test
     void anmodningOmUnntak_ikkeEessiReadyMottakerInstitusjonNull_prosessOpprettet() throws Exception {
         Behandling behandling = new Behandling();
-        behandling.setBehandlingsgrunnlag(new Behandlingsgrunnlag());
+        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer(SAKSNUMMER);
         behandling.setFagsak(fagsak);
         behandling.getSaksopplysninger().add(lagPersonSaksopplysning());
         when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(Collections.singletonList(Landkoder.SE));
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID)).thenReturn(Collections.singletonList(Land_iso2.SE));
 
         anmodningUnntakService.anmodningOmUnntak(BEHANDLING_ID, null, Collections.emptySet(), FRITEKST_SED);
 

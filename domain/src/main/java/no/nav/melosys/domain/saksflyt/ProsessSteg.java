@@ -36,7 +36,7 @@ public enum ProsessSteg implements Kodeverk {
     OPPRETT_NY_BEHANDLING("OPPRETT_NY_BEHANDLING", "Oppretter ny behandling i Melosys"),
     OPPRETT_SAK_OG_BEHANDLING_FRA_ALTINN_SØKNAD("OPPRETT_SAK_OG_BEHANDLING_FRA_ALTINN_SØKNAD", "Oppretter fagsak og behandling fra mottatt Altinn-søknad"),
     OPPRETT_SEDDOKUMENT("OPPRETT_SEDDOKUMENT", "Oppretter saksopplysning fra SED"),
-    OPPRETT_SED_GRUNNLAG("OPPRETT_SED_GRUNNLAG", "Oppretter behandlingsgrunnlag fra SED"),
+    OPPRETT_SED_GRUNNLAG("OPPRETT_SED_GRUNNLAG", "Oppretter mottatteopplysninger fra SED"),
     OPPRETT_SØKNAD("OPPRETT_SØKNAD", "Oppretter ny søknad i Melosys"),
     PUBLISER_VEDTAK("PUBLISER_VEDTAK", "Publiserer vedtak på Kafka"), // Er ikke i bruk i dag, men mulig vi vil bruke dette i fremtiden
     REGISTERKONTROLL("REGISTERKONTROLL", "Utfører registerkontroll for en behandling"),

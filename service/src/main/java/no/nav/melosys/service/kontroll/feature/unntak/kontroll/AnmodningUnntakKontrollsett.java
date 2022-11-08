@@ -17,7 +17,7 @@ public class AnmodningUnntakKontrollsett {
         AnmodningUnntakKontroll::harRegistrertAdresse,
         AnmodningUnntakKontroll::anmodningsperiodeManglerSluttdato,
         AnmodningUnntakKontroll::kunEnArbeidsgiver,
-        kontrollData -> ArbeidUtlandKontroll.arbeidsstedManglerFelter(kontrollData.behandlingsgrunnlagData()),
-        kontrollData -> ArbeidUtlandKontroll.foretakUtlandManglerFelter(kontrollData.behandlingsgrunnlagData())
+        kontrollData -> ArbeidUtlandKontroll.arbeidsstedManglerFelter(kontrollData.mottatteOpplysningerData()),
+        kontrollData -> ArbeidUtlandKontroll.foretakUtlandManglerFelter(kontrollData.mottatteOpplysningerData())
     );
 }

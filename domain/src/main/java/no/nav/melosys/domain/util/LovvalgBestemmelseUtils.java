@@ -1,10 +1,7 @@
 package no.nav.melosys.domain.util;
 
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +21,8 @@ public final class LovvalgBestemmelseUtils {
             Lovvalgbestemmelser_883_2004.values(),
             Lovvalgbestemmelser_987_2009.values(),
             Tilleggsbestemmelser_883_2004.values(),
-            Lovvalgbestemmelser_trygdeavtale_uk.values()
+            Lovvalgbestemmelser_trygdeavtale_uk.values(),
+            Lovvalgbestemmelser_trygdeavtale_usa.values()
         )) {
             for (var lovBestemmelse : lovBestemelser) {
                 kodeTilLovvalgBestemmelse.put(lovBestemmelse.getKode(), lovBestemmelse);

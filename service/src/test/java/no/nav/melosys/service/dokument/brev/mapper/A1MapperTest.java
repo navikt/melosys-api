@@ -21,8 +21,9 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.LuftfartBase;
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.LuftfartBase;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -120,7 +121,7 @@ class A1MapperTest {
         brevData.yrkesgruppe = Yrkesgrupper.ORDINAER;
         brevData.bostedsadresse = boAdresse;
         brevData.arbeidssteder = new ArrayList<>(Arrays.asList(fysiskArbeidssted, maritimtArbeidsstedSkip, maritimtArbeidsstedSokkel));
-        brevData.arbeidsland = List.of(Landkoder.SE);
+        brevData.arbeidsland = List.of(Land_iso2.SE);
         brevData.person = lagPersonopplysninger();
         brevData.hovedvirksomhet = virksomhet;
         brevData.bivirksomheter = new ArrayList<>(Collections.singletonList(utenlandskVirksomhet));
@@ -147,7 +148,7 @@ class A1MapperTest {
         ForetakUtland utenlandskForetak = lagForetakUtland(false);
         utenlandskForetak.orgnr = null;
         brevData.hovedvirksomhet = new AvklartVirksomhet(utenlandskForetak);
-        brevData.arbeidsland = List.of(Landkoder.values());// List.of(Landkoder.GB, Landkoder.SE);
+        brevData.arbeidsland = List.of(Land_iso2.values());// List.of(Landkoder.GB, Landkoder.SE);
 
         mapper.mapA1(behandling, behandlingsresultat, brevData);
 
@@ -168,7 +169,7 @@ class A1MapperTest {
 
     @Test
     void mapBrevTilXML_arbeidslandUtenFysiskArbeidssted_fyllerPåMedArbeidsland() throws JAXBException, SAXException {
-        brevData.arbeidsland = List.of(Landkoder.SE, Landkoder.DK, Landkoder.GB);
+        brevData.arbeidsland = List.of(Land_iso2.SE, Land_iso2.DK, Land_iso2.GB);
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
 
         assertThat(a1.getFysiskArbeidsstedAdresseListe().getAdresse())

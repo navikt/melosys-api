@@ -7,7 +7,7 @@ import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
-import no.nav.melosys.domain.util.LandkoderUtils
+import no.nav.melosys.domain.util.IsoLandkodeKonverterer
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForGet
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPost
@@ -133,7 +133,7 @@ class MedlService(
             fraOgMed = periodeOmLovvalg.fom,
             tilOgMed = periodeOmLovvalg.tom,
             dekning = MedlPeriodeKonverter.tilMedlTrygdeDekningEos(periodeOmLovvalg.dekning).kode,
-            lovvalgsland = LandkoderUtils.tilIso3(periodeOmLovvalg.lovvalgsland.kode),
+            lovvalgsland = IsoLandkodeKonverterer.tilIso3(periodeOmLovvalg.lovvalgsland.kode),
             grunnlag = MedlPeriodeKonverter.tilGrunnlagMedltype(
                 MedlPeriodeKonverter.hentLovvalgBestemmelse(
                     periodeOmLovvalg
@@ -149,7 +149,7 @@ class MedlService(
                 medlemskapsperiode.dekning,
                 medlemskapsperiode.bestemmelse
             ).kode,
-            lovvalgsland = LandkoderUtils.tilIso3(medlemskapsperiode.arbeidsland),
+            lovvalgsland = IsoLandkodeKonverterer.tilIso3(medlemskapsperiode.arbeidsland),
             grunnlag = MedlPeriodeKonverter.tilGrunnlagMedltype(medlemskapsperiode.bestemmelse).kode
         )
 
@@ -167,7 +167,7 @@ class MedlService(
             tilOgMed = lovvalgsperiode.tom,
             status = periodestatusMedl.kode,
             dekning = MedlPeriodeKonverter.tilMedlTrygdeDekningEos(lovvalgsperiode.dekning).kode,
-            lovvalgsland = LandkoderUtils.tilIso3(lovvalgsperiode.lovvalgsland.kode),
+            lovvalgsland = IsoLandkodeKonverterer.tilIso3(lovvalgsperiode.lovvalgsland.kode),
             lovvalg = lovvalgMedl.kode,
             grunnlag = MedlPeriodeKonverter.tilGrunnlagMedltype(
                 MedlPeriodeKonverter.hentLovvalgBestemmelse(

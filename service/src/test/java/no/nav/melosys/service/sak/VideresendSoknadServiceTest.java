@@ -9,8 +9,9 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Bostedsland;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.eessi.BucType;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -61,8 +62,8 @@ class VideresendSoknadServiceTest {
     private final Bostedsland BOSTEDSLAND = new Bostedsland(Landkoder.ES);
     private static final String SAKSNUMMER = "MEL-2222";
     private final Fagsak fagsak = lagFagsak(SAKSNUMMER);
-    private final BehandlingsgrunnlagData behandlingsgrunnlagData = new BehandlingsgrunnlagData();
-    private final Behandling behandling = lagBehandling(behandlingsgrunnlagData);
+    private final MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
+    private final Behandling behandling = lagBehandling(mottatteOpplysningerData);
 
     @BeforeEach
     public void setup() {
@@ -79,7 +80,7 @@ class VideresendSoknadServiceTest {
         behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
         final Set<String> validerteMottakere = Set.of("ES:mottakerID123");
         when(landvelgerService.hentBostedsland(behandling)).thenReturn(BOSTEDSLAND);
-        when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(any(), eq(List.of(Landkoder.ES)), eq(BucType.LA_BUC_03)))
+        when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(any(), eq(List.of(Land_iso2.ES)), eq(BucType.LA_BUC_03)))
             .thenReturn(validerteMottakere);
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
         DokumentReferanse dokumentReferanse = new DokumentReferanse("jpID", "dokID");

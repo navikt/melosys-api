@@ -3,8 +3,8 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -44,7 +44,7 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
     @Override
     public BrevData lag(BrevDataGrunnlag dataGrunnlag, String saksbehandler) {
         long behandlingID = dataGrunnlag.getBehandling().getId();
-        BehandlingsgrunnlagData grunnlagData = dataGrunnlag.getBehandlingsgrunnlagData();
+        MottatteOpplysningerData grunnlagData = dataGrunnlag.getMottatteOpplysningerData();
 
         BrevDataInnvilgelseFlereLand brevdata = lagInnvilgelseBrevdataMedA1(dataGrunnlag, saksbehandler);
 
@@ -55,7 +55,7 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
         brevdata.lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandlingID);
         brevdata.erUkjenteEllerAlleEosLand = landvelgerService.erUkjenteEllerAlleEosLand(behandlingID);
         brevdata.alleArbeidsland = landvelgerService.hentAlleArbeidsland(behandlingID).stream()
-            .map(Landkoder::getBeskrivelse)
+            .map(Land_iso2::getBeskrivelse)
             .collect(Collectors.toList());
 
         brevdata.bostedsland = landvelgerService.hentBostedsland(behandlingID, grunnlagData).getLandkodeobjekt().getBeskrivelse();

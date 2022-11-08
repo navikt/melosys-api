@@ -5,14 +5,14 @@ import java.util.List;
 import java.util.Optional;
 
 import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import org.springframework.data.repository.CrudRepository;
 
 public interface UtenlandskMyndighetRepository extends CrudRepository<UtenlandskMyndighet, Long> {
 
-    Optional<UtenlandskMyndighet> findByLandkode(Landkoder landkode);
+    Optional<UtenlandskMyndighet> findByLandkode(Land_iso2 landkode);
 
     List<UtenlandskMyndighet> findAll();
 
-    List<UtenlandskMyndighet> findByLandkodeIsIn(Collection<Landkoder> landkoder);
+    List<UtenlandskMyndighet> findByLandkodeIsIn(Collection<Land_iso2> landkoder);
 }

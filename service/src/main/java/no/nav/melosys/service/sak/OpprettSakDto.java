@@ -10,12 +10,12 @@ public class OpprettSakDto {
     private String brukerID;
     private String virksomhetOrgnr;
     private Sakstyper sakstype;
+    private Sakstemaer sakstema;
     private Behandlingstema behandlingstema;
     private Behandlingstyper behandlingstype;
     private String oppgaveID;
     private SøknadDto soknadDto;
     private boolean skalTilordnes;
-    private Sakstemaer sakstema;
     private Aktoersroller hovedpart;
 
     public String getVirksomhetOrgnr() {

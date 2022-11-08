@@ -104,24 +104,6 @@ public final class ProsessflytDefinisjon {
             )
         );
 
-        PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_SAK,
-            new ProsessFlyt(ProsessType.OPPRETT_SAK,
-                OPPRETT_SAK_OG_BEH,
-                OPPRETT_SØKNAD,
-                OPPRETT_ARKIVSAK,
-                HENT_REGISTEROPPLYSNINGER,
-                VURDER_INNGANGSVILKÅR,
-                OPPRETT_OPPGAVE
-            )
-        );
-
-        PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_BEHANDLING_FOR_SAK,
-            new ProsessFlyt(ProsessType.OPPRETT_BEHANDLING_FOR_SAK,
-                OPPRETT_NY_BEHANDLING,
-                OPPRETT_OPPGAVE
-            )
-        );
-
         PROSESS_FLYT_MAP.put(ProsessType.JFR_KNYTT,
             new ProsessFlyt(ProsessType.JFR_KNYTT,
                 OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
@@ -149,6 +131,34 @@ public final class ProsessflytDefinisjon {
                 OPPRETT_SØKNAD,
                 OPPRETT_ARKIVSAK,
                 GJENBRUK_OPPGAVE
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_SAK,
+            new ProsessFlyt(ProsessType.OPPRETT_SAK,
+                OPPRETT_SAK_OG_BEH,
+                OPPRETT_SØKNAD,
+                OPPRETT_ARKIVSAK,
+                HENT_REGISTEROPPLYSNINGER,
+                VURDER_INNGANGSVILKÅR,
+                OPPRETT_OPPGAVE
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK,
+            new ProsessFlyt(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK,
+                REPLIKER_BEHANDLING,
+                OPPRETT_OPPGAVE
+            )
+        );
+
+        PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK,
+            new ProsessFlyt(ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK,
+                OPPRETT_NY_BEHANDLING,
+                OPPRETT_SØKNAD,
+                HENT_REGISTEROPPLYSNINGER,
+                VURDER_INNGANGSVILKÅR,
+                OPPRETT_OPPGAVE
             )
         );
 

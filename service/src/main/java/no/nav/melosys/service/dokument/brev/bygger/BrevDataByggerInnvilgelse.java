@@ -5,8 +5,8 @@ import java.util.Map;
 import java.util.Set;
 
 import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
@@ -16,7 +16,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
@@ -35,7 +35,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final VilkaarsresultatService vilkaarsresultatService;
     private final PersondataFasade persondataFasade;
-    private final BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private final MottatteOpplysningerService mottatteOpplysningerService;
 
     public BrevDataByggerInnvilgelse(AvklartefaktaService avklartefaktaService,
                                      LandvelgerService landvelgerService,
@@ -44,7 +44,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
                                      BrevbestillingRequest brevbestillingRequest,
                                      VilkaarsresultatService vilkaarsresultatService,
                                      PersondataFasade persondataFasade,
-                                     BehandlingsgrunnlagService behandlingsgrunnlagService) {
+                                     MottatteOpplysningerService mottatteOpplysningerService) {
         this.landvelgerService = landvelgerService;
         this.avklartefaktaService = avklartefaktaService;
         this.anmodningsperiodeService = anmodningsperiodeService;
@@ -53,7 +53,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         this.vilkaarsresultatService = vilkaarsresultatService;
         this.brevbyggerA1 = null;
         this.persondataFasade = persondataFasade;
-        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
+        this.mottatteOpplysningerService = mottatteOpplysningerService;
     }
 
     public BrevDataByggerInnvilgelse(AvklartefaktaService avklartefaktaService,
@@ -64,7 +64,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
                                      BrevDataByggerA1 brevbyggerA1,
                                      VilkaarsresultatService vilkaarsresultatService,
                                      PersondataFasade persondataFasade,
-                                     BehandlingsgrunnlagService behandlingsgrunnlagService) {
+                                     MottatteOpplysningerService mottatteOpplysningerService) {
         this.landvelgerService = landvelgerService;
         this.avklartefaktaService = avklartefaktaService;
         this.anmodningsperiodeService = anmodningsperiodeService;
@@ -73,7 +73,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.vilkaarsresultatService = vilkaarsresultatService;
         this.persondataFasade = persondataFasade;
-        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
+        this.mottatteOpplysningerService = mottatteOpplysningerService;
     }
 
     @Override
@@ -89,11 +89,11 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         brevDataInnvilgelse.personNavn = dataGrunnlag.getPerson().getSammensattNavn();
         brevDataInnvilgelse.lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandlingID);
         brevDataInnvilgelse.arbeidsland = landvelgerService.hentArbeidsland(behandlingID).getBeskrivelse();
-        brevDataInnvilgelse.bostedsland = landvelgerService.hentBostedsland(behandlingID, dataGrunnlag.getBehandlingsgrunnlagData()).getLandkodeobjekt().getBeskrivelse();
+        brevDataInnvilgelse.bostedsland = landvelgerService.hentBostedsland(behandlingID, dataGrunnlag.getMottatteOpplysningerData()).getLandkodeobjekt().getBeskrivelse();
 
         brevDataInnvilgelse.trygdemyndighetsland = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID).stream()
             .findFirst()
-            .map(Landkoder::getBeskrivelse)
+            .map(Land_iso2::getBeskrivelse)
             .orElse(null);
 
         if (dataGrunnlag.getAvklarteVirksomheterGrunnlag().antallVirksomheter() != 1) {
@@ -126,7 +126,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         Map<String, MedfolgendeFamilie> medfølgendeBarn = hentMedfølgendeBarn(behandlingID);
         for (OmfattetFamilie omfattetBarn : avklarteMedfolgendeBarn.getFamilieOmfattetAvNorskTrygd()) {
             if (!medfølgendeBarn.containsKey(omfattetBarn.getUuid())) {
-                throw new FunksjonellException("Avklart medfølgende barn " + omfattetBarn.getUuid() + " finnes ikke i behandlingsgrunnlaget");
+                throw new FunksjonellException("Avklart medfølgende barn " + omfattetBarn.getUuid() + " finnes ikke i mottatteOpplysningeret");
             }
             MedfolgendeFamilie barn = medfølgendeBarn.get(omfattetBarn.getUuid());
             omfattetBarn.setIdent(barn.getFnr());
@@ -134,7 +134,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         }
         for (IkkeOmfattetFamilie ikkeOmfattetBarn : avklarteMedfolgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd()) {
             if (!medfølgendeBarn.containsKey(ikkeOmfattetBarn.getUuid())) {
-                throw new FunksjonellException("Avklart medfølgende barn " + ikkeOmfattetBarn.getUuid() + " finnes ikke i behandlingsgrunnlaget");
+                throw new FunksjonellException("Avklart medfølgende barn " + ikkeOmfattetBarn.getUuid() + " finnes ikke i mottatteOpplysningeret");
             }
             MedfolgendeFamilie barn = medfølgendeBarn.get(ikkeOmfattetBarn.getUuid());
             ikkeOmfattetBarn.setSammensattNavn(barn.getFnr() != null ? persondataFasade.hentSammensattNavn(barn.getFnr()) : barn.getNavn());
@@ -144,8 +144,8 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
     }
 
     private Map<String, MedfolgendeFamilie> hentMedfølgendeBarn(long behandlingID) {
-        var behandlingsgrunnlag = behandlingsgrunnlagService.hentBehandlingsgrunnlag(behandlingID);
-        return behandlingsgrunnlag == null ? Collections.emptyMap()
-            : behandlingsgrunnlag.getBehandlingsgrunnlagdata().hentMedfølgendeBarn();
+        var mottatteOpplysninger = mottatteOpplysningerService.hentMottatteOpplysninger(behandlingID);
+        return mottatteOpplysninger == null ? Collections.emptyMap()
+            : mottatteOpplysninger.getMottatteOpplysningerData().hentMedfølgendeBarn();
     }
 }

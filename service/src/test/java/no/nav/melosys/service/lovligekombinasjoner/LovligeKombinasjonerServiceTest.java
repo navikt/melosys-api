@@ -1,5 +1,7 @@
 package no.nav.melosys.service.lovligekombinasjoner;
 
+import java.util.Set;
+
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -15,10 +17,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Set;
-
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.*;
 import static no.nav.melosys.domain.kodeverk.Sakstyper.*;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -160,11 +161,19 @@ class LovligeKombinasjonerServiceTest {
     }
 
     @Test
-    void hentMuligeBehandlingstemaer_hovedpartVIRKSOMHET_skalReturnereBehandlingsTemaVIRKSOMHET() {
-        Set<Behandlingstema> behandlingstemas = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, TRYGDEAVGIFT, null);
+    void hentMuligeBehandlingstemaer_hovedpartVIRKSOMHETIkkeTrygdeavgift_skalReturnereBehandlingsTemaVIRKSOMHET() {
+        Set<Behandlingstema> behandlingstemas = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, null);
         assertThat(behandlingstemas)
             .hasSize(1)
             .contains(VIRKSOMHET);
+    }
+
+    @Test
+    void hentMuligeBehandlingstemaer_hovedpartVIRKSOMHETTrygdeavgift_skalReturnereBehandlingsTemaYRKESAKTIV() {
+        Set<Behandlingstema> behandlingstemas = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, TRYGDEAVGIFT, null);
+        assertThat(behandlingstemas)
+            .hasSize(1)
+            .contains(YRKESAKTIV);
     }
 
     @Test
@@ -197,8 +206,23 @@ class LovligeKombinasjonerServiceTest {
 
         Set<Behandlingstyper> muligeBehandlingstyper = lovligeKombinasjonerService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, sisteBehandling);
         assertThat(muligeBehandlingstyper)
-            .hasSize(4)
-            .containsExactly(NY_VURDERING, KLAGE, HENVENDELSE, ENDRET_PERIODE);
+            .hasSize(3)
+            .containsExactly(NY_VURDERING, KLAGE, HENVENDELSE);
+    }
+
+    @Test
+    void hentMuligeBehandlingStatuser_harNøyaktigRekkefølgePåMuligeStatus() {
+        var muligeStatuser = lovligeKombinasjonerService.hentMuligeBehandlingStatuser();
+        assertThat(muligeStatuser)
+            .containsExactly(UNDER_BEHANDLING, AVVENT_DOK_PART, AVVENT_DOK_UTL, AVVENT_FAGLIG_AVKLARING);
+    }
+
+    @Test
+    void hentMuligeBehandlingStatuser_avsluttetErIkkeMulig() {
+        var muligeStatuser = lovligeKombinasjonerService.hentMuligeBehandlingStatuser();
+        assertThat(muligeStatuser)
+            .containsExactlyInAnyOrder(UNDER_BEHANDLING, AVVENT_DOK_PART, AVVENT_DOK_UTL, AVVENT_FAGLIG_AVKLARING)
+            .doesNotContain(AVSLUTTET);
     }
 
     private Fagsak fagsakMedSakstypeOgSakstema(Sakstyper sakstype, Sakstemaer sakstema) {

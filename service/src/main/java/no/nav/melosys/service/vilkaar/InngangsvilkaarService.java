@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.inngangsvilkar.Feilmelding;
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse;
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_INNGANGSVILKAAR;
-import static no.nav.melosys.domain.util.LandkoderUtils.tilIso3;
+import static no.nav.melosys.domain.util.IsoLandkodeKonverterer.tilIso3;
 
 @Service
 public class InngangsvilkaarService {

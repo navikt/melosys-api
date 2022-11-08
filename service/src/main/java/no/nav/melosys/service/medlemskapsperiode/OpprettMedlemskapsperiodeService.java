@@ -6,8 +6,8 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Medlemskapsperiode;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.SoeknadFtrl;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -48,15 +48,15 @@ public class OpprettMedlemskapsperiodeService {
         medlemAvFolketrygden.getMedlemskapsperioder().clear();
 
         Behandling behandling = behandlingsresultat.getBehandling();
-        Behandlingsgrunnlag behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
-        SoeknadFtrl søknad = (SoeknadFtrl) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
+        MottatteOpplysninger mottatteOpplysninger = behandling.getMottatteOpplysninger();
+        SoeknadFtrl søknad = (SoeknadFtrl) mottatteOpplysninger.getMottatteOpplysningerData();
 
         var medlemskapsperioder = UtledMedlemskapsperioder.lagMedlemskapsperioder(
             new UtledMedlemskapsperioderRequest(
                 søknad.periode,
                 søknad.getTrygdedekning(),
                 bestemmelse,
-                behandlingsgrunnlag.getMottaksdato(),
+                mottatteOpplysninger.getMottaksdato(),
                 søknad.soeknadsland.landkoder.stream().collect(onlyElement())
             )
         );

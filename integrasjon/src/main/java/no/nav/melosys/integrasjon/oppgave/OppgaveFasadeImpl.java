@@ -266,11 +266,11 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
-    public List<Oppgave> finnOppgaverMedAktørId(String aktørId) {
+    public List<Oppgave> finnOppgaverMedAktørId(String aktørId, String[] oppgavetyper) {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medAktørId(aktørId)
             .medTema(hentGyldigeTemaer())
-            .medOppgaveTyper(hentGyldigeOppgavetyper())
+            .medOppgaveTyper(oppgavetyper != null ? oppgavetyper : hentGyldigeOppgavetyper())
             .medSorteringsfelt(SORTERINGSFELT_FRIST)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
@@ -281,11 +281,11 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
-    public List<Oppgave> finnOppgaverMedOrgnr(String orgnr) {
+    public List<Oppgave> finnOppgaverMedOrgnr(String orgnr, String[] oppgavetyper) {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medOrgnr(orgnr)
             .medTema(hentGyldigeTemaer())
-            .medOppgaveTyper(hentGyldigeOppgavetyper())
+            .medOppgaveTyper(oppgavetyper != null ? oppgavetyper : hentGyldigeOppgavetyper())
             .medSorteringsfelt(SORTERINGSFELT_FRIST)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();

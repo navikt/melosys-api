@@ -9,7 +9,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -55,7 +55,7 @@ public class HentMottakerinstitusjonerForkortetPeriode implements StegBehandler 
     private void avklarMottakerInstitusjoner(Prosessinstans prosessinstans, Behandling behandling) {
         Fagsak fagsak = behandling.getFagsak();
 
-        Collection<Landkoder> utlMyndighetLand = landvelgerService.hentUtenlandskTrygdemyndighetsland(prosessinstans.getBehandling().getId());
+        Collection<Land_iso2> utlMyndighetLand = landvelgerService.hentUtenlandskTrygdemyndighetsland(prosessinstans.getBehandling().getId());
         BucType bucType = BucType.fraBestemmelse(behandlingsresultatService.hentBehandlingsresultat(behandling.getId()).hentLovvalgsperiode().getBestemmelse());
 
         if (eessiService.landErEessiReady(bucType.name(), utlMyndighetLand)) {
@@ -64,7 +64,7 @@ public class HentMottakerinstitusjonerForkortetPeriode implements StegBehandler 
                 .stream().filter(bi -> bucType.name().equals(bi.getBucType())).collect(Collectors.toList());
 
             if (tilknyttedeBucer.isEmpty()) {
-                throw new TekniskException(utlMyndighetLand.stream().map(Landkoder::getBeskrivelse).collect(Collectors.joining(", "))
+                throw new TekniskException(utlMyndighetLand.stream().map(Land_iso2::getBeskrivelse).collect(Collectors.joining(", "))
                     + " er EESSI-ready, men har ingen tidligere buc tilknyttet seg");
             }
 

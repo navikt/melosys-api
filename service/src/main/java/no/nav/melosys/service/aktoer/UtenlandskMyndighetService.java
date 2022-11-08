@@ -1,15 +1,13 @@
 package no.nav.melosys.service.aktoer;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.google.common.base.Enums;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -39,18 +37,26 @@ public class UtenlandskMyndighetService {
 
     public void avklarUtenlandskMyndighetSomAktørOgLagre(Behandling behandling) {
         String saksnummer = behandling.getFagsak().getSaksnummer();
-        Collection<Landkoder> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId());
+        Collection<Land_iso2> landkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId());
         if (!landkoder.isEmpty()) {
-            if (behandling.getFagsak().getType() == Sakstyper.TRYGDEAVTALE) {
+            Sakstyper sakstype = behandling.getFagsak().getType();
+            if (sakstype == Sakstyper.TRYGDEAVTALE) {
                 fagsakService.oppdaterMyndighetForTrygdeavtale(saksnummer, hentLandkodeForTrygdeavtale(landkoder));
-            } else {
-                Collection<String> institusjonsIder = konverterLandkodeTilInstitusjonsId(landkoder);
+            } else if (sakstype == Sakstyper.EU_EOS) {
+                Collection<String> institusjonsIder = landkoder.stream().map(this::hentEøsInstitusjonID).toList();
                 fagsakService.oppdaterMyndigheterForEuEos(saksnummer, institusjonsIder);
+            } else {
+                log.debug("Myndighet lagres ikke for sakstype {}", sakstype);
             }
         }
     }
 
-    public UtenlandskMyndighet hentUtenlandskMyndighet(Landkoder landkode) {
+    private Optional<UtenlandskMyndighet> finnUtenlandskMyndighet(String landkode) {
+        Optional<Land_iso2> eøsLandkodeOptional = Enums.getIfPresent(Land_iso2.class, landkode).toJavaUtil();
+        return eøsLandkodeOptional.flatMap(utenlandskMyndighetRepository::findByLandkode);
+    }
+
+    public UtenlandskMyndighet hentUtenlandskMyndighet(Land_iso2 landkode) {
         return utenlandskMyndighetRepository.findByLandkode(landkode)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."));
     }
@@ -63,16 +69,8 @@ public class UtenlandskMyndighetService {
         return utenlandskMyndighetRepository.findAll();
     }
 
-    private Collection<String> konverterLandkodeTilInstitusjonsId(Collection<Landkoder> landkoder) {
-        List<String> institusjonsider = new ArrayList<>();
-        for (Landkoder landkode : landkoder) {
-            institusjonsider.add(lagInstitusjonsId(landkode));
-        }
-        return institusjonsider;
-    }
-
     public Map<UtenlandskMyndighet, Aktoer> lagUtenlandskeMyndigheterFraBehandling(Behandling behandling) {
-        Collection<Landkoder> utenlandskeMyndigheterLandkoder = new ArrayList<>();
+        Collection<Land_iso2> utenlandskeMyndigheterLandkoder = new ArrayList<>();
         try {
             utenlandskeMyndigheterLandkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId());
         } catch (IkkeFunnetException e) {
@@ -87,24 +85,24 @@ public class UtenlandskMyndighetService {
     private Aktoer lagAktoer(UtenlandskMyndighet utenlandskMyndighet) {
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(TRYGDEMYNDIGHET);
-        aktoer.setInstitusjonId(lagInstitusjonsId(utenlandskMyndighet));
+        aktoer.setInstitusjonId(utenlandskMyndighet.hentInstitusjonID());
         return aktoer;
     }
 
-    public String lagInstitusjonsId(Landkoder landkode) {
+    public Optional<String> finnInstitusjonID(String landkode) {
+        return finnUtenlandskMyndighet(landkode).map(UtenlandskMyndighet::hentInstitusjonID);
+    }
+
+    private String hentEøsInstitusjonID(Land_iso2 landkode) {
         UtenlandskMyndighet myndighet = hentUtenlandskMyndighet(landkode);
-        return lagInstitusjonsId(myndighet);
+        return myndighet.hentInstitusjonID();
     }
 
-    public String lagInstitusjonsId(UtenlandskMyndighet utenlandskMyndighet) {
-        return utenlandskMyndighet.landkode
-            + (utenlandskMyndighet.institusjonskode == null ? "" : ":" + utenlandskMyndighet.institusjonskode);
-    }
-
-    private Landkoder hentLandkodeForTrygdeavtale(Collection<Landkoder> landkoder) {
+    private Land_iso2 hentLandkodeForTrygdeavtale(Collection<Land_iso2> landkoder) {
         if (landkoder.size() != 1) {
             throw new FunksjonellException("Fant ingen eller flere enn ett trygdemyndighetsland for bilaterale trygdeavtaler.");
         }
-        return landkoder.stream().findFirst().get();
+        return landkoder.stream().findFirst().orElseThrow(
+            () -> new FunksjonellException("Fant ingen trygdemyndighetsland for bilaterale trygdeavtaler."));
     }
 }

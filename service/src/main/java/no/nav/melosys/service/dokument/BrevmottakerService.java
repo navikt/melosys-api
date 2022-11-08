@@ -180,7 +180,7 @@ public class BrevmottakerService {
     private List<Aktoer> avklarArbeidsgiverFraAlleVirksomheter(Behandling behandling) {
         Set<String> arbeidsgiverOrgnumre = new HashSet<>();
         arbeidsgiverOrgnumre.addAll(behandling.hentArbeidsforholdDokument().hentOrgnumre());
-        arbeidsgiverOrgnumre.addAll(behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().hentAlleOrganisasjonsnumre());
+        arbeidsgiverOrgnumre.addAll(behandling.getMottatteOpplysninger().getMottatteOpplysningerData().hentAlleOrganisasjonsnumre());
         return avklarArbeidsgiver(arbeidsgiverOrgnumre);
     }
 
@@ -255,6 +255,9 @@ public class BrevmottakerService {
         }
         if (brevkopiRegler.contains(SKATT_FÅR_KOPI)) {
             mottakerliste.getFasteMottakere().add(SKATT);
+        }
+        if (brevkopiRegler.contains(UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI)) {
+            mottakerliste.getKopiMottakere().add(TRYGDEMYNDIGHET);
         }
 
         if (brevkopiRegler.contains(UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI_HVIS_IKKE_ART_8_2)) {

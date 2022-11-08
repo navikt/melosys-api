@@ -25,6 +25,10 @@ public final class PeriodeRegler {
         return tom != null && ChronoUnit.MONTHS.between(fom, tom) >= 24;
     }
 
+    public static boolean periodeOver12Måneder(LocalDate fom, LocalDate tom) {
+        return tom != null && ChronoUnit.MONTHS.between(fom, tom) >= 12;
+    }
+
     public static boolean periodeOver2ÅrOgEnDag(LocalDate fom, LocalDate tom) {
         return tom != null && antallÅr(fom, tom) > 2 || antallÅr(fom, tom) >= 2 && antallDager(fom, tom) > 0;
     }
