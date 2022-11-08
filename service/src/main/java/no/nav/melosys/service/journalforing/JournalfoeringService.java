@@ -394,14 +394,14 @@ public class JournalfoeringService {
         if (StringUtils.isEmpty(journalfoeringDto.getOppgaveID())) {
             throw new FunksjonellException("OppgaveID mangler");
         }
-        if (StringUtils.isEmpty(journalfoeringDto.getAvsenderID())) {
-            throw new FunksjonellException("AvsenderID mangler");
+        if (journalfoeringDto.getAvsenderType() != null && StringUtils.isEmpty(journalfoeringDto.getAvsenderID())) {
+            throw new FunksjonellException("AvsenderID er påkrevd når AvsenderType er satt");
+        }
+        if (!StringUtils.isEmpty(journalfoeringDto.getAvsenderID()) && journalfoeringDto.getAvsenderType() == null) {
+            throw new FunksjonellException("AvsenderType er påkrevd når AvsenderID er satt");
         }
         if (StringUtils.isEmpty(journalfoeringDto.getAvsenderNavn())) {
             throw new FunksjonellException("AvsenderNavn mangler");
-        }
-        if (journalfoeringDto.getAvsenderType() == null) {
-            throw new FunksjonellException("AvsenderType mangler");
         }
         if (StringUtils.isEmpty(journalfoeringDto.getBrukerID()) && StringUtils.isEmpty(journalfoeringDto.getVirksomhetOrgnr())) {
             throw new FunksjonellException("Både BrukerID og VirksomhetOrgnr mangler. Krever én");
