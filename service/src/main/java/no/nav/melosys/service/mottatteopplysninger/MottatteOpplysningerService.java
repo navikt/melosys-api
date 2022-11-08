@@ -97,7 +97,7 @@ public class MottatteOpplysningerService {
         long behandlingID = behandling.getId();
         boolean behandleAlleSakerEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
 
-        // Toggle for å opprette søknad for folketrygdloven
+        // Toggle for å opprette søknad for folketrygdloven, fjernes når vi ikke lenger skal ha tom flyt for FTRL
         boolean skalOppretteSoknadForFolketrygdloven = unleash.isEnabled("melosys.folketrygden.mvp") && behandling.getFagsak().getType().equals(Sakstyper.FTRL);
 
         if ((behandleAlleSakerEnabled ? !SaksbehandlingRegler.harTomFlyt(behandling) : behandling.erBehandlingAvSøknadGammel())
