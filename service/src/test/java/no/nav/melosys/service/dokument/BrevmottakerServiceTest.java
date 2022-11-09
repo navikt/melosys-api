@@ -453,7 +453,7 @@ class BrevmottakerServiceTest {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(null));
         when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
 
-        assertThat(brevmottakerService.hentMottakerliste(STORBRITANNIA, 123))
+        assertThat(brevmottakerService.hentMottakerliste(TRYGDEAVTALE_GB, 123))
             .extracting(
                 Mottakerliste::getHovedMottaker,
                 Mottakerliste::getKopiMottakere,
@@ -474,7 +474,7 @@ class BrevmottakerServiceTest {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(null));
         when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
 
-        assertThat(brevmottakerService.hentMottakerliste(STORBRITANNIA, 123))
+        assertThat(brevmottakerService.hentMottakerliste(TRYGDEAVTALE_GB, 123))
             .extracting(
                 Mottakerliste::getHovedMottaker,
                 Mottakerliste::getKopiMottakere,

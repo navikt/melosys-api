@@ -14,7 +14,7 @@ import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 import no.nav.melosys.service.dokument.VedleggTyper;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.STORBRITANNIA;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.TRYGDEAVTALE_GB;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2;
 
 @Service
@@ -34,7 +34,7 @@ public class DokumentNavnService {
 
 
     public String utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(Behandling behandling, Produserbaredokumenter produserbaredokumenter, Aktoersroller mottakerRolle) {
-        if (!STORBRITANNIA.equals(produserbaredokumenter)) {
+        if (!TRYGDEAVTALE_GB.equals(produserbaredokumenter)) {
             return produserbaredokumenter.getBeskrivelse();
         }
         Aktoer mottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(mottakerRolle), behandling);
@@ -42,7 +42,7 @@ public class DokumentNavnService {
     }
 
     public String utledDokumentNavnForProduserbaredokumenterOgAktoer(Behandling behandling, Produserbaredokumenter produserbaredokumenter, Aktoer mottaker, String standardTekst) {
-        if (!STORBRITANNIA.equals(produserbaredokumenter)) {
+        if (!TRYGDEAVTALE_GB.equals(produserbaredokumenter)) {
             return standardTekst != null ? standardTekst : produserbaredokumenter.getBeskrivelse();
         }
         DokumentproduksjonsInfo dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(produserbaredokumenter);
