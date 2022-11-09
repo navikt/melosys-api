@@ -1,8 +1,6 @@
 package no.nav.melosys.melosysmock.journalpost
 
 import no.nav.melosys.melosysmock.journalpost.intern_modell.*
-import no.nav.melosys.melosysmock.journalpost.intern_modell.AvsenderMottaker
-import no.nav.melosys.melosysmock.journalpost.intern_modell.IdType
 import no.nav.melosys.melosysmock.journalpost.journalpostapi.Dokument
 import no.nav.melosys.melosysmock.journalpost.journalpostapi.DokumentVariant
 import no.nav.melosys.melosysmock.journalpost.journalpostapi.OppdaterJournalpostRequest
@@ -28,10 +26,12 @@ class JournalpostMapper {
             mottattDato = request.datoMottatt ?: LocalDate.now(),
             arkivtema = request.tema?.let { Tema.valueOf(it) },
             journalposttype = request.journalpostType!!.let { Journalposttype.valueOf(it.name) },
-            bruker = request.bruker?.let { JournalpostBruker(
-                ident = request.bruker.id,
-                brukerType = request.bruker.idType?.let { IdType.valueOf(it.name) }
-            )},
+            bruker = request.bruker?.let {
+                JournalpostBruker(
+                    ident = request.bruker.id,
+                    brukerType = request.bruker.idType?.let { IdType.valueOf(it.name) }
+                )
+            },
             kanal = request.kanal,
             tittel = request.tittel,
             eksternReferanseId = request.eksternReferanseId,
@@ -41,8 +41,9 @@ class JournalpostMapper {
 
     private fun tilDokumentListe(dokumenter: List<Dokument>?): List<DokumentModell> {
         val dokumentListe = mutableListOf<DokumentModell>()
-        dokumenter?.forEachIndexed{i, dok ->
-            val dokumentTilknyttetJournalpost = if (i == 0) DokumentTilknyttetJournalpost.HOVEDDOKUMENT else DokumentTilknyttetJournalpost.VEDLEGG
+        dokumenter?.forEachIndexed { i, dok ->
+            val dokumentTilknyttetJournalpost =
+                if (i == 0) DokumentTilknyttetJournalpost.HOVEDDOKUMENT else DokumentTilknyttetJournalpost.VEDLEGG
             dokumentListe.add(
                 DokumentModell(
                     dokumentId = lagRandomId(),
@@ -51,7 +52,7 @@ class JournalpostMapper {
                     brevkode = dok.brevkode,
                     dokumentTilknyttetJournalpost = dokumentTilknyttetJournalpost,
                     dokumentVarianter = lagDokumentvarianter(dok.dokumentvarianter)
-            )
+                )
             )
         }
         return dokumentListe
@@ -67,7 +68,10 @@ class JournalpostMapper {
         }
     }
 
-    fun oppdaterModell(oppdatering: OppdaterJournalpostRequest, journalpostModell: JournalpostModell): JournalpostModell {
+    fun oppdaterModell(
+        oppdatering: OppdaterJournalpostRequest,
+        journalpostModell: JournalpostModell
+    ): JournalpostModell {
         val oppdatertModell = journalpostModell.copy()
         oppdatering.avsenderMottaker?.let {
             oppdatertModell.avsenderMottaker.id = it.id
@@ -99,8 +103,8 @@ class JournalpostMapper {
         oppdatering.tema?.let { oppdatertModell.arkivtema = Tema.valueOf(it) }
         oppdatering.sak?.let { oppdatertModell.sakId = it.fagsakId }
         oppdatering.tittel?.let { oppdatertModell.tittel = it }
-        oppdatering.tilleggsopplysninger.forEach {
-            oppdatertModell.tilleggsoppltsninger.removeIf {t -> t.nokkel == it.nokkel}
+        oppdatering.tilleggsopplysninger?.forEach {
+            oppdatertModell.tilleggsoppltsninger.removeIf { t -> t.nokkel == it.nokkel }
             oppdatertModell.tilleggsoppltsninger.add(Tilleggsopplysning(it.nokkel, it.verdi))
         }
 

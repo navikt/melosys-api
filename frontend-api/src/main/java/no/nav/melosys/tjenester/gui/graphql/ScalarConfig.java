@@ -28,11 +28,12 @@ class ScalarConfig {
         return new Coercing<>() {
             @Override
             public String serialize(Object input) {
-                if (input instanceof LocalDate) {
+                if (input instanceof LocalDate || input instanceof String) {
                     return input.toString();
                 }
+
                 throw new CoercingSerializeException(
-                    "Serialization from " + input.getClass() + " to Date not implemented.");
+                    "Serialization from " + input.getClass() + " to LocalDate not implemented.");
             }
 
             @Override

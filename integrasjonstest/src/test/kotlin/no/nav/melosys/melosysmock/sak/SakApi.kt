@@ -1,6 +1,7 @@
 package no.nav.melosys.melosysmock.sak
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonProperty
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.web.bind.annotation.*
 import kotlin.random.Random
@@ -56,12 +57,20 @@ class SakApi {
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class SakDto(
+    @JsonProperty("id")
     var id: Long? = null,
+    @JsonProperty("tema")
     var tema: String? = null,
+    @JsonProperty("applikasjon")
     var applikasjon: String? = null,
+    @JsonProperty("fagsakNr")
     var fagsakNr: String? = null,
+    @JsonProperty("aktoerId")
     var aktoerId: String? = null,
+    @JsonProperty("orgnr")
     var orgnr: String? = null,
+    @JsonProperty("opprettetAv")
     var opprettetAv: String?,
+    @JsonProperty("opprettetTidspunkt")
     var opprettetTidspunkt: String? = null
 )
