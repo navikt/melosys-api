@@ -1,5 +1,7 @@
 package no.nav.melosys.service.journalforing;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -10,6 +12,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -38,7 +41,9 @@ import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknadGammel;
 import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
+import static no.nav.melosys.domain.kodeverk.Sakstemaer.TRYGDEAVGIFT;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 import static no.nav.melosys.service.sak.SakstypeBehandlingstemaKobling.erGyldigBehandlingstemaForSakstype;
 
 @Service
@@ -113,7 +118,7 @@ public class JournalfoeringService {
         validerOpprettelseSak(journalfoeringDto, behandleAlleSakerToggleEnabled, sakstype, sakstema, behandlingstema,
             behandlingstype);
 
-        opprettJournalføringNySakProsessinstans(journalfoeringDto, sakstype, sakstema, behandlingstema,
+        opprettJournalføringNySakProsessinstans(journalpost, journalfoeringDto, sakstype, sakstema, behandlingstema,
             behandlingstype);
     }
 
@@ -204,7 +209,7 @@ public class JournalfoeringService {
         }
     }
 
-    private void opprettJournalføringNySakProsessinstans(JournalfoeringOpprettDto journalfoeringDto, Sakstyper sakstype,
+    private void opprettJournalføringNySakProsessinstans(Journalpost journalpost, JournalfoeringOpprettDto journalfoeringDto, Sakstyper sakstype,
                                                          Sakstemaer sakstema, Behandlingstema behandlingstema,
                                                          Behandlingstyper behandlingstype) {
         var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
@@ -221,6 +226,8 @@ public class JournalfoeringService {
         if (behandleAlleSakerToggleEnabled) {
             prosessinstans.setData(ProsessDataKey.SAKSTEMA, sakstema);
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
+            prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, utledÅrsaktype(journalpost.mottaksKanalErEessi(), sakstema, behandlingstema, behandlingstype));
+            prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.ofInstant(journalpost.getForsendelseMottatt(), ZoneId.systemDefault()));
         } else {
             prosessinstans.setData(ProsessDataKey.SAKSTEMA, SakstypeSakstemaKobling.sakstema(sakstype, behandlingstema));
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandling.erBehandlingAvSøknadGammel(
@@ -257,6 +264,24 @@ public class JournalfoeringService {
 
         prosessinstansService.lagre(prosessinstans);
         log.info("Ny sak bestilt etter journalføring av journalpost {}", journalfoeringDto.getJournalpostID());
+    }
+
+    private Behandlingsaarsaktyper utledÅrsaktype(boolean erSed, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        if (erSed) {
+            return Behandlingsaarsaktyper.SED;
+        }
+        if (erSøknad(sakstema, behandlingstema, behandlingstype)) {
+            return Behandlingsaarsaktyper.SØKNAD;
+        }
+        if (behandlingstype == HENVENDELSE) {
+            return Behandlingsaarsaktyper.HENVENDELSE;
+        }
+        return Behandlingsaarsaktyper.ANNET;
+    }
+
+    private static boolean erSøknad(Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        return (sakstema == MEDLEMSKAP_LOVVALG || sakstema == TRYGDEAVGIFT) && (behandlingstema != BESLUTNING_LOVVALG_ANNET_LAND)
+            && (behandlingstype == FØRSTEGANG || behandlingstype == NY_VURDERING || behandlingstype == ENDRET_PERIODE);
     }
 
     @Transactional
@@ -340,6 +365,8 @@ public class JournalfoeringService {
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessTypeForAndregangsbehandling, journalfoeringDto);
         if (behandleAlleSakerToggleEnabled) {
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
+            prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, utledÅrsaktype(journalpost.mottaksKanalErEessi(), fagsak.getTema(), behandlingstema, behandlingstype));
+            prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.ofInstant(journalpost.getForsendelseMottatt(), ZoneId.systemDefault()));
         }
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);

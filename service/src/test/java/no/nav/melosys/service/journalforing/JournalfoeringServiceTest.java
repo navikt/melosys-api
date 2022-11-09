@@ -97,6 +97,7 @@ class JournalfoeringServiceTest {
         unleash.enable("melosys.folketrygden.mvp");
         journalpost = new Journalpost("123");
         journalpost.setHoveddokument(new ArkivDokument());
+        journalpost.setForsendelseMottatt(Instant.EPOCH);
 
         this.journalfoeringService = new JournalfoeringService(joarkFasade, prosessinstansService, eessiService, fagsakService, persondataFasade, lovligeKombinasjonerService, unleash, saksbehandlingRegler);
         opprettDto = new JournalfoeringOpprettDto();
@@ -268,6 +269,8 @@ class JournalfoeringServiceTest {
         var lagretProsessinstans = prosessinstansArgumentCaptor.getValue();
         assertThat(lagretProsessinstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class).getKode()).isEqualTo(fagsakDto.getSakstema());
         assertThat(lagretProsessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class).getKode()).isEqualTo(opprettDto.getBehandlingstypeKode());
+        assertThat(lagretProsessinstans.getData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingstyper.class)).isNotNull();
+        assertThat(lagretProsessinstans.getData(ProsessDataKey.MOTTATT_DATO, LocalDate.class)).isNotNull();
     }
 
     @Test
