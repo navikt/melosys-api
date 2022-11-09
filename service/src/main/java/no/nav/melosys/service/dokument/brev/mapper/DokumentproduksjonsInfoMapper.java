@@ -32,7 +32,7 @@ public class DokumentproduksjonsInfoMapper {
         MANGELBREV_BRUKER,
         MELDING_FORVENTET_SAKSBEHANDLINGSTID,
         MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
-        STORBRITANNIA,
+        TRYGDEAVTALE_GB,
         MELDING_HENLAGT_SAK,
         GENERELT_FRITEKSTVEDLEGG
     );
@@ -69,8 +69,8 @@ public class DokumentproduksjonsInfoMapper {
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.INNVILGELSE_FTRL_2_8.getTittel())
             )
-            .put(STORBRITANNIA,
-                new DokumentproduksjonsInfo("uk_innvilgelse_og_attest",
+            .put(TRYGDEAVTALE_GB,
+                new DokumentproduksjonsInfo("trygdeavtale_gb",
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.TRYGDEAVTALE.getTittel(),
                     Map.of(VedleggTyper.VEDTAKSBREV, JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
