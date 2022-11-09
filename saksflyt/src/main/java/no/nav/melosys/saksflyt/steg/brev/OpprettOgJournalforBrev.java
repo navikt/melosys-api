@@ -223,7 +223,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
             }
             return fritekstTittel;
         }
-        if (brevbestilling.getProduserbartdokument() == Produserbaredokumenter.STORBRITANNIA) {
+        if (brevbestilling.getProduserbartdokument() == Produserbaredokumenter.TRYGDEAVTALE_GB) {
             return dokumentNavnService.utledDokumentNavn(behandling, dokumentproduksjonsInfo, mottaker);
         }
         return dokumentproduksjonsInfo.journalføringsTittel();
