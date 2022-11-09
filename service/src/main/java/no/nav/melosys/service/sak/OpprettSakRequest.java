@@ -23,6 +23,7 @@ public class OpprettSakRequest {
     private final Behandlingstyper behandlingstype;
     private final Behandlingstema behandlingstema;
     private final Behandlingsaarsaktyper behandlingsårsaktype;
+    private final String behandlingsårsakFritekst;
     private final LocalDate mottaksdato;
     private final String initierendeJournalpostId;
     private final String initierendeDokumentId;
@@ -38,6 +39,7 @@ public class OpprettSakRequest {
         this.kontaktopplysninger = builder.kontaktopplysninger;
         this.behandlingstype = builder.behandlingstype;
         this.behandlingstema = builder.behandlingstema;
+        this.behandlingsårsakFritekst = builder.behandlingsårsakFritekst;
         this.behandlingsårsaktype = builder.behandlingsårsaktype;
         this.mottaksdato = builder.mottaksdato;
         this.initierendeJournalpostId = builder.initierendeJournalpostId;
@@ -82,6 +84,10 @@ public class OpprettSakRequest {
         return behandlingsårsaktype;
     }
 
+    public String getBehandlingsårsakFritekst() {
+        return behandlingsårsakFritekst;
+    }
+
     public LocalDate getMottaksdato() {
         return mottaksdato;
     }
@@ -112,6 +118,7 @@ public class OpprettSakRequest {
         private Behandlingstyper behandlingstype;
         private Behandlingstema behandlingstema;
         private Behandlingsaarsaktyper behandlingsårsaktype;
+        private String behandlingsårsakFritekst;
         private LocalDate mottaksdato;
         private String initierendeJournalpostId;
         private String initierendeDokumentId;
@@ -162,6 +169,11 @@ public class OpprettSakRequest {
 
         public Builder medBehandlingsårsaktype(Behandlingsaarsaktyper behandlingsårsaktype) {
             this.behandlingsårsaktype = behandlingsårsaktype;
+            return this;
+        }
+
+        public Builder medBehandlingsårsakFritekst(String behandlingsårsakFritekst) {
+            this.behandlingsårsakFritekst = behandlingsårsakFritekst;
             return this;
         }
 
