@@ -59,6 +59,7 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
         String initierendeDokumentId = prosessinstans.getData(DOKUMENT_ID);
         LocalDate mottaksdato = prosessinstans.getData(MOTTATT_DATO, LocalDate.class);
         Behandlingsaarsaktyper behandlingsårsaktype = prosessinstans.getData(BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.class);
+        String behandlingsårsakFritekst = prosessinstans.getData(BEHANDLINGSÅRSAK_FRITEKST);
         Behandlingstyper behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstyper.class);
         Behandlingstema behandlingstema = prosessinstans.getData(BEHANDLINGSTEMA, Behandlingstema.class);
         Sakstyper sakstype = prosessinstans.getData(SAKSTYPE, Sakstyper.class);
@@ -73,6 +74,7 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
             .medSakstype(sakstype)
             .medSakstema(sakstema)
             .medBehandlingsårsaktype(behandlingsårsaktype)
+            .medBehandlingsårsakFritekst(behandlingsårsakFritekst)
             .medBehandlingstema(behandlingstema)
             .medBehandlingstype(behandlingstype)
             .medMottaksdato(mottaksdato)

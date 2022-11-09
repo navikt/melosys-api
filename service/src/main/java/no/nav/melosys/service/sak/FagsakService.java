@@ -231,12 +231,14 @@ public class FagsakService {
         Behandlingstyper behandlingstype = opprettSakRequest.getBehandlingstype();
         Behandlingstema behandlingstema = opprettSakRequest.getBehandlingstema();
         Behandlingsaarsaktyper behandlingsårsaktype = opprettSakRequest.getBehandlingsårsaktype();
+        String behandlingsårsakFritekst = opprettSakRequest.getBehandlingsårsakFritekst();
         LocalDate mottaksdato = opprettSakRequest.getMottaksdato();
         String initierendeJournalpostId = opprettSakRequest.getInitierendeJournalpostId();
         String initierendeDokumentId = opprettSakRequest.getInitierendeDokumentId();
         Behandling behandling = behandlingService.nyBehandling(fagsak,
             Behandlingsstatus.OPPRETTET, behandlingstype, behandlingstema,
-            initierendeJournalpostId, initierendeDokumentId, mottaksdato, behandlingsårsaktype);
+            initierendeJournalpostId, initierendeDokumentId, mottaksdato,
+            behandlingsårsaktype, behandlingsårsakFritekst);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
 
         sakerOpprettet.increment();

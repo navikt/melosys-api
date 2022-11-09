@@ -8,9 +8,6 @@ import java.util.*;
 
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
@@ -19,6 +16,9 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -401,7 +401,9 @@ class BehandlingServiceTest {
     void nyBehandling() {
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
-        Behandling behandling = behandlingService.nyBehandling(new Fagsak(), Behandlingsstatus.OPPRETTET, SOEKNAD, Behandlingstema.UTSENDT_ARBEIDSTAKER, initierendeJournalpostId, initierendeDokumentId, null, null);
+        Behandling behandling = behandlingService.nyBehandling(
+            new Fagsak(), Behandlingsstatus.OPPRETTET, SOEKNAD, Behandlingstema.UTSENDT_ARBEIDSTAKER,
+            initierendeJournalpostId, initierendeDokumentId, null, null, null);
         verify(behandlingRepository).save(behandling);
         verify(behandlingsresultatService).lagreNyttBehandlingsresultat(behandling);
         assertThat(behandling.getType()).isEqualTo(SOEKNAD);
@@ -418,7 +420,9 @@ class BehandlingServiceTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         LocalDate frist8Uker = LocalDate.now().plusWeeks(8);
-        Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, FØRSTEGANG, BESLUTNING_LOVVALG_ANNET_LAND, initierendeJournalpostId, initierendeDokumentId, null, null);
+        Behandling behandling = behandlingService.nyBehandling(
+            fagsak, Behandlingsstatus.OPPRETTET, FØRSTEGANG, BESLUTNING_LOVVALG_ANNET_LAND,
+            initierendeJournalpostId, initierendeDokumentId, null, null, null);
 
         verify(behandlingRepository).save(behandling);
         verify(behandlingsresultatService).lagreNyttBehandlingsresultat(behandling);
@@ -437,7 +441,9 @@ class BehandlingServiceTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         LocalDate frist70Dager = LocalDate.now().plusDays(70);
-        Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, KLAGE, BESLUTNING_LOVVALG_ANNET_LAND, initierendeJournalpostId, initierendeDokumentId, null, null);
+        Behandling behandling = behandlingService.nyBehandling(
+            fagsak, Behandlingsstatus.OPPRETTET, KLAGE, BESLUTNING_LOVVALG_ANNET_LAND,
+            initierendeJournalpostId, initierendeDokumentId, null, null, null);
 
         verify(behandlingRepository).save(behandling);
         verify(behandlingsresultatService).lagreNyttBehandlingsresultat(behandling);
@@ -456,7 +462,9 @@ class BehandlingServiceTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setTema(Sakstemaer.TRYGDEAVGIFT);
         LocalDate frist90Dager = LocalDate.now().plusDays(90);
-        Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, FØRSTEGANG, ARBEID_KUN_NORGE, initierendeJournalpostId, initierendeDokumentId, null, null);
+        Behandling behandling = behandlingService.nyBehandling(
+            fagsak, Behandlingsstatus.OPPRETTET, FØRSTEGANG, ARBEID_KUN_NORGE,
+            initierendeJournalpostId, initierendeDokumentId, null, null, null);
 
         verify(behandlingRepository).save(behandling);
         verify(behandlingsresultatService).lagreNyttBehandlingsresultat(behandling);
@@ -475,7 +483,9 @@ class BehandlingServiceTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setTema(Sakstemaer.UNNTAK);
         LocalDate frist180Dager = LocalDate.now().plusDays(180);
-        Behandling behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.OPPRETTET, FØRSTEGANG, REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, initierendeJournalpostId, initierendeDokumentId, null, null);
+        Behandling behandling = behandlingService.nyBehandling(
+            fagsak, Behandlingsstatus.OPPRETTET, FØRSTEGANG, REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
+            initierendeJournalpostId, initierendeDokumentId, null, null, null);
 
         verify(behandlingRepository).save(behandling);
         verify(behandlingsresultatService).lagreNyttBehandlingsresultat(behandling);

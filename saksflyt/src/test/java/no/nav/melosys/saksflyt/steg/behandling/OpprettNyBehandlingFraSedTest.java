@@ -29,6 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -104,7 +105,7 @@ class OpprettNyBehandlingFraSedTest {
             .build();
 
         when(fagsakService.hentFagsakFraArkivsakID(gsakSaksnummer)).thenReturn(fagsak);
-        when(behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(new Behandling());
+        when(behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(new Behandling());
         when(joarkFasade.hentMottaksDatoForJournalpost(journalpostID)).thenReturn(mottaksdato);
         when(oppgaveFasade.finnÅpenBehandlingsoppgaveMedFagsaksnummer(fagsak.getSaksnummer()))
             .thenReturn(Optional.of(oppgave));
@@ -115,7 +116,7 @@ class OpprettNyBehandlingFraSedTest {
         verify(behandlingService).avsluttBehandling(behandling.getId());
         verify(behandlingService).nyBehandling(
             fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.SED, behandlingstema, journalpostID, dokumentID,
-            mottaksdato, Behandlingsaarsaktyper.SED);
+            mottaksdato, Behandlingsaarsaktyper.SED, null);
         assertThat(prosessinstans.getBehandling()).isNotNull();
     }
 
@@ -148,7 +149,7 @@ class OpprettNyBehandlingFraSedTest {
             .build();
 
         when(fagsakService.hentFagsakFraArkivsakID(gsakSaksnummer)).thenReturn(fagsak);
-        when(behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(new Behandling());
+        when(behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(new Behandling());
         when(joarkFasade.hentMottaksDatoForJournalpost(journalpostID)).thenReturn(mottaksdato);
         when(oppgaveFasade.finnÅpenBehandlingsoppgaveMedFagsaksnummer(fagsak.getSaksnummer()))
             .thenReturn(Optional.of(oppgave));
@@ -159,7 +160,7 @@ class OpprettNyBehandlingFraSedTest {
         verify(behandlingService).avsluttBehandling(behandling.getId());
         verify(behandlingService).nyBehandling(
             fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.FØRSTEGANG, behandlingstema, journalpostID, dokumentID,
-            mottaksdato, Behandlingsaarsaktyper.SED);
+            mottaksdato, Behandlingsaarsaktyper.SED, null);
         assertThat(prosessinstans.getBehandling()).isNotNull();
     }
 }

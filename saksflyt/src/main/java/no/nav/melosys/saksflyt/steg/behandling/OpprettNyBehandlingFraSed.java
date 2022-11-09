@@ -69,7 +69,8 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
             fagsak, Behandlingsstatus.UNDER_BEHANDLING,
             unleash.isEnabled("melosys.behandle_alle_saker") ? Behandlingstyper.FØRSTEGANG : Behandlingstyper.SED,
             behandlingstema, eessiMelding.getJournalpostId(), eessiMelding.getDokumentId(),
-            joarkFasade.hentMottaksDatoForJournalpost(eessiMelding.getJournalpostId()), Behandlingsaarsaktyper.SED);
+            joarkFasade.hentMottaksDatoForJournalpost(eessiMelding.getJournalpostId()),
+            Behandlingsaarsaktyper.SED, null);
 
         fagsak.getBehandlinger().add(behandling);
         fagsakService.lagre(fagsak);

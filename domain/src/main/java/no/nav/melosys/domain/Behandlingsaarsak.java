@@ -35,6 +35,12 @@ public class Behandlingsaarsak {
         this.mottaksdato = mottaksdato;
     }
 
+    public Behandlingsaarsak(@Nonnull Behandlingsaarsaktyper type, String fritekst, @Nonnull LocalDate mottaksdato) {
+        this.type = type;
+        this.fritekst = fritekst;
+        this.mottaksdato = mottaksdato;
+    }
+
     public Long getId() {
         return id;
     }
