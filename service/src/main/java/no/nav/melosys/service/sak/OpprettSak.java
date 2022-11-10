@@ -1,5 +1,7 @@
 package no.nav.melosys.service.sak;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Optional;
 
 import no.finn.unleash.Unleash;
@@ -8,9 +10,11 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
@@ -63,10 +67,12 @@ public class OpprettSak {
         validerJournalpost(journalpost);
 
         Sakstyper sakstype = opprettSakDto.getSakstype();
+        if (unleash.isEnabled("melosys.ny_opprett_sak")) {
+            opprettSakDto.setBehandlingsaarsakType(getBehandlingsaarsakType(journalpost, opprettSakDto));
+            opprettSakDto.setMottaksdato(LocalDate.ofInstant(journalpost.getForsendelseMottatt(), ZoneId.systemDefault()));
+        }
+
         if (sakstype == Sakstyper.EU_EOS) {
-            if (unleash.isEnabled("melosys.ny_opprett_sak")) {
-                // TODO
-            }
             prosessinstansService.opprettProsessinstansNySakEØS(
                 oppgave.getJournalpostId(),
                 opprettSakDto
@@ -79,6 +85,13 @@ public class OpprettSak {
         } else {
             throw new FunksjonellException("Sakstype %s støttes ikke".formatted(sakstype));
         }
+    }
+
+    private static Behandlingsaarsaktyper getBehandlingsaarsakType(Journalpost journalpost, OpprettSakDto opprettSakDto) {
+        Sakstemaer sakstema = opprettSakDto.getSakstema();
+        Behandlingstema behandlingstema = opprettSakDto.getBehandlingstema();
+        Behandlingstyper behandlingstype = opprettSakDto.getBehandlingstype();
+        return JournalfoeringService.utledÅrsaktype(journalpost, sakstema, behandlingstema, behandlingstype);
     }
 
     @Transactional

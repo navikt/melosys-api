@@ -1,5 +1,6 @@
 package no.nav.melosys.service.sak;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
@@ -307,6 +308,7 @@ class OpprettSakTest {
         final Journalpost journalpost = new Journalpost(JP_ID);
         journalpost.setJournalposttype(journalposttype);
         journalpost.setMottaksKanal(mottakskanal);
+        journalpost.setForsendelseMottatt(Instant.EPOCH);
         return journalpost;
     }
 

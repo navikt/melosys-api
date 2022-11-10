@@ -290,6 +290,8 @@ public class ProsessinstansService {
             prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakDto.getVirksomhetOrgnr());
             prosessinstans.setData(SAKSTEMA, opprettSakDto.getSakstema());
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+            prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakDto.getBehandlingsaarsakType());
+            prosessinstans.setData(MOTTATT_DATO, opprettSakDto.getMottaksdato());
         } else {
             prosessinstans.setData(SAKSTEMA,
                 SakstypeSakstemaKobling.sakstema(Sakstyper.EU_EOS, opprettSakDto.getBehandlingstema()));
@@ -323,6 +325,8 @@ public class ProsessinstansService {
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             prosessinstans.setData(ProsessDataKey.SAKSTEMA, opprettSakDto.getSakstema());
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+            prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakDto.getBehandlingsaarsakType());
+            prosessinstans.setData(MOTTATT_DATO, opprettSakDto.getMottaksdato());
         } else {
             prosessinstans.setData(ProsessDataKey.SAKSTEMA,
                 SakstypeSakstemaKobling.sakstema(Sakstyper.EU_EOS, opprettSakDto.getBehandlingstema()));
