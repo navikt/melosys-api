@@ -227,7 +227,8 @@ public class JournalfoeringService {
             prosessinstans.setData(ProsessDataKey.SAKSTEMA, sakstema);
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, utledÅrsaktype(journalpost.mottaksKanalErEessi(), sakstema, behandlingstema, behandlingstype));
-            prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.ofInstant(journalpost.getForsendelseMottatt(), ZoneId.systemDefault()));
+            prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, journalfoeringDto.getMottattDato() != null
+                ? journalfoeringDto.getMottattDato() : LocalDate.ofInstant(journalpost.getForsendelseMottatt(), ZoneId.systemDefault()));
         } else {
             prosessinstans.setData(ProsessDataKey.SAKSTEMA, SakstypeSakstemaKobling.sakstema(sakstype, behandlingstema));
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandling.erBehandlingAvSøknadGammel(
@@ -366,7 +367,8 @@ public class JournalfoeringService {
         if (behandleAlleSakerToggleEnabled) {
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, utledÅrsaktype(journalpost.mottaksKanalErEessi(), fagsak.getTema(), behandlingstema, behandlingstype));
-            prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.ofInstant(journalpost.getForsendelseMottatt(), ZoneId.systemDefault()));
+            prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, journalfoeringDto.getMottattDato() != null
+                ? journalfoeringDto.getMottattDato() : LocalDate.ofInstant(journalpost.getForsendelseMottatt(), ZoneId.systemDefault()));
         }
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
