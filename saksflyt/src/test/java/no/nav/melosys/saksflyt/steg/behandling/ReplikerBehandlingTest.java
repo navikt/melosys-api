@@ -131,6 +131,48 @@ class ReplikerBehandlingTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> replikerBehandling.utfør(prosessinstans))
-            .withMessageContaining("Finner ikke behandling som kan replikeres. Denne fantes ved opprettelse av prosesse");
+            .withMessageContaining("Finner ikke behandling som kan replikeres. Denne fantes ved opprettelse av prosessen");
+    }
+
+    @Test
+    void utførMedToggleNyOpprettSak_behandlingsårsakErIkkeSatt_kasterFeil() {
+        unleash.enable("melosys.behandle_alle_saker");
+        unleash.enable("melosys.ny_opprett_sak");
+
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        Behandling replikertBehandling = new Behandling();
+        replikertBehandling.setId(2L);
+        when(behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
+        when(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)).thenReturn(behandling);
+
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, null);
+
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> replikerBehandling.utfør(prosessinstans))
+            .withMessageContaining("Mangler mottaksdato eller behandlingsårsaktype");
+    }
+
+    @Test
+    void utførMedToggleNyOpprettSak_mottaksdatoErIkkeSatt_kasterFeil() {
+        unleash.enable("melosys.behandle_alle_saker");
+        unleash.enable("melosys.ny_opprett_sak");
+
+        Behandling behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        Behandling replikertBehandling = new Behandling();
+        replikertBehandling.setId(2L);
+        when(behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
+        when(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)).thenReturn(behandling);
+
+        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, null);
+
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> replikerBehandling.utfør(prosessinstans))
+            .withMessageContaining("Mangler mottaksdato eller behandlingsårsaktype");
     }
 }

@@ -1,10 +1,13 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsaarsak;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -13,12 +16,13 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.REPLIKER_BEHANDLING;
 
 
@@ -78,11 +82,26 @@ public class ReplikerBehandling implements StegBehandler {
             nyBehandling.setTema(behandlingstema);
         }
 
+        if (unleash.isEnabled("melosys.ny_opprett_sak")) settBehandlingsårsak(nyBehandling, prosessinstans);
+
         prosessinstans.setBehandling(nyBehandling);
 
         fagsakService.lagre(fagsak);
 
         log.info("Behandling {} replikert og behandling {} har blitt opprettet for {}",
             behandlingBruktForReplikering.get().getId(), nyBehandling.getId(), saksnummer);
+    }
+
+    private void settBehandlingsårsak(Behandling nyBehandling, Prosessinstans prosessinstans) {
+        var behandlingsårsaktype = prosessinstans.getData(BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.class);
+        var behandlingsårsakFritekst = prosessinstans.getData(BEHANDLINGSÅRSAK_FRITEKST);
+        LocalDate mottaksdato = prosessinstans.getData(MOTTATT_DATO, LocalDate.class);
+
+        if (behandlingsårsaktype == null || mottaksdato == null) {
+            throw new FunksjonellException("Mangler mottaksdato eller behandlingsårsaktype");
+        }
+
+        var behandlingsårsak = new Behandlingsaarsak(behandlingsårsaktype, behandlingsårsakFritekst, mottaksdato);
+        nyBehandling.setBehandlingsårsak(behandlingsårsak);
     }
 }
