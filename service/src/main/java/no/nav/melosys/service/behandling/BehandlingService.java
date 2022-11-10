@@ -104,7 +104,10 @@ public class BehandlingService {
         behandling.setStatus(behandlingsstatus);
         behandling.setType(behandlingstype);
         behandling.setTema(behandlingstema);
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+        if (unleash.isEnabled("melosys.ny_opprett_sak") && unleash.isEnabled("melosys.behandle_alle_saker")) {
+            if (årsaktype == null || mottaksdato == null) {
+                throw new FunksjonellException("Mangler mottaksdato eller behandlingsårsaktype");
+            }
             Behandlingsaarsak behandlingsårsak = new Behandlingsaarsak(årsaktype, årsakFritekst, mottaksdato);
             behandling.setBehandlingsårsak(behandlingsårsak);
         }

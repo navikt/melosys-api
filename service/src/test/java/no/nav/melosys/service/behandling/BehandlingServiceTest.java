@@ -401,9 +401,13 @@ class BehandlingServiceTest {
     void nyBehandling() {
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
+
+
         Behandling behandling = behandlingService.nyBehandling(
             new Fagsak(), Behandlingsstatus.OPPRETTET, SOEKNAD, Behandlingstema.UTSENDT_ARBEIDSTAKER,
             initierendeJournalpostId, initierendeDokumentId, null, null, null);
+
+
         verify(behandlingRepository).save(behandling);
         verify(behandlingsresultatService).lagreNyttBehandlingsresultat(behandling);
         assertThat(behandling.getType()).isEqualTo(SOEKNAD);
@@ -413,8 +417,22 @@ class BehandlingServiceTest {
     }
 
     @Test
+    void nyBehandling_nyOpprettSakTogglePaaOgManglerMottaksdatoOgÅrsak_kasterFeil() {
+        fakeUnleash.enable("melosys.behandle_alle_saker");
+        fakeUnleash.enable("melosys.ny_opprett_sak");
+        var fagsak = new Fagsak();
+
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> behandlingService.nyBehandling(
+                fagsak, Behandlingsstatus.OPPRETTET, SOEKNAD, Behandlingstema.UTSENDT_ARBEIDSTAKER,
+                null, null, null, null, null))
+            .withMessageContaining("Mangler mottaksdato eller behandlingsårsaktype");
+    }
+
+    @Test
     void nyBehandling_behandlingsfristKriterier_får8UkerBehandlingsfrist() {
-        fakeUnleash.enableAll();
+        fakeUnleash.enable("melosys.behandle_alle_saker");
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
         Fagsak fagsak = new Fagsak();
@@ -435,7 +453,7 @@ class BehandlingServiceTest {
 
     @Test
     void nyBehandling_behandlingsfristKriterier_får70DagerBehandlingsfrist() {
-        fakeUnleash.enableAll();
+        fakeUnleash.enable("melosys.behandle_alle_saker");
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
         Fagsak fagsak = new Fagsak();
@@ -456,7 +474,7 @@ class BehandlingServiceTest {
 
     @Test
     void nyBehandling_behandlingsfristKriterier_får90DagerBehandlingsfrist() {
-        fakeUnleash.enableAll();
+        fakeUnleash.enable("melosys.behandle_alle_saker");
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
         Fagsak fagsak = new Fagsak();
@@ -477,7 +495,7 @@ class BehandlingServiceTest {
 
     @Test
     void nyBehandling_behandlingsfristKriterier_får180DagerBehandlingsfrist() {
-        fakeUnleash.enableAll();
+        fakeUnleash.enable("melosys.behandle_alle_saker");
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
         Fagsak fagsak = new Fagsak();
