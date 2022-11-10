@@ -5,6 +5,7 @@ import io.mockk.MockKAdditionalAnswerScope
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
@@ -31,6 +32,8 @@ class SaksbehandlingReglerTest {
     @MockK
     lateinit var behandlingsresultatRepository: BehandlingsresultatRepository
 
+    private val unleash = FakeUnleash()
+
     @ParameterizedTest(name = "{0} - {1} - {2} - {3}")
     @MethodSource("tidligereBehandlingSkalIkkeReplikeresData")
     fun tidligereBehandlingSkalIkkeReplikeres(
@@ -44,7 +47,7 @@ class SaksbehandlingReglerTest {
 
 
         val result = behandlingReplikeringsRegler.skalTidligereBehandlingReplikeres(
-            behandlingHolder.lagFagsak(sakstype, sakstema), behandlingstype, behandlingstema
+            behandlingHolder.lagFagsak(sakstype, sakstema), behandlingstype, behandlingstema, unleash.isEnabled("faketoggle")
         )
 
 
@@ -155,7 +158,7 @@ class SaksbehandlingReglerTest {
 
 
         val result = behandlingReplikeringsRegler.skalTidligereBehandlingReplikeres(
-            behandlingHolder.lagFagsak(sakstype, sakstema), behandlingstype, behandlingstema
+            behandlingHolder.lagFagsak(sakstype, sakstema), behandlingstype, behandlingstema, unleash.isEnabled("fakeToggle")
         )
 
 

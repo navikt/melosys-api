@@ -89,7 +89,10 @@ class Kontroll {
     private FerdigbehandlingKontrollData hentKontrollDataForAvslagOgHenleggelse(Behandling behandling) {
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             MottatteOpplysningerData mottatteOpplysningerData = null;
-            if (!SaksbehandlingRegler.harTomFlyt(behandling)) {
+
+            boolean skalHenteMottatteOpplysningerForFTRL = unleash.isEnabled("melosys.folketrygden.mvp") && behandling.getFagsak().getType().equals(Sakstyper.FTRL);
+
+            if (!SaksbehandlingRegler.harTomFlyt(behandling) || skalHenteMottatteOpplysningerForFTRL) {
                 mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
             }
             Persondata persondata = hentPersondata(behandling);

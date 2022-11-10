@@ -352,7 +352,7 @@ public class JournalfoeringService {
         if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
             return ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING;
         }
-        if (saksbehandlingRegler.skalTidligereBehandlingReplikeres(fagsak, behandlingstype, behandlingstema)) {
+        if (saksbehandlingRegler.skalTidligereBehandlingReplikeres(fagsak, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"))) {
             return ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING;
         }
         return ProsessType.JFR_ANDREGANG_NY_BEHANDLING;

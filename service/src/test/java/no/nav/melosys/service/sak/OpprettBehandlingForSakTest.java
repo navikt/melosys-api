@@ -3,6 +3,7 @@ package no.nav.melosys.service.sak;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
@@ -44,6 +45,8 @@ class OpprettBehandlingForSakTest {
 
     private static final EasyRandom random = new EasyRandom(getRandomConfig());
 
+    private final FakeUnleash unleash = new FakeUnleash();
+
     private static EasyRandomParameters getRandomConfig() {
         return new EasyRandomParameters().collectionSizeRange(1, 4)
             .randomize(PeriodeDto.class, () -> new PeriodeDto(LocalDate.now(), LocalDate.now().plusDays(1)))
@@ -53,7 +56,7 @@ class OpprettBehandlingForSakTest {
     @BeforeEach
     public void setUp() {
         SaksbehandlingRegler saksbehandlingRegler = new SaksbehandlingRegler(behandlingsresultatRepository);
-        opprettBehandlingForSak = new OpprettBehandlingForSak(fagsakService, prosessinstansService, saksbehandlingRegler);
+        opprettBehandlingForSak = new OpprettBehandlingForSak(fagsakService, prosessinstansService, saksbehandlingRegler, unleash);
     }
 
     @Test
