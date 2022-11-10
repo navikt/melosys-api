@@ -51,11 +51,22 @@ public class OpprettSak {
 
     @Transactional
     public void opprettNySakOgBehandlingFraOppgave(OpprettSakDto opprettSakDto) {
+        if (StringUtils.isEmpty(opprettSakDto.getOppgaveID())) {
+            throw new FunksjonellException("OppgaveID mangler.");
+        }
         validerOpprettSakDto(opprettSakDto);
-        final Oppgave oppgave = validerOppgave(opprettSakDto.getOppgaveID());
-        validerJournalpost(journalfoeringService.hentJournalpost(oppgave.getJournalpostId()));
+
+        final Oppgave oppgave = oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID());
+        validerOppgave(oppgave);
+
+        Journalpost journalpost = journalfoeringService.hentJournalpost(oppgave.getJournalpostId());
+        validerJournalpost(journalpost);
+
         Sakstyper sakstype = opprettSakDto.getSakstype();
         if (sakstype == Sakstyper.EU_EOS) {
+            if (unleash.isEnabled("melosys.ny_opprett_sak")) {
+                // TODO
+            }
             prosessinstansService.opprettProsessinstansNySakEØS(
                 oppgave.getJournalpostId(),
                 opprettSakDto
@@ -141,12 +152,7 @@ public class OpprettSak {
         }
     }
 
-    private Oppgave validerOppgave(String oppgaveID) {
-        if (StringUtils.isEmpty(oppgaveID)) {
-            throw new FunksjonellException("OppgaveID mangler.");
-        }
-        final Oppgave oppgave = oppgaveService.hentOppgaveMedOppgaveID(oppgaveID);
-
+    private void validerOppgave(Oppgave oppgave) {
         if (unleash.isEnabled("melosys.ny_opprett_sak")) {
             if (!nySakKanOpprettesFraOppgavetype(oppgave.getOppgavetype())) {
                 throw new FunksjonellException("Ny sak kan ikke opprettes på bakgrunn av oppgave med type: " + oppgave.getOppgavetype().getBeskrivelse());
@@ -158,9 +164,8 @@ public class OpprettSak {
         }
 
         if (StringUtils.isEmpty(oppgave.getJournalpostId())) {
-            throw new FunksjonellException("Ny sak kan ikke opprettes fordi oppgave " + oppgaveID + " mangler journalpost.");
+            throw new FunksjonellException("Ny sak kan ikke opprettes fordi oppgave " + oppgave.getOppgaveId() + " mangler journalpost.");
         }
-        return oppgave;
     }
 
     private static boolean nySakKanOpprettesFraOppgavetype_gammel(Oppgavetyper oppgavetype) {
