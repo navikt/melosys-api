@@ -9,6 +9,7 @@ import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
@@ -74,6 +75,10 @@ public class OpprettSak {
         if (opprettSakDto.getMottaksdato() == null) {
             throw new FunksjonellException("Mottaksdato er påkrevd for å opprette sak uten oppgave/journalpost");
         }
+        if (StringUtils.isNotEmpty(opprettSakDto.getBehandlingsaarsakFritekst()) && opprettSakDto.getBehandlingsaarsakType() != Behandlingsaarsaktyper.FRITEKST) {
+            throw new FunksjonellException("Kan ikke lagre fritekst som årsak når årsakstype er " + opprettSakDto.getBehandlingsaarsakType());
+        }
+
         validerOpprettSakDto(opprettSakDto);
         prosessinstansService.opprettNySakOgBehandling(opprettSakDto);
     }

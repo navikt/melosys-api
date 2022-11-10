@@ -13,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
@@ -32,6 +33,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.jeasy.random.FieldPredicates.named;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -55,6 +57,7 @@ class OpprettSakTest {
     private static EasyRandomParameters getRandomConfig() {
         return new EasyRandomParameters().collectionSizeRange(1, 4)
             .randomize(PeriodeDto.class, () -> new PeriodeDto(LocalDate.now(), LocalDate.now().plusDays(1)))
+            .excludeField(named("behandlingsaarsakFritekst"))
             .stringLengthRange(2, 4);
     }
 
@@ -144,6 +147,18 @@ class OpprettSakTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettSak.opprettNySakOgBehandling(opprettSakDto))
             .withMessageContaining("Mottaksdato");
+    }
+
+    @Test
+    void lagNySak_årsakFritekstMedFeilType_feiler() {
+        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
+        opprettSakDto.setBehandlingsaarsakFritekst("Fritekst");
+        opprettSakDto.setBehandlingsaarsakType(Behandlingsaarsaktyper.SØKNAD);
+
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> opprettSak.opprettNySakOgBehandling(opprettSakDto))
+            .withMessageContaining("Kan ikke lagre fritekst som årsak når årsakstype");
     }
 
     @Test
