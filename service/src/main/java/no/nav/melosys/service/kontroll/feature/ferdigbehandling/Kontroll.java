@@ -71,10 +71,8 @@ class Kontroll {
     private Collection<Kontrollfeil> utførKontroller(Behandling behandling, Sakstyper sakstype) {
         var regelsettForVedtak = FerdigbehandlingKontrollsett.hentRegelsettForVedtak(sakstype);
 
-        var folketrygdenToggleEnabled = unleash.isEnabled("melosys.folketrygden.mvp");
-
         FerdigbehandlingKontrollData ferdigbehandlingKontrollData;
-        if (sakstype.equals(Sakstyper.FTRL) && folketrygdenToggleEnabled) {
+        if (sakstype.equals(Sakstyper.FTRL) && unleash.isEnabled("melosys.folketrygden.mvp")) {
             ferdigbehandlingKontrollData = hentVedtakKontrollDataFTRL(behandling);
         } else {
             ferdigbehandlingKontrollData = hentVedtakKontrollData(behandling);
