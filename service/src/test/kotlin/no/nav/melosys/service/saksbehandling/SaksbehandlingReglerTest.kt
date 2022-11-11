@@ -32,6 +32,8 @@ class SaksbehandlingReglerTest {
     @MockK
     lateinit var behandlingsresultatRepository: BehandlingsresultatRepository
 
+    private val unleash = FakeUnleash();
+
     @ParameterizedTest(name = "{0} - {1} - {2} - {3}")
     @MethodSource("tidligereBehandlingSkalIkkeReplikeresData")
     fun tidligereBehandlingSkalIkkeReplikeres(
@@ -45,7 +47,7 @@ class SaksbehandlingReglerTest {
 
 
         val result = behandlingReplikeringsRegler.skalTidligereBehandlingReplikeres(
-            behandlingHolder.lagFagsak(sakstype, sakstema), behandlingstype, behandlingstema, true
+            behandlingHolder.lagFagsak(sakstype, sakstema), behandlingstype, behandlingstema
         )
 
 
@@ -165,7 +167,7 @@ class SaksbehandlingReglerTest {
 
 
         val result = behandlingReplikeringsRegler.skalTidligereBehandlingReplikeres(
-            behandlingHolder.lagFagsak(sakstype, sakstema), behandlingstype, behandlingstema, true
+            behandlingHolder.lagFagsak(sakstype, sakstema), behandlingstype, behandlingstema
         )
 
 
@@ -227,8 +229,7 @@ class SaksbehandlingReglerTest {
         expectedBehandlingID: Long?
     ) {
         every { behandlingsresultatRepository.findById(any()) } returns lagBehandlingsresultat(resultatTypeFraRepo)
-        val saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository)
-
+        val saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository, unleash)
 
         val behandling = saksbehandlingRegler.finnBehandlingSomKanReplikeres(behandlinger)
 
@@ -361,6 +362,7 @@ class SaksbehandlingReglerTest {
 
     class BehandlingHolder {
         private val behandlingerMedType: ArrayList<Pair<Behandling, Behandlingsresultattyper?>> = ArrayList()
+        private val unleash = FakeUnleash();
 
         fun setup(behandlingsresultatRepository: BehandlingsresultatRepository): SaksbehandlingRegler {
             setupMock { id: Long, behandlingsresultattype: Behandlingsresultattyper? ->
@@ -368,7 +370,7 @@ class SaksbehandlingReglerTest {
                     behandlingsresultattype
                 )
             }
-            return SaksbehandlingRegler(behandlingsresultatRepository)
+            return SaksbehandlingRegler(behandlingsresultatRepository, unleash)
         }
 
         fun add(

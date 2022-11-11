@@ -55,7 +55,7 @@ class OpprettBehandlingForSakTest {
 
     @BeforeEach
     public void setUp() {
-        SaksbehandlingRegler saksbehandlingRegler = new SaksbehandlingRegler(behandlingsresultatRepository);
+        SaksbehandlingRegler saksbehandlingRegler = new SaksbehandlingRegler(behandlingsresultatRepository, unleash);
         opprettBehandlingForSak = new OpprettBehandlingForSak(fagsakService, prosessinstansService, saksbehandlingRegler, unleash);
     }
 

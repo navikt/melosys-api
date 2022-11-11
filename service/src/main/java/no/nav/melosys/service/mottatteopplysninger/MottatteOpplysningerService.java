@@ -99,7 +99,7 @@ public class MottatteOpplysningerService {
 
         boolean skalOppretteSoknadForFolketrygdloven = unleash.isEnabled("melosys.folketrygden.mvp") && behandling.getFagsak().erSakstypeFTRL();
 
-        if ((behandleAlleSakerEnabled ? (!SaksbehandlingRegler.harTomFlyt(behandling) || skalOppretteSoknadForFolketrygdloven) : behandling.erBehandlingAvSøknadGammel())) {
+        if ((behandleAlleSakerEnabled ? (!SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp")) || skalOppretteSoknadForFolketrygdloven) : behandling.erBehandlingAvSøknadGammel())) {
             Sakstyper sakstype = behandling.getFagsak().getType();
             switch (sakstype) {
                 case EU_EOS -> opprettSøknadYrkesaktiveEøs(behandlingID, periode, soeknadsland);

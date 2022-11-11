@@ -90,9 +90,7 @@ class Kontroll {
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             MottatteOpplysningerData mottatteOpplysningerData = null;
 
-            boolean skalHenteMottatteOpplysningerForFTRL = unleash.isEnabled("melosys.folketrygden.mvp") && behandling.getFagsak().erSakstypeFTRL();
-
-            if (!SaksbehandlingRegler.harTomFlyt(behandling) || skalHenteMottatteOpplysningerForFTRL) {
+            if (!SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"))) {
                 mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
             }
             Persondata persondata = hentPersondata(behandling);

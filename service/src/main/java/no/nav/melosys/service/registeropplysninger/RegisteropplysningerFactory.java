@@ -19,11 +19,8 @@ public final class RegisteropplysningerFactory {
         Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype,
         boolean behandleAlleSakerToggleEnabled, boolean folketrygdenToggleEnabled) {
 
-        boolean skalSetteSaksopplysningerFolketrygdloven = folketrygdenToggleEnabled && sakstype.equals(Sakstyper.FTRL);
-
         if (behandleAlleSakerToggleEnabled
-            && SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema)
-            && !skalSetteSaksopplysningerFolketrygdloven) {
+            && SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, folketrygdenToggleEnabled)) {
                 return ingenSaksopplysningTyper();
         }
 

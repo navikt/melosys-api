@@ -30,7 +30,7 @@ public class OpprettBehandlingForSak {
 
         valider(fagsak, opprettSakDto);
 
-        if (saksbehandlingRegler.skalTidligereBehandlingReplikeres(fagsak, opprettSakDto.getBehandlingstype(), opprettSakDto.getBehandlingstema(), unleash.isEnabled("melosys.folketrygden.mvp"))) {
+        if (saksbehandlingRegler.skalTidligereBehandlingReplikeres(fagsak, opprettSakDto.getBehandlingstype(), opprettSakDto.getBehandlingstema())) {
             prosessinstansService.opprettOgReplikerBehandlingForSak(saksnummer, opprettSakDto);
         } else {
             prosessinstansService.opprettNyBehandlingForSak(saksnummer, opprettSakDto);

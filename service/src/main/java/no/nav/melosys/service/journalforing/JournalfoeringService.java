@@ -230,7 +230,7 @@ public class JournalfoeringService {
 
         if (behandleAlleSakerToggleEnabled
             ? erSakstypeEøs(sakstype) && !SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype,
-            behandlingstema)
+            behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"))
             : erSakstypeEøs(sakstype) && Behandling.erBehandlingAvSøknadGammel(behandlingstema)
         ) {
             validerSøknadFelter(journalfoeringDto);
@@ -352,7 +352,7 @@ public class JournalfoeringService {
         if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
             return ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING;
         }
-        if (saksbehandlingRegler.skalTidligereBehandlingReplikeres(fagsak, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"))) {
+        if (saksbehandlingRegler.skalTidligereBehandlingReplikeres(fagsak, behandlingstype, behandlingstema)) {
             return ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING;
         }
         return ProsessType.JFR_ANDREGANG_NY_BEHANDLING;
