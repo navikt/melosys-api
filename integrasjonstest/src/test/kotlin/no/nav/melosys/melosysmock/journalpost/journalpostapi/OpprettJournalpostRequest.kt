@@ -84,7 +84,7 @@ data class Dokument(
 )
 
 data class DokumentOppdatering(
-    val dokumentInfoId: String,
+    val dokumentInfoId: String? = null,
     val tittel: String? = null,
     val brevkode: String? = null
 )
