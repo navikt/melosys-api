@@ -20,7 +20,6 @@ public class FeatureToggleConfig {
         if (!Collections.disjoint(List.of(environment.getActiveProfiles()), List.of("local", "local-mock", "test"))) {
             var fakeUnleash = new FakeUnleash();
             fakeUnleash.enableAll();
-            fakeUnleash.disable("melosys.folketrygden.mvp");
             return fakeUnleash;
         } else {
             var unleashConfig = UnleashConfig.builder()
