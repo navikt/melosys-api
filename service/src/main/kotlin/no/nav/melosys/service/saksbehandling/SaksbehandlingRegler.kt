@@ -23,6 +23,7 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
 
         if (harTomFlyt(fagsak.type, fagsak.tema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"))) return false
 
+        var test = finnBehandlingSomKanReplikeres(fagsak);
         return finnBehandlingSomKanReplikeres(fagsak) != null
     }
 

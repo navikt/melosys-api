@@ -215,7 +215,7 @@ class SaksbehandlingReglerTest {
                 add(
                     Behandlingstyper.NY_VURDERING,
                     Behandlingstema.YRKESAKTIV,
-                    Behandlingsresultattyper.HENLEGGELSE
+                    Behandlingsresultattyper.AVVIST_KLAGE
                 )
             }
         ),
@@ -365,6 +365,7 @@ class SaksbehandlingReglerTest {
         private val unleash = FakeUnleash();
 
         fun setup(behandlingsresultatRepository: BehandlingsresultatRepository): SaksbehandlingRegler {
+            unleash.enableAll()
             setupMock { id: Long, behandlingsresultattype: Behandlingsresultattyper? ->
                 every { behandlingsresultatRepository.findById(id) } returns lagBehandlingsresultat(
                     behandlingsresultattype
