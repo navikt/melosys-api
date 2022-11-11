@@ -100,6 +100,9 @@ public class OpprettSak {
         if (opprettSakDto.getMottaksdato() == null) {
             throw new FunksjonellException("Mottaksdato er påkrevd for å opprette sak uten oppgave/journalpost");
         }
+        if (opprettSakDto.getBehandlingsaarsakType() == null) {
+            throw new FunksjonellException("Årsak er påkrevd for å opprette behandling");
+        }
         if (StringUtils.isNotEmpty(opprettSakDto.getBehandlingsaarsakFritekst()) && opprettSakDto.getBehandlingsaarsakType() != Behandlingsaarsaktyper.FRITEKST) {
             throw new FunksjonellException("Kan ikke lagre fritekst som årsak når årsakstype er " + opprettSakDto.getBehandlingsaarsakType());
         }
