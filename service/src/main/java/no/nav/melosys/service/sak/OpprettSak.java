@@ -18,6 +18,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
+import no.nav.melosys.service.journalforing.UtledBehandlingsaarsak;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -91,7 +92,7 @@ public class OpprettSak {
         Sakstemaer sakstema = opprettSakDto.getSakstema();
         Behandlingstema behandlingstema = opprettSakDto.getBehandlingstema();
         Behandlingstyper behandlingstype = opprettSakDto.getBehandlingstype();
-        return JournalfoeringService.utledÅrsaktype(journalpost, sakstema, behandlingstema, behandlingstype);
+        return UtledBehandlingsaarsak.utledÅrsaktype(journalpost, sakstema, behandlingstema, behandlingstype);
     }
 
     @Transactional

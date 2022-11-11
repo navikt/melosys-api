@@ -12,7 +12,6 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -41,9 +40,8 @@ import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknadGammel;
 import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
-import static no.nav.melosys.domain.kodeverk.Sakstemaer.TRYGDEAVGIFT;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
+import static no.nav.melosys.service.journalforing.UtledBehandlingsaarsak.*;
 import static no.nav.melosys.service.sak.SakstypeBehandlingstemaKobling.erGyldigBehandlingstemaForSakstype;
 
 @Service
@@ -264,24 +262,6 @@ public class JournalfoeringService {
 
         prosessinstansService.lagre(prosessinstans);
         log.info("Ny sak bestilt etter journalføring av journalpost {}", journalfoeringDto.getJournalpostID());
-    }
-
-    public static Behandlingsaarsaktyper utledÅrsaktype(Journalpost journalpost, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
-        if (journalpost.mottaksKanalErEessi()) {
-            return Behandlingsaarsaktyper.SED;
-        }
-        if (erSøknad(sakstema, behandlingstema, behandlingstype)) {
-            return Behandlingsaarsaktyper.SØKNAD;
-        }
-        if (behandlingstype == HENVENDELSE) {
-            return Behandlingsaarsaktyper.HENVENDELSE;
-        }
-        return Behandlingsaarsaktyper.ANNET;
-    }
-
-    private static boolean erSøknad(Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
-        return (sakstema == MEDLEMSKAP_LOVVALG || sakstema == TRYGDEAVGIFT) && (behandlingstema != BESLUTNING_LOVVALG_ANNET_LAND)
-            && (behandlingstype == FØRSTEGANG || behandlingstype == NY_VURDERING || behandlingstype == ENDRET_PERIODE);
     }
 
     @Transactional
