@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.sak;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -9,11 +10,11 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
@@ -24,6 +25,7 @@ import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.*;
+import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeLesDto;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.apache.commons.lang3.StringUtils;
@@ -252,6 +254,8 @@ public class FagsakTjeneste {
             behandlingOversiktDto.setOpprettetDato(behandling.getRegistrertDato());
             behandlingOversiktDto.setBehandlingsresultattype(behandlingsresultat.getType());
             behandlingOversiktDto.setSvarFrist(behandling.getDokumentasjonSvarfristDato());
+            behandlingOversiktDto.setAnmodningsperioder(behandlingsresultat.getAnmodningsperioder()
+                .stream().map(AnmodningsperiodeLesDto::av).collect(Collectors.toSet()));
 
             setPeriodeOpplysninger(behandling, behandlingOversiktDto);
         }
