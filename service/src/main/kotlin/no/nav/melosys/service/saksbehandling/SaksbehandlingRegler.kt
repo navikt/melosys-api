@@ -18,9 +18,9 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
         fagsak: Fagsak,
         behandlingstype: Behandlingstyper,
         behandlingstema: Behandlingstema,
-        folketrygdenToggle: Boolean
+        folketrygdenToggleEnabled: Boolean
     ): Boolean {
-        if (folketrygdenToggle) {
+        if (folketrygdenToggleEnabled) {
             if (harTomFlyt(fagsak.type, fagsak.tema, behandlingstype, behandlingstema) && !fagsak.type.equals(Sakstyper.FTRL)) return false
         } else {
             if (harTomFlyt(fagsak.type, fagsak.tema, behandlingstype, behandlingstema)) return false

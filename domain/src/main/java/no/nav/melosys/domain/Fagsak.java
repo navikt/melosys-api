@@ -252,6 +252,10 @@ public class Fagsak extends RegistreringsInfo {
         return Sakstyper.EU_EOS == sakstype;
     }
 
+    public boolean erSakstypeFTRL() {
+        return type.equals(Sakstyper.FTRL);
+    }
+
     public Aktoersroller getHovedpartRolle() {
         if (harAktørMedRolleType(BRUKER)) {
             return BRUKER;

@@ -32,8 +32,6 @@ class SaksbehandlingReglerTest {
     @MockK
     lateinit var behandlingsresultatRepository: BehandlingsresultatRepository
 
-    private val unleash = FakeUnleash()
-
     @ParameterizedTest(name = "{0} - {1} - {2} - {3}")
     @MethodSource("tidligereBehandlingSkalIkkeReplikeresData")
     fun tidligereBehandlingSkalIkkeReplikeres(
@@ -47,7 +45,7 @@ class SaksbehandlingReglerTest {
 
 
         val result = behandlingReplikeringsRegler.skalTidligereBehandlingReplikeres(
-            behandlingHolder.lagFagsak(sakstype, sakstema), behandlingstype, behandlingstema, unleash.isEnabled("faketoggle")
+            behandlingHolder.lagFagsak(sakstype, sakstema), behandlingstype, behandlingstema, true
         )
 
 
@@ -143,6 +141,15 @@ class SaksbehandlingReglerTest {
                 )
             }
         ),
+        arguments(
+            Sakstyper.FTRL,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstyper.FØRSTEGANG,
+            Behandlingstema.YRKESAKTIV,
+            BehandlingHolder().apply {
+                add(Behandlingstyper.FØRSTEGANG, Behandlingstema.YRKESAKTIV)
+            }
+        ),
     )
 
     @ParameterizedTest(name = "{0} - {1} - {2} - {3}")
@@ -158,7 +165,7 @@ class SaksbehandlingReglerTest {
 
 
         val result = behandlingReplikeringsRegler.skalTidligereBehandlingReplikeres(
-            behandlingHolder.lagFagsak(sakstype, sakstema), behandlingstype, behandlingstema, unleash.isEnabled("fakeToggle")
+            behandlingHolder.lagFagsak(sakstype, sakstema), behandlingstype, behandlingstema, true
         )
 
 
@@ -194,6 +201,19 @@ class SaksbehandlingReglerTest {
                     Behandlingstyper.NY_VURDERING,
                     Behandlingstema.UTSENDT_ARBEIDSTAKER,
                     Behandlingsresultattyper.AVVIST_KLAGE
+                )
+            }
+        ),
+        arguments(
+            Sakstyper.FTRL,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstema.YRKESAKTIV,
+            BehandlingHolder().apply {
+                add(
+                    Behandlingstyper.NY_VURDERING,
+                    Behandlingstema.YRKESAKTIV,
+                    Behandlingsresultattyper.HENLEGGELSE
                 )
             }
         ),

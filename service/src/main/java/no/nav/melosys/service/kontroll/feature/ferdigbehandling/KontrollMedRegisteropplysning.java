@@ -16,8 +16,6 @@ import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 @Component
 class KontrollMedRegisteropplysning {
@@ -57,11 +55,11 @@ class KontrollMedRegisteropplysning {
     }
 
     private void hentNyeRegisteropplysninger(Behandlingsresultat behandlingsresultat, Behandling behandling) {
-        var folketrygdenToggle = unleash.isEnabled("melosys.melosys.folketrygden.mvp");
+        var folketrygdenToggleEnabled = unleash.isEnabled("melosys.melosys.folketrygden.mvp");
 
         LocalDate fraOgMed;
         LocalDate tilOgMed;
-        if (behandling.getFagsak().getType().equals(Sakstyper.FTRL) && folketrygdenToggle) {
+        if (behandling.getFagsak().erSakstypeFTRL() && folketrygdenToggleEnabled) {
             Medlemskapsperiode medlemskapsperiode = behandlingsresultat.hentValidertMedlemskapsPeriode();
             fraOgMed = medlemskapsperiode.getFom();
             tilOgMed = medlemskapsperiode.getTom();
