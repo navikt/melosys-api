@@ -30,11 +30,6 @@ public class Behandlingsaarsak {
         // JPA
     }
 
-    public Behandlingsaarsak(@Nonnull Behandlingsaarsaktyper type, @Nonnull LocalDate mottaksdato) {
-        this.type = type;
-        this.mottaksdato = mottaksdato;
-    }
-
     public Behandlingsaarsak(@Nonnull Behandlingsaarsaktyper type, String fritekst, @Nonnull LocalDate mottaksdato) {
         this.type = type;
         this.fritekst = fritekst;
