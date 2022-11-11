@@ -362,6 +362,26 @@ class JournalfoeringServiceTest {
     }
 
     @Test
+    void journalførOgOpprettSak_avsenderId_mangler() {
+        opprettDto.setAvsenderID(null);
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
+            .withMessageContaining("AvsenderID er påkrevd når AvsenderType er satt");
+    }
+
+    @Test
+    void journalførOgOpprettSak_avsenderType_mangler() {
+        opprettDto.setAvsenderType(null);
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
+            .withMessageContaining("AvsenderType er påkrevd når AvsenderID er satt");
+    }
+
+    @Test
     void journalførOgOpprettSak_støtterAutomatiskBehandling_forventException() {
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setRinaSaksnummer(RINA_SAKSNUMMER);

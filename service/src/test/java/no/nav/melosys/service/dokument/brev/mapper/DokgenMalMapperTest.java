@@ -408,7 +408,7 @@ class DokgenMalMapperTest {
         Behandling behandling = lagBehandling(lagFagsak(true));
 
         DokgenBrevbestilling brevbestilling = new InnvilgelseBrevbestilling.Builder()
-            .medProduserbartdokument(STORBRITANNIA)
+            .medProduserbartdokument(TRYGDEAVTALE_GB)
             .medBehandling(behandling)
             .medOrg(lagOrg(Landkoder.GB))
             .medKontaktopplysning(lagKontaktOpplysning())

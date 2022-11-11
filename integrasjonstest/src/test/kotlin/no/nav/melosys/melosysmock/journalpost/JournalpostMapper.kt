@@ -77,7 +77,7 @@ class JournalpostMapper {
             oppdatertModell.avsenderMottaker.id = it.id
             oppdatertModell.avsenderMottaker.land = it.land
             oppdatertModell.avsenderMottaker.navn = it.navn
-            oppdatertModell.avsenderMottaker.type = IdType.valueOf(it.idType!!.name)
+            oppdatertModell.avsenderMottaker.type = if (it.id != null) IdType.valueOf(it.idType!!.name) else null
         }
 
         oppdatering.bruker?.let {

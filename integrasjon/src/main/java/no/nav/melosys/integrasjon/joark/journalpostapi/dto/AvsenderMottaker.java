@@ -79,6 +79,8 @@ public class AvsenderMottaker {
     }
 
     public static AvsenderMottaker.IdType tilAvsenderMottakerIdType(Avsendertyper avsendertype) {
+        if (avsendertype == null) return null;
+        
         switch (avsendertype) {
             case PERSON:
                 return AvsenderMottaker.IdType.FNR;
