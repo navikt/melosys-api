@@ -15,7 +15,7 @@ CREATE TABLE BEHANDLINGSAARSAK
 (
     behandling_id   NUMBER(19)   NOT NULL PRIMARY KEY,
     aarsak_type     VARCHAR2(20) NOT NULL,
-    aarsak_fritekst VARCHAR2(25) NULL,
+    aarsak_fritekst VARCHAR2(50) NULL,
     mottak_dato     DATE NOT NULL,
     CONSTRAINT fk_behandlingsaarsak_behandling FOREIGN KEY (behandling_id) REFERENCES BEHANDLING (ID),
     CONSTRAINT fk_behandlingsaarsak_type FOREIGN KEY (aarsak_type) REFERENCES BEHANDLINGSAARSAK_TYPE (kode)
