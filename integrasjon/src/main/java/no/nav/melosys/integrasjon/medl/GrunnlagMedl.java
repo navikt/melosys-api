@@ -33,7 +33,12 @@ public enum GrunnlagMedl {
     Storbrit_NIrland_7_1("Storbrit_NIrland_7_1"),
     Storbrit_NIrland_7_3("Storbrit_NIrland_7_3"),
     Storbrit_NIrland_8_2("Storbrit_NIrland_8_2"),
-    Storbrit_NIrland_9("Storbrit_NIrland_9");
+    Storbrit_NIrland_9("Storbrit_NIrland_9"),
+    USA_ART5_2("USA_5_2"),
+    USA_ART5_4("USA_5_4"),
+    USA_ART5_5("USA_5_5"),
+    USA_ART5_6("USA_5_6"),
+    USA_ART5_9("USA_5_9");
 
     private final String kode;
 
