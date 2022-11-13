@@ -10,10 +10,7 @@ import no.nav.melosys.domain.PeriodeOmLovvalg;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.*;
 import no.nav.melosys.exception.TekniskException;
 
 import static java.util.Optional.ofNullable;
@@ -63,7 +60,12 @@ public final class MedlPeriodeKonverter {
         tbl.put(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_5, GrunnlagMedl.Storbrit_NIrland_6_5);
         tbl.put(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART7_3, GrunnlagMedl.Storbrit_NIrland_7_3);
         tbl.put(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2, GrunnlagMedl.Storbrit_NIrland_8_2);
-        tbl.put(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART9, GrunnlagMedl.Storbrit_NIrland_9);
+
+        tbl.put(Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_2, GrunnlagMedl.USA_ART5_2);
+        tbl.put(Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_4, GrunnlagMedl.USA_ART5_4);
+        tbl.put(Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_5, GrunnlagMedl.USA_ART5_5);
+        tbl.put(Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_6, GrunnlagMedl.USA_ART5_6);
+        tbl.put(Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_9, GrunnlagMedl.USA_ART5_9);
         lovvalgsbestemmelseTilGrunnlagMedlTabell = tbl;
 
 

@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_OG_JOURNALFØR_BREV;
 import static org.springframework.util.ObjectUtils.isEmpty;
@@ -192,7 +193,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
         return fritekstvedleggBestilling.stream().map(vedlegg -> {
             var vedleggBestilling = new FritekstvedleggBrevbestilling.Builder()
                 .medBehandlingId(fritekstbrevBrevbestilling.getBehandlingId())
-                .medProduserbartdokument(Produserbaredokumenter.GENERELT_FRITEKSTVEDLEGG)
+                .medProduserbartdokument(GENERELT_FRITEKSTVEDLEGG)
                 .medFritekstvedleggTittel(vedlegg.tittel())
                 .medFritekstvedleggTekst(vedlegg.fritekst())
                 .build();
@@ -223,7 +224,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
             }
             return fritekstTittel;
         }
-        if (brevbestilling.getProduserbartdokument() == Produserbaredokumenter.TRYGDEAVTALE_GB) {
+        if (List.of(TRYGDEAVTALE_GB, TRYGDEAVTALE_US).contains(brevbestilling.getProduserbartdokument())) {
             return dokumentNavnService.utledDokumentNavn(behandling, dokumentproduksjonsInfo, mottaker);
         }
         return dokumentproduksjonsInfo.journalføringsTittel();
