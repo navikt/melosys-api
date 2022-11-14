@@ -1,8 +1,6 @@
 package no.nav.melosys.melosysmock.journalpost
 
 import no.nav.melosys.melosysmock.journalpost.intern_modell.*
-import no.nav.melosys.melosysmock.journalpost.intern_modell.AvsenderMottaker
-import no.nav.melosys.melosysmock.journalpost.intern_modell.IdType
 import no.nav.melosys.melosysmock.journalpost.journalpostapi.Dokument
 import no.nav.melosys.melosysmock.journalpost.journalpostapi.DokumentVariant
 import no.nav.melosys.melosysmock.journalpost.journalpostapi.OppdaterJournalpostRequest
@@ -73,7 +71,7 @@ class JournalpostMapper {
             oppdatertModell.avsenderMottaker.id = it.id
             oppdatertModell.avsenderMottaker.land = it.land
             oppdatertModell.avsenderMottaker.navn = it.navn
-            oppdatertModell.avsenderMottaker.type = IdType.valueOf(it.idType!!.name)
+            oppdatertModell.avsenderMottaker.type = if (it.id != null) IdType.valueOf(it.idType!!.name) else null
         }
 
         oppdatering.bruker?.let {

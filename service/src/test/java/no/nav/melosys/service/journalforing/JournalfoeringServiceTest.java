@@ -2,6 +2,7 @@ package no.nav.melosys.service.journalforing;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -97,6 +98,7 @@ class JournalfoeringServiceTest {
         unleash.enable("melosys.folketrygden.mvp");
         journalpost = new Journalpost("123");
         journalpost.setHoveddokument(new ArkivDokument());
+        journalpost.setForsendelseMottatt(Instant.EPOCH);
 
         this.journalfoeringService = new JournalfoeringService(joarkFasade, prosessinstansService, eessiService, fagsakService, persondataFasade, lovligeKombinasjonerService, unleash, saksbehandlingRegler);
         opprettDto = new JournalfoeringOpprettDto();
@@ -268,6 +270,8 @@ class JournalfoeringServiceTest {
         var lagretProsessinstans = prosessinstansArgumentCaptor.getValue();
         assertThat(lagretProsessinstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class).getKode()).isEqualTo(fagsakDto.getSakstema());
         assertThat(lagretProsessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class).getKode()).isEqualTo(opprettDto.getBehandlingstypeKode());
+        assertThat(lagretProsessinstans.getData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingstyper.class)).isNotNull();
+        assertThat(lagretProsessinstans.getData(ProsessDataKey.MOTTATT_DATO, LocalDate.class)).isEqualTo(LocalDate.ofInstant(journalpost.getForsendelseMottatt(), ZoneId.systemDefault()));
     }
 
     @Test
@@ -359,6 +363,26 @@ class JournalfoeringServiceTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
             .withMessageContaining("OppgaveID mangler");
+    }
+
+    @Test
+    void journalførOgOpprettSak_avsenderId_mangler() {
+        opprettDto.setAvsenderID(null);
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
+            .withMessageContaining("AvsenderID er påkrevd når AvsenderType er satt");
+    }
+
+    @Test
+    void journalførOgOpprettSak_avsenderType_mangler() {
+        opprettDto.setAvsenderType(null);
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
+            .withMessageContaining("AvsenderType er påkrevd når AvsenderID er satt");
     }
 
     @Test

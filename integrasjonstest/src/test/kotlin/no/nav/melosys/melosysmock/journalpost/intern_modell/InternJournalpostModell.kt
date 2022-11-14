@@ -1,6 +1,5 @@
 package no.nav.melosys.melosysmock.journalpost.intern_modell
 
-import java.lang.IllegalStateException
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -32,8 +31,8 @@ data class JournalpostModell(
         if (tittel == null) {
             throw IllegalStateException("Tittel er på krevd")
         }
-        if (avsenderMottaker.id == null || avsenderMottaker.type == null){
-            throw IllegalStateException("Avsendermottaker er påkrevd")
+        if (avsenderMottaker.id != null && avsenderMottaker.type == null) {
+            throw IllegalStateException("Avsendermottaker type er påkrevd dersom id er satt")
         }
         if (journalposttype == Journalposttype.INNGAAENDE && kanal == null) {
             throw IllegalStateException("Mottakskanal er påkrevd")

@@ -724,33 +724,33 @@ class BrevbestillingServiceTest {
     @Test
     void hentMuligeMottakere_hovedMottakerBruker_storbritanniaArtikkelUlik82() {
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
-        when(mockBrevmottakerService.hentMottakerliste(STORBRITANNIA, 123L))
+        when(mockBrevmottakerService.hentMottakerliste(TRYGDEAVTALE_GB, 123L))
             .thenReturn(new Mottakerliste.Builder()
                 .medHovedMottaker(BRUKER)
                 .medKopiMottaker(ARBEIDSGIVER)
                 .medKopiMottaker(TRYGDEMYNDIGHET)
                 .medFastMottaker(FastMottakerMedOrgnr.SKATT)
                 .build());
-        when(mockBrevmottakerService.avklarMottaker(eq(STORBRITANNIA), any(), eq(behandling)))
+        when(mockBrevmottakerService.avklarMottaker(eq(TRYGDEAVTALE_GB), any(), eq(behandling)))
             .thenReturn(lagAktoerOrg(BRUKER, null));
         Aktoer arbeidsgiver = lagAktoerOrg(ARBEIDSGIVER, "123");
-        when(mockBrevmottakerService.avklarMottakere(STORBRITANNIA, Mottaker.av(ARBEIDSGIVER), behandling, false, true))
+        when(mockBrevmottakerService.avklarMottakere(TRYGDEAVTALE_GB, Mottaker.av(ARBEIDSGIVER), behandling, false, true))
             .thenReturn(List.of(arbeidsgiver));
         Aktoer trygdemyndighet = lagAktoerOrg(TRYGDEMYNDIGHET, "456");
-        when(mockBrevmottakerService.avklarMottakere(STORBRITANNIA, Mottaker.av(TRYGDEMYNDIGHET), behandling))
+        when(mockBrevmottakerService.avklarMottakere(TRYGDEAVTALE_GB, Mottaker.av(TRYGDEMYNDIGHET), behandling))
             .thenReturn(List.of(trygdemyndighet));
         Aktoer skatteetaten = lagAktoerOrg(TRYGDEMYNDIGHET, "974761076");
-        when(mockBrevmottakerService.avklarMottaker(STORBRITANNIA, FastMottakerMedOrgnr.av(FastMottakerMedOrgnr.SKATT), behandling))
+        when(mockBrevmottakerService.avklarMottaker(TRYGDEAVTALE_GB, FastMottakerMedOrgnr.av(FastMottakerMedOrgnr.SKATT), behandling))
             .thenReturn(skatteetaten);
         when(mockPersondataFasade.hentSammensattNavn(anyString())).thenReturn("Ola Nordmann");
         mockHentOrganisasjon("123", "Ståle Stål");
         mockHentOrganisasjon("974761076", "Skatt");
-        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, STORBRITANNIA, BRUKER)).thenReturn("Vedtak om medlemskap, Attest for utsendt arbeidstaker");
-        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, STORBRITANNIA, arbeidsgiver, "Kopi til arbeidsgiver")).thenReturn("Kopi av vedtak om medlemskap, Attest for utsendt arbeidstaker");
-        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, STORBRITANNIA, trygdemyndighet, "Kopi til utenlandsk trygdemyndighet")).thenReturn("Attest for utsendt arbeidstaker", "Utenlandsk trygdemyndighet");
-        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, STORBRITANNIA, skatteetaten, "Kopi til Skatt")).thenReturn("Kopi av vedtak om medlemskap");
+        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, TRYGDEAVTALE_GB, BRUKER)).thenReturn("Vedtak om medlemskap, Attest for utsendt arbeidstaker");
+        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, TRYGDEAVTALE_GB, arbeidsgiver, "Kopi til arbeidsgiver")).thenReturn("Kopi av vedtak om medlemskap, Attest for utsendt arbeidstaker");
+        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, TRYGDEAVTALE_GB, trygdemyndighet, "Kopi til utenlandsk trygdemyndighet")).thenReturn("Attest for utsendt arbeidstaker", "Utenlandsk trygdemyndighet");
+        when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, TRYGDEAVTALE_GB, skatteetaten, "Kopi til Skatt")).thenReturn("Kopi av vedtak om medlemskap");
 
-        var muligeMottakere = brevbestillingService.hentMuligeMottakere(STORBRITANNIA, 123L, null);
+        var muligeMottakere = brevbestillingService.hentMuligeMottakere(TRYGDEAVTALE_GB, 123L, null);
 
         assertThat(muligeMottakere.getHovedMottaker())
             .extracting(

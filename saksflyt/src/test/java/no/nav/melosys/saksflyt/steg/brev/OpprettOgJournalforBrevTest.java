@@ -186,16 +186,16 @@ class OpprettOgJournalforBrevTest {
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
         DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper = new DokumentproduksjonsInfoMapper(new FakeUnleash());
-        when(mockDokgenService.hentDokumentInfo(any())).thenReturn(dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(STORBRITANNIA));
+        when(mockDokgenService.hentDokumentInfo(any())).thenReturn(dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(TRYGDEAVTALE_GB));
         Aktoer mottaker = lagMottaker("12234");
 
         InnvilgelseBrevbestilling brevbestilling = new InnvilgelseBrevbestilling.Builder()
             .medBehandlingId(1L)
-            .medProduserbartdokument(STORBRITANNIA)
+            .medProduserbartdokument(TRYGDEAVTALE_GB)
             .build();
         Prosessinstans prosessinstans = lagProsessinstansMedMottaker(behandling, mottaker, brevbestilling);
 
-        when(mockDokumentNavnService.utledDokumentNavn(behandling, dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(STORBRITANNIA), mottaker)).thenReturn("Vedtak om medlemskap, Attest for utsendt arbeidstaker");
+        when(mockDokumentNavnService.utledDokumentNavn(behandling, dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(TRYGDEAVTALE_GB), mottaker)).thenReturn("Vedtak om medlemskap, Attest for utsendt arbeidstaker");
 
         opprettJournalforBrev.utfør(prosessinstans);
 

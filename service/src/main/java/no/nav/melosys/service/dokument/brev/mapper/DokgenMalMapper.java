@@ -104,7 +104,7 @@ public class DokgenMalMapper {
                 DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
             );
             case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> innvilgelseFtrlMapper.map((InnvilgelseBrevbestilling) brevbestilling);
-            case STORBRITANNIA -> trygdeavtaleMapper.map((InnvilgelseBrevbestilling) brevbestilling.toBuilder()
+            case TRYGDEAVTALE_GB -> trygdeavtaleMapper.map((InnvilgelseBrevbestilling) brevbestilling.toBuilder()
                 .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId())).build(), Land_iso2.GB);
             case TRYGDEAVTALE_US -> trygdeavtaleMapper.map((InnvilgelseBrevbestilling) brevbestilling.toBuilder()
                 .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId())).build(), Land_iso2.US);

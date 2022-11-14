@@ -42,7 +42,7 @@ public class MottatteOpplysninger {
     private String originalData;
 
     @Lob
-    @Column(name = "data")
+    @Column(name = "data", nullable = false)
     private String jsonData;
 
     @Column(name = "ekstern_referanse_id")
