@@ -20,8 +20,8 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
         behandlingstype: Behandlingstyper,
         behandlingstema: Behandlingstema
     ): Boolean {
-
-        if (harTomFlyt(fagsak.type, fagsak.tema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"))) return false
+        val ftrlToggleEnabled = unleash.isEnabled("melosys.folketrygden.mvp")
+        if (harTomFlyt(fagsak.type, fagsak.tema, behandlingstype, behandlingstema, ftrlToggleEnabled)) return false
 
         return finnBehandlingSomKanReplikeres(fagsak) != null
     }

@@ -100,8 +100,9 @@ public class OppfriskSaksopplysningerService {
         }
 
         if (behandleAlleSakerToggleEnabled) {
+
             if (behandling.getFagsak().erSakstypeEøs()
-                && !SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"))
+                && !SaksbehandlingRegler.harTomFlyt(behandling, folketrygdenToggleEnabled)
                 && behandling.kanResultereIVedtak()
                 && !inngangsvilkaarService.oppfyllervurderingEF_883_2004(behandlingID)) {
                 inngangsvilkaarService.vurderOgLagreInngangsvilkår(
