@@ -1,7 +1,10 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
+import java.time.LocalDate;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -39,13 +42,17 @@ public class OpprettNyBehandling implements StegBehandler {
         String saksnummer = prosessinstans.getData(SAKSNUMMER);
         String initierendeJournalpostId = prosessinstans.getData(JOURNALPOST_ID);
         String initierendeDokumentId = prosessinstans.getData(DOKUMENT_ID);
+        Behandlingsaarsaktyper behandlingsårsaktype = prosessinstans.getData(BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.class);
+        String behandlingsårsakFritekst = prosessinstans.getData(BEHANDLINGSÅRSAK_FRITEKST);
         Behandlingstyper behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstyper.class);
         Behandlingstema behandlingstema = prosessinstans.getData(BEHANDLINGSTEMA, Behandlingstema.class);
+        LocalDate mottaksdato = prosessinstans.getData(MOTTATT_DATO, LocalDate.class);
 
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         Behandling behandling = behandlingService.nyBehandling(fagsak,
             Behandlingsstatus.OPPRETTET, behandlingstype, behandlingstema,
-            initierendeJournalpostId, initierendeDokumentId);
+            initierendeJournalpostId, initierendeDokumentId, mottaksdato,
+            behandlingsårsaktype, behandlingsårsakFritekst);
         prosessinstans.setBehandling(behandling);
         log.info("Opprettet ny behandling {} på eksiterende fagsak {}", behandling.getId(), fagsak.getSaksnummer());
     }

@@ -3,9 +3,11 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import java.util.Collections;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsaarsak;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -60,6 +62,8 @@ class OpprettFagsakOgBehandlingTest {
         prosessinstans.setData(BEHANDLINGSTEMA, Behandlingstema.UTSENDT_ARBEIDSTAKER);
         prosessinstans.setData(SAKSTYPE, Sakstyper.EU_EOS);
         prosessinstans.setData(SAKSTEMA, Sakstemaer.MEDLEMSKAP_LOVVALG);
+        prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.FRITEKST);
+        prosessinstans.setData(BEHANDLINGSÅRSAK_FRITEKST, "Fritekst");
 
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MELTEST-333");
@@ -80,5 +84,7 @@ class OpprettFagsakOgBehandlingTest {
             .isEqualTo(representantKontaktperson);
         assertThat(opprettSakRequest.getSakstype()).isEqualTo(Sakstyper.EU_EOS);
         assertThat(opprettSakRequest.getSakstema()).isEqualTo(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        assertThat(opprettSakRequest.getBehandlingsårsaktype()).isEqualTo(Behandlingsaarsaktyper.FRITEKST);
+        assertThat(opprettSakRequest.getBehandlingsårsakFritekst()).isEqualTo("Fritekst");
     }
 }

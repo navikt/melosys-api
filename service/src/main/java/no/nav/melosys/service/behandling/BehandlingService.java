@@ -9,13 +9,10 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.brev.DokumentasjonSvarfrist;
+import no.nav.melosys.domain.kodeverk.behandlinger.*;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerKonverterer;
-import no.nav.melosys.domain.brev.DokumentasjonSvarfrist;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -95,7 +92,10 @@ public class BehandlingService {
                                    Behandlingstyper behandlingstype,
                                    Behandlingstema behandlingstema,
                                    String initierendeJournalpostId,
-                                   String initierendeDokumentId) {
+                                   String initierendeDokumentId,
+                                   LocalDate mottaksdato,
+                                   Behandlingsaarsaktyper årsaktype,
+                                   String årsakFritekst) {
         Instant nå = Instant.now();
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
@@ -104,6 +104,13 @@ public class BehandlingService {
         behandling.setStatus(behandlingsstatus);
         behandling.setType(behandlingstype);
         behandling.setTema(behandlingstema);
+        if (unleash.isEnabled("melosys.ny_opprett_sak") && unleash.isEnabled("melosys.behandle_alle_saker")) {
+            if (årsaktype == null || mottaksdato == null) {
+                throw new FunksjonellException("Mangler mottaksdato eller behandlingsårsaktype");
+            }
+            Behandlingsaarsak behandlingsårsak = new Behandlingsaarsak(årsaktype, årsakFritekst, mottaksdato);
+            behandling.setBehandlingsårsak(behandlingsårsak);
+        }
         behandling.setInitierendeJournalpostId(initierendeJournalpostId);
         behandling.setInitierendeDokumentId(initierendeDokumentId);
         behandling.setBehandlingsfrist(
@@ -253,7 +260,7 @@ public class BehandlingService {
             behandlingsreplika = replikerBehandlingUtenMottatteOpplysningerSaksopplysningerOgResultat(tidligsteInaktiveBehandling, behandlingstype);
             behandlingsresultatService.lagreNyttBehandlingsresultat(behandlingsreplika);
         } catch (InvocationTargetException | NoSuchMethodException | InstantiationException |
-                 IllegalAccessException e) {
+            IllegalAccessException e) {
             throw new TekniskException(String.format("Klarte ikke replikere behandling %s for fagsak %s",
                 tidligsteInaktiveBehandling.getId(), tidligsteInaktiveBehandling.getFagsak().getSaksnummer()), e);
         }
@@ -286,7 +293,7 @@ public class BehandlingService {
             behandlingsreplika = replikerBehandling(tidligsteInaktiveBehandling, behandlingstype);
             behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika);
         } catch (InvocationTargetException | NoSuchMethodException | InstantiationException |
-                 IllegalAccessException e) {
+            IllegalAccessException e) {
             throw new TekniskException(String.format("Klarte ikke replikere behandling %s for fagsak %s",
                 tidligsteInaktiveBehandling.getId(), tidligsteInaktiveBehandling.getFagsak().getSaksnummer()), e);
         }
