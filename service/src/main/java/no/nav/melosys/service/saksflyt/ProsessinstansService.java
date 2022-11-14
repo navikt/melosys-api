@@ -184,16 +184,18 @@ public class ProsessinstansService {
     }
 
     public void lagre(Prosessinstans prosessinstans) {
-        lagre(prosessinstans, SubjectHandler.getInstance().getUserID());
+        SubjectHandler subjectHandler = SubjectHandler.getInstance();
+        lagre(prosessinstans, subjectHandler.getUserID(), subjectHandler.getName());
     }
 
-    void lagre(Prosessinstans prosessinstans, String saksbehandler) {
+    void lagre(Prosessinstans prosessinstans, String saksbehandler, String saksbehandlerNavn) {
         LocalDateTime nå = LocalDateTime.now();
         prosessinstans.setEndretDato(nå);
         prosessinstans.setRegistrertDato(nå);
         prosessinstans.setStatus(ProsessStatus.KLAR);
         if (saksbehandler != null) {
             prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
+            prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER_NAVN, saksbehandlerNavn);
             logger.info("Saksbehandler={} har opprettet prosessinstans {} av type {}.", saksbehandler,
                 prosessinstans.getId(), prosessinstans.getType());
         } else {
