@@ -16,7 +16,7 @@ public class TestSubjectHandler extends SubjectHandler {
     }
 
     @Override
-    public String getName() {
+    public String getUserName() {
         return "Testy test";
     }
 

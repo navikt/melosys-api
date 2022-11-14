@@ -185,7 +185,7 @@ public class ProsessinstansService {
 
     public void lagre(Prosessinstans prosessinstans) {
         SubjectHandler subjectHandler = SubjectHandler.getInstance();
-        lagre(prosessinstans, subjectHandler.getUserID(), subjectHandler.getName());
+        lagre(prosessinstans, subjectHandler.getUserID(), subjectHandler.getUserName());
     }
 
     void lagre(Prosessinstans prosessinstans, String saksbehandler, String saksbehandlerNavn) {

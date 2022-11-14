@@ -22,7 +22,7 @@ public abstract class SubjectHandler {
 
     public abstract String getUserID();
 
-    public abstract String getName();
+    public abstract String getUserName();
 
     public abstract List<String> getGroups();
 

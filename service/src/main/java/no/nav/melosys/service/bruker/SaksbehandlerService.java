@@ -33,7 +33,7 @@ public class SaksbehandlerService {
     }
 
     public Saksbehandler hentBrukerinformasjon() {
-        return new Saksbehandler(SubjectHandler.getInstance().getUserID(), SubjectHandler.getInstance().getName(), SubjectHandler.getInstance().getGroups());
+        return new Saksbehandler(SubjectHandler.getInstance().getUserID(), SubjectHandler.getInstance().getUserName(), SubjectHandler.getInstance().getGroups());
     }
 
     public Optional<String> finnNavnForIdent(String ident) {
@@ -44,7 +44,7 @@ public class SaksbehandlerService {
             if (!Objects.equals(ident, userID)) {
                 return Optional.empty();
             }
-            return Optional.of(instance.getName());
+            return Optional.of(instance.getUserName());
         }
 
         String saksbehandlerID = ThreadLocalAccessInfo.getSaksbehandler();
