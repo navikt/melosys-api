@@ -4,19 +4,20 @@ import java.util.Map;
 
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.*;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 @Profile("local-mock")
 public class RestTokenServiceClientMockClient extends RestTokenServiceClientBase {
-    private final RestTemplate restTemplate;
+    private final WebClient webClient;
 
-    public RestTokenServiceClientMockClient(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public RestTokenServiceClientMockClient(WebClient webClient) {
+        this.webClient = webClient;
     }
 
     @Override
@@ -25,16 +26,14 @@ public class RestTokenServiceClientMockClient extends RestTokenServiceClientBase
         params.add("grant_type", "client_credentials");
         params.add("scope", "openid");
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
-        headers.add(HttpHeaders.AUTHORIZATION, basicAuth());
-
-        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(params, headers);
-
-        return restTemplate.<Map<String, Object>>exchange(
-            "/token", HttpMethod.POST, entity, new ParameterizedTypeReference<>() {
-            }
-        ).getBody();
+        return webClient.post()
+            .uri("token")
+            .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+            .header(HttpHeaders.AUTHORIZATION, basicAuth())
+            .bodyValue(params)
+            .retrieve()
+            .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+            })
+            .block();
     }
 }
