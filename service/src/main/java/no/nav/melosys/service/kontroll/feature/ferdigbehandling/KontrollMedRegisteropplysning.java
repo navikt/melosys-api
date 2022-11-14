@@ -59,7 +59,7 @@ class KontrollMedRegisteropplysning {
 
         LocalDate fraOgMed;
         LocalDate tilOgMed;
-        if (behandling.getFagsak().equals(Sakstyper.FTRL) && folketrygdenToggleEnabled) {
+        if (behandling.getFagsak().getType().equals(Sakstyper.FTRL) && folketrygdenToggleEnabled) {
             Medlemskapsperiode medlemskapsperiode = behandlingsresultat.hentValidertMedlemskapsPeriode();
             fraOgMed = medlemskapsperiode.getFom();
             tilOgMed = medlemskapsperiode.getTom();
