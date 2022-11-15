@@ -82,8 +82,11 @@ public class ProsessinstansService {
         prosessinstans.setData(SAKSTEMA, opprettSakDto.getSakstema());
         prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
         prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+        prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakDto.getBehandlingsaarsakType());
+        prosessinstans.setData(BEHANDLINGSÅRSAK_FRITEKST, opprettSakDto.getBehandlingsaarsakFritekst());
         prosessinstans.setData(BRUKER_ID, opprettSakDto.getBrukerID());
         prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakDto.getVirksomhetOrgnr());
+        prosessinstans.setData(MOTTATT_DATO, opprettSakDto.getMottaksdato());
         prosessinstans.setData(SØKNADSLAND, opprettSakDto.getSoknadDto().getLand());
         prosessinstans.setData(SØKNADSPERIODE, opprettSakDto.getSoknadDto().getPeriode());
         prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
@@ -98,6 +101,9 @@ public class ProsessinstansService {
         prosessinstans.setData(SAKSNUMMER, saksnummer);
         prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
         prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+        prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakDto.getBehandlingsaarsakType());
+        prosessinstans.setData(BEHANDLINGSÅRSAK_FRITEKST, opprettSakDto.getBehandlingsaarsakFritekst());
+        prosessinstans.setData(MOTTATT_DATO, opprettSakDto.getMottaksdato());
         prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
 
         lagre(prosessinstans);
@@ -110,6 +116,9 @@ public class ProsessinstansService {
         prosessinstans.setData(SAKSNUMMER, saksnummer);
         prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
         prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+        prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakDto.getBehandlingsaarsakType());
+        prosessinstans.setData(BEHANDLINGSÅRSAK_FRITEKST, opprettSakDto.getBehandlingsaarsakFritekst());
+        prosessinstans.setData(MOTTATT_DATO, opprettSakDto.getMottaksdato());
         prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
 
         lagre(prosessinstans);
@@ -281,6 +290,8 @@ public class ProsessinstansService {
             prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakDto.getVirksomhetOrgnr());
             prosessinstans.setData(SAKSTEMA, opprettSakDto.getSakstema());
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+            prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakDto.getBehandlingsaarsakType());
+            prosessinstans.setData(MOTTATT_DATO, opprettSakDto.getMottaksdato());
         } else {
             prosessinstans.setData(SAKSTEMA,
                 SakstypeSakstemaKobling.sakstema(Sakstyper.EU_EOS, opprettSakDto.getBehandlingstema()));
@@ -314,6 +325,8 @@ public class ProsessinstansService {
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             prosessinstans.setData(ProsessDataKey.SAKSTEMA, opprettSakDto.getSakstema());
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+            prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakDto.getBehandlingsaarsakType());
+            prosessinstans.setData(MOTTATT_DATO, opprettSakDto.getMottaksdato());
         } else {
             prosessinstans.setData(ProsessDataKey.SAKSTEMA,
                 SakstypeSakstemaKobling.sakstema(Sakstyper.EU_EOS, opprettSakDto.getBehandlingstema()));

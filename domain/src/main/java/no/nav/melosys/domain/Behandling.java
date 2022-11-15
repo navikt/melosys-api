@@ -43,6 +43,13 @@ public class Behandling extends RegistreringsInfo {
         BESLUTNING_LOVVALG_ANNET_LAND,
         ANMODNING_OM_UNNTAK_HOVEDREGEL
     );
+
+    private static final Set<Behandlingstyper> GAMLE_BEHANDLINGSTYPER_SOM_SKAL_MIGRERES_SENERE = Set.of(
+        Behandlingstyper.ANKE,
+        Behandlingstyper.SED,
+        Behandlingstyper.SOEKNAD
+    );
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -82,10 +89,10 @@ public class Behandling extends RegistreringsInfo {
     private Set<Saksopplysning> saksopplysninger = new HashSet<>(1);
 
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Set<BehandlingHistorikk> behandlingshistorikk = new HashSet<>(1);
-
-    @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Behandlingsnotat> behandlingsnotater = new HashSet<>(1);
+
+    @OneToOne(mappedBy = "behandling", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Behandlingsaarsak behandlingsårsak;
 
     @OneToOne(mappedBy = "behandling", cascade = CascadeType.ALL, orphanRemoval = true)
     private MottatteOpplysninger mottatteOpplysninger;
@@ -196,6 +203,21 @@ public class Behandling extends RegistreringsInfo {
 
     public void setBehandlingsnotater(Set<Behandlingsnotat> behandlingsnotater) {
         this.behandlingsnotater = behandlingsnotater;
+    }
+
+    public Behandlingsaarsak getBehandlingsårsak() {
+        return behandlingsårsak;
+    }
+
+    public void setBehandlingsårsak(Behandlingsaarsak behandlingsårsak) {
+        if (behandlingsårsak == null) {
+            if (this.behandlingsårsak != null) {
+                this.behandlingsårsak.setBehandling(null);
+            }
+        } else {
+            behandlingsårsak.setBehandling(this);
+        }
+        this.behandlingsårsak = behandlingsårsak;
     }
 
     public MottatteOpplysninger getMottatteOpplysninger() {
@@ -528,27 +550,27 @@ public class Behandling extends RegistreringsInfo {
     }
 
     public static LocalDate utledBehandlingsfrist(Behandling behandling) {
-        Behandlingstyper behandlingstype = behandling.getType();
-        Behandlingstema behandlingstema = behandling.getTema();
         Sakstemaer sakstema = behandling.getFagsak().getTema();
-        LocalDate utgangspunktDato = LocalDate.now();
-        MottatteOpplysninger mottatteOpplysninger = behandling.getMottatteOpplysninger();
+        Behandlingstema behandlingstema = behandling.getTema();
+        Behandlingstyper behandlingstype = behandling.getType();
 
-        if (mottatteOpplysninger != null) {
-            utgangspunktDato = mottatteOpplysninger.getMottaksdato() != null ? mottatteOpplysninger.getMottaksdato() : LocalDate.now();
-        }
-
-        Set<Behandlingstyper> gamleBehandlingstyperSomSkalMigreresSenere = Set.of(
-            Behandlingstyper.ANKE,
-            Behandlingstyper.SED,
-            Behandlingstyper.SOEKNAD
-        );
-
-        if (gamleBehandlingstyperSomSkalMigreresSenere.contains(behandlingstype)) {
+        if (GAMLE_BEHANDLINGSTYPER_SOM_SKAL_MIGRERES_SENERE.contains(behandlingstype)) {
             return utledFristForBehandlingtema(behandlingstema);
         }
-
+        LocalDate utgangspunktDato = finnUtgangspunktForFristberegning(behandling);
         return BehandlingfristKriterier.hentBehandlingsFrist(sakstema, behandlingstema, behandlingstype, utgangspunktDato);
+    }
+
+    private static LocalDate finnUtgangspunktForFristberegning(Behandling behandling) {
+        LocalDate utgangspunktDato;
+        if (behandling.getBehandlingsårsak() != null) {
+            utgangspunktDato = behandling.getBehandlingsårsak().getMottaksdato();
+        } else if (behandling.getMottatteOpplysninger() != null && behandling.getMottatteOpplysninger().getMottaksdato() != null) {
+            utgangspunktDato = behandling.getMottatteOpplysninger().getMottaksdato();
+        } else {
+            utgangspunktDato = LocalDate.now();
+        }
+        return utgangspunktDato;
     }
 
     /**

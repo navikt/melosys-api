@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -11,6 +12,7 @@ import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -55,6 +57,9 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
         Representerer representantRepresenterer = prosessinstans.getData(REPRESENTANT_REPRESENTERER, Representerer.class);
         String initierendeJournalpostId = prosessinstans.getData(JOURNALPOST_ID);
         String initierendeDokumentId = prosessinstans.getData(DOKUMENT_ID);
+        LocalDate mottaksdato = prosessinstans.getData(MOTTATT_DATO, LocalDate.class);
+        Behandlingsaarsaktyper behandlingsårsaktype = prosessinstans.getData(BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.class);
+        String behandlingsårsakFritekst = prosessinstans.getData(BEHANDLINGSÅRSAK_FRITEKST);
         Behandlingstyper behandlingstype = prosessinstans.getData(BEHANDLINGSTYPE, Behandlingstyper.class);
         Behandlingstema behandlingstema = prosessinstans.getData(BEHANDLINGSTEMA, Behandlingstema.class);
         Sakstyper sakstype = prosessinstans.getData(SAKSTYPE, Sakstyper.class);
@@ -68,8 +73,11 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
             .medKontaktopplysninger(lagKontaktopplysningerForRepresentant(representant, representantKontakperson))
             .medSakstype(sakstype)
             .medSakstema(sakstema)
+            .medBehandlingsårsaktype(behandlingsårsaktype)
+            .medBehandlingsårsakFritekst(behandlingsårsakFritekst)
             .medBehandlingstema(behandlingstema)
             .medBehandlingstype(behandlingstype)
+            .medMottaksdato(mottaksdato)
             .medInitierendeJournalpostId(initierendeJournalpostId)
             .medInitierendeDokumentId(initierendeDokumentId)
             .build();
