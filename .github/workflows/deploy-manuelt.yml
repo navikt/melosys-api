@@ -118,7 +118,7 @@ jobs:
           echo "APP_NAME_FRONTEND=melosys-web-q1" >> $GITHUB_ENV
           echo "APP_NAME_TRYGDEAVTALE=melosys-trygdeavtale-q1" >> $GITHUB_ENV
           echo "APP_NAME_PDL=pdl-api" >> $GITHUB_ENV
-          echo "APP_NAME_SAF=saf" >> $GITHUB_ENV
+          echo "APP_NAME_SAF=saf-q1" >> $GITHUB_ENV
           echo "APP_NAME_OPPGAVE=oppgave-q1" >> $GITHUB_ENV
           echo "APP_NAME_MELOSYS_EESSI=melosys-eessi-q1" >> $GITHUB_ENV
           echo "GROUP_MELOSYS_INNLOGGING=52981246-8032-40f0-863a-2bd2844f2d57" >> $GITHUB_ENV
