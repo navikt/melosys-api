@@ -5,12 +5,14 @@ import java.util.Set;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
@@ -29,10 +31,12 @@ import org.springframework.web.context.WebApplicationContext;
 public class LovligeKombinasjonerTjeneste {
     private final LovligeKombinasjonerService lovligeKombinasjonerService;
     private final BehandlingService behandlingService;
+    private final BehandlingsresultatService behandlingsresultatService;
 
-    public LovligeKombinasjonerTjeneste(LovligeKombinasjonerService lovligeKombinasjonerService, BehandlingService behandlingService) {
+    public LovligeKombinasjonerTjeneste(LovligeKombinasjonerService lovligeKombinasjonerService, BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService) {
         this.lovligeKombinasjonerService = lovligeKombinasjonerService;
         this.behandlingService = behandlingService;
+        this.behandlingsresultatService = behandlingsresultatService;
     }
 
     @GetMapping("/sakstyper/hent-lovlige-kombinasjoner")
@@ -70,6 +74,7 @@ public class LovligeKombinasjonerTjeneste {
         @RequestParam(value = "sisteBehandlingsID", required = false) Long sisteBehandlingsID
     ) {
         Behandling sisteBehandling = sisteBehandlingsID != null ? behandlingService.hentBehandling(sisteBehandlingsID) : null;
-        return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, sisteBehandling));
+        Behandlingsresultat sisteBehandlingsresultat = sisteBehandlingsID != null ? behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(sisteBehandlingsID) : null;
+        return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, sisteBehandling, sisteBehandlingsresultat));
     }
 }

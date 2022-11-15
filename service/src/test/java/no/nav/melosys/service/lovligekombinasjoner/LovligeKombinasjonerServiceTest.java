@@ -2,9 +2,7 @@ package no.nav.melosys.service.lovligekombinasjoner;
 
 import java.util.Set;
 
-import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -204,10 +202,31 @@ class LovligeKombinasjonerServiceTest {
         sisteBehandling.setFagsak(fagsak);
         sisteBehandling.setStatus(Behandlingsstatus.AVSLUTTET);
 
-        Set<Behandlingstyper> muligeBehandlingstyper = lovligeKombinasjonerService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, sisteBehandling);
+        Set<Behandlingstyper> muligeBehandlingstyper = lovligeKombinasjonerService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, sisteBehandling, null);
         assertThat(muligeBehandlingstyper)
             .hasSize(3)
             .containsExactly(NY_VURDERING, KLAGE, HENVENDELSE);
+    }
+
+    @Test
+    void hentMuligeBehandlingstyper_sisteBehandlingAktivOgAnmodningsperiodeSendt_skalReturnereKunNyVurdering() {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setType(EU_EOS);
+        Behandling sisteBehandling = behandlingMedTemaOgType(UTSENDT_ARBEIDSTAKER, FØRSTEGANG);
+        sisteBehandling.setFagsak(fagsak);
+        sisteBehandling.setStatus(UNDER_BEHANDLING);
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
+        anmodningsperiode.setSendtUtland(true);
+        Behandlingsresultat sisteBehandlingsresultat = new Behandlingsresultat();
+        sisteBehandlingsresultat.getAnmodningsperioder().add(anmodningsperiode);
+
+
+        Set<Behandlingstyper> muligeBehandlingstyper = lovligeKombinasjonerService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, sisteBehandling, sisteBehandlingsresultat);
+
+
+        assertThat(muligeBehandlingstyper)
+            .hasSize(1)
+            .containsExactly(NY_VURDERING);
     }
 
     @Test

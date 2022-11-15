@@ -1,11 +1,8 @@
 package no.nav.melosys.service.lovligekombinasjoner;
 
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javax.annotation.Nullable;
-
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
@@ -15,6 +12,11 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.Nullable;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static no.nav.melosys.domain.kodeverk.Saksstatuser.HENLAGT;
 import static no.nav.melosys.domain.kodeverk.Saksstatuser.HENLAGT_BORTFALT;
@@ -100,13 +102,23 @@ public class LovligeKombinasjonerService {
         }
     }
 
-    public void validerBehandlingstype(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype, Behandling sistBehandling) {
-        if (!hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, sistBehandling).contains(behandlingstype)) {
+    public void validerBehandlingstemaOgBehandlingstypeForOpprettelse(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null);
+        validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, null, null);
+    }
+
+    public void validerBehandlingstemaOgBehandlingstypeForAndregangsbehandling(Fagsak fagsak, Behandling sistBehandling, Behandlingsresultat sistBehandlingsresultat, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        validerBehandlingstema(fagsak.getHovedpartRolle(), fagsak.getType(), fagsak.getTema(), behandlingstema, sistBehandling.getTema());
+        validerBehandlingstype(fagsak.getHovedpartRolle(), fagsak.getType(), fagsak.getTema(), behandlingstema, behandlingstype, sistBehandling, sistBehandlingsresultat);
+    }
+
+    private void validerBehandlingstype(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype, Behandling sistBehandling, Behandlingsresultat sistBehandlingsresultat) {
+        if (!hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, sistBehandling, sistBehandlingsresultat).contains(behandlingstype)) {
             throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype med de andre valgte verdiene");
         }
     }
 
-    public void validerBehandlingstema(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstema sistBehandlingstema) {
+    private void validerBehandlingstema(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstema sistBehandlingstema) {
         if (!hentMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, sistBehandlingstema).contains(behandlingstema)) {
             throw new FunksjonellException(behandlingstema + " er ikke et lovlig behandlingstema med de andre valgte verdiene");
         }
@@ -117,7 +129,8 @@ public class LovligeKombinasjonerService {
         Sakstyper sakstype,
         Sakstemaer sakstema,
         @Nullable Behandlingstema behandlingstema,
-        @Nullable Behandling sisteBehandling
+        @Nullable Behandling sisteBehandling,
+        @Nullable Behandlingsresultat sisteBehandlingsresultat
     ) {
         Behandlingstema sistBehandlingstema = null;
         Saksstatuser sistSaksstatus = null;
@@ -129,6 +142,11 @@ public class LovligeKombinasjonerService {
 
         switch (hovedpart) {
             case BRUKER:
+                if (sisteBehandling != null && sisteBehandling.erAktiv() &&
+                    sisteBehandlingsresultat != null && sisteBehandlingsresultat.erArtikkel16MedSendtAnmodningOmUnntak()) {
+                    return Set.of(NY_VURDERING);
+                }
+
                 Set<Behandlingstyper> behandlingstyper = LovligeSakskombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
                     .filter(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.sakstema() == sakstema)
                     .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())
@@ -206,7 +224,7 @@ public class LovligeKombinasjonerService {
             Aktoersroller hovedpart = behandling.getFagsak().getHovedpartRolle();
             Behandlingstema behandlingstema = behandling.getTema();
 
-            return hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, null);
+            return hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, null, null);
         }
         return Collections.emptySet();
     }
