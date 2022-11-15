@@ -38,7 +38,13 @@ public enum GrunnlagMedl {
     USA_ART5_4("USA_5_4"),
     USA_ART5_5("USA_5_5"),
     USA_ART5_6("USA_5_6"),
-    USA_ART5_9("USA_5_9");
+    USA_ART5_9("USA_5_9"),
+    CAN_ART6_2("CAN_ART6_2"),
+    CAN_ART7("CAN_ART7"),
+    CAN_ART8("CAN_ART8"),
+    CAN_ART9("CAN_ART9"),
+    CAN_ART10("CAN_ART10"),
+    CAN_ART11("CAN_ART11");
 
     private final String kode;
 
