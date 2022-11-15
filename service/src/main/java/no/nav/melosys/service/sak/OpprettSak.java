@@ -122,7 +122,8 @@ public class OpprettSak {
             lovligeKombinasjonerService.validerBehandlingstemaOgBehandlingstypeForOpprettelse(
                 hovedpart, sakstype, sakstema, behandlingstema, behandlingstype);
 
-            if (erSakstypeEøs(sakstype) && !SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema)) {
+            if (erSakstypeEøs(sakstype)
+                && !SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"))) {
                 validerSøknadData(opprettSakDto.getSoknadDto());
             }
         } else {

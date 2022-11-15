@@ -243,7 +243,7 @@ public class JournalfoeringService {
 
         if (behandleAlleSakerToggleEnabled
             ? erSakstypeEøs(sakstype) && !SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype,
-            behandlingstema)
+            behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"))
             : erSakstypeEøs(sakstype) && Behandling.erBehandlingAvSøknadGammel(behandlingstema)
         ) {
             validerSøknadFelter(journalfoeringDto);

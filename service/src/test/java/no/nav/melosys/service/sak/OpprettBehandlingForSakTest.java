@@ -1,5 +1,6 @@
 package no.nav.melosys.service.sak;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
@@ -42,13 +43,14 @@ class OpprettBehandlingForSakTest {
     private BehandlingsresultatService behandlingsresultatService;
 
     private final LovligeKombinasjonerService lovligeKombinasjonerService = new LovligeKombinasjonerService();
+    private final FakeUnleash unleash = new FakeUnleash();
 
     private OpprettBehandlingForSak opprettBehandlingForSak;
 
     @BeforeEach
     public void setUp() {
-        SaksbehandlingRegler saksbehandlingRegler = new SaksbehandlingRegler(behandlingsresultatRepository);
-        opprettBehandlingForSak = new OpprettBehandlingForSak(fagsakService, prosessinstansService, saksbehandlingRegler, lovligeKombinasjonerService, behandlingService, behandlingsresultatService);
+        SaksbehandlingRegler saksbehandlingRegler = new SaksbehandlingRegler(behandlingsresultatRepository, unleash);
+        opprettBehandlingForSak = new OpprettBehandlingForSak(fagsakService, prosessinstansService, saksbehandlingRegler, lovligeKombinasjonerService, behandlingService, behandlingsresultatService, unleash);
     }
 
     @Test

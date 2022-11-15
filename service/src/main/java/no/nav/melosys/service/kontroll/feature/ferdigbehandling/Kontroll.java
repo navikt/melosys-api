@@ -71,10 +71,8 @@ class Kontroll {
     private Collection<Kontrollfeil> utførKontroller(Behandling behandling, Sakstyper sakstype) {
         var regelsettForVedtak = FerdigbehandlingKontrollsett.hentRegelsettForVedtak(sakstype);
 
-        var folketrygdenToggle = unleash.isEnabled("melosys.folketrygden.mvp");
-
         FerdigbehandlingKontrollData ferdigbehandlingKontrollData;
-        if (sakstype.equals(Sakstyper.FTRL) && folketrygdenToggle) {
+        if (sakstype.equals(Sakstyper.FTRL) && unleash.isEnabled("melosys.folketrygden.mvp")) {
             ferdigbehandlingKontrollData = hentVedtakKontrollDataFTRL(behandling);
         } else {
             ferdigbehandlingKontrollData = hentVedtakKontrollData(behandling);
@@ -89,7 +87,8 @@ class Kontroll {
     private FerdigbehandlingKontrollData hentKontrollDataForAvslagOgHenleggelse(Behandling behandling) {
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             MottatteOpplysningerData mottatteOpplysningerData = null;
-            if (!SaksbehandlingRegler.harTomFlyt(behandling)) {
+
+            if (!SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"))) {
                 mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
             }
             Persondata persondata = hentPersondata(behandling);

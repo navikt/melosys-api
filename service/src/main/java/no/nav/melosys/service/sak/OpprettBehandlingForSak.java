@@ -1,5 +1,6 @@
 package no.nav.melosys.service.sak;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
@@ -22,19 +23,22 @@ public class OpprettBehandlingForSak {
     private final LovligeKombinasjonerService lovligeKombinasjonerService;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
+    private final Unleash unleash;
 
     public OpprettBehandlingForSak(FagsakService fagsakService,
                                    ProsessinstansService prosessinstansService,
                                    SaksbehandlingRegler saksbehandlingRegler,
                                    LovligeKombinasjonerService lovligeKombinasjonerService,
                                    BehandlingService behandlingService,
-                                   BehandlingsresultatService behandlingsresultatService) {
+                                   BehandlingsresultatService behandlingsresultatService,
+                                   SaksbehandlingRegler saksbehandlingRegler, Unleash unleash) {
         this.fagsakService = fagsakService;
         this.prosessinstansService = prosessinstansService;
         this.saksbehandlingRegler = saksbehandlingRegler;
         this.lovligeKombinasjonerService = lovligeKombinasjonerService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
+        this.unleash = unleash;
     }
 
     @Transactional
