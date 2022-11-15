@@ -1,13 +1,11 @@
 package no.nav.melosys.tjenester.gui.dto;
 
 import java.time.Instant;
-import java.util.Set;
 
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.tjenester.gui.dto.anmodning.AnmodningsperiodeLesDto;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 
 
@@ -21,7 +19,6 @@ public class BehandlingOversiktDto {
     private Instant opprettetDato;
     private Behandlingsresultattyper behandlingsresultattype;
     private Instant svarFrist;
-    private Set<AnmodningsperiodeLesDto> anmodningsperioder;
 
     public Long getBehandlingID() {
         return behandlingID;
@@ -93,13 +90,5 @@ public class BehandlingOversiktDto {
 
     public void setSvarFrist(Instant svarFrist) {
         this.svarFrist = svarFrist;
-    }
-
-    public Set<AnmodningsperiodeLesDto> getAnmodningsperioder() {
-        return anmodningsperioder;
-    }
-
-    public void setAnmodningsperioder(Set<AnmodningsperiodeLesDto> anmodningsperioder) {
-        this.anmodningsperioder = anmodningsperioder;
     }
 }
