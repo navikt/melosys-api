@@ -16,7 +16,7 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 @Configuration(proxyBeanMethods = false)
 class ScalarConfig {
     @Bean
-    static GraphQLScalarType dateScalar() {
+    public GraphQLScalarType dateScalar() {
         return GraphQLScalarType.newScalar()
             .name("Date")
             .description("Format: YYYY-MM-DD (ISO-8601), example: 2017-11-24")
@@ -28,12 +28,13 @@ class ScalarConfig {
         return new Coercing<>() {
             @Override
             public String serialize(Object input) {
-                if (input instanceof LocalDate || input instanceof String) {
+                if (input instanceof LocalDate) {
                     return input.toString();
                 }
 
                 throw new CoercingSerializeException(
-                    "Serialization from " + input.getClass() + " to LocalDate not implemented.");
+                    "GraphQL serialization from " + input.getClass() + " with value " + input + " to Date scalar not" +
+                        " implemented.");
             }
 
             @Override
@@ -74,7 +75,7 @@ class ScalarConfig {
                     return ((LocalDateTime) input).truncatedTo(SECONDS).toString();
                 }
                 throw new CoercingSerializeException(
-                    "Serialization from " + input.getClass() + " to DateTime not implemented.");
+                    "Graphql serialization from " + input.getClass() + " to DateTime scalar not implemented.");
             }
 
             @Override
