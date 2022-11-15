@@ -1,5 +1,10 @@
 package no.nav.melosys.service.lovligekombinasjoner;
 
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.annotation.Nullable;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
@@ -12,11 +17,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Nullable;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static no.nav.melosys.domain.kodeverk.Saksstatuser.HENLAGT;
 import static no.nav.melosys.domain.kodeverk.Saksstatuser.HENLAGT_BORTFALT;
@@ -136,17 +136,16 @@ public class LovligeKombinasjonerService {
         Saksstatuser sistSaksstatus = null;
 
         if (sisteBehandling != null) {
+            if (sisteBehandling.erAktiv()) {
+                return sisteBehandlingsresultat != null && sisteBehandlingsresultat.erArtikkel16MedSendtAnmodningOmUnntak()
+                    ? Set.of(NY_VURDERING) : Set.of();
+            }
             sistBehandlingstema = sisteBehandling.getTema();
             sistSaksstatus = sisteBehandling.getFagsak().getStatus();
         }
 
         switch (hovedpart) {
             case BRUKER:
-                if (sisteBehandling != null && sisteBehandling.erAktiv() &&
-                    sisteBehandlingsresultat != null && sisteBehandlingsresultat.erArtikkel16MedSendtAnmodningOmUnntak()) {
-                    return Set.of(NY_VURDERING);
-                }
-
                 Set<Behandlingstyper> behandlingstyper = LovligeSakskombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
                     .filter(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.sakstema() == sakstema)
                     .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())

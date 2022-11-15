@@ -209,6 +209,21 @@ class LovligeKombinasjonerServiceTest {
     }
 
     @Test
+    void hentMuligeBehandlingstyper_sisteBehandlingAktiv_skalReturnereTomListe() {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setType(EU_EOS);
+        Behandling sisteBehandling = behandlingMedTemaOgType(UTSENDT_ARBEIDSTAKER, FØRSTEGANG);
+        sisteBehandling.setFagsak(fagsak);
+        sisteBehandling.setStatus(UNDER_BEHANDLING);
+
+
+        Set<Behandlingstyper> muligeBehandlingstyper = lovligeKombinasjonerService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, sisteBehandling, null);
+
+
+        assertThat(muligeBehandlingstyper).isEmpty();
+    }
+
+    @Test
     void hentMuligeBehandlingstyper_sisteBehandlingAktivOgAnmodningsperiodeSendt_skalReturnereKunNyVurdering() {
         Fagsak fagsak = new Fagsak();
         fagsak.setType(EU_EOS);
