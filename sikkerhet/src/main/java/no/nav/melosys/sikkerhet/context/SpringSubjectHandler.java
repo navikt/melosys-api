@@ -33,7 +33,7 @@ public class SpringSubjectHandler extends SubjectHandler {
     }
 
     @Override
-    public String getName() {
+    public String getUserName() {
         return hasValidToken() ? azureActiveDirectoryToken().getJwtTokenClaims().get(JWT_TOKEN_CLAIM_NAME).toString() : null;
     }
 

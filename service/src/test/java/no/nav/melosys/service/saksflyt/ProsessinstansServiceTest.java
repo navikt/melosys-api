@@ -96,7 +96,7 @@ class ProsessinstansServiceTest {
         String saksbehandler = "Z123456";
 
 
-        prosessinstansService.lagre(prosessinstans, saksbehandler);
+        prosessinstansService.lagre(prosessinstans, saksbehandler, null);
 
 
         verify(prosessinstans).setStatus(ProsessStatus.KLAR);

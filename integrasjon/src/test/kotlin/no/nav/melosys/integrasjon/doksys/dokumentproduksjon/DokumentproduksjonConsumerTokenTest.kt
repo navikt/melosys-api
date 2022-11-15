@@ -70,7 +70,7 @@ class DokumentproduksjonConsumerTokenTest(
         SubjectHandler.set(object : SubjectHandler() {
             override fun getOidcTokenString() = "--token-from-user--"
             override fun getUserID() = ""
-            override fun getName() = ""
+            override fun getUserName() = ""
             override fun getGroups() = mutableListOf<String>()
         })
 

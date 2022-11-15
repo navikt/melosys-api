@@ -121,7 +121,8 @@ public class ProsessinstansBehandler {
     private Prosessinstans utførSteg(StegBehandler stegBehandler, Prosessinstans prosessinstans) {
         log.info("Utfører steg {} for prosessinstans {}", stegBehandler.inngangsSteg(), prosessinstans.getId());
         String saksbehandler = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER);
-        ThreadLocalAccessInfo.beforeExecuteProcess(prosessinstans.getId(), stegBehandler.inngangsSteg().getKode(), saksbehandler);
+        String saksbehandlerNavn = prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER_NAVN);
+        ThreadLocalAccessInfo.beforeExecuteProcess(prosessinstans.getId(), stegBehandler.inngangsSteg().getKode(), saksbehandler, saksbehandlerNavn);
         try {
             stegBehandler.utfør(prosessinstans);
         } finally {
