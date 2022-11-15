@@ -54,6 +54,8 @@ public class HentRegisteropplysninger implements StegBehandler {
         }
 
         var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
+        var folketrygdenToggleEnabled = unleash.isEnabled("melosys.folketrygden.mvp");
+
         var aktørId = behandling.getFagsak().finnBrukersAktørID().orElseThrow(
             () -> new FunksjonellException("Kan ikke hente registreopplysninger når bruker ikke har aktørID")
         );
@@ -66,7 +68,8 @@ public class HentRegisteropplysninger implements StegBehandler {
                     behandling.getFagsak().getTema(),
                     behandling.getTema(),
                     behandling.getType(),
-                    behandleAlleSakerToggleEnabled));
+                    behandleAlleSakerToggleEnabled,
+                    folketrygdenToggleEnabled));
 
         (behandleAlleSakerToggleEnabled
             ? behandling.finnPeriode()

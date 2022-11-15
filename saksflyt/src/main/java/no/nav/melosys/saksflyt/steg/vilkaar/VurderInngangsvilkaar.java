@@ -64,7 +64,7 @@ public class VurderInngangsvilkaar implements StegBehandler {
 
     private boolean skalVurdereInngangsvilkår(Behandling behandling) {
         return behandling.getFagsak().erSakstypeEøs()
-            && !SaksbehandlingRegler.harTomFlyt(behandling)
+            && !SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"))
             && behandling.kanResultereIVedtak()
             && (unleash.isEnabled("melosys.tom_periode_og_land") ? behandling.harPeriodeOgLand() : true);
     }

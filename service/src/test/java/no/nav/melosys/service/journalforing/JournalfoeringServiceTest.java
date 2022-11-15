@@ -93,7 +93,7 @@ class JournalfoeringServiceTest {
 
     @BeforeEach
     public void setup() {
-        saksbehandlingRegler = new SaksbehandlingRegler(behandlingsresultatRepository);
+        saksbehandlingRegler = new SaksbehandlingRegler(behandlingsresultatRepository, unleash);
 
         unleash.enable("melosys.folketrygden.mvp");
         journalpost = new Journalpost("123");

@@ -1,5 +1,6 @@
 package no.nav.melosys.service.sak;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.exception.FunksjonellException;
@@ -14,13 +15,15 @@ public class OpprettBehandlingForSak {
     private final FagsakService fagsakService;
     private final ProsessinstansService prosessinstansService;
     private final SaksbehandlingRegler saksbehandlingRegler;
+    private final Unleash unleash;
 
     public OpprettBehandlingForSak(FagsakService fagsakService,
                                    ProsessinstansService prosessinstansService,
-                                   SaksbehandlingRegler saksbehandlingRegler) {
+                                   SaksbehandlingRegler saksbehandlingRegler, Unleash unleash) {
         this.fagsakService = fagsakService;
         this.prosessinstansService = prosessinstansService;
         this.saksbehandlingRegler = saksbehandlingRegler;
+        this.unleash = unleash;
     }
 
     @Transactional
