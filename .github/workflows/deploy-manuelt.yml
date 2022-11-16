@@ -98,7 +98,7 @@ jobs:
         uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: ${{ env.CLUSTER }}
+          CLUSTER: ${{github.event.inputs.environment == 'prod' && 'prod-fss' || 'dev-fss' }}
           RESOURCE: nais/nais.yml
           VARS: nais/vars-${{github.event.inputs.environment}}.json
       - name: Get commit message
