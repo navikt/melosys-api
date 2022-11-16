@@ -69,7 +69,6 @@ public final class MedlPeriodeKonverter {
 
         tbl.put(Lovvalgbestemmelser_trygdeavtale_ca.CAN_ART6_2, GrunnlagMedl.CAN_ART6_2);
         tbl.put(Lovvalgbestemmelser_trygdeavtale_ca.CAN_ART7, GrunnlagMedl.CAN_ART7);
-        tbl.put(Lovvalgbestemmelser_trygdeavtale_ca.CAN_ART8, GrunnlagMedl.CAN_ART8);
         tbl.put(Lovvalgbestemmelser_trygdeavtale_ca.CAN_ART9, GrunnlagMedl.CAN_ART9);
         tbl.put(Lovvalgbestemmelser_trygdeavtale_ca.CAN_ART10, GrunnlagMedl.CAN_ART10);
         tbl.put(Lovvalgbestemmelser_trygdeavtale_ca.CAN_ART11, GrunnlagMedl.CAN_ART11);
