@@ -63,7 +63,7 @@ public class BehandlingService {
                              MottatteOpplysningerRepository mottatteOpplysningerRepository,
                              BehandlingsresultatService behandlingsresultatService,
                              @Lazy OppgaveService oppgaveService,
-                             LovligeKombinasjonerService lovligeKombinasjonerService,
+                             @Lazy LovligeKombinasjonerService lovligeKombinasjonerService,
                              ApplicationEventPublisher applicationEventPublisher,
                              Unleash unleash) {
         this.behandlingRepository = behandlingRepository;
