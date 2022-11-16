@@ -66,6 +66,7 @@ jobs:
           path: |
             Dockerfile
             nais/nais.yml
+            nais/vars-${{github.event.inputs.environment}}.json
             app/target/melosys-sb-execution.jar
             docker-init-scripts/vault-systembruker-env.sh
           retention-days: 1
