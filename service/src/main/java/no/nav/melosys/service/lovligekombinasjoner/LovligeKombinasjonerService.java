@@ -16,6 +16,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.kodeverk.Saksstatuser.HENLAGT;
@@ -26,6 +28,13 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 
 @Service
 public class LovligeKombinasjonerService {
+    private final BehandlingService behandlingService;
+    private final BehandlingsresultatService behandlingsresultatService;
+
+    public LovligeKombinasjonerService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService) {
+        this.behandlingService = behandlingService;
+        this.behandlingsresultatService = behandlingsresultatService;
+    }
 
     public Set<Sakstyper> hentMuligeSakstyper() {
         return LovligeSakskombinasjoner.ALLE_MULIGE_SAKSTYPER;
@@ -99,6 +108,18 @@ public class LovligeKombinasjonerService {
             return Set.of(BESLUTNING_LOVVALG_NORGE);
         }
         return Collections.emptySet();
+    }
+
+    public Set<Behandlingstyper> hentMuligeBehandlingstyper(
+        Aktoersroller hovedpart,
+        Sakstyper sakstype,
+        Sakstemaer sakstema,
+        @Nullable Behandlingstema behandlingstema,
+        @Nullable Long sisteBehandlingsID
+    ) {
+        Behandling sisteBehandling = sisteBehandlingsID != null ? behandlingService.hentBehandling(sisteBehandlingsID) : null;
+        Behandlingsresultat sisteBehandlingsresultat = sisteBehandlingsID != null ? behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(sisteBehandlingsID) : null;
+        return hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, sisteBehandling, sisteBehandlingsresultat);
     }
 
     public Set<Behandlingstyper> hentMuligeBehandlingstyper(
@@ -233,7 +254,7 @@ public class LovligeKombinasjonerService {
             Aktoersroller hovedpart = behandling.getFagsak().getHovedpartRolle();
             Behandlingstema behandlingstema = behandling.getTema();
 
-            return hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, null, null);
+            return hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, null);
         }
         return Collections.emptySet();
     }
