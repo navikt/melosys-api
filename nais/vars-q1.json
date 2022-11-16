@@ -1,7 +1,6 @@
 {
   "CLUSTER": "dev-fss",
   "URL": "melosys-api-q1.dev.intern.nav.no",
-  "ENVIRONMENT": "q1",
   "KAFKA_POOL": "nav-dev",
   "VAULT_CLUSTER": "dev",
   "APP_NAME": "melosys-q1",
