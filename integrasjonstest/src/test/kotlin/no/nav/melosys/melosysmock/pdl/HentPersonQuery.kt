@@ -12,7 +12,6 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Component
-//@RequestScope
 class HentPersonQuery(private val querySession: PDLQuerySession) : HentPersonQueryResolver {
 
     override fun hentPerson(ident: String): PersonDto? {
@@ -94,7 +93,6 @@ fun folkeregisterMetadata(gyldighetstidspunkt: LocalDateTime = LocalDateTime.of(
     )
 
 @Component
-//@RequestScope
 class PersonResolverImpl(private val querySession: PDLQuerySession) : PersonResolver {
     override fun adressebeskyttelse(personDto: PersonDto, historikk: Boolean?): List<AdressebeskyttelseDto> {
         return listOf()

@@ -8,7 +8,6 @@ import no.nav.melosys.melosysmock.person.PersonRepoStorage
 import org.springframework.stereotype.Component
 
 @Component
-//@RequestScope
 class HentIdenterQuery(private val personRepoStorage: PersonRepoStorage) : HentIdenterQueryResolver {
 
     override fun hentIdenter(ident: String, grupper: List<IdentGruppeDto>?, historikk: Boolean?) =
