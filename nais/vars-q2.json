@@ -1,0 +1,17 @@
+{
+  "CLUSTER": "dev-fss",
+  "URL": "melosys-api.dev.intern.nav.no",
+  "ENVIRONMENT": "q2",
+  "KAFKA_POOL": "nav-dev",
+  "VAULT_CLUSTER": "dev",
+  "APP_NAME": "melosys",
+  "TENANT_URL": "trygdeetaten.no",
+  "GROUP_MELOSYS_INNLOGGING": "52981246-8032-40f0-863a-2bd2844f2d57",
+  "APP_NAME_FRONTEND": "melosys-web",
+  "APP_NAME_TRYGDEAVTALE": "melosys-trygdeavtale",
+  "APP_NAME_PDL ": "pdl-api",
+  "APP_NAME_SAF": "saf",
+  "APP_NAME_OPPGAVE": "oppgave",
+  "APP_NAME_MEDL": "medlemskap-medl-api",
+  "APP_NAME_MELOSYS_EESSI": "melosys-eessi"
+}
