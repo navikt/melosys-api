@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
+import java.time.LocalDate;
+
 import com.google.common.collect.Lists;
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
@@ -7,12 +9,14 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,6 +38,8 @@ class OpprettFagsakOgBehandlingFraSedTest {
 
     @Mock
     private FagsakService fagsakService;
+    @Mock
+    private JoarkFasade joarkFasade;
 
     private final FakeUnleash unleash = new FakeUnleash();
     private OpprettFagsakOgBehandlingFraSed opprettFagsakOgBehandlingFraSed;
@@ -42,7 +49,7 @@ class OpprettFagsakOgBehandlingFraSedTest {
 
     @BeforeEach
     void setUp() {
-        opprettFagsakOgBehandlingFraSed = new OpprettFagsakOgBehandlingFraSed(unleash, fagsakService);
+        opprettFagsakOgBehandlingFraSed = new OpprettFagsakOgBehandlingFraSed(fagsakService, joarkFasade, unleash);
         when(fagsakService.nyFagsakOgBehandling(any())).thenReturn(lagFagsak());
         unleash.enableAll();
     }
@@ -51,7 +58,7 @@ class OpprettFagsakOgBehandlingFraSedTest {
     void utfør_verifiserNyFagsakOgBehandlingBlirOpprettet() {
         Prosessinstans prosessinstans = lagProsessinstans();
         prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
-
+        when(joarkFasade.hentMottaksDatoForJournalpost(anyString())).thenReturn(LocalDate.EPOCH);
 
         opprettFagsakOgBehandlingFraSed.utfør(prosessinstans);
 
@@ -60,6 +67,8 @@ class OpprettFagsakOgBehandlingFraSedTest {
         assertThat(opprettSakRequestArgumentCaptor.getValue().getSakstype()).isEqualTo(Sakstyper.EU_EOS);
         assertThat(opprettSakRequestArgumentCaptor.getValue().getSakstema()).isEqualTo(Sakstemaer.UNNTAK);
         assertThat(opprettSakRequestArgumentCaptor.getValue().getBehandlingstype()).isEqualTo(Behandlingstyper.FØRSTEGANG);
+        assertThat(opprettSakRequestArgumentCaptor.getValue().getBehandlingsårsaktype()).isEqualTo(Behandlingsaarsaktyper.SED);
+        assertThat(opprettSakRequestArgumentCaptor.getValue().getMottaksdato()).isNotNull();
     }
 
     @Test
@@ -67,6 +76,7 @@ class OpprettFagsakOgBehandlingFraSedTest {
         unleash.disableAll();
         Prosessinstans prosessinstans = lagProsessinstans();
         prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
+        when(joarkFasade.hentMottaksDatoForJournalpost(anyString())).thenReturn(LocalDate.EPOCH);
 
 
         opprettFagsakOgBehandlingFraSed.utfør(prosessinstans);
@@ -76,18 +86,17 @@ class OpprettFagsakOgBehandlingFraSedTest {
         assertThat(opprettSakRequestArgumentCaptor.getValue().getSakstype()).isEqualTo(Sakstyper.EU_EOS);
         assertThat(opprettSakRequestArgumentCaptor.getValue().getSakstema()).isEqualTo(Sakstemaer.UNNTAK);
         assertThat(opprettSakRequestArgumentCaptor.getValue().getBehandlingstype()).isEqualTo(Behandlingstyper.SED);
+        assertThat(opprettSakRequestArgumentCaptor.getValue().getMottaksdato()).isNotNull();
     }
 
     private Prosessinstans lagProsessinstans() {
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, "123");
-        prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, "321");
-        prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, 123);
         prosessinstans.setData(ProsessDataKey.SAKSTEMA, Sakstemaer.UNNTAK);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.BESLUTNING_LOVVALG_NORGE);
 
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setRinaSaksnummer("123rina");
+        melosysEessiMelding.setJournalpostId("123");
 
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
