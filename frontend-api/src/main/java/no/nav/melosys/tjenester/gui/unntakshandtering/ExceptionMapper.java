@@ -5,14 +5,20 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import no.nav.melosys.exception.*;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.SikkerhetsbegrensningException;
+import no.nav.melosys.exception.ValideringException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.slf4j.event.Level;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.CORRELATION_ID;
 
 @ControllerAdvice
 public class ExceptionMapper {
@@ -64,6 +70,7 @@ public class ExceptionMapper {
         entity.put("status", httpStatus.value());
         entity.put("error", httpStatus.getReasonPhrase());
         entity.put("message", e.getMessage());
+        entity.put("correlationId", MDC.get(CORRELATION_ID));
         if (begrunnelser != null && !begrunnelser.isEmpty()) {
             entity.put("feilkoder", begrunnelser);
         }
