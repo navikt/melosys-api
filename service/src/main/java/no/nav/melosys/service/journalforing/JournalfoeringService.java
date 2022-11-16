@@ -330,8 +330,8 @@ public class JournalfoeringService {
         var fagsak = fagsakService.hentFagsak(saksnummer);
         var behandlingstema = behandleAlleSakerToggleEnabled ? Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode()) : null;
         var behandlingstype = Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode());
-        final Behandling sistBehandling = fagsak.hentSistRegistrertBehandling();
-        final Behandlingsresultat sistBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(sistBehandling.getId());
+        final var sistBehandling = fagsak.hentSistRegistrertBehandling();
+        final var sistBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(sistBehandling.getId());
 
         if (fagsak.hentAktivBehandling() != null && (!behandleAlleSakerToggleEnabled || sistBehandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak())) {
             throw new FunksjonellException("Det finnes allerede en aktiv behandling på fagsak " + saksnummer);
