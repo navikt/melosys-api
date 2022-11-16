@@ -6,10 +6,9 @@ import no.nav.melosys.generated.graphql.model.IdentInformasjonDto
 import no.nav.melosys.generated.graphql.model.IdentlisteDto
 import no.nav.melosys.melosysmock.person.PersonRepoStorage
 import org.springframework.stereotype.Component
-import org.springframework.web.context.annotation.RequestScope
 
 @Component
-@RequestScope
+//@RequestScope
 class HentIdenterQuery(private val personRepoStorage: PersonRepoStorage) : HentIdenterQueryResolver {
 
     override fun hentIdenter(ident: String, grupper: List<IdentGruppeDto>?, historikk: Boolean?) =
