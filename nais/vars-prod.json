@@ -1,5 +1,4 @@
 {
-  "CLUSTER": "prod-fss",
   "URL": "melosys-api.intern.nav.no",
   "KAFKA_POOL": "nav-prod",
   "VAULT_CLUSTER": "prod",

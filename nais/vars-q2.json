@@ -1,5 +1,4 @@
 {
-  "CLUSTER": "dev-fss",
   "URL": "melosys-api.dev.intern.nav.no",
   "KAFKA_POOL": "nav-dev",
   "VAULT_CLUSTER": "dev",
