@@ -81,6 +81,12 @@ public class DokumentproduksjonsInfoMapper {
                     JournalforingsTittel.TRYGDEAVTALE.getTittel(),
                     Map.of(VedleggTyper.VEDTAKSBREV, JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
                         VedleggTyper.ATTEST, JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel())))
+            .put(TRYGDEAVTALE_CAN,
+                new DokumentproduksjonsInfo("trygdeavtale_ca",
+                    DokumentKategoriKode.VB.getKode(),
+                    JournalforingsTittel.TRYGDEAVTALE.getTittel(),
+                    Map.of(VedleggTyper.VEDTAKSBREV, JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
+                        VedleggTyper.ATTEST, JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel())))
             .put(GENERELT_FRITEKSTBREV_BRUKER,
                 new DokumentproduksjonsInfo("fritekstbrev",
                     DokumentKategoriKode.IB.getKode()))

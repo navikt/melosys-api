@@ -2,6 +2,7 @@ package no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll;
 
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.PeriodeOmLovvalg;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_ca;
 import no.nav.melosys.domain.mottatteopplysninger.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
@@ -14,6 +15,8 @@ import no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderReg
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 import no.nav.melosys.service.kontroll.regler.PersonRegler;
 import no.nav.melosys.service.validering.Kontrollfeil;
+
+import java.util.Arrays;
 
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_usa.*;
@@ -94,7 +97,8 @@ final class FerdigbehandlingKontroll {
     }
 
     private static boolean erBestemmelseDerTrygdeavtaleAttestSendes(LovvalgBestemmelse bestemmelse) {
-        return erBestemmelseDerTrygdeavtaleAttestSendesUK(bestemmelse) || erBestemmelseDerTrygdeavtaleAttestSendesUSA(bestemmelse);
+        return erBestemmelseDerTrygdeavtaleAttestSendesUK(bestemmelse) || erBestemmelseDerTrygdeavtaleAttestSendesUSA(bestemmelse)
+            || erBestemmelseDerTrygdeavtaleAttestSendesCanada(bestemmelse);
     }
 
     private static boolean erBestemmelseDerTrygdeavtaleAttestSendesUK(LovvalgBestemmelse bestemmelse) {
@@ -109,5 +113,9 @@ final class FerdigbehandlingKontroll {
             || bestemmelse == USA_ART5_5
             || bestemmelse == USA_ART5_6
             || bestemmelse == USA_ART5_9;
+    }
+
+    private static boolean erBestemmelseDerTrygdeavtaleAttestSendesCanada(LovvalgBestemmelse bestemmelse) {
+        return Arrays.stream(Lovvalgbestemmelser_trygdeavtale_ca.values()).anyMatch(p -> p.equals(bestemmelse));
     }
 }
