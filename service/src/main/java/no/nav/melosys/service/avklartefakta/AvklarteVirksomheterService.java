@@ -11,7 +11,7 @@ import no.nav.melosys.domain.adresse.Adresse;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
@@ -49,7 +49,7 @@ public class AvklarteVirksomheterService {
     }
 
     public List<AvklartVirksomhet> hentUtenlandskeVirksomheter(Behandling behandling) {
-        BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        MottatteOpplysningerData grunnlagData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         Set<String> avklarteOrgnumreOgUuider = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId());
 
         return grunnlagData.foretakUtland.stream()
@@ -59,7 +59,7 @@ public class AvklarteVirksomheterService {
     }
 
     Set<String> hentNorskeSelvstendigeForetakOrgnumre(Behandling behandling) {
-        BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        MottatteOpplysningerData grunnlagData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         Set<String> organisasjonsnumre = grunnlagData.selvstendigArbeid.hentAlleOrganisasjonsnumre()
             .collect(Collectors.toSet());
 
@@ -71,7 +71,7 @@ public class AvklarteVirksomheterService {
     public Set<String> hentNorskeArbeidsgivendeOrgnumre(Behandling behandling) {
         ArbeidsforholdDokument arbDok = behandling.hentArbeidsforholdDokument();
         Set<String> arbeidsgivendeOrgnumre = arbDok.hentOrgnumre();
-        BehandlingsgrunnlagData grunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        MottatteOpplysningerData grunnlagData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         arbeidsgivendeOrgnumre.addAll(grunnlagData.juridiskArbeidsgiverNorge.ekstraArbeidsgivere);
 
         Set<String> avklarteOrgnumreOgUuider = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId());
@@ -154,18 +154,18 @@ public class AvklarteVirksomheterService {
     }
 
     private boolean erVirksomhetIDGyldig(String virksomhetID, Behandling behandling) {
-        BehandlingsgrunnlagData behandlingsgrunnlagData = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
-        return erVirksomhetForetakUtland(virksomhetID, behandlingsgrunnlagData)
-            || erVirksomhetSelvstendigForetakEllerLagtInnManuelt(virksomhetID, behandlingsgrunnlagData)
+        MottatteOpplysningerData mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
+        return erVirksomhetForetakUtland(virksomhetID, mottatteOpplysningerData)
+            || erVirksomhetSelvstendigForetakEllerLagtInnManuelt(virksomhetID, mottatteOpplysningerData)
             || erVirksomhetArbeidNorge(virksomhetID, behandling);
     }
 
-    private boolean erVirksomhetForetakUtland(String uuid, BehandlingsgrunnlagData behandlingsgrunnlagData) {
-        return behandlingsgrunnlagData.hentUtenlandskeArbeidsgivereUuid().contains(uuid);
+    private boolean erVirksomhetForetakUtland(String uuid, MottatteOpplysningerData mottatteOpplysningerData) {
+        return mottatteOpplysningerData.hentUtenlandskeArbeidsgivereUuid().contains(uuid);
     }
 
-    private boolean erVirksomhetSelvstendigForetakEllerLagtInnManuelt(String orgnr, BehandlingsgrunnlagData behandlingsgrunnlagData) {
-        return behandlingsgrunnlagData.hentAlleOrganisasjonsnumre().contains(orgnr);
+    private boolean erVirksomhetSelvstendigForetakEllerLagtInnManuelt(String orgnr, MottatteOpplysningerData mottatteOpplysningerData) {
+        return mottatteOpplysningerData.hentAlleOrganisasjonsnumre().contains(orgnr);
     }
 
     private boolean erVirksomhetArbeidNorge(String orgnr, Behandling behandling) {

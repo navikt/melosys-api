@@ -5,9 +5,9 @@ import java.util.Collection;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.SoeknadFtrl;
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -60,7 +60,7 @@ public class FattetVedtakService {
         return new FattetVedtak(
             lagSak(behandling, behandling.getFagsak(), persondata),
             lagVedtak(behandlingsresultat.getVedtakMetadata()),
-            lagSoeknad(behandling.getBehandlingsgrunnlag()),
+            lagSoeknad(behandling.getMottatteOpplysninger()),
             lagSaksopplysninger(persondata),
             null,
             lagPerioder(behandlingsresultat),
@@ -92,15 +92,15 @@ public class FattetVedtakService {
         );
     }
 
-    private Soeknad lagSoeknad(Behandlingsgrunnlag behandlingsgrunnlag) {
-        SoeknadFtrl behandlingsgrunnlagdata = (SoeknadFtrl) behandlingsgrunnlag.getBehandlingsgrunnlagdata();
+    private Soeknad lagSoeknad(MottatteOpplysninger mottatteOpplysninger) {
+        SoeknadFtrl mottatteOpplysningerData = (SoeknadFtrl) mottatteOpplysninger.getMottatteOpplysningerData();
         return new Soeknad(
-            behandlingsgrunnlagdata.getTrygdedekning(),
-            behandlingsgrunnlagdata.loennOgGodtgjoerelse,
-            behandlingsgrunnlagdata.juridiskArbeidsgiverNorge,
-            behandlingsgrunnlagdata.foretakUtland,
-            behandlingsgrunnlag.getMottaksdato(),
-            behandlingsgrunnlagdata.periode
+            mottatteOpplysningerData.getTrygdedekning(),
+            mottatteOpplysningerData.loennOgGodtgjoerelse,
+            mottatteOpplysningerData.juridiskArbeidsgiverNorge,
+            mottatteOpplysningerData.foretakUtland,
+            mottatteOpplysninger.getMottaksdato(),
+            mottatteOpplysningerData.periode
         );
     }
 

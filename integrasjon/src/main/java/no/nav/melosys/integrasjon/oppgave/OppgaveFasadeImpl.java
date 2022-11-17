@@ -266,7 +266,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
-    public List<Oppgave> finnBehandlingsoppgaverMedAktørId(String aktørId, String[] oppgavetyper) {
+    public List<Oppgave> finnOppgaverMedAktørId(String aktørId, String[] oppgavetyper) {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medAktørId(aktørId)
             .medTema(hentGyldigeTemaer())
@@ -281,7 +281,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
-    public List<Oppgave> finnBehandlingsoppgaverMedOrgnr(String orgnr, String[] oppgavetyper) {
+    public List<Oppgave> finnOppgaverMedOrgnr(String orgnr, String[] oppgavetyper) {
         OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
             .medOrgnr(orgnr)
             .medTema(hentGyldigeTemaer())

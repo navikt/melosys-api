@@ -8,10 +8,10 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RegistreringsInfo;
 import no.nav.melosys.domain.Tema;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Soeknadsland;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
+import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
@@ -22,7 +22,7 @@ import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 import no.nav.melosys.service.oppgave.dto.*;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -34,8 +34,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.kodeverk.Oppgavetyper.*;
-import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentPeriode;
-import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentSøknadsland;
+import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentPeriode;
+import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentSøknadsland;
 
 @Service
 public class OppgaveService {
@@ -45,15 +45,23 @@ public class OppgaveService {
     private final FagsakService fagsakService;
     private final OppgaveFasade oppgaveFasade;
     private final SaksopplysningerService saksopplysningerService;
-    private final BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private final MottatteOpplysningerService mottatteOpplysningerService;
     private final PersondataFasade persondataFasade;
     private final EregFasade eregFasade;
     private final Unleash unleash;
 
-    private final String[] oppgavetyper = new String[]{
+    private static final String[] BEHANDLINGSOPPGAVE_TYPER = new String[]{
         BEH_SAK_MK.getKode(),
         BEH_SAK.getKode(),
-        BEH_SED.getKode()
+        BEH_SED.getKode(),
+    };
+
+    private static final String[] BEHANDLINGSOPPGAVE_TYPER_UTVIDET = new String[]{
+        BEH_SAK_MK.getKode(),
+        BEH_SAK.getKode(),
+        BEH_SED.getKode(),
+        VUR.getKode(),
+        VURD_HENV.getKode()
     };
 
     private static final String UKJENT = "UKJENT";
@@ -62,7 +70,7 @@ public class OppgaveService {
                           FagsakService fagsakService,
                           OppgaveFasade oppgaveFasade,
                           SaksopplysningerService saksopplysningerService,
-                          BehandlingsgrunnlagService behandlingsgrunnlagService,
+                          MottatteOpplysningerService mottatteOpplysningerService,
                           PersondataFasade persondataFasade,
                           EregFasade eregFasade,
                           Unleash unleash) {
@@ -70,23 +78,31 @@ public class OppgaveService {
         this.fagsakService = fagsakService;
         this.oppgaveFasade = oppgaveFasade;
         this.saksopplysningerService = saksopplysningerService;
-        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
+        this.mottatteOpplysningerService = mottatteOpplysningerService;
         this.persondataFasade = persondataFasade;
         this.eregFasade = eregFasade;
         this.unleash = unleash;
     }
 
-    public List<Oppgave> finnOppgaverMedPersonIdent(String personIdent) {
+    public List<Oppgave> finnBehandlingsoppgaverMedPersonIdent(String personIdent) {
         String aktørId = persondataFasade.hentAktørIdForIdent(personIdent);
 
         if (aktørId == null) {
             throw new IkkeFunnetException("Finner ikke aktørId for ident " + personIdent);
         }
-        return filtrerOppgaverMedJournalpost(oppgaveFasade.finnBehandlingsoppgaverMedAktørId(aktørId, oppgavetyper));
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            return filtrerOppgaverMedJournalpost(oppgaveFasade.finnOppgaverMedAktørId(aktørId, BEHANDLINGSOPPGAVE_TYPER_UTVIDET));
+        } else {
+            return filtrerOppgaverMedJournalpost(oppgaveFasade.finnOppgaverMedAktørId(aktørId, BEHANDLINGSOPPGAVE_TYPER));
+        }
     }
 
-    public List<Oppgave> finnOppgaverMedOrgnr(String orgnr) {
-        return filtrerOppgaverMedJournalpost(oppgaveFasade.finnBehandlingsoppgaverMedOrgnr(orgnr, oppgavetyper));
+    public List<Oppgave> finnBehandlingsoppgaverMedOrgnr(String orgnr) {
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            return filtrerOppgaverMedJournalpost(oppgaveFasade.finnOppgaverMedOrgnr(orgnr, BEHANDLINGSOPPGAVE_TYPER_UTVIDET));
+        } else {
+            return filtrerOppgaverMedJournalpost(oppgaveFasade.finnOppgaverMedOrgnr(orgnr, BEHANDLINGSOPPGAVE_TYPER));
+        }
     }
 
     private List<Oppgave> filtrerOppgaverMedJournalpost(List<Oppgave> oppgaveListe) {
@@ -364,17 +380,17 @@ public class OppgaveService {
                 return behOppgaveDto;
             }
 
-            Optional<Behandlingsgrunnlag> behandlingsgrunnlag = behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId());
-            if (behandlingsgrunnlag.isPresent()) {
-                Soeknad søknadDokument = (Soeknad) behandlingsgrunnlag.get().getBehandlingsgrunnlagdata();
+            Optional<MottatteOpplysninger> mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.getId());
+            if (mottatteOpplysninger.isPresent()) {
+                Soeknad søknadDokument = (Soeknad) mottatteOpplysninger.get().getMottatteOpplysningerData();
                 Soeknadsland søknadsland = hentSøknadsland(søknadDokument);
                 behOppgaveDto.setLand(SoeknadslandDto.av(søknadsland));
                 behOppgaveDto.setPeriode(mapPeriode(søknadDokument));
             }
         } else {
             if (behandling.erBehandlingAvSøknadGammel()) {
-                Soeknad søknadDokument = (Soeknad) behandlingsgrunnlagService
-                    .hentBehandlingsgrunnlag(behandling.getId()).getBehandlingsgrunnlagdata();
+                Soeknad søknadDokument = (Soeknad) mottatteOpplysningerService
+                    .hentMottatteOpplysninger(behandling.getId()).getMottatteOpplysningerData();
                 Soeknadsland søknadsland = hentSøknadsland(søknadDokument);
                 behOppgaveDto.setLand(SoeknadslandDto.av(søknadsland));
                 behOppgaveDto.setPeriode(mapPeriode(søknadDokument));
@@ -426,10 +442,10 @@ public class OppgaveService {
         final String brukersAktørID = behandling.getFagsak().hentBrukersAktørID();
         if (persondataFasade.harStrengtFortroligAdresse(brukersAktørID)) {
             return true;
-        } else if (behandling.getBehandlingsgrunnlag() == null) {
+        } else if (behandling.getMottatteOpplysninger() == null) {
             return false;
         }
-        for (String fnr : behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().hentFnrMedfølgendeBarn()) {
+        for (String fnr : behandling.getMottatteOpplysninger().getMottatteOpplysningerData().hentFnrMedfølgendeBarn()) {
             if (persondataFasade.harStrengtFortroligAdresse(fnr)) {
                 return true;
             }

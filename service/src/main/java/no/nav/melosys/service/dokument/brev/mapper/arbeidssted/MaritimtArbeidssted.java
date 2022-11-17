@@ -1,6 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper.arbeidssted;
 
-import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.MaritimtArbeid;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;

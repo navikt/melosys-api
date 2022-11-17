@@ -1,11 +1,14 @@
 package no.nav.melosys.service.altinn;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import com.google.common.collect.MoreCollectors;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -14,6 +17,7 @@ import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.msm.AltinnDokument;
@@ -21,7 +25,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.altinn.SoknadMottakConsumer;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
@@ -34,19 +38,19 @@ import org.springframework.stereotype.Service;
 public class AltinnSoeknadService {
     private final SoknadMottakConsumer soknadMottakConsumer;
     private final FagsakService fagsakService;
-    private final BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private final MottatteOpplysningerService mottatteOpplysningerService;
     private final PersondataFasade persondataFasade;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final Unleash unleash;
 
     public AltinnSoeknadService(SoknadMottakConsumer soknadMottakConsumer,
                                 FagsakService fagsakService,
-                                BehandlingsgrunnlagService behandlingsgrunnlagService,
+                                MottatteOpplysningerService mottatteOpplysningerService,
                                 PersondataFasade persondataFasade,
                                 AvklarteVirksomheterService avklarteVirksomheterService, Unleash unleash) {
         this.soknadMottakConsumer = soknadMottakConsumer;
         this.fagsakService = fagsakService;
-        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
+        this.mottatteOpplysningerService = mottatteOpplysningerService;
         this.persondataFasade = persondataFasade;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.unleash = unleash;
@@ -54,8 +58,24 @@ public class AltinnSoeknadService {
 
     public Behandling opprettFagsakOgBehandlingFraAltinnSøknad(String søknadReferanse) {
         final MedlemskapArbeidEOSM søknad = soknadMottakConsumer.hentSøknad(søknadReferanse);
+        final LocalDate mottaksdato = hentMottaksdato(søknadReferanse);
 
-        OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
+        final Fagsak fagsak = fagsakService.nyFagsakOgBehandling(lagOpprettSakRequest(søknad, mottaksdato));
+        final Behandling behandling = fagsak.hentAktivBehandling();
+
+        mottatteOpplysningerService.opprettSøknadUtsendteArbeidstakereEøs(
+            behandling.getId(),
+            getXml(søknad),
+            SoeknadMapper.lagSoeknad(søknad),
+            søknadReferanse
+        );
+        avklarteVirksomheterService.lagreVirksomhetSomAvklartfakta(hentArbeidsgiverID(søknad), behandling.getId());
+
+        return behandling;
+    }
+
+    private OpprettSakRequest lagOpprettSakRequest(MedlemskapArbeidEOSM søknad, LocalDate mottaksdato) {
+        return new OpprettSakRequest.Builder()
             .medSakstype(Sakstyper.EU_EOS)
             .medSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG)
             .medAktørID(hentAktørID(søknad))
@@ -63,29 +83,23 @@ public class AltinnSoeknadService {
             .medArbeidsgiver(hentArbeidsgiverID(søknad))
             .medFullmektig(hentFullmektig(søknad))
             .medKontaktopplysninger(hentKontaktopplysninger(søknad))
+            .medBehandlingsårsaktype(Behandlingsaarsaktyper.SØKNAD)
+            .medMottaksdato(mottaksdato)
             .medBehandlingstema(avklarBehandlingstema(søknad))
             .medBehandlingstype(unleash.isEnabled("melosys.behandle_alle_saker")
                 ? Behandlingstyper.FØRSTEGANG
                 : Behandlingstyper.SOEKNAD)
             .build();
+    }
 
-        final Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
-        final Behandling behandling = fagsak.hentAktivBehandling();
+    private static String getXml(MedlemskapArbeidEOSM søknad) {
         String søknadXml;
         try {
             søknadXml = new XmlMapper().writeValueAsString(søknad);
         } catch (JsonProcessingException e) {
             throw new TekniskException(e);
         }
-        behandlingsgrunnlagService.opprettSøknadUtsendteArbeidstakereEøs(
-            behandling.getId(),
-            søknadXml,
-            SoeknadMapper.lagSoeknad(søknad),
-            søknadReferanse
-        );
-        avklarteVirksomheterService.lagreVirksomhetSomAvklartfakta(hentArbeidsgiverID(søknad), behandling.getId());
-
-        return behandling;
+        return søknadXml;
     }
 
     private Behandlingstema avklarBehandlingstema(MedlemskapArbeidEOSM søknad) {
@@ -102,6 +116,14 @@ public class AltinnSoeknadService {
 
     public Collection<AltinnDokument> hentDokumenterTilknyttetSoknad(String søknadReferanse) {
         return soknadMottakConsumer.hentDokumenter(søknadReferanse);
+    }
+
+    private LocalDate hentMottaksdato(String søknadReferanse) {
+        return hentDokumenterTilknyttetSoknad(søknadReferanse).stream()
+            .filter(AltinnDokument::erSøknad)
+            .map(AltinnDokument::getInnsendtTidspunkt)
+            .map(dokument -> LocalDate.ofInstant(dokument, ZoneId.systemDefault()))
+            .collect(MoreCollectors.onlyElement());
     }
 
     private String hentAktørID(MedlemskapArbeidEOSM søknad) {

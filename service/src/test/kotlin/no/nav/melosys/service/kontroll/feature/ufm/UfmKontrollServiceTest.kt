@@ -1,6 +1,5 @@
 package no.nav.melosys.service.kontroll.feature.ufm
 
-import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equality.shouldBeEqualToComparingFields
 import io.kotest.matchers.shouldBe
@@ -13,24 +12,25 @@ import io.mockk.verify
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.adresse.StrukturertAdresse
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData
 import no.nav.melosys.domain.dokument.SaksopplysningDokument
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
+import no.nav.melosys.domain.dokument.medlemskap.PeriodeType
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.person.Personopplysninger
 import no.nav.melosys.domain.person.adresse.Bostedsadresse
 import no.nav.melosys.repository.KontrollresultatRepository
 import no.nav.melosys.service.SaksbehandlingDataFactory
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.persondata.PersondataFasade
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.*
 import org.junit.jupiter.api.BeforeEach
@@ -49,7 +49,7 @@ class UfmKontrollServiceTest {
     lateinit var behandlingsresultatService: BehandlingsresultatService
 
     @MockK
-    lateinit var behandlingsgrunnlagService: BehandlingsgrunnlagService
+    lateinit var mottatteOpplysningerService: MottatteOpplysningerService
 
     @MockK
     lateinit var behandlingService: BehandlingService
@@ -68,7 +68,7 @@ class UfmKontrollServiceTest {
     private var sedDokument: SedDokument = SedDokument()
     private var medlemskapDokument = MedlemskapDokument()
     private var personopplysninger: Personopplysninger = lagPersonopplysninger()
-    private var behandlingsgrunnlagData: BehandlingsgrunnlagData = BehandlingsgrunnlagData()
+    private var mottatteOpplysningerData: MottatteOpplysningerData = MottatteOpplysningerData()
 
     @BeforeEach
     fun setup() {
@@ -76,36 +76,11 @@ class UfmKontrollServiceTest {
         ufmKontrollService = UfmKontrollService(
             kontrollresultatRepository,
             behandlingsresultatService,
-            behandlingsgrunnlagService,
+            mottatteOpplysningerService,
             behandlingService,
             persondataFasade,
             unleash
         )
-    }
-
-    @Test
-    fun utførKontrollerOgRegistrerFeil_A003_forventKontroll_ingenFeil() {
-        sedDokument.apply {
-            sedType = SedType.A003
-            lovvalgslandKode = Landkoder.SE
-            avsenderLandkode = Landkoder.SE
-            lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-        }
-        personopplysninger.apply {
-            bostedsadresse = Bostedsadresse(
-                StrukturertAdresse().apply { landkode = "SE" }, null, null, null, null,
-                null,
-                false
-            );
-        }
-        every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
-            .answers {
-                kontrollresultatSlot.captured.shouldBeEmpty().toList()
-            }
-        setupMockedTestData()
-
-
-        ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
     }
 
     @Test // Ta vekk med a003-inn toggle
@@ -122,7 +97,7 @@ class UfmKontrollServiceTest {
             medlemsperiode.add(
                 Medlemsperiode().apply {
                     periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-                    land = "SE"
+                    land = "SWE"
                 }
             )
         }
@@ -152,147 +127,23 @@ class UfmKontrollServiceTest {
     }
 
     @Test
-    fun utførKontrollerOgRegistrerFeil_A003_medOverlappendePeriode_erIkkeEndring_ingenFeil() {
+    fun
+        utførKontrollerOgRegistrerFeil_A003_lovvalgslandUtenforNorge_medOverlappendePeriodeUtenMedlemskap_erOpprinnelig_likeLand_ingenYtterligeOpplysninger_ingenKontroll() {
         sedDokument.apply {
             sedType = SedType.A003
             lovvalgslandKode = Landkoder.SE
             avsenderLandkode = Landkoder.SE
             lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-            setErEndring(false);
+            setErEndring(false)
         }
         medlemskapDokument.apply {
             medlemsperiode.add(
                 Medlemsperiode().apply {
                     periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-                    land = "SE"
+                    land = "SWE"
+                    type = PeriodeType.PERIODE_UTEN_MEDLEMSKAP
                 }
             )
-        }
-
-        personopplysninger.apply {
-            bostedsadresse = Bostedsadresse(
-                StrukturertAdresse().apply { landkode = "SE" }, null, null, null, null,
-                null,
-                false
-            );
-        }
-        every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
-            .answers {
-                kontrollresultatSlot.captured.shouldHaveSize(0).toList()
-            }
-        setupMockedTestData()
-
-
-        ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
-    }
-
-    @Test
-    fun utførKontrollerOgRegistrerFeil_A003_medOverlappendePeriode_erEndring_forventKontroll() {
-        sedDokument.apply {
-            sedType = SedType.A003
-            lovvalgslandKode = Landkoder.SE
-            avsenderLandkode = Landkoder.SE
-            lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-            setErEndring(true)
-        }
-        medlemskapDokument.apply {
-            medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-                    land = "SE"
-                }
-            )
-        }
-
-        personopplysninger.apply {
-            bostedsadresse = Bostedsadresse(
-                StrukturertAdresse().apply { landkode = "SE" }, null, null, null, null,
-                null,
-                false
-            );
-        }
-        every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
-            .answers {
-                kontrollresultatSlot.captured.shouldHaveSize(1)
-                    .sortedBy { it.begrunnelse }
-                    .apply {
-                        first().apply {
-                            begrunnelse.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
-                            behandlingsresultat.id.shouldBe(BEHANDLINGSRESULTAT_ID)
-                        }
-                    }
-            }
-        setupMockedTestData()
-
-
-        ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
-    }
-
-    @Test
-    fun utførKontrollerOgRegistrerFeil_A003_medOverlappendePeriode_harOpplysning_forventKontroll() {
-        sedDokument.apply {
-            sedType = SedType.A003
-            lovvalgslandKode = Landkoder.SE
-            avsenderLandkode = Landkoder.SE
-            lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-
-        }
-        medlemskapDokument.apply {
-            medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-                    land = "SE"
-                }
-            )
-            personopplysninger
-        }
-        behandlingsgrunnlagData.apply {
-            ytterligereInformasjon = "Vi har ekstra informasjon som en saksbehandler må manuelt behandle!"
-        }
-        personopplysninger.apply {
-            bostedsadresse = Bostedsadresse(
-                StrukturertAdresse().apply { landkode = "SE" }, null, null, null, null,
-                null,
-                false
-            );
-        }
-        every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
-            .answers {
-                kontrollresultatSlot.captured.shouldHaveSize(1)
-                    .sortedBy { it.begrunnelse }
-                    .apply {
-                        first().apply {
-                            begrunnelse.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
-                            behandlingsresultat.id.shouldBe(BEHANDLINGSRESULTAT_ID)
-                        }
-                    }
-            }
-        setupMockedTestData()
-
-
-        ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
-    }
-
-    @Test
-    fun utførKontrollerOgRegistrerFeil_A003_medOverlappendePeriode_harIkkeOpplysning_forventIkkeKontroll() {
-        sedDokument.apply {
-            sedType = SedType.A003
-            lovvalgslandKode = Landkoder.SE
-            avsenderLandkode = Landkoder.SE
-            lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-
-        }
-        medlemskapDokument.apply {
-            medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-                    land = "SE"
-                }
-            )
-            personopplysninger
-        }
-        behandlingsgrunnlagData.apply {
-            ytterligereInformasjon = null
         }
         personopplysninger.apply {
             bostedsadresse = Bostedsadresse(
@@ -312,31 +163,109 @@ class UfmKontrollServiceTest {
     }
 
     @Test
-    fun utførKontrollerOgRegistrerFeil_A003_medOverlappendePeriode_harForskjelligMedlLovvalgsland_forventKontroll() {
+    fun
+        utførKontrollerOgRegistrerFeil_A003_lovvalgslandUtenforNorge_medFlereOverlappendePerioderUtenMedlemskap_erOpprinnelig_likeLand_ingenYtterligeOpplysninger_ingenKontroll() {
         sedDokument.apply {
             sedType = SedType.A003
             lovvalgslandKode = Landkoder.SE
             avsenderLandkode = Landkoder.SE
-            lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(2))
-
+            lovvalgsperiode = Periode(LocalDate.now().plusDays(17), LocalDate.now().plusMonths(1).plusDays(5))
+            setErEndring(false)
         }
         medlemskapDokument.apply {
             medlemsperiode.add(
                 Medlemsperiode().apply {
                     periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-                    land = "SE"
-                },
+                    land = "SWE"
+                    type = PeriodeType.PERIODE_UTEN_MEDLEMSKAP
+                }
             )
             medlemsperiode.add(
                 Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2))
-                    land = "DK"
-                },
+                    periode = Periode(LocalDate.now().plusDays(15), LocalDate.now().plusMonths(2))
+                    land = "SWE"
+                    type = PeriodeType.PERIODE_UTEN_MEDLEMSKAP
+                }
             )
-            personopplysninger
         }
-        behandlingsgrunnlagData.apply {
-            ytterligereInformasjon = "Vi har ekstra informasjon som en saksbehandler må manuelt behandle!"
+        personopplysninger.apply {
+            bostedsadresse = Bostedsadresse(
+                StrukturertAdresse().apply { landkode = "SE" }, null, null, null, null,
+                null,
+                false
+            );
+        }
+        every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
+            .answers {
+                kontrollresultatSlot.captured.shouldHaveSize(0).toList()
+            }
+        setupMockedTestData()
+
+
+        ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
+    }
+
+    @Test
+    fun
+        utførKontrollerOgRegistrerFeil_A003_lovvalgslandUtenforNorge_medOverlappendePeriodeUtenMedlemskap_erOpprinnelig_harUliktLand_ingenYtterligeOpplysninger_feilKontroll() {
+        sedDokument.apply {
+            sedType = SedType.A003
+            lovvalgslandKode = Landkoder.SE
+            avsenderLandkode = Landkoder.SE
+            lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+            setErEndring(false)
+        }
+        medlemskapDokument.apply {
+            medlemsperiode.add(
+                Medlemsperiode().apply {
+                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+                    land = "DNK"
+                    type = PeriodeType.PERIODE_UTEN_MEDLEMSKAP
+                }
+            )
+        }
+        personopplysninger.apply {
+            bostedsadresse = Bostedsadresse(
+                StrukturertAdresse().apply { landkode = "SE" }, null, null, null, null,
+                null,
+                false
+            );
+        }
+        every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
+            .answers {
+                kontrollresultatSlot.captured.shouldHaveSize(1)
+                    .sortedBy { it.begrunnelse }
+                    .apply {
+                        first().apply {
+                            begrunnelse.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+                            behandlingsresultat.id.shouldBe(BEHANDLINGSRESULTAT_ID)
+                        }
+                    }
+            }
+        setupMockedTestData()
+
+
+        ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
+    }
+
+    @Test
+    fun
+        utførKontrollerOgRegistrerFeil_A003_lovvalgslandUtenforNorge_medOverlappendePeriodeMedMedlemskap_erOpprinnelig_harUliktLand_ingenYtterligeOpplysninger_feilKontroll() {
+        sedDokument.apply {
+            sedType = SedType.A003
+            lovvalgslandKode = Landkoder.SE
+            avsenderLandkode = Landkoder.SE
+            lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+            setErEndring(false)
+        }
+        medlemskapDokument.apply {
+            medlemsperiode.add(
+                Medlemsperiode().apply {
+                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+                    land = "NOR"
+                    type = PeriodeType.PERIODE_MED_MEDLEMSKAP
+                }
+            )
         }
         personopplysninger.apply {
             bostedsadresse = Bostedsadresse(
@@ -375,13 +304,13 @@ class UfmKontrollServiceTest {
             medlemsperiode.add(
                 Medlemsperiode().apply {
                     periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-                    land = "SE"
+                    land = "SWE"
                 },
             )
             medlemsperiode.add(
                 Medlemsperiode().apply {
                     periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2))
-                    land = "SE"
+                    land = "SWE"
                 },
             )
             personopplysninger
@@ -416,13 +345,13 @@ class UfmKontrollServiceTest {
             medlemsperiode.add(
                 Medlemsperiode().apply {
                     periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-                    land = "SE"
+                    land = "SWE"
                 },
             )
             medlemsperiode.add(
                 Medlemsperiode().apply {
                     periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2))
-                    land = "DK"
+                    land = "DNK"
                 },
             )
             personopplysninger
@@ -536,8 +465,8 @@ class UfmKontrollServiceTest {
             .apply {
                 id = BEHANDLINGSRESULTAT_ID
             }
-        every { behandlingsgrunnlagService.finnBehandlingsgrunnlagdata(BEHANDLING_ID) } returns
-            Optional.of(behandlingsgrunnlagData)
+        every { mottatteOpplysningerService.finnMottatteOpplysningerData(BEHANDLING_ID) } returns
+            Optional.of(mottatteOpplysningerData)
     }
 
     private fun lagSaksopplysning(

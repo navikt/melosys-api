@@ -3,7 +3,6 @@ package no.nav.melosys.tjenester.gui;
 import java.util.Collections;
 
 import io.swagger.annotations.Api;
-import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -48,7 +47,7 @@ public class TrygdeavtaleTjeneste {
     /***
      *
      * @deprecated
-     * Dette endepunket blir fjernet når trygdeavtale har tatt i bruk behandlingsgrunnlag/{behandlingID}
+     * Dette endepunket blir fjernet når trygdeavtale har tatt i bruk mottatteOpplysninger/{behandlingID}
      */
     @GetMapping("{behandlingID}")
     @Transactional
@@ -56,12 +55,12 @@ public class TrygdeavtaleTjeneste {
     public ResponseEntity<TrygdeavtaleInfoDto> hentTrygdeavtaleInfo(@PathVariable("behandlingID") long behandlingId,
                                                                     @RequestParam(value = "virksomheter", required = false) boolean hentVirksomheter,
                                                                     @RequestParam(value = "barnEktefeller", required = false) boolean hentBarnEktefeller) {
-        return hentTrygdeavtaleBehandlingsgrunnlag(behandlingId, hentVirksomheter, hentBarnEktefeller);
+        return hentTrygdeavtaleMottatteOpplysninger(behandlingId, hentVirksomheter, hentBarnEktefeller);
     }
 
-    @GetMapping("behandlingsgrunnlag/{behandlingID}")
+    @GetMapping("mottatteopplysninger/{behandlingID}")
     @Transactional
-    public ResponseEntity<TrygdeavtaleInfoDto> hentTrygdeavtaleBehandlingsgrunnlag(@PathVariable("behandlingID") long behandlingId,
+    public ResponseEntity<TrygdeavtaleInfoDto> hentTrygdeavtaleMottatteOpplysninger(@PathVariable("behandlingID") long behandlingId,
                                                                                    @RequestParam(value = "virksomheter", required = false) boolean hentVirksomheter,
                                                                                    @RequestParam(value = "barnEktefeller", required = false) boolean hentBarnEktefeller) {
         String saksbehandler = SubjectHandler.getInstance().getUserID();
@@ -69,7 +68,7 @@ public class TrygdeavtaleTjeneste {
         aksesskontroll.autoriser(behandlingId);
 
         var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
-        var behandlingsgrunnlagdata = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
+        var mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         var behandlingsResultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
 
         return ResponseEntity.ok(new TrygdeavtaleInfoDto(
@@ -77,8 +76,8 @@ public class TrygdeavtaleTjeneste {
             behandling.getTema().getKode(),
             behandling.getType().getKode(),
             aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler),
-            behandlingsgrunnlagdata.periode,
-            behandlingsgrunnlagdata.soeknadsland.hentSoeknadslandForTrygdeavtale(),
+            mottatteOpplysningerData.periode,
+            mottatteOpplysningerData.soeknadsland.hentSoeknadslandForTrygdeavtale(),
             hentVirksomheter ? trygdeavtaleService.hentVirksomheter(behandling) : Collections.emptyMap(),
             hentBarnEktefeller ? trygdeavtaleService.hentFamiliemedlemmer(behandling) : Collections.emptyList(),
             behandlingsResultat.getInnledningFritekst(),
@@ -92,8 +91,8 @@ public class TrygdeavtaleTjeneste {
     public ResponseEntity<TrygdeavtaleResultatDto> hentResultat(@PathVariable("behandlingID") long behandlingId) {
         TrygdeavtaleResultat trygdeavtaleResultat = trygdeavtaleService.hentResultat(behandlingId);
         var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
-        var behandlingsgrunnlagdata = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata();
-        return ResponseEntity.ok(TrygdeavtaleResultatDto.fra(trygdeavtaleResultat, behandlingsgrunnlagdata.personOpplysninger.medfolgendeFamilie));
+        var mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
+        return ResponseEntity.ok(TrygdeavtaleResultatDto.fra(trygdeavtaleResultat, mottatteOpplysningerData.personOpplysninger.medfolgendeFamilie));
     }
 
     @PostMapping("resultat/{behandlingID}")

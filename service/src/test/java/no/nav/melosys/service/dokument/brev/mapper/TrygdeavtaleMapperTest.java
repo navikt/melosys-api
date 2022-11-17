@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
@@ -44,7 +44,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.STORBRITANNIA;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.TRYGDEAVTALE_GB;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
 import static no.nav.melosys.service.dokument.brev.mapper.DokgenMalMapperTest.SOKNADSDATO;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -257,14 +257,14 @@ class TrygdeavtaleMapperTest {
     }
 
     private Behandling medPeriode(Behandling behandling) {
-        var behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
-        behandlingsgrunnlag.setMottaksdato(SOKNADSDATO);
+        var mottatteOpplysninger = behandling.getMottatteOpplysninger();
+        mottatteOpplysninger.setMottaksdato(SOKNADSDATO);
         return behandling;
     }
 
     private InnvilgelseBrevbestilling.Builder lagStorbritanniaBrevbestillingDefaultBuilder(Behandling behandling) {
         return new InnvilgelseBrevbestilling.Builder()
-            .medProduserbartdokument(STORBRITANNIA)
+            .medProduserbartdokument(TRYGDEAVTALE_GB)
             .medPersonDokument(lagPersondata())
             .medBehandling(behandling)
             .medOrg(lagOrg())

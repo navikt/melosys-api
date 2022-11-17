@@ -85,7 +85,7 @@ public class TrygdeavtaleVedtakService {
         if (request.getBehandlingsresultatTypeKode() == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
             return lagAvslagMangledeOpplysningerBrevbestilling(request);
         }
-        Optional<Produserbaredokumenter> produserbaredokumenter = behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.landkoder.stream()
+        Optional<Produserbaredokumenter> produserbaredokumenter = behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.landkoder.stream()
             .map(Land_iso2::valueOf)
             .findFirst()
             .map(this::utledProduserbartTrygdeavtaleDokument);
@@ -117,7 +117,7 @@ public class TrygdeavtaleVedtakService {
 
     private Produserbaredokumenter utledProduserbartTrygdeavtaleDokument(Land_iso2 soeknadsland) {
         return switch (soeknadsland) {
-            case GB -> Produserbaredokumenter.STORBRITANNIA;
+            case GB -> Produserbaredokumenter.TRYGDEAVTALE_GB;
             case US -> Produserbaredokumenter.TRYGDEAVTALE_US;
             default ->
                 throw new TekniskException("Søknadsland er ikke implementert som produsertbart dokument : " + soeknadsland);

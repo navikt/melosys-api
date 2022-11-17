@@ -365,6 +365,20 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return utpekingsperioder.stream().findFirst();
     }
 
+    public Medlemskapsperiode hentValidertMedlemskapsPeriode() {
+        return finnValidertMedlemskapsPeriode()
+            .orElseThrow(() -> new NoSuchElementException("Ingen medlemskapsPerioder finnes for behandlingsresultat " + id));
+    }
+
+    public Optional<Medlemskapsperiode> finnValidertMedlemskapsPeriode() {
+        Collection<Medlemskapsperiode> medlemskapsPerioder = medlemAvFolketrygden.getMedlemskapsperioder();
+        if (medlemskapsPerioder.size() > 1) {
+            throw new UnsupportedOperationException("Flere enn en medlemskapsPerioder er ikke støttet");
+        }
+
+        return medlemskapsPerioder.stream().findFirst();
+    }
+
     public Set<VilkaarBegrunnelse> hentVilkaarbegrunnelser(Vilkaar vilkaarType) {
         return getVilkaarsresultater().stream()
             .filter(vr -> vr.getVilkaar() == vilkaarType)

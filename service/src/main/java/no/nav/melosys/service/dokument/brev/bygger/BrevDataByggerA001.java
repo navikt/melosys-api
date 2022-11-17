@@ -105,7 +105,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
     }
 
     private Optional<String> hentUtenlandskIdent(Land_iso2 landkode) {
-        return dataGrunnlag.getBehandlingsgrunnlagData().personOpplysninger.utenlandskIdent.stream()
+        return dataGrunnlag.getMottatteOpplysningerData().personOpplysninger.utenlandskIdent.stream()
                 .filter(utenlandskIdent -> utenlandskIdent.landkode.equals(landkode.getKode()))
                 .map(utenlandskIdent -> utenlandskIdent.ident)
                 .findFirst();

@@ -23,9 +23,9 @@ public interface OppgaveFasade {
 
     Set<Oppgave> finnOppgaverMedAnsvarlig(String ansvarligSaksbehandlerID);
 
-    List<Oppgave> finnBehandlingsoppgaverMedAktørId(String aktørID, String[] oppgavetyper);
+    List<Oppgave> finnOppgaverMedAktørId(String aktørID, String[] oppgavetyper);
 
-    List<Oppgave> finnBehandlingsoppgaverMedOrgnr(String orgnr, String[] oppgavetyper);
+    List<Oppgave> finnOppgaverMedOrgnr(String orgnr, String[] oppgavetyper);
 
     List<Oppgave> finnÅpneBehandlingsoppgaverMedJournalpostID(String journalpostID);
 

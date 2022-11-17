@@ -8,7 +8,7 @@ Melosys-api er backenden for selve saksbehandlingsløsningen for prosjektet og i
 
 ## Lokal utvikling
 
-Melosys-api kan kjøres opp som en ren Spring-applikasjon med profil `local-mock` ved hjelp av 
+Melosys-api kan kjøres opp som en ren Spring-applikasjon med profil `local-mock` ved hjelp av
  [melosys-docker-compose](https://github.com/navikt/melosys-docker-compose), som spinner opp alle avhenigheter applikajsonen
  har, som database, kafka, ldap, oauth-server samt eksterne integrasjoner. Trenger også [naisdevice](https://doc.nais.io/device/install/index.html)
  for å koble til enkelte eksterne tjenester.
@@ -32,3 +32,16 @@ Melosys-api har en lagdelt arkitektur og bruker primært spring-boot som rammeve
 - **sikkerhet**: Felles logikk knyttet til sikkerhet. Eks ABAC, OIDC, STS, etc.
 - **soknad-altinn**: maven-modul som genererer POJO's fra XSD som representerer en søknad fra Altinn
 - **statistikk**: Produserer statistikk om utstedte A1 (attester om medlemskap etter EU/EØS-forordning) til dvh (datavarehus).
+
+## Versjonering for databasemigreringer
+
+I db/migration/melosysDB har vi migreringer for databasen til melosys-api.
+I db/migration/melosysDB/di_dvh har vi migreringer for Datavarehus, som er ansvarlig for saksbehandlingstatistikk i Melosys.
+
+Vi har besluttet at versjon for en ny migrering i melosysDB skal være siste versjon + 1.
+Ny migrering for Datavarehus skal være siste versjon + desimal, slik at man slippe å titte i mappen di_dvh når man oppretter
+ny migrering i melosysDB.
+
+## Komponent tester
+
+Noen komponenttester er avhengig av oracle databasen. Den kjøres opp automatisk med testcontainer. Men siden det ikke finnes et oracle image som støtter arm arkitektur må de som bruker m1 mac sette en enviroment variabel: `M1_MAC=true`. Da kobler testene seg til en kjørende database på maskinen. Se dokumentajon [her](https://github.com/navikt/melosys-docker-compose) for mer info

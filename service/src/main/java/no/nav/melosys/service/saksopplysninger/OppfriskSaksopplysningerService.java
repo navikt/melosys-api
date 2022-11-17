@@ -57,11 +57,12 @@ public class OppfriskSaksopplysningerService {
     @Transactional
     public void oppfriskSaksopplysning(long behandlingID, boolean medFamilierelasjoner) {
         var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
+        var folketrygdenToggleEnabled = unleash.isEnabled("melosys.folketrygden.mvp");
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
         if (behandling.erUtsending() && anmodningsperiodeService.harSendtAnmodningsperiode(behandlingID)) {
             throw new FunksjonellException("Anmodning om unntak er sendt for behandling %s. ".formatted(
-                behandlingID) + "Det er ikke lenger mulig å endre behandlingsgrunnlag og saksopplysninger");
+                behandlingID) + "Det er ikke lenger mulig å endre mottatteOpplysninger og saksopplysninger");
         }
 
         String aktørID = behandling.getFagsak().hentBrukersAktørID();
@@ -80,7 +81,8 @@ public class OppfriskSaksopplysningerService {
                 behandling.getFagsak().getTema(),
                 behandling.getTema(),
                 behandling.getType(),
-                behandleAlleSakerToggleEnabled))
+                behandleAlleSakerToggleEnabled,
+                folketrygdenToggleEnabled))
             .fnr(brukerID)
             .fom(periode.getFom())
             .tom(periode.getTom())
@@ -98,14 +100,15 @@ public class OppfriskSaksopplysningerService {
         }
 
         if (behandleAlleSakerToggleEnabled) {
+
             if (behandling.getFagsak().erSakstypeEøs()
-                && !SaksbehandlingRegler.harTomFlyt(behandling)
+                && !SaksbehandlingRegler.harTomFlyt(behandling, folketrygdenToggleEnabled)
                 && behandling.kanResultereIVedtak()
                 && !inngangsvilkaarService.oppfyllervurderingEF_883_2004(behandlingID)) {
                 inngangsvilkaarService.vurderOgLagreInngangsvilkår(
                     behandlingID,
                     behandling.hentSøknadsLand(),
-                    behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand,
+                    behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.erUkjenteEllerAlleEosLand,
                     periode
                 );
             }
@@ -116,7 +119,7 @@ public class OppfriskSaksopplysningerService {
                 inngangsvilkaarService.vurderOgLagreInngangsvilkår(
                     behandlingID,
                     behandling.finnSøknadsLandGammel(),
-                    behandling.getBehandlingsgrunnlag().getBehandlingsgrunnlagdata().soeknadsland.erUkjenteEllerAlleEosLand,
+                    behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.erUkjenteEllerAlleEosLand,
                     periode
                 );
             }

@@ -8,14 +8,15 @@ import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.sak.*;
@@ -30,11 +31,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
-import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentPeriode;
-import static no.nav.melosys.domain.util.BehandlingsgrunnlagUtils.hentSøknadsland;
+import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentPeriode;
+import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentSøknadsland;
 
 @Protected
 @RestController
@@ -48,7 +50,7 @@ public class FagsakTjeneste {
     private final FagsakService fagsakService;
     private final OpprettSak opprettSak;
     private final Aksesskontroll aksesskontroll;
-    private final BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private final MottatteOpplysningerService mottatteOpplysningerService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final PersondataFasade persondataFasade;
     private final SaksopplysningerService saksopplysningerService;
@@ -56,7 +58,7 @@ public class FagsakTjeneste {
     private final OpprettBehandlingForSak opprettBehandlingForSak;
     private final Unleash unleash;
 
-    public FagsakTjeneste(FagsakService fagsakService, Aksesskontroll aksesskontroll, BehandlingsgrunnlagService behandlingsgrunnlagService,
+    public FagsakTjeneste(FagsakService fagsakService, Aksesskontroll aksesskontroll, MottatteOpplysningerService mottatteOpplysningerService,
                           OpprettSak opprettSak,
                           BehandlingsresultatService behandlingsresultatService, PersondataFasade persondataFasade,
                           Unleash unleash,
@@ -64,7 +66,7 @@ public class FagsakTjeneste {
                           OpprettBehandlingForSak opprettBehandlingForSak) {
         this.fagsakService = fagsakService;
         this.aksesskontroll = aksesskontroll;
-        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
+        this.mottatteOpplysningerService = mottatteOpplysningerService;
         this.opprettSak = opprettSak;
         this.behandlingsresultatService = behandlingsresultatService;
         this.persondataFasade = persondataFasade;
@@ -107,6 +109,9 @@ public class FagsakTjeneste {
     @PostMapping("/{saksnr}/behandlinger")
     @ApiOperation(value = "Oppretter en ny behandling for sak.")
     public ResponseEntity<Void> opprettNyBehandlingForSak(@PathVariable("saksnr") String saksnummer, @RequestBody OpprettSakDto opprettSakDto) {
+        if (!unleash.isEnabled("melosys.ny_opprett_sak")) {
+            throw new FunksjonellException("Beklager, denne funksjonen er ikke støttet enda. Toggle melosys.ny_opprett_sak er disabled.");
+        }
         if (opprettSakDto.getBrukerID() != null) {
             aksesskontroll.autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
         }
@@ -156,6 +161,7 @@ public class FagsakTjeneste {
         notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer. Saker knyttet til en organisasjon søkes via organisasjonsnummer."),
         response = FagsakOppsummeringDto.class,
         responseContainer = "List")
+    @Transactional
     public List<FagsakOppsummeringDto> hentFagsaker(@RequestBody FagsakSokDto fagsakSokDto) {
 
         if (StringUtils.isNotEmpty(fagsakSokDto.ident())) {
@@ -257,32 +263,21 @@ public class FagsakTjeneste {
 
     private void setPeriodeOpplysninger(Behandling behandling, BehandlingOversiktDto behandlingOversiktDto) {
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            var optionalSedDokument = saksopplysningerService.finnSedOpplysninger(behandling.getId());
+            Behandlingsresultat behandlingsResultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
 
-            optionalSedDokument.ifPresentOrElse(sedDokument -> {
-                var søknadslandDto = SoeknadslandDto.av(sedDokument.getLovvalgslandKode());
+            Optional<Lovvalgsperiode> optionalLovvalgsperiode = behandlingsResultat.finnLovvalgsperiode();
+
+            optionalLovvalgsperiode.ifPresent(lovvalgsperiode -> {
+                var søknadslandDto = SoeknadslandDto.av(lovvalgsperiode.getLovvalgsland());
                 behandlingOversiktDto.setLand(søknadslandDto);
 
-                var lovvalgsperiode = sedDokument.getLovvalgsperiode();
-                var søknadsperiodeDto = new PeriodeDto(lovvalgsperiode.getFom(), lovvalgsperiode.getTom());
-                behandlingOversiktDto.setPeriode(søknadsperiodeDto);
-            }, () -> {
-                var behandlingsgrunnlag = behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId());
-                if (behandlingsgrunnlag.isPresent()) {
-                    var behandlingsgrunnlagData = behandlingsgrunnlag.get().getBehandlingsgrunnlagdata();
-
-                    var land = SoeknadslandDto.av(hentSøknadsland((behandlingsgrunnlagData)));
-                    behandlingOversiktDto.setLand(land);
-
-                    var periode = hentPeriode(behandlingsgrunnlagData);
-                    var søknadsperiodeDto = new PeriodeDto(periode.getFom(), periode.getTom());
-                    behandlingOversiktDto.setPeriode(søknadsperiodeDto);
-                }
+                var periodeDto = new PeriodeDto(lovvalgsperiode.getFom(), lovvalgsperiode.getTom());
+                behandlingOversiktDto.setPeriode(periodeDto);
             });
         } else {
             if (behandling.erBehandlingAvSøknadGammel()) {
-                behandlingsgrunnlagService.finnBehandlingsgrunnlag(behandling.getId())
-                    .map(Behandlingsgrunnlag::getBehandlingsgrunnlagdata).ifPresent(grunnlagData -> {
+                mottatteOpplysningerService.finnMottatteOpplysninger(behandling.getId())
+                    .map(MottatteOpplysninger::getMottatteOpplysningerData).ifPresent(grunnlagData -> {
                         SoeknadslandDto land = SoeknadslandDto.av(hentSøknadsland((grunnlagData)));
                         behandlingOversiktDto.setLand(land);
                         Periode periode = hentPeriode(grunnlagData);

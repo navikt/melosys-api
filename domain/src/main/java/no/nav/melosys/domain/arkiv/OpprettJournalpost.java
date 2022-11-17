@@ -79,8 +79,8 @@ public class OpprettJournalpost extends Journalpost {
         dokumenter.remove(hovedDokument);
 
         OpprettJournalpost opprettJournalpost = new OpprettJournalpost();
-        final var behandlingsgrunnlag = fagsak.hentSistAktivBehandling().getBehandlingsgrunnlag();
-        opprettJournalpost.setHoveddokument(lagFysiskHovedDokumentAltinn(hovedDokument, behandlingsgrunnlag));
+        final var mottatteOpplysninger = fagsak.hentSistAktivBehandling().getMottatteOpplysninger();
+        opprettJournalpost.setHoveddokument(lagFysiskHovedDokumentAltinn(hovedDokument, mottatteOpplysninger));
         opprettJournalpost.setInnhold(opprettJournalpost.getHoveddokument().getTittel());
         opprettJournalpost.setVedlegg(dokumenter.stream().map(FysiskDokument::lagFysiskDokumentAltinn).toList());
         opprettJournalpost.setSaksnummer(fagsak.getSaksnummer());

@@ -3,21 +3,21 @@ package no.nav.melosys.service.kontroll.feature.arbeidutland.kontroll;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.service.kontroll.regler.AdresseRegler;
 import no.nav.melosys.service.validering.Kontrollfeil;
 
 public class ArbeidUtlandKontroll {
-    static String ARBEIDSSTED_FIRMANAVN = "behandlingsgrunnlag.arbeidPaaLand.fysiskeArbeidssteder[%d].virksomhetNavn";
-    static String ARBEIDSSTED_LAND = "behandlingsgrunnlag.arbeidPaaLand.fysiskeArbeidssteder[%d].adresse.landkode";
-    static String FORETAK_UTLAND_NAVN = "behandlingsgrunnlag.foretakUtland[%d].navn";
-    static String FORETAK_UTLAND_LAND = "behandlingsgrunnlag.foretakUtland[%d].adresse.landkode";
+    static String ARBEIDSSTED_FIRMANAVN = "mottatteopplysninger.arbeidPaaLand.fysiskeArbeidssteder[%d].virksomhetNavn";
+    static String ARBEIDSSTED_LAND = "mottatteopplysninger.arbeidPaaLand.fysiskeArbeidssteder[%d].adresse.landkode";
+    static String FORETAK_UTLAND_NAVN = "mottatteopplysninger.foretakUtland[%d].navn";
+    static String FORETAK_UTLAND_LAND = "mottatteopplysninger.foretakUtland[%d].adresse.landkode";
 
-    public static Kontrollfeil arbeidsstedManglerFelter(BehandlingsgrunnlagData behandlingsgrunnlagData) {
-        List<FysiskArbeidssted> fysiskArbeidsstedListe = behandlingsgrunnlagData.arbeidPaaLand.fysiskeArbeidssteder;
+    public static Kontrollfeil arbeidsstedManglerFelter(MottatteOpplysningerData mottatteOpplysningerData) {
+        List<FysiskArbeidssted> fysiskArbeidsstedListe = mottatteOpplysningerData.arbeidPaaLand.fysiskeArbeidssteder;
 
         List<String> felterMedFeil = new ArrayList<>();
         for (int i = 0; i < fysiskArbeidsstedListe.size(); i++) {
@@ -33,8 +33,8 @@ public class ArbeidUtlandKontroll {
             : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSSTED, felterMedFeil);
     }
 
-    public static Kontrollfeil foretakUtlandManglerFelter(BehandlingsgrunnlagData behandlingsgrunnlagData) {
-        List<ForetakUtland> foretakUtlandListe = behandlingsgrunnlagData.foretakUtland;
+    public static Kontrollfeil foretakUtlandManglerFelter(MottatteOpplysningerData mottatteOpplysningerData) {
+        List<ForetakUtland> foretakUtlandListe = mottatteOpplysningerData.foretakUtland;
 
         List<String> felterMedFeil = new ArrayList<>();
         for (int i = 0; i < foretakUtlandListe.size(); i++) {

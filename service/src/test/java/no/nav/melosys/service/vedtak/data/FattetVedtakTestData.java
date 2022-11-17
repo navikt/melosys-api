@@ -10,13 +10,13 @@ import java.util.Set;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avgift.Trygdeavgift;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadFtrl;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.JuridiskArbeidsgiverNorge;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.LoennOgGodtgjoerelse;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.Periode;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.SoeknadFtrl;
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
+import no.nav.melosys.domain.mottatteopplysninger.data.JuridiskArbeidsgiverNorge;
+import no.nav.melosys.domain.mottatteopplysninger.data.LoennOgGodtgjoerelse;
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -45,7 +45,7 @@ public class FattetVedtakTestData {
     public static Behandling lagBehandling() {
         Behandling behandling = new Behandling();
         behandling.setId(123L);
-        behandling.setBehandlingsgrunnlag(lagBehandlingsgrunnlag());
+        behandling.setMottatteOpplysninger(lagMottatteOpplysninger());
         behandling.setFagsak(lagFagsak());
         behandling.getSaksopplysninger().add(lagPersonDokument());
         return behandling;
@@ -141,13 +141,13 @@ public class FattetVedtakTestData {
         return fagsak;
     }
 
-    private static Behandlingsgrunnlag lagBehandlingsgrunnlag() {
-        Behandlingsgrunnlag behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(lagSoeknadFtrlData());
-        return behandlingsgrunnlag;
+    private static MottatteOpplysninger lagMottatteOpplysninger() {
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        mottatteOpplysninger.setMottatteOpplysningerdata(lagSoeknadFtrlData());
+        return mottatteOpplysninger;
     }
 
-    private static BehandlingsgrunnlagData lagSoeknadFtrlData() {
+    private static MottatteOpplysningerData lagSoeknadFtrlData() {
         return new SoeknadFtrl();
     }
 

@@ -8,7 +8,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.Mottaker;
@@ -129,7 +129,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         List<Mottaker> mottakerListe = new ArrayList<>(List.of(Mottaker.av(BRUKER), FastMottakerMedOrgnr.av(SKATT)));
         if (brevSendesTilStatligSkatteoppkreving(
             resultat.hentLovvalgsperiode(),
-            behandling.getBehandlingsgrunnlag()
+            behandling.getMottatteOpplysninger()
         )) {
             mottakerListe.add(FastMottakerMedOrgnr.av(STATLIG_SKATTEOPPKREVING));
         }
@@ -165,9 +165,9 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     }
 
     private static boolean brevSendesTilStatligSkatteoppkreving(Lovvalgsperiode lovvalgsperiode,
-                                                                Behandlingsgrunnlag behandlingsgrunnlag) {
+                                                                MottatteOpplysninger mottatteOpplysninger) {
         return harArtikkelRelevantForStatligSkatteoppkreving(lovvalgsperiode)
-            && finnesArbeidsgiverUtland(behandlingsgrunnlag);
+            && finnesArbeidsgiverUtland(mottatteOpplysninger);
     }
 
     public static boolean harArtikkelRelevantForStatligSkatteoppkreving(Lovvalgsperiode lovvalgsperiode) {
@@ -177,9 +177,9 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             || lovvalgsperiode.getBestemmelse() == FO_883_2004_ART16_1;
     }
 
-    private static boolean finnesArbeidsgiverUtland(Behandlingsgrunnlag behandlingsgrunnlag) {
-        return !behandlingsgrunnlag.getBehandlingsgrunnlagdata().foretakUtland.isEmpty()
-            && behandlingsgrunnlag.getBehandlingsgrunnlagdata().foretakUtland.stream()
+    private static boolean finnesArbeidsgiverUtland(MottatteOpplysninger mottatteOpplysninger) {
+        return !mottatteOpplysninger.getMottatteOpplysningerData().foretakUtland.isEmpty()
+            && mottatteOpplysninger.getMottatteOpplysningerData().foretakUtland.stream()
             .anyMatch(foretakUtland -> Boolean.FALSE.equals(foretakUtland.selvstendigNæringsvirksomhet));
     }
 

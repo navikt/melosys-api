@@ -18,7 +18,7 @@ import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.person.Persondata;
-import no.nav.melosys.domain.util.LandkoderUtils;
+import no.nav.melosys.domain.util.IsoLandkodeKonverterer;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
@@ -165,7 +165,7 @@ class A001Mapper {
     }
 
     private static void leggTilStatsborgerskap(StatsborgerskapListeType statsborgerskapListe,
-                                        no.nav.melosys.domain.dokument.felles.Land land) {
+                                               no.nav.melosys.domain.dokument.felles.Land land) {
         StatsborgerskapType statsborgerskap = new StatsborgerskapType();
         statsborgerskap.setStatsborgerskap(hentIso3Landkode(land.getKode()));
         statsborgerskapListe.getStatsborgerskap().add(statsborgerskap);
@@ -189,10 +189,9 @@ class A001Mapper {
 
             ArbeidsstedType arbeidsstedBrev;
             if (arbeidssted.erFysisk()) {
-                arbeidsstedBrev = mapFysiskArbeidssted((FysiskArbeidssted)arbeidssted);
-            }
-            else {
-                arbeidsstedBrev = mapIkkeFysiskArbeidssted((IkkeFysiskArbeidssted)arbeidssted);
+                arbeidsstedBrev = mapFysiskArbeidssted((FysiskArbeidssted) arbeidssted);
+            } else {
+                arbeidsstedBrev = mapIkkeFysiskArbeidssted((IkkeFysiskArbeidssted) arbeidssted);
             }
             arbeidsstedListe.getArbeidssted().add(arbeidsstedBrev);
         }
@@ -318,6 +317,6 @@ class A001Mapper {
 
     //A001 krever ISO-3
     private static String hentIso3Landkode(String landkode) {
-        return landkode.length() == 2 ? LandkoderUtils.tilIso3(landkode) : landkode;
+        return landkode.length() == 2 ? IsoLandkodeKonverterer.tilIso3(landkode) : landkode;
     }
 }

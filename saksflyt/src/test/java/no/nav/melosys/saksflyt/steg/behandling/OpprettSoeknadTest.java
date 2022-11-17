@@ -8,7 +8,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,13 +22,13 @@ import static org.mockito.Mockito.verify;
 class OpprettSoeknadTest {
 
     @Mock
-    private BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private MottatteOpplysningerService mottatteOpplysningerService;
 
     private OpprettSoeknad opprettSoeknad;
 
     @BeforeEach
     public void setUp() {
-        opprettSoeknad = new OpprettSoeknad(behandlingsgrunnlagService);
+        opprettSoeknad = new OpprettSoeknad(mottatteOpplysningerService);
     }
 
     @Test
@@ -37,7 +37,7 @@ class OpprettSoeknadTest {
 
         opprettSoeknad.utfør(prosessinstans);
 
-        verify(behandlingsgrunnlagService).opprettSøknad(prosessinstans);
+        verify(mottatteOpplysningerService).opprettSøknad(prosessinstans);
     }
 
     private Prosessinstans lagProsessinstans() {

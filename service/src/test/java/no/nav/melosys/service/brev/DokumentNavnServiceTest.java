@@ -28,7 +28,7 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.SOEKNAD;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.INNVILGELSE_YRKESAKTIV;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.STORBRITANNIA;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.TRYGDEAVTALE_GB;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -83,13 +83,13 @@ class DokumentNavnServiceTest {
             when(mockLovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
         }
 
-        when(mockBrevmottakerService.avklarMottaker(STORBRITANNIA, Mottaker.av(mottaker.getRolle()), behandling)).thenReturn(mottaker);
+        when(mockBrevmottakerService.avklarMottaker(TRYGDEAVTALE_GB, Mottaker.av(mottaker.getRolle()), behandling)).thenReturn(mottaker);
 
         DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper = new DokumentproduksjonsInfoMapper(new FakeUnleash());
-        when(mockDokgenService.hentDokumentInfo(STORBRITANNIA)).thenReturn(dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(STORBRITANNIA));
+        when(mockDokgenService.hentDokumentInfo(TRYGDEAVTALE_GB)).thenReturn(dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(TRYGDEAVTALE_GB));
 
 
-        String dokumentNavn = dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, STORBRITANNIA, mottaker.getRolle());
+        String dokumentNavn = dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, TRYGDEAVTALE_GB, mottaker.getRolle());
         assertThat(dokumentNavn).isEqualTo(forventetTittel);
     }
 
@@ -105,10 +105,10 @@ class DokumentNavnServiceTest {
         }
 
         DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper = new DokumentproduksjonsInfoMapper(new FakeUnleash());
-        when(mockDokgenService.hentDokumentInfo(STORBRITANNIA)).thenReturn(dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(STORBRITANNIA));
+        when(mockDokgenService.hentDokumentInfo(TRYGDEAVTALE_GB)).thenReturn(dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(TRYGDEAVTALE_GB));
 
 
-        String dokumentNavn = dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, STORBRITANNIA, mottaker, null);
+        String dokumentNavn = dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, TRYGDEAVTALE_GB, mottaker, null);
         assertThat(dokumentNavn).isEqualTo(forventetTittel);
     }
 
@@ -126,7 +126,7 @@ class DokumentNavnServiceTest {
         DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper = new DokumentproduksjonsInfoMapper(new FakeUnleash());
 
 
-        String dokumentNavn = dokumentNavnService.utledDokumentNavn(behandling, dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(STORBRITANNIA), mottaker);
+        String dokumentNavn = dokumentNavnService.utledDokumentNavn(behandling, dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(TRYGDEAVTALE_GB), mottaker);
         assertThat(dokumentNavn).isEqualTo(forventetTittel);
     }
 

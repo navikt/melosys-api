@@ -2,19 +2,20 @@ package no.nav.melosys.service.lovligekombinasjoner;
 
 import java.util.Set;
 
-import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.*;
@@ -23,15 +24,21 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class LovligeKombinasjonerServiceTest {
+
+    @Mock
+    private BehandlingService behandlingService;
+    @Mock
+    private BehandlingsresultatService behandlingsresultatService;
 
     private LovligeKombinasjonerService lovligeKombinasjonerService;
 
     @BeforeEach
     void setup() {
-        lovligeKombinasjonerService = new LovligeKombinasjonerService();
+        lovligeKombinasjonerService = new LovligeKombinasjonerService(behandlingService, behandlingsresultatService);
     }
 
     @Test
@@ -161,11 +168,19 @@ class LovligeKombinasjonerServiceTest {
     }
 
     @Test
-    void hentMuligeBehandlingstemaer_hovedpartVIRKSOMHET_skalReturnereBehandlingsTemaVIRKSOMHET() {
-        Set<Behandlingstema> behandlingstemas = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, TRYGDEAVGIFT, null);
+    void hentMuligeBehandlingstemaer_hovedpartVIRKSOMHETIkkeTrygdeavgift_skalReturnereBehandlingsTemaVIRKSOMHET() {
+        Set<Behandlingstema> behandlingstemas = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, null);
         assertThat(behandlingstemas)
             .hasSize(1)
             .contains(VIRKSOMHET);
+    }
+
+    @Test
+    void hentMuligeBehandlingstemaer_hovedpartVIRKSOMHETTrygdeavgift_skalReturnereBehandlingsTemaYRKESAKTIV() {
+        Set<Behandlingstema> behandlingstemas = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, TRYGDEAVGIFT, null);
+        assertThat(behandlingstemas)
+            .hasSize(1)
+            .contains(YRKESAKTIV);
     }
 
     @Test
@@ -196,10 +211,55 @@ class LovligeKombinasjonerServiceTest {
         sisteBehandling.setFagsak(fagsak);
         sisteBehandling.setStatus(Behandlingsstatus.AVSLUTTET);
 
-        Set<Behandlingstyper> muligeBehandlingstyper = lovligeKombinasjonerService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, sisteBehandling);
+        Set<Behandlingstyper> muligeBehandlingstyper = lovligeKombinasjonerService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, sisteBehandling, null);
         assertThat(muligeBehandlingstyper)
             .hasSize(3)
             .containsExactly(NY_VURDERING, KLAGE, HENVENDELSE);
+    }
+
+    @Test
+    void hentMuligeBehandlingstyper_sisteBehandlingAktiv_skalReturnereTomListe() {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setType(EU_EOS);
+        Behandling sisteBehandling = behandlingMedTemaOgType(UTSENDT_ARBEIDSTAKER, FØRSTEGANG);
+        sisteBehandling.setFagsak(fagsak);
+        sisteBehandling.setStatus(UNDER_BEHANDLING);
+
+
+        Set<Behandlingstyper> muligeBehandlingstyper = lovligeKombinasjonerService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, sisteBehandling, null);
+
+
+        assertThat(muligeBehandlingstyper).isEmpty();
+    }
+
+    @Test
+    void hentMuligeBehandlingstyper_sisteBehandlingAktivOgAnmodningsperiodeSendt_skalReturnereKunNyVurdering() {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setType(EU_EOS);
+        Behandling sisteBehandling = behandlingMedTemaOgType(UTSENDT_ARBEIDSTAKER, FØRSTEGANG);
+        sisteBehandling.setFagsak(fagsak);
+        sisteBehandling.setStatus(UNDER_BEHANDLING);
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
+        anmodningsperiode.setSendtUtland(true);
+        Behandlingsresultat sisteBehandlingsresultat = new Behandlingsresultat();
+        sisteBehandlingsresultat.getAnmodningsperioder().add(anmodningsperiode);
+
+
+        Set<Behandlingstyper> muligeBehandlingstyper = lovligeKombinasjonerService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, sisteBehandling, sisteBehandlingsresultat);
+
+
+        assertThat(muligeBehandlingstyper)
+            .hasSize(1)
+            .containsExactly(NY_VURDERING);
+    }
+
+    @Test
+    void hentMuligeBehandlingstyper_senderKunMedBehandlingID_henterBehandlingOgBehandlingsresultat() {
+        lovligeKombinasjonerService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, 1L);
+
+
+        verify(behandlingService).hentBehandling(1L);
+        verify(behandlingsresultatService).hentBehandlingsresultatMedAnmodningsperioder(1L);
     }
 
     @Test

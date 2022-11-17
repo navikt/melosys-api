@@ -1,14 +1,12 @@
 package no.nav.melosys.domain
 
 import io.kotest.matchers.shouldBe
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.util.Set
 
 internal class BehandlingTest {
     @Test
@@ -116,7 +114,7 @@ internal class BehandlingTest {
             fagsak = Fagsak().apply {
                 tema = Sakstemaer.MEDLEMSKAP_LOVVALG
             }
-            behandlingsgrunnlag = Behandlingsgrunnlag().apply {
+            behandlingsårsak = Behandlingsaarsak().apply {
                 mottaksdato = utgangspunktDato
             }
             tema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
@@ -217,7 +215,7 @@ internal class BehandlingTest {
             fagsak = Fagsak().apply {
                 tema = Sakstemaer.UNNTAK
             }
-            behandlingsgrunnlag = Behandlingsgrunnlag().apply {
+            behandlingsårsak = Behandlingsaarsak().apply {
                 mottaksdato = utgangspunktDato
             }
             tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
@@ -227,7 +225,7 @@ internal class BehandlingTest {
             fagsak = Fagsak().apply {
                 tema = Sakstemaer.UNNTAK
             }
-            behandlingsgrunnlag = Behandlingsgrunnlag().apply {
+            behandlingsårsak = Behandlingsaarsak().apply {
                 mottaksdato = utgangspunktDato
             }
             tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
@@ -265,7 +263,7 @@ internal class BehandlingTest {
     @Test
     fun saksopplysningerEksistererIkke_eksistererIkke_true() {
         val behandling = Behandling().apply {
-            saksopplysninger = Set.of(
+            saksopplysninger = setOf(
                 Saksopplysning().apply {
                     type = SaksopplysningType.PDL_PERSOPL
                 }

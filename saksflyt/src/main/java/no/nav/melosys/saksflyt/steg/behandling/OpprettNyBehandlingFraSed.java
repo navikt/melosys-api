@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -11,6 +12,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -27,14 +29,16 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
     private final OppgaveService oppgaveService;
+    private final JoarkFasade joarkFasade;
     private final Unleash unleash;
 
     public OpprettNyBehandlingFraSed(FagsakService fagsakService,
                                      BehandlingService behandlingService,
                                      OppgaveService oppgaveService,
-                                     Unleash unleash) {
+                                     JoarkFasade joarkFasade, Unleash unleash) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
+        this.joarkFasade = joarkFasade;
         this.oppgaveService = oppgaveService;
         this.unleash = unleash;
     }
@@ -61,9 +65,12 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
         var fagsak = fagsakService.hentFagsakFraArkivsakID(arkivsakID);
 
         avsluttTidligereBehandling(fagsak);
-        var behandling = behandlingService.nyBehandling(fagsak, Behandlingsstatus.UNDER_BEHANDLING,
+        var behandling = behandlingService.nyBehandling(
+            fagsak, Behandlingsstatus.UNDER_BEHANDLING,
             unleash.isEnabled("melosys.behandle_alle_saker") ? Behandlingstyper.FØRSTEGANG : Behandlingstyper.SED,
-            behandlingstema, eessiMelding.getJournalpostId(), eessiMelding.getDokumentId());
+            behandlingstema, eessiMelding.getJournalpostId(), eessiMelding.getDokumentId(),
+            joarkFasade.hentMottaksDatoForJournalpost(eessiMelding.getJournalpostId()),
+            Behandlingsaarsaktyper.SED, null);
 
         fagsak.getBehandlinger().add(behandling);
         fagsakService.lagre(fagsak);

@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.util.*;
 import javax.persistence.*;
 
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
@@ -14,7 +14,7 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
-import no.nav.melosys.domain.kodeverk.Behandlingsgrunnlagtyper;
+import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -43,6 +43,13 @@ public class Behandling extends RegistreringsInfo {
         BESLUTNING_LOVVALG_ANNET_LAND,
         ANMODNING_OM_UNNTAK_HOVEDREGEL
     );
+
+    private static final Set<Behandlingstyper> GAMLE_BEHANDLINGSTYPER_SOM_SKAL_MIGRERES_SENERE = Set.of(
+        Behandlingstyper.ANKE,
+        Behandlingstyper.SED,
+        Behandlingstyper.SOEKNAD
+    );
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -82,13 +89,13 @@ public class Behandling extends RegistreringsInfo {
     private Set<Saksopplysning> saksopplysninger = new HashSet<>(1);
 
     @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Set<BehandlingHistorikk> behandlingshistorikk = new HashSet<>(1);
-
-    @OneToMany(mappedBy = "behandling", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<Behandlingsnotat> behandlingsnotater = new HashSet<>(1);
 
     @OneToOne(mappedBy = "behandling", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Behandlingsgrunnlag behandlingsgrunnlag;
+    private Behandlingsaarsak behandlingsårsak;
+
+    @OneToOne(mappedBy = "behandling", cascade = CascadeType.ALL, orphanRemoval = true)
+    private MottatteOpplysninger mottatteOpplysninger;
 
     @ManyToOne()
     @JoinColumn(name = "opprinnelig_behandling_id")
@@ -198,12 +205,27 @@ public class Behandling extends RegistreringsInfo {
         this.behandlingsnotater = behandlingsnotater;
     }
 
-    public Behandlingsgrunnlag getBehandlingsgrunnlag() {
-        return behandlingsgrunnlag;
+    public Behandlingsaarsak getBehandlingsårsak() {
+        return behandlingsårsak;
     }
 
-    public void setBehandlingsgrunnlag(Behandlingsgrunnlag behandlingsgrunnlag) {
-        this.behandlingsgrunnlag = behandlingsgrunnlag;
+    public void setBehandlingsårsak(Behandlingsaarsak behandlingsårsak) {
+        if (behandlingsårsak == null) {
+            if (this.behandlingsårsak != null) {
+                this.behandlingsårsak.setBehandling(null);
+            }
+        } else {
+            behandlingsårsak.setBehandling(this);
+        }
+        this.behandlingsårsak = behandlingsårsak;
+    }
+
+    public MottatteOpplysninger getMottatteOpplysninger() {
+        return mottatteOpplysninger;
+    }
+
+    public void setMottatteOpplysninger(MottatteOpplysninger mottatteOpplysninger) {
+        this.mottatteOpplysninger = mottatteOpplysninger;
     }
 
     /**
@@ -270,7 +292,7 @@ public class Behandling extends RegistreringsInfo {
         var optionalPeriode = finnPeriode();
         var harPeriode = optionalPeriode.isPresent() && optionalPeriode.get().getFom() != null;
 
-        var harLand = behandlingsgrunnlag.getBehandlingsgrunnlagdata().soeknadsland.erGyldig();
+        var harLand = mottatteOpplysninger.getMottatteOpplysningerData().soeknadsland.erGyldig();
 
         return harPeriode && harLand;
     }
@@ -286,8 +308,8 @@ public class Behandling extends RegistreringsInfo {
             return Optional.of(optionalSeddokument.get().getLovvalgsperiode());
         }
 
-        if (behandlingsgrunnlag != null && behandlingsgrunnlag.getBehandlingsgrunnlagdata() != null) {
-            return Optional.of(behandlingsgrunnlag.getBehandlingsgrunnlagdata().periode);
+        if (mottatteOpplysninger != null && mottatteOpplysninger.getMottatteOpplysningerData() != null) {
+            return Optional.of(mottatteOpplysninger.getMottatteOpplysningerData().periode);
         }
 
         return Optional.empty();
@@ -295,10 +317,10 @@ public class Behandling extends RegistreringsInfo {
 
     public Collection<String> hentSøknadsLand() {
         if (erNorgeUtpekt()) {
-            var utenlandskeArbeidsstederLandkoder = behandlingsgrunnlag.getBehandlingsgrunnlagdata().hentUtenlandskeArbeidsstederLandkode();
+            var utenlandskeArbeidsstederLandkoder = mottatteOpplysninger.getMottatteOpplysningerData().hentUtenlandskeArbeidsstederLandkode();
             return utenlandskeArbeidsstederLandkoder.isEmpty() ? Collections.singleton(Landkoder.NO.getKode()) : utenlandskeArbeidsstederLandkoder;
         } else {
-            return behandlingsgrunnlag.getBehandlingsgrunnlagdata().soeknadsland.landkoder;
+            return mottatteOpplysninger.getMottatteOpplysningerData().soeknadsland.landkoder;
         }
     }
 
@@ -317,7 +339,7 @@ public class Behandling extends RegistreringsInfo {
     @Deprecated
     public Optional<ErPeriode> finnPeriodeGammel() {
         if (kanResultereIVedtakGammel()) {
-            return Optional.of(behandlingsgrunnlag.getBehandlingsgrunnlagdata().periode);
+            return Optional.of(mottatteOpplysninger.getMottatteOpplysningerData().periode);
         } else if (erBehandlingAvSed()) {
             return finnSedDokument().map(SedDokument::getLovvalgsperiode);
         }
@@ -336,12 +358,12 @@ public class Behandling extends RegistreringsInfo {
 
         Collection<String> søknadsland;
         if (erNorgeUtpekt()) {
-            søknadsland = behandlingsgrunnlag.getBehandlingsgrunnlagdata().hentUtenlandskeArbeidsstederLandkode();
+            søknadsland = mottatteOpplysninger.getMottatteOpplysningerData().hentUtenlandskeArbeidsstederLandkode();
             if (søknadsland.isEmpty()) {
                 søknadsland.add(Landkoder.NO.getKode());
             }
         } else {
-            søknadsland = behandlingsgrunnlag.getBehandlingsgrunnlagdata().soeknadsland.landkoder;
+            søknadsland = mottatteOpplysninger.getMottatteOpplysningerData().soeknadsland.landkoder;
         }
         return søknadsland;
     }
@@ -443,8 +465,8 @@ public class Behandling extends RegistreringsInfo {
     }
 
     public boolean erElektroniskSøknad() {
-        if (behandlingsgrunnlag != null) {
-            return behandlingsgrunnlag.getType() == Behandlingsgrunnlagtyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS;
+        if (mottatteOpplysninger != null) {
+            return mottatteOpplysninger.getType() == Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS;
         }
         return false;
     }
@@ -528,27 +550,27 @@ public class Behandling extends RegistreringsInfo {
     }
 
     public static LocalDate utledBehandlingsfrist(Behandling behandling) {
-        Behandlingstyper behandlingstype = behandling.getType();
-        Behandlingstema behandlingstema = behandling.getTema();
         Sakstemaer sakstema = behandling.getFagsak().getTema();
-        LocalDate utgangspunktDato = LocalDate.now();
-        Behandlingsgrunnlag behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
+        Behandlingstema behandlingstema = behandling.getTema();
+        Behandlingstyper behandlingstype = behandling.getType();
 
-        if (behandlingsgrunnlag != null) {
-            utgangspunktDato = behandlingsgrunnlag.getMottaksdato() != null ? behandlingsgrunnlag.getMottaksdato() : LocalDate.now();
-        }
-
-        Set<Behandlingstyper> gamleBehandlingstyperSomSkalMigreresSenere = Set.of(
-            Behandlingstyper.ANKE,
-            Behandlingstyper.SED,
-            Behandlingstyper.SOEKNAD
-        );
-
-        if (gamleBehandlingstyperSomSkalMigreresSenere.contains(behandlingstype)) {
+        if (GAMLE_BEHANDLINGSTYPER_SOM_SKAL_MIGRERES_SENERE.contains(behandlingstype)) {
             return utledFristForBehandlingtema(behandlingstema);
         }
-
+        LocalDate utgangspunktDato = finnUtgangspunktForFristberegning(behandling);
         return BehandlingfristKriterier.hentBehandlingsFrist(sakstema, behandlingstema, behandlingstype, utgangspunktDato);
+    }
+
+    private static LocalDate finnUtgangspunktForFristberegning(Behandling behandling) {
+        LocalDate utgangspunktDato;
+        if (behandling.getBehandlingsårsak() != null) {
+            utgangspunktDato = behandling.getBehandlingsårsak().getMottaksdato();
+        } else if (behandling.getMottatteOpplysninger() != null && behandling.getMottatteOpplysninger().getMottaksdato() != null) {
+            utgangspunktDato = behandling.getMottatteOpplysninger().getMottaksdato();
+        } else {
+            utgangspunktDato = LocalDate.now();
+        }
+        return utgangspunktDato;
     }
 
     /**

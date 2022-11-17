@@ -4,7 +4,7 @@ import java.util.*;
 
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VURDERING_LOVVALG_BARN;

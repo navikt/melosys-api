@@ -31,7 +31,7 @@ import no.nav.melosys.domain.saksflyt.*;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.behandlingsgrunnlag.BehandlingsgrunnlagService;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.sak.OpprettSakDto;
@@ -57,7 +57,7 @@ public class ProsessinstansService {
     private final ApplicationEventPublisher applicationEventPublisher;
     private final ProsessinstansRepository prosessinstansRepo;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
-    private final BehandlingsgrunnlagService behandlingsgrunnlagService;
+    private final MottatteOpplysningerService mottatteOpplysningerService;
     private final Unleash unleash;
 
     private final Counter prosessinstanserOpprettet = Metrics.counter(MetrikkerNavn.PROSESSINSTANSER_OPPRETTET);
@@ -65,12 +65,12 @@ public class ProsessinstansService {
     public ProsessinstansService(ApplicationEventPublisher applicationEventPublisher,
                                  ProsessinstansRepository prosessinstansRepo,
                                  UtenlandskMyndighetService utenlandskMyndighetService,
-                                 BehandlingsgrunnlagService behandlingsgrunnlagService,
+                                 MottatteOpplysningerService mottatteOpplysningerService,
                                  Unleash unleash) {
         this.applicationEventPublisher = applicationEventPublisher;
         this.prosessinstansRepo = prosessinstansRepo;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
-        this.behandlingsgrunnlagService = behandlingsgrunnlagService;
+        this.mottatteOpplysningerService = mottatteOpplysningerService;
         this.unleash = unleash;
     }
 
@@ -82,8 +82,11 @@ public class ProsessinstansService {
         prosessinstans.setData(SAKSTEMA, opprettSakDto.getSakstema());
         prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
         prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+        prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakDto.getBehandlingsaarsakType());
+        prosessinstans.setData(BEHANDLINGSÅRSAK_FRITEKST, opprettSakDto.getBehandlingsaarsakFritekst());
         prosessinstans.setData(BRUKER_ID, opprettSakDto.getBrukerID());
         prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakDto.getVirksomhetOrgnr());
+        prosessinstans.setData(MOTTATT_DATO, opprettSakDto.getMottaksdato());
         prosessinstans.setData(SØKNADSLAND, opprettSakDto.getSoknadDto().getLand());
         prosessinstans.setData(SØKNADSPERIODE, opprettSakDto.getSoknadDto().getPeriode());
         prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
@@ -98,6 +101,9 @@ public class ProsessinstansService {
         prosessinstans.setData(SAKSNUMMER, saksnummer);
         prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
         prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+        prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakDto.getBehandlingsaarsakType());
+        prosessinstans.setData(BEHANDLINGSÅRSAK_FRITEKST, opprettSakDto.getBehandlingsaarsakFritekst());
+        prosessinstans.setData(MOTTATT_DATO, opprettSakDto.getMottaksdato());
         prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
 
         lagre(prosessinstans);
@@ -110,6 +116,9 @@ public class ProsessinstansService {
         prosessinstans.setData(SAKSNUMMER, saksnummer);
         prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
         prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+        prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakDto.getBehandlingsaarsakType());
+        prosessinstans.setData(BEHANDLINGSÅRSAK_FRITEKST, opprettSakDto.getBehandlingsaarsakFritekst());
+        prosessinstans.setData(MOTTATT_DATO, opprettSakDto.getMottaksdato());
         prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
 
         lagre(prosessinstans);
@@ -281,6 +290,8 @@ public class ProsessinstansService {
             prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakDto.getVirksomhetOrgnr());
             prosessinstans.setData(SAKSTEMA, opprettSakDto.getSakstema());
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+            prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakDto.getBehandlingsaarsakType());
+            prosessinstans.setData(MOTTATT_DATO, opprettSakDto.getMottaksdato());
         } else {
             prosessinstans.setData(SAKSTEMA,
                 SakstypeSakstemaKobling.sakstema(Sakstyper.EU_EOS, opprettSakDto.getBehandlingstema()));
@@ -314,6 +325,8 @@ public class ProsessinstansService {
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
             prosessinstans.setData(ProsessDataKey.SAKSTEMA, opprettSakDto.getSakstema());
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+            prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakDto.getBehandlingsaarsakType());
+            prosessinstans.setData(MOTTATT_DATO, opprettSakDto.getMottaksdato());
         } else {
             prosessinstans.setData(ProsessDataKey.SAKSTEMA,
                 SakstypeSakstemaKobling.sakstema(Sakstyper.EU_EOS, opprettSakDto.getBehandlingstema()));
@@ -451,7 +464,7 @@ public class ProsessinstansService {
 
     @Transactional
     public void opprettProsessinstansSøknadMottatt(SoknadMottatt søknadMottatt) {
-        if (behandlingsgrunnlagService.harMottattSøknadMedEksternReferanseID(søknadMottatt.getSoknadID())) {
+        if (mottatteOpplysningerService.harMottattSøknadMedEksternReferanseID(søknadMottatt.getSoknadID())) {
             logger.warn("Søknad med søknadID {} har vært mottatt tidligere.", søknadMottatt.getSoknadID());
         } else {
             Prosessinstans prosessinstans = new ProsessinstansBuilder()

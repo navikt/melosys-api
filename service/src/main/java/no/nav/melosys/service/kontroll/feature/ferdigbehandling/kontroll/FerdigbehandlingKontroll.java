@@ -2,7 +2,7 @@ package no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll;
 
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.PeriodeOmLovvalg;
-import no.nav.melosys.domain.behandlingsgrunnlag.SoeknadTrygdeavtale;
+import no.nav.melosys.domain.mottatteopplysninger.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
@@ -17,6 +17,7 @@ import no.nav.melosys.service.validering.Kontrollfeil;
 
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_usa.*;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_ca.*;
 
 final class FerdigbehandlingKontroll {
 
@@ -57,7 +58,7 @@ final class FerdigbehandlingKontroll {
     static Kontrollfeil periodeOverFemÅr(FerdigbehandlingKontrollData kontrollData) {
         PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();
 
-        return lovvalgsperiode.getBestemmelse() == USA_ART5_2
+        return (lovvalgsperiode.getBestemmelse() == USA_ART5_2 || lovvalgsperiode.getBestemmelse() == CAN_ART7 || lovvalgsperiode.getBestemmelse() == CAN_ART7_JF8)
             && PeriodeRegler.periodeOver5År(lovvalgsperiode.getFom(), lovvalgsperiode.getTom())
             ? new Kontrollfeil(Kontroll_begrunnelser.MER_ENN_FEM_ÅR) : null;
     }
@@ -65,30 +66,30 @@ final class FerdigbehandlingKontroll {
     static Kontrollfeil periodeOver12Måneder(FerdigbehandlingKontrollData kontrollData) {
         PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();
 
-        return lovvalgsperiode.getBestemmelse() == USA_ART5_4
+        return (lovvalgsperiode.getBestemmelse() == USA_ART5_4 || lovvalgsperiode.getBestemmelse() == CAN_ART6_2 || lovvalgsperiode.getBestemmelse() == CAN_ART6_2_JF8)
             && PeriodeRegler.periodeOver12Måneder(lovvalgsperiode.getFom(), lovvalgsperiode.getTom())
             ? new Kontrollfeil(Kontroll_begrunnelser.MER_ENN_12_MD) : null;
     }
 
     static Kontrollfeil arbeidsstedManglerFelter(FerdigbehandlingKontrollData kontrollData) {
-        return ArbeidUtlandKontroll.arbeidsstedManglerFelter(kontrollData.behandlingsgrunnlagData());
+        return ArbeidUtlandKontroll.arbeidsstedManglerFelter(kontrollData.mottatteOpplysningerData());
     }
 
     static Kontrollfeil foretakUtlandManglerFelter(FerdigbehandlingKontrollData kontrollData) {
-        return ArbeidUtlandKontroll.foretakUtlandManglerFelter(kontrollData.behandlingsgrunnlagData());
+        return ArbeidUtlandKontroll.foretakUtlandManglerFelter(kontrollData.mottatteOpplysningerData());
     }
 
     static Kontrollfeil representantIUtlandetMangler(FerdigbehandlingKontrollData kontrollData) {
         var lovvalgsperiode = kontrollData.lovvalgsperiode();
-        var behandlingsgrunnlagData = (SoeknadTrygdeavtale) kontrollData.behandlingsgrunnlagData();
+        var mottatteOpplysningerData = (SoeknadTrygdeavtale) kontrollData.mottatteOpplysningerData();
 
         return erBestemmelseDerTrygdeavtaleAttestSendes(lovvalgsperiode.getBestemmelse())
-            && ArbeidsstedRegler.representantIUtlandetMangler(behandlingsgrunnlagData.getRepresentantIUtlandet())
+            && ArbeidsstedRegler.representantIUtlandetMangler(mottatteOpplysningerData.getRepresentantIUtlandet())
             ? new Kontrollfeil(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED) : null;
     }
 
     static Kontrollfeil adresseRegistrert(FerdigbehandlingKontrollData kontrollData) {
-        return PersonRegler.harRegistrertAdresse(kontrollData.persondata(), kontrollData.behandlingsgrunnlagData())
+        return PersonRegler.harRegistrertAdresse(kontrollData.persondata(), kontrollData.mottatteOpplysningerData())
             ? null : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
     }
 

@@ -1,18 +1,20 @@
 package no.nav.melosys.service.sak;
 
-import java.util.Optional;
-
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
+import no.nav.melosys.service.journalforing.UtledBehandlingsaarsak;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -22,6 +24,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Optional;
 
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknadGammel;
@@ -50,39 +56,74 @@ public class OpprettSak {
 
     @Transactional
     public void opprettNySakOgBehandlingFraOppgave(OpprettSakDto opprettSakDto) {
-        validerOpprettSakDto(opprettSakDto);
-        final Oppgave oppgave = validerOppgave(opprettSakDto.getOppgaveID());
-        validerJournalpost(journalfoeringService.hentJournalpost(oppgave.getJournalpostId()));
-        switch (opprettSakDto.getSakstype()) {
-            case EU_EOS -> prosessinstansService.opprettProsessinstansNySakEØS(
-                oppgave.getJournalpostId(),
-                opprettSakDto
-            );
-            case FTRL, TRYGDEAVTALE -> prosessinstansService.opprettProsessinstansNySakFTRLTrygdeavtale(
-                oppgave.getJournalpostId(),
-                opprettSakDto
-            );
+        if (StringUtils.isEmpty(opprettSakDto.getOppgaveID())) {
+            throw new FunksjonellException("OppgaveID mangler.");
         }
+        validerOpprettSakDto(opprettSakDto);
+
+        final Oppgave oppgave = oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID());
+        validerOppgave(oppgave);
+
+        Journalpost journalpost = journalfoeringService.hentJournalpost(oppgave.getJournalpostId());
+        validerJournalpost(journalpost);
+
+        Sakstyper sakstype = opprettSakDto.getSakstype();
+        if (unleash.isEnabled("melosys.ny_opprett_sak")) {
+            opprettSakDto.setBehandlingsaarsakType(getBehandlingsaarsakType(journalpost, opprettSakDto));
+            opprettSakDto.setMottaksdato(LocalDate.ofInstant(journalpost.getForsendelseMottatt(), ZoneId.systemDefault()));
+        }
+
+        if (sakstype == Sakstyper.EU_EOS) {
+            prosessinstansService.opprettProsessinstansNySakEØS(
+                oppgave.getJournalpostId(),
+                opprettSakDto
+            );
+        } else if (sakstype == Sakstyper.FTRL || sakstype == Sakstyper.TRYGDEAVTALE) {
+            prosessinstansService.opprettProsessinstansNySakFTRLTrygdeavtale(
+                oppgave.getJournalpostId(),
+                opprettSakDto
+            );
+        } else {
+            throw new FunksjonellException("Sakstype %s støttes ikke".formatted(sakstype));
+        }
+    }
+
+    private static Behandlingsaarsaktyper getBehandlingsaarsakType(Journalpost journalpost, OpprettSakDto opprettSakDto) {
+        Sakstemaer sakstema = opprettSakDto.getSakstema();
+        Behandlingstema behandlingstema = opprettSakDto.getBehandlingstema();
+        Behandlingstyper behandlingstype = opprettSakDto.getBehandlingstype();
+        return UtledBehandlingsaarsak.utledÅrsaktype(journalpost, sakstema, behandlingstema, behandlingstype);
     }
 
     @Transactional
     public void opprettNySakOgBehandling(OpprettSakDto opprettSakDto) {
+        if (opprettSakDto.getMottaksdato() == null) {
+            throw new FunksjonellException("Mottaksdato er påkrevd for å opprette sak uten oppgave/journalpost");
+        }
+        if (opprettSakDto.getBehandlingsaarsakType() == null) {
+            throw new FunksjonellException("Årsak er påkrevd for å opprette behandling");
+        }
+        if (StringUtils.isNotEmpty(opprettSakDto.getBehandlingsaarsakFritekst()) && opprettSakDto.getBehandlingsaarsakType() != Behandlingsaarsaktyper.FRITEKST) {
+            throw new FunksjonellException("Kan ikke lagre fritekst som årsak når årsakstype er " + opprettSakDto.getBehandlingsaarsakType());
+        }
+
         validerOpprettSakDto(opprettSakDto);
         prosessinstansService.opprettNySakOgBehandling(opprettSakDto);
     }
 
     void validerOpprettSakDto(OpprettSakDto opprettSakDto) {
-        final var sakstype = opprettSakDto.getSakstype();
-        final var behandlingstema = opprettSakDto.getBehandlingstema();
-        final var sakstema = opprettSakDto.getSakstema();
-        final var behandlingstype = opprettSakDto.getBehandlingstype();
-        final var hovedpart = opprettSakDto.getHovedpart();
+        var hovedpart = opprettSakDto.getHovedpart();
+        var sakstype = opprettSakDto.getSakstype();
+        var sakstema = opprettSakDto.getSakstema();
+        var behandlingstema = opprettSakDto.getBehandlingstema();
+        var behandlingstype = opprettSakDto.getBehandlingstype();
 
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            lovligeKombinasjonerService.validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null);
-            lovligeKombinasjonerService.validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, null);
+            lovligeKombinasjonerService.validerBehandlingstemaOgBehandlingstypeForOpprettelse(
+                hovedpart, sakstype, sakstema, behandlingstema, behandlingstype);
 
-            if (erSakstypeEøs(sakstype) && !SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema)) {
+            if (erSakstypeEøs(sakstype)
+                && !SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"))) {
                 validerSøknadData(opprettSakDto.getSoknadDto());
             }
         } else {
@@ -129,12 +170,7 @@ public class OpprettSak {
         }
     }
 
-    private Oppgave validerOppgave(String oppgaveID) {
-        if (StringUtils.isEmpty(oppgaveID)) {
-            throw new FunksjonellException("OppgaveID mangler.");
-        }
-        final Oppgave oppgave = oppgaveService.hentOppgaveMedOppgaveID(oppgaveID);
-
+    private void validerOppgave(Oppgave oppgave) {
         if (unleash.isEnabled("melosys.ny_opprett_sak")) {
             if (!nySakKanOpprettesFraOppgavetype(oppgave.getOppgavetype())) {
                 throw new FunksjonellException("Ny sak kan ikke opprettes på bakgrunn av oppgave med type: " + oppgave.getOppgavetype().getBeskrivelse());
@@ -146,9 +182,8 @@ public class OpprettSak {
         }
 
         if (StringUtils.isEmpty(oppgave.getJournalpostId())) {
-            throw new FunksjonellException("Ny sak kan ikke opprettes fordi oppgave " + oppgaveID + " mangler journalpost.");
+            throw new FunksjonellException("Ny sak kan ikke opprettes fordi oppgave " + oppgave.getOppgaveId() + " mangler journalpost.");
         }
-        return oppgave;
     }
 
     private static boolean nySakKanOpprettesFraOppgavetype_gammel(Oppgavetyper oppgavetype) {
@@ -161,6 +196,7 @@ public class OpprettSak {
         return oppgavetype == Oppgavetyper.BEH_SAK_MK
             || oppgavetype == Oppgavetyper.BEH_SAK
             || oppgavetype == Oppgavetyper.BEH_SED
+            || oppgavetype == Oppgavetyper.VUR
             || oppgavetype == Oppgavetyper.VURD_HENV;
     }
 

@@ -9,9 +9,9 @@ import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsberegningsresultat;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
-import no.nav.melosys.domain.behandlingsgrunnlag.BehandlingsgrunnlagData;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.ForetakUtland;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
@@ -190,7 +190,7 @@ class BrevmottakerServiceTest {
     @Test
     void avklarMottakere_medArbeidsgiverRolleIkkeKunAvklarteVirksomheterOgIngenArbeidsgivere_girTomListe() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(null));
-        when(behandling.getBehandlingsgrunnlag()).thenReturn(lagBehandlingsgrunnlag(null, null));
+        when(behandling.getMottatteOpplysninger()).thenReturn(lagMottatteOpplysninger(null, null));
         when(behandling.hentArbeidsforholdDokument()).thenReturn(lagArbeidsforholdDokument(null));
 
         List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling, false, false);
@@ -201,7 +201,7 @@ class BrevmottakerServiceTest {
     @Test
     void avklarMottakere_medArbeidsgiverRolleIkkeKunAvklarteVirksomheter_girArbeidsgiverAktører() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(null));
-        when(behandling.getBehandlingsgrunnlag()).thenReturn(lagBehandlingsgrunnlag("987654321", null));
+        when(behandling.getMottatteOpplysninger()).thenReturn(lagMottatteOpplysninger("987654321", null));
         when(behandling.hentArbeidsforholdDokument()).thenReturn(lagArbeidsforholdDokument("123456789"));
 
         List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling, false, false);
@@ -214,7 +214,7 @@ class BrevmottakerServiceTest {
     @Test
     void avklarMottakere_medBareUtenlandskeArbeidsgivereIkkeKunAvklarteVirksomheter_girIngenMottakere() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(null));
-        when(behandling.getBehandlingsgrunnlag()).thenReturn(lagBehandlingsgrunnlag(null, "uuid"));
+        when(behandling.getMottatteOpplysninger()).thenReturn(lagMottatteOpplysninger(null, "uuid"));
         when(behandling.hentArbeidsforholdDokument()).thenReturn(lagArbeidsforholdDokument(null));
 
         List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling, false, false);
@@ -453,7 +453,7 @@ class BrevmottakerServiceTest {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(null));
         when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
 
-        assertThat(brevmottakerService.hentMottakerliste(STORBRITANNIA, 123))
+        assertThat(brevmottakerService.hentMottakerliste(TRYGDEAVTALE_GB, 123))
             .extracting(
                 Mottakerliste::getHovedMottaker,
                 Mottakerliste::getKopiMottakere,
@@ -474,7 +474,7 @@ class BrevmottakerServiceTest {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(null));
         when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
 
-        assertThat(brevmottakerService.hentMottakerliste(STORBRITANNIA, 123))
+        assertThat(brevmottakerService.hentMottakerliste(TRYGDEAVTALE_GB, 123))
             .extracting(
                 Mottakerliste::getHovedMottaker,
                 Mottakerliste::getKopiMottakere,
@@ -604,15 +604,15 @@ class BrevmottakerServiceTest {
         return fagsak;
     }
 
-    private Behandlingsgrunnlag lagBehandlingsgrunnlag(String ekstraArbeidsgivereOrgnr, String foretakUtlandUuid) {
-        var behandlingsgrunnlagData = new BehandlingsgrunnlagData();
-        behandlingsgrunnlagData.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.add(ekstraArbeidsgivereOrgnr);
+    private MottatteOpplysninger lagMottatteOpplysninger(String ekstraArbeidsgivereOrgnr, String foretakUtlandUuid) {
+        var mottatteOpplysningerData = new MottatteOpplysningerData();
+        mottatteOpplysningerData.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.add(ekstraArbeidsgivereOrgnr);
         var foretakUtland = new ForetakUtland();
         foretakUtland.uuid = foretakUtlandUuid;
-        behandlingsgrunnlagData.foretakUtland.add(foretakUtland);
-        var behandlingsgrunnlag = new Behandlingsgrunnlag();
-        behandlingsgrunnlag.setBehandlingsgrunnlagdata(behandlingsgrunnlagData);
-        return behandlingsgrunnlag;
+        mottatteOpplysningerData.foretakUtland.add(foretakUtland);
+        var mottatteOpplysninger = new MottatteOpplysninger();
+        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
+        return mottatteOpplysninger;
     }
 
     private ArbeidsforholdDokument lagArbeidsforholdDokument(String arbeidsgiverIDOrgNr) {

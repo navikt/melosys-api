@@ -3,7 +3,7 @@ package no.nav.melosys.service.dokument.sed;
 import java.util.Arrays;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.behandlingsgrunnlag.Behandlingsgrunnlag;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.Persondata;
@@ -35,8 +35,8 @@ public class SedDataGrunnlagFactory {
     }
 
     public SedDataGrunnlag av(Behandling behandling) {
-        Behandlingsgrunnlag behandlingsgrunnlag = behandling.getBehandlingsgrunnlag();
-        if (behandlingsgrunnlag != null) {
+        MottatteOpplysninger mottatteOpplysninger = behandling.getMottatteOpplysninger();
+        if (mottatteOpplysninger != null) {
             return new SedDataGrunnlagMedSoknad(behandling, kodeverkService, avklarteVirksomheterService,
                 avklartefaktaService, hentPersondata(behandling));
         } else {

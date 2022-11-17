@@ -18,7 +18,7 @@ import no.nav.melosys.service.kodeverk.KodeDto;
  */
 public class KodeSerializer extends StdSerializer<Kodeverk> {
     private static final Collection<Class<? extends Kodeverk>> IKKE_MAPPES_TIL_KODE_DTO = Set.of(
-        Avsendertyper.class, Behandlingsgrunnlagtyper.class, Fartsomrader.class, Flyvningstyper.class,
+        Avsendertyper.class, Mottatteopplysningertyper.class, Fartsomrader.class, Flyvningstyper.class,
         Folketrygdloven_kap2_bestemmelser.class, Innretningstyper.class, InnvilgelsesResultat.class,
         Loenn_forhold.class, Medlemskapstyper.class, Saerligeavgiftsgrupper.class,
         Tema.class, Trygdedekninger.class, Vilkaar.class,

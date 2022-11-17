@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdInterceptor;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.config.jackson.MelosysModule;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +17,7 @@ import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -56,5 +58,10 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {
         configurer.defaultContentType(MediaType.APPLICATION_JSON);
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new CorrelationIdInterceptor());
     }
 }

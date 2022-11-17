@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.felles.mdc
 import org.slf4j.MDC
 import java.security.SecureRandom
 import java.util.*
+import javax.servlet.http.HttpServletRequest
 import javax.xml.namespace.QName
 
 class MDCOperations {
@@ -57,6 +58,14 @@ class MDCOperations {
         @JvmStatic
         fun getCorrelationId(): String {
             val correlationId = MDC.get(CORRELATION_ID)
+            return if (correlationId.isNullOrBlank()) {
+                UUID.randomUUID().toString()
+            } else correlationId
+        }
+
+        @JvmStatic
+        fun getCorrelationId(request: HttpServletRequest): String {
+            val correlationId = request.getHeader(X_CORRELATION_ID)
             return if (correlationId.isNullOrBlank()) {
                 UUID.randomUUID().toString()
             } else correlationId

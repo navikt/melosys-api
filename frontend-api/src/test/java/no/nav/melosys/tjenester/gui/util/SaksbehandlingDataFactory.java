@@ -5,8 +5,8 @@ import java.util.ArrayList;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.behandlingsgrunnlag.Soeknad;
-import no.nav.melosys.domain.behandlingsgrunnlag.data.arbeidssteder.FysiskArbeidssted;
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
@@ -47,7 +47,7 @@ public final class SaksbehandlingDataFactory {
         soeknad.arbeidPaaLand.fysiskeArbeidssteder = new ArrayList<>();
         soeknad.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
         soeknad.oppholdUtland.oppholdslandkoder.add("FI");
-        soeknad.periode = new no.nav.melosys.domain.behandlingsgrunnlag.data.Periode(
+        soeknad.periode = new no.nav.melosys.domain.mottatteopplysninger.data.Periode(
             LocalDate.of(2019,1,1), LocalDate.of(2019,2,1));
         return soeknad;
     }

@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class BehandlingsresultatService {
     private static final Logger log = LoggerFactory.getLogger(BehandlingsresultatService.class);
+    private static final String KAN_IKKE_FINNE_BEHANDLINGSRESULTAT = "Kan ikke finne behandlingsresultat for behandling: ";
 
     private final BehandlingsresultatRepository behandlingsresultatRepository;
     private final VilkaarsresultatService vilkaarsresultatService;
@@ -49,17 +50,22 @@ public class BehandlingsresultatService {
 
     public Behandlingsresultat hentBehandlingsresultat(long behandlingsid) {
         return behandlingsresultatRepository.findById(behandlingsid)
-            .orElseThrow(() -> new IkkeFunnetException("Kan ikke finne behandlingsresultat for behandling: " + behandlingsid));
+            .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid));
+    }
+
+    public Behandlingsresultat hentBehandlingsresultatMedAnmodningsperioder(long behandlingsid) {
+        return behandlingsresultatRepository.findWithAnmodningsperioderById(behandlingsid)
+            .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid));
     }
 
     public Behandlingsresultat hentBehandlingsresultatMedKontrollresultat(long behandlingsid) {
         return behandlingsresultatRepository.findWithKontrollresultaterById(behandlingsid)
-            .orElseThrow(() -> new IkkeFunnetException("Kan ikke finne behandlingsresultat for behandling: " + behandlingsid));
+            .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid));
     }
 
     public Behandlingsresultat hentBehandlingsresultatMedAvklartefakta(long behandlingsid) {
         return behandlingsresultatRepository.findWithAvklartefaktaById(behandlingsid)
-            .orElseThrow(() -> new IkkeFunnetException("Kan ikke finne behandlingsresultat for behandling: " + behandlingsid));
+            .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid));
     }
 
     public void lagre(Behandlingsresultat resultat) {
