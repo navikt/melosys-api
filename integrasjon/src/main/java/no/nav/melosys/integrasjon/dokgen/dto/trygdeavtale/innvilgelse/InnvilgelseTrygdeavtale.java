@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Innvilgelse;
 
@@ -7,6 +8,7 @@ public class InnvilgelseTrygdeavtale {
 
     private final Innvilgelse innvilgelse;
     private final LovvalgBestemmelse artikkel;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private final LovvalgBestemmelse tilleggsbestemmelse;
     private final Soknad soknad;
     private final Familie familie;
