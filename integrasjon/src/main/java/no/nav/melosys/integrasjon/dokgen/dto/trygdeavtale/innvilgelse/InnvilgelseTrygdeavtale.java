@@ -7,6 +7,7 @@ public class InnvilgelseTrygdeavtale {
 
     private final Innvilgelse innvilgelse;
     private final LovvalgBestemmelse artikkel;
+    private final LovvalgBestemmelse tilleggsbestemmelse;
     private final Soknad soknad;
     private final Familie familie;
     private final boolean virksomhetArbeidsgiverSkalHaKopi;
@@ -17,6 +18,10 @@ public class InnvilgelseTrygdeavtale {
 
     public LovvalgBestemmelse getArtikkel() {
         return artikkel;
+    }
+
+    public LovvalgBestemmelse getTilleggsbestemmelse() {
+        return tilleggsbestemmelse;
     }
 
     public Soknad getSoknad() {
@@ -34,6 +39,7 @@ public class InnvilgelseTrygdeavtale {
     public InnvilgelseTrygdeavtale(Builder builder) {
         this.innvilgelse = builder.innvilgelse;
         this.artikkel = builder.artikkel;
+        this.tilleggsbestemmelse = builder.tilleggsbestemmelse;
         this.soknad = builder.soknad;
         this.familie = builder.familie;
         this.virksomhetArbeidsgiverSkalHaKopi = builder.virksomhetArbeidsgiverSkalHaKopi;
@@ -42,6 +48,7 @@ public class InnvilgelseTrygdeavtale {
     public static class Builder {
         private Innvilgelse innvilgelse;
         private LovvalgBestemmelse artikkel;
+        private LovvalgBestemmelse tilleggsbestemmelse;
         private Soknad soknad;
         private Familie familie;
         private boolean virksomhetArbeidsgiverSkalHaKopi;
@@ -53,6 +60,11 @@ public class InnvilgelseTrygdeavtale {
 
         public Builder artikkel(LovvalgBestemmelse artikkel) {
             this.artikkel = artikkel;
+            return this;
+        }
+
+        public Builder tilleggsbestemmelse(LovvalgBestemmelse tilleggsbestemmelse) {
+            this.tilleggsbestemmelse = tilleggsbestemmelse;
             return this;
         }
 
