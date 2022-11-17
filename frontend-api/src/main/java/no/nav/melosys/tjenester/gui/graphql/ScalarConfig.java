@@ -23,7 +23,7 @@ class ScalarConfig {
     private static final Logger log = LoggerFactory.getLogger(ScalarConfig.class);
 
     @Bean
-    public GraphQLScalarType dateScalar() {
+    public static GraphQLScalarType dateScalar() {
         return GraphQLScalarType.newScalar()
             .name("Date")
             .description("Format: YYYY-MM-DD (ISO-8601), example: 2017-11-24")
