@@ -66,8 +66,8 @@ public final class BrevDataUtils {
 
     public static UtenlandskPostadresse lagUtendlanskAdresse(UtenlandskMyndighet utenlandskMyndighet) {
         return UtenlandskPostadresse.builder()
-            .withAdresselinje1(utenlandskMyndighet.gateadresse_1)
-            .withAdresselinje2(utenlandskMyndighet.gateadresse_2)
+            .withAdresselinje1(utenlandskMyndighet.gateadresse1)
+            .withAdresselinje2(utenlandskMyndighet.gateadresse2)
             .withAdresselinje3(utenlandskMyndighet.postnummer + " " + utenlandskMyndighet.poststed)
             .withLand(utenlandskMyndighet.land)
             .build();

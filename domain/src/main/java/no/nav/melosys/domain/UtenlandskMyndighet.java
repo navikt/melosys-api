@@ -18,9 +18,11 @@ public class UtenlandskMyndighet {
 
     public String navn;
 
-    public String gateadresse_1;
+    @Column(name="gateadresse_1")
+    public String gateadresse1;
 
-    public String gateadresse_2;
+    @Column(name="gateadresse_2")
+    public String gateadresse2;
 
     public String postnummer;
 
@@ -62,19 +64,19 @@ public class UtenlandskMyndighet {
     }
 
     public String getKombinertGateadresse() {
-        if (gateadresse_2 == null || gateadresse_2.isEmpty()) {
-            return gateadresse_1;
+        if (gateadresse2 == null || gateadresse2.isEmpty()) {
+            return gateadresse1;
         }
-        return "%s, %s".formatted(gateadresse_1,gateadresse_2);
+        return "%s, %s".formatted(gateadresse1, gateadresse2);
     }
 
     public List<String> getGateadresseAsList() {
         List<String> gateadresse = Collections.emptyList();
-        if (gateadresse_1 != null) {
-            gateadresse.add(gateadresse_1);
+        if (gateadresse1 != null) {
+            gateadresse.add(gateadresse1);
         }
-        if (gateadresse_2 != null) {
-            gateadresse.add(gateadresse_2);
+        if (gateadresse2 != null) {
+            gateadresse.add(gateadresse2);
         }
         return gateadresse;
     }
