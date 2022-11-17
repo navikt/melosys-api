@@ -4,13 +4,11 @@ import java.util.Set;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
@@ -28,11 +26,9 @@ import org.springframework.web.context.WebApplicationContext;
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class LovligeKombinasjonerTjeneste {
     private final LovligeKombinasjonerService lovligeKombinasjonerService;
-    private final BehandlingService behandlingService;
 
-    public LovligeKombinasjonerTjeneste(LovligeKombinasjonerService lovligeKombinasjonerService, BehandlingService behandlingService) {
+    public LovligeKombinasjonerTjeneste(LovligeKombinasjonerService lovligeKombinasjonerService) {
         this.lovligeKombinasjonerService = lovligeKombinasjonerService;
-        this.behandlingService = behandlingService;
     }
 
     @GetMapping("/sakstyper/hent-lovlige-kombinasjoner")
@@ -69,7 +65,6 @@ public class LovligeKombinasjonerTjeneste {
         @RequestParam(value = "behandlingstema", required = false) Behandlingstema behandlingstema,
         @RequestParam(value = "sisteBehandlingsID", required = false) Long sisteBehandlingsID
     ) {
-        Behandling sisteBehandling = sisteBehandlingsID != null ? behandlingService.hentBehandling(sisteBehandlingsID) : null;
-        return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, sisteBehandling));
+        return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, sisteBehandlingsID));
     }
 }

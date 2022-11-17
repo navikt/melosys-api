@@ -1,18 +1,7 @@
 package no.nav.melosys.service.journalforing;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import no.finn.unleash.FakeUnleash;
-import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.BrukerIdType;
 import no.nav.melosys.domain.arkiv.Journalpost;
@@ -32,6 +21,8 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 import no.nav.melosys.service.journalforing.dto.*;
@@ -47,6 +38,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
@@ -72,13 +71,17 @@ class JournalfoeringServiceTest {
     private FagsakService fagsakService;
     @Mock
     private PersondataFasade persondataFasade;
+    @Mock
+    private BehandlingService behandlingService;
+    @Mock
+    private BehandlingsresultatService behandlingsresultatService;
 
     @Mock
     private BehandlingsresultatRepository behandlingsresultatRepository;
     @Mock
     private SaksbehandlingRegler saksbehandlingRegler;
 
-    private final LovligeKombinasjonerService lovligeKombinasjonerService = new LovligeKombinasjonerService();
+    private final LovligeKombinasjonerService lovligeKombinasjonerService = new LovligeKombinasjonerService(behandlingService, behandlingsresultatService);
     private final FakeUnleash unleash = new FakeUnleash();
 
     @Captor
@@ -93,14 +96,15 @@ class JournalfoeringServiceTest {
 
     @BeforeEach
     public void setup() {
-        saksbehandlingRegler = new SaksbehandlingRegler(behandlingsresultatRepository);
+        saksbehandlingRegler = new SaksbehandlingRegler(behandlingsresultatRepository, unleash);
 
         unleash.enable("melosys.folketrygden.mvp");
         journalpost = new Journalpost("123");
         journalpost.setHoveddokument(new ArkivDokument());
         journalpost.setForsendelseMottatt(Instant.EPOCH);
 
-        this.journalfoeringService = new JournalfoeringService(joarkFasade, prosessinstansService, eessiService, fagsakService, persondataFasade, lovligeKombinasjonerService, unleash, saksbehandlingRegler);
+        this.journalfoeringService = new JournalfoeringService(joarkFasade, prosessinstansService, eessiService, fagsakService,
+            persondataFasade, lovligeKombinasjonerService, unleash, saksbehandlingRegler, behandlingService, behandlingsresultatService);
         opprettDto = new JournalfoeringOpprettDto();
         opprettDto.setJournalpostID("setJournalpostID");
         opprettDto.setOppgaveID("setOppgaveID");
@@ -120,6 +124,7 @@ class JournalfoeringServiceTest {
 
         tilordneDto = new JournalfoeringTilordneDto();
         tilordneDto.setBehandlingstypeKode(Behandlingstyper.ENDRET_PERIODE.getKode());
+        tilordneDto.setBehandlingstemaKode(Behandlingstema.UTSENDT_ARBEIDSTAKER.getKode());
         tilordneDto.setJournalpostID("setJournalpostID");
         tilordneDto.setOppgaveID("setOppgaveID");
         tilordneDto.setAvsenderNavn("setAvsenderNavn");
@@ -619,14 +624,12 @@ class JournalfoeringServiceTest {
     void journalførOgOpprettAndregangsBehandling_altOK_prosessinstansOpprettet() {
         tilordneDto.setSaksnummer(MELOSYS_SAKSNUMMER);
 
-        var behandling = new Behandling();
+        var behandling = lagBehandling();
         behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
-        var fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.FTRL);
-        behandling.setFagsak(fagsak);
         behandling.setType(Behandlingstyper.SOEKNAD);
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
-        fagsak.getBehandlinger().add(behandling);
+        var fagsak = lagFagsak(behandling);
+        fagsak.setType(Sakstyper.FTRL);
 
         when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
         when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
@@ -652,16 +655,14 @@ class JournalfoeringServiceTest {
         tilordneDto.setBehandlingstemaKode(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET.getKode());
         tilordneDto.setBehandlingstypeKode(Behandlingstyper.HENVENDELSE.getKode());
 
-        var behandling = new Behandling();
+        var behandling = lagBehandling();
         behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
-        var fagsak = new Fagsak();
+        var fagsak = lagFagsak(behandling);
         fagsak.setType(Sakstyper.EU_EOS);
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.BRUKER);
         fagsak.setAktører(Set.of(aktoer));
-        behandling.setFagsak(fagsak);
-        fagsak.getBehandlinger().add(behandling);
 
         when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
         when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
@@ -687,18 +688,16 @@ class JournalfoeringServiceTest {
         tilordneDto.setBehandlingstemaKode(Behandlingstema.UTSENDT_ARBEIDSTAKER.getKode());
         tilordneDto.setBehandlingstypeKode(Behandlingstyper.NY_VURDERING.getKode());
 
-        var behandling = new Behandling();
+        var behandling = lagBehandling();
         behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         behandling.setType(Behandlingstyper.NY_VURDERING);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        var fagsak = new Fagsak();
+        var fagsak = lagFagsak(behandling);
         fagsak.setType(Sakstyper.EU_EOS);
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.BRUKER);
         fagsak.setAktører(Set.of(aktoer));
-        behandling.setFagsak(fagsak);
-        fagsak.getBehandlinger().add(behandling);
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_SØKNAD);
 
@@ -725,7 +724,7 @@ class JournalfoeringServiceTest {
     @Test
     void journalførOgOpprettAndregangsBehandling_behandlingstypeIkkeTillattForSakstype_kasterException() {
         tilordneDto.setSaksnummer(MELOSYS_SAKSNUMMER);
-        var fagsak = new Fagsak();
+        var fagsak = lagFagsak(lagBehandling());
 
         when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
         when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
@@ -749,10 +748,10 @@ class JournalfoeringServiceTest {
     void journalførOgOpprettAndregangsBehandling_fagsakHarAktivBehandling_feilKastes() {
         tilordneDto.setSaksnummer(MELOSYS_SAKSNUMMER);
 
-        var behandling = new Behandling();
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        var aktivBehandling = lagBehandling();
+        aktivBehandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         var fagsak = new Fagsak();
-        fagsak.getBehandlinger().add(behandling);
+        fagsak.getBehandlinger().add(aktivBehandling);
 
         when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
         when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
@@ -763,25 +762,49 @@ class JournalfoeringServiceTest {
     }
 
     @Test
+    void journalførOgOpprettAndregangsBehandling_fagsakHarAktivBehandlingMenErArtikkel16AnmodningSendtUtland_feilKastesIkke() {
+        unleash.enable("melosys.behandle_alle_saker");
+        tilordneDto.setSaksnummer(MELOSYS_SAKSNUMMER);
+
+        var aktivBehandling = lagBehandling();
+        aktivBehandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        var fagsak = lagFagsak(aktivBehandling);
+        var anmodningsperiode = new Anmodningsperiode();
+        anmodningsperiode.setSendtUtland(true);
+        var behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.getAnmodningsperioder().add(anmodningsperiode);
+
+        when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
+        when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
+        when(behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(aktivBehandling.getId())).thenReturn(behandlingsresultat);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto))
+            .withMessageNotContaining("Det finnes allerede en aktiv behandling på fagsak " + MELOSYS_SAKSNUMMER);
+    }
+
+    @Test
     void journalførOgOpprettAndregangsBehandling_sedSakTilknyttetAnnenFagsak_kasterException() {
         journalpost.setMottaksKanal("EESSI");
         var melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setRinaSaksnummer(RINA_SAKSNUMMER);
 
-        var behandling = new Behandling();
+        var behandling = lagBehandling();
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        var fagsak = new Fagsak();
-        fagsak.getBehandlinger().add(behandling);
-        fagsak.setSaksnummer("FAGSAK KOBLET TIL SED FRA FØR");
+        var fagsak1 = lagFagsak(behandling);
+        fagsak1.setSaksnummer("FAGSAK KOBLET TIL SED FRA FØR");
 
-        tilordneDto.setSaksnummer("FAGSAK SOM PRØVER Å KNYTTE JOURNALPOST FOR SED TIL SEG");
+        var fagsak2 = lagFagsak(lagBehandling());
+        fagsak2.setSaksnummer("FAGSAK SOM PRØVER Å KNYTTE JOURNALPOST FOR SED TIL SEG");
+
+        tilordneDto.setSaksnummer(fagsak2.getSaksnummer());
 
         Long arkivsakID = 111L;
 
         when(eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId())).thenReturn(melosysEessiMelding);
         when(eessiService.finnSakForRinasaksnummer(RINA_SAKSNUMMER)).thenReturn(Optional.of(arkivsakID));
-        when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
-        when(fagsakService.hentFagsak("FAGSAK SOM PRØVER Å KNYTTE JOURNALPOST FOR SED TIL SEG")).thenReturn(new Fagsak());
+        when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak1));
+        when(fagsakService.hentFagsak(fagsak2.getSaksnummer())).thenReturn(fagsak2);
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
 
@@ -862,5 +885,19 @@ class JournalfoeringServiceTest {
         fagsakDto.setSoknadsperiode(periode);
         fagsakDto.setLand(new SoeknadslandDto(Collections.singletonList(land), false));
         return fagsakDto;
+    }
+
+    private Fagsak lagFagsak(Behandling behandling) {
+        var fagsak = new Fagsak();
+        fagsak.getBehandlinger().add(behandling);
+        behandling.setFagsak(fagsak);
+        return fagsak;
+    }
+
+    private Behandling lagBehandling() {
+        var behandling = new Behandling();
+        behandling.setId(1L);
+        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
+        return behandling;
     }
 }

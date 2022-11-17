@@ -1,10 +1,8 @@
 package no.nav.melosys.melosysmock.pdl
 
 import org.springframework.stereotype.Component
-import org.springframework.web.context.annotation.RequestScope
 
 @Component
-@RequestScope
 class PDLQuerySession {
     companion object {
         const val IDENT_KEY = "IDENT"

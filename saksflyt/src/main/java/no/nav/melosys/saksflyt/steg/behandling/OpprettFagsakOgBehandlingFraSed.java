@@ -6,10 +6,12 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.sak.OpprettSakRequest;
@@ -24,12 +26,14 @@ public class OpprettFagsakOgBehandlingFraSed implements StegBehandler {
 
     private static final Logger log = LoggerFactory.getLogger(OpprettFagsakOgBehandlingFraSed.class);
 
-    private final Unleash unleash;
     private final FagsakService fagsakService;
+    private final JoarkFasade joarkFasade;
+    private final Unleash unleash;
 
-    public OpprettFagsakOgBehandlingFraSed(Unleash unleash, FagsakService fagsakService) {
-        this.unleash = unleash;
+    public OpprettFagsakOgBehandlingFraSed(FagsakService fagsakService, JoarkFasade joarkFasade, Unleash unleash) {
         this.fagsakService = fagsakService;
+        this.joarkFasade = joarkFasade;
+        this.unleash = unleash;
     }
 
     @Override
@@ -39,21 +43,23 @@ public class OpprettFagsakOgBehandlingFraSed implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
-        MelosysEessiMelding melosysEessiMelding = prosessinstans.getData(EESSI_MELDING, MelosysEessiMelding.class);
+        MelosysEessiMelding eessiMelding = prosessinstans.getData(EESSI_MELDING, MelosysEessiMelding.class);
 
         Sakstemaer sakstema = prosessinstans.getData(SAKSTEMA, Sakstemaer.class);
         Behandlingstema behandlingstema = prosessinstans.getData(BEHANDLINGSTEMA, Behandlingstema.class);
 
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
             .medAktørID(prosessinstans.hentAktørIDFraDataEllerSED())
+            .medSakstype(Sakstyper.EU_EOS)
+            .medSakstema(sakstema)
+            .medBehandlingstema(behandlingstema)
             .medBehandlingstype(unleash.isEnabled("melosys.behandle_alle_saker")
                 ? Behandlingstyper.FØRSTEGANG
                 : Behandlingstyper.SED)
-            .medBehandlingstema(behandlingstema)
-            .medInitierendeJournalpostId(melosysEessiMelding.getJournalpostId())
-            .medInitierendeDokumentId(melosysEessiMelding.getDokumentId())
-            .medSakstype(Sakstyper.EU_EOS)
-            .medSakstema(sakstema)
+            .medBehandlingsårsaktype(Behandlingsaarsaktyper.SED)
+            .medMottaksdato(joarkFasade.hentMottaksDatoForJournalpost(eessiMelding.getJournalpostId()))
+            .medInitierendeJournalpostId(eessiMelding.getJournalpostId())
+            .medInitierendeDokumentId(eessiMelding.getDokumentId())
             .build();
 
         Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
@@ -63,6 +69,6 @@ public class OpprettFagsakOgBehandlingFraSed implements StegBehandler {
         prosessinstans.setBehandling(behandling);
 
         log.info("Fagsak {} opprettet med behandling {} for RINA-sak {}",
-            fagsak.getSaksnummer(), behandling.getId(), melosysEessiMelding.getRinaSaksnummer());
+            fagsak.getSaksnummer(), behandling.getId(), eessiMelding.getRinaSaksnummer());
     }
 }

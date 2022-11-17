@@ -12,4 +12,7 @@ public interface BehandlingsresultatRepository extends CrudRepository<Behandling
 
     @EntityGraph(attributePaths={"kontrollresultater"}, type = EntityGraph.EntityGraphType.LOAD)
     Optional<Behandlingsresultat> findWithKontrollresultaterById(Long behandlingID);
+
+    @EntityGraph(attributePaths={"anmodningsperioder"}, type = EntityGraph.EntityGraphType.LOAD)
+    Optional<Behandlingsresultat> findWithAnmodningsperioderById(Long behandlingID);
 }
