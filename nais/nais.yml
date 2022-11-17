@@ -43,6 +43,12 @@ spec:
       rules:
         - application: {{APP_NAME_FRONTEND}}
         - application: {{APP_NAME_TRYGDEAVTALE}}
+    outbound:
+      rules:
+        - application: {{APP_NAME_OPPGAVE}}
+        - application: {{APP_NAME_PDL}}
+        - application: {{APP_NAME_SAF}}
+        - application: {{APP_NAME_MELOSYS_EESSI}}
   webproxy: true
   vault:
     enabled: true
