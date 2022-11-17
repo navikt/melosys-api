@@ -1,6 +1,8 @@
 package no.nav.melosys.tjenester.gui.graphql;
 
 import java.math.BigInteger;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -8,6 +10,8 @@ import java.time.format.DateTimeParseException;
 import graphql.language.IntValue;
 import graphql.language.StringValue;
 import graphql.schema.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,6 +19,9 @@ import static java.time.temporal.ChronoUnit.SECONDS;
 
 @Configuration(proxyBeanMethods = false)
 class ScalarConfig {
+
+    private static final Logger log = LoggerFactory.getLogger(ScalarConfig.class);
+
     @Bean
     public GraphQLScalarType dateScalar() {
         return GraphQLScalarType.newScalar()
@@ -24,7 +31,7 @@ class ScalarConfig {
             .build();
     }
 
-    private static Coercing<LocalDate, String> dateCoercing() {
+    static Coercing<LocalDate, String> dateCoercing() {
         return new Coercing<>() {
             @Override
             public String serialize(Object input) {
@@ -32,9 +39,26 @@ class ScalarConfig {
                     return input.toString();
                 }
 
+                if (input instanceof String && harGyldigDatoFormat(input)) {
+                    return input.toString();
+                }
+
                 throw new CoercingSerializeException(
                     "GraphQL serialization from " + input.getClass() + " with value " + input + " to Date scalar not" +
                         " implemented.");
+            }
+
+            private boolean harGyldigDatoFormat(Object input) {
+                try {
+                    DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                    formatter.setLenient(false);
+                    var date = formatter.parse(input.toString());
+                    return true;
+                } catch (Exception e) {
+                    log.warn("Har mottatt en String input med ugyldig GraphQL Date scalar format: {}",
+                        input.toString());
+                    return false;
+                }
             }
 
             @Override
