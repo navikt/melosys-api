@@ -85,7 +85,7 @@ internal class BehandlingTest {
         }
 
         val behandlingsfrist = Behandling.utledBehandlingsfrist(
-            behandling
+            behandling, LocalDate.now()
         )
         behandlingsfrist.shouldBe(LocalDate.now().plusWeeks(8))
     }
@@ -101,30 +101,9 @@ internal class BehandlingTest {
         }
 
         val behandlingsfrist = Behandling.utledBehandlingsfrist(
-            behandling
+            behandling, LocalDate.now()
         )
         behandlingsfrist.shouldBe(LocalDate.now().plusDays(70))
-    }
-
-    @Test
-    fun utledBehandlingsfrist_70dager_med_mottattDato() {
-        val utgangspunktDato = LocalDate.now().minusDays(5)
-
-        val behandling = Behandling().apply {
-            fagsak = Fagsak().apply {
-                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-            }
-            behandlingsårsak = Behandlingsaarsak().apply {
-                mottaksdato = utgangspunktDato
-            }
-            tema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
-            type = Behandlingstyper.KLAGE
-        }
-
-        val behandlingsfrist = Behandling.utledBehandlingsfrist(
-            behandling
-        )
-        behandlingsfrist.shouldBe(utgangspunktDato.plusDays(70))
     }
 
     @Test
@@ -162,16 +141,16 @@ internal class BehandlingTest {
         }
 
         val behandlingsfrist_soknadsbehandlinger = Behandling.utledBehandlingsfrist(
-            behandling_soknadsbehandlinger
+            behandling_soknadsbehandlinger, LocalDate.now()
         )
         val behandlingsfrist_anmodning_unntak = Behandling.utledBehandlingsfrist(
-            behandling_anmodning_unntak
+            behandling_anmodning_unntak, LocalDate.now()
         )
         val behandlingsfrist_attester_fra_andre_trygdeavtaleland = Behandling.utledBehandlingsfrist(
-            behandling_attester_fra_andre_trygdeavtaleland
+            behandling_attester_fra_andre_trygdeavtaleland, LocalDate.now()
         )
         val behandlingsfrist_henvendelser = Behandling.utledBehandlingsfrist(
-            behandling_henvendelser
+            behandling_henvendelser, LocalDate.now()
         )
 
         behandlingsfrist_soknadsbehandlinger.shouldBe(LocalDate.now().plusDays(90))
@@ -197,49 +176,14 @@ internal class BehandlingTest {
             type = Behandlingstyper.NY_VURDERING
         }
         val behandlingsfrist = Behandling.utledBehandlingsfrist(
-            behandling_utstasjonering
+            behandling_utstasjonering, LocalDate.now()
         )
         val behandlingsfrist_ovrige = Behandling.utledBehandlingsfrist(
-            behandling_ovrige
+            behandling_ovrige, LocalDate.now()
         )
 
         behandlingsfrist.shouldBe(LocalDate.now().plusDays(180))
         behandlingsfrist_ovrige.shouldBe(LocalDate.now().plusDays(180))
-    }
-
-    @Test
-    fun utledBehandlingsfrist_180dager_med_mottattDato() {
-        val utgangspunktDato = LocalDate.now().minusDays(5)
-
-        val behandling_utstasjonering = Behandling().apply {
-            fagsak = Fagsak().apply {
-                tema = Sakstemaer.UNNTAK
-            }
-            behandlingsårsak = Behandlingsaarsak().apply {
-                mottaksdato = utgangspunktDato
-            }
-            tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING
-            type = Behandlingstyper.NY_VURDERING
-        }
-        val behandling_ovrige = Behandling().apply {
-            fagsak = Fagsak().apply {
-                tema = Sakstemaer.UNNTAK
-            }
-            behandlingsårsak = Behandlingsaarsak().apply {
-                mottaksdato = utgangspunktDato
-            }
-            tema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
-            type = Behandlingstyper.NY_VURDERING
-        }
-        val behandlingsfrist = Behandling.utledBehandlingsfrist(
-            behandling_utstasjonering
-        )
-        val behandlingsfrist_ovrige = Behandling.utledBehandlingsfrist(
-            behandling_ovrige
-        )
-
-        behandlingsfrist.shouldBe(utgangspunktDato.plusDays(180))
-        behandlingsfrist_ovrige.shouldBe(utgangspunktDato.plusDays(180))
     }
 
     @Test

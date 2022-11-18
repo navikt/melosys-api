@@ -32,6 +32,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.behandling.UtledMottaksdato;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2;
@@ -46,13 +47,16 @@ public class TrygdeavtaleMapper {
     private final AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
+    private final UtledMottaksdato utledMottaksdato;
 
     public TrygdeavtaleMapper(AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService,
                               AvklarteVirksomheterService avklarteVirksomheterService,
-                              LovvalgsperiodeService lovvalgsperiodeService) {
+                              LovvalgsperiodeService lovvalgsperiodeService,
+                              UtledMottaksdato utledMottaksdato) {
         this.avklarteMedfølgendeFamilieService = avklarteMedfølgendeFamilieService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
+        this.utledMottaksdato = utledMottaksdato;
     }
 
     @Transactional
@@ -70,14 +74,13 @@ public class TrygdeavtaleMapper {
         if (skalIkkeHaInnvilgelse(brevbestilling)) return null;
 
         var behandling = brevbestilling.getBehandling();
-        var mottatteOpplysninger = behandling.getMottatteOpplysninger();
         var lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId());
 
         return new InnvilgelseTrygdeavtale.Builder()
             .innvilgelse(Innvilgelse.av(brevbestilling))
             .artikkel(lovvalgsperiode.getBestemmelse())
             .tilleggsbestemmelse(lovvalgsperiode.getTilleggsbestemmelse())
-            .soknad(lagSøknad(mottatteOpplysninger, lovvalgsperiode, soknadsland))
+            .soknad(lagSøknad(behandling, lovvalgsperiode, soknadsland))
             .familie(lagFamile(behandling.getId()))
             .virksomhetArbeidsgiverSkalHaKopi(brevbestilling.isVirksomhetArbeidsgiverSkalHaKopi())
             .build();
@@ -179,11 +182,11 @@ public class TrygdeavtaleMapper {
             .build();
     }
 
-    private Soknad lagSøknad(MottatteOpplysninger mottatteOpplysninger, Lovvalgsperiode lovvalgsperiode, Land_iso2 soknadsland) {
-        var avklartVirksomhet = hentAvklartVirksomhet(mottatteOpplysninger.getBehandling());
+    private Soknad lagSøknad(Behandling behandling, Lovvalgsperiode lovvalgsperiode, Land_iso2 soknadsland) {
+        var avklartVirksomhet = hentAvklartVirksomhet(behandling);
 
         return new Soknad(
-            mottatteOpplysninger.getMottaksdato(),
+            utledMottaksdato.getMottaksdato(behandling),
             lovvalgsperiode.getFom(),
             lovvalgsperiode.getTom(),
             avklartVirksomhet.navn,

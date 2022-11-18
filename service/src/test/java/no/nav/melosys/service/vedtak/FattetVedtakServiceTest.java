@@ -1,7 +1,10 @@
 package no.nav.melosys.service.vedtak;
 
+import java.time.LocalDate;
+
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.behandling.UtledMottaksdato;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.vedtak.data.FattetVedtakTestData;
@@ -17,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -36,6 +40,9 @@ class FattetVedtakServiceTest {
     @Mock
     private PersondataFasade mockPersondataFasade;
 
+    @Mock
+    private UtledMottaksdato mockUtledMottaksdato;
+
     @Captor
     private ArgumentCaptor<FattetVedtak> fattetVedtakCaptor;
 
@@ -44,15 +51,17 @@ class FattetVedtakServiceTest {
     @BeforeEach
     void setUp() {
         fattetVedtakService = new FattetVedtakService(mockFattetVedtakProducer, mockBehandlingService,
-            mockBehandlingsresultatService, mockPersondataFasade);
+            mockBehandlingsresultatService, mockPersondataFasade, mockUtledMottaksdato);
     }
 
     @Test
     void fattetVedtakFtrl_skalPubliseres() {
         final long behandlingId = 123L;
+        var mottaksdato = LocalDate.now().minusDays(5);
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(behandlingId)).thenReturn(FattetVedtakTestData.lagBehandling());
         when(mockBehandlingsresultatService.hentBehandlingsresultat(behandlingId)).thenReturn(FattetVedtakTestData.lagBehandlingsresultat());
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
+        when(mockUtledMottaksdato.getMottaksdato(any())).thenReturn(mottaksdato);
         fattetVedtakService.publiserFattetVedtak(behandlingId);
 
         verify(mockFattetVedtakProducer).produserMelding(fattetVedtakCaptor.capture());
@@ -60,6 +69,8 @@ class FattetVedtakServiceTest {
         FattetVedtak fattetVedtak = fattetVedtakCaptor.getValue();
         assertThat(fattetVedtak).isNotNull();
         assertThat(fattetVedtak.sak()).isNotNull();
+        assertThat(fattetVedtak.soknad()).isNotNull();
+        assertThat(fattetVedtak.soknad().mottaksDato()).isEqualTo(mottaksdato);
         assertThat(fattetVedtak.lovvalgOgMedlemskapsperioder()).isNotNull();
     }
 }

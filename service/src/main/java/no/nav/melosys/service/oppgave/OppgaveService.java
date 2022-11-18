@@ -8,13 +8,13 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RegistreringsInfo;
 import no.nav.melosys.domain.Tema;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -22,8 +22,9 @@ import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
+import no.nav.melosys.service.behandling.UtledMottaksdato;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.oppgave.dto.*;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
@@ -49,6 +50,7 @@ public class OppgaveService {
     private final PersondataFasade persondataFasade;
     private final EregFasade eregFasade;
     private final Unleash unleash;
+    private final UtledMottaksdato utledMottaksdato;
 
     private static final String[] BEHANDLINGSOPPGAVE_TYPER = new String[]{
         BEH_SAK_MK.getKode(),
@@ -73,7 +75,7 @@ public class OppgaveService {
                           MottatteOpplysningerService mottatteOpplysningerService,
                           PersondataFasade persondataFasade,
                           EregFasade eregFasade,
-                          Unleash unleash) {
+                          Unleash unleash, UtledMottaksdato utledMottaksdato) {
         this.behandlingService = behandlingService;
         this.fagsakService = fagsakService;
         this.oppgaveFasade = oppgaveFasade;
@@ -82,6 +84,7 @@ public class OppgaveService {
         this.persondataFasade = persondataFasade;
         this.eregFasade = eregFasade;
         this.unleash = unleash;
+        this.utledMottaksdato = utledMottaksdato;
     }
 
     public List<Oppgave> finnBehandlingsoppgaverMedPersonIdent(String personIdent) {
@@ -195,7 +198,7 @@ public class OppgaveService {
             var oppgaveToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
             var oppgaveBuilder = (
                 oppgaveToggleEnabled
-                    ? OppgaveFactory.lagBehandlingsoppgave(behandling)
+                    ? lagBehandlingsoppgave(behandling)
                     : OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()))
                 .setTilordnetRessurs(tilordnetRessurs)
                 .setJournalpostId(journalpostID)
@@ -225,6 +228,10 @@ public class OppgaveService {
 
     public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, @Nullable String journalpostID, String aktørID, @Nullable String tilordnetRessurs) {
         opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, lagOppgaveBeskrivelse(behandling), null);
+    }
+
+    public Oppgave.Builder lagBehandlingsoppgave(Behandling behandling) {
+        return OppgaveFactory.lagBehandlingsoppgave(behandling, utledMottaksdato.getMottaksdato(behandling));
     }
 
     /**

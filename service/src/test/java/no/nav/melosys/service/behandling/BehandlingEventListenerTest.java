@@ -39,7 +39,7 @@ class BehandlingEventListenerTest {
     @Mock
     private OppgaveService oppgaveService;
 
-    private static FakeUnleash unleash = new FakeUnleash();
+    private static final FakeUnleash unleash = new FakeUnleash();
 
     @Captor
     private ArgumentCaptor<OppgaveOppdatering> oppgaveOppdateringCaptor;
@@ -134,10 +134,11 @@ class BehandlingEventListenerTest {
         );
         Oppgave oppgave = new Oppgave.Builder().setOppgaveId(OPPGAVE_ID).build();
         when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(FAGSAKSNUMMER)).thenReturn(Optional.of(oppgave));
+        when(oppgaveService.lagBehandlingsoppgave(behandling)).thenReturn(OppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now()));
 
         behandlingEventListener.behandlingEndret(behandlingEndretAvSaksbehandlerEvent);
 
-        Oppgave behandlingsOppgaveForType = OppgaveFactory.lagBehandlingsoppgave(behandling).build();
+        Oppgave behandlingsOppgaveForType = oppgaveService.lagBehandlingsoppgave(behandling).build();
         verify(oppgaveService).oppdaterOppgave(eq(OPPGAVE_ID), oppgaveOppdateringCaptor.capture());
         OppgaveOppdatering capturedOppgaveOppdatering = oppgaveOppdateringCaptor.getValue();
         assertThat(capturedOppgaveOppdatering.getBehandlingstema()).isEqualTo(behandlingsOppgaveForType.getBehandlingstema());
