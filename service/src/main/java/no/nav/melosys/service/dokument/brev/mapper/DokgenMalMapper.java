@@ -108,6 +108,8 @@ public class DokgenMalMapper {
                 .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId())).build(), Land_iso2.GB);
             case TRYGDEAVTALE_US -> trygdeavtaleMapper.map((InnvilgelseBrevbestilling) brevbestilling.toBuilder()
                 .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId())).build(), Land_iso2.US);
+            case TRYGDEAVTALE_CAN -> trygdeavtaleMapper.map((InnvilgelseBrevbestilling) brevbestilling.toBuilder()
+                .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId())).build(), Land_iso2.CA);
             case GENERELT_FRITEKSTBREV_BRUKER -> FritekstbrevBruker.av(((FritekstbrevBrevbestilling) brevbestilling).toBuilder()
                     .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.BRUKER)).build(),
                 Aktoersroller.BRUKER

@@ -10,10 +10,6 @@ import javax.transaction.Transactional;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.SoeknadTrygdeavtale;
-import no.nav.melosys.domain.mottatteopplysninger.data.IdentType;
-import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
@@ -21,6 +17,10 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.SoeknadTrygdeavtale;
+import no.nav.melosys.domain.mottatteopplysninger.data.IdentType;
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
@@ -34,11 +34,11 @@ import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.mottatteopplysninger.data.IdentType.DNR;
-import static no.nav.melosys.domain.mottatteopplysninger.data.IdentType.FNR;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_1;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_9;
+import static no.nav.melosys.domain.mottatteopplysninger.data.IdentType.DNR;
+import static no.nav.melosys.domain.mottatteopplysninger.data.IdentType.FNR;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Component
@@ -76,6 +76,7 @@ public class TrygdeavtaleMapper {
         return new InnvilgelseTrygdeavtale.Builder()
             .innvilgelse(Innvilgelse.av(brevbestilling))
             .artikkel(lovvalgsperiode.getBestemmelse())
+            .tilleggsbestemmelse(lovvalgsperiode.getTilleggsbestemmelse())
             .soknad(lagSøknad(mottatteOpplysninger, lovvalgsperiode, soknadsland))
             .familie(lagFamile(behandling.getId()))
             .virksomhetArbeidsgiverSkalHaKopi(brevbestilling.isVirksomhetArbeidsgiverSkalHaKopi())
