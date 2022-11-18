@@ -20,7 +20,7 @@ class UtledMottaksdato(val joarkFasade: JoarkFasade, val unleash: Unleash) {
             val journalpost = finnJournalpost(behandling.initierendeJournalpostId)
             return tilLocalDate(journalpost?.forsendelseMottatt ?: behandling.registrertDato)
         }
-        return behandling.mottatteOpplysninger.mottaksdato ?: tilLocalDate(behandling.registrertDato)
+        return behandling.mottatteOpplysninger?.mottaksdato ?: tilLocalDate(behandling.registrertDato)
     }
 
     fun getMottaksdato(behandling: Behandling, journalpost: Journalpost?): Instant? {

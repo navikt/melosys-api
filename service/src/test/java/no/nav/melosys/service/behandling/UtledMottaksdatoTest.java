@@ -55,6 +55,20 @@ class UtledMottaksdatoTest {
     }
 
     @Test
+    void getMottaksdato_toggleErAvOgBehandlingHarIkkeMottatteOpplysninger_returnererRegistrertDato() {
+        unleash.disableAll();
+        var behandling = new Behandling();
+        behandling.setRegistrertDato(REGISTRERT_DATO);
+
+
+        var utledetDato = utledMottaksdato.getMottaksdato(behandling);
+
+
+        assertThat(utledetDato).isEqualTo(REGISTRERT_DATO_LOCALDATE);
+        verify(joarkFasade, never()).hentJournalpost(any());
+    }
+
+    @Test
     void getMottaksdato_toggleErAvOgMottatteOpplysningerHarIkkeMottaksdato_returnererRegistrertDato() {
         unleash.disableAll();
         var behandling = new Behandling();
