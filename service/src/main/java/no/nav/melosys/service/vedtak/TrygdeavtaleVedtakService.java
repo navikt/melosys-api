@@ -119,6 +119,7 @@ public class TrygdeavtaleVedtakService {
         return switch (soeknadsland) {
             case GB -> Produserbaredokumenter.TRYGDEAVTALE_GB;
             case US -> Produserbaredokumenter.TRYGDEAVTALE_US;
+            case CA -> Produserbaredokumenter.TRYGDEAVTALE_CAN;
             default ->
                 throw new TekniskException("Søknadsland er ikke implementert som produsertbart dokument : " + soeknadsland);
         };
