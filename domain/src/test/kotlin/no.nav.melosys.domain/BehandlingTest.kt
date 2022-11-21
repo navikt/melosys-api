@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class BehandlingTest {
+    var utgangspunktDato: LocalDate = LocalDate.now()
+
     @Test
     fun erAktiv_underBehandling_ja() {
         val behandling = Behandling().apply {
@@ -85,9 +87,9 @@ internal class BehandlingTest {
         }
 
         val behandlingsfrist = Behandling.utledBehandlingsfrist(
-            behandling, LocalDate.now()
+            behandling, utgangspunktDato
         )
-        behandlingsfrist.shouldBe(LocalDate.now().plusWeeks(8))
+        behandlingsfrist.shouldBe(utgangspunktDato.plusWeeks(8))
     }
 
     @Test
@@ -101,9 +103,9 @@ internal class BehandlingTest {
         }
 
         val behandlingsfrist = Behandling.utledBehandlingsfrist(
-            behandling, LocalDate.now()
+            behandling, utgangspunktDato
         )
-        behandlingsfrist.shouldBe(LocalDate.now().plusDays(70))
+        behandlingsfrist.shouldBe(utgangspunktDato.plusDays(70))
     }
 
     @Test
@@ -141,22 +143,22 @@ internal class BehandlingTest {
         }
 
         val behandlingsfrist_soknadsbehandlinger = Behandling.utledBehandlingsfrist(
-            behandling_soknadsbehandlinger, LocalDate.now()
+            behandling_soknadsbehandlinger, utgangspunktDato
         )
         val behandlingsfrist_anmodning_unntak = Behandling.utledBehandlingsfrist(
-            behandling_anmodning_unntak, LocalDate.now()
+            behandling_anmodning_unntak, utgangspunktDato
         )
         val behandlingsfrist_attester_fra_andre_trygdeavtaleland = Behandling.utledBehandlingsfrist(
-            behandling_attester_fra_andre_trygdeavtaleland, LocalDate.now()
+            behandling_attester_fra_andre_trygdeavtaleland, utgangspunktDato
         )
         val behandlingsfrist_henvendelser = Behandling.utledBehandlingsfrist(
-            behandling_henvendelser, LocalDate.now()
+            behandling_henvendelser, utgangspunktDato
         )
 
-        behandlingsfrist_soknadsbehandlinger.shouldBe(LocalDate.now().plusDays(90))
-        behandlingsfrist_anmodning_unntak.shouldBe(LocalDate.now().plusDays(90))
-        behandlingsfrist_attester_fra_andre_trygdeavtaleland.shouldBe(LocalDate.now().plusDays(90))
-        behandlingsfrist_henvendelser.shouldBe(LocalDate.now().plusDays(90))
+        behandlingsfrist_soknadsbehandlinger.shouldBe(utgangspunktDato.plusDays(90))
+        behandlingsfrist_anmodning_unntak.shouldBe(utgangspunktDato.plusDays(90))
+        behandlingsfrist_attester_fra_andre_trygdeavtaleland.shouldBe(utgangspunktDato.plusDays(90))
+        behandlingsfrist_henvendelser.shouldBe(utgangspunktDato.plusDays(90))
     }
 
     @Test
@@ -176,14 +178,14 @@ internal class BehandlingTest {
             type = Behandlingstyper.NY_VURDERING
         }
         val behandlingsfrist = Behandling.utledBehandlingsfrist(
-            behandling_utstasjonering, LocalDate.now()
+            behandling_utstasjonering, utgangspunktDato
         )
         val behandlingsfrist_ovrige = Behandling.utledBehandlingsfrist(
-            behandling_ovrige, LocalDate.now()
+            behandling_ovrige, utgangspunktDato
         )
 
-        behandlingsfrist.shouldBe(LocalDate.now().plusDays(180))
-        behandlingsfrist_ovrige.shouldBe(LocalDate.now().plusDays(180))
+        behandlingsfrist.shouldBe(utgangspunktDato.plusDays(180))
+        behandlingsfrist_ovrige.shouldBe(utgangspunktDato.plusDays(180))
     }
 
     @Test
