@@ -1,9 +1,10 @@
 package no.nav.melosys.service.sak
 
+import mu.KotlinLogging
 import no.finn.unleash.Unleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.VedtakMetadataLagretEvent
+import no.nav.melosys.domain.FagsakEndretAvSaksbehandler
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -24,6 +25,8 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import javax.transaction.Transactional
 
+private val log = KotlinLogging.logger { }
+
 @Service
 class EndreSakService(
     private val lovligeKombinasjonerService: LovligeKombinasjonerService,
@@ -37,36 +40,36 @@ class EndreSakService(
     @Transactional
     fun endre(
         saksnummer: String,
-        sakstype: Sakstyper,
-        sakstema: Sakstemaer,
-        behandlingstema: Behandlingstema,
-        behandlingstype: Behandlingstyper,
-        behandlingsstatus: Behandlingsstatus?,
-        behandlingsfrist: LocalDate?
+        nySakstype: Sakstyper,
+        nySakstema: Sakstemaer,
+        nyBehandlingstema: Behandlingstema,
+        nyBehandlingstype: Behandlingstyper,
+        nyBehandlingsstatus: Behandlingsstatus?,
+        nyBehandlingsfrist: LocalDate?
     ) {
         val fagsak = fagsakService.hentFagsak(saksnummer)
         validerSak(fagsak)
-        validerEndring(fagsak, sakstype, sakstema, behandlingstema, behandlingstype)
+        validerEndring(fagsak, nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype)
 
         val behandling = fagsak.hentAktivBehandling()
-        if (fagsak.type == sakstype && fagsak.tema == sakstema) {
-            behandlingService.endreBehandling(behandling.id, behandlingstype, behandlingstema, behandlingsstatus, behandlingsfrist)
+        if (fagsak.type == nySakstype && fagsak.tema == nySakstema) {
+            behandlingService.endreBehandling(behandling.id, nyBehandlingstype, nyBehandlingstema, nyBehandlingsstatus, nyBehandlingsfrist)
             return
         }
 
-        if (SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"))) {
+        if (SaksbehandlingRegler.harTomFlyt(nySakstype, nySakstema, nyBehandlingstype, nyBehandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"))) {
             mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id).ifPresent { mottatteOpplysningerService.slettOpplysninger(behandling.id) }
         } else {
-            gjenopprettMottatteOpplysninger(sakstype, behandling)
+            gjenopprettMottatteOpplysninger(nySakstype, behandling)
         }
 
-        fagsakService.oppdaterSakstype(saksnummer, sakstype)
-        fagsakService.oppdaterSakstema(saksnummer, sakstema)
-        behandlingService.endreBehandling(behandling.id, behandlingstype, behandlingstema, behandlingsstatus, behandlingsfrist)
+        fagsakService.oppdaterSakstype(saksnummer, nySakstype)
+        fagsakService.oppdaterSakstema(saksnummer, nySakstema)
+        behandlingService.endreBehandling(behandling.id, nyBehandlingstype, nyBehandlingstema, nyBehandlingsstatus, nyBehandlingsfrist)
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
-        // TODO oppdater oppgave
-        applicationEventPublisher.publishEvent(VedtakMetadataLagretEvent(1L))
+        applicationEventPublisher.publishEvent(FagsakEndretAvSaksbehandler(fagsak.saksnummer))
+        log.debug { "Ferdig med endring av sak $saksnummer (type: $nySakstype, tema: $nySakstema)" }
     }
 
     private fun validerSak(fagsak: Fagsak) {

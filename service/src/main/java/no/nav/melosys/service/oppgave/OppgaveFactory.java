@@ -23,7 +23,7 @@ public final class OppgaveFactory {
     private OppgaveFactory() {
     }
 
-    public static Oppgave.Builder lagJournalføringsoppgave(String journalpostID) {
+    static Oppgave.Builder lagJournalføringsoppgave(String journalpostID) {
         return new Oppgave.Builder()
             .setOppgavetype(Oppgavetyper.JFR)
             .setTema(Tema.MED)
@@ -56,10 +56,10 @@ public final class OppgaveFactory {
 
     public static Oppgave.Builder lagBehandlingsoppgave(Behandling behandling) {
         // Dokumentasjon for regler: https://confluence.adeo.no/display/TEESSI/Oppgaver+i+Gosys
-        Behandlingstyper behandlingstype = behandling.getType();
-        Behandlingstema behandlingstema = behandling.getTema();
-        Sakstemaer sakstema = behandling.getFagsak().getTema();
         Sakstyper sakstype = behandling.getFagsak().getType();
+        Sakstemaer sakstema = behandling.getFagsak().getTema();
+        Behandlingstema behandlingstema = behandling.getTema();
+        Behandlingstyper behandlingstype = behandling.getType();
 
         var oppgaveBehandlingstema = utledBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype);
         return new Oppgave.Builder()
@@ -110,7 +110,9 @@ public final class OppgaveFactory {
         };
     }
 
-    public static OppgaveBehandlingstema utledBehandlingstema(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+    static OppgaveBehandlingstema utledBehandlingstema(Sakstyper sakstype, Sakstemaer sakstema,
+                                                       Behandlingstema behandlingstema,
+                                                       Behandlingstyper behandlingstype) {
         if (skalBrukeMelosysBehandlingstemaForBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype)) {
             return switch (behandlingstema) {
                 case PENSJONIST -> OppgaveBehandlingstema.PENSJONIST_ELLER_UFORETRYGDET;

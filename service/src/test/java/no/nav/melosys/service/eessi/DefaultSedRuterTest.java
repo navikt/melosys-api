@@ -45,7 +45,7 @@ class DefaultSedRuterTest {
     @Mock
     private OppgaveService oppgaveService;
 
-    private FakeUnleash unleash = new FakeUnleash();
+    private final FakeUnleash unleash = new FakeUnleash();
 
     private DefaultSedRuter defaultSedRuter;
 
@@ -108,7 +108,7 @@ class DefaultSedRuterTest {
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(fagsak.hentSistAktivBehandling(), melosysEessiMelding);
         verify(behandlingService, never()).endreStatus(anyLong(), any());
         verify(oppgaveService, never()).finnÅpenBehandlingsoppgaveMedFagsaksnummer(any());
-        verify(oppgaveService, never()).oppdaterOppgave(any(), any());
+        verifyNoInteractions(oppgaveService);
     }
 
     @Test

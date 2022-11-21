@@ -1,5 +1,6 @@
 package no.nav.melosys.service.oppgave;
 
+
 import java.util.*;
 import javax.annotation.Nullable;
 
@@ -8,13 +9,13 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RegistreringsInfo;
 import no.nav.melosys.domain.Tema;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -22,8 +23,8 @@ import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.oppgave.dto.*;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
@@ -451,5 +452,23 @@ public class OppgaveService {
             }
         }
         return false;
+    }
+
+    public void oppdaterOppgave(String oppgaveID, Behandling behandling) {
+        Oppgave behandlingsoppgave = (
+            unleash.isEnabled("melosys.behandle_alle_saker")
+                ? OppgaveFactory.lagBehandlingsoppgave(behandling)
+                : OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()))
+            .build();
+        oppdaterOppgave(
+            oppgaveID,
+            OppgaveOppdatering.builder()
+                .behandlingstema(behandlingsoppgave.getBehandlingstema())
+                .behandlingstype(unleash.isEnabled("melosys.behandle_alle_saker") ? null : behandlingsoppgave.getBehandlingstype())
+                .tema(behandlingsoppgave.getTema())
+                .oppgavetype(behandlingsoppgave.getOppgavetype())
+                .fristFerdigstillelse(Behandling.utledBehandlingsfrist(behandling))
+                .build()
+        );
     }
 }

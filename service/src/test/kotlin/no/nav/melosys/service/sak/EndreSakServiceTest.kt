@@ -5,9 +5,11 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.slot
 import io.mockk.verify
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.FagsakEndretAvSaksbehandler
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstemaer.*
@@ -94,7 +96,10 @@ internal class EndreSakServiceTest {
         verify { mottatteOpplysningerService.opprettSøknad(aktivBehandling, any(), any()) }
         verify { oppfriskSaksopplysningerService.oppfriskSaksopplysning(aktivBehandling.id, false) }
         // event for å oppdatere oppgave
-        verify { applicationEventPublisher.publishEvent(any()) }
+        // event for å oppdatere oppgave
+        val eventCapturingSlot = slot<FagsakEndretAvSaksbehandler>()
+        verify { applicationEventPublisher.publishEvent(capture(eventCapturingSlot)) }
+        eventCapturingSlot.captured.source shouldBe saksnummer
     }
 
     @Test

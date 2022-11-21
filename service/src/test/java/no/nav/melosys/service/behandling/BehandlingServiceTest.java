@@ -261,7 +261,7 @@ class BehandlingServiceTest {
             .withMessage("Ikke mulig å endre behandlingstema");
         verify(behandlingRepository, never()).save(any(Behandling.class));
         verify(behandlingsresultatService, never()).tømBehandlingsresultat(BEHANDLING_ID);
-        verify(oppgaveService, never()).oppdaterOppgave(any(), any());
+        verifyNoInteractions(oppgaveService);
     }
 
     @Test
