@@ -525,6 +525,7 @@ class BehandlingServiceTest {
         assertThat(replikertBehandling.getDokumentasjonSvarfristDato()).isEqualTo(tidligsteInaktiveBehandling.getDokumentasjonSvarfristDato());
         assertThat(replikertBehandling.getInitierendeJournalpostId()).isEqualTo(tidligsteInaktiveBehandling.getInitierendeJournalpostId());
         assertThat(replikertBehandling.getBehandlingsfrist()).isEqualTo(LocalDate.now().plusWeeks(4));
+        assertThat(replikertBehandling.getMottatteOpplysninger().getMottatteOpplysningerData()).isNotNull();
 
         assertThat(replikertBehandling.getSaksopplysninger()).hasSize(1);
         assertThat(replikertBehandling.getSaksopplysninger()).allMatch(saksopplysning -> saksopplysning.getId() == null);
@@ -751,6 +752,7 @@ class BehandlingServiceTest {
         behandling.setSaksopplysninger(new LinkedHashSet<>());
 
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new MottatteOpplysningerData());
         behandling.getSaksopplysninger().add(opprettSaksopplysning());
         return behandling;
     }
