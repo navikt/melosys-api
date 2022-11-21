@@ -358,6 +358,7 @@ public class BehandlingService {
         }
 
         MottatteOpplysninger replikertMottatteOpplysninger = (MottatteOpplysninger) BeanUtils.cloneBean(opprinneligMottatteOpplysninger);
+        replikertMottatteOpplysninger.setMottatteOpplysningerdata(opprinneligMottatteOpplysninger.getMottatteOpplysningerData());
         replikertMottatteOpplysninger.setId(null);
         replikertMottatteOpplysninger.setBehandling(behandlingsreplika);
         return replikertMottatteOpplysninger;
