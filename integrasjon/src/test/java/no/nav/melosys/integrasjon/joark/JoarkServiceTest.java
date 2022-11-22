@@ -260,6 +260,26 @@ class JoarkServiceTest {
     }
 
     @Test
+    void hentJournalpost_statusUtgår_erUtgått() {
+        final var journalpostID = "1112233";
+        final var safJournalpost = safJournalpost(journalpostID, Journalstatus.UTGAAR, false);
+        when(safConsumer.hentJournalpost(journalpostID)).thenReturn(safJournalpost);
+
+        var journalpost = joarkService.hentJournalpost(journalpostID);
+        assertThat(journalpost.isErUtgått()).isTrue();
+    }
+
+    @Test
+    void hentJournalpost_statusMottatt_erIkkeUtgått() {
+        final var journalpostID = "1112233";
+        final var safJournalpost = safJournalpost(journalpostID, Journalstatus.MOTTATT, false);
+        when(safConsumer.hentJournalpost(journalpostID)).thenReturn(safJournalpost);
+
+        var journalpost = joarkService.hentJournalpost(journalpostID);
+        assertThat(journalpost.isErUtgått()).isFalse();
+    }
+
+    @Test
     void hentJournalpost_verifiserMapping() {
         final var journalpostID = "1112233";
         final var safJournalpost = safJournalpost(journalpostID);
@@ -443,12 +463,15 @@ class JoarkServiceTest {
     }
 
     private no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost safJournalpost(String journalpostID, boolean medLogiskVedlegg) {
+        return safJournalpost(journalpostID, Journalstatus.MOTTATT, medLogiskVedlegg);
+    }
+    private no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost safJournalpost(String journalpostID, Journalstatus journalstatus, boolean medLogiskVedlegg) {
         var logiskVedlegg = new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.LogiskVedlegg("4143", "Tittel logisk vedlegg");
         var dokumentVedlegg = new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.DokumentVariant(true, Variantformat.ARKIV.name());
         return new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalpost(
             journalpostID,
             "Tittel",
-            Journalstatus.MOTTATT,
+            journalstatus,
             Tema.MED.getKode(),
             no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Journalposttype.I,
             new no.nav.melosys.integrasjon.joark.saf.dto.journalpost.Sak("MEL-123"),
