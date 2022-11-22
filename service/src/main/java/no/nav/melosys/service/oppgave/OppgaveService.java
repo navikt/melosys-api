@@ -265,7 +265,7 @@ public class OppgaveService {
     public void oppdaterOppgave(String oppgaveID, Behandling behandling) {
         Oppgave behandlingsoppgave = (
             unleash.isEnabled("melosys.behandle_alle_saker")
-                ? OppgaveFactory.lagBehandlingsoppgave(behandling)
+                ? lagBehandlingsoppgave(behandling)
                 : OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()))
             .build();
         oppdaterOppgave(
@@ -275,7 +275,7 @@ public class OppgaveService {
                 .behandlingstype(unleash.isEnabled("melosys.behandle_alle_saker") ? null : behandlingsoppgave.getBehandlingstype())
                 .tema(behandlingsoppgave.getTema())
                 .oppgavetype(behandlingsoppgave.getOppgavetype())
-                .fristFerdigstillelse(Behandling.utledBehandlingsfrist(behandling))
+                .fristFerdigstillelse(Behandling.utledBehandlingsfrist(behandling, utledMottaksdato.getMottaksdato(behandling)))
                 .build()
         );
     }
