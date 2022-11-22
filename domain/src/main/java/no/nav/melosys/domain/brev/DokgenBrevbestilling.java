@@ -9,6 +9,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
+import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.SaksvedleggBestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
@@ -247,6 +248,13 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
         public T medAvsenderLand(String avsenderLand) {
             this.avsenderLand = avsenderLand;
+            return (T) this;
+        }
+
+        public T medAvsenderFraJournalpost(Journalpost journalpost) {
+            this.avsenderNavn = journalpost.getAvsenderNavn();
+            this.avsendertype = journalpost.getAvsenderType();
+            this.avsenderLand = journalpost.getAvsenderLand();
             return (T) this;
         }
 

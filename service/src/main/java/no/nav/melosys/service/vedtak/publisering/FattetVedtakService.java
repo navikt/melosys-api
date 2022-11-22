@@ -5,19 +5,19 @@ import java.util.Collection;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.SoeknadFtrl;
-import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.mottatteopplysninger.SoeknadFtrl;
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.pdl.dto.person.Navn;
 import no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.behandling.UtledMottaksdato;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.vedtak.publisering.dto.Fullmektig;
 import no.nav.melosys.service.vedtak.publisering.dto.*;
@@ -38,14 +38,16 @@ public class FattetVedtakService {
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final PersondataFasade persondataFasade;
+    private final UtledMottaksdato utledMottaksdato;
 
     public FattetVedtakService(FattetVedtakProducer fattetVedtakProducer, BehandlingService behandlingService,
                                BehandlingsresultatService behandlingsresultatService,
-                               PersondataFasade persondataFasade) {
+                               PersondataFasade persondataFasade, UtledMottaksdato utledMottaksdato) {
         this.fattetVedtakProducer = fattetVedtakProducer;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.persondataFasade = persondataFasade;
+        this.utledMottaksdato = utledMottaksdato;
     }
 
     @Transactional
@@ -60,7 +62,7 @@ public class FattetVedtakService {
         return new FattetVedtak(
             lagSak(behandling, behandling.getFagsak(), persondata),
             lagVedtak(behandlingsresultat.getVedtakMetadata()),
-            lagSoeknad(behandling.getMottatteOpplysninger()),
+            lagSoeknad(behandling),
             lagSaksopplysninger(persondata),
             null,
             lagPerioder(behandlingsresultat),
@@ -92,14 +94,14 @@ public class FattetVedtakService {
         );
     }
 
-    private Soeknad lagSoeknad(MottatteOpplysninger mottatteOpplysninger) {
-        SoeknadFtrl mottatteOpplysningerData = (SoeknadFtrl) mottatteOpplysninger.getMottatteOpplysningerData();
+    private Soeknad lagSoeknad(Behandling behandling) {
+        SoeknadFtrl mottatteOpplysningerData = (SoeknadFtrl) behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         return new Soeknad(
             mottatteOpplysningerData.getTrygdedekning(),
             mottatteOpplysningerData.loennOgGodtgjoerelse,
             mottatteOpplysningerData.juridiskArbeidsgiverNorge,
             mottatteOpplysningerData.foretakUtland,
-            mottatteOpplysninger.getMottaksdato(),
+            utledMottaksdato.getMottaksdato(behandling),
             mottatteOpplysningerData.periode
         );
     }

@@ -1,5 +1,6 @@
 package no.nav.melosys.service.eessi;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import no.finn.unleash.FakeUnleash;
@@ -18,6 +19,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.eessi.ruting.DefaultSedRuter;
+import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -121,8 +123,10 @@ class DefaultSedRuterTest {
         Fagsak fagsak = hentFagsak();
         fagsak.setType(Sakstyper.EU_EOS);
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        fagsak.hentAktivBehandling().setStatus(Behandlingsstatus.AVSLUTTET);
+        Behandling behandling = fagsak.hentAktivBehandling();
+        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         when(fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER)).thenReturn(Optional.of(fagsak));
+        when(oppgaveService.lagBehandlingsoppgave(any())).thenReturn(OppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now()));
 
         defaultSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER);
 

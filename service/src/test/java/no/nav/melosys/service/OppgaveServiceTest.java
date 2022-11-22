@@ -7,12 +7,6 @@ import java.util.*;
 
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
-import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Diskresjonskode;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -20,11 +14,18 @@ import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.UtledMottaksdato;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto;
@@ -59,6 +60,8 @@ class OppgaveServiceTest {
     @Mock
     private EregFasade eregFasade;
     @Mock
+    private UtledMottaksdato utledMottaksdato;
+    @Mock
     private SaksopplysningerService saksopplysningerService;
     @Mock
     private MottatteOpplysningerService mottatteOpplysningerService;
@@ -86,7 +89,8 @@ class OppgaveServiceTest {
             mottatteOpplysningerService,
             persondataFasade,
             eregFasade,
-            unleash);
+            unleash,
+            utledMottaksdato);
 
         unleash.enableAll();
         oppgave = new Oppgave.Builder()
@@ -222,8 +226,7 @@ class OppgaveServiceTest {
         List<OppgaveDto> mineSaker = oppgaveService.hentOppgaverMedAnsvarlig(tilordnetRessurs);
 
         BehandlingsoppgaveDto behandlingsOppgave = (BehandlingsoppgaveDto) mineSaker.get(0);
-        assertThat(behandlingsOppgave.getSisteNotat().equals(behandlingsnotat2.getTekst()));
-
+        assertThat(behandlingsOppgave.getSisteNotat()).isEqualTo(behandlingsnotat2.getTekst());
     }
 
 
@@ -368,11 +371,13 @@ class OppgaveServiceTest {
     @Test
     void opprettEllerGjenbrukBehandlingsoppgave_ingenEksisterendeOppgave_oppgaveBlirOpprettet() {
         Behandling behandling = lagBehandling();
-        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new MottatteOpplysningerData());
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(utledMottaksdato.getMottaksdato(behandling)).thenReturn(LocalDate.now());
+
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
+
+
         verify(oppgaveFasade).opprettOppgave(any(Oppgave.class));
         verify(oppgaveFasade, never()).opprettSensitivOppgave(any(Oppgave.class));
 
@@ -385,8 +390,11 @@ class OppgaveServiceTest {
         behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new MottatteOpplysningerData());
         behandling.getMottatteOpplysninger().setType(Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(utledMottaksdato.getMottaksdato(behandling)).thenReturn(LocalDate.now());
+
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
+
 
         verify(oppgaveFasade).opprettOppgave(oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(behandling.getTema().getBeskrivelse());
@@ -414,8 +422,11 @@ class OppgaveServiceTest {
         Behandling behandling = lagBehandling();
         behandling.setType(Behandlingstyper.NY_VURDERING);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(utledMottaksdato.getMottaksdato(behandling)).thenReturn(LocalDate.now());
+
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
+
 
         verify(oppgaveFasade).opprettOppgave(oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(behandling.getTema().getBeskrivelse());
@@ -469,12 +480,13 @@ class OppgaveServiceTest {
     @Test
     void opprettEllerGjenbrukBehandlingsoppgave_personHarBeskyttelsesbehov_sensitivOppgaveBlirOpprettet() {
         Behandling behandling = lagBehandling();
-        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new MottatteOpplysningerData());
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(persondataFasade.harStrengtFortroligAdresse("aktørID")).thenReturn(true);
+        when(utledMottaksdato.getMottaksdato(behandling)).thenReturn(LocalDate.now());
+
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
+
 
         verify(oppgaveFasade, never()).opprettOppgave(any(Oppgave.class));
         verify(oppgaveFasade).opprettSensitivOppgave(any(Oppgave.class));
@@ -490,8 +502,11 @@ class OppgaveServiceTest {
         when(persondataFasade.harStrengtFortroligAdresse("aktørID")).thenReturn(false);
         when(persondataFasade.harStrengtFortroligAdresse("fnrBarn")).thenReturn(true);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(utledMottaksdato.getMottaksdato(behandling)).thenReturn(LocalDate.now());
+
 
         oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
+
 
         verify(oppgaveFasade, never()).opprettOppgave(any(Oppgave.class));
         verify(oppgaveFasade).opprettSensitivOppgave(any(Oppgave.class));
@@ -511,8 +526,11 @@ class OppgaveServiceTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(oppgaveFasade.finnAvsluttetBehandlingsoppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(oppgave1, oppgave2));
         when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(fagsak);
+        when(utledMottaksdato.getMottaksdato(behandling)).thenReturn(LocalDate.now());
+
 
         oppgaveService.opprettOppgaveForSak(SAKSNUMMER);
+
 
         verify(oppgaveFasade).opprettOppgave(oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue().getSaksnummer()).isEqualTo(SAKSNUMMER);

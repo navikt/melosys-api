@@ -54,7 +54,7 @@ public final class OppgaveFactory {
             .setBehandlesAvApplikasjon(Fagsystem.MELOSYS);
     }
 
-    public static Oppgave.Builder lagBehandlingsoppgave(Behandling behandling) {
+    public static Oppgave.Builder lagBehandlingsoppgave(Behandling behandling, LocalDate mottaksdato) {
         // Dokumentasjon for regler: https://confluence.adeo.no/display/TEESSI/Oppgaver+i+Gosys
         Sakstyper sakstype = behandling.getFagsak().getType();
         Sakstemaer sakstema = behandling.getFagsak().getTema();
@@ -69,7 +69,7 @@ public final class OppgaveFactory {
             .setTema(utledTema(sakstema))
             .setOppgavetype(utledOppgavetype(sakstype, behandlingstema, behandlingstype))
             .setBeskrivelse(utledBeskrivelse(oppgaveBehandlingstema, sakstype, sakstema, behandlingstema, behandlingstype))
-            .setFristFerdigstillelse(Behandling.utledBehandlingsfrist(behandling));
+            .setFristFerdigstillelse(Behandling.utledBehandlingsfrist(behandling, mottaksdato));
     }
 
     /**
