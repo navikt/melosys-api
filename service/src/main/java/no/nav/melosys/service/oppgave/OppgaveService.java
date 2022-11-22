@@ -255,6 +255,24 @@ public class OppgaveService {
         oppgaveFasade.oppdaterOppgave(oppgaveID, oppgaveOppdatering);
     }
 
+    public void oppdaterOppgave(String oppgaveID, Behandling behandling) {
+        Oppgave behandlingsoppgave = (
+            unleash.isEnabled("melosys.behandle_alle_saker")
+                ? OppgaveFactory.lagBehandlingsoppgave(behandling)
+                : OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()))
+            .build();
+        oppdaterOppgave(
+            oppgaveID,
+            OppgaveOppdatering.builder()
+                .behandlingstema(behandlingsoppgave.getBehandlingstema())
+                .behandlingstype(unleash.isEnabled("melosys.behandle_alle_saker") ? null : behandlingsoppgave.getBehandlingstype())
+                .tema(behandlingsoppgave.getTema())
+                .oppgavetype(behandlingsoppgave.getOppgavetype())
+                .fristFerdigstillelse(Behandling.utledBehandlingsfrist(behandling))
+                .build()
+        );
+    }
+
     public void oppdaterOppgaveMedSaksnummer(String fagSaksnummer, OppgaveOppdatering oppgaveOppdatering) {
         finnÅpenBehandlingsoppgaveMedFagsaksnummer(fagSaksnummer).ifPresentOrElse(
             oppg -> oppdaterOppgave(oppg.getOppgaveId(), oppgaveOppdatering),
@@ -452,23 +470,5 @@ public class OppgaveService {
             }
         }
         return false;
-    }
-
-    public void oppdaterOppgave(String oppgaveID, Behandling behandling) {
-        Oppgave behandlingsoppgave = (
-            unleash.isEnabled("melosys.behandle_alle_saker")
-                ? OppgaveFactory.lagBehandlingsoppgave(behandling)
-                : OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()))
-            .build();
-        oppdaterOppgave(
-            oppgaveID,
-            OppgaveOppdatering.builder()
-                .behandlingstema(behandlingsoppgave.getBehandlingstema())
-                .behandlingstype(unleash.isEnabled("melosys.behandle_alle_saker") ? null : behandlingsoppgave.getBehandlingstype())
-                .tema(behandlingsoppgave.getTema())
-                .oppgavetype(behandlingsoppgave.getOppgavetype())
-                .fristFerdigstillelse(Behandling.utledBehandlingsfrist(behandling))
-                .build()
-        );
     }
 }
