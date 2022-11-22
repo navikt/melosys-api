@@ -97,7 +97,7 @@ class EndreSakService(
     private fun gjenopprettMottatteOpplysninger(
         sakstype: Sakstyper, behandling: Behandling
     ) {
-        val mottatteOpplysninger = mottatteOpplysningerService.hentMottatteOpplysninger(behandling.id)
+        val mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id).orElse(null)
         if (sakstype == Sakstyper.EU_EOS && !unleash.isEnabled("melosys.tom_periode_og_land")) {
             validerMottatteOpplysninger(mottatteOpplysninger)
         }

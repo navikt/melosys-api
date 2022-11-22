@@ -151,6 +151,7 @@ internal class EndreSakServiceTest {
         val opprinneligFagsak = lagFagsak(saksnummer, FTRL, UNNTAK)
         opprinneligFagsak.behandlinger.add(SaksbehandlingDataFactory.lagBehandling(opprinneligFagsak))
         every { fagsakService.hentFagsak(saksnummer) } returns opprinneligFagsak
+        every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(MottatteOpplysninger())
 
         shouldThrow<FunksjonellException>
         {
