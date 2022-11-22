@@ -254,6 +254,7 @@ public class OppgaveService {
     }
 
     public String opprettOppgave(Oppgave oppgave) {
+        log.info("Starter med å opprette oppgave med journalpostId {}", oppgave.getJournalpostId());
         return oppgaveFasade.opprettOppgave(oppgave);
     }
 
