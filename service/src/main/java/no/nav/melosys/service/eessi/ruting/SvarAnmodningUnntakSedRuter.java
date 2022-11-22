@@ -104,7 +104,7 @@ public class SvarAnmodningUnntakSedRuter implements SedRuterForSedTyper {
 
         Oppgave.Builder oppgaveBuilder = (
             unleash.isEnabled("melosys.behandle_alle_saker")
-                ? OppgaveFactory.lagBehandlingsoppgave(behandling)
+                ? oppgaveService.lagBehandlingsoppgave(behandling)
                 : OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()))
             .setAktørId(aktørID)
             .setJournalpostId(behandling.getInitierendeJournalpostId())

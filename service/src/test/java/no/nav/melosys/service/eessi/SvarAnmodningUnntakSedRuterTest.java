@@ -28,7 +28,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 
@@ -44,11 +43,9 @@ class SvarAnmodningUnntakSedRuterTest {
     @Mock
     private OppgaveService oppgaveService;
 
-    private FakeUnleash unleash = new FakeUnleash();
+    private final FakeUnleash unleash = new FakeUnleash();
 
     private SvarAnmodningUnntakSedRuter svarAnmodningUnntakSedRuter;
-
-    private final String aktørID = "223345325342";
 
     @BeforeEach
     public void setUp() {
@@ -57,7 +54,7 @@ class SvarAnmodningUnntakSedRuterTest {
     }
 
     @Test
-    void finnSakOgBestemRuting_anmodningsperiodeUtenSvarFinnes_verifiserKorrektResultat() throws Exception {
+    void finnSakOgBestemRuting_anmodningsperiodeUtenSvarFinnes_verifiserKorrektResultat() {
 
         Fagsak fagsak = hentFagsak(Behandlingstema.UTSENDT_ARBEIDSTAKER, Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
         when(fagsakService.hentFagsakFraArkivsakID(anyLong())).thenReturn(fagsak);
@@ -67,11 +64,11 @@ class SvarAnmodningUnntakSedRuterTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
         svarAnmodningUnntakSedRuter.rutSedTilBehandling(prosessinstans, 1L);
 
-        verify(prosessinstansService).opprettProsessinstansMottattSvarAnmodningUnntak(eq(fagsak.hentAktivBehandling()), eq(eessiMelding));
+        verify(prosessinstansService).opprettProsessinstansMottattSvarAnmodningUnntak(fagsak.hentAktivBehandling(), eessiMelding);
     }
 
     @Test
-    void finnSakOgBestemRuting_anmodningsperiodeSvarRegistrert_verifiserKorrektResultat() throws Exception {
+    void finnSakOgBestemRuting_anmodningsperiodeSvarRegistrert_verifiserKorrektResultat() {
 
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
         anmodningsperiode.setAnmodningsperiodeSvar(new AnmodningsperiodeSvar());
@@ -87,31 +84,31 @@ class SvarAnmodningUnntakSedRuterTest {
         svarAnmodningUnntakSedRuter.rutSedTilBehandling(prosessinstans, 1L);
 
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(
-            eq(fagsak.hentAktivBehandling()), eq(eessiMelding)
+            fagsak.hentAktivBehandling(), eessiMelding
         );
     }
 
     @Test
-    void finnSakOgBestemRuting_behandlingstypeSøknadIkkeYrkesaktiv_oppgaveOppdateres() throws Exception {
+    void finnSakOgBestemRuting_behandlingstypeSøknadIkkeYrkesaktiv_oppgaveOppdateres() {
         Fagsak fagsak = hentFagsak(Behandlingstema.IKKE_YRKESAKTIV, Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
         when(fagsakService.hentFagsakFraArkivsakID(anyLong())).thenReturn(fagsak);
         Prosessinstans prosessinstans = new Prosessinstans();
         MelosysEessiMelding eessiMelding = melosysEessiMelding();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
 
-        when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(eq(fagsak.getSaksnummer())))
+        when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(fagsak.getSaksnummer()))
             .thenReturn(Optional.of(new Oppgave.Builder().build()));
 
         svarAnmodningUnntakSedRuter.rutSedTilBehandling(prosessinstans, 1L);
 
         verify(oppgaveService).oppdaterOppgave(any(), any(OppgaveOppdatering.class));
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(
-            eq(fagsak.hentAktivBehandling()), eq(eessiMelding)
+            fagsak.hentAktivBehandling(), eessiMelding
         );
     }
 
     @Test
-    void finnSakOgBestemRuting_ingenAnmodningsperiode_forventException() throws Exception {
+    void finnSakOgBestemRuting_ingenAnmodningsperiode_forventException() {
 
         Prosessinstans prosessinstans = new Prosessinstans();
         MelosysEessiMelding eessiMelding = melosysEessiMelding();
@@ -132,7 +129,7 @@ class SvarAnmodningUnntakSedRuterTest {
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
 
         svarAnmodningUnntakSedRuter.rutSedTilBehandling(prosessinstans, null);
-        verify(oppgaveService).opprettJournalføringsoppgave(eq(melosysEessiMelding().getJournalpostId()), eq(melosysEessiMelding().getAktoerId()));
+        verify(oppgaveService).opprettJournalføringsoppgave(melosysEessiMelding().getJournalpostId(), melosysEessiMelding().getAktoerId());
     }
 
     private Fagsak hentFagsak(Behandlingstema behandlingstema, Behandlingsstatus behandlingsstatus) {
@@ -146,7 +143,7 @@ class SvarAnmodningUnntakSedRuterTest {
 
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.BRUKER);
-        aktoer.setAktørId(aktørID);
+        aktoer.setAktørId("223345325342");
         fagsak.setAktører(Sets.newSet(aktoer));
         return fagsak;
     }

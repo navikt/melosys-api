@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflyt.steg.oppgave;
 
+import java.time.LocalDate;
+
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
@@ -15,6 +17,7 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstema;
+import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +28,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,7 +40,7 @@ class GjenbrukOppgaveTest {
     @Captor
     private ArgumentCaptor<Oppgave> oppgaveCaptor;
 
-    private FakeUnleash unleash = new FakeUnleash();
+    private final FakeUnleash unleash = new FakeUnleash();
 
     private GjenbrukOppgave gjenbrukOppgave;
 
@@ -54,8 +58,13 @@ class GjenbrukOppgaveTest {
 
         Oppgave eksisterendeOppgave = new Oppgave.Builder().setBeskrivelse(oppgaveBeskrivelse).build();
         when(oppgaveService.hentOppgaveMedOppgaveID(oppgaveID)).thenReturn(eksisterendeOppgave);
+        var prosessinstans = lagProsessinstans(oppgaveID, saksnummer, false);
+        when(oppgaveService.lagBehandlingsoppgave(any())).thenReturn(OppgaveFactory.lagBehandlingsoppgave(prosessinstans.getBehandling(), LocalDate.now()));
 
-        gjenbrukOppgave.utfør(lagProsessinstans(oppgaveID, saksnummer, false));
+
+        gjenbrukOppgave.utfør(prosessinstans);
+
+
         verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue())
             .hasFieldOrPropertyWithValue("saksnummer", saksnummer)
@@ -74,8 +83,13 @@ class GjenbrukOppgaveTest {
 
         Oppgave eksisterendeOppgave = new Oppgave.Builder().setBeskrivelse(oppgaveBeskrivelse).build();
         when(oppgaveService.hentOppgaveMedOppgaveID(oppgaveID)).thenReturn(eksisterendeOppgave);
+        var prosessinstans = lagProsessinstans(oppgaveID, saksnummer, true);
+        when(oppgaveService.lagBehandlingsoppgave(any())).thenReturn(OppgaveFactory.lagBehandlingsoppgave(prosessinstans.getBehandling(), LocalDate.now()));
 
-        gjenbrukOppgave.utfør(lagProsessinstans(oppgaveID, saksnummer, true));
+
+        gjenbrukOppgave.utfør(prosessinstans);
+
+
         verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture());
         assertThat(oppgaveCaptor.getValue())
             .hasFieldOrPropertyWithValue("saksnummer", saksnummer)
