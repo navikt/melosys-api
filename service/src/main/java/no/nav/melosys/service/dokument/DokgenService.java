@@ -1,5 +1,8 @@
 package no.nav.melosys.service.dokument;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 
 import no.finn.unleash.Unleash;
@@ -201,13 +204,18 @@ public class DokgenService {
                 journalpost = joarkFasade.hentJournalpost(behandling.getInitierendeJournalpostId());
                 brevbestilling.medAvsenderFraJournalpost(journalpost);
             }
-            brevbestilling.medForsendelseMottatt(utledMottaksdato.getMottaksdato(behandling, journalpost));
+            var mottaksdato = tilInstant(utledMottaksdato.getMottaksdato(behandling, journalpost));
+            brevbestilling.medForsendelseMottatt(mottaksdato);
         } else {
             var journalpost = joarkFasade.hentJournalpost(behandling.getInitierendeJournalpostId());
             brevbestilling
                 .medForsendelseMottatt(journalpost.getForsendelseMottatt())
                 .medAvsenderFraJournalpost(journalpost);
         }
+    }
+
+    private Instant tilInstant(LocalDate localDate) {
+        return localDate != null ? localDate.atStartOfDay(ZoneId.systemDefault()).toInstant() : null;
     }
 
     private String hentSaksbehandlerNavn(String ident) {

@@ -157,7 +157,7 @@ class UtledMottaksdatoTest {
         var utledetDato = utledMottaksdato.getMottaksdato(behandling, journalpost);
 
 
-        assertThat(utledetDato).isEqualTo(MOTTAKSDATO.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        assertThat(utledetDato).isEqualTo(MOTTAKSDATO);
     }
 
     @Test
@@ -170,7 +170,7 @@ class UtledMottaksdatoTest {
         var utledetDato = utledMottaksdato.getMottaksdato(behandling, journalpost);
 
 
-        assertThat(utledetDato).isEqualTo(FORSENDELSE_MOTTATT);
+        assertThat(utledetDato).isEqualTo(LocalDate.ofInstant(FORSENDELSE_MOTTATT, ZoneId.systemDefault()));
     }
 
     @Test
@@ -183,6 +183,6 @@ class UtledMottaksdatoTest {
         var utledetDato = utledMottaksdato.getMottaksdato(behandling, journalpost);
 
 
-        assertThat(utledetDato).isEqualTo(REGISTRERT_DATO);
+        assertThat(utledetDato).isEqualTo(REGISTRERT_DATO_LOCALDATE);
     }
 }

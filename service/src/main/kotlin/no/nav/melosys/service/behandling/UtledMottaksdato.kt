@@ -23,11 +23,11 @@ class UtledMottaksdato(val joarkFasade: JoarkFasade, val unleash: Unleash) {
         return behandling.mottatteOpplysninger?.mottaksdato ?: tilLocalDate(behandling.registrertDato)
     }
 
-    fun getMottaksdato(behandling: Behandling, journalpost: Journalpost?): Instant? {
+    fun getMottaksdato(behandling: Behandling, journalpost: Journalpost?): LocalDate? {
         if (behandling.behandlingsårsak != null) {
-            return tilInstant(behandling.behandlingsårsak.mottaksdato)
+            return behandling.behandlingsårsak.mottaksdato
         }
-        return journalpost?.forsendelseMottatt ?: behandling.registrertDato
+        return tilLocalDate(journalpost?.forsendelseMottatt ?: behandling.registrertDato)
     }
 
     private fun finnJournalpost(initierendeJournalpostId: String?): Journalpost? {
@@ -37,9 +37,5 @@ class UtledMottaksdato(val joarkFasade: JoarkFasade, val unleash: Unleash) {
 
     private fun tilLocalDate(instant: Instant?): LocalDate? {
         return if (instant == null) null else LocalDate.ofInstant(instant, ZoneId.systemDefault())
-    }
-
-    private fun tilInstant(localDate: LocalDate): Instant {
-        return localDate.atStartOfDay(ZoneId.systemDefault()).toInstant()
     }
 }
