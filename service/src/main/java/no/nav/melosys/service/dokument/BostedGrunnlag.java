@@ -49,7 +49,7 @@ public class BostedGrunnlag {
         }
 
         if (StringUtils.isEmpty(bostedsadresseFraRegister.strukturertAdresse().getLandkode())) {
-            log.warn("Fant ikke bostedsadresseFraRegister, fordi vi har ikke Landkode i strukturertAdresse");
+            log.info("Fant ikke Landkode i strukturertAdresse");
             return Optional.empty();
         }
 
