@@ -46,7 +46,7 @@ class EndreSakService(
         nyBehandlingsfrist: LocalDate?
     ) {
         val fagsak = fagsakService.hentFagsak(saksnummer)
-        validerSak(fagsak)
+        validerSak(fagsak, nySakstype, nySakstema)
         validerEndring(fagsak, nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype)
 
         val behandling = fagsak.hentAktivBehandling()
@@ -70,8 +70,8 @@ class EndreSakService(
         log.debug { "Ferdig med endring av sak $saksnummer (type: $nySakstype, tema: $nySakstema)" }
     }
 
-    private fun validerSak(fagsak: Fagsak) {
-        if (!fagsak.kanEndreTypeOgTema()) {
+    private fun validerSak(fagsak: Fagsak, nySakstype: Sakstyper, nySakstema: Sakstemaer) {
+        if ((fagsak.type != nySakstype || fagsak.tema != nySakstema) && !fagsak.kanEndreTypeOgTema()) {
             throw FunksjonellException("Sakstype eller tema kan ikke endres for ${fagsak.saksnummer}")
         }
     }
