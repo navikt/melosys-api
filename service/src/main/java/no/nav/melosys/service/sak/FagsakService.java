@@ -120,7 +120,7 @@ public class FagsakService {
 
     private void validerSakstemaOppdatering(Fagsak sak, Sakstemaer sakstema) {
         if (!sak.kanEndreTypeOgTema()) {
-            throw new FunksjonellException("Sakstype kan ikke endres for" + sak.getSaksnummer());
+            throw new FunksjonellException("Sakstema kan ikke endres for" + sak.getSaksnummer());
         }
         if (sakstema == null) {
             throw new FunksjonellException("Ny sakstema " + sakstema + " er ugyldig for sak " + sak.getSaksnummer());
