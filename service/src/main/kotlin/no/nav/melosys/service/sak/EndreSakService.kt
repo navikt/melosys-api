@@ -10,8 +10,6 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.exception.FunksjonellException
@@ -97,11 +95,11 @@ class EndreSakService(
     private fun gjenopprettMottatteOpplysninger(
         sakstype: Sakstyper, behandling: Behandling
     ) {
-        val mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id).orElse(null)
         if (sakstype == Sakstyper.EU_EOS && !unleash.isEnabled("melosys.tom_periode_og_land")) {
-            validerMottatteOpplysninger(mottatteOpplysninger)
+            validerBehandling(behandling)
         }
 
+        val mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id).orElse(null)
         mottatteOpplysningerService.slettOpplysninger(behandling.id)
         mottatteOpplysningerService.opprettSøknad(
             behandling,
@@ -110,19 +108,9 @@ class EndreSakService(
         )
     }
 
-    private fun validerMottatteOpplysninger(mottatteOpplysninger: MottatteOpplysninger?) {
-        val mottatteOpplysningerdata = mottatteOpplysninger?.mottatteOpplysningerData
-        if (mottatteOpplysningerdata == null || manglerPeriode(mottatteOpplysningerdata) || manglerSøknadsland(
-                mottatteOpplysningerdata
-            )
-        ) {
+    private fun validerBehandling(behandling: Behandling) {
+        if (!behandling.harPeriodeOgLand()) {
             throw FunksjonellException("Du må legge inn periode og land i flyten for å kunne bytte til sakstype EU/EØS")
         }
     }
-
-    private fun manglerPeriode(mottatteOpplysningerdata: MottatteOpplysningerData) =
-        mottatteOpplysningerdata.periode == null || mottatteOpplysningerdata.periode.fom == null
-
-    private fun manglerSøknadsland(mottatteOpplysningerdata: MottatteOpplysningerData) =
-        mottatteOpplysningerdata.soeknadsland == null || mottatteOpplysningerdata.soeknadsland.erUkjenteEllerAlleEosLand
 }
