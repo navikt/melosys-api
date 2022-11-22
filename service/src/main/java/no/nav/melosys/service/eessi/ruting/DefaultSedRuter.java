@@ -112,7 +112,7 @@ public class DefaultSedRuter implements SedRuter {
     private String opprettBehandlingsoppgave(Behandling behandling, String aktørID) {
         var oppgave = (
             unleash.isEnabled("melosys.behandle_alle_saker")
-                ? OppgaveFactory.lagBehandlingsoppgave(behandling)
+                ? oppgaveService.lagBehandlingsoppgave(behandling)
                 : OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()))
             .setAktørId(aktørID)
             .setSaksnummer(behandling.getFagsak().getSaksnummer())

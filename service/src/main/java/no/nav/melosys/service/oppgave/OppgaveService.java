@@ -22,6 +22,7 @@ import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.UtledMottaksdato;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.oppgave.dto.*;
@@ -49,6 +50,7 @@ public class OppgaveService {
     private final PersondataFasade persondataFasade;
     private final EregFasade eregFasade;
     private final Unleash unleash;
+    private final UtledMottaksdato utledMottaksdato;
 
     private static final String[] BEHANDLINGSOPPGAVE_TYPER = new String[]{
         BEH_SAK_MK.getKode(),
@@ -73,7 +75,7 @@ public class OppgaveService {
                           MottatteOpplysningerService mottatteOpplysningerService,
                           PersondataFasade persondataFasade,
                           EregFasade eregFasade,
-                          Unleash unleash) {
+                          Unleash unleash, UtledMottaksdato utledMottaksdato) {
         this.behandlingService = behandlingService;
         this.fagsakService = fagsakService;
         this.oppgaveFasade = oppgaveFasade;
@@ -82,6 +84,7 @@ public class OppgaveService {
         this.persondataFasade = persondataFasade;
         this.eregFasade = eregFasade;
         this.unleash = unleash;
+        this.utledMottaksdato = utledMottaksdato;
     }
 
     public List<Oppgave> finnBehandlingsoppgaverMedPersonIdent(String personIdent) {
@@ -195,7 +198,7 @@ public class OppgaveService {
             var oppgaveToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
             var oppgaveBuilder = (
                 oppgaveToggleEnabled
-                    ? OppgaveFactory.lagBehandlingsoppgave(behandling)
+                    ? lagBehandlingsoppgave(behandling)
                     : OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()))
                 .setTilordnetRessurs(tilordnetRessurs)
                 .setJournalpostId(journalpostID)
@@ -227,6 +230,10 @@ public class OppgaveService {
         opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, lagOppgaveBeskrivelse(behandling), null);
     }
 
+    public Oppgave.Builder lagBehandlingsoppgave(Behandling behandling) {
+        return OppgaveFactory.lagBehandlingsoppgave(behandling, utledMottaksdato.getMottaksdato(behandling));
+    }
+
     /**
      * @deprecated Forsvinner med toggle melosys.behandle_alle_saker
      */
@@ -247,7 +254,6 @@ public class OppgaveService {
     }
 
     public String opprettOppgave(Oppgave oppgave) {
-        log.info("Oppretter oppgave med journalpostId {}", oppgave.getJournalpostId());
         return oppgaveFasade.opprettOppgave(oppgave);
     }
 

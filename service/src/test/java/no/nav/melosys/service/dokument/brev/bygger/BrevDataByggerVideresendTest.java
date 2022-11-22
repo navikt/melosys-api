@@ -48,7 +48,7 @@ public class BrevDataByggerVideresendTest {
 
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
         utenlandskMyndighet.navn = "Försäkringskassan";
-        utenlandskMyndighet.gateadresse = "Box 1164";
+        utenlandskMyndighet.gateadresse1 = "Box 1164";
         utenlandskMyndighet.postnummer = "SE-621 22";
         utenlandskMyndighet.poststed = "Visby";
         utenlandskMyndighet.land = "Sverige";

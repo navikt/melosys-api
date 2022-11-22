@@ -164,6 +164,7 @@ class FagsakTjenesteTest {
 
     @Test
     void lagNyBehandling() throws Exception {
+        when(unleash.isEnabled("melosys.ny_opprett_sak")).thenReturn(true);
         Fagsak fagsak = SaksbehandlingDataFactory.lagFagsak("MEL-1");
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
@@ -180,6 +181,16 @@ class FagsakTjenesteTest {
                 .content(objectMapper.writeValueAsString(opprettSakDto)))
             .andExpect(status().isNoContent());
         verify(aksesskontroll).autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
+    }
+
+    @Test
+    void lagNyBehandling_toggleAv_kasterFeil() throws Exception {
+        when(unleash.isEnabled("melosys.ny_opprett_sak")).thenReturn(false);
+
+        mockMvc.perform(post(BASE_URL + "/{saksnr}/behandlinger", "MEL-1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(new OpprettSakDto())))
+            .andExpect(status().isBadRequest());
     }
 
     @Test

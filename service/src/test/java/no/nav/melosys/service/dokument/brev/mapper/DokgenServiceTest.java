@@ -26,6 +26,7 @@ import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.behandling.UtledMottaksdato;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentHentingService;
@@ -91,6 +92,8 @@ class DokgenServiceTest {
     private TrygdeavtaleMapper mockTrygdeavtaleMapper;
     @Mock
     private DokumentHentingService mockDokumentHentingService;
+    @Mock
+    private UtledMottaksdato mockUtledMottaksdato;
     @Captor
     private ArgumentCaptor<DokgenBrevbestilling> brevbestillingCaptor;
 
@@ -111,7 +114,7 @@ class DokgenServiceTest {
             new DokgenMalMapper(dokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockTrygdeavtaleMapper, unleash),
             mockBehandlingsService, mockEregFasade, mockKontaktOpplysningService,
             mockBrevMottakerService, mockProsessinstansService, mockSaksbehandlerService,
-            mockUtenlandskMyndighetService);
+            mockUtenlandskMyndighetService, unleash, mockUtledMottaksdato);
 
         reset(mockDokgenConsumer);
     }
@@ -150,6 +153,38 @@ class DokgenServiceTest {
         assertThat(pdfResponse).isNotNull().isEqualTo(expectedPdf);
 
         verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(false));
+        verifyNoInteractions(mockEregFasade);
+        verifyNoInteractions(mockKontaktOpplysningService);
+    }
+
+    @Test
+    void produserBrev_nyOpprettSakToggleEnabled_henterDatoFraUtledMottaksdato() {
+        unleash.enable("melosys.ny_opprett_sak");
+        when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(false))).thenReturn(expectedPdf);
+        var journalpost = lagJournalpost();
+        when(mockJoarkFasade.hentJournalpost("journalpostId")).thenReturn(journalpost);
+        var behandling = lagBehandling();
+        behandling.setInitierendeJournalpostId("journalpostId");
+        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysninger());
+        when(mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "0123")).thenReturn("Aker");
+        when(mockKodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, "NO")).thenReturn("Norge");
+
+        Aktoer mottaker = lagBruker();
+
+        MangelbrevBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
+            .medProduserbartdokument(MANGELBREV_BRUKER)
+            .medBehandlingId(123)
+            .build();
+
+
+        byte[] pdfResponse = dokgenService.produserBrev(mottaker, brevbestilling);
+
+
+        assertThat(pdfResponse).isNotNull().isEqualTo(expectedPdf);
+
+        verify(mockDokgenConsumer).lagPdf(any(), any(), eq(false), eq(false));
+        verify(mockUtledMottaksdato).getMottaksdato(behandling, journalpost);
         verifyNoInteractions(mockEregFasade);
         verifyNoInteractions(mockKontaktOpplysningService);
     }

@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
@@ -23,6 +22,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_b
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
@@ -34,6 +34,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse.Innvilgels
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.behandling.UtledMottaksdato;
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -79,6 +80,8 @@ class TrygdeavtaleMapperTest {
     private LovvalgsperiodeService mockLovvalgsperiodeService;
     @Mock
     private AvklarteVirksomheterService mockAvklarteVirksomheterService;
+    @Mock
+    private UtledMottaksdato utledMottaksdato;
 
     private TrygdeavtaleMapper trygdeavtaleMapper;
 
@@ -87,7 +90,8 @@ class TrygdeavtaleMapperTest {
         trygdeavtaleMapper = new TrygdeavtaleMapper(
             mockAvklarteMedfolgendeFamilieService,
             mockAvklarteVirksomheterService,
-            mockLovvalgsperiodeService);
+            mockLovvalgsperiodeService,
+            utledMottaksdato);
     }
 
     @Test
@@ -166,7 +170,8 @@ class TrygdeavtaleMapperTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> trygdeavtaleMapper.map(lagStorbritanniaBrevbestilling(lagTrygdeavtaleBehandling()), Land_iso2.GB))
-            .withMessageContaining("Fant 0 avklarte virksomheter for behandling: null. Må være 1 for trygdeavtale");
+            .withMessageContaining("Fant 0 avklarte virksomheter for behandling: ")
+            .withMessageContaining("Må være 1 for trygdeavtale");
     }
 
     @Test
@@ -257,8 +262,7 @@ class TrygdeavtaleMapperTest {
     }
 
     private Behandling medPeriode(Behandling behandling) {
-        var mottatteOpplysninger = behandling.getMottatteOpplysninger();
-        mottatteOpplysninger.setMottaksdato(SOKNADSDATO);
+        when(utledMottaksdato.getMottaksdato(behandling)).thenReturn(SOKNADSDATO);
         return behandling;
     }
 

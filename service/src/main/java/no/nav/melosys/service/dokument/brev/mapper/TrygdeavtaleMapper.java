@@ -10,10 +10,6 @@ import javax.transaction.Transactional;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.SoeknadTrygdeavtale;
-import no.nav.melosys.domain.mottatteopplysninger.data.IdentType;
-import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
@@ -21,6 +17,10 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.SoeknadTrygdeavtale;
+import no.nav.melosys.domain.mottatteopplysninger.data.IdentType;
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
@@ -32,13 +32,14 @@ import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.behandling.UtledMottaksdato;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.mottatteopplysninger.data.IdentType.DNR;
-import static no.nav.melosys.domain.mottatteopplysninger.data.IdentType.FNR;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_1;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_9;
+import static no.nav.melosys.domain.mottatteopplysninger.data.IdentType.DNR;
+import static no.nav.melosys.domain.mottatteopplysninger.data.IdentType.FNR;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Component
@@ -46,13 +47,16 @@ public class TrygdeavtaleMapper {
     private final AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
+    private final UtledMottaksdato utledMottaksdato;
 
     public TrygdeavtaleMapper(AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService,
                               AvklarteVirksomheterService avklarteVirksomheterService,
-                              LovvalgsperiodeService lovvalgsperiodeService) {
+                              LovvalgsperiodeService lovvalgsperiodeService,
+                              UtledMottaksdato utledMottaksdato) {
         this.avklarteMedfølgendeFamilieService = avklarteMedfølgendeFamilieService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
+        this.utledMottaksdato = utledMottaksdato;
     }
 
     @Transactional
@@ -70,13 +74,13 @@ public class TrygdeavtaleMapper {
         if (skalIkkeHaInnvilgelse(brevbestilling)) return null;
 
         var behandling = brevbestilling.getBehandling();
-        var mottatteOpplysninger = behandling.getMottatteOpplysninger();
         var lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId());
 
         return new InnvilgelseTrygdeavtale.Builder()
             .innvilgelse(Innvilgelse.av(brevbestilling))
             .artikkel(lovvalgsperiode.getBestemmelse())
-            .soknad(lagSøknad(mottatteOpplysninger, lovvalgsperiode, soknadsland))
+            .tilleggsbestemmelse(lovvalgsperiode.getTilleggsbestemmelse())
+            .soknad(lagSøknad(behandling, lovvalgsperiode, soknadsland))
             .familie(lagFamile(behandling.getId()))
             .virksomhetArbeidsgiverSkalHaKopi(brevbestilling.isVirksomhetArbeidsgiverSkalHaKopi())
             .build();
@@ -178,11 +182,11 @@ public class TrygdeavtaleMapper {
             .build();
     }
 
-    private Soknad lagSøknad(MottatteOpplysninger mottatteOpplysninger, Lovvalgsperiode lovvalgsperiode, Land_iso2 soknadsland) {
-        var avklartVirksomhet = hentAvklartVirksomhet(mottatteOpplysninger.getBehandling());
+    private Soknad lagSøknad(Behandling behandling, Lovvalgsperiode lovvalgsperiode, Land_iso2 soknadsland) {
+        var avklartVirksomhet = hentAvklartVirksomhet(behandling);
 
         return new Soknad(
-            mottatteOpplysninger.getMottaksdato(),
+            utledMottaksdato.getMottaksdato(behandling),
             lovvalgsperiode.getFom(),
             lovvalgsperiode.getTom(),
             avklartVirksomhet.navn,

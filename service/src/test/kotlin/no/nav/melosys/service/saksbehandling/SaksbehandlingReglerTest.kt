@@ -5,6 +5,7 @@ import io.mockk.MockKAdditionalAnswerScope
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
@@ -30,6 +31,8 @@ import java.util.*
 class SaksbehandlingReglerTest {
     @MockK
     lateinit var behandlingsresultatRepository: BehandlingsresultatRepository
+
+    private val unleash = FakeUnleash();
 
     @ParameterizedTest(name = "{0} - {1} - {2} - {3}")
     @MethodSource("tidligereBehandlingSkalIkkeReplikeresData")
@@ -140,6 +143,15 @@ class SaksbehandlingReglerTest {
                 )
             }
         ),
+        arguments(
+            Sakstyper.FTRL,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstyper.FØRSTEGANG,
+            Behandlingstema.YRKESAKTIV,
+            BehandlingHolder().apply {
+                add(Behandlingstyper.FØRSTEGANG, Behandlingstema.YRKESAKTIV)
+            }
+        ),
     )
 
     @ParameterizedTest(name = "{0} - {1} - {2} - {3}")
@@ -194,6 +206,19 @@ class SaksbehandlingReglerTest {
                 )
             }
         ),
+        arguments(
+            Sakstyper.FTRL,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstema.YRKESAKTIV,
+            BehandlingHolder().apply {
+                add(
+                    Behandlingstyper.NY_VURDERING,
+                    Behandlingstema.YRKESAKTIV,
+                    Behandlingsresultattyper.AVVIST_KLAGE
+                )
+            }
+        ),
     )
 
     @ParameterizedTest(name = "behandlingsresultatType:{0} - FunnetBehandlingID:{2}")
@@ -204,8 +229,7 @@ class SaksbehandlingReglerTest {
         expectedBehandlingID: Long?
     ) {
         every { behandlingsresultatRepository.findById(any()) } returns lagBehandlingsresultat(resultatTypeFraRepo)
-        val saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository)
-
+        val saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository, unleash)
 
         val behandling = saksbehandlingRegler.finnBehandlingSomKanReplikeres(behandlinger)
 
@@ -338,14 +362,16 @@ class SaksbehandlingReglerTest {
 
     class BehandlingHolder {
         private val behandlingerMedType: ArrayList<Pair<Behandling, Behandlingsresultattyper?>> = ArrayList()
+        private val unleash = FakeUnleash();
 
         fun setup(behandlingsresultatRepository: BehandlingsresultatRepository): SaksbehandlingRegler {
+            unleash.enableAll()
             setupMock { id: Long, behandlingsresultattype: Behandlingsresultattyper? ->
                 every { behandlingsresultatRepository.findById(id) } returns lagBehandlingsresultat(
                     behandlingsresultattype
                 )
             }
-            return SaksbehandlingRegler(behandlingsresultatRepository)
+            return SaksbehandlingRegler(behandlingsresultatRepository, unleash)
         }
 
         fun add(

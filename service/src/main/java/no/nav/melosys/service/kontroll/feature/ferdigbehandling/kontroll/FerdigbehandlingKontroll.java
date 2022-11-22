@@ -2,6 +2,7 @@ package no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll;
 
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.PeriodeOmLovvalg;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_ca;
 import no.nav.melosys.domain.mottatteopplysninger.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
@@ -15,8 +16,11 @@ import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 import no.nav.melosys.service.kontroll.regler.PersonRegler;
 import no.nav.melosys.service.validering.Kontrollfeil;
 
+import java.util.Arrays;
+
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_usa.*;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_ca.*;
 
 final class FerdigbehandlingKontroll {
 
@@ -57,7 +61,7 @@ final class FerdigbehandlingKontroll {
     static Kontrollfeil periodeOverFemÅr(FerdigbehandlingKontrollData kontrollData) {
         PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();
 
-        return lovvalgsperiode.getBestemmelse() == USA_ART5_2
+        return (lovvalgsperiode.getBestemmelse() == USA_ART5_2 || lovvalgsperiode.getBestemmelse() == CAN_ART7)
             && PeriodeRegler.periodeOver5År(lovvalgsperiode.getFom(), lovvalgsperiode.getTom())
             ? new Kontrollfeil(Kontroll_begrunnelser.MER_ENN_FEM_ÅR) : null;
     }
@@ -65,7 +69,7 @@ final class FerdigbehandlingKontroll {
     static Kontrollfeil periodeOver12Måneder(FerdigbehandlingKontrollData kontrollData) {
         PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();
 
-        return lovvalgsperiode.getBestemmelse() == USA_ART5_4
+        return (lovvalgsperiode.getBestemmelse() == USA_ART5_4 || lovvalgsperiode.getBestemmelse() == CAN_ART6_2)
             && PeriodeRegler.periodeOver12Måneder(lovvalgsperiode.getFom(), lovvalgsperiode.getTom())
             ? new Kontrollfeil(Kontroll_begrunnelser.MER_ENN_12_MD) : null;
     }
@@ -93,7 +97,8 @@ final class FerdigbehandlingKontroll {
     }
 
     private static boolean erBestemmelseDerTrygdeavtaleAttestSendes(LovvalgBestemmelse bestemmelse) {
-        return erBestemmelseDerTrygdeavtaleAttestSendesUK(bestemmelse) || erBestemmelseDerTrygdeavtaleAttestSendesUSA(bestemmelse);
+        return erBestemmelseDerTrygdeavtaleAttestSendesUK(bestemmelse) || erBestemmelseDerTrygdeavtaleAttestSendesUSA(bestemmelse)
+            || erBestemmelseDerTrygdeavtaleAttestSendesCanada(bestemmelse);
     }
 
     private static boolean erBestemmelseDerTrygdeavtaleAttestSendesUK(LovvalgBestemmelse bestemmelse) {
@@ -108,5 +113,9 @@ final class FerdigbehandlingKontroll {
             || bestemmelse == USA_ART5_5
             || bestemmelse == USA_ART5_6
             || bestemmelse == USA_ART5_9;
+    }
+
+    private static boolean erBestemmelseDerTrygdeavtaleAttestSendesCanada(LovvalgBestemmelse bestemmelse) {
+        return Arrays.stream(Lovvalgbestemmelser_trygdeavtale_ca.values()).anyMatch(p -> p.equals(bestemmelse));
     }
 }
