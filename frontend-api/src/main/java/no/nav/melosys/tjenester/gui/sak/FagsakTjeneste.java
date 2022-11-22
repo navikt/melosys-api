@@ -134,15 +134,17 @@ public class FagsakTjeneste {
         return ResponseEntity.noContent().build();
     }
 
+    @Deprecated(since = "melosys.behandle_alle_saker")
     @GetMapping("{saksnr}/mulige-sakstyper")
     @ApiOperation(value = "Hent mulige nye sakstype for en behandling")
     public ResponseEntity<Collection<Sakstyper>> hentMuligeSakstyper(@PathVariable("saksnr") String saksnummer) {
         log.debug("Saksbehandler {} ber om å hente mulige nye sakstema for fagsak {}.", SubjectHandler.getInstance().getUserID(), saksnummer);
         aksesskontroll.autoriserSakstilgang(saksnummer);
 
-        return ResponseEntity.ok(fagsakService.hentMuligeSakstyper(saksnummer));
+        return ResponseEntity.ok(fagsakService.hentMuligeSakstyper());
     }
 
+    @Deprecated(since = "melosys.behandle_alle_saker")
     @GetMapping("{saksnr}/mulige-sakstemaer")
     @ApiOperation(value = "Hent mulige nye sakstema for en behandling")
     public ResponseEntity<Collection<Sakstemaer>> hentMuligeSakstemaer(@PathVariable("saksnr") String saksnummer,
@@ -151,7 +153,7 @@ public class FagsakTjeneste {
                   SubjectHandler.getInstance().getUserID(), saksnummer);
         aksesskontroll.autoriserSakstilgang(saksnummer);
 
-        return ResponseEntity.ok(fagsakService.hentMuligeSakstemaer(saksnummer, sakstype));
+        return ResponseEntity.ok(fagsakService.hentMuligeSakstemaer());
     }
 
     @PostMapping("/sok")

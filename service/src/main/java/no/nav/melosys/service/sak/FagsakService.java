@@ -386,19 +386,11 @@ public class FagsakService {
         return Behandlingstyper.NY_VURDERING;
     }
 
-    public Set<Sakstyper> hentMuligeSakstyper(String saksnummer) {
-        Behandling behandling = hentFagsak(saksnummer).hentAktivBehandling();
-        if (behandling.kanIkkeEndres() && !behandling.getFagsak().kanEndreTypeOgTema()) {
-            return Collections.emptySet();
-        }
-        return lovligeKombinasjonerService.hentMuligeSakstyper();
+    public Set<Sakstyper> hentMuligeSakstyper() {
+        return Collections.emptySet();
     }
 
-    public Set<Sakstemaer> hentMuligeSakstemaer(String saksnummer, Sakstyper sakstype) {
-        Behandling behandling = hentFagsak(saksnummer).hentAktivBehandling();
-        if (behandling.kanIkkeEndres() && !behandling.getFagsak().kanEndreTypeOgTema()) {
-            return Collections.emptySet();
-        }
-        return lovligeKombinasjonerService.hentMuligeSakstemaer(behandling.getFagsak().getHovedpartRolle(), sakstype);
+    public Set<Sakstemaer> hentMuligeSakstemaer() {
+        return Collections.emptySet();
     }
 }
