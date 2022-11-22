@@ -31,6 +31,7 @@ public class Journalpost {
     private final List<ArkivDokument> vedleggListe = new ArrayList<>();
     private String mottaksKanal;
     private String tema;
+    private boolean erErUtgått;
 
     public Journalpost(String journalpostId) {
         this.journalpostId = journalpostId;
@@ -59,8 +60,16 @@ public class Journalpost {
         this.erFerdigstilt = erFerdigstilt;
     }
 
+    public void setErUtgått(boolean erUtgått) {
+        this.erErUtgått = erUtgått;
+    }
+
     public boolean isErFerdigstilt() {
         return erFerdigstilt;
+    }
+
+    public boolean isErUtgått() {
+        return erErUtgått;
     }
 
     public String getSaksnummer() {
