@@ -266,6 +266,7 @@ class JoarkServiceTest {
         when(safConsumer.hentJournalpost(journalpostID)).thenReturn(safJournalpost);
 
         var journalpost = joarkService.hentJournalpost(journalpostID);
+
         assertThat(journalpost.isErUtgått()).isTrue();
     }
 
@@ -276,6 +277,7 @@ class JoarkServiceTest {
         when(safConsumer.hentJournalpost(journalpostID)).thenReturn(safJournalpost);
 
         var journalpost = joarkService.hentJournalpost(journalpostID);
+
         assertThat(journalpost.isErUtgått()).isFalse();
     }
 
