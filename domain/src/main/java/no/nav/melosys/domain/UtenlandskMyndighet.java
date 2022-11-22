@@ -71,7 +71,7 @@ public class UtenlandskMyndighet {
     }
 
     public List<String> getGateadresseAsList() {
-        List<String> gateadresse = Collections.emptyList();
+        List<String> gateadresse = new ArrayList<>();
         if (gateadresse1 != null) {
             gateadresse.add(gateadresse1);
         }
