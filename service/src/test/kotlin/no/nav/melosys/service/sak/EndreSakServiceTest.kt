@@ -96,7 +96,6 @@ internal class EndreSakServiceTest {
         verify { mottatteOpplysningerService.opprettSøknad(aktivBehandling, any(), any()) }
         verify { oppfriskSaksopplysningerService.oppfriskSaksopplysning(aktivBehandling.id, false) }
         // event for å oppdatere oppgave
-        // event for å oppdatere oppgave
         val eventCapturingSlot = slot<FagsakEndretAvSaksbehandler>()
         verify { applicationEventPublisher.publishEvent(capture(eventCapturingSlot)) }
         eventCapturingSlot.captured.source shouldBe saksnummer
