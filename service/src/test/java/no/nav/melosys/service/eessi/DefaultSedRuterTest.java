@@ -24,6 +24,8 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -91,19 +93,23 @@ class DefaultSedRuterTest {
         verify(oppgaveService).oppdaterOppgave(eq(oppgaveId), any(OppgaveOppdatering.class));
     }
 
-    @Test
-    void bestemManuellBehandling_A012SaksnummerOgFagsakEksistererStatusMidlertidigLovvalgsbeslutning_ikkeOppdaterStatusEllerOppgave() {
-
+    @ParameterizedTest
+    @EnumSource(value = SedType.class, names = {"A012", "X001", "X007", "X008", "A005"})
+    void rutSedTilBehandling_SedTyperSaksnummerOgFagsakEksistererStatusMidlertidigLovvalgsbeslutning_ikkeOppdaterStatusEllerOppgave(SedType sedType) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, GSAK_SAKSNUMMER);
-        MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(SedType.A012);
+        MelosysEessiMelding melosysEessiMelding = hentMelosysEessiMelding(sedType);
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
         Fagsak fagsak = hentFagsak();
         fagsak.hentSistOppdatertBehandling().setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
 
         when(fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER)).thenReturn(Optional.of(fagsak));
+
+
         defaultSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER);
+
+
         assertThat(prosessinstans.getBehandling()).isNotNull();
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(fagsak.hentSistAktivBehandling(), melosysEessiMelding);
         verify(behandlingService, never()).endreStatus(anyLong(), any());

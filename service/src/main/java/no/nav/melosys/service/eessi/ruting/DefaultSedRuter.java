@@ -1,6 +1,7 @@
 package no.nav.melosys.service.eessi.ruting;
 
 import java.util.Optional;
+import java.util.Set;
 
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
@@ -58,10 +59,12 @@ public class DefaultSedRuter implements SedRuter {
 
             if (behandling.erAktiv()) {
                 behandlingService.endreStatus(behandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
+            } else {
+
             }
 
             if (skalOppdatereOppgaveForSedType(sedType)) {
-                oppdaterOppgave(behandling, prosessinstans, sedType);
+                oppdaterEllerOpprettOppgave(behandling, prosessinstans, sedType);
             }
 
             prosessinstans.setBehandling(behandling);
@@ -76,11 +79,14 @@ public class DefaultSedRuter implements SedRuter {
         );
     }
 
+    private static final Set<SedType> SED_TYPE_TIL_MANUEL_BEHANDLING = Set.of(
+        SedType.A012, SedType.X001, SedType.X007, SedType.X008);
+
     private boolean skalOppdatereOppgaveForSedType(SedType sedType) {
-        return sedType != SedType.A012 && sedType != SedType.X001 && sedType != SedType.X007;
+        return !SED_TYPE_TIL_MANUEL_BEHANDLING.contains(sedType);
     }
 
-    private void oppdaterOppgave(Behandling behandling, Prosessinstans prosessinstans, SedType sedType) {
+    private void oppdaterEllerOpprettOppgave(Behandling behandling, Prosessinstans prosessinstans, SedType sedType) {
         Optional<Oppgave> oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         String oppgaveID;
