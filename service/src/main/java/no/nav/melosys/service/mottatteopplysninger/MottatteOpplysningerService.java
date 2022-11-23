@@ -216,6 +216,8 @@ public class MottatteOpplysningerService {
 
     @Transactional
     public void slettOpplysninger(long behandlingID) {
+        var behandling = behandlingService.hentBehandling(behandlingID);
+        behandling.setMottatteOpplysninger(null);
         mottatteOpplysningerRepository.deleteByBehandling_Id(behandlingID);
     }
 
