@@ -47,9 +47,10 @@ class EndreSakService(
     ) {
         val fagsak = fagsakService.hentFagsak(saksnummer)
         validerSak(fagsak, nySakstype, nySakstema)
+        val behandling = fagsak.hentAktivBehandling()
+        validerBehandling(behandling)
         validerEndring(fagsak, nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype)
 
-        val behandling = fagsak.hentAktivBehandling()
         if (fagsak.type == nySakstype && fagsak.tema == nySakstema) {
             behandlingService.endreBehandling(behandling.id, nyBehandlingstype, nyBehandlingstema, nyBehandlingsstatus, nyBehandlingsfrist)
             return
@@ -70,6 +71,17 @@ class EndreSakService(
         log.debug { "Ferdig med endring av sak $saksnummer (type: $nySakstype, tema: $nySakstema)" }
     }
 
+    private fun validerBehandling(behandling: Behandling) {
+        if (setOf(
+                Behandlingsstatus.AVSLUTTET,
+                Behandlingsstatus.IVERKSETTER_VEDTAK,
+                Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING
+            ).contains(behandling.status)
+        ) {
+            throw FunksjonellException("Behandling ${behandling.id} med status ${behandling.status} kan ikke endres")
+        }
+    }
+
     private fun validerSak(fagsak: Fagsak, nySakstype: Sakstyper, nySakstema: Sakstemaer) {
         if ((fagsak.type != nySakstype || fagsak.tema != nySakstema) && !fagsak.kanEndreTypeOgTema()) {
             throw FunksjonellException("Sakstype eller tema kan ikke endres for ${fagsak.saksnummer}")
@@ -78,17 +90,17 @@ class EndreSakService(
 
     private fun validerEndring(
         fagsak: Fagsak,
-        sakstype: Sakstyper,
-        sakstema: Sakstemaer,
-        behandlingstema: Behandlingstema,
-        behandlingstype: Behandlingstyper
+        nySakstype: Sakstyper,
+        nySakstema: Sakstemaer,
+        nyBehandlingstema: Behandlingstema,
+        nyBehandlingstype: Behandlingstyper
     ) {
         lovligeKombinasjonerService.validerBehandlingstemaOgBehandlingstypeForOpprettelse(
             fagsak.hovedpartRolle,
-            sakstype,
-            sakstema,
-            behandlingstema,
-            behandlingstype
+            nySakstype,
+            nySakstema,
+            nyBehandlingstema,
+            nyBehandlingstype
         )
     }
 
@@ -96,7 +108,7 @@ class EndreSakService(
         sakstype: Sakstyper, behandling: Behandling
     ) {
         if (sakstype == Sakstyper.EU_EOS && !unleash.isEnabled("melosys.tom_periode_og_land")) {
-            validerBehandling(behandling)
+            validerPeriodeOgLand(behandling)
         }
 
         val mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id).orElse(null)
@@ -108,7 +120,7 @@ class EndreSakService(
         )
     }
 
-    private fun validerBehandling(behandling: Behandling) {
+    private fun validerPeriodeOgLand(behandling: Behandling) {
         if (!behandling.harPeriodeOgLand()) {
             throw FunksjonellException("Du må legge inn periode og land i flyten for å kunne bytte til sakstype EU/EØS")
         }

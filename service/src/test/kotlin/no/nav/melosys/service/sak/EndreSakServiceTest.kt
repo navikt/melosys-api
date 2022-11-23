@@ -15,6 +15,7 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstemaer.*
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Sakstyper.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
@@ -164,6 +165,31 @@ internal class EndreSakServiceTest {
                 null
             )
         }.message.shouldBe("Du må legge inn periode og land i flyten for å kunne bytte til sakstype EU/EØS")
+    }
+
+    @Test
+    fun `ikke lov å endre behandlinger med status IVERKSETTER_VEDTAK`() {
+        val saksnummer = "MEL-124"
+        val opprinneligFagsak = lagFagsak(saksnummer, FTRL, UNNTAK)
+        val behandling = SaksbehandlingDataFactory.lagInaktivBehandling(opprinneligFagsak).apply {
+            status = Behandlingsstatus.IVERKSETTER_VEDTAK
+        }
+        opprinneligFagsak.behandlinger.add(behandling)
+        every { fagsakService.hentFagsak(saksnummer) } returns opprinneligFagsak
+        every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(MottatteOpplysninger())
+
+        shouldThrow<FunksjonellException>
+        {
+            endreSakService.endre(
+                saksnummer,
+                EU_EOS,
+                MEDLEMSKAP_LOVVALG,
+                ANMODNING_OM_UNNTAK_HOVEDREGEL,
+                FØRSTEGANG,
+                null,
+                null
+            )
+        }.message.shouldBe("Behandling 1 med status IVERKSETTER_VEDTAK kan ikke endres")
     }
 
     private fun lagFagsak(saksnummer: String, sakstype: Sakstyper, sakstema: Sakstemaer) =
