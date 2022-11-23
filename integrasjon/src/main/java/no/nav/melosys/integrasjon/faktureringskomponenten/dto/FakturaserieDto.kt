@@ -6,6 +6,7 @@ data class FakturaserieDto(
     val fullmektig: FullmektigDto?,
     val referanseBruker: String?,
     val referanseNAV: String,
+    val fakturaGjelder: String,
     val intervall: FaktureringsIntervall = FaktureringsIntervall.MANEDLIG,
     val perioder: List<FakturaseriePeriodeDto>
 )
