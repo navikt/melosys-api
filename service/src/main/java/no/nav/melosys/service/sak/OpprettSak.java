@@ -1,5 +1,9 @@
 package no.nav.melosys.service.sak;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Optional;
+
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -24,10 +28,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Optional;
 
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknadGammel;
@@ -119,7 +119,7 @@ public class OpprettSak {
         var behandlingstype = opprettSakDto.getBehandlingstype();
 
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            lovligeKombinasjonerService.validerBehandlingstemaOgBehandlingstypeForOpprettelse(
+            lovligeKombinasjonerService.validerForOpprettelse(
                 hovedpart, sakstype, sakstema, behandlingstema, behandlingstype);
 
             if (erSakstypeEøs(sakstype)

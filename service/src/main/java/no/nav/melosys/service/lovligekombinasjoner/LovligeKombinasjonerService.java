@@ -191,7 +191,7 @@ public class LovligeKombinasjonerService {
         }
     }
 
-    public void validerBehandlingstemaOgBehandlingstypeForOpprettelse(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+    public void validerForOpprettelse(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
         validerSakstema(hovedpart, sakstype, sakstema);
         validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null);
         validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, null, null);

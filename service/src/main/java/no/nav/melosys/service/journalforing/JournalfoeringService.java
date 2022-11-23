@@ -1,9 +1,13 @@
 package no.nav.melosys.service.journalforing;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.List;
+import java.util.Optional;
+
 import com.google.common.base.Enums;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -33,11 +37,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.List;
-import java.util.Optional;
 
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
 import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknadGammel;
@@ -135,7 +134,7 @@ public class JournalfoeringService {
         if (behandleAlleSakerToggleEnabled) {
             Aktoersroller hovedpart = journalføringGjelder(journalfoeringDto);
 
-            lovligeKombinasjonerService.validerBehandlingstemaOgBehandlingstypeForOpprettelse(
+            lovligeKombinasjonerService.validerForOpprettelse(
                 hovedpart, sakstype, sakstema, behandlingstema, behandlingstype);
             if (journalfoeringDto.getAvsenderType() == Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET) {
                 validerSakstypeForTrygdemyndighet(sakstype, journalfoeringDto.getAvsenderID());
