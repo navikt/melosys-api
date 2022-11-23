@@ -15,7 +15,6 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -39,21 +38,18 @@ public class FagsakService {
     private final OppgaveService oppgaveService;
     private final PersondataFasade persondataFasade;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final LovligeKombinasjonerService lovligeKombinasjonerService;
 
     private final Counter sakerOpprettet = Metrics.counter(SAKER_OPPRETTET);
 
     public FagsakService(FagsakRepository fagsakRepository, BehandlingService behandlingService,
                          KontaktopplysningService kontaktopplysningService, @Lazy OppgaveService oppgaveService,
-                         PersondataFasade persondataFasade, BehandlingsresultatService behandlingsresultatService,
-                         LovligeKombinasjonerService lovligeKombinasjonerService) {
+                         PersondataFasade persondataFasade, BehandlingsresultatService behandlingsresultatService) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
         this.kontaktopplysningService = kontaktopplysningService;
         this.oppgaveService = oppgaveService;
         this.persondataFasade = persondataFasade;
         this.behandlingsresultatService = behandlingsresultatService;
-        this.lovligeKombinasjonerService = lovligeKombinasjonerService;
     }
 
     public Fagsak hentFagsak(String saksnummer) {

@@ -16,7 +16,6 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,8 +52,6 @@ class FagsakServiceTest {
     private PersondataFasade persondataFasade;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
-    @Mock
-    private LovligeKombinasjonerService lovligeKombinasjonerService;
 
     private FagsakService fagsakService;
 
@@ -66,8 +63,8 @@ class FagsakServiceTest {
             kontaktopplysningService,
             oppgaveService,
             persondataFasade,
-            behandlingsresultatService,
-            lovligeKombinasjonerService);
+            behandlingsresultatService
+        );
     }
 
     @Test
