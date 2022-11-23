@@ -11,7 +11,7 @@ Melosys-api kan kjøres opp som en ren Spring-applikasjon<br>
 Swagger kan også nås på `localhost:8080/swagger-ui/`
 
 ### Mot lokalt docker-compose
-Sørg for å kjøre opp  [melosys-docker-compose](https://github.com/navikt/melosys-docker-compose). Alle avhenigheter av applikajsonen spinnes da opp.
+Sørg for å kjøre opp  [melosys-docker-compose](https://github.com/navikt/melosys-docker-compose). Alle avhengigheter av applikasjonen spinnes da opp.
 Som database, kafka, oauth-server samt eksterne integrasjoner. Trenger også [naisdevice](https://doc.nais.io/device/install/index.html)
 for å koble til enkelte eksterne tjenester.<br>
 Bruk profil `local-mock`
