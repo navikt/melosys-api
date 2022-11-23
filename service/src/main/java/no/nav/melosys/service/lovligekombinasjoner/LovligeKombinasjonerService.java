@@ -192,6 +192,7 @@ public class LovligeKombinasjonerService {
     }
 
     public void validerBehandlingstemaOgBehandlingstypeForOpprettelse(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        validerSakstema(hovedpart, sakstype, sakstema);
         validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null);
         validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, null, null);
     }
@@ -199,6 +200,12 @@ public class LovligeKombinasjonerService {
     public void validerBehandlingstemaOgBehandlingstypeForAndregangsbehandling(Fagsak fagsak, Behandling sistBehandling, Behandlingsresultat sistBehandlingsresultat, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
         validerBehandlingstema(fagsak.getHovedpartRolle(), fagsak.getType(), fagsak.getTema(), behandlingstema, sistBehandling.getTema());
         validerBehandlingstype(fagsak.getHovedpartRolle(), fagsak.getType(), fagsak.getTema(), behandlingstema, behandlingstype, sistBehandling, sistBehandlingsresultat);
+    }
+
+    private void validerSakstema(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema) {
+        if (!hentMuligeSakstemaer(hovedpart, sakstype).contains(sakstema)) {
+            throw new FunksjonellException(sakstema + " er ikke et lovlig sakstema med de andre valgte verdiene");
+        }
     }
 
     private void validerBehandlingstema(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstema sistBehandlingstema) {
