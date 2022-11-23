@@ -16,7 +16,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 @Protected
 @RestController
-@RequestMapping("/behandlingsaarsak")
+@RequestMapping("/behandlinger")
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class BehandlingsaarsakTjeneste {
 
@@ -30,7 +30,7 @@ public class BehandlingsaarsakTjeneste {
         this.behandlingService = behandlingService;
     }
 
-    @GetMapping("/{behandlingID}/mottaksdato")
+    @GetMapping("/{behandlingID}/aarsak/mottaksdato")
     @ApiOperation(value = "Henter mottaksdato fra behandlingsårsak, eller bruk eksisterende logikk for å finne alternativ mottaksdato")
     public ResponseEntity<MottaksdatoDto> hentMottaksdato(@PathVariable("behandlingID") long behandlingID) {
         aksesskontroll.autoriser(behandlingID);
