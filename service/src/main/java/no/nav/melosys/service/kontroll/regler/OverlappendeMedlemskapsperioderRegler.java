@@ -28,16 +28,16 @@ public final class OverlappendeMedlemskapsperioderRegler {
                 && PeriodeRegler.perioderOverlapperMerEnn1Dag(kontrollperiode, medlemsperiode.getPeriode()));
     }
 
-    public static boolean harOverlappendeMedlemsperiodeMedMedlemskapMerEnn1DagFraSed(MedlemskapDokument medlemskapDokument,
-                                                                                     ErPeriode kontrollperiode) {
+    public static boolean harOverlappendeMedlemsperiodeMedlemskapsperiodeMedMedlemskapMerEnn1DagFraSed(MedlemskapDokument medlemskapDokument,
+                                                                                                       ErPeriode kontrollperiode) {
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
             medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status)
                 && PeriodeType.PERIODE_MED_MEDLEMSKAP.equals(medlemsperiode.type)
                 && PeriodeRegler.perioderOverlapperMerEnn1Dag(kontrollperiode, medlemsperiode.getPeriode()));
     }
 
-    public static boolean harOverlappendeMedlemsperiodeUtenMedlemskapMerEnn1DagFraSed(MedlemskapDokument medlemskapDokument,
-                                                                                      ErPeriode kontrollperiode) {
+    public static boolean harOverlappendeMedlemsperiodeUnntaksperiodeUtenMedlemskapMerEnn1DagFraSed(MedlemskapDokument medlemskapDokument,
+                                                                                                    ErPeriode kontrollperiode) {
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
             medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status)
                 && PeriodeType.PERIODE_UTEN_MEDLEMSKAP.equals(medlemsperiode.type)
