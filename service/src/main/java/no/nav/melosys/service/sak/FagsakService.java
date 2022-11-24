@@ -273,6 +273,16 @@ public class FagsakService {
         return FAGSAKID_PREFIX + fagsakRepository.hentNesteSekvensVerdi();
     }
 
+    @Transactional
+    public void oppdaterFagsakOgBehandling(String saksnummer, Sakstyper nySakstype, Sakstemaer nySakstema,
+                                           Behandlingstema nyBehandlingstema, Behandlingstyper nyBehandlingstype,
+                                           Behandlingsstatus nyBehandlingsstatus, LocalDate nyBehandlingsfrist) {
+        Behandling behandling = hentFagsak(saksnummer).hentAktivBehandling();
+        behandlingService.endreBehandling(behandling.getId(), nyBehandlingstype, nyBehandlingstema, nyBehandlingsstatus, nyBehandlingsfrist);
+        oppdaterSakstype(saksnummer, nySakstype);
+        oppdaterSakstema(saksnummer, nySakstema);
+    }
+
     public void avsluttFagsakOgBehandling(Fagsak fagsak, Saksstatuser saksstatus) {
         Behandling aktivBehandling = fagsak.hentAktivBehandling();
         if (aktivBehandling == null) {

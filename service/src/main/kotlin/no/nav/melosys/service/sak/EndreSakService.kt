@@ -52,13 +52,21 @@ class EndreSakService(
         validerEndring(fagsak, nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype)
 
         if (fagsak.type == nySakstype && fagsak.tema == nySakstema) {
-            behandlingService.endreBehandling(behandling.id, nyBehandlingstype, nyBehandlingstema, nyBehandlingsstatus, nyBehandlingsfrist)
+            behandlingService.endreBehandling(
+                behandling.id, nyBehandlingstype, nyBehandlingstema, nyBehandlingsstatus, nyBehandlingsfrist
+            )
             return
         }
 
-        behandlingService.endreBehandling(behandling.id, nyBehandlingstype, nyBehandlingstema, nyBehandlingsstatus, nyBehandlingsfrist)
-        fagsakService.oppdaterSakstype(saksnummer, nySakstype)
-        fagsakService.oppdaterSakstema(saksnummer, nySakstema)
+        fagsakService.oppdaterFagsakOgBehandling(
+            saksnummer,
+            nySakstype,
+            nySakstema,
+            nyBehandlingstema,
+            nyBehandlingstype,
+            nyBehandlingsstatus,
+            nyBehandlingsfrist
+        )
 
         if (SaksbehandlingRegler.harTomFlyt(nySakstype, nySakstema, nyBehandlingstype, nyBehandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"))) {
             mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id).ifPresent { mottatteOpplysningerService.slettOpplysninger(behandling.id) }

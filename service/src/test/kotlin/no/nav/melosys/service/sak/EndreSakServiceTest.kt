@@ -90,9 +90,17 @@ internal class EndreSakServiceTest {
 
 
         val aktivBehandling = opprinneligFagsak.hentAktivBehandling()
-        verify { fagsakService.oppdaterSakstype(saksnummer, EU_EOS) }
-        verify { fagsakService.oppdaterSakstema(saksnummer, MEDLEMSKAP_LOVVALG) }
-        verify { behandlingService.endreBehandling(aktivBehandling.id, FØRSTEGANG, UTSENDT_ARBEIDSTAKER, null, null) }
+        verify {
+            fagsakService.oppdaterFagsakOgBehandling(
+                saksnummer,
+                EU_EOS,
+                MEDLEMSKAP_LOVVALG,
+                UTSENDT_ARBEIDSTAKER,
+                FØRSTEGANG,
+                null,
+                null
+            )
+        }
         verify { mottatteOpplysningerService.slettOpplysninger(aktivBehandling.id) }
         verify { mottatteOpplysningerService.opprettSøknad(aktivBehandling, any(), any()) }
         verify { oppfriskSaksopplysningerService.oppfriskSaksopplysning(aktivBehandling.id, false) }
