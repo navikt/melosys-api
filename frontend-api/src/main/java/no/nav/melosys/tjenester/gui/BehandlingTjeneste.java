@@ -16,7 +16,10 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.ldap.SaksbehandlerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import no.nav.melosys.tjenester.gui.dto.*;
+import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
+import no.nav.melosys.tjenester.gui.dto.BehandlingOppsummeringDto;
+import no.nav.melosys.tjenester.gui.dto.EndreBehandlingDto;
+import no.nav.melosys.tjenester.gui.dto.TidligereMedlemsperioderDto;
 import no.nav.melosys.tjenester.gui.dto.saksopplysninger.SaksopplysningerTilDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.slf4j.Logger;
@@ -69,21 +72,6 @@ public class BehandlingTjeneste {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * @deprecated Erstattes av endreBestilling
-     */
-    @Deprecated
-    @PostMapping("{behandlingID}/status")
-    @ApiOperation("Endre status for en gitt behandling.")
-    public ResponseEntity<Void> endreStatus(@PathVariable("behandlingID") long behandlingID,
-                                            @RequestBody EndreBehandlingsstatusDto status) {
-        log.info("Saksbehandler {} ber om å endre status for behandling {} til {}.", SubjectHandler.getInstance().getUserID(),
-            behandlingID, status.behandlingsstatus());
-        aksesskontroll.autoriserSkriv(behandlingID);
-        behandlingService.endreStatus(behandlingID, Behandlingsstatus.valueOf(status.behandlingsstatus()));
-        return ResponseEntity.noContent().build();
-    }
-
     @PostMapping("{behandlingID}/tidligere-medlemsperioder")
     @ApiOperation(value = "Knytt medlemsperioder fra MEDL til oppholdsland fra søknaden",
         response = TidligereMedlemsperioderDto.class)
@@ -120,34 +108,6 @@ public class BehandlingTjeneste {
         behandlingService.endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
         BehandlingDto behandlingDto = tilBehandlingDto(behandling, saksbehandler);
         return ResponseEntity.ok(behandlingDto);
-    }
-
-    /**
-     * @deprecated Erstattes av endreBestilling
-     */
-    @Deprecated
-    @PostMapping("{behandlingID}/endreBehandlingstema")
-    @ApiOperation(value = "Endre behandlingstema for en gitt behandling")
-    public ResponseEntity<Void> endreBehandlingstema(@PathVariable("behandlingID") long behandlingsID, @RequestBody EndreBehandlingstemaDto endreBehandlingstemaDto) {
-        log.debug("Saksbehandler {} ber om å sette behandlingstema for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingsID, endreBehandlingstemaDto);
-        aksesskontroll.autoriserSkrivOgTilordnet(behandlingsID);
-
-        behandlingService.endreBehandlingstemaTilBehandling(behandlingsID, Behandlingstema.valueOf(endreBehandlingstemaDto.behandlingstema()));
-        return ResponseEntity.noContent().build();
-    }
-
-    /**
-     * @deprecated Erstattes av endreBestilling
-     */
-    @Deprecated
-    @PostMapping("{behandlingID}/behandlingsfrist")
-    @ApiOperation("Endre behandlingsfristen for en gitt behandling samt tilhørende oppgave i Gosys")
-    public ResponseEntity<Void> endreBehandlingsfrist(@PathVariable("behandlingID") long behandlingID, @RequestBody EndreBehandlingsfristDto endreBehandlingsfristDto) {
-        log.debug("Saksbehandler {} ber om å sette behandlingsfrist for behandling {} til {}.", SubjectHandler.getInstance().getUserID(), behandlingID, endreBehandlingsfristDto.behandlingsfrist());
-        aksesskontroll.autoriserSkrivOgTilordnet(behandlingID);
-
-        behandlingService.endreBehandlingsfrist(behandlingID, endreBehandlingsfristDto.behandlingsfrist());
-        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("{behandlingID}/mulige-statuser")
