@@ -42,15 +42,13 @@ jobs:
           password: ${{ secrets.READER_TOKEN }}
       - name: Build and test
         run: mvn clean package --threads=8 -B -e -U --settings .github/settings.xml
-      - uses: actions/upload-artifact@v3
-        with:
-          name: melosys-app
-          path: |
-            Dockerfile
-            nais.yml
-            app/target/melosys-sb-execution.jar
-            docker-init-scripts/vault-systembruker-env.sh
-          retention-days: 1
+      - name: Build and publish Docker image
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          docker build --tag ${docker_image} .
+          docker login ${{ env.REGISTRY }} -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
+          docker push ${docker_image}
 
   deploy:
     runs-on: ubuntu-latest-8-cores
@@ -60,16 +58,6 @@ jobs:
         uses: navikt/digihot-deploy/actions/pre-deploy@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/download-artifact@v3
-        with:
-          name: melosys-app
-      - name: Build and publish Docker image
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          docker build --tag ${docker_image} .
-          docker login ghcr.io -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
-          docker push ${docker_image}
       - name: Deploy til dev (Q2)
         uses: nais/deploy/actions/deploy@v1
         env:
