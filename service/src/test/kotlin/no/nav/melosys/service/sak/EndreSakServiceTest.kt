@@ -131,28 +131,6 @@ internal class EndreSakServiceTest {
     }
 
     @Test
-    fun `endring av sak, ingen endring av sak - oppdater bare behandling`() {
-        val saksnummer = "MEL-123"
-        val opprinneligFagsak = lagFagsak(saksnummer, EU_EOS, MEDLEMSKAP_LOVVALG)
-        opprinneligFagsak.behandlinger.add(SaksbehandlingDataFactory.lagBehandling(opprinneligFagsak))
-        every { fagsakService.hentFagsak(saksnummer) } returns opprinneligFagsak
-
-
-        endreSakService.endre(saksnummer, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, FØRSTEGANG, null, null)
-
-
-        verify(exactly = 0) { fagsakService.oppdaterSakstype(saksnummer, EU_EOS) }
-        verify(exactly = 0) { fagsakService.oppdaterSakstema(saksnummer, MEDLEMSKAP_LOVVALG) }
-        verify { behandlingService.endreBehandling(
-            opprinneligFagsak.hentAktivBehandling().id,
-            FØRSTEGANG,
-            UTSENDT_ARBEIDSTAKER,
-            null,
-            null
-        ) }
-    }
-
-    @Test
     fun `endring av sak til EØS, toggle av og sak mangler periode og land - feiler`() {
         unleash.disableAll()
         val saksnummer = "MEL-124"

@@ -13,9 +13,11 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.FagsakRepository;
+import no.nav.melosys.service.SaksbehandlingDataFactory;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +31,7 @@ import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
 import static no.nav.melosys.domain.kodeverk.Sakstyper.EU_EOS;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.ARBEID_FLERE_LAND;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.UTSENDT_ARBEIDSTAKER;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -52,6 +55,8 @@ class FagsakServiceTest {
     private PersondataFasade persondataFasade;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
+    @Mock
+    private LovligeKombinasjonerService lovligeKombinasjonerService;
 
     private FagsakService fagsakService;
 
@@ -63,8 +68,8 @@ class FagsakServiceTest {
             kontaktopplysningService,
             oppgaveService,
             persondataFasade,
-            behandlingsresultatService
-        );
+            behandlingsresultatService,
+            lovligeKombinasjonerService);
     }
 
     @Test
@@ -143,25 +148,15 @@ class FagsakServiceTest {
     }
 
     @Test
-    void oppdaterSakstype() {
+    void oppdaterFagsakOgBehandling() {
         Fagsak fagsak = lagFagsakMedBruker();
-        fagsak.getBehandlinger().add(new Behandling());
+        fagsak.getBehandlinger().add(SaksbehandlingDataFactory.lagBehandling());
         when(fagsakRepo.findBySaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
 
-        fagsakService.oppdaterSakstype(fagsak.getSaksnummer(), Sakstyper.TRYGDEAVTALE);
+        fagsakService.oppdaterFagsakOgBehandling(fagsak.getSaksnummer(), Sakstyper.TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, Behandlingstema.ARBEID_FLERE_LAND, NY_VURDERING, null, null);
 
         verify(fagsakRepo).save(fagsak);
-    }
-
-    @Test
-    void oppdaterSakstema() {
-        Fagsak fagsak = lagFagsakMedBruker();
-        fagsak.getBehandlinger().add(new Behandling());
-        when(fagsakRepo.findBySaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
-
-        fagsakService.oppdaterSakstema(fagsak.getSaksnummer(), MEDLEMSKAP_LOVVALG);
-
-        verify(fagsakRepo).save(fagsak);
+        verify(behandlingService).endreBehandling(fagsak.hentAktivBehandling().getId(), NY_VURDERING, ARBEID_FLERE_LAND, null, null);
     }
 
     @Test

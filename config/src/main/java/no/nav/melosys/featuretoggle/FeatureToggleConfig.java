@@ -19,7 +19,7 @@ public class FeatureToggleConfig {
 
         if (!Collections.disjoint(List.of(environment.getActiveProfiles()), List.of("local", "local-mock", "test"))) {
             var fakeUnleash = new FakeUnleash();
-            fakeUnleash.enableAll();
+            fakeUnleash.enable("melosys.behandle_alle_saker", "melosys.tom_periode_og_land", "melosys.ny_opprett_sak");
             return fakeUnleash;
         } else {
             var unleashConfig = UnleashConfig.builder()
