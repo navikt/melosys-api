@@ -111,6 +111,7 @@ class FaktureringskomponentenConsumerTest(
         fullmektig: FullmektigDto = FullmektigDto("11987654321", "123456789", "Ole Brum"),
         referanseBruker: String = "Nasse Nøff",
         referanseNav: String = "NAV Medlemskap og avgift",
+        fakturaGjelder: String = "FTRL",
         intervall: FaktureringsIntervall = FaktureringsIntervall.KVARTAL,
         fakturaseriePeriode: List<FakturaseriePeriodeDto> = listOf(
             FakturaseriePeriodeDto(
@@ -127,6 +128,7 @@ class FaktureringskomponentenConsumerTest(
             fullmektig,
             referanseBruker,
             referanseNav,
+            fakturaGjelder,
             intervall,
             fakturaseriePeriode
         )
