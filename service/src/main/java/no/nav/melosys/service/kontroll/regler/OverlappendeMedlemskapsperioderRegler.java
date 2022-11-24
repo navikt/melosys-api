@@ -6,13 +6,9 @@ import no.nav.melosys.domain.PeriodeOmLovvalg;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class OverlappendeMedlemskapsperioderRegler {
-
-    private static final Logger log = LoggerFactory.getLogger(OverlappendeMedlemskapsperioderRegler.class);
-
+    
     public static boolean harOverlappendeMedlemsperiodeFraSed(MedlemskapDokument medlemskapDokument,
                                                               ErPeriode kontrollperiode) {
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
