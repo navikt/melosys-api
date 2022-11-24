@@ -22,7 +22,7 @@ public class Lovvalgsperiode implements PeriodeOmLovvalg {
     @Column(name = "fom_dato", nullable = false, updatable = false)
     private LocalDate fom;
 
-    @Column(name = "tom_dato", nullable = true, updatable = false)
+    @Column(name = "tom_dato", updatable = false)
     private LocalDate tom;
 
     @Enumerated(EnumType.STRING)

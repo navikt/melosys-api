@@ -83,29 +83,28 @@ abstract class ConsumerWireMockTestBase<T, R>(
     }
 
     fun verifyHeaders(headers: Map<String, StringValuePattern>) {
-        setupWireMock { wireMock ->
-            headers.forEach {
-                wireMock.withHeader(it.key, it.value)
-            }
+        val wireMock = createWireMock()
+        headers.forEach {
+            wireMock.withHeader(it.key, it.value)
         }
+        setupWireMock(wireMock)
     }
 
-    fun setupWireMock(consumer: (MappingBuilder) -> Unit = {}) {
-        val wireMock = createWireMock()
-
-        consumer(wireMock)
-
-        val response = WireMock.aResponse()
+    fun setupWireMock(
+        wireMock: MappingBuilder = createWireMock(),
+        data: T = getMockData(),
+        response: ResponseDefinitionBuilder = WireMock.aResponse()
             .withStatus(200)
             .withHeader("Content-Type", "application/json")
+    ): MappingBuilder {
 
-        val data = getMockData()
         if (data is String) response.withBody(data)
         if (data is ByteArray) response.withBody(data)
 
         serviceUnderTestMockServer.stubFor(
             wireMock.willReturn(response)
         )
+        return wireMock
     }
 
     fun executeFromSystem(consumer: (R) -> Unit = {}) {
@@ -154,7 +153,5 @@ abstract class ConsumerWireMockTestBase<T, R>(
 
     companion object {
         const val UUID_REGEX = "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
-
     }
-
 }

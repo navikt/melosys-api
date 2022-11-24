@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import no.finn.unleash.FakeUnleash;
@@ -68,6 +69,8 @@ class BehandlingServiceTest {
     @Mock
     private LovligeKombinasjonerService lovligeKombinasjonerService;
     @Mock
+    private UtledMottaksdato utledMottaksdato;
+    @Mock
     private ApplicationEventPublisher applicationEventPublisher;
     private final FakeUnleash fakeUnleash = new FakeUnleash();
     private BehandlingService behandlingService;
@@ -84,7 +87,7 @@ class BehandlingServiceTest {
 
     @BeforeEach
     public void setUp() {
-        behandlingService = new BehandlingService(behandlingRepository, tidligereMedlemsperiodeRepo, mottatteOpplysningerRepo, behandlingsresultatService, oppgaveService, lovligeKombinasjonerService, applicationEventPublisher, fakeUnleash);
+        behandlingService = new BehandlingService(behandlingRepository, tidligereMedlemsperiodeRepo, mottatteOpplysningerRepo, behandlingsresultatService, oppgaveService, lovligeKombinasjonerService, applicationEventPublisher, utledMottaksdato, fakeUnleash);
 
         behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
@@ -437,10 +440,14 @@ class BehandlingServiceTest {
         String initierendeDokumentId = "221234";
         Fagsak fagsak = new Fagsak();
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        when(utledMottaksdato.getMottaksdato(any())).thenReturn(LocalDate.now());
         LocalDate frist8Uker = LocalDate.now().plusWeeks(8);
+
+
         Behandling behandling = behandlingService.nyBehandling(
             fagsak, Behandlingsstatus.OPPRETTET, FØRSTEGANG, BESLUTNING_LOVVALG_ANNET_LAND,
             initierendeJournalpostId, initierendeDokumentId, null, null, null);
+
 
         verify(behandlingRepository).save(behandling);
         verify(behandlingsresultatService).lagreNyttBehandlingsresultat(behandling);
@@ -458,10 +465,14 @@ class BehandlingServiceTest {
         String initierendeDokumentId = "221234";
         Fagsak fagsak = new Fagsak();
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        when(utledMottaksdato.getMottaksdato(any())).thenReturn(LocalDate.now());
         LocalDate frist70Dager = LocalDate.now().plusDays(70);
+
+
         Behandling behandling = behandlingService.nyBehandling(
             fagsak, Behandlingsstatus.OPPRETTET, KLAGE, BESLUTNING_LOVVALG_ANNET_LAND,
             initierendeJournalpostId, initierendeDokumentId, null, null, null);
+
 
         verify(behandlingRepository).save(behandling);
         verify(behandlingsresultatService).lagreNyttBehandlingsresultat(behandling);
@@ -479,10 +490,14 @@ class BehandlingServiceTest {
         String initierendeDokumentId = "221234";
         Fagsak fagsak = new Fagsak();
         fagsak.setTema(Sakstemaer.TRYGDEAVGIFT);
+        when(utledMottaksdato.getMottaksdato(any())).thenReturn(LocalDate.now());
         LocalDate frist90Dager = LocalDate.now().plusDays(90);
+
+
         Behandling behandling = behandlingService.nyBehandling(
             fagsak, Behandlingsstatus.OPPRETTET, FØRSTEGANG, ARBEID_KUN_NORGE,
             initierendeJournalpostId, initierendeDokumentId, null, null, null);
+
 
         verify(behandlingRepository).save(behandling);
         verify(behandlingsresultatService).lagreNyttBehandlingsresultat(behandling);
@@ -500,10 +515,14 @@ class BehandlingServiceTest {
         String initierendeDokumentId = "221234";
         Fagsak fagsak = new Fagsak();
         fagsak.setTema(Sakstemaer.UNNTAK);
+        when(utledMottaksdato.getMottaksdato(any())).thenReturn(LocalDate.now());
         LocalDate frist180Dager = LocalDate.now().plusDays(180);
+
+
         Behandling behandling = behandlingService.nyBehandling(
             fagsak, Behandlingsstatus.OPPRETTET, FØRSTEGANG, REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
             initierendeJournalpostId, initierendeDokumentId, null, null, null);
+
 
         verify(behandlingRepository).save(behandling);
         verify(behandlingsresultatService).lagreNyttBehandlingsresultat(behandling);
@@ -518,6 +537,8 @@ class BehandlingServiceTest {
     void replikerBehandling_replikererObjekterOgCollections() throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
         Behandling tidligsteInaktiveBehandling = opprettBehandlingMedData();
         Behandling replikertBehandling = behandlingService.replikerBehandling(tidligsteInaktiveBehandling, ENDRET_PERIODE);
+        tidligsteInaktiveBehandling.setRegistrertDato(Instant.now().minus(2, ChronoUnit.DAYS));
+
 
         assertThat(replikertBehandling.getId()).isNull();
         assertThat(replikertBehandling.getTema()).isEqualTo(tidligsteInaktiveBehandling.getTema());
@@ -525,6 +546,8 @@ class BehandlingServiceTest {
         assertThat(replikertBehandling.getDokumentasjonSvarfristDato()).isEqualTo(tidligsteInaktiveBehandling.getDokumentasjonSvarfristDato());
         assertThat(replikertBehandling.getInitierendeJournalpostId()).isEqualTo(tidligsteInaktiveBehandling.getInitierendeJournalpostId());
         assertThat(replikertBehandling.getBehandlingsfrist()).isEqualTo(LocalDate.now().plusWeeks(4));
+        assertThat(replikertBehandling.getRegistrertDato()).isNotEqualTo(tidligsteInaktiveBehandling.getRegistrertDato());
+        assertThat(replikertBehandling.getMottatteOpplysninger().getMottatteOpplysningerData()).isNotNull();
 
         assertThat(replikertBehandling.getSaksopplysninger()).hasSize(1);
         assertThat(replikertBehandling.getSaksopplysninger()).allMatch(saksopplysning -> saksopplysning.getId() == null);
@@ -548,12 +571,16 @@ class BehandlingServiceTest {
     void replikerBehandlingMedNyttBehandlingsresultat_replikererOgLagrerNyttBehandlingsresultat() {
         Behandling tidligsteInaktiveBehandling = opprettBehandlingMedData();
         assertThat(tidligsteInaktiveBehandling.getMottatteOpplysninger()).isNotNull();
+        tidligsteInaktiveBehandling.setRegistrertDato(Instant.now().minus(2, ChronoUnit.DAYS));
+
 
         Behandling replikertBehandling = behandlingService.replikerBehandlingMedNyttBehandlingsresultat(tidligsteInaktiveBehandling, NY_VURDERING);
+
 
         assertThat(replikertBehandling.getId()).isNull();
         assertThat(replikertBehandling.getTema()).isEqualTo(tidligsteInaktiveBehandling.getTema());
         assertThat(replikertBehandling.getStatus()).isEqualTo(OPPRETTET);
+        assertThat(replikertBehandling.getRegistrertDato()).isNotEqualTo(tidligsteInaktiveBehandling.getRegistrertDato());
         assertThat(replikertBehandling.getDokumentasjonSvarfristDato()).isEqualTo(tidligsteInaktiveBehandling.getDokumentasjonSvarfristDato());
         assertThat(replikertBehandling.getInitierendeJournalpostId()).isEqualTo(tidligsteInaktiveBehandling.getInitierendeJournalpostId());
         assertThat(replikertBehandling.getBehandlingsfrist()).isEqualTo(LocalDate.now().plusWeeks(4));
@@ -751,6 +778,7 @@ class BehandlingServiceTest {
         behandling.setSaksopplysninger(new LinkedHashSet<>());
 
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new MottatteOpplysningerData());
         behandling.getSaksopplysninger().add(opprettSaksopplysning());
         return behandling;
     }

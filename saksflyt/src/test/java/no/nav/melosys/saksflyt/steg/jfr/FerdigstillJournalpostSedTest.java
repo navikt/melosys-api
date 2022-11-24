@@ -94,6 +94,21 @@ class FerdigstillJournalpostSedTest {
         verifyNoMoreInteractions(joarkFasade);
     }
 
+    @Test
+    void utfør_gjørIngenting_nårJournalpostErUtgått() {
+        Journalpost journalpost = new Journalpost(JOURNALPOST_ID);
+        journalpost.setErUtgått(true);
+        journalpost.setJournalposttype(Journalposttype.INN);
+        when(joarkFasade.hentJournalpost(JOURNALPOST_ID)).thenReturn(journalpost);
+
+
+        Prosessinstans prosessinstans = hentProsessinstans();
+        ferdigstillJournalpostSed.utfør(prosessinstans);
+
+        verify(joarkFasade).hentJournalpost(JOURNALPOST_ID);
+        verifyNoMoreInteractions(joarkFasade);
+    }
+
     private static Prosessinstans hentProsessinstans() {
 
         Aktoer bruker = new Aktoer();

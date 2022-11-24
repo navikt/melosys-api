@@ -10,8 +10,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 import java.util.*
-import java.util.List
 
 internal class OppgaveFactoryTest {
 
@@ -20,10 +20,10 @@ internal class OppgaveFactoryTest {
 
     @Test
     fun eueos_medlemskapLovvalg_standardEndretPeriode_flere_1() {
-        val sakstyper = List.of(Sakstyper.EU_EOS)
-        val sakstemaer = List.of(Sakstemaer.MEDLEMSKAP_LOVVALG)
+        val sakstyper = listOf(Sakstyper.EU_EOS)
+        val sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
         val behandlingstyper = BEHANDLINGSTYPE_STANDARD_MED_ENDRET_PERIODE
-        val behandlingstemaer = List.of(
+        val behandlingstemaer = listOf(
             Behandlingstema.UTSENDT_ARBEIDSTAKER,
             Behandlingstema.UTSENDT_SELVSTENDIG,
             Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY,
@@ -48,10 +48,10 @@ internal class OppgaveFactoryTest {
 
     @Test
     fun eueos_medlemskapLovvalg_standardEndretPeriode_beslutningLovvalgNorge_2() {
-        val sakstyper = List.of(Sakstyper.EU_EOS)
-        val sakstemaer = List.of(Sakstemaer.MEDLEMSKAP_LOVVALG)
+        val sakstyper = listOf(Sakstyper.EU_EOS)
+        val sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
         val behandlingstyper = BEHANDLINGSTYPE_STANDARD_MED_ENDRET_PERIODE
-        val behandlingstemaer = List.of(Behandlingstema.BESLUTNING_LOVVALG_NORGE)
+        val behandlingstemaer = listOf(Behandlingstema.BESLUTNING_LOVVALG_NORGE)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.EU_EOS_LAND
         val expectedTema = Tema.MED
@@ -70,10 +70,10 @@ internal class OppgaveFactoryTest {
 
     @Test
     fun eueos_medlemskapLovvalg_henvendelse_trygdetid_3() {
-        val sakstyper = List.of(Sakstyper.EU_EOS)
-        val sakstemaer = List.of(Sakstemaer.MEDLEMSKAP_LOVVALG)
-        val behandlingstyper = List.of(Behandlingstyper.HENVENDELSE)
-        val behandlingstemaer = List.of(Behandlingstema.TRYGDETID)
+        val sakstyper = listOf(Sakstyper.EU_EOS)
+        val sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
+        val behandlingstyper = listOf(Behandlingstyper.HENVENDELSE)
+        val behandlingstemaer = listOf(Behandlingstema.TRYGDETID)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.EU_EOS_LAND
         val expectedTema = Tema.MED
@@ -92,10 +92,10 @@ internal class OppgaveFactoryTest {
 
     @Test
     fun ftrl_medlemskapLovvalg_standard_beggeYrkesaktiv_4() {
-        val sakstyper = List.of(Sakstyper.FTRL)
-        val sakstemaer = List.of(Sakstemaer.MEDLEMSKAP_LOVVALG)
+        val sakstyper = listOf(Sakstyper.FTRL)
+        val sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
         val behandlingstyper = BEHANDLINGSTYPE_STANDARD
-        val behandlingstemaer = List.of(Behandlingstema.YRKESAKTIV, Behandlingstema.IKKE_YRKESAKTIV)
+        val behandlingstemaer = listOf(Behandlingstema.YRKESAKTIV, Behandlingstema.IKKE_YRKESAKTIV)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.UTENFOR_AVTALELAND
         val expectedTema = Tema.MED
@@ -114,10 +114,10 @@ internal class OppgaveFactoryTest {
 
     @Test
     fun trygdeavtale_medlemskapLovvalg_standard_beggeYrkesaktiv_5() {
-        val sakstyper = List.of(Sakstyper.TRYGDEAVTALE)
-        val sakstemaer = List.of(Sakstemaer.MEDLEMSKAP_LOVVALG)
+        val sakstyper = listOf(Sakstyper.TRYGDEAVTALE)
+        val sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
         val behandlingstyper = BEHANDLINGSTYPE_STANDARD
-        val behandlingstemaer = List.of(Behandlingstema.YRKESAKTIV, Behandlingstema.IKKE_YRKESAKTIV)
+        val behandlingstemaer = listOf(Behandlingstema.YRKESAKTIV, Behandlingstema.IKKE_YRKESAKTIV)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.AVTALELAND
         val expectedTema = Tema.MED
@@ -136,10 +136,10 @@ internal class OppgaveFactoryTest {
 
     @Test
     fun ftrl_medlemskapLovvalg_standard_unntakMedlemskap_6() {
-        val sakstyper = List.of(Sakstyper.FTRL)
-        val sakstemaer = List.of(Sakstemaer.MEDLEMSKAP_LOVVALG)
+        val sakstyper = listOf(Sakstyper.FTRL)
+        val sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
         val behandlingstyper = BEHANDLINGSTYPE_STANDARD
-        val behandlingstemaer = List.of(Behandlingstema.UNNTAK_MEDLEMSKAP)
+        val behandlingstemaer = listOf(Behandlingstema.UNNTAK_MEDLEMSKAP)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.UTENFOR_AVTALELAND
         val expectedTema = Tema.MED
@@ -158,10 +158,10 @@ internal class OppgaveFactoryTest {
 
     @Test
     fun eueos_medlemskapLovvalg_standard_pensjonist_7() {
-        val sakstyper = List.of(Sakstyper.EU_EOS)
-        val sakstemaer = List.of(Sakstemaer.MEDLEMSKAP_LOVVALG)
+        val sakstyper = listOf(Sakstyper.EU_EOS)
+        val sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
         val behandlingstyper = BEHANDLINGSTYPE_STANDARD
-        val behandlingstemaer = List.of(Behandlingstema.PENSJONIST)
+        val behandlingstemaer = listOf(Behandlingstema.PENSJONIST)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.PENSJONIST_ELLER_UFORETRYGDET
         val expectedTema = Tema.MED
@@ -181,10 +181,10 @@ internal class OppgaveFactoryTest {
 
     @Test
     fun trygdeavtale_medlemskapLovvalg_standard_pensjonist_7() {
-        val sakstyper = List.of(Sakstyper.TRYGDEAVTALE)
-        val sakstemaer = List.of(Sakstemaer.MEDLEMSKAP_LOVVALG)
+        val sakstyper = listOf(Sakstyper.TRYGDEAVTALE)
+        val sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
         val behandlingstyper = BEHANDLINGSTYPE_STANDARD
-        val behandlingstemaer = List.of(Behandlingstema.PENSJONIST)
+        val behandlingstemaer = listOf(Behandlingstema.PENSJONIST)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.PENSJONIST_ELLER_UFORETRYGDET
         val expectedTema = Tema.MED
@@ -204,10 +204,10 @@ internal class OppgaveFactoryTest {
 
     @Test
     fun ftrl_medlemskapLovvalg_standard_pensjonist_7() {
-        val sakstyper = List.of(Sakstyper.FTRL)
-        val sakstemaer = List.of(Sakstemaer.MEDLEMSKAP_LOVVALG)
+        val sakstyper = listOf(Sakstyper.FTRL)
+        val sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
         val behandlingstyper = BEHANDLINGSTYPE_STANDARD
-        val behandlingstemaer = List.of(Behandlingstema.PENSJONIST)
+        val behandlingstemaer = listOf(Behandlingstema.PENSJONIST)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.PENSJONIST_ELLER_UFORETRYGDET
         val expectedTema = Tema.MED
@@ -228,9 +228,9 @@ internal class OppgaveFactoryTest {
     @Test
     fun alle_trygdeavgift_standard_pensjonist_8() {
         val sakstyper = SAKSTYPE_ALLE
-        val sakstemaer = List.of(Sakstemaer.TRYGDEAVGIFT)
+        val sakstemaer = listOf(Sakstemaer.TRYGDEAVGIFT)
         val behandlingstyper = BEHANDLINGSTYPE_STANDARD
-        val behandlingstemaer = List.of(Behandlingstema.PENSJONIST)
+        val behandlingstemaer = listOf(Behandlingstema.PENSJONIST)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.PENSJONIST_ELLER_UFORETRYGDET
         val expectedTema = Tema.TRY
@@ -251,9 +251,9 @@ internal class OppgaveFactoryTest {
     @Test
     fun alle_trygdeavgift_standard_yrkesaktiv_9() {
         val sakstyper = SAKSTYPE_ALLE
-        val sakstemaer = List.of(Sakstemaer.TRYGDEAVGIFT)
+        val sakstemaer = listOf(Sakstemaer.TRYGDEAVGIFT)
         val behandlingstyper = BEHANDLINGSTYPE_STANDARD
-        val behandlingstemaer = List.of(Behandlingstema.YRKESAKTIV)
+        val behandlingstemaer = listOf(Behandlingstema.YRKESAKTIV)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.YRKESAKTIV
         val expectedTema = Tema.TRY
@@ -273,10 +273,10 @@ internal class OppgaveFactoryTest {
 
     @Test
     fun eueos_unntak_flere_annmodningUnntakHovedregel_10() {
-        val sakstyper = List.of(Sakstyper.EU_EOS)
-        val sakstemaer = List.of(Sakstemaer.UNNTAK)
-        val behandlingstyper = List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING)
-        val behandlingstemaer = List.of(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
+        val sakstyper = listOf(Sakstyper.EU_EOS)
+        val sakstemaer = listOf(Sakstemaer.UNNTAK)
+        val behandlingstyper = listOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING)
+        val behandlingstemaer = listOf(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.ANMODNING_UNNTAK
         val expectedTema = Tema.UFM
@@ -296,10 +296,10 @@ internal class OppgaveFactoryTest {
 
     @Test
     fun eueos_unntak_flere_registreringUnntakNorskTrygdUtstasjonering_11() {
-        val sakstyper = List.of(Sakstyper.EU_EOS)
-        val sakstemaer = List.of(Sakstemaer.UNNTAK)
-        val behandlingstyper = List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING)
-        val behandlingstemaer = List.of(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING)
+        val sakstyper = listOf(Sakstyper.EU_EOS)
+        val sakstemaer = listOf(Sakstemaer.UNNTAK)
+        val behandlingstyper = listOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING)
+        val behandlingstemaer = listOf(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.REGISTRERING_UNNTAK
         val expectedTema = Tema.UFM
@@ -319,10 +319,10 @@ internal class OppgaveFactoryTest {
 
     @Test
     fun eueos_unntak_flere_registreringUnntakNorskTrygdOvrige_11() {
-        val sakstyper = List.of(Sakstyper.EU_EOS)
-        val sakstemaer = List.of(Sakstemaer.UNNTAK)
-        val behandlingstyper = List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING)
-        val behandlingstemaer = List.of(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE)
+        val sakstyper = listOf(Sakstyper.EU_EOS)
+        val sakstemaer = listOf(Sakstemaer.UNNTAK)
+        val behandlingstyper = listOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING)
+        val behandlingstemaer = listOf(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.REGISTRERING_UNNTAK
         val expectedTema = Tema.UFM
@@ -342,10 +342,10 @@ internal class OppgaveFactoryTest {
 
     @Test
     fun eueos_unntak_flere_beslutningLovvalgAnnetLand_11() {
-        val sakstyper = List.of(Sakstyper.EU_EOS)
-        val sakstemaer = List.of(Sakstemaer.UNNTAK)
-        val behandlingstyper = List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING)
-        val behandlingstemaer = List.of(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND)
+        val sakstyper = listOf(Sakstyper.EU_EOS)
+        val sakstemaer = listOf(Sakstemaer.UNNTAK)
+        val behandlingstyper = listOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING)
+        val behandlingstemaer = listOf(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.REGISTRERING_UNNTAK
         val expectedTema = Tema.UFM
@@ -365,10 +365,10 @@ internal class OppgaveFactoryTest {
 
     @Test
     fun eueos_medlemskapLovvalg_henvendelse_foresporselTrygdemyndighet_12() {
-        val sakstyper = List.of(Sakstyper.EU_EOS)
-        val sakstemaer = List.of(Sakstemaer.MEDLEMSKAP_LOVVALG)
-        val behandlingstyper = List.of(Behandlingstyper.HENVENDELSE)
-        val behandlingstemaer = List.of(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
+        val sakstyper = listOf(Sakstyper.EU_EOS)
+        val sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
+        val behandlingstyper = listOf(Behandlingstyper.HENVENDELSE)
+        val behandlingstemaer = listOf(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.EU_EOS_LAND
         val expectedTema = Tema.MED
@@ -388,10 +388,10 @@ internal class OppgaveFactoryTest {
 
     @Test
     fun trygdeavtale_medlemskapLovvalg_henvendelse_foresporselTrygdemyndighet_12() {
-        val sakstyper = List.of(Sakstyper.TRYGDEAVTALE)
-        val sakstemaer = List.of(Sakstemaer.MEDLEMSKAP_LOVVALG)
-        val behandlingstyper = List.of(Behandlingstyper.HENVENDELSE)
-        val behandlingstemaer = List.of(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
+        val sakstyper = listOf(Sakstyper.TRYGDEAVTALE)
+        val sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
+        val behandlingstyper = listOf(Behandlingstyper.HENVENDELSE)
+        val behandlingstemaer = listOf(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.AVTALELAND
         val expectedTema = Tema.MED
@@ -410,10 +410,10 @@ internal class OppgaveFactoryTest {
 
     @Test
     fun eueos_unntak_henvendelse_foresporselTrygdemyndighet_13() {
-        val sakstyper = List.of(Sakstyper.EU_EOS)
-        val sakstemaer = List.of(Sakstemaer.UNNTAK)
-        val behandlingstyper = List.of(Behandlingstyper.HENVENDELSE)
-        val behandlingstemaer = List.of(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
+        val sakstyper = listOf(Sakstyper.EU_EOS)
+        val sakstemaer = listOf(Sakstemaer.UNNTAK)
+        val behandlingstyper = listOf(Behandlingstyper.HENVENDELSE)
+        val behandlingstemaer = listOf(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.EU_EOS_LAND
         val expectedTema = Tema.UFM
@@ -433,10 +433,10 @@ internal class OppgaveFactoryTest {
 
     @Test
     fun trygdeavtale_unntak_henvendelse_foresporselTrygdemyndighet_13() {
-        val sakstyper = List.of(Sakstyper.TRYGDEAVTALE)
-        val sakstemaer = List.of(Sakstemaer.UNNTAK)
-        val behandlingstyper = List.of(Behandlingstyper.HENVENDELSE)
-        val behandlingstemaer = List.of(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
+        val sakstyper = listOf(Sakstyper.TRYGDEAVTALE)
+        val sakstemaer = listOf(Sakstemaer.UNNTAK)
+        val behandlingstyper = listOf(Behandlingstyper.HENVENDELSE)
+        val behandlingstemaer = listOf(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.AVTALELAND
         val expectedTema = Tema.UFM
@@ -455,10 +455,10 @@ internal class OppgaveFactoryTest {
 
     @Test
     fun trygdeavtale_unntak_flere_anmodningOmUnntakHovedregel_14() {
-        val sakstyper = List.of(Sakstyper.TRYGDEAVTALE)
-        val sakstemaer = List.of(Sakstemaer.UNNTAK)
-        val behandlingstyper = List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING)
-        val behandlingstemaer = List.of(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
+        val sakstyper = listOf(Sakstyper.TRYGDEAVTALE)
+        val sakstemaer = listOf(Sakstemaer.UNNTAK)
+        val behandlingstyper = listOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING)
+        val behandlingstemaer = listOf(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.ANMODNING_UNNTAK
         val expectedTema = Tema.UFM
@@ -478,10 +478,10 @@ internal class OppgaveFactoryTest {
 
     @Test
     fun trygdeavtale_unntak_standard_registreringUnntak_15() {
-        val sakstyper = List.of(Sakstyper.TRYGDEAVTALE)
-        val sakstemaer = List.of(Sakstemaer.UNNTAK)
+        val sakstyper = listOf(Sakstyper.TRYGDEAVTALE)
+        val sakstemaer = listOf(Sakstemaer.UNNTAK)
         val behandlingstyper = BEHANDLINGSTYPE_STANDARD
-        val behandlingstemaer = List.of(Behandlingstema.REGISTRERING_UNNTAK)
+        val behandlingstemaer = listOf(Behandlingstema.REGISTRERING_UNNTAK)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.REGISTRERING_UNNTAK
         val expectedTema = Tema.UFM
@@ -501,9 +501,9 @@ internal class OppgaveFactoryTest {
 
     @Test
     fun eueos_medlemskapLovvalg_henvendelse_alle_16() {
-        val sakstyper = List.of(Sakstyper.EU_EOS)
-        val sakstemaer = List.of(Sakstemaer.MEDLEMSKAP_LOVVALG)
-        val behandlingstyper = List.of(Behandlingstyper.HENVENDELSE)
+        val sakstyper = listOf(Sakstyper.EU_EOS)
+        val sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
+        val behandlingstyper = listOf(Behandlingstyper.HENVENDELSE)
         val behandlingstemaer =
             getAlleBehandlingstemaUnntatt(Behandlingstema.TRYGDETID, Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
 
@@ -524,9 +524,9 @@ internal class OppgaveFactoryTest {
 
     @Test
     fun trygdeavtale_medlemskapLovvalg_henvendelse_alle_16() {
-        val sakstyper = List.of(Sakstyper.TRYGDEAVTALE)
-        val sakstemaer = List.of(Sakstemaer.MEDLEMSKAP_LOVVALG)
-        val behandlingstyper = List.of(Behandlingstyper.HENVENDELSE)
+        val sakstyper = listOf(Sakstyper.TRYGDEAVTALE)
+        val sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
+        val behandlingstyper = listOf(Behandlingstyper.HENVENDELSE)
         val behandlingstemaer = getAlleBehandlingstemaUnntatt(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.AVTALELAND
@@ -546,9 +546,9 @@ internal class OppgaveFactoryTest {
 
     @Test
     fun ftrl_medlemskapLovvalg_henvendelse_alle_16() {
-        val sakstyper = List.of(Sakstyper.FTRL)
-        val sakstemaer = List.of(Sakstemaer.MEDLEMSKAP_LOVVALG)
-        val behandlingstyper = List.of(Behandlingstyper.HENVENDELSE)
+        val sakstyper = listOf(Sakstyper.FTRL)
+        val sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
+        val behandlingstyper = listOf(Behandlingstyper.HENVENDELSE)
         val behandlingstemaer = BEHANDLINGSTEMA_ALLE
 
         val expectedBehandlingstema = OppgaveBehandlingstema.UTENFOR_AVTALELAND
@@ -568,9 +568,9 @@ internal class OppgaveFactoryTest {
 
     @Test
     fun eueos_unntak_henvendelse_alle_17() {
-        val sakstyper = List.of(Sakstyper.EU_EOS)
-        val sakstemaer = List.of(Sakstemaer.UNNTAK)
-        val behandlingstyper = List.of(Behandlingstyper.HENVENDELSE)
+        val sakstyper = listOf(Sakstyper.EU_EOS)
+        val sakstemaer = listOf(Sakstemaer.UNNTAK)
+        val behandlingstyper = listOf(Behandlingstyper.HENVENDELSE)
         val behandlingstemaer = getAlleBehandlingstemaUnntatt(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.EU_EOS_LAND
@@ -590,9 +590,9 @@ internal class OppgaveFactoryTest {
 
     @Test
     fun trygdeavtale_unntak_henvendelse_alle_17() {
-        val sakstyper = List.of(Sakstyper.TRYGDEAVTALE)
-        val sakstemaer = List.of(Sakstemaer.UNNTAK)
-        val behandlingstyper = List.of(Behandlingstyper.HENVENDELSE)
+        val sakstyper = listOf(Sakstyper.TRYGDEAVTALE)
+        val sakstemaer = listOf(Sakstemaer.UNNTAK)
+        val behandlingstyper = listOf(Behandlingstyper.HENVENDELSE)
         val behandlingstemaer = getAlleBehandlingstemaUnntatt(
             Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET,
             Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
@@ -615,9 +615,9 @@ internal class OppgaveFactoryTest {
 
     @Test
     fun ftrl_unntak_henvendelse_alle_17() {
-        val sakstyper = List.of(Sakstyper.FTRL)
-        val sakstemaer = List.of(Sakstemaer.UNNTAK)
-        val behandlingstyper = List.of(Behandlingstyper.HENVENDELSE)
+        val sakstyper = listOf(Sakstyper.FTRL)
+        val sakstemaer = listOf(Sakstemaer.UNNTAK)
+        val behandlingstyper = listOf(Behandlingstyper.HENVENDELSE)
         val behandlingstemaer = BEHANDLINGSTEMA_ALLE
 
         val expectedBehandlingstema = OppgaveBehandlingstema.UTENFOR_AVTALELAND
@@ -638,9 +638,9 @@ internal class OppgaveFactoryTest {
     @Test
     fun alle_trygdeavgift_henvendelse_pensjonist_18() {
         val sakstyper = SAKSTYPE_ALLE
-        val sakstemaer = List.of(Sakstemaer.TRYGDEAVGIFT)
-        val behandlingstyper = List.of(Behandlingstyper.HENVENDELSE)
-        val behandlingstemaer = List.of(Behandlingstema.PENSJONIST)
+        val sakstemaer = listOf(Sakstemaer.TRYGDEAVGIFT)
+        val behandlingstyper = listOf(Behandlingstyper.HENVENDELSE)
+        val behandlingstemaer = listOf(Behandlingstema.PENSJONIST)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.PENSJONIST_ELLER_UFORETRYGDET
         val expectedTema = Tema.TRY
@@ -661,9 +661,9 @@ internal class OppgaveFactoryTest {
     @Test
     fun alle_trygdeavgift_henvendelse_yrkesaktiv_18() {
         val sakstyper = SAKSTYPE_ALLE
-        val sakstemaer = List.of(Sakstemaer.TRYGDEAVGIFT)
-        val behandlingstyper = List.of(Behandlingstyper.HENVENDELSE)
-        val behandlingstemaer = List.of(Behandlingstema.YRKESAKTIV)
+        val sakstemaer = listOf(Sakstemaer.TRYGDEAVGIFT)
+        val behandlingstyper = listOf(Behandlingstyper.HENVENDELSE)
+        val behandlingstemaer = listOf(Behandlingstema.YRKESAKTIV)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.YRKESAKTIV
         val expectedTema = Tema.TRY
@@ -757,7 +757,7 @@ internal class OppgaveFactoryTest {
         behandling.type = behandlingstype
         behandling.tema = melosysBehandlingstema
 
-        val oppgave = OppgaveFactory.lagBehandlingsoppgave(behandling).build()
+        val oppgave = OppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now()).build()
 
         Assertions.assertThat(oppgave.behandlingstema)
             .`as`("Behandlingstema (${sakstype}, ${sakstema}, ${behandlingstype}, ${melosysBehandlingstema})")
@@ -781,11 +781,11 @@ internal class OppgaveFactoryTest {
     }
 
     companion object {
-        private val SAKSTYPE_ALLE: Collection<Sakstyper> = List.of(*Sakstyper.values())
-        private val BEHANDLINGSTEMA_ALLE: Collection<Behandlingstema> = List.of(*Behandlingstema.values())
+        private val SAKSTYPE_ALLE: Collection<Sakstyper> = listOf(*Sakstyper.values())
+        private val BEHANDLINGSTEMA_ALLE: Collection<Behandlingstema> = listOf(*Behandlingstema.values())
         private val BEHANDLINGSTYPE_STANDARD: Collection<Behandlingstyper> =
-            List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE)
-        private val BEHANDLINGSTYPE_STANDARD_MED_ENDRET_PERIODE: Collection<Behandlingstyper> = List.of(
+            listOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE)
+        private val BEHANDLINGSTYPE_STANDARD_MED_ENDRET_PERIODE: Collection<Behandlingstyper> = listOf(
             Behandlingstyper.FØRSTEGANG,
             Behandlingstyper.NY_VURDERING,
             Behandlingstyper.ENDRET_PERIODE,

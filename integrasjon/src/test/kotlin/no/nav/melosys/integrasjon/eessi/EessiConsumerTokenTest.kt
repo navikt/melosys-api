@@ -1,6 +1,9 @@
 package no.nav.melosys.integrasjon.eessi
 
 import com.github.tomakehurst.wiremock.client.WireMock
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.string.shouldContain
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
@@ -61,6 +64,7 @@ class EessiConsumerTokenTest(
         executeFromController()
     }
 
+
     @Test
     fun authorizationSkalKommeFraSystemNårHverkenSystemEllerBrukerErKilde() {
         verifyHeaders(
@@ -88,6 +92,20 @@ class EessiConsumerTokenTest(
         executeErrorFromServer { error ->
             Assertions.assertThat(error).contains(errorFromServerMessage())
         }
+    }
+
+    @Test
+    fun `Skal feile om token ikke stemmer overens`() {
+        verifyHeaders(
+            mapOf(
+                Pair("Authorization", WireMock.equalTo("Bearer --feil token--")),
+                Pair(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)),
+                Pair(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+            )
+        )
+        shouldThrow<TekniskException> {
+            executeFromSystem()
+        }.message.shouldContain("Authorization: Bearer --token-from-system--         <<<<< Header does not match")
     }
 
     override fun getMockData(): String = "[]"

@@ -1,10 +1,15 @@
 package no.nav.melosys.service.dokument;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
+import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.SaksvedleggBestilling;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -18,6 +23,7 @@ import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.bruker.SaksbehandlerService;
+import no.nav.melosys.service.behandling.UtledMottaksdato;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.FritekstvedleggDto;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
@@ -44,16 +50,22 @@ public class DokgenService {
     private final ProsessinstansService prosessinstansService;
     private final SaksbehandlerService saksbehandlerService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
+    private final Unleash unleash;
+    private final UtledMottaksdato utledMottaksdato;
 
     public DokgenService(DokgenConsumer dokgenConsumer,
                          DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper,
                          JoarkFasade joarkFasade,
-                         DokgenMalMapper dokgenMalMapper, BehandlingService behandlingService,
+                         DokgenMalMapper dokgenMalMapper,
+                         BehandlingService behandlingService,
                          EregFasade eregFasade,
                          KontaktopplysningService kontaktopplysningService,
-                         BrevmottakerService brevmottakerService, ProsessinstansService prosessinstansService,
+                         BrevmottakerService brevmottakerService,
+                         ProsessinstansService prosessinstansService,
                          SaksbehandlerService saksbehandlerService,
-                         UtenlandskMyndighetService utenlandskMyndighetService) {
+                         UtenlandskMyndighetService utenlandskMyndighetService,
+                         Unleash unleash,
+                         UtledMottaksdato utledMottaksdato) {
         this.dokgenConsumer = dokgenConsumer;
         this.dokumentproduksjonsInfoMapper = dokumentproduksjonsInfoMapper;
         this.joarkFasade = joarkFasade;
@@ -65,6 +77,8 @@ public class DokgenService {
         this.prosessinstansService = prosessinstansService;
         this.saksbehandlerService = saksbehandlerService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
+        this.unleash = unleash;
+        this.utledMottaksdato = utledMottaksdato;
     }
 
     @Transactional
@@ -109,7 +123,7 @@ public class DokgenService {
             settUtenlandskMyndighetOpplysninger(mottaker.hentMyndighetLandkode(), builder);
         }
 
-        settJournalpostOpplysninger(behandling, builder);
+        settForsendelseMottattOgAvsender(behandling, builder);
 
         var dokgenDto = dokgenMalMapper.mapBehandling(builder.build(), mottaker);
         return dokgenConsumer.lagPdf(malnavn, dokgenDto, brevbestilling.isBestillKopi(), brevbestilling.isBestillUtkast());
@@ -183,13 +197,25 @@ public class DokgenService {
         brevbestilling.medUtenlandskMyndighet(utenlandskMyndighet);
     }
 
-    private void settJournalpostOpplysninger(Behandling behandling, DokgenBrevbestilling.Builder<?> brevbestilling) {
-        var journalpost = joarkFasade.hentJournalpost(behandling.getInitierendeJournalpostId());
-        brevbestilling
-            .medForsendelseMottatt(journalpost.getForsendelseMottatt())
-            .medAvsenderNavn(journalpost.getAvsenderNavn())
-            .medAvsendertype(journalpost.getAvsenderType())
-            .medAvsenderLand(journalpost.getAvsenderLand());
+    private void settForsendelseMottattOgAvsender(Behandling behandling, DokgenBrevbestilling.Builder<?> brevbestilling) {
+        if (unleash.isEnabled("melosys.ny_opprett_sak")) {
+            Journalpost journalpost = null;
+            if (behandling.getInitierendeJournalpostId() != null) {
+                journalpost = joarkFasade.hentJournalpost(behandling.getInitierendeJournalpostId());
+                brevbestilling.medAvsenderFraJournalpost(journalpost);
+            }
+            var mottaksdato = tilInstant(utledMottaksdato.getMottaksdato(behandling, journalpost));
+            brevbestilling.medForsendelseMottatt(mottaksdato);
+        } else {
+            var journalpost = joarkFasade.hentJournalpost(behandling.getInitierendeJournalpostId());
+            brevbestilling
+                .medForsendelseMottatt(journalpost.getForsendelseMottatt())
+                .medAvsenderFraJournalpost(journalpost);
+        }
+    }
+
+    private Instant tilInstant(LocalDate localDate) {
+        return localDate != null ? localDate.atStartOfDay(ZoneId.systemDefault()).toInstant() : null;
     }
 
     private String hentSaksbehandlerNavn(String ident) {

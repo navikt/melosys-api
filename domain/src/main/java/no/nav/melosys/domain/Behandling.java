@@ -549,7 +549,7 @@ public class Behandling extends RegistreringsInfo {
             || BESLUTNING_LOVVALG_ANNET_LAND.getKode().equalsIgnoreCase(behandlingstemaKode);
     }
 
-    public static LocalDate utledBehandlingsfrist(Behandling behandling) {
+    public static LocalDate utledBehandlingsfrist(Behandling behandling, LocalDate utgangspunktDato) {
         Sakstemaer sakstema = behandling.getFagsak().getTema();
         Behandlingstema behandlingstema = behandling.getTema();
         Behandlingstyper behandlingstype = behandling.getType();
@@ -557,20 +557,8 @@ public class Behandling extends RegistreringsInfo {
         if (GAMLE_BEHANDLINGSTYPER_SOM_SKAL_MIGRERES_SENERE.contains(behandlingstype)) {
             return utledFristForBehandlingtema(behandlingstema);
         }
-        LocalDate utgangspunktDato = finnUtgangspunktForFristberegning(behandling);
-        return BehandlingfristKriterier.hentBehandlingsFrist(sakstema, behandlingstema, behandlingstype, utgangspunktDato);
-    }
 
-    private static LocalDate finnUtgangspunktForFristberegning(Behandling behandling) {
-        LocalDate utgangspunktDato;
-        if (behandling.getBehandlingsårsak() != null) {
-            utgangspunktDato = behandling.getBehandlingsårsak().getMottaksdato();
-        } else if (behandling.getMottatteOpplysninger() != null && behandling.getMottatteOpplysninger().getMottaksdato() != null) {
-            utgangspunktDato = behandling.getMottatteOpplysninger().getMottaksdato();
-        } else {
-            utgangspunktDato = LocalDate.now();
-        }
-        return utgangspunktDato;
+        return BehandlingfristKriterier.hentBehandlingsFrist(sakstema, behandlingstema, behandlingstype, utgangspunktDato);
     }
 
     /**
