@@ -6,7 +6,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.jaxb.LovvalgBestemmelseXmlAdapter;
@@ -14,10 +13,7 @@ import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.Arbeidssted;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
-import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.domain.kodeverk.*;
 
 @XmlRootElement
 public class SedDokument implements SaksopplysningDokument {
@@ -168,5 +164,13 @@ public class SedDokument implements SaksopplysningDokument {
         }
 
         return nyLovvalgsperiode;
+    }
+
+    public boolean erUnntaksperiode() {
+        return !Landkoder.NO.equals(lovvalgslandKode);
+    }
+
+    public boolean erMedlemskapsperiode() {
+        return Landkoder.NO.equals(lovvalgslandKode);
     }
 }
