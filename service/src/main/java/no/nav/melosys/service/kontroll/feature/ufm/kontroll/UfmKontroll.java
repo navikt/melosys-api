@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
 import no.nav.melosys.service.kontroll.feature.ufm.data.UfmKontrollData;
 import no.nav.melosys.service.kontroll.regler.*;
 import org.slf4j.Logger;
@@ -81,13 +82,11 @@ final class UfmKontroll {
             Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER : null;
     }
 
-
     static Kontroll_begrunnelser overlappendeMedlemsperiodeForA003(UfmKontrollData kontrollData) {
         var sedDokument = kontrollData.sedDokument();
         var lovvalgsperiode = sedDokument.getLovvalgsperiode();
 
         var medlemskapDokument = kontrollData.medlemskapDokument();
-
 
         if (harOverlappendeMedlemsperiodeMerEnn1DagFraSed(medlemskapDokument, lovvalgsperiode)) {
             if (sedDokument.erMedlemskapsperiode()) {
@@ -142,6 +141,6 @@ final class UfmKontroll {
     }
 
     private static boolean harMottatteOpplysningerMedYtterligereInformasjon(Optional<MottatteOpplysningerData> optionalMottatteOpplysningerData) {
-        return optionalMottatteOpplysningerData.isPresent() && !isEmpty(optionalMottatteOpplysningerData.get().ytterligereInformasjon);
+        return optionalMottatteOpplysningerData.isPresent() && !isEmpty(((SedGrunnlag) optionalMottatteOpplysningerData.get()).ytterligereInformasjon);
     }
 }
