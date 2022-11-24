@@ -62,13 +62,8 @@ public final class OverlappendeMedlemskapsperioderRegler {
         }
         var sedLovvalgsperiode = sedDokument.getLovvalgsperiode();
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
-            medlemsperiode -> {
-                log.info("[harOverlappendePerioderMedUlikSedLovvalgslandOgMedlLovvalgsland]: " +
-                        "sammenligner sedDokument lovvalgslandKode: {} med medlemsperiode land: {}",
-                    sedDokument.getLovvalgslandKode().getKode(), medlemsperiode.getLand());
-                return !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status)
-                    && PeriodeRegler.perioderOverlapperMerEnn1Dag(sedLovvalgsperiode, medlemsperiode.getPeriode())
-                    && !sedDokument.getLovvalgslandKode().getKode().equals(medlemsperiode.hentLandSomIso2());
-            });
+            medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status)
+                && PeriodeRegler.perioderOverlapperMerEnn1Dag(sedLovvalgsperiode, medlemsperiode.getPeriode())
+                && !sedDokument.getLovvalgslandKode().getKode().equals(medlemsperiode.hentLandSomIso2()));
     }
 }

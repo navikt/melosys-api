@@ -333,6 +333,114 @@ class UfmKontrollServiceTest {
     }
 
     @Test
+    fun
+        utførKontrollerOgRegistrerFeil_A003_medOverlappendePeriode_harLikMedlLovvalgsland_erOpprinnelig_medYtterligereInformasjon_feilKontroll() {
+        val erOpprinnelig = true;
+        sedDokument.apply {
+            sedType = SedType.A003
+            lovvalgslandKode = Landkoder.SE
+            avsenderLandkode = Landkoder.SE
+            lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+            setErEndring(!erOpprinnelig)
+        }
+        medlemskapDokument.apply {
+            medlemsperiode.add(
+                Medlemsperiode().apply {
+                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+                    land = "SWE"
+                },
+            )
+            medlemsperiode.add(
+                Medlemsperiode().apply {
+                    periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2))
+                    land = "SWE"
+                },
+            )
+            personopplysninger
+        }
+        personopplysninger.apply {
+            bostedsadresse = Bostedsadresse(
+                StrukturertAdresse().apply { landkode = "SE" }, null, null, null, null,
+                null,
+                false
+            );
+        }
+        mottatteOpplysningerData.apply {
+            ytterligereInformasjon = "Har ytterligere informasjon!"
+        }
+
+        every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
+            .answers {
+                kontrollresultatSlot.captured.shouldHaveSize(1)
+                    .sortedBy { it.begrunnelse }
+                    .apply {
+                        first().apply {
+                            begrunnelse.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+                            behandlingsresultat.id.shouldBe(BEHANDLINGSRESULTAT_ID)
+                        }
+                    }
+            }
+        setupMockedTestData()
+
+
+        ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
+    }
+
+
+    @Test
+    fun utførKontrollerOgRegistrerFeil_A003_medOverlappendePeriode_harLikMedlLovvalgsland_erIkkeOpprinnelig_utenYtterligereInformasjon_feilKontroll() {
+        val erOpprinnelig = false;
+        sedDokument.apply {
+            sedType = SedType.A003
+            lovvalgslandKode = Landkoder.SE
+            avsenderLandkode = Landkoder.SE
+            lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+            setErEndring(!erOpprinnelig)
+        }
+        medlemskapDokument.apply {
+            medlemsperiode.add(
+                Medlemsperiode().apply {
+                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+                    land = "SWE"
+                },
+            )
+            medlemsperiode.add(
+                Medlemsperiode().apply {
+                    periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2))
+                    land = "SWE"
+                },
+            )
+            personopplysninger
+        }
+        personopplysninger.apply {
+            bostedsadresse = Bostedsadresse(
+                StrukturertAdresse().apply { landkode = "SE" }, null, null, null, null,
+                null,
+                false
+            );
+        }
+        mottatteOpplysningerData.apply {
+            ytterligereInformasjon = null
+        }
+
+        every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
+            .answers {
+                kontrollresultatSlot.captured.shouldHaveSize(1)
+                    .sortedBy { it.begrunnelse }
+                    .apply {
+                        first().apply {
+                            begrunnelse.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+                            behandlingsresultat.id.shouldBe(BEHANDLINGSRESULTAT_ID)
+                        }
+                    }
+            }
+        setupMockedTestData()
+
+
+        ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
+    }
+    
+    @Test
     fun utførKontrollerOgRegistrerFeil_A003_medOverlappendePeriode_harLikMedlLovvalgslandIPeriodeUtenomSedEndring_forventIkkeKontroll() {
         sedDokument.apply {
             sedType = SedType.A003
