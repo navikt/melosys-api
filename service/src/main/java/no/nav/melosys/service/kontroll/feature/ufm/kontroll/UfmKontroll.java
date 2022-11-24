@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
 import no.nav.melosys.service.kontroll.feature.ufm.data.UfmKontrollData;
 import no.nav.melosys.service.kontroll.regler.*;
 import org.slf4j.Logger;
@@ -87,25 +88,25 @@ final class UfmKontroll {
 
         var medlemskapDokument = kontrollData.medlemskapDokument();
 
-        if (harOverlappendeMedlemsperiodeMedlemskapsperiodeMedMedlemskapMerEnn1DagFraSed(medlemskapDokument, lovvalgsperiode)) {
-            log.info("Mottatt overlappende medlemsperiode med medlemskap for A003");
-            return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
-        }
-
-        if (harOverlappendeMedlemsperiodeUnntaksperiodeUtenMedlemskapMerEnn1DagFraSed(medlemskapDokument, lovvalgsperiode)) {
-            log.info("Mottatt overlappende unntaksperiode uten medlemskap for A003");
-            if (sedDokument.getErEndring()) {
-                log.info("Mottatt overlappende medlemsperiode for A003 med en endring");
+        if (harOverlappendeMedlemsperiodeMerEnn1DagFraSed(medlemskapDokument, lovvalgsperiode)) {
+            if (sedDokument.erMedlemskapsperiode()) {
+                log.info("Mottatt overlappende medlemsperiode med medlemskap for A003");
                 return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
-            }
-            var optionalMottatteOpplysningerData = kontrollData.mottatteOpplysningerData();
-            if (harMottatteOpplysningerMedYtterligereInformasjon(optionalMottatteOpplysningerData)) {
-                log.info("Mottatt overlappende medlemsperiode for A003 med ytterligere informasjon");
-                return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
-            }
-            if (harOverlappendePerioderMedUlikSedLovvalgslandOgMedlLovvalgsland(sedDokument, medlemskapDokument)) {
-                log.info("Mottatt overlappende medlemsperiode for A003 med ulike lovvalgsland i SED og MEDL");
-                return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
+            } else if (sedDokument.erUnntaksperiode()) {
+                log.info("Mottatt overlappende unntaksperiode uten medlemskap for A003");
+                if (sedDokument.getErEndring()) {
+                    log.info("Mottatt overlappende medlemsperiode for A003 med en endring");
+                    return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
+                }
+                var optionalMottatteOpplysningerData = kontrollData.mottatteOpplysningerData();
+                if (harMottatteOpplysningerMedYtterligereInformasjon(optionalMottatteOpplysningerData)) {
+                    log.info("Mottatt overlappende medlemsperiode for A003 med ytterligere informasjon");
+                    return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
+                }
+                if (harOverlappendePerioderMedUlikSedLovvalgslandOgMedlLovvalgsland(sedDokument, medlemskapDokument)) {
+                    log.info("Mottatt overlappende medlemsperiode for A003 med ulike lovvalgsland i SED og MEDL");
+                    return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
+                }
             }
         }
         return null;
@@ -140,6 +141,6 @@ final class UfmKontroll {
     }
 
     private static boolean harMottatteOpplysningerMedYtterligereInformasjon(Optional<MottatteOpplysningerData> optionalMottatteOpplysningerData) {
-        return optionalMottatteOpplysningerData.isPresent() && !isEmpty(optionalMottatteOpplysningerData.get().ytterligereInformasjon);
+        return optionalMottatteOpplysningerData.isPresent() && !isEmpty(((SedGrunnlag) optionalMottatteOpplysningerData.get()).ytterligereInformasjon);
     }
 }
