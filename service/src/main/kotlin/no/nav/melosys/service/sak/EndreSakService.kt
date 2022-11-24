@@ -56,15 +56,15 @@ class EndreSakService(
             return
         }
 
+        behandlingService.endreBehandling(behandling.id, nyBehandlingstype, nyBehandlingstema, nyBehandlingsstatus, nyBehandlingsfrist)
+        fagsakService.oppdaterSakstype(saksnummer, nySakstype)
+        fagsakService.oppdaterSakstema(saksnummer, nySakstema)
+
         if (SaksbehandlingRegler.harTomFlyt(nySakstype, nySakstema, nyBehandlingstype, nyBehandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"))) {
             mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id).ifPresent { mottatteOpplysningerService.slettOpplysninger(behandling.id) }
         } else {
             gjenopprettMottatteOpplysninger(nySakstype, behandling)
         }
-
-        fagsakService.oppdaterSakstype(saksnummer, nySakstype)
-        fagsakService.oppdaterSakstema(saksnummer, nySakstema)
-        behandlingService.endreBehandling(behandling.id, nyBehandlingstype, nyBehandlingstema, nyBehandlingsstatus, nyBehandlingsfrist)
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
         applicationEventPublisher.publishEvent(FagsakEndretAvSaksbehandler(fagsak.saksnummer))
