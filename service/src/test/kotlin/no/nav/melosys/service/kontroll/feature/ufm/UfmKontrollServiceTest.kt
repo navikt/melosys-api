@@ -23,7 +23,7 @@ import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
+import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag
 import no.nav.melosys.domain.person.Personopplysninger
 import no.nav.melosys.domain.person.adresse.Bostedsadresse
 import no.nav.melosys.repository.KontrollresultatRepository
@@ -68,7 +68,7 @@ class UfmKontrollServiceTest {
     private var sedDokument: SedDokument = SedDokument()
     private var medlemskapDokument = MedlemskapDokument()
     private var personopplysninger: Personopplysninger = lagPersonopplysninger()
-    private var mottatteOpplysningerData: MottatteOpplysningerData = MottatteOpplysningerData()
+    private var mottatteOpplysningerData: SedGrunnlag = SedGrunnlag()
 
     @BeforeEach
     fun setup() {
@@ -439,7 +439,7 @@ class UfmKontrollServiceTest {
 
         ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
     }
-    
+
     @Test
     fun utførKontrollerOgRegistrerFeil_A003_medOverlappendePeriode_harLikMedlLovvalgslandIPeriodeUtenomSedEndring_forventIkkeKontroll() {
         sedDokument.apply {
