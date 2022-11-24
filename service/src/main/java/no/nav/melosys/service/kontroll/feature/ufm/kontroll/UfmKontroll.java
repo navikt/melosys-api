@@ -113,37 +113,6 @@ final class UfmKontroll {
         return null;
     }
 
-    static Kontroll_begrunnelser overlappendeMedlemsperiodeForA0032(UfmKontrollData kontrollData) {
-        var sedDokument = kontrollData.sedDokument();
-        var lovvalgsperiode = sedDokument.getLovvalgsperiode();
-
-        var medlemskapDokument = kontrollData.medlemskapDokument();
-
-
-        if (harOverlappendeMedlemsperiodeMedlemskapsperiodeMedMedlemskapMerEnn1DagFraSed(medlemskapDokument, lovvalgsperiode)) {
-            log.info("Mottatt overlappende medlemsperiode med medlemskap for A003");
-            return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
-        }
-
-        if (harOverlappendeMedlemsperiodeUnntaksperiodeUtenMedlemskapMerEnn1DagFraSed(medlemskapDokument, lovvalgsperiode)) {
-            log.info("Mottatt overlappende unntaksperiode uten medlemskap for A003");
-            if (sedDokument.getErEndring()) {
-                log.info("Mottatt overlappende medlemsperiode for A003 med en endring");
-                return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
-            }
-            var optionalMottatteOpplysningerData = kontrollData.mottatteOpplysningerData();
-            if (harMottatteOpplysningerMedYtterligereInformasjon(optionalMottatteOpplysningerData)) {
-                log.info("Mottatt overlappende medlemsperiode for A003 med ytterligere informasjon");
-                return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
-            }
-            if (harOverlappendePerioderMedUlikSedLovvalgslandOgMedlLovvalgsland(sedDokument, medlemskapDokument)) {
-                log.info("Mottatt overlappende medlemsperiode for A003 med ulike lovvalgsland i SED og MEDL");
-                return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
-            }
-        }
-        return null;
-    }
-
     static Kontroll_begrunnelser overlappendeMedlemsperiodeMerEnn1Dag(UfmKontrollData kontrollData) {
         return harOverlappendeMedlemsperiodeMerEnn1DagFraSed(
             kontrollData.medlemskapDokument(), kontrollData.sedDokument().getLovvalgsperiode()) ?
