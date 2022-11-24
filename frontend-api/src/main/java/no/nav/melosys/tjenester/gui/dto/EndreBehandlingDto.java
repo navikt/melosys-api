@@ -10,6 +10,6 @@ public record EndreBehandlingDto(
     Behandlingstyper behandlingstype,
     Behandlingstema behandlingstema,
     Behandlingsstatus behandlingsstatus,
-    LocalDate behandlingsfrist
+    LocalDate mottaksdato
 ) {
 }

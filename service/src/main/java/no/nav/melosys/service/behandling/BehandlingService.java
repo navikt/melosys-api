@@ -129,7 +129,7 @@ public class BehandlingService {
     }
 
     @Transactional
-    public void endreBehandling(long behandlingID, Behandlingstyper type, Behandlingstema tema, Behandlingsstatus status, LocalDate behandlingsfrist) {
+    public void endreBehandling(long behandlingID, Behandlingstyper type, Behandlingstema tema, Behandlingsstatus status, LocalDate mottaksdato) {
         var behandling = hentBehandling(behandlingID);
         boolean behandlingErLåst = behandling.kanIkkeEndres();
 
@@ -145,8 +145,8 @@ public class BehandlingService {
         if (tema != null && tema != behandling.getTema() && saksbehandlerKanEndreTema(behandling, tema) && !behandlingErLåst) {
             endreTema(behandling, tema);
         }
-        if (behandlingsfrist != null && !behandlingsfrist.equals(behandling.getBehandlingsfrist())) {
-            endreBehandlingsfrist(behandling, behandlingsfrist);
+        if (mottaksdato != null && !mottaksdato.equals(behandling.getMottatteOpplysninger().getMottaksdato())) {
+            endreMottaksdato(behandling, mottaksdato);
         }
     }
 
@@ -240,9 +240,10 @@ public class BehandlingService {
         applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
     }
 
-    public void endreBehandlingsfrist(Behandling behandling, LocalDate behandlingsfrist) {
-        log.info("Endrer behandlingsfrist for behandling {} fra {} til {}", behandling.getId(), behandling.getBehandlingsfrist(), behandlingsfrist);
-        behandling.setBehandlingsfrist(behandlingsfrist);
+    public void endreMottaksdato(Behandling behandling, LocalDate mottaksdato) {
+        log.info("Endrer mottaksdato for behandling {} fra {} til {}",
+            behandling.getId(), behandling.getMottatteOpplysninger().getMottaksdato(), mottaksdato);
+        behandling.getMottatteOpplysninger().setMottaksdato(mottaksdato);
         behandlingRepository.save(behandling);
         applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
     }
