@@ -136,13 +136,15 @@ public class BehandlingService {
         if (!behandling.erAktiv()) {
             throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres");
         }
-        if (status != null && status != behandling.getStatus() && saksbehandlerKanEndreStatus(behandling, status)) {
+        if (status != null && status != behandling.getStatus()) {
+            validerNyStatusMulig(behandling, status);
             endreStatus(behandling, status);
         }
-        if (type != null && type != behandling.getType() && saksbehandlerKanEndreType(behandling, type) && !behandlingErLåst) {
+        if (type != null && type != behandling.getType() && !behandlingErLåst) {
+            validerNyTypeMulig(behandling, type);
             endreType(behandling, type);
         }
-        if (tema != null && tema != behandling.getTema() && saksbehandlerKanEndreTema(behandling, tema) && !behandlingErLåst) {
+        if (tema != null && tema != behandling.getTema() && !behandlingErLåst && validerNyTemaMulig(behandling, tema)) {
             endreTema(behandling, tema);
         }
         if (behandlingsfrist != null && !behandlingsfrist.equals(behandling.getBehandlingsfrist())) {
@@ -462,32 +464,28 @@ public class BehandlingService {
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), nyBehandlingsResultatType);
     }
 
-    private boolean saksbehandlerKanEndreStatus(Behandling behandling, Behandlingsstatus status) {
+    private void validerNyStatusMulig(Behandling behandling, Behandlingsstatus status) {
         if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
             MuligeManuelleBehandlingsendringer.validerNyStatusMulig(behandling, status);
-            return true;
+        } else {
+            lovligeKombinasjonerService.validerNyStatusMulig(behandling, status);
         }
-
-        lovligeKombinasjonerService.validerNyStatusMulig(behandling, status);
-        return true;
     }
 
-    private boolean saksbehandlerKanEndreType(Behandling behandling, Behandlingstyper type) {
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            lovligeKombinasjonerService.validerOmNyTypeKanEndresTil(behandling, type);
-        } else {
+    @Deprecated(since = "melosys.behandle_alle_saker")
+    private void validerNyTypeMulig(Behandling behandling, Behandlingstyper type) {
+        if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
             MuligeManuelleBehandlingsendringer.validerNyTypeMulig(behandling, type);
         }
-        return true;
     }
 
-    private boolean saksbehandlerKanEndreTema(Behandling behandling, Behandlingstema tema) {
-        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            lovligeKombinasjonerService.validerOmNyttTemaKanEndresTil(behandling, tema);
-        } else {
+    @Deprecated(since = "melosys.behandle_alle_saker")
+    private boolean validerNyTemaMulig(Behandling behandling, Behandlingstema tema) {
+        if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
+            var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
             MuligeManuelleBehandlingsendringer.validerNyttTemaMulig(behandling, behandlingsresultat, tema, unleash.isEnabled("melosys.behandle_alle_saker"));
+            return behandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak();
         }
-        return behandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak();
+        return true;
     }
 }

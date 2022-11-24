@@ -37,6 +37,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.FERDIGBEHANDLET;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
@@ -118,7 +119,6 @@ class BehandlingServiceTest {
         behandling.setMottatteOpplysninger(opprettMottatteOpplysninger());
 
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(BEHANDLINGSRESULTAT);
 
         behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, BEHANDLING_FRIST);
 
@@ -186,22 +186,6 @@ class BehandlingServiceTest {
         assertThat(((BehandlingEndretAvSaksbehandlerEvent) behandlingEndretEvents.get(2)).getBehandlingstema()).isEqualTo(BEHANDLING_TEMA);
         assertThat(behandlingEndretEvents.get(3).getBehandlingID()).isEqualTo(BEHANDLING_ID);
         assertThat(((BehandlingEndretAvSaksbehandlerEvent) behandlingEndretEvents.get(3)).getBehandlingsfrist()).isEqualTo(BEHANDLING_FRIST);
-    }
-
-    @Test
-    void endreBehandling_med_ikke_godtatt_behandlingstema() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-
-        behandling.setTema(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
-        behandling.setType(SOEKNAD);
-        behandling.setFagsak(fagsak);
-        behandling.setMottatteOpplysninger(opprettMottatteOpplysninger());
-
-        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, BEHANDLING_FRIST));
     }
 
     @Test
@@ -646,7 +630,9 @@ class BehandlingServiceTest {
         behandling.setType(Behandlingstyper.NY_VURDERING);
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
-        behandlingService.avsluttNyVurdering(BEHANDLING_ID, Behandlingsresultattyper.FERDIGBEHANDLET);
+        behandlingService.avsluttNyVurdering(BEHANDLING_ID, FERDIGBEHANDLET);
+
+        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID, FERDIGBEHANDLET);
     }
 
     @Test
@@ -717,7 +703,7 @@ class BehandlingServiceTest {
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> behandlingService.avsluttNyVurdering(BEHANDLING_ID, Behandlingsresultattyper.FERDIGBEHANDLET))
+            .isThrownBy(() -> behandlingService.avsluttNyVurdering(BEHANDLING_ID, FERDIGBEHANDLET))
             .withMessageContaining("Behandling " + BEHANDLING_ID + " er ikke typen NY_VURDERING!");
     }
 
