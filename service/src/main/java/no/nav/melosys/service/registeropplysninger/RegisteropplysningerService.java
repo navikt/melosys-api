@@ -26,7 +26,6 @@ import no.nav.melosys.service.sob.SobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -81,7 +80,7 @@ public class RegisteropplysningerService {
         this.registeropplysningerPeriodeFactory = registeropplysningerPeriodeFactory;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void hentOgLagreOpplysninger(RegisteropplysningerRequest registeropplysningerRequest) {
         if (PeriodeRegler.feilIPeriode(registeropplysningerRequest.getFom(), registeropplysningerRequest.getTom())) {
             log.info("Henter ikke registeropplysninger for behandling {} pga. manglende periode eller feil i periode. fom={}, tom={}",
