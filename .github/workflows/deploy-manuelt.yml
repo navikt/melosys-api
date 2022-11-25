@@ -70,7 +70,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest-8-cores
-    needs: [build, docker]
+    needs: build
     if: always() && (needs.docker.result == 'success' || needs.docker.result == 'skipped')
     steps:
       - uses: actions/checkout@v3
