@@ -248,10 +248,12 @@ public class FagsakService {
         Behandling behandling = hentFagsak(saksnummer).hentAktivBehandling();
         Fagsak fagsak = hentFagsak(saksnummer);
         validerOppdatering(fagsak, nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype);
-        log.info("Endrer sakstype for fagsak {} fra {} til {}", fagsak.getSaksnummer(), fagsak.getType(), nySakstype);
-        fagsak.setType(nySakstype);
-        fagsak.setTema(nySakstema);
-        fagsakRepository.save(fagsak);
+        if (fagsak.getType() != nySakstype || fagsak.getTema() != nySakstema) {
+            log.info("Endrer sakstype for fagsak {} fra {} til {}", fagsak.getSaksnummer(), fagsak.getType(), nySakstype);
+            fagsak.setType(nySakstype);
+            fagsak.setTema(nySakstema);
+            fagsakRepository.save(fagsak);
+        }
         behandlingService.endreBehandling(behandling.getId(), nyBehandlingstype, nyBehandlingstema, nyBehandlingsstatus, nyBehandlingsfrist);
     }
 

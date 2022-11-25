@@ -16,7 +16,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
@@ -32,7 +31,6 @@ private val log = KotlinLogging.logger { }
 class EndreSakService(
     private val lovligeKombinasjonerService: LovligeKombinasjonerService,
     private val fagsakService: FagsakService,
-    private val behandlingService: BehandlingService,
     private val mottatteOpplysningerService: MottatteOpplysningerService,
     private val oppfriskSaksopplysningerService: OppfriskSaksopplysningerService,
     private val applicationEventPublisher: ApplicationEventPublisher,
@@ -54,13 +52,6 @@ class EndreSakService(
         validerBehandling(behandling)
         validerEndring(fagsak, nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype)
 
-        if (fagsak.type == nySakstype && fagsak.tema == nySakstema) {
-            behandlingService.endreBehandling(
-                behandling.id, nyBehandlingstype, nyBehandlingstema, nyBehandlingsstatus, nyBehandlingsfrist
-            )
-            return
-        }
-
         fagsakService.oppdaterFagsakOgBehandling(
             saksnummer,
             nySakstype,
@@ -71,15 +62,18 @@ class EndreSakService(
             nyBehandlingsfrist
         )
 
-        if (SaksbehandlingRegler.harTomFlyt(nySakstype, nySakstema, nyBehandlingstype, nyBehandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"))) {
-            mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id).ifPresent { mottatteOpplysningerService.slettOpplysninger(behandling.id) }
-        } else {
-            gjenopprettMottatteOpplysninger(nySakstype, behandling)
-        }
+        if (fagsak.type != nySakstype || fagsak.tema != nySakstema) {
+            if (SaksbehandlingRegler.harTomFlyt(nySakstype, nySakstema, nyBehandlingstype, nyBehandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"))) {
+                mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id).ifPresent { mottatteOpplysningerService.slettOpplysninger(behandling.id) }
+            } else {
+                gjenopprettMottatteOpplysninger(nySakstype, behandling)
+            }
 
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
-        applicationEventPublisher.publishEvent(FagsakEndretAvSaksbehandler(fagsak.saksnummer))
-        log.debug { "Ferdig med endring av sak $saksnummer (type: $nySakstype, tema: $nySakstema)" }
+            oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
+
+            applicationEventPublisher.publishEvent(FagsakEndretAvSaksbehandler(fagsak.saksnummer))
+            log.debug { "Ferdig med endring av sak $saksnummer (type: $nySakstype, tema: $nySakstema)" }
+        }
     }
 
     private fun validerBehandling(behandling: Behandling) {

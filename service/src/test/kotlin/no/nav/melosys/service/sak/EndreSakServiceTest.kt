@@ -24,7 +24,6 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.SaksbehandlingDataFactory
-import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
@@ -41,9 +40,6 @@ internal class EndreSakServiceTest {
 
     @RelaxedMockK
     lateinit var fagsakService: FagsakService
-
-    @RelaxedMockK
-    lateinit var behandlingService: BehandlingService
 
     @RelaxedMockK
     lateinit var mottatteOpplysningerService: MottatteOpplysningerService
@@ -64,7 +60,6 @@ internal class EndreSakServiceTest {
         endreSakService = EndreSakService(
             lovligeKombinasjonerService,
             fagsakService,
-            behandlingService,
             mottatteOpplysningerService,
             oppfriskSaksopplysningerService,
             applicationEventPublisher,
