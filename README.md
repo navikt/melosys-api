@@ -7,13 +7,27 @@ Melosys-api er backenden for selve saksbehandlingsløsningen for prosjektet og i
  saksbehandlingsløsningen.
 
 ## Lokal utvikling
-
-Melosys-api kan kjøres opp som en ren Spring-applikasjon med profil `local-mock` ved hjelp av
- [melosys-docker-compose](https://github.com/navikt/melosys-docker-compose), som spinner opp alle avhenigheter applikajsonen
- har, som database, kafka, oauth-server samt eksterne integrasjoner. Trenger også [naisdevice](https://doc.nais.io/device/install/index.html)
- for å koble til enkelte eksterne tjenester.
-
+Melosys-api kan kjøres opp som en ren Spring-applikasjon<br>
 Swagger kan også nås på `localhost:8080/swagger-ui/`
+
+### Mot lokalt docker-compose
+Sørg for å kjøre opp  [melosys-docker-compose](https://github.com/navikt/melosys-docker-compose). Alle avhengigheter av applikasjonen spinnes da opp.
+Som database, kafka, oauth-server samt eksterne integrasjoner. Trenger også [naisdevice](https://doc.nais.io/device/install/index.html)
+for å koble til enkelte eksterne tjenester.<br>
+Bruk profil `local-mock`
+
+### Lokal utvikling mot q1 cluster
+Man må ha melosys-web kjørende lokalt først<br>
+Bruk profil `local-q1`<br>
+Men trenger å sette følgende env variabler
+* AZURE_APP_CLIENT_ID
+* AZURE_APP_CLIENT_SECRET
+* melosysDB.password
+* systemuser.password
+
+Man henter ut disse verdiene fra melosys-api-q1 poden på dev-fss ved å kjøre:<br>
+`env | grep AZURE_APP_CLIENT_ID` og `env | grep AZURE_APP_CLIENT_SECRET`<br>
+`melosysDB.password` og `systemuser.password` finner man i [vault](https://vault.adeo.no/ui/vault/secrets/kv%2Fpreprod%2Ffss/show/melosys-q1/teammelosys)
 
 ## Arkitektur
 
