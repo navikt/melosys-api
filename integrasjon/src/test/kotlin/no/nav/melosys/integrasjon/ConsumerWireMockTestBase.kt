@@ -88,10 +88,11 @@ abstract class ConsumerWireMockTestBase<T, R>(
     }
 
     fun verifyHeaders(headers: Map<String, StringValuePattern>) {
-        val wireMock = setupWireMock()
+        val wireMock = createWireMock()
         headers.forEach {
             wireMock.withHeader(it.key, it.value)
         }
+        setupWireMock(wireMock)
     }
 
     fun setupWireMock(
@@ -110,7 +111,7 @@ abstract class ConsumerWireMockTestBase<T, R>(
         )
         return wireMock
     }
-    
+
     fun executeFromSystem(consumer: (R) -> Unit = {}) {
         val uuid = UUID.randomUUID()
         try {
