@@ -127,7 +127,7 @@ class EndreSakService(
         mottatteOpplysningerService.opprettSøknad(
             behandling,
             mottatteOpplysninger?.mottatteOpplysningerData?.periode ?: Periode(),
-            soeknadslandTilGjenoppretting(nySakstype, mottatteOpplysninger?.mottatteOpplysningerData?.soeknadsland)
+            søknadslandTilGjenoppretting(nySakstype, mottatteOpplysninger?.mottatteOpplysningerData?.soeknadsland)
         )
     }
 
@@ -136,28 +136,25 @@ class EndreSakService(
             throw FunksjonellException("Du må legge inn periode og land i flyten for å kunne bytte til sakstype EU/EØS")
         }
         val landkoder = behandling.mottatteOpplysninger?.mottatteOpplysningerData?.soeknadsland?.landkoder!!
-        if (!landkoder.all { land -> landErGyldigForSakstype(land, EU_EOS) }) {
+        if (!landkoder.all { land -> landkodeErGyldigForSakstype(land, EU_EOS) }) {
             throw FunksjonellException("Du må legge til støttet EU/EØS-land for å kunne bytte til sakstype EU/EØS")
         }
     }
 
-    private fun soeknadslandTilGjenoppretting(nySakstype: Sakstyper, soeknadsland: Soeknadsland?): Soeknadsland {
-        val tomSoeknadsland = Soeknadsland()
+    private fun søknadslandTilGjenoppretting(nySakstype: Sakstyper, soeknadsland: Soeknadsland?): Soeknadsland {
+        val tomSøknadsland = Soeknadsland()
 
-        if (soeknadsland == null || soeknadsland.landkoder?.isEmpty() == true) {
-            return tomSoeknadsland
+        if (soeknadsland == null || soeknadsland.landkoder.isEmpty()) {
+            return tomSøknadsland
         }
-        if ((nySakstype != EU_EOS) && (soeknadsland.erUkjenteEllerAlleEosLand || (soeknadsland.landkoder?.size != 1))) {
-            return tomSoeknadsland
+        if ((nySakstype != EU_EOS) && (soeknadsland.erUkjenteEllerAlleEosLand || (soeknadsland.landkoder.size != 1))) {
+            return tomSøknadsland
         }
-        if (landErGyldigForSakstype(soeknadsland.landkoder.get(0), nySakstype)) {
-            return soeknadsland
-        } else {
-            return tomSoeknadsland
-        }
+
+        return if (landkodeErGyldigForSakstype(soeknadsland.landkoder[0], nySakstype)) soeknadsland else tomSøknadsland
     }
 
-    private fun landErGyldigForSakstype(land: String, sakstype: Sakstyper): Boolean =
+    private fun landkodeErGyldigForSakstype(land: String, sakstype: Sakstyper): Boolean =
         when (sakstype) {
             EU_EOS -> Landkoder.values().any { landkoder -> landkoder.kode == land }
             TRYGDEAVTALE -> Trygdeavtale_myndighetsland.values().any { landkoder -> landkoder.kode == land }
