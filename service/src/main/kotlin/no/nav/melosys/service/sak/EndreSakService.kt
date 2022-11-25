@@ -5,8 +5,11 @@ import no.finn.unleash.Unleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.FagsakEndretAvSaksbehandler
+import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.Sakstyper.*
+import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -113,9 +116,9 @@ class EndreSakService(
     }
 
     private fun gjenopprettMottatteOpplysninger(
-        sakstype: Sakstyper, behandling: Behandling
+        nySakstype: Sakstyper, behandling: Behandling
     ) {
-        if (sakstype == Sakstyper.EU_EOS && !unleash.isEnabled("melosys.tom_periode_og_land")) {
+        if (nySakstype == EU_EOS && !unleash.isEnabled("melosys.tom_periode_og_land")) {
             validerPeriodeOgLand(behandling)
         }
 
@@ -124,7 +127,7 @@ class EndreSakService(
         mottatteOpplysningerService.opprettSøknad(
             behandling,
             mottatteOpplysninger?.mottatteOpplysningerData?.periode ?: Periode(),
-            mottatteOpplysninger?.mottatteOpplysningerData?.soeknadsland ?: Soeknadsland()
+            soeknadslandTilGjenoppretting(nySakstype, mottatteOpplysninger?.mottatteOpplysningerData?.soeknadsland)
         )
     }
 
@@ -132,5 +135,32 @@ class EndreSakService(
         if (!behandling.harPeriodeOgLand()) {
             throw FunksjonellException("Du må legge inn periode og land i flyten for å kunne bytte til sakstype EU/EØS")
         }
+        val landkoder = behandling.mottatteOpplysninger?.mottatteOpplysningerData?.soeknadsland?.landkoder!!
+        if (!landkoder.all { land -> landErGyldigForSakstype(land, EU_EOS) }) {
+            throw FunksjonellException("Du må legge til støttet EU/EØS-land for å kunne bytte til sakstype EU/EØS")
+        }
     }
+
+    private fun soeknadslandTilGjenoppretting(nySakstype: Sakstyper, soeknadsland: Soeknadsland?): Soeknadsland {
+        val tomSoeknadsland = Soeknadsland()
+
+        if (soeknadsland == null || soeknadsland.landkoder?.isEmpty() == true) {
+            return tomSoeknadsland
+        }
+        if ((nySakstype != EU_EOS) && (soeknadsland.erUkjenteEllerAlleEosLand || (soeknadsland.landkoder?.size != 1))) {
+            return tomSoeknadsland
+        }
+        if (landErGyldigForSakstype(soeknadsland.landkoder.get(0), nySakstype)) {
+            return soeknadsland
+        } else {
+            return tomSoeknadsland
+        }
+    }
+
+    private fun landErGyldigForSakstype(land: String, sakstype: Sakstyper): Boolean =
+        when (sakstype) {
+            EU_EOS -> Landkoder.values().any { landkoder -> landkoder.kode == land }
+            TRYGDEAVTALE -> Trygdeavtale_myndighetsland.values().any { landkoder -> landkoder.kode == land }
+            FTRL -> true
+        }
 }
