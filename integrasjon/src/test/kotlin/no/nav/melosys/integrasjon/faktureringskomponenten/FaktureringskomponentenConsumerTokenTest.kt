@@ -4,43 +4,49 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
+import no.nav.melosys.integrasjon.OAuthMockServer
+import no.nav.melosys.integrasjon.eessi.EessiConsumerProducer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriodeDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FullmektigDto
-import no.nav.melosys.integrasjon.felles.GenericContextClientRequestInterceptor
+import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
 import no.nav.melosys.integrasjon.reststs.RestStsClient
-import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
+import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
+import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
+import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.context.annotation.Import
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import java.math.BigDecimal
 import java.time.LocalDate
 
-@WebMvcTest(
-    value = [
-        StsRestTemplateProducer::class,
-        RestStsClient::class,
-        FaktureringskomponentenConsumer::class,
-        GenericContextExchangeFilter::class,
-        FaktureringskomponentenConsumerProducer::class,
-        GenericContextClientRequestInterceptor::class
-    ]
+@Import(
+    StsWebClientProducer::class,
+    RestTokenServiceClient::class,
+    OAuthMockServer::class,
+
+    GenericAuthFilterFactory::class,
+    FaktureringskomponentenConsumerProducer::class,
 )
-@ActiveProfiles("wiremock-test")
+@WebMvcTest
 @AutoConfigureWebClient
+@EnableOAuth2Client
+@ActiveProfiles("wiremock-test")
 class FaktureringskomponentenConsumerTokenTest(
     @Autowired private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
-    @Value("\${mockserver.security.port}") mockSecurityPort: Int
-) : ConsumerWireMockTestBase<String, String>(mockServiceUnderTestPort, mockSecurityPort) {
+    @Value("\${mockserver.security.port}") mockSecurityPort: Int,
+    @Autowired oAuthMockServer: OAuthMockServer
+) : ConsumerWireMockTestBase<String, String>(mockServiceUnderTestPort, mockSecurityPort, oAuthMockServer) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {

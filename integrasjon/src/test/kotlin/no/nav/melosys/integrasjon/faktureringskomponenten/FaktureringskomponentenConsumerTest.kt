@@ -7,15 +7,19 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import no.nav.melosys.integrasjon.MetricsTestConfig
+import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.StsMockServer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriodeDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FullmektigDto
+import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
-import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
+import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
+import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
+import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -29,19 +33,21 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.*
 
-@WebMvcTest(
-    value = [
-        StsRestTemplateProducer::class,
+@Import(
+    StsWebClientProducer::class,
+    RestTokenServiceClient::class,
+    OAuthMockServer::class,
+    CorrelationIdOutgoingFilter::class,
+    StsMockServer::class,
 
-        GenericContextExchangeFilter::class,
-        FaktureringskomponentenConsumerProducer::class,
-        CorrelationIdOutgoingFilter::class
-    ]
+    GenericAuthFilterFactory::class,
+    FaktureringskomponentenConsumerProducer::class,
 )
-@ActiveProfiles("wiremock-test")
+@WebMvcTest
 @AutoConfigureWebClient
+@EnableOAuth2Client
+@ActiveProfiles("wiremock-test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Import(StsMockServer::class, MetricsTestConfig::class)
 class FaktureringskomponentenConsumerTest(
     @Autowired private val stsMockServer: StsMockServer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int
