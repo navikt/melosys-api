@@ -52,6 +52,8 @@ class EndreSakService(
         validerBehandling(behandling)
         validerEndring(fagsak, nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype)
 
+        val opprinneligSakstype = fagsak.type
+        val opprinneligSakstema = fagsak.tema
         fagsakService.oppdaterFagsakOgBehandling(
             saksnummer,
             nySakstype,
@@ -62,18 +64,18 @@ class EndreSakService(
             nyBehandlingsfrist
         )
 
-        if (fagsak.type != nySakstype || fagsak.tema != nySakstema) {
-            if (SaksbehandlingRegler.harTomFlyt(nySakstype, nySakstema, nyBehandlingstype, nyBehandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"))) {
-                mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id).ifPresent { mottatteOpplysningerService.slettOpplysninger(behandling.id) }
-            } else {
-                gjenopprettMottatteOpplysninger(nySakstype, behandling)
-            }
-
-            oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
-
-            applicationEventPublisher.publishEvent(FagsakEndretAvSaksbehandler(fagsak.saksnummer))
-            log.debug { "Ferdig med endring av sak $saksnummer (type: $nySakstype, tema: $nySakstema)" }
+        if (SaksbehandlingRegler.harTomFlyt(nySakstype, nySakstema, nyBehandlingstype, nyBehandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"))) {
+            mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id).ifPresent { mottatteOpplysningerService.slettOpplysninger(behandling.id) }
+        } else {
+            gjenopprettMottatteOpplysninger(nySakstype, behandling)
         }
+
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
+
+        if (opprinneligSakstype != nySakstype || opprinneligSakstema != nySakstema) {
+            applicationEventPublisher.publishEvent(FagsakEndretAvSaksbehandler(fagsak.saksnummer))
+        }
+        log.debug { "Ferdig med endring av sak $saksnummer (type: $nySakstype, tema: $nySakstema)" }
     }
 
     private fun validerBehandling(behandling: Behandling) {
