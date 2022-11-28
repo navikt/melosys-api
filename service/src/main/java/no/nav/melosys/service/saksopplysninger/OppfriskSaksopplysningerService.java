@@ -69,7 +69,6 @@ public class OppfriskSaksopplysningerService {
         String brukerID = persondataFasade.hentFolkeregisterident(aktørID);
 
         //OK om perioden er tom. Ikke alle behandlingstema krever periode.
-        //Implisitt at perioden eksisterer om behandling kan resultere i vedtak
         ErPeriode periode = behandleAlleSakerToggleEnabled
             ? behandling.finnPeriode().orElse(new Periode())
             : behandling.finnPeriodeGammel().orElse(new Periode());
@@ -103,6 +102,7 @@ public class OppfriskSaksopplysningerService {
 
             if (behandling.getFagsak().erSakstypeEøs()
                 && !SaksbehandlingRegler.harTomFlyt(behandling, folketrygdenToggleEnabled)
+                && behandling.harPeriode()
                 && behandling.kanResultereIVedtak()
                 && !inngangsvilkaarService.oppfyllervurderingEF_883_2004(behandlingID)) {
                 inngangsvilkaarService.vurderOgLagreInngangsvilkår(

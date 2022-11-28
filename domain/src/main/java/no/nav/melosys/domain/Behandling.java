@@ -1,11 +1,5 @@
 package no.nav.melosys.domain;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.*;
-import javax.persistence.*;
-
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
@@ -14,16 +8,22 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
-import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import javax.persistence.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.*;
 
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 
@@ -289,12 +289,14 @@ public class Behandling extends RegistreringsInfo {
     }
 
     public boolean harPeriodeOgLand() {
+        var harLand = mottatteOpplysninger.getMottatteOpplysningerData().soeknadsland.erGyldig();
+        return harPeriode() && harLand;
+    }
+
+    public boolean harPeriode() {
         var optionalPeriode = finnPeriode();
         var harPeriode = optionalPeriode.isPresent() && optionalPeriode.get().getFom() != null;
-
-        var harLand = mottatteOpplysninger.getMottatteOpplysningerData().soeknadsland.erGyldig();
-
-        return harPeriode && harLand;
+        return harPeriode;
     }
 
     public ErPeriode hentPeriode() {
