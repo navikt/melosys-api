@@ -603,9 +603,10 @@ public class Behandling extends RegistreringsInfo {
 
     @Override
     public String toString() {
+        String saksnummer = Optional.ofNullable(fagsak).map(Fagsak::getSaksnummer).orElse("null");
         return "Behandling{" +
             "id=" + id +
-            ", fagsak=" + fagsak.getSaksnummer() +
+            ", fagsak=" + saksnummer +
             ", type=" + type +
             ", status=" + status +
             "} ";

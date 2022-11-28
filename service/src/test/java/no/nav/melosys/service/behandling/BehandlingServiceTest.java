@@ -51,7 +51,7 @@ class BehandlingServiceTest {
     private static final Behandlingstyper BEHANDLING_TYPE = Behandlingstyper.NY_VURDERING;
     private static final Behandlingstema BEHANDLING_TEMA = Behandlingstema.ARBEID_FLERE_LAND;
     private static final Behandlingsstatus BEHANDLING_STATUS = UNDER_BEHANDLING;
-    private static final LocalDate BEHANDLING_FRIST = LocalDate.now().plusMonths(1);
+    private static final LocalDate MOTTAKSDATO = LocalDate.now().plusMonths(1);
     private final Behandlingsresultat BEHANDLINGSRESULTAT = new Behandlingsresultat();
     private static final String SAKSNUMMER = "12";
     private static final List<Long> PERIODE_IDS = Arrays.asList(2L, 3L);
@@ -120,7 +120,7 @@ class BehandlingServiceTest {
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(BEHANDLINGSRESULTAT);
 
-        behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, BEHANDLING_FRIST);
+        behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, MOTTAKSDATO);
 
         verify(behandlingRepository, times(4)).save(behandlingCaptor.capture());
         verify(applicationEventPublisher, times(4)).publishEvent(behandlingEventCaptor.capture());
@@ -131,7 +131,8 @@ class BehandlingServiceTest {
         assertThat(lagredeBehandlinger.get(1).getId()).isEqualTo(BEHANDLING_ID);
         assertThat(lagredeBehandlinger.get(1).getType()).isEqualTo(BEHANDLING_TYPE);
         assertThat(lagredeBehandlinger.get(2).getId()).isEqualTo(BEHANDLING_ID);
-        assertThat(lagredeBehandlinger.get(2).getBehandlingsfrist()).isEqualTo(BEHANDLING_FRIST);
+        assertThat(lagredeBehandlinger.get(2).getMottatteOpplysninger().getMottaksdato()).isEqualTo(MOTTAKSDATO);
+        assertThat(lagredeBehandlinger.get(2).getBehandlingsfrist()).isEqualTo(Behandling.utledBehandlingsfrist(lagredeBehandlinger.get(2), MOTTAKSDATO));
         assertThat(lagredeBehandlinger.get(3).getId()).isEqualTo(BEHANDLING_ID);
         assertThat(lagredeBehandlinger.get(3).getTema()).isEqualTo(BEHANDLING_TEMA);
 
@@ -144,7 +145,7 @@ class BehandlingServiceTest {
         assertThat(behandlingEndretEvents.get(2).getBehandlingID()).isEqualTo(BEHANDLING_ID);
         assertThat(((BehandlingEndretAvSaksbehandlerEvent) behandlingEndretEvents.get(2)).getBehandlingstema()).isEqualTo(BEHANDLING_TEMA);
         assertThat(behandlingEndretEvents.get(3).getBehandlingID()).isEqualTo(BEHANDLING_ID);
-        assertThat(((BehandlingEndretAvSaksbehandlerEvent) behandlingEndretEvents.get(3)).getBehandlingsfrist()).isEqualTo(BEHANDLING_FRIST);
+        assertThat(((BehandlingEndretAvSaksbehandlerEvent) behandlingEndretEvents.get(3)).getBehandlingsfrist()).isEqualTo(Behandling.utledBehandlingsfrist(lagredeBehandlinger.get(2), MOTTAKSDATO));
     }
 
     @Test
@@ -161,7 +162,7 @@ class BehandlingServiceTest {
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(BEHANDLINGSRESULTAT);
 
-        behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, BEHANDLING_FRIST);
+        behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, MOTTAKSDATO);
 
         verify(behandlingRepository, times(4)).save(behandlingCaptor.capture());
         verify(applicationEventPublisher, times(4)).publishEvent(behandlingEventCaptor.capture());
@@ -172,7 +173,7 @@ class BehandlingServiceTest {
         assertThat(lagredeBehandlinger.get(1).getId()).isEqualTo(BEHANDLING_ID);
         assertThat(lagredeBehandlinger.get(1).getType()).isEqualTo(BEHANDLING_TYPE);
         assertThat(lagredeBehandlinger.get(2).getId()).isEqualTo(BEHANDLING_ID);
-        assertThat(lagredeBehandlinger.get(2).getBehandlingsfrist()).isEqualTo(BEHANDLING_FRIST);
+        assertThat(lagredeBehandlinger.get(2).getBehandlingsfrist()).isEqualTo(Behandling.utledFristForBehandlingtema(lagredeBehandlinger.get(2).getTema()));
         assertThat(lagredeBehandlinger.get(3).getId()).isEqualTo(BEHANDLING_ID);
         assertThat(lagredeBehandlinger.get(3).getTema()).isEqualTo(BEHANDLING_TEMA);
 
@@ -185,7 +186,7 @@ class BehandlingServiceTest {
         assertThat(behandlingEndretEvents.get(2).getBehandlingID()).isEqualTo(BEHANDLING_ID);
         assertThat(((BehandlingEndretAvSaksbehandlerEvent) behandlingEndretEvents.get(2)).getBehandlingstema()).isEqualTo(BEHANDLING_TEMA);
         assertThat(behandlingEndretEvents.get(3).getBehandlingID()).isEqualTo(BEHANDLING_ID);
-        assertThat(((BehandlingEndretAvSaksbehandlerEvent) behandlingEndretEvents.get(3)).getBehandlingsfrist()).isEqualTo(BEHANDLING_FRIST);
+        assertThat(((BehandlingEndretAvSaksbehandlerEvent) behandlingEndretEvents.get(3)).getBehandlingsfrist()).isEqualTo(Behandling.utledFristForBehandlingtema(lagredeBehandlinger.get(3).getTema()));
     }
 
     @Test
@@ -201,7 +202,7 @@ class BehandlingServiceTest {
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, BEHANDLING_FRIST));
+            .isThrownBy(() -> behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, MOTTAKSDATO));
     }
 
     @Test
@@ -209,11 +210,11 @@ class BehandlingServiceTest {
         behandling.setTema(BEHANDLING_TEMA);
         behandling.setType(BEHANDLING_TYPE);
         behandling.setStatus(BEHANDLING_STATUS);
-        behandling.setBehandlingsfrist(BEHANDLING_FRIST);
+        behandling.setBehandlingsfrist(MOTTAKSDATO);
         behandling.setMottatteOpplysninger(opprettMottatteOpplysninger());
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
-        behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, null, null, BEHANDLING_FRIST);
+        behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, null, null, null);
 
         verify(behandlingRepository, never()).save(any());
         verify(applicationEventPublisher, never()).publishEvent(any());

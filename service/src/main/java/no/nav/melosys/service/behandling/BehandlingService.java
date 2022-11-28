@@ -244,6 +244,9 @@ public class BehandlingService {
         log.info("Endrer mottaksdato for behandling {} fra {} til {}",
             behandling.getId(), behandling.getMottatteOpplysninger().getMottaksdato(), mottaksdato);
         behandling.getMottatteOpplysninger().setMottaksdato(mottaksdato);
+        behandling.setBehandlingsfrist(unleash.isEnabled("melosys.behandle_alle_saker")
+            ? Behandling.utledBehandlingsfrist(behandling, mottaksdato)
+            : Behandling.utledFristForBehandlingtema(behandling.getTema()));
         behandlingRepository.save(behandling);
         applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
     }
