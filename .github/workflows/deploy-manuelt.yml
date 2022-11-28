@@ -60,36 +60,17 @@ jobs:
           password: ${{ secrets.READER_TOKEN }}
       - name: Build and test
         run: mvn clean verify --threads=8 ${{github.event.inputs.environment != 'prod' && '-DskipTests'}} -B -e -U --settings .github/settings.xml
-      - uses: actions/upload-artifact@v3
-        with:
-          name: melosys-app
-          path: |
-            Dockerfile
-            nais.yml
-            app/target/melosys-sb-execution.jar
-            docker-init-scripts/vault-systembruker-env.sh
-          retention-days: 1
-
-  docker:
-    runs-on: ubuntu-latest-8-cores
-    needs: build
-    steps:
-      - uses: actions/download-artifact@v3
-        with:
-          name: melosys-app
-      - name: GitHub Package Registry login
-        run: |
-          echo ${GITHUB_TOKEN} | docker login -u ${GITHUB_REPOSITORY} --password-stdin ghcr.io
+      - name: Build and publish Docker image
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Docker build
         run: |
-          docker build -t ${IMAGE} .
+          docker build --tag ${IMAGE} .
+          docker login ghcr.io -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
           docker push ${IMAGE}
 
   deploy:
     runs-on: ubuntu-latest-8-cores
-    needs: [build, docker]
+    needs: [build]
     if: always() && (needs.docker.result == 'success' || needs.docker.result == 'skipped')
     steps:
       - uses: actions/checkout@v3
