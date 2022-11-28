@@ -69,34 +69,32 @@ public class BehandlingEventListener {
 
     @EventListener
     public void behandlingEndret(BehandlingEndretAvSaksbehandlerEvent behandlingEndretAvSaksbehandlerEvent) {
-        ThreadLocalAccessInfo.executeProcess("behandlingEndret", () -> {
-            final var behandling = behandlingService.hentBehandling(behandlingEndretAvSaksbehandlerEvent.getBehandlingID());
-            Optional<Oppgave> oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
-            oppgave.ifPresent(value -> {
-                    final var behandlingstype = behandlingEndretAvSaksbehandlerEvent.getBehandlingstype();
-                    final var behandlingstema = behandlingEndretAvSaksbehandlerEvent.getBehandlingstema();
+        final var behandling = behandlingService.hentBehandling(behandlingEndretAvSaksbehandlerEvent.getBehandlingID());
+        Optional<Oppgave> oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
+        oppgave.ifPresent(value -> {
+                final var behandlingstype = behandlingEndretAvSaksbehandlerEvent.getBehandlingstype();
+                final var behandlingstema = behandlingEndretAvSaksbehandlerEvent.getBehandlingstema();
 
-                    final Oppgave behandlingsoppgave = (
-                        unleash.isEnabled("melosys.behandle_alle_saker")
-                            ? oppgaveService.lagBehandlingsoppgave(behandling)
-                            : OppgaveFactory.lagBehandlingsOppgaveForType(behandlingstema, behandlingstype))
-                        .build();
+                final Oppgave behandlingsoppgave = (
+                    unleash.isEnabled("melosys.behandle_alle_saker")
+                        ? oppgaveService.lagBehandlingsoppgave(behandling)
+                        : OppgaveFactory.lagBehandlingsOppgaveForType(behandlingstema, behandlingstype))
+                    .build();
 
-                    final LocalDate frist = behandlingEndretAvSaksbehandlerEvent.getBehandlingsfrist();
+                final LocalDate frist = behandlingEndretAvSaksbehandlerEvent.getBehandlingsfrist();
 
-                    log.info("Oppdaterer oppgave {} med behandlingstype {}, behandlingstema {} og fristFerdigstillelse {}",
-                        value.getOppgaveId(), behandlingstype.getKode(), behandlingstema.getKode(), frist);
+                log.info("Oppdaterer oppgave {} med behandlingstype {}, behandlingstema {} og fristFerdigstillelse {}",
+                    value.getOppgaveId(), behandlingstype.getKode(), behandlingstema.getKode(), frist);
 
-                    oppgaveService.oppdaterOppgave(
-                        value.getOppgaveId(),
-                        OppgaveOppdatering.builder()
-                            .behandlingstema(behandlingsoppgave.getBehandlingstema())
-                            .behandlingstype(unleash.isEnabled("melosys.behandle_alle_saker") ? null : behandlingsoppgave.getBehandlingstype())
-                            .tema(behandlingsoppgave.getTema())
-                            .fristFerdigstillelse(frist)
-                            .build());
-                }
-            );
-        });
+                oppgaveService.oppdaterOppgave(
+                    value.getOppgaveId(),
+                    OppgaveOppdatering.builder()
+                        .behandlingstema(behandlingsoppgave.getBehandlingstema())
+                        .behandlingstype(unleash.isEnabled("melosys.behandle_alle_saker") ? null : behandlingsoppgave.getBehandlingstype())
+                        .tema(behandlingsoppgave.getTema())
+                        .fristFerdigstillelse(frist)
+                        .build());
+            }
+        );
     }
 }
