@@ -2,9 +2,9 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Miljø (dev, q1 eller prod)'
+        description: 'Miljø (q2, q1 eller prod)'
         required: true
-        default: 'dev'
+        default: 'q2'
 
 env:
   IMAGE: ghcr.io/${{ github.repository }}/melosys-api:${{ github.sha }}
