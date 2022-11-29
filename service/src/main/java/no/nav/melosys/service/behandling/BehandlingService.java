@@ -223,9 +223,8 @@ public class BehandlingService {
         } else if (status == Behandlingsstatus.AVSLUTTET) {
             oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
         }
-        if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
-            applicationEventPublisher.publishEvent(new BehandlingEndretStatusEvent(status, behandling));
-        }
+
+        applicationEventPublisher.publishEvent(new BehandlingEndretStatusEvent(status, behandling));
     }
 
     public void endreType(Behandling behandling, Behandlingstyper type) {

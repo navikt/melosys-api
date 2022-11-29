@@ -2,7 +2,10 @@ package no.nav.melosys.service.sak
 
 import mu.KotlinLogging
 import no.finn.unleash.Unleash
-import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.BehandlingEndretAvSaksbehandlerEvent
+import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.FagsakEndretAvSaksbehandler
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -82,9 +85,6 @@ class EndreSakService(
         }
         if (opprinneligBehandlingstema != nyBehandlingstema || opprinneligBehandlingstype != nyBehandlingstype || nyBehandlingsfrist != null) {
             applicationEventPublisher.publishEvent(BehandlingEndretAvSaksbehandlerEvent(behandling.id, behandling))
-        }
-        if (nyBehandlingsstatus != null) {
-            applicationEventPublisher.publishEvent(BehandlingEndretStatusEvent(nyBehandlingsstatus, behandling))
         }
         log.debug { "Ferdig med endring av sak $saksnummer (type: $nySakstype, tema: $nySakstema)" }
     }
