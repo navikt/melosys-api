@@ -21,6 +21,7 @@ import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
+import org.springframework.context.ApplicationEvent
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -53,10 +54,7 @@ class EndreSakService(
         validerBehandling(behandling)
         validerEndring(fagsak, nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype)
 
-        val opprinneligSakstype = fagsak.type
-        val opprinneligSakstema = fagsak.tema
-        val opprinneligBehandlingstema = behandling.tema
-        val opprinneligBehandlingstype = behandling.type
+        val events = utledEvents(fagsak, behandling, nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype, nyBehandlingsfrist)
         fagsakService.oppdaterFagsakOgBehandling(
             saksnummer,
             nySakstype,
@@ -67,7 +65,7 @@ class EndreSakService(
             nyBehandlingsfrist
         )
 
-        if (opprinneligSakstype == nySakstype && opprinneligSakstema == nySakstema && opprinneligBehandlingstema == nyBehandlingstema && opprinneligBehandlingstype == nyBehandlingstype) {
+        if (events.isEmpty()) {
             log.debug { "Endring av kun mottaksdato eller behandlingsstatus skal ikke endre mottatte opplysninger eller registeropplysninger" }
             return
         }
@@ -80,13 +78,31 @@ class EndreSakService(
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
 
-        if (opprinneligSakstype != nySakstype || opprinneligSakstema != nySakstema) {
-            applicationEventPublisher.publishEvent(FagsakEndretAvSaksbehandler(fagsak.saksnummer))
-        }
-        if (opprinneligBehandlingstema != nyBehandlingstema || opprinneligBehandlingstype != nyBehandlingstype || nyBehandlingsfrist != null) {
-            applicationEventPublisher.publishEvent(BehandlingEndretAvSaksbehandlerEvent(behandling.id, behandling))
+        events.forEach { event ->
+            applicationEventPublisher.publishEvent(event)
         }
         log.debug { "Ferdig med endring av sak $saksnummer (type: $nySakstype, tema: $nySakstema)" }
+    }
+
+    private fun utledEvents(
+        fagsak: Fagsak,
+        behandling: Behandling,
+        nySakstype: Sakstyper,
+        nySakstema: Sakstemaer,
+        nyBehandlingstema: Behandlingstema,
+        nyBehandlingstype: Behandlingstyper,
+        nyBehandlingsfrist: LocalDate?
+    ): List<ApplicationEvent> {
+        val applicationEvents = mutableListOf<ApplicationEvent>()
+
+        if (fagsak.type != nySakstype || fagsak.tema != nySakstema) {
+            applicationEvents.add(FagsakEndretAvSaksbehandler(fagsak.saksnummer))
+        }
+
+        if (behandling.tema != nyBehandlingstema || behandling.type != nyBehandlingstype || nyBehandlingsfrist != null) {
+            applicationEvents.add(BehandlingEndretAvSaksbehandlerEvent(behandling.id, behandling))
+        }
+        return applicationEvents
     }
 
     private fun validerBehandling(behandling: Behandling) {
