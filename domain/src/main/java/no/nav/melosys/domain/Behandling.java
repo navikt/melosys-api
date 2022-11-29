@@ -1,5 +1,10 @@
 package no.nav.melosys.domain;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.*;
+import javax.persistence.*;
+
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
@@ -19,11 +24,6 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import javax.persistence.*;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.*;
 
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 
@@ -288,15 +288,22 @@ public class Behandling extends RegistreringsInfo {
             .findFirst().map(Saksopplysning::getDokument);
     }
 
+    public Optional<no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData> finnMottatteOpplysningerData() {
+        return Optional.ofNullable(mottatteOpplysninger).map(MottatteOpplysninger::getMottatteOpplysningerData);
+    }
+
     public boolean harPeriodeOgLand() {
-        var harLand = mottatteOpplysninger.getMottatteOpplysningerData().soeknadsland.erGyldig();
-        return harPeriode() && harLand;
+        return harPeriode() && harLand();
     }
 
     public boolean harPeriode() {
         var optionalPeriode = finnPeriode();
         var harPeriode = optionalPeriode.isPresent() && optionalPeriode.get().getFom() != null;
         return harPeriode;
+    }
+
+    private boolean harLand() {
+        return mottatteOpplysninger.getMottatteOpplysningerData().soeknadsland.erGyldig();
     }
 
     public ErPeriode hentPeriode() {
