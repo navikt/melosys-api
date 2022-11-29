@@ -9,7 +9,7 @@ on:
     branches:
       - master
 env:
-  docker_image: ghcr.io/${{ github.repository }}/melosys-api:${{ github.sha }}
+  IMAGE: ghcr.io/${{ github.repository }}/melosys-api:${{ github.sha }}
 jobs:
   build:
     name: Build
@@ -46,9 +46,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          docker build --tag ${docker_image} .
+          docker build --tag ${IMAGE} .
           docker login ${{ env.REGISTRY }} -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
-          docker push ${docker_image}
+          docker push ${IMAGE}
 
   deploy:
     runs-on: ubuntu-latest-8-cores
