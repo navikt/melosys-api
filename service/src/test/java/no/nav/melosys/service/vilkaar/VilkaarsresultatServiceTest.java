@@ -2,10 +2,14 @@ package no.nav.melosys.service.vilkaar;
 
 import java.util.*;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -28,11 +32,14 @@ class VilkaarsresultatServiceTest {
     @Mock
     private VilkaarsresultatRepository vilkaarsresultatRepo;
 
+    private final FakeUnleash unleash = new FakeUnleash();
+
     private VilkaarsresultatService vilkaarsresultatService;
 
     @BeforeEach
     public void setUp() {
-        vilkaarsresultatService = new VilkaarsresultatService(behandlingsresultatService, vilkaarsresultatRepo);
+        vilkaarsresultatService = new VilkaarsresultatService(behandlingsresultatService, vilkaarsresultatRepo, unleash);
+        unleash.disableAll();
     }
 
     @Test
@@ -60,11 +67,7 @@ class VilkaarsresultatServiceTest {
     @Test
     void registrerVilkår() {
         long behandlingID = 1L;
-        var fagsak = new Fagsak();
-        fagsak.setType(Sakstyper.EU_EOS);
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setBehandling(new Behandling());
-        behandlingsresultat.getBehandling().setFagsak(fagsak);
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
 
         VilkaarDto vilkaarDto = new VilkaarDto();
@@ -85,7 +88,8 @@ class VilkaarsresultatServiceTest {
     }
 
     @Test
-    void tømVilkårForBehandlingsresultat_sakstypeIkkEøs_sletterAlleVilkår() {
+    void tømVilkårForBehandlingsresultat_sakstypeIkkeEøs_sletterAlleVilkår() {
+        unleash.enableAll();
         long behandlingID = 1L;
         var fagsak = new Fagsak();
         fagsak.setType(Sakstyper.FTRL);
@@ -102,14 +106,41 @@ class VilkaarsresultatServiceTest {
     }
 
     @Test
-    void tømVilkårForBehandlingsresultat_sakstypeEøs_sletterIkkeInngangsvilkår() {
+    void tømVilkårForBehandlingsresultat_sakstypeEøsMenTomFlyt_sletterAlleVilkår() {
+        unleash.enableAll();
         long behandlingID = 1L;
         var fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        var behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setType(Behandlingstyper.HENVENDELSE);
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(behandlingID);
-        behandlingsresultat.setBehandling(new Behandling());
-        behandlingsresultat.getBehandling().setFagsak(fagsak);
+        behandlingsresultat.setBehandling(behandling);
+
+
+        vilkaarsresultatService.tømVilkårForBehandlingsresultat(behandlingsresultat);
+
+
+        verify(vilkaarsresultatRepo).deleteByBehandlingsresultatId(behandlingID);
+    }
+
+    @Test
+    void tømVilkårForBehandlingsresultat_sakstypeEøs_sletterIkkeInngangsvilkår() {
+        unleash.enableAll();
+        long behandlingID = 1L;
+        var fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        var behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setId(behandlingID);
+        behandlingsresultat.setBehandling(behandling);
 
 
         vilkaarsresultatService.tømVilkårForBehandlingsresultat(behandlingsresultat);
