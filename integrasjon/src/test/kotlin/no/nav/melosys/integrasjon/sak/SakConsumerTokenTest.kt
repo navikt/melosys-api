@@ -2,26 +2,35 @@ package no.nav.melosys.integrasjon.sak
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
+import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.sak.dto.SakDto
+import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 
-@WebMvcTest(
-    value = [
-        SakConsumerImpl::class,
-        SakConsumerProducer::class
-    ]
+@Import(
+    SakConsumerProducer::class,
+    OAuthMockServer::class
 )
+@WebMvcTest
+@AutoConfigureWebClient
+@EnableOAuth2Client
 @ActiveProfiles("wiremock-test")
 class SakConsumerTokenTest(
     @Autowired private val sakConsumer: SakConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
-    @Value("\${mockserver.security.port}") mockSecurityPort: Int
-) : ConsumerWireMockTestBase<String, SakDto>(mockServiceUnderTestPort, mockSecurityPort) {
+    @Value("\${mockserver.security.port}") mockSecurityPort: Int,
+    @Autowired oAuthMockServer: OAuthMockServer
+) : ConsumerWireMockTestBase<String, SakDto>(mockServiceUnderTestPort, mockSecurityPort, oAuthMockServer) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {
@@ -34,13 +43,11 @@ class SakConsumerTokenTest(
     }
 
     @Test
-    fun authorizationSkalKommeFraBruker() {
-        verifyHeaders(
-            mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
-            )
-        )
-        executeFromController()
+    fun authorizationFraBruker_kasterException() {
+        setupWireMock()
+        shouldThrow<TekniskException> {
+            executeFromController()
+        }.message.shouldBe("Sak kan kun bli kalt i fra prosess")
     }
 
     @Test

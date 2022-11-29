@@ -20,14 +20,6 @@ public interface RestConsumer {
                 .getBytes(StandardCharsets.UTF_8));
     }
 
-    default String getAuth() {
-        if (isSystem()) {
-            return basicAuth();
-        } else {
-            return "Bearer " + SubjectHandler.getInstance().getOidcTokenString();
-        }
-    }
-
     default String getCallID() {
         String callID = MDCOperations.getFromMDC(MDCOperations.MDC_CALL_ID);
         if (callID == null) {
@@ -44,9 +36,6 @@ public interface RestConsumer {
         return SubjectHandler.getInstance().getUserID();
     }
 
-    default boolean isSystem() {
-        return false;
-    }
 
     default RuntimeException tilException(String feilmelding, HttpStatus status) {
         if (status == HttpStatus.UNAUTHORIZED || status == HttpStatus.FORBIDDEN) {

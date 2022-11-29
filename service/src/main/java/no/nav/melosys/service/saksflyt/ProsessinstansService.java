@@ -179,6 +179,14 @@ public class ProsessinstansService {
         return ThreadLocalAccessInfo.getSaksbehandler();
     }
 
+    private static String getSaksbehandlerNavn() {
+        String saksbehandlerNavn = SubjectHandler.getInstance().getUserName();
+        if (saksbehandlerNavn != null) return saksbehandlerNavn;
+
+        //Når en prosess lager en ny prosess har vi ingen innlogget bruker
+        return ThreadLocalAccessInfo.getSaksbehandlerNavn();
+    }
+
     public boolean harAktivProsessinstans(Long behandlingID) {
         return prosessinstansRepo.findByBehandling_IdAndStatusIs(
             behandlingID, ProsessStatus.KLAR
@@ -193,16 +201,17 @@ public class ProsessinstansService {
     }
 
     public void lagre(Prosessinstans prosessinstans) {
-        lagre(prosessinstans, getSaksbehandlerIdent());
+        lagre(prosessinstans, getSaksbehandlerIdent(), getSaksbehandlerNavn());
     }
 
-    void lagre(Prosessinstans prosessinstans, String saksbehandler) {
+    void lagre(Prosessinstans prosessinstans, String saksbehandler, String saksbehandlerNavn) {
         LocalDateTime nå = LocalDateTime.now();
         prosessinstans.setEndretDato(nå);
         prosessinstans.setRegistrertDato(nå);
         prosessinstans.setStatus(ProsessStatus.KLAR);
         if (saksbehandler != null) {
             prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
+            prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER_NAVN, saksbehandlerNavn);
             logger.info("Saksbehandler={} har opprettet prosessinstans {} av type {}.", saksbehandler,
                 prosessinstans.getId(), prosessinstans.getType());
         } else {

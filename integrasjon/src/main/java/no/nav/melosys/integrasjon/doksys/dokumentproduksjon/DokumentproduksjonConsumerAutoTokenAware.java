@@ -1,6 +1,5 @@
 package no.nav.melosys.integrasjon.doksys.dokumentproduksjon;
 
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import no.nav.melosys.sikkerhet.sts.NAVSTSClient;
 import no.nav.melosys.sikkerhet.sts.StsWrapper;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.*;
@@ -13,28 +12,22 @@ public class DokumentproduksjonConsumerAutoTokenAware implements Dokumentproduks
 
     private final StsWrapper stsWrapper;
     private final DokumentproduksjonV3 systemPort;
-    private final DokumentproduksjonV3 saksbehandlerPort;
 
     public DokumentproduksjonConsumerAutoTokenAware(DokumentproduksjonConsumerConfig config, StsWrapper stsWrapper) {
         this.stsWrapper = stsWrapper;
-        saksbehandlerPort = wrapWithSts(config.getPort(), NAVSTSClient.StsClientType.SECURITYCONTEXT_TIL_SAML);
         systemPort = wrapWithSts(config.getPort(), NAVSTSClient.StsClientType.SYSTEM_SAML);
     }
 
     @Override
     public ProduserDokumentutkastResponse produserDokumentutkast(ProduserDokumentutkastRequest request) throws ProduserDokumentutkastBrevdataValideringFeilet, ProduserDokumentutkastInputValideringFeilet {
-        if (ThreadLocalAccessInfo.shouldUseSystemToken()) {
-            return systemPort.produserDokumentutkast(request);
-        }
-        return saksbehandlerPort.produserDokumentutkast(request);
+        // Bruk system token frem til vi får saksbehandler azure token til å virke med doksys
+        return systemPort.produserDokumentutkast(request);
     }
 
     @Override
     public ProduserIkkeredigerbartDokumentResponse produserIkkeredigerbartDokument(ProduserIkkeredigerbartDokumentRequest request) throws ProduserIkkeredigerbartDokumentDokumentErRedigerbart, ProduserIkkeRedigerbartDokumentJoarkForretningsmessigUnntak, ProduserIkkeredigerbartDokumentSikkerhetsbegrensning, ProduserIkkeredigerbartDokumentBrevdataValideringFeilet, ProduserIkkeredigerbartDokumentDokumentErVedlegg, ProduserIkkeRedigerbartDokumentInputValideringFeilet {
-        if (ThreadLocalAccessInfo.shouldUseSystemToken()) {
-            return systemPort.produserIkkeredigerbartDokument(request);
-        }
-        return saksbehandlerPort.produserIkkeredigerbartDokument(request);
+        // Bruk system token frem til vi får saksbehandler azure token til å virke med doksys
+        return systemPort.produserIkkeredigerbartDokument(request);
     }
 
     private DokumentproduksjonV3 wrapWithSts(DokumentproduksjonV3 port, NAVSTSClient.StsClientType oidcTilSaml) {

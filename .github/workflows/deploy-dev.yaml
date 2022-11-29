@@ -67,8 +67,9 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-fss
-          RESOURCE: nais.yml
-          VAR: APP_NAME=melosys,VAULT_CLUSTER=dev,URL=melosys-api.dev.intern.nav.no,KAFKA_POOL=nav-dev,IMAGE=${{ env.docker_image }}
+          RESOURCE: nais/nais.yml
+          VAR: IMAGE=${{ env.IMAGE }}
+          VARS: nais/vars-q2.json
       - name: Get commit message
         run: echo "COMMIT_MSG=$(git log --format=%s -n 1)" >> $GITHUB_ENV
       - name: Slack Notification

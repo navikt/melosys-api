@@ -4,36 +4,52 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
+import no.nav.melosys.integrasjon.OAuthMockServer
+import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
+import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.sts.*
+import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentRequest
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentResponse
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 
-@WebMvcTest(
-    value = [
-        DokumentproduksjonConsumerConfig::class,
-        DokumentproduksjonConsumerProducer::class
-    ]
+@Import(
+    StsLoginConfig::class,
+    StsProdWrapper::class,
+    StsTestWrapper::class,
+    OAuthMockServer::class,
+
+    DokumentproduksjonConsumerConfig::class,
+    DokumentproduksjonConsumerProducer::class
 )
-@Import(StsLoginConfig::class, StsProdWrapper::class, StsTestWrapper::class)
+@WebMvcTest
+@AutoConfigureWebClient
 @ActiveProfiles("wiremock-test")
 class DokumentproduksjonConsumerTokenTest(
     @Autowired private val dokumentproduksjonConsumer: DokumentproduksjonConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
-    @Value("\${mockserver.security.port}") mockSecurityPort: Int
+    @Value("\${mockserver.security.port}") mockSecurityPort: Int,
+    @Autowired oAuthMockServer: OAuthMockServer
 ) : ConsumerWireMockTestBase<String, ProduserIkkeredigerbartDokumentResponse>(
     mockServiceUnderTestPort,
-    mockSecurityPort
+    mockSecurityPort, oAuthMockServer
 ) {
-
     override fun createWireMock(): MappingBuilder = post("/soap/services/dokumentproduksjon/v3")
 
     override fun defaultStsWireMockStub() {}
+
+    @AfterAll
+    fun after() {
+        SubjectHandler.set(SpringSubjectHandler(SpringTokenValidationContextHolder()))
+    }
 
     @Test
     fun authorizationSkalKommeFraSystem() {
@@ -51,7 +67,15 @@ class DokumentproduksjonConsumerTokenTest(
     }
 
     @Test
+    @Disabled("Docsys støtter ikke azure ennå, så bruker kun system token")
     fun authorizationSkalKommeFraBruker() {
+        SubjectHandler.set(object : SubjectHandler() {
+            override fun getOidcTokenString() = "--token-from-user--"
+            override fun getUserID() = ""
+            override fun getUserName() = ""
+            override fun getGroups() = mutableListOf<String>()
+        })
+
         val binarySecurityToken = """
                 <wsse:BinarySecurityToken
                         xmlns:wsse="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd"

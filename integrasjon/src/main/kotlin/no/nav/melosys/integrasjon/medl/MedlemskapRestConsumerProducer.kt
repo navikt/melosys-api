@@ -1,12 +1,9 @@
 package no.nav.melosys.integrasjon.medl
 
-import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
+import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.RestConsumer
 import no.nav.melosys.integrasjon.felles.WebClientConfig
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
-import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingInterceptor
-import no.nav.melosys.integrasjon.felles.mdc.MDCOperations.Companion.X_CORRELATION_ID
-import no.nav.melosys.integrasjon.felles.mdc.MDCOperations.Companion.getCorrelationId
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -16,17 +13,17 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 
 @Configuration
-class MedlemskapRestConsumerProducer(@Value("\${medlemskap.rest.url}") private val url: String) :
-    RestConsumer, WebClientConfig {
+class MedlemskapRestConsumerProducer(
+    @Value("\${medlemskap.rest.url}") private val url: String,
+    private val genericAuthFilterFactory: GenericAuthFilterFactory
+) : RestConsumer, WebClientConfig {
     @Bean
     fun medlemskapRestConsumer(
-        webClientBuilder: WebClient.Builder,
-        genericContextExchangeFilter: GenericContextExchangeFilter,
-        correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
+        webClientBuilder: WebClient.Builder, correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
     ) = MedlemskapRestConsumer(
         webClientBuilder
             .baseUrl(url)
-            .filter(genericContextExchangeFilter)
+            .filter(genericAuthFilterFactory.getFilter(CLIENT_NAME))
             .filter(headerFilter())
             .filter(correlationIdOutgoingFilter)
             .filter(errorFilter("Kall mot Medl feilet."))
@@ -45,5 +42,6 @@ class MedlemskapRestConsumerProducer(@Value("\${medlemskap.rest.url}") private v
 
     companion object {
         private const val CONSUMER_ID = "srvmelosys"
+        private val CLIENT_NAME = "medl"
     }
 }

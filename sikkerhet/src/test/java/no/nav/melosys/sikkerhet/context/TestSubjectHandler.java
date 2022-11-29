@@ -1,5 +1,8 @@
 package no.nav.melosys.sikkerhet.context;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TestSubjectHandler extends SubjectHandler {
 
     @Override
@@ -12,5 +15,14 @@ public class TestSubjectHandler extends SubjectHandler {
         return "Z990007";
     }
 
+    @Override
+    public String getUserName() {
+        return "Testy test";
+    }
+
+    @Override
+    public List<String> getGroups() {
+        return new ArrayList<>();
+    }
 
 }
