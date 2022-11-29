@@ -1,14 +1,17 @@
 package no.nav.melosys.service.sak
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.inspectors.forExactly
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import io.mockk.called
-import io.mockk.every
+import io.kotest.matchers.types.shouldBeTypeOf
+import io.mockk.*
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.verify
 import no.finn.unleash.FakeUnleash
+import no.nav.melosys.domain.BehandlingEndretAvSaksbehandlerEvent
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.FagsakEndretAvSaksbehandler
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstemaer.*
@@ -29,6 +32,7 @@ import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.springframework.context.ApplicationEvent
 import org.springframework.context.ApplicationEventPublisher
 import java.util.*
 
@@ -75,15 +79,17 @@ internal class EndreSakServiceTest {
             periode = Periode()
             soeknadsland = Soeknadsland()
         }
-        opprinneligFagsak.behandlinger.add(SaksbehandlingDataFactory.lagBehandling(opprinneligFagsak, mottatteOpplysningerData))
+        val aktivBehandling = SaksbehandlingDataFactory.lagBehandling(opprinneligFagsak, mottatteOpplysningerData)
+        opprinneligFagsak.behandlinger.add(aktivBehandling)
         every { fagsakService.hentFagsak(saksnummer) } returns opprinneligFagsak
         every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(MottatteOpplysninger())
+        val applicationEvents = mutableListOf<ApplicationEvent>()
+        every { applicationEventPublisher.publishEvent(capture(applicationEvents)) } just Runs
 
 
         endreSakService.endre(saksnummer, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, FØRSTEGANG, null, null)
 
 
-        val aktivBehandling = opprinneligFagsak.hentAktivBehandling()
         verify {
             fagsakService.oppdaterFagsakOgBehandling(
                 saksnummer,
@@ -98,7 +104,14 @@ internal class EndreSakServiceTest {
         verify { mottatteOpplysningerService.slettOpplysninger(aktivBehandling.id) }
         verify { mottatteOpplysningerService.opprettSøknad(aktivBehandling, any(), any()) }
         verify { oppfriskSaksopplysningerService.oppfriskSaksopplysning(aktivBehandling.id, false) }
-        //TODO sjekk event for å oppdatere oppgave
+
+        applicationEvents.shouldHaveSize(2).forExactly(1) {
+            it.shouldBeTypeOf<FagsakEndretAvSaksbehandler>()
+            it.source shouldBe saksnummer
+        }.forExactly(1) {
+            it.shouldBeTypeOf<BehandlingEndretAvSaksbehandlerEvent>()
+            it.source shouldBe aktivBehandling.id
+        }
     }
 
     @Test
