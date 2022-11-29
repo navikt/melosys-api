@@ -22,24 +22,23 @@ class ByUserIdStrategy implements Strategy {
 
     @Override
     public boolean isEnabled(Map<String, String> parameters) {
-        String userID = getUserID();
-        if (StringUtils.isEmpty(userID)) {
-            log.warn("Har ikke bruker til unleash");
+        Optional<String> userIDs = Optional.ofNullable(parameters.get("user"));
+        if (StringUtils.isEmpty(getLoggedInUserID()) && userIDs.isPresent() && !userIDs.get().isBlank()) {
+            log.warn("Finner ikke innlogget bruker i context, mens brukere er registert i unleash. Er sannsynligvis en SED prosess");
         }
 
-        return StringUtils.isNotEmpty(userID) && Optional.ofNullable(parameters.get("user"))
+        return StringUtils.isNotEmpty(getLoggedInUserID()) && userIDs
             .map(users -> Arrays.asList(users.split(",")))
-            .stream().anyMatch(users -> users.contains(userID));
+            .stream().anyMatch(users -> users.contains(getLoggedInUserID()));
     }
 
-    private static String getUserID() {
+    private static String getLoggedInUserID() {
         String userID = null;
         SubjectHandler instance = SubjectHandler.getInstance();
         if (instance != null) {
             userID = instance.getUserID();
         }
         if (userID == null) {
-            log.warn("instance.getUserID() returnerte null");
             userID = ThreadLocalAccessInfo.getSaksbehandler();
         }
         return userID;
