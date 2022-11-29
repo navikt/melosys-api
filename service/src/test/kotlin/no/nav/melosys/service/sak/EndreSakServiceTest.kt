@@ -2,6 +2,7 @@ package no.nav.melosys.service.sak
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import io.mockk.called
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
@@ -171,6 +172,22 @@ internal class EndreSakServiceTest {
                 null
             )
         }.message.shouldBe("Behandling 1 med status IVERKSETTER_VEDTAK kan ikke endres")
+    }
+
+    @Test
+    fun `endring av kun mottaksdato eller behandlingsstatus skal ikke endre mottatte opplysninger eller registeropplysninger`() {
+        val saksnummer = "MEL-124"
+        val sak = lagFagsak(saksnummer, EU_EOS, UNNTAK)
+        val behandling = SaksbehandlingDataFactory.lagBehandling(sak)
+        sak.behandlinger.add(behandling)
+        every { fagsakService.hentFagsak(saksnummer) } returns sak
+
+
+        endreSakService.endre(sak.saksnummer, sak.type, sak.tema, behandling.tema, behandling.type, Behandlingsstatus.AVVENT_FAGLIG_AVKLARING, null)
+
+
+        verify { mottatteOpplysningerService wasNot called}
+        verify { oppfriskSaksopplysningerService wasNot called}
     }
 
     private fun lagFagsak(saksnummer: String, sakstype: Sakstyper, sakstema: Sakstemaer) =

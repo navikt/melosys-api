@@ -54,6 +54,8 @@ class EndreSakService(
 
         val opprinneligSakstype = fagsak.type
         val opprinneligSakstema = fagsak.tema
+        val opprinneligBehandlingstema = behandling.tema
+        val opprinneligBehandlingstype = behandling.type
         fagsakService.oppdaterFagsakOgBehandling(
             saksnummer,
             nySakstype,
@@ -63,6 +65,11 @@ class EndreSakService(
             nyBehandlingsstatus,
             nyBehandlingsfrist
         )
+
+        if (opprinneligSakstype == nySakstype && opprinneligSakstema == nySakstema && opprinneligBehandlingstema == nyBehandlingstema && opprinneligBehandlingstype == nyBehandlingstype) {
+            log.debug { "Endring av kun mottaksdato eller behandlingsstatus skal ikke endre mottatte opplysninger eller registeropplysninger" }
+            return
+        }
 
         if (SaksbehandlingRegler.harTomFlyt(nySakstype, nySakstema, nyBehandlingstype, nyBehandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"))) {
             mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id).ifPresent { mottatteOpplysningerService.slettOpplysninger(behandling.id) }
