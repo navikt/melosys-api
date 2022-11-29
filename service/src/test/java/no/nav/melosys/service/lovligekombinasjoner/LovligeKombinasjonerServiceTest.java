@@ -2,16 +2,17 @@ package no.nav.melosys.service.lovligekombinasjoner;
 
 import java.util.Set;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Anmodningsperiode;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import org.assertj.core.util.Sets;
+import no.nav.melosys.service.sak.FagsakService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,10 +26,13 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class LovligeKombinasjonerServiceTest {
 
+    @Mock
+    private FagsakService fagsakService;
     @Mock
     private BehandlingService behandlingService;
     @Mock
@@ -38,132 +42,196 @@ class LovligeKombinasjonerServiceTest {
 
     @BeforeEach
     void setup() {
-        lovligeKombinasjonerService = new LovligeKombinasjonerService(behandlingService, behandlingsresultatService);
+        lovligeKombinasjonerService = new LovligeKombinasjonerService(fagsakService, behandlingService, behandlingsresultatService);
     }
 
     @Test
-    void hentMuligeTyper_temaForespørselTrygdemyndighet_returnererHenvendelse() {
-        Fagsak fagsak = fagsakMedSakstypeOgSakstema(EU_EOS, UNNTAK);
-        Behandling behandling = behandlingMedTemaOgType(FORESPØRSEL_TRYGDEMYNDIGHET, HENVENDELSE);
-        behandling.setFagsak(fagsak);
-        var muligeTyper = lovligeKombinasjonerService.behandlinstyperSomKanEndresTil(behandling);
-        assertThat(muligeTyper).containsExactly(HENVENDELSE);
+    void hentMuligeSakstyper_saksnummerErNull_returnererAlleSakstyper() {
+        var muligeSakstyper = lovligeKombinasjonerService.hentMuligeSakstyper(null);
+
+
+        assertThat(muligeSakstyper).hasSize(3).contains(EU_EOS, FTRL, TRYGDEAVTALE);
     }
 
     @Test
-    void hentMuligeTyper_temaArbeidThenestepersonEllerFly_returnererLovligKombinasjon() {
-        Fagsak fagsak = fagsakMedSakstypeOgSakstema(EU_EOS, MEDLEMSKAP_LOVVALG);
-        Behandling behandling = behandlingMedTemaOgType(ARBEID_TJENESTEPERSON_ELLER_FLY, NY_VURDERING);
-        behandling.setFagsak(fagsak);
-        var muligeTyper = lovligeKombinasjonerService.behandlinstyperSomKanEndresTil(behandling);
+    void hentMuligeSakstyper_saksnummerIkkeNullSakKanEndres_returnererAlleSakstyper() {
+        var fagsak = new Fagsak();
+        fagsak.getBehandlinger().add(new Behandling());
+        when(fagsakService.hentFagsak("saksnummer")).thenReturn(fagsak);
+
+
+        var muligeSakstyper = lovligeKombinasjonerService.hentMuligeSakstyper("saksnummer");
+
+
+        assertThat(muligeSakstyper).hasSize(3).contains(EU_EOS, FTRL, TRYGDEAVTALE);
+    }
+
+    @Test
+    void hentMuligeSakstyper_saksnummerIkkeNullSakKanIkkeEndres_returnererTomListe() {
+        var fagsak = new Fagsak();
+        fagsak.getBehandlinger().add(new Behandling());
+        fagsak.getBehandlinger().add(new Behandling());
+        fagsak.getBehandlinger().get(0).setStatus(AVSLUTTET);
+        when(fagsakService.hentFagsak("saksnummer")).thenReturn(fagsak);
+
+
+        var muligeSakstyper = lovligeKombinasjonerService.hentMuligeSakstyper("saksnummer");
+
+
+        assertThat(muligeSakstyper).isEmpty();
+    }
+
+
+    @Test
+    void hentMuligeSakstemaer_saksnummerErNull_returnererLovligeSakstemaer() {
+        var muligeSakstemaer = lovligeKombinasjonerService.hentMuligeSakstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, null);
+
+
+        assertThat(muligeSakstemaer).isNotEmpty();
+    }
+
+    @Test
+    void hentMuligeSakstemaer_saksnummerErIkkeNullSakKanEndres_returnererLovligeSakstemaer() {
+        var fagsak = new Fagsak();
+        fagsak.getBehandlinger().add(new Behandling());
+        when(fagsakService.hentFagsak("saksnummer")).thenReturn(fagsak);
+
+
+        var muligeSakstemaer = lovligeKombinasjonerService.hentMuligeSakstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, "saksnummer");
+
+
+        assertThat(muligeSakstemaer).isNotEmpty();
+    }
+
+    @Test
+    void hentMuligeSakstemaer_saksnummerErIkkeNullSakKanIkkeEndres_returnererTomListe() {
+        var fagsak = new Fagsak();
+        fagsak.getBehandlinger().add(new Behandling());
+        fagsak.getBehandlinger().add(new Behandling());
+        fagsak.getBehandlinger().get(0).setStatus(AVSLUTTET);
+        when(fagsakService.hentFagsak("saksnummer")).thenReturn(fagsak);
+
+
+        var muligeSakstemaer = lovligeKombinasjonerService.hentMuligeSakstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, "saksnummer");
+
+
+        assertThat(muligeSakstemaer).isEmpty();
+    }
+
+    @Test
+    void hentMuligeBehandlingstyper_temaArbeidThenestepersonEllerFly_returnererLovligKombinasjon() {
+        var muligeTyper = lovligeKombinasjonerService
+            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, ARBEID_TJENESTEPERSON_ELLER_FLY, null);
+
+
         assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
     @Test
-    void hentMuligeTyper_EU_EOS_MEDLEMSKAP_LOVVALG_temaIkkeYrkesAktiv_returnererLovligKombinasjon() {
-        Fagsak fagsak = fagsakMedSakstypeOgSakstema(EU_EOS, MEDLEMSKAP_LOVVALG);
-        Behandling behandling = behandlingMedTemaOgType(IKKE_YRKESAKTIV, NY_VURDERING);
-        behandling.setFagsak(fagsak);
-        var muligeTyper = lovligeKombinasjonerService.behandlinstyperSomKanEndresTil(behandling);
+    void hentMuligeBehandlingstyper_EU_EOS_MEDLEMSKAP_LOVVALG_temaIkkeYrkesAktiv_returnererLovligKombinasjon() {
+        var muligeTyper = lovligeKombinasjonerService
+            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, IKKE_YRKESAKTIV, null);
+
+
         assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
     @Test
-    void hentMuligeTyper_EU_EOS_UNNTAK_temaForespørselTrygdemyndighet_returnererLovligKombinasjon() {
-        Fagsak fagsak = fagsakMedSakstypeOgSakstema(EU_EOS, UNNTAK);
-        Behandling behandling = behandlingMedTemaOgType(FORESPØRSEL_TRYGDEMYNDIGHET, HENVENDELSE);
-        behandling.setFagsak(fagsak);
-        var muligeTyper = lovligeKombinasjonerService.behandlinstyperSomKanEndresTil(behandling);
+    void hentMuligeBehandlingstyper_EU_EOS_UNNTAK_temaForespørselTrygdemyndighet_returnererLovligKombinasjon() {
+        var muligeTyper = lovligeKombinasjonerService
+            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, UNNTAK, FORESPØRSEL_TRYGDEMYNDIGHET, null);
+
+
         assertThat(muligeTyper).contains(HENVENDELSE);
     }
 
     @Test
-    void hentMuligeTyper_EU_EOS_TRYGDEAVGIFT_temaYrkesaktiv_returnererLovligKombinasjon() {
-        Fagsak fagsak = fagsakMedSakstypeOgSakstema(EU_EOS, TRYGDEAVGIFT);
-        Behandling behandling = behandlingMedTemaOgType(YRKESAKTIV, KLAGE);
-        behandling.setFagsak(fagsak);
-        var muligeTyper = lovligeKombinasjonerService.behandlinstyperSomKanEndresTil(behandling);
+    void hentMuligeBehandlingstyper_EU_EOS_TRYGDEAVGIFT_temaYrkesaktiv_returnererLovligKombinasjon() {
+        var muligeTyper = lovligeKombinasjonerService
+            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, TRYGDEAVGIFT, YRKESAKTIV, null);
+
+
         assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
     @Test
-    void hentMuligeTyper_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_returnererLovligKombinasjon() {
-        Fagsak fagsak = fagsakMedSakstypeOgSakstema(FTRL, MEDLEMSKAP_LOVVALG);
-        Behandling behandling = behandlingMedTemaOgType(YRKESAKTIV, KLAGE);
-        behandling.setFagsak(fagsak);
-        var muligeTyper = lovligeKombinasjonerService.behandlinstyperSomKanEndresTil(behandling);
+    void hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_returnererLovligKombinasjon() {
+        var muligeTyper = lovligeKombinasjonerService
+            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, MEDLEMSKAP_LOVVALG, YRKESAKTIV, null);
+
+
         assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
     @Test
-    void hentMuligeTyper_FTRL_LOVVALG_MEDLEMSKAP_temaPensjonist_returnererLovligKombinasjon() {
-        Fagsak fagsak = fagsakMedSakstypeOgSakstema(FTRL, MEDLEMSKAP_LOVVALG);
-        Behandling behandling = behandlingMedTemaOgType(PENSJONIST, KLAGE);
-        behandling.setFagsak(fagsak);
-        var muligeTyper = lovligeKombinasjonerService.behandlinstyperSomKanEndresTil(behandling);
+    void hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaPensjonist_returnererLovligKombinasjon() {
+        var muligeTyper = lovligeKombinasjonerService
+            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, MEDLEMSKAP_LOVVALG, PENSJONIST, null);
+
+
         assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
     @Test
-    void hentMuligeTyper_FTRL_TRYGDEAVGIFT_temaPensjonist_returnererLovligKombinasjon() {
-        Fagsak fagsak = fagsakMedSakstypeOgSakstema(FTRL, TRYGDEAVGIFT);
-        Behandling behandling = behandlingMedTemaOgType(PENSJONIST, KLAGE);
-        behandling.setFagsak(fagsak);
-        var muligeTyper = lovligeKombinasjonerService.behandlinstyperSomKanEndresTil(behandling);
+    void hentMuligeBehandlingstyper_FTRL_TRYGDEAVGIFT_temaPensjonist_returnererLovligKombinasjon() {
+        var muligeTyper = lovligeKombinasjonerService
+            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, TRYGDEAVGIFT, PENSJONIST, null);
+
+
         assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
     @Test
-    void hentMuligeTyper_FTRL_TRYGDEAVGIFT_temaYrkesaktiv_returnererLovligKombinasjon() {
-        Fagsak fagsak = fagsakMedSakstypeOgSakstema(FTRL, TRYGDEAVGIFT);
-        Behandling behandling = behandlingMedTemaOgType(YRKESAKTIV, KLAGE);
-        behandling.setFagsak(fagsak);
-        var muligeTyper = lovligeKombinasjonerService.behandlinstyperSomKanEndresTil(behandling);
+    void hentMuligeBehandlingstyper_FTRL_TRYGDEAVGIFT_temaYrkesaktiv_returnererLovligKombinasjon() {
+        var muligeTyper = lovligeKombinasjonerService
+            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, TRYGDEAVGIFT, YRKESAKTIV, null);
+
+
         assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
     @Test
-    void hentMuligeTyper_TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_returnererLovligKombinasjon() {
-        Fagsak fagsak = fagsakMedSakstypeOgSakstema(TRYGDEAVTALE, MEDLEMSKAP_LOVVALG);
-        Behandling behandling = behandlingMedTemaOgType(YRKESAKTIV, KLAGE);
-        behandling.setFagsak(fagsak);
-        var muligeTyper = lovligeKombinasjonerService.behandlinstyperSomKanEndresTil(behandling);
+    void hentMuligeBehandlingstyper_TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_returnererLovligKombinasjon() {
+        var muligeTyper = lovligeKombinasjonerService
+            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, YRKESAKTIV, null);
+
+
         assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
     @Test
-    void hentMuligeTyper_TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_temaPensjonist_returnererLovligKombinasjon() {
-        Fagsak fagsak = fagsakMedSakstypeOgSakstema(TRYGDEAVTALE, MEDLEMSKAP_LOVVALG);
-        Behandling behandling = behandlingMedTemaOgType(PENSJONIST, KLAGE);
-        behandling.setFagsak(fagsak);
-        var muligeTyper = lovligeKombinasjonerService.behandlinstyperSomKanEndresTil(behandling);
+    void hentMuligeBehandlingstyper_TRYGDEAVTALE_LOVVALG_MEDLEMSKAP_temaPensjonist_returnererLovligKombinasjon() {
+        var muligeTyper = lovligeKombinasjonerService
+            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, PENSJONIST, null);
+
+
         assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
     @Test
-    void hentMuligeTyper_TRYGDEAVTALE_UNNTAK_temaForespørselTrygdemyndighet_returnererLovligKombinasjon() {
-        Fagsak fagsak = fagsakMedSakstypeOgSakstema(TRYGDEAVTALE, UNNTAK);
-        Behandling behandling = behandlingMedTemaOgType(FORESPØRSEL_TRYGDEMYNDIGHET, HENVENDELSE);
-        behandling.setFagsak(fagsak);
-        var muligeTyper = lovligeKombinasjonerService.behandlinstyperSomKanEndresTil(behandling);
+    void hentMuligeBehandlingstyper_TRYGDEAVTALE_UNNTAK_temaForespørselTrygdemyndighet_returnererLovligKombinasjon() {
+        var muligeTyper = lovligeKombinasjonerService
+            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, TRYGDEAVTALE, UNNTAK, FORESPØRSEL_TRYGDEMYNDIGHET, null);
+
+
         assertThat(muligeTyper).contains(HENVENDELSE);
     }
 
     @Test
-    void hentMuligeTyper_TRYGDEAVTALE_TRYGDEAVGIFT_temaYrkesaktiv_returnererLovligKombinasjon() {
-        Fagsak fagsak = fagsakMedSakstypeOgSakstema(TRYGDEAVTALE, TRYGDEAVGIFT);
-        Behandling behandling = behandlingMedTemaOgType(YRKESAKTIV, KLAGE);
-        behandling.setFagsak(fagsak);
-        var muligeTyper = lovligeKombinasjonerService.behandlinstyperSomKanEndresTil(behandling);
+    void hentMuligeBehandlingstyper_TRYGDEAVTALE_TRYGDEAVGIFT_temaYrkesaktiv_returnererLovligKombinasjon() {
+        var muligeTyper = lovligeKombinasjonerService
+            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, TRYGDEAVTALE, TRYGDEAVGIFT, YRKESAKTIV, null);
+
+
         assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
     @Test
-    void hentMuligeTyper_TRYGDEAVTALE_TRYGDEAVGIFT_temaPensjonist_returnererLovligKombinasjon() {
-        Fagsak fagsak = fagsakMedSakstypeOgSakstema(TRYGDEAVTALE, TRYGDEAVGIFT);
-        Behandling behandling = behandlingMedTemaOgType(PENSJONIST, KLAGE);
-        behandling.setFagsak(fagsak);
-        var muligeTyper = lovligeKombinasjonerService.behandlinstyperSomKanEndresTil(behandling);
+    void hentMuligeBehandlingstyper_TRYGDEAVTALE_TRYGDEAVGIFT_temaPensjonist_returnererLovligKombinasjon() {
+        var muligeTyper = lovligeKombinasjonerService
+            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, TRYGDEAVTALE, TRYGDEAVGIFT, PENSJONIST, null);
+
+
         assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
@@ -275,16 +343,6 @@ class LovligeKombinasjonerServiceTest {
         assertThat(muligeStatuser)
             .containsExactlyInAnyOrder(UNDER_BEHANDLING, AVVENT_DOK_PART, AVVENT_DOK_UTL, AVVENT_FAGLIG_AVKLARING)
             .doesNotContain(AVSLUTTET);
-    }
-
-    private Fagsak fagsakMedSakstypeOgSakstema(Sakstyper sakstype, Sakstemaer sakstema) {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setType(sakstype);
-        fagsak.setTema(sakstema);
-        Aktoer a1 = new Aktoer();
-        a1.setRolle(Aktoersroller.BRUKER);
-        fagsak.setAktører(Sets.newLinkedHashSet(a1));
-        return fagsak;
     }
 
     private Behandling behandlingMedTemaOgType(Behandlingstema tema, Behandlingstyper type) {

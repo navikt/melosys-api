@@ -46,7 +46,7 @@ public class FagsakService {
     public FagsakService(FagsakRepository fagsakRepository, BehandlingService behandlingService,
                          KontaktopplysningService kontaktopplysningService, @Lazy OppgaveService oppgaveService,
                          PersondataFasade persondataFasade, BehandlingsresultatService behandlingsresultatService,
-                         LovligeKombinasjonerService lovligeKombinasjonerService) {
+                         @Lazy LovligeKombinasjonerService lovligeKombinasjonerService) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
         this.kontaktopplysningService = kontaktopplysningService;
