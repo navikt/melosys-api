@@ -44,6 +44,8 @@ class OpprettBetalingsplan(
 
         if (aktoerer.size > 1) {
             throw FunksjonellException("Kunne ikke opprette betalingsplan, det finnes ${aktoerer.size} aktører med rolle BRUKER")
+        } else if (aktoerer.isEmpty()) {
+            throw FunksjonellException("Kunne ikke opprette betalingsplan, det finnes ${aktoerer.size} aktører")
         }
 
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsId);
