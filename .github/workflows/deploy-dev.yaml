@@ -9,7 +9,8 @@ on:
     branches:
       - master
 env:
-  IMAGE: ghcr.io/${{ github.repository }}/melosys-api:${{ github.sha }}
+  docker_image: ghcr.io/${{ github.repository }}/melosys-api:${{ github.sha }}
+
 jobs:
   build:
     name: Build
@@ -46,9 +47,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          docker build --tag ${IMAGE} .
+          docker build --tag ${docker_image} .
           docker login ghcr.io -u ${GITHUB_REPOSITORY} -p ${GITHUB_TOKEN}
-          docker push ${IMAGE}
+          docker push ${docker_image}
 
   deploy:
     runs-on: ubuntu-latest-8-cores
@@ -68,7 +69,7 @@ jobs:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: dev-fss
           RESOURCE: nais/nais.yml
-          VAR: IMAGE=${{ env.IMAGE }}
+          VAR: IMAGE=${{ env.docker_image }}
           VARS: nais/vars-q2.json
       - name: Get commit message
         run: echo "COMMIT_MSG=$(git log --format=%s -n 1)" >> $GITHUB_ENV
