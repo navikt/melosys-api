@@ -223,30 +223,38 @@ public class BehandlingService {
         } else if (status == Behandlingsstatus.AVSLUTTET) {
             oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
         }
-        applicationEventPublisher.publishEvent(new BehandlingEndretStatusEvent(status, behandling));
+        if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
+            applicationEventPublisher.publishEvent(new BehandlingEndretStatusEvent(status, behandling));
+        }
     }
 
     public void endreType(Behandling behandling, Behandlingstyper type) {
         log.info("Endrer behandlingstypen for behandling {} fra {} til {}", behandling.getId(), behandling.getType(), type);
         behandling.setType(type);
         behandlingRepository.save(behandling);
-        tilbakestillMottatteOpplysninger(behandling);
-        applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
+        if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
+            tilbakestillMottatteOpplysninger(behandling);
+            applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
+        }
     }
 
     public void endreTema(Behandling behandling, Behandlingstema tema) {
         log.info("Endrer behandlingstema for behandling {} fra {} til {}", behandling.getId(), behandling.getTema(), tema);
         behandling.setTema(tema);
         behandlingRepository.save(behandling);
-        tilbakestillMottatteOpplysninger(behandling);
-        applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
+        if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
+            tilbakestillMottatteOpplysninger(behandling);
+            applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
+        }
     }
 
     public void endreBehandlingsfrist(Behandling behandling, LocalDate behandlingsfrist) {
         log.info("Endrer behandlingsfrist for behandling {} fra {} til {}", behandling.getId(), behandling.getBehandlingsfrist(), behandlingsfrist);
         behandling.setBehandlingsfrist(behandlingsfrist);
         behandlingRepository.save(behandling);
-        applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
+        if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
+            applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
+        }
     }
 
     public List<Long> hentMedlemsperioder(long behandlingID) {

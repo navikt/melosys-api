@@ -123,7 +123,7 @@ class BehandlingServiceTest {
         behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, BEHANDLING_FRIST);
 
         verify(behandlingRepository, times(4)).save(behandlingCaptor.capture());
-        verify(applicationEventPublisher, times(4)).publishEvent(behandlingEventCaptor.capture());
+        verify(applicationEventPublisher, never()).publishEvent(behandlingEventCaptor.capture());
 
         var lagredeBehandlinger = behandlingCaptor.getAllValues();
         assertThat(lagredeBehandlinger.get(0).getId()).isEqualTo(BEHANDLING_ID);
@@ -134,17 +134,6 @@ class BehandlingServiceTest {
         assertThat(lagredeBehandlinger.get(2).getBehandlingsfrist()).isEqualTo(BEHANDLING_FRIST);
         assertThat(lagredeBehandlinger.get(3).getId()).isEqualTo(BEHANDLING_ID);
         assertThat(lagredeBehandlinger.get(3).getTema()).isEqualTo(BEHANDLING_TEMA);
-
-        var behandlingEndretEvents = behandlingEventCaptor.getAllValues();
-
-        assertThat(behandlingEndretEvents.get(0).getBehandlingID()).isEqualTo(BEHANDLING_ID);
-        assertThat(((BehandlingEndretStatusEvent) behandlingEndretEvents.get(0)).getBehandlingsstatus()).isEqualTo(BEHANDLING_STATUS);
-        assertThat(behandlingEndretEvents.get(1).getBehandlingID()).isEqualTo(BEHANDLING_ID);
-        assertThat(((BehandlingEndretAvSaksbehandlerEvent) behandlingEndretEvents.get(1)).getBehandlingstype()).isEqualTo(BEHANDLING_TYPE);
-        assertThat(behandlingEndretEvents.get(2).getBehandlingID()).isEqualTo(BEHANDLING_ID);
-        assertThat(((BehandlingEndretAvSaksbehandlerEvent) behandlingEndretEvents.get(2)).getBehandlingstema()).isEqualTo(BEHANDLING_TEMA);
-        assertThat(behandlingEndretEvents.get(3).getBehandlingID()).isEqualTo(BEHANDLING_ID);
-        assertThat(((BehandlingEndretAvSaksbehandlerEvent) behandlingEndretEvents.get(3)).getBehandlingsfrist()).isEqualTo(BEHANDLING_FRIST);
     }
 
     @Test
