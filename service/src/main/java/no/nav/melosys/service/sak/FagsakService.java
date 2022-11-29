@@ -245,8 +245,8 @@ public class FagsakService {
     public void oppdaterFagsakOgBehandling(String saksnummer, Sakstyper nySakstype, Sakstemaer nySakstema,
                                            Behandlingstema nyBehandlingstema, Behandlingstyper nyBehandlingstype,
                                            Behandlingsstatus nyBehandlingsstatus, LocalDate nyBehandlingsfrist) {
-        Behandling behandling = hentFagsak(saksnummer).hentAktivBehandling();
         Fagsak fagsak = hentFagsak(saksnummer);
+        Behandling behandling = fagsak.hentAktivBehandling();
         validerOppdatering(fagsak, nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype);
         if (fagsak.getType() != nySakstype || fagsak.getTema() != nySakstema) {
             log.info("Endrer sakstype for fagsak {} fra {} til {}", fagsak.getSaksnummer(), fagsak.getType(), nySakstype);
