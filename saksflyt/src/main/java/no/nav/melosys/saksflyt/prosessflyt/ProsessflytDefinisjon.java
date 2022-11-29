@@ -191,6 +191,7 @@ public final class ProsessflytDefinisjon {
             new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_FTRL,
                 LAGRE_MEDLEMSKAPSPERIODE_MEDL,
                 OPPRETT_AVGIFTSOPPGAVE,
+                OPPRETT_BETALINGSPLAN,
                 AVSLUTT_SAK_OG_BEHANDLING
             )
         );

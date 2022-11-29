@@ -21,6 +21,7 @@ public enum ProsessDataKey {
     BEHANDLINGSÅRSAKTYPE("behandlingsårsakType"),
     BEHANDLINGSÅRSAK_FRITEKST("behandlingsårsakFritekst"),
     BREVBESTILLING("brevbestilling"),
+    BETALINGSINTERVALL("betalingsIntervall"),
     BREVDATA("brevData"),
     BRUKER_ID("brukerID"),
     CORRELATION_ID_SAKSFLYT("correlationId"),

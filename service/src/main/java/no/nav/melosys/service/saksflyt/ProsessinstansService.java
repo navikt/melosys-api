@@ -292,7 +292,7 @@ public class ProsessinstansService {
             .medBehandling(behandling)
             .medBegrunnelseFritekst(request.getBegrunnelseFritekst())
             .build();
-
+        prosessinstans.setData(BETALINGSINTERVALL, request.getBetalingsIntervall());
         prosessinstans.setData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstype.VEDTAK);
 
         lagre(prosessinstans);
