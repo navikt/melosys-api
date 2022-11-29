@@ -90,7 +90,12 @@ public class VilkaarsresultatService {
 
     @Transactional
     public void tømVilkårForBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
-        vilkaarsresultatRepo.deleteByBehandlingsresultatAndVilkaarNotIn(behandlingsresultat, IMMUTABLE_VILKAAR);
+        var fagsak = behandlingsresultat.getBehandling().getFagsak();
+        if (fagsak.erSakstypeEøs()) {
+            vilkaarsresultatRepo.deleteByBehandlingsresultatAndVilkaarNotIn(behandlingsresultat, IMMUTABLE_VILKAAR);
+        } else {
+            vilkaarsresultatRepo.deleteByBehandlingsresultatId(behandlingsresultat.getId());
+        }
     }
 
     private void validerVilkår(List<VilkaarDto> vilkaarDtoer) {
