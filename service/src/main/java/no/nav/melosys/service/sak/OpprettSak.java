@@ -119,7 +119,7 @@ public class OpprettSak {
         var behandlingstype = opprettSakDto.getBehandlingstype();
 
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            lovligeKombinasjonerService.validerForOpprettelse(
+            lovligeKombinasjonerService.validerOpprettelseOgEndring(
                 hovedpart, sakstype, sakstema, behandlingstema, behandlingstype);
 
             if (erSakstypeEøs(sakstype)

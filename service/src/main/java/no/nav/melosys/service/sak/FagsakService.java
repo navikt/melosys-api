@@ -262,7 +262,7 @@ public class FagsakService {
         if (!sak.kanEndreTypeOgTema()) {
             throw new FunksjonellException("Sakstype og sakstema kan ikke endres for" + sak.getSaksnummer());
         }
-        lovligeKombinasjonerService.validerForOpprettelse(sak.getHovedpartRolle(), nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype);
+        lovligeKombinasjonerService.validerOpprettelseOgEndring(sak.getHovedpartRolle(), nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype);
     }
 
 

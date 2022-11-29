@@ -134,7 +134,7 @@ public class JournalfoeringService {
         if (behandleAlleSakerToggleEnabled) {
             Aktoersroller hovedpart = journalføringGjelder(journalfoeringDto);
 
-            lovligeKombinasjonerService.validerForOpprettelse(
+            lovligeKombinasjonerService.validerOpprettelseOgEndring(
                 hovedpart, sakstype, sakstema, behandlingstema, behandlingstype);
             if (journalfoeringDto.getAvsenderType() == Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET) {
                 validerSakstypeForTrygdemyndighet(sakstype, journalfoeringDto.getAvsenderID());

@@ -113,7 +113,7 @@ class EndreSakService(
         nyBehandlingstema: Behandlingstema,
         nyBehandlingstype: Behandlingstyper
     ) {
-        lovligeKombinasjonerService.validerForOpprettelse(
+        lovligeKombinasjonerService.validerOpprettelseOgEndring(
             fagsak.hovedpartRolle,
             nySakstype,
             nySakstema,
