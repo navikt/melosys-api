@@ -21,10 +21,10 @@ public class FattVedtakRequest {
     private final List<KopiMottaker> kopiMottakere;
     private final String bestillersId;
     private final String nyVurderingBakgrunn;
-    private final FaktureringsIntervall betalingsIntervall;
+    private final FaktureringsIntervall betalingsintervall;
 
-    public FaktureringsIntervall getBetalingsIntervall() {
-        return betalingsIntervall;
+    public FaktureringsIntervall getBetalingsintervall() {
+        return betalingsintervall;
     }
 
     public String getFritekst() {
@@ -80,7 +80,7 @@ public class FattVedtakRequest {
         this.kopiMottakere = builder.kopiMottakere;
         this.bestillersId = builder.bestillersId;
         this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
-        this.betalingsIntervall = builder.betalingsIntervall;
+        this.betalingsintervall = builder.betalingsintervall;
     }
 
     public Behandlingsresultattyper getBehandlingsresultatTypeKode() {
@@ -104,7 +104,7 @@ public class FattVedtakRequest {
         private String barnFritekst;
         private List<KopiMottaker> kopiMottakere;
         private String bestillersId;
-        private FaktureringsIntervall betalingsIntervall;
+        private FaktureringsIntervall betalingsintervall;
 
         public Builder medBehandlingsresultat(Behandlingsresultattyper behandlingsresultatTypeKode) {
             this.behandlingsresultatTypeKode = behandlingsresultatTypeKode;
@@ -198,8 +198,8 @@ public class FattVedtakRequest {
             return this;
         }
 
-        public Builder medBetalingsIntervall(FaktureringsIntervall betalingsIntervall) {
-            this.betalingsIntervall = betalingsIntervall;
+        public Builder medBetalingsIntervall(FaktureringsIntervall betalingsintervall) {
+            this.betalingsintervall = betalingsintervall;
             return this;
         }
 
