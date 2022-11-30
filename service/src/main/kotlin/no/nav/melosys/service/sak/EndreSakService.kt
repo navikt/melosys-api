@@ -65,18 +65,15 @@ class EndreSakService(
             nyBehandlingsfrist
         )
 
-        if (events.isEmpty()) {
-            log.debug { "Endring av kun mottaksdato eller behandlingsstatus skal ikke endre mottatte opplysninger eller registeropplysninger" }
-            return
-        }
+        if (sakEndres(fagsak, nySakstype, nySakstema) || behandlingEndreTypeTema(behandling, nyBehandlingstema, nyBehandlingstype)) {
+            if (SaksbehandlingRegler.harTomFlyt(nySakstype, nySakstema, nyBehandlingstype, nyBehandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"))) {
+                mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id).ifPresent { mottatteOpplysningerService.slettOpplysninger(behandling.id) }
+            } else {
+                gjenopprettMottatteOpplysninger(nySakstype, behandling)
+            }
 
-        if (SaksbehandlingRegler.harTomFlyt(nySakstype, nySakstema, nyBehandlingstype, nyBehandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"))) {
-            mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id).ifPresent { mottatteOpplysningerService.slettOpplysninger(behandling.id) }
-        } else {
-            gjenopprettMottatteOpplysninger(nySakstype, behandling)
+            oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
         }
-
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
 
         events.forEach { event ->
             applicationEventPublisher.publishEvent(event)
@@ -84,25 +81,10 @@ class EndreSakService(
         log.debug { "Ferdig med endring av sak $saksnummer (type: $nySakstype, tema: $nySakstema)" }
     }
 
-    private fun utledEvents(
-        fagsak: Fagsak,
-        behandling: Behandling,
-        nySakstype: Sakstyper,
-        nySakstema: Sakstemaer,
-        nyBehandlingstema: Behandlingstema,
-        nyBehandlingstype: Behandlingstyper,
-        nyBehandlingsfrist: LocalDate?
-    ): List<ApplicationEvent> {
-        val applicationEvents = mutableListOf<ApplicationEvent>()
-
-        if (fagsak.type != nySakstype || fagsak.tema != nySakstema) {
-            applicationEvents.add(FagsakEndretAvSaksbehandler(fagsak.saksnummer))
+    private fun validerSak(fagsak: Fagsak, nySakstype: Sakstyper, nySakstema: Sakstemaer) {
+        if (sakEndres(fagsak, nySakstype, nySakstema) && !fagsak.kanEndreTypeOgTema()) {
+            throw FunksjonellException("Sakstype eller tema kan ikke endres for ${fagsak.saksnummer}")
         }
-
-        if (behandling.tema != nyBehandlingstema || behandling.type != nyBehandlingstype || nyBehandlingsfrist != null) {
-            applicationEvents.add(BehandlingEndretAvSaksbehandlerEvent(behandling.id, behandling))
-        }
-        return applicationEvents
     }
 
     private fun validerBehandling(behandling: Behandling) {
@@ -113,12 +95,6 @@ class EndreSakService(
             ).contains(behandling.status)
         ) {
             throw FunksjonellException("Behandling ${behandling.id} med status ${behandling.status} kan ikke endres")
-        }
-    }
-
-    private fun validerSak(fagsak: Fagsak, nySakstype: Sakstyper, nySakstema: Sakstemaer) {
-        if ((fagsak.type != nySakstype || fagsak.tema != nySakstema) && !fagsak.kanEndreTypeOgTema()) {
-            throw FunksjonellException("Sakstype eller tema kan ikke endres for ${fagsak.saksnummer}")
         }
     }
 
@@ -137,6 +113,39 @@ class EndreSakService(
             nyBehandlingstype
         )
     }
+
+    private fun utledEvents(
+        fagsak: Fagsak,
+        behandling: Behandling,
+        nySakstype: Sakstyper,
+        nySakstema: Sakstemaer,
+        nyBehandlingstema: Behandlingstema,
+        nyBehandlingstype: Behandlingstyper,
+        nyBehandlingsfrist: LocalDate?
+    ): List<ApplicationEvent> {
+        val applicationEvents = mutableListOf<ApplicationEvent>()
+
+        if (sakEndres(fagsak, nySakstype, nySakstema)) {
+            applicationEvents.add(FagsakEndretAvSaksbehandler(fagsak.saksnummer))
+        }
+
+        if (behandlingEndreTypeTema(behandling, nyBehandlingstema, nyBehandlingstype) || nyBehandlingsfrist != null) {
+            applicationEvents.add(BehandlingEndretAvSaksbehandlerEvent(behandling.id, behandling))
+        }
+        return applicationEvents
+    }
+
+    private fun sakEndres(
+        fagsak: Fagsak,
+        nySakstype: Sakstyper,
+        nySakstema: Sakstemaer
+    ) = fagsak.type != nySakstype || fagsak.tema != nySakstema
+
+    private fun behandlingEndreTypeTema(
+        behandling: Behandling,
+        nyBehandlingstema: Behandlingstema,
+        nyBehandlingstype: Behandlingstyper
+    ) = behandling.tema != nyBehandlingstema || behandling.type != nyBehandlingstype
 
     private fun gjenopprettMottatteOpplysninger(
         nySakstype: Sakstyper, behandling: Behandling
