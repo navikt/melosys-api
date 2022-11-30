@@ -1,17 +1,14 @@
 package no.nav.melosys.service.sak
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.inspectors.forExactly
-import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeTypeOf
-import io.mockk.*
+import io.mockk.called
+import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.verify
 import no.finn.unleash.FakeUnleash
-import no.nav.melosys.domain.BehandlingEndretAvSaksbehandlerEvent
 import no.nav.melosys.domain.Fagsak
-import no.nav.melosys.domain.FagsakEndretAvSaksbehandler
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstemaer.*
@@ -19,7 +16,8 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Sakstyper.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ANKE
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
@@ -32,7 +30,6 @@ import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.springframework.context.ApplicationEvent
 import org.springframework.context.ApplicationEventPublisher
 import java.util.*
 
@@ -83,11 +80,16 @@ internal class EndreSakServiceTest {
         opprinneligFagsak.behandlinger.add(aktivBehandling)
         every { fagsakService.hentFagsak(saksnummer) } returns opprinneligFagsak
         every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(MottatteOpplysninger())
-        val applicationEvents = mutableListOf<ApplicationEvent>()
-        every { applicationEventPublisher.publishEvent(capture(applicationEvents)) } just Runs
 
-
-        endreSakService.endre(saksnummer, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, FØRSTEGANG, UNDER_BEHANDLING, null)
+        endreSakService.endre(
+            saksnummer,
+            EU_EOS,
+            MEDLEMSKAP_LOVVALG,
+            UTSENDT_ARBEIDSTAKER,
+            FØRSTEGANG,
+            UNDER_BEHANDLING,
+            null
+        )
 
 
         verify {
@@ -104,14 +106,7 @@ internal class EndreSakServiceTest {
         verify { mottatteOpplysningerService.slettOpplysninger(aktivBehandling.id) }
         verify { mottatteOpplysningerService.opprettSøknad(aktivBehandling, any(), any()) }
         verify { oppfriskSaksopplysningerService.oppfriskSaksopplysning(aktivBehandling.id, false) }
-
-        applicationEvents.shouldHaveSize(2).forExactly(1) {
-            it.shouldBeTypeOf<FagsakEndretAvSaksbehandler>()
-            it.source shouldBe saksnummer
-        }.forExactly(1) {
-            it.shouldBeTypeOf<BehandlingEndretAvSaksbehandlerEvent>()
-            it.source shouldBe aktivBehandling.id
-        }
+        verify { applicationEventPublisher.publishEvent(any()) }
     }
 
     @Test
@@ -191,11 +186,19 @@ internal class EndreSakServiceTest {
         every { fagsakService.hentFagsak(saksnummer) } returns sak
 
 
-        endreSakService.endre(sak.saksnummer, sak.type, sak.tema, behandling.tema, behandling.type, AVVENT_FAGLIG_AVKLARING, null)
+        endreSakService.endre(
+            sak.saksnummer,
+            sak.type,
+            sak.tema,
+            behandling.tema,
+            behandling.type,
+            AVVENT_FAGLIG_AVKLARING,
+            null
+        )
 
 
-        verify { mottatteOpplysningerService wasNot called}
-        verify { oppfriskSaksopplysningerService wasNot called}
+        verify { mottatteOpplysningerService wasNot called }
+        verify { oppfriskSaksopplysningerService wasNot called }
     }
 
     private fun lagFagsak(saksnummer: String, sakstype: Sakstyper, sakstema: Sakstemaer) =

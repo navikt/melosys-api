@@ -72,6 +72,7 @@ public class BehandlingEventListener {
         final var behandling = behandlingService.hentBehandling(behandlingEndretAvSaksbehandlerEvent.getBehandlingID());
         Optional<Oppgave> oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
         oppgave.ifPresent(value -> {
+                // Disse variablene kan fjernes når melosys.behandle_alle_saker fjernes
                 final var behandlingstype = behandlingEndretAvSaksbehandlerEvent.getBehandlingstype();
                 final var behandlingstema = behandlingEndretAvSaksbehandlerEvent.getBehandlingstema();
 
@@ -92,6 +93,7 @@ public class BehandlingEventListener {
                         .behandlingstema(behandlingsoppgave.getBehandlingstema())
                         .behandlingstype(unleash.isEnabled("melosys.behandle_alle_saker") ? null : behandlingsoppgave.getBehandlingstype())
                         .tema(behandlingsoppgave.getTema())
+                        .oppgavetype(behandlingsoppgave.getOppgavetype())
                         .fristFerdigstillelse(frist)
                         .build());
             }

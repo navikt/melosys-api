@@ -21,7 +21,6 @@ import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
-import org.springframework.context.ApplicationEvent
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -54,9 +53,9 @@ class EndreSakService(
         validerBehandling(behandling)
         validerEndring(fagsak, nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype)
 
-        val events = utledEvents(fagsak, behandling, nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype, nyBehandlingsfrist)
-        val sakSkalEndres = sakEndres(fagsak, nySakstype, nySakstema)
-        val behandlingSkalEndreTypeEllerTema = behandlingEndreTypeTema(behandling, nyBehandlingstema, nyBehandlingstype)
+        val sakEndres = sakEndres(fagsak, nySakstype, nySakstema)
+        val behandlingTemaEllerTypeEndres = behandlingTemaTypeEndres(behandling, nyBehandlingstema, nyBehandlingstype)
+
         fagsakService.oppdaterFagsakOgBehandling(
             saksnummer,
             nySakstype,
@@ -67,7 +66,7 @@ class EndreSakService(
             nyBehandlingsfrist
         )
 
-        if (sakSkalEndres || behandlingSkalEndreTypeEllerTema) {
+        if (sakEndres || behandlingTemaEllerTypeEndres) {
             if (SaksbehandlingRegler.harTomFlyt(nySakstype, nySakstema, nyBehandlingstype, nyBehandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"))) {
                 mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id).ifPresent { mottatteOpplysningerService.slettOpplysninger(behandling.id) }
             } else {
@@ -77,9 +76,12 @@ class EndreSakService(
             oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
         }
 
-        events.forEach { event ->
-            applicationEventPublisher.publishEvent(event)
+        if (sakEndres) {
+            applicationEventPublisher.publishEvent(FagsakEndretAvSaksbehandler(fagsak.saksnummer))
+        } else if (behandlingTemaEllerTypeEndres || nyBehandlingsfrist != null) {
+            applicationEventPublisher.publishEvent(BehandlingEndretAvSaksbehandlerEvent(behandling.id, behandling))
         }
+
         log.debug { "Ferdig med endring av sak $saksnummer (type: $nySakstype, tema: $nySakstema)" }
     }
 
@@ -116,34 +118,13 @@ class EndreSakService(
         )
     }
 
-    private fun utledEvents(
-        fagsak: Fagsak,
-        behandling: Behandling,
-        nySakstype: Sakstyper,
-        nySakstema: Sakstemaer,
-        nyBehandlingstema: Behandlingstema,
-        nyBehandlingstype: Behandlingstyper,
-        nyBehandlingsfrist: LocalDate?
-    ): List<ApplicationEvent> {
-        val applicationEvents = mutableListOf<ApplicationEvent>()
-
-        if (sakEndres(fagsak, nySakstype, nySakstema)) {
-            applicationEvents.add(FagsakEndretAvSaksbehandler(fagsak.saksnummer))
-        }
-
-        if (behandlingEndreTypeTema(behandling, nyBehandlingstema, nyBehandlingstype) || nyBehandlingsfrist != null) {
-            applicationEvents.add(BehandlingEndretAvSaksbehandlerEvent(behandling.id, behandling))
-        }
-        return applicationEvents
-    }
-
     private fun sakEndres(
         fagsak: Fagsak,
         nySakstype: Sakstyper,
         nySakstema: Sakstemaer
     ) = fagsak.type != nySakstype || fagsak.tema != nySakstema
 
-    private fun behandlingEndreTypeTema(
+    private fun behandlingTemaTypeEndres(
         behandling: Behandling,
         nyBehandlingstema: Behandlingstema,
         nyBehandlingstype: Behandlingstyper
