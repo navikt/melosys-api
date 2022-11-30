@@ -267,52 +267,6 @@ public class LovligeKombinasjonerService {
         }
     }
 
-    public void validerOmNyttTemaKanEndresTil(Behandling behandling, Behandlingstema tema) {
-        var muligeBehandlingstema = behandlingstemaSomKanEndresTil(behandling);
-        if (!muligeBehandlingstema.contains(tema)) {
-            throw new FunksjonellException(String.format("Behandlingen kan ikke endres til tema %s. Gyldige temaer for behandling %s er %s",
-                tema, behandling.getId(), muligeBehandlingstema));
-        }
-    }
-
-    public Set<Behandlingstema> behandlingstemaSomKanEndresTil(Behandling behandling) {
-        if (behandling == null || behandling.kanIkkeEndres()) {
-            return Collections.emptySet();
-        }
-
-        if (behandling.getFagsak() != null && behandling.getFagsak().getType() != null && behandling.getFagsak().getTema() != null) {
-            Sakstyper sakstype = behandling.getFagsak().getType();
-            Aktoersroller hovedpart = behandling.getFagsak().getHovedpartRolle();
-            Sakstemaer sakstema = behandling.getFagsak().getTema();
-
-            return hentMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, null);
-        }
-        return Collections.emptySet();
-    }
-
-    public void validerOmNyTypeKanEndresTil(Behandling behandling, Behandlingstyper type) {
-        var muligeBehandlingstyper = behandlinstyperSomKanEndresTil(behandling);
-        if (!muligeBehandlingstyper.contains(type)) {
-            throw new FunksjonellException(String.format("Behandlingen kan ikke endres til type %s. Gyldige typer for behandling %s er %s",
-                type, behandling.getId(), muligeBehandlingstyper));
-        }
-    }
-
-    public Set<Behandlingstyper> behandlinstyperSomKanEndresTil(Behandling behandling) {
-        if (behandling == null || behandling.kanIkkeEndres()) {
-            return Collections.emptySet();
-        }
-        if (behandling.getFagsak() != null && behandling.getFagsak().getType() != null && behandling.getFagsak().getTema() != null) {
-            Sakstyper sakstype = behandling.getFagsak().getType();
-            Sakstemaer sakstema = behandling.getFagsak().getTema();
-            Aktoersroller hovedpart = behandling.getFagsak().getHovedpartRolle();
-            Behandlingstema behandlingstema = behandling.getTema();
-
-            return hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, null);
-        }
-        return Collections.emptySet();
-    }
-
     @SafeVarargs
     private static <T> Set<T> combineSets(Set<T>... t) {
         return Stream.of(t)
