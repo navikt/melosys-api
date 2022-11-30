@@ -45,7 +45,7 @@ class EndreSakService(
         nySakstema: Sakstemaer,
         nyBehandlingstema: Behandlingstema,
         nyBehandlingstype: Behandlingstyper,
-        nyBehandlingsstatus: Behandlingsstatus?,
+        nyBehandlingsstatus: Behandlingsstatus,
         nyBehandlingsfrist: LocalDate?
     ) {
         val fagsak = fagsakService.hentFagsak(saksnummer)

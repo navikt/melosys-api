@@ -17,7 +17,7 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstemaer.*
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Sakstyper.*
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
@@ -87,7 +87,7 @@ internal class EndreSakServiceTest {
         every { applicationEventPublisher.publishEvent(capture(applicationEvents)) } just Runs
 
 
-        endreSakService.endre(saksnummer, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, FØRSTEGANG, null, null)
+        endreSakService.endre(saksnummer, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, FØRSTEGANG, UNDER_BEHANDLING, null)
 
 
         verify {
@@ -97,7 +97,7 @@ internal class EndreSakServiceTest {
                 MEDLEMSKAP_LOVVALG,
                 UTSENDT_ARBEIDSTAKER,
                 FØRSTEGANG,
-                null,
+                UNDER_BEHANDLING,
                 null
             )
         }
@@ -127,7 +127,7 @@ internal class EndreSakServiceTest {
         every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(MottatteOpplysninger())
 
 
-        endreSakService.endre(saksnummer, FTRL, TRYGDEAVGIFT, YRKESAKTIV, ANKE, null, null)
+        endreSakService.endre(saksnummer, FTRL, TRYGDEAVGIFT, YRKESAKTIV, ANKE, AVVENT_FAGLIG_AVKLARING, null)
 
 
         verify { mottatteOpplysningerService.slettOpplysninger(fagsak.hentAktivBehandling().id) }
@@ -151,7 +151,7 @@ internal class EndreSakServiceTest {
                 MEDLEMSKAP_LOVVALG,
                 ANMODNING_OM_UNNTAK_HOVEDREGEL,
                 FØRSTEGANG,
-                null,
+                AVVENT_DOK_PART,
                 null
             )
         }.message.shouldBe("Du må legge inn periode og land i flyten for å kunne bytte til sakstype EU/EØS")
@@ -162,7 +162,7 @@ internal class EndreSakServiceTest {
         val saksnummer = "MEL-124"
         val opprinneligFagsak = lagFagsak(saksnummer, FTRL, UNNTAK)
         val behandling = SaksbehandlingDataFactory.lagInaktivBehandling(opprinneligFagsak).apply {
-            status = Behandlingsstatus.IVERKSETTER_VEDTAK
+            status = IVERKSETTER_VEDTAK
         }
         opprinneligFagsak.behandlinger.add(behandling)
         every { fagsakService.hentFagsak(saksnummer) } returns opprinneligFagsak
@@ -176,7 +176,7 @@ internal class EndreSakServiceTest {
                 MEDLEMSKAP_LOVVALG,
                 ANMODNING_OM_UNNTAK_HOVEDREGEL,
                 FØRSTEGANG,
-                null,
+                UNDER_BEHANDLING,
                 null
             )
         }.message.shouldBe("Behandling 1 med status IVERKSETTER_VEDTAK kan ikke endres")
@@ -191,7 +191,7 @@ internal class EndreSakServiceTest {
         every { fagsakService.hentFagsak(saksnummer) } returns sak
 
 
-        endreSakService.endre(sak.saksnummer, sak.type, sak.tema, behandling.tema, behandling.type, Behandlingsstatus.AVVENT_FAGLIG_AVKLARING, null)
+        endreSakService.endre(sak.saksnummer, sak.type, sak.tema, behandling.tema, behandling.type, AVVENT_FAGLIG_AVKLARING, null)
 
 
         verify { mottatteOpplysningerService wasNot called}
