@@ -55,6 +55,8 @@ class EndreSakService(
         validerEndring(fagsak, nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype)
 
         val events = utledEvents(fagsak, behandling, nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype, nyBehandlingsfrist)
+        val sakSkalEndres = sakEndres(fagsak, nySakstype, nySakstema)
+        val behandlingSkalEndreTypeEllerTema = behandlingEndreTypeTema(behandling, nyBehandlingstema, nyBehandlingstype)
         fagsakService.oppdaterFagsakOgBehandling(
             saksnummer,
             nySakstype,
@@ -65,7 +67,7 @@ class EndreSakService(
             nyBehandlingsfrist
         )
 
-        if (sakEndres(fagsak, nySakstype, nySakstema) || behandlingEndreTypeTema(behandling, nyBehandlingstema, nyBehandlingstype)) {
+        if (sakSkalEndres || behandlingSkalEndreTypeEllerTema) {
             if (SaksbehandlingRegler.harTomFlyt(nySakstype, nySakstema, nyBehandlingstype, nyBehandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"))) {
                 mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id).ifPresent { mottatteOpplysningerService.slettOpplysninger(behandling.id) }
             } else {
