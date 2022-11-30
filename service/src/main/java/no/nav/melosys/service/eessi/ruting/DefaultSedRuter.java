@@ -55,20 +55,18 @@ public class DefaultSedRuter implements SedRuter {
             log.info("Oppretter oppgave sed {} i rinasak {}", eessiMelding.getSedId(), eessiMelding.getRinaSaksnummer());
             oppgaveService.opprettJournalføringsoppgave(eessiMelding.getJournalpostId(), prosessinstans.hentAktørIDFraDataEllerSED());
         } else {
-            Behandling behandling = fagsak.get().hentSistAktivBehandling();
+            Behandling sistAktivBehandling = fagsak.get().hentSistAktivBehandling();
 
-            if (behandling.erAktiv()) {
-                behandlingService.endreStatus(behandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
-            } else {
-
+            if (sistAktivBehandling.erAktiv()) {
+                behandlingService.endreStatus(sistAktivBehandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
             }
 
             if (skalOppdatereOppgaveForSedType(sedType)) {
-                oppdaterEllerOpprettOppgave(behandling, prosessinstans, sedType);
+                oppdaterEllerOpprettOppgave(sistAktivBehandling, prosessinstans, sedType);
             }
 
-            prosessinstans.setBehandling(behandling);
-            opprettJournalføringProsess(eessiMelding, behandling);
+            prosessinstans.setBehandling(sistAktivBehandling);
+            opprettJournalføringProsess(eessiMelding, sistAktivBehandling);
         }
     }
 
@@ -79,11 +77,12 @@ public class DefaultSedRuter implements SedRuter {
         );
     }
 
-    private static final Set<SedType> SED_TYPE_TIL_MANUEL_BEHANDLING = Set.of(
-        SedType.A012, SedType.X001, SedType.X007, SedType.X008);
-
     private boolean skalOppdatereOppgaveForSedType(SedType sedType) {
-        return !SED_TYPE_TIL_MANUEL_BEHANDLING.contains(sedType);
+        return switch (sedType) {
+            case A001, A003, A009, A010, A012, X001, X007 -> false;
+            //TODO: fiks resten etter tabell: https://confluence.adeo.no/display/TEESSI/Automatisk+mottak+av+ulike+SED
+            default -> true;
+        };
     }
 
     private void oppdaterEllerOpprettOppgave(Behandling behandling, Prosessinstans prosessinstans, SedType sedType) {
