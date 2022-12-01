@@ -165,7 +165,6 @@ public class BehandlingService {
         tidligereMedlemsperiodeRepository.saveAll(tidligereMedlemsperioder);
     }
 
-    @Deprecated
     public void lagre(Behandling behandling) {
         behandlingRepository.save(behandling);
     }

@@ -92,7 +92,7 @@ public class RegisteropplysningerService {
             return;
         }
 
-        Behandling behandling = behandlingService.hentBehandling(registeropplysningerRequest.getBehandlingID());
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(registeropplysningerRequest.getBehandlingID());
 
         hentOgLagreOpplysninger(registeropplysningerRequest, behandling);
     }
@@ -209,6 +209,14 @@ public class RegisteropplysningerService {
         Saksopplysning saksopplysning = sobService.finnSakOgBehandlingskjedeListe(aktørId);
 
         return List.of(saksopplysning);
+    }
+
+    @Transactional
+    public void slettRegisterOpplysninger(long behandlingID) {
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
+        behandling.getSaksopplysninger().removeIf(s -> s.getType() != SaksopplysningType.SEDOPPL);
+        behandling.setSisteOpplysningerHentetDato(null);
+        behandlingService.lagre(behandling);
     }
 
     @FunctionalInterface

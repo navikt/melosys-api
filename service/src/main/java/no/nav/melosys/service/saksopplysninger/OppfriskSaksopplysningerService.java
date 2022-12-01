@@ -1,5 +1,7 @@
 package no.nav.melosys.service.saksopplysninger;
 
+import java.util.Optional;
+
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ErPeriode;
@@ -65,8 +67,8 @@ public class OppfriskSaksopplysningerService {
                 behandlingID) + "Det er ikke lenger mulig å endre mottatteOpplysninger og saksopplysninger");
         }
 
-        String aktørID = behandling.getFagsak().hentBrukersAktørID();
-        String brukerID = persondataFasade.hentFolkeregisterident(aktørID);
+        Optional<String> aktørIdOptional = behandling.getFagsak().finnBrukersAktørID();
+        String brukerID = aktørIdOptional.map(persondataFasade::hentFolkeregisterident).orElse(null);
 
         //OK om perioden er tom. Ikke alle behandlingstema krever periode.
         ErPeriode periode = behandleAlleSakerToggleEnabled
@@ -91,6 +93,7 @@ public class OppfriskSaksopplysningerService {
             .build();
 
         log.info("Starter oppfrisking av behandlingID: {} ", behandlingID);
+        registeropplysningerService.slettRegisterOpplysninger(behandlingID);
         registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequest);
         behandlingsresultatService.tømBehandlingsresultat(behandlingID);
 
