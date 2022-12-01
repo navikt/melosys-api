@@ -7,7 +7,6 @@ import java.util.Optional;
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingEndretAvSaksbehandlerEvent;
-import no.nav.melosys.domain.BehandlingsfristEndretEvent;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.DokumentBestiltEvent;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
@@ -96,25 +95,6 @@ class BehandlingEventListenerTest {
         when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
         behandlingEventListener.dokumentBestilt(new DokumentBestiltEvent(BEHANDLING_ID, Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER));
         verify(behandlingService).oppdaterStatusOgSvarfrist(eq(behandling), eq(Behandlingsstatus.AVVENT_DOK_PART), any(Instant.class));
-    }
-
-    @Test
-    void behandlingsfristEndret_enUkeFrem_oppdatererFrist() {
-        LocalDate nå = LocalDate.now();
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer(FAGSAKSNUMMER);
-        behandling.setBehandlingsfrist(nå);
-        behandling.setFagsak(fagsak);
-        Oppgave oppgave = new Oppgave.Builder().setOppgaveId(OPPGAVE_ID).build();
-
-        when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID)).thenReturn(behandling);
-        when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(FAGSAKSNUMMER)).thenReturn(Optional.of(oppgave));
-
-        behandlingEventListener.behandlingsfristEndret(new BehandlingsfristEndretEvent(BEHANDLING_ID, nå.plusWeeks(1)));
-
-        verify(behandlingService, only()).hentBehandlingMedSaksopplysninger(BEHANDLING_ID);
-        verify(oppgaveService).oppdaterOppgave(eq(OPPGAVE_ID), oppgaveOppdateringCaptor.capture());
-        assertThat(oppgaveOppdateringCaptor.getValue().getFristFerdigstillelse()).isEqualTo(nå.plusWeeks(1));
     }
 
     @Test

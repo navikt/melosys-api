@@ -231,20 +231,6 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void endreBehandlingstema_ugyldigNyttTemaForSøknad_exceptionKastes() {
-        behandling.setTema(ARBEID_FLERE_LAND);
-        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(BEHANDLINGSRESULTAT);
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> behandlingService.endreBehandlingstemaTilBehandling(BEHANDLING_ID, ØVRIGE_SED_MED))
-            .withMessage("Ikke mulig å endre behandlingstema");
-        verify(behandlingRepository, never()).save(any(Behandling.class));
-        verify(behandlingsresultatService, never()).tømBehandlingsresultat(BEHANDLING_ID);
-        verifyNoInteractions(oppgaveService);
-    }
-
-    @Test
     void oppdaterStatus_statusAvventDok_dokumentasjonSvarfristOppdatert() {
         var fagsak = new Fagsak();
         fagsak.setSaksnummer(SAKSNUMMER);
@@ -732,20 +718,6 @@ class BehandlingServiceTest {
         behandlingService.endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
 
         verify(behandlingRepository, never()).save(any());
-    }
-
-    @Test
-    void endreBehandlingsfrist_enUkeFrem_fristOppdateres() {
-        LocalDate nå = LocalDate.now();
-        Behandling behandling = new Behandling();
-        behandling.setBehandlingsfrist(nå);
-        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
-
-        behandlingService.endreBehandlingsfrist(BEHANDLING_ID, nå.plusWeeks(1));
-
-        assertThat(behandling.getBehandlingsfrist()).isEqualTo(nå.plusWeeks(1));
-        verify(behandlingRepository).save(behandling);
-        verify(applicationEventPublisher).publishEvent(any(BehandlingsfristEndretEvent.class));
     }
 
     private Behandling opprettBehandlingMedData() {

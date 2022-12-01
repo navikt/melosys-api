@@ -152,29 +152,6 @@ public class BehandlingService {
         }
     }
 
-    /**
-     * @deprecated Erstattes av endreBestilling
-     */
-    @Deprecated
-    @Transactional
-    public void endreBehandlingstemaTilBehandling(long behandlingID, Behandlingstema nyttTema) {
-        Behandling behandling = hentBehandling(behandlingID);
-        var mottatteOpplysninger = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        if (MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandling, mottatteOpplysninger, unleash.isEnabled("melosys.behandle_alle_saker")).contains(nyttTema)) {
-            behandling.setTema(nyttTema);
-
-            tilbakestillMottatteOpplysninger(behandling);
-            applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
-            if (nyttTema != ARBEID_FLERE_LAND) {
-                behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.erUkjenteEllerAlleEosLand = false;
-                MottatteOpplysningerKonverterer.oppdaterMottatteOpplysninger(behandling.getMottatteOpplysninger());
-                mottatteOpplysningerRepository.saveAndFlush(behandling.getMottatteOpplysninger());
-            }
-        } else {
-            throw new FunksjonellException("Ikke mulig å endre behandlingstema");
-        }
-    }
-
     @Transactional
     public void knyttMedlemsperioder(long behandlingID, List<Long> periodeIder) {
         Behandling behandling = hentBehandling(behandlingID);
@@ -411,19 +388,6 @@ public class BehandlingService {
         behandling.setStatus(behandlingsstatus);
         behandling.setDokumentasjonSvarfristDato(svarfristDato);
         behandlingRepository.save(behandling);
-    }
-
-    /**
-     * @deprecated Erstattes av endreBestilling
-     */
-    @Deprecated
-    @Transactional
-    public void endreBehandlingsfrist(long behandlingId, LocalDate behandlingsfrist) {
-        Behandling behandling = hentBehandling(behandlingId);
-        behandling.setBehandlingsfrist(behandlingsfrist);
-        behandlingRepository.save(behandling);
-
-        applicationEventPublisher.publishEvent(new BehandlingsfristEndretEvent(behandlingId, behandlingsfrist));
     }
 
     private void tilbakestillMottatteOpplysninger(Behandling behandling) {

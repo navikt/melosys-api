@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.BehandlingEndretAvSaksbehandlerEvent;
-import no.nav.melosys.domain.BehandlingsfristEndretEvent;
 import no.nav.melosys.domain.brev.DokumentasjonSvarfrist;
 import no.nav.melosys.domain.dokument.DokumentBestiltEvent;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -14,11 +13,9 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
@@ -50,21 +47,6 @@ public class BehandlingEventListener {
                 );
             }
         }
-    }
-
-    @EventListener
-    @Async
-    public void behandlingsfristEndret(BehandlingsfristEndretEvent behandlingsfristEndretEvent) {
-        ThreadLocalAccessInfo.executeProcess("behandlingsfristEndret", () -> {
-            var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingsfristEndretEvent.getBehandlingId());
-            Optional<Oppgave> oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
-            oppgave.ifPresent(value -> oppgaveService.oppdaterOppgave(
-                value.getOppgaveId(),
-                OppgaveOppdatering.builder()
-                    .fristFerdigstillelse(behandlingsfristEndretEvent.getFristFerdigstillelse())
-                    .build())
-            );
-        });
     }
 
     @EventListener
