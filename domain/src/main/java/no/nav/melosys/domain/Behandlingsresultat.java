@@ -372,10 +372,6 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public Optional<Medlemskapsperiode> finnValidertMedlemskapsPeriode() {
         Collection<Medlemskapsperiode> medlemskapsPerioder = medlemAvFolketrygden.getMedlemskapsperioder();
-//        if (medlemskapsPerioder.size() > 1) {
-//            throw new UnsupportedOperationException("Flere enn en medlemskapsPerioder er ikke støttet");
-//        }
-
         return medlemskapsPerioder.stream().findFirst();
     }
 
