@@ -259,8 +259,8 @@ public class FagsakService {
 
     private void validerOppdatering(Fagsak sak, Sakstyper nySakstype, Sakstemaer nySakstema,
                                     Behandlingstema nyBehandlingstema, Behandlingstyper nyBehandlingstype) {
-        if (!sak.kanEndreTypeOgTema()) {
-            throw new FunksjonellException("Sakstype og sakstema kan ikke endres for" + sak.getSaksnummer());
+        if ((sak.getType() != nySakstype || sak.getTema() != nySakstema) && !sak.kanEndreTypeOgTema()) {
+            throw new FunksjonellException("Sakstype og sakstema kan ikke endres for " + sak.getSaksnummer());
         }
         lovligeKombinasjonerService.validerOpprettelseOgEndring(sak.getHovedpartRolle(), nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype);
     }
