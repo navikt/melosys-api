@@ -104,8 +104,8 @@ public class OppfriskSaksopplysningerService {
         if (behandleAlleSakerToggleEnabled) {
 
             if (behandling.getFagsak().erSakstypeEøs()
+                && behandling.harPeriodeOgLand()
                 && !SaksbehandlingRegler.harTomFlyt(behandling, folketrygdenToggleEnabled)
-                && behandling.harPeriode()
                 && behandling.kanResultereIVedtak()
                 && !inngangsvilkaarService.oppfyllervurderingEF_883_2004(behandlingID)) {
                 inngangsvilkaarService.vurderOgLagreInngangsvilkår(

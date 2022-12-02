@@ -206,6 +206,38 @@ class OppfriskSaksopplysningerServiceTest {
     }
 
     @Test
+    void oppfriskSaksopplysning_utenPeriode_henterIkkeInngangsvilkår() {
+        Behandling behandling = lagBehandling();
+        behandling.getMottatteOpplysninger().getMottatteOpplysningerData().periode = new Periode();
+        behandling.getFagsak().setType(Sakstyper.EU_EOS);
+
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
+
+
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
+
+
+        verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any(Periode.class));
+    }
+
+    @Test
+    void oppfriskSaksopplysning_utenLand_henterIkkeInngangsvilkår() {
+        Behandling behandling = lagBehandling();
+        behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland = new Soeknadsland();
+        behandling.getFagsak().setType(Sakstyper.EU_EOS);
+
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
+
+
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
+
+
+        verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any(Periode.class));
+    }
+
+    @Test
     void oppfriskSaksopplysning_utenFamilierelasjoner_girForventetInformasjonsbehov() {
         Behandling behandling = lagBehandling();
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
