@@ -173,6 +173,7 @@ public class MottatteOpplysningerService {
         mottatteOpplysninger.setOriginalData(originalData);
         mottatteOpplysninger.setEksternReferanseID(eksternReferanseID);
         mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
+        behandling.setMottatteOpplysninger(mottatteOpplysninger);
         mottatteOpplysningerRepository.save(mottatteOpplysninger);
     }
 
