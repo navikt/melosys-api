@@ -4,7 +4,7 @@
   "VAULT_CLUSTER": "prod",
   "APP_NAME": "melosys",
   "TENANT_URL": "nav.no",
-  "GROUP_MELOSYS_INNLOGGING": "4a0c7611-a7b6-4ea5-ade7-1ea29e122620",
+  "GROUP_MELOSYS_INNLOGGING": "0d7c7755-fd5d-46ee-bbb9-975484cfb5b1",
   "APP_NAME_FRONTEND": "melosys-web",
   "APP_NAME_TRYGDEAVTALE": "melosys-trygdeavtale",
   "APP_NAME_PDL": "pdl-api",
