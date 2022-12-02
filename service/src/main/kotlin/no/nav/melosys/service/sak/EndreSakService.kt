@@ -53,10 +53,18 @@ class EndreSakService(
         validerSak(fagsak, nySakstype, nySakstema)
         val behandling = fagsak.hentAktivBehandling()
         validerBehandling(behandling)
-        validerEndring(fagsak, nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype)
 
         val sakEndres = sakEndres(fagsak, nySakstype, nySakstema)
         val behandlingTemaEllerTypeEndres = behandlingTemaTypeEndres(behandling, nyBehandlingstema, nyBehandlingstype)
+        validerEndring(
+            fagsak,
+            behandling,
+            nySakstype,
+            nySakstema,
+            nyBehandlingstema,
+            nyBehandlingstype,
+            sakEndres || behandlingTemaEllerTypeEndres
+        )
 
         fagsakService.oppdaterFagsakOgBehandling(
             saksnummer,
@@ -102,21 +110,25 @@ class EndreSakService(
         ) {
             throw FunksjonellException("Behandling ${behandling.id} med status ${behandling.status} kan ikke endres")
         }
-
-        val behandlingsresultatMedAnmodningsperioder =
-            behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(behandling.id)
-        if (behandlingsresultatMedAnmodningsperioder.erArtikkel16MedSendtAnmodningOmUnntak()) {
-            throw FunksjonellException("Behandling ${behandling.id} har sendt anmodning om unntak og kan ikke lenger endres")
-        }
     }
 
     private fun validerEndring(
         fagsak: Fagsak,
+        behandling: Behandling,
         nySakstype: Sakstyper,
         nySakstema: Sakstemaer,
         nyBehandlingstema: Behandlingstema,
-        nyBehandlingstype: Behandlingstyper
+        nyBehandlingstype: Behandlingstyper,
+        temaEllerTypeEndres: Boolean
     ) {
+        if (temaEllerTypeEndres) {
+            val behandlingsresultatMedAnmodningsperioder =
+                behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(behandling.id)
+            if (behandlingsresultatMedAnmodningsperioder.erArtikkel16MedSendtAnmodningOmUnntak()) {
+                throw FunksjonellException("Behandling ${behandling.id} har sendt anmodning om unntak og kan ikke lenger endres")
+            }
+        }
+
         lovligeKombinasjonerService.validerOpprettelseOgEndring(
             fagsak.hovedpartRolle,
             nySakstype,

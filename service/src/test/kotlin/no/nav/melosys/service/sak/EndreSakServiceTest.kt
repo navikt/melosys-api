@@ -185,7 +185,7 @@ internal class EndreSakServiceTest {
     }
 
     @Test
-    fun `ikke lov å endre behandlinger med sendt anmodning om unntak`() {
+    fun `ikke lov å endre fagsak eller behandlinger med sendt anmodning om unntak`() {
         val saksnummer = "MEL-124"
         val opprinneligFagsak = lagFagsak(saksnummer, FTRL, UNNTAK)
         val behandling = SaksbehandlingDataFactory.lagBehandling(opprinneligFagsak)
@@ -211,6 +211,46 @@ internal class EndreSakServiceTest {
                 null
             )
         }.message.shouldBe("Behandling 1 har sendt anmodning om unntak og kan ikke lenger endres")
+    }
+
+    @Test
+    fun `greit å endre behandlingsstatus med sendt anmodning om unntak`() {
+        val saksnummer = "MEL-124"
+        val sak = lagFagsak(saksnummer, FTRL, UNNTAK)
+        val behandling = SaksbehandlingDataFactory.lagBehandling(sak)
+        sak.behandlinger.add(behandling)
+        every { fagsakService.hentFagsak(saksnummer) } returns sak
+        val anmodningsperiode = Anmodningsperiode().apply {
+            setSendtUtland(true)
+        }
+        val resultat = Behandlingsresultat().apply {
+            anmodningsperioder.add(anmodningsperiode)
+        }
+        every { behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(behandling.id) } returns resultat
+
+
+        endreSakService.endre(
+            sak.saksnummer,
+            sak.type,
+            sak.tema,
+            behandling.tema,
+            behandling.type,
+            AVVENT_FAGLIG_AVKLARING,
+            null
+        )
+
+
+        verify {
+            fagsakService.oppdaterFagsakOgBehandling(
+                sak.saksnummer,
+                sak.type,
+                sak.tema,
+                behandling.tema,
+                behandling.type,
+                AVVENT_FAGLIG_AVKLARING,
+                null
+            )
+        }
     }
 
     @Test
