@@ -8,6 +8,8 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.finn.unleash.FakeUnleash
+import no.nav.melosys.domain.Anmodningsperiode
+import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -24,6 +26,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.SaksbehandlingDataFactory
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
@@ -40,6 +43,9 @@ internal class EndreSakServiceTest {
 
     @RelaxedMockK
     lateinit var fagsakService: FagsakService
+
+    @RelaxedMockK
+    lateinit var behandlingsresultatService: BehandlingsresultatService
 
     @RelaxedMockK
     lateinit var mottatteOpplysningerService: MottatteOpplysningerService
@@ -60,6 +66,7 @@ internal class EndreSakServiceTest {
         endreSakService = EndreSakService(
             lovligeKombinasjonerService,
             fagsakService,
+            behandlingsresultatService,
             mottatteOpplysningerService,
             oppfriskSaksopplysningerService,
             applicationEventPublisher,
@@ -175,6 +182,35 @@ internal class EndreSakServiceTest {
                 null
             )
         }.message.shouldBe("Behandling 1 med status IVERKSETTER_VEDTAK kan ikke endres")
+    }
+
+    @Test
+    fun `ikke lov å endre behandlinger med sendt anmodning om unntak`() {
+        val saksnummer = "MEL-124"
+        val opprinneligFagsak = lagFagsak(saksnummer, FTRL, UNNTAK)
+        val behandling = SaksbehandlingDataFactory.lagBehandling(opprinneligFagsak)
+        opprinneligFagsak.behandlinger.add(behandling)
+        every { fagsakService.hentFagsak(saksnummer) } returns opprinneligFagsak
+        val anmodningsperiode = Anmodningsperiode().apply {
+            setSendtUtland(true)
+        }
+        val resultat = Behandlingsresultat().apply {
+            anmodningsperioder.add(anmodningsperiode)
+        }
+        every { behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(behandling.id) } returns resultat
+
+        shouldThrow<FunksjonellException>
+        {
+            endreSakService.endre(
+                saksnummer,
+                EU_EOS,
+                MEDLEMSKAP_LOVVALG,
+                UTSENDT_ARBEIDSTAKER,
+                FØRSTEGANG,
+                UNDER_BEHANDLING,
+                null
+            )
+        }.message.shouldBe("Behandling 1 har sendt anmodning om unntak og kan ikke lenger endres")
     }
 
     @Test
