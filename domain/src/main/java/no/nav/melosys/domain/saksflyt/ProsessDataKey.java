@@ -52,6 +52,7 @@ public enum ProsessDataKey {
     REPRESENTANT_KONTAKTPERSON("representantKontakperson"),
     REPRESENTANT_REPRESENTERER("representantRepresenterer"),
     SAKSBEHANDLER("saksbehandler"),
+    SAKSBEHANDLER_NAVN("saksbehandlerNavn"),
     SAKSNUMMER("saksnummer"),
     SAKSTYPE("sakstype"),
     SAKSTEMA("sakstema"),

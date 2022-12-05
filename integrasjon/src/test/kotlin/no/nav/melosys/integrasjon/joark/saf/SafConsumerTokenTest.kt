@@ -2,39 +2,39 @@ package no.nav.melosys.integrasjon.joark.saf
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
-import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
-import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
+import no.nav.melosys.integrasjon.OAuthMockServer
+import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
-import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
-import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
+import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
+import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import org.assertj.core.api.Assertions
-import org.assertj.core.api.AssertionsForClassTypes
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 
-@WebMvcTest(
-    value = [
-        StsRestTemplateProducer::class,
-        RestTokenServiceClient::class,
+@Import(
+    StsWebClientProducer::class,
+    RestTokenServiceClient::class,
+    OAuthMockServer::class,
 
-        SafConsumerImpl::class,
-        SafConsumerProducer::class,
-        GenericContextExchangeFilter::class
-    ]
+    GenericAuthFilterFactory::class,
+    SafConsumerProducer::class,
 )
+@WebMvcTest
 @ActiveProfiles("wiremock-test")
+@EnableOAuth2Client
 @AutoConfigureWebClient
 class SafConsumerTokenTest(
     @Autowired private val safConsumer: SafConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
-    @Value("\${mockserver.security.port}") mockSecurityPort: Int
-) : ConsumerWireMockTestBase<ByteArray,ByteArray>(mockServiceUnderTestPort, mockSecurityPort) {
+    @Value("\${mockserver.security.port}") mockSecurityPort: Int,
+    @Autowired oAuthMockServer: OAuthMockServer
+) : ConsumerWireMockTestBase<ByteArray, ByteArray>(mockServiceUnderTestPort, mockSecurityPort, oAuthMockServer) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {
@@ -51,7 +51,7 @@ class SafConsumerTokenTest(
     fun authorizationSkalKommeFraBruker() {
         verifyHeaders(
             mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
+                Pair("Authorization", WireMock.equalTo("Bearer -- user_access_token --")),
                 Pair("Nav-Consumer-Id", WireMock.equalTo("melosys"))
             )
         )
@@ -67,18 +67,6 @@ class SafConsumerTokenTest(
             )
         )
         executeRequest()
-    }
-
-    @Test
-    fun authorizationSkalKommeFraBruker_Feiler_nårUtenSubjectHandler() {
-        ThreadLocalAccessInfo.beforeControllerRequest("request", false)
-        SpringSubjectHandler.set(NullSubjectHandler())
-
-        AssertionsForClassTypes.assertThatExceptionOfType(TekniskException::class.java)
-            .isThrownBy { executeRequest() }
-            .withMessageContaining("Token mangler fra bruker! ThreadLocalAccessInfo{requestUri='request', prossessId='null'}")
-
-        ThreadLocalAccessInfo.afterControllerRequest("request")
     }
 
     @Test

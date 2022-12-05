@@ -26,7 +26,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
-import no.nav.melosys.service.ldap.SaksbehandlerService;
+import no.nav.melosys.service.bruker.SaksbehandlerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -84,7 +84,8 @@ class BrevDataServiceTest {
     private UtenlandskMyndighet lagUtenlandskMyndighet() {
         UtenlandskMyndighet myndighet = new UtenlandskMyndighet();
         myndighet.navn = "navn";
-        myndighet.gateadresse = "gateadresse 123";
+        myndighet.gateadresse1 = "gateadresse 123";
+        myndighet.gateadresse2 = "institusjon ABC";
         myndighet.land = "HR";
         when(utenlandskMyndighetRepository.findByLandkode(Land_iso2.HR)).thenReturn(Optional.of(myndighet));
         return myndighet;
@@ -478,9 +479,9 @@ class BrevDataServiceTest {
         expectedBrevMottaker.setKortNavn(myndighet.navn);
         expectedBrevMottaker.setSpraakkode(Spraakkode.NB);
         expectedBrevMottaker.setMottakeradresse(UtenlandskPostadresse.builder()
-            .withAdresselinje1(myndighet.gateadresse)
-            .withAdresselinje2(myndighet.postnummer + " " + myndighet.poststed)
-            .withAdresselinje3("")
+            .withAdresselinje1(myndighet.gateadresse1)
+            .withAdresselinje2(myndighet.gateadresse2)
+            .withAdresselinje3(myndighet.postnummer + " " + myndighet.poststed)
             .withLand(myndighet.land)
             .build());
 

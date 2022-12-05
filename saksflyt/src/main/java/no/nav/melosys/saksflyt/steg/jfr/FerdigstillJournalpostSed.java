@@ -43,8 +43,12 @@ public class FerdigstillJournalpostSed implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
         final MelosysEessiMelding eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
 
-        if (erJournalpostFerdigstilt(eessiMelding.getJournalpostId())) {
+        Journalpost journalpost = joarkFasade.hentJournalpost(eessiMelding.getJournalpostId());
+        if (erJournalpostFerdigstilt(journalpost)) {
             log.warn("Journalpost {} for sed {} i RINA-sak {} er allerede ferdigstilt. Behandler ikke videre",
+                eessiMelding.getJournalpostId(), eessiMelding.getSedId(), eessiMelding.getRinaSaksnummer());
+        } else if (erJournalpostUtgått(journalpost)) {
+            log.warn("Journalpost {} for sed {} i RINA-sak {} er utgått. Behandler ikke videre",
                 eessiMelding.getJournalpostId(), eessiMelding.getSedId(), eessiMelding.getRinaSaksnummer());
         } else {
             final var behandling = prosessinstans.getBehandling();
@@ -73,9 +77,11 @@ public class FerdigstillJournalpostSed implements StegBehandler {
         return persondataFasade.hentFolkeregisterident(aktørID);
     }
 
-    private boolean erJournalpostFerdigstilt(String journalpostId) {
-        Journalpost journalpost = joarkFasade.hentJournalpost(journalpostId);
-
+    private boolean erJournalpostFerdigstilt(Journalpost journalpost) {
         return (journalpost.isErFerdigstilt() && journalpost.getJournalposttype() == Journalposttype.INN);
+    }
+
+    private boolean erJournalpostUtgått(Journalpost journalpost) {
+        return journalpost.isErUtgått();
     }
 }

@@ -31,14 +31,15 @@ import no.nav.melosys.domain.saksflyt.*;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.sak.SakstypeSakstemaKobling;
 import no.nav.melosys.service.soknad.SoknadMottatt;
 import no.nav.melosys.service.vedtak.FattVedtakRequest;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -170,6 +171,22 @@ public class ProsessinstansService {
         return journalfoeringDto.isIkkeSendForvaltingsmelding() != null && !journalfoeringDto.isIkkeSendForvaltingsmelding();
     }
 
+    private static String getSaksbehandlerIdent() {
+        String saksbehandlerIdent = SubjectHandler.getInstance().getUserID();
+        if (saksbehandlerIdent != null) return saksbehandlerIdent;
+
+        //Når en prosess lager en ny prosess har vi ingen innlogget bruker
+        return ThreadLocalAccessInfo.getSaksbehandler();
+    }
+
+    private static String getSaksbehandlerNavn() {
+        String saksbehandlerNavn = SubjectHandler.getInstance().getUserName();
+        if (saksbehandlerNavn != null) return saksbehandlerNavn;
+
+        //Når en prosess lager en ny prosess har vi ingen innlogget bruker
+        return ThreadLocalAccessInfo.getSaksbehandlerNavn();
+    }
+
     public boolean harAktivProsessinstans(Long behandlingID) {
         return prosessinstansRepo.findByBehandling_IdAndStatusIs(
             behandlingID, ProsessStatus.KLAR
@@ -184,16 +201,17 @@ public class ProsessinstansService {
     }
 
     public void lagre(Prosessinstans prosessinstans) {
-        lagre(prosessinstans, SubjectHandler.getInstance().getUserID());
+        lagre(prosessinstans, getSaksbehandlerIdent(), getSaksbehandlerNavn());
     }
 
-    void lagre(Prosessinstans prosessinstans, String saksbehandler) {
+    void lagre(Prosessinstans prosessinstans, String saksbehandler, String saksbehandlerNavn) {
         LocalDateTime nå = LocalDateTime.now();
         prosessinstans.setEndretDato(nå);
         prosessinstans.setRegistrertDato(nå);
         prosessinstans.setStatus(ProsessStatus.KLAR);
         if (saksbehandler != null) {
             prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
+            prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER_NAVN, saksbehandlerNavn);
             logger.info("Saksbehandler={} har opprettet prosessinstans {} av type {}.", saksbehandler,
                 prosessinstans.getId(), prosessinstans.getType());
         } else {

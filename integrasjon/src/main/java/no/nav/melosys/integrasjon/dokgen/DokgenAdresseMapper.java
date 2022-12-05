@@ -102,7 +102,7 @@ public final class DokgenAdresseMapper {
             var utenlandskMyndighet = brevbestilling.getUtenlandskMyndighet();
             return new Mottaker(
                 utenlandskMyndighet.navn,
-                Collections.singletonList(utenlandskMyndighet.gateadresse),
+                utenlandskMyndighet.getGateadresseAsList(),
                 utenlandskMyndighet.postnummer,
                 utenlandskMyndighet.poststed,
                 utenlandskMyndighet.land,

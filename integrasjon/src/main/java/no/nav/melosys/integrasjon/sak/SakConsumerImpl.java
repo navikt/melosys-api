@@ -49,13 +49,6 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
     }
 
     @Override
-    public boolean isSystem() {
-        if (ThreadLocalAccessInfo.shouldUseSystemToken()) return true;
-        if (ThreadLocalAccessInfo.shouldUseOidcToken()) return false;
-        throw new TekniskException("Uregistert kall prøver å registrere token provider");
-    }
-
-    @Override
     public SakDto hentSak(Long id) {
         try {
             return target
@@ -111,5 +104,12 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
         FeilResponseDto feilResponseDto = response.readEntity(FeilResponseDto.class);
         log.error("Feil oppstod. Uuid={}, Response Kode={}, Feilmelding={}", feilResponseDto.getUuid(), response.getStatus(), feilResponseDto.getFeilmelding());
         httpStatusTilException(response.getStatus(), feilResponseDto.getFeilmelding());
+    }
+
+    private String getAuth() {
+        if (ThreadLocalAccessInfo.shouldUseOidcToken()) {
+            throw new TekniskException("Sak kan kun bli kalt i fra prosess");
+        }
+        return basicAuth();
     }
 }

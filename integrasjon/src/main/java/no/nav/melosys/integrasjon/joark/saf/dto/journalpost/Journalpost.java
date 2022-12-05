@@ -46,6 +46,7 @@ public record Journalpost(
         }
 
         journalpost.setErFerdigstilt(erFerdigstilt());
+        journalpost.setErUtgått(erUtgått());
         journalpost.setForsendelseJournalfoert(hentForsendelseJournalført());
         journalpost.setForsendelseMottatt(hentForsendelseMottatt());
         journalpost.setHoveddokument(hentHoveddokument());
@@ -106,6 +107,11 @@ public record Journalpost(
         }
         return false;
     }
+
+    private boolean erUtgått() {
+        return journalstatus == Journalstatus.UTGAAR;
+    }
+
 
     private boolean erInngående() {
         return Journalposttype.I == journalposttype;

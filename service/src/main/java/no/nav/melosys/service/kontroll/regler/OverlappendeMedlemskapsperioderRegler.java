@@ -4,16 +4,11 @@ import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.PeriodeOmLovvalg;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
-import no.nav.melosys.domain.dokument.medlemskap.PeriodeType;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public final class OverlappendeMedlemskapsperioderRegler {
-
-    private static final Logger log = LoggerFactory.getLogger(OverlappendeMedlemskapsperioderRegler.class);
-
+    
     public static boolean harOverlappendeMedlemsperiodeFraSed(MedlemskapDokument medlemskapDokument,
                                                               ErPeriode kontrollperiode) {
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
@@ -25,22 +20,6 @@ public final class OverlappendeMedlemskapsperioderRegler {
                                                                         ErPeriode kontrollperiode) {
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
             medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status)
-                && PeriodeRegler.perioderOverlapperMerEnn1Dag(kontrollperiode, medlemsperiode.getPeriode()));
-    }
-
-    public static boolean harOverlappendeMedlemsperiodeMedMedlemskapMerEnn1DagFraSed(MedlemskapDokument medlemskapDokument,
-                                                                                     ErPeriode kontrollperiode) {
-        return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
-            medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status)
-                && PeriodeType.PERIODE_MED_MEDLEMSKAP.equals(medlemsperiode.type)
-                && PeriodeRegler.perioderOverlapperMerEnn1Dag(kontrollperiode, medlemsperiode.getPeriode()));
-    }
-
-    public static boolean harOverlappendeMedlemsperiodeUtenMedlemskapMerEnn1DagFraSed(MedlemskapDokument medlemskapDokument,
-                                                                                      ErPeriode kontrollperiode) {
-        return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
-            medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status)
-                && PeriodeType.PERIODE_UTEN_MEDLEMSKAP.equals(medlemsperiode.type)
                 && PeriodeRegler.perioderOverlapperMerEnn1Dag(kontrollperiode, medlemsperiode.getPeriode()));
     }
 
@@ -62,13 +41,8 @@ public final class OverlappendeMedlemskapsperioderRegler {
         }
         var sedLovvalgsperiode = sedDokument.getLovvalgsperiode();
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
-            medlemsperiode -> {
-                log.info("[harOverlappendePerioderMedUlikSedLovvalgslandOgMedlLovvalgsland]: " +
-                        "sammenligner sedDokument lovvalgslandKode: {} med medlemsperiode land: {}",
-                    sedDokument.getLovvalgslandKode().getKode(), medlemsperiode.getLand());
-                return !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status)
-                    && PeriodeRegler.perioderOverlapperMerEnn1Dag(sedLovvalgsperiode, medlemsperiode.getPeriode())
-                    && !sedDokument.getLovvalgslandKode().getKode().equals(medlemsperiode.hentLandSomIso2());
-            });
+            medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status)
+                && PeriodeRegler.perioderOverlapperMerEnn1Dag(sedLovvalgsperiode, medlemsperiode.getPeriode())
+                && !sedDokument.getLovvalgslandKode().getKode().equals(medlemsperiode.hentLandSomIso2()));
     }
 }

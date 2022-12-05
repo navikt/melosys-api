@@ -65,10 +65,12 @@ public final class BrevDataUtils {
     }
 
     public static UtenlandskPostadresse lagUtendlanskAdresse(UtenlandskMyndighet utenlandskMyndighet) {
-        return UtenlandskPostadresse.builder().withAdresselinje1(utenlandskMyndighet.gateadresse)
-            .withAdresselinje2(utenlandskMyndighet.postnummer + " " + utenlandskMyndighet.poststed)
-            .withAdresselinje3("")
-            .withLand(utenlandskMyndighet.land).build();
+        return UtenlandskPostadresse.builder()
+            .withAdresselinje1(utenlandskMyndighet.gateadresse1)
+            .withAdresselinje2(utenlandskMyndighet.gateadresse2)
+            .withAdresselinje3(utenlandskMyndighet.postnummer + " " + utenlandskMyndighet.poststed)
+            .withLand(utenlandskMyndighet.land)
+            .build();
     }
 
     private static <T extends AdresseEnhet> T lagAdresse(T adresse, NorskPostadresse postadresse) {
