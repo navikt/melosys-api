@@ -42,7 +42,7 @@ class OppgaveConsumerImplTest {
 
     @BeforeEach
     void setup() {
-        oppgaveConsumer = new OppgaveConsumerImpl(WebClient.builder().baseUrl("http://localhost:" + mockServer.getPort()).build());
+        oppgaveConsumer = new OppgaveConsumer(WebClient.builder().baseUrl("http://localhost:" + mockServer.getPort()).build());
     }
 
     @Test

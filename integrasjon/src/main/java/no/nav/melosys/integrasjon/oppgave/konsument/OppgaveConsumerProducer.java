@@ -29,7 +29,7 @@ public class OppgaveConsumerProducer implements WebClientConfig {
     public OppgaveConsumer oppgaveConsumer(
         WebClient.Builder webClientBuilder, CorrelationIdOutgoingFilter correlationIdOutgoingFilter
     ) {
-        return new OppgaveConsumerImpl(
+        return new OppgaveConsumer(
             webClientBuilder
                 .defaultHeaders(this::defaultHeaders)
                 .filter(genericAuthFilterFactory.getFilter(CLIENT_NAME))
