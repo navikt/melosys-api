@@ -84,6 +84,8 @@ public enum Bestemmelse {
             .put(Overgangsregelbestemmelser.FO_1408_1971_ART14C_B, Bestemmelse.ART_14_c_b)
             .build());
 
+    //TODO oppdater
+
     private String value;
 
     Bestemmelse(String value) {
