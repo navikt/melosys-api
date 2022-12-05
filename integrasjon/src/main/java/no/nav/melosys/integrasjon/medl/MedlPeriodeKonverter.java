@@ -7,6 +7,7 @@ import java.util.Set;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import no.nav.melosys.domain.PeriodeOmLovvalg;
+import no.nav.melosys.domain.eessi.sed.Bestemmelse;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
@@ -27,7 +28,9 @@ public final class MedlPeriodeKonverter {
     private static final Collection<LovvalgBestemmelse> TILLEGGSBESTEMMELSER_MAPPES_TIL_MEDL = Set.of(
         Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_2,
         Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1,
-        Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5
+        Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5,
+        Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A,
+        Tilleggsbestemmelser_883_2004.FO_883_2004_ART87_8
     );
 
     static {
@@ -41,6 +44,8 @@ public final class MedlPeriodeKonverter {
         tbl.put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1, GrunnlagMedl.FO_11_4_1);
         tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2, GrunnlagMedl.FO_11_4_2);
         tbl.put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5, GrunnlagMedl.FO_11_5);
+        tbl.put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A, GrunnlagMedl.FO_11_5);
+        tbl.put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87_8, GrunnlagMedl.FO_11_5);
         tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, GrunnlagMedl.FO_12_1);
         tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2, GrunnlagMedl.FO_12_2);
         tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, GrunnlagMedl.FO_13_1_A);
@@ -72,6 +77,14 @@ public final class MedlPeriodeKonverter {
         tbl.put(Lovvalgbestemmelser_trygdeavtale_ca.CAN_ART9, GrunnlagMedl.CAN_ART9);
         tbl.put(Lovvalgbestemmelser_trygdeavtale_ca.CAN_ART10, GrunnlagMedl.CAN_ART10);
         tbl.put(Lovvalgbestemmelser_trygdeavtale_ca.CAN_ART11, GrunnlagMedl.CAN_ART11);
+
+        //TODO er dette korrekt plass?
+
+        tbl.put(Overgangsregelbestemmelser.FO_1408_1971_ART14_2_A, GrunnlagMedl.FO_1408_14_2_A);
+        tbl.put(Overgangsregelbestemmelser.FO_1408_1971_ART14_2_B, GrunnlagMedl.FO_1408_14_2_B);
+        tbl.put(Overgangsregelbestemmelser.FO_1408_1971_ART14A_2, GrunnlagMedl.FO_1408_14_A_2);
+        tbl.put(Overgangsregelbestemmelser.FO_1408_1971_ART14C_A, GrunnlagMedl.FO_1408_14_C_A);
+        tbl.put(Overgangsregelbestemmelser.FO_1408_1971_ART14C_B, GrunnlagMedl.FO_1408_14_C_B);
 
         lovvalgsbestemmelseTilGrunnlagMedlTabell = tbl;
 
