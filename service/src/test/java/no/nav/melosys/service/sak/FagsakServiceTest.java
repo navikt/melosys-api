@@ -6,28 +6,32 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.FagsakRepository;
+import no.nav.melosys.service.SaksbehandlingDataFactory;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.kodeverk.Sakstemaer.*;
-import static no.nav.melosys.domain.kodeverk.Sakstyper.*;
+import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
+import static no.nav.melosys.domain.kodeverk.Sakstyper.EU_EOS;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.ARBEID_FLERE_LAND;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.UTSENDT_ARBEIDSTAKER;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -51,6 +55,8 @@ class FagsakServiceTest {
     private PersondataFasade persondataFasade;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
+    @Mock
+    private LovligeKombinasjonerService lovligeKombinasjonerService;
 
     private FagsakService fagsakService;
 
@@ -62,7 +68,8 @@ class FagsakServiceTest {
             kontaktopplysningService,
             oppgaveService,
             persondataFasade,
-            behandlingsresultatService);
+            behandlingsresultatService,
+            lovligeKombinasjonerService);
     }
 
     @Test
@@ -141,109 +148,15 @@ class FagsakServiceTest {
     }
 
     @Test
-    void hentMuligeSakstema_med_behandlingstema_med_behandlingstema_lovlig() {
+    void oppdaterFagsakOgBehandling() {
         Fagsak fagsak = lagFagsakMedBruker();
-        Behandling behandling = lagBehandling(1L, SOEKNAD, UNDER_BEHANDLING, Instant.now());
-        behandling.setTema(UTSENDT_ARBEIDSTAKER);
-        fagsak.setBehandlinger(List.of(behandling));
-        fagsak.setTema(MEDLEMSKAP_LOVVALG);
-        behandling.setFagsak(fagsak);
-
+        fagsak.getBehandlinger().add(SaksbehandlingDataFactory.lagBehandling());
         when(fagsakRepo.findBySaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
 
-        Set<Sakstemaer> muligeSakstemaer = fagsakService.hentMuligeSakstemaer(SAKSNUMMER);
+        fagsakService.oppdaterFagsakOgBehandling(fagsak.getSaksnummer(), Sakstyper.TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, Behandlingstema.ARBEID_FLERE_LAND, NY_VURDERING, null, null);
 
-        assertThat(muligeSakstemaer)
-            .isNotEmpty()
-            .contains(UNNTAK, TRYGDEAVGIFT)
-            .doesNotContain(MEDLEMSKAP_LOVVALG);
-    }
-
-    @Test
-    @Disabled("Frem til sakstype fiks")
-    void hentMuligeSakstyper_med_behandlingstema_med_behandlingstema_lovlig() {
-        Fagsak fagsak = lagFagsakMedBruker();
-        Behandling behandling = lagBehandling(1L, SOEKNAD, UNDER_BEHANDLING, Instant.now());
-        behandling.setTema(UTSENDT_ARBEIDSTAKER);
-        fagsak.setBehandlinger(List.of(behandling));
-        fagsak.setType(EU_EOS);
-        behandling.setFagsak(fagsak);
-
-        when(fagsakRepo.findBySaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
-
-        Set<Sakstyper> muligeSakstyper = fagsakService.hentMuligeSakstyper(SAKSNUMMER);
-
-        assertThat(muligeSakstyper)
-            .isNotEmpty()
-            .contains(TRYGDEAVTALE, FTRL)
-            .doesNotContain(EU_EOS);
-    }
-
-    @Test
-    @Disabled("Frem til sakstype fiks")
-    void endreFagsakTypeMedMuligeVerdier_med_behandlingstema_lovlig() {
-        Fagsak fagsak = lagFagsakMedBruker();
-        Behandling behandling = lagBehandling(1L, SOEKNAD, UNDER_BEHANDLING, Instant.now());
-        behandling.setTema(UTSENDT_ARBEIDSTAKER);
-        fagsak.setBehandlinger(List.of(behandling));
-        fagsak.setType(EU_EOS);
-        fagsak.setTema(MEDLEMSKAP_LOVVALG);
-        behandling.setFagsak(fagsak);
-
-        when(fagsakRepo.findBySaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
-
-        Set<Sakstyper> muligeSakstyper = fagsakService.hentMuligeSakstyper(SAKSNUMMER);
-        Optional<Sakstyper> valgtSakstype = muligeSakstyper.stream().findFirst();
-
-        assertThat(valgtSakstype).isNotNull();
-
-        fagsakService.endreSakstype(fagsak, valgtSakstype.get());
-
-        assertThat(fagsak.getType()).isEqualTo(valgtSakstype.get());
-    }
-
-    @Test
-    void endreFagsakTemaMedMuligeVerdier_med_behandlingstema_lovlig() {
-        Fagsak fagsak = lagFagsakMedBruker();
-        Behandling behandling = lagBehandling(1L, SOEKNAD, UNDER_BEHANDLING, Instant.now());
-        behandling.setTema(UTSENDT_ARBEIDSTAKER);
-        fagsak.setBehandlinger(List.of(behandling));
-        fagsak.setType(EU_EOS);
-        fagsak.setTema(MEDLEMSKAP_LOVVALG);
-        behandling.setFagsak(fagsak);
-
-        when(fagsakRepo.findBySaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
-
-        Set<Sakstemaer> muligeSakstemaer = fagsakService.hentMuligeSakstemaer(SAKSNUMMER);
-        Optional<Sakstemaer> valgtSakstema = muligeSakstemaer.stream().findFirst();
-
-        assertThat(valgtSakstema).isNotNull();
-
-        fagsakService.endreSakstema(fagsak, valgtSakstema.get());
-
-        assertThat(fagsak.getTema()).isEqualTo(valgtSakstema.get());
-    }
-
-    @Test
-    void hentFagsakTypeOgTemaMedMuligeVerdier_med_behandlingstema_ikke_lovlig() {
-        Fagsak fagsak = lagFagsakMedBruker();
-        Behandling behandling = lagBehandling(1L, SOEKNAD, UNDER_BEHANDLING, Instant.now());
-        behandling.setTema(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
-        fagsak.setBehandlinger(List.of(behandling));
-        fagsak.setType(EU_EOS);
-        fagsak.setTema(MEDLEMSKAP_LOVVALG);
-        behandling.setFagsak(fagsak);
-
-        when(fagsakRepo.findBySaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
-
-        Set<Sakstyper> muligeSakstyper = fagsakService.hentMuligeSakstyper(SAKSNUMMER);
-        Set<Sakstemaer> muligeSakstemaer = fagsakService.hentMuligeSakstemaer(SAKSNUMMER);
-
-        Optional<Sakstemaer> valgtSakstema = muligeSakstemaer.stream().findFirst();
-        Optional<Sakstyper> valgtSakstype = muligeSakstyper.stream().findFirst();
-
-        assertThat(valgtSakstype).isEmpty();
-        assertThat(valgtSakstema).isEmpty();
+        verify(fagsakRepo).save(fagsak);
+        verify(behandlingService).endreBehandling(fagsak.hentAktivBehandling().getId(), NY_VURDERING, ARBEID_FLERE_LAND, null, null);
     }
 
     @Test

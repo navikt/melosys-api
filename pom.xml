@@ -70,6 +70,7 @@
         <json-smart.version>2.4.8</json-smart.version>
         <jms-api.version>2.0.1</jms-api.version>
         <kotest.version>5.3.2</kotest.version>
+        <kotlin-logging.version>3.0.0</kotlin-logging.version>
         <mockito-kotlin.version>4.0.0</mockito-kotlin.version>
         <mockk.version>1.12.5</mockk.version>
         <micrometer-jvm-extras.version>0.2.2</micrometer-jvm-extras.version>
@@ -228,6 +229,11 @@
                 <groupId>com.zaxxer</groupId>
                 <artifactId>HikariCP</artifactId>
                 <version>${hikaricp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.microutils</groupId>
+                <artifactId>kotlin-logging-jvm</artifactId>
+                <version>${kotlin-logging.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.micrometer</groupId>

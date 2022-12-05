@@ -3,6 +3,7 @@ package no.nav.melosys.service.vilkaar;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
@@ -11,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,13 +22,16 @@ import static no.nav.melosys.domain.kodeverk.Vilkaar.*;
 public class VilkaarsresultatService {
     private final BehandlingsresultatService behandlingsresultatService;
     private final VilkaarsresultatRepository vilkaarsresultatRepo;
+    private final Unleash unleash;
 
     private static final Collection<Vilkaar> IMMUTABLE_VILKAAR = Collections.singleton(FO_883_2004_INNGANGSVILKAAR);
 
     public VilkaarsresultatService(BehandlingsresultatService behandlingsresultatService,
-                                   VilkaarsresultatRepository vilkaarsresultatRepo) {
+                                   VilkaarsresultatRepository vilkaarsresultatRepo,
+                                   Unleash unleash) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.vilkaarsresultatRepo = vilkaarsresultatRepo;
+        this.unleash = unleash;
     }
 
     @Transactional(readOnly = true)
@@ -90,7 +95,17 @@ public class VilkaarsresultatService {
 
     @Transactional
     public void tømVilkårForBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
-        vilkaarsresultatRepo.deleteByBehandlingsresultatAndVilkaarNotIn(behandlingsresultat, IMMUTABLE_VILKAAR);
+        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
+            var behandling = behandlingsresultat.getBehandling();
+            var fagsak = behandling.getFagsak();
+            if (fagsak.erSakstypeEøs() && !SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"))) {
+                vilkaarsresultatRepo.deleteByBehandlingsresultatAndVilkaarNotIn(behandlingsresultat, IMMUTABLE_VILKAAR);
+            } else {
+                vilkaarsresultatRepo.deleteByBehandlingsresultatId(behandlingsresultat.getId());
+            }
+        } else {
+            vilkaarsresultatRepo.deleteByBehandlingsresultatAndVilkaarNotIn(behandlingsresultat, IMMUTABLE_VILKAAR);
+        }
     }
 
     private void validerVilkår(List<VilkaarDto> vilkaarDtoer) {

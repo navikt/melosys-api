@@ -118,7 +118,7 @@ public class ThreadLocalAccessInfo {
             StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
             var stackTraceElements = Arrays.stream(stackTrace).map(StackTraceElement::toString).toList();
             String stackTraceAsString = String.join("\n", stackTraceElements);
-            log.warn("Call have not been registret from RestController or Prosess\n{}", stackTraceAsString);
+            log.warn("Call have not been registrert from RestController or Prosess\n{}", stackTraceAsString);
             return true;
         }
         return threadLocalAccessInfo.isFromAdminRequest();

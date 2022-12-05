@@ -1,5 +1,6 @@
 package no.nav.melosys.service.oppgave;
 
+
 import java.util.*;
 import javax.annotation.Nullable;
 
@@ -259,6 +260,24 @@ public class OppgaveService {
 
     public void oppdaterOppgave(String oppgaveID, OppgaveOppdatering oppgaveOppdatering) {
         oppgaveFasade.oppdaterOppgave(oppgaveID, oppgaveOppdatering);
+    }
+
+    public void oppdaterOppgave(String oppgaveID, Behandling behandling) {
+        Oppgave behandlingsoppgave = (
+            unleash.isEnabled("melosys.behandle_alle_saker")
+                ? lagBehandlingsoppgave(behandling)
+                : OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()))
+            .build();
+        oppdaterOppgave(
+            oppgaveID,
+            OppgaveOppdatering.builder()
+                .behandlingstema(behandlingsoppgave.getBehandlingstema())
+                .behandlingstype(unleash.isEnabled("melosys.behandle_alle_saker") ? null : behandlingsoppgave.getBehandlingstype())
+                .tema(behandlingsoppgave.getTema())
+                .oppgavetype(behandlingsoppgave.getOppgavetype())
+                .fristFerdigstillelse(Behandling.utledBehandlingsfrist(behandling, utledMottaksdato.getMottaksdato(behandling)))
+                .build()
+        );
     }
 
     public void oppdaterOppgaveMedSaksnummer(String fagSaksnummer, OppgaveOppdatering oppgaveOppdatering) {

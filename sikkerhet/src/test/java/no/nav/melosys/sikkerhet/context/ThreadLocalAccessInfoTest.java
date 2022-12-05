@@ -40,7 +40,7 @@ class ThreadLocalAccessInfoTest {
         assertThat(listAppender.list)
             .singleElement()
             .matches(iLoggingEvent -> iLoggingEvent.getMessage()
-                .contains("Call have not been registret from RestController or Prosess")
+                .contains("Call have not been registrert from RestController or Prosess")
             );
     }
 

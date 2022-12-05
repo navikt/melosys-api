@@ -337,7 +337,7 @@ class OpprettSakTest {
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(null);
 
-        doThrow(new FunksjonellException("Behandlingstema")).when(lovligeKombinasjonerService).validerBehandlingstemaOgBehandlingstypeForOpprettelse(any(), any(), any(), any(), any());
+        doThrow(new FunksjonellException("Behandlingstema")).when(lovligeKombinasjonerService).validerOpprettelseOgEndring(any(), any(), any(), any(), any());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto))
