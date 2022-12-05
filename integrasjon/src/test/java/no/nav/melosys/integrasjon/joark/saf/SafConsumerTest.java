@@ -32,7 +32,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class SafConsumerImplTest {
+class SafConsumerTest {
     private static final String JOURNALPOST_ID = "1";
     private static final String DOKUMENT_ID = "1";
 
@@ -229,7 +229,7 @@ class SafConsumerImplTest {
     }
 
     private static List<Journalpost> lagJournalposter(int antall) {
-        return Stream.generate(SafConsumerImplTest::lagJournalpost).limit(antall).collect(Collectors.toList());
+        return Stream.generate(SafConsumerTest::lagJournalpost).limit(antall).collect(Collectors.toList());
     }
 
     private static Journalpost lagJournalpost() {

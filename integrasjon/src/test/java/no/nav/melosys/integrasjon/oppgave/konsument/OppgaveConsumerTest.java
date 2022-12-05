@@ -25,7 +25,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class OppgaveConsumerImplTest {
+class OppgaveConsumerTest {
 
     private static MockWebServer mockServer;
 
