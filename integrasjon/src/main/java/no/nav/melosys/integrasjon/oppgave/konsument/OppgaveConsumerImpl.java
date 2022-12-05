@@ -3,13 +3,14 @@ package no.nav.melosys.integrasjon.oppgave.konsument;
 import java.util.*;
 
 import no.nav.melosys.integrasjon.felles.FeilResponseDto;
+import no.nav.melosys.integrasjon.felles.RestFeil;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-public class OppgaveConsumerImpl implements OppgaveConsumer {
+public class OppgaveConsumerImpl extends RestFeil implements OppgaveConsumer {
     // Oppgave (/Abac) kaster feil om svaret på et søk inneholder oppgaver med 50+ unike personer
     private static final int OPPGAVE_ANTALL_ABAC_LIMIT = 40;
     private static final String OPPGAVE_BASE_URI = "/oppgaver";

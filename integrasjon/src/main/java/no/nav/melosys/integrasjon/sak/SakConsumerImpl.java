@@ -16,12 +16,13 @@ import javax.ws.rs.core.Response.Status.Family;
 
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.felles.BasicAuthAware;
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
 import no.nav.melosys.integrasjon.felles.FeilResponseDto;
 import no.nav.melosys.integrasjon.felles.JacksonObjectMapperProvider;
-import no.nav.melosys.integrasjon.felles.RestConsumer;
 import no.nav.melosys.integrasjon.sak.dto.SakDto;
 import no.nav.melosys.integrasjon.sak.dto.SakSearchRequest;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,7 @@ import org.slf4j.LoggerFactory;
 import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.X_CORRELATION_ID;
 import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.getCorrelationId;
 
-public class SakConsumerImpl implements RestConsumer, SakConsumer {
+public class SakConsumerImpl implements SakConsumer, BasicAuthAware {
     private static final Logger log = LoggerFactory.getLogger(SakConsumerImpl.class);
 
     private static final GenericType<List<SakDto>> sakDtoListType = new GenericType<>() {
@@ -86,7 +87,8 @@ public class SakConsumerImpl implements RestConsumer, SakConsumer {
 
     @Override
     public SakDto opprettSak(SakDto sakDto) {
-        sakDto.setOpprettetAv(getUserID());
+        String userID = SubjectHandler.getInstance().getUserID();
+        sakDto.setOpprettetAv(userID);
         try (Response response = target
             .request()
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
