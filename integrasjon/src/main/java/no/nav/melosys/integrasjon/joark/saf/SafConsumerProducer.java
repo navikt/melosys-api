@@ -29,7 +29,7 @@ public class SafConsumerProducer implements WebClientConfig {
     @Bean
     public SafConsumer safConsumer(WebClient.Builder webClientBuilder,
                                    CorrelationIdOutgoingFilter correlationIdOutgoingFilter) {
-        return new SafConsumerImpl(
+        return new SafConsumer(
             webClientBuilder
                 .filter(genericAuthFilterFactory.getFilter(CLIENT_NAME))
                 .filter(correlationIdOutgoingFilter)

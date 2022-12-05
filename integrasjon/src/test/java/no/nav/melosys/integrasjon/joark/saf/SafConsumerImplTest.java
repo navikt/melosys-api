@@ -93,7 +93,7 @@ class SafConsumerImplTest {
         mockServer = new MockWebServer();
         mockServer.start();
 
-        safConsumer = new SafConsumerImpl(WebClient.builder().baseUrl("http://localhost:" + mockServer.getPort()).build());
+        safConsumer = new SafConsumer(WebClient.builder().baseUrl("http://localhost:" + mockServer.getPort()).build());
     }
 
     @Test
