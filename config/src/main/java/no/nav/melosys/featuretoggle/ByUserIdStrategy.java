@@ -19,12 +19,12 @@ class ByUserIdStrategy implements Strategy {
     public String getName() {
         return "byUserId";
     }
-
     @Override
+
     public boolean isEnabled(Map<String, String> parameters) {
         Optional<String> userIDs = Optional.ofNullable(parameters.get("user"));
         if (StringUtils.isEmpty(getLoggedInUserID()) && userIDs.isPresent() && !userIDs.get().isBlank()) {
-            log.warn("Finner ikke innlogget bruker i context, mens brukere er registert i unleash. Er sannsynligvis en SED prosess");
+            log.debug("Finner ikke innlogget bruker i context, mens brukere er registert i unleash. Er sannsynligvis en SED prosess");
         }
 
         return StringUtils.isNotEmpty(getLoggedInUserID()) && userIDs
