@@ -214,7 +214,7 @@ internal class EndreSakServiceTest {
                 capture(soeknadslandSlot)
             )
         }
-        assertThat(soeknadslandSlot.captured.landkoder).isNotEqualTo(mottatteOpplysningerData.soeknadsland.landkoder)
+        assertThat(soeknadslandSlot.captured.landkoder).isEmpty()
     }
 
     @Test
