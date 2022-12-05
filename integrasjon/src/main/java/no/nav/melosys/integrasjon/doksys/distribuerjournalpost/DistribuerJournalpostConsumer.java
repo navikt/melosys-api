@@ -3,7 +3,7 @@ package no.nav.melosys.integrasjon.doksys.distribuerjournalpost;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostRequest;
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostResponse;
-import no.nav.melosys.integrasjon.felles.RestFeil;
+import no.nav.melosys.integrasjon.felles.RestErrorHandling;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -16,7 +16,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 @Retryable
-public class DistribuerJournalpostConsumer extends RestFeil {
+public class DistribuerJournalpostConsumer extends RestErrorHandling {
     private static final Logger log = LoggerFactory.getLogger(DistribuerJournalpostConsumer.class);
 
     private final RestTemplate restTemplate;

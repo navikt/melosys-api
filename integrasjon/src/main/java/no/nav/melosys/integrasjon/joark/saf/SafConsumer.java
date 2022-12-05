@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.integrasjon.felles.CallIdAware;
-import no.nav.melosys.integrasjon.felles.RestFeil;
+import no.nav.melosys.integrasjon.felles.RestErrorHandling;
 import no.nav.melosys.integrasjon.felles.graphql.GraphQLError;
 import no.nav.melosys.integrasjon.felles.graphql.GraphQLRequest;
 import no.nav.melosys.integrasjon.felles.graphql.GraphQLResponse;
@@ -26,7 +26,7 @@ import reactor.core.publisher.Mono;
 
 import static java.util.Objects.requireNonNull;
 
-public class SafConsumer extends RestFeil implements CallIdAware {
+public class SafConsumer extends RestErrorHandling implements CallIdAware {
     private static final String CALL_ID = "Nav-Callid";
     private static final String HENT_DOKUMENT_ROOT = "/rest/hentdokument/{journalpostId}/{dokumentInfoId}/{variantFormat}";
     private static final String GRAPHQL_ROOT = "/graphql";
