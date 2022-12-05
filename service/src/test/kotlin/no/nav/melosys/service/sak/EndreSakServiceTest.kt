@@ -6,6 +6,7 @@ import io.mockk.called
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.slot
 import io.mockk.verify
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Anmodningsperiode
@@ -16,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstemaer.*
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.Sakstyper.*
+import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ANKE
@@ -30,6 +32,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -134,6 +137,84 @@ internal class EndreSakServiceTest {
 
         verify { mottatteOpplysningerService.slettOpplysninger(fagsak.hentAktivBehandling().id) }
         verify(exactly = 0) { mottatteOpplysningerService.opprettSøknad(fagsak.hentAktivBehandling(), any(), any()) }
+    }
+
+    @Test
+    fun `endring av sak, land gyldig for både ny og gammel flyt - bruker eksisterende soeknadsland`() {
+        unleash.enable("melosys.tom_periode_og_land")
+        val saksnummer = "MEL-123"
+        val fagsak = SaksbehandlingDataFactory.lagFagsak(saksnummer)
+        val mottatteOpplysningerData = MottatteOpplysningerData().apply {
+            periode = Periode()
+            soeknadsland = Soeknadsland().apply { landkoder.add(Trygdeavtale_myndighetsland.FR.kode) }
+        }
+        fagsak.type = TRYGDEAVTALE
+        val behandling = SaksbehandlingDataFactory.lagBehandling(fagsak, mottatteOpplysningerData)
+        fagsak.behandlinger.add(behandling)
+        every { fagsakService.hentFagsak(saksnummer) } returns fagsak
+        every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(behandling.mottatteOpplysninger)
+
+
+        endreSakService.endre(
+            saksnummer,
+            EU_EOS,
+            MEDLEMSKAP_LOVVALG,
+            UTSENDT_ARBEIDSTAKER,
+            FØRSTEGANG,
+            UNDER_BEHANDLING,
+            null
+        )
+
+
+        val soeknadslandSlot = slot<Soeknadsland>()
+        verify { mottatteOpplysningerService.slettOpplysninger(fagsak.hentAktivBehandling().id) }
+        verify {
+            mottatteOpplysningerService.opprettSøknad(
+                fagsak.hentAktivBehandling(),
+                any(),
+                capture(soeknadslandSlot)
+            )
+        }
+        assertThat(soeknadslandSlot.captured.landkoder).isEqualTo(mottatteOpplysningerData.soeknadsland.landkoder)
+    }
+
+    @Test
+    fun `endring av sak, land ikke gyldig for ny flyt - bruker tomt soeknadsland`() {
+        unleash.enable("melosys.tom_periode_og_land")
+        val saksnummer = "MEL-123"
+        val fagsak = SaksbehandlingDataFactory.lagFagsak(saksnummer)
+        val mottatteOpplysningerData = MottatteOpplysningerData().apply {
+            periode = Periode()
+            soeknadsland = Soeknadsland().apply { landkoder.add(Trygdeavtale_myndighetsland.AU.kode) }
+        }
+        fagsak.type = TRYGDEAVTALE
+        val behandling = SaksbehandlingDataFactory.lagBehandling(fagsak, mottatteOpplysningerData)
+        fagsak.behandlinger.add(behandling)
+        every { fagsakService.hentFagsak(saksnummer) } returns fagsak
+        every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(behandling.mottatteOpplysninger)
+
+
+        endreSakService.endre(
+            saksnummer,
+            EU_EOS,
+            MEDLEMSKAP_LOVVALG,
+            UTSENDT_ARBEIDSTAKER,
+            FØRSTEGANG,
+            UNDER_BEHANDLING,
+            null
+        )
+
+
+        val soeknadslandSlot = slot<Soeknadsland>()
+        verify { mottatteOpplysningerService.slettOpplysninger(fagsak.hentAktivBehandling().id) }
+        verify {
+            mottatteOpplysningerService.opprettSøknad(
+                fagsak.hentAktivBehandling(),
+                any(),
+                capture(soeknadslandSlot)
+            )
+        }
+        assertThat(soeknadslandSlot.captured.landkoder).isNotEqualTo(mottatteOpplysningerData.soeknadsland.landkoder)
     }
 
     @Test
