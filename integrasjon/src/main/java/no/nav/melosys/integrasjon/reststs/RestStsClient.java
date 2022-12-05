@@ -5,6 +5,4 @@ import no.nav.melosys.integrasjon.felles.RestConsumer;
 public interface RestStsClient extends RestConsumer {
 
     String bearerToken();
-
-    String collectToken();
 }
