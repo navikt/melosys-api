@@ -220,10 +220,18 @@ public class Behandling extends RegistreringsInfo {
         this.behandlingsårsak = behandlingsårsak;
     }
 
+    /**
+     * @deprecated MottatteOpplysninger har blitt døpt om til Behandlingsårsak
+     */
+    @Deprecated(since = "melosys.ny_opprett_sak")
     public MottatteOpplysninger getMottatteOpplysninger() {
         return mottatteOpplysninger;
     }
 
+    /**
+     * @deprecated MottatteOpplysninger har blitt døpt om til Behandlingsårsak
+     */
+    @Deprecated(since = "melosys.ny_opprett_sak")
     public void setMottatteOpplysninger(MottatteOpplysninger mottatteOpplysninger) {
         this.mottatteOpplysninger = mottatteOpplysninger;
     }
