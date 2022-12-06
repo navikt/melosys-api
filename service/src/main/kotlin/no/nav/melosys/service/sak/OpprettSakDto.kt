@@ -21,5 +21,5 @@ class OpprettSakDto {
     var oppgaveID: String? = null
     var soknadDto: SøknadDto? = null
     var mottaksdato: LocalDate? = null
-    var isSkalTilordnes = false
+    var skalTilordnes: Boolean = false
 }

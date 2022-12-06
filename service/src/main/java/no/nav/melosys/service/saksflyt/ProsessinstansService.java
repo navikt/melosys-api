@@ -90,7 +90,7 @@ public class ProsessinstansService {
         prosessinstans.setData(MOTTATT_DATO, opprettSakDto.getMottaksdato());
         prosessinstans.setData(SØKNADSLAND, opprettSakDto.getSoknadDto().getLand());
         prosessinstans.setData(SØKNADSPERIODE, opprettSakDto.getSoknadDto().getPeriode());
-        prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
+        prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.getSkalTilordnes());
 
         lagre(prosessinstans);
     }
@@ -105,7 +105,7 @@ public class ProsessinstansService {
         prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakDto.getBehandlingsaarsakType());
         prosessinstans.setData(BEHANDLINGSÅRSAK_FRITEKST, opprettSakDto.getBehandlingsaarsakFritekst());
         prosessinstans.setData(MOTTATT_DATO, opprettSakDto.getMottaksdato());
-        prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
+        prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.getSkalTilordnes());
 
         lagre(prosessinstans);
     }
@@ -120,7 +120,7 @@ public class ProsessinstansService {
         prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakDto.getBehandlingsaarsakType());
         prosessinstans.setData(BEHANDLINGSÅRSAK_FRITEKST, opprettSakDto.getBehandlingsaarsakFritekst());
         prosessinstans.setData(MOTTATT_DATO, opprettSakDto.getMottaksdato());
-        prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
+        prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.getSkalTilordnes());
 
         lagre(prosessinstans);
     }
@@ -321,7 +321,7 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, opprettSakDto.getBrukerID());
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, opprettSakDto.getOppgaveID());
-        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
+        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, opprettSakDto.getSkalTilordnes());
         if (opprettSakDto.getSoknadDto().getPeriode() != null) {
             prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, opprettSakDto.getSoknadDto().getPeriode());
         }
@@ -354,7 +354,7 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
         prosessinstans.setData(ProsessDataKey.BRUKER_ID, opprettSakDto.getBrukerID());
         prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, opprettSakDto.getOppgaveID());
-        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, opprettSakDto.isSkalTilordnes());
+        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, opprettSakDto.getSkalTilordnes());
 
         lagre(prosessinstans);
     }
