@@ -8,6 +8,10 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.jpa.MottatteOpplysningerListener;
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper;
 
+/**
+ * @deprecated MottatteOpplysninger har blitt døpt om til Behandlingsårsak
+ */
+@Deprecated(since = "melosys.ny_opprett_sak")
 @Entity
 @EntityListeners(MottatteOpplysningerListener.class)
 @Table(name = "mottatteopplysninger")
