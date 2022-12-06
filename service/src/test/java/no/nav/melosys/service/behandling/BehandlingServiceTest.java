@@ -116,7 +116,7 @@ class BehandlingServiceTest {
         behandling.setTema(ARBEID_TJENESTEPERSON_ELLER_FLY);
         behandling.setType(HENVENDELSE);
         behandling.setFagsak(fagsak);
-        behandling.setMottatteOpplysninger(opprettMottatteOpplysninger());
+        behandling.setBehandlingsårsak(new Behandlingsaarsak());
 
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
 
@@ -131,7 +131,7 @@ class BehandlingServiceTest {
         assertThat(lagredeBehandlinger.get(1).getId()).isEqualTo(BEHANDLING_ID);
         assertThat(lagredeBehandlinger.get(1).getType()).isEqualTo(BEHANDLING_TYPE);
         assertThat(lagredeBehandlinger.get(2).getId()).isEqualTo(BEHANDLING_ID);
-        assertThat(lagredeBehandlinger.get(2).getMottatteOpplysninger().getMottaksdato()).isEqualTo(MOTTAKSDATO);
+        assertThat(lagredeBehandlinger.get(2).getBehandlingsårsak().getMottaksdato()).isEqualTo(MOTTAKSDATO);
         assertThat(lagredeBehandlinger.get(2).getBehandlingsfrist()).isEqualTo(Behandling.utledBehandlingsfrist(lagredeBehandlinger.get(2), MOTTAKSDATO));
         assertThat(lagredeBehandlinger.get(3).getId()).isEqualTo(BEHANDLING_ID);
         assertThat(lagredeBehandlinger.get(3).getTema()).isEqualTo(BEHANDLING_TEMA);
