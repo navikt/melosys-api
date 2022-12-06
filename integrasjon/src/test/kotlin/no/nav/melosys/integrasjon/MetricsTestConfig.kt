@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon
 
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -30,13 +31,10 @@ class MetricsTestConfig() {
 
         fun checkMetricsUri(uri: String) {
             meterRegistry.meters
-                .shouldHaveSize(1)
-                .first().id.apply {
-                    name.shouldBe("test")
-                    this.getTag("uri")
-                        .shouldBe(uri)
-                }
+                .map { it.id.getTag("uri") }
+                .shouldContain(uri)
         }
+
         fun metricsUriShouldContainBrackets() {
             meterRegistry.meters
                 .shouldHaveSize(1)

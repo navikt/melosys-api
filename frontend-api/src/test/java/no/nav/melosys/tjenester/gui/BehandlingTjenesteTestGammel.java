@@ -22,9 +22,12 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.ldap.SaksbehandlerService;
+import no.nav.melosys.service.bruker.SaksbehandlerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.tjenester.gui.dto.*;
+import no.nav.melosys.tjenester.gui.dto.EndreBehandlingDto;
+import no.nav.melosys.tjenester.gui.dto.EndreBehandlingsstatusDto;
+import no.nav.melosys.tjenester.gui.dto.EndreBehandlingstemaDto;
+import no.nav.melosys.tjenester.gui.dto.TidligereMedlemsperioderDto;
 import no.nav.melosys.tjenester.gui.dto.saksopplysninger.SaksopplysningerTilDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
@@ -171,19 +174,6 @@ class BehandlingTjenesteTestGammel {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
             .andExpect(status().isNoContent());
-    }
-
-    @Test
-    void endreBehandlingsfrist() throws Exception {
-        LocalDate frist = LocalDate.now().plusWeeks(1);
-        EndreBehandlingsfristDto endreBehandlingsfristDto = new EndreBehandlingsfristDto(frist);
-
-        mockMvc.perform(post(BASE_URL + "/{behandlingID}/behandlingsfrist", BEHANDLING_ID)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(endreBehandlingsfristDto)))
-            .andExpect(status().isNoContent());
-
-        verify(behandlingService).endreBehandlingsfrist(BEHANDLING_ID, frist);
     }
 
     @Test

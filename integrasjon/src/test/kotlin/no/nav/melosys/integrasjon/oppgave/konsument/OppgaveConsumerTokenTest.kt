@@ -3,35 +3,40 @@ package no.nav.melosys.integrasjon.oppgave.konsument
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
-import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
+import no.nav.melosys.integrasjon.OAuthMockServer
+import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
-import no.nav.melosys.integrasjon.reststs.StsRestTemplateProducer
+import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
+import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 
-@WebMvcTest(
-    value = [
-        StsRestTemplateProducer::class,
-        RestTokenServiceClient::class,
+@Import(
+    StsWebClientProducer::class,
+    RestTokenServiceClient::class,
+    OAuthMockServer::class,
 
-        OppgaveConsumerImpl::class,
-        OppgaveConsumerProducer::class,
-        GenericContextExchangeFilter::class
-    ]
+    OppgaveConsumer::class,
+    OppgaveConsumerProducer::class,
+    GenericAuthFilterFactory::class
 )
+@WebMvcTest
 @ActiveProfiles("wiremock-test")
+@EnableOAuth2Client
 @AutoConfigureWebClient
 class OppgaveConsumerTokenTest(
     @Autowired private val oppgaveConsumer: OppgaveConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
-    @Value("\${mockserver.security.port}") mockSecurityPort: Int
-) : ConsumerWireMockTestBase<String, OppgaveDto>(mockServiceUnderTestPort, mockSecurityPort) {
+    @Value("\${mockserver.security.port}") mockSecurityPort: Int,
+    @Autowired oAuthMockServer: OAuthMockServer
+) : ConsumerWireMockTestBase<String, OppgaveDto>(mockServiceUnderTestPort, mockSecurityPort, oAuthMockServer) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {
@@ -47,7 +52,7 @@ class OppgaveConsumerTokenTest(
     fun authorizationSkalKommeFraBruker() {
         verifyHeaders(
             mapOf<String, StringValuePattern>(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-user--")),
+                Pair("Authorization", WireMock.equalTo("Bearer -- user_access_token --")),
             )
         )
         executeFromController()

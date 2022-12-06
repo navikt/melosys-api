@@ -1,22 +1,24 @@
 package no.nav.melosys.service.eessi.kafka;
 
+import java.util.Map;
+import java.util.UUID;
+
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
-import java.util.UUID;
 
 import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.CORRELATION_ID;
 import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.putToMDC;
 
 @Service
+@Profile("!local-q1 & !local-q2")
 public class EessiMeldingConsumer {
 
     private static final Logger log = LoggerFactory.getLogger(EessiMeldingConsumer.class);

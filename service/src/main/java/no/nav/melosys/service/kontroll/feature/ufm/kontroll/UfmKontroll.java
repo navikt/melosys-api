@@ -95,16 +95,16 @@ final class UfmKontroll {
             } else if (sedDokument.erUnntaksperiode()) {
                 log.info("Mottatt overlappende unntaksperiode uten medlemskap for A003");
                 if (sedDokument.getErEndring()) {
-                    log.info("Mottatt overlappende medlemsperiode for A003 med en endring");
+                    log.info("Mottatt overlappende unntaksperiode for A003 med en endring");
                     return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
                 }
                 var optionalMottatteOpplysningerData = kontrollData.mottatteOpplysningerData();
                 if (harMottatteOpplysningerMedYtterligereInformasjon(optionalMottatteOpplysningerData)) {
-                    log.info("Mottatt overlappende medlemsperiode for A003 med ytterligere informasjon");
+                    log.info("Mottatt overlappende unntaksperiode for A003 med ytterligere informasjon");
                     return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
                 }
                 if (harOverlappendePerioderMedUlikSedLovvalgslandOgMedlLovvalgsland(sedDokument, medlemskapDokument)) {
-                    log.info("Mottatt overlappende medlemsperiode for A003 med ulike lovvalgsland i SED og MEDL");
+                    log.info("Mottatt overlappende unntaksperiode for A003 med ulike lovvalgsland i SED og MEDL");
                     return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
                 }
             }

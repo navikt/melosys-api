@@ -15,6 +15,8 @@ public class ThreadLocalAccessInfo {
 
     private String saksbehandler;
 
+    private String saksbehandlerNavn;
+
     private boolean isFromWebRequest() {
         return requestUri != null;
     }
@@ -34,6 +36,11 @@ public class ThreadLocalAccessInfo {
     public static String getSaksbehandler() {
         ThreadLocalAccessInfo threadLocalAccessInfo = ThreadLocalAccessInfo.threadLocalStorage.get();
         return threadLocalAccessInfo.getUserID();
+    }
+
+    public static String getSaksbehandlerNavn() {
+        ThreadLocalAccessInfo threadLocalAccessInfo = ThreadLocalAccessInfo.threadLocalStorage.get();
+        return threadLocalAccessInfo.saksbehandlerNavn;
     }
 
     private static final ThreadLocal<ThreadLocalAccessInfo> threadLocalStorage =
@@ -71,16 +78,17 @@ public class ThreadLocalAccessInfo {
     }
 
     public static void beforeExecuteProcess(UUID processId, String prosessSteg) {
-        beforeExecuteProcess(processId, prosessSteg, null);
+        beforeExecuteProcess(processId, prosessSteg, null, null);
     }
 
-    public static void beforeExecuteProcess(UUID processId, String prosessSteg, String saksbehandler) {
+    public static void beforeExecuteProcess(UUID processId, String prosessSteg, String saksbehandler, String saksbehandlerNavn) {
         ThreadLocalAccessInfo threadLocalAccessInfo = ThreadLocalAccessInfo.threadLocalStorage.get();
         if (threadLocalAccessInfo.processId != null || threadLocalAccessInfo.prosessSteg != null) {
             throw new IllegalStateException("processId and prosessSteg should always be null before execute ");
         }
 
         threadLocalAccessInfo.saksbehandler = saksbehandler;
+        threadLocalAccessInfo.saksbehandlerNavn = saksbehandlerNavn;
         threadLocalAccessInfo.processId = processId;
         threadLocalAccessInfo.prosessSteg = prosessSteg;
     }
@@ -110,7 +118,7 @@ public class ThreadLocalAccessInfo {
             StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
             var stackTraceElements = Arrays.stream(stackTrace).map(StackTraceElement::toString).toList();
             String stackTraceAsString = String.join("\n", stackTraceElements);
-            log.warn("Call have not been registret from RestController or Prosess\n{}", stackTraceAsString);
+            log.warn("Call have not been registrert from RestController or Prosess\n{}", stackTraceAsString);
             return true;
         }
         return threadLocalAccessInfo.isFromAdminRequest();

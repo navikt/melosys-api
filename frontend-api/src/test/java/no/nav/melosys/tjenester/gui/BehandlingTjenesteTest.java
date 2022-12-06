@@ -22,9 +22,10 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.ldap.SaksbehandlerService;
+import no.nav.melosys.service.bruker.SaksbehandlerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.tjenester.gui.dto.*;
+import no.nav.melosys.tjenester.gui.dto.EndreBehandlingDto;
+import no.nav.melosys.tjenester.gui.dto.TidligereMedlemsperioderDto;
 import no.nav.melosys.tjenester.gui.dto.saksopplysninger.SaksopplysningerTilDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
@@ -72,7 +73,7 @@ class BehandlingTjenesteTest {
     private ObjectMapper objectMapper;
 
     private EasyRandom random;
-    private FakeUnleash fakeUnleash = new FakeUnleash();
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     private static final long BEHANDLING_ID = 11L;
     private static final List<Long> PERIODE_IDER = Arrays.asList(2L, 3L, 5L);
@@ -118,15 +119,6 @@ class BehandlingTjenesteTest {
     }
 
     @Test
-    void endreStatus() throws Exception {
-        var endreBehandlingsstatusDto = new EndreBehandlingsstatusDto("UNDER_BEHANDLING");
-        mockMvc.perform(post(BASE_URL + "/{behandlingID}/status", BEHANDLING_ID)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(endreBehandlingsstatusDto)))
-            .andExpect(status().isNoContent());
-    }
-
-    @Test
     void knyttMedlemsperioder() throws Exception {
         TidligereMedlemsperioderDto tidligereMedlemsperioderDto = new TidligereMedlemsperioderDto();
         tidligereMedlemsperioderDto.periodeIder = PERIODE_IDER;
@@ -160,29 +152,6 @@ class BehandlingTjenesteTest {
         mockMvc.perform(get(BASE_URL + "/{behandlingID}", BEHANDLING_ID)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
-    }
-
-    @Test
-    void endreBehandlingstema() throws Exception {
-        EndreBehandlingstemaDto dto = new EndreBehandlingstemaDto("ARBEID_FLERE_LAND");
-
-        mockMvc.perform(post(BASE_URL + "/{behandlingID}/endreBehandlingstema", BEHANDLING_ID)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto)))
-            .andExpect(status().isNoContent());
-    }
-
-    @Test
-    void endreBehandlingsfrist() throws Exception {
-        LocalDate frist = LocalDate.now().plusWeeks(1);
-        EndreBehandlingsfristDto endreBehandlingsfristDto = new EndreBehandlingsfristDto(frist);
-
-        mockMvc.perform(post(BASE_URL + "/{behandlingID}/behandlingsfrist", BEHANDLING_ID)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(endreBehandlingsfristDto)))
-            .andExpect(status().isNoContent());
-
-        verify(behandlingService).endreBehandlingsfrist(BEHANDLING_ID, frist);
     }
 
     @Test

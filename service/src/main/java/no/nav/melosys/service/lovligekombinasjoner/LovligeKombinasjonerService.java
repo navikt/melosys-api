@@ -18,6 +18,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.sak.FagsakService;
 import org.springframework.stereotype.Service;
 
 import static no.nav.melosys.domain.kodeverk.Saksstatuser.HENLAGT;
@@ -28,24 +29,47 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 
 @Service
 public class LovligeKombinasjonerService {
+    private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
 
-    public LovligeKombinasjonerService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService) {
+    public LovligeKombinasjonerService(FagsakService fagsakService, BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService) {
+        this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
     }
 
-    public Set<Sakstyper> hentMuligeSakstyper() {
-        return LovligeSakskombinasjoner.ALLE_MULIGE_SAKSTYPER;
+    /**
+     * Henter mulige sakstyper
+     *
+     * @param saksnummer Saksnummer til eksisterende fagsak. (default = null)
+     *                   Brukt for å sjekke om eksisterende fagsak kan endre sakstype.
+     */
+    public Set<Sakstyper> hentMuligeSakstyper(@Nullable String saksnummer) {
+        return saksnummer == null || fagsakService.hentFagsak(saksnummer).kanEndreTypeOgTema()
+            ? LovligeSakskombinasjoner.ALLE_MULIGE_SAKSTYPER
+            : Collections.emptySet();
     }
 
-    public Set<Sakstemaer> hentMuligeSakstemaer(@Nullable Aktoersroller hovedpart, Sakstyper sakstype) {
+    /**
+     * Henter mulige sakstemaer
+     *
+     * @param hovedpart  Hovedpart knyttet til fagsaken. (default = null)
+     *                   Sender vi ikke inn hovedpart returnerer vi mulige sakstemaer for alle støttede hovedparter.
+     * @param sakstype   Allerede valgt sakstype.
+     * @param saksnummer Saksnummer til eksisterende fagsak. (default = null)
+     *                   Brukt for å sjekke om eksisterende fagsak kan endre sakstema.
+     */
+    public Set<Sakstemaer> hentMuligeSakstemaer(@Nullable Aktoersroller hovedpart, Sakstyper sakstype, @Nullable String saksnummer) {
         if (hovedpart == null) {
             return combineSets(
-                hentMuligeSakstemaer(Aktoersroller.BRUKER, sakstype),
-                hentMuligeSakstemaer(Aktoersroller.VIRKSOMHET, sakstype)
+                hentMuligeSakstemaer(Aktoersroller.BRUKER, sakstype, saksnummer),
+                hentMuligeSakstemaer(Aktoersroller.VIRKSOMHET, sakstype, saksnummer)
             );
+        }
+
+        if (saksnummer != null && !fagsakService.hentFagsak(saksnummer).kanEndreTypeOgTema()) {
+            return Collections.emptySet();
         }
 
         return switch (hovedpart) {
@@ -59,6 +83,17 @@ public class LovligeKombinasjonerService {
         };
     }
 
+    /**
+     * Henter mulige behandlingstemaer
+     *
+     * @param hovedpart           Hovedpart knyttet til fagsaken. (default = null)
+     *                            Hvis null returnerer vi mulige behandlingstemaer for alle støttede hovedparter samt
+     *                            mulige behandlingstemaer for SED. (MELOSYS-5223)
+     * @param sakstype            Allerede valgt sakstype.
+     * @param sakstema            Allerede valgt sakstema.
+     * @param sistBehandlingstema Behandlingstema til forrige behandling i fagsaken. (default = null)
+     *                            Brukt ved knytting til eksisterende sak.
+     */
     public Set<Behandlingstema> hentMuligeBehandlingstemaer(
         @Nullable Aktoersroller hovedpart,
         Sakstyper sakstype,
@@ -122,11 +157,23 @@ public class LovligeKombinasjonerService {
         return hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, sisteBehandling, sisteBehandlingsresultat);
     }
 
+    /**
+     * Henter mulige behandlingstemaer
+     *
+     * @param hovedpart                Hovedpart knyttet til fagsaken.
+     * @param sakstype                 Allerede valgt sakstype.
+     * @param sakstema                 Allerede valgt sakstema.
+     * @param behandlingstema          Allerede valgt behandlingstema.
+     * @param sisteBehandling          Forrige behandling i fagsaken. (default = null)
+     *                                 Brukt ved knytting til eksisterende sak.
+     * @param sisteBehandlingsresultat Forrige behandlingsresultat i fagsaken. (default = null)
+     *                                 Brukt ved knytting til eksisterende sak.
+     */
     public Set<Behandlingstyper> hentMuligeBehandlingstyper(
         Aktoersroller hovedpart,
         Sakstyper sakstype,
         Sakstemaer sakstema,
-        @Nullable Behandlingstema behandlingstema,
+        Behandlingstema behandlingstema,
         @Nullable Behandling sisteBehandling,
         @Nullable Behandlingsresultat sisteBehandlingsresultat
     ) {
@@ -191,7 +238,8 @@ public class LovligeKombinasjonerService {
         }
     }
 
-    public void validerBehandlingstemaOgBehandlingstypeForOpprettelse(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+    public void validerOpprettelseOgEndring(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        validerSakstema(hovedpart, sakstype, sakstema, null);
         validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null);
         validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, null, null);
     }
@@ -199,6 +247,12 @@ public class LovligeKombinasjonerService {
     public void validerBehandlingstemaOgBehandlingstypeForAndregangsbehandling(Fagsak fagsak, Behandling sistBehandling, Behandlingsresultat sistBehandlingsresultat, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
         validerBehandlingstema(fagsak.getHovedpartRolle(), fagsak.getType(), fagsak.getTema(), behandlingstema, sistBehandling.getTema());
         validerBehandlingstype(fagsak.getHovedpartRolle(), fagsak.getType(), fagsak.getTema(), behandlingstema, behandlingstype, sistBehandling, sistBehandlingsresultat);
+    }
+
+    private void validerSakstema(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, String saksnummer) {
+        if (!hentMuligeSakstemaer(hovedpart, sakstype, saksnummer).contains(sakstema)) {
+            throw new FunksjonellException(sakstema + " er ikke et lovlig sakstema med de andre valgte verdiene");
+        }
     }
 
     private void validerBehandlingstema(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstema sistBehandlingstema) {
@@ -211,52 +265,6 @@ public class LovligeKombinasjonerService {
         if (!hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, sistBehandling, sistBehandlingsresultat).contains(behandlingstype)) {
             throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype med de andre valgte verdiene");
         }
-    }
-
-    public void validerOmNyttTemaKanEndresTil(Behandling behandling, Behandlingstema tema) {
-        var muligeBehandlingstema = behandlingstemaSomKanEndresTil(behandling);
-        if (!muligeBehandlingstema.contains(tema)) {
-            throw new FunksjonellException(String.format("Behandlingen kan ikke endres til tema %s. Gyldige temaer for behandling %s er %s",
-                tema, behandling.getId(), muligeBehandlingstema));
-        }
-    }
-
-    public Set<Behandlingstema> behandlingstemaSomKanEndresTil(Behandling behandling) {
-        if (behandling == null || behandling.kanIkkeEndres()) {
-            return Collections.emptySet();
-        }
-
-        if (behandling.getFagsak() != null && behandling.getFagsak().getType() != null && behandling.getFagsak().getTema() != null) {
-            Sakstyper sakstype = behandling.getFagsak().getType();
-            Aktoersroller hovedpart = behandling.getFagsak().getHovedpartRolle();
-            Sakstemaer sakstema = behandling.getFagsak().getTema();
-
-            return hentMuligeBehandlingstemaer(hovedpart, sakstype, sakstema, null);
-        }
-        return Collections.emptySet();
-    }
-
-    public void validerOmNyTypeKanEndresTil(Behandling behandling, Behandlingstyper type) {
-        var muligeBehandlingstyper = behandlinstyperSomKanEndresTil(behandling);
-        if (!muligeBehandlingstyper.contains(type)) {
-            throw new FunksjonellException(String.format("Behandlingen kan ikke endres til type %s. Gyldige typer for behandling %s er %s",
-                type, behandling.getId(), muligeBehandlingstyper));
-        }
-    }
-
-    public Set<Behandlingstyper> behandlinstyperSomKanEndresTil(Behandling behandling) {
-        if (behandling == null || behandling.kanIkkeEndres()) {
-            return Collections.emptySet();
-        }
-        if (behandling.getFagsak() != null && behandling.getFagsak().getType() != null && behandling.getFagsak().getTema() != null) {
-            Sakstyper sakstype = behandling.getFagsak().getType();
-            Sakstemaer sakstema = behandling.getFagsak().getTema();
-            Aktoersroller hovedpart = behandling.getFagsak().getHovedpartRolle();
-            Behandlingstema behandlingstema = behandling.getTema();
-
-            return hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, null);
-        }
-        return Collections.emptySet();
     }
 
     @SafeVarargs

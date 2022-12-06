@@ -1,0 +1,84 @@
+apiVersion: nais.io/v1alpha1
+kind: Application
+metadata:
+  name: {{APP_NAME}}
+  namespace: teammelosys
+  labels:
+    team: teammelosys
+spec:
+  image: {{ IMAGE }}
+  port: 8080
+  replicas:
+    min: 2
+    max: 2
+    cpuThresholdPercentage: 80
+  liveness:
+    path: internal/health
+    initialDelay: 50
+    timeout: 10
+    failureThreshold: 5
+  readiness:
+    path: internal/health
+    initialDelay: 45
+    timeout: 10
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2048Mi
+    requests:
+      cpu: 200m
+      memory: 1024Mi
+  azure:
+    application:
+      enabled: true
+      tenant: {{TENANT_URL}}
+      claims:
+        extra:
+          - "NAVident"
+        groups:
+          - id: {{GROUP_MELOSYS_INNLOGGING}}
+        allowAllUsers: false
+  accessPolicy:
+    inbound:
+      rules:
+        - application: {{APP_NAME_FRONTEND}}
+        - application: {{APP_NAME_TRYGDEAVTALE}}
+    outbound:
+      rules:
+        - application: {{APP_NAME_OPPGAVE}}
+        - application: {{APP_NAME_PDL}}
+        - application: {{APP_NAME_SAF}}
+        - application: {{APP_NAME_MEDL}}
+        - application: {{APP_NAME_MELOSYS_EESSI}}
+  webproxy: true
+  vault:
+    enabled: true
+    paths:
+      - mountPath: /var/run/secrets/nais.io/serviceuser
+        kvPath: /serviceuser/data/{{VAULT_CLUSTER}}/srvmelosys
+  prometheus:
+    enabled: true
+    path: /internal/prometheus
+  ingresses:
+  - "https://{{ URL }}"
+  env:
+  - name: SPRING_PROFILES_ACTIVE
+    value: nais
+  - name: GROUP_MELOSYS_INNLOGGING
+    value: {{GROUP_MELOSYS_INNLOGGING}}
+  - name: APP_NAME_OPPGAVE
+    value: {{APP_NAME_OPPGAVE}}
+  - name: APP_NAME_PDL
+    value: {{APP_NAME_PDL}}
+  - name: APP_NAME_SAF
+    value: {{APP_NAME_SAF}}
+  - name: APP_NAME_MELOSYS_EESSI
+    value: {{APP_NAME_MELOSYS_EESSI}}
+  - name: APP_NAME_MEDL
+    value: {{APP_NAME_MEDL}}
+  - name: APP_NAME_FAKTURERINGSKOMPONENTEN
+    value: {{APP_NAME_FAKTURERINGSKOMPONENTEN}}
+  - name: NAIS_CLUSTER_NAME_FAKTURERINGSKOMPONENTEN
+    value: {{NAIS_CLUSTER_NAME_FAKTURERINGSKOMPONENTEN}}
+  kafka:
+    pool: {{ KAFKA_POOL }}

@@ -11,8 +11,6 @@ import io.mockk.spyk
 import no.nav.melosys.integrasjon.felles.EnvironmentHandler
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingInterceptor
-import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
-import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.*
@@ -22,20 +20,16 @@ import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Import(
-    value = [
-        CorrelationIdOutgoingInterceptor::class,
-        CorrelationIdOutgoingFilter::class
-    ]
+    CorrelationIdOutgoingInterceptor::class,
+    CorrelationIdOutgoingFilter::class
 )
 abstract class ConsumerWireMockTestBase<T, R>(
     mockPort: Int,
-    stsMockPort: Int
+    stsMockPort: Int,
+    private val oAuthMockServer: OAuthMockServer
 ) {
-    companion object {
-        const val UUID_REGEX = "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
-    }
 
-    protected val serviceUnderTestMockServer: WireMockServer =
+    private val serviceUnderTestMockServer: WireMockServer =
         WireMockServer(WireMockConfiguration.wireMockConfig().port(mockPort))
 
     protected val stsMockServer: WireMockServer =
@@ -49,6 +43,8 @@ abstract class ConsumerWireMockTestBase<T, R>(
 
     @BeforeAll
     fun beforeAll() {
+        oAuthMockServer.start()
+
         serviceUnderTestMockServer.start()
         stsMockServer.start()
 
@@ -62,6 +58,7 @@ abstract class ConsumerWireMockTestBase<T, R>(
     fun afterAll() {
         serviceUnderTestMockServer.stop()
         stsMockServer.stop()
+        oAuthMockServer.stop()
     }
 
     @BeforeEach
@@ -84,7 +81,6 @@ abstract class ConsumerWireMockTestBase<T, R>(
 
     @AfterEach
     fun afterEach() {
-        SpringSubjectHandler.set(NullSubjectHandler())
     }
 
     fun verifyHeaders(headers: Map<String, StringValuePattern>) {
@@ -123,7 +119,6 @@ abstract class ConsumerWireMockTestBase<T, R>(
     }
 
     fun executeFromController(consumer: (R) -> Unit = {}) {
-        SpringSubjectHandler.set(TestSubjectHandler())
         try {
             ThreadLocalAccessInfo.beforeControllerRequest("request", false)
             consumer(executeRequest())
@@ -157,13 +152,7 @@ abstract class ConsumerWireMockTestBase<T, R>(
 
     open fun errorFromServerMessage() = "500 INTERNAL_SERVER_ERROR - {\"melding\": \"Internal Server Error\"}"
 
-    open class TestSubjectHandler : SubjectHandler() {
-        override fun getOidcTokenString(): String? = "--token-from-user--"
-
-        override fun getUserID(): String? = "Z123"
-    }
-
-    class NullSubjectHandler : TestSubjectHandler() {
-        override fun getOidcTokenString(): String? = null
+    companion object {
+        const val UUID_REGEX = "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"
     }
 }

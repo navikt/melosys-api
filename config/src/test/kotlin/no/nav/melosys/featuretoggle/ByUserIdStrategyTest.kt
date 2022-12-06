@@ -58,7 +58,7 @@ internal class ByUserIdStrategyTest {
     @Test
     fun `unleash skal være enabled når brukerID finnes i ThreadLocalAccessInfo`() {
         val uuid = UUID.randomUUID()
-        ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "", SAKSBEHANDLER)
+        ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "", SAKSBEHANDLER, null)
         val byUserIdStrategy = ByUserIdStrategy()
 
 

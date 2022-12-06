@@ -2,9 +2,9 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: 'Miljø (dev, q1 eller prod)'
+        description: 'Miljø (q2, q1 eller prod)'
         required: true
-        default: 'dev'
+        default: 'q2'
 
 env:
   IMAGE: ghcr.io/${{ github.repository }}/melosys-api:${{ github.sha }}
@@ -70,51 +70,25 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest-8-cores
-    needs: [build]
-    if: always() && (needs.docker.result == 'success' || needs.docker.result == 'skipped')
+    needs: build
     steps:
       - uses: actions/checkout@v3
-      - name: Deploy to prod
-        if: github.event.inputs.environment == 'prod'
-        run: |
-          echo "CLUSTER=prod-fss" >> $GITHUB_ENV
-          echo "URL=melosys-api.intern.nav.no" >> $GITHUB_ENV
-          echo "KAFKA_POOL=nav-prod" >> $GITHUB_ENV
-          echo "VAULT_CLUSTER=prod" >> $GITHUB_ENV
-          echo "APP_NAME=melosys" >> $GITHUB_ENV
-      - name: Deploy to q1
-        if: github.event.inputs.environment == 'q1'
-        run: |
-          echo "CLUSTER=dev-fss" >> $GITHUB_ENV
-          echo "URL=melosys-api-q1.dev.intern.nav.no" >> $GITHUB_ENV
-          echo "ENVIRONMENT=q1" >> $GITHUB_ENV
-          echo "KAFKA_POOL=nav-dev" >> $GITHUB_ENV
-          echo "VAULT_CLUSTER=dev" >> $GITHUB_ENV
-          echo "APP_NAME=melosys-q1" >> $GITHUB_ENV
-      - name: Deploy to dev
-        if: github.event.inputs.environment == 'dev'
-        run: |
-          echo "CLUSTER=dev-fss" >> $GITHUB_ENV
-          echo "URL=melosys-api.dev.intern.nav.no" >> $GITHUB_ENV
-          echo "KAFKA_POOL=nav-dev" >> $GITHUB_ENV
-          echo "VAULT_CLUSTER=dev" >> $GITHUB_ENV
-          echo "APP_NAME=melosys" >> $GITHUB_ENV
-      - uses: nais/deploy/actions/deploy@v1
-        if: ${{ env.CLUSTER != '' }}
+      - name: deploy to ${{github.event.inputs.environment}}
+        uses: nais/deploy/actions/deploy@v1
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
-          CLUSTER: ${{ env.CLUSTER }}
-          RESOURCE: nais.yml
-          VAR: IMAGE=${{ env.IMAGE }},URL=${{ env.URL }},KAFKA_POOL=${{ env.KAFKA_POOL }},VAULT_CLUSTER=${{ env.VAULT_CLUSTER }},APP_NAME=${{ env.APP_NAME }}
+          CLUSTER: ${{github.event.inputs.environment == 'prod' && 'prod-fss' || 'dev-fss' }}
+          RESOURCE: nais/nais.yml
+          VAR: IMAGE=${{ env.IMAGE }}
+          VARS: nais/vars-${{github.event.inputs.environment}}.json
       - name: Get commit message
         run: echo "COMMIT_MSG=$(git log --format=%s -n 1)" >> $GITHUB_ENV
       - name: Slack Notification
-        if: ${{ env.CLUSTER != '' }}
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_COLOR: "${{ job.status == 'success' && 'good' || 'danger' }}"
           SLACK_USERNAME: Github Actions
           SLACK_ICON: https://github.com/github.png?size=48
-          SLACK_TITLE: "melosys-api ${{ job.status == 'success' && 'ble deployet' || 'kunne ikke deployes' }} til ${{ env.ENVIRONMENT }}"
+          SLACK_TITLE: "melosys-api ${{ job.status == 'success' && 'ble deployet' || 'kunne ikke deployes' }} til ${{github.event.inputs.environment}}"
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_MESSAGE: ${{ env.COMMIT_MSG }}

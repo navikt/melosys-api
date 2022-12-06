@@ -136,40 +136,19 @@ public class BehandlingService {
         if (!behandling.erAktiv()) {
             throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres");
         }
-        if (status != null && status != behandling.getStatus() && saksbehandlerKanEndreStatus(behandling, status)) {
+        if (status != null && status != behandling.getStatus()) {
+            validerNyStatusMulig(behandling, status);
             endreStatus(behandling, status);
         }
-        if (type != null && type != behandling.getType() && saksbehandlerKanEndreType(behandling, type) && !behandlingErLåst) {
+        if (type != null && type != behandling.getType() && !behandlingErLåst) {
+            validerNyTypeMulig(behandling, type);
             endreType(behandling, type);
         }
-        if (tema != null && tema != behandling.getTema() && saksbehandlerKanEndreTema(behandling, tema) && !behandlingErLåst) {
+        if (tema != null && tema != behandling.getTema() && !behandlingErLåst && validerNyTemaMulig(behandling, tema)) {
             endreTema(behandling, tema);
         }
         if (mottaksdato != null && !mottaksdato.equals(behandling.getMottatteOpplysninger().getMottaksdato())) {
             endreMottaksdato(behandling, mottaksdato);
-        }
-    }
-
-    /**
-     * @deprecated Erstattes av endreBestilling
-     */
-    @Deprecated
-    @Transactional
-    public void endreBehandlingstemaTilBehandling(long behandlingID, Behandlingstema nyttTema) {
-        Behandling behandling = hentBehandling(behandlingID);
-        var mottatteOpplysninger = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        if (MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandling, mottatteOpplysninger, unleash.isEnabled("melosys.behandle_alle_saker")).contains(nyttTema)) {
-            behandling.setTema(nyttTema);
-
-            tilbakestillMottatteOpplysninger(behandling);
-            applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
-            if (nyttTema != ARBEID_FLERE_LAND) {
-                behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.erUkjenteEllerAlleEosLand = false;
-                MottatteOpplysningerKonverterer.oppdaterMottatteOpplysninger(behandling.getMottatteOpplysninger());
-                mottatteOpplysningerRepository.saveAndFlush(behandling.getMottatteOpplysninger());
-            }
-        } else {
-            throw new FunksjonellException("Ikke mulig å endre behandlingstema");
         }
     }
 
@@ -186,7 +165,6 @@ public class BehandlingService {
         tidligereMedlemsperiodeRepository.saveAll(tidligereMedlemsperioder);
     }
 
-    @Deprecated
     public void lagre(Behandling behandling) {
         behandlingRepository.save(behandling);
     }
@@ -221,6 +199,7 @@ public class BehandlingService {
         } else if (status == Behandlingsstatus.AVSLUTTET) {
             oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
         }
+
         applicationEventPublisher.publishEvent(new BehandlingEndretStatusEvent(status, behandling));
     }
 
@@ -228,16 +207,20 @@ public class BehandlingService {
         log.info("Endrer behandlingstypen for behandling {} fra {} til {}", behandling.getId(), behandling.getType(), type);
         behandling.setType(type);
         behandlingRepository.save(behandling);
-        tilbakestillMottatteOpplysninger(behandling);
-        applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
+        if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
+            tilbakestillMottatteOpplysninger(behandling);
+            applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
+        }
     }
 
     public void endreTema(Behandling behandling, Behandlingstema tema) {
         log.info("Endrer behandlingstema for behandling {} fra {} til {}", behandling.getId(), behandling.getTema(), tema);
         behandling.setTema(tema);
         behandlingRepository.save(behandling);
-        tilbakestillMottatteOpplysninger(behandling);
-        applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
+        if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
+            tilbakestillMottatteOpplysninger(behandling);
+            applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
+        }
     }
 
     public void endreMottaksdato(Behandling behandling, LocalDate mottaksdato) {
@@ -248,7 +231,9 @@ public class BehandlingService {
             ? Behandling.utledBehandlingsfrist(behandling, mottaksdato)
             : Behandling.utledFristForBehandlingtema(behandling.getTema()));
         behandlingRepository.save(behandling);
-        applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
+        if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
+            applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
+        }
     }
 
     public List<Long> hentMedlemsperioder(long behandlingID) {
@@ -408,19 +393,6 @@ public class BehandlingService {
         behandlingRepository.save(behandling);
     }
 
-    /**
-     * @deprecated Erstattes av endreBestilling
-     */
-    @Deprecated
-    @Transactional
-    public void endreBehandlingsfrist(long behandlingId, LocalDate behandlingsfrist) {
-        Behandling behandling = hentBehandling(behandlingId);
-        behandling.setBehandlingsfrist(behandlingsfrist);
-        behandlingRepository.save(behandling);
-
-        applicationEventPublisher.publishEvent(new BehandlingsfristEndretEvent(behandlingId, behandlingsfrist));
-    }
-
     private void tilbakestillMottatteOpplysninger(Behandling behandling) {
         behandlingsresultatService.tømBehandlingsresultat(behandling.getId());
         if (behandling.getTema() != ARBEID_FLERE_LAND && behandling.getMottatteOpplysninger() != null) {
@@ -466,32 +438,28 @@ public class BehandlingService {
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), nyBehandlingsResultatType);
     }
 
-    private boolean saksbehandlerKanEndreStatus(Behandling behandling, Behandlingsstatus status) {
+    private void validerNyStatusMulig(Behandling behandling, Behandlingsstatus status) {
         if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
             MuligeManuelleBehandlingsendringer.validerNyStatusMulig(behandling, status);
-            return true;
+        } else {
+            lovligeKombinasjonerService.validerNyStatusMulig(behandling, status);
         }
-
-        lovligeKombinasjonerService.validerNyStatusMulig(behandling, status);
-        return true;
     }
 
-    private boolean saksbehandlerKanEndreType(Behandling behandling, Behandlingstyper type) {
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            lovligeKombinasjonerService.validerOmNyTypeKanEndresTil(behandling, type);
-        } else {
+    @Deprecated(since = "melosys.behandle_alle_saker")
+    private void validerNyTypeMulig(Behandling behandling, Behandlingstyper type) {
+        if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
             MuligeManuelleBehandlingsendringer.validerNyTypeMulig(behandling, type);
         }
-        return true;
     }
 
-    private boolean saksbehandlerKanEndreTema(Behandling behandling, Behandlingstema tema) {
-        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            lovligeKombinasjonerService.validerOmNyttTemaKanEndresTil(behandling, tema);
-        } else {
+    @Deprecated(since = "melosys.behandle_alle_saker")
+    private boolean validerNyTemaMulig(Behandling behandling, Behandlingstema tema) {
+        if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
+            var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
             MuligeManuelleBehandlingsendringer.validerNyttTemaMulig(behandling, behandlingsresultat, tema, unleash.isEnabled("melosys.behandle_alle_saker"));
+            return behandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak();
         }
-        return behandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak();
+        return true;
     }
 }
