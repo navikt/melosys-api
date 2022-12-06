@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.reststs;
 
 import java.util.Map;
 
+import no.nav.melosys.integrasjon.felles.BasicAuthAware;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
@@ -13,7 +14,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 @Profile("local-mock")
-public class RestTokenServiceClientMockClient extends RestTokenServiceClientBase {
+public class RestTokenServiceClientMockClient extends RestTokenServiceClientBase implements BasicAuthAware {
     private final WebClient webClient;
 
     public RestTokenServiceClientMockClient(WebClient webClient) {

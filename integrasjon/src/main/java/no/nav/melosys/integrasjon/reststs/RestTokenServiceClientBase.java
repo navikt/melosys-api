@@ -22,7 +22,7 @@ public abstract class RestTokenServiceClientBase implements RestStsClient {
         return "Bearer " + collectToken();
     }
 
-    public synchronized String collectToken() {
+    private synchronized String collectToken() {
         if (shouldCollectNewToken()) {
             token = generateToken();
         }

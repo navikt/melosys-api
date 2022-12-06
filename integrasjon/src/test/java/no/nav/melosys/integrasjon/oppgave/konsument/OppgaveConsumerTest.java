@@ -25,7 +25,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class OppgaveConsumerImplTest {
+class OppgaveConsumerTest {
 
     private static MockWebServer mockServer;
 
@@ -42,7 +42,7 @@ class OppgaveConsumerImplTest {
 
     @BeforeEach
     void setup() {
-        oppgaveConsumer = new OppgaveConsumerImpl(WebClient.builder().baseUrl("http://localhost:" + mockServer.getPort()).build());
+        oppgaveConsumer = new OppgaveConsumer(WebClient.builder().baseUrl("http://localhost:" + mockServer.getPort()).build());
     }
 
     @Test

@@ -1,6 +1,5 @@
 package no.nav.melosys.integrasjon.medl
 
-import no.nav.melosys.integrasjon.felles.RestConsumer
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForGet
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPost
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPut
@@ -12,7 +11,7 @@ import org.springframework.web.util.UriBuilder
 import java.time.LocalDate
 
 @Retryable
-open class MedlemskapRestConsumer(private val webClient: WebClient) : RestConsumer {
+open class MedlemskapRestConsumer(private val webClient: WebClient)  {
     // Metoder må være open for at retry skal funke og at webClient ikke skal bli null
     // https://github.com/spring-projects/spring-framework/issues/26729
     open fun hentPeriodeListe(fnr: String, fom: LocalDate?, tom: LocalDate?): List<MedlemskapsunntakForGet> {
