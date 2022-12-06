@@ -59,9 +59,12 @@ public class DefaultSedRuter implements SedRuter {
 
             if (sistAktivBehandling.erAktiv()) {
                 behandlingService.endreStatus(sistAktivBehandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
+            } else if (sedTypeSkalHaOppgave(sedType)) {
+                oppgaveService.opprettJournalføringsoppgave(eessiMelding.getJournalpostId(), prosessinstans.hentAktørIDFraDataEllerSED());
+                return;
             }
 
-            if (skalOppdatereOppgaveForSedType(sedType)) {
+            if (sedTypeSkalHaOppgave(sedType)) {
                 oppdaterEllerOpprettOppgave(sistAktivBehandling, prosessinstans, sedType);
             }
 
@@ -77,12 +80,8 @@ public class DefaultSedRuter implements SedRuter {
         );
     }
 
-    private boolean skalOppdatereOppgaveForSedType(SedType sedType) {
-        return switch (sedType) {
-            case A001, A003, A009, A010, A012, X001, X007 -> false;
-            //TODO: fiks resten etter tabell: https://confluence.adeo.no/display/TEESSI/Automatisk+mottak+av+ulike+SED
-            default -> true;
-        };
+    private boolean sedTypeSkalHaOppgave(SedType sedType) {
+        return !Set.of(SedType.X001, SedType.X007, SedType.A012).contains(sedType);
     }
 
     private void oppdaterEllerOpprettOppgave(Behandling behandling, Prosessinstans prosessinstans, SedType sedType) {
