@@ -169,7 +169,7 @@ class DefaultSedRuterTest {
         verify(oppgaveService).opprettJournalføringsoppgave(melosysEessiMelding.getJournalpostId(), melosysEessiMelding.getAktoerId());
         verify(behandlingService, never()).endreStatus(anyLong(), any());
         verify(oppgaveService, never()).opprettOppgave(any());
-        verify(oppgaveService, never()).oppdaterOppgave(any(), any());
+        verify(oppgaveService, never()).oppdaterOppgave(any(), any(OppgaveOppdatering.class));
         verify(prosessinstansService, never()).opprettProsessinstansSedJournalføring(any(), any());
     }
 
