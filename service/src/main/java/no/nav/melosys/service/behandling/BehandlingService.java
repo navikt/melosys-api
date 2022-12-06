@@ -147,14 +147,8 @@ public class BehandlingService {
         if (tema != null && tema != behandling.getTema() && !behandlingErLåst && validerNyTemaMulig(behandling, tema)) {
             endreTema(behandling, tema);
         }
-        if (unleash.isEnabled("melosys.ny_opprett_sak")) {
-            if (mottaksdato != null && !mottaksdato.equals((behandling.getBehandlingsårsak().getMottaksdato()))) {
-                endreMottaksdato(behandling, mottaksdato);
-            }
-        } else {
-            if (mottaksdato != null && !mottaksdato.equals(behandling.getMottatteOpplysninger().getMottaksdato())) {
-                endreMottatteOpplysningerMottaksdato(behandling, mottaksdato);
-            }
+        if (mottaksdato != null && !mottaksdato.equals((utledMottaksdato.getMottaksdato(behandling)))) {
+            endreMottaksdato(behandling, mottaksdato);
         }
     }
 
@@ -231,26 +225,18 @@ public class BehandlingService {
 
     public void endreMottaksdato(Behandling behandling, LocalDate mottaksdato) {
         log.info("Endrer mottaksdato for behandling {} fra {} til {}",
-            behandling.getId(), behandling.getBehandlingsårsak().getMottaksdato(), mottaksdato);
-        behandling.getBehandlingsårsak().setMottaksdato(mottaksdato);
-        behandling.setBehandlingsfrist(unleash.isEnabled("melosys.behandle_alle_saker")
-            ? Behandling.utledBehandlingsfrist(behandling, mottaksdato)
-            : Behandling.utledFristForBehandlingtema(behandling.getTema()));
-        behandlingRepository.save(behandling);
-        if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
-            applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
+            behandling.getId(), utledMottaksdato.getMottaksdato(behandling), mottaksdato);
+        if (unleash.isEnabled("melosys.ny_opprett_sak")) {
+            behandling.getBehandlingsårsak().setMottaksdato(mottaksdato);
+        } else {
+            behandling.getMottatteOpplysninger().setMottaksdato(mottaksdato);
         }
-    }
-
-    @Deprecated(since = "melosys.ny_opprett_sak")
-    public void endreMottatteOpplysningerMottaksdato(Behandling behandling, LocalDate mottaksdato) {
-        log.info("Endrer mottaksdato for behandling {} fra {} til {}",
-            behandling.getId(), behandling.getMottatteOpplysninger().getMottaksdato(), mottaksdato);
-        behandling.getMottatteOpplysninger().setMottaksdato(mottaksdato);
         behandling.setBehandlingsfrist(unleash.isEnabled("melosys.behandle_alle_saker")
             ? Behandling.utledBehandlingsfrist(behandling, mottaksdato)
             : Behandling.utledFristForBehandlingtema(behandling.getTema()));
+
         behandlingRepository.save(behandling);
+
         if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
             applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
         }
