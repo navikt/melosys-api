@@ -14,8 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpStatusCodeException;
 
-public class RestErrorHandling {
-    private static final Logger log = LoggerFactory.getLogger(RestErrorHandling.class);
+public class RestErrorHandler {
+    private static final Logger log = LoggerFactory.getLogger(RestErrorHandler.class);
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
