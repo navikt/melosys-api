@@ -15,6 +15,6 @@ public class SakConsumerProducer {
 
     @Bean
     public SakConsumer sakConsumer() {
-        return new SakConsumerImpl(endpointUrl);
+        return new SakConsumer(endpointUrl);
     }
 }

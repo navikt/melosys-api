@@ -12,6 +12,7 @@
     </root>
 
     <logger name="no.nav.melosys.integrasjon.felles.RestClientLoggingFilter" level="DEBUG"/>
+    <logger name="no.nav.security" level="DEBUG" />
     <logger name="org.apache.cxf.services" level="WARN"/>
     <logger name="org.springframework.oxm.jaxb.Jaxb2Marshaller" level="WARN"/>
     <logger name="no.nav.melosys.frontendlogg" level="TRACE"/>
@@ -22,4 +23,7 @@
     <logger name="org.springframework.transaction" level="WARN" />
     <logger name="org.springframework.transaction.interceptor" level="WARN" />
     <logger name="org.hibernate.SQL" level="WARN" />
+
+    <logger name="reactor.netty.http.client" level="INFO"/>
+    <logger name="org.springframework.web.client.RestTemplate" level="INFO"/>
 </included>

@@ -29,7 +29,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
-import no.nav.melosys.service.ldap.SaksbehandlerService;
+import no.nav.melosys.service.bruker.SaksbehandlerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;

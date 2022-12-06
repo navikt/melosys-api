@@ -102,8 +102,8 @@ public class MottatteOpplysningerService {
             Sakstyper sakstype = behandling.getFagsak().getType();
             switch (sakstype) {
                 case EU_EOS -> opprettSøknadYrkesaktiveEøs(behandlingID, periode, soeknadsland);
-                case FTRL -> opprettSøknadFolketrygden(behandlingID);
-                case TRYGDEAVTALE -> opprettSøknadTrygdeavtale(behandlingID);
+                case FTRL -> opprettSøknadFolketrygden(behandlingID, periode, soeknadsland);
+                case TRYGDEAVTALE -> opprettSøknadTrygdeavtale(behandlingID, periode, soeknadsland);
             }
             log.info("Opprettet søknad for behandling {}.", behandlingID);
         } else {
@@ -129,13 +129,19 @@ public class MottatteOpplysningerService {
             eksternReferanseID);
     }
 
-    private void opprettSøknadFolketrygden(long behandlingID) {
-        opprettMottatteOpplysninger(behandlingID, new SoeknadFtrl(), SØKNAD_FOLKETRYGDEN,
+    private void opprettSøknadFolketrygden(long behandlingID, Periode periode, Soeknadsland soeknadsland) {
+        SoeknadFtrl soeknadFtrl = new SoeknadFtrl();
+        soeknadFtrl.periode = periode;
+        soeknadFtrl.soeknadsland = soeknadsland;
+        opprettMottatteOpplysninger(behandlingID, soeknadFtrl, SØKNAD_FOLKETRYGDEN,
             VERSJON_SOEKNAD_GRUNNLAG);
     }
 
-    private void opprettSøknadTrygdeavtale(long behandlingID) {
-        opprettMottatteOpplysninger(behandlingID, new SoeknadTrygdeavtale(), SØKNAD_TRYGDEAVTALE,
+    private void opprettSøknadTrygdeavtale(long behandlingID, Periode periode, Soeknadsland soeknadsland) {
+        SoeknadTrygdeavtale soeknadTrygdeavtale = new SoeknadTrygdeavtale();
+        soeknadTrygdeavtale.periode = periode;
+        soeknadTrygdeavtale.soeknadsland = soeknadsland;
+        opprettMottatteOpplysninger(behandlingID, soeknadTrygdeavtale, SØKNAD_TRYGDEAVTALE,
             VERSJON_SOEKNAD_GRUNNLAG);
     }
 
@@ -173,6 +179,7 @@ public class MottatteOpplysningerService {
         mottatteOpplysninger.setOriginalData(originalData);
         mottatteOpplysninger.setEksternReferanseID(eksternReferanseID);
         mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
+        behandling.setMottatteOpplysninger(mottatteOpplysninger);
         mottatteOpplysningerRepository.save(mottatteOpplysninger);
     }
 
@@ -200,18 +207,25 @@ public class MottatteOpplysningerService {
     }
 
     @Transactional
-    public MottatteOpplysninger oppdaterMottatteOpplysninger(MottatteOpplysninger mottatteOpplysninger) {
+    public void oppdaterMottatteOpplysninger(MottatteOpplysninger mottatteOpplysninger) {
         MottatteOpplysningerKonverterer.oppdaterMottatteOpplysninger(mottatteOpplysninger);
-        return mottatteOpplysningerRepository.saveAndFlush(mottatteOpplysninger);
+        mottatteOpplysningerRepository.saveAndFlush(mottatteOpplysninger);
     }
 
     @Transactional
-    public MottatteOpplysninger oppdaterMottatteOpplysningerPeriodeOgLand(long behandlingID, Periode periode, Soeknadsland soeknadsland) {
+    public void oppdaterMottatteOpplysningerPeriodeOgLand(long behandlingID, Periode periode, Soeknadsland soeknadsland) {
         MottatteOpplysninger mottatteOpplysninger = hentMottatteOpplysninger(behandlingID);
         mottatteOpplysninger.getMottatteOpplysningerData().periode = periode;
         mottatteOpplysninger.getMottatteOpplysningerData().soeknadsland = soeknadsland;
         MottatteOpplysningerKonverterer.oppdaterMottatteOpplysninger(mottatteOpplysninger);
-        return mottatteOpplysningerRepository.saveAndFlush(mottatteOpplysninger);
+        mottatteOpplysningerRepository.saveAndFlush(mottatteOpplysninger);
+    }
+
+    @Transactional
+    public void slettOpplysninger(long behandlingID) {
+        var behandling = behandlingService.hentBehandling(behandlingID);
+        behandling.setMottatteOpplysninger(null);
+        mottatteOpplysningerRepository.deleteByBehandling_Id(behandlingID);
     }
 
     public Optional<MottatteOpplysninger> finnMottatteOpplysninger(Long behandlingID) {

@@ -33,6 +33,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Collections.*;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_ca.CAN_ART7;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_trygdeavtale_ca.CAN_ART8;
 import static no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie.Relasjonsrolle.BARN;
 import static no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER;
 import static no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie.tilMedfolgendeFamilie;
@@ -130,6 +132,43 @@ class TrygdeavtaleServiceTest {
                 FULL_DEKNING_FTRL,
                 INNVILGET,
                 LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.bestemmelse()),
+                Landkoder.NO,
+                null
+            );
+    }
+
+    @Test
+    void overførResultat_tilleggsbestemmelse_lagresKorrekt() {
+        var trygdeavtaleResultat = lagTrygdeavtaleMedTilleggsbestemmelse();
+        when(lovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(List.of());
+
+        trygdeavtaleService.overførResultat(1L, trygdeavtaleResultat);
+
+        verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(1L), lovvalgsperioderArgumentCaptor.capture());
+
+        assertThat(lovvalgsperioderArgumentCaptor.getValue())
+            .hasSize(1)
+            .flatExtracting(
+                Lovvalgsperiode::getId,
+                Lovvalgsperiode::getFom,
+                Lovvalgsperiode::getTom,
+                Lovvalgsperiode::getMedlemskapstype,
+                Lovvalgsperiode::getDekning,
+                Lovvalgsperiode::getInnvilgelsesresultat,
+                Lovvalgsperiode::getBestemmelse,
+                Lovvalgsperiode::getTilleggsbestemmelse,
+                Lovvalgsperiode::getLovvalgsland,
+                Lovvalgsperiode::getMedlPeriodeID
+            )
+            .containsExactly(
+                null,
+                trygdeavtaleResultat.lovvalgsperiodeFom(),
+                trygdeavtaleResultat.lovvalgsperiodeTom(),
+                PLIKTIG,
+                FULL_DEKNING_FTRL,
+                INNVILGET,
+                LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.bestemmelse()),
+                LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.tilleggsbestemmelse()),
                 Landkoder.NO,
                 null
             );
@@ -316,6 +355,29 @@ class TrygdeavtaleServiceTest {
         assertThat(response).isEmpty();
     }
 
+    private TrygdeavtaleResultat lagTrygdeavtaleMedTilleggsbestemmelse() {
+        return new TrygdeavtaleResultat.Builder()
+            .virksomhet(ORGNR_1)
+            .bestemmelse(CAN_ART7.getKode())
+            .tilleggsbestemmelse(CAN_ART8.getKode())
+            .familie(new AvklarteMedfolgendeFamilie(
+                Set.of(new OmfattetFamilie(UUID_BARN_2)),
+                Set.of(
+                    new IkkeOmfattetFamilie(
+                        UUID_BARN_1,
+                        OVER_18_AR.getKode(),
+                        BEGRUNNELSE_BARN),
+                    new IkkeOmfattetFamilie(
+                        UUID_EKTEFELLE,
+                        EGEN_INNTEKT.getKode(),
+                        BEGRUNNELSE_SAMBOER)
+                )
+            ))
+            .lovvalgsperiodeFom(PERIODE_FOM)
+            .lovvalgsperiodeTom(PERIODE_TOM)
+            .build();
+    }
+
     private TrygdeavtaleResultat lagTrygdeavtaleAltFyltUtResultat() {
         return new TrygdeavtaleResultat.Builder()
             .virksomhet(ORGNR_1)
@@ -355,6 +417,17 @@ class TrygdeavtaleServiceTest {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setId(11L);
         lovvalgsperiode.setBestemmelse(UK_ART6_1);
+        lovvalgsperiode.setFom(PERIODE_FOM);
+        lovvalgsperiode.setTom(PERIODE_TOM);
+        lovvalgsperiode.setMedlPeriodeID(111L);
+        return lovvalgsperiode;
+    }
+
+    private Lovvalgsperiode lagLovvalgsperiodeMedTilleggsbestemmelse() {
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setId(11L);
+        lovvalgsperiode.setBestemmelse(CAN_ART7);
+        lovvalgsperiode.setTilleggsbestemmelse(CAN_ART8);
         lovvalgsperiode.setFom(PERIODE_FOM);
         lovvalgsperiode.setTom(PERIODE_TOM);
         lovvalgsperiode.setMedlPeriodeID(111L);

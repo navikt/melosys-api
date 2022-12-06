@@ -26,7 +26,6 @@ import no.nav.melosys.service.sob.SobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
@@ -81,10 +80,11 @@ public class RegisteropplysningerService {
         this.registeropplysningerPeriodeFactory = registeropplysningerPeriodeFactory;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void hentOgLagreOpplysninger(RegisteropplysningerRequest registeropplysningerRequest) {
         if (PeriodeRegler.feilIPeriode(registeropplysningerRequest.getFom(), registeropplysningerRequest.getTom())) {
-            log.warn("Henter ikke registeropplysninger for behandling {} pga feil i periode. fom={}, tom={}", registeropplysningerRequest.getBehandlingID(), registeropplysningerRequest.getFom(), registeropplysningerRequest.getTom());
+            log.info("Henter ikke registeropplysninger for behandling {} pga. manglende periode eller feil i periode. fom={}, tom={}",
+                registeropplysningerRequest.getBehandlingID(), registeropplysningerRequest.getFom(), registeropplysningerRequest.getTom());
             registeropplysningerRequest = registeropplysningerRequest.lagKopiUtenPeriodeOgOpplysningstyperSomKreverPeriode();
         }
         if (registeropplysningerRequest.getOpplysningstyper().isEmpty()) {
@@ -92,7 +92,7 @@ public class RegisteropplysningerService {
             return;
         }
 
-        Behandling behandling = behandlingService.hentBehandling(registeropplysningerRequest.getBehandlingID());
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(registeropplysningerRequest.getBehandlingID());
 
         hentOgLagreOpplysninger(registeropplysningerRequest, behandling);
     }
@@ -209,6 +209,14 @@ public class RegisteropplysningerService {
         Saksopplysning saksopplysning = sobService.finnSakOgBehandlingskjedeListe(aktørId);
 
         return List.of(saksopplysning);
+    }
+
+    @Transactional
+    public void slettRegisterOpplysninger(long behandlingID) {
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
+        behandling.getSaksopplysninger().removeIf(s -> s.getType() != SaksopplysningType.SEDOPPL);
+        behandling.setSisteOpplysningerHentetDato(null);
+        behandlingService.lagre(behandling);
     }
 
     @FunctionalInterface

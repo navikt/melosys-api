@@ -11,7 +11,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.service.BehandlingsnotatService;
-import no.nav.melosys.service.ldap.SaksbehandlerService;
+import no.nav.melosys.service.bruker.SaksbehandlerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsnotatPostDto;
 import org.junit.jupiter.api.BeforeEach;

@@ -37,8 +37,6 @@ public class MottatteOpplysningerData {
 
     public List<LuftfartBase> luftfartBaser = new ArrayList<>();
 
-    public String ytterligereInformasjon;
-
     public Bosted bosted = new Bosted();
 
     public Set<String> hentAlleOrganisasjonsnumre() {

@@ -68,7 +68,7 @@ public class TrygdeavtaleTjeneste {
         aksesskontroll.autoriser(behandlingId);
 
         var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
-        var mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
+        var mottatteOpplysningerData = behandling.finnMottatteOpplysningerData().orElse(null);
         var behandlingsResultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
 
         return ResponseEntity.ok(new TrygdeavtaleInfoDto(
@@ -76,8 +76,8 @@ public class TrygdeavtaleTjeneste {
             behandling.getTema().getKode(),
             behandling.getType().getKode(),
             aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandler),
-            mottatteOpplysningerData.periode,
-            mottatteOpplysningerData.soeknadsland.hentSoeknadslandForTrygdeavtale(),
+            mottatteOpplysningerData != null ? mottatteOpplysningerData.periode : null,
+            mottatteOpplysningerData != null ? mottatteOpplysningerData.soeknadsland.hentSoeknadslandForTrygdeavtale() : null,
             hentVirksomheter ? trygdeavtaleService.hentVirksomheter(behandling) : Collections.emptyMap(),
             hentBarnEktefeller ? trygdeavtaleService.hentFamiliemedlemmer(behandling) : Collections.emptyList(),
             behandlingsResultat.getInnledningFritekst(),

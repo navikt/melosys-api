@@ -20,6 +20,7 @@ import static no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie
 public record TrygdeavtaleResultatDto(
     String virksomhet,
     String bestemmelse,
+    String tilleggsbestemmelse,
     LocalDate lovvalgsperiodeFom,
     LocalDate lovvalgsperiodeTom,
     List<MedfolgendeFamilieDto> barn,
@@ -29,6 +30,7 @@ public record TrygdeavtaleResultatDto(
         return new TrygdeavtaleResultat.Builder()
             .familie(lagAvklarteMedfolgendeFamilie())
             .bestemmelse(bestemmelse)
+            .tilleggsbestemmelse(tilleggsbestemmelse)
             .virksomhet(virksomhet)
             .lovvalgsperiodeFom(lovvalgsperiodeFom)
             .lovvalgsperiodeTom(lovvalgsperiodeTom)
@@ -46,6 +48,7 @@ public record TrygdeavtaleResultatDto(
             .ektefelle(ektefelle)
             .barn(barn)
             .bestemmelse(resultat.bestemmelse())
+            .tilleggsbestemmelse(resultat.tilleggsbestemmelse())
             .virksomhet(resultat.virksomhet())
             .lovvalgsperiodeFom(resultat.lovvalgsperiodeFom())
             .lovvalgsperiodeTom(resultat.lovvalgsperiodeTom())
@@ -81,6 +84,7 @@ public record TrygdeavtaleResultatDto(
     public static class Builder {
         private String virksomhet;
         private String bestemmelse;
+        private String tilleggsbestemmelse;
         private LocalDate lovvalgsperiodeFom;
         private LocalDate lovvalgsperiodeTom;
         private final List<MedfolgendeFamilieDto> barn = new ArrayList<>();
@@ -93,6 +97,11 @@ public record TrygdeavtaleResultatDto(
 
         public Builder bestemmelse(String bestemmelse) {
             this.bestemmelse = bestemmelse;
+            return this;
+        }
+
+        public Builder tilleggsbestemmelse(String tilleggsbestemmelse) {
+            this.tilleggsbestemmelse = tilleggsbestemmelse;
             return this;
         }
 
@@ -130,6 +139,7 @@ public record TrygdeavtaleResultatDto(
             return new TrygdeavtaleResultatDto(
                 virksomhet,
                 bestemmelse,
+                tilleggsbestemmelse,
                 lovvalgsperiodeFom,
                 lovvalgsperiodeTom,
                 barn,

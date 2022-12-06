@@ -116,7 +116,7 @@ class DefaultSedRuterTest {
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(fagsak.hentSistAktivBehandling(), melosysEessiMelding);
         verify(behandlingService, never()).endreStatus(anyLong(), any());
         verify(oppgaveService, never()).finnÅpenBehandlingsoppgaveMedFagsaksnummer(any());
-        verify(oppgaveService, never()).oppdaterOppgave(any(), any());
+        verifyNoInteractions(oppgaveService);
     }
 
     @Test

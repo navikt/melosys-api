@@ -8,6 +8,7 @@ import java.time.LocalDate;
 public record TrygdeavtaleResultat(
     String virksomhet,
     String bestemmelse,
+    String tilleggsbestemmelse,
     LocalDate lovvalgsperiodeFom,
     LocalDate lovvalgsperiodeTom,
     AvklarteMedfolgendeFamilie familie) {
@@ -15,6 +16,7 @@ public record TrygdeavtaleResultat(
     public static class Builder {
         private String virksomhet;
         private String bestemmelse;
+        private String tilleggsbestemmelse;
         private LocalDate lovvalgsperiodeFom;
         private LocalDate lovvalgsperiodeTom;
         private AvklarteMedfolgendeFamilie familie;
@@ -26,6 +28,11 @@ public record TrygdeavtaleResultat(
 
         public Builder bestemmelse(String bestemmelse) {
             this.bestemmelse = bestemmelse;
+            return this;
+        }
+
+        public Builder tilleggsbestemmelse(String tilleggsbestemmelse) {
+            this.tilleggsbestemmelse = tilleggsbestemmelse;
             return this;
         }
 
@@ -42,6 +49,7 @@ public record TrygdeavtaleResultat(
         public Builder lovvalgsperiodeOgBestemmelse(Lovvalgsperiode lovvalgsperiode) {
             if (lovvalgsperiode == null) return this;
             this.bestemmelse = lovvalgsperiode.getBestemmelse().getKode();
+            this.tilleggsbestemmelse = lovvalgsperiode.getTilleggsbestemmelse() != null ? lovvalgsperiode.getTilleggsbestemmelse().getKode() : null;
             this.lovvalgsperiodeFom = lovvalgsperiode.getFom();
             this.lovvalgsperiodeTom = lovvalgsperiode.getTom();
             return this;
@@ -56,6 +64,7 @@ public record TrygdeavtaleResultat(
             return new TrygdeavtaleResultat(
                 virksomhet,
                 bestemmelse,
+                tilleggsbestemmelse,
                 lovvalgsperiodeFom,
                 lovvalgsperiodeTom,
                 familie

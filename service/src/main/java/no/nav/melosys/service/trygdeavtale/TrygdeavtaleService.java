@@ -133,6 +133,7 @@ public class TrygdeavtaleService {
         lovvalgsperiode.setDekning(FULL_DEKNING_FTRL);
         lovvalgsperiode.setInnvilgelsesresultat(INNVILGET);
         lovvalgsperiode.setBestemmelse(LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.bestemmelse()));
+        lovvalgsperiode.setTilleggsbestemmelse(LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.tilleggsbestemmelse()));
         lovvalgsperiode.setLovvalgsland(Landkoder.NO);
 
         return lovvalgsperiode;

@@ -1,0 +1,17 @@
+{
+  "URL": "melosys-api.intern.nav.no",
+  "KAFKA_POOL": "nav-prod",
+  "VAULT_CLUSTER": "prod",
+  "APP_NAME": "melosys",
+  "TENANT_URL": "nav.no",
+  "GROUP_MELOSYS_INNLOGGING": "0d7c7755-fd5d-46ee-bbb9-975484cfb5b1",
+  "APP_NAME_FRONTEND": "melosys-web",
+  "APP_NAME_TRYGDEAVTALE": "melosys-trygdeavtale",
+  "APP_NAME_PDL": "pdl-api",
+  "APP_NAME_SAF": "saf",
+  "APP_NAME_OPPGAVE": "oppgave",
+  "APP_NAME_MEDL": "medlemskap-medl-api",
+  "APP_NAME_MELOSYS_EESSI": "melosys-eessi",
+  "APP_NAME_FAKTURERINGSKOMPONENTEN": "faktureringskomponenten",
+  "NAIS_CLUSTER_NAME_FAKTURERINGSKOMPONENTEN": "prod-gcp"
+}

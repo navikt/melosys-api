@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdInterceptor;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.tjenester.gui.config.jackson.MelosysModule;
@@ -39,7 +40,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     private ObjectMapper apiObjectMapper() {
         return Jackson2ObjectMapperBuilder.json()
-            .modules(new JavaTimeModule(), new MelosysModule(kodeverkService))
+            .modules(new JavaTimeModule(), new KotlinModule.Builder().build(), new MelosysModule(kodeverkService))
             .featuresToEnable(MapperFeature.DEFAULT_VIEW_INCLUSION)
             .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
             .build();
