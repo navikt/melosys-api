@@ -8,10 +8,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.jpa.MottatteOpplysningerListener;
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper;
 
-/**
- * @deprecated MottatteOpplysninger har blitt døpt om til Behandlingsårsak
- */
-@Deprecated(since = "melosys.ny_opprett_sak")
 @Entity
 @EntityListeners(MottatteOpplysningerListener.class)
 @Table(name = "mottatteopplysninger")
@@ -34,6 +30,10 @@ public class MottatteOpplysninger {
     @Column(name = "endret_dato", nullable = false)
     private Instant endretDato;
 
+    /**
+     * @deprecated Mottaksdato har blitt flyttet til behandlingsårsak
+     */
+    @Deprecated(since = "melosys.ny_opprett_sak")
     @Column(name = "mottaksdato")
     private LocalDate mottaksdato;
 
@@ -87,10 +87,18 @@ public class MottatteOpplysninger {
         this.endretDato = endretDato;
     }
 
+    /**
+     * @deprecated Mottaksdato har blitt flyttet til behandlingsårsak
+     */
+    @Deprecated(since = "melosys.ny_opprett_sak")
     public LocalDate getMottaksdato() {
         return mottaksdato;
     }
 
+    /**
+     * @deprecated Mottaksdato har blitt flyttet til behandlingsårsak
+     */
+    @Deprecated(since = "melosys.ny_opprett_sak")
     public void setMottaksdato(LocalDate mottaksdato) {
         this.mottaksdato = mottaksdato;
     }
