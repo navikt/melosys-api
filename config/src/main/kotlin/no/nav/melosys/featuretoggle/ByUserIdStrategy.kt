@@ -36,10 +36,13 @@ internal class ByUserIdStrategy : Strategy {
     private fun calledFrom(): String =
         Thread.currentThread().stackTrace.let { stackTraceElements ->
             val element = stackTraceElements.find {
-                it.fileName == "DefaultUnleash.java" && it.lineNumber == 93
+                it.methodName == "isEnabled" && it.className == "no.finn.unleash.DefaultUnleash"
             } ?: return@let "Fant ikke unleash bruk i stacktrace"
-            val indexWhereCallToUnleashStarted = stackTraceElements.indexOf(element) + 1
-            stackTraceElements[indexWhereCallToUnleashStarted].toString()
+            val indexWhereCallToUnleashStarted = stackTraceElements.indexOf(element)
+            val indexOfFirst = (indexWhereCallToUnleashStarted..stackTraceElements.size).indexOfFirst {
+                stackTraceElements[it].methodName != "isEnabled"
+            }
+            stackTraceElements[indexOfFirst + indexWhereCallToUnleashStarted].toString()
         }
 
     private fun getLoggedInUserID(): String? =
