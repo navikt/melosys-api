@@ -122,7 +122,7 @@ internal class ByUserIdStrategyTest {
             )
     }
 
-    @Test // siden de andre testene ikke fungere på githib har vi denne i tilleg
+    @Test // siden de andre testene ikke fungerer på github har vi denne i tillegg
     fun `unleash toggle skal bli false når vi ikke har saksbehandler`() {
         val unleash = setUpUnleashMock(subjectHandlerReturnUserId = null)
 
