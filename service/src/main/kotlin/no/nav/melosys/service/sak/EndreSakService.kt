@@ -47,7 +47,7 @@ class EndreSakService(
         nyBehandlingstema: Behandlingstema,
         nyBehandlingstype: Behandlingstyper,
         nyBehandlingsstatus: Behandlingsstatus,
-        nyBehandlingsfrist: LocalDate?
+        nyMottaksdato: LocalDate?
     ) {
         val fagsak = fagsakService.hentFagsak(saksnummer)
         validerSak(fagsak, nySakstype, nySakstema)
@@ -73,7 +73,7 @@ class EndreSakService(
             nyBehandlingstema,
             nyBehandlingstype,
             nyBehandlingsstatus,
-            nyBehandlingsfrist
+            nyMottaksdato
         )
 
         if (sakEndres || behandlingTemaEllerTypeEndres) {
@@ -88,7 +88,7 @@ class EndreSakService(
 
         if (sakEndres) {
             applicationEventPublisher.publishEvent(FagsakEndretAvSaksbehandler(fagsak.saksnummer))
-        } else if (behandlingTemaEllerTypeEndres || nyBehandlingsfrist != null) {
+        } else if (behandlingTemaEllerTypeEndres || nyMottaksdato != null) {
             applicationEventPublisher.publishEvent(BehandlingEndretAvSaksbehandlerEvent(behandling.id, behandling))
         }
 

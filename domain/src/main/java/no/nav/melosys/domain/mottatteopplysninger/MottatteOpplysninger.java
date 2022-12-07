@@ -90,7 +90,7 @@ public class MottatteOpplysninger {
     /**
      * @deprecated Mottaksdato har blitt flyttet til behandlingsårsak
      */
-    @Deprecated(since = "melosys.ny_opprett_sak")
+    @Deprecated()
     public LocalDate getMottaksdato() {
         return mottaksdato;
     }
@@ -98,7 +98,7 @@ public class MottatteOpplysninger {
     /**
      * @deprecated Mottaksdato har blitt flyttet til behandlingsårsak
      */
-    @Deprecated(since = "melosys.ny_opprett_sak")
+    @Deprecated()
     public void setMottaksdato(LocalDate mottaksdato) {
         this.mottaksdato = mottaksdato;
     }
