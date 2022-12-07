@@ -1,16 +1,21 @@
 package no.nav.melosys.service.kontroll.feature.ufm.kontroll;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Optional;
 
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
 import no.nav.melosys.service.kontroll.feature.ufm.data.UfmKontrollData;
 import no.nav.melosys.service.kontroll.regler.*;
+import org.apache.commons.lang3.EnumUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004.*;
 import static no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderRegler.*;
 import static org.apache.cxf.common.util.StringUtils.isEmpty;
 
@@ -108,6 +113,14 @@ final class UfmKontroll {
                     return Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER;
                 }
             }
+        }
+        return null;
+    }
+
+    static Kontroll_begrunnelser unntakForA003(UfmKontrollData kontrollData) {
+        if (!kontrollData.sedDokument().getLovvalgslandKode().getKode().equals("NO")
+            && EnumUtils.isValidEnum(Tilleggsbestemmelser_883_2004.class, kontrollData.sedDokument().getLovvalgBestemmelse().getKode())) {
+                return Kontroll_begrunnelser.ANNET;
         }
         return null;
     }

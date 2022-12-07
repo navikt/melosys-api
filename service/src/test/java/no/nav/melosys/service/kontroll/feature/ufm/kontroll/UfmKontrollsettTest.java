@@ -33,7 +33,7 @@ class UfmKontrollsettTest {
     void hentKontrollerA003_verifiserKontroller() {
         Set<Function<UfmKontrollData, Kontroll_begrunnelser>> kontroller =
             UfmKontrollsett.hentRegelsettForSedType(SedType.A003, unleash);
-        assertThat(kontroller).hasSize(11);
+        assertThat(kontroller).hasSize(12);
     }
 
     @Test
