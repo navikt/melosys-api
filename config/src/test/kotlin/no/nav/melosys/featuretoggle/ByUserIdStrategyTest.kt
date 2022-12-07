@@ -110,7 +110,7 @@ internal class ByUserIdStrategyTest {
     fun `det skal logges hvor unleash isEnabled blir kalt fra`() {
         val unleash = setUpUnleashMock(subjectHandlerReturnUserId = null)
 
-        repeat((0..10).count()) {
+        repeat(10) {
             val enabled = unleash.isEnabled("melosys.toggle")
             enabled.shouldBeFalse()
         }
