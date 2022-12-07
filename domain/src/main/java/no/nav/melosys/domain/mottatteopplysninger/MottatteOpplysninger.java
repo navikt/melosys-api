@@ -33,7 +33,7 @@ public class MottatteOpplysninger {
     /**
      * @deprecated Mottaksdato har blitt flyttet til behandlingsårsak
      */
-    @Deprecated(since = "melosys.ny_opprett_sak")
+    @Deprecated()
     @Column(name = "mottaksdato")
     private LocalDate mottaksdato;
 
