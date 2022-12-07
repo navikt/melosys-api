@@ -38,8 +38,8 @@ internal class ByUserIdStrategy : Strategy {
             val element = stackTraceElements.find {
                 it.toString().contains(STACK_TRACE_LINE_AFTER_UNLEASH_IS_ENABLED)
             } ?: return@let "Fant ikke unleash bruk i stacktrace\n" + stackTraceElements.joinToString("\n")
-            val indexWhereCallToUnleashStarted = stackTraceElements.indexOf(element)
-            stackTraceElements[indexWhereCallToUnleashStarted - 1].toString()
+            val indexToLineAfterUnleashIsEnabledCall = stackTraceElements.indexOf(element)
+            stackTraceElements[indexToLineAfterUnleashIsEnabledCall - 1].toString()
         }
 
     private fun getLoggedInUserID(): String? =
