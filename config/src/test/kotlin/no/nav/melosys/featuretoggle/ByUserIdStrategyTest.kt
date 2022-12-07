@@ -115,11 +115,10 @@ internal class ByUserIdStrategyTest {
             enabled.shouldBeFalse()
         }
 
+        val expectedLogMessage = "Unleash byUserId Strategy brukes uten innlogget saksbehandler, blir kalt fra:\n" +
+            "no.nav.melosys.featuretoggle.ByUserIdStrategyTest.det skal logges hvor unleash isEnabled blir kalt fra"
         listAppender.list.shouldHaveSize(1)
-            .first().message.shouldContain(
-                "Unleash byUserId Strategy brukes uten innlogget saksbehandler, blir kalt fra:\n" +
-                    "no.nav.melosys.featuretoggle.ByUserIdStrategyTest.det skal logges hvor unleash isEnabled blir kalt fra"
-            )
+            .first().message.shouldContain(expectedLogMessage)
     }
 
     @Test // siden de andre testene ikke fungerer på github har vi denne i tillegg
