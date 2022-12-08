@@ -8,7 +8,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ScalarConfigTest {
     @Test
-    void dateCoercing_forsøkSerializeString_kasterException() {
+    void dateCoercing_forsøkSerializeLocalDateString_kasterException() {
         var dateCoercing = ScalarConfig.dateCoercing();
 
         assertThatThrownBy(() -> dateCoercing.serialize("2019-01-01"))
