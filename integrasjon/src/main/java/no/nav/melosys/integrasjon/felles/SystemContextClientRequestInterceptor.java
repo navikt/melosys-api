@@ -24,7 +24,7 @@ public class SystemContextClientRequestInterceptor implements ClientHttpRequestI
     public ClientHttpResponse intercept(@Nonnull final HttpRequest request,
                                         @Nonnull final byte[] body,
                                         @Nonnull final ClientHttpRequestExecution execution) throws IOException {
-        request.getHeaders().add(HttpHeaders.AUTHORIZATION, "Bearer " + restStsClient.collectToken());
+        request.getHeaders().add(HttpHeaders.AUTHORIZATION, restStsClient.bearerToken());
         return execution.execute(request, body);
     }
 }

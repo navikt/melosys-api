@@ -1,5 +1,13 @@
 package no.nav.melosys.service.journalforing;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
@@ -39,14 +47,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -81,7 +81,7 @@ class JournalfoeringServiceTest {
     @Mock
     private SaksbehandlingRegler saksbehandlingRegler;
 
-    private final LovligeKombinasjonerService lovligeKombinasjonerService = new LovligeKombinasjonerService(behandlingService, behandlingsresultatService);
+    private final LovligeKombinasjonerService lovligeKombinasjonerService = new LovligeKombinasjonerService(fagsakService, behandlingService, behandlingsresultatService);
     private final FakeUnleash unleash = new FakeUnleash();
 
     @Captor

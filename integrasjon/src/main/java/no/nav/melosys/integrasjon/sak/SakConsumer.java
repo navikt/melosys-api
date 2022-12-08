@@ -1,18 +1,112 @@
 package no.nav.melosys.integrasjon.sak;
 
+import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.List;
+import javax.net.ssl.SSLContext;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
 
-import no.nav.melosys.integrasjon.felles.FeilHandterer;
+import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.integrasjon.felles.*;
 import no.nav.melosys.integrasjon.sak.dto.SakDto;
 import no.nav.melosys.integrasjon.sak.dto.SakSearchRequest;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Retryable;
 
+import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.X_CORRELATION_ID;
+import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.getCorrelationId;
+
 @Retryable
-public interface SakConsumer extends FeilHandterer {
+public class SakConsumer implements FeilHandterer, BasicAuthAware {
+    private static final Logger log = LoggerFactory.getLogger(SakConsumer.class);
 
-    SakDto hentSak(Long id);
+    private static final GenericType<List<SakDto>> sakDtoListType = new GenericType<>() {
+    };
 
-    List<SakDto> finnSaker(SakSearchRequest sakSearchRequest);
+    private final WebTarget target;
 
-    SakDto opprettSak(SakDto sakDto);
+    SakConsumer(String endpointUrl) {
+        try {
+            SSLContext sslContext = SSLContext.getDefault();
+            Client client = ClientBuilder.newBuilder().sslContext(sslContext).build();
+            target = client.register(JacksonObjectMapperProvider.class).target(endpointUrl);
+        } catch (NoSuchAlgorithmException e) {
+            log.error("Feilet under oppsett av integrasjon mot Sak API", e);
+            throw new IntegrasjonException("Feilet under oppsett av integrasjon mot Sak API");
+        }
+    }
+
+    public SakDto hentSak(Long id) {
+        try {
+            return target
+                .path(Long.toString(id))
+                .request()
+                .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
+                .header(X_CORRELATION_ID, getCorrelationId())
+                .header(HttpHeaders.AUTHORIZATION, getAuth())
+                .get(SakDto.class);
+        } catch (RuntimeException e) {
+            ExceptionMapper.JaxGetRuntimeExTilMelosysEx(e);
+            return null; // Død kode
+        }
+    }
+
+    public List<SakDto> finnSaker(SakSearchRequest sakSearchRequest) {
+        try {
+            return target
+                .queryParam("aktoerId", sakSearchRequest.getAktørId())
+                .queryParam("orgnr", sakSearchRequest.getOrgnr())
+                .queryParam("applikasjon", sakSearchRequest.getApplikasjon())
+                .queryParam("tema", sakSearchRequest.getTema())
+                .queryParam("fagsakNr", sakSearchRequest.getFagsakNr())
+                .request()
+                .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
+                .header(X_CORRELATION_ID, getCorrelationId())
+                .header(HttpHeaders.AUTHORIZATION, getAuth())
+                .get(sakDtoListType);
+        } catch (RuntimeException e) {
+            ExceptionMapper.JaxGetRuntimeExTilMelosysEx(e);
+            return Collections.emptyList(); // Død kode
+        }
+    }
+
+    public SakDto opprettSak(SakDto sakDto) {
+        String userID = SubjectHandler.getInstance().getUserID();
+        sakDto.setOpprettetAv(userID);
+        try (Response response = target
+            .request()
+            .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON)
+            .header(X_CORRELATION_ID, getCorrelationId())
+            .header(HttpHeaders.AUTHORIZATION, getAuth())
+            .post(Entity.json(sakDto))) {
+            håndterEvFeil(response);
+            return response.readEntity(SakDto.class);
+        }
+    }
+
+    public void håndterEvFeil(Response response) {
+        if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) return;
+        FeilResponseDto feilResponseDto = response.readEntity(FeilResponseDto.class);
+        log.error("Feil oppstod. Uuid={}, Response Kode={}, Feilmelding={}", feilResponseDto.getUuid(), response.getStatus(), feilResponseDto.getFeilmelding());
+        httpStatusTilException(response.getStatus(), feilResponseDto.getFeilmelding());
+    }
+
+    private String getAuth() {
+        if (ThreadLocalAccessInfo.shouldUseOidcToken()) {
+            throw new TekniskException("Sak kan kun bli kalt i fra prosess");
+        }
+        return basicAuth();
+    }
 }

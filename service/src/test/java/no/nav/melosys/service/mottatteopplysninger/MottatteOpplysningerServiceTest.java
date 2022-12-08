@@ -10,14 +10,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.mottatteopplysninger.*;
-import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
-import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.mottatteopplysninger.*;
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
+import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.MottatteOpplysningerRepository;
@@ -180,13 +180,15 @@ class MottatteOpplysningerServiceTest {
     }
 
     @Test
-    void opprettSøknadFolketrygden_harRettType() {
+    void opprettSøknadFolketrygden_harPeriodeOgLand_setterPeriodeOgLandOgHarRettType() {
         Behandling behandling = lagBehandling(Sakstyper.FTRL, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.ARBEID_I_UTLANDET);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
+        var periode = new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 12, 31));
+        var soeknadsland = new Soeknadsland(List.of("UK"), false);
 
 
-        mottatteOpplysningerService.opprettSøknad(behandling, null, null);
+        mottatteOpplysningerService.opprettSøknad(behandling, periode, soeknadsland);
 
 
         verify(mottatteOpplysningerRepository).save(mottatteOpplysningerArgumentCaptor.capture());
@@ -194,25 +196,32 @@ class MottatteOpplysningerServiceTest {
 
         assertThat(opprettet).isNotNull();
         assertThat(opprettet.getMottatteOpplysningerData()).isInstanceOf(SoeknadFtrl.class);
+        assertThat(opprettet.getMottatteOpplysningerData().periode).isEqualTo(periode);
+        assertThat(opprettet.getMottatteOpplysningerData().soeknadsland).isEqualTo(soeknadsland);
         assertThat(opprettet.getType()).isEqualTo(Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN);
         assertThat(opprettet.getBehandling()).isEqualTo(behandling);
         assertThat(opprettet.getMottaksdato()).isNotNull();
     }
 
     @Test
-    void opprettSøknadTrygdeavtale_harRettType() {
+    void opprettSøknadTrygdeavtale_harPeriodeOgLand_setterPeriodeOgLandOgHarRettType() {
         Behandling behandling = lagBehandling(Sakstyper.TRYGDEAVTALE, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.YRKESAKTIV);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
+        var periode = new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 12, 31));
+        var soeknadsland = new Soeknadsland(List.of("UK"), false);
 
 
-        mottatteOpplysningerService.opprettSøknad(behandling, null, null);
+        mottatteOpplysningerService.opprettSøknad(behandling, periode, soeknadsland);
+
 
         verify(mottatteOpplysningerRepository).save(mottatteOpplysningerArgumentCaptor.capture());
         MottatteOpplysninger opprettet = mottatteOpplysningerArgumentCaptor.getValue();
 
         assertThat(opprettet).isNotNull();
         assertThat(opprettet.getMottatteOpplysningerData()).isInstanceOf(SoeknadTrygdeavtale.class);
+        assertThat(opprettet.getMottatteOpplysningerData().periode).isEqualTo(periode);
+        assertThat(opprettet.getMottatteOpplysningerData().soeknadsland).isEqualTo(soeknadsland);
         assertThat(opprettet.getType()).isEqualTo(Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE);
         assertThat(opprettet.getBehandling()).isEqualTo(behandling);
         assertThat(opprettet.getMottaksdato()).isNotNull();

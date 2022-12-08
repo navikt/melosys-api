@@ -7,8 +7,8 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 
+import no.nav.melosys.integrasjon.felles.CallIdAware;
 import no.nav.melosys.integrasjon.felles.JacksonObjectMapperProvider;
-import no.nav.melosys.integrasjon.felles.RestConsumer;
 import no.nav.melosys.integrasjon.kodeverk.impl.dto.KodeDto;
 
 import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.X_CORRELATION_ID;
@@ -16,7 +16,7 @@ import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.getCorrelation
 import static no.nav.melosys.integrasjon.kodeverk.impl.KodeverkRegisterImpl.BOKMÅL;
 
 
-public class KodeverkConsumerImpl implements RestConsumer {
+public class KodeverkConsumerImpl implements CallIdAware {
 
     private static final String VERSJON = "v1";
     private static final String CONSUMER_ID = "srvmelosys";

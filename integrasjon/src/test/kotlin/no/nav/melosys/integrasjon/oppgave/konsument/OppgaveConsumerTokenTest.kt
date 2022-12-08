@@ -23,7 +23,7 @@ import org.springframework.test.context.ActiveProfiles
     RestTokenServiceClient::class,
     OAuthMockServer::class,
 
-    OppgaveConsumerImpl::class,
+    OppgaveConsumer::class,
     OppgaveConsumerProducer::class,
     GenericAuthFilterFactory::class
 )
