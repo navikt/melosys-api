@@ -33,16 +33,31 @@ class ScalarConfig {
 
     static Coercing<LocalDate, String> dateCoercing() {
         return new Coercing<>() {
-
             @Override
             public String serialize(Object input) {
                 if (input instanceof LocalDate) {
                     return input.toString();
                 }
 
+                if (input instanceof String && harGyldigDatoFormat(input)) {
+                    return input.toString();
+                }
+
                 throw new CoercingSerializeException(
                     "GraphQL serialization from " + input.getClass() + " with value " + input + " to Date scalar not" +
                         " implemented.");
+            }
+
+            private boolean harGyldigDatoFormat(Object input) {
+                try {
+                    DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+                    formatter.setLenient(false);
+                    var date = formatter.parse(input.toString());
+                    return true;
+                } catch (Exception e) {
+                    log.warn("Har mottatt en String input med ugyldig GraphQL Date scalar format: {}", input);
+                    return false;
+                }
             }
 
             @Override
