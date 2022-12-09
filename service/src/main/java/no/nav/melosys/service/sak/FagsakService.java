@@ -244,7 +244,7 @@ public class FagsakService {
     @Transactional
     public void oppdaterFagsakOgBehandling(String saksnummer, Sakstyper nySakstype, Sakstemaer nySakstema,
                                            Behandlingstema nyBehandlingstema, Behandlingstyper nyBehandlingstype,
-                                           Behandlingsstatus nyBehandlingsstatus, LocalDate nyBehandlingsfrist) {
+                                           Behandlingsstatus nyBehandlingsstatus, LocalDate nyMottaksdato) {
         Fagsak fagsak = hentFagsak(saksnummer);
         Behandling behandling = fagsak.hentAktivBehandling();
         validerOppdatering(fagsak, nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype);
@@ -254,7 +254,7 @@ public class FagsakService {
             fagsak.setTema(nySakstema);
             fagsakRepository.save(fagsak);
         }
-        behandlingService.endreBehandling(behandling.getId(), nyBehandlingstype, nyBehandlingstema, nyBehandlingsstatus, nyBehandlingsfrist);
+        behandlingService.endreBehandling(behandling.getId(), nyBehandlingstype, nyBehandlingstema, nyBehandlingsstatus, nyMottaksdato);
     }
 
     private void validerOppdatering(Fagsak sak, Sakstyper nySakstype, Sakstemaer nySakstema,

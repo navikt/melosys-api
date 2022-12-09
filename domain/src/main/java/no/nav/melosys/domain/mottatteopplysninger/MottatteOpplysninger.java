@@ -30,6 +30,10 @@ public class MottatteOpplysninger {
     @Column(name = "endret_dato", nullable = false)
     private Instant endretDato;
 
+    /**
+     * @deprecated Mottaksdato har blitt flyttet til behandlingsårsak
+     */
+    @Deprecated()
     @Column(name = "mottaksdato")
     private LocalDate mottaksdato;
 
@@ -83,10 +87,18 @@ public class MottatteOpplysninger {
         this.endretDato = endretDato;
     }
 
+    /**
+     * @deprecated Mottaksdato har blitt flyttet til behandlingsårsak
+     */
+    @Deprecated()
     public LocalDate getMottaksdato() {
         return mottaksdato;
     }
 
+    /**
+     * @deprecated Mottaksdato har blitt flyttet til behandlingsårsak
+     */
+    @Deprecated()
     public void setMottaksdato(LocalDate mottaksdato) {
         this.mottaksdato = mottaksdato;
     }

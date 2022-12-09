@@ -129,7 +129,7 @@ public class BehandlingService {
     }
 
     @Transactional
-    public void endreBehandling(long behandlingID, Behandlingstyper type, Behandlingstema tema, Behandlingsstatus status, LocalDate behandlingsfrist) {
+    public void endreBehandling(long behandlingID, Behandlingstyper type, Behandlingstema tema, Behandlingsstatus status, LocalDate mottaksdato) {
         var behandling = hentBehandling(behandlingID);
         boolean behandlingErLåst = behandling.kanIkkeEndres();
 
@@ -147,8 +147,8 @@ public class BehandlingService {
         if (tema != null && tema != behandling.getTema() && !behandlingErLåst && validerNyTemaMulig(behandling, tema)) {
             endreTema(behandling, tema);
         }
-        if (behandlingsfrist != null && !behandlingsfrist.equals(behandling.getBehandlingsfrist())) {
-            endreBehandlingsfrist(behandling, behandlingsfrist);
+        if (mottaksdato != null && !mottaksdato.equals((utledMottaksdato.getMottaksdato(behandling)))) {
+            endreMottaksdato(behandling, mottaksdato);
         }
     }
 
@@ -223,10 +223,20 @@ public class BehandlingService {
         }
     }
 
-    public void endreBehandlingsfrist(Behandling behandling, LocalDate behandlingsfrist) {
-        log.info("Endrer behandlingsfrist for behandling {} fra {} til {}", behandling.getId(), behandling.getBehandlingsfrist(), behandlingsfrist);
-        behandling.setBehandlingsfrist(behandlingsfrist);
+    public void endreMottaksdato(Behandling behandling, LocalDate mottaksdato) {
+        log.info("Endrer mottaksdato for behandling {} fra {} til {}",
+            behandling.getId(), utledMottaksdato.getMottaksdato(behandling), mottaksdato);
+        if (unleash.isEnabled("melosys.ny_opprett_sak")) {
+            behandling.getBehandlingsårsak().setMottaksdato(mottaksdato);
+        } else {
+            behandling.getMottatteOpplysninger().setMottaksdato(mottaksdato);
+        }
+        behandling.setBehandlingsfrist(unleash.isEnabled("melosys.behandle_alle_saker")
+            ? Behandling.utledBehandlingsfrist(behandling, mottaksdato)
+            : Behandling.utledFristForBehandlingtema(behandling.getTema()));
+
         behandlingRepository.save(behandling);
+
         if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
             applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
         }
@@ -247,7 +257,7 @@ public class BehandlingService {
             behandlingsreplika = replikerBehandlingUtenMottatteOpplysningerSaksopplysningerOgResultat(tidligsteInaktiveBehandling, behandlingstype);
             behandlingsresultatService.lagreNyttBehandlingsresultat(behandlingsreplika);
         } catch (InvocationTargetException | NoSuchMethodException | InstantiationException |
-            IllegalAccessException e) {
+                 IllegalAccessException e) {
             throw new TekniskException(String.format("Klarte ikke replikere behandling %s for fagsak %s",
                 tidligsteInaktiveBehandling.getId(), tidligsteInaktiveBehandling.getFagsak().getSaksnummer()), e);
         }
@@ -284,7 +294,7 @@ public class BehandlingService {
             behandlingsreplika = replikerBehandling(tidligsteInaktiveBehandling, behandlingstype);
             behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika);
         } catch (InvocationTargetException | NoSuchMethodException | InstantiationException |
-            IllegalAccessException e) {
+                 IllegalAccessException e) {
             throw new TekniskException(String.format("Klarte ikke replikere behandling %s for fagsak %s",
                 tidligsteInaktiveBehandling.getId(), tidligsteInaktiveBehandling.getFagsak().getSaksnummer()), e);
         }

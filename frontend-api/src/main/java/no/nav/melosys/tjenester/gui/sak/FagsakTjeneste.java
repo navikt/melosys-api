@@ -130,7 +130,7 @@ public class FagsakTjeneste {
             SubjectHandler.getInstance().getUserID(), saksnummer, endreDto.getSakstype(), endreDto.getSakstema());
         aksesskontroll.autoriserSakstilgang(saksnummer);
         endreSakService.endre(saksnummer, endreDto.getSakstype(), endreDto.getSakstema(), endreDto.getBehandlingstema(),
-            endreDto.getBehandlingstype(), endreDto.getBehandlingsstatus(), endreDto.getBehandlingsfrist());
+            endreDto.getBehandlingstype(), endreDto.getBehandlingsstatus(), endreDto.getMottaksdato());
         return ResponseEntity.noContent().build();
     }
 
