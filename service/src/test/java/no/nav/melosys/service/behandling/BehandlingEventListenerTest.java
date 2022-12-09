@@ -125,6 +125,8 @@ class BehandlingEventListenerTest {
         assertThat(capturedOppgaveOppdatering.getBehandlingstype()).isEqualTo(behandlingsOppgaveForType.getBehandlingstype());
         assertThat(capturedOppgaveOppdatering.getTema()).isEqualTo(behandlingsOppgaveForType.getTema());
         assertThat(capturedOppgaveOppdatering.getFristFerdigstillelse()).isEqualTo(LocalDate.of(2022, 3, 7));
+        assertThat(capturedOppgaveOppdatering.getBeskrivelse()).isEqualTo(behandlingsOppgaveForType.getBeskrivelse());
+        assertThat(capturedOppgaveOppdatering.getOppgavetype()).isEqualTo(behandlingsOppgaveForType.getOppgavetype());
     }
 
     @Test
