@@ -206,7 +206,7 @@ internal class MedlServiceTest {
                     dekning = DekningMedl.FULL.kode,
                     lovvalgsland = "BEL",
                     lovvalg = LovvalgMedl.FORL.kode,
-                    grunnlag = GrunnlagMedl.FO_11_4_1.kode,
+                    grunnlag = GrunnlagMedl.FO_11_5.kode,
                     sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
                         kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
                     )
