@@ -7,7 +7,7 @@ WHERE SAKSNUMMER in (
                                                          FROM BEHANDLING)
                          SELECT *
                          FROM behandling_med_counter
-                         WHERE beh_row_number = 1)) AND f.SAKSNUMMER = b.SAKSNUMMER
+                         WHERE beh_row_number = 1)) AND b.SAKSNUMMER = f.SAKSNUMMER
       AND b.BEH_TEMA  IN ('BESLUTNING_LOVVALG_NORGE')
       AND f.TEMA != 'MEDLEMSKAP_LOVVALG'
     );
@@ -21,7 +21,7 @@ WHERE SAKSNUMMER in (
                                                          FROM BEHANDLING)
                          SELECT *
                          FROM behandling_med_counter
-                         WHERE beh_row_number = 1)) AND f.SAKSNUMMER = b.SAKSNUMMER
+                         WHERE beh_row_number = 1)) AND b.SAKSNUMMER = f.SAKSNUMMER
       AND b.BEH_TEMA  IN ('BESLUTNING_LOVVALG_ANNET_LAND', 'REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE', 'REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING')
       AND f.TEMA != 'UNNTAK'
 );
