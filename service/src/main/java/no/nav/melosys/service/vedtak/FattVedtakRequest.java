@@ -1,11 +1,12 @@
 package no.nav.melosys.service.vedtak;
 
-import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.service.dokument.brev.KopiMottaker;
-
 import java.util.List;
 import java.util.Set;
+
+import no.nav.melosys.domain.kodeverk.Vedtakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall;
+import no.nav.melosys.service.dokument.brev.KopiMottaker;
 
 public class FattVedtakRequest {
     private final Behandlingsresultattyper behandlingsresultatTypeKode;
@@ -20,6 +21,11 @@ public class FattVedtakRequest {
     private final List<KopiMottaker> kopiMottakere;
     private final String bestillersId;
     private final String nyVurderingBakgrunn;
+    private final FaktureringsIntervall betalingsintervall;
+
+    public FaktureringsIntervall getBetalingsintervall() {
+        return betalingsintervall;
+    }
 
     public String getFritekst() {
         return fritekst;
@@ -74,6 +80,7 @@ public class FattVedtakRequest {
         this.kopiMottakere = builder.kopiMottakere;
         this.bestillersId = builder.bestillersId;
         this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
+        this.betalingsintervall = builder.betalingsintervall;
     }
 
     public Behandlingsresultattyper getBehandlingsresultatTypeKode() {
@@ -97,6 +104,7 @@ public class FattVedtakRequest {
         private String barnFritekst;
         private List<KopiMottaker> kopiMottakere;
         private String bestillersId;
+        private FaktureringsIntervall betalingsintervall;
 
         public Builder medBehandlingsresultat(Behandlingsresultattyper behandlingsresultatTypeKode) {
             this.behandlingsresultatTypeKode = behandlingsresultatTypeKode;
@@ -187,6 +195,11 @@ public class FattVedtakRequest {
 
         public Builder medBestillersId(String bestillersId) {
             this.bestillersId = bestillersId;
+            return this;
+        }
+
+        public Builder medBetalingsIntervall(FaktureringsIntervall betalingsintervall) {
+            this.betalingsintervall = betalingsintervall;
             return this;
         }
 

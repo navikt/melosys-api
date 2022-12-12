@@ -37,7 +37,7 @@ public class MedlemskapsperiodeService {
     @Transactional(readOnly = true)
     public Collection<Medlemskapsperiode> hentMedlemskapsperioder(long behandlingsresultatID) {
         return medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingsresultatID)
-            .map(MedlemAvFolketrygden::getMedlemskapsperioder)
+            .map(medlemAvFolketrygden -> medlemAvFolketrygden.getMedlemskapsperioder().stream().toList())
             .orElse(Collections.emptyList());
     }
 

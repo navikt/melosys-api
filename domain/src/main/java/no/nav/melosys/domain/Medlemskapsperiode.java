@@ -55,7 +55,7 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
     @Column(name = "medlperiode_id")
     private Long medlPeriodeID;
 
-    @OneToMany(mappedBy = "medlemskapsperiode", orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "medlemskapsperiode", orphanRemoval = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Collection<Trygdeavgift> trygdeavgift = new ArrayList<>(1);
 
 
