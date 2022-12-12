@@ -23,6 +23,7 @@ import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
 import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag
 import no.nav.melosys.domain.person.Personopplysninger
 import no.nav.melosys.domain.person.adresse.Bostedsadresse
@@ -520,22 +521,11 @@ class UfmKontrollServiceTest {
             sedType = SedType.A003
             lovvalgslandKode = Landkoder.CH
             avsenderLandkode = Landkoder.CH
+            statsborgerskapKoder = listOf(Landkoder.NO.kode, Landkoder.CH.kode)
             lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-
+            lovvalgBestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART87_8
         }
         medlemskapDokument.apply {
-            medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-                    land = "Swe"
-                },
-            )
-            medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2))
-                    land = "Swe"
-                },
-            )
             personopplysninger
         }
         personopplysninger.apply {
@@ -550,7 +540,6 @@ class UfmKontrollServiceTest {
                 kontrollresultatSlot.captured.shouldHaveSize(1).toList()
             }
         setupMockedTestData()
-
 
         ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
     }

@@ -119,8 +119,7 @@ final class UfmKontroll {
     static Kontroll_begrunnelser unntakForA003(UfmKontrollData kontrollData) {
         if (!UfmRegler.lovvalgslandErNorge(kontrollData.sedDokument().getLovvalgslandKode())) {
             var lovvalgBestemmelse = kontrollData.sedDokument().getLovvalgBestemmelse();
-            if (lovvalgBestemmelse == null) return Kontroll_begrunnelser.ANNET; // TODO finn ut hva vi skal gjøre om lovvalgsbestemmelse om ingen lovvalgsbestemmelse er valgt
-            if (EnumUtils.isValidEnum(Tilleggsbestemmelser_883_2004.class, lovvalgBestemmelse.getKode())) return Kontroll_begrunnelser.ANNET; //TODO oppdater til nytt kodeverk
+            if (lovvalgBestemmelse != null && EnumUtils.isValidEnum(Tilleggsbestemmelser_883_2004.class, lovvalgBestemmelse.getKode())) return Kontroll_begrunnelser.ANNET; //TODO oppdater til nytt kodeverk
         }
         return null;
     }
