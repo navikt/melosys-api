@@ -276,6 +276,7 @@ public class OppgaveService {
                 .tema(behandlingsoppgave.getTema())
                 .oppgavetype(behandlingsoppgave.getOppgavetype())
                 .fristFerdigstillelse(Behandling.utledBehandlingsfrist(behandling, utledMottaksdato.getMottaksdato(behandling)))
+                .beskrivelse(behandlingsoppgave.getBeskrivelse())
                 .build()
         );
     }
