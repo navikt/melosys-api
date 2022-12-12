@@ -4,8 +4,8 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Optional;
 
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
@@ -15,7 +15,6 @@ import org.apache.commons.lang3.EnumUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004.*;
 import static no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderRegler.*;
 import static org.apache.cxf.common.util.StringUtils.isEmpty;
 
@@ -118,9 +117,10 @@ final class UfmKontroll {
     }
 
     static Kontroll_begrunnelser unntakForA003(UfmKontrollData kontrollData) {
-        if (!kontrollData.sedDokument().getLovvalgslandKode().getKode().equals("NO")
-            && EnumUtils.isValidEnum(Tilleggsbestemmelser_883_2004.class, kontrollData.sedDokument().getLovvalgBestemmelse().getKode())) {
-                return Kontroll_begrunnelser.ANNET;
+        if (!UfmRegler.lovvalgslandErNorge(kontrollData.sedDokument().getLovvalgslandKode())) {
+            var lovvalgBestemmelse = kontrollData.sedDokument().getLovvalgBestemmelse();
+            if (lovvalgBestemmelse == null) return Kontroll_begrunnelser.ANNET; // TODO finn ut hva vi skal gjøre om lovvalgsbestemmelse om ingen lovvalgsbestemmelse er valgt
+            if (EnumUtils.isValidEnum(Tilleggsbestemmelser_883_2004.class, lovvalgBestemmelse.getKode())) return Kontroll_begrunnelser.ANNET; //TODO oppdater til nytt kodeverk
         }
         return null;
     }

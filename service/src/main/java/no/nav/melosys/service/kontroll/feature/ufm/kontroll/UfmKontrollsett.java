@@ -43,28 +43,28 @@ public class UfmKontrollsett {
         UfmKontroll::periodeOver5År,
         UfmKontroll::periodeOver1ÅrFremITid,
         UfmKontroll::overlappendeMedlemsperiodeForA003,
-        UfmKontroll::unntakForA003,
         UfmKontroll::statsborgerskapIkkeMedlemsland,
         UfmKontroll::personDød,
         UfmKontroll::personBosattINorge,
         UfmKontroll::utbetaltYtelserFraOffentligIPeriode,
         UfmKontroll::utbetaltBarnetrygdytelser,
-        UfmKontroll::arbeidssted
-    );
+        UfmKontroll::arbeidssted,
+        UfmKontroll::unntakForA003
+        );
     private static final Set<Function<UfmKontrollData, Kontroll_begrunnelser>> REGELSETT_A003_GAMMEL = Set.of(
         UfmKontroll::periodeErÅpen,
         UfmKontroll::periodeStarterFørFørsteJuni2012,
         UfmKontroll::periodeOver5År,
         UfmKontroll::periodeOver1ÅrFremITid,
         UfmKontroll::overlappendeMedlemsperiodeMerEnn1Dag,
-        UfmKontroll::unntakForA003,
         UfmKontroll::statsborgerskapIkkeMedlemsland,
         UfmKontroll::personDød,
         UfmKontroll::personBosattINorge,
         UfmKontroll::utbetaltYtelserFraOffentligIPeriode,
         UfmKontroll::utbetaltBarnetrygdytelser,
-        UfmKontroll::arbeidssted
-    );
+        UfmKontroll::arbeidssted,
+        UfmKontroll::unntakForA003
+        );
 
     private static final Set<Function<UfmKontrollData, Kontroll_begrunnelser>> REGELSETT_A009 = Set.of(
         UfmKontroll::periodeErÅpen,

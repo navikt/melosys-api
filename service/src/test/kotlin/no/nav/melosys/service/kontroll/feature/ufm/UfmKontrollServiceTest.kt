@@ -515,6 +515,47 @@ class UfmKontrollServiceTest {
     }
 
     @Test
+    fun utførKontrollerOgRegistrerFeil_A003_forventUnntak() {
+        sedDokument.apply {
+            sedType = SedType.A003
+            lovvalgslandKode = Landkoder.CH
+            avsenderLandkode = Landkoder.CH
+            lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+
+        }
+        medlemskapDokument.apply {
+            medlemsperiode.add(
+                Medlemsperiode().apply {
+                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+                    land = "Swe"
+                },
+            )
+            medlemsperiode.add(
+                Medlemsperiode().apply {
+                    periode = Periode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2))
+                    land = "Swe"
+                },
+            )
+            personopplysninger
+        }
+        personopplysninger.apply {
+            bostedsadresse = Bostedsadresse(
+                StrukturertAdresse().apply { landkode = "CH" }, null, null, null, null,
+                null,
+                false
+            );
+        }
+        every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
+            .answers {
+                kontrollresultatSlot.captured.shouldHaveSize(1).toList()
+            }
+        setupMockedTestData()
+
+
+        ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
+    }
+
+    @Test
     fun utførKontrollerOgRegistrerFeil_A009_forventKontroll_lovvalgslandNorge() {
         sedDokument.apply {
             sedType = SedType.A009
