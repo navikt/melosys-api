@@ -1,10 +1,5 @@
 package no.nav.melosys.service.behandling;
 
-import java.lang.reflect.InvocationTargetException;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.*;
-
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.finn.unleash.Unleash;
@@ -29,6 +24,11 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.*;
 
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.ARBEID_FLERE_LAND;
@@ -129,26 +129,30 @@ public class BehandlingService {
     }
 
     @Transactional
-    public void endreBehandling(long behandlingID, Behandlingstyper type, Behandlingstema tema, Behandlingsstatus status, LocalDate mottaksdato) {
+    public void endreBehandling(long behandlingID, Behandlingstyper nyType, Behandlingstema nyTema, Behandlingsstatus nyStatus, LocalDate nyMottaksdato) {
         var behandling = hentBehandling(behandlingID);
         boolean behandlingErLåst = behandling.kanIkkeEndres();
 
         if (!behandling.erAktiv()) {
             throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres");
         }
-        if (status != null && status != behandling.getStatus()) {
-            validerNyStatusMulig(behandling, status);
-            endreStatus(behandling, status);
+        if (nyStatus != null && nyStatus != behandling.getStatus()) {
+            validerNyStatusMulig(behandling, nyStatus);
+            endreStatus(behandling, nyStatus);
         }
-        if (type != null && type != behandling.getType() && !behandlingErLåst) {
-            validerNyTypeMulig(behandling, type);
-            endreType(behandling, type);
+        if (nyType != null && nyType != behandling.getType() && !behandlingErLåst) {
+            validerNyTypeMulig(behandling, nyType);
+            endreType(behandling, nyType);
         }
-        if (tema != null && tema != behandling.getTema() && !behandlingErLåst && validerNyTemaMulig(behandling, tema)) {
-            endreTema(behandling, tema);
+        if (nyTema != null && nyTema != behandling.getTema() && !behandlingErLåst && validerNyTemaMulig(behandling, nyTema)) {
+            endreTema(behandling, nyTema);
         }
-        if (mottaksdato != null && !mottaksdato.equals((utledMottaksdato.getMottaksdato(behandling)))) {
-            endreMottaksdato(behandling, mottaksdato);
+        var nåværendeMottaksdato = utledMottaksdato.getMottaksdato(behandling);
+
+        oppdaterBehandlingsfrist(behandling, nyMottaksdato != null ? nyMottaksdato : nåværendeMottaksdato);
+
+        if (nyMottaksdato != null && !nyMottaksdato.equals(nåværendeMottaksdato)) {
+            endreMottaksdato(behandling, nyMottaksdato);
         }
     }
 
@@ -231,6 +235,15 @@ public class BehandlingService {
         } else {
             behandling.getMottatteOpplysninger().setMottaksdato(mottaksdato);
         }
+
+        behandlingRepository.save(behandling);
+
+        if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
+            applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
+        }
+    }
+
+    public void oppdaterBehandlingsfrist(Behandling behandling, LocalDate mottaksdato) {
         behandling.setBehandlingsfrist(unleash.isEnabled("melosys.behandle_alle_saker")
             ? Behandling.utledBehandlingsfrist(behandling, mottaksdato)
             : Behandling.utledFristForBehandlingtema(behandling.getTema()));
@@ -257,7 +270,7 @@ public class BehandlingService {
             behandlingsreplika = replikerBehandlingUtenMottatteOpplysningerSaksopplysningerOgResultat(tidligsteInaktiveBehandling, behandlingstype);
             behandlingsresultatService.lagreNyttBehandlingsresultat(behandlingsreplika);
         } catch (InvocationTargetException | NoSuchMethodException | InstantiationException |
-                 IllegalAccessException e) {
+            IllegalAccessException e) {
             throw new TekniskException(String.format("Klarte ikke replikere behandling %s for fagsak %s",
                 tidligsteInaktiveBehandling.getId(), tidligsteInaktiveBehandling.getFagsak().getSaksnummer()), e);
         }
@@ -294,7 +307,7 @@ public class BehandlingService {
             behandlingsreplika = replikerBehandling(tidligsteInaktiveBehandling, behandlingstype);
             behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika);
         } catch (InvocationTargetException | NoSuchMethodException | InstantiationException |
-                 IllegalAccessException e) {
+            IllegalAccessException e) {
             throw new TekniskException(String.format("Klarte ikke replikere behandling %s for fagsak %s",
                 tidligsteInaktiveBehandling.getId(), tidligsteInaktiveBehandling.getFagsak().getSaksnummer()), e);
         }

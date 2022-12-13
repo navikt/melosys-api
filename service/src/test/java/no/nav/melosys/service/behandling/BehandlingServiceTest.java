@@ -122,7 +122,7 @@ class BehandlingServiceTest {
 
         behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, MOTTAKSDATO);
 
-        verify(behandlingRepository, times(4)).save(behandlingCaptor.capture());
+        verify(behandlingRepository, times(5)).save(behandlingCaptor.capture());
         verify(applicationEventPublisher).publishEvent(behandlingEventCaptor.capture());
 
         var lagredeBehandlinger = behandlingCaptor.getAllValues();
@@ -158,8 +158,8 @@ class BehandlingServiceTest {
 
         behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, MOTTAKSDATO);
 
-        verify(behandlingRepository, times(4)).save(behandlingCaptor.capture());
-        verify(applicationEventPublisher, times(4)).publishEvent(behandlingEventCaptor.capture());
+        verify(behandlingRepository, times(5)).save(behandlingCaptor.capture());
+        verify(applicationEventPublisher, times(5)).publishEvent(behandlingEventCaptor.capture());
 
         var lagredeBehandlinger = behandlingCaptor.getAllValues();
         assertThat(lagredeBehandlinger.get(0).getId()).isEqualTo(BEHANDLING_ID);
@@ -185,16 +185,20 @@ class BehandlingServiceTest {
 
     @Test
     void endreBehandling_nullEllerSammeVerdi_ingenEndring() {
+        fakeUnleash.enableAll();
         behandling.setTema(BEHANDLING_TEMA);
         behandling.setType(BEHANDLING_TYPE);
         behandling.setStatus(BEHANDLING_STATUS);
         behandling.setBehandlingsfrist(MOTTAKSDATO);
         behandling.setMottatteOpplysninger(opprettMottatteOpplysninger());
+        behandling.setFagsak(new Fagsak());
+        behandling.getFagsak().setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+        when(utledMottaksdato.getMottaksdato(any())).thenReturn(MOTTAKSDATO);
 
         behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, null, null, null);
 
-        verify(behandlingRepository, never()).save(any());
+        verify(behandlingRepository).save(any());
         verify(applicationEventPublisher, never()).publishEvent(any());
     }
 
