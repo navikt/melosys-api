@@ -156,7 +156,20 @@ class FagsakServiceTest {
         fagsakService.oppdaterFagsakOgBehandling(fagsak.getSaksnummer(), Sakstyper.TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, Behandlingstema.ARBEID_FLERE_LAND, NY_VURDERING, null, null);
 
         verify(fagsakRepo).save(fagsak);
+        verify(lovligeKombinasjonerService).validerOpprettelseOgEndring(fagsak.getHovedpartRolle(), Sakstyper.TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, Behandlingstema.ARBEID_FLERE_LAND, NY_VURDERING);
         verify(behandlingService).endreBehandling(fagsak.hentAktivBehandling().getId(), NY_VURDERING, ARBEID_FLERE_LAND, null, null);
+    }
+
+    @Test
+    void oppdaterFagsakOgBehandling_ingenEndringPåTypeTema_validererIkke() {
+        Fagsak fagsak = lagFagsakMedBruker();
+        Behandling behandling = SaksbehandlingDataFactory.lagBehandling();
+        fagsak.getBehandlinger().add(behandling);
+        when(fagsakRepo.findBySaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
+
+        fagsakService.oppdaterFagsakOgBehandling(fagsak.getSaksnummer(), fagsak.getType(), fagsak.getTema(), behandling.getTema(), behandling.getType(), null, null);
+
+        verifyNoInteractions(lovligeKombinasjonerService);
     }
 
     @Test

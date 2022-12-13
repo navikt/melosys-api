@@ -247,7 +247,7 @@ public class FagsakService {
                                            Behandlingsstatus nyBehandlingsstatus, LocalDate nyMottaksdato) {
         Fagsak fagsak = hentFagsak(saksnummer);
         Behandling behandling = fagsak.hentAktivBehandling();
-        validerOppdatering(fagsak, nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype);
+        validerOppdatering(fagsak, behandling, nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype);
         if (fagsak.getType() != nySakstype || fagsak.getTema() != nySakstema) {
             log.info("Endrer sakstype for fagsak {} fra {} til {}", fagsak.getSaksnummer(), fagsak.getType(), nySakstype);
             fagsak.setType(nySakstype);
@@ -257,12 +257,16 @@ public class FagsakService {
         behandlingService.endreBehandling(behandling.getId(), nyBehandlingstype, nyBehandlingstema, nyBehandlingsstatus, nyMottaksdato);
     }
 
-    private void validerOppdatering(Fagsak sak, Sakstyper nySakstype, Sakstemaer nySakstema,
+    private void validerOppdatering(Fagsak sak, Behandling behandling, Sakstyper nySakstype, Sakstemaer nySakstema,
                                     Behandlingstema nyBehandlingstema, Behandlingstyper nyBehandlingstype) {
-        if ((sak.getType() != nySakstype || sak.getTema() != nySakstema) && !sak.kanEndreTypeOgTema()) {
+        var fagsakHarEndring = sak.getType() != nySakstype || sak.getTema() != nySakstema;
+        if (fagsakHarEndring && !sak.kanEndreTypeOgTema()) {
             throw new FunksjonellException("Sakstype og sakstema kan ikke endres for " + sak.getSaksnummer());
         }
-        lovligeKombinasjonerService.validerOpprettelseOgEndring(sak.getHovedpartRolle(), nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype);
+        var behandlingHarEndring = behandling.getTema() != nyBehandlingstema || behandling.getType() != nyBehandlingstype;
+        if (fagsakHarEndring || behandlingHarEndring) {
+            lovligeKombinasjonerService.validerOpprettelseOgEndring(sak.getHovedpartRolle(), nySakstype, nySakstema, nyBehandlingstema, nyBehandlingstype);
+        }
     }
 
 
