@@ -230,7 +230,7 @@ public class BehandlingService {
     public void endreMottaksdato(Behandling behandling, LocalDate mottaksdato) {
         log.info("Endrer mottaksdato for behandling {} fra {} til {}",
             behandling.getId(), utledMottaksdato.getMottaksdato(behandling), mottaksdato);
-        if (unleash.isEnabled("melosys.ny_opprett_sak")) {
+        if (unleash.isEnabled("melosys.ny_opprett_sak") && behandling.getBehandlingsårsak() != null) {
             behandling.getBehandlingsårsak().setMottaksdato(mottaksdato);
         } else {
             behandling.getMottatteOpplysninger().setMottaksdato(mottaksdato);
