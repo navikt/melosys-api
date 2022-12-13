@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -161,7 +160,6 @@ public class FagsakTjeneste {
         notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer. Saker knyttet til en organisasjon søkes via organisasjonsnummer."),
         response = FagsakOppsummeringDto.class,
         responseContainer = "List")
-    @Transactional
     public List<FagsakOppsummeringDto> hentFagsaker(@RequestBody FagsakSokDto fagsakSokDto) {
 
         if (StringUtils.isNotEmpty(fagsakSokDto.ident())) {
@@ -283,7 +281,7 @@ public class FagsakTjeneste {
                     }
                 });
 
-            Behandlingsresultat behandlingsResultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+            Behandlingsresultat behandlingsResultat = behandlingsresultatService.hentBehandlingsresultatMedLovvalgsperioder(behandling.getId());
 
             behandlingsResultat.finnLovvalgsperiode().ifPresent(lovvalgsperiode -> {
                 var periode = new PeriodeDto(lovvalgsperiode.getFom(), lovvalgsperiode.getTom());
