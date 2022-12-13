@@ -387,6 +387,7 @@ class FagsakTjenesteTest {
         behandlingsresultat.getLovvalgsperioder().add(lagLovvalgsPeriode());
 
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+        when(behandlingsresultatService.hentBehandlingsresultatMedLovvalgsperioder(anyLong())).thenReturn(behandlingsresultat);
         when(mottatteOpplysningerService.finnMottatteOpplysninger(fagsak.getBehandlinger().get(0).getId())).thenReturn(Optional.of(mottatteOpplysninger));
         when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
         when(persondataFasade.hentSammensattNavn(any())).thenReturn("Joe Moe");
