@@ -147,8 +147,11 @@ public class BehandlingService {
         if (tema != null && tema != behandling.getTema() && !behandlingErLåst && validerNyTemaMulig(behandling, tema)) {
             endreTema(behandling, tema);
         }
-        if (mottaksdato != null && !mottaksdato.equals((utledMottaksdato.getMottaksdato(behandling)))) {
+        var gammelMottaksdato = utledMottaksdato.getMottaksdato(behandling);
+        if (mottaksdato != null && !mottaksdato.equals(gammelMottaksdato)) {
             endreMottaksdato(behandling, mottaksdato);
+        } else {
+            oppdaterBehandlingsfrist(behandling, gammelMottaksdato);
         }
     }
 
@@ -231,15 +234,21 @@ public class BehandlingService {
         } else {
             behandling.getMottatteOpplysninger().setMottaksdato(mottaksdato);
         }
-        behandling.setBehandlingsfrist(unleash.isEnabled("melosys.behandle_alle_saker")
-            ? Behandling.utledBehandlingsfrist(behandling, mottaksdato)
-            : Behandling.utledFristForBehandlingtema(behandling.getTema()));
+        oppdaterBehandlingsfrist(behandling, mottaksdato);
 
         behandlingRepository.save(behandling);
 
         if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
             applicationEventPublisher.publishEvent(new BehandlingEndretAvSaksbehandlerEvent(behandling.getId(), behandling));
         }
+    }
+
+    public void oppdaterBehandlingsfrist(Behandling behandling, LocalDate mottaksdato) {
+        behandling.setBehandlingsfrist(unleash.isEnabled("melosys.behandle_alle_saker")
+            ? Behandling.utledBehandlingsfrist(behandling, mottaksdato)
+            : Behandling.utledFristForBehandlingtema(behandling.getTema()));
+
+        behandlingRepository.save(behandling);
     }
 
     public List<Long> hentMedlemsperioder(long behandlingID) {
@@ -257,7 +266,7 @@ public class BehandlingService {
             behandlingsreplika = replikerBehandlingUtenMottatteOpplysningerSaksopplysningerOgResultat(tidligsteInaktiveBehandling, behandlingstype);
             behandlingsresultatService.lagreNyttBehandlingsresultat(behandlingsreplika);
         } catch (InvocationTargetException | NoSuchMethodException | InstantiationException |
-                 IllegalAccessException e) {
+            IllegalAccessException e) {
             throw new TekniskException(String.format("Klarte ikke replikere behandling %s for fagsak %s",
                 tidligsteInaktiveBehandling.getId(), tidligsteInaktiveBehandling.getFagsak().getSaksnummer()), e);
         }
@@ -294,7 +303,7 @@ public class BehandlingService {
             behandlingsreplika = replikerBehandling(tidligsteInaktiveBehandling, behandlingstype);
             behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika);
         } catch (InvocationTargetException | NoSuchMethodException | InstantiationException |
-                 IllegalAccessException e) {
+            IllegalAccessException e) {
             throw new TekniskException(String.format("Klarte ikke replikere behandling %s for fagsak %s",
                 tidligsteInaktiveBehandling.getId(), tidligsteInaktiveBehandling.getFagsak().getSaksnummer()), e);
         }
