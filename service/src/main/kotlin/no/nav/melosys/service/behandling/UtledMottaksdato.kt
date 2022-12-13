@@ -17,6 +17,9 @@ class UtledMottaksdato(val joarkFasade: JoarkFasade, val unleash: Unleash) {
             if (behandling.behandlingsårsak != null) {
                 return behandling.behandlingsårsak.mottaksdato
             }
+            if (behandling.mottatteOpplysninger != null && behandling.mottatteOpplysninger.mottaksdato != null) {
+                return behandling.mottatteOpplysninger.mottaksdato
+            }
             val journalpost = finnJournalpost(behandling.initierendeJournalpostId)
             return tilLocalDate(journalpost?.forsendelseMottatt ?: behandling.registrertDato)
         }
@@ -26,6 +29,9 @@ class UtledMottaksdato(val joarkFasade: JoarkFasade, val unleash: Unleash) {
     fun getMottaksdato(behandling: Behandling, journalpost: Journalpost?): LocalDate? {
         if (behandling.behandlingsårsak != null) {
             return behandling.behandlingsårsak.mottaksdato
+        }
+        if (behandling.mottatteOpplysninger != null && behandling.mottatteOpplysninger.mottaksdato != null) {
+            return behandling.mottatteOpplysninger.mottaksdato
         }
         return tilLocalDate(journalpost?.forsendelseMottatt ?: behandling.registrertDato)
     }
