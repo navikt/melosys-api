@@ -13,7 +13,7 @@
 
     <properties>
         <commons-cli.version>1.5.0</commons-cli.version>
-        <graphql-spring-boot-starter.version>12.0.0</graphql-spring-boot-starter.version>
+        <graphql-spring-boot-starter.version>15.0.0</graphql-spring-boot-starter.version>
         <scala.version>2.13.8</scala.version>
         <testcontainers.version>1.17.1</testcontainers.version>
     </properties>
