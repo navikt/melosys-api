@@ -10,15 +10,10 @@ UPDATE BEHANDLING
 SET BEH_TEMA = 'YRKESAKTIV'
 WHERE BEH_TEMA = 'ARBEID_I_UTLANDET';
 
--- Oppdaterer behandlingstype fra SOEKNAD og SED til FØRSTEGANG hvis raden er første behandling for fagsaken
 UPDATE BEHANDLING
 SET BEH_TYPE = 'FØRSTEGANG'
-WHERE ID in (select id
-             from (with behandling_med_sak_counter AS (SELECT id,
-                                                              BEH_TYPE,
-                                                              ROW_NUMBER() over (PARTITION BY SAKSNUMMER ORDER BY REGISTRERT_DATO) AS sak_row_number
-                                                       FROM BEHANDLING)
-                   SELECT *
-                   FROM behandling_med_sak_counter
-                   WHERE BEH_TYPE in ('SOEKNAD', 'SED')
-                     AND sak_row_number = 1));
+WHERE BEH_TYPE in ('SED', 'SOEKNAD');
+
+UPDATE BEHANDLING
+SET BEH_TYPE = 'HENVENDELSE'
+WHERE BEH_TEMA = 'FORESPØRSEL_TRYGDEMYNDIGHET';
