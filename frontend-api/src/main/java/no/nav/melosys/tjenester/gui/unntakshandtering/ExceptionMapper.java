@@ -52,7 +52,7 @@ public class ExceptionMapper {
         return håndter(e, HttpStatus.INTERNAL_SERVER_ERROR, Level.ERROR);
     }
 
-    private ResponseEntity<Map<String, Object>> håndter(Exception e, HttpStatus httpStatus, Level loggnivå){
+    private ResponseEntity<Map<String, Object>> håndter(Exception e, HttpStatus httpStatus, Level loggnivå) {
         return håndter(e, httpStatus, loggnivå, Collections.emptyList());
     }
 
@@ -60,16 +60,17 @@ public class ExceptionMapper {
                                                         HttpStatus httpStatus,
                                                         Level loggnivå,
                                                         Collection begrunnelser) {
+        String message = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
         if (loggnivå.equals(Level.ERROR)) {
-            log.error(API_KALL_FEILET + e.getMessage(), e);
+            log.error(API_KALL_FEILET + message, e);
         } else if (loggnivå.equals(Level.WARN)) {
-            log.warn(API_KALL_FEILET + e.getMessage(), e);
+            log.warn(API_KALL_FEILET + message, e);
         }
 
         Map<String, Object> entity = new HashMap<>();
         entity.put("status", httpStatus.value());
         entity.put("error", httpStatus.getReasonPhrase());
-        entity.put("message", e.getMessage());
+        entity.put("message", message);
         entity.put("correlationId", MDC.get(CORRELATION_ID));
         if (begrunnelser != null && !begrunnelser.isEmpty()) {
             entity.put("feilkoder", begrunnelser);
