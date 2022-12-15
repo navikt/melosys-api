@@ -236,6 +236,32 @@ class LovligeKombinasjonerServiceTest {
     }
 
     @Test
+    void hentMuligeBehandlingstyper_avsluttet_returnererIkkeFørstegang() {
+        Behandling sisteBehandling = behandlingMedTemaOgType(UTSENDT_ARBEIDSTAKER, FØRSTEGANG);
+        sisteBehandling.setStatus(AVSLUTTET);
+        sisteBehandling.setFagsak(new Fagsak());
+
+        var muligeTyper = lovligeKombinasjonerService
+            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, sisteBehandling, null);
+
+
+        assertThat(muligeTyper).contains(NY_VURDERING, HENVENDELSE, KLAGE).doesNotContain(FØRSTEGANG);
+    }
+
+    @Test
+    void hentMuligeBehandlingstyper_midlertidigLovvalgsbesluttet_returnererIkkeFørstegang() {
+        Behandling sisteBehandling = behandlingMedTemaOgType(UTSENDT_ARBEIDSTAKER, FØRSTEGANG);
+        sisteBehandling.setStatus(MIDLERTIDIG_LOVVALGSBESLUTNING);
+        sisteBehandling.setFagsak(new Fagsak());
+
+        var muligeTyper = lovligeKombinasjonerService
+            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, sisteBehandling, null);
+
+
+        assertThat(muligeTyper).contains(NY_VURDERING, HENVENDELSE, KLAGE).doesNotContain(FØRSTEGANG);
+    }
+
+    @Test
     void hentMuligeBehandlingstemaer_hovedpartVIRKSOMHETIkkeTrygdeavgift_skalReturnereBehandlingsTemaVIRKSOMHET() {
         Set<Behandlingstema> behandlingstemas = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, null);
         assertThat(behandlingstemas)
