@@ -84,17 +84,17 @@ public final class LocalUnleash implements Unleash {
         return new LocalUnleash.FakeMore();
     }
 
-    public void enableAllExcept(ToggleName... excludedFeatures) {
+    public void enableAllExcept(String... excludedFeatures) {
         enableAll();
-        for (ToggleName toggle : excludedFeatures) {
-            this.excludedFeatures.put(toggle.name, false);
+        for (String toggle : excludedFeatures) {
+            this.excludedFeatures.put(toggle, false);
         }
     }
 
-    public void disableAllExcept(ToggleName... excludedFeatures) {
+    public void disableAllExcept(String... excludedFeatures) {
         disableAll();
-        for (ToggleName toggle : excludedFeatures) {
-            this.excludedFeatures.put(toggle.name, true);
+        for (String toggle : excludedFeatures) {
+            this.excludedFeatures.put(toggle, true);
         }
     }
 

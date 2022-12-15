@@ -81,8 +81,8 @@ class JournalfoeringServiceTest {
     @Mock
     private SaksbehandlingRegler saksbehandlingRegler;
 
-    private final LovligeKombinasjonerService lovligeKombinasjonerService = new LovligeKombinasjonerService(fagsakService, behandlingService, behandlingsresultatService);
     private final FakeUnleash unleash = new FakeUnleash();
+    private final LovligeKombinasjonerService lovligeKombinasjonerService = new LovligeKombinasjonerService(fagsakService, behandlingService, behandlingsresultatService, unleash);
 
     @Captor
     private ArgumentCaptor<Prosessinstans> prosessinstansArgumentCaptor;

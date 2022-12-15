@@ -11,9 +11,11 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -33,6 +35,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.KLAGE;
 import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentPeriode;
 import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentSøknadsland;
 
