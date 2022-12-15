@@ -13,9 +13,9 @@ import no.finn.unleash.lang.Nullable;
 public final class LocalUnleash implements Unleash {
     private boolean enableAll = false;
     private boolean disableAll = false;
-    private Map<String, Boolean> excludedFeatures = new HashMap<>();
     private Map<String, Boolean> features = new HashMap<>();
     private Map<String, Variant> variants = new HashMap<>();
+    private Map<String, Boolean> excludedFeatures = new HashMap<>();
 
     @Override
     public boolean isEnabled(String toggleName) {
@@ -27,7 +27,7 @@ public final class LocalUnleash implements Unleash {
         if (enableAll) {
             return excludedFeatures.getOrDefault(toggleName, true);
         } else if (disableAll) {
-            return false;
+            return excludedFeatures.getOrDefault(toggleName, false);
         } else {
             return features.getOrDefault(toggleName, defaultSetting);
         }
@@ -91,16 +91,25 @@ public final class LocalUnleash implements Unleash {
         }
     }
 
+    public void disableAllExcept(ToggleName... excludedFeatures) {
+        disableAll();
+        for (ToggleName toggle : excludedFeatures) {
+            this.excludedFeatures.put(toggle.name, true);
+        }
+    }
+
     public void enableAll() {
         disableAll = false;
         enableAll = true;
         features.clear();
+        excludedFeatures.clear();
     }
 
     public void disableAll() {
         disableAll = true;
         enableAll = false;
         features.clear();
+        excludedFeatures.clear();
     }
 
     public void resetAll() {
@@ -108,6 +117,7 @@ public final class LocalUnleash implements Unleash {
         enableAll = false;
         features.clear();
         variants.clear();
+        excludedFeatures.clear();
     }
 
     public void enable(String... features) {
