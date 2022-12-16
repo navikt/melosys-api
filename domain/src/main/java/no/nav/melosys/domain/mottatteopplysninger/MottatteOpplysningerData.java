@@ -76,7 +76,7 @@ public class MottatteOpplysningerData {
 
     public Map<String, String> hentUtenlandskeArbeidsgivereUuidOgNavn() {
         return foretakUtland.stream()
-            .filter(f -> Objects.nonNull(f.uuid))
+            .filter(f -> Objects.nonNull(f.uuid) && Objects.nonNull(f.navn))
             .collect(Collectors.toMap(f -> f.uuid, f -> f.navn));
     }
 
