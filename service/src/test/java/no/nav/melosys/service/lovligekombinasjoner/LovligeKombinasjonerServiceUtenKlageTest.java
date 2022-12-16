@@ -30,7 +30,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class LovligeKombinasjonerServiceTest {
+class LovligeKombinasjonerServiceUtenKlageTest {
+
+    /*
+     *      Tester for når melosys.behandlingstype.klage er disabled
+     */
 
     @Mock
     private FagsakService fagsakService;
@@ -43,9 +47,7 @@ class LovligeKombinasjonerServiceTest {
 
     @BeforeEach
     void setup() {
-        var unleash = new FakeUnleash();
-        unleash.enableAll();
-        lovligeKombinasjonerService = new LovligeKombinasjonerService(fagsakService, behandlingService, behandlingsresultatService, unleash);
+        lovligeKombinasjonerService = new LovligeKombinasjonerService(fagsakService, behandlingService, behandlingsresultatService, new FakeUnleash());
     }
 
     @Test
@@ -127,7 +129,7 @@ class LovligeKombinasjonerServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, ARBEID_TJENESTEPERSON_ELLER_FLY, null);
 
 
-        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE);
     }
 
     @Test
@@ -136,7 +138,7 @@ class LovligeKombinasjonerServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, IKKE_YRKESAKTIV, null);
 
 
-        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE);
     }
 
     @Test
@@ -154,7 +156,7 @@ class LovligeKombinasjonerServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, TRYGDEAVGIFT, YRKESAKTIV, null);
 
 
-        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE);
     }
 
     @Test
@@ -163,7 +165,7 @@ class LovligeKombinasjonerServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, MEDLEMSKAP_LOVVALG, YRKESAKTIV, null);
 
 
-        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE);
     }
 
     @Test
@@ -172,7 +174,7 @@ class LovligeKombinasjonerServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, MEDLEMSKAP_LOVVALG, PENSJONIST, null);
 
 
-        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE);
     }
 
     @Test
@@ -181,7 +183,7 @@ class LovligeKombinasjonerServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, TRYGDEAVGIFT, PENSJONIST, null);
 
 
-        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE);
     }
 
     @Test
@@ -190,7 +192,7 @@ class LovligeKombinasjonerServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, TRYGDEAVGIFT, YRKESAKTIV, null);
 
 
-        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE);
     }
 
     @Test
@@ -199,7 +201,7 @@ class LovligeKombinasjonerServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, YRKESAKTIV, null);
 
 
-        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE);
     }
 
     @Test
@@ -208,7 +210,7 @@ class LovligeKombinasjonerServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, PENSJONIST, null);
 
 
-        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE);
     }
 
     @Test
@@ -226,7 +228,7 @@ class LovligeKombinasjonerServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, TRYGDEAVTALE, TRYGDEAVGIFT, YRKESAKTIV, null);
 
 
-        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE);
     }
 
     @Test
@@ -235,33 +237,7 @@ class LovligeKombinasjonerServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, TRYGDEAVTALE, TRYGDEAVGIFT, PENSJONIST, null);
 
 
-        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
-    }
-
-    @Test
-    void hentMuligeBehandlingstyper_avsluttet_returnererIkkeFørstegang() {
-        Behandling sisteBehandling = behandlingMedTemaOgType(UTSENDT_ARBEIDSTAKER, FØRSTEGANG);
-        sisteBehandling.setStatus(AVSLUTTET);
-        sisteBehandling.setFagsak(new Fagsak());
-
-        var muligeTyper = lovligeKombinasjonerService
-            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, sisteBehandling, null);
-
-
-        assertThat(muligeTyper).contains(NY_VURDERING, HENVENDELSE, KLAGE).doesNotContain(FØRSTEGANG);
-    }
-
-    @Test
-    void hentMuligeBehandlingstyper_midlertidigLovvalgsbesluttet_returnererIkkeFørstegang() {
-        Behandling sisteBehandling = behandlingMedTemaOgType(UTSENDT_ARBEIDSTAKER, FØRSTEGANG);
-        sisteBehandling.setStatus(MIDLERTIDIG_LOVVALGSBESLUTNING);
-        sisteBehandling.setFagsak(new Fagsak());
-
-        var muligeTyper = lovligeKombinasjonerService
-            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, sisteBehandling, null);
-
-
-        assertThat(muligeTyper).contains(NY_VURDERING, HENVENDELSE, KLAGE).doesNotContain(FØRSTEGANG);
+        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE);
     }
 
     @Test
@@ -310,8 +286,8 @@ class LovligeKombinasjonerServiceTest {
 
         Set<Behandlingstyper> muligeBehandlingstyper = lovligeKombinasjonerService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, sisteBehandling, null);
         assertThat(muligeBehandlingstyper)
-            .hasSize(3)
-            .containsExactly(NY_VURDERING, KLAGE, HENVENDELSE);
+            .hasSize(2)
+            .containsExactly(NY_VURDERING, HENVENDELSE);
     }
 
     @Test
