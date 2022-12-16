@@ -32,6 +32,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class LovligeKombinasjonerServiceUtenKlageTest {
 
+    /*
+     *      Tester for når melosys.behandlingstype.klage er disabled
+     */
+
     @Mock
     private FagsakService fagsakService;
     @Mock
