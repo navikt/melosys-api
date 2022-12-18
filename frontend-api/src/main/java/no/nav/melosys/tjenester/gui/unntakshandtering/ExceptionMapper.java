@@ -51,11 +51,6 @@ public class ExceptionMapper {
         return håndter(e, request, HttpStatus.INTERNAL_SERVER_ERROR, Level.ERROR);
     }
 
-    //    @ExceptionHandler(value = Exception.class)
-    public ResponseEntity<Map<String, Object>> håndter(Exception e) {
-        return håndter(e, null, HttpStatus.INTERNAL_SERVER_ERROR, Level.ERROR);
-    }
-
     private ResponseEntity<Map<String, Object>> håndter(Exception e, HttpServletRequest request, HttpStatus httpStatus, Level loggnivå) {
         return håndter(e, request, httpStatus, loggnivå, Collections.emptyList());
     }
