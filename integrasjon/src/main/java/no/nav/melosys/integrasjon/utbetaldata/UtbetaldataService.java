@@ -2,9 +2,11 @@ package no.nav.melosys.integrasjon.utbetaldata;
 
 import java.io.StringWriter;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import javax.xml.bind.JAXBException;
 import javax.xml.ws.WebServiceException;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.exception.FunksjonellException;
@@ -12,7 +14,9 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
+import no.nav.melosys.integrasjon.utbetaling.UtbetalingConsumerV2;
 import no.nav.melosys.integrasjon.utbetaldata.utbetaling.*;
+import no.nav.melosys.integrasjon.utbetaling.UtbetalingServiceV2;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonIkkeTilgang;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonPeriodeIkkeGyldig;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonPersonIkkeFunnet;
@@ -29,20 +33,20 @@ public class UtbetaldataService implements UtbetaldataFasade {
 
     private final UtbetalingConsumer utbetalingConsumer;
     private final DokumentFactory dokumentFactory;
-    private final UtbetalingConsumerV2 utbetalingConsumerV2;
+    private final Unleash unleash;
+    private final UtbetalingServiceV2 utbetalingServiceV2;
 
-    public UtbetaldataService(UtbetalingConsumer utbetalingConsumer, DokumentFactory dokumentFactory, UtbetalingConsumerV2 utbetalingConsumerV2) {
+    public UtbetaldataService(UtbetalingConsumer utbetalingConsumer, DokumentFactory dokumentFactory, UtbetalingServiceV2 utbetalingServiceV2, Unleash unleash) {
         this.utbetalingConsumer = utbetalingConsumer;
         this.dokumentFactory = dokumentFactory;
-        this.utbetalingConsumerV2 = utbetalingConsumerV2;
+        this.unleash = unleash;
+        this.utbetalingServiceV2 = utbetalingServiceV2;
     }
 
-    @Deprecated
     @Override
     public Saksopplysning hentUtbetalingerBarnetrygd(String fnr, LocalDate fom, LocalDate tom) {
 
-        if (false) { //TODO lag featuretoggle
-
+        if (!unleash.isEnabled("ubetalinger.v2")) { //TODO lag featuretoggle
             WSHentUtbetalingsinformasjonResponse response;
 
             if (erUtbetalingsDataStøttet(tom)) {
@@ -56,14 +60,13 @@ public class UtbetaldataService implements UtbetaldataFasade {
             return UtbetaldataMapper.tilSaksopplysning(response, lagXml(response).toString());
 
         } else {
+            System.out.println("Utbetalinger v2 brukes:");
             UtbetalingResponse response;
             if (erUtbetalingsDataStøttet(tom)) {
                 // TODO hvorfor har vi i det hele tatt denne conditionen?
-                response = new UtbetalingResponse(null);
+                response = new UtbetalingResponse(new ArrayList<>());
             } else {
-                response = filtrerYtelserAvTypeBarnetrygd(
-                    hentUtbetalingsinformasjonV2(lagRequest(fnr, fom.toString(), tom.toString()))
-                    );
+                return utbetalingServiceV2.hentSaksopplysningForUtbetaling(fnr, fom, tom);
             }
 
             return UtbetaldataMapper.tilSaksopplysning(response, response.toString());
@@ -82,10 +85,6 @@ public class UtbetaldataService implements UtbetaldataFasade {
         } catch (WebServiceException e) {
             throw new IntegrasjonException(e);
         }
-    }
-
-    private UtbetalingResponse hentUtbetalingsinformasjonV2(UtbetalingRequest request) {
-            return utbetalingConsumerV2.hentUtbetalingsInformasjon(request.getPeriode().getFom(), request.getPeriode().getTom(), request.getIdent());
     }
 
     private StringWriter lagXml(WSHentUtbetalingsinformasjonResponse response) {
@@ -107,10 +106,6 @@ public class UtbetaldataService implements UtbetaldataFasade {
         request.setId(lagIdent(fnr));
         request.setPeriode(lagPeriode(fom, tom));
         return request;
-    }
-
-    private UtbetalingRequest lagRequest(String fnr, String fom, String tom) {
-        return new UtbetalingRequest(fnr, new Periode(fom, tom), null, null);
     }
 
     private static WSIdent lagIdent(String fnr) {
@@ -144,28 +139,12 @@ public class UtbetaldataService implements UtbetaldataFasade {
         return response;
     }
 
-    private UtbetalingResponse filtrerYtelserAvTypeBarnetrygd(UtbetalingResponse response) {
-        taVekkUtbetalingerUtenBarnetrygd(response);
-        taVekkYtelserFraUtbetalingerSomIkkeErBarnetrygd(response);
-        return response;
-    }
-
     private void taVekkYtelserFraUtbetalingerSomIkkeErBarnetrygd(WSHentUtbetalingsinformasjonResponse response) {
         response.getUtbetalingListe().forEach(utbetaling -> utbetaling.getYtelseListe()
             .removeIf(ytelse -> !erBarnetrygdytelse(ytelse)));
     }
 
     private void taVekkUtbetalingerUtenBarnetrygd(WSHentUtbetalingsinformasjonResponse response) {
-        response.getUtbetalingListe().removeIf(utbetaling -> utbetaling.getYtelseListe().stream()
-            .noneMatch(this::erBarnetrygdytelse));
-    }
-
-    private void taVekkYtelserFraUtbetalingerSomIkkeErBarnetrygd(UtbetalingResponse response) {
-        response.getUtbetalingListe().forEach(utbetaling -> utbetaling.getYtelseListe()
-            .removeIf(ytelse -> !erBarnetrygdytelse(ytelse)));
-    }
-
-    private void taVekkUtbetalingerUtenBarnetrygd(UtbetalingResponse response) {
         response.getUtbetalingListe().removeIf(utbetaling -> utbetaling.getYtelseListe().stream()
             .noneMatch(this::erBarnetrygdytelse));
     }

@@ -7,16 +7,17 @@ data class UtbetalingResponse(
     var utbetalingListe: List<Utbetaling>
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class Utbetaling(
-    val forfallsdato: String,
+    val forfallsdato: String?,
     val posteringsdato: String,
     val utbetalingNettobeloep: Double,
-    val utbetalingsdato: String,
-    val utbetalingsmelding: String,
+    val utbetalingsdato: String?,
+    val utbetalingsmelding: String?,
     val utbetalingsmetode: String,
     val utbetalingsstatus: String,
     val utbetaltTil: UtbetaltTil,
-    val utbetaltTilKonto: UtbetaltTilKonto,
+    val utbetaltTilKonto: UtbetaltTilKonto?,
     val ytelseListe: List<Ytelse>
 )
 
@@ -32,18 +33,18 @@ data class UtbetaltTilKonto(
 )
 
 data class Ytelse(
-    val bilagsnummer: String,
-    val refundertForOrg: RefundertForOrg,
+    val bilagsnummer: String?,
+    val refundertForOrg: RefundertForOrg?,
     val rettighetshaver: Rettighetshaver,
-    val skattListe: List<SkattListe>,
+    val skattListe: List<Skatt>,
     val skattsum: Double,
-    val trekkListe: List<TrekkListe>,
+    val trekkListe: List<TrekkListe>?,
     val trekksum: Int,
     val ytelseNettobeloep: Int,
-    val ytelseskomponentListe: List<YtelseskomponentListe>,
+    val ytelseskomponentListe: List<YtelseskomponentListe>?,
     val ytelseskomponentersum: Double,
     val ytelsesperiode: Ytelsesperiode,
-    val ytelsestype: String
+    val ytelsestype: String?
 )
 
 data class RefundertForOrg(
@@ -58,7 +59,7 @@ data class Rettighetshaver(
     val navn: String
 )
 
-data class SkattListe(
+data class Skatt(
     val skattebeloep: Double
 )
 

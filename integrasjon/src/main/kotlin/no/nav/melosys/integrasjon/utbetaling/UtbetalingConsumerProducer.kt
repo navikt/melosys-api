@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.utbetaldata.utbetaling
+package no.nav.melosys.integrasjon.utbetaling
 
 import no.nav.melosys.integrasjon.felles.CallIdAware
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
@@ -13,12 +13,12 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 
 @Configuration
-class UtbetalingConsumerProducerV2(
+class UtbetalingConsumerProducer(
     @Value("\${utbetaling.rest.url}") private val url: String,
     private val genericAuthFilterFactory: GenericAuthFilterFactory
 ) : CallIdAware, WebClientConfig {
     @Bean
-    fun utbetalingConsumerV2(
+    fun utbetalingConsumer(
         webClientBuilder: WebClient.Builder, correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
     ) = UtbetalingConsumerV2(
         webClientBuilder
@@ -26,6 +26,7 @@ class UtbetalingConsumerProducerV2(
             .filter(genericAuthFilterFactory.getFilter(CLIENT_NAME))
             .filter(headerFilter())
             .filter(correlationIdOutgoingFilter)
+            .filter(errorFilter("Kall mot Utbetalinger feilet."))
             .build()
     )
 
@@ -40,7 +41,7 @@ class UtbetalingConsumerProducerV2(
         }
 
     companion object {
-        private const val CONSUMER_ID = "test"
-        private val CLIENT_NAME = "test"
+        private const val CONSUMER_ID = "srvmelosys"
+        private val CLIENT_NAME = "betalinger"
     }
 }

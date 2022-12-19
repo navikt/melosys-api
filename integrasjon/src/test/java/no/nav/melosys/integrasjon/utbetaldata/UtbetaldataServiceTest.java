@@ -1,11 +1,16 @@
 package no.nav.melosys.integrasjon.utbetaldata;
 
+import java.io.IOException;
 import java.time.LocalDate;
+import java.util.*;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.ws.WebServiceException;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKilde;
 import no.nav.melosys.domain.SaksopplysningKildesystem;
@@ -19,8 +24,8 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
-import no.nav.melosys.integrasjon.utbetaldata.utbetaling.UtbetalingConsumer;
-import no.nav.melosys.integrasjon.utbetaldata.utbetaling.UtbetalingConsumerV2;
+import no.nav.melosys.integrasjon.utbetaldata.utbetaling.*;
+import no.nav.melosys.integrasjon.utbetaling.UtbetalingServiceV2;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonIkkeTilgang;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonPeriodeIkkeGyldig;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonPersonIkkeFunnet;
@@ -45,18 +50,19 @@ class UtbetaldataServiceTest {
     private UtbetalingConsumer utbetalingConsumer;
     @Mock
     private XsltTemplatesFactory xsltTemplatesFactory;
-    @Mock
-    private UtbetalingConsumerV2 utbetalingConsumerV2;
 
     private UtbetaldataService utbetaldataService;
+    private UtbetalingServiceV2 utbetalingServiceV2;
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
 
     @BeforeEach
     void setup() {
         xsltTemplatesFactory = mock(XsltTemplatesFactory.class);
         DokumentFactory dokumentFactory = new DokumentFactory(JaxbConfig.getJaxb2Marshaller(), xsltTemplatesFactory);
+        fakeUnleash.disableAll();
 
-        utbetaldataService = new UtbetaldataService(utbetalingConsumer, dokumentFactory, utbetalingConsumerV2);
+        utbetaldataService = new UtbetaldataService(utbetalingConsumer, dokumentFactory, utbetalingServiceV2, fakeUnleash);
     }
 
     @Test
@@ -168,5 +174,13 @@ class UtbetaldataServiceTest {
         return ((no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonResponse)
             unmarshaller.unmarshal(ClassLoader.getSystemResource(String.format("mock/utbetaldata/%s.xml", fnr)))
         ).getHentUtbetalingsinformasjonResponse();
+    }
+
+    private UtbetalingResponse mockResponse() throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules()
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        var utbetalinger = objectMapper.readValue(ClassLoader.getSystemResource("mock/utbetaldata/ubetalingResponse.json"), Utbetaling[].class);
+        UtbetalingResponse res = new UtbetalingResponse(Arrays.asList(utbetalinger));
+        return res;
     }
 }

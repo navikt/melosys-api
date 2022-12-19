@@ -154,7 +154,7 @@
             <artifactId>person-v3-tjenestespesifikasjon</artifactId>
         </dependency>
 
-        <!-- Utbetaling -->
+        <!-- utbetaldata -->
         <dependency>
             <groupId>no.nav.tjenestespesifikasjoner</groupId>
             <artifactId>utbetaling-tjenestespesifikasjon</artifactId>
