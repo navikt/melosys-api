@@ -20,6 +20,7 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.utbetaldata.utbetaling.UtbetalingConsumer;
+import no.nav.melosys.integrasjon.utbetaldata.utbetaling.UtbetalingConsumerV2;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonIkkeTilgang;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonPeriodeIkkeGyldig;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonPersonIkkeFunnet;
@@ -44,6 +45,8 @@ class UtbetaldataServiceTest {
     private UtbetalingConsumer utbetalingConsumer;
     @Mock
     private XsltTemplatesFactory xsltTemplatesFactory;
+    @Mock
+    private UtbetalingConsumerV2 utbetalingConsumerV2;
 
     private UtbetaldataService utbetaldataService;
 
@@ -53,7 +56,7 @@ class UtbetaldataServiceTest {
         xsltTemplatesFactory = mock(XsltTemplatesFactory.class);
         DokumentFactory dokumentFactory = new DokumentFactory(JaxbConfig.getJaxb2Marshaller(), xsltTemplatesFactory);
 
-        utbetaldataService = new UtbetaldataService(utbetalingConsumer, dokumentFactory);
+        utbetaldataService = new UtbetaldataService(utbetalingConsumer, dokumentFactory, utbetalingConsumerV2);
     }
 
     @Test

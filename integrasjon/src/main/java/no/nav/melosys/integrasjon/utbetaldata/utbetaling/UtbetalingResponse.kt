@@ -17,7 +17,7 @@ data class Utbetaling(
     val utbetalingsstatus: String,
     val utbetaltTil: UtbetaltTil,
     val utbetaltTilKonto: UtbetaltTilKonto,
-    val ytelseListe: List<YtelseListe>
+    val ytelseListe: List<Ytelse>
 )
 
 data class UtbetaltTil(
@@ -31,7 +31,7 @@ data class UtbetaltTilKonto(
     val kontotype: String
 )
 
-data class YtelseListe(
+data class Ytelse(
     val bilagsnummer: String,
     val refundertForOrg: RefundertForOrg,
     val rettighetshaver: Rettighetshaver,

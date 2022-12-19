@@ -12,7 +12,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
-import no.nav.melosys.integrasjon.utbetaldata.utbetaling.UtbetalingConsumer;
+import no.nav.melosys.integrasjon.utbetaldata.utbetaling.*;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonIkkeTilgang;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonPeriodeIkkeGyldig;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonPersonIkkeFunnet;
@@ -29,25 +29,45 @@ public class UtbetaldataService implements UtbetaldataFasade {
 
     private final UtbetalingConsumer utbetalingConsumer;
     private final DokumentFactory dokumentFactory;
+    private final UtbetalingConsumerV2 utbetalingConsumerV2;
 
-    public UtbetaldataService(UtbetalingConsumer utbetalingConsumer, DokumentFactory dokumentFactory) {
+    public UtbetaldataService(UtbetalingConsumer utbetalingConsumer, DokumentFactory dokumentFactory, UtbetalingConsumerV2 utbetalingConsumerV2) {
         this.utbetalingConsumer = utbetalingConsumer;
         this.dokumentFactory = dokumentFactory;
+        this.utbetalingConsumerV2 = utbetalingConsumerV2;
     }
 
+    @Deprecated
     @Override
     public Saksopplysning hentUtbetalingerBarnetrygd(String fnr, LocalDate fom, LocalDate tom) {
-        WSHentUtbetalingsinformasjonResponse response;
 
-        if (erUtbetalingsDataStøttet(tom)) {
-            response = new WSHentUtbetalingsinformasjonResponse();
+        if (false) { //TODO lag featuretoggle
+
+            WSHentUtbetalingsinformasjonResponse response;
+
+            if (erUtbetalingsDataStøttet(tom)) {
+                response = new WSHentUtbetalingsinformasjonResponse();
+            } else {
+                response = filtrerYtelserAvTypeBarnetrygd(
+                    hentUtbetalingsinformasjon(lagRequest(fnr, fom, tom))
+                );
+            }
+
+            return UtbetaldataMapper.tilSaksopplysning(response, lagXml(response).toString());
+
         } else {
-            response = filtrerYtelserAvTypeBarnetrygd(
-                hentUtbetalingsinformasjon(lagRequest(fnr, fom, tom))
-            );
-        }
+            UtbetalingResponse response;
+            if (erUtbetalingsDataStøttet(tom)) {
+                // TODO hvorfor har vi i det hele tatt denne conditionen?
+                response = new UtbetalingResponse(null);
+            } else {
+                response = filtrerYtelserAvTypeBarnetrygd(
+                    hentUtbetalingsinformasjonV2(lagRequest(fnr, fom.toString(), tom.toString()))
+                    );
+            }
 
-        return UtbetaldataMapper.tilSaksopplysning(response, lagXml(response).toString());
+            return UtbetaldataMapper.tilSaksopplysning(response, response.toString());
+        }
     }
 
     private WSHentUtbetalingsinformasjonResponse hentUtbetalingsinformasjon(WSHentUtbetalingsinformasjonRequest request) {
@@ -62,6 +82,10 @@ public class UtbetaldataService implements UtbetaldataFasade {
         } catch (WebServiceException e) {
             throw new IntegrasjonException(e);
         }
+    }
+
+    private UtbetalingResponse hentUtbetalingsinformasjonV2(UtbetalingRequest request) {
+            return utbetalingConsumerV2.hentUtbetalingsInformasjon(request.getPeriode().getFom(), request.getPeriode().getTom(), request.getIdent());
     }
 
     private StringWriter lagXml(WSHentUtbetalingsinformasjonResponse response) {
@@ -83,6 +107,10 @@ public class UtbetaldataService implements UtbetaldataFasade {
         request.setId(lagIdent(fnr));
         request.setPeriode(lagPeriode(fom, tom));
         return request;
+    }
+
+    private UtbetalingRequest lagRequest(String fnr, String fom, String tom) {
+        return new UtbetalingRequest(fnr, new Periode(fom, tom), null, null);
     }
 
     private static WSIdent lagIdent(String fnr) {
@@ -116,6 +144,12 @@ public class UtbetaldataService implements UtbetaldataFasade {
         return response;
     }
 
+    private UtbetalingResponse filtrerYtelserAvTypeBarnetrygd(UtbetalingResponse response) {
+        taVekkUtbetalingerUtenBarnetrygd(response);
+        taVekkYtelserFraUtbetalingerSomIkkeErBarnetrygd(response);
+        return response;
+    }
+
     private void taVekkYtelserFraUtbetalingerSomIkkeErBarnetrygd(WSHentUtbetalingsinformasjonResponse response) {
         response.getUtbetalingListe().forEach(utbetaling -> utbetaling.getYtelseListe()
             .removeIf(ytelse -> !erBarnetrygdytelse(ytelse)));
@@ -126,10 +160,24 @@ public class UtbetaldataService implements UtbetaldataFasade {
             .noneMatch(this::erBarnetrygdytelse));
     }
 
+    private void taVekkYtelserFraUtbetalingerSomIkkeErBarnetrygd(UtbetalingResponse response) {
+        response.getUtbetalingListe().forEach(utbetaling -> utbetaling.getYtelseListe()
+            .removeIf(ytelse -> !erBarnetrygdytelse(ytelse)));
+    }
+
+    private void taVekkUtbetalingerUtenBarnetrygd(UtbetalingResponse response) {
+        response.getUtbetalingListe().removeIf(utbetaling -> utbetaling.getYtelseListe().stream()
+            .noneMatch(this::erBarnetrygdytelse));
+    }
+
     private boolean erBarnetrygdytelse(WSYtelse ytelse) {
         return ytelse.getYtelsestype() != null
             && ytelse.getYtelsestype().getValue() != null
             && ytelse.getYtelsestype().getValue().trim().equalsIgnoreCase(BARNETRYGD);
+    }
+
+    private boolean erBarnetrygdytelse(Ytelse ytelse) {
+        return ytelse.getYtelsestype().trim().equalsIgnoreCase(BARNETRYGD);
     }
 
     private boolean erUtbetalingsDataStøttet(LocalDate tom) {

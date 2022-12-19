@@ -5,7 +5,7 @@ import org.springframework.retry.annotation.Retryable
 import org.springframework.web.reactive.function.client.WebClient
 
 @Retryable
-class UtbetalingConsumerV2(private val webClient: WebClient) {
+open class UtbetalingConsumerV2(private val webClient: WebClient) {
 
     open fun hentUtbetalingsInformasjon(fom: String, tom: String, ident: String) = webClient.get()
         .uri("/v2/hent-utbetalingsinformasjon/intern")
