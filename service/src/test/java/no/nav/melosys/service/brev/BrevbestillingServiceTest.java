@@ -79,7 +79,7 @@ class BrevbestillingServiceTest {
     void init() {
         unleash.enable("melosys.behandle_alle_saker");
         brevbestillingService = new BrevbestillingService(mockBrevmottakerService, mockDokServiceFasade, mockBehandlingService, mockEregFasade,
-            mockKontaktopplysningService, mockPersondataFasade, mockDokumentNavnService, unleash);
+            mockKontaktopplysningService, mockPersondataFasade, mockDokumentNavnService, utenlandskMyndighetService, unleash);
     }
 
     @Test

@@ -252,6 +252,10 @@ public class Fagsak extends RegistreringsInfo {
         return erSakstypeEøs(type);
     }
 
+    public boolean erTrygdeavtale(){
+        return getType() == Sakstyper.TRYGDEAVTALE;
+    }
+
     public static boolean erSakstypeEøs(Sakstyper sakstype) {
         return Sakstyper.EU_EOS == sakstype;
     }

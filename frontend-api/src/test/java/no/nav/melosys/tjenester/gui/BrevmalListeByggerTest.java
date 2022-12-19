@@ -63,8 +63,8 @@ class BrevmalListeByggerTest {
         unleash.enable("melosys.behandle_alle_saker");
         BrevbestillingService brevbestillingService = new BrevbestillingService(mockBrevmottakerService,
             mockDokServiceFasade, mockBehandlingService, mockEregFasade, mockKontaktopplysningService,
-            mockPersondataFasade, mockDokumentNavnService, unleash);
-        brevmalListeBygger = new BrevmalListeBygger(brevbestillingService, mockBehandlingService, unleash);
+            mockPersondataFasade, mockDokumentNavnService, utenlandskMyndighetService, unleash);
+        brevmalListeBygger = new BrevmalListeBygger(brevbestillingService, mockBehandlingService, utenlandskMyndighetService, unleash);
     }
 
     @Test

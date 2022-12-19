@@ -5,9 +5,11 @@ import java.util.Collection;
 import java.util.List;
 
 import no.finn.unleash.Unleash;
+import no.nav.dok.brevdata.felles.v1.navfelles.UtenlandskPostadresse;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
+import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
@@ -22,6 +24,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
@@ -59,6 +62,7 @@ public class BrevbestillingService {
     private final KontaktopplysningService kontaktopplysningService;
     private final PersondataFasade persondataFasade;
     private final DokumentNavnService dokumentNavnService;
+    private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final Unleash unleash;
 
     public BrevbestillingService(BrevmottakerService brevmottakerService,
@@ -68,7 +72,7 @@ public class BrevbestillingService {
                                  KontaktopplysningService kontaktopplysningService,
                                  PersondataFasade persondataFasade,
                                  DokumentNavnService dokumentNavnService,
-                                 Unleash unleash) {
+                                 UtenlandskMyndighetService utenlandskMyndighetService, Unleash unleash) {
         this.brevmottakerService = brevmottakerService;
         this.dokumentServiceFasade = dokumentServiceFasade;
         this.behandlingService = behandlingService;
@@ -76,6 +80,7 @@ public class BrevbestillingService {
         this.kontaktopplysningService = kontaktopplysningService;
         this.persondataFasade = persondataFasade;
         this.dokumentNavnService = dokumentNavnService;
+        this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.unleash = unleash;
     }
 
@@ -231,6 +236,8 @@ public class BrevbestillingService {
                 return List.of(MANGELBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
             case VIRKSOMHET:
                 return List.of(GENERELT_FRITEKSTBREV_VIRKSOMHET);
+            case TRYGDEMYNDIGHET:
+                return List.of(GENERELT_FRITEKSTBREV_BRUKER);
             default:
                 throw new FunksjonellException("Rollen " + rolle + " kan ikke sende brev gjennom brevmenyen");
         }
@@ -286,6 +293,15 @@ public class BrevbestillingService {
                 String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null ? kontaktopplysning.getKontaktOrgnr() : mottaker.getOrgnr();
                 orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();
                 break;
+            }
+            case TRYGDEMYNDIGHET:{
+                UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(mottaker.hentMyndighetLandkode());
+                return new BrevAdresse.Builder()
+                    .medAdresselinjer(List.of(utenlandskMyndighet.gateadresse1, utenlandskMyndighet.gateadresse2))
+                    .medPostnr(utenlandskMyndighet.postnummer)
+                    .medPoststed(utenlandskMyndighet.poststed)
+                    .medLand(utenlandskMyndighet.land)
+                    .build();
             }
             default:
                 throw new FunksjonellException("Mottakersrolle støttes ikke: " + mottaker.getRolle());
