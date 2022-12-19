@@ -11,7 +11,7 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.oppgave.OppgaveSoek;
+import no.nav.melosys.service.oppgave.OppgaveSoekFilter;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.*;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -36,12 +36,12 @@ public class OppgaveTjeneste {
 
     private final Oppgaveplukker oppgaveplukker;
     private final OppgaveService oppgaveService;
-    private final OppgaveSoek oppgaveSoek;
+    private final OppgaveSoekFilter oppgaveSoekFilter;
 
-    public OppgaveTjeneste(Oppgaveplukker oppgaveplukker, OppgaveService oppgaveService, OppgaveSoek oppgaveSoek) {
+    public OppgaveTjeneste(Oppgaveplukker oppgaveplukker, OppgaveService oppgaveService, OppgaveSoekFilter oppgaveSoekFilter) {
         this.oppgaveplukker = oppgaveplukker;
         this.oppgaveService = oppgaveService;
-        this.oppgaveSoek = oppgaveSoek;
+        this.oppgaveSoekFilter = oppgaveSoekFilter;
     }
 
     @PostMapping("/plukk")
@@ -122,8 +122,8 @@ public class OppgaveTjeneste {
         }
         try {
             var oppgaveliste = StringUtils.isNotEmpty(personIdent)
-                ? oppgaveSoek.finnBehandlingsoppgaverMedPersonIdent(personIdent)
-                : oppgaveSoek.finnBehandlingsoppgaverMedOrgnr(orgnr);
+                ? oppgaveSoekFilter.finnBehandlingsoppgaverMedPersonIdent(personIdent)
+                : oppgaveSoekFilter.finnBehandlingsoppgaverMedOrgnr(orgnr);
             return ResponseEntity.ok(oppgaveliste.stream().map(no.nav.melosys.tjenester.gui.dto.oppgave.OppgaveDto::av).toList());
         } catch (IkkeFunnetException e) {
             return ResponseEntity.ok(new ArrayList<>());
