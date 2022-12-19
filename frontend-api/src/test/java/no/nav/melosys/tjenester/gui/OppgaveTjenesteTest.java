@@ -9,6 +9,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.oppgave.OppgaveSoek;
 import no.nav.melosys.service.oppgave.Oppgaveplukker;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
@@ -36,6 +37,8 @@ class OppgaveTjenesteTest {
     private Oppgaveplukker oppgaveplukker;
     @MockBean
     private OppgaveService oppgaveService;
+    @MockBean
+    private OppgaveSoek oppgaveSoek;
 
     @Autowired
     private MockMvc mockMvc;
@@ -93,8 +96,8 @@ class OppgaveTjenesteTest {
             .andExpect(status().isOk());
 
 
-        verify(oppgaveService).finnBehandlingsoppgaverMedPersonIdent("fnr");
-        verify(oppgaveService, never()).finnBehandlingsoppgaverMedOrgnr(anyString());
+        verify(oppgaveSoek).finnBehandlingsoppgaverMedPersonIdent("fnr");
+        verify(oppgaveSoek, never()).finnBehandlingsoppgaverMedOrgnr(anyString());
     }
 
     @Test
@@ -105,8 +108,8 @@ class OppgaveTjenesteTest {
             )
             .andExpect(status().isOk());
 
-        verify(oppgaveService).finnBehandlingsoppgaverMedOrgnr("orgnr");
-        verify(oppgaveService, never()).finnBehandlingsoppgaverMedPersonIdent(anyString());
+        verify(oppgaveSoek).finnBehandlingsoppgaverMedOrgnr("orgnr");
+        verify(oppgaveSoek, never()).finnBehandlingsoppgaverMedPersonIdent(anyString());
     }
 
     @Test
