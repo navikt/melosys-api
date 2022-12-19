@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
 
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -25,46 +26,45 @@ public class ExceptionMapper {
 
     private static final Logger log = LoggerFactory.getLogger(ExceptionMapper.class);
 
-    private static final String API_KALL_FEILET = "API kall feilet: ";
-
     @ExceptionHandler(value = IkkeFunnetException.class)
-    public ResponseEntity<Map<String, Object>> håndter(IkkeFunnetException e) {
-        return håndter(e, HttpStatus.NOT_FOUND, Level.WARN);
+    public ResponseEntity<Map<String, Object>> håndter(IkkeFunnetException e, HttpServletRequest request) {
+        return håndter(e, request, HttpStatus.NOT_FOUND, Level.WARN);
     }
 
     @ExceptionHandler(value = FunksjonellException.class)
-    public ResponseEntity<Map<String, Object>> håndter(FunksjonellException e) {
-        return håndter(e, HttpStatus.BAD_REQUEST, Level.WARN);
+    public ResponseEntity<Map<String, Object>> håndter(FunksjonellException e, HttpServletRequest request) {
+        return håndter(e, request, HttpStatus.BAD_REQUEST, Level.WARN);
     }
 
     @ExceptionHandler(value = SikkerhetsbegrensningException.class)
-    public ResponseEntity<Map<String, Object>> håndter(SikkerhetsbegrensningException e) {
-        return håndter(e, HttpStatus.FORBIDDEN, Level.WARN);
+    public ResponseEntity<Map<String, Object>> håndter(SikkerhetsbegrensningException e, HttpServletRequest request) {
+        return håndter(e, request, HttpStatus.FORBIDDEN, Level.WARN);
     }
 
     @ExceptionHandler(value = ValideringException.class)
-    public ResponseEntity<Map<String, Object>> håndter(ValideringException e) {
-        return håndter(e, HttpStatus.BAD_REQUEST, Level.INFO, e.getFeilkoder());
+    public ResponseEntity<Map<String, Object>> håndter(ValideringException e, HttpServletRequest request) {
+        return håndter(e, request, HttpStatus.BAD_REQUEST, Level.INFO, e.getFeilkoder());
     }
 
     @ExceptionHandler(value = Exception.class)
-    public ResponseEntity<Map<String, Object>> håndter(Exception e) {
-        return håndter(e, HttpStatus.INTERNAL_SERVER_ERROR, Level.ERROR);
+    public ResponseEntity<Map<String, Object>> håndter(Exception e, HttpServletRequest request) {
+        return håndter(e, request, HttpStatus.INTERNAL_SERVER_ERROR, Level.ERROR);
     }
 
-    private ResponseEntity<Map<String, Object>> håndter(Exception e, HttpStatus httpStatus, Level loggnivå) {
-        return håndter(e, httpStatus, loggnivå, Collections.emptyList());
+    private ResponseEntity<Map<String, Object>> håndter(Exception e, HttpServletRequest request, HttpStatus httpStatus, Level loggnivå) {
+        return håndter(e, request, httpStatus, loggnivå, Collections.emptyList());
     }
 
     private ResponseEntity<Map<String, Object>> håndter(Exception e,
+                                                        HttpServletRequest request,
                                                         HttpStatus httpStatus,
                                                         Level loggnivå,
                                                         Collection begrunnelser) {
         String message = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
         if (loggnivå.equals(Level.ERROR)) {
-            log.error(API_KALL_FEILET + message, e);
+            log.error("API kall feilet: {}\nremoteHost:{}\nrequestURI :{}", message, request.getRemoteHost(), request.getRequestURI(), e);
         } else if (loggnivå.equals(Level.WARN)) {
-            log.warn(API_KALL_FEILET + message, e);
+            log.warn("API kall feilet: {}\nremoteHost:{}\nrequestURI :{}", message, request.getRemoteHost(), request.getRequestURI(), e);
         }
 
         Map<String, Object> entity = new HashMap<>();
