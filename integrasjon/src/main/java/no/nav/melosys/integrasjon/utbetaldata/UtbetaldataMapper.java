@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.utbetaldata;
 
+import java.time.LocalDate;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Saksopplysning;
@@ -14,6 +15,7 @@ import no.nav.melosys.integrasjon.utbetaldata.utbetaling.UtbetalingResponse;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.informasjon.WSUtbetaling;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.informasjon.WSYtelse;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.meldinger.WSHentUtbetalingsinformasjonResponse;
+import org.joda.time.LocalDateTime;
 
 final class UtbetaldataMapper {
 
@@ -71,10 +73,10 @@ final class UtbetaldataMapper {
         return utbetaling;
     }
 
-    private static Utbetaling tilUtbetalling(no.nav.melosys.integrasjon.utbetaldata.utbetaling.Utbetaling wsUtbetaling) {
+    private static Utbetaling tilUtbetalling(no.nav.melosys.integrasjon.utbetaldata.utbetaling.Utbetaling utbetalingResponse) {
         var utbetaling = new Utbetaling();
-        utbetaling.ytelser = wsUtbetaling.getYtelseListe().stream()
-            .map(UtbetaldataMapper::tilYtelseV2)
+        utbetaling.ytelser = utbetalingResponse.getYtelseListe().stream()
+            .map(UtbetaldataMapper::tilYtelse)
             .collect(Collectors.toList());
 
         return utbetaling;
@@ -90,11 +92,11 @@ final class UtbetaldataMapper {
         return ytelse;
     }
 
-    private static Ytelse tilYtelseV2(no.nav.melosys.integrasjon.utbetaldata.utbetaling.Ytelse ytelseRes) {
+    private static Ytelse tilYtelse(no.nav.melosys.integrasjon.utbetaldata.utbetaling.Ytelse ytelseRes) {
         var ytelse = new Ytelse();
         ytelse.periode = new Periode(
-            KonverteringsUtils.jodaDateTimeToJavaLocalDate(ytelseRes.getYtelsesperiode().getTom()),
-            KonverteringsUtils.jodaDateTimeToJavaLocalDate(ytelseRes.getYtelsesperiode().getFom())
+            LocalDate.parse(ytelseRes.getYtelsesperiode().getFom()),
+            LocalDate.parse(ytelseRes.getYtelsesperiode().getTom())
         );
         ytelse.type = ytelseRes.getYtelsestype();
         return ytelse;
