@@ -13,5 +13,5 @@ data class EndreSakDto(
     val behandlingstema: Behandlingstema,
     val behandlingstype: Behandlingstyper,
     val behandlingsstatus: Behandlingsstatus,
-    val behandlingsfrist: LocalDate?
+    val mottaksdato: LocalDate?
 )

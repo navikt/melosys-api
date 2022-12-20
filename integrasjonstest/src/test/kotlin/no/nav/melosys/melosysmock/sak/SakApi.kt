@@ -62,6 +62,6 @@ data class SakDto(
     var fagsakNr: String? = null,
     var aktoerId: String? = null,
     var orgnr: String? = null,
-    var opprettetAv: String?,
+    var opprettetAv: String? = null,
     var opprettetTidspunkt: String? = null
 )

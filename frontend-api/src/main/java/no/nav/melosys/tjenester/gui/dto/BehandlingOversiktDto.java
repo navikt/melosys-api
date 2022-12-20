@@ -14,8 +14,9 @@ public class BehandlingOversiktDto {
     private Behandlingsstatus behandlingsstatus;
     private Behandlingstyper behandlingstype;
     private Behandlingstema behandlingstema;
-    private PeriodeDto periode;
+    private PeriodeDto lovvalgsperiode;
     private SoeknadslandDto land;
+    private PeriodeDto soknadsperiode;
     private Instant opprettetDato;
     private Behandlingsresultattyper behandlingsresultattype;
     private Instant svarFrist;
@@ -52,12 +53,12 @@ public class BehandlingOversiktDto {
         this.behandlingstema = behandlingstema;
     }
 
-    public PeriodeDto getPeriode() {
-        return periode;
+    public PeriodeDto getLovvalgsperiode() {
+        return lovvalgsperiode;
     }
 
-    public void setPeriode(PeriodeDto søknadsperiode) {
-        this.periode = søknadsperiode;
+    public void setLovvalgsperiode(PeriodeDto søknadsperiode) {
+        this.lovvalgsperiode = søknadsperiode;
     }
 
     public SoeknadslandDto getLand() {
@@ -66,6 +67,14 @@ public class BehandlingOversiktDto {
 
     public void setLand(SoeknadslandDto land) {
         this.land = land;
+    }
+
+    public PeriodeDto getSoknadsperiode() {
+        return soknadsperiode;
+    }
+
+    public void setSoknadsperiode(PeriodeDto soknadsperiode) {
+        this.soknadsperiode = soknadsperiode;
     }
 
     public Instant getOpprettetDato() {

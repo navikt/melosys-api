@@ -76,7 +76,8 @@ public class MottatteOpplysningerService {
         Behandling behandling = prosessinstans.getBehandling();
         Soeknadsland soeknadsland;
         Periode periode;
-        if (unleash.isEnabled("melosys.tom_periode_og_land")) {
+        Sakstyper sakstype = behandling.getFagsak().getType();
+        if (unleash.isEnabled("melosys.tom_periode_og_land") || sakstype == Sakstyper.TRYGDEAVTALE) {
             soeknadsland = prosessinstans.getData(
                 ProsessDataKey.SØKNADSLAND,
                 new TypeReference<>() {

@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.joark.journalpostapi.dto;
 
 public class Dokumentoppdatering {
+
     public final String tittel;
     public final String dokumentInfoId;
 

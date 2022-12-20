@@ -47,7 +47,7 @@ class EndreSakService(
         nyBehandlingstema: Behandlingstema,
         nyBehandlingstype: Behandlingstyper,
         nyBehandlingsstatus: Behandlingsstatus,
-        nyBehandlingsfrist: LocalDate?
+        nyMottaksdato: LocalDate?
     ) {
         val fagsak = fagsakService.hentFagsak(saksnummer)
         validerSak(fagsak, nySakstype, nySakstema)
@@ -56,15 +56,16 @@ class EndreSakService(
 
         val sakEndres = sakEndres(fagsak, nySakstype, nySakstema)
         val behandlingTemaEllerTypeEndres = behandlingTemaTypeEndres(behandling, nyBehandlingstema, nyBehandlingstype)
-        validerEndring(
-            fagsak,
-            behandling,
-            nySakstype,
-            nySakstema,
-            nyBehandlingstema,
-            nyBehandlingstype,
-            sakEndres || behandlingTemaEllerTypeEndres
-        )
+        if (sakEndres || behandlingTemaEllerTypeEndres) {
+            validerEndring(
+                fagsak,
+                behandling,
+                nySakstype,
+                nySakstema,
+                nyBehandlingstema,
+                nyBehandlingstype,
+            )
+        }
 
         fagsakService.oppdaterFagsakOgBehandling(
             saksnummer,
@@ -73,7 +74,7 @@ class EndreSakService(
             nyBehandlingstema,
             nyBehandlingstype,
             nyBehandlingsstatus,
-            nyBehandlingsfrist
+            nyMottaksdato
         )
 
         if (sakEndres || behandlingTemaEllerTypeEndres) {
@@ -88,7 +89,7 @@ class EndreSakService(
 
         if (sakEndres) {
             applicationEventPublisher.publishEvent(FagsakEndretAvSaksbehandler(fagsak.saksnummer))
-        } else if (behandlingTemaEllerTypeEndres || nyBehandlingsfrist != null) {
+        } else if (behandlingTemaEllerTypeEndres || nyMottaksdato != null) {
             applicationEventPublisher.publishEvent(BehandlingEndretAvSaksbehandlerEvent(behandling.id, behandling))
         }
 
@@ -119,14 +120,11 @@ class EndreSakService(
         nySakstema: Sakstemaer,
         nyBehandlingstema: Behandlingstema,
         nyBehandlingstype: Behandlingstyper,
-        temaEllerTypeEndres: Boolean
     ) {
-        if (temaEllerTypeEndres) {
-            val behandlingsresultatMedAnmodningsperioder =
-                behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(behandling.id)
-            if (behandlingsresultatMedAnmodningsperioder.erArtikkel16MedSendtAnmodningOmUnntak()) {
-                throw FunksjonellException("Behandling ${behandling.id} har sendt anmodning om unntak og kan ikke lenger endres")
-            }
+        val behandlingsresultatMedAnmodningsperioder =
+            behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(behandling.id)
+        if (behandlingsresultatMedAnmodningsperioder.erArtikkel16MedSendtAnmodningOmUnntak()) {
+            throw FunksjonellException("Behandling ${behandling.id} har sendt anmodning om unntak og kan ikke lenger endres")
         }
 
         lovligeKombinasjonerService.validerOpprettelseOgEndring(

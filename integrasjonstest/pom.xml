@@ -63,12 +63,6 @@
         <dependency>
             <groupId>no.nav.melosys</groupId>
             <artifactId>app</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>no.nav.melosys</groupId>
-                    <artifactId>frontend-api</artifactId>
-                </exclusion>
-            </exclusions>
             <scope>test</scope>
         </dependency>
 
@@ -263,13 +257,13 @@
                         <configuration>
                             <graphqlSchemaPaths>
                                 <graphqlSchemaPath>
-                                    ${project.basedir}/src/test/resources/root.graphqls
+                                    ${project.basedir}/src/test/resources/root.graphqls-test
                                 </graphqlSchemaPath>
                                 <graphqlSchemaPath>
-                                    ${project.basedir}/src/test/resources/saf/schema.graphqls
+                                    ${project.basedir}/src/test/resources/saf/schema.graphqls-test
                                 </graphqlSchemaPath>
                                 <graphqlSchemaPath>
-                                    ${project.basedir}/src/test/resources/pdl/schema.graphqls
+                                    ${project.basedir}/src/test/resources/pdl/schema.graphqls-test
                                 </graphqlSchemaPath>
                             </graphqlSchemaPaths>
                             <outputDir>${project.build.directory}/generated-sources/graphql</outputDir>

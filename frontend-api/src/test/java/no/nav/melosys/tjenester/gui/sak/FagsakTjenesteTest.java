@@ -50,8 +50,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
-import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.*;
 import static org.jeasy.random.FieldPredicates.*;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -209,7 +210,7 @@ class FagsakTjenesteTest {
     }
 
     @Test
-    void hentFagsaker_lovvalgsperiode_verifiserErMappetKorrekt() throws Exception {
+    void hentFagsaker_medBehandlingsresultatOgLovvalgsperiode_verifiserErMappetKorrekt() throws Exception {
         long behandlingID = 123L;
 
         String saksnummer = "MEL-1";
@@ -223,25 +224,12 @@ class FagsakTjenesteTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.BRUKER.toString())))
             .andExpect(jsonPath("$[0].saksnummer", equalTo(saksnummer)))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].land.landkoder[0]", equalTo(FORVENTET_LOVVALGSPERIODE.lovvalgsland)))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].periode.fom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.getFom().toString())))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].periode.tom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.getTom().toString())));
-    }
-
-    @Test
-    void hentFagsaker_medBehandlingsresultatOgLovvalgsperiode_verifiserPeriodenErSattRiktig() throws Exception {
-        var behandlingID = 123L;
-
-        mockFagsakMedBehandling(behandlingID, "MEL-1");
-
-        var fagsakSokDto = new FagsakSokDto(FNR, null, null);
-
-        mockMvc.perform(post(BASE_URL + "/sok")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(fagsakSokDto)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].periode.fom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.getFom().toString())))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].periode.tom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.getTom().toString())));
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].land.landkoder[0]", equalTo(Landkoder.DK.getKode())))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].land.landkoder[0]", is(not(equalTo(FORVENTET_LOVVALGSPERIODE.lovvalgsland)))))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.fom", equalTo("2019-01-01")))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.tom", equalTo("2019-02-01")))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].lovvalgsperiode.fom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.getFom().toString())))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].lovvalgsperiode.tom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.getTom().toString())));
     }
 
     @Test
@@ -267,8 +255,8 @@ class FagsakTjenesteTest {
             .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.BRUKER.toString())))
             .andExpect(jsonPath("$[0].saksnummer", equalTo("MEL-1")))
             .andExpect(jsonPath("$[0].behandlingOversikter[0].land.landkoder[0]", equalTo("NO")))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].periode.fom", equalTo("2022-01-01")))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].periode.tom", equalTo("2022-02-01")));
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.fom", equalTo("2022-01-01")))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.tom", equalTo("2022-02-01")));
 
         verify(saksopplysningerService).finnSedOpplysninger(123L);
     }
@@ -370,8 +358,8 @@ class FagsakTjenesteTest {
             Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET, Behandlingstyper.NY_VURDERING, Behandlingsstatus.OPPRETTET, null);
 
         mockMvc.perform(post(BASE_URL + "/{saksnr}/endre", "123")
-                            .content(objectMapper.writeValueAsString(endreSakDto))
-                            .contentType(MediaType.APPLICATION_JSON))
+                .content(objectMapper.writeValueAsString(endreSakDto))
+                .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNoContent());
 
         verify(aksesskontroll).autoriserSakstilgang("123");
@@ -399,13 +387,12 @@ class FagsakTjenesteTest {
         behandlingsresultat.getLovvalgsperioder().add(lagLovvalgsPeriode());
 
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-        when(mottatteOpplysningerService.finnMottatteOpplysninger(1L)).thenReturn(Optional.of(mottatteOpplysninger));
+        when(behandlingsresultatService.hentBehandlingsresultatMedLovvalgsperioder(anyLong())).thenReturn(behandlingsresultat);
+        when(mottatteOpplysningerService.finnMottatteOpplysninger(fagsak.getBehandlinger().get(0).getId())).thenReturn(Optional.of(mottatteOpplysninger));
         when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
         when(persondataFasade.hentSammensattNavn(any())).thenReturn("Joe Moe");
-        if (fagsak != null) {
-            doReturn(List.of(fagsak)).when(fagsakService).hentFagsakerMedAktør(Aktoersroller.BRUKER, FNR);
-            doReturn(List.of(fagsak)).when(fagsakService).hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, ORGNR);
-        }
+        doReturn(List.of(fagsak)).when(fagsakService).hentFagsakerMedAktør(Aktoersroller.BRUKER, FNR);
+        doReturn(List.of(fagsak)).when(fagsakService).hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, ORGNR);
     }
 
     private void mockNorskSedDokumentMedPeriode(long behandlingID, LocalDate fom, LocalDate tom) {

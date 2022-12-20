@@ -10,8 +10,11 @@ import no.nav.melosys.domain.util.MottatteOpplysningerUtils;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class BostedGrunnlag {
+    private static final Logger log = LoggerFactory.getLogger(BostedGrunnlag.class);
     private final MottatteOpplysningerData grunnlagData;
     private final Bostedsadresse bostedsadresseFraRegister;
     private final KodeverkService kodeverkService;
@@ -40,8 +43,13 @@ public class BostedGrunnlag {
     }
 
     private Optional<StrukturertAdresse> finnBostedsadresseFraRegister() {
-        if (bostedsadresseFraRegister == null
-            || StringUtils.isEmpty(bostedsadresseFraRegister.strukturertAdresse().getLandkode())) {
+        if (bostedsadresseFraRegister == null) {
+            log.warn("Fant ikke bostedsaddresse fra register, fordi bostedsadresseFraRegister er null");
+            return Optional.empty();
+        }
+
+        if (StringUtils.isEmpty(bostedsadresseFraRegister.strukturertAdresse().getLandkode())) {
+            log.info("Fant ikke Landkode i strukturertAdresse");
             return Optional.empty();
         }
 

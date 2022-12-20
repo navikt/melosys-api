@@ -2,6 +2,7 @@ package no.nav.melosys.service.lovligekombinasjoner;
 
 import java.util.Set;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -42,7 +43,9 @@ class LovligeKombinasjonerServiceTest {
 
     @BeforeEach
     void setup() {
-        lovligeKombinasjonerService = new LovligeKombinasjonerService(fagsakService, behandlingService, behandlingsresultatService);
+        var unleash = new FakeUnleash();
+        unleash.enableAll();
+        lovligeKombinasjonerService = new LovligeKombinasjonerService(fagsakService, behandlingService, behandlingsresultatService, unleash);
     }
 
     @Test
@@ -233,6 +236,32 @@ class LovligeKombinasjonerServiceTest {
 
 
         assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+    }
+
+    @Test
+    void hentMuligeBehandlingstyper_avsluttet_returnererIkkeFørstegang() {
+        Behandling sisteBehandling = behandlingMedTemaOgType(UTSENDT_ARBEIDSTAKER, FØRSTEGANG);
+        sisteBehandling.setStatus(AVSLUTTET);
+        sisteBehandling.setFagsak(new Fagsak());
+
+        var muligeTyper = lovligeKombinasjonerService
+            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, sisteBehandling, null);
+
+
+        assertThat(muligeTyper).contains(NY_VURDERING, HENVENDELSE, KLAGE).doesNotContain(FØRSTEGANG);
+    }
+
+    @Test
+    void hentMuligeBehandlingstyper_midlertidigLovvalgsbesluttet_returnererIkkeFørstegang() {
+        Behandling sisteBehandling = behandlingMedTemaOgType(UTSENDT_ARBEIDSTAKER, FØRSTEGANG);
+        sisteBehandling.setStatus(MIDLERTIDIG_LOVVALGSBESLUTNING);
+        sisteBehandling.setFagsak(new Fagsak());
+
+        var muligeTyper = lovligeKombinasjonerService
+            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, sisteBehandling, null);
+
+
+        assertThat(muligeTyper).contains(NY_VURDERING, HENVENDELSE, KLAGE).doesNotContain(FØRSTEGANG);
     }
 
     @Test

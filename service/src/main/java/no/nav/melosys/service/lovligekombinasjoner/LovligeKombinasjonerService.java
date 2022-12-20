@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
@@ -16,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -32,11 +34,13 @@ public class LovligeKombinasjonerService {
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
+    private final Unleash unleash;
 
-    public LovligeKombinasjonerService(FagsakService fagsakService, BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService) {
+    public LovligeKombinasjonerService(FagsakService fagsakService, BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService, Unleash unleash) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
+        this.unleash = unleash;
     }
 
     /**
@@ -206,12 +210,16 @@ public class LovligeKombinasjonerService {
                     behandlingstyper = new LinkedHashSet<>(List.of(NY_VURDERING, KLAGE, HENVENDELSE));
                 }
 
-                if (sisteBehandling != null && sisteBehandling.erAvsluttet()) {
+                if (sisteBehandling != null && sisteBehandling.erInaktiv()) {
                     behandlingstyper.remove(FØRSTEGANG);
                 }
 
                 if (sistSaksstatus != null && Set.of(HENLAGT, HENLAGT_BORTFALT, AVSLUTTET).contains(sistSaksstatus)) {
                     behandlingstyper = Set.of(HENVENDELSE);
+                }
+
+                if (!unleash.isEnabled(ToggleName.BEHANDLINGSTYPE_KLAGE)) {
+                    behandlingstyper.remove(KLAGE);
                 }
 
                 return behandlingstyper;

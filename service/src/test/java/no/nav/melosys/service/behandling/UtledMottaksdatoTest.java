@@ -185,4 +185,16 @@ class UtledMottaksdatoTest {
 
         assertThat(utledetDato).isEqualTo(REGISTRERT_DATO_LOCALDATE);
     }
+
+    @Test
+    void getMottaksdato_behandlingsårsakFinnesIkkeMottatteOpplysningerHarDato_returnererMottatteOpplysningerMottaksdato() {
+        var behandling = new Behandling();
+        var mottatteOpplysninger = new MottatteOpplysninger();
+        mottatteOpplysninger.setMottaksdato(MOTTAKSDATO);
+        behandling.setMottatteOpplysninger(mottatteOpplysninger);
+
+        var utledetDato = utledMottaksdato.getMottaksdato(behandling);
+
+        assertThat(utledetDato).isEqualTo(MOTTAKSDATO);
+    }
 }

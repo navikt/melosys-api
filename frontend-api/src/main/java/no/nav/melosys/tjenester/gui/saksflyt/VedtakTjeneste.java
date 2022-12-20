@@ -90,6 +90,7 @@ public class VedtakTjeneste {
             .medBehandlingsresultat(fattVedtakDto.getBehandlingsresultatTypeKode())
             .medVedtakstype(fattVedtakDto.getVedtakstype())
             .medBestillersId(bestillersId)
+            .medBetalingsIntervall(fattVedtakDto.getBetalingsintervall())
             .build();
     }
 }
