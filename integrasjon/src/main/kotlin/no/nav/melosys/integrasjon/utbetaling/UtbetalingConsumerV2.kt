@@ -1,6 +1,5 @@
 package no.nav.melosys.integrasjon.utbetaling
 
-import no.nav.melosys.integrasjon.utbetaldata.utbetaling.UtbetalingResponse
 import org.springframework.http.MediaType
 import org.springframework.retry.annotation.Retryable
 import org.springframework.web.reactive.function.client.WebClient
@@ -12,6 +11,6 @@ open class UtbetalingConsumerV2(private val webClient: WebClient) {
         .uri("/v2/hent-utbetalingsinformasjon/intern")
         .accept(MediaType.APPLICATION_JSON)
         .retrieve()
-        .bodyToMono(UtbetalingResponse::class.java)
+        .bodyToMono(Array<Utbetaling>::class.java)
         .block()!!
 }

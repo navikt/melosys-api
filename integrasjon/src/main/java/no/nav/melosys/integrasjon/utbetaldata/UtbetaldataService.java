@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.utbetaldata;
 
 import java.io.StringWriter;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import javax.xml.bind.JAXBException;
 import javax.xml.ws.WebServiceException;
 
@@ -14,9 +13,9 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
-import no.nav.melosys.integrasjon.utbetaling.UtbetalingConsumerV2;
 import no.nav.melosys.integrasjon.utbetaldata.utbetaling.*;
 import no.nav.melosys.integrasjon.utbetaling.UtbetalingServiceV2;
+import no.nav.melosys.integrasjon.utbetaling.Ytelse;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonIkkeTilgang;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonPeriodeIkkeGyldig;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonPersonIkkeFunnet;
@@ -49,7 +48,7 @@ public class UtbetaldataService implements UtbetaldataFasade {
         if (!unleash.isEnabled("ubetalinger.v2")) { //TODO lag featuretoggle
             WSHentUtbetalingsinformasjonResponse response;
 
-            if (erUtbetalingsDataStøttet(tom)) {
+            if (erUtbetalingsDataStoettet(tom)) {
                 response = new WSHentUtbetalingsinformasjonResponse();
             } else {
                 response = filtrerYtelserAvTypeBarnetrygd(
@@ -61,15 +60,14 @@ public class UtbetaldataService implements UtbetaldataFasade {
 
         } else {
             System.out.println("Utbetalinger v2 brukes:");
-            UtbetalingResponse response;
-            if (erUtbetalingsDataStøttet(tom)) {
+            if (erUtbetalingsDataStoettet(tom)) {
                 // TODO hvorfor har vi i det hele tatt denne conditionen?
-                response = new UtbetalingResponse(new ArrayList<>());
+                // ????
+                return null;
             } else {
                 return utbetalingServiceV2.hentSaksopplysningForUtbetaling(fnr, fom, tom);
             }
 
-            return UtbetaldataMapper.tilSaksopplysning(response, response.toString());
         }
     }
 
@@ -159,7 +157,7 @@ public class UtbetaldataService implements UtbetaldataFasade {
         return ytelse.getYtelsestype().trim().equalsIgnoreCase(BARNETRYGD);
     }
 
-    private boolean erUtbetalingsDataStøttet(LocalDate tom) {
+    private boolean erUtbetalingsDataStoettet(LocalDate tom) {
         return tom != null && datoErEldreEnnTreÅr(tom);
     }
 

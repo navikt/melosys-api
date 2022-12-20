@@ -61,5 +61,68 @@
         }
       }
     ]
+  },
+  {
+    "posteringsdato": "2022-12-19",
+    "utbetaltTil": {
+      "aktoertype": "PERSON",
+      "ident": "string",
+      "navn": "string"
+    },
+    "utbetalingNettobeloep": 999.5,
+    "utbetalingsmelding": "string",
+    "utbetalingsdato": "2022-12-19",
+    "forfallsdato": "2022-12-19",
+    "utbetaltTilKonto": {
+      "kontonummer": "string",
+      "kontotype": "string"
+    },
+    "utbetalingsmetode": "string",
+    "utbetalingsstatus": "string",
+    "ytelseListe": [
+      {
+        "ytelsestype": "string",
+        "ytelsesperiode": {
+          "fom": "2022-12-19",
+          "tom": "2022-12-19"
+        },
+        "ytelseskomponentListe": [
+          {
+            "ytelseskomponenttype": "string",
+            "satsbeloep": 999,
+            "satstype": "string",
+            "satsantall": 2.5,
+            "ytelseskomponentbeloep": 42
+          }
+        ],
+        "ytelseskomponentersum": 111.22,
+        "trekkListe": [
+          {
+            "trekktype": "string",
+            "trekkbeloep": 100,
+            "kreditor": "string"
+          }
+        ],
+        "trekksum": 1000,
+        "skattListe": [
+          {
+            "skattebeloep": 99.9
+          }
+        ],
+        "skattsum": 1000.5,
+        "ytelseNettobeloep": 1999,
+        "bilagsnummer": "string",
+        "rettighetshaver": {
+          "aktoertype": "PERSON",
+          "ident": "string",
+          "navn": "string"
+        },
+        "refundertForOrg": {
+          "aktoertype": "PERSON",
+          "ident": "string",
+          "navn": "string"
+        }
+      }
+    ]
   }
 ]
