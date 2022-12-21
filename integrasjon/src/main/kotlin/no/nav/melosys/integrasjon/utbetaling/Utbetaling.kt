@@ -28,8 +28,9 @@ data class UtbetaltTilKonto(
     var kontotype: String? = null
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class Ytelse(
-    var bilagsnummer: String? = null,
+    /*var bilagsnummer: String? = null,
     var refundertForOrg: RefundertForOrg? = null,
     var rettighetshaver: Rettighetshaver? = null,
     var skattListe: List<Skatt>? = null,
@@ -38,8 +39,8 @@ data class Ytelse(
     var trekksum: Int? = null,
     var ytelseNettobeloep: Int? = null,
     var ytelseskomponentListe: List<YtelseskomponentListe>? = null,
-    var ytelseskomponentersum: Double? = null,
-    var ytelsesperiode: Ytelsesperiode,
+    var ytelseskomponentersum: Double? = null,*/
+    var ytelsesperiode: Ytelsesperiode? = null,
     var ytelsestype: String? = null
 )
 
@@ -74,6 +75,6 @@ data class YtelseskomponentListe(
 )
 
 data class Ytelsesperiode(
-    var fom: LocalDate,
-    var tom: LocalDate
+    var fom: LocalDate? = null,
+    var tom: LocalDate? = null
 )

@@ -9,6 +9,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.melosys.domain.dokument.utbetaling.Periode
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
 import no.nav.melosys.domain.dokument.utbetaling.Ytelse
 import no.nav.melosys.integrasjon.utbetaling.*
@@ -45,20 +46,16 @@ class UtbetalingServiceV2 {
             .first()
             .mottattDokument.isNullOrEmpty()
 
-        var ytelseA = Ytelse()
-        ytelseA.type = "test1"
-        var ytelseB = Ytelse()
-        ytelseB.type = "test2"
-
-        var forverntetYtelseListe = listOf<Ytelse>()
-
         saksopplysning.dokument
             .shouldBeInstanceOf<UtbetalingDokument>()
             .utbetalinger.shouldHaveSize(2)
             .first()
+            .ytelser.shouldHaveSize(1)
+            .first()
             .shouldBeEqualToComparingFields(
-                no.nav.melosys.domain.dokument.utbetaling.Utbetaling().apply {
-                    ytelser = forverntetYtelseListe
+                no.nav.melosys.domain.dokument.utbetaling.Ytelse().apply {
+                    type = "string"
+                    periode = Periode(LocalDate.parse("2022-12-19"), LocalDate.parse("2022-12-19"))
                 }
                 , FieldsEqualityCheckConfig(ignorePrivateFields = false)
             )

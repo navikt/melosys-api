@@ -34,7 +34,7 @@ class UtbetalingServiceV2(
                         ytelser = it.ytelseListe.map {
                             Ytelse().apply {
                                 type = it.ytelsestype
-                                periode = Periode(it.ytelsesperiode.fom, it.ytelsesperiode.tom)
+                                periode = Periode(it.ytelsesperiode!!.fom, it.ytelsesperiode!!.tom)
                             }
                         }
                     }
