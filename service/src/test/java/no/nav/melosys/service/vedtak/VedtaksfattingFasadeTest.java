@@ -62,14 +62,14 @@ class VedtaksfattingFasadeTest {
     }
 
     @Test
-    void fattVedtak_feilBehandlingstype_kasterException() {
+    void fattVedtak_feilBehandlingstema_kasterException() {
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         when(mockBehandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
         FattVedtakRequest fattVedtakRequest = lagFattFtrlVedtakRequest();
 
         assertThatThrownBy(() -> vedtaksfattingFasade.fattVedtak(behandlingID, fattVedtakRequest))
             .isInstanceOf(FunksjonellException.class)
-            .hasMessage("Kan ikke fatte vedtak ved behandlingstema UFM: Melding om utstasjonering – A009");
+            .hasMessageContaining("Kan ikke fatte vedtak ved behandlingstema");
     }
 
     @Test

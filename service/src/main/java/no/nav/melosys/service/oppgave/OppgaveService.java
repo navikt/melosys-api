@@ -35,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.domain.kodeverk.Oppgavetyper.*;
 import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentPeriode;
 import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentSøknadsland;
 
@@ -52,20 +51,6 @@ public class OppgaveService {
     private final EregFasade eregFasade;
     private final Unleash unleash;
     private final UtledMottaksdato utledMottaksdato;
-
-    private static final String[] BEHANDLINGSOPPGAVE_TYPER = new String[]{
-        BEH_SAK_MK.getKode(),
-        BEH_SAK.getKode(),
-        BEH_SED.getKode(),
-    };
-
-    private static final String[] BEHANDLINGSOPPGAVE_TYPER_UTVIDET = new String[]{
-        BEH_SAK_MK.getKode(),
-        BEH_SAK.getKode(),
-        BEH_SED.getKode(),
-        VUR.getKode(),
-        VURD_HENV.getKode()
-    };
 
     private static final String UKJENT = "UKJENT";
 
@@ -86,33 +71,6 @@ public class OppgaveService {
         this.eregFasade = eregFasade;
         this.unleash = unleash;
         this.utledMottaksdato = utledMottaksdato;
-    }
-
-    public List<Oppgave> finnBehandlingsoppgaverMedPersonIdent(String personIdent) {
-        String aktørId = persondataFasade.hentAktørIdForIdent(personIdent);
-
-        if (aktørId == null) {
-            throw new IkkeFunnetException("Finner ikke aktørId for ident " + personIdent);
-        }
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            return filtrerOppgaverMedJournalpost(oppgaveFasade.finnOppgaverMedAktørId(aktørId, BEHANDLINGSOPPGAVE_TYPER_UTVIDET));
-        } else {
-            return filtrerOppgaverMedJournalpost(oppgaveFasade.finnOppgaverMedAktørId(aktørId, BEHANDLINGSOPPGAVE_TYPER));
-        }
-    }
-
-    public List<Oppgave> finnBehandlingsoppgaverMedOrgnr(String orgnr) {
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            return filtrerOppgaverMedJournalpost(oppgaveFasade.finnOppgaverMedOrgnr(orgnr, BEHANDLINGSOPPGAVE_TYPER_UTVIDET));
-        } else {
-            return filtrerOppgaverMedJournalpost(oppgaveFasade.finnOppgaverMedOrgnr(orgnr, BEHANDLINGSOPPGAVE_TYPER));
-        }
-    }
-
-    private List<Oppgave> filtrerOppgaverMedJournalpost(List<Oppgave> oppgaveListe) {
-        return oppgaveListe.stream()
-            .filter(oppgave -> oppgave.getJournalpostId() != null)
-            .toList();
     }
 
     public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) {

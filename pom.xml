@@ -40,7 +40,7 @@
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <!-- Melosys -->
-        <melosys.internt.kodeverk.version>5.15.154</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.15.155</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.124</melosys.brev.version>
 
         <!-- NAV -->
@@ -74,7 +74,7 @@
         <mockito-kotlin.version>4.0.0</mockito-kotlin.version>
         <mockk.version>1.12.5</mockk.version>
         <micrometer-jvm-extras.version>0.2.2</micrometer-jvm-extras.version>
-        <networknt.json-schema-validator.version>1.0.68</networknt.json-schema-validator.version>
+        <networknt.json-schema-validator.version>1.0.74</networknt.json-schema-validator.version>
         <ojdbc.version>21.5.0.0</ojdbc.version>
         <okhttp.version>4.9.3</okhttp.version>
         <oracle.version>18</oracle.version>
