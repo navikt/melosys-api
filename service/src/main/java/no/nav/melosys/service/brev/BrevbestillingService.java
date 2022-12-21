@@ -52,7 +52,8 @@ public class BrevbestillingService {
         GENERELT_FRITEKSTBREV_BRUKER,
         GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
         GENERELT_FRITEKSTBREV_VIRKSOMHET,
-        AVSLAG_MANGLENDE_OPPLYSNINGER
+        AVSLAG_MANGLENDE_OPPLYSNINGER,
+        UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV
     );
 
     private final DokumentServiceFasade dokumentServiceFasade;
@@ -117,6 +118,11 @@ public class BrevbestillingService {
         if (hovedmottaker == ARBEIDSGIVER || hovedmottaker == VIRKSOMHET) {
             var orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(orgnrTilValgtArbeidsgiver).getDokument();
             return orgDokument.getNavn();
+        }
+        if(hovedmottaker == TRYGDEMYNDIGHET && produserbaredokumenter == UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV){
+            Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(hovedmottaker), behandling);
+            UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(avklartMottaker.hentMyndighetLandkode());
+            return utenlandskMyndighet.navn;
         }
         throw new FunksjonellException("Melosys støtter ikke hovedmottakere med rollen " + hovedmottaker);
     }
@@ -237,7 +243,7 @@ public class BrevbestillingService {
             case VIRKSOMHET:
                 return List.of(GENERELT_FRITEKSTBREV_VIRKSOMHET);
             case TRYGDEMYNDIGHET:
-                return List.of(GENERELT_FRITEKSTBREV_BRUKER);
+                return List.of(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV);
             default:
                 throw new FunksjonellException("Rollen " + rolle + " kan ikke sende brev gjennom brevmenyen");
         }
@@ -297,6 +303,7 @@ public class BrevbestillingService {
             case TRYGDEMYNDIGHET:{
                 UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(mottaker.hentMyndighetLandkode());
                 return new BrevAdresse.Builder()
+                    .medMottakerNavn(utenlandskMyndighet.navn)
                     .medAdresselinjer(List.of(utenlandskMyndighet.gateadresse1, utenlandskMyndighet.gateadresse2))
                     .medPostnr(utenlandskMyndighet.postnummer)
                     .medPoststed(utenlandskMyndighet.poststed)

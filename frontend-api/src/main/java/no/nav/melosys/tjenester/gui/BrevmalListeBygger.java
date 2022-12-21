@@ -51,6 +51,7 @@ public class BrevmalListeBygger {
                     case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevmalTypeDtoForMangelbrev(p, behandlingId);
                     case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET ->
                         lagBrevmalTypeDtoForFritekstbrev(p, behandlingId);
+                    case UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV -> lagBrevmalTypeDtoForEngelskFritekst(p, behandlingId);
                     default -> null;
                 })
                 .filter(Objects::nonNull)
@@ -208,6 +209,40 @@ public class BrevmalListeBygger {
                     .medValg(hentDistribusjonstyper())
                     .erPåkrevd()
                     .build(),
+                new BrevmalFeltDto.Builder()
+                    .medKodeOgBeskrivelse(BrevmalFeltKode.BREV_TITTEL)
+                    .medFeltType(FeltType.TEKST)
+                    .medHjelpetekst("Tittelen du skriver inn her, vil bli tittelen på brevet når du sender det ut.")
+                    .medValg(hentFritekstTittelValg(behandlingId))
+                    .medTegnBegrensning(60)
+                    .erPåkrevd()
+                    .build(),
+                new BrevmalFeltDto.Builder()
+                    .medKodeOgBeskrivelse(BrevmalFeltKode.STANDARDTEKST_KONTAKTINFORMASJON)
+                    .medFeltType(FeltType.SJEKKBOKS)
+                    .build(),
+                new BrevmalFeltDto.Builder()
+                    .medKodeOgBeskrivelse(BrevmalFeltKode.FRITEKST)
+                    .medHjelpetekst("Teksten du skriver inn her vil være hovedteksten i brevet du lager.")
+                    .medFeltType(FeltType.FRITEKST)
+                    .erPåkrevd()
+                    .build(),
+                new BrevmalFeltDto.Builder()
+                    .medKodeOgBeskrivelse(BrevmalFeltKode.VEDLEGG)
+                    .medFeltType(FeltType.VEDLEGG)
+                    .build(),
+                new BrevmalFeltDto.Builder()
+                    .medKodeOgBeskrivelse(BrevmalFeltKode.FRITEKSTVEDLEGG)
+                    .medFeltType(FeltType.FRITEKSTVEDLEGG)
+                    .build()
+            ))
+            .build();
+    }
+
+    private BrevmalTypeDto lagBrevmalTypeDtoForEngelskFritekst(Produserbaredokumenter produserbartdokument, long behandlingId) {
+        return new BrevmalTypeDto.Builder()
+            .medType(produserbartdokument)
+            .medFelter(asList(
                 new BrevmalFeltDto.Builder()
                     .medKodeOgBeskrivelse(BrevmalFeltKode.BREV_TITTEL)
                     .medFeltType(FeltType.TEKST)
