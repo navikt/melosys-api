@@ -50,11 +50,14 @@ public class Oppgaveplukker {
 
     @Transactional
     public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) {
+        log.info("Begynner plukking av oppgave for saksbehandler med følgende kriterier: {}", plukkDto);
         List<Oppgave> utildelteOppgaverEtterFrist = new ArrayList<>();
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            for (var oppgaveBehandlingstema : hentAlleOppgaveBehandlingstemaTilSøk(plukkDto.sakstype(), plukkDto.sakstema(), plukkDto.behandlingstema())) {
+            Set<String> oppgaveBehandlingstemaSet = hentAlleOppgaveBehandlingstemaTilSøk(plukkDto.sakstype(), plukkDto.sakstema(), plukkDto.behandlingstema());
+            for (var oppgaveBehandlingstema : oppgaveBehandlingstemaSet) {
                 utildelteOppgaverEtterFrist.addAll(oppgaveFasade.finnUtildelteOppgaverEtterFrist(oppgaveBehandlingstema));
             }
+            log.info("Funnet {} oppgaver med oppgaveTema {}", utildelteOppgaverEtterFrist.size(), oppgaveBehandlingstemaSet);
         } else {
             var parametere = OppgaveFactory.hentOppgaveParametere(plukkDto.behandlingstema());
             utildelteOppgaverEtterFrist = oppgaveFasade.finnUtildelteOppgaverEtterFrist(parametere.behandlingstype, parametere.behandlingstema);
@@ -83,6 +86,9 @@ public class Oppgaveplukker {
         if (valg.isPresent()) {
             oppdaterBehandlingsstatus(valg.get().getSaksnummer());
             oppgaveService.tildelOppgave(valg.get().getOppgaveId(), saksbehandlerID);
+            log.info("Oppgave {} ble plukket.", valg.get().getOppgaveId());
+        } else {
+            log.info("Ingen oppgave kunne plukkes med følgende kriterier {}", plukkDto);
         }
         return valg;
     }

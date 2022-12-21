@@ -66,7 +66,7 @@ public class BehandlingTjeneste {
             endreBehandling.behandlingstype(),
             endreBehandling.behandlingstema(),
             endreBehandling.behandlingsstatus(),
-            endreBehandling.behandlingsfrist()
+            endreBehandling.mottaksdato()
         );
 
         return ResponseEntity.noContent().build();

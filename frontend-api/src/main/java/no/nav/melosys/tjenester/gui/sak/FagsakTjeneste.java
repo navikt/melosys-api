@@ -8,7 +8,6 @@ import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -31,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -130,7 +128,7 @@ public class FagsakTjeneste {
             SubjectHandler.getInstance().getUserID(), saksnummer, endreDto.getSakstype(), endreDto.getSakstema());
         aksesskontroll.autoriserSakstilgang(saksnummer);
         endreSakService.endre(saksnummer, endreDto.getSakstype(), endreDto.getSakstema(), endreDto.getBehandlingstema(),
-            endreDto.getBehandlingstype(), endreDto.getBehandlingsstatus(), endreDto.getBehandlingsfrist());
+            endreDto.getBehandlingstype(), endreDto.getBehandlingsstatus(), endreDto.getMottaksdato());
         return ResponseEntity.noContent().build();
     }
 
@@ -150,7 +148,7 @@ public class FagsakTjeneste {
     public ResponseEntity<Collection<Sakstemaer>> hentMuligeSakstemaer(@PathVariable("saksnr") String saksnummer,
                                                                        @RequestParam("sakstype") Sakstyper sakstype) {
         log.debug("Saksbehandler {} ber om å hente mulige nye sakstema for fagsak {}.",
-                  SubjectHandler.getInstance().getUserID(), saksnummer);
+            SubjectHandler.getInstance().getUserID(), saksnummer);
         aksesskontroll.autoriserSakstilgang(saksnummer);
 
         return ResponseEntity.ok(fagsakService.hentMuligeSakstemaer());
@@ -162,7 +160,6 @@ public class FagsakTjeneste {
         notes = ("Saker knyttet til en bruker søkes via fødselsnummer eller d-nummer. Saker knyttet til en organisasjon søkes via organisasjonsnummer."),
         response = FagsakOppsummeringDto.class,
         responseContainer = "List")
-    @Transactional
     public List<FagsakOppsummeringDto> hentFagsaker(@RequestBody FagsakSokDto fagsakSokDto) {
 
         if (StringUtils.isNotEmpty(fagsakSokDto.ident())) {
@@ -264,16 +261,31 @@ public class FagsakTjeneste {
 
     private void setPeriodeOpplysninger(Behandling behandling, BehandlingOversiktDto behandlingOversiktDto) {
         if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            Behandlingsresultat behandlingsResultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+            saksopplysningerService.finnSedOpplysninger(behandling.getId()).ifPresentOrElse(sedDoument -> {
+                    var land = SoeknadslandDto.av(sedDoument.getLovvalgslandKode());
+                    behandlingOversiktDto.setLand(land);
 
-            Optional<Lovvalgsperiode> optionalLovvalgsperiode = behandlingsResultat.finnLovvalgsperiode();
+                    var periode = sedDoument.getLovvalgsperiode();
+                    behandlingOversiktDto.setSoknadsperiode(new PeriodeDto(periode.getFom(), periode.getTom()));
+                },
+                () -> {
+                    var mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.getId());
+                    if (mottatteOpplysninger.isPresent()) {
+                        var mottatteOpplysningerData = mottatteOpplysninger.get().getMottatteOpplysningerData();
 
-            optionalLovvalgsperiode.ifPresent(lovvalgsperiode -> {
-                var søknadslandDto = SoeknadslandDto.av(lovvalgsperiode.getLovvalgsland());
-                behandlingOversiktDto.setLand(søknadslandDto);
+                        var land = SoeknadslandDto.av(hentSøknadsland((mottatteOpplysningerData)));
+                        behandlingOversiktDto.setLand(land);
 
-                var periodeDto = new PeriodeDto(lovvalgsperiode.getFom(), lovvalgsperiode.getTom());
-                behandlingOversiktDto.setPeriode(periodeDto);
+                        var periode = hentPeriode(mottatteOpplysningerData);
+                        behandlingOversiktDto.setSoknadsperiode(new PeriodeDto(periode.getFom(), periode.getTom()));
+                    }
+                });
+
+            Behandlingsresultat behandlingsResultat = behandlingsresultatService.hentBehandlingsresultatMedLovvalgsperioder(behandling.getId());
+
+            behandlingsResultat.finnLovvalgsperiode().ifPresent(lovvalgsperiode -> {
+                var periode = new PeriodeDto(lovvalgsperiode.getFom(), lovvalgsperiode.getTom());
+                behandlingOversiktDto.setLovvalgsperiode(periode);
             });
         } else {
             if (behandling.erBehandlingAvSøknadGammel()) {
@@ -283,14 +295,14 @@ public class FagsakTjeneste {
                         behandlingOversiktDto.setLand(land);
                         Periode periode = hentPeriode(grunnlagData);
                         if (periode != null) {
-                            behandlingOversiktDto.setPeriode(new PeriodeDto(periode.getFom(), periode.getTom()));
+                            behandlingOversiktDto.setSoknadsperiode(new PeriodeDto(periode.getFom(), periode.getTom()));
                         }
                     });
             } else {
                 saksopplysningerService.finnSedOpplysninger(behandling.getId()).ifPresent(sedDokument -> {
                     SoeknadslandDto land = SoeknadslandDto.av(sedDokument.getLovvalgslandKode());
                     behandlingOversiktDto.setLand(land);
-                    behandlingOversiktDto.setPeriode(new PeriodeDto(
+                    behandlingOversiktDto.setSoknadsperiode(new PeriodeDto(
                         sedDokument.getLovvalgsperiode().getFom(), sedDokument.getLovvalgsperiode().getTom())
                     );
                 });

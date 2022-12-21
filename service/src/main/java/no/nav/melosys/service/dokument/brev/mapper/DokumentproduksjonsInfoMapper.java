@@ -34,7 +34,8 @@ public class DokumentproduksjonsInfoMapper {
         MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
         TRYGDEAVTALE_GB,
         MELDING_HENLAGT_SAK,
-        GENERELT_FRITEKSTVEDLEGG
+        GENERELT_FRITEKSTVEDLEGG,
+        TRYGDEAVTALE_US
     );
 
     static {

@@ -77,6 +77,7 @@ public class BehandlingEventListener {
                         .tema(behandlingsoppgave.getTema())
                         .oppgavetype(behandlingsoppgave.getOppgavetype())
                         .fristFerdigstillelse(frist)
+                        .beskrivelse(behandlingsoppgave.getBeskrivelse())
                         .build());
             }
         );

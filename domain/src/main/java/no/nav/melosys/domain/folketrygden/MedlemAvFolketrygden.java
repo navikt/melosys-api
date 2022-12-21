@@ -28,8 +28,8 @@ public class MedlemAvFolketrygden {
     @Enumerated(EnumType.STRING)
     private Vurderingsutfall_trygdeavgift_utenlandsk_inntekt vurderingTrygdeavgiftUtenlandskInntekt;
 
-    @OneToMany(mappedBy = "medlemAvFolketrygden", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    private Collection<Medlemskapsperiode> medlemskapsperioder = new HashSet<>(1);
+    @OneToMany(mappedBy = "medlemAvFolketrygden", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private Collection<Medlemskapsperiode> medlemskapsperioder = new HashSet<>();
 
     @OneToOne(mappedBy = "medlemAvFolketrygden", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private FastsattTrygdeavgift fastsattTrygdeavgift;

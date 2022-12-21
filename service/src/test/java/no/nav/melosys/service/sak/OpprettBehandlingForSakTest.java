@@ -42,8 +42,8 @@ class OpprettBehandlingForSakTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
 
-    private final LovligeKombinasjonerService lovligeKombinasjonerService = new LovligeKombinasjonerService(fagsakService, behandlingService, behandlingsresultatService);
     private final FakeUnleash unleash = new FakeUnleash();
+    private final LovligeKombinasjonerService lovligeKombinasjonerService = new LovligeKombinasjonerService(fagsakService, behandlingService, behandlingsresultatService, unleash);
 
     private OpprettBehandlingForSak opprettBehandlingForSak;
 

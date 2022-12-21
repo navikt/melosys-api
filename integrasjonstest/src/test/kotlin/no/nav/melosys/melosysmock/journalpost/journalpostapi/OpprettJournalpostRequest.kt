@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.time.LocalDate
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class OpprettJournalpostRequest (
+data class OpprettJournalpostRequest(
     val journalpostType: JournalpostType? = null,
     val avsenderMottaker: AvsenderMottaker? = null,
     val bruker: Bruker? = null,
@@ -44,7 +44,7 @@ enum class JournalpostType {
     INNGAAENDE, UTGAAENDE, NOTAT
 }
 
-data class AvsenderMottaker (
+data class AvsenderMottaker(
     val id: String? = null,
     val navn: String? = null,
     val land: String? = null,
@@ -55,7 +55,7 @@ enum class IdType {
     FNR, ORGNR, HPRNR, UTL_ORG
 }
 
-data class Bruker (
+data class Bruker(
     val idType: BrukerIdType? = null,
     val id: String? = null
 )
@@ -64,32 +64,32 @@ enum class BrukerIdType {
     FNR, ORGNR
 }
 
-data class TilleggsopplysningReq (
+data class TilleggsopplysningReq(
     val nokkel: String? = null,
     val verdi: String? = null
 )
 
-data class Sak (
+data class Sak(
     val fagsakId: String? = null,
     val sakstype: String? = null,
     val fagsaksystem: String? = null
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class Dokument (
+data class Dokument(
     val tittel: String? = null,
     val brevkode: String? = null,
     val dokumentKategori: String? = null,
     val dokumentvarianter: List<DokumentVariant>? = null
 )
 
-data class DokumentOppdatering (
-    val dokumentInfoId: String,
+data class DokumentOppdatering(
+    val dokumentInfoId: String? = null,
     val tittel: String? = null,
     val brevkode: String? = null
 )
 
-data class DokumentVariant (
+data class DokumentVariant(
     val filtype: JournalpostFiltype = JournalpostFiltype.PDFA,
     val variantformat: String? = null,
     val fysiskDokument: ByteArray? = null

@@ -16,7 +16,8 @@ class MelosysEessiApi {
     fun hentMottakerinstitusjoner() = emptyArray<Unit>()
 
     @GetMapping("/sak")
-    fun hentSaksrelasjon(@RequestParam("rinaSaksnummer") rinaSaksnummer: String) = saksrelasjoner.filter { s -> s.rinaSaksnummer == rinaSaksnummer }
+    fun hentSaksrelasjon(@RequestParam("rinaSaksnummer") rinaSaksnummer: String) =
+        saksrelasjoner.filter { s -> s.rinaSaksnummer == rinaSaksnummer }
 
     @PostMapping("/sak")
     fun lagreSaksrelasjon(@RequestBody saksrelasjon: Saksrelasjon) {
@@ -26,7 +27,7 @@ class MelosysEessiApi {
 }
 
 data class Saksrelasjon(
-    val gsakSaksnummer: Long,
-    val rinaSaksnummer: String,
-    val bucType: String
+    val gsakSaksnummer: Long? = null,
+    val rinaSaksnummer: String? = null,
+    val bucType: String? = null
 )
