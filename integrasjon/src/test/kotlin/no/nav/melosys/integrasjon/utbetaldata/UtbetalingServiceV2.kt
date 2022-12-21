@@ -11,7 +11,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.domain.dokument.utbetaling.Periode
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
-import no.nav.melosys.domain.dokument.utbetaling.Ytelse
+import no.nav.melosys.integrasjon.utbetaldata.utbetaling.UtbetalingRequest
 import no.nav.melosys.integrasjon.utbetaling.*
 import no.nav.melosys.integrasjon.utbetaling.UtbetalingServiceV2
 import org.junit.jupiter.api.Test
@@ -27,12 +27,16 @@ class UtbetalingServiceV2 {
 
     @Test
     fun skalHenteUtbetalinger() {
+        val fom = LocalDate.now().minusMonths(2).toString()
+        val tom = LocalDate.now().toString()
+
+        val utbetalingRequest = UtbetalingRequest(FNR,
+            no.nav.melosys.integrasjon.utbetaldata.utbetaling.Periode(fom, tom),
+            "UTBETALINGSPERIODE",
+            "RETTIGHETSHAVER")
+
         every {
-            mockRestConsumer.hentUtbetalingsInformasjon(
-                FNR,
-                LocalDate.now().minusMonths(2).toString(),
-                LocalDate.now().toString()
-            )
+            mockRestConsumer.hentUtbetalingsInformasjon(utbetalingRequest)
         } returns hentUtbetalingListe()
 
         val saksopplysning = utbetaldataServiceV2.hentSaksopplysningForUtbetaling(FNR,
@@ -79,9 +83,26 @@ class UtbetalingServiceV2 {
     }
 
     @Test
-    @Throws(java.lang.Exception::class)
     fun hentUtbetalingerBarnetrygd_tomDatoEldreEnnTreÅr_forventTomResponsIngenKall() {
+        val fom = LocalDate.now().minusMonths(2).toString()
+        val tom = LocalDate.now().toString()
 
+        val utbetalingRequest = UtbetalingRequest(FNR,
+            no.nav.melosys.integrasjon.utbetaldata.utbetaling.Periode(fom, tom),
+            "UTBETALINGSPERIODE",
+            "RETTIGHETSHAVER")
+
+        every {
+            mockRestConsumer.hentUtbetalingsInformasjon(utbetalingRequest)
+        } returns hentUtbetalingListe()
+
+        val saksopplysning = utbetaldataServiceV2.hentSaksopplysningForUtbetaling(FNR,
+            LocalDate.now().minusYears(5).minusMonths(2),
+            LocalDate.now().minusYears(3).minusDays(1))
+
+        saksopplysning.dokument
+            .shouldBeInstanceOf<UtbetalingDokument>()
+            .utbetalinger.shouldHaveSize(0)
     }
 
     @Test

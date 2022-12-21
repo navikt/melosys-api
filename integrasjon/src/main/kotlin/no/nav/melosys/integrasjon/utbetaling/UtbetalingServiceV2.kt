@@ -9,6 +9,7 @@ import no.nav.melosys.domain.dokument.utbetaling.Utbetaling
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
 import no.nav.melosys.domain.dokument.utbetaling.Ytelse
 import no.nav.melosys.exception.TekniskException
+import no.nav.melosys.integrasjon.utbetaldata.utbetaling.UtbetalingRequest
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 
@@ -22,8 +23,18 @@ class UtbetalingServiceV2(
         objectMapper.registerModule(JavaTimeModule())
     }
 
-    fun hentSaksopplysningForUtbetaling(fnr: String, fom: LocalDate?, tom: LocalDate?): Saksopplysning {
-        val utbetalingResponse = utbetalingConsumerV2.hentUtbetalingsInformasjon(fnr, fom.toString(), tom.toString())
+    fun hentSaksopplysningForUtbetaling(fnr: String, fom: LocalDate, tom: LocalDate?): Saksopplysning {
+
+        val utbetalingRequest = UtbetalingRequest(fnr,
+            no.nav.melosys.integrasjon.utbetaldata.utbetaling.Periode(fom.toString(), tom.toString()),
+            "UTBETALINGSPERIODE",
+            "RETTIGHETSHAVER")
+
+        val utbetalingResponse = if (tom != null && tom.isBefore(LocalDate.now().minusYears(3))) {
+            emptyList() //TODO Kopi av nåverende impl. Kan muligens fjernes fullstendig, men vet ikke hvorfor vi har satt den til å være tom tidligere.
+        } else {
+            utbetalingConsumerV2.hentUtbetalingsInformasjon(utbetalingRequest)
+        }
 
         return Saksopplysning().apply {
             type = SaksopplysningType.UTBETAL
@@ -46,7 +57,7 @@ class UtbetalingServiceV2(
                     objectMapper.writeValueAsString(utbetalingResponse)
                 )
             } catch (e: JsonProcessingException) {
-                throw TekniskException("Kunne ikke lagre kildedokument fra utbetaldta")
+                throw TekniskException("Kunne ikke lagre kildedokument fra utbetaldata")
             }
         }
     }

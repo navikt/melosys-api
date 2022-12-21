@@ -60,14 +60,7 @@ public class UtbetaldataService implements UtbetaldataFasade {
 
         } else {
             System.out.println("Utbetalinger v2 brukes:");
-            if (erUtbetalingsDataStoettet(tom)) {
-                // TODO hvorfor har vi i det hele tatt denne conditionen?
-                // ????
-                return null;
-            } else {
-                return utbetalingServiceV2.hentSaksopplysningForUtbetaling(fnr, fom, tom);
-            }
-
+            return utbetalingServiceV2.hentSaksopplysningForUtbetaling(fnr, fom, tom);
         }
     }
 
