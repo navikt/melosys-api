@@ -15,6 +15,9 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.FunksjonellException;
 
+import static no.nav.melosys.domain.Behandling.*;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET;
+
 public final class OppgaveFactory {
 
     private static final long FRIST_FERDIGSTILLELSE_JFR_OPPG = 7;
@@ -69,7 +72,7 @@ public final class OppgaveFactory {
             .setTema(utledTema(sakstema))
             .setOppgavetype(utledOppgavetype(sakstype, behandlingstema, behandlingstype))
             .setBeskrivelse(utledBeskrivelse(oppgaveBehandlingstema, sakstype, sakstema, behandlingstema, behandlingstype))
-            .setFristFerdigstillelse(Behandling.utledBehandlingsfrist(behandling, mottaksdato));
+            .setFristFerdigstillelse(utledBehandlingsfrist(behandling, mottaksdato));
     }
 
     /**
@@ -169,18 +172,36 @@ public final class OppgaveFactory {
     }
 
     private static Oppgavetyper utledOppgavetype(Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        if (sakstype == Sakstyper.EU_EOS) {
+            return oppgavetypeEøs(behandlingstema, behandlingstype);
+        }
+        if (sakstype == Sakstyper.TRYGDEAVTALE) {
+            return oppgavetypeTrygdeavtale(behandlingstema, behandlingstype);
+        }
+
         if (behandlingstype == Behandlingstyper.HENVENDELSE) {
             return Oppgavetyper.VURD_HENV;
         }
+        return Oppgavetyper.BEH_SAK_MK;
+    }
 
-        if (sakstype == Sakstyper.EU_EOS) {
-            return switch (behandlingstema) {
-                case ANMODNING_OM_UNNTAK_HOVEDREGEL, REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, BESLUTNING_LOVVALG_ANNET_LAND ->
-                    Oppgavetyper.BEH_SED;
-                default -> Oppgavetyper.BEH_SAK_MK;
-            };
+    private static Oppgavetyper oppgavetypeEøs(Behandlingstema tema, Behandlingstyper behandlingstype) {
+        if (erAnmodningOmUnntak(tema) || erRegistreringAvUnntak(tema) || erBehandlingAvSedForespørsler(tema)) {
+            return Oppgavetyper.BEH_SED;
         }
+        if (behandlingstype == Behandlingstyper.HENVENDELSE) {
+            return Oppgavetyper.VURD_HENV;
+        }
+        return Oppgavetyper.BEH_SAK_MK;
+    }
 
+    private static Oppgavetyper oppgavetypeTrygdeavtale(Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        if (behandlingstema == FORESPØRSEL_TRYGDEMYNDIGHET) {
+            return Oppgavetyper.BEH_SAK_MK;
+        }
+        if (behandlingstype == Behandlingstyper.HENVENDELSE) {
+            return Oppgavetyper.VURD_HENV;
+        }
         return Oppgavetyper.BEH_SAK_MK;
     }
 

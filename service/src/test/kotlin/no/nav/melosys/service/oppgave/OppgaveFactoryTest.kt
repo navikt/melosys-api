@@ -77,7 +77,7 @@ internal class OppgaveFactoryTest {
 
         val expectedBehandlingstema = OppgaveBehandlingstema.EU_EOS_LAND
         val expectedTema = Tema.MED
-        val expectedOppgavetype = Oppgavetyper.VURD_HENV
+        val expectedOppgavetype = Oppgavetyper.BEH_SED
 
         test(
             sakstyper,
@@ -372,7 +372,7 @@ internal class OppgaveFactoryTest {
 
         val expectedBehandlingstema = OppgaveBehandlingstema.EU_EOS_LAND
         val expectedTema = Tema.MED
-        val expectedOppgavetype = Oppgavetyper.VURD_HENV
+        val expectedOppgavetype = Oppgavetyper.BEH_SED
 
         test(
             sakstyper,
@@ -395,7 +395,7 @@ internal class OppgaveFactoryTest {
 
         val expectedBehandlingstema = OppgaveBehandlingstema.AVTALELAND
         val expectedTema = Tema.MED
-        val expectedOppgavetype = Oppgavetyper.VURD_HENV
+        val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
         test(
             sakstyper,
@@ -417,7 +417,7 @@ internal class OppgaveFactoryTest {
 
         val expectedBehandlingstema = OppgaveBehandlingstema.EU_EOS_LAND
         val expectedTema = Tema.UFM
-        val expectedOppgavetype = Oppgavetyper.VURD_HENV
+        val expectedOppgavetype = Oppgavetyper.BEH_SED
 
         test(
             sakstyper,
@@ -440,7 +440,7 @@ internal class OppgaveFactoryTest {
 
         val expectedBehandlingstema = OppgaveBehandlingstema.AVTALELAND
         val expectedTema = Tema.UFM
-        val expectedOppgavetype = Oppgavetyper.VURD_HENV
+        val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
         test(
             sakstyper,
@@ -500,12 +500,11 @@ internal class OppgaveFactoryTest {
     }
 
     @Test
-    fun eueos_medlemskapLovvalg_henvendelse_alle_16() {
+    fun eueos_medlemskapLovvalg_henvendelse_ikkeSed_16() {
         val sakstyper = listOf(Sakstyper.EU_EOS)
         val sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
         val behandlingstyper = listOf(Behandlingstyper.HENVENDELSE)
-        val behandlingstemaer =
-            getAlleBehandlingstemaUnntatt(Behandlingstema.TRYGDETID, Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
+        val behandlingstemaer = listOf(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingstema.UTSENDT_ARBEIDSTAKER)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.EU_EOS_LAND
         val expectedTema = Tema.MED
@@ -567,11 +566,11 @@ internal class OppgaveFactoryTest {
     }
 
     @Test
-    fun eueos_unntak_henvendelse_alle_17() {
+    fun eueos_unntak_henvendelse_ikkeSed_17() {
         val sakstyper = listOf(Sakstyper.EU_EOS)
         val sakstemaer = listOf(Sakstemaer.UNNTAK)
         val behandlingstyper = listOf(Behandlingstyper.HENVENDELSE)
-        val behandlingstemaer = getAlleBehandlingstemaUnntatt(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
+        val behandlingstemaer = listOf(Behandlingstema.REGISTRERING_UNNTAK)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.EU_EOS_LAND
         val expectedTema = Tema.UFM
@@ -690,7 +689,7 @@ internal class OppgaveFactoryTest {
             Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET,
             OppgaveBehandlingstema.EU_EOS_LAND,
             Tema.MED,
-            Oppgavetyper.BEH_SAK_MK,
+            Oppgavetyper.BEH_SED,
             Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET.beskrivelse
         )
     }
