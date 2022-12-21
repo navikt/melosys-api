@@ -4,8 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.dokument.utbetaling.Periode
 import no.nav.melosys.domain.dokument.utbetaling.Utbetaling
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
+import no.nav.melosys.domain.dokument.utbetaling.Ytelse
 import no.nav.melosys.exception.TekniskException
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -27,7 +29,16 @@ class UtbetalingServiceV2(
             type = SaksopplysningType.UTBETAL
             versjon = BETALINGER_VERSJON
             dokument = UtbetalingDokument().apply {
-                utbetalinger = ArrayList<Utbetaling>();
+                utbetalinger = utbetalingResponse.map {
+                    Utbetaling().apply {
+                        ytelser = it.ytelseListe.map {
+                            Ytelse().apply {
+                                type = it.ytelsestype
+                                periode = Periode(it.ytelsesperiode.fom, it.ytelsesperiode.tom)
+                            }
+                        }
+                    }
+                }
             }
             try {
                 leggTilKildesystemOgMottattDokument(

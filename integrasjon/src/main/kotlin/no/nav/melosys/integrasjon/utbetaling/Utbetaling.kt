@@ -1,78 +1,79 @@
 package no.nav.melosys.integrasjon.utbetaling
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import java.time.LocalDate
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class Utbetaling(
-    var forfallsdato: String?,
-    var posteringsdato: String,
-    var utbetalingNettobeloep: Double,
-    var utbetalingsdato: String?,
-    var utbetalingsmelding: String?,
-    var utbetalingsmetode: String,
-    var utbetalingsstatus: String,
-    var utbetaltTil: UtbetaltTil,
-    var utbetaltTilKonto: UtbetaltTilKonto?,
-    var ytelseListe: List<Ytelse>
+    var forfallsdato: String? = null,
+    var posteringsdato: String? = null,
+    var utbetalingNettobeloep: Double? = null,
+    var utbetalingsdato: String? = null,
+    var utbetalingsmelding: String? = null,
+    var utbetalingsmetode: String? = null,
+    var utbetalingsstatus: String? = null,
+    var utbetaltTil: UtbetaltTil? = null,
+    var utbetaltTilKonto: UtbetaltTilKonto? = null,
+    var ytelseListe: List<Ytelse> = emptyList()
 )
 
 data class UtbetaltTil(
-    var aktoertype: String,
-    var ident: String,
-    var navn: String
+    var aktoertype: String? = null,
+    var ident: String? = null,
+    var navn: String? = null
 )
 
 data class UtbetaltTilKonto(
-    var kontonummer: String,
-    var kontotype: String
+    var kontonummer: String? = null,
+    var kontotype: String? = null
 )
 
 data class Ytelse(
-    var bilagsnummer: String?,
-    var refundertForOrg: RefundertForOrg?,
-    var rettighetshaver: Rettighetshaver,
-    var skattListe: List<Skatt>,
-    var skattsum: Double,
-    var trekkListe: List<TrekkListe>?,
-    var trekksum: Int,
-    var ytelseNettobeloep: Int,
-    var ytelseskomponentListe: List<YtelseskomponentListe>?,
-    var ytelseskomponentersum: Double,
+    var bilagsnummer: String? = null,
+    var refundertForOrg: RefundertForOrg? = null,
+    var rettighetshaver: Rettighetshaver? = null,
+    var skattListe: List<Skatt>? = null,
+    var skattsum: Double? = null,
+    var trekkListe: List<TrekkListe>? = null,
+    var trekksum: Int? = null,
+    var ytelseNettobeloep: Int? = null,
+    var ytelseskomponentListe: List<YtelseskomponentListe>? = null,
+    var ytelseskomponentersum: Double? = null,
     var ytelsesperiode: Ytelsesperiode,
-    var ytelsestype: String?
+    var ytelsestype: String? = null
 )
 
 data class RefundertForOrg(
-    var aktoertype: String,
-    var ident: String,
-    var navn: String
+    var aktoertype: String? = null,
+    var ident: String? = null,
+    var navn: String? = null
 )
 
 data class Rettighetshaver(
-    var aktoertype: String,
-    var ident: String,
-    var navn: String
+    var aktoertype: String? = null,
+    var ident: String? = null,
+    var navn: String? = null
 )
 
 data class Skatt(
-    var skattebeloep: Double
+    var skattebeloep: Double? = null
 )
 
 data class TrekkListe(
-    var kreditor: String,
-    var trekkbeloep: Int,
-    var trekktype: String
+    var kreditor: String? = null,
+    var trekkbeloep: Int? = null,
+    var trekktype: String? = null
 )
 
 data class YtelseskomponentListe(
-    var satsantall: Double,
-    var satsbeloep: Int,
-    var satstype: String,
-    var ytelseskomponentbeloep: Int,
-    var ytelseskomponenttype: String
+    var satsantall: Double? = null,
+    var satsbeloep: Int? = null,
+    var satstype: String? = null,
+    var ytelseskomponentbeloep: Int? = null,
+    var ytelseskomponenttype: String? = null
 )
 
 data class Ytelsesperiode(
-    var fom: String,
-    var tom: String
+    var fom: LocalDate,
+    var tom: LocalDate
 )

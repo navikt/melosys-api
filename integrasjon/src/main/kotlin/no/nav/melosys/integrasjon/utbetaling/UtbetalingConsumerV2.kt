@@ -12,5 +12,5 @@ open class UtbetalingConsumerV2(private val webClient: WebClient) {
         .accept(MediaType.APPLICATION_JSON)
         .retrieve()
         .bodyToMono(Array<Utbetaling>::class.java)
-        .block()!!
+        .block()!!.toList()
 }

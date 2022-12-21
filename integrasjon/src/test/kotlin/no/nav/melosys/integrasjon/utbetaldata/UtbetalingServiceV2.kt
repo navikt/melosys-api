@@ -9,14 +9,9 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
-import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
-import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
-import no.nav.melosys.integrasjon.medl.LovvalgMedl
-import no.nav.melosys.integrasjon.medl.PeriodestatusMedl
-import no.nav.melosys.integrasjon.utbetaling.Utbetaling
-import no.nav.melosys.integrasjon.utbetaling.UtbetalingConsumerV2
+import no.nav.melosys.domain.dokument.utbetaling.Ytelse
+import no.nav.melosys.integrasjon.utbetaling.*
 import no.nav.melosys.integrasjon.utbetaling.UtbetalingServiceV2
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -50,29 +45,29 @@ class UtbetalingServiceV2 {
             .first()
             .mottattDokument.isNullOrEmpty()
 
+        var ytelseA = Ytelse()
+        ytelseA.type = "test1"
+        var ytelseB = Ytelse()
+        ytelseB.type = "test2"
+
+        var forverntetYtelseListe = listOf<Ytelse>()
+
         saksopplysning.dokument
             .shouldBeInstanceOf<UtbetalingDokument>()
             .utbetalinger.shouldHaveSize(2)
             .first()
             .shouldBeEqualToComparingFields(
-                Utbetaling(null
-                ,"dato"
-                ,10000.00
-                ,null,
-                null,
-                "test",
-                    "betalt",
-                    null,
-                    null,
-                    null)
+                no.nav.melosys.domain.dokument.utbetaling.Utbetaling().apply {
+                    ytelser = forverntetYtelseListe
+                }
                 , FieldsEqualityCheckConfig(ignorePrivateFields = false)
             )
     }
 
-    private fun hentUtbetalingListe() = objectMapper.readValue(
+    private fun hentUtbetalingListe(): List<Utbetaling> = objectMapper.readValue(
         javaClass.classLoader.getResource("mock/utbetaldata/ubetalingResponse.json"),
         Array<Utbetaling>::class.java
-    )
+    ).toList()
 
     @Test
     @Throws(Exception::class)
