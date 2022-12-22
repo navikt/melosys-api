@@ -18,7 +18,7 @@ import reactor.core.publisher.Mono;
 public class OppgaveConsumer extends RestErrorHandler {
     // Oppgave (på grunn av Abac) kaster feil om svaret på et søk inneholder oppgaver med 50+ unike personer
     private static final int OPPGAVE_ABAC_ANTALL_LIMIT = 40;
-    private static final int OPPGAVE_ANTALL_LIMIT = 400;
+    private static final int OPPGAVE_ANTALL_LIMIT = 1000;
     private static final String OPPGAVE_BASE_URI = "/oppgaver";
     private static final String OPPGAVE_URI_MED_ID = OPPGAVE_BASE_URI + "/{oppgaveID}";
 
