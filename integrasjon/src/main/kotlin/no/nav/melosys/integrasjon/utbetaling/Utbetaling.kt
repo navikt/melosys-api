@@ -3,7 +3,7 @@ package no.nav.melosys.integrasjon.utbetaling
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.time.LocalDate
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreProperties(ignoreUnknown = false)
 data class Utbetaling(
     var forfallsdato: String? = null,
     var posteringsdato: String? = null,
@@ -14,7 +14,7 @@ data class Utbetaling(
     var utbetalingsstatus: String? = null,
     var utbetaltTil: UtbetaltTil? = null,
     var utbetaltTilKonto: UtbetaltTilKonto? = null,
-    var ytelseListe: List<Ytelse> = emptyList()
+    var ytelseListe: MutableList<Ytelse> = mutableListOf()
 )
 
 data class UtbetaltTil(
@@ -28,9 +28,8 @@ data class UtbetaltTilKonto(
     var kontotype: String? = null
 )
 
-@JsonIgnoreProperties(ignoreUnknown = true)
 data class Ytelse(
-    /*var bilagsnummer: String? = null,
+    var bilagsnummer: String? = null,
     var refundertForOrg: RefundertForOrg? = null,
     var rettighetshaver: Rettighetshaver? = null,
     var skattListe: List<Skatt>? = null,
@@ -39,9 +38,9 @@ data class Ytelse(
     var trekksum: Int? = null,
     var ytelseNettobeloep: Int? = null,
     var ytelseskomponentListe: List<YtelseskomponentListe>? = null,
-    var ytelseskomponentersum: Double? = null,*/
+    var ytelseskomponentersum: Double? = null,
     var ytelsesperiode: Ytelsesperiode? = null,
-    var ytelsestype: String? = null
+    var ytelsestype: String = ""
 )
 
 data class RefundertForOrg(

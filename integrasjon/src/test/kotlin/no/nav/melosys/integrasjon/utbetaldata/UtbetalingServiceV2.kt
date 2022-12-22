@@ -58,7 +58,7 @@ class UtbetalingServiceV2 {
             .first()
             .shouldBeEqualToComparingFields(
                 no.nav.melosys.domain.dokument.utbetaling.Ytelse().apply {
-                    type = "string"
+                    type = "BARNETRYGD"
                     periode = Periode(LocalDate.parse("2022-12-19"), LocalDate.parse("2022-12-19"))
                 }
                 , FieldsEqualityCheckConfig(ignorePrivateFields = false)

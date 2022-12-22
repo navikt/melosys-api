@@ -3,15 +3,22 @@ package no.nav.melosys.integrasjon.utbetaling
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Saksopplysning
+import no.nav.melosys.domain.SaksopplysningKildesystem
+import no.nav.melosys.domain.SaksopplysningType
 import no.nav.melosys.domain.dokument.utbetaling.Periode
 import no.nav.melosys.domain.dokument.utbetaling.Utbetaling
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
 import no.nav.melosys.domain.dokument.utbetaling.Ytelse
 import no.nav.melosys.exception.TekniskException
+import no.nav.melosys.integrasjon.utbetaldata.UtbetaldataService
 import no.nav.melosys.integrasjon.utbetaldata.utbetaling.UtbetalingRequest
+import no.nav.tjeneste.virksomhet.utbetaling.v1.informasjon.WSUtbetaling
+import no.nav.tjeneste.virksomhet.utbetaling.v1.informasjon.WSYtelse
+import no.nav.tjeneste.virksomhet.utbetaling.v1.meldinger.WSHentUtbetalingsinformasjonResponse
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.util.function.Consumer
 
 @Service
 class UtbetalingServiceV2(
@@ -23,6 +30,8 @@ class UtbetalingServiceV2(
         objectMapper.registerModule(JavaTimeModule())
     }
 
+
+
     fun hentSaksopplysningForUtbetaling(fnr: String, fom: LocalDate, tom: LocalDate?): Saksopplysning {
 
         val utbetalingRequest = UtbetalingRequest(fnr,
@@ -30,11 +39,10 @@ class UtbetalingServiceV2(
             "UTBETALINGSPERIODE",
             "RETTIGHETSHAVER")
 
-        val utbetalingResponse = if (tom != null && tom.isBefore(LocalDate.now().minusYears(3))) {
-            emptyList() //TODO Kopi av nåverende impl. Kan muligens fjernes fullstendig, men vet ikke hvorfor vi har satt den til å være tom tidligere.
-        } else {
-            utbetalingConsumerV2.hentUtbetalingsInformasjon(utbetalingRequest)
-        }
+        val utbetalingResponse = if (skalReturnereTomListeDersomTomEldreEnnTreAar(fnr, fom, tom))
+            emptyList()
+        else
+            fjernYtelserFraUtbetalingerSomIkkeErBarnetrygd(utbetalingConsumerV2.hentUtbetalingsInformasjon(utbetalingRequest))
 
         return Saksopplysning().apply {
             type = SaksopplysningType.UTBETAL
@@ -62,8 +70,21 @@ class UtbetalingServiceV2(
         }
     }
 
+    fun skalReturnereTomListeDersomTomEldreEnnTreAar(fnr: String, fom: LocalDate, tom: LocalDate?): Boolean {
+        return (tom != null && tom.isBefore(LocalDate.now().minusYears(3)))
+    }
+
+    private fun fjernYtelserFraUtbetalingerSomIkkeErBarnetrygd(response: List<no.nav.melosys.integrasjon.utbetaling.Utbetaling>): List<no.nav.melosys.integrasjon.utbetaling.Utbetaling> {
+        response.forEach(Consumer { utbetaling: no.nav.melosys.integrasjon.utbetaling.Utbetaling ->
+            utbetaling.ytelseListe
+                .removeIf { ytelse: no.nav.melosys.integrasjon.utbetaling.Ytelse -> ytelse.ytelsestype != BARNETRYGD }
+        })
+        return response
+    }
+
     companion object {
         const val BETALINGER_VERSJON = "2.0"
+        const val BARNETRYGD = "BARNETRYGD"
     }
 
 }

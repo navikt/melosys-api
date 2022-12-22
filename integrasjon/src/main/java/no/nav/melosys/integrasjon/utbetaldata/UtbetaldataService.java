@@ -146,10 +146,6 @@ public class UtbetaldataService implements UtbetaldataFasade {
             && ytelse.getYtelsestype().getValue().trim().equalsIgnoreCase(BARNETRYGD);
     }
 
-    private boolean erBarnetrygdytelse(Ytelse ytelse) {
-        return ytelse.getYtelsestype().trim().equalsIgnoreCase(BARNETRYGD);
-    }
-
     private boolean erUtbetalingsDataStoettet(LocalDate tom) {
         return tom != null && datoErEldreEnnTreÅr(tom);
     }

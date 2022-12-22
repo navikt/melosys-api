@@ -18,7 +18,7 @@
     "utbetalingsstatus": "string",
     "ytelseListe": [
       {
-        "ytelsestype": "string",
+        "ytelsestype": "BARNETRYGD",
         "ytelsesperiode": {
           "fom": "2022-12-19",
           "tom": "2022-12-19"
@@ -81,7 +81,7 @@
     "utbetalingsstatus": "string",
     "ytelseListe": [
       {
-        "ytelsestype": "string",
+        "ytelsestype": "IKKEBARNETRYGD",
         "ytelsesperiode": {
           "fom": "2022-12-19",
           "tom": "2022-12-19"
