@@ -13,12 +13,12 @@ import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
 
 @Configuration
-class UtbetalingConsumerProducer(
+class UtbetalingConsumerProducerV2(
     @Value("\${utbetaling.rest.url}") private val url: String,
     private val genericAuthFilterFactory: GenericAuthFilterFactory
 ) : CallIdAware, WebClientConfig {
     @Bean
-    fun utbetalingConsumer(
+    fun utbetalingConsumerV2(
         webClientBuilder: WebClient.Builder, correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
     ) = UtbetalingConsumerV2(
         webClientBuilder
