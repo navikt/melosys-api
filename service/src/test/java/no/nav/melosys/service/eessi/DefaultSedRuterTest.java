@@ -164,13 +164,14 @@ class DefaultSedRuterTest {
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         when(fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER)).thenReturn(Optional.of(fagsak));
 
+
         defaultSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER);
 
+
         verify(oppgaveService).opprettJournalføringsoppgave(melosysEessiMelding.getJournalpostId(), melosysEessiMelding.getAktoerId());
-        verify(behandlingService, never()).endreStatus(anyLong(), any());
-        verify(oppgaveService, never()).opprettOppgave(any());
-        verify(oppgaveService, never()).oppdaterOppgave(any(), any(OppgaveOppdatering.class));
-        verify(prosessinstansService, never()).opprettProsessinstansSedJournalføring(any(), any());
+        verifyNoMoreInteractions(oppgaveService);
+        verifyNoInteractions(behandlingService);
+        verifyNoInteractions(prosessinstansService);
     }
 
     private MelosysEessiMelding hentMelosysEessiMelding(SedType sedType) {
