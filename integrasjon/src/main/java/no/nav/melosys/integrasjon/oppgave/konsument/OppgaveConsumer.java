@@ -4,7 +4,10 @@ import java.util.*;
 
 import no.nav.melosys.integrasjon.felles.FeilResponseDto;
 import no.nav.melosys.integrasjon.felles.RestErrorHandler;
-import no.nav.melosys.integrasjon.oppgave.konsument.dto.*;
+import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
+import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest;
+import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSvar;
+import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.web.reactive.function.client.ClientResponse;
@@ -13,8 +16,9 @@ import reactor.core.publisher.Mono;
 
 @Retryable
 public class OppgaveConsumer extends RestErrorHandler {
-    // Oppgave (/Abac) kaster feil om svaret på et søk inneholder oppgaver med 50+ unike personer
-    private static final int OPPGAVE_ANTALL_ABAC_LIMIT = 40;
+    // Oppgave (på grunn av Abac) kaster feil om svaret på et søk inneholder oppgaver med 50+ unike personer
+    private static final int OPPGAVE_ABAC_ANTALL_LIMIT = 40;
+    private static final int OPPGAVE_ANTALL_LIMIT = 400;
     private static final String OPPGAVE_BASE_URI = "/oppgaver";
     private static final String OPPGAVE_URI_MED_ID = OPPGAVE_BASE_URI + "/{oppgaveID}";
 
@@ -43,8 +47,8 @@ public class OppgaveConsumer extends RestErrorHandler {
             return Collections.emptyList();
         }
         List<OppgaveDto> oppgaveListe = new ArrayList<>(oppgaveSvar.getOppgaver());
-        if (oppgaveSvar.getAntallTreffTotalt() > offset + OPPGAVE_ANTALL_ABAC_LIMIT) {
-            oppgaveListe.addAll(hentOppgaveListe(oppgaveSearchRequest, offset + OPPGAVE_ANTALL_ABAC_LIMIT));
+        if (offset <= OPPGAVE_ANTALL_LIMIT && oppgaveSvar.getAntallTreffTotalt() > offset + OPPGAVE_ABAC_ANTALL_LIMIT) {
+            oppgaveListe.addAll(hentOppgaveListe(oppgaveSearchRequest, offset + OPPGAVE_ABAC_ANTALL_LIMIT));
         }
         return oppgaveListe;
     }
@@ -63,7 +67,7 @@ public class OppgaveConsumer extends RestErrorHandler {
                     .queryParamIfPresent("tilordnetRessurs", Optional.ofNullable(oppgaveSearchRequest.getTilordnetRessurs()))
                     .queryParamIfPresent("statuskategori", Optional.ofNullable(oppgaveSearchRequest.getStatusKategori()))
                     .queryParamIfPresent("behandlesAvApplikasjon", Optional.ofNullable(oppgaveSearchRequest.getBehandlesAvApplikasjon()))
-                    .queryParam("limit", OPPGAVE_ANTALL_ABAC_LIMIT)
+                    .queryParam("limit", OPPGAVE_ABAC_ANTALL_LIMIT)
                     .queryParam("offset", offset)
                     .queryParamIfPresent("behandlingstype", Optional.ofNullable(oppgaveSearchRequest.getBehandlingstype()))
                     .queryParamIfPresent("behandlingstema", Optional.ofNullable(oppgaveSearchRequest.getBehandlingstema()))
