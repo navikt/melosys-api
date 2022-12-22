@@ -6,9 +6,11 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equality.FieldsEqualityCheckConfig
 import io.kotest.matchers.equality.shouldBeEqualToComparingFields
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.string.shouldNotBeEmpty
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
+import no.nav.melosys.domain.SaksopplysningKildesystem
 import no.nav.melosys.domain.dokument.utbetaling.Periode
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
 import no.nav.melosys.integrasjon.utbetaldata.utbetaling.UtbetalingRequest
@@ -26,7 +28,7 @@ class UtbetalingServiceV2 {
     private val utbetaldataServiceV2: UtbetalingServiceV2 = UtbetalingServiceV2(mockRestConsumer, objectMapper)
 
     @Test
-    fun skalHenteUtbetalinger() {
+    fun hentUtbetalingerBarnetrygd_medTreff_verifiserSaksopplysning() {
         val fom = LocalDate.now().minusMonths(2).toString()
         val tom = LocalDate.now().toString()
 
@@ -48,13 +50,18 @@ class UtbetalingServiceV2 {
             .kilder
             .shouldHaveSize(1)
             .first()
-            .mottattDokument.isNullOrEmpty()
+            .kilde.equals(SaksopplysningKildesystem.UTBETALDATA)
+
+        saksopplysning
+            .kilder
+            .first()
+            .mottattDokument.shouldNotBeNull().shouldNotBeEmpty()
 
         saksopplysning.dokument
             .shouldBeInstanceOf<UtbetalingDokument>()
             .utbetalinger.shouldHaveSize(2)
             .first()
-            .ytelser.shouldHaveSize(1)
+            .ytelser.shouldHaveSize(2)
             .first()
             .shouldBeEqualToComparingFields(
                 no.nav.melosys.domain.dokument.utbetaling.Ytelse().apply {
@@ -65,25 +72,8 @@ class UtbetalingServiceV2 {
             )
     }
 
-    private fun hentUtbetalingListe(): List<Utbetaling> = objectMapper.readValue(
-        javaClass.classLoader.getResource("mock/utbetaldata/ubetalingResponse.json"),
-        Array<Utbetaling>::class.java
-    ).toList()
-
     @Test
-    @Throws(Exception::class)
-    fun hentUtbetalingerBarnetrygd_medTreff_verifiserSaksopplysning() {
-
-    }
-
-    @Test
-    @Throws(Exception::class)
-    fun hentUtbetalingerBarnetrygd_medForskjelligeYtelserIEnUtbetaling_verifiserSaksopplysning() {
-
-    }
-
-    @Test
-    fun hentUtbetalingerBarnetrygd_tomDatoEldreEnnTreÅr_forventTomResponsIngenKall() {
+    fun hentUtbetalingerBarnetrygd_utenGyldigeYtelserIUtbetaling_verifiserSaksopplysning() {
         val fom = LocalDate.now().minusMonths(2).toString()
         val tom = LocalDate.now().toString()
 
@@ -97,8 +87,33 @@ class UtbetalingServiceV2 {
         } returns hentUtbetalingListe()
 
         val saksopplysning = utbetaldataServiceV2.hentSaksopplysningForUtbetaling(FNR,
-            LocalDate.now().minusYears(5).minusMonths(2),
-            LocalDate.now().minusYears(3).minusDays(1))
+            LocalDate.now().minusMonths(2),
+            LocalDate.now())
+
+        saksopplysning.dokument
+            .shouldBeInstanceOf<UtbetalingDokument>()
+            .utbetalinger.shouldHaveSize(2)
+            .last()
+            .ytelser.shouldHaveSize(0)
+    }
+
+    @Test
+    fun hentUtbetalingerBarnetrygd_tomDatoEldreEnnTreÅr_forventTomResponsIngenKall() {
+        val fom = LocalDate.now().minusYears(5).minusMonths(2)
+        val tom = LocalDate.now().minusYears(3).minusDays(1)
+
+        val utbetalingRequest = UtbetalingRequest(FNR,
+            no.nav.melosys.integrasjon.utbetaldata.utbetaling.Periode(fom.toString(), tom.toString()),
+            "UTBETALINGSPERIODE",
+            "RETTIGHETSHAVER")
+
+        every {
+            mockRestConsumer.hentUtbetalingsInformasjon(utbetalingRequest)
+        } returns hentUtbetalingListe()
+
+        val saksopplysning = utbetaldataServiceV2.hentSaksopplysningForUtbetaling(FNR,
+            fom,
+            tom)
 
         saksopplysning.dokument
             .shouldBeInstanceOf<UtbetalingDokument>()
@@ -106,10 +121,32 @@ class UtbetalingServiceV2 {
     }
 
     @Test
-    @Throws(java.lang.Exception::class)
     fun hentUtbetalingerBarnetrygd_fomDatoEldreEnnTreÅrTomDatoIDag_forventKallMedFomTreÅrSiden() {
+        val fom = LocalDate.now().minusYears(5).minusMonths(2)
+        val tom = LocalDate.now().minusDays(1)
 
+        val utbetalingRequest = UtbetalingRequest(FNR,
+            no.nav.melosys.integrasjon.utbetaldata.utbetaling.Periode(fom.toString(), tom.toString()),
+            "UTBETALINGSPERIODE",
+            "RETTIGHETSHAVER")
+
+        every {
+            mockRestConsumer.hentUtbetalingsInformasjon(utbetalingRequest)
+        } returns hentUtbetalingListe()
+
+        val saksopplysning = utbetaldataServiceV2.hentSaksopplysningForUtbetaling(FNR,
+            fom,
+            tom)
+
+        saksopplysning.dokument
+            .shouldBeInstanceOf<UtbetalingDokument>()
+            .utbetalinger.shouldHaveSize(2)
     }
+
+    private fun hentUtbetalingListe(): List<Utbetaling> = objectMapper.readValue(
+        javaClass.classLoader.getResource("mock/utbetaldata/ubetalingResponse.json"),
+        Array<Utbetaling>::class.java
+    ).toList()
 
     companion object {
         private const val FNR = "77777777773"

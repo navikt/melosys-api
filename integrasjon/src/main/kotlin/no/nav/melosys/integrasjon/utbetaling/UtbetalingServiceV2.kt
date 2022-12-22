@@ -30,10 +30,7 @@ class UtbetalingServiceV2(
         objectMapper.registerModule(JavaTimeModule())
     }
 
-
-
     fun hentSaksopplysningForUtbetaling(fnr: String, fom: LocalDate, tom: LocalDate?): Saksopplysning {
-
         val utbetalingRequest = UtbetalingRequest(fnr,
             no.nav.melosys.integrasjon.utbetaldata.utbetaling.Periode(fom.toString(), tom.toString()),
             "UTBETALINGSPERIODE",
