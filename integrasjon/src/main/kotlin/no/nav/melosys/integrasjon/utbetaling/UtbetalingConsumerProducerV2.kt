@@ -14,7 +14,7 @@ import reactor.core.publisher.Mono
 
 @Configuration
 class UtbetalingConsumerProducerV2(
-    @Value("\${utbetaling.rest.url}") private val url: String,
+    @Value("\${utbetaling.rest.url}") private val url: String, //TODO hvorfor funker ikke URL?
     private val genericAuthFilterFactory: GenericAuthFilterFactory
 ) : CallIdAware, WebClientConfig {
     @Bean
@@ -23,7 +23,6 @@ class UtbetalingConsumerProducerV2(
     ) = UtbetalingConsumerV2(
         webClientBuilder
             .baseUrl(url)
-            .filter(genericAuthFilterFactory.getFilter(CLIENT_NAME))
             .filter(headerFilter())
             .filter(correlationIdOutgoingFilter)
             .filter(errorFilter("Kall mot Utbetalinger feilet."))
@@ -42,6 +41,6 @@ class UtbetalingConsumerProducerV2(
 
     companion object {
         private const val CONSUMER_ID = "srvmelosys"
-        private val CLIENT_NAME = "betalinger"
+        //private val CLIENT_NAME = "sokos-utbetaldata"
     }
 }
