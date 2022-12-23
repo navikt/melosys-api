@@ -45,7 +45,7 @@ public class UtbetaldataService implements UtbetaldataFasade {
     @Override
     public Saksopplysning hentUtbetalingerBarnetrygd(String fnr, LocalDate fom, LocalDate tom) {
 
-        if (!unleash.isEnabled("ubetalinger.v2")) { //TODO lag featuretoggle
+        if (!unleash.isEnabled("melosys.utbetalinger.v2")) {
             WSHentUtbetalingsinformasjonResponse response;
 
             if (erUtbetalingsDataStoettet(tom)) {
