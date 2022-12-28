@@ -14,7 +14,7 @@ import reactor.core.publisher.Mono
 
 @Configuration
 class UtbetalingConsumerProducerV2(
-    @Value("https://sokos-utbetaldata.dev.intern.nav.no/utbetaldata/api") private val url: String, //TODO hvorfor funker kun hardkoda URL?
+    @Value("\${utbetaling_rest.url}") private val url: String, //TODO hvorfor funker kun hardkoda URL?
     private val genericAuthFilterFactory: GenericAuthFilterFactory
 ) : CallIdAware, WebClientConfig {
     @Bean
@@ -42,6 +42,6 @@ class UtbetalingConsumerProducerV2(
 
     companion object {
         private const val CONSUMER_ID = "melosys"
-        private const val CLIENT_NAME = "medl" //TODO finn ut hvordan vi legger til ny klient sokos-utbetaldata
+        private const val CLIENT_NAME = "medl" //TODO fiks klient lokalt
     }
 }
