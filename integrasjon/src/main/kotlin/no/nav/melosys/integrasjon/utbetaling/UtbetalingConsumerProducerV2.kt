@@ -42,6 +42,6 @@ class UtbetalingConsumerProducerV2(
 
     companion object {
         private const val CONSUMER_ID = "melosys"
-        private const val CLIENT_NAME = "medl" //TODO fiks klient lokalt
+        private const val CLIENT_NAME = "utbetaldata" //TODO fiks klient lokalt
     }
 }

@@ -9,7 +9,7 @@ import org.springframework.web.reactive.function.client.WebClient
 open class UtbetalingConsumerV2(private val webClient: WebClient) {
 
     open fun hentUtbetalingsInformasjon(request: UtbetalingRequest) = webClient.post()
-        .uri("/v2/hent-utbetalingsinformasjon/intern")
+        //.uri("/v2/hent-utbetalingsinformasjon/intern")
         .accept(MediaType.APPLICATION_JSON)
         .bodyValue(request)
         .retrieve()
