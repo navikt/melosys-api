@@ -56,7 +56,6 @@ class UtbetaldataServiceTest {
     void setup() {
         xsltTemplatesFactory = mock(XsltTemplatesFactory.class);
         DokumentFactory dokumentFactory = new DokumentFactory(JaxbConfig.getJaxb2Marshaller(), xsltTemplatesFactory);
-        fakeUnleash.disableAll();
 
         utbetaldataService = new UtbetaldataService(utbetalingConsumer, dokumentFactory, utbetalingServiceV2, fakeUnleash);
     }

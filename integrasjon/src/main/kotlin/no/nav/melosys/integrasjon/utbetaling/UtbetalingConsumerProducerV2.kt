@@ -14,7 +14,7 @@ import reactor.core.publisher.Mono
 
 @Configuration
 class UtbetalingConsumerProducerV2(
-    @Value("\${utbetaling_rest.url}") private val url: String, //TODO hvorfor funker kun hardkoda URL?
+    @Value("\${utbetaling_rest.url}") private val url: String,
     private val genericAuthFilterFactory: GenericAuthFilterFactory
 ) : CallIdAware, WebClientConfig {
     @Bean
@@ -41,7 +41,7 @@ class UtbetalingConsumerProducerV2(
         }
 
     companion object {
-        private const val CONSUMER_ID = "melosys"
-        private const val CLIENT_NAME = "utbetaldata" //TODO fiks klient lokalt
+        private const val CONSUMER_ID = "melosys" //TODO bekreft id
+        private const val CLIENT_NAME = "utbetaldata" //TODO bekreft navn
     }
 }
