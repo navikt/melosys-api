@@ -6,7 +6,7 @@ import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("v2/hent-utbetalingsinformasjon/intern")
+@RequestMapping("/utbetaldata/api/v2/hent-utbetalingsinformasjon/intern")
 @Unprotected
 class UtbetalDataRestApi {
     @PostMapping
