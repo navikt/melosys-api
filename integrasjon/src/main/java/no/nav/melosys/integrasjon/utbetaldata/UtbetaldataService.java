@@ -59,7 +59,6 @@ public class UtbetaldataService implements UtbetaldataFasade {
             return UtbetaldataMapper.tilSaksopplysning(response, lagXml(response).toString());
 
         } else {
-            System.out.println("Utbetalinger v2 brukes:");
             return utbetalingServiceV2.hentSaksopplysningForUtbetaling(fnr, fom, tom);
         }
     }
