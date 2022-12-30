@@ -117,7 +117,7 @@ final class UfmKontroll {
     }
 
     static Kontroll_begrunnelser unntakForA003(UfmKontrollData kontrollData) {
-        if (!UfmRegler.lovvalgslandErNorge(kontrollData.sedDokument().getLovvalgslandKode())) {
+        if (!kontrollData.persondata().hentGjeldendePostadresse().landkode().equals("NO")) {
             var lovvalgBestemmelse = kontrollData.sedDokument().getLovvalgBestemmelse();
             if (lovvalgBestemmelse != null && EnumUtils.isValidEnum(Tilleggsbestemmelser_883_2004.class, lovvalgBestemmelse.getKode())) return Kontroll_begrunnelser.ANNET; //TODO oppdater til nytt kodeverk
         }
