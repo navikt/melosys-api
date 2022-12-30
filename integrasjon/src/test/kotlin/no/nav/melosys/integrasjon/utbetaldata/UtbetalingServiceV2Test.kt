@@ -21,7 +21,7 @@ import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class UtbetalingServiceV2 {
+class UtbetalingServiceV2Test {
 
     private var mockRestConsumer = mockk<UtbetalingConsumerV2>()
     private val objectMapper = ObjectMapper().apply { registerModule(JavaTimeModule()) }

@@ -11,11 +11,7 @@ import no.nav.melosys.domain.dokument.utbetaling.Utbetaling
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
 import no.nav.melosys.domain.dokument.utbetaling.Ytelse
 import no.nav.melosys.exception.TekniskException
-import no.nav.melosys.integrasjon.utbetaldata.UtbetaldataService
 import no.nav.melosys.integrasjon.utbetaldata.utbetaling.UtbetalingRequest
-import no.nav.tjeneste.virksomhet.utbetaling.v1.informasjon.WSUtbetaling
-import no.nav.tjeneste.virksomhet.utbetaling.v1.informasjon.WSYtelse
-import no.nav.tjeneste.virksomhet.utbetaling.v1.meldinger.WSHentUtbetalingsinformasjonResponse
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.function.Consumer
@@ -36,7 +32,7 @@ class UtbetalingServiceV2(
             "UTBETALINGSPERIODE",
             "RETTIGHETSHAVER")
 
-        val utbetalingResponse = if (skalReturnereTomListeDersomTomEldreEnnTreAar(fnr, fom, tom))
+        val utbetalingResponse = if (erTomEldreEnnTreAar(fnr, fom, tom))
             emptyList()
         else
             fjernYtelserFraUtbetalingerSomIkkeErBarnetrygd(utbetalingConsumerV2.hentUtbetalingsInformasjon(utbetalingRequest))
@@ -67,7 +63,7 @@ class UtbetalingServiceV2(
         }
     }
 
-    fun skalReturnereTomListeDersomTomEldreEnnTreAar(fnr: String, fom: LocalDate, tom: LocalDate?): Boolean {
+    fun erTomEldreEnnTreAar(fnr: String, fom: LocalDate, tom: LocalDate?): Boolean {
         return (tom != null && tom.isBefore(LocalDate.now().minusYears(3)))
     }
 

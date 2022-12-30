@@ -3,7 +3,7 @@ package no.nav.melosys.integrasjon.utbetaling
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.time.LocalDate
 
-@JsonIgnoreProperties(ignoreUnknown = false)
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class Utbetaling(
     var forfallsdato: String? = null,
     var posteringsdato: String? = null,
