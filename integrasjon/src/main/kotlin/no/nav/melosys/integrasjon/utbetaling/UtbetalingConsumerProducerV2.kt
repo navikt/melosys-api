@@ -41,7 +41,7 @@ class UtbetalingConsumerProducerV2(
         }
 
     companion object {
-        private const val CONSUMER_ID = "melosys" //TODO bekreft id
-        private const val CLIENT_NAME = "utbetaldata" //TODO bekreft navn
+        private const val CONSUMER_ID = "srvmelosys"
+        private const val CLIENT_NAME = "sokos-utbetaldata" //TODO bekreft navn
     }
 }
