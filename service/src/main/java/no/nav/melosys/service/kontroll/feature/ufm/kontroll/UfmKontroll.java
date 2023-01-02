@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Optional;
 
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
@@ -117,9 +118,12 @@ final class UfmKontroll {
     }
 
     static Kontroll_begrunnelser unntakForA003(UfmKontrollData kontrollData) {
-        if (!kontrollData.persondata().hentGjeldendePostadresse().landkode().equals("NO")) {
+        if (!kontrollData.sedDokument().getLovvalgslandKode().equals(Landkoder.NO)) {
             var lovvalgBestemmelse = kontrollData.sedDokument().getLovvalgBestemmelse();
-            if (lovvalgBestemmelse != null && EnumUtils.isValidEnum(Tilleggsbestemmelser_883_2004.class, lovvalgBestemmelse.getKode())) return Kontroll_begrunnelser.ANNET; //TODO oppdater til nytt kodeverk
+            var transitionalRule = !isEmpty(((SedGrunnlag) kontrollData.mottatteOpplysningerData().get()).overgangsregelbestemmelser.get(0).getBeskrivelse())
+            //TODO fiks imorgeng, overgangsregler er her ^
+            if (lovvalgBestemmelse != null
+                && EnumUtils.isValidEnum(Tilleggsbestemmelser_883_2004.class, lovvalgBestemmelse.getKode())) return Kontroll_begrunnelser.OVERGANGSREGEL_VALGT; //TODO oppdater til nytt kodeverk
         }
         return null;
     }
