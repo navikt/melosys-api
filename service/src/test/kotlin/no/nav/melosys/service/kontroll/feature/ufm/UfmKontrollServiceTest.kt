@@ -23,6 +23,8 @@ import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
 import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag
 import no.nav.melosys.domain.person.Personopplysninger
@@ -516,7 +518,7 @@ class UfmKontrollServiceTest {
     }
 
     @Test
-    fun utførKontrollerOgRegistrerFeil_A003_forventUnntak() {
+    fun utførKontrollerOgRegistrerFeil_A003_forventKontroll_fraLovvalgsBestemmelse_Unntak() {
         sedDokument.apply {
             sedType = SedType.A003
             lovvalgslandKode = Landkoder.CH
@@ -534,6 +536,39 @@ class UfmKontrollServiceTest {
                 null,
                 false
             );
+        }
+        every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
+            .answers {
+                kontrollresultatSlot.captured.shouldHaveSize(1).toList()
+            }
+        setupMockedTestData()
+
+        ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
+    }
+
+    @Test
+    fun utførKontrollerOgRegistrerFeil_A003_forventKontroll_fraTransitiveBestemmelser_Unntak() {
+        sedDokument.apply {
+            sedType = SedType.A003
+            lovvalgslandKode = Landkoder.CH
+            avsenderLandkode = Landkoder.CH
+            statsborgerskapKoder = listOf(Landkoder.NO.kode, Landkoder.CH.kode)
+            lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
+            lovvalgBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_1
+        }
+        medlemskapDokument.apply {
+            personopplysninger
+        }
+        personopplysninger.apply {
+            bostedsadresse = Bostedsadresse(
+                StrukturertAdresse().apply { landkode = "CH" }, null, null, null, null,
+                null,
+                false
+            );
+        }
+        mottatteOpplysningerData.apply {
+            overgangsregelbestemmelser.add(Overgangsregelbestemmelser.FO_1408_1971_ART14A_2);
+            overgangsregelbestemmelser.add(Overgangsregelbestemmelser.FO_1408_1971_ART14_2_B)
         }
         every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
             .answers {
