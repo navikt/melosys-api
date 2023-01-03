@@ -62,8 +62,8 @@ class UtbetaldataRestService(
         }
     }
 
-    fun erTomEldreEnnTreAar(fnr: String, fom: LocalDate, tom: LocalDate?): Boolean {
-        return (tom != null && tom.isBefore(LocalDate.now().minusYears(3)))
+    fun erTomEldreEnnTreAar(fnr: String, fom: LocalDate, tom: LocalDate): Boolean {
+        return (tom.isBefore(LocalDate.now().minusYears(3)))
     }
 
     private fun fjernYtelserFraUtbetalingerSomIkkeErBarnetrygd(response: List<no.nav.melosys.integrasjon.utbetaling.Utbetaling>): List<no.nav.melosys.integrasjon.utbetaling.Utbetaling> {
