@@ -72,6 +72,7 @@ class RegisteropplysningerServiceTest {
 
     @BeforeEach
     public void setUp() throws Exception {
+        unleash.enableAll();
         registeropplysningerService = new RegisteropplysningerService(persondataFasade, medlPeriodeService, eregFasade, aaregFasade, behandlingService,
             sobService, inntektService, utbetaldataService, saksopplysningerService, registeropplysningerPeriodeFactory, unleash, utbetaldataRestService);
         when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(AKTØR_ID);
@@ -79,7 +80,7 @@ class RegisteropplysningerServiceTest {
         when(aaregFasade.finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.ARBFORH));
         when(medlPeriodeService.hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.MEDL));
         when(inntektService.hentInntektListe(anyString(), anyYearMonth(), anyYearMonth())).thenReturn(lagSaksopplysning(SaksopplysningType.INNTK));
-        when(utbetaldataService.hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.UTBETAL));
+        when(utbetaldataRestService.hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.UTBETAL));
         when(eregFasade.hentOrganisasjon(anyString())).thenReturn(lagSaksopplysning(SaksopplysningType.ORG));
         when(sobService.finnSakOgBehandlingskjedeListe(anyString())).thenReturn(lagSaksopplysning(SaksopplysningType.SOB_SAK));
 
@@ -117,7 +118,7 @@ class RegisteropplysningerServiceTest {
         verify(medlPeriodeService).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
         verify(eregFasade).hentOrganisasjon(anyString());
         verify(sobService).finnSakOgBehandlingskjedeListe(AKTØR_ID);
-        verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
+        verify(utbetaldataRestService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
     }
 
     @Test
@@ -157,7 +158,7 @@ class RegisteropplysningerServiceTest {
 
         verify(medlPeriodeService).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
         verify(sobService).finnSakOgBehandlingskjedeListe(AKTØR_ID);
-        verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
+        verify(utbetaldataRestService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
     }
 
     @Test
@@ -216,7 +217,7 @@ class RegisteropplysningerServiceTest {
             .saksopplysningTyper(saksopplysningstyper().utbetalingsopplysninger().build())
             .build());
 
-        verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), any(), any());
+        verify(utbetaldataRestService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
         verify(behandlingService).lagre(any(Behandling.class));
     }
 
