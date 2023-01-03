@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.utbetaldata.utbetaling
+package no.nav.melosys.integrasjon.utbetaling
 
 data class UtbetalingRequest(
     val ident: String,

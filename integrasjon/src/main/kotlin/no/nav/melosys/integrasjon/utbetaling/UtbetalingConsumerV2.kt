@@ -1,6 +1,5 @@
 package no.nav.melosys.integrasjon.utbetaling
 
-import no.nav.melosys.integrasjon.utbetaldata.utbetaling.UtbetalingRequest
 import org.springframework.http.MediaType
 import org.springframework.retry.annotation.Retryable
 import org.springframework.web.reactive.function.client.WebClient

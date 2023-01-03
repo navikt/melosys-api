@@ -1,6 +1,6 @@
 package no.nav.melosys.melosysmock.utbetal
 
-import no.nav.melosys.integrasjon.utbetaldata.utbetaling.UtbetalingRequest
+import no.nav.melosys.integrasjon.utbetaling.UtbetalingRequest
 import no.nav.melosys.integrasjon.utbetaling.Utbetaling
 import no.nav.melosys.integrasjon.utbetaling.Ytelse
 import no.nav.melosys.integrasjon.utbetaling.Ytelsesperiode

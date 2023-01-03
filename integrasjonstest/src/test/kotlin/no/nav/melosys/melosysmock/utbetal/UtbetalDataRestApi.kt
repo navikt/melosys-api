@@ -1,6 +1,6 @@
 package no.nav.melosys.melosysmock.utbetal
 
-import no.nav.melosys.integrasjon.utbetaldata.utbetaling.UtbetalingRequest
+import no.nav.melosys.integrasjon.utbetaling.UtbetalingRequest
 import no.nav.melosys.integrasjon.utbetaling.Utbetaling
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.web.bind.annotation.*

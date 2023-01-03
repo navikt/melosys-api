@@ -2,15 +2,14 @@ package no.nav.melosys.integrasjon.utbetaldata
 
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
-import no.nav.melosys.integrasjon.utbetaldata.utbetaling.Periode
-import no.nav.melosys.integrasjon.utbetaldata.utbetaling.UtbetalingRequest
+import no.nav.melosys.integrasjon.utbetaling.Periode
+import no.nav.melosys.integrasjon.utbetaling.UtbetalingRequest
 import no.nav.melosys.integrasjon.utbetaling.UtbetalingConsumerProducerV2
 import no.nav.melosys.integrasjon.utbetaling.UtbetalingConsumerV2
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client

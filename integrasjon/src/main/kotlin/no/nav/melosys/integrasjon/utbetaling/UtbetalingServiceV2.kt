@@ -11,7 +11,6 @@ import no.nav.melosys.domain.dokument.utbetaling.Utbetaling
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
 import no.nav.melosys.domain.dokument.utbetaling.Ytelse
 import no.nav.melosys.exception.TekniskException
-import no.nav.melosys.integrasjon.utbetaldata.utbetaling.UtbetalingRequest
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.function.Consumer
@@ -26,9 +25,9 @@ class UtbetalingServiceV2(
         objectMapper.registerModule(JavaTimeModule())
     }
 
-    fun hentSaksopplysningForUtbetaling(fnr: String, fom: LocalDate, tom: LocalDate?): Saksopplysning {
+    fun hentSaksopplysningForUtbetaling(fnr: String, fom: LocalDate, tom: LocalDate): Saksopplysning {
         val utbetalingRequest = UtbetalingRequest(fnr,
-            no.nav.melosys.integrasjon.utbetaldata.utbetaling.Periode(fom.toString(), tom.toString()),
+            Periode(fom.toString(), tom.toString()),
             "UTBETALINGSPERIODE",
             "RETTIGHETSHAVER")
 
@@ -46,7 +45,7 @@ class UtbetalingServiceV2(
                         ytelser = it.ytelseListe.map {
                             Ytelse().apply {
                                 type = it.ytelsestype
-                                periode = Periode(it.ytelsesperiode!!.fom, it.ytelsesperiode!!.tom)
+                                periode = Periode(LocalDate.parse(it.ytelsesperiode.fom), LocalDate.parse(it.ytelsesperiode.tom))
                             }
                         }
                     }

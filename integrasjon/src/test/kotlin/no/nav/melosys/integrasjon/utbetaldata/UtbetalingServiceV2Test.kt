@@ -13,7 +13,7 @@ import io.mockk.mockk
 import no.nav.melosys.domain.SaksopplysningKildesystem
 import no.nav.melosys.domain.dokument.utbetaling.Periode
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
-import no.nav.melosys.integrasjon.utbetaldata.utbetaling.UtbetalingRequest
+import no.nav.melosys.integrasjon.utbetaling.UtbetalingRequest
 import no.nav.melosys.integrasjon.utbetaling.*
 import no.nav.melosys.integrasjon.utbetaling.UtbetalingServiceV2
 import org.junit.jupiter.api.Test
@@ -33,7 +33,7 @@ class UtbetalingServiceV2Test {
         val tom = LocalDate.now().toString()
 
         val utbetalingRequest = UtbetalingRequest(FNR,
-            no.nav.melosys.integrasjon.utbetaldata.utbetaling.Periode(fom, tom),
+            Periode(fom, tom),
             "UTBETALINGSPERIODE",
             "RETTIGHETSHAVER")
 
@@ -78,7 +78,7 @@ class UtbetalingServiceV2Test {
         val tom = LocalDate.now().toString()
 
         val utbetalingRequest = UtbetalingRequest(FNR,
-            no.nav.melosys.integrasjon.utbetaldata.utbetaling.Periode(fom, tom),
+            Periode(fom, tom),
             "UTBETALINGSPERIODE",
             "RETTIGHETSHAVER")
 
@@ -103,7 +103,7 @@ class UtbetalingServiceV2Test {
         val tom = LocalDate.now().minusYears(3).minusDays(1)
 
         val utbetalingRequest = UtbetalingRequest(FNR,
-            no.nav.melosys.integrasjon.utbetaldata.utbetaling.Periode(fom.toString(), tom.toString()),
+            Periode(fom.toString(), tom.toString()),
             "UTBETALINGSPERIODE",
             "RETTIGHETSHAVER")
 
@@ -126,7 +126,7 @@ class UtbetalingServiceV2Test {
         val tom = LocalDate.now().minusDays(1)
 
         val utbetalingRequest = UtbetalingRequest(FNR,
-            no.nav.melosys.integrasjon.utbetaldata.utbetaling.Periode(fom.toString(), tom.toString()),
+            Periode(fom.toString(), tom.toString()),
             "UTBETALINGSPERIODE",
             "RETTIGHETSHAVER")
 
