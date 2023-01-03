@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Optional;
 
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
@@ -117,17 +118,6 @@ final class UfmKontroll {
         return null;
     }
 
-    static Kontroll_begrunnelser unntakForA003(UfmKontrollData kontrollData) {
-        if (!kontrollData.sedDokument().getLovvalgslandKode().equals(Landkoder.NO)) {
-            var lovvalgBestemmelse = kontrollData.sedDokument().getLovvalgBestemmelse();
-            var transitionalRule = !isEmpty(((SedGrunnlag) kontrollData.mottatteOpplysningerData().get()).overgangsregelbestemmelser.get(0).getBeskrivelse())
-            //TODO fiks imorgeng, overgangsregler er her ^
-            if (lovvalgBestemmelse != null
-                && EnumUtils.isValidEnum(Tilleggsbestemmelser_883_2004.class, lovvalgBestemmelse.getKode())) return Kontroll_begrunnelser.OVERGANGSREGEL_VALGT; //TODO oppdater til nytt kodeverk
-        }
-        return null;
-    }
-
     static Kontroll_begrunnelser overlappendeMedlemsperiodeMerEnn1Dag(UfmKontrollData kontrollData) {
         return harOverlappendeMedlemsperiodeMerEnn1DagFraSed(
             kontrollData.medlemskapDokument(), kontrollData.sedDokument().getLovvalgsperiode()) ?
@@ -154,6 +144,22 @@ final class UfmKontroll {
     static Kontroll_begrunnelser arbeidssted(UfmKontrollData kontrollData) {
         return ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(kontrollData.sedDokument()) ?
             Kontroll_begrunnelser.ARBEIDSSTED_UTENFOR_EOS : null;
+    }
+
+    static Kontroll_begrunnelser unntakForA003(UfmKontrollData kontrollData) {
+        return !UfmRegler.lovvalgslandErNorge(kontrollData.sedDokument().getLovvalgslandKode())
+            && (harTransitiveRegler(kontrollData.mottatteOpplysningerData()) || harOvergangsregler(kontrollData.sedDokument()))
+            ? Kontroll_begrunnelser.OVERGANGSREGEL_VALGT : null;
+    }
+
+    private static boolean harTransitiveRegler(Optional<MottatteOpplysningerData> optionalMottatteOpplysningerData) {
+        return optionalMottatteOpplysningerData.isPresent()
+            && !isEmpty(((SedGrunnlag) optionalMottatteOpplysningerData.get()).overgangsregelbestemmelser.get(0).getBeskrivelse());
+    }
+
+    private static boolean harOvergangsregler(SedDokument sedDokument) {
+        return sedDokument.getLovvalgBestemmelse().equals(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87_8)
+            || sedDokument.getLovvalgBestemmelse().equals(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A);
     }
 
     private static boolean harMottatteOpplysningerMedYtterligereInformasjon(Optional<MottatteOpplysningerData> optionalMottatteOpplysningerData) {
