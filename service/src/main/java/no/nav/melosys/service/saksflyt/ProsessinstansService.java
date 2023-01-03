@@ -420,7 +420,6 @@ public class ProsessinstansService {
     }
 
     @Transactional
-    //TODO oppretter prosessinstans for mottak sed
     public void opprettProsessinstansSedMottak(MelosysEessiMelding melosysEessiMelding) {
         Prosessinstans prosessinstans = prosessinstansForSedMottak(melosysEessiMelding);
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, melosysEessiMelding.getAktoerId());
