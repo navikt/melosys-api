@@ -5,6 +5,7 @@ import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKildesystem;
@@ -17,6 +18,7 @@ import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.inntk.InntektService;
 import no.nav.melosys.integrasjon.utbetaldata.UtbetaldataService;
+import no.nav.melosys.integrasjon.utbetaling.UtbetalingRestService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -61,13 +63,17 @@ class RegisteropplysningerServiceTest {
     private SaksopplysningerService saksopplysningerService;
     @Mock
     private RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory;
+    @Mock
+    private UtbetalingRestService utbetalingRestService;
+
+    private final FakeUnleash unleash = new FakeUnleash();
 
     private RegisteropplysningerService registeropplysningerService;
 
     @BeforeEach
     public void setUp() throws Exception {
         registeropplysningerService = new RegisteropplysningerService(persondataFasade, medlPeriodeService, eregFasade, aaregFasade, behandlingService,
-            sobService, inntektService, utbetaldataService, saksopplysningerService, registeropplysningerPeriodeFactory);
+            sobService, inntektService, utbetaldataService, saksopplysningerService, registeropplysningerPeriodeFactory, unleash, utbetalingRestService);
         when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(AKTØR_ID);
 
         when(aaregFasade.finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.ARBFORH));

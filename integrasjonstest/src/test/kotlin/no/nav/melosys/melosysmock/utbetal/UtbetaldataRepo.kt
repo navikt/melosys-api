@@ -1,9 +1,6 @@
 package no.nav.melosys.melosysmock.utbetal
 
-import no.nav.melosys.integrasjon.utbetaling.UtbetalingRequest
-import no.nav.melosys.integrasjon.utbetaling.Utbetaling
-import no.nav.melosys.integrasjon.utbetaling.Ytelse
-import no.nav.melosys.integrasjon.utbetaling.Ytelsesperiode
+import no.nav.melosys.integrasjon.utbetaling.*
 import java.time.LocalDate
 
 typealias UtbetaldataRepository = MutableList<Utbetaling>
@@ -16,19 +13,19 @@ object UtbetaldataRepo {
             Utbetaling(
                 ytelseListe = mutableListOf(
                     Ytelse(
-                        ytelsesperiode = Ytelsesperiode(
-                            LocalDate.now().minusMonths(10), LocalDate.now().minusMonths(9)
+                        ytelsesperiode = Periode(
+                            LocalDate.now().minusMonths(10).toString(), LocalDate.now().minusMonths(9).toString()
                         ),
                         ytelsestype = "BARNETRYGD"
                     ), Ytelse(
-                        ytelsesperiode = Ytelsesperiode(
-                            LocalDate.now().minusMonths(8), LocalDate.now().minusMonths(7)
+                        ytelsesperiode = Periode(
+                            LocalDate.now().minusMonths(8).toString(), LocalDate.now().minusMonths(7).toString()
                         ),
                         ytelsestype = "BARNETRYGD"
                     ),
                     Ytelse(
-                        ytelsesperiode = Ytelsesperiode(
-                            LocalDate.now().minusMonths(2), LocalDate.now().minusMonths(1)
+                        ytelsesperiode = Periode(
+                            LocalDate.now().minusMonths(2).toString(), LocalDate.now().minusMonths(1).toString()
                         ),
                         ytelsestype = "IKKE_BARNETRYGD"
                     )
@@ -38,8 +35,8 @@ object UtbetaldataRepo {
         Utbetaling(
             ytelseListe = mutableListOf(
                 Ytelse(
-                    ytelsesperiode = Ytelsesperiode(
-                        LocalDate.now().minusMonths(20), LocalDate.now().minusMonths(10)
+                    ytelsesperiode = Periode(
+                        LocalDate.now().minusMonths(20).toString(), LocalDate.now().minusMonths(10).toString()
                     ),
                     ytelsestype = "IKKE_BARNETRYGD"
                 )
@@ -48,8 +45,8 @@ object UtbetaldataRepo {
         Utbetaling(
             ytelseListe = mutableListOf(
                 Ytelse(
-                    ytelsesperiode = Ytelsesperiode(
-                        LocalDate.now().minusMonths(50), LocalDate.now().minusMonths(40)
+                    ytelsesperiode = Periode(
+                        LocalDate.now().minusMonths(50).toString(), LocalDate.now().minusMonths(40).toString()
                     ),
                     ytelsestype = "BARNETRYGD"
                 )

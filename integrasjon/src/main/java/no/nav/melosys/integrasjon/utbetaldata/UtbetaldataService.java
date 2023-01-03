@@ -14,8 +14,7 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.utbetaldata.utbetaling.*;
-import no.nav.melosys.integrasjon.utbetaling.UtbetalingServiceV2;
-import no.nav.melosys.integrasjon.utbetaling.Ytelse;
+import no.nav.melosys.integrasjon.utbetaling.UtbetalingRestService;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonIkkeTilgang;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonPeriodeIkkeGyldig;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonPersonIkkeFunnet;
@@ -32,22 +31,16 @@ public class UtbetaldataService implements UtbetaldataFasade {
 
     private final UtbetalingConsumer utbetalingConsumer;
     private final DokumentFactory dokumentFactory;
-    private final Unleash unleash;
-    private final UtbetalingServiceV2 utbetalingServiceV2;
 
-    public UtbetaldataService(UtbetalingConsumer utbetalingConsumer, DokumentFactory dokumentFactory, UtbetalingServiceV2 utbetalingServiceV2, Unleash unleash) {
+    public UtbetaldataService(UtbetalingConsumer utbetalingConsumer, DokumentFactory dokumentFactory) {
         this.utbetalingConsumer = utbetalingConsumer;
         this.dokumentFactory = dokumentFactory;
-        this.unleash = unleash;
-        this.utbetalingServiceV2 = utbetalingServiceV2;
     }
 
+    @Deprecated
     @Override
     public Saksopplysning hentUtbetalingerBarnetrygd(String fnr, LocalDate fom, LocalDate tom) {
-
-        if (!unleash.isEnabled("melosys.utbetalinger.v2")) {
             WSHentUtbetalingsinformasjonResponse response;
-
             if (erUtbetalingsDataStoettet(tom)) {
                 response = new WSHentUtbetalingsinformasjonResponse();
             } else {
@@ -55,12 +48,7 @@ public class UtbetaldataService implements UtbetaldataFasade {
                     hentUtbetalingsinformasjon(lagRequest(fnr, fom, tom))
                 );
             }
-
             return UtbetaldataMapper.tilSaksopplysning(response, lagXml(response).toString());
-
-        } else {
-            return utbetalingServiceV2.hentSaksopplysningForUtbetaling(fnr, fom, tom);
-        }
     }
 
     private WSHentUtbetalingsinformasjonResponse hentUtbetalingsinformasjon(WSHentUtbetalingsinformasjonRequest request) {

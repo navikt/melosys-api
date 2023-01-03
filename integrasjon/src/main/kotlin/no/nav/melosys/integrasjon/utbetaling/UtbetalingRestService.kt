@@ -16,7 +16,7 @@ import java.time.LocalDate
 import java.util.function.Consumer
 
 @Service
-class UtbetalingServiceV2(
+class UtbetalingRestService(
     private val utbetalingConsumerV2: UtbetalingConsumerV2,
     private val objectMapper: ObjectMapper
 ) {

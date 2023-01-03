@@ -15,17 +15,17 @@ import no.nav.melosys.domain.dokument.utbetaling.Periode
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
 import no.nav.melosys.integrasjon.utbetaling.UtbetalingRequest
 import no.nav.melosys.integrasjon.utbetaling.*
-import no.nav.melosys.integrasjon.utbetaling.UtbetalingServiceV2
+import no.nav.melosys.integrasjon.utbetaling.UtbetalingRestService
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class UtbetalingServiceV2Test {
+class UtbetalingRestServiceTest {
 
     private var mockRestConsumer = mockk<UtbetalingConsumerV2>()
     private val objectMapper = ObjectMapper().apply { registerModule(JavaTimeModule()) }
-    private val utbetaldataServiceV2: UtbetalingServiceV2 = UtbetalingServiceV2(mockRestConsumer, objectMapper)
+    private val utbetaldataServiceV2: UtbetalingRestService = UtbetalingRestService(mockRestConsumer, objectMapper)
 
     @Test
     fun hentUtbetalingerBarnetrygd_medTreff_verifiserSaksopplysning() {
