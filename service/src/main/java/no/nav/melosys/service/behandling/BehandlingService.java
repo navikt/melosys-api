@@ -402,6 +402,10 @@ public class BehandlingService {
     }
 
     public void oppdaterBehandlingsstatusHvisTilhørendeSaksbehandler(Behandling behandling, String saksbehandlerID) {
+        if (!unleash.isEnabled("melosys.MELOSYS-4175_oppdaterstatus")) {
+            endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
+            return;
+        }
         if (behandlingIDTilhørerSaksbehandlerID(behandling.getId(), saksbehandlerID)) {
             endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
         }
