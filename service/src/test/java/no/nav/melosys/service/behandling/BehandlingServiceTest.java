@@ -27,6 +27,9 @@ import no.nav.melosys.repository.MottatteOpplysningerRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.oppgave.dto.BehandlingDto;
+import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto;
+import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,6 +46,8 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -714,6 +719,68 @@ class BehandlingServiceTest {
 
         assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.UNDER_BEHANDLING);
         verify(behandlingRepository).save(behandling);
+    }
+
+    @Test
+    void behandlingIDTilhørerSaksbehandlerID_saksbehandlerErSattPåBehandlingID_forventTrue() {
+        Long behandlingID = 456L;
+        String saksbehandlerID = "saksbehandlerID";
+
+        BehandlingsoppgaveDto oppgave1 = new BehandlingsoppgaveDto();
+        var behandlingDto1 = new BehandlingDto();
+        behandlingDto1.setBehandlingID(123L);
+        oppgave1.setBehandling(behandlingDto1);
+
+        BehandlingsoppgaveDto oppgave2 = new BehandlingsoppgaveDto();
+        var behandlingDto2 = new BehandlingDto();
+        behandlingDto2.setBehandlingID(456L);
+        oppgave2.setBehandling(behandlingDto2);
+
+        BehandlingsoppgaveDto oppgave3 = new BehandlingsoppgaveDto();
+        var behandlingDto3 = new BehandlingDto();
+        behandlingDto3.setBehandlingID(789L);
+        oppgave3.setBehandling(behandlingDto3);
+
+        List<OppgaveDto> oppgaveDtoList = Arrays.asList(oppgave1, oppgave2, oppgave3);
+
+        when(oppgaveService.hentOppgaverMedAnsvarlig("saksbehandlerID")).thenReturn(oppgaveDtoList);
+
+
+        boolean behandlingIDTilhørerSaksbehandlerID = behandlingService.behandlingIDTilhørerSaksbehandlerID(behandlingID, saksbehandlerID);
+
+
+        assertTrue(behandlingIDTilhørerSaksbehandlerID);
+    }
+
+    @Test
+    void behandlingIDTilhørerSaksbehandlerID_saksbehandlerErIkkeSattPåBehandlingID_forventFalse() {
+        Long behandlingID = 123456L;
+        String saksbehandlerID = "saksbehandlerID";
+
+        BehandlingsoppgaveDto oppgave1 = new BehandlingsoppgaveDto();
+        var behandlingDto1 = new BehandlingDto();
+        behandlingDto1.setBehandlingID(123L);
+        oppgave1.setBehandling(behandlingDto1);
+
+        BehandlingsoppgaveDto oppgave2 = new BehandlingsoppgaveDto();
+        var behandlingDto2 = new BehandlingDto();
+        behandlingDto2.setBehandlingID(456L);
+        oppgave2.setBehandling(behandlingDto2);
+
+        BehandlingsoppgaveDto oppgave3 = new BehandlingsoppgaveDto();
+        var behandlingDto3 = new BehandlingDto();
+        behandlingDto3.setBehandlingID(789L);
+        oppgave3.setBehandling(behandlingDto3);
+
+        List<OppgaveDto> oppgaveDtoList = Arrays.asList(oppgave1, oppgave2, oppgave3);
+
+        when(oppgaveService.hentOppgaverMedAnsvarlig("saksbehandlerID")).thenReturn(oppgaveDtoList);
+
+
+        boolean behandlingIDTilhørerSaksbehandlerID = behandlingService.behandlingIDTilhørerSaksbehandlerID(behandlingID, saksbehandlerID);
+
+
+        assertFalse(behandlingIDTilhørerSaksbehandlerID);
     }
 
     @Test

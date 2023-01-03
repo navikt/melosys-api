@@ -1,5 +1,10 @@
 package no.nav.melosys.service.behandling;
 
+import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.*;
+
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.finn.unleash.Unleash;
@@ -17,6 +22,8 @@ import no.nav.melosys.repository.MottatteOpplysningerRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto;
+import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,11 +32,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.reflect.InvocationTargetException;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.*;
-
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.ARBEID_FLERE_LAND;
 import static no.nav.melosys.metrics.MetrikkerNavn.*;
@@ -37,6 +39,16 @@ import static no.nav.melosys.metrics.MetrikkerNavn.*;
 @Service
 public class BehandlingService {
     private static final Logger log = LoggerFactory.getLogger(BehandlingService.class);
+    private static final String FINNER_IKKE_BEHANDLING = "Finner ikke behandling med id ";
+
+    static {
+        Arrays.stream(Behandlingstema.values()).forEach(
+            b -> Metrics.counter(BEHANDLINGSTEMAER_OPPRETTET, TAG_TEMA, b.getKode())
+        );
+        Arrays.stream(Behandlingstyper.values()).forEach(
+            b -> Metrics.counter(BEHANDLINGSTYPER_OPPRETTET, TAG_TYPE, b.getKode())
+        );
+    }
 
     private final BehandlingRepository behandlingRepository;
     private final TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository;
@@ -48,16 +60,6 @@ public class BehandlingService {
     private final UtledMottaksdato utledMottaksdato;
     private final Unleash unleash;
     private final Counter behandlingerAvsluttet = Metrics.counter(BEHANDLINGER_AVSLUTTET);
-    private static final String FINNER_IKKE_BEHANDLING = "Finner ikke behandling med id ";
-
-    static {
-        Arrays.stream(Behandlingstema.values()).forEach(
-            b -> Metrics.counter(BEHANDLINGSTEMAER_OPPRETTET, TAG_TEMA, b.getKode())
-        );
-        Arrays.stream(Behandlingstyper.values()).forEach(
-            b -> Metrics.counter(BEHANDLINGSTYPER_OPPRETTET, TAG_TYPE, b.getKode())
-        );
-    }
 
     public BehandlingService(BehandlingRepository behandlingRepository,
                              TidligereMedlemsperiodeRepository tidligereMedlemsperiodeRepository,
@@ -270,7 +272,7 @@ public class BehandlingService {
             behandlingsreplika = replikerBehandlingUtenMottatteOpplysningerSaksopplysningerOgResultat(tidligsteInaktiveBehandling, behandlingstype);
             behandlingsresultatService.lagreNyttBehandlingsresultat(behandlingsreplika);
         } catch (InvocationTargetException | NoSuchMethodException | InstantiationException |
-            IllegalAccessException e) {
+                 IllegalAccessException e) {
             throw new TekniskException(String.format("Klarte ikke replikere behandling %s for fagsak %s",
                 tidligsteInaktiveBehandling.getId(), tidligsteInaktiveBehandling.getFagsak().getSaksnummer()), e);
         }
@@ -307,7 +309,7 @@ public class BehandlingService {
             behandlingsreplika = replikerBehandling(tidligsteInaktiveBehandling, behandlingstype);
             behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika);
         } catch (InvocationTargetException | NoSuchMethodException | InstantiationException |
-            IllegalAccessException e) {
+                 IllegalAccessException e) {
             throw new TekniskException(String.format("Klarte ikke replikere behandling %s for fagsak %s",
                 tidligsteInaktiveBehandling.getId(), tidligsteInaktiveBehandling.getFagsak().getSaksnummer()), e);
         }
@@ -399,11 +401,26 @@ public class BehandlingService {
         return behandlingRepository.findAllByStatus(behandlingsstatus);
     }
 
-    public void endreBehandlingsstatusFraOpprettetTilUnderBehandling(Behandling aktivBehandling) {
+    public void oppdaterBehandlingsstatusHvisTilhørendeSaksbehandler(Behandling behandling, String saksbehandlerID) {
+        if (behandlingIDTilhørerSaksbehandlerID(behandling.getId(), saksbehandlerID)) {
+            endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
+        }
+    }
+
+    void endreBehandlingsstatusFraOpprettetTilUnderBehandling(Behandling aktivBehandling) {
         if (aktivBehandling.getStatus() == Behandlingsstatus.OPPRETTET) {
             aktivBehandling.setStatus(UNDER_BEHANDLING);
             behandlingRepository.save(aktivBehandling);
         }
+    }
+
+    boolean behandlingIDTilhørerSaksbehandlerID(Long behandlingID, String saksbehandlerID) {
+        List<OppgaveDto> oppgaveDtoList = oppgaveService.hentOppgaverMedAnsvarlig(saksbehandlerID);
+        return oppgaveDtoList
+            .stream()
+            .filter(BehandlingsoppgaveDto.class::isInstance)
+            .map(BehandlingsoppgaveDto.class::cast)
+            .anyMatch(behandlingsoppgaveDto -> Objects.equals(behandlingsoppgaveDto.getBehandling().getBehandlingID(), behandlingID));
     }
 
     public void oppdaterStatusOgSvarfrist(Behandling behandling, Behandlingsstatus behandlingsstatus, Instant svarfristDato) {
