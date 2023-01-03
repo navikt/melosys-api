@@ -18,7 +18,7 @@ import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.inntk.InntektService;
 import no.nav.melosys.integrasjon.utbetaldata.UtbetaldataService;
-import no.nav.melosys.integrasjon.utbetaling.UtbetalingRestService;
+import no.nav.melosys.integrasjon.utbetaling.UtbetaldataRestService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 import no.nav.melosys.service.medl.MedlPeriodeService;
@@ -61,7 +61,7 @@ public class RegisteropplysningerService {
     private final SaksopplysningerService saksopplysningerService;
     private final RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory;
     private final Unleash unleash;
-    private final UtbetalingRestService utbetalingRestService;
+    private final UtbetaldataRestService utbetaldataRestService;
 
     public RegisteropplysningerService(PersondataFasade persondataFasade,
                                        MedlPeriodeService medlPeriodeService,
@@ -73,7 +73,7 @@ public class RegisteropplysningerService {
                                        SaksopplysningerService saksopplysningerService,
                                        RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory,
                                        Unleash unleash,
-                                       UtbetalingRestService utbetalingRestService) {
+                                       UtbetaldataRestService utbetaldataRestService) {
         this.persondataFasade = persondataFasade;
         this.medlPeriodeService = medlPeriodeService;
         this.eregFasade = eregFasade;
@@ -85,7 +85,7 @@ public class RegisteropplysningerService {
         this.saksopplysningerService = saksopplysningerService;
         this.registeropplysningerPeriodeFactory = registeropplysningerPeriodeFactory;
         this.unleash = unleash;
-        this.utbetalingRestService = utbetalingRestService;
+        this.utbetaldataRestService = utbetaldataRestService;
     }
 
     @Transactional
@@ -191,7 +191,7 @@ public class RegisteropplysningerService {
 
         RegisteropplysningerPeriodeFactory.Periode periodeForYtelser = registeropplysningerPeriodeFactory.hentPeriodeForInntekt(fom, tom, behandling);
         Saksopplysning saksopplysning = unleash.isEnabled("melosys.utbetalinger.v2") ?
-            utbetalingRestService.hentSaksopplysningForUtbetaling(registeropplysningerRequest.getFnr(), periodeForYtelser.fom.atDay(1), periodeForYtelser.tom.atDay(1))
+            utbetaldataRestService.hentUtbetalingerBarnetrygd(registeropplysningerRequest.getFnr(), periodeForYtelser.fom.atDay(1), periodeForYtelser.tom.atDay(1))
             : utbetaldataService.hentUtbetalingerBarnetrygd(registeropplysningerRequest.getFnr(), periodeForYtelser.fom.atDay(1), periodeForYtelser.tom.atDay(1));
 
         return List.of(saksopplysning);

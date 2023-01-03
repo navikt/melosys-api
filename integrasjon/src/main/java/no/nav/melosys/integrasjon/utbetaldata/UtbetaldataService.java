@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import javax.xml.bind.JAXBException;
 import javax.xml.ws.WebServiceException;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.exception.FunksjonellException;
@@ -14,7 +13,6 @@ import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
 import no.nav.melosys.integrasjon.utbetaldata.utbetaling.*;
-import no.nav.melosys.integrasjon.utbetaling.UtbetalingRestService;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonIkkeTilgang;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonPeriodeIkkeGyldig;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonPersonIkkeFunnet;

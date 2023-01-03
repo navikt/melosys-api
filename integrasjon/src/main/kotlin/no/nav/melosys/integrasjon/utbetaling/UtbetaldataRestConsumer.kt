@@ -5,7 +5,7 @@ import org.springframework.retry.annotation.Retryable
 import org.springframework.web.reactive.function.client.WebClient
 
 @Retryable
-open class UtbetalingConsumerV2(private val webClient: WebClient) {
+open class UtbetaldataRestConsumer(private val webClient: WebClient) {
 
     open fun hentUtbetalingsInformasjon(request: UtbetalingRequest) = webClient.post()
         .accept(MediaType.APPLICATION_JSON)

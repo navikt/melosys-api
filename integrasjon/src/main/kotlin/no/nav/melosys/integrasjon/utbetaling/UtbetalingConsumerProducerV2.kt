@@ -20,7 +20,7 @@ class UtbetalingConsumerProducerV2(
     @Bean
     fun utbetalingConsumerV2(
         webClientBuilder: WebClient.Builder, correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
-    ) = UtbetalingConsumerV2(
+    ) = UtbetaldataRestConsumer(
         webClientBuilder
             .baseUrl(url)
             .filter(headerFilter())

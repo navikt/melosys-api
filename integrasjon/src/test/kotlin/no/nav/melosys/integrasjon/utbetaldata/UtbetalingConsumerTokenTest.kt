@@ -11,7 +11,7 @@ import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.melosys.integrasjon.utbetaling.Periode
 import no.nav.melosys.integrasjon.utbetaling.UtbetalingRequest
 import no.nav.melosys.integrasjon.utbetaling.UtbetalingConsumerProducerV2
-import no.nav.melosys.integrasjon.utbetaling.UtbetalingConsumerV2
+import no.nav.melosys.integrasjon.utbetaling.UtbetaldataRestConsumer
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -38,7 +38,7 @@ import java.time.LocalDate
 @EnableOAuth2Client
 @ActiveProfiles("wiremock-test")
 class UtbetalingConsumerTokenTest(
-    @Autowired private val utbetalingRestConsumer: UtbetalingConsumerV2,
+    @Autowired private val utbetalingRestConsumer: UtbetaldataRestConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
     @Autowired oAuthMockServer: OAuthMockServer

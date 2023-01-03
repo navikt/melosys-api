@@ -16,8 +16,8 @@ import java.time.LocalDate
 import java.util.function.Consumer
 
 @Service
-class UtbetalingRestService(
-    private val utbetalingConsumerV2: UtbetalingConsumerV2,
+class UtbetaldataRestService(
+    private val utbetaldataRestConsumer: UtbetaldataRestConsumer,
     private val objectMapper: ObjectMapper
 ) {
 
@@ -25,7 +25,7 @@ class UtbetalingRestService(
         objectMapper.registerModule(JavaTimeModule())
     }
 
-    fun hentSaksopplysningForUtbetaling(fnr: String, fom: LocalDate, tom: LocalDate): Saksopplysning {
+    fun hentUtbetalingerBarnetrygd(fnr: String, fom: LocalDate, tom: LocalDate): Saksopplysning {
         val utbetalingRequest = UtbetalingRequest(fnr,
             Periode(fom.toString(), tom.toString()),
             "UTBETALINGSPERIODE",
@@ -34,7 +34,7 @@ class UtbetalingRestService(
         val utbetalingResponse = if (erTomEldreEnnTreAar(fnr, fom, tom))
             emptyList()
         else
-            fjernYtelserFraUtbetalingerSomIkkeErBarnetrygd(utbetalingConsumerV2.hentUtbetalingsInformasjon(utbetalingRequest))
+            fjernYtelserFraUtbetalingerSomIkkeErBarnetrygd(utbetaldataRestConsumer.hentUtbetalingsInformasjon(utbetalingRequest))
 
         return Saksopplysning().apply {
             type = SaksopplysningType.UTBETAL

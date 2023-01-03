@@ -18,7 +18,7 @@ import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.inntk.InntektService;
 import no.nav.melosys.integrasjon.utbetaldata.UtbetaldataService;
-import no.nav.melosys.integrasjon.utbetaling.UtbetalingRestService;
+import no.nav.melosys.integrasjon.utbetaling.UtbetaldataRestService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -64,7 +64,7 @@ class RegisteropplysningerServiceTest {
     @Mock
     private RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory;
     @Mock
-    private UtbetalingRestService utbetalingRestService;
+    private UtbetaldataRestService utbetaldataRestService;
 
     private final FakeUnleash unleash = new FakeUnleash();
 
@@ -73,7 +73,7 @@ class RegisteropplysningerServiceTest {
     @BeforeEach
     public void setUp() throws Exception {
         registeropplysningerService = new RegisteropplysningerService(persondataFasade, medlPeriodeService, eregFasade, aaregFasade, behandlingService,
-            sobService, inntektService, utbetaldataService, saksopplysningerService, registeropplysningerPeriodeFactory, unleash, utbetalingRestService);
+            sobService, inntektService, utbetaldataService, saksopplysningerService, registeropplysningerPeriodeFactory, unleash, utbetaldataRestService);
         when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(AKTØR_ID);
 
         when(aaregFasade.finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.ARBFORH));
