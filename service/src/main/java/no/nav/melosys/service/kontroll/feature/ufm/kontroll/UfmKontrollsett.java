@@ -62,8 +62,7 @@ public class UfmKontrollsett {
         UfmKontroll::personBosattINorge,
         UfmKontroll::utbetaltYtelserFraOffentligIPeriode,
         UfmKontroll::utbetaltBarnetrygdytelser,
-        UfmKontroll::arbeidssted,
-        UfmKontroll::unntakForA003
+        UfmKontroll::arbeidssted
         );
 
     private static final Set<Function<UfmKontrollData, Kontroll_begrunnelser>> REGELSETT_A009 = Set.of(
