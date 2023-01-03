@@ -1,19 +1,15 @@
 package no.nav.melosys.service.kontroll.feature.ufm.kontroll;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Optional;
 
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
 import no.nav.melosys.service.kontroll.feature.ufm.data.UfmKontrollData;
 import no.nav.melosys.service.kontroll.regler.*;
-import org.apache.commons.lang3.EnumUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -154,12 +150,13 @@ final class UfmKontroll {
 
     private static boolean harTransitiveRegler(Optional<MottatteOpplysningerData> optionalMottatteOpplysningerData) {
         return optionalMottatteOpplysningerData.isPresent()
-            && !isEmpty(((SedGrunnlag) optionalMottatteOpplysningerData.get()).overgangsregelbestemmelser.get(0).getBeskrivelse());
+            && !((SedGrunnlag) optionalMottatteOpplysningerData.get()).overgangsregelbestemmelser.isEmpty();
     }
 
     private static boolean harOvergangsregler(SedDokument sedDokument) {
-        return sedDokument.getLovvalgBestemmelse().equals(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87_8)
-            || sedDokument.getLovvalgBestemmelse().equals(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A);
+        return sedDokument.getLovvalgBestemmelse() != null
+            && (sedDokument.getLovvalgBestemmelse().equals(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87_8)
+                || sedDokument.getLovvalgBestemmelse().equals(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A));
     }
 
     private static boolean harMottatteOpplysningerMedYtterligereInformasjon(Optional<MottatteOpplysningerData> optionalMottatteOpplysningerData) {
