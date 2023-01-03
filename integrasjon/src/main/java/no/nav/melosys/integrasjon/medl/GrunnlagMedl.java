@@ -51,8 +51,6 @@ public enum GrunnlagMedl {
     CAN_ART10("Canada_10"),
     CAN_ART11("Canada_11");
 
-    //TODO legg til koder
-
     private final String kode;
 
     GrunnlagMedl(String kode) {
