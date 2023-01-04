@@ -14,6 +14,9 @@ import no.nav.melosys.exception.TekniskException
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.function.Consumer
+import mu.KotlinLogging
+
+private val log = KotlinLogging.logger { }
 
 @Service
 class UtbetaldataRestService(
@@ -67,6 +70,8 @@ class UtbetaldataRestService(
     }
 
     private fun fjernYtelserFraUtbetalingerSomIkkeErBarnetrygd(response: List<no.nav.melosys.integrasjon.utbetaling.Utbetaling>): List<no.nav.melosys.integrasjon.utbetaling.Utbetaling> {
+        log.info { "Henter utbetalinger for barnetrygd" }
+        log.info { response }
         response.forEach(Consumer { utbetaling: no.nav.melosys.integrasjon.utbetaling.Utbetaling ->
             utbetaling.ytelseListe
                 .removeIf { ytelse: no.nav.melosys.integrasjon.utbetaling.Ytelse -> ytelse.ytelsestype != BARNETRYGD }
