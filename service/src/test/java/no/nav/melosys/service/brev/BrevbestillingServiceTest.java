@@ -28,6 +28,7 @@ import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
@@ -69,6 +70,8 @@ class BrevbestillingServiceTest {
     private BehandlingService mockBehandlingService;
     @Mock
     private DokumentNavnService mockDokumentNavnService;
+    @Mock
+    private UtenlandskMyndighetService utenlandskMyndighetService;
 
     private final FakeUnleash unleash = new FakeUnleash();
     private final Behandling behandling = lagBehandling();

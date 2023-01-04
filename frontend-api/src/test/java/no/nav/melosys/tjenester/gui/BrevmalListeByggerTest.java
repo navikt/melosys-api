@@ -14,9 +14,13 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.BrevbestillingService;
 import no.nav.melosys.service.brev.DokumentNavnService;
@@ -53,6 +57,7 @@ class BrevmalListeByggerTest {
     private KontaktopplysningService mockKontaktopplysningService;
     @Mock
     private DokumentNavnService mockDokumentNavnService;
+    private UtenlandskMyndighetService utenlandskMyndighetService;
 
     private final FakeUnleash unleash = new FakeUnleash();
     private BrevmalListeBygger brevmalListeBygger;
@@ -64,7 +69,7 @@ class BrevmalListeByggerTest {
         BrevbestillingService brevbestillingService = new BrevbestillingService(mockBrevmottakerService,
             mockDokServiceFasade, mockBehandlingService, mockEregFasade, mockKontaktopplysningService,
             mockPersondataFasade, mockDokumentNavnService, utenlandskMyndighetService, unleash);
-        brevmalListeBygger = new BrevmalListeBygger(brevbestillingService, mockBehandlingService, utenlandskMyndighetService, unleash);
+        brevmalListeBygger = new BrevmalListeBygger(brevbestillingService, mockBehandlingService, unleash);
     }
 
     @Test
@@ -553,6 +558,11 @@ class BrevmalListeByggerTest {
     void byggBrevmalDtoListe_trygdeavtale_lagerRiktigeTittelValgForFritekstbrev() {
         Behandling behandlingTrygdeavtale = lagBehandling(Behandlingstyper.FØRSTEGANG);
         behandlingTrygdeavtale.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
+        mottatteOpplysningerData.soeknadsland = new Soeknadsland(Collections.singletonList("GB"), false);
+        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
+        behandlingTrygdeavtale.setMottatteOpplysninger(mottatteOpplysninger);
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
@@ -560,14 +570,16 @@ class BrevmalListeByggerTest {
         List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
-        assertThat(tilgjengeligeMaler).hasSize(3);
+        assertThat(tilgjengeligeMaler).hasSize(4);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(1).getValg().getValgAlternativer())
-            .hasSize(2)
+            .hasSize(3)
             .flatExtracting(
                 FeltvalgAlternativDto::getKode,
                 FeltvalgAlternativDto::isVisFelt)
             .containsExactly(
                 HENVENDELSE_OM_MEDLEMSKAP.getKode(),
+                false,
+                ENGELSK_FRITEKSTBREV.getKode(),
                 false,
                 FRITEKST.getKode(),
                 true);
@@ -577,13 +589,18 @@ class BrevmalListeByggerTest {
     void byggBrevmalDtoListe_trygdeavtale_lagerRiktigeDistribusjonstyperForFritekstbrev() {
         Behandling behandlingTrygdeavtale = lagBehandling(Behandlingstyper.FØRSTEGANG);
         behandlingTrygdeavtale.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
+        mottatteOpplysningerData.soeknadsland = new Soeknadsland(Collections.singletonList("GB"), false);
+        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
+        behandlingTrygdeavtale.setMottatteOpplysninger(mottatteOpplysninger);
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
         List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
-        assertThat(tilgjengeligeMaler).hasSize(3);
+        assertThat(tilgjengeligeMaler).hasSize(4);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
             .hasSize(3)
             .flatExtracting(
@@ -709,6 +726,11 @@ class BrevmalListeByggerTest {
         unleash.disable("melosys.behandle_alle_saker");
         Behandling behandlingTrygdeavtale = lagBehandling(Behandlingstyper.SOEKNAD);
         behandlingTrygdeavtale.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
+        mottatteOpplysningerData.soeknadsland = new Soeknadsland(Collections.singletonList("GB"), false);
+        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
+        behandlingTrygdeavtale.setMottatteOpplysninger(mottatteOpplysninger);
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
@@ -716,14 +738,16 @@ class BrevmalListeByggerTest {
         List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
-        assertThat(tilgjengeligeMaler).hasSize(3);
+        assertThat(tilgjengeligeMaler).hasSize(4);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(1).getValg().getValgAlternativer())
-            .hasSize(2)
+            .hasSize(3)
             .flatExtracting(
                 FeltvalgAlternativDto::getKode,
                 FeltvalgAlternativDto::isVisFelt)
             .containsExactly(
                 HENVENDELSE_OM_MEDLEMSKAP.getKode(),
+                false,
+                ENGELSK_FRITEKSTBREV.getKode(),
                 false,
                 FRITEKST.getKode(),
                 true);
@@ -734,13 +758,18 @@ class BrevmalListeByggerTest {
         unleash.disable("melosys.behandle_alle_saker");
         Behandling behandlingTrygdeavtale = lagBehandling(Behandlingstyper.SOEKNAD);
         behandlingTrygdeavtale.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
+        mottatteOpplysningerData.soeknadsland = new Soeknadsland(Collections.singletonList("GB"), false);
+        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
+        behandlingTrygdeavtale.setMottatteOpplysninger(mottatteOpplysninger);
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
         when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
         List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
-        assertThat(tilgjengeligeMaler).hasSize(3);
+        assertThat(tilgjengeligeMaler).hasSize(4);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
             .hasSize(3)
             .flatExtracting(

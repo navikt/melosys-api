@@ -4,9 +4,7 @@ import java.util.*;
 
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
@@ -15,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.brev.Distribusjonstype;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.BrevAdresse;
 import no.nav.melosys.service.brev.BrevbestillingService;
@@ -24,7 +21,8 @@ import org.springframework.stereotype.Component;
 
 import static java.util.Arrays.asList;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
-import static no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland.*;
+import static no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland.GB;
+import static no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland.JE;
 
 @Component
 public class BrevmalListeBygger {
@@ -289,9 +287,12 @@ public class BrevmalListeBygger {
             case FTRL:
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.CONFIRMATION_OF_MEMBERSHIP));
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.BEKREFTELSE_PÅ_MEDLEMSKAP));
+                valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.HENVENDELSE_OM_MEDLEMSKAP));
+                break;
             case TRYGDEAVTALE:
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.HENVENDELSE_OM_MEDLEMSKAP));
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.ENGELSK_FRITEKSTBREV));
+                break;
         }
 
         valgAlternativer.add(fritekstFeltvalgAlternativDto);
