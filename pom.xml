@@ -536,7 +536,7 @@
                 <classifier>jaxb-sources</classifier>
                 <version>${melosys.brev.version}</version>
             </dependency>
-            <!-- Utbetaling -->
+            <!-- Utbetaldata -->
             <dependency>
                 <groupId>no.nav.tjenestespesifikasjoner</groupId>
                 <artifactId>utbetaling-tjenestespesifikasjon</artifactId>

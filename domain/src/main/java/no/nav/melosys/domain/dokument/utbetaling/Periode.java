@@ -17,6 +17,14 @@ public class Periode implements ErPeriode {
         this.tom = tom;
     }
 
+    public void setFom(LocalDate fom) {
+        this.fom = fom;
+    }
+
+    public void setTom(LocalDate tom) {
+        this.tom = tom;
+    }
+
     @Override
     public LocalDate getFom() {
         return fom;

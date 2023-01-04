@@ -12,7 +12,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.integrasjon.KonverteringsUtils;
-import no.nav.melosys.integrasjon.utbetaldata.utbetaling.UtbetalingConsumer;
+import no.nav.melosys.integrasjon.utbetaldata.utbetaling.*;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonIkkeTilgang;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonPeriodeIkkeGyldig;
 import no.nav.tjeneste.virksomhet.utbetaling.v1.HentUtbetalingsinformasjonPersonIkkeFunnet;
@@ -35,19 +35,18 @@ public class UtbetaldataService implements UtbetaldataFasade {
         this.dokumentFactory = dokumentFactory;
     }
 
+    @Deprecated
     @Override
     public Saksopplysning hentUtbetalingerBarnetrygd(String fnr, LocalDate fom, LocalDate tom) {
-        WSHentUtbetalingsinformasjonResponse response;
-
-        if (erUtbetalingsDataStøttet(tom)) {
-            response = new WSHentUtbetalingsinformasjonResponse();
-        } else {
-            response = filtrerYtelserAvTypeBarnetrygd(
-                hentUtbetalingsinformasjon(lagRequest(fnr, fom, tom))
-            );
-        }
-
-        return UtbetaldataMapper.tilSaksopplysning(response, lagXml(response).toString());
+            WSHentUtbetalingsinformasjonResponse response;
+            if (erUtbetalingsDataStoettet(tom)) {
+                response = new WSHentUtbetalingsinformasjonResponse();
+            } else {
+                response = filtrerYtelserAvTypeBarnetrygd(
+                    hentUtbetalingsinformasjon(lagRequest(fnr, fom, tom))
+                );
+            }
+            return UtbetaldataMapper.tilSaksopplysning(response, lagXml(response).toString());
     }
 
     private WSHentUtbetalingsinformasjonResponse hentUtbetalingsinformasjon(WSHentUtbetalingsinformasjonRequest request) {
@@ -132,7 +131,7 @@ public class UtbetaldataService implements UtbetaldataFasade {
             && ytelse.getYtelsestype().getValue().trim().equalsIgnoreCase(BARNETRYGD);
     }
 
-    private boolean erUtbetalingsDataStøttet(LocalDate tom) {
+    private boolean erUtbetalingsDataStoettet(LocalDate tom) {
         return tom != null && datoErEldreEnnTreÅr(tom);
     }
 
