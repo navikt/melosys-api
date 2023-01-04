@@ -27,9 +27,7 @@ import no.nav.melosys.repository.MottatteOpplysningerRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.oppgave.dto.BehandlingDto;
 import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto;
-import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -722,65 +720,28 @@ class BehandlingServiceTest {
     }
 
     @Test
-    void behandlingIDTilhørerSaksbehandlerID_saksbehandlerErSattPåBehandlingID_forventTrue() {
-        Long behandlingID = 456L;
-        String saksbehandlerID = "saksbehandlerID";
+    void behandlingMedSaksnummerTilhørerSaksbehandlerID_saksbehandlerErSattPåOppgaven_forventTrue() {
+        String saksnummer = "MEL-1234";
+        String saksbehandlerId = "Z123456";
+        BehandlingsoppgaveDto oppgave = new BehandlingsoppgaveDto();
+        oppgave.setAnsvarligID(saksbehandlerId);
+        when(oppgaveService.hentÅpenOppgaveDtoMedFagsaksnummer(saksnummer)).thenReturn(oppgave);
 
-        BehandlingsoppgaveDto oppgave1 = new BehandlingsoppgaveDto();
-        var behandlingDto1 = new BehandlingDto();
-        behandlingDto1.setBehandlingID(123L);
-        oppgave1.setBehandling(behandlingDto1);
+        boolean result = behandlingService.behandlingMedSaksnummerTilhørerSaksbehandlerID(saksnummer, saksbehandlerId);
 
-        BehandlingsoppgaveDto oppgave2 = new BehandlingsoppgaveDto();
-        var behandlingDto2 = new BehandlingDto();
-        behandlingDto2.setBehandlingID(456L);
-        oppgave2.setBehandling(behandlingDto2);
-
-        BehandlingsoppgaveDto oppgave3 = new BehandlingsoppgaveDto();
-        var behandlingDto3 = new BehandlingDto();
-        behandlingDto3.setBehandlingID(789L);
-        oppgave3.setBehandling(behandlingDto3);
-
-        List<OppgaveDto> oppgaveDtoList = Arrays.asList(oppgave1, oppgave2, oppgave3);
-
-        when(oppgaveService.hentOppgaverMedAnsvarlig("saksbehandlerID")).thenReturn(oppgaveDtoList);
-
-
-        boolean behandlingIDTilhørerSaksbehandlerID = behandlingService.behandlingIDTilhørerSaksbehandlerID(behandlingID, saksbehandlerID);
-
-
-        assertTrue(behandlingIDTilhørerSaksbehandlerID);
+        assertTrue(result);
     }
 
     @Test
-    void behandlingIDTilhørerSaksbehandlerID_saksbehandlerErIkkeSattPåBehandlingID_forventFalse() {
-        Long behandlingID = 123456L;
-        String saksbehandlerID = "saksbehandlerID";
+    void behandlingMedSaksnummerTilhørerSaksbehandlerID_saksbehandlerErIkkeSattPåOppgaven_forventFalse() {
+        BehandlingsoppgaveDto oppgave = new BehandlingsoppgaveDto();
+        oppgave.setAnsvarligID("TYBO");
 
-        BehandlingsoppgaveDto oppgave1 = new BehandlingsoppgaveDto();
-        var behandlingDto1 = new BehandlingDto();
-        behandlingDto1.setBehandlingID(123L);
-        oppgave1.setBehandling(behandlingDto1);
+        when(oppgaveService.hentÅpenOppgaveDtoMedFagsaksnummer("MEL-1234")).thenReturn(oppgave);
 
-        BehandlingsoppgaveDto oppgave2 = new BehandlingsoppgaveDto();
-        var behandlingDto2 = new BehandlingDto();
-        behandlingDto2.setBehandlingID(456L);
-        oppgave2.setBehandling(behandlingDto2);
+        boolean result = behandlingService.behandlingMedSaksnummerTilhørerSaksbehandlerID("MEL-1234", "Z123456");
 
-        BehandlingsoppgaveDto oppgave3 = new BehandlingsoppgaveDto();
-        var behandlingDto3 = new BehandlingDto();
-        behandlingDto3.setBehandlingID(789L);
-        oppgave3.setBehandling(behandlingDto3);
-
-        List<OppgaveDto> oppgaveDtoList = Arrays.asList(oppgave1, oppgave2, oppgave3);
-
-        when(oppgaveService.hentOppgaverMedAnsvarlig("saksbehandlerID")).thenReturn(oppgaveDtoList);
-
-
-        boolean behandlingIDTilhørerSaksbehandlerID = behandlingService.behandlingIDTilhørerSaksbehandlerID(behandlingID, saksbehandlerID);
-
-
-        assertFalse(behandlingIDTilhørerSaksbehandlerID);
+        assertFalse(result);
     }
 
     @Test

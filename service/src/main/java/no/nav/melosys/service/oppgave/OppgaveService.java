@@ -142,6 +142,11 @@ public class OppgaveService {
             .orElseThrow(() -> new IkkeFunnetException("Finner ingen åpen oppgave med saksnummer " + saksnummer));
     }
 
+    public OppgaveDto hentÅpenOppgaveDtoMedFagsaksnummer(String saksnummer) {
+        Oppgave oppgave = hentÅpenBehandlingsoppgaveMedFagsaksnummer(saksnummer);
+        return tilOppgaveDto(oppgave);
+    }
+
     public Oppgave hentOppgaveMedOppgaveID(String oppgaveID) {
         return oppgaveFasade.hentOppgave(oppgaveID);
     }

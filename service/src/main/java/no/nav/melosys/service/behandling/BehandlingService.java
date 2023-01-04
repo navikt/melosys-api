@@ -22,7 +22,6 @@ import no.nav.melosys.repository.MottatteOpplysningerRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto;
 import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
@@ -406,7 +405,8 @@ public class BehandlingService {
             endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
             return;
         }
-        if (behandlingIDTilhørerSaksbehandlerID(behandling.getId(), saksbehandlerID)) {
+        String saksnummer = behandling.getFagsak().getSaksnummer();
+        if (behandlingMedSaksnummerTilhørerSaksbehandlerID(saksnummer, saksbehandlerID)) {
             endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
         }
     }
@@ -418,13 +418,9 @@ public class BehandlingService {
         }
     }
 
-    boolean behandlingIDTilhørerSaksbehandlerID(Long behandlingID, String saksbehandlerID) {
-        List<OppgaveDto> oppgaveDtoList = oppgaveService.hentOppgaverMedAnsvarlig(saksbehandlerID);
-        return oppgaveDtoList
-            .stream()
-            .filter(BehandlingsoppgaveDto.class::isInstance)
-            .map(BehandlingsoppgaveDto.class::cast)
-            .anyMatch(behandlingsoppgaveDto -> Objects.equals(behandlingsoppgaveDto.getBehandling().getBehandlingID(), behandlingID));
+    boolean behandlingMedSaksnummerTilhørerSaksbehandlerID(String saksnummer, String saksbehandlerID) {
+        OppgaveDto oppgaveDto = oppgaveService.hentÅpenOppgaveDtoMedFagsaksnummer(saksnummer);
+        return saksbehandlerID.equalsIgnoreCase(oppgaveDto.getAnsvarligID());
     }
 
     public void oppdaterStatusOgSvarfrist(Behandling behandling, Behandlingsstatus behandlingsstatus, Instant svarfristDato) {
