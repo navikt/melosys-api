@@ -13,6 +13,7 @@ import no.nav.melosys.domain.brev.DokumentasjonSvarfrist;
 import no.nav.melosys.domain.kodeverk.behandlinger.*;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerKonverterer;
+import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -22,7 +23,6 @@ import no.nav.melosys.repository.MottatteOpplysningerRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.oppgave.dto.OppgaveDto;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -419,8 +419,11 @@ public class BehandlingService {
     }
 
     boolean behandlingMedSaksnummerTilhørerSaksbehandlerID(String saksnummer, String saksbehandlerID) {
-        OppgaveDto oppgaveDto = oppgaveService.hentÅpenOppgaveDtoMedFagsaksnummer(saksnummer);
-        return saksbehandlerID.equalsIgnoreCase(oppgaveDto.getAnsvarligID());
+        Optional<Oppgave> oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(saksnummer);
+        if (oppgave.isPresent()) {
+            return saksbehandlerID.equalsIgnoreCase(oppgave.get().getTilordnetRessurs());
+        }
+        return false;
     }
 
     public void oppdaterStatusOgSvarfrist(Behandling behandling, Behandlingsstatus behandlingsstatus, Instant svarfristDato) {

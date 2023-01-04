@@ -20,6 +20,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
+import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -27,7 +28,6 @@ import no.nav.melosys.repository.MottatteOpplysningerRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.oppgave.dto.BehandlingsoppgaveDto;
 import org.assertj.core.util.Sets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -723,9 +723,10 @@ class BehandlingServiceTest {
     void behandlingMedSaksnummerTilhørerSaksbehandlerID_saksbehandlerErSattPåOppgaven_forventTrue() {
         String saksnummer = "MEL-1234";
         String saksbehandlerId = "Z123456";
-        BehandlingsoppgaveDto oppgave = new BehandlingsoppgaveDto();
-        oppgave.setAnsvarligID(saksbehandlerId);
-        when(oppgaveService.hentÅpenOppgaveDtoMedFagsaksnummer(saksnummer)).thenReturn(oppgave);
+        Oppgave oppgave = new Oppgave.Builder()
+            .setTilordnetRessurs(saksbehandlerId)
+            .build();
+        when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(saksnummer)).thenReturn(Optional.of(oppgave));
 
         boolean result = behandlingService.behandlingMedSaksnummerTilhørerSaksbehandlerID(saksnummer, saksbehandlerId);
 
@@ -734,10 +735,11 @@ class BehandlingServiceTest {
 
     @Test
     void behandlingMedSaksnummerTilhørerSaksbehandlerID_saksbehandlerErIkkeSattPåOppgaven_forventFalse() {
-        BehandlingsoppgaveDto oppgave = new BehandlingsoppgaveDto();
-        oppgave.setAnsvarligID("TYBO");
+        Oppgave oppgave = new Oppgave.Builder()
+            .setTilordnetRessurs("TYBO")
+            .build();
 
-        when(oppgaveService.hentÅpenOppgaveDtoMedFagsaksnummer("MEL-1234")).thenReturn(oppgave);
+        when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer("MEL-1234")).thenReturn(Optional.of(oppgave));
 
         boolean result = behandlingService.behandlingMedSaksnummerTilhørerSaksbehandlerID("MEL-1234", "Z123456");
 
