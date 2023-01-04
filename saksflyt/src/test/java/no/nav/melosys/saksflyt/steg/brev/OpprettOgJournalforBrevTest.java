@@ -400,7 +400,7 @@ class OpprettOgJournalforBrevTest {
             List.of(new SaksvedleggBestilling("1", "2"), new SaksvedleggBestilling("3", "4"));
         FritekstbrevBrevbestilling brevbestilling = new FritekstbrevBrevbestilling.Builder()
             .medProduserbartdokument(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV)
-            .medFritekstTittel("Tittel")
+            .medFritekstTittel("Request to remain subject to Norwegian legislation")
             .medSaksvedleggBestilling(saksvedleggBestillingList)
             .medFritekst("Innhold")
             .build();
@@ -415,7 +415,7 @@ class OpprettOgJournalforBrevTest {
         verify(mockJoarkFasade).opprettJournalpost(opprettJournalpostCaptor.capture(), anyBoolean());
 
         OpprettJournalpost captured = opprettJournalpostCaptor.getValue();
-        assertThat(captured.getHoveddokument().getTittel()).isEqualTo("Tittel");
+        assertThat(captured.getHoveddokument().getTittel()).isEqualTo("Søknad om unntak");
         assertThat(captured.getVedlegg())
             .extracting(fysiskDokument -> fysiskDokument.getDokumentVarianter()
                     .stream().map(DokumentVariant::getData).findFirst().orElse(null),
