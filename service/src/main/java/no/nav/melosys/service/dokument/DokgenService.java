@@ -266,13 +266,14 @@ public class DokgenService {
                 .medBarnFritekst(brevbestillingRequest.getBarnFritekst())
                 .medVirksomhetArbeidsgiverSkalHaKopi(inneholderArbeidsgiverSomKopimottaker(brevbestillingRequest.getKopiMottakere()))
                 .medNyVurderingBakgrunn(brevbestillingRequest.getNyVurderingBakgrunn());
-            case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET -> new FritekstbrevBrevbestilling.Builder()
+            case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET,UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV -> new FritekstbrevBrevbestilling.Builder()
                 .medDistribusjonstype(brevbestillingRequest.getDistribusjonstype())
                 .medFritekstTittel(brevbestillingRequest.getFritekstTittel())
                 .medFritekst(brevbestillingRequest.getFritekst())
                 .medKontaktpersonNavn(brevbestillingRequest.getKontaktpersonNavn())
                 .medKontaktopplysninger(brevbestillingRequest.isKontaktopplysninger())
-                .medBrukerSkalHaKopi(inneholderBrukerSomKopimottaker(brevbestillingRequest.getKopiMottakere()));
+                .medBrukerSkalHaKopi(inneholderBrukerSomKopimottaker(brevbestillingRequest.getKopiMottakere()))
+                .medDokumentTittel(brevbestillingRequest.getDokumentTittel());
             case AVSLAG_MANGLENDE_OPPLYSNINGER -> new AvslagBrevbestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK)
                 .medFritekst(brevbestillingRequest.getFritekst());

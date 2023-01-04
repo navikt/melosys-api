@@ -252,6 +252,12 @@ public class BrevmalListeBygger {
                     .erPåkrevd()
                     .build(),
                 new BrevmalFeltDto.Builder()
+                    .medKodeOgBeskrivelse(BrevmalFeltKode.DOKUMENT_TITTEL)
+                    .medFeltType(FeltType.TEKST)
+                    .medHjelpetekst("Tittelen du skriver inn her vil bli journalføringstittel.")
+                    .medTegnBegrensning(60)
+                    .build(),
+                new BrevmalFeltDto.Builder()
                     .medKodeOgBeskrivelse(BrevmalFeltKode.STANDARDTEKST_KONTAKTINFORMASJON)
                     .medFeltType(FeltType.SJEKKBOKS)
                     .build(),
@@ -260,14 +266,6 @@ public class BrevmalListeBygger {
                     .medHjelpetekst("Teksten du skriver inn her vil være hovedteksten i brevet du lager.")
                     .medFeltType(FeltType.FRITEKST)
                     .erPåkrevd()
-                    .build(),
-                new BrevmalFeltDto.Builder()
-                    .medKodeOgBeskrivelse(BrevmalFeltKode.VEDLEGG)
-                    .medFeltType(FeltType.VEDLEGG)
-                    .build(),
-                new BrevmalFeltDto.Builder()
-                    .medKodeOgBeskrivelse(BrevmalFeltKode.FRITEKSTVEDLEGG)
-                    .medFeltType(FeltType.FRITEKSTVEDLEGG)
                     .build()
             ))
             .build();
@@ -293,6 +291,7 @@ public class BrevmalListeBygger {
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.BEKREFTELSE_PÅ_MEDLEMSKAP));
             case TRYGDEAVTALE:
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.HENVENDELSE_OM_MEDLEMSKAP));
+                valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.ENGELSK_FRITEKSTBREV));
         }
 
         valgAlternativer.add(fritekstFeltvalgAlternativDto);
