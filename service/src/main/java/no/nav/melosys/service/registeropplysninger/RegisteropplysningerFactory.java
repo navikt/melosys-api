@@ -40,7 +40,7 @@ public final class RegisteropplysningerFactory {
             case ANMODNING_OM_UNNTAK_HOVEDREGEL -> hentSaksopplysningTyperForAnmodningOmUnntak();
             case BESLUTNING_LOVVALG_NORGE, BESLUTNING_LOVVALG_ANNET_LAND ->
                 hentSaksopplysningTyperForBeslutningOmLovvalg();
-            case ØVRIGE_SED_MED, ØVRIGE_SED_UFM, FORESPØRSEL_TRYGDEMYNDIGHET, TRYGDETID -> // Etter fjerning av melosys.behandle_alle_saker toggle kan denne fjernes siden den alltid vil ha tom flyt.
+            case FORESPØRSEL_TRYGDEMYNDIGHET, TRYGDETID -> // Etter fjerning av melosys.behandle_alle_saker toggle kan denne fjernes siden den alltid vil ha tom flyt.
                 ingenSaksopplysningTyper();
             default -> throw new TekniskException(
                 "Kan ikke utlede relevante saksopplysninger fra behandlingstema " + behandlingstema);

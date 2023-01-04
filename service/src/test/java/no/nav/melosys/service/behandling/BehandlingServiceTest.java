@@ -226,14 +226,14 @@ class BehandlingServiceTest {
         behandling.setTema(TRYGDETID);
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
-        behandlingService.endreTema(behandling, ØVRIGE_SED_MED);
+        behandlingService.endreTema(behandling, FORESPØRSEL_TRYGDEMYNDIGHET);
 
         verify(behandlingRepository).save(behandlingCaptor.capture());
         verify(behandlingsresultatService).tømBehandlingsresultat(BEHANDLING_ID);
         verify(applicationEventPublisher).publishEvent(behandlingEndretAvSaksbehandlerEventArgumentCaptor.capture());
-        assertThat(behandlingCaptor.getValue().getTema()).isEqualTo(ØVRIGE_SED_MED);
+        assertThat(behandlingCaptor.getValue().getTema()).isEqualTo(FORESPØRSEL_TRYGDEMYNDIGHET);
         assertThat(behandlingCaptor.getValue().getId()).isEqualTo(BEHANDLING_ID);
-        assertThat(behandlingEndretAvSaksbehandlerEventArgumentCaptor.getValue().getBehandlingstema()).isEqualTo(ØVRIGE_SED_MED);
+        assertThat(behandlingEndretAvSaksbehandlerEventArgumentCaptor.getValue().getBehandlingstema()).isEqualTo(FORESPØRSEL_TRYGDEMYNDIGHET);
     }
 
     @Test

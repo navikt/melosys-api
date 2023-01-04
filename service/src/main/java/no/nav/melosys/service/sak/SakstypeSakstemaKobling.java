@@ -33,12 +33,6 @@ public final class SakstypeSakstemaKobling {
         if (Behandling.erAnmodningOmUnntak(behandlingstema) || Behandling.erRegistreringAvUnntak(behandlingstema)) {
             return UNNTAK;
         }
-        if (behandlingstema == ØVRIGE_SED_MED) {
-            return MEDLEMSKAP_LOVVALG;
-        }
-        if (behandlingstema == ØVRIGE_SED_UFM) {
-            return UNNTAK;
-        }
 
         throw new FunksjonellException(String.format("Finner ikke sakstema for behandlingstema %s", behandlingstema));
     }

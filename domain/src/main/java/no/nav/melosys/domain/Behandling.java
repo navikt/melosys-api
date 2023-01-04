@@ -32,9 +32,10 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 @EntityListeners(AuditingEntityListener.class)
 public class Behandling extends RegistreringsInfo {
 
-    public static final Set<Behandlingstema> BEHANDLINGSTEMA_SED_FORESPØRSEL = Set.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM,
+    public static final Set<Behandlingstema> BEHANDLINGSTEMA_SED_FORESPØRSEL = Set.of(
         FORESPØRSEL_TRYGDEMYNDIGHET,
-        TRYGDETID);
+        TRYGDETID
+    );
 
     private static final Set<Behandlingstema> BEHANDLINGSTEMA_SOM_IKKE_KAN_ENDRES = Set.of(
         REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
@@ -582,8 +583,6 @@ public class Behandling extends RegistreringsInfo {
             case BESLUTNING_LOVVALG_NORGE,
                 BESLUTNING_LOVVALG_ANNET_LAND -> LocalDate.now().plusWeeks(4);
             case ANMODNING_OM_UNNTAK_HOVEDREGEL,
-                ØVRIGE_SED_UFM,
-                ØVRIGE_SED_MED,
                 FORESPØRSEL_TRYGDEMYNDIGHET,
                 TRYGDETID -> LocalDate.now().plusWeeks(8);
             case VIRKSOMHET -> LocalDate.now().plusDays(90);

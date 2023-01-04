@@ -27,8 +27,6 @@ public final class SakstypeBehandlingstemaKobling {
                 Behandlingstema.TRYGDETID,
                 Behandlingstema.IKKE_YRKESAKTIV,
                 Behandlingstema.ARBEID_NORGE_BOSATT_ANNET_LAND,
-                Behandlingstema.ØVRIGE_SED_MED,
-                Behandlingstema.ØVRIGE_SED_UFM,
                 Behandlingstema.BESLUTNING_LOVVALG_NORGE,
                 Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND,
                 Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,

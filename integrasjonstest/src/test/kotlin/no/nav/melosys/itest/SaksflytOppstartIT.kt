@@ -154,7 +154,7 @@ internal class SaksflytOppstartIT(
         id = 1
         this.fagsak = fagsak
         type = Behandlingstyper.FØRSTEGANG
-        tema = Behandlingstema.ØVRIGE_SED_MED
+        tema = Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET
         status = Behandlingsstatus.OPPRETTET
         behandlingsfrist = LocalDate.now().plusMonths(1)
         leggTilRegisteringInfo()

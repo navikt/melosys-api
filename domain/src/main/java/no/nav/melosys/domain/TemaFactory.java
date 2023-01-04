@@ -21,7 +21,6 @@ public class TemaFactory {
         ARBEID_NORGE_BOSATT_ANNET_LAND,
         BESLUTNING_LOVVALG_NORGE,
         TRYGDETID,
-        ØVRIGE_SED_MED,
         ARBEID_I_UTLANDET,
         ARBEID_KUN_NORGE,
         YRKESAKTIV,
@@ -36,7 +35,6 @@ public class TemaFactory {
         REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
         ANMODNING_OM_UNNTAK_HOVEDREGEL,
         BESLUTNING_LOVVALG_ANNET_LAND,
-        ØVRIGE_SED_UFM,
         REGISTRERING_UNNTAK
     );
 

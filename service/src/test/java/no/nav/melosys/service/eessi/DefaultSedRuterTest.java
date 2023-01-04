@@ -185,7 +185,7 @@ class DefaultSedRuterTest {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        behandling.setTema(Behandlingstema.ØVRIGE_SED_MED);
+        behandling.setTema(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
 
         Fagsak fagsak = new Fagsak();
