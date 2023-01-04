@@ -382,6 +382,48 @@ class OpprettOgJournalforBrevTest {
                 Tuple.tuple(new byte[]{3, 4}, "c"));
     }
 
+    @Test
+    void utfør_produserEngelskFritekstbrev() {
+        Behandling behandling = TestdataFactory.lagBehandling();
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
+        when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
+        when(mockDokumentHentingService.hentJournalposter("MEL-test")).thenReturn(
+            List.of(lagJournalpost("1", "2", "tittel 1"),
+                lagJournalpost("3", "4", "tittel 2")
+            )
+        );
+        when(mockJoarkFasade.hentDokument("1", "2")).thenReturn(new byte[]{1, 2});
+        when(mockJoarkFasade.hentDokument("3", "4")).thenReturn(new byte[]{3, 4});
+
+        List<SaksvedleggBestilling> saksvedleggBestillingList =
+            List.of(new SaksvedleggBestilling("1", "2"), new SaksvedleggBestilling("3", "4"));
+        FritekstbrevBrevbestilling brevbestilling = new FritekstbrevBrevbestilling.Builder()
+            .medProduserbartdokument(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV)
+            .medFritekstTittel("Tittel")
+            .medSaksvedleggBestilling(saksvedleggBestillingList)
+            .medFritekst("Innhold")
+            .build();
+
+        Prosessinstans prosessinstans = lagProsessinstans(behandling, brevbestilling);
+
+        opprettJournalforBrev.utfør(prosessinstans);
+
+        verify(mockDokumentHentingService).hentJournalposter("MEL-test");
+        verify(mockJoarkFasade).hentDokument("1", "2");
+        verify(mockJoarkFasade).hentDokument("3", "4");
+        verify(mockJoarkFasade).opprettJournalpost(opprettJournalpostCaptor.capture(), anyBoolean());
+
+        OpprettJournalpost captured = opprettJournalpostCaptor.getValue();
+        assertThat(captured.getHoveddokument().getTittel()).isEqualTo("Tittel");
+        assertThat(captured.getVedlegg())
+            .extracting(fysiskDokument -> fysiskDokument.getDokumentVarianter()
+                    .stream().map(DokumentVariant::getData).findFirst().orElse(null),
+                ArkivDokument::getTittel)
+            .containsExactly(Tuple.tuple(new byte[]{1, 2}, "tittel 1"),
+                Tuple.tuple(new byte[]{3, 4}, "tittel 2"));
+    }
+
     private Prosessinstans lagProsessinstans(Behandling behandling, DokgenBrevbestilling brevbestilling) {
         Aktoer mottaker = lagMottaker("1234");
 
