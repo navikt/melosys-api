@@ -100,13 +100,13 @@ public class BehandlingTjeneste {
     @JsonView(DokumentView.FrontendApi.class)
     @ApiOperation(value = "Hent en spesifikk behandling", response = BehandlingDto.class)
     public ResponseEntity<BehandlingDto> hentBehandling(@PathVariable("behandlingID") long behandlingID) {
-        String saksbehandler = SubjectHandler.getInstance().getUserID();
-        log.debug("Saksbehandler {} ber om å hente behandling {}.", saksbehandler, behandlingID);
+        String saksbehandlerID = SubjectHandler.getInstance().getUserID();
+        log.debug("Saksbehandler {} ber om å hente behandling {}.", saksbehandlerID, behandlingID);
         aksesskontroll.autoriser(behandlingID);
 
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
-        behandlingService.endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
-        BehandlingDto behandlingDto = tilBehandlingDto(behandling, saksbehandler);
+        behandlingService.oppdaterBehandlingsstatusHvisTilhørendeSaksbehandler(behandling, saksbehandlerID);
+        BehandlingDto behandlingDto = tilBehandlingDto(behandling, saksbehandlerID);
         return ResponseEntity.ok(behandlingDto);
     }
 
