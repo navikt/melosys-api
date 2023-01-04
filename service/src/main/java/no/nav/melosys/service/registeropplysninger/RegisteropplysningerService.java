@@ -189,6 +189,8 @@ public class RegisteropplysningerService {
             fom = treÅrTilbake;
         }
 
+        log.info("Henter utbetalinger");
+
         RegisteropplysningerPeriodeFactory.Periode periodeForYtelser = registeropplysningerPeriodeFactory.hentPeriodeForInntekt(fom, tom, behandling);
         Saksopplysning saksopplysning = unleash.isEnabled("melosys.utbetalinger.v2") ?
             utbetaldataRestService.hentUtbetalingerBarnetrygd(registeropplysningerRequest.getFnr(), periodeForYtelser.fom.atDay(1), periodeForYtelser.tom.atDay(1))
