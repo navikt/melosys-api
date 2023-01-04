@@ -24,7 +24,7 @@ public final class TestdataFactory {
     public static Behandling lagBehandling() {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setSaksopplysninger(singleton(lagPersonopplysning()));
         behandling.setFagsak(lagFagsak());

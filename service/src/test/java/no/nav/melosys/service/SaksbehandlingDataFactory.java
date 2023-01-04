@@ -34,7 +34,7 @@ public final class SaksbehandlingDataFactory {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setFagsak(fagsak);
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
@@ -62,7 +62,7 @@ public final class SaksbehandlingDataFactory {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        behandling.setType(Behandlingstyper.SED);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setTema(Behandlingstema.TRYGDETID);
         behandling.setFagsak(lagFagsak());
         final Instant nå = Instant.now();

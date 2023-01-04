@@ -43,9 +43,11 @@ public class BrevmalListeBygger {
             List<Produserbaredokumenter> produserbareDokumenter = brevbestillingService.hentMuligeProduserbaredokumenter(behandlingId, mottaker.getRolle());
 
             List<BrevmalTypeDto> typer = produserbareDokumenter.stream().map(p -> switch (p) {
-                    case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> lagBrevmalTypeDtoForForventetSaksbehandlingstid(p);
+                    case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE ->
+                        lagBrevmalTypeDtoForForventetSaksbehandlingstid(p);
                     case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevmalTypeDtoForMangelbrev(p, behandlingId);
-                    case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET -> lagBrevmalTypeDtoForFritekstbrev(p, behandlingId);
+                    case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET ->
+                        lagBrevmalTypeDtoForFritekstbrev(p, behandlingId);
                     default -> null;
                 })
                 .filter(Objects::nonNull)
@@ -97,7 +99,8 @@ public class BrevmalListeBygger {
             case BRUKER -> MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG;
             case VIRKSOMHET -> MottakerType.VIRKSOMHET;
             case ARBEIDSGIVER -> MottakerType.ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG;
-            default -> throw new FunksjonellException("Vi støtter ikke brev med hovedmottaker: " + hovedmottaker.getKode());
+            default ->
+                throw new FunksjonellException("Vi støtter ikke brev med hovedmottaker: " + hovedmottaker.getKode());
         };
     }
 
@@ -152,10 +155,7 @@ public class BrevmalListeBygger {
     }
 
     private boolean harStandardTekstIMangelbrev(Sakstemaer sakstema, Behandlingstyper behandlingstype) {
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            return sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG && behandlingstype == Behandlingstyper.FØRSTEGANG;
-        }
-        return behandlingstype == Behandlingstyper.SOEKNAD || behandlingstype == Behandlingstyper.KLAGE;
+        return sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG && behandlingstype == Behandlingstyper.FØRSTEGANG;
     }
 
     private FeltValgDto hentDistribusjonstyper() {

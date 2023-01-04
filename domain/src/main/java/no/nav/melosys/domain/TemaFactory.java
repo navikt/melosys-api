@@ -15,7 +15,6 @@ public class TemaFactory {
     private static final EnumSet<Behandlingstema> GYLDIGE_BEHANDLINGSTEMA_MEDLEMSKAP = EnumSet.of(
         UTSENDT_ARBEIDSTAKER,
         UTSENDT_SELVSTENDIG,
-        ARBEID_ETT_LAND_ØVRIG,
         ARBEID_TJENESTEPERSON_ELLER_FLY,
         IKKE_YRKESAKTIV,
         ARBEID_FLERE_LAND,

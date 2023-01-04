@@ -77,7 +77,7 @@ class JournalfoeringIT(
         val behandling = journalføringProsess.behandling
         behandling.apply {
             status.shouldBe(Behandlingsstatus.OPPRETTET)
-            type.shouldBe(Behandlingstyper.SOEKNAD)
+            type.shouldBe(Behandlingstyper.FØRSTEGANG)
             tema.shouldBe(Behandlingstema.UTSENDT_ARBEIDSTAKER)
         }
         behandling.fagsak.apply {

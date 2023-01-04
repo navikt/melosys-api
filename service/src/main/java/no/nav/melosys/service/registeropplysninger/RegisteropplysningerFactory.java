@@ -29,7 +29,6 @@ public final class RegisteropplysningerFactory {
                 UTSENDT_SELVSTENDIG,
                 ARBEID_FLERE_LAND,
                 IKKE_YRKESAKTIV, // Etter fjerning av melosys.behandle_alle_saker toggle kan denne fjernes siden den alltid vil ha tom flyt.
-                ARBEID_ETT_LAND_ØVRIG,
                 ARBEID_TJENESTEPERSON_ELLER_FLY,
                 ARBEID_NORGE_BOSATT_ANNET_LAND,
                 ARBEID_I_UTLANDET,

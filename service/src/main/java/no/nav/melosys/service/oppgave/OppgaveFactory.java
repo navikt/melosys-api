@@ -85,7 +85,7 @@ public final class OppgaveFactory {
                 new OppgaveParametere(EU_EOS, "ae0034", Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
             case ARBEID_FLERE_LAND ->
                 new OppgaveParametere(EU_EOS, "ae0242", Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
-            case ARBEID_ETT_LAND_ØVRIG, ARBEID_TJENESTEPERSON_ELLER_FLY ->
+            case ARBEID_TJENESTEPERSON_ELLER_FLY ->
                 new OppgaveParametere(EU_EOS, "ae0243", Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
             case IKKE_YRKESAKTIV ->
                 new OppgaveParametere(EU_EOS, "ae0238", Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));

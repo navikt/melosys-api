@@ -102,7 +102,7 @@ class DokgenConsumerTest {
     private Behandling lagBehandling() {
         Behandling behandling = new Behandling();
         behandling.setFagsak(lagFagsak(behandling));
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setSaksopplysninger(Collections.singleton(lagPersondokument()));
         return behandling;
     }
@@ -111,7 +111,7 @@ class DokgenConsumerTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         fagsak.setBehandlinger(List.of(behandling));
         return fagsak;
     }

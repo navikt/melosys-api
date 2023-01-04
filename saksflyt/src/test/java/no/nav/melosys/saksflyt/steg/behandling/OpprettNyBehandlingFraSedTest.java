@@ -74,52 +74,6 @@ class OpprettNyBehandlingFraSedTest {
             .withMessageContaining("Behandlingstema kan ikke være null");
     }
 
-
-    @Test
-    void utfør_harTidligereBehandlingOgOppgaveToggleDisabled_nyBehandlingOpprettet() {
-        unleash.disableAll();
-        final long gsakSaksnummer = 123L;
-        final Behandlingstema behandlingstema = Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING;
-        final String journalpostID = "jp123";
-        final String dokumentID = "dok123";
-        final var eessiMelding = new MelosysEessiMelding();
-        eessiMelding.setJournalpostId(journalpostID);
-        eessiMelding.setDokumentId(dokumentID);
-
-        Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, gsakSaksnummer);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
-        prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
-        prosessinstans.setData(ProsessDataKey.DOKUMENT_ID, dokumentID);
-        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
-
-        Behandling behandling = new Behandling();
-        behandling.setId(123L);
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-199001");
-        fagsak.setBehandlinger(Lists.newArrayList(behandling));
-
-        Oppgave oppgave = new Oppgave.Builder()
-            .setOppgaveId("123oppg")
-            .build();
-
-        when(fagsakService.hentFagsakFraArkivsakID(gsakSaksnummer)).thenReturn(fagsak);
-        when(behandlingService.nyBehandling(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(new Behandling());
-        when(joarkFasade.hentMottaksDatoForJournalpost(journalpostID)).thenReturn(mottaksdato);
-        when(oppgaveFasade.finnÅpenBehandlingsoppgaveMedFagsaksnummer(fagsak.getSaksnummer()))
-            .thenReturn(Optional.of(oppgave));
-
-        opprettNyBehandlingFraSed.utfør(prosessinstans);
-
-        verify(oppgaveFasade).ferdigstillOppgave(oppgave.getOppgaveId());
-        verify(behandlingService).avsluttBehandling(behandling.getId());
-        verify(behandlingService).nyBehandling(
-            fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.SED, behandlingstema, journalpostID, dokumentID,
-            mottaksdato, Behandlingsaarsaktyper.SED, null);
-        assertThat(prosessinstans.getBehandling()).isNotNull();
-    }
-
     @Test
     void utfør_harTidligereBehandlingOgOppgave_nyBehandlingOpprettet() {
         final long gsakSaksnummer = 123L;

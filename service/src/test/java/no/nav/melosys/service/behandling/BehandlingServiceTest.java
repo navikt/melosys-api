@@ -376,13 +376,13 @@ class BehandlingServiceTest {
 
 
         Behandling behandling = behandlingService.nyBehandling(
-            new Fagsak(), Behandlingsstatus.OPPRETTET, SOEKNAD, Behandlingstema.UTSENDT_ARBEIDSTAKER,
+            new Fagsak(), Behandlingsstatus.OPPRETTET, FØRSTEGANG, Behandlingstema.UTSENDT_ARBEIDSTAKER,
             initierendeJournalpostId, initierendeDokumentId, null, null, null);
 
 
         verify(behandlingRepository).save(behandling);
         verify(behandlingsresultatService).lagreNyttBehandlingsresultat(behandling);
-        assertThat(behandling.getType()).isEqualTo(SOEKNAD);
+        assertThat(behandling.getType()).isEqualTo(FØRSTEGANG);
         assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.OPPRETTET);
         assertThat(behandling.getInitierendeJournalpostId()).isEqualTo(initierendeJournalpostId);
         assertThat(behandling.getInitierendeDokumentId()).isEqualTo(initierendeDokumentId);
@@ -397,7 +397,7 @@ class BehandlingServiceTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> behandlingService.nyBehandling(
-                fagsak, Behandlingsstatus.OPPRETTET, SOEKNAD, Behandlingstema.UTSENDT_ARBEIDSTAKER,
+                fagsak, Behandlingsstatus.OPPRETTET, FØRSTEGANG, Behandlingstema.UTSENDT_ARBEIDSTAKER,
                 null, null, null, null, null))
             .withMessageContaining("Mangler mottaksdato eller behandlingsårsaktype");
     }

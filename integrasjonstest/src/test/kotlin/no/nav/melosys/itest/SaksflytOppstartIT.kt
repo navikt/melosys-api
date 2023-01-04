@@ -153,7 +153,7 @@ internal class SaksflytOppstartIT(
     private fun lagBehandling(fagsak: Fagsak): Behandling = Behandling().apply {
         id = 1
         this.fagsak = fagsak
-        type = Behandlingstyper.SED
+        type = Behandlingstyper.FØRSTEGANG
         tema = Behandlingstema.ØVRIGE_SED_MED
         status = Behandlingsstatus.OPPRETTET
         behandlingsfrist = LocalDate.now().plusMonths(1)

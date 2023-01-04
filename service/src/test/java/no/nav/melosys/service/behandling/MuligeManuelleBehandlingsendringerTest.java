@@ -97,7 +97,7 @@ class MuligeManuelleBehandlingsendringerTest {
 
     @Test
     void hentMuligeTyper_feilType_returnererTomListe() {
-        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandlingMedTemaOgType(UTSENDT_ARBEIDSTAKER, SOEKNAD));
+        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandlingMedTemaOgType(UTSENDT_ARBEIDSTAKER, FØRSTEGANG));
         assertThat(muligeTyper).isEmpty();
     }
 

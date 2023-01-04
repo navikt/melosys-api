@@ -89,7 +89,7 @@ class SvarAnmodningUnntakSedRuterTest {
     }
 
     @Test
-    void finnSakOgBestemRuting_behandlingstypeSøknadIkkeYrkesaktiv_oppgaveOppdateres() {
+    void finnSakOgBestemRuting_behandlingstypeFørstegangIkkeYrkesaktiv_oppgaveOppdateres() {
         Fagsak fagsak = hentFagsak(Behandlingstema.IKKE_YRKESAKTIV, Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
         when(fagsakService.hentFagsakFraArkivsakID(anyLong())).thenReturn(fagsak);
         Prosessinstans prosessinstans = new Prosessinstans();

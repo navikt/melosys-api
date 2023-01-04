@@ -44,12 +44,6 @@ public class Behandling extends RegistreringsInfo {
         ANMODNING_OM_UNNTAK_HOVEDREGEL
     );
 
-    private static final Set<Behandlingstyper> GAMLE_BEHANDLINGSTYPER_SOM_SKAL_MIGRERES_SENERE = Set.of(
-        Behandlingstyper.ANKE,
-        Behandlingstyper.SED,
-        Behandlingstyper.SOEKNAD
-    );
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -510,7 +504,6 @@ public class Behandling extends RegistreringsInfo {
     public static boolean erBehandlingAvSøknadGammel(String behandlingstemaKode) {
         return erBehandlingAvSøknadUtsendtArbeidstaker(behandlingstemaKode)
             || erBehandlingAvSøknadArbeidIFlereLand(behandlingstemaKode)
-            || ARBEID_ETT_LAND_ØVRIG.getKode().equalsIgnoreCase(behandlingstemaKode)
             || ARBEID_TJENESTEPERSON_ELLER_FLY.getKode().equalsIgnoreCase(behandlingstemaKode)
             || IKKE_YRKESAKTIV.getKode().equalsIgnoreCase(behandlingstemaKode)
             || ARBEID_NORGE_BOSATT_ANNET_LAND.getKode().equalsIgnoreCase(behandlingstemaKode)
@@ -563,10 +556,6 @@ public class Behandling extends RegistreringsInfo {
         Behandlingstema behandlingstema = behandling.getTema();
         Behandlingstyper behandlingstype = behandling.getType();
 
-        if (GAMLE_BEHANDLINGSTYPER_SOM_SKAL_MIGRERES_SENERE.contains(behandlingstype)) {
-            return utledFristForBehandlingtema(behandlingstema);
-        }
-
         return BehandlingfristKriterier.hentBehandlingsFrist(sakstema, behandlingstema, behandlingstype, utgangspunktDato);
     }
 
@@ -579,7 +568,6 @@ public class Behandling extends RegistreringsInfo {
             case UTSENDT_ARBEIDSTAKER,
                 UTSENDT_SELVSTENDIG,
                 ARBEID_FLERE_LAND,
-                ARBEID_ETT_LAND_ØVRIG,
                 ARBEID_TJENESTEPERSON_ELLER_FLY,
                 ARBEID_KUN_NORGE,
                 IKKE_YRKESAKTIV,

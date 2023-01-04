@@ -82,7 +82,7 @@ internal class BehandlingsresultatServiceIT(
                 leggTilRegisteringInfo()
                 behandlingsfrist = LocalDate.now().plusYears(1)
                 status = Behandlingsstatus.AVSLUTTET
-                type = Behandlingstyper.SOEKNAD
+                type = Behandlingstyper.FØRSTEGANG
                 tema = Behandlingstema.YRKESAKTIV
             }.also { behandlingRepository.save(it) }
 
@@ -91,7 +91,7 @@ internal class BehandlingsresultatServiceIT(
                 leggTilRegisteringInfo()
                 behandlingsfrist = LocalDate.now().plusYears(1)
                 status = Behandlingsstatus.OPPRETTET
-                type = Behandlingstyper.SOEKNAD
+                type = Behandlingstyper.FØRSTEGANG
                 tema = Behandlingstema.YRKESAKTIV
             }.also {
                 behandlingRepository.save(it)

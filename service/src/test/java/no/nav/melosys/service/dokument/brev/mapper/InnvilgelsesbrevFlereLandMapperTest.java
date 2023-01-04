@@ -121,7 +121,7 @@ class InnvilgelsesbrevFlereLandMapperTest {
 
     private static Behandling lagBehandling(Fagsak fagsak) {
         Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);
         return behandling;
     }

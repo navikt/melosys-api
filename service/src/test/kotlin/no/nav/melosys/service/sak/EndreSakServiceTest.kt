@@ -20,7 +20,6 @@ import no.nav.melosys.domain.kodeverk.Sakstyper.*
 import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.ANKE
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
@@ -132,7 +131,7 @@ internal class EndreSakServiceTest {
         every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(MottatteOpplysninger())
 
 
-        endreSakService.endre(saksnummer, FTRL, TRYGDEAVGIFT, YRKESAKTIV, ANKE, AVVENT_FAGLIG_AVKLARING, null)
+        endreSakService.endre(saksnummer, FTRL, TRYGDEAVGIFT, YRKESAKTIV, FØRSTEGANG, AVVENT_FAGLIG_AVKLARING, null)
 
 
         verify { mottatteOpplysningerService.slettOpplysninger(fagsak.hentAktivBehandling().id) }

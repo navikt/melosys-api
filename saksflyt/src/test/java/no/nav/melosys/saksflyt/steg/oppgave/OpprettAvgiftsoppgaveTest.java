@@ -121,7 +121,7 @@ class OpprettAvgiftsoppgaveTest {
     private static Behandling lagBehandling(Fagsak fagsak) {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);
         behandling.setInitierendeJournalpostId("JOURNALPOSTID");
         return behandling;

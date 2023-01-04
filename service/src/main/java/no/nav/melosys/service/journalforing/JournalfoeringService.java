@@ -18,6 +18,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -234,9 +235,7 @@ public class JournalfoeringService {
             prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, utledÅrsaktype(journalpost, sakstema, behandlingstema, behandlingstype));
             prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, utledMottaksdato(journalfoeringDto.getMottattDato(), journalpost));
         } else {
-            prosessinstans.setData(ProsessDataKey.SAKSTEMA, SakstypeSakstemaKobling.sakstema(sakstype, behandlingstema));
-            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandling.erBehandlingAvSøknadGammel(
-                behandlingstema) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED);
+            throw new TekniskException("Støtter ikke lenger disabled melosys.behandle_alle_saker");
         }
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
 
@@ -313,12 +312,7 @@ public class JournalfoeringService {
 
         if (unleash.isEnabled("melosys.behandle_alle_saker")) return;
 
-        if (!fagsak.harMinstEnBehandlingAvType(Behandlingstyper.SOEKNAD)) return;
-
-        throw new FunksjonellException(
-            "Saker kun bestående av avsluttede behandlinger med f.eks behandlingstype SED har lov til å knytte til " +
-                "eksisterende sak uten å opprette ny behandling. Denne saken inneholder en behandling med behandlingstype SOEKNAD."
-        );
+        throw new TekniskException("Støtter ikke lenger disabled melosys.behandle_alle_saker");
     }
 
     @Transactional

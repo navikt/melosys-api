@@ -2,6 +2,7 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import no.nav.dok.melosysbrev.felles.melosys_felles.BehandlingstypeKode;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 
 final class BehandlingstypeKodeMapper {
 
@@ -22,6 +23,8 @@ final class BehandlingstypeKodeMapper {
             return BehandlingstypeKode.SOEKNAD;
         } else if (behandling.erNorgeUtpekt()) {
             return BehandlingstypeKode.UTL_MYND_UTPEKT_NORGE;
+        } else if (behandling.getType() == Behandlingstyper.FØRSTEGANG) {
+            return BehandlingstypeKode.SOEKNAD;
         }
 
         return BehandlingstypeKode.valueOf(behandling.getType().getKode());
@@ -32,7 +35,7 @@ final class BehandlingstypeKodeMapper {
             return BehandlingstypeKode.UTL_MYND_UTPEKT_NORGE;
         } else {
             return switch (behandling.getType()) {
-                case SOEKNAD, FØRSTEGANG -> BehandlingstypeKode.SOEKNAD;
+                case FØRSTEGANG -> BehandlingstypeKode.SOEKNAD;
                 case KLAGE -> BehandlingstypeKode.KLAGE;
                 case NY_VURDERING -> BehandlingstypeKode.NY_VURDERING;
                 case ENDRET_PERIODE -> BehandlingstypeKode.ENDRET_PERIODE;

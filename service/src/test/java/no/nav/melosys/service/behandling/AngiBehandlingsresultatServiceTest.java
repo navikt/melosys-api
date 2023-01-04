@@ -204,7 +204,7 @@ class AngiBehandlingsresultatServiceTest {
 
     @Test
     void oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_ugyldigScenario_kasterFeilmelding() {
-        var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.UNNTAK, Sakstyper.EU_EOS, Behandlingstyper.HENVENDELSE, Behandlingstema.ARBEID_ETT_LAND_ØVRIG);
+        var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.UNNTAK, Sakstyper.EU_EOS, Behandlingstyper.HENVENDELSE, Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
 

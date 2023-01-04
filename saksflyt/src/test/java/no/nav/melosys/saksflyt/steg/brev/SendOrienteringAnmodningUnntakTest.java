@@ -43,7 +43,7 @@ class SendOrienteringAnmodningUnntakTest {
     @BeforeEach
     public void setUp() {
         behandling = new Behandling();
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setId(1L);
 
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandling.getId())).thenReturn(behandling);
