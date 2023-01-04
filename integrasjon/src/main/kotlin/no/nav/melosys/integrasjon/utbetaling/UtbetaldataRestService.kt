@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.utbetaling
 
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.SaksopplysningKildesystem
@@ -19,7 +18,7 @@ import java.util.function.Consumer
 @Service
 class UtbetaldataRestService(
     private val utbetaldataRestConsumer: UtbetaldataRestConsumer,
-    private val objectMapper: ObjectMapper = jacksonObjectMapper()
+    private val objectMapper: ObjectMapper
 ) {
 
     init {
