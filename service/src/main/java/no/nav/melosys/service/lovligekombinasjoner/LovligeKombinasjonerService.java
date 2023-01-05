@@ -113,13 +113,12 @@ public class LovligeKombinasjonerService {
         }
 
         switch (hovedpart) {
-            case BRUKER:
+            case BRUKER -> {
                 Set<Behandlingstema> behandlingstemaer = LovligeSakskombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
                     .filter(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.sakstema() == sakstema)
                     .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())
                     .flatMap(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTemaer().stream())
                     .collect(Collectors.toCollection(LinkedHashSet::new));
-
                 if (sistBehandlingstema != null && Set.of(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
                     REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
                     BESLUTNING_LOVVALG_NORGE,
@@ -128,14 +127,17 @@ public class LovligeKombinasjonerService {
                     return Set.of(sistBehandlingstema);
                 }
                 return behandlingstemaer;
-            case VIRKSOMHET:
+            }
+            case VIRKSOMHET -> {
                 return LovligeSakskombinasjoner.muligeSaksKombinasjonerVirksomhet.get(sakstype).stream()
                     .filter(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.sakstema() == sakstema)
                     .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())
                     .flatMap(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTemaer().stream())
                     .collect(Collectors.toCollection(LinkedHashSet::new));
-            default:
+            }
+            default -> {
                 return Collections.emptySet();
+            }
         }
     }
 
@@ -173,7 +175,7 @@ public class LovligeKombinasjonerService {
      * @param sisteBehandlingsresultat Forrige behandlingsresultat i fagsaken. (default = null)
      *                                 Brukt ved knytting til eksisterende sak.
      */
-    public Set<Behandlingstyper> hentMuligeBehandlingstyper(
+    Set<Behandlingstyper> hentMuligeBehandlingstyper(
         Aktoersroller hovedpart,
         Sakstyper sakstype,
         Sakstemaer sakstema,
@@ -194,45 +196,49 @@ public class LovligeKombinasjonerService {
         }
 
         switch (hovedpart) {
-            case BRUKER:
-                Set<Behandlingstyper> behandlingstyper = LovligeSakskombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
-                    .filter(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.sakstema() == sakstema)
-                    .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())
-                    .filter(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTemaer().contains(behandlingstema))
-                    .flatMap(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTyper().stream())
-                    .collect(Collectors.toCollection(LinkedHashSet::new));
-
-                if (sistBehandlingstema != null && Set.of(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
-                    REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
-                    BESLUTNING_LOVVALG_NORGE,
-                    BESLUTNING_LOVVALG_ANNET_LAND,
-                    ANMODNING_OM_UNNTAK_HOVEDREGEL).contains(sistBehandlingstema)) {
-                    behandlingstyper = new LinkedHashSet<>(List.of(NY_VURDERING, KLAGE, HENVENDELSE));
-                }
-
-                if (sisteBehandling != null && sisteBehandling.erInaktiv()) {
-                    behandlingstyper.remove(FØRSTEGANG);
-                }
-
-                if (sistSaksstatus != null && Set.of(HENLAGT, HENLAGT_BORTFALT, AVSLUTTET).contains(sistSaksstatus)) {
-                    behandlingstyper = Set.of(HENVENDELSE);
-                }
-
-                if (!unleash.isEnabled(ToggleName.BEHANDLINGSTYPE_KLAGE)) {
-                    behandlingstyper.remove(KLAGE);
-                }
-
-                return behandlingstyper;
-            case VIRKSOMHET:
+            case BRUKER -> {
+                return behandlingstyperForBruker(sakstype, sakstema, behandlingstema, sisteBehandling, sistBehandlingstema, sistSaksstatus);
+            }
+            case VIRKSOMHET -> {
                 return LovligeSakskombinasjoner.muligeSaksKombinasjonerVirksomhet.get(sakstype).stream()
                     .filter(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.sakstema() == sakstema)
                     .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())
                     .filter(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTemaer().contains(behandlingstema))
                     .flatMap(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTyper().stream())
                     .collect(Collectors.toCollection(LinkedHashSet::new));
-            default:
+            }
+            default -> {
                 return Collections.emptySet();
+            }
         }
+    }
+
+    private Set<Behandlingstyper> behandlingstyperForBruker(Sakstyper sakstype, Sakstemaer sakstema,
+                                                            Behandlingstema behandlingstema, Behandling sisteBehandling,
+                                                            Behandlingstema sistBehandlingstema, Saksstatuser sistSaksstatus) {
+        Set<Behandlingstyper> behandlingstyper = LovligeSakskombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
+            .filter(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.sakstema() == sakstema)
+            .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())
+            .filter(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTemaer().contains(behandlingstema))
+            .flatMap(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTyper().stream())
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+        if (sistBehandlingstema != null && Set.of(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
+            REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
+            BESLUTNING_LOVVALG_NORGE,
+            BESLUTNING_LOVVALG_ANNET_LAND,
+            ANMODNING_OM_UNNTAK_HOVEDREGEL).contains(sistBehandlingstema)) {
+            behandlingstyper = new LinkedHashSet<>(List.of(NY_VURDERING, KLAGE, HENVENDELSE));
+        }
+        if (sisteBehandling != null && sisteBehandling.erInaktiv()) {
+            behandlingstyper.remove(FØRSTEGANG);
+        }
+        if (sistSaksstatus != null && Set.of(HENLAGT, HENLAGT_BORTFALT, AVSLUTTET).contains(sistSaksstatus)) {
+            behandlingstyper = Set.of(HENVENDELSE);
+        }
+        if (!unleash.isEnabled(ToggleName.BEHANDLINGSTYPE_KLAGE)) {
+            behandlingstyper.remove(KLAGE);
+        }
+        return behandlingstyper;
     }
 
     public Set<Behandlingsstatus> hentMuligeBehandlingStatuser() {
@@ -247,7 +253,7 @@ public class LovligeKombinasjonerService {
     }
 
     public void validerOpprettelseOgEndring(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
-        validerSakstema(hovedpart, sakstype, sakstema, null);
+        validerSakstema(hovedpart, sakstype, sakstema);
         validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null);
         validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, null, null);
     }
@@ -257,8 +263,8 @@ public class LovligeKombinasjonerService {
         validerBehandlingstype(fagsak.getHovedpartRolle(), fagsak.getType(), fagsak.getTema(), behandlingstema, behandlingstype, sistBehandling, sistBehandlingsresultat);
     }
 
-    private void validerSakstema(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, String saksnummer) {
-        if (!hentMuligeSakstemaer(hovedpart, sakstype, saksnummer).contains(sakstema)) {
+    private void validerSakstema(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema) {
+        if (!hentMuligeSakstemaer(hovedpart, sakstype, null).contains(sakstema)) {
             throw new FunksjonellException(sakstema + " er ikke et lovlig sakstema med de andre valgte verdiene");
         }
     }
