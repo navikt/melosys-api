@@ -256,11 +256,11 @@ public class Fagsak extends RegistreringsInfo {
         return Sakstyper.EU_EOS == sakstype;
     }
 
-    public boolean erTrygdeavtale(){
-        return erTrygdeavtale(type);
+    public boolean erSakstypeTrygdeavtale(){
+        return erSakstypeTrygdeavtale(type);
     }
 
-    public static boolean erTrygdeavtale(Sakstyper sakstyper){
+    public static boolean erSakstypeTrygdeavtale(Sakstyper sakstyper){
         return Sakstyper.TRYGDEAVTALE == sakstyper;
     }
 
