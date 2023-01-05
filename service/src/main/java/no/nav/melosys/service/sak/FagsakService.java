@@ -336,6 +336,10 @@ public class FagsakService {
         }
     }
 
+    /**
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker. Skal erstattes alle steder den er brukt
+     */
+    @Deprecated
     public Optional<Behandling> hentBehandlingSomErUtgangspunktForRevurdering(Fagsak fagsak) {
         if (fagsak.harAktivBehandling()) {
             return Optional.of(fagsak.hentSistAktivBehandling());
@@ -343,6 +347,10 @@ public class FagsakService {
         return hentBehandlingForNyVurdering(fagsak);
     }
 
+    /**
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker. Skal erstattes alle steder den er brukt
+     */
+    @Deprecated
     public Optional<Behandling> hentBehandlingForNyVurdering(Fagsak fagsak) {
         var førsteBehandling = fagsak.hentTidligstRegistrertBehandling();
 

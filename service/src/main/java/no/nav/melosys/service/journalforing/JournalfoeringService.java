@@ -226,8 +226,7 @@ public class JournalfoeringService {
             prosessType = ProsessType.JFR_NY_SAK_VIRKSOMHET;
         }
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessType,
-            journalfoeringDto);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessType, journalfoeringDto);
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, sakstype);
         if (behandleAlleSakerToggleEnabled) {
             prosessinstans.setData(ProsessDataKey.SAKSTEMA, sakstema);

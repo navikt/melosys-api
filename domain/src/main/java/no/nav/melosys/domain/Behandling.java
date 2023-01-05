@@ -32,6 +32,10 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 @EntityListeners(AuditingEntityListener.class)
 public class Behandling extends RegistreringsInfo {
 
+    /**
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker
+     */
+    @Deprecated
     public static final Set<Behandlingstema> BEHANDLINGSTEMA_SED_FORESPØRSEL = Set.of(
         FORESPØRSEL_TRYGDEMYNDIGHET,
         TRYGDETID

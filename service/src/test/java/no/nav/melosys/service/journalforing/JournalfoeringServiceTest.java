@@ -300,6 +300,18 @@ class JournalfoeringServiceTest {
     }
 
     @Test
+    void journalførOgOpprettSak_sakstypeFtrlBehandlingstemaArbeidFlereLand_feilKombinasjonSakstypeBehandlingstemaKasterFeil() {
+        FagsakDto fagsakDto = lagFagsakDto(null, null, null, Sakstyper.FTRL);
+        opprettDto.setFagsak(fagsakDto);
+        opprettDto.setBehandlingstemaKode(Behandlingstema.ARBEID_FLERE_LAND.getKode());
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
+            .withMessageContaining("ikke et lovlig behandlingstema med de andre valgte verdiene");
+    }
+
+    @Test
     void journalførOgOpprettSak_fomEtterTom_feiler() {
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MAX, LocalDate.MIN, "DK", Sakstyper.EU_EOS);
         opprettDto.setFagsak(fagsakDto);
