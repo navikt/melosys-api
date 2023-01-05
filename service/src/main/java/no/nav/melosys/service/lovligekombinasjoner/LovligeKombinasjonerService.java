@@ -151,35 +151,37 @@ public class LovligeKombinasjonerService {
         return Collections.emptySet();
     }
 
+    /**
+     * Henter mulige behandlingstemaer
+     *
+     * @param hovedpart          Hovedpart knyttet til fagsaken.
+     * @param sakstype           Allerede valgt sakstype.
+     * @param sakstema           Allerede valgt sakstema.
+     * @param behandlingstema    Allerede valgt behandlingstema.
+     * @param aktivBehandlingID  Nåværende behandling i fagsaken. (default = null) Brukt ved endring av sak.
+     * @param sisteBehandlingsID Forrige behandling i fagsaken. (default = null)
+     *                           Brukt ved knytting til eksisterende sak.
+     */
     public Set<Behandlingstyper> hentMuligeBehandlingstyper(
         Aktoersroller hovedpart,
         Sakstyper sakstype,
         Sakstemaer sakstema,
         @Nullable Behandlingstema behandlingstema,
+        @Nullable Long aktivBehandlingID,
         @Nullable Long sisteBehandlingsID
     ) {
+        Behandling aktivBehandling = aktivBehandlingID != null ? behandlingService.hentBehandling(aktivBehandlingID) : null;
         Behandling sisteBehandling = sisteBehandlingsID != null ? behandlingService.hentBehandling(sisteBehandlingsID) : null;
         Behandlingsresultat sisteBehandlingsresultat = sisteBehandlingsID != null ? behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(sisteBehandlingsID) : null;
-        return hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, sisteBehandling, sisteBehandlingsresultat);
+        return hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, null, sisteBehandling, sisteBehandlingsresultat);
     }
 
-    /**
-     * Henter mulige behandlingstemaer
-     *
-     * @param hovedpart                Hovedpart knyttet til fagsaken.
-     * @param sakstype                 Allerede valgt sakstype.
-     * @param sakstema                 Allerede valgt sakstema.
-     * @param behandlingstema          Allerede valgt behandlingstema.
-     * @param sisteBehandling          Forrige behandling i fagsaken. (default = null)
-     *                                 Brukt ved knytting til eksisterende sak.
-     * @param sisteBehandlingsresultat Forrige behandlingsresultat i fagsaken. (default = null)
-     *                                 Brukt ved knytting til eksisterende sak.
-     */
     Set<Behandlingstyper> hentMuligeBehandlingstyper(
         Aktoersroller hovedpart,
         Sakstyper sakstype,
         Sakstemaer sakstema,
         Behandlingstema behandlingstema,
+        @Nullable Behandling aktivBehandling,
         @Nullable Behandling sisteBehandling,
         @Nullable Behandlingsresultat sisteBehandlingsresultat
     ) {
@@ -276,7 +278,7 @@ public class LovligeKombinasjonerService {
     }
 
     private void validerBehandlingstype(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype, Behandling sistBehandling, Behandlingsresultat sistBehandlingsresultat) {
-        if (!hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, sistBehandling, sistBehandlingsresultat).contains(behandlingstype)) {
+        if (!hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, null, sistBehandling, sistBehandlingsresultat).contains(behandlingstype)) {
             throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype med de andre valgte verdiene");
         }
     }

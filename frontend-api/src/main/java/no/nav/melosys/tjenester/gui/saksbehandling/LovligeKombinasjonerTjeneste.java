@@ -69,6 +69,6 @@ public class LovligeKombinasjonerTjeneste {
         @RequestParam(value = "behandlingstema", required = false) Behandlingstema behandlingstema,
         @RequestParam(value = "sisteBehandlingsID", required = false) Long sisteBehandlingsID
     ) {
-        return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, sisteBehandlingsID));
+        return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, sisteBehandlingsID, sisteBehandlingsID));
     }
 }
