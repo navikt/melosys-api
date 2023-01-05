@@ -17,6 +17,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.BrevAdresse;
 import no.nav.melosys.service.brev.BrevbestillingService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.tjenester.gui.dto.brev.*;
 import org.springframework.stereotype.Component;
 
@@ -56,40 +57,41 @@ public class BrevmalListeBygger {
     }
 
     private List<MottakerDto> hentTilgjengeligeMottakere(long behandlingId) {
-        var fagsak = behandlingService.hentBehandling(behandlingId).getFagsak();
+        var behandling = behandlingService.hentBehandling(behandlingId);
+        var fagsak = behandling.getFagsak();
         List<MottakerDto> mottakere = new ArrayList<>();
 
         if (fagsak.getHovedpartRolle() == BRUKER) {
-            mottakere.addAll(lagMottakereForRolle(behandlingId, BRUKER));
-            mottakere.addAll(lagMottakereForRolle(behandlingId, ARBEIDSGIVER));
+            mottakere.add(lagMottakerForRolle(behandlingId, BRUKER));
+            if (!SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"))) {
+                mottakere.add(lagMottakerForRolle(behandlingId, ARBEIDSGIVER));
+            }
+            mottakere.add(lagMottakerAnnenOrganisasjon(ARBEIDSGIVER));
         } else if (fagsak.getHovedpartRolle() == VIRKSOMHET) {
-            mottakere.addAll(lagMottakereForRolle(behandlingId, VIRKSOMHET));
+            mottakere.add(lagMottakerForRolle(behandlingId, VIRKSOMHET));
+            mottakere.add(lagMottakerAnnenOrganisasjon(VIRKSOMHET));
         } else {
             throw new FunksjonellException("Sak må ha hovedpart for å kunne sende brev");
         }
         return mottakere;
     }
 
-    private List<MottakerDto> lagMottakereForRolle(long behandlingId, Aktoersroller rolle) {
-        List<MottakerDto> mottakere = new ArrayList<>();
+    private MottakerDto lagMottakerForRolle(long behandlingId, Aktoersroller rolle) {
         var builder = new MottakerDto.Builder()
             .medType(mapType(rolle))
             .medRolle(rolle);
 
         leggTilAdresseOgFeilmelding(builder, rolle, behandlingId);
 
-        mottakere.add(builder.build());
+        return builder.build();
+    }
 
-        if (rolle == Aktoersroller.ARBEIDSGIVER || rolle == Aktoersroller.VIRKSOMHET) {
-            mottakere.add(
-                new MottakerDto.Builder()
-                    .medType(MottakerType.ANNEN_ORGANISASJON)
-                    .medRolle(rolle)
-                    .orgnrSettesAvSaksbehandler()
-                    .build()
-            );
-        }
-        return mottakere;
+    private MottakerDto lagMottakerAnnenOrganisasjon(Aktoersroller tilhørendeRolle) {
+        return new MottakerDto.Builder()
+            .medType(MottakerType.ANNEN_ORGANISASJON)
+            .medRolle(tilhørendeRolle)
+            .orgnrSettesAvSaksbehandler()
+            .build();
     }
 
     private MottakerType mapType(Aktoersroller hovedmottaker) {
