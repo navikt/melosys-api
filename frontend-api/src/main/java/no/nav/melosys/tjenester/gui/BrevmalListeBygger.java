@@ -1,12 +1,13 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Distribusjonstype;
@@ -21,8 +22,6 @@ import org.springframework.stereotype.Component;
 
 import static java.util.Arrays.asList;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
-import static no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland.GB;
-import static no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland.JE;
 
 @Component
 public class BrevmalListeBygger {
@@ -84,11 +83,6 @@ public class BrevmalListeBygger {
             .medType(mapType(rolle))
             .medRolle(rolle);
 
-        if (TRYGDEMYNDIGHET == rolle) {
-            Collection<String> soeknadsland = behandling.hentSøknadsLand();
-            builder.medTrygdemyndighet(utledTrygdemyndighetsland(soeknadsland));
-        }
-
         leggTilAdresseOgFeilmelding(builder, rolle, behandling.getId());
 
         mottakere.add(builder.build());
@@ -103,21 +97,6 @@ public class BrevmalListeBygger {
             );
         }
         return mottakere;
-    }
-
-    private List<Trygdeavtale_myndighetsland> utledTrygdemyndighetsland(Collection<String> soeknadsland) {
-        if (soeknadsland.size() != 1) {
-            return Collections.emptyList();
-        }
-        Trygdeavtale_myndighetsland trygdeavtaleMyndighetsland = soeknadsland.stream()
-            .map(Trygdeavtale_myndighetsland::valueOf)
-            .findAny()
-            .get();
-
-        return switch (trygdeavtaleMyndighetsland) {
-            case GB -> List.of(GB, JE);
-            default -> List.of(trygdeavtaleMyndighetsland);
-        };
     }
 
     private MottakerType mapType(Aktoersroller hovedmottaker) {
