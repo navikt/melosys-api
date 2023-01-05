@@ -23,8 +23,8 @@ class UtbetalingConsumerProducerV2(
     ) = UtbetaldataRestConsumer(
         webClientBuilder
             .baseUrl(url)
-            .filter(headerFilter())
             .filter(genericAuthFilterFactory.getFilter(CLIENT_NAME))
+            .filter(headerFilter())
             .filter(correlationIdOutgoingFilter)
             .filter(errorFilter("Kall mot Utbetalinger feilet."))
             .build()
