@@ -7,7 +7,7 @@ import org.springframework.web.reactive.function.client.WebClient
 @Retryable
 open class UtbetaldataRestConsumer(private val webClient: WebClient) {
 
-    open fun hentUtbetalingsInformasjon(request: UtbetalingRequest) = webClient.post()
+    open fun hentUtbetalingsInformasjon(request: UtbetalingRequest) = webClient.post().uri("")
         .accept(MediaType.APPLICATION_JSON)
         .bodyValue(request)
         .retrieve()
