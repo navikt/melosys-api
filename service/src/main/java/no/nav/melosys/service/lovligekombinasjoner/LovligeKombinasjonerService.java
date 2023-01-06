@@ -218,7 +218,7 @@ public class LovligeKombinasjonerService {
     private Set<Behandlingstyper> behandlingstyperForBruker(Sakstyper sakstype, Sakstemaer sakstema,
                                                             Behandlingstema behandlingstema, Behandling aktivBehandling, Behandling sisteBehandling,
                                                             Behandlingstema sistBehandlingstema, Saksstatuser sistSaksstatus) {
-        Set<Behandlingstyper> behandlingstyper = LovligeSakskombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
+        LinkedHashSet<Behandlingstyper> behandlingstyper = LovligeSakskombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
             .filter(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.sakstema() == sakstema)
             .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())
             .filter(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTemaer().contains(behandlingstema))
@@ -238,7 +238,7 @@ public class LovligeKombinasjonerService {
             behandlingstyper.remove(FØRSTEGANG);
         }
         if (sistSaksstatus != null && Set.of(HENLAGT, HENLAGT_BORTFALT, AVSLUTTET).contains(sistSaksstatus)) {
-            behandlingstyper = Set.of(HENVENDELSE);
+            behandlingstyper = new LinkedHashSet<>(List.of(HENVENDELSE));
         }
         if (!unleash.isEnabled(ToggleName.BEHANDLINGSTYPE_KLAGE)) {
             behandlingstyper.remove(KLAGE);
