@@ -19,15 +19,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class MuligeManuelleBehandlingsendringerTest {
 
-    @Deprecated(since = "Tas vekk samtidig som toggle melosys.behandle_alle_saker")
-    @Test
-    void hentMuligeStatuser_temaOvrigeSedMed_avsluttetErMulig_toggleOff() {
-        var muligeStatuser =
-            MuligeManuelleBehandlingsendringer.hentMuligeStatuser(behandlingMedTema(Behandlingstema.ØVRIGE_SED_MED));
-        assertThat(muligeStatuser).containsExactlyInAnyOrder(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING,
-            AVVENT_FAGLIG_AVKLARING, AVSLUTTET);
-    }
-
     @Test
     void hentMuligeStatuser_temaArbeidUtland_avsluttetErIkkeMulig() {
         var muligeStatuser = MuligeManuelleBehandlingsendringer.hentMuligeStatuser(behandlingMedTema(Behandlingstema.ARBEID_I_UTLANDET));
@@ -60,8 +51,8 @@ class MuligeManuelleBehandlingsendringerTest {
 
     @Test
     void hentMuligeBehandlingstema_gyldigSEDForespørselBehandlingstema_returnererSEDForespørselBehandlingstema() {
-        var muligeBehandlingstema = MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandlingMedTema(ØVRIGE_SED_MED), behandlingsresultatSendtUtland(false), false);
-        var behandlingstemaSedForespørselUtenValgtTema = BEHANDLINGSTEMA_SED_FORESPØRSEL.stream().filter(tema -> tema != ØVRIGE_SED_MED).collect(Collectors.toSet());
+        var muligeBehandlingstema = MuligeManuelleBehandlingsendringer.hentMuligeBehandlingstema(behandlingMedTema(FORESPØRSEL_TRYGDEMYNDIGHET), behandlingsresultatSendtUtland(false), false);
+        var behandlingstemaSedForespørselUtenValgtTema = BEHANDLINGSTEMA_SED_FORESPØRSEL.stream().filter(tema -> tema != FORESPØRSEL_TRYGDEMYNDIGHET).collect(Collectors.toSet());
         assertThat(muligeBehandlingstema).isEqualTo(behandlingstemaSedForespørselUtenValgtTema);
     }
 
@@ -97,7 +88,7 @@ class MuligeManuelleBehandlingsendringerTest {
 
     @Test
     void hentMuligeTyper_feilType_returnererTomListe() {
-        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandlingMedTemaOgType(UTSENDT_ARBEIDSTAKER, SOEKNAD));
+        var muligeTyper = MuligeManuelleBehandlingsendringer.hentMuligeTyper(behandlingMedTemaOgType(UTSENDT_ARBEIDSTAKER, FØRSTEGANG));
         assertThat(muligeTyper).isEmpty();
     }
 

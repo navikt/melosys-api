@@ -116,7 +116,7 @@ public class InnvilgelseArbeidsgiverBrevMapperTest {
 
     private static Behandling lagBehandling(Fagsak fagsak, Set<Saksopplysning> saksopplysninger) {
         Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);
         behandling.setSaksopplysninger(saksopplysninger);
         return behandling;

@@ -176,7 +176,7 @@ public class FamiliemedlemObjectFactory {
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setFagsak(lagFagsak());
         return behandling;

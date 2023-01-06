@@ -154,7 +154,7 @@ class VedtaksfattingFasadeTest {
         Behandling behandling = new Behandling();
         behandling.setId(behandlingID);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();

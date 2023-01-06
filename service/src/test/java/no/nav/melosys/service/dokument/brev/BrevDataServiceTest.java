@@ -610,7 +610,7 @@ class BrevDataServiceTest {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setRegistrertDato(Instant.now());
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);
 
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());

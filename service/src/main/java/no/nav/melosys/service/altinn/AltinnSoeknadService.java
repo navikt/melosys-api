@@ -75,6 +75,9 @@ public class AltinnSoeknadService {
     }
 
     private OpprettSakRequest lagOpprettSakRequest(MedlemskapArbeidEOSM søknad, LocalDate mottaksdato) {
+        if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
+            throw new TekniskException("Støtter ikke lenger disabled melosys.behandle_alle_saker");
+        }
         return new OpprettSakRequest.Builder()
             .medSakstype(Sakstyper.EU_EOS)
             .medSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG)
@@ -86,9 +89,7 @@ public class AltinnSoeknadService {
             .medBehandlingsårsaktype(Behandlingsaarsaktyper.SØKNAD)
             .medMottaksdato(mottaksdato)
             .medBehandlingstema(avklarBehandlingstema(søknad))
-            .medBehandlingstype(unleash.isEnabled("melosys.behandle_alle_saker")
-                ? Behandlingstyper.FØRSTEGANG
-                : Behandlingstyper.SOEKNAD)
+            .medBehandlingstype(Behandlingstyper.FØRSTEGANG)
             .build();
     }
 
@@ -107,7 +108,7 @@ public class AltinnSoeknadService {
             if (unleash.isEnabled("melosys.behandle_alle_saker")) {
                 return Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY;
             } else {
-                return Behandlingstema.ARBEID_ETT_LAND_ØVRIG;
+                throw new TekniskException("Støtter ikke lenger disabled melosys.behandle_alle_saker");
             }
         } else {
             return Behandlingstema.UTSENDT_ARBEIDSTAKER;

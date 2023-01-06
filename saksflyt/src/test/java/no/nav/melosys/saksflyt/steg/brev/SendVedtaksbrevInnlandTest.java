@@ -345,7 +345,7 @@ class SendVedtaksbrevInnlandTest {
     private static Behandling lagBehandling() {
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLINGID);
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
         behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new Soeknad());
         behandling.setFagsak(lagFagsak());

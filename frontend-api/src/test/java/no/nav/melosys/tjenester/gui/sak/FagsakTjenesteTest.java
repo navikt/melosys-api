@@ -171,7 +171,7 @@ class FagsakTjenesteTest {
         fagsak.setBehandlinger(Collections.singletonList(behandling));
         var opprettSakDto = new OpprettSakDto();
         opprettSakDto.setBrukerID(FNR);
-        opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_ETT_LAND_ØVRIG);
+        opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY);
         opprettSakDto.setBehandlingstype(Behandlingstyper.NY_VURDERING);
 
         mockMvc.perform(post(BASE_URL + "/{saksnr}/behandlinger", fagsak.getSaksnummer())

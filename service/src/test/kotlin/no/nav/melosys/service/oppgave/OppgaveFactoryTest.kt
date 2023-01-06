@@ -685,7 +685,7 @@ internal class OppgaveFactoryTest {
         test(
             Sakstyper.EU_EOS,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Behandlingstyper.SOEKNAD,
+            Behandlingstyper.FØRSTEGANG,
             Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET,
             OppgaveBehandlingstema.EU_EOS_LAND,
             Tema.MED,
@@ -699,7 +699,7 @@ internal class OppgaveFactoryTest {
         test(
             Sakstyper.FTRL,
             Sakstemaer.TRYGDEAVGIFT,
-            Behandlingstyper.SOEKNAD,
+            Behandlingstyper.FØRSTEGANG,
             Behandlingstema.ARBEID_FLERE_LAND,
             OppgaveBehandlingstema.UTENFOR_AVTALELAND,
             Tema.TRY,

@@ -45,6 +45,7 @@ import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -498,34 +499,7 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    void opprettProsessinstansNySak_behandlingstypeSøknadTemaIkkeYrkesaktivToggleDisabled() {
-        unleash.disableAll();
-        OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
-        opprettSakDto.setSakstype(Sakstyper.EU_EOS);
-        opprettSakDto.setBehandlingstema(Behandlingstema.IKKE_YRKESAKTIV);
-        String journalpostID = "journalpostID";
-
-
-        prosessinstansService.opprettProsessinstansNySakEØS(journalpostID, opprettSakDto);
-
-
-        verify(prosessinstansRepo).save(piCaptor.capture());
-        Prosessinstans prosessinstans = piCaptor.getValue();
-        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.OPPRETT_NY_SAK_EOS_FRA_OPPGAVE);
-        assertThat(prosessinstans.getData(ProsessDataKey.SAKSTYPE, Sakstyper.class)).isEqualTo(Sakstyper.EU_EOS);
-        assertThat(prosessinstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class)).isEqualTo(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class)).isEqualTo(Behandlingstyper.SOEKNAD);
-        assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class)).isEqualTo(Behandlingstema.IKKE_YRKESAKTIV);
-        assertThat(prosessinstans.getData(ProsessDataKey.BRUKER_ID)).isEqualTo(opprettSakDto.getBrukerID());
-        assertThat(prosessinstans.getData(ProsessDataKey.OPPGAVE_ID)).isEqualTo(opprettSakDto.getOppgaveID());
-        assertThat(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID)).isEqualTo(journalpostID);
-        assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, PeriodeDto.class)).isEqualTo(opprettSakDto.getSoknadDto().getPeriode());
-        assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSLAND, SoeknadslandDto.class)).isEqualTo(opprettSakDto.getSoknadDto().getLand());
-        assertThat(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).isEqualTo(opprettSakDto.getSkalTilordnes());
-    }
-
-    @Test
-    void opprettProsessinstansNySak_behandlingstypeSøknadTemaIkkeYrkesaktiv() {
+    void opprettProsessinstansNySak_behandlingstypeFørstegangTemaIkkeYrkesaktiv() {
         OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.IKKE_YRKESAKTIV);
@@ -551,34 +525,7 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    void opprettProsessinstansNySak_behandlingstypeSedTemaTrygdetidToggleDisabled() {
-        unleash.disableAll();
-        OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
-        opprettSakDto.setSakstype(Sakstyper.EU_EOS);
-        opprettSakDto.setBehandlingstema(Behandlingstema.TRYGDETID);
-        String journalpostID = "journalpostID";
-
-
-        prosessinstansService.opprettProsessinstansNySakEØS(journalpostID, opprettSakDto);
-
-
-        verify(prosessinstansRepo).save(piCaptor.capture());
-        Prosessinstans prosessinstans = piCaptor.getValue();
-        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.OPPRETT_NY_SAK_EOS_FRA_OPPGAVE);
-        assertThat(prosessinstans.getData(ProsessDataKey.SAKSTYPE, Sakstyper.class)).isEqualTo(Sakstyper.EU_EOS);
-        assertThat(prosessinstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class)).isEqualTo(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class)).isEqualTo(Behandlingstyper.SED);
-        assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class)).isEqualTo(Behandlingstema.TRYGDETID);
-        assertThat(prosessinstans.getData(ProsessDataKey.BRUKER_ID)).isEqualTo(opprettSakDto.getBrukerID());
-        assertThat(prosessinstans.getData(ProsessDataKey.OPPGAVE_ID)).isEqualTo(opprettSakDto.getOppgaveID());
-        assertThat(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID)).isEqualTo(journalpostID);
-        assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, PeriodeDto.class)).isEqualTo(opprettSakDto.getSoknadDto().getPeriode());
-        assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSLAND, SoeknadslandDto.class)).isEqualTo(opprettSakDto.getSoknadDto().getLand());
-        assertThat(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).isEqualTo(opprettSakDto.getSkalTilordnes());
-    }
-
-    @Test
-    void opprettProsessinstansNySak_behandlingstypeSedTemaTrygdetid() {
+    void opprettProsessinstansNySak_behandlingstypeFørstegangTemaTrygdetid() {
         OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.TRYGDETID);
@@ -650,6 +597,7 @@ class ProsessinstansServiceTest {
     }
 
     @Test
+    @Disabled("funker ikke så lenge melosys.behandle_alle_saker finnes")
     void opprettProsessinstansNySakFTRLTrygdeavtaleToggleDisabled_altOk_setterProsessInstansKorrekt() {
         unleash.disableAll();
         OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
@@ -666,7 +614,7 @@ class ProsessinstansServiceTest {
         assertThat(prosessinstans.getType()).isEqualTo(ProsessType.OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE_FRA_OPPGAVE);
         assertThat(prosessinstans.getData(ProsessDataKey.SAKSTYPE, Sakstyper.class)).isEqualTo(Sakstyper.FTRL);
         assertThat(prosessinstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class)).isEqualTo(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class)).isEqualTo(Behandlingstyper.SOEKNAD);
+        assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class)).isEqualTo(Behandlingstyper.FØRSTEGANG);
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class)).isEqualTo(Behandlingstema.ARBEID_I_UTLANDET);
         assertThat(prosessinstans.getData(ProsessDataKey.BRUKER_ID)).isEqualTo(opprettSakDto.getBrukerID());
         assertThat(prosessinstans.getData(ProsessDataKey.OPPGAVE_ID)).isEqualTo(opprettSakDto.getOppgaveID());
