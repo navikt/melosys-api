@@ -67,8 +67,9 @@ public class LovligeKombinasjonerTjeneste {
         @RequestParam("sakstype") Sakstyper sakstype,
         @RequestParam("sakstema") Sakstemaer sakstema,
         @RequestParam(value = "behandlingstema", required = false) Behandlingstema behandlingstema,
+        @RequestParam(value = "aktivBehandlingID", required = false) Long aktivBehandlingID,
         @RequestParam(value = "sisteBehandlingsID", required = false) Long sisteBehandlingsID
     ) {
-        return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, sisteBehandlingsID, sisteBehandlingsID));
+        return ResponseEntity.ok(lovligeKombinasjonerService.hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, aktivBehandlingID, sisteBehandlingsID));
     }
 }

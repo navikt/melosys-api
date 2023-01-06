@@ -1,5 +1,6 @@
 package no.nav.melosys.service.lovligekombinasjoner;
 
+import java.util.List;
 import java.util.Set;
 
 import no.finn.unleash.FakeUnleash;
@@ -26,7 +27,6 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -351,12 +351,46 @@ class LovligeKombinasjonerServiceTest {
     }
 
     @Test
-    void hentMuligeBehandlingstyper_senderKunMedBehandlingID_henterBehandlingOgBehandlingsresultat() {
-        lovligeKombinasjonerService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, null, 1L);
+    void hentMuligeBehandlingstyper_aktivBehandlingSomErFørst_skalReturnereAlleBehandlingstyper() {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setType(EU_EOS);
+        Behandling aktivBehandling = behandlingMedTemaOgType(UTSENDT_ARBEIDSTAKER, FØRSTEGANG);
+        aktivBehandling.setId(1L);
+        aktivBehandling.setFagsak(fagsak);
+        aktivBehandling.setStatus(UNDER_BEHANDLING);
+        fagsak.getBehandlinger().add(aktivBehandling);
+        when(behandlingService.hentBehandling(aktivBehandling.getId())).thenReturn(aktivBehandling);
 
 
-        verify(behandlingService).hentBehandling(1L);
-        verify(behandlingsresultatService).hentBehandlingsresultatMedAnmodningsperioder(1L);
+        Set<Behandlingstyper> muligeBehandlingstyper = lovligeKombinasjonerService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, aktivBehandling.getId(), null);
+
+
+        assertThat(muligeBehandlingstyper).containsExactly(FØRSTEGANG, NY_VURDERING, KLAGE, HENVENDELSE);
+    }
+
+    @Test
+    void hentMuligeBehandlingstyper_aktivBehandlingSomIkkeErFørst_skalIkkeHaFørstegang() {
+        Fagsak fagsak = new Fagsak();
+        fagsak.setType(EU_EOS);
+
+        Behandling forrigeBehandling = behandlingMedTemaOgType(UTSENDT_ARBEIDSTAKER, FØRSTEGANG);
+        forrigeBehandling.setId(1L);
+        forrigeBehandling.setFagsak(fagsak);
+        forrigeBehandling.setStatus(AVSLUTTET);
+
+        Behandling aktivBehandling = behandlingMedTemaOgType(UTSENDT_ARBEIDSTAKER, NY_VURDERING);
+        aktivBehandling.setId(2L);
+        aktivBehandling.setFagsak(fagsak);
+        aktivBehandling.setStatus(UNDER_BEHANDLING);
+        fagsak.getBehandlinger().addAll(List.of(forrigeBehandling, aktivBehandling));
+
+        when(behandlingService.hentBehandling(aktivBehandling.getId())).thenReturn(aktivBehandling);
+
+
+        Set<Behandlingstyper> muligeBehandlingstyper = lovligeKombinasjonerService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, aktivBehandling.getId(), null);
+
+
+        assertThat(muligeBehandlingstyper).isNotEmpty().doesNotContain(FØRSTEGANG);
     }
 
     @Test

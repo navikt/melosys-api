@@ -173,7 +173,7 @@ public class LovligeKombinasjonerService {
         Behandling aktivBehandling = aktivBehandlingID != null ? behandlingService.hentBehandling(aktivBehandlingID) : null;
         Behandling sisteBehandling = sisteBehandlingID != null ? behandlingService.hentBehandling(sisteBehandlingID) : null;
         Behandlingsresultat sisteBehandlingsresultat = sisteBehandlingID != null ? behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(sisteBehandlingID) : null;
-        return hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, null, sisteBehandling, sisteBehandlingsresultat);
+        return hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, aktivBehandling, sisteBehandling, sisteBehandlingsresultat);
     }
 
     Set<Behandlingstyper> hentMuligeBehandlingstyper(
@@ -199,7 +199,7 @@ public class LovligeKombinasjonerService {
 
         switch (hovedpart) {
             case BRUKER -> {
-                return behandlingstyperForBruker(sakstype, sakstema, behandlingstema, sisteBehandling, sistBehandlingstema, sistSaksstatus);
+                return behandlingstyperForBruker(sakstype, sakstema, behandlingstema, aktivBehandling, sisteBehandling, sistBehandlingstema, sistSaksstatus);
             }
             case VIRKSOMHET -> {
                 return LovligeSakskombinasjoner.muligeSaksKombinasjonerVirksomhet.get(sakstype).stream()
@@ -216,7 +216,7 @@ public class LovligeKombinasjonerService {
     }
 
     private Set<Behandlingstyper> behandlingstyperForBruker(Sakstyper sakstype, Sakstemaer sakstema,
-                                                            Behandlingstema behandlingstema, Behandling sisteBehandling,
+                                                            Behandlingstema behandlingstema, Behandling aktivBehandling, Behandling sisteBehandling,
                                                             Behandlingstema sistBehandlingstema, Saksstatuser sistSaksstatus) {
         Set<Behandlingstyper> behandlingstyper = LovligeSakskombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
             .filter(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.sakstema() == sakstema)
@@ -230,6 +230,12 @@ public class LovligeKombinasjonerService {
             BESLUTNING_LOVVALG_ANNET_LAND,
             ANMODNING_OM_UNNTAK_HOVEDREGEL).contains(sistBehandlingstema)) {
             behandlingstyper = new LinkedHashSet<>(List.of(NY_VURDERING, KLAGE, HENVENDELSE));
+        }
+        if (aktivBehandling != null && aktivBehandling.getFagsak().getBehandlinger().size() > 1) {
+            behandlingstyper.remove(FØRSTEGANG);
+        }
+        if (sisteBehandling != null && sisteBehandling.erInaktiv()) {
+            behandlingstyper.remove(FØRSTEGANG);
         }
         if (sisteBehandling != null && sisteBehandling.erInaktiv()) {
             behandlingstyper.remove(FØRSTEGANG);
