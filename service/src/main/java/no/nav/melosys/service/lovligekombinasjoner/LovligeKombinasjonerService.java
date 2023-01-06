@@ -159,7 +159,7 @@ public class LovligeKombinasjonerService {
      * @param sakstema           Allerede valgt sakstema.
      * @param behandlingstema    Allerede valgt behandlingstema.
      * @param aktivBehandlingID  Nåværende behandling i fagsaken. (default = null) Brukt ved endring av sak.
-     * @param sisteBehandlingsID Forrige behandling i fagsaken. (default = null)
+     * @param sisteBehandlingID Forrige behandling i fagsaken. (default = null)
      *                           Brukt ved knytting til eksisterende sak.
      */
     public Set<Behandlingstyper> hentMuligeBehandlingstyper(
@@ -168,11 +168,11 @@ public class LovligeKombinasjonerService {
         Sakstemaer sakstema,
         @Nullable Behandlingstema behandlingstema,
         @Nullable Long aktivBehandlingID,
-        @Nullable Long sisteBehandlingsID
+        @Nullable Long sisteBehandlingID
     ) {
         Behandling aktivBehandling = aktivBehandlingID != null ? behandlingService.hentBehandling(aktivBehandlingID) : null;
-        Behandling sisteBehandling = sisteBehandlingsID != null ? behandlingService.hentBehandling(sisteBehandlingsID) : null;
-        Behandlingsresultat sisteBehandlingsresultat = sisteBehandlingsID != null ? behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(sisteBehandlingsID) : null;
+        Behandling sisteBehandling = sisteBehandlingID != null ? behandlingService.hentBehandling(sisteBehandlingID) : null;
+        Behandlingsresultat sisteBehandlingsresultat = sisteBehandlingID != null ? behandlingsresultatService.hentBehandlingsresultatMedAnmodningsperioder(sisteBehandlingID) : null;
         return hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, null, sisteBehandling, sisteBehandlingsresultat);
     }
 
