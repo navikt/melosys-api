@@ -57,7 +57,7 @@ class JournalfoeringIT(
     }
 
     @Test
-    fun journalførOgOpprettSakBehandleAlleSaker_EU_EOS_prosesserKjørerAlleSteg() {
+    fun journalførOgOpprettSak_EU_EOS_prosesserKjørerAlleSteg() {
         unleash.enable("melosys.behandle_alle_saker")
         val journalfoeringOpprettDto = defaultJournalføringDto().apply {
             fagsak.sakstype = Sakstyper.EU_EOS.kode
