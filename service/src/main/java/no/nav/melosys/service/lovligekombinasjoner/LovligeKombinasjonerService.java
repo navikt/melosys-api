@@ -258,14 +258,18 @@ public class LovligeKombinasjonerService {
     }
 
     public void validerOpprettelseOgEndring(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        validerOpprettelseOgEndring(null, hovedpart, sakstype, sakstema, behandlingstema, behandlingstype);
+    }
+
+    public void validerOpprettelseOgEndring(Behandling aktivBehandling, Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
         validerSakstema(hovedpart, sakstype, sakstema);
         validerBehandlingstema(hovedpart, sakstype, sakstema, behandlingstema, null);
-        validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, null, null);
+        validerBehandlingstype(hovedpart, sakstype, sakstema, behandlingstema, behandlingstype, aktivBehandling, null, null);
     }
 
     public void validerBehandlingstemaOgBehandlingstypeForAndregangsbehandling(Fagsak fagsak, Behandling sistBehandling, Behandlingsresultat sistBehandlingsresultat, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
         validerBehandlingstema(fagsak.getHovedpartRolle(), fagsak.getType(), fagsak.getTema(), behandlingstema, sistBehandling.getTema());
-        validerBehandlingstype(fagsak.getHovedpartRolle(), fagsak.getType(), fagsak.getTema(), behandlingstema, behandlingstype, sistBehandling, sistBehandlingsresultat);
+        validerBehandlingstype(fagsak.getHovedpartRolle(), fagsak.getType(), fagsak.getTema(), behandlingstema, behandlingstype, null, sistBehandling, sistBehandlingsresultat);
     }
 
     private void validerSakstema(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema) {
@@ -280,8 +284,10 @@ public class LovligeKombinasjonerService {
         }
     }
 
-    private void validerBehandlingstype(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype, Behandling sistBehandling, Behandlingsresultat sistBehandlingsresultat) {
-        if (!hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, null, sistBehandling, sistBehandlingsresultat).contains(behandlingstype)) {
+    private void validerBehandlingstype(Aktoersroller hovedpart, Sakstyper sakstype, Sakstemaer sakstema,
+                                        Behandlingstema behandlingstema, Behandlingstyper behandlingstype,
+                                        Behandling aktivBehandling, Behandling sistBehandling, Behandlingsresultat sistBehandlingsresultat) {
+        if (!hentMuligeBehandlingstyper(hovedpart, sakstype, sakstema, behandlingstema, aktivBehandling, sistBehandling, sistBehandlingsresultat).contains(behandlingstype)) {
             throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype med de andre valgte verdiene");
         }
     }
