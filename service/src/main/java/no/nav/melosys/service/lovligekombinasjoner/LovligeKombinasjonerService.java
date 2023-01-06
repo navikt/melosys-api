@@ -237,9 +237,6 @@ public class LovligeKombinasjonerService {
         if (sisteBehandling != null && sisteBehandling.erInaktiv()) {
             behandlingstyper.remove(FØRSTEGANG);
         }
-        if (sisteBehandling != null && sisteBehandling.erInaktiv()) {
-            behandlingstyper.remove(FØRSTEGANG);
-        }
         if (sistSaksstatus != null && Set.of(HENLAGT, HENLAGT_BORTFALT, AVSLUTTET).contains(sistSaksstatus)) {
             behandlingstyper = Set.of(HENVENDELSE);
         }
