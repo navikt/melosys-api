@@ -281,7 +281,7 @@ class LovligeKombinasjonerServiceTest {
     }
 
     @Test
-    void hentMuligeBehandlingstemaer_ingenHovedpart_skalReturnereSammeSomHovedpartVIRKSOMHETgBRUKER() {
+    void hentMuligeBehandlingstemaer_ingenHovedpart_skalReturnereSammeSomHovedpartVIRKSOMHETogBRUKER() {
         Set<Behandlingstema> behandlingstemaer = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(null, TRYGDEAVTALE, TRYGDEAVGIFT, null);
 
         Set<Behandlingstema> behandlingstemaerVirksomhet = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, TRYGDEAVGIFT, null);
@@ -293,11 +293,28 @@ class LovligeKombinasjonerServiceTest {
     }
 
     @Test
+    void hentMuligeBehandlingstemaer_ingenHovedpartMedlemskapLovvalg_skalReturnereSedBehandlingstema() {
+        Set<Behandlingstema> behandlingstemaer = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(null, EU_EOS, MEDLEMSKAP_LOVVALG, null);
+
+        assertThat(behandlingstemaer)
+            .contains(BESLUTNING_LOVVALG_NORGE);
+    }
+
+    @Test
     void hentMuligeBehandlingstemaer_ingenHovedpartUnntak_skalReturnereSedBehandlingstema() {
         Set<Behandlingstema> behandlingstemaer = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(null, EU_EOS, UNNTAK, null);
 
         assertThat(behandlingstemaer)
-            .contains(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, BESLUTNING_LOVVALG_ANNET_LAND);
+            .contains(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, BESLUTNING_LOVVALG_ANNET_LAND, ANMODNING_OM_UNNTAK_HOVEDREGEL);
+    }
+
+    @Test
+    void hentMuligeBehandlingstemaer_ingenHovedpartTrygdeavgift_skalReturnereIngenSedBehandlingstema() {
+        Set<Behandlingstema> behandlingstemaer = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(null, EU_EOS, TRYGDEAVGIFT, null);
+
+        assertThat(behandlingstemaer)
+            .isNotEmpty()
+            .doesNotContain(BESLUTNING_LOVVALG_NORGE, REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, BESLUTNING_LOVVALG_ANNET_LAND, ANMODNING_OM_UNNTAK_HOVEDREGEL);
     }
 
     @Test

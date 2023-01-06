@@ -140,11 +140,8 @@ public class LovligeKombinasjonerService {
     }
 
     private Set<Behandlingstema> hentMuligeBehandlingstemaerSED(Sakstyper sakstype, Sakstemaer sakstema) {
-        if (sakstype == Sakstyper.EU_EOS && sakstema == Sakstemaer.UNNTAK) {
-            return Set.of(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, BESLUTNING_LOVVALG_ANNET_LAND);
-        }
-        if (sakstype == Sakstyper.EU_EOS && sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG) {
-            return Set.of(BESLUTNING_LOVVALG_NORGE);
+        if (sakstype == Sakstyper.EU_EOS) {
+            return LovligeSakskombinasjoner.EU_EOS_SED_BEHANDLINGSTEMA.getOrDefault(sakstema, Collections.emptySet());
         }
         return Collections.emptySet();
     }
