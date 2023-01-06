@@ -10,7 +10,7 @@ import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.melosys.integrasjon.utbetaling.Periode
 import no.nav.melosys.integrasjon.utbetaling.UtbetalingRequest
-import no.nav.melosys.integrasjon.utbetaling.UtbetalingConsumerProducerV2
+import no.nav.melosys.integrasjon.utbetaling.UtbetaldataRestConsumerProducer
 import no.nav.melosys.integrasjon.utbetaling.UtbetaldataRestConsumer
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import org.assertj.core.api.Assertions
@@ -31,7 +31,7 @@ import java.time.LocalDate
     OAuthMockServer::class,
 
     GenericAuthFilterFactory::class,
-    UtbetalingConsumerProducerV2::class,
+    UtbetaldataRestConsumerProducer::class,
 )
 @WebMvcTest
 @AutoConfigureWebClient
