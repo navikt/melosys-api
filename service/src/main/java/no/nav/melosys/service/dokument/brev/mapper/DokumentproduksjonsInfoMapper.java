@@ -35,7 +35,8 @@ public class DokumentproduksjonsInfoMapper {
         TRYGDEAVTALE_GB,
         MELDING_HENLAGT_SAK,
         GENERELT_FRITEKSTVEDLEGG,
-        TRYGDEAVTALE_US
+        TRYGDEAVTALE_US,
+        TRYGDEAVTALE_CAN
     );
 
     static {
