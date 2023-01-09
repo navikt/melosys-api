@@ -175,6 +175,10 @@ public class Prosessinstans {
         this.data.putAll(data);
     }
 
+    public void removeData(ProsessDataKey key) {
+        this.data.remove(key.getKode());
+    }
+
     public ProsessSteg getSistFullførtSteg() {
         return sistFullførtSteg;
     }

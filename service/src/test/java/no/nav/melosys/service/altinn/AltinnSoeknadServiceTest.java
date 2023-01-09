@@ -55,7 +55,6 @@ class AltinnSoeknadServiceTest {
     private PersondataFasade persondataFasade;
     @Mock
     private AvklarteVirksomheterService avklarteVirksomheterService;
-    private final FakeUnleash unleash = new FakeUnleash();
 
     private AltinnSoeknadService altinnSoeknadService;
 
@@ -71,8 +70,7 @@ class AltinnSoeknadServiceTest {
     @BeforeEach
     void setup() {
         altinnSoeknadService = new AltinnSoeknadService(soknadMottakConsumer, fagsakService,
-            mottatteOpplysningerService, persondataFasade, avklarteVirksomheterService, unleash);
-        unleash.enableAll();
+            mottatteOpplysningerService, persondataFasade, avklarteVirksomheterService);
     }
 
     @Test

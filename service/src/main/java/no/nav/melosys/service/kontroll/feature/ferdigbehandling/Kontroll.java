@@ -6,10 +6,10 @@ import java.util.Objects;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -85,19 +85,13 @@ class Kontroll {
     }
 
     private FerdigbehandlingKontrollData hentKontrollDataForAvslagOgHenleggelse(Behandling behandling) {
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            MottatteOpplysningerData mottatteOpplysningerData = null;
+        MottatteOpplysningerData mottatteOpplysningerData = null;
 
-            if (!SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"))) {
-                mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
-            }
-            Persondata persondata = hentPersondata(behandling);
-            return FerdigbehandlingKontrollData.lagKontrollDataForAvslag(persondata, mottatteOpplysningerData);
-        } else  {
-            MottatteOpplysningerData mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
-            Persondata persondata = hentPersondata(behandling);
-            return FerdigbehandlingKontrollData.lagKontrollDataForAvslag(persondata, mottatteOpplysningerData);
+        if (!SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"))) {
+            mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         }
+        Persondata persondata = hentPersondata(behandling);
+        return FerdigbehandlingKontrollData.lagKontrollDataForAvslag(persondata, mottatteOpplysningerData);
     }
 
     private FerdigbehandlingKontrollData hentVedtakKontrollData(Behandling behandling) {
@@ -115,7 +109,7 @@ class Kontroll {
         MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();
         MottatteOpplysningerData mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         Persondata persondata = hentPersondata(behandling);
-        return FerdigbehandlingKontrollData.lagKontrollDataForFTRL(medlemskapDokument,persondata, mottatteOpplysningerData);
+        return FerdigbehandlingKontrollData.lagKontrollDataForFTRL(medlemskapDokument, persondata, mottatteOpplysningerData);
     }
 
     private Persondata hentPersondata(Behandling behandling) {

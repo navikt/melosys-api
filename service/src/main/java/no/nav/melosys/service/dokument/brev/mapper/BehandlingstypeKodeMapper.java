@@ -10,26 +10,6 @@ final class BehandlingstypeKodeMapper {
         throw new IllegalStateException("Utility class");
     }
 
-    static BehandlingstypeKode hentBehandlingstypeKode(Behandling behandling) {
-
-        if (behandling.erBehandlingAvSøknadGammel()) {
-            if (behandling.erNyVurdering()) {
-                return BehandlingstypeKode.NY_VURDERING;
-            } else if (behandling.erEndretPeriode()) {
-                return BehandlingstypeKode.ENDRET_PERIODE;
-            } else if (behandling.erKlage()) {
-                return BehandlingstypeKode.KLAGE;
-            }
-            return BehandlingstypeKode.SOEKNAD;
-        } else if (behandling.erNorgeUtpekt()) {
-            return BehandlingstypeKode.UTL_MYND_UTPEKT_NORGE;
-        } else if (behandling.getType() == Behandlingstyper.FØRSTEGANG) {
-            return BehandlingstypeKode.SOEKNAD;
-        }
-
-        return BehandlingstypeKode.valueOf(behandling.getType().getKode());
-    }
-
     static BehandlingstypeKode hentBehandlingstypeKodeAlleBehandlinger(Behandling behandling) {
         if (behandling.erNorgeUtpekt()) {
             return BehandlingstypeKode.UTL_MYND_UTPEKT_NORGE;

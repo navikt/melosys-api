@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import com.google.common.collect.Lists;
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -29,7 +28,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -45,15 +43,13 @@ class OpprettNyBehandlingFraSedTest {
     @Mock
     private OppgaveService oppgaveFasade;
 
-    private final FakeUnleash unleash = new FakeUnleash();
     private final LocalDate mottaksdato = LocalDate.EPOCH;
 
     private OpprettNyBehandlingFraSed opprettNyBehandlingFraSed;
 
     @BeforeEach
     public void setup() {
-        opprettNyBehandlingFraSed = new OpprettNyBehandlingFraSed(fagsakService, behandlingService, oppgaveFasade, joarkFasade, unleash);
-        unleash.enableAll();
+        opprettNyBehandlingFraSed = new OpprettNyBehandlingFraSed(fagsakService, behandlingService, oppgaveFasade, joarkFasade);
     }
 
     @Test

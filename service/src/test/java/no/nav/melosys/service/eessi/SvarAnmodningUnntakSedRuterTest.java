@@ -43,14 +43,11 @@ class SvarAnmodningUnntakSedRuterTest {
     @Mock
     private OppgaveService oppgaveService;
 
-    private final FakeUnleash unleash = new FakeUnleash();
-
     private SvarAnmodningUnntakSedRuter svarAnmodningUnntakSedRuter;
 
     @BeforeEach
     public void setUp() {
-        svarAnmodningUnntakSedRuter = new SvarAnmodningUnntakSedRuter(prosessinstansService, fagsakService, anmodningsperiodeService, oppgaveService, unleash);
-        unleash.enableAll();
+        svarAnmodningUnntakSedRuter = new SvarAnmodningUnntakSedRuter(prosessinstansService, fagsakService, anmodningsperiodeService, oppgaveService);
     }
 
     @Test

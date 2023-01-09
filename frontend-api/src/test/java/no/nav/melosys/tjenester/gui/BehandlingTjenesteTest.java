@@ -164,26 +164,6 @@ class BehandlingTjenesteTest {
             .andExpect(MockMvcResultMatchers.jsonPath("$.length()", equalTo(MULIGE_STATUSER.size())));
     }
 
-    @Test
-    void hentMuligeBehandlingstema() throws Exception {
-        when(behandlingService.hentMuligeBehandlingstema(BEHANDLING_ID)).thenReturn(MULIGE_BEHANDLINGSTEMA);
-
-        mockMvc.perform(get(BASE_URL + "/{behandlingID}/mulige-behandlingstema", BEHANDLING_ID)
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.length()", equalTo(MULIGE_BEHANDLINGSTEMA.size())));
-    }
-
-    @Test
-    void hentMuligeTyper() throws Exception {
-        when(behandlingService.hentMuligeTyper(BEHANDLING_ID)).thenReturn(MULIGE_TYPER);
-
-        mockMvc.perform(get(BASE_URL + "/{behandlingID}/mulige-typer", BEHANDLING_ID)
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.length()", equalTo(MULIGE_TYPER.size())));
-    }
-
     private Behandling opprettTomBehandlingMedId() {
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);

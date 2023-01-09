@@ -13,7 +13,6 @@ public final class Oppgave {
     private final String aktørId;
     private final String orgnr;
     private final String behandlingstema;
-    private final String behandlingstype;
     private final String beskrivelse;
     private final Fagsystem behandlesAvApplikasjon;
     private final ZonedDateTime opprettetTidspunkt;
@@ -36,7 +35,6 @@ public final class Oppgave {
         private String orgnr;
         private Fagsystem behandlesAvApplikasjon;
         private String behandlingstema;
-        private String behandlingstype;
         private String beskrivelse;
         private ZonedDateTime opprettetTidspunkt;
         private LocalDate fristFerdigstillelse;
@@ -123,12 +121,6 @@ public final class Oppgave {
             return this;
         }
 
-
-        public Builder setBehandlingstype(String behandlingstype) {
-            this.behandlingstype = behandlingstype;
-            return this;
-        }
-
         public Builder setBehandlingstema(String behandlingstema) {
             this.behandlingstema = behandlingstema;
             return this;
@@ -173,7 +165,6 @@ public final class Oppgave {
         this.versjon = builder.versjon;
         this.aktørId = builder.aktørId;
         this.orgnr = builder.orgnr;
-        this.behandlingstype = builder.behandlingstype;
         this.behandlingstema = builder.behandlingstema;
         this.beskrivelse = builder.beskrivelse;
         this.tildeltEnhetsnr = builder.tildeltEnhetsnr;
@@ -196,10 +187,6 @@ public final class Oppgave {
 
     public String getBehandlingstema() {
         return behandlingstema;
-    }
-
-    public String getBehandlingstype() {
-        return behandlingstype;
     }
 
     public String getBeskrivelse() {

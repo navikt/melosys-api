@@ -50,22 +50,22 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
         entry(Medfolgende_barn_begrunnelser.MANGLER_OPPLYSNINGER, BarnAvslagBegrunnelseKode.MANGLER_OPPLYSNINGER));
 
     @Override
-    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevdata, boolean enableBehandleAlleSaker) throws JAXBException, SAXException {
+    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevdata) throws JAXBException, SAXException {
         BrevDataInnvilgelse brevDataInnvilgelse = (BrevDataInnvilgelse) brevdata;
 
         VedleggMapper vedleggMapper = new VedleggMapper(behandling, resultat);
         vedleggMapper.map(brevDataInnvilgelse.vedleggA1);
 
-        Fag fag = mapFag(behandling, resultat, brevDataInnvilgelse, enableBehandleAlleSaker);
+        Fag fag = mapFag(behandling, resultat, brevDataInnvilgelse);
 
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = lagBrevdataType(fellesType, navFelles, fag, vedleggMapper.hent());
         return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    private Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataInnvilgelse brevdata, boolean enableBehandleAlleSaker) {
+    private Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataInnvilgelse brevdata) {
         Fag fag = new Fag();
 
-        fag.setBehandlingstype(enableBehandleAlleSaker ? BehandlingstypeKodeMapper.hentBehandlingstypeKodeAlleBehandlinger(behandling) : BehandlingstypeKodeMapper.hentBehandlingstypeKode(behandling));
+        fag.setBehandlingstype(BehandlingstypeKodeMapper.hentBehandlingstypeKodeAlleBehandlinger(behandling));
         fag.setSakstype(SakstypeKode.valueOf(behandling.getFagsak().getType().getKode()));
 
         AvklartVirksomhet hovedvirksomhet = brevdata.hovedvirksomhet;

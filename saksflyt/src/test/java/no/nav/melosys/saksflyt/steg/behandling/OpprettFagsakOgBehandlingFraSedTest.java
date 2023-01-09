@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import java.time.LocalDate;
 
 import com.google.common.collect.Lists;
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -41,7 +40,6 @@ class OpprettFagsakOgBehandlingFraSedTest {
     @Mock
     private JoarkFasade joarkFasade;
 
-    private final FakeUnleash unleash = new FakeUnleash();
     private OpprettFagsakOgBehandlingFraSed opprettFagsakOgBehandlingFraSed;
 
     @Captor
@@ -49,9 +47,8 @@ class OpprettFagsakOgBehandlingFraSedTest {
 
     @BeforeEach
     void setUp() {
-        opprettFagsakOgBehandlingFraSed = new OpprettFagsakOgBehandlingFraSed(fagsakService, joarkFasade, unleash);
+        opprettFagsakOgBehandlingFraSed = new OpprettFagsakOgBehandlingFraSed(fagsakService, joarkFasade);
         when(fagsakService.nyFagsakOgBehandling(any())).thenReturn(lagFagsak());
-        unleash.enableAll();
     }
 
     @Test

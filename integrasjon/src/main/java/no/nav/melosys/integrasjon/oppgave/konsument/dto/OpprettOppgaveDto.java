@@ -17,7 +17,6 @@ public class OpprettOppgaveDto {
     private String orgnr;
     private String behandlesAvApplikasjon;
     private String behandlingstema;
-    private String behandlingstype;
     private String beskrivelse;
     @JsonSerialize(using = ToStringSerializer.class)
     @JsonDeserialize(using = LocalDateDeserializer.class)
@@ -69,14 +68,6 @@ public class OpprettOppgaveDto {
 
     public void setBehandlingstema(String behandlingstema) {
         this.behandlingstema = behandlingstema;
-    }
-
-    public String getBehandlingstype() {
-        return behandlingstype;
-    }
-
-    public void setBehandlingstype(String behandlingstype) {
-        this.behandlingstype = behandlingstype;
     }
 
     public String getBeskrivelse() {
@@ -167,7 +158,6 @@ public class OpprettOppgaveDto {
             ", orgnr='" + orgnr + '\'' +
             ", behandlesAvApplikasjon='" + behandlesAvApplikasjon + '\'' +
             ", behandlingstema='" + behandlingstema + '\'' +
-            ", behandlingstype='" + behandlingstype + '\'' +
             ", beskrivelse='" + beskrivelse + '\'' +
             ", fristFerdigstillelse=" + fristFerdigstillelse +
             ", journalpostId='" + journalpostId + '\'' +

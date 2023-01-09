@@ -44,6 +44,10 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private Persondata personMottaker;
     private List<SaksvedleggBestilling> saksvedleggBestilling;
     private Distribusjonstype distribusjonstype;
+    /**
+     * @deprecated Å bare sende en boolean funker dårlig for oversikt i opprydding. Må gjøres på en annen måte
+     */
+    @Deprecated
     private boolean toggleEnabled;
     private List<FritekstvedleggBestilling> fritekstvedleggBestilling;
 
@@ -303,6 +307,10 @@ public class DokgenBrevbestilling extends Brevbestilling {
             return (T) this;
         }
 
+        /**
+         * @deprecated Å bare sende en boolean funker dårlig for oversikt under opprydding av toggle. Må gjøres på en annen måte
+         */
+        @Deprecated
         public T medToggleEnabled(boolean toggleEnabled) {
             this.toggleEnabled = toggleEnabled;
             return (T) this;

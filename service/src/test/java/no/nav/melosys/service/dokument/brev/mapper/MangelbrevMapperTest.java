@@ -44,13 +44,14 @@ class MangelbrevMapperTest {
 
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
 
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
         brevData.fritekst = "Test";
 
-        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, null, brevData, false);
+        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, null, brevData);
 
         assertThat(xml).isNotNull();
     }
@@ -63,30 +64,9 @@ class MangelbrevMapperTest {
 
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
-
-        Fag fag = mapper.mapFag(brevData, behandling, false);
-
-        assertThat(fag).isNotNull();
-        assertThat(fag.getDatoMottatt()).isNotNull();
-        assertThat(fag.getAvsender()).isNotNull();
-        assertThat(fag.getBehandlingstype()).isEqualTo(BehandlingstypeKode.SOEKNAD);
-
-        assertThat(fag.getManglendeOpplysninger()).isNotNull();
-        assertThat(fag.getManglendeOpplysninger().getFristDato()).isNotNull();
-        assertThat(fag.getManglendeOpplysninger().getManglendeOpplysningerFritekst()).isNotNull();
-    }
-
-    @Test
-    void mapFag_behandleAlleSaker() {
-        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
-        brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
-        brevData.fritekst = "Test";
-
-        Behandling behandling = new Behandling();
-        behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
 
-        Fag fag = mapper.mapFag(brevData, behandling, true);
+        Fag fag = mapper.mapFag(brevData, behandling);
 
         assertThat(fag).isNotNull();
         assertThat(fag.getDatoMottatt()).isNotNull();
@@ -104,7 +84,7 @@ class MangelbrevMapperTest {
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
         assertThatExceptionOfType(IntegrasjonException.class)
-            .isThrownBy(() -> mapper.mapFag(brevData, new Behandling(), false))
+            .isThrownBy(() -> mapper.mapFag(brevData, new Behandling()))
             .withMessageContaining("Mangelbrev mangler informasjon");
     }
 }

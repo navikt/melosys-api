@@ -47,11 +47,9 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     private static final String[] OPPGAVETYPER_BEHANDLINGSOPPGAVE = new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode(), Oppgavetyper.BEH_SED.getKode(), Oppgavetyper.VURD_HENV.getKode()};
 
     private final OppgaveConsumer oppgaveConsumer;
-    private final Unleash unleash;
 
     public OppgaveFasadeImpl(OppgaveConsumer oppgaveConsumer, Unleash unleash) {
         this.oppgaveConsumer = oppgaveConsumer;
-        this.unleash = unleash;
     }
 
     @Override
@@ -76,29 +74,6 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .medSorteringsfelt(SORTERINGSFELT_FRIST)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .medTema(hentGyldigeTemaer())
-            .medTildeltRessurs(false)
-            .medBehandlesAvApplikasjon(Fagsystem.MELOSYS.getKode());
-
-        List<OppgaveDto> oppgaver = oppgaveConsumer.hentOppgaveListe(searchRequestBuilder.build());
-
-        return oppgaver.stream().map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
-            .filter(erGyldigBehandlingsoppgave)
-            .toList();
-    }
-
-    /**
-     * @deprecated Fjernes med toggle melosys.behandle_alle_saker
-     */
-    @Deprecated
-    @Override
-    public List<Oppgave> finnUtildelteOppgaverEtterFrist(String behandlingstype, String behandlingstema) {
-        OppgaveSearchRequest.Builder searchRequestBuilder = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
-            .medBehandlingsType(behandlingstype)
-            .medBehandlingstema(behandlingstema)
-            .medOppgaveTyper(hentGyldigeOppgavetyper())
-            .medSorteringsfelt(SORTERINGSFELT_FRIST)
-            .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
-            .medTema(Tema.MED.getKode(), Tema.UFM.getKode())
             .medTildeltRessurs(false)
             .medBehandlesAvApplikasjon(Fagsystem.MELOSYS.getKode());
 
@@ -143,7 +118,6 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         oppgaveDto.setAktørId(oppgave.getAktørId());
         oppgaveDto.setOrgnr(oppgave.getOrgnr());
         oppgaveDto.setBehandlingstema(oppgave.getBehandlingstema());
-        oppgaveDto.setBehandlingstype(oppgave.getBehandlingstype());
         oppgaveDto.setBeskrivelse(oppgave.getBeskrivelse());
 
         if (oppgave.getFristFerdigstillelse() != null) {
@@ -201,10 +175,6 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
 
         if (oppgaveOppdatering.getBehandlingstema() != null) {
             oppgaveDto.setBehandlingstema(oppgaveOppdatering.getBehandlingstema());
-        }
-
-        if (oppgaveOppdatering.getBehandlingstype() != null) {
-            oppgaveDto.setBehandlingstype(oppgaveOppdatering.getBehandlingstype());
         }
 
         if (StringUtils.isNotEmpty(oppgaveOppdatering.getPrioritet())) {
@@ -387,9 +357,6 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     private String[] hentGyldigeTemaer() {
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            return new String[]{Tema.MED.getKode(), Tema.UFM.getKode(), Tema.TRY.getKode()};
-        }
-        return new String[]{Tema.MED.getKode(), Tema.UFM.getKode()};
+        return new String[]{Tema.MED.getKode(), Tema.UFM.getKode(), Tema.TRY.getKode()};
     }
 }

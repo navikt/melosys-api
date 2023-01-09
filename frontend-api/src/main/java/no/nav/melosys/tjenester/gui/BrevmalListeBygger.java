@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
@@ -28,12 +27,10 @@ public class BrevmalListeBygger {
 
     private final BrevbestillingService brevbestillingService;
     private final BehandlingService behandlingService;
-    private final Unleash unleash;
 
-    public BrevmalListeBygger(BrevbestillingService brevbestillingService, BehandlingService behandlingService, Unleash unleash) {
+    public BrevmalListeBygger(BrevbestillingService brevbestillingService, BehandlingService behandlingService) {
         this.brevbestillingService = brevbestillingService;
         this.behandlingService = behandlingService;
-        this.unleash = unleash;
     }
 
     public List<BrevmalDto> byggBrevmalDtoListe(long behandlingId) {

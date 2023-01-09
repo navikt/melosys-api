@@ -31,18 +31,18 @@ public class MangelbrevMapper implements BrevDataMapper {
     private static final int FRIST_UKER = 3;
 
     @Override
-    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData, boolean enableBehandleAlleSaker) throws JAXBException, SAXException {
-        Fag fag = mapFag(brevData, behandling, enableBehandleAlleSaker);
+    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException {
+        Fag fag = mapFag(brevData, behandling);
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    public Fag mapFag(BrevData brevData, Behandling behandling, boolean enableBehandleAlleSaker) {
+    public Fag mapFag(BrevData brevData, Behandling behandling) {
         if (brevData.fritekst == null) {
             throw new IntegrasjonException("Mangelbrev mangler informasjon om manglende opplysninger.");
         }
         Fag fag = new Fag();
-        fag.setBehandlingstype(enableBehandleAlleSaker ? BehandlingstypeKodeMapper.hentBehandlingstypeKodeAlleBehandlinger(behandling) : BehandlingstypeKodeMapper.hentBehandlingstypeKode(behandling));
+        fag.setBehandlingstype(BehandlingstypeKodeMapper.hentBehandlingstypeKodeAlleBehandlinger(behandling));
         ManglendeOpplysningerType manglendeOpplysningerType = new ManglendeOpplysningerType();
         manglendeOpplysningerType.setManglendeOpplysningerFritekst(brevData.fritekst);
         try {

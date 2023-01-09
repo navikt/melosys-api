@@ -11,5 +11,5 @@ import org.xml.sax.SAXException;
 
 public interface BrevDataMapper {
 
-    String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData, boolean enableBehandleAlleSaker) throws JAXBException, SAXException;
+    String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException;
 }

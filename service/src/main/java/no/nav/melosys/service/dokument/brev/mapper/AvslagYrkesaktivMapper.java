@@ -31,7 +31,7 @@ public class AvslagYrkesaktivMapper implements BrevDataMapper {
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat,
-                                BrevData brevDataFelles, boolean enableBehandleAlleSaker) throws JAXBException, SAXException {
+                                BrevData brevDataFelles) throws JAXBException, SAXException {
         BrevDataAvslagYrkesaktiv brevdata = (BrevDataAvslagYrkesaktiv) brevDataFelles;
         Fag fag = mapFag(behandling, resultat, brevdata);
 

@@ -1,18 +1,16 @@
 package no.nav.melosys.tjenester.gui.sak;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
@@ -55,12 +53,10 @@ public class FagsakTjeneste {
     private final SaksopplysningerService saksopplysningerService;
     private final OrganisasjonOppslagService organisasjonOppslagService;
     private final OpprettBehandlingForSak opprettBehandlingForSak;
-    private final Unleash unleash;
 
     public FagsakTjeneste(FagsakService fagsakService, Aksesskontroll aksesskontroll, MottatteOpplysningerService mottatteOpplysningerService,
                           OpprettSak opprettSak, EndreSakService endreSakService,
                           BehandlingsresultatService behandlingsresultatService, PersondataFasade persondataFasade,
-                          Unleash unleash,
                           SaksopplysningerService saksopplysningerService, OrganisasjonOppslagService organisasjonOppslagService,
                           OpprettBehandlingForSak opprettBehandlingForSak) {
         this.fagsakService = fagsakService;
@@ -72,7 +68,6 @@ public class FagsakTjeneste {
         this.persondataFasade = persondataFasade;
         this.saksopplysningerService = saksopplysningerService;
         this.organisasjonOppslagService = organisasjonOppslagService;
-        this.unleash = unleash;
         this.opprettBehandlingForSak = opprettBehandlingForSak;
 
     }
@@ -97,7 +92,7 @@ public class FagsakTjeneste {
             aksesskontroll.autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
         }
 
-        if (opprettSakDto.getOppgaveID() == null && unleash.isEnabled("melosys.ny_opprett_sak")) {
+        if (opprettSakDto.getOppgaveID() == null) {
             opprettSak.opprettNySakOgBehandling(opprettSakDto);
         } else {
             opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
@@ -109,9 +104,6 @@ public class FagsakTjeneste {
     @PostMapping("/{saksnr}/behandlinger")
     @ApiOperation(value = "Oppretter en ny behandling for sak.")
     public ResponseEntity<Void> opprettNyBehandlingForSak(@PathVariable("saksnr") String saksnummer, @RequestBody OpprettSakDto opprettSakDto) {
-        if (!unleash.isEnabled("melosys.ny_opprett_sak")) {
-            throw new FunksjonellException("Beklager, denne funksjonen er ikke støttet enda. Toggle melosys.ny_opprett_sak er disabled.");
-        }
         if (opprettSakDto.getBrukerID() != null) {
             aksesskontroll.autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
         }
@@ -130,28 +122,6 @@ public class FagsakTjeneste {
         endreSakService.endre(saksnummer, endreDto.getSakstype(), endreDto.getSakstema(), endreDto.getBehandlingstema(),
             endreDto.getBehandlingstype(), endreDto.getBehandlingsstatus(), endreDto.getMottaksdato());
         return ResponseEntity.noContent().build();
-    }
-
-    @Deprecated(since = "melosys.behandle_alle_saker")
-    @GetMapping("{saksnr}/mulige-sakstyper")
-    @ApiOperation(value = "Hent mulige nye sakstype for en behandling")
-    public ResponseEntity<Collection<Sakstyper>> hentMuligeSakstyper(@PathVariable("saksnr") String saksnummer) {
-        log.debug("Saksbehandler {} ber om å hente mulige nye sakstema for fagsak {}.", SubjectHandler.getInstance().getUserID(), saksnummer);
-        aksesskontroll.autoriserSakstilgang(saksnummer);
-
-        return ResponseEntity.ok(fagsakService.hentMuligeSakstyper());
-    }
-
-    @Deprecated(since = "melosys.behandle_alle_saker")
-    @GetMapping("{saksnr}/mulige-sakstemaer")
-    @ApiOperation(value = "Hent mulige nye sakstema for en behandling")
-    public ResponseEntity<Collection<Sakstemaer>> hentMuligeSakstemaer(@PathVariable("saksnr") String saksnummer,
-                                                                       @RequestParam("sakstype") Sakstyper sakstype) {
-        log.debug("Saksbehandler {} ber om å hente mulige nye sakstema for fagsak {}.",
-            SubjectHandler.getInstance().getUserID(), saksnummer);
-        aksesskontroll.autoriserSakstilgang(saksnummer);
-
-        return ResponseEntity.ok(fagsakService.hentMuligeSakstemaer());
     }
 
     @PostMapping("/sok")
@@ -176,20 +146,6 @@ public class FagsakTjeneste {
         }
 
         return Collections.emptyList();
-    }
-
-    /**
-     * @deprecated Fjernes med toggle melosys.behandle_alle_saker
-     */
-    @Deprecated
-    @ApiOperation(value = "Korrigerer eller omgjør et vedtak eller en anmodning til utenlandsk myndighet " +
-        "for en sak ved å opprette en ny behandling basert på den siste endrede behandling")
-    @PostMapping("/{saksnummer}/revurder")
-    public ResponseEntity<RevurderingOpprettetDto> revurderSisteBehandling(@PathVariable("saksnummer") String saksnummer) {
-        aksesskontroll.autoriserSakstilgang(saksnummer);
-
-        long behandlingID = fagsakService.opprettNyVurderingBehandling(saksnummer);
-        return ResponseEntity.ok(new RevurderingOpprettetDto(behandlingID));
     }
 
     @PutMapping("/{saksnummer}/ferdigbehandle")
@@ -260,54 +216,32 @@ public class FagsakTjeneste {
     }
 
     private void setPeriodeOpplysninger(Behandling behandling, BehandlingOversiktDto behandlingOversiktDto) {
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            saksopplysningerService.finnSedOpplysninger(behandling.getId()).ifPresentOrElse(sedDoument -> {
-                    var land = SoeknadslandDto.av(sedDoument.getLovvalgslandKode());
+        saksopplysningerService.finnSedOpplysninger(behandling.getId()).ifPresentOrElse(sedDoument -> {
+                var land = SoeknadslandDto.av(sedDoument.getLovvalgslandKode());
+                behandlingOversiktDto.setLand(land);
+
+                var periode = sedDoument.getLovvalgsperiode();
+                behandlingOversiktDto.setSoknadsperiode(new PeriodeDto(periode.getFom(), periode.getTom()));
+            },
+            () -> {
+                var mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.getId());
+                if (mottatteOpplysninger.isPresent()) {
+                    var mottatteOpplysningerData = mottatteOpplysninger.get().getMottatteOpplysningerData();
+
+                    var land = SoeknadslandDto.av(hentSøknadsland((mottatteOpplysningerData)));
                     behandlingOversiktDto.setLand(land);
 
-                    var periode = sedDoument.getLovvalgsperiode();
+                    var periode = hentPeriode(mottatteOpplysningerData);
                     behandlingOversiktDto.setSoknadsperiode(new PeriodeDto(periode.getFom(), periode.getTom()));
-                },
-                () -> {
-                    var mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.getId());
-                    if (mottatteOpplysninger.isPresent()) {
-                        var mottatteOpplysningerData = mottatteOpplysninger.get().getMottatteOpplysningerData();
-
-                        var land = SoeknadslandDto.av(hentSøknadsland((mottatteOpplysningerData)));
-                        behandlingOversiktDto.setLand(land);
-
-                        var periode = hentPeriode(mottatteOpplysningerData);
-                        behandlingOversiktDto.setSoknadsperiode(new PeriodeDto(periode.getFom(), periode.getTom()));
-                    }
-                });
-
-            Behandlingsresultat behandlingsResultat = behandlingsresultatService.hentBehandlingsresultatMedLovvalgsperioder(behandling.getId());
-
-            behandlingsResultat.finnLovvalgsperiode().ifPresent(lovvalgsperiode -> {
-                var periode = new PeriodeDto(lovvalgsperiode.getFom(), lovvalgsperiode.getTom());
-                behandlingOversiktDto.setLovvalgsperiode(periode);
+                }
             });
-        } else {
-            if (behandling.erBehandlingAvSøknadGammel()) {
-                mottatteOpplysningerService.finnMottatteOpplysninger(behandling.getId())
-                    .map(MottatteOpplysninger::getMottatteOpplysningerData).ifPresent(grunnlagData -> {
-                        SoeknadslandDto land = SoeknadslandDto.av(hentSøknadsland((grunnlagData)));
-                        behandlingOversiktDto.setLand(land);
-                        Periode periode = hentPeriode(grunnlagData);
-                        if (periode != null) {
-                            behandlingOversiktDto.setSoknadsperiode(new PeriodeDto(periode.getFom(), periode.getTom()));
-                        }
-                    });
-            } else {
-                saksopplysningerService.finnSedOpplysninger(behandling.getId()).ifPresent(sedDokument -> {
-                    SoeknadslandDto land = SoeknadslandDto.av(sedDokument.getLovvalgslandKode());
-                    behandlingOversiktDto.setLand(land);
-                    behandlingOversiktDto.setSoknadsperiode(new PeriodeDto(
-                        sedDokument.getLovvalgsperiode().getFom(), sedDokument.getLovvalgsperiode().getTom())
-                    );
-                });
-            }
-        }
+
+        Behandlingsresultat behandlingsResultat = behandlingsresultatService.hentBehandlingsresultatMedLovvalgsperioder(behandling.getId());
+
+        behandlingsResultat.finnLovvalgsperiode().ifPresent(lovvalgsperiode -> {
+            var periode = new PeriodeDto(lovvalgsperiode.getFom(), lovvalgsperiode.getTom());
+            behandlingOversiktDto.setLovvalgsperiode(periode);
+        });
     }
 
     private String hentNavn(List<Behandling> behandlinger) {

@@ -25,17 +25,17 @@ public class ForvaltningsmeldingMapper implements BrevDataMapper {
     private static final String XSD_LOCATION = "melosysbrev/melosys_000082.xsd";
 
     @Override
-    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData, boolean enableBehandleAlleSaker) throws JAXBException, SAXException {
-        Fag fag = mapFag(brevData, behandling, enableBehandleAlleSaker);
+    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException {
+        Fag fag = mapFag(brevData, behandling);
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    Fag mapFag(BrevData brevData, Behandling behandling, boolean enableBehandleAlleSaker) {
+    Fag mapFag(BrevData brevData, Behandling behandling) {
         Fag fag = new Fag();
         BrevDataMottattDato brevDataMottattDato = (BrevDataMottattDato) brevData;
         final Instant forsendelseMottattTidspunkt = brevDataMottattDato.initierendeJournalpostForsendelseMottattTidspunkt;
-        fag.setBehandlingstype(enableBehandleAlleSaker ? BehandlingstypeKodeMapper.hentBehandlingstypeKodeAlleBehandlinger(behandling) : BehandlingstypeKodeMapper.hentBehandlingstypeKode(behandling));
+        fag.setBehandlingstype(BehandlingstypeKodeMapper.hentBehandlingstypeKodeAlleBehandlinger(behandling));
         fag.setDatoMottatt(convertToXMLGregorianCalendarRemoveTimezone(forsendelseMottattTidspunkt));
         fag.setSaksbehandlingstidDato(convertToXMLGregorianCalendarRemoveTimezone(Saksbehandlingstid.beregnSaksbehandlingsfrist(forsendelseMottattTidspunkt)));
 

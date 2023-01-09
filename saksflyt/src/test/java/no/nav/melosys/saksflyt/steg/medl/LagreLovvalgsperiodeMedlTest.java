@@ -44,18 +44,14 @@ class LagreLovvalgsperiodeMedlTest {
     private final Prosessinstans prosessinstans = new Prosessinstans();
     private final Behandling behandling = new Behandling();
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-    private final FakeUnleash unleash = new FakeUnleash();
-
 
     @BeforeEach
     public void setup() {
-        lagreLovvalgsperiodeMedl = new LagreLovvalgsperiodeMedl(behandlingsresultatService, medlPeriodeService, unleash);
+        lagreLovvalgsperiodeMedl = new LagreLovvalgsperiodeMedl(behandlingsresultatService, medlPeriodeService);
 
         behandling.setId(behandlingID);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         prosessinstans.setBehandling(behandling);
-
-        unleash.enable("melosys.behandle_alle_saker");
     }
 
     @Test

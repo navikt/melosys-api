@@ -8,23 +8,11 @@ import org.junit.jupiter.api.Test;
 
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
-import static no.nav.melosys.service.dokument.brev.mapper.BehandlingstypeKodeMapper.hentBehandlingstypeKode;
 import static no.nav.melosys.service.dokument.brev.mapper.BehandlingstypeKodeMapper.hentBehandlingstypeKodeAlleBehandlinger;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 public class BehandlingstypeKodeMapperTest {
-
-    @Test
-    public void hentBehandlingstypeKode_mapKorrektBehandlingstype() {
-        assertThat(hentBehandlingstypeKode(behandling(FØRSTEGANG, UTSENDT_ARBEIDSTAKER))).isEqualTo(BehandlingstypeKode.SOEKNAD);
-        assertThat(hentBehandlingstypeKode(behandling(FØRSTEGANG, UTSENDT_SELVSTENDIG))).isEqualTo(BehandlingstypeKode.SOEKNAD);
-        assertThat(hentBehandlingstypeKode(behandling(ENDRET_PERIODE, UTSENDT_ARBEIDSTAKER))).isEqualTo(BehandlingstypeKode.ENDRET_PERIODE);
-        assertThat(hentBehandlingstypeKode(behandling(NY_VURDERING, UTSENDT_SELVSTENDIG))).isEqualTo(BehandlingstypeKode.NY_VURDERING);
-        assertThat(hentBehandlingstypeKode(behandling(KLAGE, UTSENDT_ARBEIDSTAKER))).isEqualTo(BehandlingstypeKode.KLAGE);
-        assertThat(hentBehandlingstypeKode(behandling(FØRSTEGANG, BESLUTNING_LOVVALG_NORGE))).isEqualTo(BehandlingstypeKode.UTL_MYND_UTPEKT_NORGE);
-        assertThat(hentBehandlingstypeKode(behandling(FØRSTEGANG, UTSENDT_ARBEIDSTAKER))).isEqualTo(BehandlingstypeKode.SOEKNAD);
-    }
 
     @Test
     void hentBehandlingstypeKodeAlleBehandlinger_mapKorrektBehandlingstype() {

@@ -31,22 +31,22 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
     private static final String XSD_LOCATION = "melosysbrev/melosys_000083.xsd";
 
     @Override
-    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevdata, boolean enableBehandleAlleSaker) throws JAXBException, SAXException {
+    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevdata) throws JAXBException, SAXException {
         BrevDataInnvilgelseFlereLand brevDataInnvilgelse = (BrevDataInnvilgelseFlereLand) brevdata;
 
         VedleggMapper vedleggMapper = new VedleggMapper(behandling, resultat);
         vedleggMapper.map(brevDataInnvilgelse.vedleggA1);
 
-        Fag fag = mapFag(behandling, resultat, brevDataInnvilgelse, enableBehandleAlleSaker);
+        Fag fag = mapFag(behandling, resultat, brevDataInnvilgelse);
 
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = lagBrevdataType(fellesType, navFelles, fag, vedleggMapper.hent());
         return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);
     }
 
-    private Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataInnvilgelseFlereLand brevdata, boolean enableBehandleAlleSaker) {
+    private Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataInnvilgelseFlereLand brevdata) {
         Fag fag = new Fag();
 
-        fag.setBehandlingstype(enableBehandleAlleSaker ? BehandlingstypeKodeMapper.hentBehandlingstypeKodeAlleBehandlinger(behandling) : BehandlingstypeKodeMapper.hentBehandlingstypeKode(behandling));
+        fag.setBehandlingstype(BehandlingstypeKodeMapper.hentBehandlingstypeKodeAlleBehandlinger(behandling));
 
         // Logikk i brev benytter antallArbeidsgivere for å aktivere tekst med arbeidsgiver eller arbeidsgiverListe
         int antallArbeidsgivere = brevdata.arbeidsgivere.size();

@@ -45,7 +45,6 @@ final class OppgaveFasadeImplTest {
     @BeforeEach
     void setup() {
         oppgaveFasadeImpl = new OppgaveFasadeImpl(oppgaveConsumer, unleash);
-        unleash.enable("melosys.behandle_alle_saker");
     }
 
     @Test
@@ -81,7 +80,6 @@ final class OppgaveFasadeImplTest {
         assertThat(oppgaveDto.getAktørId()).isEqualTo(oppgave.getAktørId());
         assertThat(oppgaveDto.getOrgnr()).isEqualTo(oppgave.getOrgnr());
         assertThat(oppgaveDto.getBehandlesAvApplikasjon()).isEqualTo(Fagsystem.MELOSYS.getKode());
-        assertThat(oppgaveDto.getBehandlingstype()).isEqualTo(oppgave.getBehandlingstype());
         assertThat(oppgaveDto.getBeskrivelse()).isEqualTo("bla bla");
         assertThat(oppgaveDto.getOppgavetype()).isEqualTo(oppgave.getOppgavetype().getKode());
         assertThat(oppgaveDto.getPrioritet()).isEqualTo(PrioritetType.NORM.toString());
@@ -162,7 +160,6 @@ final class OppgaveFasadeImplTest {
         oppgaveBuilder.setAktivDato(LocalDate.now());
         oppgaveBuilder.setAktørId("aktoer123");
         oppgaveBuilder.setAktørId("orgnr");
-        oppgaveBuilder.setBehandlingstype("aebehandlingstype1234");
         oppgaveBuilder.setBehandlingstema("abbehandlingstema1234");
         oppgaveBuilder.setBeskrivelse("bla bla");
         oppgaveBuilder.setOpprettetTidspunkt(ZonedDateTime.now());

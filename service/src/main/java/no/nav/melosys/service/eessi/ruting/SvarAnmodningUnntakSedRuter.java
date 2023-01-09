@@ -35,17 +35,14 @@ public class SvarAnmodningUnntakSedRuter implements SedRuterForSedTyper {
     private final FagsakService fagsakService;
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final OppgaveService oppgaveService;
-    private final Unleash unleash;
 
     public SvarAnmodningUnntakSedRuter(ProsessinstansService prosessinstansService, FagsakService fagsakService,
                                        AnmodningsperiodeService anmodningsperiodeService,
-                                       OppgaveService oppgaveService,
-                                       Unleash unleash) {
+                                       OppgaveService oppgaveService) {
         this.prosessinstansService = prosessinstansService;
         this.fagsakService = fagsakService;
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.oppgaveService = oppgaveService;
-        this.unleash = unleash;
     }
 
     @Override
@@ -102,10 +99,7 @@ public class SvarAnmodningUnntakSedRuter implements SedRuterForSedTyper {
     private void opprettOppgave(Behandling behandling, String sedType) {
         String aktørID = behandling.getFagsak().hentBrukersAktørID();
 
-        Oppgave.Builder oppgaveBuilder = (
-            unleash.isEnabled("melosys.behandle_alle_saker")
-                ? oppgaveService.lagBehandlingsoppgave(behandling)
-                : OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()))
+        Oppgave.Builder oppgaveBuilder = oppgaveService.lagBehandlingsoppgave(behandling)
             .setAktørId(aktørID)
             .setJournalpostId(behandling.getInitierendeJournalpostId())
             .setSaksnummer(behandling.getFagsak().getSaksnummer())
