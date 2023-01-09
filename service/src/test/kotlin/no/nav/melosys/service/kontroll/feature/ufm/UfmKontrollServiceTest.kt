@@ -83,49 +83,6 @@ class UfmKontrollServiceTest {
         )
     }
 
-    @Test // Ta vekk med a003-inn toggle
-    fun utførKontrollerOgRegistrerFeil_A003_medOverlappendePeriode_forventKontroll_overlappendePerioder_gammel() {
-        unleash.disableAll();
-        sedDokument.apply {
-            sedType = SedType.A003
-            lovvalgslandKode = Landkoder.SE
-            avsenderLandkode = Landkoder.SE
-            lovvalgsperiode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-            setErEndring(false);
-        }
-        medlemskapDokument.apply {
-            medlemsperiode.add(
-                Medlemsperiode().apply {
-                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(1))
-                    land = "SWE"
-                }
-            )
-        }
-
-        personopplysninger.apply {
-            bostedsadresse = Bostedsadresse(
-                StrukturertAdresse().apply { landkode = "SE" }, null, null, null, null,
-                null,
-                false
-            );
-        }
-        every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
-            .answers {
-                kontrollresultatSlot.captured.shouldHaveSize(1)
-                    .sortedBy { it.begrunnelse }
-                    .apply {
-                        first().apply {
-                            begrunnelse.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
-                            behandlingsresultat.id.shouldBe(BEHANDLINGSRESULTAT_ID)
-                        }
-                    }
-            }
-        setupMockedTestData()
-
-
-        ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
-    }
-
     @Test
     fun
         utførKontrollerOgRegistrerFeil_A003_lovvalgslandUtenforNorge_medOverlappendePeriodeUtenMedlemskap_erOpprinnelig_likeLand_ingenYtterligeOpplysninger_ingenKontroll() {
