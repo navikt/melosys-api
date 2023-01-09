@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.sak.FagsakService;
@@ -48,14 +49,15 @@ public class OpprettFagsakOgBehandlingFraSed implements StegBehandler {
         Sakstemaer sakstema = prosessinstans.getData(SAKSTEMA, Sakstemaer.class);
         Behandlingstema behandlingstema = prosessinstans.getData(BEHANDLINGSTEMA, Behandlingstema.class);
 
+        if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
+            throw new TekniskException("Støtter ikke lenger disabled melosys.behandle_alle_saker");
+        }
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
             .medAktørID(prosessinstans.hentAktørIDFraDataEllerSED())
             .medSakstype(Sakstyper.EU_EOS)
             .medSakstema(sakstema)
             .medBehandlingstema(behandlingstema)
-            .medBehandlingstype(unleash.isEnabled("melosys.behandle_alle_saker")
-                ? Behandlingstyper.FØRSTEGANG
-                : Behandlingstyper.SED)
+            .medBehandlingstype(Behandlingstyper.FØRSTEGANG)
             .medBehandlingsårsaktype(Behandlingsaarsaktyper.SED)
             .medMottaksdato(joarkFasade.hentMottaksDatoForJournalpost(eessiMelding.getJournalpostId()))
             .medInitierendeJournalpostId(eessiMelding.getJournalpostId())

@@ -414,22 +414,6 @@ class BrevbestillingServiceTest {
     }
 
     @Test
-    void hentBrevMaler_behandlingErSoeknad_returnererSoeknadMalITillegg() {
-        unleash.disable("melosys.behandle_alle_saker");
-        behandling.setType(Behandlingstyper.SOEKNAD);
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(321L)).thenReturn(behandling);
-        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(321L, BRUKER);
-
-        assertThat(brevMaler)
-            .hasSize(3)
-            .containsExactlyInAnyOrder(
-                MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
-                MANGELBREV_BRUKER,
-                GENERELT_FRITEKSTBREV_BRUKER
-            );
-    }
-
-    @Test
     void hentBrevMaler_behandlingErFørstegangMedSakstemaMedlemskapLovvalg_returnererForventetSaksbehandlingstidMalITillegg() {
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.getFagsak().setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
@@ -440,22 +424,6 @@ class BrevbestillingServiceTest {
             .hasSize(3)
             .containsExactlyInAnyOrder(
                 MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
-                MANGELBREV_BRUKER,
-                GENERELT_FRITEKSTBREV_BRUKER
-            );
-    }
-
-    @Test
-    void hentBrevMaler_behandlingErKlageToggleAv_returnererKlageMalITillegg() {
-        unleash.disable("melosys.behandle_alle_saker");
-        behandling.setType(Behandlingstyper.KLAGE);
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
-        List<Produserbaredokumenter> brevMaler = brevbestillingService.hentMuligeProduserbaredokumenter(123L, BRUKER);
-
-        assertThat(brevMaler)
-            .hasSize(3)
-            .containsExactlyInAnyOrder(
-                MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
                 MANGELBREV_BRUKER,
                 GENERELT_FRITEKSTBREV_BRUKER
             );

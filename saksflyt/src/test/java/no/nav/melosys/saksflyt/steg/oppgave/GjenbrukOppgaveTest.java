@@ -143,7 +143,7 @@ class GjenbrukOppgaveTest {
 
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);
 
         prosessinstans.setBehandling(behandling);

@@ -396,7 +396,7 @@ class OppgaveplukkerTest {
     private Behandling opprettBehandling() {
         var behandling = new Behandling();
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         return behandling;
     }
 
@@ -410,7 +410,7 @@ class OppgaveplukkerTest {
     private Fagsak opprettFagsakMedBehandling(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema) {
         var fagsak = new Fagsak();
         var behandling = new Behandling();
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setTema(behandlingstema);
         behandling.setStatus(Behandlingsstatus.AVVENT_DOK_PART);
         behandling.setDokumentasjonSvarfristDato(Instant.now().plus(Duration.ofDays(1)));

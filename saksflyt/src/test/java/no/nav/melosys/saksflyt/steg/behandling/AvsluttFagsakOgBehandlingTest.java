@@ -53,7 +53,7 @@ class AvsluttFagsakOgBehandlingTest {
         prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_EOS);
 
         behandling = new Behandling();
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setId(123L);
 
         fagsak = new Fagsak();

@@ -19,6 +19,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
@@ -238,10 +239,7 @@ public class BrevbestillingService {
 
     // Denne kan slettes når melosys.behandle_alle_saker fjernes. Burde MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD endre navn også?
     private boolean skalKunneSendeMeldingForventetSaksbehanlingstidSoknad(Sakstemaer sakstema, Behandlingstyper behandlingstype) {
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            return sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG && behandlingstype == Behandlingstyper.FØRSTEGANG;
-        }
-        return behandlingstype == Behandlingstyper.SOEKNAD;
+        return sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG && behandlingstype == Behandlingstyper.FØRSTEGANG;
     }
 
     // Denne kan slettes når melosys.behandle_alle_saker fjernes. Burde MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE fjernes også?

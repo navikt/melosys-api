@@ -50,6 +50,7 @@ spec:
         - application: {{APP_NAME_SAF}}
         - application: {{APP_NAME_MEDL}}
         - application: {{APP_NAME_MELOSYS_EESSI}}
+        - application: {{APP_NAME_UTBETALING}}
   webproxy: true
   vault:
     enabled: true
@@ -80,5 +81,7 @@ spec:
     value: {{APP_NAME_FAKTURERINGSKOMPONENTEN}}
   - name: NAIS_CLUSTER_NAME_FAKTURERINGSKOMPONENTEN
     value: {{NAIS_CLUSTER_NAME_FAKTURERINGSKOMPONENTEN}}
+  - name: APP_NAME_UTBETALING
+    value: {{APP_NAME_UTBETALING}}
   kafka:
     pool: {{ KAFKA_POOL }}

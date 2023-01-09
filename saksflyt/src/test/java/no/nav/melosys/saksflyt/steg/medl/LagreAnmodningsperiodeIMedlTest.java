@@ -58,7 +58,7 @@ class LagreAnmodningsperiodeIMedlTest {
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         prosessinstans.setBehandling(behandling);
-        prosessinstans.getBehandling().setType(Behandlingstyper.SOEKNAD);
+        prosessinstans.getBehandling().setType(Behandlingstyper.FØRSTEGANG);
         prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
     }
 

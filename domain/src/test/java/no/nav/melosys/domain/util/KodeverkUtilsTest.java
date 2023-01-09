@@ -12,8 +12,8 @@ class KodeverkUtilsTest {
 
     @Test
     void dekod() {
-        Behandlingstyper behandlingstype = KodeverkUtils.dekod(Behandlingstyper.class, Behandlingstyper.SOEKNAD.getKode());
-        assertThat(behandlingstype).isEqualTo(Behandlingstyper.SOEKNAD);
+        Behandlingstyper behandlingstype = KodeverkUtils.dekod(Behandlingstyper.class, Behandlingstyper.FØRSTEGANG.getKode());
+        assertThat(behandlingstype).isEqualTo(Behandlingstyper.FØRSTEGANG);
     }
 
     @Test

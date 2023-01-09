@@ -3,6 +3,7 @@ package no.nav.melosys.itest
 import io.kotest.assertions.extracting
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldHaveSize
+import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.arkiv.*
 import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.Periode
@@ -31,6 +32,7 @@ class SedMottakTestIT(
     @Autowired private val joarkFasade: JoarkFasade,
     @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
     @Autowired private val prosessinstansRepository: ProsessinstansRepository,
+    @Autowired private val unleash: FakeUnleash,
 ) : ComponentTestBase() {
 
     lateinit var rinaSaksnummer: String
@@ -44,6 +46,7 @@ class SedMottakTestIT(
 
     @Test
     fun mottaSED_mottar3SED_blirBehandletEtterHverandre() {
+        unleash.enable("melosys.behandle_alle_saker")
         //Periode på 6 år - fører til et kontrolltreff
         val eessiMeldingA009 = melosysEessiMelding(
             BucType.LA_BUC_04, SedType.A009, Periode(LocalDate.now(), LocalDate.now().plusYears(6)),

@@ -336,6 +336,10 @@ public class FagsakService {
         }
     }
 
+    /**
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker. Skal erstattes alle steder den er brukt
+     */
+    @Deprecated
     public Optional<Behandling> hentBehandlingSomErUtgangspunktForRevurdering(Fagsak fagsak) {
         if (fagsak.harAktivBehandling()) {
             return Optional.of(fagsak.hentSistAktivBehandling());
@@ -343,13 +347,15 @@ public class FagsakService {
         return hentBehandlingForNyVurdering(fagsak);
     }
 
+    /**
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker. Skal erstattes alle steder den er brukt
+     */
+    @Deprecated
     public Optional<Behandling> hentBehandlingForNyVurdering(Fagsak fagsak) {
         var førsteBehandling = fagsak.hentTidligstRegistrertBehandling();
 
-        if (førsteBehandling.getType() == Behandlingstyper.SOEKNAD || førsteBehandling.erBeslutningLovvalgNorge()) {
+        if (førsteBehandling.erBeslutningLovvalgNorge()) {
             return hentBehandlingMedSistRegistrertVedtakEllerAvvisning(fagsak);
-        } else if (førsteBehandling.getType() == Behandlingstyper.SED) {
-            return hentBehandlingMedSistRegistrertUnntak(fagsak);
         }
         return Optional.empty();
     }
@@ -360,15 +366,6 @@ public class FagsakService {
             .filter(Objects::nonNull)
             .filter(behandlingsresultat -> behandlingsresultat.harVedtak() || behandlingsresultat.erUtpekingNorgeAvvist())
             .max(Comparator.comparing(Behandlingsresultat::getRegistrertDato))
-            .map(Behandlingsresultat::getBehandling);
-    }
-
-    public Optional<Behandling> hentBehandlingMedSistRegistrertUnntak(Fagsak fagsak) {
-        return fagsak.getBehandlinger().stream()
-            .map(behandling -> behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
-            .filter(Objects::nonNull)
-            .filter(Behandlingsresultat::erRegistrertUnntak)
-            .max(Comparator.comparing(RegistreringsInfo::getRegistrertDato))
             .map(Behandlingsresultat::getBehandling);
     }
 

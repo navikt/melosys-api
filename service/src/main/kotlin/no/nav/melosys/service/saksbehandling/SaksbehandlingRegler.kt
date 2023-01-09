@@ -77,8 +77,6 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
                 UNNTAK_MEDLEMSKAP,
                 FORESPØRSEL_TRYGDEMYNDIGHET,
                 TRYGDETID,
-                ØVRIGE_SED_MED,
-                ØVRIGE_SED_UFM,
                 -> true
 
                 ANMODNING_OM_UNNTAK_HOVEDREGEL -> sakstype == Sakstyper.TRYGDEAVTALE

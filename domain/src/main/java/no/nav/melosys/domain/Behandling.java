@@ -32,9 +32,14 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 @EntityListeners(AuditingEntityListener.class)
 public class Behandling extends RegistreringsInfo {
 
-    public static final Set<Behandlingstema> BEHANDLINGSTEMA_SED_FORESPØRSEL = Set.of(ØVRIGE_SED_MED, ØVRIGE_SED_UFM,
+    /**
+     * @deprecated Fjernes med toggle melosys.behandle_alle_saker
+     */
+    @Deprecated
+    public static final Set<Behandlingstema> BEHANDLINGSTEMA_SED_FORESPØRSEL = Set.of(
         FORESPØRSEL_TRYGDEMYNDIGHET,
-        TRYGDETID);
+        TRYGDETID
+    );
 
     private static final Set<Behandlingstema> BEHANDLINGSTEMA_SOM_IKKE_KAN_ENDRES = Set.of(
         REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
@@ -42,12 +47,6 @@ public class Behandling extends RegistreringsInfo {
         BESLUTNING_LOVVALG_NORGE,
         BESLUTNING_LOVVALG_ANNET_LAND,
         ANMODNING_OM_UNNTAK_HOVEDREGEL
-    );
-
-    private static final Set<Behandlingstyper> GAMLE_BEHANDLINGSTYPER_SOM_SKAL_MIGRERES_SENERE = Set.of(
-        Behandlingstyper.ANKE,
-        Behandlingstyper.SED,
-        Behandlingstyper.SOEKNAD
     );
 
     @Id
@@ -510,7 +509,6 @@ public class Behandling extends RegistreringsInfo {
     public static boolean erBehandlingAvSøknadGammel(String behandlingstemaKode) {
         return erBehandlingAvSøknadUtsendtArbeidstaker(behandlingstemaKode)
             || erBehandlingAvSøknadArbeidIFlereLand(behandlingstemaKode)
-            || ARBEID_ETT_LAND_ØVRIG.getKode().equalsIgnoreCase(behandlingstemaKode)
             || ARBEID_TJENESTEPERSON_ELLER_FLY.getKode().equalsIgnoreCase(behandlingstemaKode)
             || IKKE_YRKESAKTIV.getKode().equalsIgnoreCase(behandlingstemaKode)
             || ARBEID_NORGE_BOSATT_ANNET_LAND.getKode().equalsIgnoreCase(behandlingstemaKode)
@@ -563,10 +561,6 @@ public class Behandling extends RegistreringsInfo {
         Behandlingstema behandlingstema = behandling.getTema();
         Behandlingstyper behandlingstype = behandling.getType();
 
-        if (GAMLE_BEHANDLINGSTYPER_SOM_SKAL_MIGRERES_SENERE.contains(behandlingstype)) {
-            return utledFristForBehandlingtema(behandlingstema);
-        }
-
         return BehandlingfristKriterier.hentBehandlingsFrist(sakstema, behandlingstema, behandlingstype, utgangspunktDato);
     }
 
@@ -579,7 +573,6 @@ public class Behandling extends RegistreringsInfo {
             case UTSENDT_ARBEIDSTAKER,
                 UTSENDT_SELVSTENDIG,
                 ARBEID_FLERE_LAND,
-                ARBEID_ETT_LAND_ØVRIG,
                 ARBEID_TJENESTEPERSON_ELLER_FLY,
                 ARBEID_KUN_NORGE,
                 IKKE_YRKESAKTIV,
@@ -594,8 +587,6 @@ public class Behandling extends RegistreringsInfo {
             case BESLUTNING_LOVVALG_NORGE,
                 BESLUTNING_LOVVALG_ANNET_LAND -> LocalDate.now().plusWeeks(4);
             case ANMODNING_OM_UNNTAK_HOVEDREGEL,
-                ØVRIGE_SED_UFM,
-                ØVRIGE_SED_MED,
                 FORESPØRSEL_TRYGDEMYNDIGHET,
                 TRYGDETID -> LocalDate.now().plusWeeks(8);
             case VIRKSOMHET -> LocalDate.now().plusDays(90);

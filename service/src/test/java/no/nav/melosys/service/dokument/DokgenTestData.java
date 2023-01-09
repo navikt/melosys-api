@@ -56,7 +56,7 @@ public final class DokgenTestData {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setFagsak(fagsak);
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setMottatteOpplysninger(lagMottatteOpplysninger());
         return behandling;
     }
@@ -142,7 +142,7 @@ public final class DokgenTestData {
 
     private static List<Behandling> lagBehandlinger() {
         Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setRegistrertDato(Instant.now());
 
         return singletonList(behandling);

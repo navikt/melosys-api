@@ -103,7 +103,7 @@ public class BehandlingsnotatTjenesteTest {
     private Behandlingsnotat lagBehandlingsnotat() {
         Behandling behandling = new Behandling();
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        behandling.setType(Behandlingstyper.SED);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
 
         Behandlingsnotat behandlingsnotat = new Behandlingsnotat();
