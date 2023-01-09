@@ -61,7 +61,7 @@
         <commons-text.version>1.10.0</commons-text.version>
         <findbugs.jsr305.version>3.0.2</findbugs.jsr305.version>
         <guava.version>31.1-jre</guava.version>
-        <graphql-java.version>17.4</graphql-java.version>
+        <graphql-java.version>20.0</graphql-java.version>
         <logback.version>1.2.11</logback.version>
         <logstash.version>7.1</logstash.version>
         <hikaricp.version>5.0.1</hikaricp.version>
@@ -109,6 +109,7 @@
         <xmlunit.version>2.9.0</xmlunit.version>
         <javax.activation.version>1.1.1</javax.activation.version>
         <org.jboss.logging.annotations.version>2.2.1.Final</org.jboss.logging.annotations.version>
+        <org.antlr.antlr4-runtime.version>4.9.3</org.antlr.antlr4-runtime.version>
     </properties>
 
     <!-- Unngå å put scope i dependency management. Sett det heller der det
@@ -461,6 +462,16 @@
                 <groupId>org.jboss.logging</groupId>
                 <artifactId>jboss-logging-processor</artifactId>
                 <version>${org.jboss.logging.annotations.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.antlr</groupId>
+                <artifactId>antlr4-runtime</artifactId>
+                <version>${org.antlr.antlr4-runtime.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.graphql-java</groupId>
+                <artifactId>graphql-java-extended-scalars</artifactId>
+                <version>${graphql-java.version}</version>
             </dependency>
 
             <!-- NAV felleskomponenter -->
