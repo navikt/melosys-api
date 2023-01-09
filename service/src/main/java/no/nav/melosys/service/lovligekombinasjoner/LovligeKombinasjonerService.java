@@ -112,33 +112,31 @@ public class LovligeKombinasjonerService {
             );
         }
 
-        switch (hovedpart) {
-            case BRUKER -> {
-                Set<Behandlingstema> behandlingstemaer = LovligeSakskombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
-                    .filter(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.sakstema() == sakstema)
-                    .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())
-                    .flatMap(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTemaer().stream())
-                    .collect(Collectors.toCollection(LinkedHashSet::new));
-                if (sistBehandlingstema != null && Set.of(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
-                    REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
-                    BESLUTNING_LOVVALG_NORGE,
-                    BESLUTNING_LOVVALG_ANNET_LAND,
-                    ANMODNING_OM_UNNTAK_HOVEDREGEL).contains(sistBehandlingstema)) {
-                    return Set.of(sistBehandlingstema);
-                }
-                return behandlingstemaer;
-            }
-            case VIRKSOMHET -> {
-                return LovligeSakskombinasjoner.muligeSaksKombinasjonerVirksomhet.get(sakstype).stream()
-                    .filter(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.sakstema() == sakstema)
-                    .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())
-                    .flatMap(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTemaer().stream())
-                    .collect(Collectors.toCollection(LinkedHashSet::new));
-            }
-            default -> {
-                return Collections.emptySet();
-            }
+        return switch (hovedpart) {
+            case BRUKER -> behandlingstemaForBruker(sakstype, sakstema, sistBehandlingstema);
+            case VIRKSOMHET -> LovligeSakskombinasjoner.muligeSaksKombinasjonerVirksomhet.get(sakstype).stream()
+                .filter(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.sakstema() == sakstema)
+                .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())
+                .flatMap(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTemaer().stream())
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+            default -> Collections.emptySet();
+        };
+    }
+
+    private Set<Behandlingstema> behandlingstemaForBruker(Sakstyper sakstype, Sakstemaer sakstema, @org.jetbrains.annotations.Nullable Behandlingstema sistBehandlingstema) {
+        Set<Behandlingstema> behandlingstemaer = LovligeSakskombinasjoner.muligeSaksKombinasjonerBruker.get(sakstype).stream()
+            .filter(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.sakstema() == sakstema)
+            .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())
+            .flatMap(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTemaer().stream())
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+        if (sistBehandlingstema != null && Set.of(REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
+            REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
+            BESLUTNING_LOVVALG_NORGE,
+            BESLUTNING_LOVVALG_ANNET_LAND,
+            ANMODNING_OM_UNNTAK_HOVEDREGEL).contains(sistBehandlingstema)) {
+            return Set.of(sistBehandlingstema);
         }
+        return behandlingstemaer;
     }
 
     private Set<Behandlingstema> hentMuligeBehandlingstemaerSED(Sakstyper sakstype, Sakstemaer sakstema) {
@@ -197,22 +195,16 @@ public class LovligeKombinasjonerService {
             sistSaksstatus = sisteBehandling.getFagsak().getStatus();
         }
 
-        switch (hovedpart) {
-            case BRUKER -> {
-                return behandlingstyperForBruker(sakstype, sakstema, behandlingstema, aktivBehandling, sisteBehandling, sistBehandlingstema, sistSaksstatus);
-            }
-            case VIRKSOMHET -> {
-                return LovligeSakskombinasjoner.muligeSaksKombinasjonerVirksomhet.get(sakstype).stream()
-                    .filter(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.sakstema() == sakstema)
-                    .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())
-                    .filter(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTemaer().contains(behandlingstema))
-                    .flatMap(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTyper().stream())
-                    .collect(Collectors.toCollection(LinkedHashSet::new));
-            }
-            default -> {
-                return Collections.emptySet();
-            }
-        }
+        return switch (hovedpart) {
+            case BRUKER -> behandlingstyperForBruker(sakstype, sakstema, behandlingstema, aktivBehandling, sisteBehandling, sistBehandlingstema, sistSaksstatus);
+            case VIRKSOMHET -> LovligeSakskombinasjoner.muligeSaksKombinasjonerVirksomhet.get(sakstype).stream()
+                .filter(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.sakstema() == sakstema)
+                .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())
+                .filter(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTemaer().contains(behandlingstema))
+                .flatMap(behandlingsKombinasjon -> behandlingsKombinasjon.behandlingsTyper().stream())
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+            default -> Collections.emptySet();
+        };
     }
 
     private Set<Behandlingstyper> behandlingstyperForBruker(Sakstyper sakstype, Sakstemaer sakstema,
