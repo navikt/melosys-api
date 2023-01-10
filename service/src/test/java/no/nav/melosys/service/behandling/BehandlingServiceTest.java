@@ -20,6 +20,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
+import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
@@ -43,6 +44,8 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -226,14 +229,14 @@ class BehandlingServiceTest {
         behandling.setTema(TRYGDETID);
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
-        behandlingService.endreTema(behandling, ØVRIGE_SED_MED);
+        behandlingService.endreTema(behandling, FORESPØRSEL_TRYGDEMYNDIGHET);
 
         verify(behandlingRepository).save(behandlingCaptor.capture());
         verify(behandlingsresultatService).tømBehandlingsresultat(BEHANDLING_ID);
         verify(applicationEventPublisher).publishEvent(behandlingEndretAvSaksbehandlerEventArgumentCaptor.capture());
-        assertThat(behandlingCaptor.getValue().getTema()).isEqualTo(ØVRIGE_SED_MED);
+        assertThat(behandlingCaptor.getValue().getTema()).isEqualTo(FORESPØRSEL_TRYGDEMYNDIGHET);
         assertThat(behandlingCaptor.getValue().getId()).isEqualTo(BEHANDLING_ID);
-        assertThat(behandlingEndretAvSaksbehandlerEventArgumentCaptor.getValue().getBehandlingstema()).isEqualTo(ØVRIGE_SED_MED);
+        assertThat(behandlingEndretAvSaksbehandlerEventArgumentCaptor.getValue().getBehandlingstema()).isEqualTo(FORESPØRSEL_TRYGDEMYNDIGHET);
     }
 
     @Test
@@ -376,13 +379,13 @@ class BehandlingServiceTest {
 
 
         Behandling behandling = behandlingService.nyBehandling(
-            new Fagsak(), Behandlingsstatus.OPPRETTET, SOEKNAD, Behandlingstema.UTSENDT_ARBEIDSTAKER,
+            new Fagsak(), Behandlingsstatus.OPPRETTET, FØRSTEGANG, Behandlingstema.UTSENDT_ARBEIDSTAKER,
             initierendeJournalpostId, initierendeDokumentId, null, null, null);
 
 
         verify(behandlingRepository).save(behandling);
         verify(behandlingsresultatService).lagreNyttBehandlingsresultat(behandling);
-        assertThat(behandling.getType()).isEqualTo(SOEKNAD);
+        assertThat(behandling.getType()).isEqualTo(FØRSTEGANG);
         assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.OPPRETTET);
         assertThat(behandling.getInitierendeJournalpostId()).isEqualTo(initierendeJournalpostId);
         assertThat(behandling.getInitierendeDokumentId()).isEqualTo(initierendeDokumentId);
@@ -397,7 +400,7 @@ class BehandlingServiceTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> behandlingService.nyBehandling(
-                fagsak, Behandlingsstatus.OPPRETTET, SOEKNAD, Behandlingstema.UTSENDT_ARBEIDSTAKER,
+                fagsak, Behandlingsstatus.OPPRETTET, FØRSTEGANG, Behandlingstema.UTSENDT_ARBEIDSTAKER,
                 null, null, null, null, null))
             .withMessageContaining("Mangler mottaksdato eller behandlingsårsaktype");
     }
@@ -714,6 +717,33 @@ class BehandlingServiceTest {
 
         assertThat(behandling.getStatus()).isEqualTo(Behandlingsstatus.UNDER_BEHANDLING);
         verify(behandlingRepository).save(behandling);
+    }
+
+    @Test
+    void behandlingMedSaksnummerTilhørerSaksbehandlerID_saksbehandlerErSattPåOppgaven_forventTrue() {
+        String saksnummer = "MEL-1234";
+        String saksbehandlerId = "Z123456";
+        Oppgave oppgave = new Oppgave.Builder()
+            .setTilordnetRessurs(saksbehandlerId)
+            .build();
+        when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(saksnummer)).thenReturn(Optional.of(oppgave));
+
+        boolean result = behandlingService.behandlingMedSaksnummerTilhørerSaksbehandlerID(saksnummer, saksbehandlerId);
+
+        assertTrue(result);
+    }
+
+    @Test
+    void behandlingMedSaksnummerTilhørerSaksbehandlerID_saksbehandlerErIkkeSattPåOppgaven_forventFalse() {
+        Oppgave oppgave = new Oppgave.Builder()
+            .setTilordnetRessurs("TYBO")
+            .build();
+
+        when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer("MEL-1234")).thenReturn(Optional.of(oppgave));
+
+        boolean result = behandlingService.behandlingMedSaksnummerTilhørerSaksbehandlerID("MEL-1234", "Z123456");
+
+        assertFalse(result);
     }
 
     @Test

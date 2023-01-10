@@ -313,7 +313,7 @@ class TrygdeavtaleTjenesteTest {
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setMottatteOpplysninger(lagMottatteOpplysninger());
         return behandling;
     }

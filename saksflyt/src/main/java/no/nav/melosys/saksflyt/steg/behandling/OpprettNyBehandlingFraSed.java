@@ -50,6 +50,9 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
+        if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
+            throw new TekniskException("Støtter ikke lenger disabled melosys.behandle_alle_saker");
+        }
 
         var arkivsakID = prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class);
         var behandlingstema = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class);
@@ -67,7 +70,7 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
         avsluttTidligereBehandling(fagsak);
         var behandling = behandlingService.nyBehandling(
             fagsak, Behandlingsstatus.UNDER_BEHANDLING,
-            unleash.isEnabled("melosys.behandle_alle_saker") ? Behandlingstyper.FØRSTEGANG : Behandlingstyper.SED,
+            Behandlingstyper.FØRSTEGANG,
             behandlingstema, eessiMelding.getJournalpostId(), eessiMelding.getDokumentId(),
             joarkFasade.hentMottaksDatoForJournalpost(eessiMelding.getJournalpostId()),
             Behandlingsaarsaktyper.SED, null);

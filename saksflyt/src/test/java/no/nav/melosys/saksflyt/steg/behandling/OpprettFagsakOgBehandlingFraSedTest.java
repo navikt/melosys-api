@@ -71,24 +71,6 @@ class OpprettFagsakOgBehandlingFraSedTest {
         assertThat(opprettSakRequestArgumentCaptor.getValue().getMottaksdato()).isNotNull();
     }
 
-    @Test
-    void utfør_toggleDisabled_verifiserNyFagsakOgBehandlingBlirOpprettet() {
-        unleash.disableAll();
-        Prosessinstans prosessinstans = lagProsessinstans();
-        prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
-        when(joarkFasade.hentMottaksDatoForJournalpost(anyString())).thenReturn(LocalDate.EPOCH);
-
-
-        opprettFagsakOgBehandlingFraSed.utfør(prosessinstans);
-
-
-        verify(fagsakService).nyFagsakOgBehandling(opprettSakRequestArgumentCaptor.capture());
-        assertThat(opprettSakRequestArgumentCaptor.getValue().getSakstype()).isEqualTo(Sakstyper.EU_EOS);
-        assertThat(opprettSakRequestArgumentCaptor.getValue().getSakstema()).isEqualTo(Sakstemaer.UNNTAK);
-        assertThat(opprettSakRequestArgumentCaptor.getValue().getBehandlingstype()).isEqualTo(Behandlingstyper.SED);
-        assertThat(opprettSakRequestArgumentCaptor.getValue().getMottaksdato()).isNotNull();
-    }
-
     private Prosessinstans lagProsessinstans() {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.SAKSTEMA, Sakstemaer.UNNTAK);

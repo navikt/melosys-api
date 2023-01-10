@@ -28,6 +28,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.*;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
@@ -312,10 +313,7 @@ public class ProsessinstansService {
             prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakDto.getBehandlingsaarsakType());
             prosessinstans.setData(MOTTATT_DATO, opprettSakDto.getMottaksdato());
         } else {
-            prosessinstans.setData(SAKSTEMA,
-                SakstypeSakstemaKobling.sakstema(Sakstyper.EU_EOS, opprettSakDto.getBehandlingstema()));
-            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE,
-                Behandling.erBehandlingAvSøknadGammel(opprettSakDto.getBehandlingstema()) ? Behandlingstyper.SOEKNAD : Behandlingstyper.SED);
+            throw new TekniskException("Støtter ikke lenger disabled melosys.behandle_alle_saker");
         }
 
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
@@ -347,9 +345,7 @@ public class ProsessinstansService {
             prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakDto.getBehandlingsaarsakType());
             prosessinstans.setData(MOTTATT_DATO, opprettSakDto.getMottaksdato());
         } else {
-            prosessinstans.setData(ProsessDataKey.SAKSTEMA,
-                SakstypeSakstemaKobling.sakstema(Sakstyper.EU_EOS, opprettSakDto.getBehandlingstema()));
-            prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.SOEKNAD);
+            throw new TekniskException("Støtter ikke lenger disabled melosys.behandle_alle_saker");
         }
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());

@@ -26,7 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.SOEKNAD;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.INNVILGELSE_YRKESAKTIV;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.TRYGDEAVTALE_GB;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1;
@@ -77,7 +77,7 @@ class DokumentNavnServiceTest {
     void utledDokumentNavnForProduserbaredokumenterOgAktoerRolle_StorbritanniaInnvilgelseOgAttestMedUlikeParametre_korrektTittel(boolean skalHaAttest, boolean erNyVurdering, Aktoer mottaker, String forventetTittel) {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
-        behandling.setType(erNyVurdering ? NY_VURDERING : SOEKNAD);
+        behandling.setType(erNyVurdering ? NY_VURDERING : FØRSTEGANG);
 
         if (!mottaker.erUtenlandskMyndighet() && !FastMottakerMedOrgnr.SKATT.getOrgnr().equals(mottaker.getOrgnr())) {
             when(mockLovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
@@ -98,7 +98,7 @@ class DokumentNavnServiceTest {
     void utledDokumentNavnForProduserbaredokumenterOgAktoer_StorbritanniaInnvilgelseOgAttestMedUlikeParametre_korrektTittel(boolean skalHaAttest, boolean erNyVurdering, Aktoer mottaker, String forventetTittel) {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
-        behandling.setType(erNyVurdering ? NY_VURDERING : SOEKNAD);
+        behandling.setType(erNyVurdering ? NY_VURDERING : FØRSTEGANG);
 
         if (!mottaker.erUtenlandskMyndighet() && !FastMottakerMedOrgnr.SKATT.getOrgnr().equals(mottaker.getOrgnr())) {
             when(mockLovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
@@ -117,7 +117,7 @@ class DokumentNavnServiceTest {
     void utledDokumentNavn_StorbritanniaInnvilgelseOgAttestMedUlikeParametre_korrektTittel(boolean skalHaAttest, boolean erNyVurdering, Aktoer mottaker, String forventetTittel) {
         Behandling behandling = new Behandling();
         behandling.setId(123L);
-        behandling.setType(erNyVurdering ? NY_VURDERING : SOEKNAD);
+        behandling.setType(erNyVurdering ? NY_VURDERING : FØRSTEGANG);
 
         if (!mottaker.erUtenlandskMyndighet() && !FastMottakerMedOrgnr.SKATT.getOrgnr().equals(mottaker.getOrgnr())) {
             when(mockLovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
