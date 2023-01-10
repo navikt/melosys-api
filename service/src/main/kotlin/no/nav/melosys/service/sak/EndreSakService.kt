@@ -128,6 +128,7 @@ class EndreSakService(
         }
 
         lovligeKombinasjonerService.validerOpprettelseOgEndring(
+            behandling,
             fagsak.hovedpartRolle,
             nySakstype,
             nySakstema,
