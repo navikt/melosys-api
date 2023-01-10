@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
@@ -19,7 +18,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
@@ -218,7 +216,7 @@ public class BrevbestillingService {
         switch (rolle) {
             case BRUKER:
                 List<Produserbaredokumenter> brevmaler = new ArrayList<>();
-                if (skalKunneSendeMeldingForventetSaksbehanlingstidSoknad(behandling.getFagsak().getTema(), behandling.getType())) {
+                if (behandling.getFagsak().getTema() == Sakstemaer.MEDLEMSKAP_LOVVALG && behandling.getType() == Behandlingstyper.FØRSTEGANG) {
                     brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
                 }
                 brevmaler.addAll(asList(MANGELBREV_BRUKER, GENERELT_FRITEKSTBREV_BRUKER));
@@ -230,12 +228,6 @@ public class BrevbestillingService {
             default:
                 throw new FunksjonellException("Rollen " + rolle + " kan ikke sende brev gjennom brevmenyen");
         }
-    }
-
-    // Denne kan slettes når melosys.behandle_alle_saker fjernes. Burde MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD endre navn også?
-    // Kan ikke slettes direkte. Med mindre MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD også fjernes her?
-    private boolean skalKunneSendeMeldingForventetSaksbehanlingstidSoknad(Sakstemaer sakstema, Behandlingstyper behandlingstype) {
-        return sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG && behandlingstype == Behandlingstyper.FØRSTEGANG;
     }
 
     @Transactional
