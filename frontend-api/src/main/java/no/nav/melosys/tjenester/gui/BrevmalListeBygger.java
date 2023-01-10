@@ -39,22 +39,24 @@ public class BrevmalListeBygger {
     public List<BrevmalDto> byggBrevmalDtoListe(long behandlingId) {
         List<MottakerDto> mottakere = hentTilgjengeligeMottakere(behandlingId);
 
-        return mottakere.stream().map(mottaker -> {
-            List<Produserbaredokumenter> produserbareDokumenter = brevbestillingService.hentMuligeProduserbaredokumenter(behandlingId, mottaker.getRolle());
+        return mottakere.stream().map(mottaker -> mottakerTilBrevmalDto(behandlingId, mottaker)).toList();
+    }
 
-            List<BrevmalTypeDto> typer = produserbareDokumenter.stream().map(p -> switch (p) {
-                    case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE ->
-                        lagBrevmalTypeDtoForForventetSaksbehandlingstid(p);
-                    case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevmalTypeDtoForMangelbrev(p, behandlingId);
-                    case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET ->
-                        lagBrevmalTypeDtoForFritekstbrev(p, behandlingId);
-                    default -> null;
-                })
-                .filter(Objects::nonNull)
-                .toList();
+    private BrevmalDto mottakerTilBrevmalDto(long behandlingId, MottakerDto mottaker) {
+        List<Produserbaredokumenter> produserbareDokumenter = brevbestillingService.hentMuligeProduserbaredokumenter(behandlingId, mottaker.getRolle());
 
-            return new BrevmalDto(mottaker, typer);
-        }).toList();
+        List<BrevmalTypeDto> typer = produserbareDokumenter.stream().map(p -> switch (p) {
+                case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE ->
+                    lagBrevmalTypeDtoForForventetSaksbehandlingstid(p);
+                case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevmalTypeDtoForMangelbrev(p, behandlingId);
+                case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET ->
+                    lagBrevmalTypeDtoForFritekstbrev(p, behandlingId);
+                default -> null;
+            })
+            .filter(Objects::nonNull)
+            .toList();
+
+        return new BrevmalDto(mottaker, typer);
     }
 
     private List<MottakerDto> hentTilgjengeligeMottakere(long behandlingId) {
