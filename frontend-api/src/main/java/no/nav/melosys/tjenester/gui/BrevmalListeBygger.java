@@ -67,7 +67,7 @@ public class BrevmalListeBygger {
         if (fagsak.getHovedpartRolle() == BRUKER) {
             mottakere.addAll(lagMottakereForRolle(behandling, BRUKER));
             mottakere.addAll(lagMottakereForRolle(behandling, ARBEIDSGIVER));
-            if (fagsak.erTrygdeavtale()) {
+            if (fagsak.erSakstypeTrygdeavtale()) {
                 mottakere.addAll(lagMottakereForRolle(behandling, TRYGDEMYNDIGHET));
             }
         } else if (fagsak.getHovedpartRolle() == VIRKSOMHET) {
