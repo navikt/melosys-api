@@ -3,6 +3,7 @@ package no.nav.melosys.service.medl;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.medl.MedlService;
 import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
@@ -11,6 +12,8 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.ANMODNING_OM_UNNTAK;
 
 @Service
 public class MedlAnmodningsperiodeService {
@@ -34,6 +37,25 @@ public class MedlAnmodningsperiodeService {
     public void avsluttTidligereAnmodningsperiode(Behandling behandling) {
         Anmodningsperiode forrigeAnmodningsPeriode = finnAnmodningsperiodeForForrigeA001(behandling);
         Long medlPeriodeID = forrigeAnmodningsPeriode.getMedlPeriodeID();
+        log.info("Avslutter tidligere anmodningsperiode med MedlPeriodeID: {}", medlPeriodeID);
+        medlService.avvisPeriode(medlPeriodeID, StatusaarsakMedl.AVVIST);
+    }
+
+    public void avsluttTidligereSendtAnmodningPeriode(Behandling nyBehandling) {
+        Fagsak fagsak = nyBehandling.getFagsak();
+        Behandling forrigeBehandling = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato().stream()
+            .filter(behandling -> !behandling.getId().equals(nyBehandling.getId()))
+            .filter(behandling -> {
+                Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+                return ANMODNING_OM_UNNTAK == behandlingsresultat.getType();
+            })
+            .findFirst()
+            .orElseThrow(() -> new FunksjonellException("Fant ikke tidligere periode på en ny vurdering med saksnummer: %s"
+                .formatted(fagsak.getSaksnummer()))
+            );
+
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(forrigeBehandling.getId());
+        Long medlPeriodeID = behandlingsresultat.hentAnmodningsperiode().getMedlPeriodeID();
         log.info("Avslutter tidligere anmodningsperiode med MedlPeriodeID: {}", medlPeriodeID);
         medlService.avvisPeriode(medlPeriodeID, StatusaarsakMedl.AVVIST);
     }
