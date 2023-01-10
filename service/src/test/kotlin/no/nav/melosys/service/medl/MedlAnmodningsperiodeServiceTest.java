@@ -19,7 +19,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.ANMODNING_OM_UNNTAK;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -89,40 +88,12 @@ class MedlAnmodningsperiodeServiceTest {
         verify(medlService).avvisPeriode(MOCKED_FORRIGE_BEHANDLING_MEDL_PERIODE_ID, StatusaarsakMedl.AVVIST);
     }
 
-    @Test
-    void avsluttTidligereSendtAnmodningPeriode_avslutterTidligereAnmodningsperiode_ok() {
-        Behandling tidligereBehandling = new Behandling();
-        tidligereBehandling.setId(1L);
-        tidligereBehandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        tidligereBehandling.setRegistrertDato(Instant.now());
-        tidligereBehandling.setFagsak(fagsak);
-
-        Behandling nyBehandling = new Behandling();
-        nyBehandling.setId(2L);
-        nyBehandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        nyBehandling.setRegistrertDato(Instant.now().plusSeconds(60));
-        nyBehandling.setFagsak(fagsak);
-
-        fagsak.setBehandlinger(List.of(
-            tidligereBehandling,
-            nyBehandling
-        ));
-
-        when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat);
-
-
-        medlAnmodningsperiodeService.avsluttTidligereSendtAnmodningPeriode(nyBehandling);
-
-
-        verify(medlService).avvisPeriode(MOCKED_FORRIGE_BEHANDLING_MEDL_PERIODE_ID, StatusaarsakMedl.AVVIST);
-    }
 
     private Behandlingsresultat lagBehandlingsresultatMedAnmodningsperiode() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
         anmodningsperiode.setMedlPeriodeID(MOCKED_FORRIGE_BEHANDLING_MEDL_PERIODE_ID);
         behandlingsresultat.setAnmodningsperioder(Set.of(anmodningsperiode));
-        behandlingsresultat.setType(ANMODNING_OM_UNNTAK);
         return behandlingsresultat;
     }
 

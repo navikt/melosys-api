@@ -8,8 +8,6 @@ import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.medl.MedlAnmodningsperiodeService;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessType.ANMODNING_OM_UNNTAK;
-
 @Component
 public class AvsluttTidligereMedlAnmodningsperiode implements StegBehandler {
     private final MedlAnmodningsperiodeService medlAnmodningsperiodeService;
@@ -28,9 +26,6 @@ public class AvsluttTidligereMedlAnmodningsperiode implements StegBehandler {
         Behandling nyBehandling = prosessinstans.getBehandling();
         if (erOppdatertA001(nyBehandling, prosessinstans)) {
             medlAnmodningsperiodeService.avsluttTidligereAnmodningsperiode(nyBehandling);
-        }
-        if (nyBehandling.erNyVurdering() && ANMODNING_OM_UNNTAK == prosessinstans.getType()) {
-            medlAnmodningsperiodeService.avsluttTidligereSendtAnmodningPeriode(nyBehandling);
         }
     }
 
