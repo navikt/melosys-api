@@ -8,8 +8,12 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.*;
-import no.nav.melosys.domain.brev.*;
+import no.nav.melosys.domain.brev.DokgenBrevbestilling;
+import no.nav.melosys.domain.brev.FritekstbrevBrevbestilling;
+import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
+import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -28,6 +32,9 @@ import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -350,40 +357,14 @@ class OpprettOgJournalforBrevTest {
                 Tuple.tuple(new byte[]{3, 4}, "tittel 2"));
     }
 
-    @Test
-    void utfør_produserFritekstvedlegg() {
-        Behandling behandling = TestdataFactory.lagBehandling();
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
-        when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
-        when(mockDokgenService.produserBrev(any(), any())).thenReturn(null, new byte[]{1, 2}, new byte[]{3, 4});
-
-        var fritekstvedleggBestillingList =
-            List.of(new FritekstvedleggBestilling("x", "<p>s</p>"), new FritekstvedleggBestilling("c", "<p>h</p>"));
-        var brevbestilling = new FritekstbrevBrevbestilling.Builder()
-            .medProduserbartdokument(GENERELT_FRITEKSTBREV_BRUKER)
-            .medFritekstTittel("Tittel")
-            .medFritekstvedleggBestilling(fritekstvedleggBestillingList)
-            .medFritekst("Innhold")
-            .build();
-
-        Prosessinstans prosessinstans = lagProsessinstans(behandling, brevbestilling);
-        opprettJournalforBrev.utfør(prosessinstans);
-
-        verify(mockJoarkFasade).opprettJournalpost(opprettJournalpostCaptor.capture(), anyBoolean());
-
-        OpprettJournalpost captured = opprettJournalpostCaptor.getValue();
-        assertThat(captured.getHoveddokument().getTittel()).isEqualTo("Tittel");
-        assertThat(captured.getVedlegg())
-            .extracting(fysiskDokument -> fysiskDokument.getDokumentVarianter()
-                    .stream().map(DokumentVariant::getData).findFirst().orElse(null),
-                ArkivDokument::getTittel)
-            .containsExactly(Tuple.tuple(new byte[]{1, 2}, "x"),
-                Tuple.tuple(new byte[]{3, 4}, "c"));
-    }
-
-    @Test
-    void utfør_produserEngelskFritekstbrev() {
+    @ParameterizedTest
+    @MethodSource("hentProduserbaredokumenter")
+    void utfør_produserFritekstbrev(
+        Produserbaredokumenter produserbaredokumenter,
+        String tittel,
+        String dokumentTittel,
+        String journalforingstittel
+    ) {
         Behandling behandling = TestdataFactory.lagBehandling();
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
@@ -399,10 +380,11 @@ class OpprettOgJournalforBrevTest {
         List<SaksvedleggBestilling> saksvedleggBestillingList =
             List.of(new SaksvedleggBestilling("1", "2"), new SaksvedleggBestilling("3", "4"));
         FritekstbrevBrevbestilling brevbestilling = new FritekstbrevBrevbestilling.Builder()
-            .medProduserbartdokument(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV)
-            .medFritekstTittel("Request to remain subject to Norwegian legislation")
+            .medProduserbartdokument(produserbaredokumenter)
+            .medFritekstTittel(tittel)
             .medSaksvedleggBestilling(saksvedleggBestillingList)
             .medFritekst("Innhold")
+            .medDokumentTittel(dokumentTittel)
             .build();
 
         Prosessinstans prosessinstans = lagProsessinstans(behandling, brevbestilling);
@@ -415,13 +397,38 @@ class OpprettOgJournalforBrevTest {
         verify(mockJoarkFasade).opprettJournalpost(opprettJournalpostCaptor.capture(), anyBoolean());
 
         OpprettJournalpost captured = opprettJournalpostCaptor.getValue();
-        assertThat(captured.getHoveddokument().getTittel()).isEqualTo("Søknad om unntak");
+        assertThat(captured.getHoveddokument().getTittel()).isEqualTo(journalforingstittel);
         assertThat(captured.getVedlegg())
             .extracting(fysiskDokument -> fysiskDokument.getDokumentVarianter()
                     .stream().map(DokumentVariant::getData).findFirst().orElse(null),
                 ArkivDokument::getTittel)
             .containsExactly(Tuple.tuple(new byte[]{1, 2}, "tittel 1"),
                 Tuple.tuple(new byte[]{3, 4}, "tittel 2"));
+    }
+
+    private static List<Arguments> hentProduserbaredokumenter() {
+        return List.of(
+            Arguments.of(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV,
+                "Request to remain subject to Norwegian legislation",
+                null,
+                "Søknad om unntak"),
+            Arguments.of(GENERELT_FRITEKSTBREV_BRUKER,
+                "Tittel",
+                "Overstyrt tittel",
+                "Overstyrt tittel"),
+            Arguments.of(GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
+                "Tittel",
+                null,
+                "Tittel"),
+            Arguments.of(GENERELT_FRITEKSTBREV_VIRKSOMHET,
+                "Tittel",
+                null,
+                "Tittel"),
+            Arguments.of(GENERELT_FRITEKSTVEDLEGG,
+                "Tittel",
+                null,
+                "Tittel")
+        );
     }
 
     private Prosessinstans lagProsessinstans(Behandling behandling, DokgenBrevbestilling brevbestilling) {
