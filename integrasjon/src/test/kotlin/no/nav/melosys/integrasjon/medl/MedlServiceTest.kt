@@ -190,6 +190,35 @@ internal class MedlServiceTest {
     }
 
     @Test
+    fun skalOpprettPeriodeForeløpigUnntak() {
+        val lovvalgsperiode = lagLovvalgsPeriode()
+        val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
+        lovvalgsperiode.tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5
+        every {
+            mockRestConsumer.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
+        } answers {
+            medlemskapsunntakForPostCapturingSlot.captured.shouldBeEqualToComparingFields(
+                MedlemskapsunntakForPost(
+                    ident = FNR,
+                    fraOgMed = lovvalgsperiode.fom,
+                    tilOgMed = lovvalgsperiode.tom,
+                    status = LovvalgMedl.UAVK.kode,
+                    dekning = DekningMedl.FULL.kode,
+                    lovvalgsland = "BEL",
+                    lovvalg = LovvalgMedl.FORL.kode,
+                    grunnlag = GrunnlagMedl.FO_11_5.kode,
+                    sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                    )
+                )
+            )
+            hentMedlemskapsunntak()
+        }
+        medlService.opprettPeriodeForeløpig(FNR, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD)
+            .shouldBe(123456)
+    }
+
+    @Test
     fun skalOpprettePeriodeEndeligFtrl() {
         val medlemskapsperiode = lagMedlemskapsPeriode()
         val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
