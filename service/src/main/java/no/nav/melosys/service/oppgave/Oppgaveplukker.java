@@ -3,6 +3,7 @@ package no.nav.melosys.service.oppgave;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
@@ -54,10 +55,14 @@ public class Oppgaveplukker {
         }
         log.info("Funnet {} oppgaver med oppgaveTema {}", utildelteOppgaver.size(), oppgaveBehandlingstemaSet);
 
+        Set<String> saksnumre = utildelteOppgaver.stream().map(Oppgave::getSaksnummer).collect(Collectors.toSet());
+        Map<String, Fagsak> sasksnummerFagsakMap = fagsakService.hentFagsaker(saksnumre).stream()
+            .collect(Collectors.toMap(Fagsak::getSaksnummer, Function.identity()));
+
         List<Oppgave> filtrerteOppgaver = utildelteOppgaver.stream()
             .filter(oppgave -> {
                 String saksnummer = oppgave.getSaksnummer();
-                Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
+                Fagsak fagsak = sasksnummerFagsakMap.get(saksnummer);
                 if (fagsak == null) {
                     log.warn("Fant ikke fagsak {} for oppgave {}", saksnummer, oppgave.getOppgaveId());
                     return false;

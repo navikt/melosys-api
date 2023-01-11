@@ -295,4 +295,8 @@ public class FagsakService {
         fagsak.setStatus(saksstatus);
         fagsakRepository.save(fagsak);
     }
+
+    public List<Fagsak> hentFagsaker(Collection<String> saksnumre) {
+        return fagsakRepository.findAllBySaksnummerIn(saksnumre);
+    }
 }
