@@ -108,6 +108,9 @@ public class DokumentproduksjonsInfoMapper {
             .put(GENERELT_FRITEKSTVEDLEGG,
                 new DokumentproduksjonsInfo("fritekstvedlegg",
                     DokumentKategoriKode.IB.getKode()))
+            .put(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV,
+                new DokumentproduksjonsInfo("trygdeavtale_fritekstbrev",
+                    DokumentKategoriKode.IB.getKode()))
             .build());
     }
 

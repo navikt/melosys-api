@@ -8,7 +8,8 @@ public enum BrevmalFeltKode {
     INNLEDNING_FRITEKST("Innledningstekst"),
     VEDLEGG("Vedlegg"),
     FRITEKSTVEDLEGG("Legg til fritekstvedlegg"),
-    MANGLER_FRITEKST("Hva skal mottakeren sende inn?");
+    MANGLER_FRITEKST("Hva skal mottakeren sende inn?"),
+    DOKUMENT_TITTEL("Dokumenttittel (valgfritt)");
 
     private final String beskrivelse;
 

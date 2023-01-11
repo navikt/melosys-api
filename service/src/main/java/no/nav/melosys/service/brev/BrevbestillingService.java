@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import no.nav.dok.brevdata.felles.v1.navfelles.UtenlandskPostadresse;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
+import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
@@ -21,6 +23,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
@@ -48,7 +51,8 @@ public class BrevbestillingService {
         GENERELT_FRITEKSTBREV_BRUKER,
         GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
         GENERELT_FRITEKSTBREV_VIRKSOMHET,
-        AVSLAG_MANGLENDE_OPPLYSNINGER
+        AVSLAG_MANGLENDE_OPPLYSNINGER,
+        UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV
     );
 
     private final DokumentServiceFasade dokumentServiceFasade;
@@ -58,6 +62,7 @@ public class BrevbestillingService {
     private final KontaktopplysningService kontaktopplysningService;
     private final PersondataFasade persondataFasade;
     private final DokumentNavnService dokumentNavnService;
+    private final UtenlandskMyndighetService utenlandskMyndighetService;
 
     public BrevbestillingService(BrevmottakerService brevmottakerService,
                                  DokumentServiceFasade dokumentServiceFasade,
@@ -65,7 +70,9 @@ public class BrevbestillingService {
                                  EregFasade eregFasade,
                                  KontaktopplysningService kontaktopplysningService,
                                  PersondataFasade persondataFasade,
-                                 DokumentNavnService dokumentNavnService) {
+                                 DokumentNavnService dokumentNavnService,
+                                 UtenlandskMyndighetService utenlandskMyndighetService
+    ) {
         this.brevmottakerService = brevmottakerService;
         this.dokumentServiceFasade = dokumentServiceFasade;
         this.behandlingService = behandlingService;
@@ -73,6 +80,7 @@ public class BrevbestillingService {
         this.kontaktopplysningService = kontaktopplysningService;
         this.persondataFasade = persondataFasade;
         this.dokumentNavnService = dokumentNavnService;
+        this.utenlandskMyndighetService = utenlandskMyndighetService;
     }
 
     @Transactional
@@ -108,6 +116,11 @@ public class BrevbestillingService {
         if (hovedmottaker == ARBEIDSGIVER || hovedmottaker == VIRKSOMHET) {
             var orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(orgnrTilValgtArbeidsgiver).getDokument();
             return orgDokument.getNavn();
+        }
+        if(hovedmottaker == TRYGDEMYNDIGHET && produserbaredokumenter == UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV){
+            Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(hovedmottaker), behandling);
+            UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(avklartMottaker.hentMyndighetLandkode());
+            return utenlandskMyndighet.navn;
         }
         throw new FunksjonellException("Melosys støtter ikke hovedmottakere med rollen " + hovedmottaker);
     }
@@ -225,6 +238,8 @@ public class BrevbestillingService {
                 return List.of(MANGELBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
             case VIRKSOMHET:
                 return List.of(GENERELT_FRITEKSTBREV_VIRKSOMHET);
+            case TRYGDEMYNDIGHET:
+                return List.of(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV);
             default:
                 throw new FunksjonellException("Rollen " + rolle + " kan ikke sende brev gjennom brevmenyen");
         }
@@ -264,6 +279,16 @@ public class BrevbestillingService {
                 String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null ? kontaktopplysning.getKontaktOrgnr() : mottaker.getOrgnr();
                 orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();
                 break;
+            }
+            case TRYGDEMYNDIGHET:{
+                UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(mottaker.hentMyndighetLandkode());
+                return new BrevAdresse.Builder()
+                    .medMottakerNavn(utenlandskMyndighet.navn)
+                    .medAdresselinjer(List.of(utenlandskMyndighet.gateadresse1, utenlandskMyndighet.gateadresse2))
+                    .medPostnr(utenlandskMyndighet.postnummer)
+                    .medPoststed(utenlandskMyndighet.poststed)
+                    .medLand(utenlandskMyndighet.land)
+                    .build();
             }
             default:
                 throw new FunksjonellException("Mottakersrolle støttes ikke: " + mottaker.getRolle());
