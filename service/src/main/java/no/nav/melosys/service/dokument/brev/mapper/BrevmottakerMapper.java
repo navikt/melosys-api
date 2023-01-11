@@ -65,6 +65,14 @@ public class BrevmottakerMapper {
                     UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI
                 ).build()),
 
+            Map.entry(TRYGDEAVTALE_AU, new Mottakerliste.Builder()
+                .medHovedMottaker(BRUKER)
+                .medBrevkopiRegler(
+                    ARBEIDSGIVER_FÅR_KOPI,
+                    SKATT_FÅR_KOPI,
+                    UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI
+                ).build()),
+
             Map.entry(GENERELT_FRITEKSTBREV_BRUKER, new Mottakerliste.Builder()
                 .medHovedMottaker(BRUKER).build()),
 
