@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
@@ -68,7 +67,7 @@ public class Oppgaveplukker {
             }).toList();
 
         Optional<Oppgave> valg = filtrerteOppgaver.stream()
-            .sorted(Oppgave.lavestTilHøyestPrioritet.reversed())
+            .sorted(Oppgave.LAVEST_TIL_HØYEST_PRIORITET.reversed())
             .filter(oppgave -> !erTilbakeLagt(saksbehandlerID, oppgave.getOppgaveId()))
             .findFirst();
 
