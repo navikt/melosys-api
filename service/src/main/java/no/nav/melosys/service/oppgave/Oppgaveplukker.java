@@ -14,7 +14,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -60,8 +59,8 @@ public class Oppgaveplukker {
                 String saksnummer = oppgave.getSaksnummer();
                 Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
                 if (fagsak == null) {
-                    log.error("Fant ikke fagsak {} for oppgave {}", saksnummer, oppgave.getOppgaveId());
-                    throw new TekniskException("Fant ikke fagsak " + saksnummer);
+                    log.warn("Fant ikke fagsak {} for oppgave {}", saksnummer, oppgave.getOppgaveId());
+                    return false;
                 }
                 return fagsakMatcherSøk(fagsak, plukkDto) && !venterSakPaaDokumentasjonEllerFagligAvklaring(fagsak);
             }).toList();
@@ -82,11 +81,11 @@ public class Oppgaveplukker {
         Behandling behandling = fagsak.hentSistAktivBehandling();
         if (behandling.erVenterForDokumentasjon()) {
             if (behandling.getDokumentasjonSvarfristDato() == null) {
-                log.error("Behandling {} tilhørende {} avventer dokumentasjon, men har ingen svarfristdato.",
+                log.warn("Behandling {} tilhørende {} avventer dokumentasjon, men har ingen svarfristdato.",
                     behandling.getId(), fagsak.getSaksnummer());
                 return true;
             }
-            return behandling.getDokumentasjonSvarfristDato().isAfter(Instant.now());
+            return Instant.now().isBefore(behandling.getDokumentasjonSvarfristDato());
         }
         return behandling.harStatus(Behandlingsstatus.AVVENT_FAGLIG_AVKLARING);
     }
