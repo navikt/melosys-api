@@ -41,19 +41,17 @@ public class AltinnSoeknadService {
     private final MottatteOpplysningerService mottatteOpplysningerService;
     private final PersondataFasade persondataFasade;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
-    private final Unleash unleash;
 
     public AltinnSoeknadService(SoknadMottakConsumer soknadMottakConsumer,
                                 FagsakService fagsakService,
                                 MottatteOpplysningerService mottatteOpplysningerService,
                                 PersondataFasade persondataFasade,
-                                AvklarteVirksomheterService avklarteVirksomheterService, Unleash unleash) {
+                                AvklarteVirksomheterService avklarteVirksomheterService) {
         this.soknadMottakConsumer = soknadMottakConsumer;
         this.fagsakService = fagsakService;
         this.mottatteOpplysningerService = mottatteOpplysningerService;
         this.persondataFasade = persondataFasade;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
-        this.unleash = unleash;
     }
 
     public Behandling opprettFagsakOgBehandlingFraAltinnSøknad(String søknadReferanse) {
@@ -75,9 +73,6 @@ public class AltinnSoeknadService {
     }
 
     private OpprettSakRequest lagOpprettSakRequest(MedlemskapArbeidEOSM søknad, LocalDate mottaksdato) {
-        if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
-            throw new TekniskException("Støtter ikke lenger disabled melosys.behandle_alle_saker");
-        }
         return new OpprettSakRequest.Builder()
             .medSakstype(Sakstyper.EU_EOS)
             .medSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG)
@@ -105,11 +100,7 @@ public class AltinnSoeknadService {
 
     private Behandlingstema avklarBehandlingstema(MedlemskapArbeidEOSM søknad) {
         if (Boolean.TRUE.equals(søknad.getInnhold().getArbeidsgiver().isOffentligVirksomhet())) {
-            if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-                return Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY;
-            } else {
-                throw new TekniskException("Støtter ikke lenger disabled melosys.behandle_alle_saker");
-            }
+            return Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY;
         } else {
             return Behandlingstema.UTSENDT_ARBEIDSTAKER;
         }

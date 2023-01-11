@@ -118,24 +118,15 @@ public class SedDataBygger {
         sedDataDto.setUtenlandskIdent(grunnlagMedSøknad.getMottatteOpplysningerData().personOpplysninger.utenlandskIdent.stream()
             .map(SedDataBygger::tilUtenlandskIdentDto).toList());
 
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            var behandling = grunnlagMedSøknad.getBehandling();
-            if (behandling.getFagsak().erSakstypeEøs() &&
-                !behandling.erBehandlingAvSed() &&
-                !SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"))
-            ) {
-                sedDataDto.setSøknadsperiode(new Periode(
-                    grunnlagMedSøknad.getMottatteOpplysningerData().periode.getFom(),
-                    grunnlagMedSøknad.getMottatteOpplysningerData().periode.getTom()
-                ));
-            }
-        } else {
-            if (grunnlagMedSøknad.getBehandling().erBehandlingAvSøknadGammel()) {
-                sedDataDto.setSøknadsperiode(new Periode(
-                    grunnlagMedSøknad.getMottatteOpplysningerData().periode.getFom(),
-                    grunnlagMedSøknad.getMottatteOpplysningerData().periode.getTom()
-                ));
-            }
+        var behandling = grunnlagMedSøknad.getBehandling();
+        if (behandling.getFagsak().erSakstypeEøs() &&
+            !behandling.erBehandlingAvSed() &&
+            !SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"))
+        ) {
+            sedDataDto.setSøknadsperiode(new Periode(
+                grunnlagMedSøknad.getMottatteOpplysningerData().periode.getFom(),
+                grunnlagMedSøknad.getMottatteOpplysningerData().periode.getTom()
+            ));
         }
 
         return sedDataDto;

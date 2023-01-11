@@ -49,8 +49,6 @@ class DefaultSedRuterTest {
     @Mock
     private OppgaveService oppgaveService;
 
-    private final FakeUnleash unleash = new FakeUnleash();
-
     private DefaultSedRuter defaultSedRuter;
 
     private static final String SAKSNUMMER = "MEL-!!!";
@@ -58,8 +56,7 @@ class DefaultSedRuterTest {
 
     @BeforeEach
     public void setup() {
-        defaultSedRuter = new DefaultSedRuter(prosessinstansService, fagsakService, behandlingService, oppgaveService, unleash);
-        unleash.enableAll();
+        defaultSedRuter = new DefaultSedRuter(prosessinstansService, fagsakService, behandlingService, oppgaveService);
     }
 
     @Test

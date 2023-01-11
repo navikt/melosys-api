@@ -26,6 +26,7 @@ import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.tjenester.gui.dto.brev.*;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -56,15 +57,15 @@ class BrevmalListeByggerTest {
     private DokumentNavnService mockDokumentNavnService;
 
     private final FakeUnleash unleash = new FakeUnleash();
+
     private BrevmalListeBygger brevmalListeBygger;
 
 
     @BeforeEach
     void init() {
-        unleash.enable("melosys.behandle_alle_saker");
         BrevbestillingService brevbestillingService = new BrevbestillingService(mockBrevmottakerService,
             mockDokServiceFasade, mockBehandlingService, mockEregFasade, mockKontaktopplysningService,
-            mockPersondataFasade, mockDokumentNavnService, unleash);
+            mockPersondataFasade, mockDokumentNavnService);
         brevmalListeBygger = new BrevmalListeBygger(brevbestillingService, mockBehandlingService, unleash);
     }
 
@@ -190,36 +191,6 @@ class BrevmalListeByggerTest {
                 BrevmalTypeDto::getFelter)
             .containsExactly(
                 Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
-                null);
-    }
-
-    @Test
-    void byggBrevmalDtoListe_behandlingErKlage_returnererKlageMal() {
-        unleash.disableAll();
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.KLAGE));
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.KLAGE));
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
-
-
-        List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
-
-
-        assertThat(tilgjengeligeMaler).hasSize(2);
-
-        assertThat(tilgjengeligeMaler.get(0).getBrevTyper())
-            .hasSize(3)
-            .extracting(BrevmalTypeDto::getType)
-            .contains(
-                Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
-                Produserbaredokumenter.MANGELBREV_BRUKER,
-                Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER);
-
-        assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(0))
-            .extracting(
-                BrevmalTypeDto::getType,
-                BrevmalTypeDto::getFelter)
-            .containsExactly(
-                Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
                 null);
     }
 

@@ -7,6 +7,7 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.FellesType;
 import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.service.dokument.brev.BrevDataMottattDato;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import org.jeasy.random.EasyRandom;
@@ -42,10 +43,14 @@ public class ForvaltningsmeldingMapperTest {
 
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.UTSENDT_SELVSTENDIG);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
+
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
-        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, null, brevData, false);
+
+        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, null, brevData);
+
 
         assertThat(xml).isNotNull();
     }
@@ -56,8 +61,9 @@ public class ForvaltningsmeldingMapperTest {
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
 
-        Fag fag = mapper.mapFag(brevData, behandling, false);
+        Fag fag = mapper.mapFag(brevData, behandling);
 
         assertThat(fag).isNotNull();
         assertThat(fag.getDatoMottatt()).isNotNull();

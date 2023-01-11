@@ -30,144 +30,37 @@ class UtledMottaksdatoTest {
     @Mock
     private JoarkFasade joarkFasade;
 
-    private final FakeUnleash unleash = new FakeUnleash();
-
     private UtledMottaksdato utledMottaksdato;
 
     @BeforeEach
     void setUp() {
-        utledMottaksdato = new UtledMottaksdato(joarkFasade, unleash);
+        utledMottaksdato = new UtledMottaksdato(joarkFasade);
     }
-
-    @Test
-    void getMottaksdato_toggleErAvOgMottatteOpplysningerHarMottaksdato_returnererMottaksdato() {
-        unleash.disableAll();
-        var behandling = new Behandling();
-        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottaksdato(MOTTAKSDATO);
-
-
-        var utledetDato = utledMottaksdato.getMottaksdato(behandling);
-
-
-        assertThat(utledetDato).isEqualTo(MOTTAKSDATO);
-        verify(joarkFasade, never()).hentJournalpost(any());
-    }
-
-    @Test
-    void getMottaksdato_toggleErAvOgBehandlingHarIkkeMottatteOpplysninger_returnererRegistrertDato() {
-        unleash.disableAll();
-        var behandling = new Behandling();
-        behandling.setRegistrertDato(REGISTRERT_DATO);
-
-
-        var utledetDato = utledMottaksdato.getMottaksdato(behandling);
-
-
-        assertThat(utledetDato).isEqualTo(REGISTRERT_DATO_LOCALDATE);
-        verify(joarkFasade, never()).hentJournalpost(any());
-    }
-
-    @Test
-    void getMottaksdato_toggleErAvOgMottatteOpplysningerHarIkkeMottaksdato_returnererRegistrertDato() {
-        unleash.disableAll();
-        var behandling = new Behandling();
-        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottaksdato(null);
-        behandling.setRegistrertDato(REGISTRERT_DATO);
-
-
-        var utledetDato = utledMottaksdato.getMottaksdato(behandling);
-
-
-        assertThat(utledetDato).isEqualTo(REGISTRERT_DATO_LOCALDATE);
-        verify(joarkFasade, never()).hentJournalpost(any());
-    }
-
-    @Test
-    void getMottaksdato_toggleErPåOgBehandlingsårsakFinnes_returnererMottaksdato() {
-        unleash.enableAll();
-        var behandling = new Behandling();
-        behandling.setBehandlingsårsak(new Behandlingsaarsak());
-        behandling.getBehandlingsårsak().setMottaksdato(MOTTAKSDATO);
-
-
-        var utledetDato = utledMottaksdato.getMottaksdato(behandling);
-
-
-        assertThat(utledetDato).isEqualTo(MOTTAKSDATO);
-        verify(joarkFasade, never()).hentJournalpost(any());
-    }
-
-    @Test
-    void getMottaksdato_toggleErPåBehandlingsårsakFinnesIkkeJournalpostHarDato_returnererForsendelseMottatt() {
-        unleash.enableAll();
-        var journalpost = new Journalpost(JOURNALPOST_ID);
-        journalpost.setForsendelseMottatt(FORSENDELSE_MOTTATT);
-        when(joarkFasade.hentJournalpost(JOURNALPOST_ID)).thenReturn(journalpost);
-        var behandling = new Behandling();
-        behandling.setInitierendeJournalpostId(JOURNALPOST_ID);
-
-
-        var utledetDato = utledMottaksdato.getMottaksdato(behandling);
-
-
-        assertThat(utledetDato).isEqualTo(LocalDate.ofInstant(FORSENDELSE_MOTTATT, ZoneId.systemDefault()));
-    }
-
-    @Test
-    void getMottaksdato_toggleErPåBehandlingsårsakFinnesIkkeJournalpostHarIkkeDato_returnererRegistrertDato() {
-        unleash.enableAll();
-        var journalpost = new Journalpost(JOURNALPOST_ID);
-        when(joarkFasade.hentJournalpost(JOURNALPOST_ID)).thenReturn(journalpost);
-        var behandling = new Behandling();
-        behandling.setRegistrertDato(REGISTRERT_DATO);
-        behandling.setInitierendeJournalpostId(JOURNALPOST_ID);
-
-
-        var utledetDato = utledMottaksdato.getMottaksdato(behandling);
-
-
-        assertThat(utledetDato).isEqualTo(REGISTRERT_DATO_LOCALDATE);
-    }
-
-    @Test
-    void getMottaksdato_toggleErPåBehandlingsårsakFinnesIkkeHarIkkeInitierendeJournalpost_returnererRegistrertDato() {
-        unleash.enableAll();
-        var behandling = new Behandling();
-        behandling.setRegistrertDato(REGISTRERT_DATO);
-
-
-        var utledetDato = utledMottaksdato.getMottaksdato(behandling);
-
-
-        assertThat(utledetDato).isEqualTo(REGISTRERT_DATO_LOCALDATE);
-        verify(joarkFasade, never()).hentJournalpost(any());
-    }
-
 
     @Test
     void getMottaksdato_behandlingsårsakFinnes_returnererMottaksdato() {
-        var journalpost = new Journalpost(JOURNALPOST_ID);
         var behandling = new Behandling();
         behandling.setBehandlingsårsak(new Behandlingsaarsak());
         behandling.getBehandlingsårsak().setMottaksdato(MOTTAKSDATO);
 
 
-        var utledetDato = utledMottaksdato.getMottaksdato(behandling, journalpost);
+        var utledetDato = utledMottaksdato.getMottaksdato(behandling);
 
 
         assertThat(utledetDato).isEqualTo(MOTTAKSDATO);
+        verify(joarkFasade, never()).hentJournalpost(any());
     }
 
     @Test
     void getMottaksdato_behandlingsårsakFinnesIkkeJournalpostHarDato_returnererForsendelseMottatt() {
         var journalpost = new Journalpost(JOURNALPOST_ID);
         journalpost.setForsendelseMottatt(FORSENDELSE_MOTTATT);
+        when(joarkFasade.hentJournalpost(JOURNALPOST_ID)).thenReturn(journalpost);
         var behandling = new Behandling();
+        behandling.setInitierendeJournalpostId(JOURNALPOST_ID);
 
 
-        var utledetDato = utledMottaksdato.getMottaksdato(behandling, journalpost);
+        var utledetDato = utledMottaksdato.getMottaksdato(behandling);
 
 
         assertThat(utledetDato).isEqualTo(LocalDate.ofInstant(FORSENDELSE_MOTTATT, ZoneId.systemDefault()));
@@ -175,6 +68,62 @@ class UtledMottaksdatoTest {
 
     @Test
     void getMottaksdato_behandlingsårsakFinnesIkkeJournalpostHarIkkeDato_returnererRegistrertDato() {
+        var journalpost = new Journalpost(JOURNALPOST_ID);
+        when(joarkFasade.hentJournalpost(JOURNALPOST_ID)).thenReturn(journalpost);
+        var behandling = new Behandling();
+        behandling.setRegistrertDato(REGISTRERT_DATO);
+        behandling.setInitierendeJournalpostId(JOURNALPOST_ID);
+
+
+        var utledetDato = utledMottaksdato.getMottaksdato(behandling);
+
+
+        assertThat(utledetDato).isEqualTo(REGISTRERT_DATO_LOCALDATE);
+    }
+
+    @Test
+    void getMottaksdato_behandlingsårsakFinnesIkkeHarIkkeInitierendeJournalpost_returnererRegistrertDato() {
+        var behandling = new Behandling();
+        behandling.setRegistrertDato(REGISTRERT_DATO);
+
+
+        var utledetDato = utledMottaksdato.getMottaksdato(behandling);
+
+
+        assertThat(utledetDato).isEqualTo(REGISTRERT_DATO_LOCALDATE);
+        verify(joarkFasade, never()).hentJournalpost(any());
+    }
+
+
+    @Test
+    void getMottaksdatoMedJournalpost_behandlingsårsakFinnes_returnererMottaksdato() {
+        var journalpost = new Journalpost(JOURNALPOST_ID);
+        var behandling = new Behandling();
+        behandling.setBehandlingsårsak(new Behandlingsaarsak());
+        behandling.getBehandlingsårsak().setMottaksdato(MOTTAKSDATO);
+
+
+        var utledetDato = utledMottaksdato.getMottaksdato(behandling, journalpost);
+
+
+        assertThat(utledetDato).isEqualTo(MOTTAKSDATO);
+    }
+
+    @Test
+    void getMottaksdatoMedJournalpost_behandlingsårsakFinnesIkkeJournalpostHarDato_returnererForsendelseMottatt() {
+        var journalpost = new Journalpost(JOURNALPOST_ID);
+        journalpost.setForsendelseMottatt(FORSENDELSE_MOTTATT);
+        var behandling = new Behandling();
+
+
+        var utledetDato = utledMottaksdato.getMottaksdato(behandling, journalpost);
+
+
+        assertThat(utledetDato).isEqualTo(LocalDate.ofInstant(FORSENDELSE_MOTTATT, ZoneId.systemDefault()));
+    }
+
+    @Test
+    void getMottaksdatoMedJournalpost_behandlingsårsakFinnesIkkeJournalpostHarIkkeDato_returnererRegistrertDato() {
         var journalpost = new Journalpost(JOURNALPOST_ID);
         var behandling = new Behandling();
         behandling.setRegistrertDato(REGISTRERT_DATO);

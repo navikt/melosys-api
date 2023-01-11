@@ -119,24 +119,6 @@ public class BehandlingTjeneste {
         return ResponseEntity.ok(behandlingService.hentMuligeStatuser(behandlingID));
     }
 
-    @GetMapping("{behandlingID}/mulige-behandlingstema")
-    @ApiOperation(value = "Hent mulige nye behandlingstema for en behandling")
-    public ResponseEntity<Collection<Behandlingstema>> hentMuligeBehandlingstema(@PathVariable("behandlingID") long behandlingsID) {
-        log.debug("Saksbehandler {} ber om å hente mulige nye behandlingstema for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingsID);
-        aksesskontroll.autoriser(behandlingsID);
-
-        return ResponseEntity.ok(behandlingService.hentMuligeBehandlingstema(behandlingsID));
-    }
-
-    @GetMapping("{behandlingID}/mulige-typer")
-    @ApiOperation("Hent mulige nye behandlingstyper for en behandling")
-    public ResponseEntity<Collection<Behandlingstyper>> hentMuligeTyper(@PathVariable("behandlingID") long behandlingID) {
-        log.debug("Saksbehandler {} ber om å hente mulige nye behandlingstyper for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
-        aksesskontroll.autoriser(behandlingID);
-
-        return ResponseEntity.ok(behandlingService.hentMuligeTyper(behandlingID));
-    }
-
     private BehandlingDto tilBehandlingDto(Behandling behandling, String saksbehandler) {
         var behandlingDto = new BehandlingDto();
         behandlingDto.setBehandlingID(behandling.getId());

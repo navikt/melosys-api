@@ -180,7 +180,7 @@ class OpprettSakTest {
     }
 
     @Test
-    void nySakOgBehandlingFraOppgave_sakstypeTrygdeavtaleFeatureToggleEnabled_oppretterProsess() {
+    void nySakOgBehandlingFraOppgave_sakstypeTrygdeavtale_oppretterProsess() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.TRYGDEAVTALE);
         opprettSakDto.setBehandlingstema(Behandlingstema.YRKESAKTIV);
@@ -194,18 +194,6 @@ class OpprettSakTest {
 
 
         verify(prosessinstansService).opprettProsessinstansNySakFTRLTrygdeavtale(oppgave.getJournalpostId(), opprettSakDto);
-    }
-
-    @Test
-    void nySakOgBehandlingFraOppgave_sakstypeFtrlFeatureToggleDisabled_kasterException() {
-        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
-        opprettSakDto.setSakstype(Sakstyper.FTRL);
-        opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_I_UTLANDET);
-        unleash.disableAll();
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto))
-            .withMessageContaining("Kan ikke opprette ny sak med");
     }
 
     @Test

@@ -36,32 +36,25 @@ public class Oppgaveplukker {
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
     private final OppgaveService oppgaveService;
-    private final Unleash unleash;
 
     public Oppgaveplukker(OppgaveFasade oppgaveFasade, OppgaveTilbakeleggingRepository oppgaveTilbakeleggingRepo,
-                          FagsakService fagsakService, BehandlingService behandlingService, OppgaveService oppgaveService, Unleash unleash) {
+                          FagsakService fagsakService, BehandlingService behandlingService, OppgaveService oppgaveService) {
         this.oppgaveFasade = oppgaveFasade;
         this.oppgaveTilbakkeleggingRepo = oppgaveTilbakeleggingRepo;
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.oppgaveService = oppgaveService;
-        this.unleash = unleash;
     }
 
     @Transactional
     public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) {
         log.info("Begynner plukking av oppgave for saksbehandler med følgende kriterier: {}", plukkDto);
         List<Oppgave> utildelteOppgaverEtterFrist = new ArrayList<>();
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            Set<String> oppgaveBehandlingstemaSet = hentAlleOppgaveBehandlingstemaTilSøk(plukkDto.sakstype(), plukkDto.sakstema(), plukkDto.behandlingstema());
-            for (var oppgaveBehandlingstema : oppgaveBehandlingstemaSet) {
-                utildelteOppgaverEtterFrist.addAll(oppgaveFasade.finnUtildelteOppgaverEtterFrist(oppgaveBehandlingstema));
-            }
-            log.info("Funnet {} oppgaver med oppgaveTema {}", utildelteOppgaverEtterFrist.size(), oppgaveBehandlingstemaSet);
-        } else {
-            var parametere = OppgaveFactory.hentOppgaveParametere(plukkDto.behandlingstema());
-            utildelteOppgaverEtterFrist = oppgaveFasade.finnUtildelteOppgaverEtterFrist(parametere.behandlingstype, parametere.behandlingstema);
+        Set<String> oppgaveBehandlingstemaSet = hentAlleOppgaveBehandlingstemaTilSøk(plukkDto.sakstype(), plukkDto.sakstema(), plukkDto.behandlingstema());
+        for (var oppgaveBehandlingstema : oppgaveBehandlingstemaSet) {
+            utildelteOppgaverEtterFrist.addAll(oppgaveFasade.finnUtildelteOppgaverEtterFrist(oppgaveBehandlingstema));
         }
+        log.info("Funnet {} oppgaver med oppgaveTema {}", utildelteOppgaverEtterFrist.size(), oppgaveBehandlingstemaSet);
 
         List<Oppgave> filtrerteOppgaver = utildelteOppgaverEtterFrist.stream()
             .filter(oppgave -> {
@@ -71,11 +64,7 @@ public class Oppgaveplukker {
                     log.error("Fant ikke fagsak {} for oppgave {}", saksnummer, oppgave.getOppgaveId());
                     throw new TekniskException("Fant ikke fagsak " + saksnummer);
                 }
-                if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-                    return fagsakMatcherSøk(fagsak, plukkDto) && !venterSakPaaDokumentasjonEllerFagligAvklaring(fagsak);
-                } else {
-                    return !venterSakPaaDokumentasjonEllerFagligAvklaring(fagsak);
-                }
+                return fagsakMatcherSøk(fagsak, plukkDto) && !venterSakPaaDokumentasjonEllerFagligAvklaring(fagsak);
             }).toList();
 
         Optional<Oppgave> valg = filtrerteOppgaver.stream()

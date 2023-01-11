@@ -57,7 +57,7 @@ class InnvilgelsesbrevFlereLandMapperTest {
         var navFelles = lagNAVFelles();
         var brevdataInnvilgelse = lagBrevdataInnvilgelse();
 
-        String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdataInnvilgelse, false);
+        String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevdataInnvilgelse);
         assertThat(resultat).matches("(?s)<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
     }
 

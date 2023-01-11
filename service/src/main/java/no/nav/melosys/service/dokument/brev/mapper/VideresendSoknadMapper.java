@@ -19,7 +19,7 @@ public class VideresendSoknadMapper implements BrevDataMapper {
     private static final String XSD_LOCATION = "melosysbrev/melosys_000146.xsd";
 
     @Override
-    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData, boolean enableBehandleAlleSaker) throws JAXBException, SAXException {
+    public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat, BrevData brevData) throws JAXBException, SAXException {
         BrevDataVideresend brevDataVideresend = (BrevDataVideresend) brevData;
         Fag fag = new Fag();
         fag.setBostedsland(brevDataVideresend.bostedsland);

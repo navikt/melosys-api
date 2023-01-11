@@ -46,14 +46,13 @@ public class HentRegisteropplysninger implements StegBehandler {
     @Override
     public void utfør(Prosessinstans prosessinstans) {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
-        boolean erForVirksomhet = unleash.isEnabled("melosys.ny_opprett_sak") ? behandling.getFagsak().getHovedpartRolle() == Aktoersroller.VIRKSOMHET : false;
+        boolean erForVirksomhet = behandling.getFagsak().getHovedpartRolle() == Aktoersroller.VIRKSOMHET;
 
         if (!behandling.getFagsak().erSakstypeEøs() || erForVirksomhet) {
             log.debug("Hopper over steg {} fordi sak {} har sakstype {} og behandlingstema {}", HENT_REGISTEROPPLYSNINGER.getKode(), behandling.getFagsak().getSaksnummer(), behandling.getFagsak().getType(), behandling.getTema());
             return;
         }
 
-        var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
         var folketrygdenToggleEnabled = unleash.isEnabled("melosys.folketrygden.mvp");
 
         var aktørId = behandling.getFagsak().finnBrukersAktørID().orElseThrow(
@@ -68,13 +67,9 @@ public class HentRegisteropplysninger implements StegBehandler {
                     behandling.getFagsak().getTema(),
                     behandling.getTema(),
                     behandling.getType(),
-                    behandleAlleSakerToggleEnabled,
                     folketrygdenToggleEnabled));
 
-        (behandleAlleSakerToggleEnabled
-            ? behandling.finnPeriode()
-            : behandling.finnPeriodeGammel()
-        ).ifPresent(periode -> {
+        behandling.finnPeriode().ifPresent(periode -> {
             registeropplysningerRequestBuilder.fom(periode.getFom());
             registeropplysningerRequestBuilder.tom(periode.getTom());
         });

@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.register;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.HashSet;
 
 import no.finn.unleash.FakeUnleash;
@@ -80,6 +81,9 @@ class HentRegisteropplysningerTest {
         prosessinstans.setBehandling(behandling);
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Sakstyper.FTRL);
+        Aktoer bruker = new Aktoer();
+        bruker.setRolle(Aktoersroller.BRUKER);
+        fagsak.setAktører(Collections.singleton(bruker));
         behandling.setFagsak(fagsak);
         behandling.setTema(Behandlingstema.ARBEID_KUN_NORGE);
 

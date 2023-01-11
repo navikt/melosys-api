@@ -2,7 +2,6 @@ package no.nav.melosys.service.behandling.jobb;
 
 import java.util.Collections;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -30,20 +29,17 @@ public class AvsluttArt13BehandlingService {
     private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
-    private final Unleash unleash;
 
     public AvsluttArt13BehandlingService(BehandlingService behandlingService,
                                          FagsakService fagsakService,
                                          BehandlingsresultatService behandlingsresultatService,
                                          MedlPeriodeService medlPeriodeService,
-                                         LovvalgsperiodeService lovvalgsperiodeService,
-                                         Unleash unleash) {
+                                         LovvalgsperiodeService lovvalgsperiodeService) {
         this.behandlingService = behandlingService;
         this.fagsakService = fagsakService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
-        this.unleash = unleash;
     }
 
     @Transactional
@@ -71,15 +67,13 @@ public class AvsluttArt13BehandlingService {
 
         fagsakService.avsluttFagsakOgBehandling(behandling.getFagsak(), behandling, Saksstatuser.LOVVALG_AVKLART);
 
-        medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode, unleash.isEnabled("melosys.behandle_alle_saker") ? behandling.erBehandlingAvSed() : !behandling.erBehandlingAvSøknadGammel());
+        medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode, behandling.erBehandlingAvSed());
         log.info("Behandling {} avsluttet og satt til endelig i Medl", behandling.getId());
     }
 
 
     private boolean toMndHarPassertSidenSaksbehandling(Behandling behandling, Behandlingsresultat behandlingsresultat) {
-        var behandlingKanResultereIVedtak = unleash.isEnabled("melosys.behandle_alle_saker")
-            ? behandling.kanResultereIVedtak()
-            : behandling.kanResultereIVedtakGammel();
+        var behandlingKanResultereIVedtak = behandling.kanResultereIVedtak();
         if (behandlingKanResultereIVedtak && !erUtpekingUtenVedtak(behandlingsresultat)) {
 
             if (!behandlingsresultat.harVedtak()) {

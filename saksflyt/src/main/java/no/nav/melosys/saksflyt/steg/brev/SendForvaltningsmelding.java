@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.brev;
 
 import java.util.List;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -27,12 +26,10 @@ public class SendForvaltningsmelding implements StegBehandler {
 
     private final BrevBestiller brevBestiller;
     private final BehandlingService behandlingService;
-    private final Unleash unleash;
 
-    public SendForvaltningsmelding(BrevBestiller brevBestiller, BehandlingService behandlingService, Unleash unleash) {
+    public SendForvaltningsmelding(BrevBestiller brevBestiller, BehandlingService behandlingService) {
         this.brevBestiller = brevBestiller;
         this.behandlingService = behandlingService;
-        this.unleash = unleash;
     }
 
     @Override
@@ -53,10 +50,6 @@ public class SendForvaltningsmelding implements StegBehandler {
     }
 
     private boolean skalSendeForvaltningsmelding(Prosessinstans prosessinstans) {
-        boolean skalSendesForvaltningsmelding = prosessinstans.getData(SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class, Boolean.FALSE);
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            return skalSendesForvaltningsmelding;
-        }
-        return prosessinstans.getBehandling().erBehandlingAvSøknadGammel() && skalSendesForvaltningsmelding;
+        return prosessinstans.getData(SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class, Boolean.FALSE);
     }
 }

@@ -116,6 +116,7 @@ class VurderInngangsvilkaarTest {
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
+        behandling.getFagsak().setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
 
         vurderInngangsvilkaar.utfør(prosessinstans);
         verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any());

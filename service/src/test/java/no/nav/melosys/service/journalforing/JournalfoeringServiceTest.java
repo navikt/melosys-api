@@ -99,7 +99,6 @@ class JournalfoeringServiceTest {
         saksbehandlingRegler = new SaksbehandlingRegler(behandlingsresultatRepository, unleash);
 
         unleash.enable("melosys.folketrygden.mvp");
-        unleash.enable("melosys.behandle_alle_saker");
         journalpost = new Journalpost("123");
         journalpost.setHoveddokument(new ArkivDokument());
         journalpost.setForsendelseMottatt(Instant.EPOCH);
@@ -209,7 +208,6 @@ class JournalfoeringServiceTest {
 
     @Test
     void journalførOgOpprettSak_ugyldigBehandlingstypeOgSakstema_nårSenderForvaltningsmelding_kasterException() {
-        unleash.enable("melosys.behandle_alle_saker");
         opprettDto.setBehandlingstypeKode(Behandlingstyper.NY_VURDERING.getKode());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
@@ -224,7 +222,6 @@ class JournalfoeringServiceTest {
 
     @Test
     void journalførOgOpprettSak_ugyldigAktoersrolle_nårSenderForvaltningsmelding_kasterException() {
-        unleash.enable("melosys.behandle_alle_saker");
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS);
@@ -242,7 +239,6 @@ class JournalfoeringServiceTest {
 
     @Test
     void journalførOgOpprettSak_gyldigSkalSendeForvaltningsmeldingKasterIkkeFeilUnderValidering_ingenFeil() {
-        unleash.enable("melosys.behandle_alle_saker");
         when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK_BRUKER), any())).thenReturn(new Prosessinstans());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
@@ -264,8 +260,7 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void journalførOgOpprettSak_toggleEnabled_oppretterKorrektProsessinstans() {
-        unleash.enable("melosys.behandle_alle_saker");
+    void journalførOgOpprettSak_oppretterKorrektProsessinstans() {
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS);
         fagsakDto.setSakstema(Sakstemaer.UNNTAK.getKode());
         opprettDto.setFagsak(fagsakDto);
@@ -338,15 +333,15 @@ class JournalfoeringServiceTest {
 
     @Test
     void journalførOgOpprettSak_sakstypeFtrlFeatureToggleFolketrygdMvpDisabled_kasterException() {
+        unleash.disableAll();
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, null, "DK", Sakstyper.FTRL);
         opprettDto.setFagsak(fagsakDto);
         opprettDto.setBehandlingstemaKode(Behandlingstema.ARBEID_I_UTLANDET.getKode());
-        unleash.disableAll();
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
-            .withMessageContaining("Kan ikke opprette ny sak med behandlingstema " + Behandlingstema.ARBEID_I_UTLANDET);
+            .withMessageContaining("%s er ikke et lovlig behandlingstema med de andre valgte verdiene".formatted(Behandlingstema.ARBEID_I_UTLANDET));
     }
 
     @Test
@@ -468,7 +463,6 @@ class JournalfoeringServiceTest {
 
     @Test
     void journalførOgOpprettSak_trygdeMyndighetEøsOgSakstypeIkkeEøs_kasterException() {
-        unleash.enable("melosys.behandle_alle_saker");
         opprettDto.setAvsenderID("BE");
         opprettDto.getFagsak().setSakstype(Sakstyper.TRYGDEAVTALE.getKode());
         opprettDto.setBehandlingstemaKode(Behandlingstema.YRKESAKTIV.getKode());
@@ -481,7 +475,6 @@ class JournalfoeringServiceTest {
 
     @Test
     void journalførOgOpprettSak_trygdeMyndighetlandOgSakstypeIkkeTrygeavtale_kasterException() {
-        unleash.enable("melosys.behandle_alle_saker");
         opprettDto.setAvsenderID("RS");
         opprettDto.getFagsak().setSakstype(Sakstyper.EU_EOS.getKode());
         opprettDto.setBehandlingstemaKode(Behandlingstema.ARBEID_FLERE_LAND.getKode());
@@ -618,7 +611,6 @@ class JournalfoeringServiceTest {
 
     @Test
     void journalførOgOpprettAndregangsBehandlingIkkeKopierBehandling_altOK_prosessinstansOpprettet() {
-        unleash.enable("melosys.behandle_alle_saker");
         tilordneDto.setSaksnummer(MELOSYS_SAKSNUMMER);
         tilordneDto.setBehandlingstemaKode(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET.getKode());
         tilordneDto.setBehandlingstypeKode(Behandlingstyper.HENVENDELSE.getKode());
@@ -651,7 +643,6 @@ class JournalfoeringServiceTest {
 
     @Test
     void journalførOgOpprettAndregangsBehandlingKopierBehandling_altOK_prosessinstansOpprettet() {
-        unleash.enable("melosys.behandle_alle_saker");
         tilordneDto.setSaksnummer(MELOSYS_SAKSNUMMER);
         tilordneDto.setBehandlingstemaKode(Behandlingstema.UTSENDT_ARBEIDSTAKER.getKode());
         tilordneDto.setBehandlingstypeKode(Behandlingstyper.NY_VURDERING.getKode());
@@ -709,7 +700,6 @@ class JournalfoeringServiceTest {
 
     @Test
     void journalførOgOpprettAndregangsBehandling_fagsakHarAktivBehandlingMenErArtikkel16AnmodningSendtUtland_feilKastesIkke() {
-        unleash.enable("melosys.behandle_alle_saker");
         tilordneDto.setSaksnummer(MELOSYS_SAKSNUMMER);
 
         var aktivBehandling = lagBehandling();

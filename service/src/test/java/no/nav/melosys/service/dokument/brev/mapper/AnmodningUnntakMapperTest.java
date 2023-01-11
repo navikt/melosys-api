@@ -64,7 +64,7 @@ class AnmodningUnntakMapperTest {
 
         BrevDataAnmodningUnntak brevData = lagBrevData(resultat);
 
-        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData, false);
+        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);
 
         assertThat(xml).matches("(?s)<\\?xml version=\"\\d\\.\\d+\" .*>\n.*")
             .contains(":yrkesaktivitet>SELVSTENDIG</ns");

@@ -30,17 +30,15 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
     private final BehandlingService behandlingService;
     private final OppgaveService oppgaveService;
     private final JoarkFasade joarkFasade;
-    private final Unleash unleash;
 
     public OpprettNyBehandlingFraSed(FagsakService fagsakService,
                                      BehandlingService behandlingService,
                                      OppgaveService oppgaveService,
-                                     JoarkFasade joarkFasade, Unleash unleash) {
+                                     JoarkFasade joarkFasade) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.joarkFasade = joarkFasade;
         this.oppgaveService = oppgaveService;
-        this.unleash = unleash;
     }
 
     @Override
@@ -50,10 +48,6 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
-        if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
-            throw new TekniskException("Støtter ikke lenger disabled melosys.behandle_alle_saker");
-        }
-
         var arkivsakID = prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class);
         var behandlingstema = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class);
         prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, true);

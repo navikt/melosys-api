@@ -71,7 +71,7 @@ public class AvslagArbeidsgiverMapperTest {
 
 
         AvslagArbeidsgiverMapper spy = Mockito.spy(new AvslagArbeidsgiverMapper());
-        String xml = spy.mapTilBrevXML(fellesType, navFelles, null, null, brevData, false);
+        String xml = spy.mapTilBrevXML(fellesType, navFelles, null, null, brevData);
 
         assertThat(xml).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
     }

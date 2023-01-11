@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -48,14 +47,13 @@ class AvsluttArt13BehandlingServiceTest {
     private final Fagsak fagsak = new Fagsak();
     private final Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
     private final VedtakMetadata vedtakMetadata = new VedtakMetadata();
-    private final FakeUnleash unleash = new FakeUnleash();
 
     private final long behandlingID = 11L;
 
     @BeforeEach
     public void setup() {
         avsluttArt13BehandlingService = new AvsluttArt13BehandlingService(behandlingService, fagsakService,
-            behandlingsresultatService, medlPeriodeService, lovvalgsperiodeService, unleash);
+            behandlingsresultatService, medlPeriodeService, lovvalgsperiodeService);
 
         behandling.setId(behandlingID);
         behandlingsresultat.setId(behandlingID);
@@ -73,8 +71,6 @@ class AvsluttArt13BehandlingServiceTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID))
             .thenReturn(behandlingsresultat);
-
-        unleash.enable("melosys.behandle_alle_saker");
     }
 
     @Test

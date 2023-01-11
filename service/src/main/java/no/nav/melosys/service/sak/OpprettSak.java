@@ -5,7 +5,6 @@ import java.time.ZoneId;
 import java.util.Optional;
 
 import no.finn.unleash.Unleash;
-import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
@@ -29,10 +28,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.Behandling.erBehandlingAvSedForespørsler;
-import static no.nav.melosys.domain.Behandling.erBehandlingAvSøknadGammel;
 import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
-import static no.nav.melosys.service.sak.SakstypeBehandlingstemaKobling.erGyldigBehandlingstemaForSakstype;
 
 @Service
 public class OpprettSak {
@@ -67,12 +63,10 @@ public class OpprettSak {
         Journalpost journalpost = journalfoeringService.hentJournalpost(oppgave.getJournalpostId());
         validerJournalpost(journalpost);
 
-        Sakstyper sakstype = opprettSakDto.getSakstype();
-        if (unleash.isEnabled("melosys.ny_opprett_sak")) {
-            opprettSakDto.setBehandlingsaarsakType(getBehandlingsaarsakType(journalpost, opprettSakDto));
-            opprettSakDto.setMottaksdato(LocalDate.ofInstant(journalpost.getForsendelseMottatt(), ZoneId.systemDefault()));
-        }
+        opprettSakDto.setBehandlingsaarsakType(getBehandlingsaarsakType(journalpost, opprettSakDto));
+        opprettSakDto.setMottaksdato(LocalDate.ofInstant(journalpost.getForsendelseMottatt(), ZoneId.systemDefault()));
 
+        Sakstyper sakstype = opprettSakDto.getSakstype();
         if (sakstype == Sakstyper.EU_EOS) {
             prosessinstansService.opprettProsessinstansNySakEØS(
                 oppgave.getJournalpostId(),
@@ -118,32 +112,12 @@ public class OpprettSak {
         var behandlingstema = opprettSakDto.getBehandlingstema();
         var behandlingstype = opprettSakDto.getBehandlingstype();
 
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            lovligeKombinasjonerService.validerOpprettelseOgEndring(
-                hovedpart, sakstype, sakstema, behandlingstema, behandlingstype);
+        lovligeKombinasjonerService.validerOpprettelseOgEndring(
+            hovedpart, sakstype, sakstema, behandlingstema, behandlingstype);
 
-            if (erSakstypeEøs(sakstype)
-                && !SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"))) {
-                validerSøknadData(opprettSakDto.getSoknadDto());
-            }
-        } else {
-            validerBehandlingstema(behandlingstema, sakstype);
-
-            if (erBehandlingAvSøknadGammel(behandlingstema) && erSakstypeEøs(sakstype)) {
-                validerSøknadData(opprettSakDto.getSoknadDto());
-            }
-        }
-    }
-
-    void validerBehandlingstema(Behandlingstema behandlingstema, Sakstyper sakstype) {
-        if (behandlingstema == null) {
-            throw new FunksjonellException("Behandlingstema mangler for å opprette ny sak");
-        } else if (!Behandling.erBehandlingAvSøknadGammel(behandlingstema) && !erBehandlingAvSedForespørsler(behandlingstema)) {
-            throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + behandlingstema);
-        } else if (!erGyldigBehandlingstemaForSakstype(sakstype, behandlingstema)) {
-            throw new FunksjonellException("Behandlingstema " + behandlingstema + " er ikke gyldig for sakstype " + sakstype);
-        } else if (behandlingstema == Behandlingstema.ARBEID_I_UTLANDET && !unleash.isEnabled("melosys.folketrygden.mvp")) {
-            throw new FunksjonellException("Kan ikke opprette ny sak med behandlingstema " + behandlingstema);
+        if (erSakstypeEøs(sakstype)
+            && !SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"))) {
+            validerSøknadData(opprettSakDto.getSoknadDto());
         }
     }
 
@@ -171,25 +145,13 @@ public class OpprettSak {
     }
 
     private void validerOppgave(Oppgave oppgave) {
-        if (unleash.isEnabled("melosys.ny_opprett_sak")) {
-            if (!nySakKanOpprettesFraOppgavetype(oppgave.getOppgavetype())) {
-                throw new FunksjonellException("Ny sak kan ikke opprettes på bakgrunn av oppgave med type: " + oppgave.getOppgavetype().getBeskrivelse());
-            }
-        } else {
-            if (!nySakKanOpprettesFraOppgavetype_gammel(oppgave.getOppgavetype())) {
-                throw new FunksjonellException("Ny sak kan ikke opprettes på bakgrunn av oppgave med type: " + oppgave.getOppgavetype().getBeskrivelse());
-            }
+        if (!nySakKanOpprettesFraOppgavetype(oppgave.getOppgavetype())) {
+            throw new FunksjonellException("Ny sak kan ikke opprettes på bakgrunn av oppgave med type: " + oppgave.getOppgavetype().getBeskrivelse());
         }
 
         if (StringUtils.isEmpty(oppgave.getJournalpostId())) {
             throw new FunksjonellException("Ny sak kan ikke opprettes fordi oppgave " + oppgave.getOppgaveId() + " mangler journalpost.");
         }
-    }
-
-    private static boolean nySakKanOpprettesFraOppgavetype_gammel(Oppgavetyper oppgavetype) {
-        return oppgavetype == Oppgavetyper.BEH_SAK_MK
-            || oppgavetype == Oppgavetyper.BEH_SAK
-            || oppgavetype == Oppgavetyper.BEH_SED;
     }
 
     private static boolean nySakKanOpprettesFraOppgavetype(Oppgavetyper oppgavetype) {

@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.oppgave;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -9,7 +8,6 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
-import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,11 +20,9 @@ public class GjenbrukOppgave implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(GjenbrukOppgave.class);
 
     private final OppgaveService oppgaveService;
-    private final Unleash unleash;
 
-    public GjenbrukOppgave(OppgaveService oppgaveService, Unleash unleash) {
+    public GjenbrukOppgave(OppgaveService oppgaveService) {
         this.oppgaveService = oppgaveService;
-        this.unleash = unleash;
     }
 
     @Override
@@ -42,18 +38,15 @@ public class GjenbrukOppgave implements StegBehandler {
         final String saksnummer = fagsak.getSaksnummer();
 
         final Oppgave gjenbruktOppgave = oppgaveService.hentOppgaveMedOppgaveID(oppgaveID);
-        final Oppgave nyOppgave = (
-            unleash.isEnabled("melosys.behandle_alle_saker")
-                ? oppgaveService.lagBehandlingsoppgave(behandling)
-                : OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()))
+        final Oppgave nyOppgave = (oppgaveService.lagBehandlingsoppgave(behandling))
             .setSaksnummer(fagsak.getSaksnummer())
             .setTilordnetRessurs(prosessinstans.hentSaksbehandlerHvisTilordnes())
             .setAktørId(
-                unleash.isEnabled("melosys.behandle_alle_saker") && fagsak.getHovedpartRolle() == Aktoersroller.VIRKSOMHET
+                fagsak.getHovedpartRolle() == Aktoersroller.VIRKSOMHET
                     ? null
                     : fagsak.hentBrukersAktørID())
             .setOrgnr(
-                unleash.isEnabled("melosys.behandle_alle_saker") && fagsak.getHovedpartRolle() == Aktoersroller.VIRKSOMHET
+                fagsak.getHovedpartRolle() == Aktoersroller.VIRKSOMHET
                     ? fagsak.hentVirksomhet().getOrgnr()
                     : null)
             .setBeskrivelse(gjenbruktOppgave.getBeskrivelse())

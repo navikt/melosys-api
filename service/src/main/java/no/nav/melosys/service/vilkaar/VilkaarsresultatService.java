@@ -95,16 +95,12 @@ public class VilkaarsresultatService {
 
     @Transactional
     public void tømVilkårForBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            var behandling = behandlingsresultat.getBehandling();
-            var fagsak = behandling.getFagsak();
-            if (fagsak.erSakstypeEøs() && !SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"))) {
-                vilkaarsresultatRepo.deleteByBehandlingsresultatAndVilkaarNotIn(behandlingsresultat, IMMUTABLE_VILKAAR);
-            } else {
-                vilkaarsresultatRepo.deleteByBehandlingsresultatId(behandlingsresultat.getId());
-            }
-        } else {
+        var behandling = behandlingsresultat.getBehandling();
+        var fagsak = behandling.getFagsak();
+        if (fagsak.erSakstypeEøs() && !SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"))) {
             vilkaarsresultatRepo.deleteByBehandlingsresultatAndVilkaarNotIn(behandlingsresultat, IMMUTABLE_VILKAAR);
+        } else {
+            vilkaarsresultatRepo.deleteByBehandlingsresultatId(behandlingsresultat.getId());
         }
     }
 

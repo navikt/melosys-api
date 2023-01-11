@@ -32,17 +32,14 @@ public class DefaultSedRuter implements SedRuter {
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
     private final OppgaveService oppgaveService;
-    private final Unleash unleash;
 
     public DefaultSedRuter(ProsessinstansService prosessinstansService, FagsakService fagsakService,
                            BehandlingService behandlingService,
-                           OppgaveService oppgaveService,
-                           Unleash unleash) {
+                           OppgaveService oppgaveService) {
         this.prosessinstansService = prosessinstansService;
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.oppgaveService = oppgaveService;
-        this.unleash = unleash;
     }
 
     @Override
@@ -108,10 +105,7 @@ public class DefaultSedRuter implements SedRuter {
     }
 
     private String opprettBehandlingsoppgave(Behandling behandling, String aktørID) {
-        var oppgave = (
-            unleash.isEnabled("melosys.behandle_alle_saker")
-                ? oppgaveService.lagBehandlingsoppgave(behandling)
-                : OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()))
+        var oppgave = oppgaveService.lagBehandlingsoppgave(behandling)
             .setAktørId(aktørID)
             .setSaksnummer(behandling.getFagsak().getSaksnummer())
             .build();

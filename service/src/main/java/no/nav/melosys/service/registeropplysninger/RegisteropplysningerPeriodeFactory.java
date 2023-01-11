@@ -13,38 +13,25 @@ public class RegisteropplysningerPeriodeFactory {
     private final Integer arbeidsforholdhistorikkAntallMåneder;
     private final Integer medlemskaphistorikkAntallÅr;
     private final Integer inntektshistorikkAntallMåneder;
-    private final Unleash unleash;
 
     public RegisteropplysningerPeriodeFactory(@Value("${melosys.service.fagsak.arbeidsforholdhistorikk.antallMåneder}") Integer arbeidsforholdhistorikkAntallMåneder,
                                               @Value("${melosys.service.fagsak.medlemskaphistorikk.antallÅr}") Integer medlemskaphistorikkAntallÅr,
-                                              @Value("${melosys.service.fagsak.inntektshistorikk.antallMåneder}") Integer inntektshistorikkAntallMåneder,
-                                              Unleash unleash) {
+                                              @Value("${melosys.service.fagsak.inntektshistorikk.antallMåneder}") Integer inntektshistorikkAntallMåneder) {
         this.arbeidsforholdhistorikkAntallMåneder = arbeidsforholdhistorikkAntallMåneder;
         this.medlemskaphistorikkAntallÅr = medlemskaphistorikkAntallÅr;
         this.inntektshistorikkAntallMåneder = inntektshistorikkAntallMåneder;
-        this.unleash = unleash;
     }
 
     DatoPeriode hentPeriodeForMedlemskap(LocalDate fom, LocalDate tom, Behandling behandling) {
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            return behandling.erBehandlingAvSed()
-                ? hentPeriodeForMedlemskapMottakSed(fom, tom)
-                : hentPeriodeForMedlemskapBehandlingSøknad(fom, tom);
-        }
-        return behandling.erBehandlingAvSøknadGammel()
-            ? hentPeriodeForMedlemskapBehandlingSøknad(fom, tom)
-            : hentPeriodeForMedlemskapMottakSed(fom, tom);
+        return behandling.erBehandlingAvSed()
+            ? hentPeriodeForMedlemskapMottakSed(fom, tom)
+            : hentPeriodeForMedlemskapBehandlingSøknad(fom, tom);
     }
 
     Periode hentPeriodeForInntekt(LocalDate fom, LocalDate tom, Behandling behandling) {
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            return behandling.erBehandlingAvSed()
-                ? hentPeriodeForInntektMottakSed(fom, tom)
-                : hentPeriodeForInntektBehandlingSøknad(fom, tom);
-        }
-        return behandling.erBehandlingAvSøknadGammel()
-            ? hentPeriodeForInntektBehandlingSøknad(fom, tom)
-            : hentPeriodeForInntektMottakSed(fom, tom);
+        return behandling.erBehandlingAvSed()
+            ? hentPeriodeForInntektMottakSed(fom, tom)
+            : hentPeriodeForInntektBehandlingSøknad(fom, tom);
     }
 
     DatoPeriode hentPeriodeForArbeidsforhold(LocalDate fom, LocalDate tom) {
