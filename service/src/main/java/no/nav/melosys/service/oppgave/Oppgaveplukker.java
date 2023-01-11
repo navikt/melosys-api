@@ -47,14 +47,14 @@ public class Oppgaveplukker {
     @Transactional
     public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) {
         log.info("Begynner plukking av oppgave for saksbehandler med følgende kriterier: {}", plukkDto);
-        List<Oppgave> utildelteOppgaverEtterFrist = new ArrayList<>();
+        List<Oppgave> utildelteOppgaver = new ArrayList<>();
         Set<String> oppgaveBehandlingstemaSet = hentAlleOppgaveBehandlingstemaTilSøk(plukkDto.sakstype(), plukkDto.sakstema(), plukkDto.behandlingstema());
         for (var oppgaveBehandlingstema : oppgaveBehandlingstemaSet) {
-            utildelteOppgaverEtterFrist.addAll(oppgaveFasade.finnUtildelteOppgaverEtterFrist(oppgaveBehandlingstema));
+            utildelteOppgaver.addAll(oppgaveFasade.finnUtildelteOppgaverEtterFrist(oppgaveBehandlingstema));
         }
-        log.info("Funnet {} oppgaver med oppgaveTema {}", utildelteOppgaverEtterFrist.size(), oppgaveBehandlingstemaSet);
+        log.info("Funnet {} oppgaver med oppgaveTema {}", utildelteOppgaver.size(), oppgaveBehandlingstemaSet);
 
-        List<Oppgave> filtrerteOppgaver = utildelteOppgaverEtterFrist.stream()
+        List<Oppgave> filtrerteOppgaver = utildelteOppgaver.stream()
             .filter(oppgave -> {
                 String saksnummer = oppgave.getSaksnummer();
                 Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
