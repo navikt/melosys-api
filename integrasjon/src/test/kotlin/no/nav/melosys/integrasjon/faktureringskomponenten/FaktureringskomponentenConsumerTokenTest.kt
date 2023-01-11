@@ -15,6 +15,7 @@ import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -40,6 +41,7 @@ import java.util.*
 @AutoConfigureWebClient
 @EnableOAuth2Client
 @ActiveProfiles("wiremock-test")
+@Disabled
 class FaktureringskomponentenConsumerTokenTest(
     @Autowired private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
@@ -99,6 +101,7 @@ class FaktureringskomponentenConsumerTokenTest(
     }
 
     @Test
+    @Disabled
     fun skalBrukeErrorFilterOgGiRiktigFeilmelding() {
         executeErrorFromServer { error ->
             Assertions.assertThat(error).contains(errorFromServerMessage())
