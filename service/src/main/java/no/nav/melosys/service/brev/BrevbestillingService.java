@@ -34,7 +34,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper.*;
 
@@ -95,22 +96,25 @@ public class BrevbestillingService {
     }
 
     private String hentMottakerNavn(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller hovedmottaker, String orgnrTilValgtArbeidsgiver) {
-        if (hovedmottaker == BRUKER) {
-            Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(hovedmottaker), behandling);
-            if (avklartMottaker.getRolle() == BRUKER) {
-                return hentSammensattNavn(behandling);
-            } else if (avklartMottaker.erPerson()) {
-                return persondataFasade.hentSammensattNavn(avklartMottaker.getPersonIdent());
-            } else {
-                var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartMottaker.getOrgnr());
+        switch (hovedmottaker) {
+            case BRUKER -> {
+                Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(hovedmottaker), behandling);
+                if (avklartMottaker.getRolle() == BRUKER) {
+                    return hentSammensattNavn(behandling);
+                } else if (avklartMottaker.erPerson()) {
+                    return persondataFasade.hentSammensattNavn(avklartMottaker.getPersonIdent());
+                } else {
+                    var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartMottaker.getOrgnr());
+                    return orgDokument.getNavn();
+                }
+            }
+            case ARBEIDSGIVER, VIRKSOMHET -> {
+                var orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(orgnrTilValgtArbeidsgiver).getDokument();
                 return orgDokument.getNavn();
             }
+            default ->
+                throw new FunksjonellException("Melosys støtter ikke hovedmottakere med rollen " + hovedmottaker);
         }
-        if (hovedmottaker == ARBEIDSGIVER || hovedmottaker == VIRKSOMHET) {
-            var orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(orgnrTilValgtArbeidsgiver).getDokument();
-            return orgDokument.getNavn();
-        }
-        throw new FunksjonellException("Melosys støtter ikke hovedmottakere med rollen " + hovedmottaker);
     }
 
     private String hentSammensattNavn(Behandling behandling) {
