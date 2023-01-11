@@ -107,6 +107,7 @@ final class FerdigbehandlingKontroll {
             || bestemmelse == Lovvalgbestemmelser_trygdeavtale_uk.UK_ART7_3;
     }
 
+    //TODO legg til for Australia?
     private static boolean erBestemmelseDerTrygdeavtaleAttestSendesUSA(LovvalgBestemmelse bestemmelse) {
         return bestemmelse == USA_ART5_2
             || bestemmelse == USA_ART5_4

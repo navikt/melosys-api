@@ -24,7 +24,8 @@ public final class LovvalgBestemmelseUtils {
             Lovvalgbestemmelser_trygdeavtale_uk.values(),
             Lovvalgbestemmelser_trygdeavtale_usa.values(),
             Lovvalgbestemmelser_trygdeavtale_ca.values(),
-            Tilleggsbestemmelser_trygdeavtale_ca.values()
+            Tilleggsbestemmelser_trygdeavtale_ca.values(),
+            Lovvalgbestemmelser_trygdeavtale_au.values()
         )) {
             for (var lovBestemmelse : lovBestemelser) {
                 kodeTilLovvalgBestemmelse.put(lovBestemmelse.getKode(), lovBestemmelse);

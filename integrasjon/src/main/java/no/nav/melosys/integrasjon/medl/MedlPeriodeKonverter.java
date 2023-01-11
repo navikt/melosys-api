@@ -76,6 +76,8 @@ public final class MedlPeriodeKonverter {
         tbl.put(Lovvalgbestemmelser_trygdeavtale_ca.CAN_ART10, GrunnlagMedl.CAN_ART10);
         tbl.put(Lovvalgbestemmelser_trygdeavtale_ca.CAN_ART11, GrunnlagMedl.CAN_ART11);
 
+        //TODO mapping for australia
+
         tbl.put(Overgangsregelbestemmelser.FO_1408_1971_ART14_2_A, GrunnlagMedl.FO_1408_14_2_A);
         tbl.put(Overgangsregelbestemmelser.FO_1408_1971_ART14_2_B, GrunnlagMedl.FO_1408_14_2_B);
         tbl.put(Overgangsregelbestemmelser.FO_1408_1971_ART14A_2, GrunnlagMedl.FO_1408_14_A_2);
