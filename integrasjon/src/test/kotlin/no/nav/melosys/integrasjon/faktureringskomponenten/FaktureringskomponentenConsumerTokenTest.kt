@@ -1,18 +1,16 @@
 package no.nav.melosys.integrasjon.faktureringskomponenten
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
-import no.nav.melosys.integrasjon.eessi.EessiConsumerProducer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriodeDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FullmektigDto
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
-import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
-import no.nav.melosys.integrasjon.reststs.RestStsClient
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
@@ -28,6 +26,7 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.util.*
 
 @Import(
     StsWebClientProducer::class,
@@ -48,11 +47,13 @@ class FaktureringskomponentenConsumerTokenTest(
     @Autowired oAuthMockServer: OAuthMockServer
 ) : ConsumerWireMockTestBase<String, String>(mockServiceUnderTestPort, mockSecurityPort, oAuthMockServer) {
 
+    private val objectMapper = ObjectMapper()
+
     @Test
     fun authorizationSkalKommeFraSystem() {
         verifyHeaders(
             mapOf(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
+                // TODO: få ut token og bruk verifyToken
                 Pair(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)),
                 Pair(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
             )
@@ -60,11 +61,26 @@ class FaktureringskomponentenConsumerTokenTest(
         executeFromSystem()
     }
 
+    private fun verifyToken(token: String) {
+        val decoder = Base64.getUrlDecoder()
+        val parts = token.split(".")
+        Assertions.assertThat(parts).hasSize(3)
+        val header = parts[0].removePrefix("Bearer ").let { objectMapper.readTree(String(decoder.decode(it))) }
+        val payload = parts[1].let { objectMapper.readTree(String(decoder.decode(it))) }
+
+        Assertions.assertThat(header).hasSize(3)
+        Assertions.assertThat(header.get("kid").textValue()).isEqualTo("oauth2/v2.0")
+        Assertions.assertThat(header.get("typ").textValue()).isEqualTo("JWT")
+
+        Assertions.assertThat(payload).hasSize(10)
+        Assertions.assertThat(payload.get("aud").textValue()).isEqualTo("api://dev-fss.teammelosys.melosys-faktureringskomponenten/.default")
+    }
+
     @Test
     fun authorizationSkalKommeFraSystemNårHverkenSystemEllerBrukerErKilde() {
         verifyHeaders(
             mapOf(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
+                // TODO: få ut token og bruk verifyToken
                 Pair(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)),
                 Pair(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
             )

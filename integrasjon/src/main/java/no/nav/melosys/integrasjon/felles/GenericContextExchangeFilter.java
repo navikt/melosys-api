@@ -3,7 +3,6 @@ package no.nav.melosys.integrasjon.felles;
 import java.util.Optional;
 import javax.annotation.Nonnull;
 
-import no.nav.melosys.integrasjon.reststs.RestStsClient;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import no.nav.security.token.support.client.core.ClientProperties;
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService;
@@ -15,17 +14,14 @@ import org.springframework.web.reactive.function.client.ExchangeFilterFunction;
 import org.springframework.web.reactive.function.client.ExchangeFunction;
 import reactor.core.publisher.Mono;
 
-public class GenericContextExchangeFilter implements ExchangeFilterFunction {
-    private final RestStsClient restStsClient;
+public abstract class GenericContextExchangeFilter implements ExchangeFilterFunction {
 
-    private final OAuth2AccessTokenService oAuth2AccessTokenService;
+    protected final OAuth2AccessTokenService oAuth2AccessTokenService;
 
-    private final ClientProperties clientProperties;
+    protected final ClientProperties clientProperties;
 
-    public GenericContextExchangeFilter(RestStsClient restStsClient,
-                                        ClientConfigurationProperties clientConfigurationProperties,
-                                        OAuth2AccessTokenService oAuth2AccessTokenService, String clientName) {
-        this.restStsClient = restStsClient;
+    protected GenericContextExchangeFilter(ClientConfigurationProperties clientConfigurationProperties,
+                                           OAuth2AccessTokenService oAuth2AccessTokenService, String clientName) {
         this.oAuth2AccessTokenService = oAuth2AccessTokenService;
         this.clientProperties = Optional.ofNullable(clientConfigurationProperties.getRegistration().get(clientName))
             .orElseThrow(() -> new RuntimeException("Fant ikke OAuth2-config for " + clientName));
@@ -51,9 +47,7 @@ public class GenericContextExchangeFilter implements ExchangeFilterFunction {
         return "Bearer " + getUserToken();
     }
 
-    protected String getSystemToken() {
-        return restStsClient.bearerToken();
-    }
+    protected abstract String getSystemToken();
 
     private String getUserToken() {
         return oAuth2AccessTokenService.getAccessToken(clientProperties).getAccessToken();
