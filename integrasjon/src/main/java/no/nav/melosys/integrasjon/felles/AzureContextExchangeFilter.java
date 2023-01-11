@@ -30,7 +30,7 @@ public class AzureContextExchangeFilter extends GenericContextExchangeFilter {
         log.info("clientPropertiesForSystem: {}", clientPropertiesForSystem);
         log.info("token: {}", accessToken);
 
-        return accessToken;
+        return "Bearer " + accessToken;
 
     }
 }
