@@ -50,8 +50,8 @@ public class BrevmalListeBygger {
                 case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE ->
                     lagBrevmalTypeDtoForForventetSaksbehandlingstid(p);
                 case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevmalTypeDtoForMangelbrev(p, behandlingId);
-                case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET ->
-                    lagBrevmalTypeDtoForFritekstbrev(p, behandlingId);
+                case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
+                    GENERELT_FRITEKSTBREV_VIRKSOMHET, FRITEKSTBREV -> lagBrevmalTypeDtoForFritekstbrev(p, behandlingId);
                 default -> null;
             })
             .filter(Objects::nonNull)
