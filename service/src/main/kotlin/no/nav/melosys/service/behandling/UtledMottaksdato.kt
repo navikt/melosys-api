@@ -1,6 +1,5 @@
 package no.nav.melosys.service.behandling
 
-import no.finn.unleash.Unleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.arkiv.Journalpost
 import no.nav.melosys.integrasjon.joark.JoarkFasade
@@ -10,20 +9,17 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 @Component
-class UtledMottaksdato(val joarkFasade: JoarkFasade, val unleash: Unleash) {
+class UtledMottaksdato(val joarkFasade: JoarkFasade) {
 
     fun getMottaksdato(behandling: Behandling): LocalDate? {
-        if (unleash.isEnabled("melosys.ny_opprett_sak")) {
-            if (behandling.behandlingsårsak != null) {
-                return behandling.behandlingsårsak.mottaksdato
-            }
-            if (behandling.mottatteOpplysninger != null && behandling.mottatteOpplysninger.mottaksdato != null) {
-                return behandling.mottatteOpplysninger.mottaksdato
-            }
-            val journalpost = finnJournalpost(behandling.initierendeJournalpostId)
-            return tilLocalDate(journalpost?.forsendelseMottatt ?: behandling.registrertDato)
+        if (behandling.behandlingsårsak != null) {
+            return behandling.behandlingsårsak.mottaksdato
         }
-        return behandling.mottatteOpplysninger?.mottaksdato ?: tilLocalDate(behandling.registrertDato)
+        if (behandling.mottatteOpplysninger != null && behandling.mottatteOpplysninger.mottaksdato != null) {
+            return behandling.mottatteOpplysninger.mottaksdato
+        }
+        val journalpost = finnJournalpost(behandling.initierendeJournalpostId)
+        return tilLocalDate(journalpost?.forsendelseMottatt ?: behandling.registrertDato)
     }
 
     fun getMottaksdato(behandling: Behandling, journalpost: Journalpost?): LocalDate? {

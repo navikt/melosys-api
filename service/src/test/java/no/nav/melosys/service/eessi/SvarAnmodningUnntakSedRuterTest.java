@@ -43,14 +43,11 @@ class SvarAnmodningUnntakSedRuterTest {
     @Mock
     private OppgaveService oppgaveService;
 
-    private final FakeUnleash unleash = new FakeUnleash();
-
     private SvarAnmodningUnntakSedRuter svarAnmodningUnntakSedRuter;
 
     @BeforeEach
     public void setUp() {
-        svarAnmodningUnntakSedRuter = new SvarAnmodningUnntakSedRuter(prosessinstansService, fagsakService, anmodningsperiodeService, oppgaveService, unleash);
-        unleash.enableAll();
+        svarAnmodningUnntakSedRuter = new SvarAnmodningUnntakSedRuter(prosessinstansService, fagsakService, anmodningsperiodeService, oppgaveService);
     }
 
     @Test
@@ -89,7 +86,7 @@ class SvarAnmodningUnntakSedRuterTest {
     }
 
     @Test
-    void finnSakOgBestemRuting_behandlingstypeSøknadIkkeYrkesaktiv_oppgaveOppdateres() {
+    void finnSakOgBestemRuting_behandlingstypeFørstegangIkkeYrkesaktiv_oppgaveOppdateres() {
         Fagsak fagsak = hentFagsak(Behandlingstema.IKKE_YRKESAKTIV, Behandlingsstatus.ANMODNING_UNNTAK_SENDT);
         when(fagsakService.hentFagsakFraArkivsakID(anyLong())).thenReturn(fagsak);
         Prosessinstans prosessinstans = new Prosessinstans();

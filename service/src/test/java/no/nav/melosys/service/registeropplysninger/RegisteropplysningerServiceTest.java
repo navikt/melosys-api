@@ -5,6 +5,7 @@ import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKildesystem;
@@ -17,6 +18,7 @@ import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.inntk.InntektService;
 import no.nav.melosys.integrasjon.utbetaldata.UtbetaldataService;
+import no.nav.melosys.integrasjon.utbetaling.UtbetaldataRestService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -61,19 +63,24 @@ class RegisteropplysningerServiceTest {
     private SaksopplysningerService saksopplysningerService;
     @Mock
     private RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory;
+    @Mock
+    private UtbetaldataRestService utbetaldataRestService;
+
+    private final FakeUnleash unleash = new FakeUnleash();
 
     private RegisteropplysningerService registeropplysningerService;
 
     @BeforeEach
     public void setUp() throws Exception {
+        unleash.enableAll();
         registeropplysningerService = new RegisteropplysningerService(persondataFasade, medlPeriodeService, eregFasade, aaregFasade, behandlingService,
-            sobService, inntektService, utbetaldataService, saksopplysningerService, registeropplysningerPeriodeFactory);
+            sobService, inntektService, utbetaldataService, saksopplysningerService, registeropplysningerPeriodeFactory, unleash, utbetaldataRestService);
         when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(AKTØR_ID);
 
         when(aaregFasade.finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.ARBFORH));
         when(medlPeriodeService.hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.MEDL));
         when(inntektService.hentInntektListe(anyString(), anyYearMonth(), anyYearMonth())).thenReturn(lagSaksopplysning(SaksopplysningType.INNTK));
-        when(utbetaldataService.hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.UTBETAL));
+        when(utbetaldataRestService.hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.UTBETAL));
         when(eregFasade.hentOrganisasjon(anyString())).thenReturn(lagSaksopplysning(SaksopplysningType.ORG));
         when(sobService.finnSakOgBehandlingskjedeListe(anyString())).thenReturn(lagSaksopplysning(SaksopplysningType.SOB_SAK));
 
@@ -111,7 +118,7 @@ class RegisteropplysningerServiceTest {
         verify(medlPeriodeService).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
         verify(eregFasade).hentOrganisasjon(anyString());
         verify(sobService).finnSakOgBehandlingskjedeListe(AKTØR_ID);
-        verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
+        verify(utbetaldataRestService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
     }
 
     @Test
@@ -151,7 +158,7 @@ class RegisteropplysningerServiceTest {
 
         verify(medlPeriodeService).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
         verify(sobService).finnSakOgBehandlingskjedeListe(AKTØR_ID);
-        verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
+        verify(utbetaldataRestService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
     }
 
     @Test
@@ -210,7 +217,7 @@ class RegisteropplysningerServiceTest {
             .saksopplysningTyper(saksopplysningstyper().utbetalingsopplysninger().build())
             .build());
 
-        verify(utbetaldataService).hentUtbetalingerBarnetrygd(anyString(), any(), any());
+        verify(utbetaldataRestService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
         verify(behandlingService).lagre(any(Behandling.class));
     }
 

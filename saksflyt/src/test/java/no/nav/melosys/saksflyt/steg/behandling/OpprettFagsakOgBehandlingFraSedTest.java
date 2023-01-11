@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import java.time.LocalDate;
 
 import com.google.common.collect.Lists;
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -41,7 +40,6 @@ class OpprettFagsakOgBehandlingFraSedTest {
     @Mock
     private JoarkFasade joarkFasade;
 
-    private final FakeUnleash unleash = new FakeUnleash();
     private OpprettFagsakOgBehandlingFraSed opprettFagsakOgBehandlingFraSed;
 
     @Captor
@@ -49,9 +47,8 @@ class OpprettFagsakOgBehandlingFraSedTest {
 
     @BeforeEach
     void setUp() {
-        opprettFagsakOgBehandlingFraSed = new OpprettFagsakOgBehandlingFraSed(fagsakService, joarkFasade, unleash);
+        opprettFagsakOgBehandlingFraSed = new OpprettFagsakOgBehandlingFraSed(fagsakService, joarkFasade);
         when(fagsakService.nyFagsakOgBehandling(any())).thenReturn(lagFagsak());
-        unleash.enableAll();
     }
 
     @Test
@@ -68,24 +65,6 @@ class OpprettFagsakOgBehandlingFraSedTest {
         assertThat(opprettSakRequestArgumentCaptor.getValue().getSakstema()).isEqualTo(Sakstemaer.UNNTAK);
         assertThat(opprettSakRequestArgumentCaptor.getValue().getBehandlingstype()).isEqualTo(Behandlingstyper.FØRSTEGANG);
         assertThat(opprettSakRequestArgumentCaptor.getValue().getBehandlingsårsaktype()).isEqualTo(Behandlingsaarsaktyper.SED);
-        assertThat(opprettSakRequestArgumentCaptor.getValue().getMottaksdato()).isNotNull();
-    }
-
-    @Test
-    void utfør_toggleDisabled_verifiserNyFagsakOgBehandlingBlirOpprettet() {
-        unleash.disableAll();
-        Prosessinstans prosessinstans = lagProsessinstans();
-        prosessinstans.setType(ProsessType.ANMODNING_OM_UNNTAK);
-        when(joarkFasade.hentMottaksDatoForJournalpost(anyString())).thenReturn(LocalDate.EPOCH);
-
-
-        opprettFagsakOgBehandlingFraSed.utfør(prosessinstans);
-
-
-        verify(fagsakService).nyFagsakOgBehandling(opprettSakRequestArgumentCaptor.capture());
-        assertThat(opprettSakRequestArgumentCaptor.getValue().getSakstype()).isEqualTo(Sakstyper.EU_EOS);
-        assertThat(opprettSakRequestArgumentCaptor.getValue().getSakstema()).isEqualTo(Sakstemaer.UNNTAK);
-        assertThat(opprettSakRequestArgumentCaptor.getValue().getBehandlingstype()).isEqualTo(Behandlingstyper.SED);
         assertThat(opprettSakRequestArgumentCaptor.getValue().getMottaksdato()).isNotNull();
     }
 

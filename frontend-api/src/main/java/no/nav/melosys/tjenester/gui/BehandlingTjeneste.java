@@ -100,13 +100,13 @@ public class BehandlingTjeneste {
     @JsonView(DokumentView.FrontendApi.class)
     @ApiOperation(value = "Hent en spesifikk behandling", response = BehandlingDto.class)
     public ResponseEntity<BehandlingDto> hentBehandling(@PathVariable("behandlingID") long behandlingID) {
-        String saksbehandler = SubjectHandler.getInstance().getUserID();
-        log.debug("Saksbehandler {} ber om å hente behandling {}.", saksbehandler, behandlingID);
+        String saksbehandlerID = SubjectHandler.getInstance().getUserID();
+        log.debug("Saksbehandler {} ber om å hente behandling {}.", saksbehandlerID, behandlingID);
         aksesskontroll.autoriser(behandlingID);
 
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
-        behandlingService.endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
-        BehandlingDto behandlingDto = tilBehandlingDto(behandling, saksbehandler);
+        behandlingService.oppdaterBehandlingsstatusHvisTilhørendeSaksbehandler(behandling, saksbehandlerID);
+        BehandlingDto behandlingDto = tilBehandlingDto(behandling, saksbehandlerID);
         return ResponseEntity.ok(behandlingDto);
     }
 
@@ -117,24 +117,6 @@ public class BehandlingTjeneste {
         aksesskontroll.autoriser(behandlingID);
 
         return ResponseEntity.ok(behandlingService.hentMuligeStatuser(behandlingID));
-    }
-
-    @GetMapping("{behandlingID}/mulige-behandlingstema")
-    @ApiOperation(value = "Hent mulige nye behandlingstema for en behandling")
-    public ResponseEntity<Collection<Behandlingstema>> hentMuligeBehandlingstema(@PathVariable("behandlingID") long behandlingsID) {
-        log.debug("Saksbehandler {} ber om å hente mulige nye behandlingstema for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingsID);
-        aksesskontroll.autoriser(behandlingsID);
-
-        return ResponseEntity.ok(behandlingService.hentMuligeBehandlingstema(behandlingsID));
-    }
-
-    @GetMapping("{behandlingID}/mulige-typer")
-    @ApiOperation("Hent mulige nye behandlingstyper for en behandling")
-    public ResponseEntity<Collection<Behandlingstyper>> hentMuligeTyper(@PathVariable("behandlingID") long behandlingID) {
-        log.debug("Saksbehandler {} ber om å hente mulige nye behandlingstyper for behandling {}.", SubjectHandler.getInstance().getUserID(), behandlingID);
-        aksesskontroll.autoriser(behandlingID);
-
-        return ResponseEntity.ok(behandlingService.hentMuligeTyper(behandlingID));
     }
 
     private BehandlingDto tilBehandlingDto(Behandling behandling, String saksbehandler) {

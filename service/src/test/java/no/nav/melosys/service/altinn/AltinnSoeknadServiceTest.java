@@ -55,7 +55,6 @@ class AltinnSoeknadServiceTest {
     private PersondataFasade persondataFasade;
     @Mock
     private AvklarteVirksomheterService avklarteVirksomheterService;
-    private final FakeUnleash unleash = new FakeUnleash();
 
     private AltinnSoeknadService altinnSoeknadService;
 
@@ -71,35 +70,7 @@ class AltinnSoeknadServiceTest {
     @BeforeEach
     void setup() {
         altinnSoeknadService = new AltinnSoeknadService(soknadMottakConsumer, fagsakService,
-            mottatteOpplysningerService, persondataFasade, avklarteVirksomheterService, unleash);
-        unleash.enableAll();
-    }
-
-    @Test
-    void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksistererToggleDisabled_verifiserFagsakBehandlingOgMottatteOpplysningerOpprettet() {
-        unleash.disableAll();
-        final Fagsak fagsak = lagFagsak();
-        final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
-
-        when(soknadMottakConsumer.hentSøknad(søknadID)).thenReturn(søknad);
-        when(soknadMottakConsumer.hentDokumenter(søknadID)).thenReturn(Set.of(søknadDokument));
-        when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
-        when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
-
-
-        assertThat(altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)).isEqualTo(fagsak.hentAktivBehandling());
-
-
-        OpprettSakRequest req = captor.getValue();
-        assertThat(req.getSakstype()).isEqualTo(Sakstyper.EU_EOS);
-        assertThat(req.getSakstema()).isEqualTo(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        assertThat(req.getBehandlingstema()).isEqualTo(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        assertThat(req.getBehandlingstype()).isEqualTo(Behandlingstyper.SOEKNAD);
-        assertThat(req.getArbeidsgiver()).isEqualTo(søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer());
-        assertThat(req.getAktørID()).isEqualTo(aktørID);
-
-        verify(mottatteOpplysningerService).opprettSøknadUtsendteArbeidstakereEøs(eq(1L), anyString(), any(),
-            eq(søknadID));
+            mottatteOpplysningerService, persondataFasade, avklarteVirksomheterService);
     }
 
     @Test
@@ -131,31 +102,6 @@ class AltinnSoeknadServiceTest {
     }
 
     @Test
-    @Deprecated(forRemoval = true, since = "Fjernes med melosys.behandle_alle_saker")
-    void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksistererArbeidsgiverOffentlig_verifiserBehandlingstemaArbeidsEttLandØvrig() {
-        unleash.disableAll();
-        final Fagsak fagsak = lagFagsak();
-        final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
-
-        søknad.getInnhold().getArbeidsgiver().setOffentligVirksomhet(Boolean.TRUE);
-
-        when(soknadMottakConsumer.hentSøknad(søknadID)).thenReturn(søknad);
-        when(soknadMottakConsumer.hentDokumenter(søknadID)).thenReturn(Set.of(søknadDokument));
-        when(fagsakService.nyFagsakOgBehandling(captor.capture())).thenReturn(fagsak);
-        when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(aktørID);
-
-
-        assertThat(altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID)).isEqualTo(fagsak.hentAktivBehandling());
-
-
-        OpprettSakRequest req = captor.getValue();
-        assertThat(req.getBehandlingstema()).isEqualTo(Behandlingstema.ARBEID_ETT_LAND_ØVRIG);
-        assertThat(req.getBehandlingstype()).isEqualTo(Behandlingstyper.SOEKNAD);
-        assertThat(req.getArbeidsgiver()).isEqualTo(søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer());
-        assertThat(req.getAktørID()).isEqualTo(aktørID);
-    }
-
-    @Test
     void opprettFagsakOgBehandlingFraAltinnSøknad_soeknadEksistererArbeidsgiverOffentlig_verifiserArbeidTjenestepersonEllerFly() {
         final Fagsak fagsak = lagFagsak();
         final MedlemskapArbeidEOSM søknad = lagMedlemskapArbeidEOSM();
@@ -177,6 +123,7 @@ class AltinnSoeknadServiceTest {
         assertThat(req.getArbeidsgiver()).isEqualTo(søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer());
         assertThat(req.getAktørID()).isEqualTo(aktørID);
     }
+
     @Test
     void opprettSakFraAltinnSøknad_rådgivningsfirmaErFullmektig_lagerFullmektig() {
         final Fagsak fagsak = lagFagsak();

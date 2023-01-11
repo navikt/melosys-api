@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -28,12 +27,10 @@ public class OpprettFagsakOgBehandlingFraSed implements StegBehandler {
 
     private final FagsakService fagsakService;
     private final JoarkFasade joarkFasade;
-    private final Unleash unleash;
 
-    public OpprettFagsakOgBehandlingFraSed(FagsakService fagsakService, JoarkFasade joarkFasade, Unleash unleash) {
+    public OpprettFagsakOgBehandlingFraSed(FagsakService fagsakService, JoarkFasade joarkFasade) {
         this.fagsakService = fagsakService;
         this.joarkFasade = joarkFasade;
-        this.unleash = unleash;
     }
 
     @Override
@@ -53,9 +50,7 @@ public class OpprettFagsakOgBehandlingFraSed implements StegBehandler {
             .medSakstype(Sakstyper.EU_EOS)
             .medSakstema(sakstema)
             .medBehandlingstema(behandlingstema)
-            .medBehandlingstype(unleash.isEnabled("melosys.behandle_alle_saker")
-                ? Behandlingstyper.FØRSTEGANG
-                : Behandlingstyper.SED)
+            .medBehandlingstype(Behandlingstyper.FØRSTEGANG)
             .medBehandlingsårsaktype(Behandlingsaarsaktyper.SED)
             .medMottaksdato(joarkFasade.hentMottaksDatoForJournalpost(eessiMelding.getJournalpostId()))
             .medInitierendeJournalpostId(eessiMelding.getJournalpostId())

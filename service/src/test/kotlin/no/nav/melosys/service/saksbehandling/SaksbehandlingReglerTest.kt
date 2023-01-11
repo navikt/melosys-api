@@ -265,7 +265,7 @@ class SaksbehandlingReglerTest {
                 listOf(
                     Behandling().apply {
                         id = 0
-                        type = Behandlingstyper.ANKE
+                        type = Behandlingstyper.KLAGE
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.AVSLUTTET
                         fagsak = Fagsak().apply {
@@ -286,7 +286,7 @@ class SaksbehandlingReglerTest {
                 listOf(
                     Behandling().apply {
                         id = 0
-                        type = Behandlingstyper.ANKE
+                        type = Behandlingstyper.KLAGE
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.AVSLUTTET
                         fagsak = Fagsak().apply {
@@ -322,7 +322,7 @@ class SaksbehandlingReglerTest {
                     },
                     Behandling().apply {
                         id = 1
-                        type = Behandlingstyper.ANKE
+                        type = Behandlingstyper.KLAGE
                         tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
                         status = Behandlingsstatus.AVSLUTTET
                         fagsak = Fagsak().apply {

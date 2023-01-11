@@ -4,14 +4,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.BehandlingEndretAvSaksbehandlerEvent;
 import no.nav.melosys.domain.brev.DokumentasjonSvarfrist;
 import no.nav.melosys.domain.dokument.DokumentBestiltEvent;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
-import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,12 +25,10 @@ public class BehandlingEventListener {
 
     private final BehandlingService behandlingService;
     private final OppgaveService oppgaveService;
-    private final Unleash unleash;
 
-    public BehandlingEventListener(BehandlingService behandlingService, OppgaveService oppgaveService, Unleash unleash) {
+    public BehandlingEventListener(BehandlingService behandlingService, OppgaveService oppgaveService) {
         this.behandlingService = behandlingService;
         this.oppgaveService = oppgaveService;
-        this.unleash = unleash;
     }
 
     @EventListener
@@ -54,26 +50,18 @@ public class BehandlingEventListener {
         final var behandling = behandlingService.hentBehandling(behandlingEndretAvSaksbehandlerEvent.getBehandlingID());
         Optional<Oppgave> oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
         oppgave.ifPresent(value -> {
-                // Disse variablene kan fjernes når melosys.behandle_alle_saker fjernes
-                final var behandlingstype = behandlingEndretAvSaksbehandlerEvent.getBehandlingstype();
-                final var behandlingstema = behandlingEndretAvSaksbehandlerEvent.getBehandlingstema();
-
-                final Oppgave behandlingsoppgave = (
-                    unleash.isEnabled("melosys.behandle_alle_saker")
-                        ? oppgaveService.lagBehandlingsoppgave(behandling)
-                        : OppgaveFactory.lagBehandlingsOppgaveForType(behandlingstema, behandlingstype))
-                    .build();
+                final Oppgave behandlingsoppgave = oppgaveService.lagBehandlingsoppgave(behandling).build();
 
                 final LocalDate frist = behandlingEndretAvSaksbehandlerEvent.getBehandlingsfrist();
 
                 log.info("Oppdaterer oppgave {} med behandlingstype {}, behandlingstema {} og fristFerdigstillelse {}",
-                    value.getOppgaveId(), behandlingstype.getKode(), behandlingstema.getKode(), frist);
+                    value.getOppgaveId(),  behandling.getType().getKode(), behandling.getTema().getKode(), frist
+                );
 
                 oppgaveService.oppdaterOppgave(
                     value.getOppgaveId(),
                     OppgaveOppdatering.builder()
                         .behandlingstema(behandlingsoppgave.getBehandlingstema())
-                        .behandlingstype(unleash.isEnabled("melosys.behandle_alle_saker") ? null : behandlingsoppgave.getBehandlingstype())
                         .tema(behandlingsoppgave.getTema())
                         .oppgavetype(behandlingsoppgave.getOppgavetype())
                         .fristFerdigstillelse(frist)

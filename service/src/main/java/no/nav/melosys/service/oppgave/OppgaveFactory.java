@@ -17,6 +17,7 @@ import no.nav.melosys.exception.FunksjonellException;
 
 import static no.nav.melosys.domain.Behandling.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.TRYGDETID;
 
 public final class OppgaveFactory {
 
@@ -35,28 +36,6 @@ public final class OppgaveFactory {
             .setFristFerdigstillelse(LocalDate.now().plusDays(FRIST_FERDIGSTILLELSE_JFR_OPPG));
     }
 
-    /**
-     * @deprecated Fjernes med toggle melosys.behandle_alle_saker
-     */
-    @Deprecated
-    public static Oppgave.Builder lagBehandlingsOppgaveForType(Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
-        final OppgaveParametere parametere = hentOppgaveParametere(behandlingstema);
-
-        if (behandlingstype == Behandlingstyper.ENDRET_PERIODE) {
-            parametere.fristFerdigstillelse = fristDager(1);
-            parametere.oppgavetype = Oppgavetyper.VUR;
-        }
-
-        return new Oppgave.Builder()
-            .setBehandlingstype(parametere.behandlingstype)
-            .setBehandlingstema(parametere.behandlingstema)
-            .setTema(parametere.tema)
-            .setOppgavetype(parametere.oppgavetype)
-            .setFristFerdigstillelse(parametere.fristFerdigstillelse)
-            .setPrioritet(PrioritetType.NORM)
-            .setBehandlesAvApplikasjon(Fagsystem.MELOSYS);
-    }
-
     public static Oppgave.Builder lagBehandlingsoppgave(Behandling behandling, LocalDate mottaksdato) {
         // Dokumentasjon for regler: https://confluence.adeo.no/display/TEESSI/Oppgaver+i+Gosys
         Sakstyper sakstype = behandling.getFagsak().getType();
@@ -73,44 +52,6 @@ public final class OppgaveFactory {
             .setOppgavetype(utledOppgavetype(sakstype, behandlingstema, behandlingstype))
             .setBeskrivelse(utledBeskrivelse(oppgaveBehandlingstema, sakstype, sakstema, behandlingstema, behandlingstype))
             .setFristFerdigstillelse(utledBehandlingsfrist(behandling, mottaksdato));
-    }
-
-    /**
-     * @deprecated Fjernes med toggle melosys.behandle_alle_saker
-     */
-    @Deprecated
-    static OppgaveParametere hentOppgaveParametere(Behandlingstema behandlingstema) {
-        return switch (behandlingstema) {
-            case UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG ->
-                new OppgaveParametere(EU_EOS, "ae0034", Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
-            case ARBEID_FLERE_LAND ->
-                new OppgaveParametere(EU_EOS, "ae0242", Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
-            case ARBEID_ETT_LAND_ØVRIG, ARBEID_TJENESTEPERSON_ELLER_FLY ->
-                new OppgaveParametere(EU_EOS, "ae0243", Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
-            case IKKE_YRKESAKTIV ->
-                new OppgaveParametere(EU_EOS, "ae0238", Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
-            case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING ->
-                new OppgaveParametere(EU_EOS, "ae0111", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(2));
-            case REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE ->
-                new OppgaveParametere(EU_EOS, "ae0235", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(2));
-            case BESLUTNING_LOVVALG_NORGE ->
-                new OppgaveParametere(EU_EOS, "ae0112", Tema.MED, Oppgavetyper.BEH_SED, fristUker(4));
-            case BESLUTNING_LOVVALG_ANNET_LAND ->
-                new OppgaveParametere(EU_EOS, "ae0113", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(4));
-            case ANMODNING_OM_UNNTAK_HOVEDREGEL ->
-                new OppgaveParametere(EU_EOS, "ae0110", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(8));
-            case ØVRIGE_SED_UFM ->
-                new OppgaveParametere(EU_EOS, "ae0254", Tema.UFM, Oppgavetyper.BEH_SED, fristUker(8));
-            case ØVRIGE_SED_MED ->
-                new OppgaveParametere(EU_EOS, "ae0254", Tema.MED, Oppgavetyper.BEH_SED, fristUker(8));
-            case TRYGDETID -> new OppgaveParametere(EU_EOS, "ae0236", Tema.MED, Oppgavetyper.BEH_SED, fristUker(8));
-            case ARBEID_I_UTLANDET ->
-                new OppgaveParametere("ab0388", null, Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
-            case ARBEID_KUN_NORGE, YRKESAKTIV ->
-                new OppgaveParametere("ab0387", null, Tema.MED, Oppgavetyper.BEH_SAK_MK, fristDager(30));
-            default -> throw new IllegalArgumentException(
-                "Melosys støtter ikke mapping for behandlingstema  " + behandlingstema);
-        };
     }
 
     static OppgaveBehandlingstema utledBehandlingstema(Sakstyper sakstype, Sakstemaer sakstema,
@@ -186,7 +127,7 @@ public final class OppgaveFactory {
     }
 
     private static Oppgavetyper oppgavetypeEøs(Behandlingstema tema, Behandlingstyper behandlingstype) {
-        if (erAnmodningOmUnntak(tema) || erRegistreringAvUnntak(tema) || erBehandlingAvSedForespørsler(tema)) {
+        if (erAnmodningOmUnntak(tema) || erRegistreringAvUnntak(tema) || List.of(FORESPØRSEL_TRYGDEMYNDIGHET, TRYGDETID).contains(tema)) {
             return Oppgavetyper.BEH_SED;
         }
         if (behandlingstype == Behandlingstyper.HENVENDELSE) {
@@ -233,33 +174,5 @@ public final class OppgaveFactory {
 
     private static String sedEllerDefaultBeskrivelse(Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype, String sed) {
         return sakstype == Sakstyper.EU_EOS && behandlingstype == Behandlingstyper.HENVENDELSE && behandlingstema == Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET ? sed : behandlingstema.getBeskrivelse();
-    }
-
-    private static LocalDate fristUker(int uker) {
-        return LocalDate.now().plusWeeks(uker);
-    }
-
-    private static LocalDate fristDager(int dager) {
-        return LocalDate.now().plusDays(dager);
-    }
-
-    /**
-     * @deprecated Fjernes med toggle melosys.behandle_alle_saker
-     */
-    @Deprecated
-    static class OppgaveParametere {
-        final String behandlingstema;
-        final String behandlingstype;
-        final Tema tema;
-        Oppgavetyper oppgavetype;
-        LocalDate fristFerdigstillelse;
-
-        OppgaveParametere(String behandlingstema, String behandlingstype, Tema tema, Oppgavetyper oppgavetype, LocalDate fristFerdigstillelse) {
-            this.behandlingstema = behandlingstema;
-            this.behandlingstype = behandlingstype;
-            this.tema = tema;
-            this.oppgavetype = oppgavetype;
-            this.fristFerdigstillelse = fristFerdigstillelse;
-        }
     }
 }

@@ -54,7 +54,7 @@ public class InnvilgelseArbeidsgiverBrevMapperTest {
         brevDataInnvilgelse.hovedvirksomhet = new AvklartVirksomhet("Equinor", "987654321", null, Yrkesaktivitetstyper.LOENNET_ARBEID);
         brevDataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
         brevDataInnvilgelse.personNavn = "For Etter";
-        String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevDataInnvilgelse, false);
+        String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevDataInnvilgelse);
         // TODO: Vurder å bruke XMLUnit e.l. til å sammenlikne XML-strengen
         // grundig mot forventninger.
         assertThat(resultat).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
@@ -116,7 +116,7 @@ public class InnvilgelseArbeidsgiverBrevMapperTest {
 
     private static Behandling lagBehandling(Fagsak fagsak, Set<Saksopplysning> saksopplysninger) {
         Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);
         behandling.setSaksopplysninger(saksopplysninger);
         return behandling;

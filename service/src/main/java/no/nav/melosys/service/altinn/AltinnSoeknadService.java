@@ -41,19 +41,17 @@ public class AltinnSoeknadService {
     private final MottatteOpplysningerService mottatteOpplysningerService;
     private final PersondataFasade persondataFasade;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
-    private final Unleash unleash;
 
     public AltinnSoeknadService(SoknadMottakConsumer soknadMottakConsumer,
                                 FagsakService fagsakService,
                                 MottatteOpplysningerService mottatteOpplysningerService,
                                 PersondataFasade persondataFasade,
-                                AvklarteVirksomheterService avklarteVirksomheterService, Unleash unleash) {
+                                AvklarteVirksomheterService avklarteVirksomheterService) {
         this.soknadMottakConsumer = soknadMottakConsumer;
         this.fagsakService = fagsakService;
         this.mottatteOpplysningerService = mottatteOpplysningerService;
         this.persondataFasade = persondataFasade;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
-        this.unleash = unleash;
     }
 
     public Behandling opprettFagsakOgBehandlingFraAltinnSøknad(String søknadReferanse) {
@@ -86,9 +84,7 @@ public class AltinnSoeknadService {
             .medBehandlingsårsaktype(Behandlingsaarsaktyper.SØKNAD)
             .medMottaksdato(mottaksdato)
             .medBehandlingstema(avklarBehandlingstema(søknad))
-            .medBehandlingstype(unleash.isEnabled("melosys.behandle_alle_saker")
-                ? Behandlingstyper.FØRSTEGANG
-                : Behandlingstyper.SOEKNAD)
+            .medBehandlingstype(Behandlingstyper.FØRSTEGANG)
             .build();
     }
 
@@ -104,11 +100,7 @@ public class AltinnSoeknadService {
 
     private Behandlingstema avklarBehandlingstema(MedlemskapArbeidEOSM søknad) {
         if (Boolean.TRUE.equals(søknad.getInnhold().getArbeidsgiver().isOffentligVirksomhet())) {
-            if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-                return Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY;
-            } else {
-                return Behandlingstema.ARBEID_ETT_LAND_ØVRIG;
-            }
+            return Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY;
         } else {
             return Behandlingstema.UTSENDT_ARBEIDSTAKER;
         }

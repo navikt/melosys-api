@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.jfr;
 
 import java.util.Optional;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -15,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.TemaFactory.fraBehandlingstema;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_ARKIVSAK;
 import static no.nav.melosys.service.oppgave.OppgaveFactory.utledTema;
 
@@ -26,12 +24,10 @@ public class OpprettArkivsak implements StegBehandler {
 
     private final FagsakService fagsakService;
     private final ArkivsakService arkivsakService;
-    private final Unleash unleash;
 
-    public OpprettArkivsak(FagsakService fagsakService, ArkivsakService arkivsakService, Unleash unleash) {
+    public OpprettArkivsak(FagsakService fagsakService, ArkivsakService arkivsakService) {
         this.fagsakService = fagsakService;
         this.arkivsakService = arkivsakService;
-        this.unleash = unleash;
     }
 
     @Override
@@ -52,9 +48,7 @@ public class OpprettArkivsak implements StegBehandler {
         Optional<String> aktørId = fagsak.finnBrukersAktørID();
         Optional<String> virksomhetOrgnr = fagsak.finnVirksomhetsOrgnr();
 
-        var tema = unleash.isEnabled("melosys.behandle_alle_saker")
-            ? utledTema(behandling.getFagsak().getTema())
-            : fraBehandlingstema(behandling.getTema());
+        var tema = utledTema(behandling.getFagsak().getTema());
 
         Long arkivsakID;
         if (aktørId.isPresent()) {

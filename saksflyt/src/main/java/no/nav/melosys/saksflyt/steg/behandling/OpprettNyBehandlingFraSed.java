@@ -30,17 +30,15 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
     private final BehandlingService behandlingService;
     private final OppgaveService oppgaveService;
     private final JoarkFasade joarkFasade;
-    private final Unleash unleash;
 
     public OpprettNyBehandlingFraSed(FagsakService fagsakService,
                                      BehandlingService behandlingService,
                                      OppgaveService oppgaveService,
-                                     JoarkFasade joarkFasade, Unleash unleash) {
+                                     JoarkFasade joarkFasade) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.joarkFasade = joarkFasade;
         this.oppgaveService = oppgaveService;
-        this.unleash = unleash;
     }
 
     @Override
@@ -50,7 +48,6 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
-
         var arkivsakID = prosessinstans.getData(ProsessDataKey.GSAK_SAK_ID, Long.class);
         var behandlingstema = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class);
         prosessinstans.setData(ProsessDataKey.ER_OPPDATERT_SED, true);
@@ -67,7 +64,7 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
         avsluttTidligereBehandling(fagsak);
         var behandling = behandlingService.nyBehandling(
             fagsak, Behandlingsstatus.UNDER_BEHANDLING,
-            unleash.isEnabled("melosys.behandle_alle_saker") ? Behandlingstyper.FØRSTEGANG : Behandlingstyper.SED,
+            Behandlingstyper.FØRSTEGANG,
             behandlingstema, eessiMelding.getJournalpostId(), eessiMelding.getDokumentId(),
             joarkFasade.hentMottaksDatoForJournalpost(eessiMelding.getJournalpostId()),
             Behandlingsaarsaktyper.SED, null);

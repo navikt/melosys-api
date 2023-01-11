@@ -106,7 +106,7 @@ public class AvslagYrkesaktivMapperTest {
         brevData.art16Vilkaar = vilkaarsresultat16_1;
 
         AvslagYrkesaktivMapper spy = Mockito.spy(new AvslagYrkesaktivMapper());
-        String xml = spy.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData, false);
+        String xml = spy.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);
 
         assertThat(xml).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
     }
@@ -128,7 +128,7 @@ public class AvslagYrkesaktivMapperTest {
         Vilkaarsresultat vilkår12_1_avslått = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART12_1, false, Art12_1_begrunnelser.IKKE_VESENTLIG_VIRKSOMHET);
         resultat.getVilkaarsresultater().add(vilkår12_1_avslått);
 
-        String xml = spy.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData, false);
+        String xml = spy.mapTilBrevXML(fellesType, navFelles, behandling, resultat, brevData);
         assertThat(xml).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
     }
 

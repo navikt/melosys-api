@@ -66,7 +66,6 @@ public class OppgaveDto extends OpprettOppgaveDto {
         oppgaveDto.setOrgnr(oppgave.getOrgnr());
         oppgaveDto.setBehandlesAvApplikasjon(oppgave.getBehandlesAvApplikasjon().getKode());
         oppgaveDto.setBehandlingstema(oppgave.getBehandlingstema());
-        oppgaveDto.setBehandlingstype(oppgave.getBehandlingstype());
         oppgaveDto.setBeskrivelse(oppgave.getBeskrivelse());
         oppgaveDto.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
         oppgaveDto.setJournalpostId(oppgave.getJournalpostId());

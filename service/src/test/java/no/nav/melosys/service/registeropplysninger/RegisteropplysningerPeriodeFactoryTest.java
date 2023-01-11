@@ -3,7 +3,6 @@ package no.nav.melosys.service.registeropplysninger;
 import java.time.LocalDate;
 import java.time.YearMonth;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -20,7 +19,6 @@ class RegisteropplysningerPeriodeFactoryTest {
     private final Integer inntektshistorikkAntallMåneder = 6;
     private final Behandling behandlingAvSøknad = lagBehandling(true);
     private final Behandling mottakAvSed = lagBehandling(false);
-    private final FakeUnleash unleash = new FakeUnleash();
 
     private RegisteropplysningerPeriodeFactory factory;
 
@@ -29,9 +27,7 @@ class RegisteropplysningerPeriodeFactoryTest {
         factory = new RegisteropplysningerPeriodeFactory(
             arbeidsforholdhistorikkAntallMåneder,
             medlemskaphistorikkAntallÅr,
-            inntektshistorikkAntallMåneder,
-            unleash);
-        unleash.enable("melosys.behandle_alle_saker");
+            inntektshistorikkAntallMåneder);
     }
 
     @Test

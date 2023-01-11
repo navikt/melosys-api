@@ -74,7 +74,7 @@ class OpprettSakTest {
     void nySakOgBehandlingFraOppgave_oppretterProsess() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
-        opprettSakDto.setBehandlingstema(Behandlingstema.ØVRIGE_SED_MED);
+        opprettSakDto.setBehandlingstema(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET);
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         when(journalfoeringService.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN, "skanning"));
@@ -180,7 +180,7 @@ class OpprettSakTest {
     }
 
     @Test
-    void nySakOgBehandlingFraOppgave_sakstypeTrygdeavtaleFeatureToggleEnabled_oppretterProsess() {
+    void nySakOgBehandlingFraOppgave_sakstypeTrygdeavtale_oppretterProsess() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.TRYGDEAVTALE);
         opprettSakDto.setBehandlingstema(Behandlingstema.YRKESAKTIV);
@@ -194,18 +194,6 @@ class OpprettSakTest {
 
 
         verify(prosessinstansService).opprettProsessinstansNySakFTRLTrygdeavtale(oppgave.getJournalpostId(), opprettSakDto);
-    }
-
-    @Test
-    void nySakOgBehandlingFraOppgave_sakstypeFtrlFeatureToggleDisabled_kasterException() {
-        OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
-        opprettSakDto.setSakstype(Sakstyper.FTRL);
-        opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_I_UTLANDET);
-        unleash.disableAll();
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto))
-            .withMessageContaining("Kan ikke opprette ny sak med");
     }
 
     @Test
@@ -238,7 +226,7 @@ class OpprettSakTest {
     void nySakOgBehandlingFraOppgave_journalpostUtgående_feiler() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
-        opprettSakDto.setBehandlingstema(Behandlingstema.ØVRIGE_SED_MED);
+        opprettSakDto.setBehandlingstema(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET);
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId(JP_ID).build();
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         when(journalfoeringService.hentJournalpost(JP_ID)).thenReturn(lagJournalpost(Journalposttype.UT, "NAV"));
@@ -252,7 +240,7 @@ class OpprettSakTest {
     void nySakOgBehandlingFraOppgave_journalpostFraSedErKnyttetTilEksisterendeSak_feiler() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
-        opprettSakDto.setBehandlingstema(Behandlingstema.ØVRIGE_SED_MED);
+        opprettSakDto.setBehandlingstema(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET);
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId(JP_ID).build();
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         final Journalpost journalpost = lagJournalpost(Journalposttype.INN, "EESSI");
@@ -268,7 +256,7 @@ class OpprettSakTest {
     void nySakOgBehandlingFraOppgave_journalpostFraSedErIkkeKnyttetTilEksisterendeSak_oppretterProsess() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
-        opprettSakDto.setBehandlingstema(Behandlingstema.ØVRIGE_SED_MED);
+        opprettSakDto.setBehandlingstema(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET);
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId(JP_ID).build();
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         final Journalpost journalpost = lagJournalpost(Journalposttype.INN, "EESSI");

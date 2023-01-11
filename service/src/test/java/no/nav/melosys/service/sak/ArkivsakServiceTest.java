@@ -36,7 +36,7 @@ public class ArkivsakServiceTest {
     }
 
     @Test
-    public void opprettSakForBruker_behandlingstypeSøknad_temaMed() {
+    public void opprettSakForBruker_behandlingstypeFørstegang_temaMed() {
         final String saksnummer = "MEL-123";
         final Tema tema = Tema.MED;
         final String aktørID = "123123123";
@@ -76,7 +76,7 @@ public class ArkivsakServiceTest {
     }
 
     @Test
-    public void opprettSakForVirksomhet_behandlingstypeSøknad_temaMed() {
+    public void opprettSakForVirksomhet_behandlingstypeFørstegang_temaMed() {
         final String saksnummer = "MEL-123";
         final Tema tema = Tema.MED;
         final String orgId = "123123123";

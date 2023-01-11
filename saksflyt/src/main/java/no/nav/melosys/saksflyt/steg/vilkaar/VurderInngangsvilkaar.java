@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.vilkaar;
 
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -37,28 +36,15 @@ public class VurderInngangsvilkaar implements StegBehandler {
         final long behandlingID = prosessinstans.getBehandling().getId();
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
 
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            if (skalVurdereInngangsvilkår(behandling)) {
-                var søknadsland = behandling.hentSøknadsLand();
-                var erUkjenteEllerAlleEosLand = behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.erUkjenteEllerAlleEosLand;
-                var periode = behandling.hentPeriode();
+        if (skalVurdereInngangsvilkår(behandling)) {
+            var søknadsland = behandling.hentSøknadsLand();
+            var erUkjenteEllerAlleEosLand = behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.erUkjenteEllerAlleEosLand;
+            var periode = behandling.hentPeriode();
 
-                boolean kvalifisererForEF_883_2004 = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, erUkjenteEllerAlleEosLand, periode);
-                log.info("Inngangsvilkår vurdert for behandling {}. kvalifisererForEF_883_2004: {}", behandlingID, kvalifisererForEF_883_2004);
-            } else {
-                log.info("Inngangsvilkår ikke vurdert for sak {} og behandling {} med sakstype {} og sakstema {}", behandling.getFagsak().getSaksnummer(), behandlingID, behandling.getFagsak().getType(), behandling.getFagsak().getTema());
-            }
+            boolean kvalifisererForEF_883_2004 = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, erUkjenteEllerAlleEosLand, periode);
+            log.info("Inngangsvilkår vurdert for behandling {}. kvalifisererForEF_883_2004: {}", behandlingID, kvalifisererForEF_883_2004);
         } else {
-            if (behandling.getFagsak().getType() == Sakstyper.EU_EOS && behandling.kanResultereIVedtakGammel()) {
-                var søknadsland = behandling.finnSøknadsLandGammel();
-                var erUkjenteEllerAlleEosLand = behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.erUkjenteEllerAlleEosLand;
-                var periode = behandling.hentPeriodeGammel();
-
-                boolean kvalifisererForEF_883_2004 = inngangsvilkaarService.vurderOgLagreInngangsvilkår(behandlingID, søknadsland, erUkjenteEllerAlleEosLand, periode);
-                log.info("Inngangsvilkår vurdert for behandling {}. kvalifisererForEF_883_2004: {}", behandlingID, kvalifisererForEF_883_2004);
-            } else {
-                log.info("Inngangsvilkår ikke vurdert for behandling {} med tema {}", behandlingID, behandling.getTema());
-            }
+            log.info("Inngangsvilkår ikke vurdert for sak {} og behandling {} med sakstype {} og sakstema {}", behandling.getFagsak().getSaksnummer(), behandlingID, behandling.getFagsak().getType(), behandling.getFagsak().getTema());
         }
     }
 

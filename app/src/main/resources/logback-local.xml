@@ -24,6 +24,10 @@
     <logger name="org.springframework.transaction.interceptor" level="WARN" />
     <logger name="org.hibernate.SQL" level="WARN" />
 
+    <logger name="org.apache.cxf.ws.addressing.soap.MAPCodec" level="ERROR"/>
+    <logger name="org.apache.cxf.ws.addressing.ContextUtils" level="ERROR"/>
+
+    <!-- Sett til debug for å se info om kall til eksterne tjenster -->
     <logger name="reactor.netty.http.client" level="INFO"/>
     <logger name="org.springframework.web.client.RestTemplate" level="INFO"/>
 </included>

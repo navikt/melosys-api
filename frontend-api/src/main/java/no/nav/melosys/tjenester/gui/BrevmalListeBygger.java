@@ -17,6 +17,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.BrevAdresse;
 import no.nav.melosys.service.brev.BrevbestillingService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.tjenester.gui.dto.brev.*;
 import org.springframework.stereotype.Component;
 
@@ -59,44 +60,44 @@ public class BrevmalListeBygger {
     }
 
     private List<MottakerDto> hentTilgjengeligeMottakere(long behandlingId) {
-        Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        var behandling = behandlingService.hentBehandling(behandlingId);
         var fagsak = behandling.getFagsak();
         List<MottakerDto> mottakere = new ArrayList<>();
 
         if (fagsak.getHovedpartRolle() == BRUKER) {
-            mottakere.addAll(lagMottakereForRolle(behandling, BRUKER));
-            mottakere.addAll(lagMottakereForRolle(behandling, ARBEIDSGIVER));
-            if (fagsak.erSakstypeTrygdeavtale()) {
-                mottakere.addAll(lagMottakereForRolle(behandling, TRYGDEMYNDIGHET));
+            mottakere.add(lagMottakerForRolle(behandlingId, BRUKER));
+            if (!SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"))) {
+                mottakere.add(lagMottakerForRolle(behandlingId, ARBEIDSGIVER));
             }
+            if (fagsak.erSakstypeTrygdeavtale()) {
+                mottakere.add(lagMottakerForRolle(behandlingId, TRYGDEMYNDIGHET));
+            }
+            mottakere.add(lagMottakerAnnenOrganisasjon(ARBEIDSGIVER));
         } else if (fagsak.getHovedpartRolle() == VIRKSOMHET) {
-            mottakere.addAll(lagMottakereForRolle(behandling, VIRKSOMHET));
+            mottakere.add(lagMottakerForRolle(behandlingId, VIRKSOMHET));
+            mottakere.add(lagMottakerAnnenOrganisasjon(VIRKSOMHET));
         } else {
             throw new FunksjonellException("Sak må ha hovedpart for å kunne sende brev");
         }
         return mottakere;
     }
 
-    private List<MottakerDto> lagMottakereForRolle(Behandling behandling, Aktoersroller rolle) {
-        List<MottakerDto> mottakere = new ArrayList<>();
+    private MottakerDto lagMottakerForRolle(long behandlingId, Aktoersroller rolle) {
         var builder = new MottakerDto.Builder()
             .medType(mapType(rolle))
             .medRolle(rolle);
 
-        leggTilAdresseOgFeilmelding(builder, rolle, behandling.getId());
+        leggTilAdresseOgFeilmelding(builder, rolle, behandlingId);
 
-        mottakere.add(builder.build());
+        return builder.build();
+    }
 
-        if (rolle == Aktoersroller.ARBEIDSGIVER || rolle == Aktoersroller.VIRKSOMHET) {
-            mottakere.add(
-                new MottakerDto.Builder()
-                    .medType(MottakerType.ANNEN_ORGANISASJON)
-                    .medRolle(rolle)
-                    .orgnrSettesAvSaksbehandler()
-                    .build()
-            );
-        }
-        return mottakere;
+    private MottakerDto lagMottakerAnnenOrganisasjon(Aktoersroller tilhørendeRolle) {
+        return new MottakerDto.Builder()
+            .medType(MottakerType.ANNEN_ORGANISASJON)
+            .medRolle(tilhørendeRolle)
+            .orgnrSettesAvSaksbehandler()
+            .build();
     }
 
     private MottakerType mapType(Aktoersroller hovedmottaker) {
@@ -161,10 +162,7 @@ public class BrevmalListeBygger {
     }
 
     private boolean harStandardTekstIMangelbrev(Sakstemaer sakstema, Behandlingstyper behandlingstype) {
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            return sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG && behandlingstype == Behandlingstyper.FØRSTEGANG;
-        }
-        return behandlingstype == Behandlingstyper.SOEKNAD || behandlingstype == Behandlingstyper.KLAGE;
+        return sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG && behandlingstype == Behandlingstyper.FØRSTEGANG;
     }
 
     private FeltValgDto hentDistribusjonstyper() {

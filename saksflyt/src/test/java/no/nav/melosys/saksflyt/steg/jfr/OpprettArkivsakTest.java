@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -33,11 +32,9 @@ class OpprettArkivsakTest {
 
     private OpprettArkivsak opprettArkivsak;
 
-    private final FakeUnleash unleash = new FakeUnleash();
-
     @BeforeEach
     public void setUp() {
-        opprettArkivsak = new OpprettArkivsak(fagsakService, arkivsakService, unleash);
+        opprettArkivsak = new OpprettArkivsak(fagsakService, arkivsakService);
     }
 
     @Test
@@ -47,6 +44,7 @@ class OpprettArkivsakTest {
         String aktørID = "4214323324";
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-4321");
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
 
         Aktoer bruker = new Aktoer();
         bruker.setAktørId(aktørID);
@@ -69,7 +67,6 @@ class OpprettArkivsakTest {
 
     @Test
     void utfør_arkivsakIDEksistererIkkeFraFør_arkivsakBlirOpprettet_brukFagsakTema() {
-        unleash.enable("melosys.behandle_alle_saker");
         final long forventetArkivsakID = 1234432;
 
         String aktørID = "4214323324";
@@ -97,7 +94,6 @@ class OpprettArkivsakTest {
 
     @Test
     void utfør_virksomhetErHovedpart_oppretterSakForVirksomhet() {
-        unleash.enable("melosys.behandle_alle_saker");
         final long forventetArkivsakID = 1234432;
 
         String orgnr = "999999999";
@@ -147,7 +143,6 @@ class OpprettArkivsakTest {
 
     @Test
     void utfør_harVerkenBrukerIDEllerVirksomhetOrgnr_kasterException() {
-        unleash.enable("melosys.behandle_alle_saker");
         Fagsak fagsak = new Fagsak();
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         fagsak.setSaksnummer("MEL-4321");

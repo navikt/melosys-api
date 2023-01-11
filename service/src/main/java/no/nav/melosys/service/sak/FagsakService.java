@@ -18,7 +18,6 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -295,95 +294,5 @@ public class FagsakService {
     public void oppdaterStatus(Fagsak fagsak, Saksstatuser saksstatus) {
         fagsak.setStatus(saksstatus);
         fagsakRepository.save(fagsak);
-    }
-
-    /**
-     * @deprecated Fjernes med toggle melosys.behandle_alle_saker
-     */
-    @Deprecated
-    @Transactional
-    public long opprettNyVurderingBehandling(String saksnummer) {
-        Fagsak fagsak = hentFagsak(saksnummer);
-        validerOpprettNyVurdering(fagsak);
-
-        Optional<Behandling> behandling = hentBehandlingSomErUtgangspunktForRevurdering(fagsak);
-        Behandling replikertBehandling;
-
-        if (behandling.isPresent()) {
-            replikertBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandling.get(), avgjørBehandlingstype(fagsak));
-        } else {
-            behandling = Optional.of(fagsak.hentSistOppdatertBehandling());
-            replikertBehandling = behandlingService.replikerBehandlingMedNyttBehandlingsresultat(behandling.get(), avgjørBehandlingstype(fagsak));
-        }
-
-        if (!behandling.get().erAvsluttet()) {
-            behandlingService.avsluttBehandling(behandling.get().getId());
-        }
-
-        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(
-            replikertBehandling, replikertBehandling.getInitierendeJournalpostId(), fagsak.hentBrukersAktørID(), SubjectHandler.getInstance().getUserID()
-        );
-        return replikertBehandling.getId();
-    }
-
-    private void validerOpprettNyVurdering(Fagsak fagsak) {
-        Behandling sistAktivBehandling = fagsak.hentSistAktivBehandling();
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(sistAktivBehandling.getId());
-        if (sistAktivBehandling.erAktiv() && behandlingsresultat.erIkkeArtikkel16MedSendtAnmodningOmUnntak()) {
-            throw new FunksjonellException("Kan ikke revurdere en aktiv behandling");
-        } else if (sistAktivBehandling.erEndretPeriode()) {
-            throw new FunksjonellException("Kan ikke revurdere en behandling av type " + Behandlingstyper.ENDRET_PERIODE.getBeskrivelse());
-        }
-    }
-
-    public Optional<Behandling> hentBehandlingSomErUtgangspunktForRevurdering(Fagsak fagsak) {
-        if (fagsak.harAktivBehandling()) {
-            return Optional.of(fagsak.hentSistAktivBehandling());
-        }
-        return hentBehandlingForNyVurdering(fagsak);
-    }
-
-    public Optional<Behandling> hentBehandlingForNyVurdering(Fagsak fagsak) {
-        var førsteBehandling = fagsak.hentTidligstRegistrertBehandling();
-
-        if (førsteBehandling.getType() == Behandlingstyper.SOEKNAD || førsteBehandling.erBeslutningLovvalgNorge()) {
-            return hentBehandlingMedSistRegistrertVedtakEllerAvvisning(fagsak);
-        } else if (førsteBehandling.getType() == Behandlingstyper.SED) {
-            return hentBehandlingMedSistRegistrertUnntak(fagsak);
-        }
-        return Optional.empty();
-    }
-
-    public Optional<Behandling> hentBehandlingMedSistRegistrertVedtakEllerAvvisning(Fagsak fagsak) {
-        return fagsak.getBehandlinger().stream()
-            .map(behandling -> behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
-            .filter(Objects::nonNull)
-            .filter(behandlingsresultat -> behandlingsresultat.harVedtak() || behandlingsresultat.erUtpekingNorgeAvvist())
-            .max(Comparator.comparing(Behandlingsresultat::getRegistrertDato))
-            .map(Behandlingsresultat::getBehandling);
-    }
-
-    public Optional<Behandling> hentBehandlingMedSistRegistrertUnntak(Fagsak fagsak) {
-        return fagsak.getBehandlinger().stream()
-            .map(behandling -> behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
-            .filter(Objects::nonNull)
-            .filter(Behandlingsresultat::erRegistrertUnntak)
-            .max(Comparator.comparing(RegistreringsInfo::getRegistrertDato))
-            .map(Behandlingsresultat::getBehandling);
-    }
-
-    private Behandlingstyper avgjørBehandlingstype(Fagsak fagsak) {
-        if (fagsak.harAktivBehandling()) {
-            return fagsak.hentSistAktivBehandling().getType();
-        }
-        return Behandlingstyper.NY_VURDERING;
-    }
-
-    public Set<Sakstyper> hentMuligeSakstyper() {
-        return Collections.emptySet();
-    }
-
-    public Set<Sakstemaer> hentMuligeSakstemaer() {
-        return Collections.emptySet();
     }
 }

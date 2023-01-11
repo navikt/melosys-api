@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import no.finn.unleash.Unleash;
 import no.nav.dok.brevdata.felles.v1.navfelles.UtenlandskPostadresse;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
@@ -64,7 +63,6 @@ public class BrevbestillingService {
     private final PersondataFasade persondataFasade;
     private final DokumentNavnService dokumentNavnService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
-    private final Unleash unleash;
 
     public BrevbestillingService(BrevmottakerService brevmottakerService,
                                  DokumentServiceFasade dokumentServiceFasade,
@@ -73,7 +71,8 @@ public class BrevbestillingService {
                                  KontaktopplysningService kontaktopplysningService,
                                  PersondataFasade persondataFasade,
                                  DokumentNavnService dokumentNavnService,
-                                 UtenlandskMyndighetService utenlandskMyndighetService, Unleash unleash) {
+                                 UtenlandskMyndighetService utenlandskMyndighetService
+    ) {
         this.brevmottakerService = brevmottakerService;
         this.dokumentServiceFasade = dokumentServiceFasade;
         this.behandlingService = behandlingService;
@@ -82,7 +81,6 @@ public class BrevbestillingService {
         this.persondataFasade = persondataFasade;
         this.dokumentNavnService = dokumentNavnService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
-        this.unleash = unleash;
     }
 
     @Transactional
@@ -231,10 +229,8 @@ public class BrevbestillingService {
         switch (rolle) {
             case BRUKER:
                 List<Produserbaredokumenter> brevmaler = new ArrayList<>();
-                if (skalKunneSendeMeldingForventetSaksbehanlingstidSoknad(behandling.getFagsak().getTema(), behandling.getType())) {
+                if (behandling.getFagsak().getTema() == Sakstemaer.MEDLEMSKAP_LOVVALG && behandling.getType() == Behandlingstyper.FØRSTEGANG) {
                     brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-                } else if (skalKunneSendeMeldingForventetSaksbehanlingstidKlage(behandling.getType())) {
-                    brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE);
                 }
                 brevmaler.addAll(asList(MANGELBREV_BRUKER, GENERELT_FRITEKSTBREV_BRUKER));
                 return brevmaler;
@@ -247,22 +243,6 @@ public class BrevbestillingService {
             default:
                 throw new FunksjonellException("Rollen " + rolle + " kan ikke sende brev gjennom brevmenyen");
         }
-    }
-
-    // Denne kan slettes når melosys.behandle_alle_saker fjernes. Burde MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD endre navn også?
-    private boolean skalKunneSendeMeldingForventetSaksbehanlingstidSoknad(Sakstemaer sakstema, Behandlingstyper behandlingstype) {
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            return sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG && behandlingstype == Behandlingstyper.FØRSTEGANG;
-        }
-        return behandlingstype == Behandlingstyper.SOEKNAD;
-    }
-
-    // Denne kan slettes når melosys.behandle_alle_saker fjernes. Burde MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE fjernes også?
-    private boolean skalKunneSendeMeldingForventetSaksbehanlingstidKlage(Behandlingstyper behandlingstype) {
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            return false;
-        }
-        return behandlingstype == Behandlingstyper.KLAGE;
     }
 
     @Transactional

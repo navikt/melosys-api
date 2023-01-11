@@ -56,52 +56,8 @@ class JournalfoeringIT(
         oAuthMockServer.stop()
     }
 
-
     @Test
     fun journalførOgOpprettSak_EU_EOS_prosesserKjørerAlleSteg() {
-        val journalfoeringOpprettDto = defaultJournalføringDto().apply {
-            fagsak.sakstype = Sakstyper.EU_EOS.kode
-            fagsak.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode
-            behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
-            behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
-        }
-
-
-        val journalføringProsess = journalførOgVentTilProsesserErFerdige(
-            journalfoeringOpprettDto,
-            waitFor = ProsessType.JFR_NY_SAK_BRUKER,
-            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
-        )
-
-
-        val behandling = journalføringProsess.behandling
-        behandling.apply {
-            status.shouldBe(Behandlingsstatus.OPPRETTET)
-            type.shouldBe(Behandlingstyper.SOEKNAD)
-            tema.shouldBe(Behandlingstema.UTSENDT_ARBEIDSTAKER)
-        }
-        behandling.fagsak.apply {
-            type.shouldBe(Sakstyper.EU_EOS)
-            status.shouldBe(Saksstatuser.OPPRETTET)
-            registrertAv.shouldBe(Fagsystem.MELOSYS.toString())
-            tema.shouldBe(Sakstemaer.MEDLEMSKAP_LOVVALG)
-        }
-        behandling.mottatteOpplysninger.mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
-            .shouldBeEqualToComparingFields(Soeknad().apply {
-                soeknadsland.apply {
-                    landkoder = listOf(Landkoder.IE.kode)
-                    erUkjenteEllerAlleEosLand = false
-                }
-                periode = Periode(
-                    periodeFOM,
-                    periodeTOM
-                )
-            }, FieldsEqualityCheckConfig(ignorePrivateFields = false))
-    }
-
-    @Test
-    fun journalførOgOpprettSakMedToggleBehandleAlleSaker_EU_EOS_prosesserKjørerAlleSteg() {
-        unleash.enable("melosys.behandle_alle_saker")
         val journalfoeringOpprettDto = defaultJournalføringDto().apply {
             fagsak.sakstype = Sakstyper.EU_EOS.kode
             fagsak.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode
@@ -144,8 +100,6 @@ class JournalfoeringIT(
 
     @Test
     fun journalførOgOpprettAndregangsBehandling_replikerBehandling_replikerBehandlingProsessStegBlirKjørt() {
-        unleash.enable("melosys.behandle_alle_saker")
-
         val journalfoeringOpprettDto = defaultJournalføringDto().apply {
             fagsak.sakstype = Sakstyper.EU_EOS.kode
             fagsak.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode
@@ -201,7 +155,6 @@ class JournalfoeringIT(
 
     @Test
     fun journalførOgOpprettAndregangsBehandling_fraAvslåttFlyt_flytMedPeriodeOgLand() {
-        unleash.enable("melosys.behandle_alle_saker")
         unleash.enable("melosys.tom_periode_og_land")
 
         val journalfoeringOpprettDto = defaultJournalføringDto().apply {
@@ -259,7 +212,6 @@ class JournalfoeringIT(
 
     @Test
     fun journalførOgOpprettAndregangsBehandling_fraTomflyt_flytMedPeriodeOgLand() {
-        unleash.enable("melosys.behandle_alle_saker")
         unleash.enable("melosys.tom_periode_og_land")
 
         val journalfoeringOpprettDto = defaultJournalføringDto().apply {

@@ -4,6 +4,14 @@
     <appender name="stdout_json" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <fieldNames><version>[ignore]</version></fieldNames>
+            <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                <maxDepthPerThrowable>30</maxDepthPerThrowable>
+                <exclude>java\.util\.concurrent\..*</exclude>
+                <exclude>org\.apache\.tomcat\..*</exclude>
+                <exclude>org\.apache\.coyote\..*</exclude>
+                <exclude>org\.apache\.catalina\..*</exclude>
+                <exclude>org\.springframework\.web\..*</exclude>
+            </throwableConverter>
         </encoder>
     </appender>
 
@@ -19,4 +27,8 @@
     <logger name="no.nav.melosys.frontendlogg" level="WARN"/>
     <logger name="no.nav.melosys.sikkerhet.abac" level="WARN"/>
     <logger name="no.nav.security.token.support" level="WARN"/>
+
+    <!-- Disse logger ~30.000 warnings i måneden -->
+    <logger name="org.apache.cxf.ws.addressing.soap.MAPCodec" level="ERROR"/>
+    <logger name="org.apache.cxf.ws.addressing.ContextUtils" level="ERROR"/>
 </included>

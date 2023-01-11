@@ -7,7 +7,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
@@ -102,14 +101,10 @@ class FagsakTjenesteTest {
     private MockMvc mockMvc;
     @Autowired
     private ObjectMapper objectMapper;
-    @MockBean
-    private Unleash unleash;
     private EasyRandom random;
 
     @BeforeEach
     void setUp() {
-        when(unleash.isEnabled("melosys.behandle_alle_saker")).thenReturn(true);
-
         random = new EasyRandom(new EasyRandomParameters()
             .overrideDefaultInitialization(true)
             .collectionSizeRange(1, 4)
@@ -146,7 +141,7 @@ class FagsakTjenesteTest {
                 .content(objectMapper.writeValueAsString(opprettSakDto)))
             .andExpect(status().isNoContent());
         verify(aksesskontroll).autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
-        verify(opprettSak).opprettNySakOgBehandlingFraOppgave(any(OpprettSakDto.class));
+        verify(opprettSak).opprettNySakOgBehandling(any(OpprettSakDto.class));
     }
 
     @Test
@@ -162,7 +157,6 @@ class FagsakTjenesteTest {
 
     @Test
     void lagNyBehandling() throws Exception {
-        when(unleash.isEnabled("melosys.ny_opprett_sak")).thenReturn(true);
         Fagsak fagsak = SaksbehandlingDataFactory.lagFagsak("MEL-1");
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
@@ -171,7 +165,7 @@ class FagsakTjenesteTest {
         fagsak.setBehandlinger(Collections.singletonList(behandling));
         var opprettSakDto = new OpprettSakDto();
         opprettSakDto.setBrukerID(FNR);
-        opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_ETT_LAND_ØVRIG);
+        opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY);
         opprettSakDto.setBehandlingstype(Behandlingstyper.NY_VURDERING);
 
         mockMvc.perform(post(BASE_URL + "/{saksnr}/behandlinger", fagsak.getSaksnummer())
@@ -179,16 +173,6 @@ class FagsakTjenesteTest {
                 .content(objectMapper.writeValueAsString(opprettSakDto)))
             .andExpect(status().isNoContent());
         verify(aksesskontroll).autoriserFolkeregisterIdent(opprettSakDto.getBrukerID());
-    }
-
-    @Test
-    void lagNyBehandling_toggleAv_kasterFeil() throws Exception {
-        when(unleash.isEnabled("melosys.ny_opprett_sak")).thenReturn(false);
-
-        mockMvc.perform(post(BASE_URL + "/{saksnr}/behandlinger", "MEL-1")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(new OpprettSakDto())))
-            .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -230,35 +214,6 @@ class FagsakTjenesteTest {
             .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.tom", equalTo("2019-02-01")))
             .andExpect(jsonPath("$[0].behandlingOversikter[0].lovvalgsperiode.fom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.getFom().toString())))
             .andExpect(jsonPath("$[0].behandlingOversikter[0].lovvalgsperiode.tom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.getTom().toString())));
-    }
-
-    @Test
-    void hentFagsaker_medSedDokument_unleashFalse_verifiserMappetKorrektMedGammelLogikk() throws Exception {
-        when(unleash.isEnabled("melosys.behandle_alle_saker")).thenReturn(false);
-        LocalDate sedDokumentFom = LocalDate.of(2022, 1, 1);
-        LocalDate sedDokumentTom = LocalDate.of(2022, 2, 1);
-        mockNorskSedDokumentMedPeriode(123L, sedDokumentFom, sedDokumentTom);
-
-        Fagsak fagsak = SaksbehandlingDataFactory.lagFagsak("MEL-1");
-        var behandling = new Behandling();
-        behandling.setFagsak(fagsak);
-        behandling.setId(123L);
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
-        mockFagsakTjeneste(fagsak);
-        var fagsakSokDto = new FagsakSokDto(FNR, null, null);
-
-
-        mockMvc.perform(post(BASE_URL + "/sok")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(fagsakSokDto)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.BRUKER.toString())))
-            .andExpect(jsonPath("$[0].saksnummer", equalTo("MEL-1")))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].land.landkoder[0]", equalTo("NO")))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.fom", equalTo("2022-01-01")))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.tom", equalTo("2022-02-01")));
-
-        verify(saksopplysningerService).finnSedOpplysninger(123L);
     }
 
     @Test
@@ -338,18 +293,6 @@ class FagsakTjenesteTest {
                 .content(objectMapper.writeValueAsString(fagsakSokDto)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.length()", equalTo(0)));
-    }
-
-    @Test
-    void revurderSisteBehandling() throws Exception {
-        when(fagsakService.opprettNyVurderingBehandling("123")).thenReturn(1L);
-
-        mockMvc.perform(post(BASE_URL + "/{saksnr}/revurder", "123")
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.behandlingID", equalTo(1)));
-
-        verify(aksesskontroll).autoriserSakstilgang("123");
     }
 
     @Test

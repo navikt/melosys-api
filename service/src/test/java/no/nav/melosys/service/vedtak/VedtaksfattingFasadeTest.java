@@ -1,6 +1,5 @@
 package no.nav.melosys.service.vedtak;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
@@ -51,11 +50,10 @@ class VedtaksfattingFasadeTest {
     private VedtaksfattingFasade vedtaksfattingFasade;
 
     private Behandling behandling;
-    private final FakeUnleash unleash = new FakeUnleash();
 
     @BeforeEach
     void init() {
-        vedtaksfattingFasade = new VedtaksfattingFasade(mockBehandlingService, mockEosVedtakService, mockFtrlVedtakService, trygdeavtaleVedtakService, unleash);
+        vedtaksfattingFasade = new VedtaksfattingFasade(mockBehandlingService, mockEosVedtakService, mockFtrlVedtakService, trygdeavtaleVedtakService);
         behandling = lagBehandling();
 
         SpringSubjectHandler.set(new TestSubjectHandler());
@@ -154,12 +152,16 @@ class VedtaksfattingFasadeTest {
         Behandling behandling = new Behandling();
         behandling.setId(behandlingID);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(behandlingID);
         behandlingsresultat.setBehandling(behandling);
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
+        behandling.setFagsak(fagsak);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);

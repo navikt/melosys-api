@@ -600,7 +600,7 @@ class DokgenMalMapperTest {
         Avslagbrev avslagbrev = (Avslagbrev) dokgenMalMapper.mapBehandling(brevbestilling, lagMottaker(BRUKER));
 
         assertThat(avslagbrev.getMottaker().type()).isEqualTo(BRUKER.getKode());
-        assertThat(avslagbrev.getBehandlingstype()).isEqualTo(Behandlingstyper.SOEKNAD.getKode());
+        assertThat(avslagbrev.getBehandlingstype()).isEqualTo(Behandlingstyper.FØRSTEGANG.getKode());
         assertThat(avslagbrev.getMangelbrevDatoer()).containsExactly(
             datoOktober,
             datoDesember);

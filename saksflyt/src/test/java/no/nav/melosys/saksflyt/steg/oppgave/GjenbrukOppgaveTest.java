@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.oppgave;
 
 import java.time.LocalDate;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -40,14 +39,11 @@ class GjenbrukOppgaveTest {
     @Captor
     private ArgumentCaptor<Oppgave> oppgaveCaptor;
 
-    private final FakeUnleash unleash = new FakeUnleash();
-
     private GjenbrukOppgave gjenbrukOppgave;
 
     @BeforeEach
     public void setUp() {
-        gjenbrukOppgave = new GjenbrukOppgave(oppgaveService, unleash);
-        unleash.enableAll();
+        gjenbrukOppgave = new GjenbrukOppgave(oppgaveService);
     }
 
     @Test
@@ -100,28 +96,6 @@ class GjenbrukOppgaveTest {
             .hasFieldOrPropertyWithValue("orgnr", "999999999");
     }
 
-    @Test
-    void gjenbrukOppgave_utfør_oppdatererOppgave_toggle() {
-        unleash.disableAll();
-        final String oppgaveID = "1234";
-        final String saksnummer = "MEL-123";
-        final String oppgaveBeskrivelse = "jeg beskriver oppgave";
-
-        Oppgave eksisterendeOppgave = new Oppgave.Builder().setBeskrivelse(oppgaveBeskrivelse).build();
-        when(oppgaveService.hentOppgaveMedOppgaveID(oppgaveID)).thenReturn(eksisterendeOppgave);
-
-        gjenbrukOppgave.utfør(lagProsessinstans(oppgaveID, saksnummer, false));
-        verify(oppgaveService).opprettOppgave(oppgaveCaptor.capture());
-        assertThat(oppgaveCaptor.getValue())
-            .hasFieldOrPropertyWithValue("saksnummer", saksnummer)
-            .hasFieldOrPropertyWithValue("behandlesAvApplikasjon", Fagsystem.MELOSYS)
-            .hasFieldOrPropertyWithValue("oppgavetype", Oppgavetyper.BEH_SAK_MK)
-            .hasFieldOrPropertyWithValue("behandlingstema", OppgaveBehandlingstema.EU_EOS_LAND.getKode())
-            .hasFieldOrPropertyWithValue("behandlingstype", "ae0034")
-            .hasFieldOrPropertyWithValue("tilordnetRessurs", "Deg321")
-            .hasFieldOrPropertyWithValue("aktørId", "123321");
-    }
-
     private static Prosessinstans lagProsessinstans(String oppgaveID, String saksnummer, Boolean erForVirksomhet) {
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer(saksnummer);
@@ -143,7 +117,7 @@ class GjenbrukOppgaveTest {
 
         Behandling behandling = new Behandling();
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setFagsak(fagsak);
 
         prosessinstans.setBehandling(behandling);

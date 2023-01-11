@@ -30,7 +30,7 @@ public final class UtpekingAnnetLandMapper implements BrevDataMapper {
                                 MelosysNAVFelles navFelles,
                                 Behandling behandling,
                                 Behandlingsresultat resultat,
-                                BrevData brevData, boolean enableBehandleAlleSaker) throws JAXBException, SAXException {
+                                BrevData brevData) throws JAXBException, SAXException {
         Fag fag = mapFag((BrevDataUtpekingAnnetLand)brevData);
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);
         return JaxbHelper.marshalAndValidate(brevdataTypeJAXBElement, XSD_LOCATION);

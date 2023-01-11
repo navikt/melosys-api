@@ -28,14 +28,12 @@ public abstract class DokgenDto {
 
     private final String saksbehandlerNavn;
     private Mottaker mottaker;
-    private final boolean toggleEnabled;
 
     protected DokgenDto(DokgenBrevbestilling brevbestilling, Aktoersroller mottakerType, Saksinfo saksinfo) {
         this.saksinfo = saksinfo;
         this.dagensDato = Instant.now();
         this.saksbehandlerNavn = brevbestilling.getSaksbehandlerNavn();
         this.mottaker = mapMottaker(brevbestilling, mottakerType);
-        this.toggleEnabled = brevbestilling.isToggleEnabled();
     }
 
     protected DokgenDto(DokgenBrevbestilling brevbestilling, Aktoersroller mottakerType) {
@@ -64,9 +62,5 @@ public abstract class DokgenDto {
 
     protected LocalDate instantTilLocalDate(Instant datoOgTid) {
         return datoOgTid != null ? LocalDate.ofInstant(datoOgTid, ZoneId.systemDefault()) : null;
-    }
-
-    public boolean isToggleEnabled() {
-        return toggleEnabled;
     }
 }

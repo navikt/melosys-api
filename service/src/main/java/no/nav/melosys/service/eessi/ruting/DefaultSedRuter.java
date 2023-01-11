@@ -1,6 +1,7 @@
 package no.nav.melosys.service.eessi.ruting;
 
 import java.util.Optional;
+import java.util.Set;
 
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
@@ -31,17 +32,14 @@ public class DefaultSedRuter implements SedRuter {
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
     private final OppgaveService oppgaveService;
-    private final Unleash unleash;
 
     public DefaultSedRuter(ProsessinstansService prosessinstansService, FagsakService fagsakService,
                            BehandlingService behandlingService,
-                           OppgaveService oppgaveService,
-                           Unleash unleash) {
+                           OppgaveService oppgaveService) {
         this.prosessinstansService = prosessinstansService;
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.oppgaveService = oppgaveService;
-        this.unleash = unleash;
     }
 
     @Override
@@ -54,18 +52,21 @@ public class DefaultSedRuter implements SedRuter {
             log.info("Oppretter oppgave sed {} i rinasak {}", eessiMelding.getSedId(), eessiMelding.getRinaSaksnummer());
             oppgaveService.opprettJournalføringsoppgave(eessiMelding.getJournalpostId(), prosessinstans.hentAktørIDFraDataEllerSED());
         } else {
-            Behandling behandling = fagsak.get().hentSistAktivBehandling();
+            Behandling sistAktivBehandling = fagsak.get().hentSistAktivBehandling();
 
-            if (behandling.erAktiv()) {
-                behandlingService.endreStatus(behandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
+            if (sistAktivBehandling.erAktiv()) {
+                behandlingService.endreStatus(sistAktivBehandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
+            } else if (sedTypeSkalHaOppgave(sedType)) {
+                oppgaveService.opprettJournalføringsoppgave(eessiMelding.getJournalpostId(), prosessinstans.hentAktørIDFraDataEllerSED());
+                return;
             }
 
-            if (skalOppdatereOppgaveForSedType(sedType)) {
-                oppdaterOppgave(behandling, prosessinstans, sedType);
+            if (sedTypeSkalHaOppgave(sedType)) {
+                oppdaterEllerOpprettOppgave(sistAktivBehandling, prosessinstans, sedType);
             }
 
-            prosessinstans.setBehandling(behandling);
-            opprettJournalføringProsess(eessiMelding, behandling);
+            prosessinstans.setBehandling(sistAktivBehandling);
+            opprettJournalføringProsess(eessiMelding, sistAktivBehandling);
         }
     }
 
@@ -76,11 +77,11 @@ public class DefaultSedRuter implements SedRuter {
         );
     }
 
-    private boolean skalOppdatereOppgaveForSedType(SedType sedType) {
-        return sedType != SedType.A012 && sedType != SedType.X001 && sedType != SedType.X007;
+    private boolean sedTypeSkalHaOppgave(SedType sedType) {
+        return !Set.of(SedType.X001, SedType.X007, SedType.A012).contains(sedType);
     }
 
-    private void oppdaterOppgave(Behandling behandling, Prosessinstans prosessinstans, SedType sedType) {
+    private void oppdaterEllerOpprettOppgave(Behandling behandling, Prosessinstans prosessinstans, SedType sedType) {
         Optional<Oppgave> oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         String oppgaveID;
@@ -104,10 +105,7 @@ public class DefaultSedRuter implements SedRuter {
     }
 
     private String opprettBehandlingsoppgave(Behandling behandling, String aktørID) {
-        var oppgave = (
-            unleash.isEnabled("melosys.behandle_alle_saker")
-                ? oppgaveService.lagBehandlingsoppgave(behandling)
-                : OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()))
+        var oppgave = oppgaveService.lagBehandlingsoppgave(behandling)
             .setAktørId(aktørID)
             .setSaksnummer(behandling.getFagsak().getSaksnummer())
             .build();

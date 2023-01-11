@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Diskresjonskode;
@@ -66,8 +65,6 @@ class OppgaveServiceTest {
     @Mock
     private MottatteOpplysningerService mottatteOpplysningerService;
 
-    private final FakeUnleash unleash = new FakeUnleash();
-
     private OppgaveService oppgaveService;
 
     @Captor
@@ -89,10 +86,8 @@ class OppgaveServiceTest {
             mottatteOpplysningerService,
             persondataFasade,
             eregFasade,
-            unleash,
             utledMottaksdato);
 
-        unleash.enableAll();
         oppgave = new Oppgave.Builder()
             .setOppgavetype(Oppgavetyper.BEH_SAK_MK)
             .setTilordnetRessurs("Z998877")
@@ -355,20 +350,6 @@ class OppgaveServiceTest {
     }
 
     @Test
-    void finnÅpenBehandlingsoppgaveMedFagsaksnummer_returnererTrygdeavgiftOppgaveToggleAv_filtrererIkkeUtOppgave() {
-        unleash.disableAll();
-        when(oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(
-            new Oppgave.Builder()
-                .setTema(Tema.TRY)
-                .setOppgavetype(Oppgavetyper.VUR)
-                .build()));
-
-        var oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER);
-
-        assertThat(oppgave).isPresent();
-    }
-
-    @Test
     void opprettEllerGjenbrukBehandlingsoppgave_ingenEksisterendeOppgave_oppgaveBlirOpprettet() {
         Behandling behandling = lagBehandling();
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
@@ -401,23 +382,6 @@ class OppgaveServiceTest {
     }
 
     @Test
-    void opprettEllerGjenbrukBehandlingsoppgave_oppgaveOpprettElektroniskSøknad_oppgaveBlirOpprettetMedBeskrvielse() {
-        unleash.disableAll();
-
-        final String mottattString = "Mottatt elektronisk søknad";
-        Behandling behandling = lagBehandling();
-        behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new MottatteOpplysningerData());
-        behandling.getMottatteOpplysninger().setType(Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS);
-        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-
-        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
-
-        verify(oppgaveFasade).opprettOppgave(oppgaveCaptor.capture());
-        assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(mottattString);
-    }
-
-    @Test
     void opprettEllerGjenbrukBehandlingsoppgave_oppgaveNyVurdering_oppgaveBlirOpprettetMedBeskrivelse() {
         Behandling behandling = lagBehandling();
         behandling.setType(Behandlingstyper.NY_VURDERING);
@@ -433,24 +397,9 @@ class OppgaveServiceTest {
     }
 
     @Test
-    void opprettEllerGjenbrukBehandlingsoppgave_oppgaveNyVurdering_oppgaveBlirOpprettetMedBeskrvielse() {
-        unleash.disableAll();
-
-        final String mottattString = "Ny vurdering";
-        Behandling behandling = lagBehandling();
-        behandling.setType(Behandlingstyper.NY_VURDERING);
-        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-
-        oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(behandling, "222", "333", "Z99999");
-
-        verify(oppgaveFasade).opprettOppgave(oppgaveCaptor.capture());
-        assertThat(oppgaveCaptor.getValue().getBeskrivelse()).isEqualTo(mottattString);
-    }
-
-    @Test
     void opprettEllerGjenbrukBehandlingsoppgave_oppgaveEksistererSaksbehandlerErTilordnet_oppgaveBlirIkkeOpprettetEllerOppdatert() {
         Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer(SAKSNUMMER);
@@ -465,7 +414,7 @@ class OppgaveServiceTest {
     void opprettEllerGjenbrukBehandlingsoppgave_oppgaveEksistererTilordnetAnnenRessurs_oppdaterTilordnetRessurs() {
         final String tilordnetRessurs = "Z12332123";
         Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setSaksnummer(SAKSNUMMER);

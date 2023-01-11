@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -31,7 +30,6 @@ class FerdigstillJournalpostSedTest {
     private PersondataFasade persondataFasade;
 
     private FerdigstillJournalpostSed ferdigstillJournalpostSed;
-    private final FakeUnleash unleash = new FakeUnleash();
 
     private static final String JOURNALPOST_ID = "jp123";
     private static final String BRUKER_ID = "bruker123";
@@ -41,7 +39,7 @@ class FerdigstillJournalpostSedTest {
 
     @BeforeEach
     public void setUp() {
-        ferdigstillJournalpostSed = new FerdigstillJournalpostSed(joarkFasade, persondataFasade, unleash);
+        ferdigstillJournalpostSed = new FerdigstillJournalpostSed(joarkFasade, persondataFasade);
     }
 
     @Test
@@ -63,7 +61,6 @@ class FerdigstillJournalpostSedTest {
 
     @Test
     void utfør_oppdatererJournalpost_nårJournalpostIkkeErFerdigstilt_brukFagsakTema() {
-        unleash.enable("melosys.behandle_alle_saker");
         when(persondataFasade.hentFolkeregisterident(AKTØR_ID)).thenReturn(BRUKER_ID);
         Journalpost journalpost = new Journalpost(JOURNALPOST_ID);
         journalpost.setErFerdigstilt(false);

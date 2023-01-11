@@ -42,7 +42,6 @@ public class DokgenMalMapper {
         var brevbestillingBuilder = mottattBrevbestilling.toBuilder();
         berikBestillingMedPersondata(brevbestillingBuilder, mottattBrevbestilling.getBehandling(), aktoerMottaker);
 
-        berikBestillingMedToggleEnabled(brevbestillingBuilder);
         DokgenDto dto = lagDokgenDtoFraBestilling(brevbestillingBuilder.build());
 
         Mottaker mottaker = dto.getMottaker();
@@ -67,11 +66,6 @@ public class DokgenMalMapper {
         mottattBrevbestilling
             .medPersonDokument(dokgenMapperDatahenter.hentPersondata(behandling, mottaker))
             .medPersonMottaker(dokgenMapperDatahenter.hentPersonMottaker(mottaker));
-    }
-
-    private void berikBestillingMedToggleEnabled(DokgenBrevbestilling.Builder<?> mottatBrevbestilling) {
-        mottatBrevbestilling
-            .medToggleEnabled(unleash.isEnabled("melosys.behandle_alle_saker"));
     }
 
     private Avslagbrev hentAvslagsbrev(DokgenBrevbestilling brevbestilling) {

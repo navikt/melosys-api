@@ -42,8 +42,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.UTSENDT_ARBEIDSTAKER;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.UTSENDT_SELVSTENDIG;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.SOEKNAD;
 import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
 import static org.hamcrest.Matchers.equalTo;
 import static org.jeasy.random.FieldPredicates.*;
@@ -104,7 +104,7 @@ class BehandlingTjenesteTest {
 
     @Test
     void endreBehandling() throws Exception {
-        final var behandlingstype = SOEKNAD;
+        final var behandlingstype = FØRSTEGANG;
         final var behandlingstema = Behandlingstema.ARBEID_I_UTLANDET;
         final var behandlingsstatus = Behandlingsstatus.UNDER_BEHANDLING;
         final var behandlingsfrist = LocalDate.now();
@@ -162,26 +162,6 @@ class BehandlingTjenesteTest {
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andExpect(MockMvcResultMatchers.jsonPath("$.length()", equalTo(MULIGE_STATUSER.size())));
-    }
-
-    @Test
-    void hentMuligeBehandlingstema() throws Exception {
-        when(behandlingService.hentMuligeBehandlingstema(BEHANDLING_ID)).thenReturn(MULIGE_BEHANDLINGSTEMA);
-
-        mockMvc.perform(get(BASE_URL + "/{behandlingID}/mulige-behandlingstema", BEHANDLING_ID)
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.length()", equalTo(MULIGE_BEHANDLINGSTEMA.size())));
-    }
-
-    @Test
-    void hentMuligeTyper() throws Exception {
-        when(behandlingService.hentMuligeTyper(BEHANDLING_ID)).thenReturn(MULIGE_TYPER);
-
-        mockMvc.perform(get(BASE_URL + "/{behandlingID}/mulige-typer", BEHANDLING_ID)
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(MockMvcResultMatchers.jsonPath("$.length()", equalTo(MULIGE_TYPER.size())));
     }
 
     private Behandling opprettTomBehandlingMedId() {

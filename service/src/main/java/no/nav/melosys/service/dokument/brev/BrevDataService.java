@@ -131,8 +131,7 @@ public class BrevDataService {
         try {
             FellesType fellesType = mapFellesType(mottaker, kontaktopplysning, behandling);
             MelosysNAVFelles navFelles = mapNAVFelles(mottaker, kontaktopplysning, behandling, brevData);
-            boolean enableBehandleAlleSaker = unleash.isEnabled("melosys.behandle_alle_saker");
-            String brevXml = BrevDataMapperRuter.brevDataMapper(produserbartDokument).mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData, enableBehandleAlleSaker);
+            String brevXml = BrevDataMapperRuter.brevDataMapper(produserbartDokument).mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData);
 
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
             dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);

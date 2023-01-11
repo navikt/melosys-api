@@ -10,7 +10,6 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RegistreringsInfo;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
@@ -49,7 +48,6 @@ public class OppgaveService {
     private final MottatteOpplysningerService mottatteOpplysningerService;
     private final PersondataFasade persondataFasade;
     private final EregFasade eregFasade;
-    private final Unleash unleash;
     private final UtledMottaksdato utledMottaksdato;
 
     private static final String UKJENT = "UKJENT";
@@ -61,7 +59,7 @@ public class OppgaveService {
                           MottatteOpplysningerService mottatteOpplysningerService,
                           PersondataFasade persondataFasade,
                           EregFasade eregFasade,
-                          Unleash unleash, UtledMottaksdato utledMottaksdato) {
+                          UtledMottaksdato utledMottaksdato) {
         this.behandlingService = behandlingService;
         this.fagsakService = fagsakService;
         this.oppgaveFasade = oppgaveFasade;
@@ -69,7 +67,6 @@ public class OppgaveService {
         this.mottatteOpplysningerService = mottatteOpplysningerService;
         this.persondataFasade = persondataFasade;
         this.eregFasade = eregFasade;
-        this.unleash = unleash;
         this.utledMottaksdato = utledMottaksdato;
     }
 
@@ -131,10 +128,7 @@ public class OppgaveService {
     }
 
     private boolean filtrerUtAvgiftsoppgaver(Oppgave oppgave) {
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            return !(Tema.TRY.equals(oppgave.getTema()) && Oppgavetyper.VUR.equals(oppgave.getOppgavetype()));
-        }
-        return true;
+        return !(Tema.TRY.equals(oppgave.getTema()) && Oppgavetyper.VUR.equals(oppgave.getOppgavetype()));
     }
 
     public Oppgave hentÅpenBehandlingsoppgaveMedFagsaksnummer(String saksnummer) {
@@ -150,24 +144,16 @@ public class OppgaveService {
         return fagsakService.hentFagsak(saksnummer).hentSistAktivBehandling();
     }
 
-    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, @Nullable String journalpostID, @Nullable String aktørID, @Nullable String tilordnetRessurs, @Nullable @Deprecated String beskrivelse, @Nullable String orgnr) {
+    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, @Nullable String journalpostID, @Nullable String aktørID, @Nullable String tilordnetRessurs, @Nullable String orgnr) {
         Optional<Oppgave> eksisterendeOppgave = finnÅpenBehandlingsoppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
 
         if (eksisterendeOppgave.isEmpty()) {
-            var oppgaveToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
-            var oppgaveBuilder = (
-                oppgaveToggleEnabled
-                    ? lagBehandlingsoppgave(behandling)
-                    : OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()))
+            var oppgaveBuilder = (lagBehandlingsoppgave(behandling))
                 .setTilordnetRessurs(tilordnetRessurs)
                 .setJournalpostId(journalpostID)
                 .setAktørId(aktørID)
                 .setOrgnr(orgnr)
                 .setSaksnummer(behandling.getFagsak().getSaksnummer());
-
-            if (!oppgaveToggleEnabled) {
-                oppgaveBuilder.setBeskrivelse(beskrivelse);
-            }
 
             String oppgaveID = StringUtils.isNotEmpty(aktørID) && harBeskyttelsesbehov(behandling.getId())
                 ? oppgaveFasade.opprettSensitivOppgave(oppgaveBuilder.build())
@@ -181,30 +167,12 @@ public class OppgaveService {
         }
     }
 
-    public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, @Nullable String journalpostID, String aktørID, @Nullable String tilordnetRessurs, @Nullable String orgnr) {
-        opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, lagOppgaveBeskrivelse(behandling), orgnr);
-    }
-
     public void opprettEllerGjenbrukBehandlingsoppgave(Behandling behandling, @Nullable String journalpostID, String aktørID, @Nullable String tilordnetRessurs) {
-        opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, lagOppgaveBeskrivelse(behandling), null);
+        opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, tilordnetRessurs, null);
     }
 
     public Oppgave.Builder lagBehandlingsoppgave(Behandling behandling) {
         return OppgaveFactory.lagBehandlingsoppgave(behandling, utledMottaksdato.getMottaksdato(behandling));
-    }
-
-    /**
-     * @deprecated Forsvinner med toggle melosys.behandle_alle_saker
-     */
-    @Deprecated
-    private String lagOppgaveBeskrivelse(Behandling behandling) {
-        if (behandling.erElektroniskSøknad()) {
-            return "Mottatt elektronisk søknad";
-        }
-        if (behandling.erNyVurdering()) {
-            return "Ny vurdering";
-        }
-        return null;
     }
 
     public void opprettJournalføringsoppgave(String journalpostID, String aktørID) {
@@ -213,6 +181,7 @@ public class OppgaveService {
     }
 
     public String opprettOppgave(Oppgave oppgave) {
+        log.info("Starter med å opprette oppgave med journalpostId {}", oppgave.getJournalpostId());
         return oppgaveFasade.opprettOppgave(oppgave);
     }
 
@@ -221,16 +190,11 @@ public class OppgaveService {
     }
 
     public void oppdaterOppgave(String oppgaveID, Behandling behandling) {
-        Oppgave behandlingsoppgave = (
-            unleash.isEnabled("melosys.behandle_alle_saker")
-                ? lagBehandlingsoppgave(behandling)
-                : OppgaveFactory.lagBehandlingsOppgaveForType(behandling.getTema(), behandling.getType()))
-            .build();
+        Oppgave behandlingsoppgave = lagBehandlingsoppgave(behandling).build();
         oppdaterOppgave(
             oppgaveID,
             OppgaveOppdatering.builder()
                 .behandlingstema(behandlingsoppgave.getBehandlingstema())
-                .behandlingstype(unleash.isEnabled("melosys.behandle_alle_saker") ? null : behandlingsoppgave.getBehandlingstype())
                 .tema(behandlingsoppgave.getTema())
                 .oppgavetype(behandlingsoppgave.getOppgavetype())
                 .fristFerdigstillelse(Behandling.utledBehandlingsfrist(behandling, utledMottaksdato.getMottaksdato(behandling)))
@@ -256,9 +220,8 @@ public class OppgaveService {
         Behandling behandling = fagsak.hentSistAktivBehandling();
         Optional<Oppgave> oppgave = finnSisteAvsluttetBehandlingsoppgaveMedFagsaksnummer(saksnummer);
         String tilordnetRessurs = oppgave.map(Oppgave::getTilordnetRessurs).orElse(null);
-        String beskrivelse = oppgave.map(Oppgave::getBeskrivelse).orElse(null);
 
-        opprettEllerGjenbrukBehandlingsoppgave(behandling, behandling.getInitierendeJournalpostId(), fagsak.hentBrukersAktørID(), tilordnetRessurs, beskrivelse, null);
+        opprettEllerGjenbrukBehandlingsoppgave(behandling, behandling.getInitierendeJournalpostId(), fagsak.hentBrukersAktørID(), tilordnetRessurs, null);
     }
 
     public boolean saksbehandlerErTilordnetOppgaveForSaksnummer(String saksbehandler, String saksnummer) {
@@ -354,41 +317,22 @@ public class OppgaveService {
             return behOppgaveDto;
         }
 
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            Optional<SedDokument> sedopplysninger = saksopplysningerService.finnSedOpplysninger(behandling.getId());
-            if (sedopplysninger.isPresent()) {
-                SedDokument sedDokument = sedopplysninger.get();
-                behOppgaveDto.setLand(SoeknadslandDto.av(sedDokument.getLovvalgslandKode()));
-                behOppgaveDto.setPeriode(new PeriodeDto(
-                    sedDokument.getLovvalgsperiode().getFom(),
-                    sedDokument.getLovvalgsperiode().getTom()));
-                return behOppgaveDto;
-            }
+        Optional<SedDokument> sedopplysninger = saksopplysningerService.finnSedOpplysninger(behandling.getId());
+        if (sedopplysninger.isPresent()) {
+            SedDokument sedDokument = sedopplysninger.get();
+            behOppgaveDto.setLand(SoeknadslandDto.av(sedDokument.getLovvalgslandKode()));
+            behOppgaveDto.setPeriode(new PeriodeDto(
+                sedDokument.getLovvalgsperiode().getFom(),
+                sedDokument.getLovvalgsperiode().getTom()));
+            return behOppgaveDto;
+        }
 
-            Optional<MottatteOpplysninger> mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.getId());
-            if (mottatteOpplysninger.isPresent()) {
-                Soeknad søknadDokument = (Soeknad) mottatteOpplysninger.get().getMottatteOpplysningerData();
-                Soeknadsland søknadsland = hentSøknadsland(søknadDokument);
-                behOppgaveDto.setLand(SoeknadslandDto.av(søknadsland));
-                behOppgaveDto.setPeriode(mapPeriode(søknadDokument));
-            }
-        } else {
-            if (behandling.erBehandlingAvSøknadGammel()) {
-                Soeknad søknadDokument = (Soeknad) mottatteOpplysningerService
-                    .hentMottatteOpplysninger(behandling.getId()).getMottatteOpplysningerData();
-                Soeknadsland søknadsland = hentSøknadsland(søknadDokument);
-                behOppgaveDto.setLand(SoeknadslandDto.av(søknadsland));
-                behOppgaveDto.setPeriode(mapPeriode(søknadDokument));
-            } else {
-                saksopplysningerService.finnSedOpplysninger(behandling.getId()).ifPresent(
-                    sedDokument -> {
-                        Landkoder lovvalgslandKode = sedDokument.getLovvalgslandKode();
-                        behOppgaveDto.setLand(SoeknadslandDto.av(lovvalgslandKode));
-                        behOppgaveDto.setPeriode(new PeriodeDto(
-                            sedDokument.getLovvalgsperiode().getFom(), sedDokument.getLovvalgsperiode().getTom())
-                        );
-                    });
-            }
+        Optional<MottatteOpplysninger> mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.getId());
+        if (mottatteOpplysninger.isPresent()) {
+            Soeknad søknadDokument = (Soeknad) mottatteOpplysninger.get().getMottatteOpplysningerData();
+            Soeknadsland søknadsland = hentSøknadsland(søknadDokument);
+            behOppgaveDto.setLand(SoeknadslandDto.av(søknadsland));
+            behOppgaveDto.setPeriode(mapPeriode(søknadDokument));
         }
 
         return behOppgaveDto;

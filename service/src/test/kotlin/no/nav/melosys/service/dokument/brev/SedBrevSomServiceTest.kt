@@ -7,7 +7,6 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
-import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Tema
@@ -40,8 +39,6 @@ class SedSomBrevServiceTest {
     @MockK
     lateinit var utenlandskMyndighetServiceMock: UtenlandskMyndighetService
 
-    val unleash = FakeUnleash()
-
     lateinit var sedSomBrevService: SedSomBrevService
 
     @BeforeEach
@@ -50,14 +47,12 @@ class SedSomBrevServiceTest {
             eessiServiceMock,
             joarkFasadeMock,
             persondataFasadeMock,
-            utenlandskMyndighetServiceMock,
-            unleash
+            utenlandskMyndighetServiceMock
         )
     }
 
     @Test
     fun lagJournalpostForSendingAvSedSomBrevTest() {
-        unleash.enable("melosys.behandle_alle_saker")
         val fagsak: Fagsak = mockk<Fagsak>()
         val behandling = Behandling()
         behandling.id = 123

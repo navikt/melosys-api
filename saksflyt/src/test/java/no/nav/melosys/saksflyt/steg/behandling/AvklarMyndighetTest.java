@@ -67,7 +67,7 @@ class AvklarMyndighetTest {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setFagsak(fagsak);
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         Soeknad søknadDokument = new Soeknad();
         søknadDokument.soeknadsland.landkoder.add("BE");
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();

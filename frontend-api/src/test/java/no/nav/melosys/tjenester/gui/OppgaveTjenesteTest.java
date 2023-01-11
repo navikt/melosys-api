@@ -65,7 +65,7 @@ class OppgaveTjenesteTest {
         PlukkOppgaveInnDto innData = new PlukkOppgaveInnDto(null, null, Behandlingstema.UTSENDT_ARBEIDSTAKER);
 
         Behandling behandling = new Behandling();
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setId(1L);
 

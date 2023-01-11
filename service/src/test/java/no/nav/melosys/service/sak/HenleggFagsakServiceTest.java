@@ -100,7 +100,7 @@ class HenleggFagsakServiceTest {
     void henleggFagsak_avslutterKunBehandling_nårBehandlingTypeIkkeErNyVurdering() {
         when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
-        behandling.setType(Behandlingstyper.SOEKNAD);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
 
         henleggFagsakService.henleggFagsakEllerBehandling(saksnummer, "ANNET", "- Justin Bieber");
 

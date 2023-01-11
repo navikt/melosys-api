@@ -118,7 +118,7 @@ public class AngiBehandlingsresultatService {
 
     private boolean erGyldigEndringForAVSLAG_SØKNAD(Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
         return sakstema == MEDLEMSKAP_LOVVALG &&
-            Set.of(ARBEID_ETT_LAND_ØVRIG, ARBEID_TJENESTEPERSON_ELLER_FLY, ARBEID_KUN_NORGE, YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST, UNNTAK_MEDLEMSKAP).contains(behandlingstema) &&
+            Set.of(ARBEID_TJENESTEPERSON_ELLER_FLY, ARBEID_KUN_NORGE, YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST, UNNTAK_MEDLEMSKAP).contains(behandlingstema) &&
             Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype);
     }
 
