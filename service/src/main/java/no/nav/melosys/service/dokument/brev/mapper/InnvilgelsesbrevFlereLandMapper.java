@@ -46,7 +46,7 @@ public final class InnvilgelsesbrevFlereLandMapper implements BrevDataMapper {
     private Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataInnvilgelseFlereLand brevdata) {
         Fag fag = new Fag();
 
-        fag.setBehandlingstype(BehandlingstypeKodeMapper.hentBehandlingstypeKodeAlleBehandlinger(behandling));
+        fag.setBehandlingstype(BehandlingstypeKodeMapper.hentBehandlingstypeKode(behandling));
 
         // Logikk i brev benytter antallArbeidsgivere for å aktivere tekst med arbeidsgiver eller arbeidsgiverListe
         int antallArbeidsgivere = brevdata.arbeidsgivere.size();

@@ -52,14 +52,15 @@ public class ReplikerBehandling implements StegBehandler {
         var behandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
         var behandlingstema = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class);
 
-        Optional<Behandling> behandlingBruktForReplikering = Optional.ofNullable(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak));
-        if (behandlingBruktForReplikering.isEmpty()) {
-            throw new FunksjonellException("Finner ikke behandling som kan replikeres. Denne fantes ved opprettelse av prosessen");
-        }
+        Behandling behandlingBruktForReplikering = Optional.ofNullable(
+            behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)
+        ).orElseThrow(() ->
+            new FunksjonellException("Finner ikke behandling som kan replikeres. Denne fantes ved opprettelse av prosessen")
+        );
 
-        Behandling nyBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandlingBruktForReplikering.get(), behandlingstype);
+        Behandling nyBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandlingBruktForReplikering, behandlingstype);
 
-        if (behandlingBruktForReplikering.get().erAktiv()) {
+        if (behandlingBruktForReplikering.erAktiv()) {
             throw new FunksjonellException("Støtter ikke opprettelse av ny behandling når behandling som er utgangspunkt for revurdering er aktiv");
         }
         if (behandlingstema != null) {
@@ -73,7 +74,7 @@ public class ReplikerBehandling implements StegBehandler {
         fagsakService.lagre(fagsak);
 
         log.info("Behandling {} replikert og behandling {} har blitt opprettet for {}",
-            behandlingBruktForReplikering.get().getId(), nyBehandling.getId(), saksnummer);
+            behandlingBruktForReplikering.getId(), nyBehandling.getId(), saksnummer);
     }
 
     private void settBehandlingsårsak(Behandling nyBehandling, Prosessinstans prosessinstans) {

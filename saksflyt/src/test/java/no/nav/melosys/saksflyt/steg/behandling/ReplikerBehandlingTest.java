@@ -44,8 +44,6 @@ class ReplikerBehandlingTest {
         replikerBehandling = new ReplikerBehandling(fagsakService, behandlingService, behandlingReplikeringsRegler);
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, "MelTest-1");
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD);
-        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now());
         when(fagsakService.hentFagsak("MelTest-1")).thenReturn(fagsak);
     }
 
@@ -59,6 +57,8 @@ class ReplikerBehandlingTest {
         replikertBehandling.setId(2L);
         replikertBehandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         fagsak.setBehandlinger(List.of(behandling));
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD);
+        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now());
         when(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)).thenReturn(behandling);
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
 
@@ -74,6 +74,8 @@ class ReplikerBehandlingTest {
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         Behandling replikertBehandling = new Behandling();
         replikertBehandling.setId(2L);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD);
+        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now());
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
         when(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)).thenReturn(behandling);
 
@@ -92,6 +94,8 @@ class ReplikerBehandlingTest {
         fagsak.setBehandlinger(List.of(behandling));
         Behandling replikertBehandling = new Behandling();
         replikertBehandling.setId(2L);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD);
+        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now());
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
         when(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)).thenReturn(behandling);
 
@@ -110,6 +114,8 @@ class ReplikerBehandlingTest {
         fagsak.setBehandlinger(List.of(behandling));
         Behandling replikertBehandling = new Behandling();
         replikertBehandling.setId(2L);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD);
+        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now());
         when(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)).thenReturn(null);
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -127,7 +133,7 @@ class ReplikerBehandlingTest {
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
         when(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)).thenReturn(behandling);
 
-        prosessinstans.removeData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE);
+        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> replikerBehandling.utfør(prosessinstans))
@@ -144,7 +150,7 @@ class ReplikerBehandlingTest {
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
         when(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)).thenReturn(behandling);
 
-        prosessinstans.removeData(ProsessDataKey.MOTTATT_DATO);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD);
 
 
         assertThatExceptionOfType(FunksjonellException.class)

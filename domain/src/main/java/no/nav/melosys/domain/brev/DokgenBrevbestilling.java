@@ -44,11 +44,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private Persondata personMottaker;
     private List<SaksvedleggBestilling> saksvedleggBestilling;
     private Distribusjonstype distribusjonstype;
-    /**
-     * @deprecated Å bare sende en boolean funker dårlig for oversikt i opprydding. Må gjøres på en annen måte
-     */
-    @Deprecated
-    private boolean toggleEnabled;
     private List<FritekstvedleggBestilling> fritekstvedleggBestilling;
 
     public DokgenBrevbestilling() {
@@ -74,7 +69,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
         this.personMottaker = builder.personMottaker;
         this.saksvedleggBestilling = builder.saksvedleggBestilling;
         this.distribusjonstype = builder.distribusjonstype;
-        this.toggleEnabled = builder.toggleEnabled;
         this.fritekstvedleggBestilling = builder.fritekstvedleggBestilling;
     }
 
@@ -146,10 +140,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return distribusjonstype;
     }
 
-    public boolean isToggleEnabled() {
-        return toggleEnabled;
-    }
-
     public Builder toBuilder() {
         return new Builder(this);
     }
@@ -174,7 +164,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private Persondata personMottaker;
         private List<SaksvedleggBestilling> saksvedleggBestilling;
         private Distribusjonstype distribusjonstype;
-        private boolean toggleEnabled;
         private List<FritekstvedleggBestilling> fritekstvedleggBestilling;
 
 
@@ -201,7 +190,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
             this.personMottaker = brevbestilling.personMottaker;
             this.saksvedleggBestilling = brevbestilling.saksvedleggBestilling;
             this.distribusjonstype = brevbestilling.distribusjonstype;
-            this.toggleEnabled = brevbestilling.toggleEnabled;
             this.fritekstvedleggBestilling = brevbestilling.fritekstvedleggBestilling;
         }
 
@@ -304,15 +292,6 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
         public T medDistribusjonstype(Distribusjonstype distribusjonstype) {
             this.distribusjonstype = distribusjonstype;
-            return (T) this;
-        }
-
-        /**
-         * @deprecated Å bare sende en boolean funker dårlig for oversikt under opprydding av toggle. Må gjøres på en annen måte
-         */
-        @Deprecated
-        public T medToggleEnabled(boolean toggleEnabled) {
-            this.toggleEnabled = toggleEnabled;
             return (T) this;
         }
 

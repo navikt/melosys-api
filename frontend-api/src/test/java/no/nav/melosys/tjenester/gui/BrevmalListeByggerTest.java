@@ -170,36 +170,6 @@ class BrevmalListeByggerTest {
     }
 
     @Test
-    @Disabled("Feiler pga deprecated skalKunneSendeMeldingForventetSaksbehanlingstidSoknad")
-    void byggBrevmalDtoListe_behandlingErKlage_returnererKlageMal() {
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.KLAGE));
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.KLAGE));
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
-
-
-        List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
-
-
-        assertThat(tilgjengeligeMaler).hasSize(3);
-
-        assertThat(tilgjengeligeMaler.get(0).getBrevTyper())
-            .hasSize(3)
-            .extracting(BrevmalTypeDto::getType)
-            .contains(
-                Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
-                Produserbaredokumenter.MANGELBREV_BRUKER,
-                Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER);
-
-        assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(0))
-            .extracting(
-                BrevmalTypeDto::getType,
-                BrevmalTypeDto::getFelter)
-            .containsExactly(
-                Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
-                null);
-    }
-
-    @Test
     void byggBrevmalDtoListe_brukerAdresseNull_returnererMalMedFeilmelding() {
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(null));
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(null));

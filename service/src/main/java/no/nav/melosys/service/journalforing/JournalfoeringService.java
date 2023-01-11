@@ -342,14 +342,6 @@ public class JournalfoeringService {
         }
     }
 
-    private void validerBehandlingstype(Sakstyper sakstype, Behandlingstyper behandlingstype) {
-        if (List.of(Sakstyper.EU_EOS, Sakstyper.TRYGDEAVTALE).contains(sakstype)
-            && behandlingstype != Behandlingstyper.NY_VURDERING
-        ) {
-            throw new FunksjonellException(behandlingstype + " er ikke en lovlig behandlingstype ved knytting av dokument til sak");
-        }
-    }
-
     private void fellesValidering(JournalfoeringDto journalfoeringDto) {
         if (journalfoeringDto instanceof JournalfoeringOpprettDto journalfoeringOpprettDto
             && journalfoeringOpprettDto.getFagsak() == null) {

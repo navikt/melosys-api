@@ -2,7 +2,6 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import no.nav.dok.melosysbrev.felles.melosys_felles.BehandlingstypeKode;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 
 final class BehandlingstypeKodeMapper {
 
@@ -10,7 +9,7 @@ final class BehandlingstypeKodeMapper {
         throw new IllegalStateException("Utility class");
     }
 
-    static BehandlingstypeKode hentBehandlingstypeKodeAlleBehandlinger(Behandling behandling) {
+    static BehandlingstypeKode hentBehandlingstypeKode(Behandling behandling) {
         if (behandling.erNorgeUtpekt()) {
             return BehandlingstypeKode.UTL_MYND_UTPEKT_NORGE;
         } else {

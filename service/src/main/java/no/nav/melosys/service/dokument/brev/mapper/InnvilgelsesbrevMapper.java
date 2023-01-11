@@ -65,7 +65,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
     private Fag mapFag(Behandling behandling, Behandlingsresultat resultat, BrevDataInnvilgelse brevdata) {
         Fag fag = new Fag();
 
-        fag.setBehandlingstype(BehandlingstypeKodeMapper.hentBehandlingstypeKodeAlleBehandlinger(behandling));
+        fag.setBehandlingstype(BehandlingstypeKodeMapper.hentBehandlingstypeKode(behandling));
         fag.setSakstype(SakstypeKode.valueOf(behandling.getFagsak().getType().getKode()));
 
         AvklartVirksomhet hovedvirksomhet = brevdata.hovedvirksomhet;

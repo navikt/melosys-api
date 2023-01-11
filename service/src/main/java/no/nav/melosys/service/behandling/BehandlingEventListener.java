@@ -55,7 +55,7 @@ public class BehandlingEventListener {
                 final LocalDate frist = behandlingEndretAvSaksbehandlerEvent.getBehandlingsfrist();
 
                 log.info("Oppdaterer oppgave {} med behandlingstype {}, behandlingstema {} og fristFerdigstillelse {}",
-                    value.getOppgaveId(),  behandlingEndretAvSaksbehandlerEvent.getBehandlingstype().getKode(), behandlingEndretAvSaksbehandlerEvent.getBehandlingstema().getKode(), frist
+                    value.getOppgaveId(),  behandling.getType().getKode(), behandling.getTema().getKode(), frist
                 );
 
                 oppgaveService.oppdaterOppgave(

@@ -42,7 +42,7 @@ public class MangelbrevMapper implements BrevDataMapper {
             throw new IntegrasjonException("Mangelbrev mangler informasjon om manglende opplysninger.");
         }
         Fag fag = new Fag();
-        fag.setBehandlingstype(BehandlingstypeKodeMapper.hentBehandlingstypeKodeAlleBehandlinger(behandling));
+        fag.setBehandlingstype(BehandlingstypeKodeMapper.hentBehandlingstypeKode(behandling));
         ManglendeOpplysningerType manglendeOpplysningerType = new ManglendeOpplysningerType();
         manglendeOpplysningerType.setManglendeOpplysningerFritekst(brevData.fritekst);
         try {
