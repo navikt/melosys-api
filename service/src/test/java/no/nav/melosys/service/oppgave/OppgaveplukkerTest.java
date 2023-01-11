@@ -161,54 +161,7 @@ class OppgaveplukkerTest {
         assertThat(oppgave).isNotPresent();
     }
 
-    @Test
-    void plukkOppgave_1_tilbakelagt() {
-        List<Oppgave> oppgaver = new ArrayList<>();
-        oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.NORM, LocalDate.of(2018, 8, 7), SAKSNUMMER_1));
-        oppgaver.add(opprettOppgave("2", Oppgavetyper.BEH_SAK_MK, PrioritetType.NORM, LocalDate.of(2018, 8, 8), SAKSNUMMER_2));
-        oppgaver.add(opprettOppgave("3", Oppgavetyper.VUR, PrioritetType.NORM, LocalDate.of(2018, 8, 9), SAKSNUMMER_3));
-        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anyString())).thenReturn(oppgaver);
 
-        Fagsak fagsak = opprettFagsak();
-        Behandling behandling = opprettBehandling();
-        behandling.setStatus(Behandlingsstatus.OPPRETTET);
-        behandling.setFagsak(fagsak);
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
-        when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
-
-        List<OppgaveTilbakelegging> tilbakelagt = new ArrayList<>();
-        tilbakelagt.add(new OppgaveTilbakelegging());
-        when(oppgaveTilbakkeleggingRepo.findBySaksbehandlerIdAndOppgaveId(anyString(), eq("1"))).thenReturn(tilbakelagt);
-
-        Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", opprettPlukkOppgaveInnDto());
-
-        assertThat(oppgave).isPresent();
-        oppgave.ifPresent(o -> assertThat(o.getOppgaveId()).isEqualTo("2"));
-    }
-
-    @Test
-    void plukkOppgave_alle_tilbakelagt() {
-        List<Oppgave> oppgaver = new ArrayList<>();
-        oppgaver.add(opprettOppgave("1", Oppgavetyper.BEH_SAK_MK, PrioritetType.LAV, LocalDate.of(2018, 8, 7), SAKSNUMMER_1));
-        oppgaver.add(opprettOppgave("2", Oppgavetyper.BEH_SAK_MK, PrioritetType.HOY, LocalDate.of(2018, 8, 7), SAKSNUMMER_2));
-        oppgaver.add(opprettOppgave("3", Oppgavetyper.BEH_SAK_MK, PrioritetType.NORM, LocalDate.of(2018, 8, 7), SAKSNUMMER_3));
-        when(oppgaveFasade.finnUtildelteOppgaverEtterFrist(anyString())).thenReturn(oppgaver);
-
-        Fagsak fagsak = opprettFagsak();
-        Behandling behandling = opprettBehandling();
-        behandling.setStatus(Behandlingsstatus.OPPRETTET);
-        behandling.setFagsak(fagsak);
-        fagsak.setBehandlinger(Collections.singletonList(behandling));
-        when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
-
-        List<OppgaveTilbakelegging> tilbakelagt = new ArrayList<>();
-        tilbakelagt.add(new OppgaveTilbakelegging());
-        when(oppgaveTilbakkeleggingRepo.findBySaksbehandlerIdAndOppgaveId(anyString(), anyString())).thenReturn(tilbakelagt);
-
-        Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", opprettPlukkOppgaveInnDto());
-
-        assertThat(oppgave).isEmpty();
-    }
 
     @Test
     void leggTilbakeOppgave_medBegrunnelse() {

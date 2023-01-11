@@ -66,10 +66,7 @@ public class Oppgaveplukker {
                 return fagsakMatcherSøk(fagsak, plukkDto) && !venterSakPaaDokumentasjonEllerFagligAvklaring(fagsak);
             }).toList();
 
-        Optional<Oppgave> valg = filtrerteOppgaver.stream()
-            .sorted(Oppgave.LAVEST_TIL_HØYEST_PRIORITET.reversed())
-            .filter(oppgave -> !erTilbakeLagt(saksbehandlerID, oppgave.getOppgaveId()))
-            .findFirst();
+        Optional<Oppgave> valg = filtrerteOppgaver.stream().max(Oppgave.LAVEST_TIL_HØYEST_PRIORITET);
 
         if (valg.isPresent()) {
             oppdaterBehandlingsstatus(valg.get().getSaksnummer());
@@ -92,11 +89,6 @@ public class Oppgaveplukker {
             return behandling.getDokumentasjonSvarfristDato().isAfter(Instant.now());
         }
         return behandling.harStatus(Behandlingsstatus.AVVENT_FAGLIG_AVKLARING);
-    }
-
-    private boolean erTilbakeLagt(String saksbehandlerID, String oppgaveId) {
-        List<OppgaveTilbakelegging> tilbakelegging = oppgaveTilbakkeleggingRepo.findBySaksbehandlerIdAndOppgaveId(saksbehandlerID, oppgaveId);
-        return !tilbakelegging.isEmpty();
     }
 
     private void oppdaterBehandlingsstatus(String saksnummer) {
