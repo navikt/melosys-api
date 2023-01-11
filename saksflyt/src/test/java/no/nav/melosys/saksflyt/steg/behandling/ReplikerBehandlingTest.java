@@ -1,11 +1,11 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -38,11 +38,10 @@ class ReplikerBehandlingTest {
 
     private final Fagsak fagsak = new Fagsak();
     private final Prosessinstans prosessinstans = new Prosessinstans();
-    private final FakeUnleash unleash = new FakeUnleash();
 
     @BeforeEach
     public void setUp() {
-        replikerBehandling = new ReplikerBehandling(fagsakService, behandlingService, behandlingReplikeringsRegler, unleash);
+        replikerBehandling = new ReplikerBehandling(fagsakService, behandlingService, behandlingReplikeringsRegler);
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, "MelTest-1");
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.ENDRET_PERIODE);
         when(fagsakService.hentFagsak("MelTest-1")).thenReturn(fagsak);
@@ -54,9 +53,14 @@ class ReplikerBehandlingTest {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        Behandling replikertBehandling = new Behandling();
+        replikertBehandling.setId(2L);
+        replikertBehandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         fagsak.setBehandlinger(List.of(behandling));
-        when(fagsakService.hentBehandlingSomErUtgangspunktForRevurdering(fagsak)).thenReturn(Optional.empty());
-        when(behandlingService.replikerBehandlingMedNyttBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(new Behandling());
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD);
+        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now());
+        when(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)).thenReturn(behandling);
+        when(behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> replikerBehandling.utfør(prosessinstans))
@@ -70,25 +74,8 @@ class ReplikerBehandlingTest {
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         Behandling replikertBehandling = new Behandling();
         replikertBehandling.setId(2L);
-        when(fagsakService.hentBehandlingSomErUtgangspunktForRevurdering(fagsak)).thenReturn(Optional.of(behandling));
-        when(behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
-
-        replikerBehandling.utfør(prosessinstans);
-
-        verify(fagsakService).lagre(fagsak);
-        assertThat(prosessinstans.getBehandling()).isEqualTo(replikertBehandling);
-        verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE);
-    }
-
-    @Test
-    void utførMedToggleBehandleAlleSaker_finnesBehandlingSomErUtgangspunktForRevurdering_settStegOpprettOppgave() {
-        unleash.enable("melosys.behandle_alle_saker");
-
-        Behandling behandling = new Behandling();
-        behandling.setId(1L);
-        behandling.setStatus(Behandlingsstatus.AVSLUTTET);
-        Behandling replikertBehandling = new Behandling();
-        replikertBehandling.setId(2L);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD);
+        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now());
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
         when(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)).thenReturn(behandling);
 
@@ -107,26 +94,28 @@ class ReplikerBehandlingTest {
         fagsak.setBehandlinger(List.of(behandling));
         Behandling replikertBehandling = new Behandling();
         replikertBehandling.setId(2L);
-        when(fagsakService.hentBehandlingSomErUtgangspunktForRevurdering(fagsak)).thenReturn(Optional.empty());
-        when(behandlingService.replikerBehandlingMedNyttBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD);
+        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now());
+        when(behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
+        when(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)).thenReturn(behandling);
 
         replikerBehandling.utfør(prosessinstans);
 
         verify(fagsakService).lagre(fagsak);
         assertThat(prosessinstans.getBehandling()).isEqualTo(replikertBehandling);
-        verify(behandlingService).replikerBehandlingMedNyttBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE);
+        verify(behandlingService).replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE);
     }
 
     @Test
-    void utførMedToggleBehandleAlleSaker_finnesIkkeBehandlingSomErUtgangspunktForRevurdering_kasterFeil() {
-        unleash.enable("melosys.behandle_alle_saker");
-
+    void utfør_finnesIkkeBehandlingSomErUtgangspunktForRevurdering_kasterFeil() {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         fagsak.setBehandlinger(List.of(behandling));
         Behandling replikertBehandling = new Behandling();
         replikertBehandling.setId(2L);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD);
+        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now());
         when(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)).thenReturn(null);
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -135,10 +124,7 @@ class ReplikerBehandlingTest {
     }
 
     @Test
-    void utførMedToggleNyOpprettSak_behandlingsårsakErIkkeSatt_kasterFeil() {
-        unleash.enable("melosys.behandle_alle_saker");
-        unleash.enable("melosys.ny_opprett_sak");
-
+    void utfør_behandlingsårsakErIkkeSatt_kasterFeil() {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
@@ -147,8 +133,7 @@ class ReplikerBehandlingTest {
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
         when(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)).thenReturn(behandling);
 
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, null);
-
+        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> replikerBehandling.utfør(prosessinstans))
@@ -156,10 +141,7 @@ class ReplikerBehandlingTest {
     }
 
     @Test
-    void utførMedToggleNyOpprettSak_mottaksdatoErIkkeSatt_kasterFeil() {
-        unleash.enable("melosys.behandle_alle_saker");
-        unleash.enable("melosys.ny_opprett_sak");
-
+    void utfør_mottaksdatoErIkkeSatt_kasterFeil() {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
@@ -168,7 +150,7 @@ class ReplikerBehandlingTest {
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
         when(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)).thenReturn(behandling);
 
-        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, null);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD);
 
 
         assertThatExceptionOfType(FunksjonellException.class)

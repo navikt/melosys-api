@@ -58,7 +58,6 @@ public class OppfriskSaksopplysningerService {
 
     @Transactional
     public void oppfriskSaksopplysning(long behandlingID, boolean medFamilierelasjoner) {
-        var behandleAlleSakerToggleEnabled = unleash.isEnabled("melosys.behandle_alle_saker");
         var folketrygdenToggleEnabled = unleash.isEnabled("melosys.folketrygden.mvp");
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
@@ -71,9 +70,7 @@ public class OppfriskSaksopplysningerService {
         String brukerID = aktørIdOptional.map(persondataFasade::hentFolkeregisterident).orElse(null);
 
         //OK om perioden er tom. Ikke alle behandlingstema krever periode.
-        ErPeriode periode = behandleAlleSakerToggleEnabled
-            ? behandling.finnPeriode().orElse(new Periode())
-            : behandling.finnPeriodeGammel().orElse(new Periode());
+        ErPeriode periode = behandling.finnPeriode().orElse(new Periode());
 
         RegisteropplysningerRequest registeropplysningerRequest = RegisteropplysningerRequest.builder()
             .behandlingID(behandlingID)
@@ -82,7 +79,6 @@ public class OppfriskSaksopplysningerService {
                 behandling.getFagsak().getTema(),
                 behandling.getTema(),
                 behandling.getType(),
-                behandleAlleSakerToggleEnabled,
                 folketrygdenToggleEnabled))
             .fnr(brukerID)
             .fom(periode.getFom())
@@ -101,31 +97,17 @@ public class OppfriskSaksopplysningerService {
             ufmKontrollService.utførKontrollerOgRegistrerFeil(behandlingID);
         }
 
-        if (behandleAlleSakerToggleEnabled) {
-
-            if (behandling.getFagsak().erSakstypeEøs()
-                && behandling.harPeriodeOgLand()
-                && !SaksbehandlingRegler.harTomFlyt(behandling, folketrygdenToggleEnabled)
-                && behandling.kanResultereIVedtak()
-                && !inngangsvilkaarService.oppfyllervurderingEF_883_2004(behandlingID)) {
-                inngangsvilkaarService.vurderOgLagreInngangsvilkår(
-                    behandlingID,
-                    behandling.hentSøknadsLand(),
-                    behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.erUkjenteEllerAlleEosLand,
-                    periode
-                );
-            }
-        } else {
-            if (behandling.kanResultereIVedtakGammel()
-                && behandling.getFagsak().getType() == Sakstyper.EU_EOS
-                && !inngangsvilkaarService.oppfyllervurderingEF_883_2004(behandlingID)) {
-                inngangsvilkaarService.vurderOgLagreInngangsvilkår(
-                    behandlingID,
-                    behandling.finnSøknadsLandGammel(),
-                    behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.erUkjenteEllerAlleEosLand,
-                    periode
-                );
-            }
+        if (behandling.getFagsak().erSakstypeEøs()
+            && behandling.harPeriodeOgLand()
+            && !SaksbehandlingRegler.harTomFlyt(behandling, folketrygdenToggleEnabled)
+            && behandling.kanResultereIVedtak()
+            && !inngangsvilkaarService.oppfyllervurderingEF_883_2004(behandlingID)) {
+            inngangsvilkaarService.vurderOgLagreInngangsvilkår(
+                behandlingID,
+                behandling.hentSøknadsLand(),
+                behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.erUkjenteEllerAlleEosLand,
+                periode
+            );
         }
     }
 }

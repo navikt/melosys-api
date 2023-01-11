@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -11,7 +10,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.sak.FagsakService;
@@ -29,12 +27,10 @@ public class OpprettFagsakOgBehandlingFraSed implements StegBehandler {
 
     private final FagsakService fagsakService;
     private final JoarkFasade joarkFasade;
-    private final Unleash unleash;
 
-    public OpprettFagsakOgBehandlingFraSed(FagsakService fagsakService, JoarkFasade joarkFasade, Unleash unleash) {
+    public OpprettFagsakOgBehandlingFraSed(FagsakService fagsakService, JoarkFasade joarkFasade) {
         this.fagsakService = fagsakService;
         this.joarkFasade = joarkFasade;
-        this.unleash = unleash;
     }
 
     @Override
@@ -49,9 +45,6 @@ public class OpprettFagsakOgBehandlingFraSed implements StegBehandler {
         Sakstemaer sakstema = prosessinstans.getData(SAKSTEMA, Sakstemaer.class);
         Behandlingstema behandlingstema = prosessinstans.getData(BEHANDLINGSTEMA, Behandlingstema.class);
 
-        if (!unleash.isEnabled("melosys.behandle_alle_saker")) {
-            throw new TekniskException("Støtter ikke lenger disabled melosys.behandle_alle_saker");
-        }
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
             .medAktørID(prosessinstans.hentAktørIDFraDataEllerSED())
             .medSakstype(Sakstyper.EU_EOS)

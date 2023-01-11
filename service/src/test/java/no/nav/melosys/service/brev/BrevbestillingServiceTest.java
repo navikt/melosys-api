@@ -70,16 +70,14 @@ class BrevbestillingServiceTest {
     @Mock
     private DokumentNavnService mockDokumentNavnService;
 
-    private final FakeUnleash unleash = new FakeUnleash();
     private final Behandling behandling = lagBehandling();
 
     private BrevbestillingService brevbestillingService;
 
     @BeforeEach
     void init() {
-        unleash.enable("melosys.behandle_alle_saker");
         brevbestillingService = new BrevbestillingService(mockBrevmottakerService, mockDokServiceFasade, mockBehandlingService, mockEregFasade,
-            mockKontaktopplysningService, mockPersondataFasade, mockDokumentNavnService, unleash);
+            mockKontaktopplysningService, mockPersondataFasade, mockDokumentNavnService);
     }
 
     @Test

@@ -8,13 +8,10 @@ import java.util.*;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -27,18 +24,20 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.soknad.SoknadMottatt;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
@@ -75,13 +74,11 @@ class ProsessinstansServiceTest {
     private ArgumentCaptor<Prosessinstans> piCaptor;
 
     private ProsessinstansService prosessinstansService;
-    private final FakeUnleash unleash = new FakeUnleash();
 
     @BeforeEach
     public void setUp() {
         prosessinstansService = new ProsessinstansService(applicationEventPublisher,
-            prosessinstansRepo, utenlandskMyndighetService, mottatteOpplysningerService, unleash);
-        unleash.enableAll();
+            prosessinstansRepo, utenlandskMyndighetService, mottatteOpplysningerService);
     }
 
     @Test
@@ -597,11 +594,11 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    @Disabled("funker ikke så lenge melosys.behandle_alle_saker finnes")
-    void opprettProsessinstansNySakFTRLTrygdeavtaleToggleDisabled_altOk_setterProsessInstansKorrekt() {
-        unleash.disableAll();
+    void opprettProsessinstansNySakFTRL_altOk_setterProsessInstansKorrekt() {
         OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.FTRL);
+        opprettSakDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        opprettSakDto.setBehandlingstype(Behandlingstyper.FØRSTEGANG);
         opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_I_UTLANDET);
         String journalpostID = "journalpostID";
 

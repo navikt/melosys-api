@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
@@ -53,9 +52,6 @@ class OppgaveplukkerTest {
     @Mock
     private OppgaveService oppgaveService;
 
-    private FakeUnleash unleash = new FakeUnleash();
-
-
     private Oppgaveplukker oppgaveplukker;
 
     private final static long BEHANDLING_ID = 123L;
@@ -67,9 +63,7 @@ class OppgaveplukkerTest {
 
     @BeforeEach
     public void setUp() {
-        this.oppgaveplukker = new Oppgaveplukker(oppgaveFasade, oppgaveTilbakkeleggingRepo, fagsakService, behandlingService, oppgaveService, unleash);
-
-        unleash.enableAll();
+        this.oppgaveplukker = new Oppgaveplukker(oppgaveFasade, oppgaveTilbakkeleggingRepo, fagsakService, behandlingService, oppgaveService);
 
         Behandling behandling = opprettBehandling();
         Fagsak fagsak = opprettFagsak();

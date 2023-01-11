@@ -59,7 +59,7 @@ public class AnmodningUnntakMapper implements BrevDataMapper {
 
     @Override
     public String mapTilBrevXML(FellesType fellesType, MelosysNAVFelles navFelles, Behandling behandling, Behandlingsresultat resultat,
-                                BrevData brevDataFelles, boolean enableBehandleAlleSaker) throws JAXBException, SAXException {
+                                BrevData brevDataFelles) throws JAXBException, SAXException {
         BrevDataAnmodningUnntak brevdata = (BrevDataAnmodningUnntak) brevDataFelles;
         Fag fag = mapFag(behandling, resultat, brevdata);
         JAXBElement<BrevdataType> brevdataTypeJAXBElement = mapintoBrevdataType(fellesType, navFelles, fag);

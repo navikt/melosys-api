@@ -3,7 +3,9 @@ package no.nav.melosys.service.kontroll.feature.ufm.kontroll;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
 import no.nav.melosys.service.kontroll.feature.ufm.data.UfmKontrollData;
@@ -138,6 +140,23 @@ final class UfmKontroll {
     static Kontroll_begrunnelser arbeidssted(UfmKontrollData kontrollData) {
         return ArbeidsstedRegler.erArbeidsstedFraSvalbardOgJanMayen(kontrollData.sedDokument()) ?
             Kontroll_begrunnelser.ARBEIDSSTED_UTENFOR_EOS : null;
+    }
+
+    static Kontroll_begrunnelser unntakForA003(UfmKontrollData kontrollData) {
+        return !UfmRegler.lovvalgslandErNorge(kontrollData.sedDokument().getLovvalgslandKode())
+            && (harTransitiveRegler(kontrollData.mottatteOpplysningerData()) || harOvergangsregler(kontrollData.sedDokument()))
+            ? Kontroll_begrunnelser.OVERGANGSREGEL_VALGT : null;
+    }
+
+    private static boolean harTransitiveRegler(Optional<MottatteOpplysningerData> optionalMottatteOpplysningerData) {
+        return optionalMottatteOpplysningerData.isPresent()
+            && !((SedGrunnlag) optionalMottatteOpplysningerData.get()).overgangsregelbestemmelser.isEmpty();
+    }
+
+    private static boolean harOvergangsregler(SedDokument sedDokument) {
+        return sedDokument.getLovvalgBestemmelse() != null
+            && (sedDokument.getLovvalgBestemmelse().equals(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87_8)
+                || sedDokument.getLovvalgBestemmelse().equals(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A));
     }
 
     private static boolean harMottatteOpplysningerMedYtterligereInformasjon(Optional<MottatteOpplysningerData> optionalMottatteOpplysningerData) {

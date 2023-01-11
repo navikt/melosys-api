@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsaarsak;
 import no.nav.melosys.domain.Fagsak;
@@ -35,13 +34,10 @@ public class ReplikerBehandling implements StegBehandler {
     private final BehandlingService behandlingService;
     private final SaksbehandlingRegler behandlingReplikeringsRegler;
 
-    private final Unleash unleash;
-
-    public ReplikerBehandling(FagsakService fagsakService, BehandlingService behandlingService, SaksbehandlingRegler behandlingReplikeringsRegler, Unleash unleash) {
+    public ReplikerBehandling(FagsakService fagsakService, BehandlingService behandlingService, SaksbehandlingRegler behandlingReplikeringsRegler) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.behandlingReplikeringsRegler = behandlingReplikeringsRegler;
-        this.unleash = unleash;
     }
 
     @Override
@@ -56,40 +52,29 @@ public class ReplikerBehandling implements StegBehandler {
         var behandlingstype = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class);
         var behandlingstema = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class);
 
-        Behandling nyBehandling;
-        Optional<Behandling> behandlingBruktForReplikering;
+        Behandling behandlingBruktForReplikering = Optional.ofNullable(
+            behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)
+        ).orElseThrow(() ->
+            new FunksjonellException("Finner ikke behandling som kan replikeres. Denne fantes ved opprettelse av prosessen")
+        );
 
-        if (unleash.isEnabled("melosys.behandle_alle_saker")) {
-            behandlingBruktForReplikering = Optional.ofNullable(behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak));
-            if (behandlingBruktForReplikering.isEmpty()) {
-                throw new FunksjonellException("Finner ikke behandling som kan replikeres. Denne fantes ved opprettelse av prosessen");
-            }
-        } else {
-            behandlingBruktForReplikering = fagsakService.hentBehandlingSomErUtgangspunktForRevurdering(fagsak);
-        }
+        Behandling nyBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandlingBruktForReplikering, behandlingstype);
 
-        if (behandlingBruktForReplikering.isPresent()) {
-            nyBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(behandlingBruktForReplikering.get(), behandlingstype);
-        } else {
-            behandlingBruktForReplikering = Optional.of(fagsak.hentSistOppdatertBehandling());
-            nyBehandling = behandlingService.replikerBehandlingMedNyttBehandlingsresultat(behandlingBruktForReplikering.get(), behandlingstype);
-        }
-
-        if (behandlingBruktForReplikering.get().erAktiv()) {
+        if (behandlingBruktForReplikering.erAktiv()) {
             throw new FunksjonellException("Støtter ikke opprettelse av ny behandling når behandling som er utgangspunkt for revurdering er aktiv");
         }
         if (behandlingstema != null) {
             nyBehandling.setTema(behandlingstema);
         }
 
-        if (unleash.isEnabled("melosys.ny_opprett_sak")) settBehandlingsårsak(nyBehandling, prosessinstans);
+        settBehandlingsårsak(nyBehandling, prosessinstans);
 
         prosessinstans.setBehandling(nyBehandling);
 
         fagsakService.lagre(fagsak);
 
         log.info("Behandling {} replikert og behandling {} har blitt opprettet for {}",
-            behandlingBruktForReplikering.get().getId(), nyBehandling.getId(), saksnummer);
+            behandlingBruktForReplikering.getId(), nyBehandling.getId(), saksnummer);
     }
 
     private void settBehandlingsårsak(Behandling nyBehandling, Prosessinstans prosessinstans) {

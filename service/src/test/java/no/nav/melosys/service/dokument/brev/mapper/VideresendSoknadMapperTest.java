@@ -32,7 +32,7 @@ public class VideresendSoknadMapperTest {
         MelosysNAVFelles navFelles = lagNAVFelles();
 
         BrevDataVideresend brevdata = lagBrevDataVideresend();
-        String resultat = instans.mapTilBrevXML(fellesType, navFelles, new Behandling(), new Behandlingsresultat(), brevdata, false);
+        String resultat = instans.mapTilBrevXML(fellesType, navFelles, new Behandling(), new Behandlingsresultat(), brevdata);
         assertThat(resultat).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
     }
 

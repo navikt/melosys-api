@@ -3,7 +3,6 @@ package no.nav.melosys.service.oppgave;
 import java.time.LocalDate;
 import java.util.List;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
@@ -29,7 +28,6 @@ class OppgaveSoekFilterTest {
     @Mock
     private PersondataFasade persondataFasade;
 
-    private final FakeUnleash unleash = new FakeUnleash();
     private OppgaveSoekFilter oppgaveSoekFilter;
 
 
@@ -38,10 +36,7 @@ class OppgaveSoekFilterTest {
         this.oppgaveSoekFilter = new OppgaveSoekFilter(
             oppgaveFasade,
             joarkFasade,
-            persondataFasade,
-            unleash);
-
-        unleash.enableAll();
+            persondataFasade);
     }
 
     @Test

@@ -58,7 +58,6 @@ class JournalfoeringIT(
 
     @Test
     fun journalførOgOpprettSak_EU_EOS_prosesserKjørerAlleSteg() {
-        unleash.enable("melosys.behandle_alle_saker")
         val journalfoeringOpprettDto = defaultJournalføringDto().apply {
             fagsak.sakstype = Sakstyper.EU_EOS.kode
             fagsak.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode
@@ -101,8 +100,6 @@ class JournalfoeringIT(
 
     @Test
     fun journalførOgOpprettAndregangsBehandling_replikerBehandling_replikerBehandlingProsessStegBlirKjørt() {
-        unleash.enable("melosys.behandle_alle_saker")
-
         val journalfoeringOpprettDto = defaultJournalføringDto().apply {
             fagsak.sakstype = Sakstyper.EU_EOS.kode
             fagsak.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode
@@ -158,7 +155,6 @@ class JournalfoeringIT(
 
     @Test
     fun journalførOgOpprettAndregangsBehandling_fraAvslåttFlyt_flytMedPeriodeOgLand() {
-        unleash.enable("melosys.behandle_alle_saker")
         unleash.enable("melosys.tom_periode_og_land")
 
         val journalfoeringOpprettDto = defaultJournalføringDto().apply {
@@ -216,7 +212,6 @@ class JournalfoeringIT(
 
     @Test
     fun journalførOgOpprettAndregangsBehandling_fraTomflyt_flytMedPeriodeOgLand() {
-        unleash.enable("melosys.behandle_alle_saker")
         unleash.enable("melosys.tom_periode_og_land")
 
         val journalfoeringOpprettDto = defaultJournalføringDto().apply {

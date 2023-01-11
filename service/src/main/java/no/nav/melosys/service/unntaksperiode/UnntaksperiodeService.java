@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
 import no.nav.melosys.domain.ErPeriode;
@@ -37,22 +36,19 @@ public class UnntaksperiodeService {
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
     private final UnntaksperiodeKontrollService unntaksperiodeKontrollService;
-    private final Unleash unleash;
 
     public UnntaksperiodeService(BehandlingService behandlingService,
                                  BehandlingsresultatService behandlingsresultatService,
                                  LovvalgsperiodeService lovvalgsperiodeService,
                                  OppgaveService oppgaveService,
                                  ProsessinstansService prosessinstansService,
-                                 UnntaksperiodeKontrollService unntaksperiodeKontrollService,
-                                 Unleash unleash) {
+                                 UnntaksperiodeKontrollService unntaksperiodeKontrollService) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
         this.unntaksperiodeKontrollService = unntaksperiodeKontrollService;
-        this.unleash = unleash;
     }
 
     @Transactional
@@ -87,9 +83,7 @@ public class UnntaksperiodeService {
         if (endretPeriode != null) {
             return new Periode(endretPeriode.fom(), endretPeriode.tom());
         }
-        return unleash.isEnabled("melosys.behandle_alle_saker")
-            ? behandling.hentPeriode()
-            : behandling.hentPeriodeGammel();
+        return behandling.hentPeriode();
     }
 
 

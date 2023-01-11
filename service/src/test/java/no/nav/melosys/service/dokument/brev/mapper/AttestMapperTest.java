@@ -136,7 +136,7 @@ public class AttestMapperTest {
         navFelles.getMottaker().setMottakeradresse(lagNorskPostadresse());
         navFelles.setKontaktinformasjon(lagKontaktInformasjon());
 
-        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData, false);
+        String xml = mapper.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevData);
 
         assertThat(xml).isNotNull();
     }

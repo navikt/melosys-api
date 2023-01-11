@@ -67,7 +67,7 @@ class VilkaarsresultatServiceTest {
     @Test
     void registrerVilkår() {
         long behandlingID = 1L;
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        Behandlingsresultat behandlingsresultat = opprettBehandlingsresultatMedBehandling();
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
 
         VilkaarDto vilkaarDto = new VilkaarDto();
@@ -80,9 +80,7 @@ class VilkaarsresultatServiceTest {
         vilkaarsresultatService.registrerVilkår(behandlingID, Collections.singletonList(vilkaarDto));
 
 
-        verify(vilkaarsresultatRepo).deleteByBehandlingsresultatAndVilkaarNotIn(
-            behandlingsresultat, Collections.singleton(Vilkaar.FO_883_2004_INNGANGSVILKAAR)
-        );
+        verify(vilkaarsresultatRepo).deleteByBehandlingsresultatId(behandlingsresultat.getId());
         verify(vilkaarsresultatRepo).flush();
         verify(vilkaarsresultatRepo).save(any(Vilkaarsresultat.class));
     }
@@ -160,5 +158,15 @@ class VilkaarsresultatServiceTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> vilkaarsresultatService.registrerVilkår(1L, Collections.singletonList(vilkaarDto)))
             .withMessageContaining("Kan ikke endre vilkår " + Vilkaar.FO_883_2004_INNGANGSVILKAAR);
+    }
+
+    private Behandlingsresultat opprettBehandlingsresultatMedBehandling() {
+        var behandlingsresultat = new Behandlingsresultat();
+        var behandling = new Behandling();
+        var fagsak = new Fagsak();
+        behandling.setFagsak(fagsak);
+        behandlingsresultat.setBehandling(behandling);
+        behandlingsresultat.setId(1L);
+        return behandlingsresultat;
     }
 }

@@ -116,8 +116,6 @@ class SedDataByggerTest {
         lovvalgsperiode.setTom(LocalDate.now().plusMonths(2L));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2);
         when(lovvalgsperiodeService.hentTidligereLovvalgsperioder(any())).thenReturn(List.of(lovvalgsperiode));
-
-        unleash.enable("melosys.behandle_alle_saker");
     }
 
     private SedDataGrunnlagMedSoknad lagGrunnlagMedSøknad() {
@@ -548,18 +546,6 @@ class SedDataByggerTest {
         assertThat(sedData.getArbeidsgivendeVirksomheter())
             .extracting(Virksomhet::getOrgnr)
             .contains("orgnr");
-    }
-
-    @Test
-    void lag_erBehandlingAvSøknadToggleAv_søknadsperiodeBlirSatt() {
-        unleash.disable("melosys.behandle_alle_saker");
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
-        var søknad = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
-        var sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
-
-        assertThat(sedData.getSøknadsperiode())
-            .extracting(Periode::getFom, Periode::getTom)
-            .containsExactly(søknad.periode.getFom(), søknad.periode.getTom());
     }
 
     @Test
