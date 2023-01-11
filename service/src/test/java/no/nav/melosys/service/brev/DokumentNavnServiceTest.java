@@ -6,6 +6,7 @@ import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.brev.Etat;
 import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -25,8 +26,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.INNVILGELSE_YRKESAKTIV;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.TRYGDEAVTALE_GB;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1;
@@ -79,7 +80,7 @@ class DokumentNavnServiceTest {
         behandling.setId(1L);
         behandling.setType(erNyVurdering ? NY_VURDERING : FØRSTEGANG);
 
-        if (!mottaker.erUtenlandskMyndighet() && !FastMottakerMedOrgnr.SKATT.getOrgnr().equals(mottaker.getOrgnr())) {
+        if (!mottaker.erUtenlandskMyndighet() && !FastMottakerMedOrgnr.SKATTEETATEN.getOrgnr().equals(mottaker.getOrgnr())) {
             when(mockLovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
         }
 
@@ -100,7 +101,7 @@ class DokumentNavnServiceTest {
         behandling.setId(1L);
         behandling.setType(erNyVurdering ? NY_VURDERING : FØRSTEGANG);
 
-        if (!mottaker.erUtenlandskMyndighet() && !FastMottakerMedOrgnr.SKATT.getOrgnr().equals(mottaker.getOrgnr())) {
+        if (!mottaker.erUtenlandskMyndighet() && !FastMottakerMedOrgnr.SKATTEETATEN.getOrgnr().equals(mottaker.getOrgnr())) {
             when(mockLovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
         }
 
@@ -119,7 +120,7 @@ class DokumentNavnServiceTest {
         behandling.setId(123L);
         behandling.setType(erNyVurdering ? NY_VURDERING : FØRSTEGANG);
 
-        if (!mottaker.erUtenlandskMyndighet() && !FastMottakerMedOrgnr.SKATT.getOrgnr().equals(mottaker.getOrgnr())) {
+        if (!mottaker.erUtenlandskMyndighet() && !FastMottakerMedOrgnr.SKATTEETATEN.getOrgnr().equals(mottaker.getOrgnr())) {
             when(mockLovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
         }
 
@@ -136,14 +137,14 @@ class DokumentNavnServiceTest {
             Arguments.of(false, false, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap"),
             Arguments.of(true, false, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap, Attest for utsendt arbeidstaker"),
             Arguments.of(false, false, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap"),
-            Arguments.of(false, false, lagMottaker(TRYGDEMYNDIGHET, null, FastMottakerMedOrgnr.OrgNr.SKATTEETATEN_ORGNR.getOrgnr(), null), "Kopi av vedtak om medlemskap"),
+            Arguments.of(false, false, lagMottaker(TRYGDEMYNDIGHET, null, Etat.SKATTEETATEN_ORGNR.getOrgnr(), null), "Kopi av vedtak om medlemskap"),
             Arguments.of(true, false, lagMottaker(TRYGDEMYNDIGHET, null, null, "1234"), "Attest for utsendt arbeidstaker"),
 
             Arguments.of(true, true, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap, Attest for utsendt arbeidstaker - endring"),
             Arguments.of(false, true, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap - endring"),
             Arguments.of(true, true, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap, Attest for utsendt arbeidstaker - endring"),
             Arguments.of(false, true, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap - endring"),
-            Arguments.of(false, true, lagMottaker(TRYGDEMYNDIGHET, null, FastMottakerMedOrgnr.OrgNr.SKATTEETATEN_ORGNR.getOrgnr(), null), "Kopi av vedtak om medlemskap - endring"),
+            Arguments.of(false, true, lagMottaker(TRYGDEMYNDIGHET, null, Etat.SKATTEETATEN_ORGNR.getOrgnr(), null), "Kopi av vedtak om medlemskap - endring"),
             Arguments.of(true, true, lagMottaker(TRYGDEMYNDIGHET, null, null, "1234"), "Attest for utsendt arbeidstaker - endring")
         );
     }

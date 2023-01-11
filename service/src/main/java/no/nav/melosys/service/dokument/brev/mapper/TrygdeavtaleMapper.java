@@ -287,7 +287,7 @@ public class TrygdeavtaleMapper {
 
     private boolean erSkatteetaten(OrganisasjonDokument org) {
         // Skatteetaten skal ikke ha attest
-        return org != null && FastMottakerMedOrgnr.SKATT.getOrgnr().equals(org.getOrgnummer());
+        return org != null && FastMottakerMedOrgnr.SKATTEETATEN.getOrgnr().equals(org.getOrgnummer());
     }
 
     private boolean skalIkkeHaInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {

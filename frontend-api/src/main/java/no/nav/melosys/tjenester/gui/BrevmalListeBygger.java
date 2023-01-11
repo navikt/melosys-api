@@ -46,12 +46,13 @@ public class BrevmalListeBygger {
     private BrevmalDto mottakerTilBrevmalDto(long behandlingId, MottakerDto mottaker) {
         List<Produserbaredokumenter> produserbareDokumenter = brevbestillingService.hentMuligeProduserbaredokumenter(behandlingId, mottaker.getRolle());
 
-        List<BrevmalTypeDto> typer = produserbareDokumenter.stream().map(p -> switch (p) {
+        List<BrevmalTypeDto> typer = produserbareDokumenter.stream().map(dokument -> switch (dokument) {
                 case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE ->
-                    lagBrevmalTypeDtoForForventetSaksbehandlingstid(p);
-                case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevmalTypeDtoForMangelbrev(p, behandlingId);
+                    lagBrevmalTypeDtoForForventetSaksbehandlingstid(dokument);
+                case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevmalTypeDtoForMangelbrev(dokument, behandlingId);
                 case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
-                    GENERELT_FRITEKSTBREV_VIRKSOMHET, FRITEKSTBREV -> lagBrevmalTypeDtoForFritekstbrev(p, behandlingId);
+                    GENERELT_FRITEKSTBREV_VIRKSOMHET -> lagBrevmalTypeDtoForGenereltFritekstbrev(dokument, behandlingId);
+                case FRITEKSTBREV -> lagBrevmalTypeDtoForFritekstbrev(dokument, behandlingId);
                 default -> null;
             })
             .filter(Objects::nonNull)
@@ -184,7 +185,7 @@ public class BrevmalListeBygger {
         return new FeltValgDto(distribusjonstyper, FeltValgType.RADIO);
     }
 
-    private BrevmalTypeDto lagBrevmalTypeDtoForFritekstbrev(Produserbaredokumenter produserbartdokument, long behandlingId) {
+    private BrevmalTypeDto lagBrevmalTypeDtoForGenereltFritekstbrev(Produserbaredokumenter produserbartdokument, long behandlingId) {
         return new BrevmalTypeDto.Builder()
             .medType(produserbartdokument)
             .medFelter(asList(
@@ -201,6 +202,44 @@ public class BrevmalListeBygger {
                     .medValg(hentFritekstTittelValg(behandlingId))
                     .medTegnBegrensning(60)
                     .erPåkrevd()
+                    .build(),
+                new BrevmalFeltDto.Builder()
+                    .medKodeOgBeskrivelse(BrevmalFeltKode.STANDARDTEKST_KONTAKTINFORMASJON)
+                    .medFeltType(FeltType.SJEKKBOKS)
+                    .build(),
+                new BrevmalFeltDto.Builder()
+                    .medKodeOgBeskrivelse(BrevmalFeltKode.FRITEKST)
+                    .medHjelpetekst("Teksten du skriver inn her vil være hovedteksten i brevet du lager.")
+                    .medFeltType(FeltType.FRITEKST)
+                    .erPåkrevd()
+                    .build(),
+                new BrevmalFeltDto.Builder()
+                    .medKodeOgBeskrivelse(BrevmalFeltKode.VEDLEGG)
+                    .medFeltType(FeltType.VEDLEGG)
+                    .build(),
+                new BrevmalFeltDto.Builder()
+                    .medKodeOgBeskrivelse(BrevmalFeltKode.FRITEKSTVEDLEGG)
+                    .medFeltType(FeltType.FRITEKSTVEDLEGG)
+                    .build()
+            ))
+            .build();
+    }
+
+    private BrevmalTypeDto lagBrevmalTypeDtoForFritekstbrev(Produserbaredokumenter produserbartdokument, long behandlingId) {
+        return new BrevmalTypeDto.Builder()
+            .medType(produserbartdokument)
+            .medFelter(asList(
+                new BrevmalFeltDto.Builder()
+                    .medKodeOgBeskrivelse(BrevmalFeltKode.BREV_TITTEL)
+                    .medFeltType(FeltType.TEKST)
+                    .medValg(hentFritekstTittelValg(behandlingId))
+                    .medTegnBegrensning(60)
+                    .erPåkrevd()
+                    .build(),
+                new BrevmalFeltDto.Builder()
+                    .medKodeOgBeskrivelse(BrevmalFeltKode.DOKUMENTTITTEL)
+                    .medFeltType(FeltType.TEKST)
+                    .medTegnBegrensning(60)
                     .build(),
                 new BrevmalFeltDto.Builder()
                     .medKodeOgBeskrivelse(BrevmalFeltKode.STANDARDTEKST_KONTAKTINFORMASJON)

@@ -7,7 +7,10 @@ public enum FeltvalgAlternativKode {
     BEKREFTELSE_PÅ_MEDLEMSKAP("Bekreftelse på medlemskap i folketrygden"),
     HENVENDELSE_OM_MEDLEMSKAP("Svar på henvendelse om medlemskap i folketrygden"),
     FRITEKST("Fritekst"),
-    STANDARD("Standardtekst søknad/klage");
+    STANDARD("Standardtekst søknad/klage"),
+    ETAT_SKATTEETATEN("Skatteetaten"),
+    ETAT_SKATTEINNKREVER_UTLAND("Skatteinnkrever utland"),
+    ETAT_HELFO("Helfo");
 
     private final String beskrivelse;
 

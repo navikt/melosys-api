@@ -4,6 +4,7 @@ import java.util.List;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import no.nav.melosys.domain.brev.Etat;
 import no.nav.melosys.service.brev.BrevbestillingService;
 import no.nav.melosys.service.dokument.MuligeMottakereDto;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
@@ -75,6 +76,14 @@ public class BrevbestillingTjeneste {
             .medBestillersId(SubjectHandler.getInstance().getUserID())
             .build();
         brevbestillingService.produserBrev(behandlingID, brevbestillingRequest);
+    }
+
+    @GetMapping(value = "/tilgjengelige-offentlige-etater", produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Henter alle tilgjengelige offentlige etater",
+        response = Etat.class,
+        responseContainer = "List")
+    public List<Etat> hentTilgjengeligeMaler() {
+        return brevbestillingService.hentOffentligeEtater();
     }
 
     private HttpHeaders genPdfHeaders(String navn) {

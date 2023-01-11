@@ -9,9 +9,6 @@ import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsberegningsresultat;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
@@ -23,6 +20,9 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -40,7 +40,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Collections.emptyList;
-import static no.nav.melosys.domain.brev.FastMottakerMedOrgnr.SKATT;
+import static no.nav.melosys.domain.brev.FastMottakerMedOrgnr.SKATTEETATEN;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.*;
@@ -358,7 +358,7 @@ class BrevmottakerServiceTest {
             .containsExactly(
                 BRUKER,
                 List.of(ARBEIDSGIVER),
-                List.of(SKATT)
+                List.of(SKATTEETATEN)
             );
 
         verify(trygdeavgiftsberegningService).finnBeregningsresultat(anyLong());
@@ -378,7 +378,7 @@ class BrevmottakerServiceTest {
             .containsExactly(
                 BRUKER,
                 emptyList(),
-                List.of(SKATT)
+                List.of(SKATTEETATEN)
             );
 
         verify(trygdeavgiftsberegningService).finnBeregningsresultat(anyLong());
@@ -398,7 +398,7 @@ class BrevmottakerServiceTest {
             .containsExactly(
                 BRUKER,
                 List.of(BRUKER, ARBEIDSGIVER),
-                List.of(SKATT)
+                List.of(SKATTEETATEN)
             );
 
         verify(trygdeavgiftsberegningService).finnBeregningsresultat(anyLong());
@@ -419,7 +419,7 @@ class BrevmottakerServiceTest {
             .containsExactly(
                 BRUKER,
                 List.of(BRUKER),
-                List.of(SKATT)
+                List.of(SKATTEETATEN)
             );
 
         verify(trygdeavgiftsberegningService).finnBeregningsresultat(anyLong());
@@ -462,7 +462,7 @@ class BrevmottakerServiceTest {
             .containsExactly(
                 BRUKER,
                 List.of(ARBEIDSGIVER, TRYGDEMYNDIGHET),
-                List.of(SKATT)
+                List.of(SKATTEETATEN)
             );
     }
 
@@ -483,7 +483,7 @@ class BrevmottakerServiceTest {
             .containsExactly(
                 BRUKER,
                 List.of(ARBEIDSGIVER),
-                List.of(SKATT)
+                List.of(SKATTEETATEN)
             );
     }
 

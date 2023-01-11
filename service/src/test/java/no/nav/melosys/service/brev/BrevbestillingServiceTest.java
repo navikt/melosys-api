@@ -4,7 +4,6 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
@@ -343,11 +342,11 @@ class BrevbestillingServiceTest {
     void hentMuligeMottakere_fastTilSkatt_returnererSkattSomFast() {
         when(mockBehandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(mockBrevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
-            .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).medFastMottaker(FastMottakerMedOrgnr.SKATT).build());
+            .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).medFastMottaker(FastMottakerMedOrgnr.SKATTEETATEN).build());
         when(mockBrevmottakerService.avklarMottaker(MANGELBREV_BRUKER, Mottaker.av(BRUKER), behandling))
             .thenReturn(lagAktoerOrg(BRUKER, null));
-        Aktoer skatteetaten = FastMottakerMedOrgnr.av(FastMottakerMedOrgnr.SKATT).getAktør();
-        when(mockBrevmottakerService.avklarMottaker(MANGELBREV_BRUKER, FastMottakerMedOrgnr.av(FastMottakerMedOrgnr.SKATT), behandling))
+        Aktoer skatteetaten = FastMottakerMedOrgnr.av(FastMottakerMedOrgnr.SKATTEETATEN).getAktør();
+        when(mockBrevmottakerService.avklarMottaker(MANGELBREV_BRUKER, FastMottakerMedOrgnr.av(FastMottakerMedOrgnr.SKATTEETATEN), behandling))
             .thenReturn(skatteetaten);
         mockHentOrganisasjon("974761076", "Skatteetaten");
         when(mockDokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
@@ -695,7 +694,7 @@ class BrevbestillingServiceTest {
                 .medHovedMottaker(BRUKER)
                 .medKopiMottaker(ARBEIDSGIVER)
                 .medKopiMottaker(TRYGDEMYNDIGHET)
-                .medFastMottaker(FastMottakerMedOrgnr.SKATT)
+                .medFastMottaker(FastMottakerMedOrgnr.SKATTEETATEN)
                 .build());
         when(mockBrevmottakerService.avklarMottaker(eq(TRYGDEAVTALE_GB), any(), eq(behandling)))
             .thenReturn(lagAktoerOrg(BRUKER, null));
@@ -706,7 +705,7 @@ class BrevbestillingServiceTest {
         when(mockBrevmottakerService.avklarMottakere(TRYGDEAVTALE_GB, Mottaker.av(TRYGDEMYNDIGHET), behandling))
             .thenReturn(List.of(trygdemyndighet));
         Aktoer skatteetaten = lagAktoerOrg(TRYGDEMYNDIGHET, "974761076");
-        when(mockBrevmottakerService.avklarMottaker(TRYGDEAVTALE_GB, FastMottakerMedOrgnr.av(FastMottakerMedOrgnr.SKATT), behandling))
+        when(mockBrevmottakerService.avklarMottaker(TRYGDEAVTALE_GB, FastMottakerMedOrgnr.av(FastMottakerMedOrgnr.SKATTEETATEN), behandling))
             .thenReturn(skatteetaten);
         when(mockPersondataFasade.hentSammensattNavn(anyString())).thenReturn("Ola Nordmann");
         mockHentOrganisasjon("123", "Ståle Stål");

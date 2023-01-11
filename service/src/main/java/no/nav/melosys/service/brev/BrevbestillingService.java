@@ -8,10 +8,7 @@ import java.util.List;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
-import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
-import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.brev.Mottakerliste;
-import no.nav.melosys.domain.brev.Postadresse;
+import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
@@ -312,5 +309,9 @@ public class BrevbestillingService {
 
     public byte[] produserUtkast(long behandlingID, BrevbestillingRequest brevbestillingRequest) {
         return dokumentServiceFasade.produserUtkast(behandlingID, brevbestillingRequest);
+    }
+
+    public List<Etat> hentOffentligeEtater() {
+        return List.of(Etat.SKATTEETATEN_ORGNR, Etat.SKATTINNKREVER_UTLAND_ORGNR, Etat.HELFO_ORGNR);
     }
 }
