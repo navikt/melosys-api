@@ -247,7 +247,7 @@ public class DokgenService {
                 .medManglerInfoFritekst(brevbestillingRequest.getManglerFritekst())
                 .medKontaktpersonNavn(brevbestillingRequest.getKontaktpersonNavn())
                 .medBrukerSkalHaKopi(inneholderBrukerSomKopimottaker(brevbestillingRequest.getKopiMottakere()));
-            case INNVILGELSE_FOLKETRYGDLOVEN_2_8, TRYGDEAVTALE_GB, TRYGDEAVTALE_US, TRYGDEAVTALE_CAN -> new InnvilgelseBrevbestilling.Builder()
+            case INNVILGELSE_FOLKETRYGDLOVEN_2_8, TRYGDEAVTALE_GB, TRYGDEAVTALE_US, TRYGDEAVTALE_CAN, TRYGDEAVTALE_AU -> new InnvilgelseBrevbestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK)
                 .medInnledningFritekst(brevbestillingRequest.getInnledningFritekst())
                 .medBegrunnelseFritekst(brevbestillingRequest.getBegrunnelseFritekst())

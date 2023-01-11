@@ -227,7 +227,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
             }
             return fritekstTittel;
         }
-        if (List.of(TRYGDEAVTALE_GB, TRYGDEAVTALE_US, TRYGDEAVTALE_CAN).contains(brevbestilling.getProduserbartdokument())) {
+        if (List.of(TRYGDEAVTALE_GB, TRYGDEAVTALE_US, TRYGDEAVTALE_CAN, TRYGDEAVTALE_AU).contains(brevbestilling.getProduserbartdokument())) {
             return dokumentNavnService.utledDokumentNavn(behandling, dokumentproduksjonsInfo, mottaker);
         }
         return dokumentproduksjonsInfo.journalføringsTittel();
