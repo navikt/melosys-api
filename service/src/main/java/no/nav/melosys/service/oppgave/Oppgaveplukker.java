@@ -73,21 +73,47 @@ public class Oppgaveplukker {
         Map<String, Fagsak> sasksnummerFagsakMap = fagsakService.hentFagsaker(saksnumre).stream()
             .collect(Collectors.toMap(Fagsak::getSaksnummer, Function.identity()));
 
-        List<Oppgave> filtrerteOppgaver = utildelteOppgaver.stream()
-            .filter(oppgave -> {
-                String saksnummer = oppgave.getSaksnummer();
-                Fagsak fagsak = sasksnummerFagsakMap.get(saksnummer);
-                if (fagsak == null) {
-                    log.warn("Fant ikke fagsak {} for oppgave {}", saksnummer, oppgave.getOppgaveId());
-                    return false;
-                }
-                boolean venterPåDokEllerAvklaring = venterPåDokumentasjonEllerFagligAvklaring(fagsak);
-                return fagsakMatcherSøk(fagsak, plukkDto) && !venterPåDokEllerAvklaring;
-            }).toList();
+        int antallSakSomIkkeMattcherSøk = 0;
+        int antallSakSomVenter = 0;
+        List<Oppgave> filtrerteOppgaver = new ArrayList<>();
+        for (Oppgave oppgave : utildelteOppgaver) {
+            String saksnummer = oppgave.getSaksnummer();
+            Fagsak fagsak = sasksnummerFagsakMap.get(saksnummer);
+            if (fagsak == null) {
+                log.warn("Fant ikke fagsak {} for oppgave {}", saksnummer, oppgave.getOppgaveId());
+                continue;
+            }
+            boolean fagsakMatcherSøk = fagsakMatcherSøk(fagsak, plukkDto);
+            boolean venterPåDokEllerAvklaring = venterPåDokumentasjonEllerFagligAvklaring(fagsak);
+            if (!fagsakMatcherSøk) {
+                antallSakSomIkkeMattcherSøk++;
+            }
+            if (venterPåDokEllerAvklaring) {
+                antallSakSomVenter++;
+            }
+
+            if (fagsakMatcherSøk && !venterPåDokEllerAvklaring) {
+                filtrerteOppgaver.add(oppgave);
+            }
+        }
+
+        if (antallSakSomIkkeMattcherSøk > 0) {
+            log.info("Antall sak som ikke matcher søk: {} / {}", antallSakSomIkkeMattcherSøk, saksnumre.size());
+        }
+        log.info("Antall sak som venter på dokumentasjon eller avklaring: {} / {}", antallSakSomVenter, saksnumre.size());
         return filtrerteOppgaver;
     }
 
+    private boolean fagsakMatcherSøk(Fagsak fagsak, PlukkOppgaveInnDto plukkDto) {
+        return fagsak != null && fagsak.getType() == plukkDto.sakstype()
+            && fagsak.getTema() == plukkDto.sakstema()
+            && fagsak.getBehandlinger().stream().anyMatch(behandling -> behandling.getTema() == plukkDto.behandlingstema());
+    }
+
     private boolean venterPåDokumentasjonEllerFagligAvklaring(Fagsak fagsak) {
+        if (fagsak == null) {
+            return false;
+        }
         Behandling behandling = fagsak.hentSistAktivBehandling();
         if (behandling.erVenterForDokumentasjon()) {
             if (behandling.getDokumentasjonSvarfristDato() == null) {
@@ -113,12 +139,6 @@ public class Oppgaveplukker {
         return Arrays.stream(Behandlingstyper.values())
             .map(behandlingstype -> OppgaveFactory.utledBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype).getKode())
             .collect(Collectors.toSet());
-    }
-
-    private boolean fagsakMatcherSøk(Fagsak fagsak, PlukkOppgaveInnDto plukkDto) {
-        return fagsak.getType() == plukkDto.sakstype()
-            && fagsak.getTema() == plukkDto.sakstema()
-            && fagsak.getBehandlinger().stream().anyMatch(behandling -> behandling.getTema() == plukkDto.behandlingstema());
     }
 
     @Transactional
