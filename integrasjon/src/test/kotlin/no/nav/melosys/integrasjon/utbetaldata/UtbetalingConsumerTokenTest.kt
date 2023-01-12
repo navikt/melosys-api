@@ -9,9 +9,9 @@ import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.melosys.integrasjon.utbetaling.Periode
-import no.nav.melosys.integrasjon.utbetaling.UtbetalingRequest
-import no.nav.melosys.integrasjon.utbetaling.UtbetalingConsumerProducerV2
 import no.nav.melosys.integrasjon.utbetaling.UtbetaldataRestConsumer
+import no.nav.melosys.integrasjon.utbetaling.UtbetalingConsumerProducerV2
+import no.nav.melosys.integrasjon.utbetaling.UtbetalingRequest
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
@@ -48,7 +48,7 @@ class UtbetalingConsumerTokenTest(
     fun authorizationSkalKommeFraSystem() {
         verifyHeaders(
             mapOf(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
+                Pair("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--")),
                 Pair(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)),
                 Pair(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
             )
@@ -60,7 +60,7 @@ class UtbetalingConsumerTokenTest(
     fun authorizationSkalKommeFraSystemNårHverkenSystemEllerBrukerErKilde() {
         verifyHeaders(
             mapOf(
-                Pair("Authorization", WireMock.equalTo("Bearer --token-from-system--")),
+                Pair("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--")),
                 Pair(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE)),
                 Pair(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
             )
@@ -96,6 +96,13 @@ class UtbetalingConsumerTokenTest(
     override fun executeRequest() {
         val fnr = "12345678990"
         val periodeFom = Periode(LocalDate.now().minusDays(2).toString(), LocalDate.now().plusDays(2).toString())
-        utbetalingRestConsumer.hentUtbetalingsInformasjon(UtbetalingRequest(fnr, periodeFom, "UTBETALINGSPERIODE", "RETTIGHETSHAVER"))
+        utbetalingRestConsumer.hentUtbetalingsInformasjon(
+            UtbetalingRequest(
+                fnr,
+                periodeFom,
+                "UTBETALINGSPERIODE",
+                "RETTIGHETSHAVER"
+            )
+        )
     }
 }
