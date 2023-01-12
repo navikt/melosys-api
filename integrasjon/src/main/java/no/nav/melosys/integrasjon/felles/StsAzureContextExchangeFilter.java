@@ -18,5 +18,4 @@ public class StsAzureContextExchangeFilter extends GenericContextExchangeFilter 
     protected String getSystemToken() {
         return restStsClient.bearerToken();
     }
-
 }
