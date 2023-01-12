@@ -1,14 +1,13 @@
 package no.nav.melosys.saksflyt.steg.medl;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -39,6 +38,7 @@ class LagreAnmodningsperiodeIMedlTest {
 
     private Prosessinstans prosessinstans;
     private Behandlingsresultat behandlingsresultat;
+    private Behandling behandling;
     private LocalDate NOW = LocalDate.now();
 
     @BeforeEach
@@ -47,7 +47,7 @@ class LagreAnmodningsperiodeIMedlTest {
 
         prosessinstans = new Prosessinstans();
 
-        Behandling behandling = new Behandling();
+        behandling = new Behandling();
         behandling.setId(1L);
 
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(null, null, Landkoder.CH,
@@ -86,6 +86,33 @@ class LagreAnmodningsperiodeIMedlTest {
 
         lagreAnmodningsperiodeIMedl.utfør(prosessinstans);
         verify(medlPeriodeService, never()).opprettPeriodeUnderAvklaring(any(Anmodningsperiode.class), anyLong(), anyBoolean());
+    }
+
+    @Test
+    void utfør_oppdaterAnmodningsperiode_ok() {
+        Fagsak fagsak = new Fagsak();
+        Behandling forrigeBehandling = new Behandling();
+        forrigeBehandling.setId(2L);
+        forrigeBehandling.setRegistrertDato(Instant.now().minusSeconds(10));
+
+        behandling.setFagsak(fagsak);
+        behandling.setType(Behandlingstyper.NY_VURDERING);
+        behandling.setRegistrertDato(Instant.now());
+
+        behandlingsresultat.setType(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode(NOW, NOW.plusMonths(1), null, null, null, null, null, null);
+        anmodningsperiode.setMedlPeriodeID(12L);
+        behandlingsresultat.setAnmodningsperioder(Set.of(anmodningsperiode));
+
+        fagsak.setBehandlinger(Arrays.asList(behandling, forrigeBehandling));
+
+        when(behandlingsresultatService.hentBehandlingsresultat(forrigeBehandling.getId())).thenReturn(behandlingsresultat);
+
+
+        lagreAnmodningsperiodeIMedl.utfør(prosessinstans);
+
+
+        verify(medlPeriodeService).oppdaterPeriodeUnderAvklaring(anmodningsperiode, false);
     }
 
     private Set<Anmodningsperiode> lagAnmodningsperioderMedDato(LocalDate fom, LocalDate tom) {

@@ -69,6 +69,10 @@ public class MedlPeriodeService {
         lagreMedlPeriodeId(medlPeriodeID, periodeOmLovvalg, behandlingID);
     }
 
+    public void oppdaterPeriodeUnderAvklaring(PeriodeOmLovvalg periodeOmLovvalg, boolean erSed) {
+        medlService.oppdaterPeriodeUnderAvklaring(periodeOmLovvalg, hentKildedokumenttype(erSed));
+    }
+
     public void opprettPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, Long behandlingID, boolean erSed) {
         String fnr = hentFnr(behandlingID);
         log.info("Oppretter endelig periode i MEDL for behandling {}", behandlingID);
