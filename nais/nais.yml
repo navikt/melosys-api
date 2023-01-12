@@ -51,6 +51,7 @@ spec:
         - application: {{APP_NAME_MEDL}}
         - application: {{APP_NAME_MELOSYS_EESSI}}
         - application: {{APP_NAME_UTBETALING}}
+        - application: {{APP_NAME_FAKTURERINGSKOMPONENTEN}}
   webproxy: true
   vault:
     enabled: true

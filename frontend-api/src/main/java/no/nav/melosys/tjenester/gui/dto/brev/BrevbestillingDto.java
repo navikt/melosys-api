@@ -32,6 +32,7 @@ public class BrevbestillingDto {
     private String nyVurderingBakgrunn;
     private List<SaksvedleggDto> saksvedlegg;
     private List <FritekstvedleggDto> fritekstvedlegg;
+    private String dokumentTittel;
 
     /**
      * @deprecated Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel
@@ -71,7 +72,8 @@ public class BrevbestillingDto {
             .medYtterligereInformasjon(this.getYtterligereInformasjon())
             .medNyVurderingBakgrunn(this.getNyVurderingBakgrunn())
             .medSaksvedlegg(this.getSaksvedlegg())
-            .medFritekstvedlegg(this.getFritekstvedlegg());
+            .medFritekstvedlegg(this.getFritekstvedlegg())
+            .medDokumentTittel(this.getDokumentTittel());
     }
 
     public BrevbestillingDto(Builder builder) {
@@ -94,6 +96,7 @@ public class BrevbestillingDto {
         this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
         this.saksvedlegg = builder.saksvedlegg;
         this.fritekstvedlegg = builder.fritekstvedlegg;
+        this.dokumentTittel = builder.dokumentTittel;
     }
 
     public Produserbaredokumenter getProduserbardokument() {
@@ -179,6 +182,10 @@ public class BrevbestillingDto {
         return fritekstvedlegg;
     }
 
+    public String getDokumentTittel() {
+        return dokumentTittel;
+    }
+
     public static class Builder {
         private Produserbaredokumenter produserbardokument;
         private Aktoersroller mottaker;
@@ -199,6 +206,7 @@ public class BrevbestillingDto {
         private String nyVurderingBakgrunn;
         private List<SaksvedleggDto> saksvedlegg;
         private List<FritekstvedleggDto> fritekstvedlegg;
+        private String dokumentTittel;
 
         public Builder medProduserbardokument(Produserbaredokumenter produserbardokument) {
             this.produserbardokument = produserbardokument;
@@ -290,6 +298,11 @@ public class BrevbestillingDto {
             return this;
         }
 
+        public Builder medDokumentTittel(String dokumentTittel){
+            this.dokumentTittel = dokumentTittel;
+            return this;
+        }
+
         public BrevbestillingDto build() {
             return new BrevbestillingDto(this);
         }
@@ -316,14 +329,15 @@ public class BrevbestillingDto {
             && Objects.equals(begrunnelseKode, that.begrunnelseKode)
             && Objects.equals(ytterligereInformasjon, that.ytterligereInformasjon)
             && Objects.equals(nyVurderingBakgrunn, that.nyVurderingBakgrunn)
-            && Objects.equals(saksvedlegg, that.saksvedlegg);
+            && Objects.equals(saksvedlegg, that.saksvedlegg)
+            && Objects.equals(dokumentTittel, that.dokumentTittel);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(produserbardokument, mottaker, orgNr, innledningFritekst, manglerFritekst,
             begrunnelseFritekst, ektefelleFritekst, barnFritekst, kontaktpersonNavn, kopiMottakere, distribusjonstype, fritekstTittel,
-            fritekst, kontaktopplysninger, begrunnelseKode, ytterligereInformasjon, nyVurderingBakgrunn, saksvedlegg);
+            fritekst, kontaktopplysninger, begrunnelseKode, ytterligereInformasjon, nyVurderingBakgrunn, saksvedlegg, dokumentTittel);
     }
 
     @Override
@@ -347,6 +361,7 @@ public class BrevbestillingDto {
             ", ytterligereInformasjon='" + ytterligereInformasjon + '\'' +
             ", nyVurderingBakgrunn='" + nyVurderingBakgrunn + '\'' +
             ", saksvedlegg='" + saksvedlegg + '\'' +
+            ", dokumentTittel='" + dokumentTittel + '\'' +
             '}';
     }
 }

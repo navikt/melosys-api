@@ -1,8 +1,8 @@
 package no.nav.melosys.tjenester.gui.dto.brev;
 
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-
 import java.util.Collection;
+
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 
 public class MottakerDto {
     private final String type;

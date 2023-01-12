@@ -35,7 +35,8 @@ public class DokumentproduksjonsInfoMapper {
         TRYGDEAVTALE_GB,
         MELDING_HENLAGT_SAK,
         GENERELT_FRITEKSTVEDLEGG,
-        TRYGDEAVTALE_US
+        TRYGDEAVTALE_US,
+        TRYGDEAVTALE_CAN
     );
 
     static {
@@ -88,6 +89,12 @@ public class DokumentproduksjonsInfoMapper {
                     JournalforingsTittel.TRYGDEAVTALE.getTittel(),
                     Map.of(VedleggTyper.VEDTAKSBREV, JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
                         VedleggTyper.ATTEST, JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel())))
+            .put(TRYGDEAVTALE_AU,
+                new DokumentproduksjonsInfo("trygdeavtale_au",
+                    DokumentKategoriKode.VB.getKode(),
+                    JournalforingsTittel.TRYGDEAVTALE.getTittel(),
+                    Map.of(VedleggTyper.VEDTAKSBREV, JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
+                        VedleggTyper.ATTEST, JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel())))
             .put(GENERELT_FRITEKSTBREV_BRUKER,
                 new DokumentproduksjonsInfo("fritekstbrev",
                     DokumentKategoriKode.IB.getKode()))
@@ -107,6 +114,9 @@ public class DokumentproduksjonsInfoMapper {
                     JournalforingsTittel.MELDING_HENLAGT_SAK.getTittel()))
             .put(GENERELT_FRITEKSTVEDLEGG,
                 new DokumentproduksjonsInfo("fritekstvedlegg",
+                    DokumentKategoriKode.IB.getKode()))
+            .put(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV,
+                new DokumentproduksjonsInfo("trygdeavtale_fritekstbrev",
                     DokumentKategoriKode.IB.getKode()))
             .build());
     }
