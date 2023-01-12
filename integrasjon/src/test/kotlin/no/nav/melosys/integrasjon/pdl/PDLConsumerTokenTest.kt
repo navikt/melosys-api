@@ -24,7 +24,7 @@ import org.springframework.test.context.ActiveProfiles
     OAuthMockServer::class,
 
     PDLConsumerProducer::class,
-    PDLAuthFilter::class
+    PDLAuthFilterAzure::class
 )
 @WebMvcTest
 @AutoConfigureWebClient

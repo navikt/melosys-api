@@ -24,7 +24,7 @@ class UtbetalingConsumerProducerV2(
         webClientBuilder
             .baseUrl(url)
             .filter(headerFilter())
-            .filter(genericAuthFilterFactory.getFilter(CLIENT_NAME))
+            .filter(genericAuthFilterFactory.getStsAzureFilter(CLIENT_NAME))
             .filter(correlationIdOutgoingFilter)
             .filter(errorFilter("Kall mot Utbetalinger feilet."))
             .build()

@@ -19,7 +19,7 @@ public class PDLConsumerProducer implements WebClientConfig {
     @Bean
     public PDLConsumer pdlConsumerForSaksbehandler(WebClient.Builder webclientBuilder,
                                                    @Value("${PDL.url}") String pdlUrl,
-                                                   PDLAuthFilter pdlAuthFilter,
+                                                   PDLAuthFilterAzure pdlAuthFilter,
                                                    CorrelationIdOutgoingFilter correlationIdOutgoingFilter) {
         return new PDLConsumerImpl(
             webclientBuilder(webclientBuilder, pdlUrl)
