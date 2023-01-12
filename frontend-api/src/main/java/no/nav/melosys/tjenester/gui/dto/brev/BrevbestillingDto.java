@@ -18,6 +18,7 @@ public class BrevbestillingDto {
     private Aktoersroller mottaker;
     private String orgNr;
     private String institusjonId;
+    private List<String> orgNrEtater;
     private String innledningFritekst;
     private String manglerFritekst;
     private String begrunnelseFritekst;
@@ -31,7 +32,7 @@ public class BrevbestillingDto {
     private boolean kontaktopplysninger;
     private String nyVurderingBakgrunn;
     private List<SaksvedleggDto> saksvedlegg;
-    private List <FritekstvedleggDto> fritekstvedlegg;
+    private List<FritekstvedleggDto> fritekstvedlegg;
 
     /**
      * @deprecated Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel
@@ -49,13 +50,12 @@ public class BrevbestillingDto {
     }
 
     public BrevbestillingRequest.Builder tilRequestBuilder() {
-        var a = this.getDistribusjonstype();
-
         return new BrevbestillingRequest.Builder()
             .medProduserbardokument(this.getProduserbardokument())
             .medMottaker(this.getMottaker())
             .medOrgNr(this.getOrgNr())
             .medInstitusjonId(this.getInstitusjonId())
+            .medOrgNrEtater(this.getOrgNrEtater())
             .medInnledningFritekst(this.getInnledningFritekst())
             .medManglerFritekst(this.getManglerFritekst())
             .medBegrunnelseFritekst(this.getBegrunnelseFritekst())
@@ -79,6 +79,7 @@ public class BrevbestillingDto {
         this.mottaker = builder.mottaker;
         this.orgNr = builder.orgNr;
         this.innledningFritekst = builder.innledningFritekst;
+        this.orgNrEtater = builder.orgNrEtater;
         this.manglerFritekst = builder.manglerFritekst;
         this.begrunnelseFritekst = builder.begrunnelseFritekst;
         this.ektefelleFritekst = builder.ektefelleFritekst;
@@ -110,6 +111,10 @@ public class BrevbestillingDto {
 
     public String getInstitusjonId() {
         return institusjonId;
+    }
+
+    public List<String> getOrgNrEtater() {
+        return orgNrEtater;
     }
 
     public String getInnledningFritekst() {
@@ -184,6 +189,7 @@ public class BrevbestillingDto {
         private Aktoersroller mottaker;
         private String orgNr;
         private String innledningFritekst;
+        private List<String> orgNrEtater;
         private String manglerFritekst;
         private String begrunnelseFritekst;
         private String ektefelleFritekst;
@@ -217,6 +223,12 @@ public class BrevbestillingDto {
 
         public Builder medInnledningFritekst(String innledningFritekst) {
             this.innledningFritekst = innledningFritekst;
+            return this;
+        }
+
+
+        public Builder medOrgNrEtater(List<String> etater) {
+            this.orgNrEtater = etater;
             return this;
         }
 
@@ -303,6 +315,8 @@ public class BrevbestillingDto {
         return kontaktopplysninger == that.kontaktopplysninger && produserbardokument == that.produserbardokument
             && mottaker == that.mottaker
             && Objects.equals(orgNr, that.orgNr)
+            && Objects.equals(institusjonId, that.institusjonId)
+            && Objects.equals(orgNrEtater, that.orgNrEtater)
             && Objects.equals(innledningFritekst, that.innledningFritekst)
             && Objects.equals(manglerFritekst, that.manglerFritekst)
             && Objects.equals(begrunnelseFritekst, that.begrunnelseFritekst)
@@ -321,7 +335,8 @@ public class BrevbestillingDto {
 
     @Override
     public int hashCode() {
-        return Objects.hash(produserbardokument, mottaker, orgNr, innledningFritekst, manglerFritekst,
+        return Objects.hash(produserbardokument, mottaker, orgNr, institusjonId, orgNrEtater, innledningFritekst,
+            manglerFritekst,
             begrunnelseFritekst, ektefelleFritekst, barnFritekst, kontaktpersonNavn, kopiMottakere, distribusjonstype, fritekstTittel,
             fritekst, kontaktopplysninger, begrunnelseKode, ytterligereInformasjon, nyVurderingBakgrunn, saksvedlegg);
     }
@@ -332,6 +347,8 @@ public class BrevbestillingDto {
             "produserbardokument=" + produserbardokument +
             ", mottaker=" + mottaker +
             ", orgNr='" + orgNr + '\'' +
+            ", institusjonId='" + institusjonId + '\'' +
+            ", etater='" + orgNrEtater + '\'' +
             ", innledningFritekst='" + innledningFritekst + '\'' +
             ", manglerFritekst='" + manglerFritekst + '\'' +
             ", begrunnelseFritekst='" + begrunnelseFritekst + '\'' +

@@ -11,6 +11,7 @@ public class BrevbestillingRequest {
     private Produserbaredokumenter produserbardokument;
     private Aktoersroller mottaker;
     private String orgNr;
+    private List<String> orgNrEtater;
     private String institusjonId;
     private String innledningFritekst;
     private String manglerFritekst;
@@ -53,6 +54,7 @@ public class BrevbestillingRequest {
         this.mottaker = builder.mottaker;
         this.orgNr = builder.orgNr;
         this.institusjonId = builder.institusjonId;
+        this.orgNrEtater = builder.orgNrEtater;
         this.innledningFritekst = builder.innledningFritekst;
         this.manglerFritekst = builder.manglerFritekst;
         this.ektefelleFritekst = builder.ektefelleFritekst;
@@ -90,6 +92,10 @@ public class BrevbestillingRequest {
 
     public String getInstitusjonId() {
         return institusjonId;
+    }
+
+    public List<String> getOrgNrEtater() {
+        return orgNrEtater;
     }
 
     public String getInnledningFritekst() {
@@ -164,6 +170,7 @@ public class BrevbestillingRequest {
         private Aktoersroller mottaker;
         private String orgNr;
         private String institusjonId;
+        private List<String> orgNrEtater;
         private String innledningFritekst;
         private String manglerFritekst;
         private String begrunnelseFritekst;
@@ -199,6 +206,11 @@ public class BrevbestillingRequest {
 
         public Builder medInstitusjonId(String institusjonId) {
             this.institusjonId = institusjonId;
+            return this;
+        }
+
+        public Builder medOrgNrEtater(List<String> etater) {
+            this.orgNrEtater = etater;
             return this;
         }
 
