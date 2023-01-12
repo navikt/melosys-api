@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import no.nav.dok.brevdata.felles.v1.navfelles.UtenlandskPostadresse;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
@@ -245,7 +244,6 @@ public class BrevbestillingService {
         }
     }
 
-    @Transactional
     public List<BrevAdresse> hentBrevAdresseTilMottakere(Aktoersroller aktoersroller, long behandlingId) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         var mottakere = brevmottakerService.avklarMottakere(null, Mottaker.av(aktoersroller), behandling, false, false);
