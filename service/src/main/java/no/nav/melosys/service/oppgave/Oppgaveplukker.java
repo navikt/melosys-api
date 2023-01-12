@@ -3,9 +3,9 @@ package no.nav.melosys.service.oppgave;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
@@ -15,7 +15,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -49,28 +48,15 @@ public class Oppgaveplukker {
     @Transactional
     public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) {
         log.info("Begynner plukking av oppgave for saksbehandler med følgende kriterier: {}", plukkDto);
-        List<Oppgave> utildelteOppgaverEtterFrist = new ArrayList<>();
+        List<Oppgave> utildelteOppgaver = new ArrayList<>();
         Set<String> oppgaveBehandlingstemaSet = hentAlleOppgaveBehandlingstemaTilSøk(plukkDto.sakstype(), plukkDto.sakstema(), plukkDto.behandlingstema());
         for (var oppgaveBehandlingstema : oppgaveBehandlingstemaSet) {
-            utildelteOppgaverEtterFrist.addAll(oppgaveFasade.finnUtildelteOppgaverEtterFrist(oppgaveBehandlingstema));
+            utildelteOppgaver.addAll(oppgaveFasade.finnUtildelteOppgaverEtterFrist(oppgaveBehandlingstema));
         }
-        log.info("Funnet {} oppgaver med oppgaveTema {}", utildelteOppgaverEtterFrist.size(), oppgaveBehandlingstemaSet);
+        log.info("Funnet {} oppgaver med oppgaveTema {}", utildelteOppgaver.size(), oppgaveBehandlingstemaSet);
 
-        List<Oppgave> filtrerteOppgaver = utildelteOppgaverEtterFrist.stream()
-            .filter(oppgave -> {
-                String saksnummer = oppgave.getSaksnummer();
-                Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
-                if (fagsak == null) {
-                    log.error("Fant ikke fagsak {} for oppgave {}", saksnummer, oppgave.getOppgaveId());
-                    throw new TekniskException("Fant ikke fagsak " + saksnummer);
-                }
-                return fagsakMatcherSøk(fagsak, plukkDto) && !venterSakPaaDokumentasjonEllerFagligAvklaring(fagsak);
-            }).toList();
-
-        Optional<Oppgave> valg = filtrerteOppgaver.stream()
-            .sorted(Oppgave.lavestTilHøyestPrioritet.reversed())
-            .filter(oppgave -> !erTilbakeLagt(saksbehandlerID, oppgave.getOppgaveId()))
-            .findFirst();
+        List<Oppgave> filtrerteOppgaver = filtrerOppgaver(plukkDto, utildelteOppgaver);
+        Optional<Oppgave> valg = filtrerteOppgaver.stream().max(Oppgave.LAVEST_TIL_HØYEST_PRIORITET);
 
         if (valg.isPresent()) {
             oppdaterBehandlingsstatus(valg.get().getSaksnummer());
@@ -82,22 +68,62 @@ public class Oppgaveplukker {
         return valg;
     }
 
-    private boolean venterSakPaaDokumentasjonEllerFagligAvklaring(Fagsak fagsak) {
+    private List<Oppgave> filtrerOppgaver(PlukkOppgaveInnDto plukkDto, List<Oppgave> utildelteOppgaver) {
+        Set<String> saksnumre = utildelteOppgaver.stream().map(Oppgave::getSaksnummer).collect(Collectors.toSet());
+        Map<String, Fagsak> sasksnummerFagsakMap = fagsakService.hentFagsaker(saksnumre).stream()
+            .collect(Collectors.toMap(Fagsak::getSaksnummer, Function.identity()));
+
+        int antallSakSomIkkeMatcherSøk = 0;
+        int antallSakSomVenter = 0;
+        List<Oppgave> filtrerteOppgaver = new ArrayList<>();
+        for (Oppgave oppgave : utildelteOppgaver) {
+            String saksnummer = oppgave.getSaksnummer();
+            Fagsak fagsak = sasksnummerFagsakMap.get(saksnummer);
+            if (fagsak == null) {
+                log.warn("Fant ikke fagsak {} for oppgave {}", saksnummer, oppgave.getOppgaveId());
+                continue;
+            }
+            boolean fagsakMatcherSøk = fagsakMatcherSøk(fagsak, plukkDto);
+            boolean venterPåDokEllerAvklaring = venterPåDokumentasjonEllerFagligAvklaring(fagsak);
+            if (!fagsakMatcherSøk) {
+                antallSakSomIkkeMatcherSøk++;
+            }
+            if (venterPåDokEllerAvklaring) {
+                antallSakSomVenter++;
+            }
+
+            if (fagsakMatcherSøk && !venterPåDokEllerAvklaring) {
+                filtrerteOppgaver.add(oppgave);
+            }
+        }
+
+        if (antallSakSomIkkeMatcherSøk > 0) {
+            log.info("Antall sak som ikke matcher søk: {} / {}", antallSakSomIkkeMatcherSøk, saksnumre.size());
+        }
+        log.info("Antall sak som venter på dokumentasjon eller avklaring: {} / {}", antallSakSomVenter, saksnumre.size());
+        return filtrerteOppgaver;
+    }
+
+    private boolean fagsakMatcherSøk(Fagsak fagsak, PlukkOppgaveInnDto plukkDto) {
+        return fagsak != null && fagsak.getType() == plukkDto.sakstype()
+            && fagsak.getTema() == plukkDto.sakstema()
+            && fagsak.getBehandlinger().stream().anyMatch(behandling -> behandling.getTema() == plukkDto.behandlingstema());
+    }
+
+    private boolean venterPåDokumentasjonEllerFagligAvklaring(Fagsak fagsak) {
+        if (fagsak == null) {
+            return false;
+        }
         Behandling behandling = fagsak.hentSistAktivBehandling();
         if (behandling.erVenterForDokumentasjon()) {
             if (behandling.getDokumentasjonSvarfristDato() == null) {
-                log.error("Behandling {} tilhørende {} avventer dokumentasjon, men har ingen svarfristdato.",
+                log.warn("Behandling {} tilhørende {} avventer dokumentasjon, men har ingen svarfristdato.",
                     behandling.getId(), fagsak.getSaksnummer());
                 return true;
             }
-            return behandling.getDokumentasjonSvarfristDato().isAfter(Instant.now());
+            return Instant.now().isBefore(behandling.getDokumentasjonSvarfristDato());
         }
         return behandling.harStatus(Behandlingsstatus.AVVENT_FAGLIG_AVKLARING);
-    }
-
-    private boolean erTilbakeLagt(String saksbehandlerID, String oppgaveId) {
-        List<OppgaveTilbakelegging> tilbakelegging = oppgaveTilbakkeleggingRepo.findBySaksbehandlerIdAndOppgaveId(saksbehandlerID, oppgaveId);
-        return !tilbakelegging.isEmpty();
     }
 
     private void oppdaterBehandlingsstatus(String saksnummer) {
@@ -113,12 +139,6 @@ public class Oppgaveplukker {
         return Arrays.stream(Behandlingstyper.values())
             .map(behandlingstype -> OppgaveFactory.utledBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype).getKode())
             .collect(Collectors.toSet());
-    }
-
-    private boolean fagsakMatcherSøk(Fagsak fagsak, PlukkOppgaveInnDto plukkDto) {
-        return fagsak.getType() == plukkDto.sakstype()
-            && fagsak.getTema() == plukkDto.sakstema()
-            && fagsak.getBehandlinger().stream().anyMatch(behandling -> behandling.getTema() == plukkDto.behandlingstema());
     }
 
     @Transactional
