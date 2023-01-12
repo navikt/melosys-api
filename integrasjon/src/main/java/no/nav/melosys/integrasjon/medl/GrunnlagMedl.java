@@ -49,7 +49,11 @@ public enum GrunnlagMedl {
     CAN_ART8("Canada_8"),
     CAN_ART9("Canada_9"),
     CAN_ART10("Canada_10"),
-    CAN_ART11("Canada_11");
+    CAN_ART11("Canada_11"),
+    AUS_ART9_2("Australia_9_2"),
+    AUS_ART9_3("Australia_9_3"),
+    AUS_ART14_1("Australia_14_1");
+
 
     private final String kode;
 
