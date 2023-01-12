@@ -55,21 +55,7 @@ public class Oppgaveplukker {
         }
         log.info("Funnet {} oppgaver med oppgaveTema {}", utildelteOppgaver.size(), oppgaveBehandlingstemaSet);
 
-        Set<String> saksnumre = utildelteOppgaver.stream().map(Oppgave::getSaksnummer).collect(Collectors.toSet());
-        Map<String, Fagsak> sasksnummerFagsakMap = fagsakService.hentFagsaker(saksnumre).stream()
-            .collect(Collectors.toMap(Fagsak::getSaksnummer, Function.identity()));
-
-        List<Oppgave> filtrerteOppgaver = utildelteOppgaver.stream()
-            .filter(oppgave -> {
-                String saksnummer = oppgave.getSaksnummer();
-                Fagsak fagsak = sasksnummerFagsakMap.get(saksnummer);
-                if (fagsak == null) {
-                    log.warn("Fant ikke fagsak {} for oppgave {}", saksnummer, oppgave.getOppgaveId());
-                    return false;
-                }
-                return fagsakMatcherSøk(fagsak, plukkDto) && !venterSakPaaDokumentasjonEllerFagligAvklaring(fagsak);
-            }).toList();
-
+        List<Oppgave> filtrerteOppgaver = filtrerOppgaver(plukkDto, utildelteOppgaver);
         Optional<Oppgave> valg = filtrerteOppgaver.stream().max(Oppgave.LAVEST_TIL_HØYEST_PRIORITET);
 
         if (valg.isPresent()) {
@@ -82,7 +68,26 @@ public class Oppgaveplukker {
         return valg;
     }
 
-    private boolean venterSakPaaDokumentasjonEllerFagligAvklaring(Fagsak fagsak) {
+    private List<Oppgave> filtrerOppgaver(PlukkOppgaveInnDto plukkDto, List<Oppgave> utildelteOppgaver) {
+        Set<String> saksnumre = utildelteOppgaver.stream().map(Oppgave::getSaksnummer).collect(Collectors.toSet());
+        Map<String, Fagsak> sasksnummerFagsakMap = fagsakService.hentFagsaker(saksnumre).stream()
+            .collect(Collectors.toMap(Fagsak::getSaksnummer, Function.identity()));
+
+        List<Oppgave> filtrerteOppgaver = utildelteOppgaver.stream()
+            .filter(oppgave -> {
+                String saksnummer = oppgave.getSaksnummer();
+                Fagsak fagsak = sasksnummerFagsakMap.get(saksnummer);
+                if (fagsak == null) {
+                    log.warn("Fant ikke fagsak {} for oppgave {}", saksnummer, oppgave.getOppgaveId());
+                    return false;
+                }
+                boolean venterPåDokEllerAvklaring = venterPåDokumentasjonEllerFagligAvklaring(fagsak);
+                return fagsakMatcherSøk(fagsak, plukkDto) && !venterPåDokEllerAvklaring;
+            }).toList();
+        return filtrerteOppgaver;
+    }
+
+    private boolean venterPåDokumentasjonEllerFagligAvklaring(Fagsak fagsak) {
         Behandling behandling = fagsak.hentSistAktivBehandling();
         if (behandling.erVenterForDokumentasjon()) {
             if (behandling.getDokumentasjonSvarfristDato() == null) {
