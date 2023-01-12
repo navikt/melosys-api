@@ -44,12 +44,12 @@ public abstract class GenericContextExchangeFilter implements ExchangeFilterFunc
         if (ThreadLocalAccessInfo.shouldUseSystemToken()) {
             return getSystemToken();
         }
-        return "Bearer " + getUserToken();
+        return getUserToken();
     }
 
     protected abstract String getSystemToken();
 
     private String getUserToken() {
-        return oAuth2AccessTokenService.getAccessToken(clientProperties).getAccessToken();
+        return "Bearer " + oAuth2AccessTokenService.getAccessToken(clientProperties).getAccessToken();
     }
 }
