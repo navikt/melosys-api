@@ -73,7 +73,7 @@ public class Oppgaveplukker {
         Map<String, Fagsak> sasksnummerFagsakMap = fagsakService.hentFagsaker(saksnumre).stream()
             .collect(Collectors.toMap(Fagsak::getSaksnummer, Function.identity()));
 
-        int antallSakSomIkkeMattcherSøk = 0;
+        int antallSakSomIkkeMatcherSøk = 0;
         int antallSakSomVenter = 0;
         List<Oppgave> filtrerteOppgaver = new ArrayList<>();
         for (Oppgave oppgave : utildelteOppgaver) {
@@ -86,7 +86,7 @@ public class Oppgaveplukker {
             boolean fagsakMatcherSøk = fagsakMatcherSøk(fagsak, plukkDto);
             boolean venterPåDokEllerAvklaring = venterPåDokumentasjonEllerFagligAvklaring(fagsak);
             if (!fagsakMatcherSøk) {
-                antallSakSomIkkeMattcherSøk++;
+                antallSakSomIkkeMatcherSøk++;
             }
             if (venterPåDokEllerAvklaring) {
                 antallSakSomVenter++;
@@ -97,8 +97,8 @@ public class Oppgaveplukker {
             }
         }
 
-        if (antallSakSomIkkeMattcherSøk > 0) {
-            log.info("Antall sak som ikke matcher søk: {} / {}", antallSakSomIkkeMattcherSøk, saksnumre.size());
+        if (antallSakSomIkkeMatcherSøk > 0) {
+            log.info("Antall sak som ikke matcher søk: {} / {}", antallSakSomIkkeMatcherSøk, saksnumre.size());
         }
         log.info("Antall sak som venter på dokumentasjon eller avklaring: {} / {}", antallSakSomVenter, saksnumre.size());
         return filtrerteOppgaver;
