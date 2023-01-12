@@ -62,20 +62,19 @@ public class LagreAnmodningsperiodeIMedl implements StegBehandler {
 
     private Optional<Long> finnOpprinneligMedlPeriodeID(Behandling nyBehandling) {
         Fagsak fagsak = nyBehandling.getFagsak();
-        Behandling forrigeBehandling = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato().stream()
+        Optional<Behandling> forrigeBehandling = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato().stream()
             .filter(behandling -> !behandling.getId().equals(nyBehandling.getId()))
             .filter(behandling -> {
                 Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
                 return ANMODNING_OM_UNNTAK == behandlingsresultat.getType();
             })
-            .findFirst()
-            .orElse(null);
+            .findFirst();
 
-        if (forrigeBehandling == null) {
+        if (forrigeBehandling.isEmpty()) {
             return Optional.empty();
+        } else {
+            Behandlingsresultat opprinneligResultat = behandlingsresultatService.hentBehandlingsresultat(forrigeBehandling.get().getId());
+            return opprinneligResultat.finnAnmodningsperiode().map(Anmodningsperiode::getMedlPeriodeID);
         }
-
-        Behandlingsresultat opprinneligResultat = behandlingsresultatService.hentBehandlingsresultat(forrigeBehandling.getId());
-        return opprinneligResultat.finnAnmodningsperiode().map(Anmodningsperiode::getMedlPeriodeID);
     }
 }
