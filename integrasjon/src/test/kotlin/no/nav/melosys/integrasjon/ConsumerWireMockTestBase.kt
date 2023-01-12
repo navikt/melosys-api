@@ -43,10 +43,9 @@ abstract class ConsumerWireMockTestBase<T, R>(
 
     @BeforeAll
     fun beforeAll() {
-        oAuthMockServer.start()
-
         serviceUnderTestMockServer.start()
         stsMockServer.start()
+        oAuthMockServer.start()
 
         val environment = spyk(MockEnvironment())
         environment.setProperty("systemuser.username", "test")
@@ -66,6 +65,10 @@ abstract class ConsumerWireMockTestBase<T, R>(
         serviceUnderTestMockServer.resetAll()
         stsMockServer.resetAll()
         defaultStsWireMockStub()
+    }
+
+    @AfterEach
+    fun afterBase() {
     }
 
     open fun defaultStsWireMockStub() {
@@ -112,6 +115,7 @@ abstract class ConsumerWireMockTestBase<T, R>(
         val uuid = UUID.randomUUID()
         try {
             ThreadLocalAccessInfo.beforeExecuteProcess(uuid, "prossesSteg")
+            oAuthMockServer.reset()
             consumer(executeRequest())
         } finally {
             ThreadLocalAccessInfo.afterExecuteProcess(uuid)
@@ -121,6 +125,7 @@ abstract class ConsumerWireMockTestBase<T, R>(
     fun executeFromController(consumer: (R) -> Unit = {}) {
         try {
             ThreadLocalAccessInfo.beforeControllerRequest("request", false)
+            oAuthMockServer.reset()
             consumer(executeRequest())
         } finally {
             ThreadLocalAccessInfo.afterControllerRequest("request")

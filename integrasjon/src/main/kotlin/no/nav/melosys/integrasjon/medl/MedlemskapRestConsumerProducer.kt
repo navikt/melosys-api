@@ -23,7 +23,7 @@ class MedlemskapRestConsumerProducer(
     ) = MedlemskapRestConsumer(
         webClientBuilder
             .baseUrl(url)
-            .filter(genericAuthFilterFactory.getFilter(CLIENT_NAME))
+            .filter(genericAuthFilterFactory.getStsAzureFilter(CLIENT_NAME))
             .filter(headerFilter())
             .filter(correlationIdOutgoingFilter)
             .filter(errorFilter("Kall mot Medl feilet."))
