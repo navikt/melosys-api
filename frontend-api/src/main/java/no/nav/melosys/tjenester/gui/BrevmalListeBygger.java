@@ -51,9 +51,9 @@ public class BrevmalListeBygger {
                     lagBrevmalTypeDtoForForventetSaksbehandlingstid(dokument);
                 case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevmalTypeDtoForMangelbrev(dokument, behandlingId);
                 case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET ->
-                    lagBrevmalTypeDtoForFritekstbrev(dokument, behandlingId);
+                    lagBrevmalTypeDtoForGenereltFritekstbrev(dokument, behandlingId);
                 case UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV -> lagBrevmalTypeDtoForEngelskFritekst(dokument, behandlingId);
-                case FRITEKSTBREV -> lagBrevmalTypeDtoForFritekstbrev(dokument, behandlingId);
+                case FRITEKSTBREV -> lagBrevmalTypeDtoForFritekstbrev(dokument);
                 default -> null;
             })
             .filter(Objects::nonNull)
@@ -230,14 +230,14 @@ public class BrevmalListeBygger {
             .build();
     }
 
-    private BrevmalTypeDto lagBrevmalTypeDtoForFritekstbrev(Produserbaredokumenter produserbartdokument, long behandlingId) {
+    private BrevmalTypeDto lagBrevmalTypeDtoForFritekstbrev(Produserbaredokumenter produserbartdokument) {
         return new BrevmalTypeDto.Builder()
             .medType(produserbartdokument)
             .medFelter(asList(
                 new BrevmalFeltDto.Builder()
                     .medKodeOgBeskrivelse(BrevmalFeltKode.BREV_TITTEL)
                     .medFeltType(FeltType.TEKST)
-                    .medValg(hentFritekstTittelValg(behandlingId))
+                    .medValg(hentFritekstFeltValg())
                     .medTegnBegrensning(60)
                     .erPåkrevd()
                     .build(),
@@ -266,6 +266,14 @@ public class BrevmalListeBygger {
                     .build()
             ))
             .build();
+    }
+
+    private static FeltValgDto hentFritekstFeltValg() {
+        var orienteringBeslutningFeltvalgAlternativDto = new FeltvalgAlternativDto(FeltvalgAlternativKode.ORIENTERING_BESLUTNING);
+        var fritekstFeltvalgAlternativDto = new FeltvalgAlternativDto(FeltvalgAlternativKode.FRITEKST, true);
+
+        return new FeltValgDto(List.of(orienteringBeslutningFeltvalgAlternativDto, fritekstFeltvalgAlternativDto),
+            FeltValgType.SELECT);
     }
 
     private BrevmalTypeDto lagBrevmalTypeDtoForEngelskFritekst(Produserbaredokumenter produserbartdokument, long behandlingId) {
