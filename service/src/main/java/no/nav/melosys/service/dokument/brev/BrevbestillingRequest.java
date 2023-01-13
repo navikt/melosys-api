@@ -45,11 +45,6 @@ public class BrevbestillingRequest {
     public BrevbestillingRequest() {
     }
 
-    // Må ha mulighet for å sette produserbartdokument pga bakoverkompabilitet
-    public void setProduserbardokument(Produserbaredokumenter produserbardokument) {
-        this.produserbardokument = produserbardokument;
-    }
-
     public BrevbestillingRequest(Builder builder) {
         this.produserbardokument = builder.produserbardokument;
         this.mottaker = builder.mottaker;

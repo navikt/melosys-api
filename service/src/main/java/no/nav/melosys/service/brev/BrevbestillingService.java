@@ -1,20 +1,10 @@
 package no.nav.melosys.service.brev;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import no.nav.dok.brevdata.felles.v1.navfelles.UtenlandskPostadresse;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
-import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
-import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.brev.Mottakerliste;
-import no.nav.melosys.domain.brev.Postadresse;
+import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
@@ -36,6 +26,11 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
@@ -55,7 +50,8 @@ public class BrevbestillingService {
         GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
         GENERELT_FRITEKSTBREV_VIRKSOMHET,
         AVSLAG_MANGLENDE_OPPLYSNINGER,
-        UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV
+        UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV,
+        FRITEKSTBREV
     );
 
     private final DokumentServiceFasade dokumentServiceFasade;
@@ -105,27 +101,34 @@ public class BrevbestillingService {
     }
 
     private String hentMottakerNavn(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller hovedmottaker, String orgnrTilValgtArbeidsgiver) {
-        if (hovedmottaker == BRUKER) {
-            Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(hovedmottaker), behandling);
-            if (avklartMottaker.getRolle() == BRUKER) {
-                return hentSammensattNavn(behandling);
-            } else if (avklartMottaker.erPerson()) {
-                return persondataFasade.hentSammensattNavn(avklartMottaker.getPersonIdent());
-            } else {
-                var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartMottaker.getOrgnr());
+        switch (hovedmottaker) {
+            case BRUKER -> {
+                Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(hovedmottaker), behandling);
+                if (avklartMottaker.getRolle() == BRUKER) {
+                    return hentSammensattNavn(behandling);
+                } else if (avklartMottaker.erPerson()) {
+                    return persondataFasade.hentSammensattNavn(avklartMottaker.getPersonIdent());
+                } else {
+                    var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartMottaker.getOrgnr());
+                    return orgDokument.getNavn();
+                }
+            }
+            case ARBEIDSGIVER, VIRKSOMHET -> {
+                var orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(orgnrTilValgtArbeidsgiver).getDokument();
                 return orgDokument.getNavn();
             }
+            case TRYGDEMYNDIGHET -> {
+                if (produserbaredokumenter == UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV) {
+                    Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(hovedmottaker), behandling);
+                    UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(avklartMottaker.hentMyndighetLandkode());
+                    return utenlandskMyndighet.navn;
+                } else {
+                    throw new FunksjonellException("Melosys støtter ikke hovedmottakere med rollen " + hovedmottaker);
+                }
+            }
+            default ->
+                throw new FunksjonellException("Melosys støtter ikke hovedmottakere med rollen " + hovedmottaker);
         }
-        if (hovedmottaker == ARBEIDSGIVER || hovedmottaker == VIRKSOMHET) {
-            var orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(orgnrTilValgtArbeidsgiver).getDokument();
-            return orgDokument.getNavn();
-        }
-        if(hovedmottaker == TRYGDEMYNDIGHET && produserbaredokumenter == UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV){
-            Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(hovedmottaker), behandling);
-            UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(avklartMottaker.hentMyndighetLandkode());
-            return utenlandskMyndighet.navn;
-        }
-        throw new FunksjonellException("Melosys støtter ikke hovedmottakere med rollen " + hovedmottaker);
     }
 
     private String hentSammensattNavn(Behandling behandling) {
@@ -288,7 +291,7 @@ public class BrevbestillingService {
                 orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();
                 break;
             }
-            case TRYGDEMYNDIGHET:{
+            case TRYGDEMYNDIGHET: {
                 UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(mottaker.hentMyndighetLandkode());
                 return new BrevAdresse.Builder()
                     .medMottakerNavn(utenlandskMyndighet.navn)

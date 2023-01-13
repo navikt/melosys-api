@@ -76,12 +76,13 @@ public class DokgenMalMapper {
 
     private DokgenDto lagDokgenDtoFraBestilling(DokgenBrevbestilling brevbestilling) {
         return switch (brevbestilling.getProduserbartdokument()) {
-            case MELDING_FORVENTET_SAKSBEHANDLINGSTID, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD -> SaksbehandlingstidSoknad.av(
-                brevbestilling.toBuilder()
-                    .medAvsenderLand(dokgenMapperDatahenter.hentLandnavnFraLandkode(brevbestilling.getAvsenderLand()))
-                    .build(),
-                Saksbehandlingstid.beregnSaksbehandlingsfrist(brevbestilling.getForsendelseMottatt())
-            );
+            case MELDING_FORVENTET_SAKSBEHANDLINGSTID, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD ->
+                SaksbehandlingstidSoknad.av(
+                    brevbestilling.toBuilder()
+                        .medAvsenderLand(dokgenMapperDatahenter.hentLandnavnFraLandkode(brevbestilling.getAvsenderLand()))
+                        .build(),
+                    Saksbehandlingstid.beregnSaksbehandlingsfrist(brevbestilling.getForsendelseMottatt())
+                );
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> SaksbehandlingstidKlage.av(brevbestilling,
                 Saksbehandlingstid.beregnSaksbehandlingsfrist(brevbestilling.getForsendelseMottatt()));
             case MANGELBREV_BRUKER -> MangelbrevBruker.av(
@@ -97,7 +98,8 @@ public class DokgenMalMapper {
                     .build(),
                 DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
             );
-            case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> innvilgelseFtrlMapper.map((InnvilgelseBrevbestilling) brevbestilling);
+            case INNVILGELSE_FOLKETRYGDLOVEN_2_8 ->
+                innvilgelseFtrlMapper.map((InnvilgelseBrevbestilling) brevbestilling);
             case TRYGDEAVTALE_GB -> trygdeavtaleMapper.map((InnvilgelseBrevbestilling) brevbestilling.toBuilder()
                 .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId())).build(), Land_iso2.GB);
             case TRYGDEAVTALE_US -> trygdeavtaleMapper.map((InnvilgelseBrevbestilling) brevbestilling.toBuilder()
@@ -113,14 +115,19 @@ public class DokgenMalMapper {
             case GENERELT_FRITEKSTBREV_VIRKSOMHET -> FritekstbrevVirksomhet.av(
                 ((FritekstbrevBrevbestilling) brevbestilling).toBuilder().build(), Aktoersroller.VIRKSOMHET
             );
-            case GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> FritekstbrevBruker.av(((FritekstbrevBrevbestilling) brevbestilling).toBuilder()
-                    .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.ARBEIDSGIVER)).build(),
-                Aktoersroller.ARBEIDSGIVER
-            );
+            case GENERELT_FRITEKSTBREV_ARBEIDSGIVER ->
+                FritekstbrevBruker.av(((FritekstbrevBrevbestilling) brevbestilling).toBuilder()
+                        .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.ARBEIDSGIVER)).build(),
+                    Aktoersroller.ARBEIDSGIVER
+                );
+            case FRITEKSTBREV ->
+                FritekstbrevOffentligEtat.av(((FritekstbrevBrevbestilling) brevbestilling).toBuilder().build());
             case AVSLAG_MANGLENDE_OPPLYSNINGER -> hentAvslagsbrev(brevbestilling);
-            case MELDING_HENLAGT_SAK -> Henleggelsesbrev.av(((HenleggelseBrevbestilling) brevbestilling).toBuilder().build());
-            case GENERELT_FRITEKSTVEDLEGG -> Fritekstvedlegg.av(((FritekstvedleggBrevbestilling) brevbestilling).toBuilder().build(), Aktoersroller.BRUKER);
+            case MELDING_HENLAGT_SAK ->
+                Henleggelsesbrev.av(((HenleggelseBrevbestilling) brevbestilling).toBuilder().build());
             // Aktoersrolle for GENERELT_FRITEKSTVEDLEGG er likegyldig da brevet kun journalføres og distribueres sammen med fritekstbrevet
+            case GENERELT_FRITEKSTVEDLEGG ->
+                Fritekstvedlegg.av(((FritekstvedleggBrevbestilling) brevbestilling).toBuilder().build(), Aktoersroller.BRUKER);
             case UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV -> FritekstbrevTrygdemyndighet.av((FritekstbrevBrevbestilling) brevbestilling, Aktoersroller.TRYGDEMYNDIGHET);
             default -> throw new FunksjonellException(
                 format("ProduserbartDokument %s er ikke støttet av melosys-dokgen",

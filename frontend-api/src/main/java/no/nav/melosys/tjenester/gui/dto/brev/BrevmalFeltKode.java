@@ -6,7 +6,7 @@ public enum BrevmalFeltKode {
     FRITEKST("Tekst til brev"),
     FRITEKSTVEDLEGG("Legg til fritekstvedlegg"),
     MANGLER_FRITEKST("Hva skal mottakeren sende inn?"),
-    DOKUMENT_TITTEL("Dokumenttittel (valgfritt)");
+    DOKUMENT_TITTEL("Dokumenttittel (valgfritt)"),
     INNLEDNING_FRITEKST("Innledningstekst"),
     STANDARDTEKST_KONTAKTINFORMASJON("Legg til standardtekst med kontaktinformasjon nederst i brevet"),
     VEDLEGG("Vedlegg");

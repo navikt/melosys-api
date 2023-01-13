@@ -46,13 +46,13 @@ public class BrevmalListeBygger {
     private BrevmalDto mottakerTilBrevmalDto(long behandlingId, MottakerDto mottaker) {
         List<Produserbaredokumenter> produserbareDokumenter = brevbestillingService.hentMuligeProduserbaredokumenter(behandlingId, mottaker.getRolle());
 
-        List<BrevmalTypeDto> typer = produserbareDokumenter.stream().map(p -> switch (p) {
+        List<BrevmalTypeDto> typer = produserbareDokumenter.stream().map(dokument -> switch (dokument) {
                 case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE ->
-                    lagBrevmalTypeDtoForForventetSaksbehandlingstid(p);
-                case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevmalTypeDtoForMangelbrev(p, behandlingId);
+                    lagBrevmalTypeDtoForForventetSaksbehandlingstid(dokument);
+                case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevmalTypeDtoForMangelbrev(dokument, behandlingId);
                 case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET ->
-                    lagBrevmalTypeDtoForFritekstbrev(p, behandlingId);
-                case UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV -> lagBrevmalTypeDtoForEngelskFritekst(p, behandlingId);
+                    lagBrevmalTypeDtoForFritekstbrev(dokument, behandlingId);
+                case UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV -> lagBrevmalTypeDtoForEngelskFritekst(dokument, behandlingId);
                 case FRITEKSTBREV -> lagBrevmalTypeDtoForFritekstbrev(dokument, behandlingId);
                 default -> null;
             })
@@ -242,7 +242,7 @@ public class BrevmalListeBygger {
                     .erPåkrevd()
                     .build(),
                 new BrevmalFeltDto.Builder()
-                    .medKodeOgBeskrivelse(BrevmalFeltKode.DOKUMENTTITTEL)
+                    .medKodeOgBeskrivelse(BrevmalFeltKode.DOKUMENT_TITTEL)
                     .medFeltType(FeltType.TEKST)
                     .medTegnBegrensning(60)
                     .build(),
