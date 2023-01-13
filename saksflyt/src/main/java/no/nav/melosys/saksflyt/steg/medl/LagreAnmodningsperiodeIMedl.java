@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.medl;
 
+import java.util.Collection;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Anmodningsperiode;
@@ -62,19 +63,12 @@ public class LagreAnmodningsperiodeIMedl implements StegBehandler {
 
     private Optional<Long> finnOpprinneligMedlPeriodeID(Behandling nyBehandling) {
         Fagsak fagsak = nyBehandling.getFagsak();
-        Optional<Behandling> forrigeBehandling = fagsak.hentBehandlingerSortertSynkendePåRegistrertDato().stream()
+        return fagsak.hentBehandlingerSortertSynkendePåRegistrertDato().stream()
             .filter(behandling -> !behandling.getId().equals(nyBehandling.getId()))
-            .filter(behandling -> {
-                Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-                return ANMODNING_OM_UNNTAK == behandlingsresultat.getType();
-            })
+            .map(behandling -> behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
+            .map(Behandlingsresultat::finnAnmodningsperiode)
+            .flatMap(Optional::stream)
+            .map(Anmodningsperiode::getMedlPeriodeID)
             .findFirst();
-
-        if (forrigeBehandling.isEmpty()) {
-            return Optional.empty();
-        } else {
-            Behandlingsresultat opprinneligResultat = behandlingsresultatService.hentBehandlingsresultat(forrigeBehandling.get().getId());
-            return opprinneligResultat.finnAnmodningsperiode().map(Anmodningsperiode::getMedlPeriodeID);
-        }
     }
 }

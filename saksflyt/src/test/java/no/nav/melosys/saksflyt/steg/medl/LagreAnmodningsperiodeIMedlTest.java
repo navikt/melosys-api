@@ -93,20 +93,29 @@ class LagreAnmodningsperiodeIMedlTest {
         Fagsak fagsak = new Fagsak();
         Behandling forrigeBehandling = new Behandling();
         forrigeBehandling.setId(2L);
+        forrigeBehandling.setFagsak(fagsak);
+        forrigeBehandling.setType(Behandlingstyper.NY_VURDERING);
         forrigeBehandling.setRegistrertDato(Instant.now().minusSeconds(10));
+
+        Behandling førsteBehandling = new Behandling();
+        førsteBehandling.setId(3L);
+        førsteBehandling.setFagsak(fagsak);
+        førsteBehandling.setType(Behandlingstyper.FØRSTEGANG);
+        førsteBehandling.setRegistrertDato(Instant.now().minusSeconds(20));
+        Anmodningsperiode førsteAnmodningsperiode = new Anmodningsperiode();
+        førsteAnmodningsperiode.setMedlPeriodeID(44L);
 
         behandling.setFagsak(fagsak);
         behandling.setType(Behandlingstyper.NY_VURDERING);
         behandling.setRegistrertDato(Instant.now());
 
-        behandlingsresultat.setType(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
+        fagsak.setBehandlinger(Arrays.asList(behandling, forrigeBehandling, førsteBehandling));
+
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(NOW, NOW.plusMonths(1), null, null, null, null, null, null);
-        anmodningsperiode.setMedlPeriodeID(12L);
         behandlingsresultat.setAnmodningsperioder(Set.of(anmodningsperiode));
 
-        fagsak.setBehandlinger(Arrays.asList(behandling, forrigeBehandling));
-
-        when(behandlingsresultatService.hentBehandlingsresultat(forrigeBehandling.getId())).thenReturn(behandlingsresultat);
+        when(behandlingsresultatService.hentBehandlingsresultat(forrigeBehandling.getId())).thenReturn(lagBehandlingsresultat(Behandlingsresultattyper.IKKE_FASTSATT, null));
+        when(behandlingsresultatService.hentBehandlingsresultat(førsteBehandling.getId())).thenReturn(lagBehandlingsresultat(Behandlingsresultattyper.ANMODNING_OM_UNNTAK, førsteAnmodningsperiode));
 
 
         lagreAnmodningsperiodeIMedl.utfør(prosessinstans);
@@ -118,4 +127,15 @@ class LagreAnmodningsperiodeIMedlTest {
     private Set<Anmodningsperiode> lagAnmodningsperioderMedDato(LocalDate fom, LocalDate tom) {
         return Set.of(new Anmodningsperiode(fom, tom, null, null, null, null, null, null));
     }
+
+    public Behandlingsresultat lagBehandlingsresultat(Behandlingsresultattyper behandlingsresultattyper, Anmodningsperiode anmodningsperiode) {
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setType(behandlingsresultattyper);
+        if (anmodningsperiode != null) {
+            behandlingsresultat.setAnmodningsperioder(Set.of(anmodningsperiode));
+        }
+
+        return behandlingsresultat;
+    }
+
 }
