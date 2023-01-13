@@ -85,7 +85,7 @@ class BehandlingServiceTest {
 
     @BeforeEach
     public void setUp() {
-        behandlingService = new BehandlingService(behandlingRepository, tidligereMedlemsperiodeRepo, behandlingsresultatService, oppgaveService, lovligeKombinasjonerService, applicationEventPublisher, utledMottaksdato, fakeUnleash);
+        behandlingService = new BehandlingService(behandlingRepository, tidligereMedlemsperiodeRepo, behandlingsresultatService, oppgaveService, mottatteOpplysningerService, lovligeKombinasjonerService, applicationEventPublisher, utledMottaksdato, fakeUnleash);
 
         behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);

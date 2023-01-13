@@ -8,12 +8,14 @@ import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.dokument.DokumentView;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
+import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.bruker.SaksbehandlerService;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
@@ -42,17 +44,19 @@ public class BehandlingTjeneste {
     private final SaksbehandlerService saksbehandlerService;
     private final Aksesskontroll aksesskontroll;
     private final BehandlingsresultatService behandlingsresultatService;
+    private final MottatteOpplysningerService mottatteOpplysningerService;
 
     public BehandlingTjeneste(BehandlingService behandlingService,
                               SaksopplysningerTilDto saksopplysningerTilDto,
                               SaksbehandlerService saksbehandlerService,
                               Aksesskontroll aksesskontroll,
-                              BehandlingsresultatService behandlingsresultatService) {
+                              BehandlingsresultatService behandlingsresultatService, MottatteOpplysningerService mottatteOpplysningerService) {
         this.behandlingService = behandlingService;
         this.saksopplysningerTilDto = saksopplysningerTilDto;
         this.saksbehandlerService = saksbehandlerService;
         this.aksesskontroll = aksesskontroll;
         this.behandlingsresultatService = behandlingsresultatService;
+        this.mottatteOpplysningerService = mottatteOpplysningerService;
     }
 
     @PostMapping("{behandlingID}/endre")
@@ -104,7 +108,9 @@ public class BehandlingTjeneste {
         log.debug("Saksbehandler {} ber om å hente behandling {}.", saksbehandlerID, behandlingID);
         aksesskontroll.autoriser(behandlingID);
 
+        lagManglendeMottateOpplysningerForFTRL(behandlingID);
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
+
         behandlingService.oppdaterBehandlingsstatusHvisTilhørendeSaksbehandler(behandling, saksbehandlerID);
         BehandlingDto behandlingDto = tilBehandlingDto(behandling, saksbehandlerID);
         return ResponseEntity.ok(behandlingDto);
@@ -127,6 +133,19 @@ public class BehandlingTjeneste {
         var saksopplysningerDto = saksopplysningerTilDto.getSaksopplysningerDto(behandling.getSaksopplysninger());
         behandlingDto.setSaksopplysninger(saksopplysningerDto);
         return behandlingDto;
+    }
+
+    private void lagManglendeMottateOpplysningerForFTRL(long behandlingID) {
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        boolean erFtrl = behandling.getFagsak().getType() == Sakstyper.FTRL;
+
+        if (erFtrl && harIkkeMottatteOpplysninger(behandlingID)) {
+            mottatteOpplysningerService.opprettSøknad(behandling, new Periode(), new Soeknadsland());
+        }
+    }
+
+    private boolean harIkkeMottatteOpplysninger(long behandlingID) {
+        return !mottatteOpplysningerService.finnMottatteOpplysninger(behandlingID).isPresent();
     }
 
     private BehandlingOppsummeringDto tilOppsummeringDto(Behandling behandling) {
