@@ -8,7 +8,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.serializer.LovvalgBestemmelseDeserializer;
 import org.junit.jupiter.api.Test;
 
@@ -37,6 +39,10 @@ class DokgenBrevbestillingTest {
             node.put(a.getName(), a.getType().getSimpleName());
             if (a.getType().getSimpleName().equals("boolean")) {
                 node.put(a.getName(), false);
+            } else if (a.getType().getSimpleName().equals(Aktoersroller.class.getSimpleName())) {
+                node.put(a.getName(), Aktoersroller.OFFENTLIG_ETAT.name());
+            } else if (a.getType().getSimpleName().equals(Representerer.class.getSimpleName())) {
+                node.put(a.getName(), Representerer.BRUKER.name());
             } else {
                 node.put(a.getName(), a.getType().getSimpleName());
             }
