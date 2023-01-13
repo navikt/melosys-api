@@ -7,7 +7,10 @@ import com.nimbusds.jwt.JWT
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.PlainJWT
 import com.ninjasquad.springmockk.MockkBean
+import io.mockk.clearMocks
 import io.mockk.every
+import io.mockk.verify
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
 import no.nav.security.token.support.core.context.TokenValidationContext
 import no.nav.security.token.support.core.context.TokenValidationContextHolder
@@ -27,11 +30,19 @@ class OAuthMockServer(
     @MockkBean
     private lateinit var tokenValidationContextHolder: TokenValidationContextHolder
 
-    fun start() {
-        every { tokenValidationContextHolder.tokenValidationContext } returns tokenValidationContext()
-        every { tokenValidationContextHolder.tokenValidationContext = any() } returns Unit
-        azureMockServer.start()
+    private fun shouldUseSystemToken() = ThreadLocalAccessInfo.shouldUseSystemToken()
 
+    private fun getToken(): String = if (shouldUseSystemToken()) "--azure-token-from-system--" else "-- user_access_token --"
+
+    fun reset() {
+        clearMocks(tokenValidationContextHolder)
+        if (ThreadLocalAccessInfo.shouldUseSystemToken()) {
+            verify(exactly = 0) { tokenValidationContextHolder.tokenValidationContext }
+            verify(exactly = 0) { tokenValidationContextHolder.tokenValidationContext = any() }
+        } else {
+            every { tokenValidationContextHolder.tokenValidationContext } returns tokenValidationContext()
+            every { tokenValidationContextHolder.tokenValidationContext = any() } returns Unit
+        }
         azureMockServer.stubFor(
             WireMock.post("/oauth2/v2.0/token").willReturn(
                 WireMock.aResponse()
@@ -43,12 +54,20 @@ class OAuthMockServer(
                         "scope": "scope1 scope2",
                         "expires_in": 3952,
                         "ext_expires_in": 3952,
-                        "access_token": "-- user_access_token -- "
+                        "access_token": "${getToken()}"
                         }
                     """
                     )
             )
         )
+    }
+
+    fun start() {
+        azureMockServer.start()
+    }
+
+    fun stop() {
+        azureMockServer.stop()
     }
 
     private fun tokenValidationContext(): TokenValidationContext {
@@ -63,10 +82,6 @@ class OAuthMockServer(
                 .build()
         )
         return TokenValidationContext(mapOf("issuer1" to JwtToken(jwt.serialize())))
-    }
-
-    fun stop() {
-        azureMockServer.stop()
     }
 }
 

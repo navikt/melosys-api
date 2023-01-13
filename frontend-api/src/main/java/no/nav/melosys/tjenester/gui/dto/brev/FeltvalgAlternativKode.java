@@ -11,6 +11,7 @@ public enum FeltvalgAlternativKode {
     ETAT_SKATTEETATEN("Skatteetaten"),
     ETAT_SKATTEINNKREVER_UTLAND("Skatteinnkrever utland"),
     ETAT_HELFO("Helfo");
+    ENGELSK_FRITEKSTBREV("Request to remain subject to Norwegian legislation");
 
     private final String beskrivelse;
 

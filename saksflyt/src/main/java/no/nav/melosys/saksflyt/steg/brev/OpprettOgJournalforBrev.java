@@ -216,15 +216,18 @@ public class OpprettOgJournalforBrev implements StegBehandler {
             }).toList();
     }
 
-    public String utledJournalføringsTittel(Behandling behandling, DokumentproduksjonsInfo dokumentproduksjonsInfo, DokgenBrevbestilling brevbestilling, Aktoer mottaker) {
+    private String utledJournalføringsTittel(Behandling behandling, DokumentproduksjonsInfo dokumentproduksjonsInfo, DokgenBrevbestilling brevbestilling, Aktoer mottaker) {
         if (brevbestilling instanceof FritekstbrevBrevbestilling fritekstbrevBrevbestilling) {
-            String fritekstTittel = fritekstbrevBrevbestilling.getFritekstTittel();
+            String fritekstTittel = fritekstbrevBrevbestilling.getDokumentTittel() != null ? fritekstbrevBrevbestilling.getDokumentTittel() : fritekstbrevBrevbestilling.getFritekstTittel();
             if (isEmpty(fritekstTittel)) {
                 throw new FunksjonellException("Tittel til fritekstbrev mangler, behandlingId:" + brevbestilling.getBehandlingId());
             }
+            if("Request to remain subject to Norwegian legislation".equals(fritekstTittel)){
+                return "Søknad om unntak";
+            }
             return fritekstTittel;
         }
-        if (List.of(TRYGDEAVTALE_GB, TRYGDEAVTALE_US, TRYGDEAVTALE_CAN).contains(brevbestilling.getProduserbartdokument())) {
+        if (List.of(TRYGDEAVTALE_GB, TRYGDEAVTALE_US, TRYGDEAVTALE_CAN, TRYGDEAVTALE_AU).contains(brevbestilling.getProduserbartdokument())) {
             return dokumentNavnService.utledDokumentNavn(behandling, dokumentproduksjonsInfo, mottaker);
         }
         return dokumentproduksjonsInfo.journalføringsTittel();

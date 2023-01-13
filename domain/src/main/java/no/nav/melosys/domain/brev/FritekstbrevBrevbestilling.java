@@ -6,6 +6,7 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
     private boolean kontaktopplysninger;
     private String navnFullmektig;
     private boolean brukerSkalHaKopi;
+    private String dokumentTittel;
 
     public FritekstbrevBrevbestilling() {
         super();
@@ -19,6 +20,7 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
         this.kontaktopplysninger = builder.kontaktopplysninger;
         this.navnFullmektig = builder.navnFullmektig;
         this.brukerSkalHaKopi = builder.brukerSkalHaKopi;
+        this.dokumentTittel = builder.dokumentTittel;
     }
 
     public String getFritekstTittel() {
@@ -41,6 +43,10 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
         return brukerSkalHaKopi;
     }
 
+    public String getDokumentTittel() {
+        return dokumentTittel;
+    }
+
     public Builder toBuilder() {
         return new Builder(this);
     }
@@ -51,6 +57,7 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
         private boolean kontaktopplysninger;
         private String navnFullmektig;
         private boolean brukerSkalHaKopi;
+        private String dokumentTittel;
 
         public Builder() {
         }
@@ -62,6 +69,7 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
             this.kontaktopplysninger = fritekstbrevBrevbestilling.kontaktopplysninger;
             this.navnFullmektig = fritekstbrevBrevbestilling.navnFullmektig;
             this.brukerSkalHaKopi = fritekstbrevBrevbestilling.brukerSkalHaKopi;
+            this.dokumentTittel = fritekstbrevBrevbestilling.dokumentTittel;
         }
 
         public Builder medFritekstTittel(String fritekstTittel) {
@@ -86,6 +94,11 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
 
         public Builder medBrukerSkalHaKopi(boolean brukerSkalHaKopi) {
             this.brukerSkalHaKopi = brukerSkalHaKopi;
+            return this;
+        }
+
+        public Builder medDokumentTittel(String dokumentTittel){
+            this.dokumentTittel = dokumentTittel;
             return this;
         }
 

@@ -29,7 +29,7 @@ public class FaktureringskomponentenConsumerProducer implements WebClientConfig 
     ) {
         return new FaktureringskomponentenConsumer(webClientBuilder
             .baseUrl(url)
-            .filter(genericAuthFilterFactory.getFilter("faktureringskomponenten"))
+            .filter(genericAuthFilterFactory.getAzureFilter("faktureringskomponenten"))
             .filter(correlationIdOutgoingFilter)
             .filter(errorFilter("Kall mot Faktureringskomponenten feilet"))
             .defaultHeaders(this::defaultHeaders)
