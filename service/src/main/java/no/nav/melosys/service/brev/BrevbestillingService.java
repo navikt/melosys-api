@@ -1,5 +1,10 @@
 package no.nav.melosys.service.brev;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
@@ -26,15 +31,9 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper.*;
 
@@ -83,6 +82,21 @@ public class BrevbestillingService {
     }
 
     @Transactional
+    public List<MuligMottakerDto> hentMuligeMottakereEtater(Produserbaredokumenter produserbaredokumenter,
+                                                            long behandlingId,
+                                                            List<String> orgnrEtater) {
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
+        return orgnrEtater.stream()
+            .map(orgnr -> new MuligMottakerDto.Builder()
+                .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, produserbaredokumenter, OFFENTLIG_ETAT))
+                .medMottakerNavn(hentMottakerNavn(produserbaredokumenter, behandling, OFFENTLIG_ETAT, orgnr))
+                .medRolle(OFFENTLIG_ETAT)
+                .medOrgnr(orgnr)
+                .build())
+            .toList();
+    }
+
+    @Transactional
     public MuligeMottakereDto hentMuligeMottakere(Produserbaredokumenter produserbaredokumenter, long behandlingId, String orgnrTilValgtArbeidsgiver) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         Mottakerliste mottakerliste = brevmottakerService.hentMottakerliste(produserbaredokumenter, behandlingId);
@@ -113,7 +127,7 @@ public class BrevbestillingService {
                     return orgDokument.getNavn();
                 }
             }
-            case ARBEIDSGIVER, VIRKSOMHET -> {
+            case ARBEIDSGIVER, VIRKSOMHET, OFFENTLIG_ETAT -> {
                 var orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(orgnrTilValgtArbeidsgiver).getDokument();
                 return orgDokument.getNavn();
             }
