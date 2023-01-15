@@ -14,13 +14,15 @@ import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
+import org.springframework.test.context.ActiveProfiles
 
+@ActiveProfiles("test")
 @Import(FakeUnleash::class)
 class MottatteOpplysningerHeleContextSimpleIT(
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val mottatteOpplysningerRepository: MottatteOpplysningerRepository,
     @Autowired private val unleash: FakeUnleash,
-) : ComponentTestBase() {
+)  : LazyInitializationConfig, KafkaConfig, OracleTestContainerBase() {
 
     @RelaxedMockK
     private lateinit var joarkFasade: JoarkFasade

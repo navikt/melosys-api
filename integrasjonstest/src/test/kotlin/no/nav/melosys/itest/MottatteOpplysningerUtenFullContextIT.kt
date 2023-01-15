@@ -14,7 +14,9 @@ import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
+import org.springframework.test.context.ActiveProfiles
 
+@ActiveProfiles("test")
 @Import(FakeUnleash::class)
 class MottatteOpplysningerUtenFullContextIT(
     @Autowired private val behandlingRepository: BehandlingRepository,
