@@ -16,17 +16,18 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 
 @Import(FakeUnleash::class)
-internal class MottatteOpplysningerUtenFullContextIT(
-    @Autowired
-    private val behandlingRepository: BehandlingRepository,
-    @Autowired
-    private val mottatteOpplysningerRepository: MottatteOpplysningerRepository,
-    @Autowired
-    private val unleash: FakeUnleash,
+class MottatteOpplysningerUtenFullContextIT(
+    @Autowired private val behandlingRepository: BehandlingRepository,
+    @Autowired private val mottatteOpplysningerRepository: MottatteOpplysningerRepository,
+    @Autowired private val unleash: FakeUnleash,
 ) : DataJpaTestBase() {
 
     @RelaxedMockK
     private lateinit var joarkFasade: JoarkFasade
+
+    private val mottatteOpplysningerService by lazy {
+        MottatteOpplysningerService(mottatteOpplysningerRepository, behandlingService, joarkFasade, unleash)
+    }
 
     private val behandlingService by lazy {
         BehandlingService(
@@ -36,23 +37,14 @@ internal class MottatteOpplysningerUtenFullContextIT(
         )
     }
 
-    private val mottatteOpplysningerService by lazy {
-        MottatteOpplysningerService(mottatteOpplysningerRepository, behandlingService, joarkFasade, unleash)
-    }
-
     @Test
     fun `legg til mottate opplysinger på eksisterende behanding`() {
-
         unleash.enable(ToggleName.FOLKETRYGDEN_MVP)
 
         val behandlingID: Long = 61 // Velg en id som du alt har i databasen - lag med MottatteOpplysningerIT
+
         val behandling = behandlingRepository.findById(behandlingID).get()
-
-        print(behandling)
-
         // Denne funker uten å kaste InvalidDataAccessApiUsageException: detached entity passed to persist
         mottatteOpplysningerService.opprettSøknad(behandling, Periode(), Soeknadsland())
     }
-
-
 }

@@ -4,7 +4,6 @@ import io.mockk.impl.annotations.RelaxedMockK
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
-import no.nav.melosys.featuretoggle.LocalUnleash
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.repository.BehandlingRepository
@@ -16,7 +15,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 
-@Import(LocalUnleash::class)
+@Import(FakeUnleash::class)
 class MottatteOpplysningerHeleContextSimpleIT(
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val mottatteOpplysningerRepository: MottatteOpplysningerRepository,
@@ -44,8 +43,8 @@ class MottatteOpplysningerHeleContextSimpleIT(
 
         val behandlingID: Long = 61 // Velg en id som du alt har i databasen - lag med MottatteOpplysningerIT
 
-        val behandling = behandlingRepository.findById(behandlingID)
+        val behandling = behandlingRepository.findById(behandlingID).get()
         // kaster InvalidDataAccessApiUsageException: detached entity passed to persist
-        mottatteOpplysningerService.opprettSøknad(behandling.get(), Periode(), Soeknadsland())
+        mottatteOpplysningerService.opprettSøknad(behandling, Periode(), Soeknadsland())
     }
 }
