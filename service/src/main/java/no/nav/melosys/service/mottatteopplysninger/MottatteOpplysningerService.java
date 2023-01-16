@@ -16,7 +16,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.MottatteOpplysningerRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -37,16 +37,18 @@ public class MottatteOpplysningerService {
     private static final String VERSJON_SOEKNAD_GRUNNLAG = "1.2";
 
     private final MottatteOpplysningerRepository mottatteOpplysningerRepository;
+    private final FTRLMottatteOpplysningerService ftrlMottatteOpplysningerService;
     private final BehandlingService behandlingService;
     private final JoarkFasade joarkFasade;
 
     private final Unleash unleash;
 
     public MottatteOpplysningerService(MottatteOpplysningerRepository mottatteOpplysningerRepository,
-                                       BehandlingService behandlingService,
+                                       FTRLMottatteOpplysningerService ftrlMottatteOpplysningerService, BehandlingService behandlingService,
                                        JoarkFasade joarkFasade,
                                        Unleash unleash) {
         this.mottatteOpplysningerRepository = mottatteOpplysningerRepository;
+        this.ftrlMottatteOpplysningerService = ftrlMottatteOpplysningerService;
         this.behandlingService = behandlingService;
         this.joarkFasade = joarkFasade;
         this.unleash = unleash;
@@ -55,7 +57,13 @@ public class MottatteOpplysningerService {
     @Transactional(readOnly = true)
     public MottatteOpplysninger hentMottatteOpplysninger(long behandlingID) {
         return finnMottatteOpplysninger(behandlingID)
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke mottatteOpplysninger for behandling " + behandlingID));
+            .orElse(getOpprettSøknadOgleggTilEksisterendeBehandlingOmMangler(behandlingID));
+    }
+
+    private MottatteOpplysninger getOpprettSøknadOgleggTilEksisterendeBehandlingOmMangler(long behandlingID) {
+        ftrlMottatteOpplysningerService.opprettSøknadOgleggTilEksisterendeBehandlingOmMangler(this, behandlingID);
+        return finnMottatteOpplysninger(behandlingID).orElseThrow(() ->
+            new TekniskException("Finner ikke mottatteOpplysninger for behandling - selv om den nettopp ble laget " + behandlingID));
     }
 
     @Transactional(readOnly = true)

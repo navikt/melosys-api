@@ -1,35 +1,51 @@
 package no.nav.melosys.itest
 
-import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import no.finn.unleash.FakeUnleash
-import no.nav.melosys.domain.mottatteopplysninger.data.Periode
-import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.RegistreringsInfo
+import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.repository.BehandlingRepository
+import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.repository.MottatteOpplysningerRepository
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.UtledMottaksdato
+import no.nav.melosys.service.mottatteopplysninger.FTRLMottatteOpplysningerService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
+import java.time.Instant
+import java.time.LocalDate
 
 @ActiveProfiles("test")
-@Import(FakeUnleash::class)
-class MottatteOpplysningerUtenFullContextIT(
+@Import(FakeUnleash::class, FTRLMottatteOpplysningerService::class)
+@ExtendWith(MockKExtension::class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+internal class MottatteOpplysningerUtenFullContextIT(
     @Autowired private val behandlingRepository: BehandlingRepository,
+    @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val mottatteOpplysningerRepository: MottatteOpplysningerRepository,
+    @Autowired private val ftrlMottatteOpplysningerService: FTRLMottatteOpplysningerService,
     @Autowired private val unleash: FakeUnleash,
 ) : DataJpaTestBase() {
 
-    @RelaxedMockK
+    @MockK
     private lateinit var joarkFasade: JoarkFasade
-
-    private val mottatteOpplysningerService by lazy {
-        MottatteOpplysningerService(mottatteOpplysningerRepository, behandlingService, joarkFasade, unleash)
-    }
 
     private val behandlingService by lazy {
         BehandlingService(
@@ -39,14 +55,56 @@ class MottatteOpplysningerUtenFullContextIT(
         )
     }
 
+    private val mottatteOpplysningerService by lazy {
+        MottatteOpplysningerService(
+            mottatteOpplysningerRepository,
+            ftrlMottatteOpplysningerService,
+            behandlingService,
+            joarkFasade,
+            unleash
+        )
+    }
+
+    @BeforeAll
+    fun before() {
+        every { joarkFasade.hentMottaksDatoForJournalpost(any()) } returns LocalDate.now()
+    }
+
     @Test
     fun `legg til mottate opplysinger på eksisterende behanding`() {
         unleash.enable(ToggleName.FOLKETRYGDEN_MVP)
 
-        val behandlingID: Long = 61 // Velg en id som du alt har i databasen - lag med MottatteOpplysningerIT
+        val behandling = lagFagsakMedBehandlinge()
 
-        val behandling = behandlingRepository.findById(behandlingID).get()
         // Denne funker uten å kaste InvalidDataAccessApiUsageException: detached entity passed to persist
-        mottatteOpplysningerService.opprettSøknad(behandling, Periode(), Soeknadsland())
+        mottatteOpplysningerService.hentMottatteOpplysninger(behandling.id)
     }
+
+    private fun lagFagsakMedBehandlinge(): Behandling {
+        Fagsak().apply {
+            saksnummer = "MEL-1001"
+            type = Sakstyper.FTRL
+            status = Saksstatuser.OPPRETTET
+            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            leggTilRegisteringInfo()
+        }.also { fsak ->
+            fagsakRepository.save(fsak)
+
+            return Behandling().apply {
+                fagsak = fsak
+                leggTilRegisteringInfo()
+                behandlingsfrist = LocalDate.now().plusYears(1)
+                status = Behandlingsstatus.OPPRETTET
+                type = Behandlingstyper.FØRSTEGANG
+                tema = Behandlingstema.YRKESAKTIV
+            }.also { behandlingRepository.save(it) }
+        }
+    }
+
+    private fun RegistreringsInfo.leggTilRegisteringInfo() {
+        registrertDato = Instant.now()
+        endretDato = Instant.now()
+        endretAv = "bla"
+    }
+
 }

@@ -43,6 +43,8 @@ class MottatteOpplysningerServiceTest {
     private BehandlingService behandlingService;
     @Mock
     private JoarkFasade joarkFasade;
+    @Mock
+    private FTRLMottatteOpplysningerService ftrlMottatteOpplysningerService;
 
     private MottatteOpplysningerService mottatteOpplysningerService;
 
@@ -55,7 +57,7 @@ class MottatteOpplysningerServiceTest {
 
     @BeforeEach
     public void setup() {
-        mottatteOpplysningerService = new MottatteOpplysningerService(mottatteOpplysningerRepository, behandlingService, joarkFasade, unleash);
+        mottatteOpplysningerService = new MottatteOpplysningerService(mottatteOpplysningerRepository, ftrlMottatteOpplysningerService, behandlingService, joarkFasade, unleash);
 
         unleash.enableAll();
     }
