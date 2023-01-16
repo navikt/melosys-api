@@ -69,7 +69,7 @@ public class BrevmalListeBygger {
             if (!SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"))) {
                 mottakere.add(lagMottakerForRolle(behandlingId, ARBEIDSGIVER));
             }
-            if (fagsak.erSakstypeTrygdeavtale() && behandling.harLand()) {
+            if (unleash.isEnabled("melosys.trygdeavtale.fritekstbrev") && fagsak.erSakstypeTrygdeavtale() && behandling.harLand()) {
                 mottakere.add(lagMottakerForRolle(behandlingId, TRYGDEMYNDIGHET));
             }
             mottakere.add(lagMottakerAnnenOrganisasjon(ARBEIDSGIVER));
@@ -215,6 +215,10 @@ public class BrevmalListeBygger {
     }
 
     private BrevmalTypeDto lagBrevmalTypeDtoForEngelskFritekst(Produserbaredokumenter produserbartdokument, long behandlingId) {
+        if (!unleash.isEnabled("melosys.trygdeavtale.fritekstbrev")) {
+            return null;
+        }
+
         return new BrevmalTypeDto.Builder()
             .medType(produserbartdokument)
             .medFelter(asList(

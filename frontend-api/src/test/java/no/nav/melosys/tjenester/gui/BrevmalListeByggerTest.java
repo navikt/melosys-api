@@ -70,6 +70,7 @@ class BrevmalListeByggerTest {
         BrevbestillingService brevbestillingService = new BrevbestillingService(mockBrevmottakerService,
             mockDokServiceFasade, mockBehandlingService, mockEregFasade, mockKontaktopplysningService,
             mockPersondataFasade, mockDokumentNavnService, utenlandskMyndighetService);
+        unleash.enable("melosys.trygdeavtale.fritekstbrev");
         brevmalListeBygger = new BrevmalListeBygger(brevbestillingService, mockBehandlingService, unleash);
     }
 
