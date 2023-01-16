@@ -59,9 +59,7 @@ internal class MottatteOpplysningerUtenFullContextIT(
         MottatteOpplysningerService(
             mottatteOpplysningerRepository,
             ftrlMottatteOpplysningerService,
-            behandlingService,
-            joarkFasade,
-            unleash
+            behandlingService, joarkFasade, unleash
         )
     }
 
@@ -97,6 +95,8 @@ internal class MottatteOpplysningerUtenFullContextIT(
                 status = Behandlingsstatus.OPPRETTET
                 type = Behandlingstyper.FØRSTEGANG
                 tema = Behandlingstema.YRKESAKTIV
+                initierendeJournalpostId = "1223"
+
             }.also { behandlingRepository.save(it) }
         }
     }
@@ -106,5 +106,4 @@ internal class MottatteOpplysningerUtenFullContextIT(
         endretDato = Instant.now()
         endretAv = "bla"
     }
-
 }

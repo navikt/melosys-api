@@ -18,7 +18,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.mottatteopplysninger.*;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
-import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.MottatteOpplysningerRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -71,9 +71,9 @@ class MottatteOpplysningerServiceTest {
 
     @Test
     void hentMottatteOpplysningerForBehandlingID_finnesIkke_kastException() {
-        assertThatExceptionOfType(IkkeFunnetException.class)
+        assertThatExceptionOfType(TekniskException.class)
             .isThrownBy(() -> mottatteOpplysningerService.hentMottatteOpplysninger(1))
-            .withMessageContaining("Finner ikke mottatteOpplysninger for behandling 1");
+            .withMessageContaining("Finner ikke mottatteOpplysninger for behandling - selv om den nettopp ble laget 1");
     }
 
     @Test
