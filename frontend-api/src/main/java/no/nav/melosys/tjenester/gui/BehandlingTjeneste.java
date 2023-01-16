@@ -12,7 +12,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.bruker.SaksbehandlerService;
-import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
@@ -41,19 +40,17 @@ public class BehandlingTjeneste {
     private final SaksbehandlerService saksbehandlerService;
     private final Aksesskontroll aksesskontroll;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final MottatteOpplysningerService mottatteOpplysningerService;
 
     public BehandlingTjeneste(BehandlingService behandlingService,
                               SaksopplysningerTilDto saksopplysningerTilDto,
                               SaksbehandlerService saksbehandlerService,
                               Aksesskontroll aksesskontroll,
-                              BehandlingsresultatService behandlingsresultatService, MottatteOpplysningerService mottatteOpplysningerService) {
+                              BehandlingsresultatService behandlingsresultatService) {
         this.behandlingService = behandlingService;
         this.saksopplysningerTilDto = saksopplysningerTilDto;
         this.saksbehandlerService = saksbehandlerService;
         this.aksesskontroll = aksesskontroll;
         this.behandlingsresultatService = behandlingsresultatService;
-        this.mottatteOpplysningerService = mottatteOpplysningerService;
     }
 
     @PostMapping("{behandlingID}/endre")
