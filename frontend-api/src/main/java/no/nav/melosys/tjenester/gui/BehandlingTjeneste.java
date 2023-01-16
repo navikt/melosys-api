@@ -8,10 +8,7 @@ import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.dokument.DokumentView;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
-import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.bruker.SaksbehandlerService;
@@ -108,7 +105,6 @@ public class BehandlingTjeneste {
         log.debug("Saksbehandler {} ber om å hente behandling {}.", saksbehandlerID, behandlingID);
         aksesskontroll.autoriser(behandlingID);
 
-        lagManglendeMottateOpplysningerForFTRL(behandlingID);
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
 
         behandlingService.oppdaterBehandlingsstatusHvisTilhørendeSaksbehandler(behandling, saksbehandlerID);
@@ -133,19 +129,6 @@ public class BehandlingTjeneste {
         var saksopplysningerDto = saksopplysningerTilDto.getSaksopplysningerDto(behandling.getSaksopplysninger());
         behandlingDto.setSaksopplysninger(saksopplysningerDto);
         return behandlingDto;
-    }
-
-    private void lagManglendeMottateOpplysningerForFTRL(long behandlingID) {
-        Behandling behandling = behandlingService.hentBehandling(behandlingID);
-        boolean erFtrl = behandling.getFagsak().getType() == Sakstyper.FTRL;
-
-        if (erFtrl && harIkkeMottatteOpplysninger(behandlingID)) {
-            mottatteOpplysningerService.opprettSøknad(behandling, new Periode(), new Soeknadsland());
-        }
-    }
-
-    private boolean harIkkeMottatteOpplysninger(long behandlingID) {
-        return !mottatteOpplysningerService.finnMottatteOpplysninger(behandlingID).isPresent();
     }
 
     private BehandlingOppsummeringDto tilOppsummeringDto(Behandling behandling) {

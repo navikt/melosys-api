@@ -16,6 +16,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.MottatteOpplysningerRepository;
@@ -57,7 +58,7 @@ public class MottatteOpplysningerService {
     @Transactional(readOnly = true)
     public MottatteOpplysninger hentMottatteOpplysninger(long behandlingID) {
         return finnMottatteOpplysninger(behandlingID)
-            .orElse(getOpprettSøknadOgleggTilEksisterendeBehandlingOmMangler(behandlingID));
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke mottatteOpplysninger for behandling " + behandlingID));
     }
 
     private MottatteOpplysninger getOpprettSøknadOgleggTilEksisterendeBehandlingOmMangler(long behandlingID) {
@@ -188,7 +189,7 @@ public class MottatteOpplysningerService {
         mottatteOpplysninger.setEksternReferanseID(eksternReferanseID);
         mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
-        mottatteOpplysningerRepository.save(mottatteOpplysninger);
+        mottatteOpplysningerRepository.saveAndFlush(mottatteOpplysninger);
     }
 
     // Gjør mottaksdato nødvendig for kun folketrygden da nåværende journalpost-oppslag kun støtter inngående
