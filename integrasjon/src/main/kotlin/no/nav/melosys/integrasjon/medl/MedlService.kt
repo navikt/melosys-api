@@ -72,6 +72,14 @@ class MedlService(
         )
     }
 
+    fun oppdaterPeriodeUnderAvklaring(
+        periodeOmLovvalg: PeriodeOmLovvalg?,
+        kildedokumenttypeMedl: KildedokumenttypeMedl?
+    ) {
+        oppdaterPeriode(periodeOmLovvalg!!, PeriodestatusMedl.UAVK, LovvalgMedl.UAVK, kildedokumenttypeMedl!!)
+    }
+
+
     fun opprettPeriodeForeløpig(
         fnr: String?, periodeOmLovvalg: PeriodeOmLovvalg?, kildedokumenttypeMedl: KildedokumenttypeMedl?
     ): Long? {
@@ -154,24 +162,24 @@ class MedlService(
         )
 
     private fun oppdaterPeriode(
-        lovvalgsperiode: Lovvalgsperiode, periodestatusMedl: PeriodestatusMedl,
+        periodeOmLovvalg: PeriodeOmLovvalg, periodestatusMedl: PeriodestatusMedl,
         lovvalgMedl: LovvalgMedl, kildedokumenttypeMedl: KildedokumenttypeMedl
     ) {
-        val medlPeriodeID = lovvalgsperiode.medlPeriodeID
+        val medlPeriodeID = periodeOmLovvalg.medlPeriodeID
             ?: throw TekniskException("Det er ikke lagret noen medlPeriodeID på lovvalgsperiode som skal oppdateres i MEDL")
         val eksisterendePeriode = hentEksisterendePeriode(medlPeriodeID)
 
         val request = MedlemskapsunntakForPut(
             unntakId = medlPeriodeID,
-            fraOgMed = lovvalgsperiode.fom,
-            tilOgMed = lovvalgsperiode.tom,
+            fraOgMed = periodeOmLovvalg.fom,
+            tilOgMed = periodeOmLovvalg.tom,
             status = periodestatusMedl.kode,
-            dekning = MedlPeriodeKonverter.tilMedlTrygdeDekningEos(lovvalgsperiode.dekning).kode,
-            lovvalgsland = IsoLandkodeKonverterer.tilIso3(lovvalgsperiode.lovvalgsland.kode),
+            dekning = MedlPeriodeKonverter.tilMedlTrygdeDekningEos(periodeOmLovvalg.dekning).kode,
+            lovvalgsland = IsoLandkodeKonverterer.tilIso3(periodeOmLovvalg.lovvalgsland.kode),
             lovvalg = lovvalgMedl.kode,
             grunnlag = MedlPeriodeKonverter.tilGrunnlagMedltype(
                 MedlPeriodeKonverter.hentLovvalgBestemmelse(
-                    lovvalgsperiode
+                    periodeOmLovvalg
                 )
             ).kode,
             sporingsinformasjon = MedlemskapsunntakForPut.SporingsinformasjonForPut(

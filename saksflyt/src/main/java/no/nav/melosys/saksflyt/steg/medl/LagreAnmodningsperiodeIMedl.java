@@ -1,7 +1,12 @@
 package no.nav.melosys.saksflyt.steg.medl;
 
+import java.util.Collection;
+import java.util.Optional;
+
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -12,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.ANMODNING_OM_UNNTAK;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.LAGRE_ANMODNINGSPERIODE_MEDL;
 
 @Component
@@ -39,8 +45,30 @@ public class LagreAnmodningsperiodeIMedl implements StegBehandler {
         Anmodningsperiode anmodningsperiode = behandlingsresultatService.hentBehandlingsresultat(behandlingID).hentAnmodningsperiode();
         if (PeriodeRegler.feilIPeriode(anmodningsperiode.getFom(), anmodningsperiode.getTom())) {
             log.info("Lagrer ikke anmodningsperiode i MEDL pga ulogisk periode. BehID={}", behandlingID);
-        } else {
-            medlPeriodeService.opprettPeriodeUnderAvklaring(anmodningsperiode, behandlingID, behandling.erBehandlingAvSed());
+            return;
         }
+        if (behandling.erNyVurdering() && !behandling.erBehandlingAvSed()) {
+            anmodningsperiode.setMedlPeriodeID(finnOpprinneligMedlPeriodeID(behandling).orElse(null));
+        }
+        opprettEllerOppdaterMedlPeriode(behandling, anmodningsperiode);
+    }
+
+    private void opprettEllerOppdaterMedlPeriode(Behandling behandling, Anmodningsperiode anmodningsperiode) {
+        if (anmodningsperiode.getMedlPeriodeID() == null) {
+            medlPeriodeService.opprettPeriodeUnderAvklaring(anmodningsperiode, behandling.getId(), behandling.erBehandlingAvSed());
+        } else {
+            medlPeriodeService.oppdaterPeriodeUnderAvklaring(anmodningsperiode, behandling.erBehandlingAvSed());
+        }
+    }
+
+    private Optional<Long> finnOpprinneligMedlPeriodeID(Behandling nyBehandling) {
+        Fagsak fagsak = nyBehandling.getFagsak();
+        return fagsak.hentBehandlingerSortertSynkendePåRegistrertDato().stream()
+            .filter(behandling -> !behandling.getId().equals(nyBehandling.getId()))
+            .map(behandling -> behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
+            .map(Behandlingsresultat::finnAnmodningsperiode)
+            .flatMap(Optional::stream)
+            .map(Anmodningsperiode::getMedlPeriodeID)
+            .findFirst();
     }
 }
