@@ -69,7 +69,7 @@ public class BrevmalListeBygger {
             if (!SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"))) {
                 mottakere.add(lagMottakerForRolle(behandlingId, ARBEIDSGIVER));
             }
-            if (fagsak.erSakstypeTrygdeavtale()) {
+            if (fagsak.erSakstypeTrygdeavtale() && behandling.harLand()) {
                 mottakere.add(lagMottakerForRolle(behandlingId, TRYGDEMYNDIGHET));
             }
             mottakere.add(lagMottakerAnnenOrganisasjon(ARBEIDSGIVER));
