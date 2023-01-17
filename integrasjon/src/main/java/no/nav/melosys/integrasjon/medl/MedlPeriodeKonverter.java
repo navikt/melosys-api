@@ -26,11 +26,8 @@ public final class MedlPeriodeKonverter {
     private static final Map<Folketrygdloven_kap2_bestemmelser, GrunnlagMedl> ftrlKap2BestemmelserGrunnLagMedlTabell;
 
     private static final Collection<LovvalgBestemmelse> TILLEGGSBESTEMMELSER_MAPPES_TIL_MEDL = Set.of(
-        Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_2,
         Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1,
-        Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5,
-        Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A,
-        Tilleggsbestemmelser_883_2004.FO_883_2004_ART87_8
+        Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5
     );
 
     static {
@@ -58,10 +55,6 @@ public final class MedlPeriodeKonverter {
         tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART15, GrunnlagMedl.FO_15);
         tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1, GrunnlagMedl.FO_16);
         tbl.put(Lovvalgbestemmelser_987_2009.FO_987_2009_ART14_11, GrunnlagMedl.FO_987_2009_14_11);
-        tbl.put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A, GrunnlagMedl.FO_883_2004_ART87_8);
-        tbl.put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87_8, GrunnlagMedl.FO_883_2004_ART87A);
-        tbl.put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_2, GrunnlagMedl.FO_883_2004_ART11_2);
-
 
         tbl.put(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1, GrunnlagMedl.Storbrit_NIrland_6_1);
         tbl.put(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_5, GrunnlagMedl.Storbrit_NIrland_6_5);
