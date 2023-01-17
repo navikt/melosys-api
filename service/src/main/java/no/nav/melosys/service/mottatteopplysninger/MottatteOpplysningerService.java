@@ -57,7 +57,7 @@ public class MottatteOpplysningerService {
     @Transactional(readOnly = true)
     public MottatteOpplysninger hentMottatteOpplysninger(long behandlingID) {
         return finnMottatteOpplysninger(behandlingID)
-            .orElse(opprettSøknadOgleggTilEksisterendeBehandlingOmMangler(behandlingID));
+            .orElseGet(() -> opprettSøknadOgleggTilEksisterendeBehandlingOmMangler(behandlingID));
     }
 
     private MottatteOpplysninger opprettSøknadOgleggTilEksisterendeBehandlingOmMangler(long behandlingID) {
