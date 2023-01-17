@@ -26,11 +26,8 @@ public final class MedlPeriodeKonverter {
     private static final Map<Folketrygdloven_kap2_bestemmelser, GrunnlagMedl> ftrlKap2BestemmelserGrunnLagMedlTabell;
 
     private static final Collection<LovvalgBestemmelse> TILLEGGSBESTEMMELSER_MAPPES_TIL_MEDL = Set.of(
-        Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_2,
         Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1,
-        Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5,
-        Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A,
-        Tilleggsbestemmelser_883_2004.FO_883_2004_ART87_8
+        Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5
     );
 
     static {
