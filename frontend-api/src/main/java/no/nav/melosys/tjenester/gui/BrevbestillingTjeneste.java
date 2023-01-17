@@ -57,16 +57,6 @@ public class BrevbestillingTjeneste {
         return brevbestillingService.hentMuligeMottakere(hentMuligeMottakereRequestDto.produserbartdokument(), behandlingID, hentMuligeMottakereRequestDto.orgnr());
     }
 
-    @PostMapping(value = "/mulige-mottakere-etater/{behandlingID}", produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Henter alle mulige mottakere for valgte etater")
-    public List<MuligMottakerDto> hentTilgjengeligeMottakereEtater(@PathVariable long behandlingID,
-                                                                   @RequestBody HentMuligeMottakereEtaterRequestDto hentMuligeMottakereRequestDto) {
-        aksesskontroll.autoriser(behandlingID);
-        return brevbestillingService.hentMuligeMottakereEtater(hentMuligeMottakereRequestDto.produserbartdokument(),
-            behandlingID, hentMuligeMottakereRequestDto.orgnrEtater());
-    }
-
-
     @PostMapping(value = "pdf/brev/utkast/{behandlingID}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_PDF_VALUE)
     @ApiOperation(value = "Produser utkast")
     public ResponseEntity<byte[]> produserUtkast(@PathVariable long behandlingID,
@@ -90,6 +80,17 @@ public class BrevbestillingTjeneste {
         brevbestillingService.produserBrev(behandlingID, brevbestillingRequest);
     }
 
+    @PostMapping(value = "/mulige-mottakere-etater/{behandlingID}", produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Henter alle mulige mottakere for valgte etater")
+    public List<MuligMottakerDto> hentTilgjengeligeMottakereEtater(@PathVariable long behandlingID,
+                                                                   @RequestBody HentMuligeMottakereEtaterRequestDto hentMuligeMottakereRequestDto) {
+        aksesskontroll.autoriser(behandlingID);
+        return brevbestillingService.hentMuligeMottakereEtater(hentMuligeMottakereRequestDto.produserbartdokument(),
+            behandlingID, hentMuligeMottakereRequestDto.orgnrEtater());
+    }
+
+
+    // TODO: lurer på om vi burde bruke samme API "/mulige-mottakere-etater" bare uten behandlingID.
     @GetMapping(value = "/tilgjengelige-offentlige-etater", produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Henter alle tilgjengelige offentlige etater",
         response = Etat.class,

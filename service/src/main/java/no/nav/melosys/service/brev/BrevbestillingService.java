@@ -17,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
@@ -114,12 +115,12 @@ public class BrevbestillingService {
             .build();
     }
 
-    private String hentMottakerNavn(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller hovedmottaker, String orgnrTilValgtArbeidsgiver) {
+    private String hentMottakerNavn(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller hovedmottaker, String orgnr) {
         switch (hovedmottaker) {
             case BRUKER -> {
                 Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(hovedmottaker), behandling);
                 if (avklartMottaker.getRolle() == BRUKER) {
-                    return hentSammensattNavn(behandling);
+                    return persondataFasade.hentSammensattNavn(behandling.getFagsak().hentBrukersAktørID());
                 } else if (avklartMottaker.erPerson()) {
                     return persondataFasade.hentSammensattNavn(avklartMottaker.getPersonIdent());
                 } else {
@@ -128,8 +129,13 @@ public class BrevbestillingService {
                 }
             }
             case ARBEIDSGIVER, VIRKSOMHET, OFFENTLIG_ETAT -> {
-                var orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(orgnrTilValgtArbeidsgiver).getDokument();
-                return orgDokument.getNavn();
+                var saksopplysning = eregFasade.finnOrganisasjon(orgnr);
+                if (saksopplysning.isPresent()) {
+                    var orgDokument = (OrganisasjonDokument) saksopplysning.get().getDokument();
+                    return orgDokument.getNavn();
+                } else {
+                    throw new IkkeFunnetException("Kan ikke hente mottakernavn, fant ikke orgnr %s".formatted(orgnr));
+                }
             }
             case TRYGDEMYNDIGHET -> {
                 if (produserbaredokumenter == UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV) {
@@ -143,10 +149,6 @@ public class BrevbestillingService {
             default ->
                 throw new FunksjonellException("Melosys støtter ikke hovedmottakere med rollen " + hovedmottaker);
         }
-    }
-
-    private String hentSammensattNavn(Behandling behandling) {
-        return persondataFasade.hentSammensattNavn(behandling.getFagsak().hentBrukersAktørID());
     }
 
     private List<MuligMottakerDto> lagKopiMottakereMuligMottakerDtos(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<Aktoersroller> kopiMottakere, Aktoersroller hovedmottaker) {
@@ -170,7 +172,7 @@ public class BrevbestillingService {
         if (avklartKopi.getRolle() == BRUKER || hovedmottaker == kopiMottaker) {
             return new MuligMottakerDto.Builder()
                 .medDokumentNavn("Kopi til bruker")
-                .medMottakerNavn(hentSammensattNavn(behandling))
+                .medMottakerNavn(persondataFasade.hentSammensattNavn(behandling.getFagsak().hentBrukersAktørID()))
                 .medRolle(BRUKER)
                 .medAktørId(behandling.getFagsak().hentBrukersAktørID())
                 .build();
