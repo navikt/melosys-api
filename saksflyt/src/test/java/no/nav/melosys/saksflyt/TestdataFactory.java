@@ -1,7 +1,5 @@
 package no.nav.melosys.saksflyt;
 
-import java.time.LocalDate;
-
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -10,11 +8,14 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
+
+import java.time.LocalDate;
 
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
@@ -80,6 +81,7 @@ public final class TestdataFactory {
         fagsak.setSaksnummer(saksnummer);
         fagsak.setStatus(Saksstatuser.OPPRETTET);
         fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         fagsak.getAktører().add(lagBruker());
         fagsak.setGsakSaksnummer(123L);
         return fagsak;
