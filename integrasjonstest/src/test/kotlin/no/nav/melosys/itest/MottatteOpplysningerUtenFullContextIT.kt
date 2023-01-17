@@ -1,5 +1,6 @@
 package no.nav.melosys.itest
 
+import io.kotest.matchers.optional.shouldBeEmpty
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -74,8 +75,17 @@ internal class MottatteOpplysningerUtenFullContextIT(
 
         val behandling = lagFagsakMedBehandlinge()
 
-        // Denne funker uten å kaste InvalidDataAccessApiUsageException: detached entity passed to persist
         mottatteOpplysningerService.hentMottatteOpplysninger(behandling.id)
+
+        // skal ikke lages ved andre kjøring
+        mottatteOpplysningerService.hentMottatteOpplysninger(behandling.id)
+    }
+
+    @Test
+    fun `legg til mottate opplysinger på eksisterende behanding 2`() {
+        val behandling = lagFagsakMedBehandlinge()
+
+        mottatteOpplysningerRepository.findById(behandling.id).shouldBeEmpty()
     }
 
     private fun lagFagsakMedBehandlinge(): Behandling {

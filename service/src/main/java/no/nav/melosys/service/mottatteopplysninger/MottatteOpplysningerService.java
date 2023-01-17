@@ -16,7 +16,9 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.MottatteOpplysningerRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -61,9 +63,11 @@ public class MottatteOpplysningerService {
     }
 
     private MottatteOpplysninger opprettSøknadOgleggTilEksisterendeBehandlingOmMangler(long behandlingID) {
-        ftrlMottatteOpplysningerService.opprettSøknadOgleggTilEksisterendeBehandlingOmMangler(this, behandlingID);
+        if (unleash.isEnabled(ToggleName.FOLKETRYGDEN_MVP)) {
+            ftrlMottatteOpplysningerService.opprettSøknadOgleggTilEksisterendeBehandlingOmMangler(this, behandlingID);
+        }
         return finnMottatteOpplysninger(behandlingID).orElseThrow(() ->
-            new TekniskException("Finner ikke mottatteOpplysninger for behandling - selv om den nettopp ble laget " + behandlingID));
+            new IkkeFunnetException("Finner ikke mottatteOpplysninger for behandling " + behandlingID));
     }
 
     @Transactional(readOnly = true)
