@@ -798,12 +798,12 @@ class BrevbestillingServiceTest {
             .hasSize(2)
             .first()
             .hasFieldOrPropertyWithValue("mottakerNavn", "Skatteetaten-NAVNET")
-            .hasFieldOrPropertyWithValue("rolle", OFFENTLIG_ETAT)
+            .hasFieldOrPropertyWithValue("rolle", ETAT)
             .hasFieldOrPropertyWithValue("orgnr", SKATTEETATEN.getOrgnr());
         assertThat(muligMottakerDto)
             .last()
             .hasFieldOrPropertyWithValue("mottakerNavn", "HELFO-NAVNET")
-            .hasFieldOrPropertyWithValue("rolle", OFFENTLIG_ETAT)
+            .hasFieldOrPropertyWithValue("rolle", ETAT)
             .hasFieldOrPropertyWithValue("orgnr", HELFO.getOrgnr());
     }
 

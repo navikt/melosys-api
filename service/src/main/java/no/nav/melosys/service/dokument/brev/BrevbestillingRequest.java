@@ -10,8 +10,8 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 public class BrevbestillingRequest {
     private Produserbaredokumenter produserbardokument;
     private Aktoersroller mottaker;
-    private String orgNr;
-    private List<String> orgNrEtater;
+    private String orgnr;
+    private List<String> orgnrEtater;
     private String institusjonId;
     private String innledningFritekst;
     private String manglerFritekst;
@@ -48,9 +48,9 @@ public class BrevbestillingRequest {
     public BrevbestillingRequest(Builder builder) {
         this.produserbardokument = builder.produserbardokument;
         this.mottaker = builder.mottaker;
-        this.orgNr = builder.orgNr;
+        this.orgnr = builder.orgNr;
         this.institusjonId = builder.institusjonId;
-        this.orgNrEtater = builder.orgNrEtater;
+        this.orgnrEtater = builder.orgNrEtater;
         this.innledningFritekst = builder.innledningFritekst;
         this.manglerFritekst = builder.manglerFritekst;
         this.ektefelleFritekst = builder.ektefelleFritekst;
@@ -83,16 +83,16 @@ public class BrevbestillingRequest {
         return mottaker;
     }
 
-    public String getOrgNr() {
-        return orgNr;
+    public String getOrgnr() {
+        return orgnr;
     }
 
     public String getInstitusjonId() {
         return institusjonId;
     }
 
-    public List<String> getOrgNrEtater() {
-        return orgNrEtater;
+    public List<String> getOrgnrEtater() {
+        return orgnrEtater;
     }
 
     public String getInnledningFritekst() {

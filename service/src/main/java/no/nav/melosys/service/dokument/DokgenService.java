@@ -82,10 +82,10 @@ public class DokgenService {
         Produserbaredokumenter produserbartdokument = brevbestillingRequest.getProduserbardokument();
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         Aktoer mottaker;
-        if (hasText(brevbestillingRequest.getOrgNr()) || hasText(brevbestillingRequest.getInstitusjonId())) {
+        if (hasText(brevbestillingRequest.getOrgnr()) || hasText(brevbestillingRequest.getInstitusjonId())) {
             mottaker = new Aktoer();
             mottaker.setRolle(brevbestillingRequest.getMottaker());
-            mottaker.setOrgnr(brevbestillingRequest.getOrgNr());
+            mottaker.setOrgnr(brevbestillingRequest.getOrgnr());
             mottaker.setInstitusjonId(brevbestillingRequest.getInstitusjonId());
         } else {
             mottaker = brevmottakerService.avklarMottakere(produserbartdokument,
@@ -158,17 +158,17 @@ public class DokgenService {
 
     private List<Aktoer> hentMottakere(BrevbestillingRequest brevbestillingRequest, Produserbaredokumenter produserbartDokument, Behandling behandling) {
         List<Aktoer> mottakere = new ArrayList<>();
-        boolean erBrevTilOrganisasjon = hasText(brevbestillingRequest.getOrgNr());
-        boolean erBrevTilOffentligeEtater =
-            Aktoersroller.OFFENTLIG_ETAT.equals(brevbestillingRequest.getMottaker()) && !brevbestillingRequest.getOrgNrEtater().isEmpty();
+        boolean erBrevTilOrganisasjon = hasText(brevbestillingRequest.getOrgnr());
+        boolean erBrevTilEtat = Aktoersroller.ETAT.equals(brevbestillingRequest.getMottaker())
+            && !brevbestillingRequest.getOrgnrEtater().isEmpty();
 
         if (erBrevTilOrganisasjon) {
             Aktoer mottaker = new Aktoer();
             mottaker.setRolle(brevbestillingRequest.getMottaker());
-            mottaker.setOrgnr(brevbestillingRequest.getOrgNr());
+            mottaker.setOrgnr(brevbestillingRequest.getOrgnr());
             mottakere.add(mottaker);
-        } else if (erBrevTilOffentligeEtater) {
-            for (String orgNr : brevbestillingRequest.getOrgNrEtater()) {
+        } else if (erBrevTilEtat) {
+            for (String orgNr : brevbestillingRequest.getOrgnrEtater()) {
                 Aktoer mottaker = new Aktoer();
                 mottaker.setRolle(brevbestillingRequest.getMottaker());
                 mottaker.setOrgnr(orgNr);

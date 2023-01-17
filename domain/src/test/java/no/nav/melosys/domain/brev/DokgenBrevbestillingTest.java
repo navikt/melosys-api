@@ -40,7 +40,7 @@ class DokgenBrevbestillingTest {
             if (a.getType().getSimpleName().equals("boolean")) {
                 node.put(a.getName(), false);
             } else if (a.getType().getSimpleName().equals(Aktoersroller.class.getSimpleName())) {
-                node.put(a.getName(), Aktoersroller.OFFENTLIG_ETAT.name());
+                node.put(a.getName(), Aktoersroller.ETAT.name());
             } else if (a.getType().getSimpleName().equals(Representerer.class.getSimpleName())) {
                 node.put(a.getName(), Representerer.BRUKER.name());
             } else {

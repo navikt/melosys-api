@@ -89,14 +89,10 @@ public class BrevbestillingTjeneste {
             behandlingID, hentMuligeMottakereRequestDto.orgnrEtater());
     }
 
-
-    // TODO: lurer på om vi burde bruke samme API "/mulige-mottakere-etater" bare uten behandlingID.
-    @GetMapping(value = "/tilgjengelige-offentlige-etater", produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Henter alle tilgjengelige offentlige etater",
-        response = Etat.class,
-        responseContainer = "List")
-    public List<Etat> hentTilgjengeligeMaler() {
-        return brevbestillingService.hentOffentligeEtater();
+    @GetMapping(value = "/tilgjengelige-etater", produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Henter alle tilgjengelige etater", response = Etat.class, responseContainer = "List")
+    public List<Etat> hentTilgjengeligeEtater() {
+        return brevbestillingService.hentEtater();
     }
 
     private HttpHeaders genPdfHeaders(String navn) {

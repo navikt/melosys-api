@@ -98,7 +98,7 @@ public class BrevmottakerService {
             case VIRKSOMHET -> avklarMottakereForVirksomhet(behandling);
             case ARBEIDSGIVER -> avklarMottakereForArbeidsgiver(behandling, kunAvklarteVirksomheter);
             case TRYGDEMYNDIGHET -> avklarMottakereForMyndigheter(mottaker, behandling, produserbartDokument);
-            case OFFENTLIG_ETAT -> Collections.singletonList(mottaker.getAktør());
+            case ETAT -> Collections.singletonList(mottaker.getAktør());
             default -> throw new FunksjonellException("%s støttes ikke.".formatted(mottaker.hentAktørsRolle()));
         };
     }

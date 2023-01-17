@@ -77,12 +77,12 @@ public class BrevmalListeBygger {
                     mottakere.add(lagMottakerForRolle(behandlingId, TRYGDEMYNDIGHET));
                 }
                 mottakere.add(lagMottakerAnnenOrganisasjon(ARBEIDSGIVER));
-                mottakere.add(lagMottakerAndreOffentligeEtater());
+                mottakere.add(lagMottakerAndreEtater());
             }
             case VIRKSOMHET -> {
                 mottakere.add(lagMottakerForRolle(behandlingId, VIRKSOMHET));
                 mottakere.add(lagMottakerAnnenOrganisasjon(VIRKSOMHET));
-                mottakere.add(lagMottakerAndreOffentligeEtater());
+                mottakere.add(lagMottakerAndreEtater());
             }
             default -> throw new FunksjonellException("Sak må ha hovedpart for å kunne sende brev");
 
@@ -108,10 +108,10 @@ public class BrevmalListeBygger {
             .build();
     }
 
-    private MottakerDto lagMottakerAndreOffentligeEtater() {
+    private MottakerDto lagMottakerAndreEtater() {
         return new MottakerDto.Builder()
             .medType(MottakerType.ANDRE_OFFENTLIGE_ETATER)
-            .medRolle(OFFENTLIG_ETAT)
+            .medRolle(ETAT)
             .orgnrSettesAvSaksbehandler()
             .build();
     }

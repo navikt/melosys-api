@@ -87,7 +87,7 @@ public class BrevmottakerMapper {
                 .build()),
 
             Map.entry(FRITEKSTBREV, new Mottakerliste.Builder()
-                .medHovedMottaker(OFFENTLIG_ETAT)
+                .medHovedMottaker(ETAT)
                 .build()),
 
             Map.entry(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV, new Mottakerliste.Builder()

@@ -89,9 +89,9 @@ public class BrevbestillingService {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         return orgnrEtater.stream()
             .map(orgnr -> new MuligMottakerDto.Builder()
-                .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, produserbaredokumenter, OFFENTLIG_ETAT))
-                .medMottakerNavn(hentMottakerNavn(produserbaredokumenter, behandling, OFFENTLIG_ETAT, orgnr))
-                .medRolle(OFFENTLIG_ETAT)
+                .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, produserbaredokumenter, ETAT))
+                .medMottakerNavn(hentMottakerNavn(produserbaredokumenter, behandling, ETAT, orgnr))
+                .medRolle(ETAT)
                 .medOrgnr(orgnr)
                 .build())
             .toList();
@@ -128,7 +128,7 @@ public class BrevbestillingService {
                     return orgDokument.getNavn();
                 }
             }
-            case ARBEIDSGIVER, VIRKSOMHET, OFFENTLIG_ETAT -> {
+            case ARBEIDSGIVER, VIRKSOMHET, ETAT -> {
                 var saksopplysning = eregFasade.finnOrganisasjon(orgnr);
                 if (saksopplysning.isPresent()) {
                     var orgDokument = (OrganisasjonDokument) saksopplysning.get().getDokument();
@@ -265,7 +265,7 @@ public class BrevbestillingService {
                 return List.of(GENERELT_FRITEKSTBREV_VIRKSOMHET);
             case TRYGDEMYNDIGHET:
                 return List.of(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV);
-            case OFFENTLIG_ETAT:
+            case ETAT:
                 return Collections.singletonList(FRITEKSTBREV);
             default:
                 throw new FunksjonellException("Rollen " + rolle + " kan ikke sende brev gjennom brevmenyen");
@@ -356,7 +356,7 @@ public class BrevbestillingService {
         return dokumentServiceFasade.produserUtkast(behandlingID, brevbestillingRequest);
     }
 
-    public List<Etat> hentOffentligeEtater() {
+    public List<Etat> hentEtater() {
         return List.of(Etat.SKATTEETATEN_ORGNR, Etat.SKATTINNKREVER_UTLAND_ORGNR, Etat.HELFO_ORGNR);
     }
 }
