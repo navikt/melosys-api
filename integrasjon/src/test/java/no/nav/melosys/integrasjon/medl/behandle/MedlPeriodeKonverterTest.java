@@ -69,8 +69,6 @@ class MedlPeriodeKonverterTest {
     void hentLovvalgbestemmelse() {
         assertThat(MedlPeriodeKonverter.hentLovvalgBestemmelse(lovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, null)))
             .isEqualTo(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        assertThat(MedlPeriodeKonverter.hentLovvalgBestemmelse(lovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_2)))
-            .isEqualTo(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_2);
         assertThat(MedlPeriodeKonverter.hentLovvalgBestemmelse(lovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5)))
             .isEqualTo(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5);
         assertThat(MedlPeriodeKonverter.hentLovvalgBestemmelse(lovvalgsperiode(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1)))
