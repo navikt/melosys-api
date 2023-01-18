@@ -1,14 +1,14 @@
 package no.nav.melosys.domain.arkiv;
 
-import java.util.Collection;
-import java.util.List;
-
 import com.google.common.collect.MoreCollectors;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.msm.AltinnDokument;
+
+import java.util.Collection;
+import java.util.List;
 
 import static no.nav.melosys.domain.arkiv.FysiskDokument.*;
 
@@ -109,12 +109,12 @@ public class OpprettJournalpost extends Journalpost {
         return opprettJournalpost;
     }
 
-    public static OpprettJournalpost lagJournalpostForBrev(JournalpostBestilling bestilling) {
+    public static OpprettJournalpost lagJournalpostForBrev(JournalpostBestilling bestilling, Tema tema) {
         OpprettJournalpost opprettJournalpost = new OpprettJournalpost();
         opprettJournalpost.setHoveddokument(lagFysiskDokument(bestilling));
         opprettJournalpost.setJournalposttype(Journalposttype.UT);
         opprettJournalpost.setJournalførendeEnhet(MEDLEMSKAP_OG_AVGIFT);
-        opprettJournalpost.setTema(MEDLEMSKAP);
+        opprettJournalpost.setTema(tema.getKode());
         opprettJournalpost.setSaksnummer(bestilling.getSaksnummer());
         opprettJournalpost.setBrukerId(bestilling.getHovedpartId());
         opprettJournalpost.setBrukerIdType(bestilling.getHovedpartIdType());

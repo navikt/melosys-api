@@ -1,18 +1,17 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
-import java.util.List;
-import java.util.Set;
-
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.FritekstbrevBrevbestilling;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -39,6 +38,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
+import java.util.Set;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -122,6 +124,7 @@ class OpprettOgJournalforBrevTest {
         virksomhet.setOrgnr("orgnr");
         virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
         var fagsak = new Fagsak();
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         fagsak.setAktører(Set.of(virksomhet));
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
@@ -355,6 +358,75 @@ class OpprettOgJournalforBrevTest {
                 ArkivDokument::getTittel)
             .containsExactly(Tuple.tuple(new byte[]{1, 2}, "tittel 1"),
                 Tuple.tuple(new byte[]{3, 4}, "tittel 2"));
+    }
+
+    @Test
+    void utførOpprettJournalforBrevMedSakstemaMedlemskapLovvalg() {
+        ArgumentCaptor<OpprettJournalpost> captor = ArgumentCaptor.forClass(OpprettJournalpost.class);
+        Behandling behandling = TestdataFactory.lagBehandling();
+        behandling.getFagsak().setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
+        when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
+
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
+            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
+            .build();
+
+        Prosessinstans prosessinstans = lagProsessinstans(behandling, brevbestilling);
+
+        opprettJournalforBrev.utfør(prosessinstans);
+
+
+        verify(mockJoarkFasade).opprettJournalpost(captor.capture(), anyBoolean());
+        assertThat(captor.getValue()).isNotNull();
+        assertThat(captor.getValue().getTema()).isEqualTo(Tema.MED.getKode());
+    }
+
+    @Test
+    void utførOpprettJournalforBrevMedSakstemaTrygdeavgift() {
+        ArgumentCaptor<OpprettJournalpost> captor = ArgumentCaptor.forClass(OpprettJournalpost.class);
+        Behandling behandling = TestdataFactory.lagBehandling();
+        behandling.getFagsak().setTema(Sakstemaer.TRYGDEAVGIFT);
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
+        when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
+
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
+            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
+            .build();
+
+        Prosessinstans prosessinstans = lagProsessinstans(behandling, brevbestilling);
+
+        opprettJournalforBrev.utfør(prosessinstans);
+
+
+        verify(mockJoarkFasade).opprettJournalpost(captor.capture(), anyBoolean());
+        assertThat(captor.getValue()).isNotNull();
+        assertThat(captor.getValue().getTema()).isEqualTo(Tema.TRY.getKode());
+    }
+
+    @Test
+    void utførOpprettJournalforBrevMedSakstemaUnntak() {
+        ArgumentCaptor<OpprettJournalpost> captor = ArgumentCaptor.forClass(OpprettJournalpost.class);
+        Behandling behandling = TestdataFactory.lagBehandling();
+        behandling.getFagsak().setTema(Sakstemaer.UNNTAK);
+        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
+        when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());
+
+        DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
+            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
+            .build();
+
+        Prosessinstans prosessinstans = lagProsessinstans(behandling, brevbestilling);
+
+        opprettJournalforBrev.utfør(prosessinstans);
+
+
+        verify(mockJoarkFasade).opprettJournalpost(captor.capture(), anyBoolean());
+        assertThat(captor.getValue()).isNotNull();
+        assertThat(captor.getValue().getTema()).isEqualTo(Tema.UFM.getKode());
     }
 
     @ParameterizedTest
