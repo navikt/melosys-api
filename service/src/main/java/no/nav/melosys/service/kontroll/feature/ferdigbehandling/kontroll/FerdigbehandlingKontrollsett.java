@@ -38,7 +38,7 @@ public class FerdigbehandlingKontrollsett {
         FerdigbehandlingKontroll::periodeOverFemÅr,
         FerdigbehandlingKontroll::periodeManglerSluttdato,
         FerdigbehandlingKontroll::arbeidsstedManglerFelter,
-        FerdigbehandlingKontroll::representantIUtlandetMangler //TODO fix au
+        FerdigbehandlingKontroll::representantIUtlandetMangler
     );
 
     private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_AVSLAG_HENLEGGELSE = Set.of(
