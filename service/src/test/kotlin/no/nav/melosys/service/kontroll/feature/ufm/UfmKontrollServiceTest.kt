@@ -9,7 +9,6 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
-import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.dokument.SaksopplysningDokument
@@ -35,7 +34,7 @@ import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.persondata.PersondataFasade
-import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.*
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -62,8 +61,6 @@ class UfmKontrollServiceTest {
 
     lateinit var ufmKontrollService: UfmKontrollService
 
-    private val unleash: FakeUnleash = FakeUnleash()
-
     private val BEHANDLING_ID = 1L
     private val BEHANDLINGSRESULTAT_ID = 2L
     private val behandling: Behandling = SaksbehandlingDataFactory.lagBehandling()
@@ -75,14 +72,12 @@ class UfmKontrollServiceTest {
 
     @BeforeEach
     fun setup() {
-        unleash.enableAll()
         ufmKontrollService = UfmKontrollService(
             kontrollresultatRepository,
             behandlingsresultatService,
             mottatteOpplysningerService,
             behandlingService,
-            persondataFasade,
-            unleash
+            persondataFasade
         )
     }
 
@@ -110,7 +105,7 @@ class UfmKontrollServiceTest {
                 StrukturertAdresse().apply { landkode = "SE" }, null, null, null, null,
                 null,
                 false
-            );
+            )
         }
         every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
             .answers {
@@ -153,7 +148,7 @@ class UfmKontrollServiceTest {
                 StrukturertAdresse().apply { landkode = "SE" }, null, null, null, null,
                 null,
                 false
-            );
+            )
         }
         every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
             .answers {
@@ -189,7 +184,7 @@ class UfmKontrollServiceTest {
                 StrukturertAdresse().apply { landkode = "SE" }, null, null, null, null,
                 null,
                 false
-            );
+            )
         }
         every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
             .answers {
@@ -232,7 +227,7 @@ class UfmKontrollServiceTest {
                 StrukturertAdresse().apply { landkode = "SE" }, null, null, null, null,
                 null,
                 false
-            );
+            )
         }
         every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
             .answers {
@@ -280,7 +275,7 @@ class UfmKontrollServiceTest {
                 StrukturertAdresse().apply { landkode = "SE" }, null, null, null, null,
                 null,
                 false
-            );
+            )
         }
         every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
             .answers {
@@ -295,7 +290,7 @@ class UfmKontrollServiceTest {
     @Test
     fun
         utførKontrollerOgRegistrerFeil_A003_medOverlappendePeriode_harLikMedlLovvalgsland_erOpprinnelig_medYtterligereInformasjon_feilKontroll() {
-        val erOpprinnelig = true;
+        val erOpprinnelig = true
         sedDokument.apply {
             sedType = SedType.A003
             lovvalgslandKode = Landkoder.SE
@@ -323,7 +318,7 @@ class UfmKontrollServiceTest {
                 StrukturertAdresse().apply { landkode = "SE" }, null, null, null, null,
                 null,
                 false
-            );
+            )
         }
         mottatteOpplysningerData.apply {
             ytterligereInformasjon = "Har ytterligere informasjon!"
@@ -349,7 +344,7 @@ class UfmKontrollServiceTest {
 
     @Test
     fun utførKontrollerOgRegistrerFeil_A003_medOverlappendePeriode_harLikMedlLovvalgsland_erIkkeOpprinnelig_utenYtterligereInformasjon_feilKontroll() {
-        val erOpprinnelig = false;
+        val erOpprinnelig = false
         sedDokument.apply {
             sedType = SedType.A003
             lovvalgslandKode = Landkoder.SE
@@ -377,7 +372,7 @@ class UfmKontrollServiceTest {
                 StrukturertAdresse().apply { landkode = "SE" }, null, null, null, null,
                 null,
                 false
-            );
+            )
         }
         mottatteOpplysningerData.apply {
             ytterligereInformasjon = null
@@ -429,7 +424,7 @@ class UfmKontrollServiceTest {
                 StrukturertAdresse().apply { landkode = "SE" }, null, null, null, null,
                 null,
                 false
-            );
+            )
         }
         every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
             .answers {
@@ -492,7 +487,7 @@ class UfmKontrollServiceTest {
                 StrukturertAdresse().apply { landkode = "CH" }, null, null, null, null,
                 null,
                 false
-            );
+            )
         }
         every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }
             .answers {
@@ -521,10 +516,10 @@ class UfmKontrollServiceTest {
                 StrukturertAdresse().apply { landkode = "CH" }, null, null, null, null,
                 null,
                 false
-            );
+            )
         }
         mottatteOpplysningerData.apply {
-            overgangsregelbestemmelser.add(Overgangsregelbestemmelser.FO_1408_1971_ART14A_2);
+            overgangsregelbestemmelser.add(Overgangsregelbestemmelser.FO_1408_1971_ART14A_2)
             overgangsregelbestemmelser.add(Overgangsregelbestemmelser.FO_1408_1971_ART14_2_B)
         }
         every { kontrollresultatRepository.saveAll(capture(kontrollresultatSlot)) }

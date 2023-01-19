@@ -1,5 +1,7 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling;
 
+import java.time.LocalDate;
+
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -14,8 +16,6 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDate;
 
 @Component
 class KontrollMedRegisteropplysning {
@@ -55,7 +55,7 @@ class KontrollMedRegisteropplysning {
     }
 
     private void hentNyeRegisteropplysninger(Behandlingsresultat behandlingsresultat, Behandling behandling) {
-        var folketrygdenToggleEnabled = unleash.isEnabled("melosys.melosys.folketrygden.mvp");
+        var folketrygdenToggleEnabled = unleash.isEnabled("melosys.folketrygden.mvp");
 
         LocalDate fraOgMed;
         LocalDate tilOgMed;

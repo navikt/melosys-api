@@ -3,7 +3,6 @@ package no.nav.melosys.service.dokument.brev.mapper;
 import java.time.Instant;
 import java.util.List;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.*;
@@ -25,16 +24,13 @@ public class DokgenMalMapper {
     private final DokgenMapperDatahenter dokgenMapperDatahenter;
     private final InnvilgelseFtrlMapper innvilgelseFtrlMapper;
     private final TrygdeavtaleMapper trygdeavtaleMapper;
-    private final Unleash unleash;
 
     public DokgenMalMapper(DokgenMapperDatahenter dokgenMapperDatahenter,
                            InnvilgelseFtrlMapper innvilgelseFtrlMapper,
-                           TrygdeavtaleMapper trygdeavtaleMapper,
-                           Unleash unleash) {
+                           TrygdeavtaleMapper trygdeavtaleMapper) {
         this.dokgenMapperDatahenter = dokgenMapperDatahenter;
         this.innvilgelseFtrlMapper = innvilgelseFtrlMapper;
         this.trygdeavtaleMapper = trygdeavtaleMapper;
-        this.unleash = unleash;
     }
 
     public DokgenDto mapBehandling(DokgenBrevbestilling mottattBrevbestilling, Aktoer aktoerMottaker) {

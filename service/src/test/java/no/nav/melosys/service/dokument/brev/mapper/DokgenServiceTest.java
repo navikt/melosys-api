@@ -28,6 +28,7 @@ import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandling.UtledMottaksdato;
+import no.nav.melosys.service.bruker.SaksbehandlerService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentHentingService;
@@ -37,7 +38,6 @@ import no.nav.melosys.service.dokument.brev.FritekstvedleggDto;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
 import no.nav.melosys.service.dokument.brev.SaksvedleggDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.service.bruker.SaksbehandlerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.assertj.core.groups.Tuple;
@@ -111,7 +111,7 @@ class DokgenServiceTest {
 
         dokgenService = new DokgenService(mockDokgenConsumer, new DokumentproduksjonsInfoMapper(unleash),
             mockJoarkFasade,
-            new DokgenMalMapper(dokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockTrygdeavtaleMapper, unleash),
+            new DokgenMalMapper(dokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockTrygdeavtaleMapper),
             mockBehandlingsService, mockEregFasade, mockKontaktOpplysningService,
             mockBrevMottakerService, mockProsessinstansService, mockSaksbehandlerService,
             mockUtenlandskMyndighetService, mockUtledMottaksdato);
