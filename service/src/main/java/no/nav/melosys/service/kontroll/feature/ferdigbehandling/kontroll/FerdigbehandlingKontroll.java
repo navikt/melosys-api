@@ -99,8 +99,10 @@ final class FerdigbehandlingKontroll {
     }
 
     private static boolean erBestemmelseDerTrygdeavtaleAttestSendes(LovvalgBestemmelse bestemmelse) {
-        return erBestemmelseDerTrygdeavtaleAttestSendesUK(bestemmelse) || erBestemmelseDerTrygdeavtaleAttestSendesUSA(bestemmelse)
-            || erBestemmelseDerTrygdeavtaleAttestSendesCanada(bestemmelse);
+        return erBestemmelseDerTrygdeavtaleAttestSendesUK(bestemmelse)
+            || erBestemmelseDerTrygdeavtaleAttestSendesUSA(bestemmelse)
+            || erBestemmelseDerTrygdeavtaleAttestSendesCanada(bestemmelse)
+            || erBestemmelseDerTrygdeavtaleAttestSendesAU(bestemmelse);
     }
 
     private static boolean erBestemmelseDerTrygdeavtaleAttestSendesUK(LovvalgBestemmelse bestemmelse) {
@@ -109,13 +111,17 @@ final class FerdigbehandlingKontroll {
             || bestemmelse == Lovvalgbestemmelser_trygdeavtale_uk.UK_ART7_3;
     }
 
-    //TODO legg til for Australia?
     private static boolean erBestemmelseDerTrygdeavtaleAttestSendesUSA(LovvalgBestemmelse bestemmelse) {
         return bestemmelse == USA_ART5_2
             || bestemmelse == USA_ART5_4
             || bestemmelse == USA_ART5_5
             || bestemmelse == USA_ART5_6
             || bestemmelse == USA_ART5_9;
+    }
+
+    private static boolean erBestemmelseDerTrygdeavtaleAttestSendesAU(LovvalgBestemmelse bestemmelse) {
+        return bestemmelse == AUS_ART9_2
+            || bestemmelse == AUS_ART9_3;
     }
 
     private static boolean erBestemmelseDerTrygdeavtaleAttestSendesCanada(LovvalgBestemmelse bestemmelse) {
