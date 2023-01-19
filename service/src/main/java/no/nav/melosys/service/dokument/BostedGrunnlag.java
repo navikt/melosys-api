@@ -67,7 +67,6 @@ public class BostedGrunnlag {
 
     public Optional<StrukturertAdresse> finnKontaktadresse() {
         if (kontaktadresseFraRegister == null) {
-            log.warn("Fant ikke kontaktadresseFraRegister fra register, fordi kontaktadresseFraRegister er null");
             return Optional.empty();
         }
 
