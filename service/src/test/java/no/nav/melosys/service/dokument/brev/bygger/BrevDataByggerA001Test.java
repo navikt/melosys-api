@@ -5,10 +5,6 @@ import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
-import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
@@ -21,7 +17,13 @@ import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
+import no.nav.melosys.domain.mottatteopplysninger.data.Bosted;
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
+import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak;
 import no.nav.melosys.domain.person.Persondata;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
@@ -49,6 +51,9 @@ import static no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning.ERST
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning_uten_art12.SJOEMANNSKIRKEN;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagVilkaarsresultat;
+import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysningerUtenBostedsadresse;
+import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysningerUtenBostedsadresseOgKontaktadresse;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
@@ -319,5 +324,26 @@ class BrevDataByggerA001Test {
 
         BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(brevdataGrunnlag, SAKSBEHANDLER_ID);
         assertThat(brevDataA001.ytterligereInformasjon).isEqualTo(forventetInfo);
+    }
+
+    @Test
+    void lagBrevdata_harIkkeBostedsadresse_brukerKontaktadresse() {
+        søknad.bosted = new Bosted();
+        var doksysBrevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
+        var personopplysninger = lagPersonopplysningerUtenBostedsadresse();
+        BrevDataGrunnlag brevdataGrunnlag = lagBrevDataGrunnlag(doksysBrevbestilling, personopplysninger);
+
+        BrevDataA001 brevDataA001 = (BrevDataA001) brevDataByggerA001.lag(brevdataGrunnlag, SAKSBEHANDLER_ID);
+        assertThat(brevDataA001.bostedsadresse).isEqualTo(personopplysninger.finnKontaktadresse().get().hentEllerLagStrukturertAdresse());
+    }
+
+    @Test
+    void lagBrevdata_harIkkeBostedsadresseEllerKontaktadresse_kasterFeilmelding() {
+        søknad.bosted = new Bosted();
+        var doksysBrevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
+        var personopplysninger = lagPersonopplysningerUtenBostedsadresseOgKontaktadresse();
+        BrevDataGrunnlag brevdataGrunnlag = lagBrevDataGrunnlag(doksysBrevbestilling, personopplysninger);
+
+        assertThatExceptionOfType(FunksjonellException.class).isThrownBy(() -> brevDataByggerA001.lag(brevdataGrunnlag, SAKSBEHANDLER_ID));
     }
 }
