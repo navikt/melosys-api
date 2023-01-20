@@ -62,7 +62,9 @@ public class BrevDataByggerA001 implements BrevDataBygger {
             ListUtils.union(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige(),
                             dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeSelvstendige());
 
-        brevData.bostedsadresse = dataGrunnlag.getBostedGrunnlag().hentBostedsadresse();
+        brevData.bostedsadresse = dataGrunnlag.getBostedGrunnlag().finnBostedsadresse()
+            .or(() -> dataGrunnlag.getBostedGrunnlag().finnKontaktadresse())
+            .orElseThrow(() -> new FunksjonellException("Finner verken bostedsadresse eller kontaktadresse"));
         brevData.arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder();
 
         brevData.utenlandskIdent = hentUtenlandskIdent(landkode);

@@ -3,9 +3,9 @@ package no.nav.melosys.service.dokument.brev.datagrunnlag;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -34,7 +34,10 @@ public class BrevDataGrunnlag implements DataGrunnlag {
             .orElse(null);
         this.person = persondata;
         this.avklarteVirksomheterGrunnlag = new AvklarteVirksomheterGrunnlag(behandling, avklarteVirksomheterService);
-        this.bostedGrunnlag = new BostedGrunnlag(mottatteOpplysningerData, person.finnBostedsadresse().orElse(null),
+        this.bostedGrunnlag = new BostedGrunnlag(
+            mottatteOpplysningerData,
+            person.finnBostedsadresse().orElse(null),
+            person.finnKontaktadresse().orElse(null),
             kodeverkService);
         this.arbeidsstedGrunnlag = new ArbeidsstedGrunnlag(
             avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(behandling.getId()),

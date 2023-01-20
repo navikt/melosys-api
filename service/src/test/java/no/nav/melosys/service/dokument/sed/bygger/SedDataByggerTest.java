@@ -287,7 +287,7 @@ class SedDataByggerTest {
 
     @Test
     void lag_utenKontaktadresse_kontadresseErNull() {
-        Persondata persondata = PersonopplysningerObjectFactory.lagPersonpplysningerUtenKontaktadresse();
+        Persondata persondata = PersonopplysningerObjectFactory.lagPersonopplysningerUtenKontaktadresse();
         SedDataGrunnlagMedSoknad sedDataGrunnlagMedSoknad = lagGrunnlagMedSøknad(persondata);
 
         SedDataDto sedData = dataBygger.lag(sedDataGrunnlagMedSoknad, behandlingsresultat, PeriodeType.LOVVALGSPERIODE);

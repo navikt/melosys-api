@@ -212,10 +212,9 @@ class A1MapperTest {
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
         List<String> utfylteAdresselinjer = a1.getFysiskArbeidsstedAdresseListe().getAdresse().stream()
             .map(AdresseType::getAdresselinje1)
-            .filter(StringUtils::isNotEmpty)
-            .collect(Collectors.toList());
+            .filter(StringUtils::isNotEmpty).toList();
 
-        assertThat(utfylteAdresselinjer.size()).isEqualTo(1);
+        assertThat(utfylteAdresselinjer).hasSize(1);
     }
 
     @Test
@@ -234,10 +233,9 @@ class A1MapperTest {
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
         List<String> utfylteAdresselinjer = a1.getFysiskArbeidsstedAdresseListe().getAdresse().stream()
             .map(AdresseType::getAdresselinje1)
-            .filter(StringUtils::isNotEmpty)
-            .collect(Collectors.toList());
+            .filter(StringUtils::isNotEmpty).toList();
 
-        assertThat(utfylteAdresselinjer.size()).isGreaterThan(1);
+        assertThat(utfylteAdresselinjer).hasSizeGreaterThan(1);
     }
 
     @Test
@@ -303,7 +301,7 @@ class A1MapperTest {
 
     @Test
     void mapTilBrevXML_harIngenKontaktadresse_forventUtfylltMidlertidigAdresseMedOppholdsadresse() {
-        brevData.person = lagPersonpplysningerUtenKontaktadresse();
+        brevData.person = lagPersonopplysningerUtenKontaktadresse();
         A1 a1 = mapper.mapA1(behandling, behandlingsresultat, brevData);
         assertThat(a1.getPerson().getMidlertidigOppholdsadresse().getGatenavn()).isEqualTo("gatenavnOppholdsadresseFreg");
     }
