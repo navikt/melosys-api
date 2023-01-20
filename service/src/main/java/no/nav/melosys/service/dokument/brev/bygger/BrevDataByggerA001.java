@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.util.*;
 import java.util.stream.Stream;
 
+import no.nav.dok.melosysbrev._000115.BostedsadresseTypeKode;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
@@ -56,15 +57,23 @@ public class BrevDataByggerA001 implements BrevDataBygger {
 
         brevData.arbeidsgivendeVirksomheter =
             ListUtils.union(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere(),
-                            dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeArbeidsgivere());
+                dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeArbeidsgivere());
 
         brevData.selvstendigeVirksomheter =
             ListUtils.union(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige(),
-                            dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeSelvstendige());
+                dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeSelvstendige());
 
-        brevData.bostedsadresse = dataGrunnlag.getBostedGrunnlag().finnBostedsadresse()
-            .or(() -> dataGrunnlag.getBostedGrunnlag().finnKontaktadresse())
-            .orElseThrow(() -> new FunksjonellException("Finner verken bostedsadresse eller kontaktadresse"));
+        dataGrunnlag.getBostedGrunnlag().finnBostedsadresse().ifPresentOrElse(adresse -> {
+            brevData.bostedsadresse = adresse;
+            brevData.bostedsadresseTypeKode = Optional.of(BostedsadresseTypeKode.BOSTEDSLAND);
+        }, () ->
+            dataGrunnlag.getBostedGrunnlag().finnKontaktadresse().ifPresentOrElse(adresse -> {
+                brevData.bostedsadresse = adresse;
+                brevData.bostedsadresseTypeKode = Optional.of(BostedsadresseTypeKode.KONTAKTADRESSE);
+            }, () -> {
+                throw new FunksjonellException("Finner verken bostedsadresse eller kontaktadresse");
+            }));
+
         brevData.arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder();
 
         brevData.utenlandskIdent = hentUtenlandskIdent(landkode);
@@ -108,9 +117,9 @@ public class BrevDataByggerA001 implements BrevDataBygger {
 
     private Optional<String> hentUtenlandskIdent(Land_iso2 landkode) {
         return dataGrunnlag.getMottatteOpplysningerData().personOpplysninger.utenlandskIdent.stream()
-                .filter(utenlandskIdent -> utenlandskIdent.landkode.equals(landkode.getKode()))
-                .map(utenlandskIdent -> utenlandskIdent.ident)
-                .findFirst();
+            .filter(utenlandskIdent -> utenlandskIdent.landkode.equals(landkode.getKode()))
+            .map(utenlandskIdent -> utenlandskIdent.ident)
+            .findFirst();
     }
 
     private Collection<Anmodningsperiode> hentAnmodningsperioder() {

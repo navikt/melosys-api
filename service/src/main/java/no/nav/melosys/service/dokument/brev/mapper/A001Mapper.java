@@ -45,7 +45,7 @@ class A001Mapper {
 
         seda001.setTrygdemyndighet(mapTrygdemyndighet(brevData.utenlandskMyndighet));
 
-        seda001.setPerson(mapPerson(brevData.persondata, brevData.bostedsadresse, brevData.utenlandskIdent));
+        seda001.setPerson(mapPerson(brevData.persondata, brevData.bostedsadresse, brevData.bostedsadresseTypeKode, brevData.utenlandskIdent));
 
         seda001.setSelvstendigNæringsvirksomhetListe(mapSelvstendigvirksometliste(brevData.selvstendigeVirksomheter));
         seda001.setForetakListe(mapForetakliste(brevData.arbeidsgivendeVirksomheter));
@@ -138,12 +138,12 @@ class A001Mapper {
         return trygdemyndighet;
     }
 
-    private PersonType mapPerson(Persondata personDok, StrukturertAdresse bostedsadresse, Optional<String> utenlandskIdent) {
+    private PersonType mapPerson(Persondata personDok, StrukturertAdresse bostedsadresse, Optional<BostedsadresseTypeKode> bostedsadresseTypeKode, Optional<String> utenlandskIdent) {
         PersonType person = new PersonType();
         person.setPersonnavn(lagPersonnavn(personDok));
         person.setStatsborgerskapListe(mapStatsborgerskapListe(personDok));
         person.setKjønn(KjoennKode.fromValue(personDok.hentKjønnType().getKode()));
-        person.setBostedsadresse(mapBostedAdresse(bostedsadresse));
+        person.setBostedsadresse(mapBostedAdresse(bostedsadresse, bostedsadresseTypeKode));
         person.setFødselsnummer(personDok.hentFolkeregisterident());
         //Fødeland og Fødested skal ikke fylles ut
         utenlandskIdent.ifPresent(person::setUtenlandskID);
@@ -229,7 +229,7 @@ class A001Mapper {
         return arbeidsstedBrev;
     }
 
-    private BostedsadresseType mapBostedAdresse(StrukturertAdresse bosted) {
+    private BostedsadresseType mapBostedAdresse(StrukturertAdresse bosted, Optional<BostedsadresseTypeKode> bostedsadresseType) {
         BostedsadresseType bostedsadresse = new BostedsadresseType();
         bostedsadresse.setGatenavn(bosted.getGatenavn());
         bostedsadresse.setHusnummer(bosted.getHusnummerEtasjeLeilighet());
@@ -237,7 +237,7 @@ class A001Mapper {
         bostedsadresse.setPoststed(bosted.getPoststed());
         bostedsadresse.setRegion(bosted.getRegion());
         bostedsadresse.setLand(hentIso3Landkode(bosted.getLandkode()));
-        bostedsadresse.setAdresseType(BostedsadresseTypeKode.BOSTEDSLAND); // Lev1 kun bostedsland
+        bostedsadresse.setAdresseType(bostedsadresseType.orElse(BostedsadresseTypeKode.BOSTEDSLAND));
         return bostedsadresse;
     }
 

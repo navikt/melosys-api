@@ -3,10 +3,14 @@ package no.nav.melosys.service.dokument.brev;
 import java.time.LocalDate;
 import java.util.*;
 
-import no.nav.melosys.domain.*;
+import no.nav.dok.melosysbrev._000115.BostedsadresseTypeKode;
+import no.nav.melosys.domain.Anmodningsperiode;
+import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.UtenlandskMyndighet;
+import no.nav.melosys.domain.VilkaarBegrunnelse;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 
@@ -19,6 +23,7 @@ public class BrevDataA001 extends BrevData {
 
     public Persondata persondata;
     public StrukturertAdresse bostedsadresse;
+    public Optional<BostedsadresseTypeKode> bostedsadresseTypeKode;
     public Optional<String> utenlandskIdent;
 
     public List<AvklartVirksomhet> arbeidsgivendeVirksomheter;
