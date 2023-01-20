@@ -3,11 +3,13 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.util.*;
 import java.util.stream.Stream;
 
+import kotlin.Pair;
 import no.nav.dok.melosysbrev._000115.BostedsadresseTypeKode;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
@@ -63,16 +65,9 @@ public class BrevDataByggerA001 implements BrevDataBygger {
             ListUtils.union(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige(),
                 dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeSelvstendige());
 
-        dataGrunnlag.getBostedGrunnlag().finnBostedsadresse().ifPresentOrElse(adresse -> {
-            brevData.bostedsadresse = adresse;
-            brevData.bostedsadresseTypeKode = BostedsadresseTypeKode.BOSTEDSLAND;
-        }, () ->
-            dataGrunnlag.getBostedGrunnlag().finnKontaktadresse().ifPresentOrElse(adresse -> {
-                brevData.bostedsadresse = adresse;
-                brevData.bostedsadresseTypeKode = BostedsadresseTypeKode.KONTAKTADRESSE;
-            }, () -> {
-                throw new FunksjonellException("Finner verken bostedsadresse eller kontaktadresse");
-            }));
+        var adresseOgType = hentBostedsadresseOgTypeKode();
+        brevData.bostedsadresse = adresseOgType.getFirst();
+        brevData.bostedsadresseTypeKode = adresseOgType.getSecond();
 
         brevData.arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder();
 
@@ -120,6 +115,20 @@ public class BrevDataByggerA001 implements BrevDataBygger {
             .filter(utenlandskIdent -> utenlandskIdent.landkode.equals(landkode.getKode()))
             .map(utenlandskIdent -> utenlandskIdent.ident)
             .findFirst();
+    }
+
+    private Pair<StrukturertAdresse, BostedsadresseTypeKode> hentBostedsadresseOgTypeKode() {
+        var bostedsadresse = dataGrunnlag.getBostedGrunnlag().finnBostedsadresse();
+        if (bostedsadresse.isPresent()) {
+            return new Pair<>(bostedsadresse.get(), BostedsadresseTypeKode.BOSTEDSLAND);
+        }
+
+        var kontaktadresse = dataGrunnlag.getBostedGrunnlag().finnKontaktadresse();
+        if (kontaktadresse.isPresent()) {
+            return new Pair<>(kontaktadresse.get(), BostedsadresseTypeKode.KONTAKTADRESSE);
+        }
+
+        throw new FunksjonellException("Finner verken bostedsadresse eller kontaktadresse");
     }
 
     private Collection<Anmodningsperiode> hentAnmodningsperioder() {
