@@ -8,7 +8,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import no.finn.unleash.Unleash;
 import no.nav.dok.brevdata.felles.v1.navfelles.Saksbehandler;
 import no.nav.dok.brevdata.felles.v1.navfelles.*;
 import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType;
@@ -18,11 +17,11 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -53,18 +52,15 @@ public class BrevDataService {
     private final PersondataFasade persondataFasade;
     private final SaksbehandlerService saksbehandlerService;
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
-    private final Unleash unleash;
 
     public BrevDataService(BehandlingsresultatRepository behandlingsresultatRepository,
                            PersondataFasade persondataFasade,
                            SaksbehandlerService saksbehandlerService,
-                           UtenlandskMyndighetRepository utenlandskMyndighetRepository,
-                           Unleash unleash) {
+                           UtenlandskMyndighetRepository utenlandskMyndighetRepository) {
         this.behandlingsresultatRepository = behandlingsresultatRepository;
         this.persondataFasade = persondataFasade;
         this.saksbehandlerService = saksbehandlerService;
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
-        this.unleash = unleash;
     }
 
     public DokumentbestillingMetadata lagBestillingMetadata(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling, BrevData brevData) {
