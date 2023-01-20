@@ -138,7 +138,7 @@ class A001Mapper {
         return trygdemyndighet;
     }
 
-    private PersonType mapPerson(Persondata personDok, StrukturertAdresse bostedsadresse, Optional<BostedsadresseTypeKode> bostedsadresseTypeKode, Optional<String> utenlandskIdent) {
+    private PersonType mapPerson(Persondata personDok, StrukturertAdresse bostedsadresse, BostedsadresseTypeKode bostedsadresseTypeKode, Optional<String> utenlandskIdent) {
         PersonType person = new PersonType();
         person.setPersonnavn(lagPersonnavn(personDok));
         person.setStatsborgerskapListe(mapStatsborgerskapListe(personDok));
@@ -229,7 +229,7 @@ class A001Mapper {
         return arbeidsstedBrev;
     }
 
-    private BostedsadresseType mapBostedAdresse(StrukturertAdresse bosted, Optional<BostedsadresseTypeKode> bostedsadresseType) {
+    private BostedsadresseType mapBostedAdresse(StrukturertAdresse bosted, BostedsadresseTypeKode bostedsadresseType) {
         BostedsadresseType bostedsadresse = new BostedsadresseType();
         bostedsadresse.setGatenavn(bosted.getGatenavn());
         bostedsadresse.setHusnummer(bosted.getHusnummerEtasjeLeilighet());
@@ -237,7 +237,7 @@ class A001Mapper {
         bostedsadresse.setPoststed(bosted.getPoststed());
         bostedsadresse.setRegion(bosted.getRegion());
         bostedsadresse.setLand(hentIso3Landkode(bosted.getLandkode()));
-        bostedsadresse.setAdresseType(bostedsadresseType.orElse(BostedsadresseTypeKode.BOSTEDSLAND));
+        bostedsadresse.setAdresseType(bostedsadresseType != null ? bostedsadresseType : BostedsadresseTypeKode.BOSTEDSLAND);
         return bostedsadresse;
     }
 

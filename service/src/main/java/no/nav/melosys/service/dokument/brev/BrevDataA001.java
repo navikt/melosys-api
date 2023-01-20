@@ -23,7 +23,7 @@ public class BrevDataA001 extends BrevData {
 
     public Persondata persondata;
     public StrukturertAdresse bostedsadresse;
-    public Optional<BostedsadresseTypeKode> bostedsadresseTypeKode;
+    public BostedsadresseTypeKode bostedsadresseTypeKode;
     public Optional<String> utenlandskIdent;
 
     public List<AvklartVirksomhet> arbeidsgivendeVirksomheter;

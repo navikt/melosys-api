@@ -1,5 +1,11 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.*;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+
 import no.nav.dok.melosysbrev._000115.BostedsadresseTypeKode;
 import no.nav.dok.melosysbrev._000116.BrevdataType;
 import no.nav.dok.melosysbrev._000116.Fag;
@@ -28,12 +34,6 @@ import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
-
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.*;
 
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning.UTSENDELSE_MELLOM_24_MN_OG_5_AAR;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning_uten_art12.SJOEMANNSKIRKEN;
@@ -173,7 +173,7 @@ class A001MapperTest {
 
     @Test
     void mapSEDA001_kontaktAdresseType_korrektAdresseType() {
-        brevData.bostedsadresseTypeKode = Optional.of(BostedsadresseTypeKode.KONTAKTADRESSE);
+        brevData.bostedsadresseTypeKode = BostedsadresseTypeKode.KONTAKTADRESSE;
 
         var SEDA001 = mapper.mapSEDA001(brevData);
 
@@ -182,7 +182,7 @@ class A001MapperTest {
 
     @Test
     void mapSEDA001_ingenAdresseType_korrektAdresseType() {
-        brevData.bostedsadresseTypeKode = Optional.empty();
+        brevData.bostedsadresseTypeKode = null;
 
         var SEDA001 = mapper.mapSEDA001(brevData);
 

@@ -65,11 +65,11 @@ public class BrevDataByggerA001 implements BrevDataBygger {
 
         dataGrunnlag.getBostedGrunnlag().finnBostedsadresse().ifPresentOrElse(adresse -> {
             brevData.bostedsadresse = adresse;
-            brevData.bostedsadresseTypeKode = Optional.of(BostedsadresseTypeKode.BOSTEDSLAND);
+            brevData.bostedsadresseTypeKode = BostedsadresseTypeKode.BOSTEDSLAND;
         }, () ->
             dataGrunnlag.getBostedGrunnlag().finnKontaktadresse().ifPresentOrElse(adresse -> {
                 brevData.bostedsadresse = adresse;
-                brevData.bostedsadresseTypeKode = Optional.of(BostedsadresseTypeKode.KONTAKTADRESSE);
+                brevData.bostedsadresseTypeKode = BostedsadresseTypeKode.KONTAKTADRESSE;
             }, () -> {
                 throw new FunksjonellException("Finner verken bostedsadresse eller kontaktadresse");
             }));
