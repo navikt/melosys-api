@@ -71,7 +71,6 @@ internal class SaksflytOppstartIT(
         SakRepo.clear()
     }
 
-    @Disabled("temp")
     @Test
     fun `prosessinstansBehandler laster og publiserer prosesser som har hengt ved oppstart`() {
         val fagsak = lagFagsak().also { fagsakRepository.save(it) }
@@ -129,6 +128,7 @@ internal class SaksflytOppstartIT(
             this.status = status
             sistFullførtSteg = null
             registrertDato = endretDato
+            låsReferanse = if (status === ProsessStatus.PÅ_VENT) "123_dummy_1" else null
             this.endretDato = endretDato
         }
     }
