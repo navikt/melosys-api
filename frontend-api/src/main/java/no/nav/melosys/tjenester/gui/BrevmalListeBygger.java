@@ -268,7 +268,7 @@ public class BrevmalListeBygger {
             .build();
     }
 
-    private static FeltValgDto hentFritekstFeltValg() {
+    private FeltValgDto hentFritekstFeltValg() {
         var orienteringBeslutningFeltvalgAlternativDto = new FeltvalgAlternativDto(FeltvalgAlternativKode.ORIENTERING_BESLUTNING);
         var fritekstFeltvalgAlternativDto = new FeltvalgAlternativDto(FeltvalgAlternativKode.FRITEKST, true);
 
@@ -324,18 +324,17 @@ public class BrevmalListeBygger {
         final List<FeltvalgAlternativDto> valgAlternativer = new ArrayList<>();
 
         switch (fagsak.getType()) {
-            case EU_EOS:
+            case EU_EOS ->
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.HENVENDELSE_OM_TRYGDETILHØRLIGHET));
-                break;
-            case FTRL:
+            case FTRL -> {
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.CONFIRMATION_OF_MEMBERSHIP));
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.BEKREFTELSE_PÅ_MEDLEMSKAP));
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.HENVENDELSE_OM_MEDLEMSKAP));
-                break;
-            case TRYGDEAVTALE:
+            }
+            case TRYGDEAVTALE -> {
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.HENVENDELSE_OM_MEDLEMSKAP));
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.ENGELSK_FRITEKSTBREV));
-                break;
+            }
         }
 
         valgAlternativer.add(fritekstFeltvalgAlternativDto);

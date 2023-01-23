@@ -171,11 +171,12 @@ public class BrevbestillingService {
     private MuligMottakerDto lagKopiMottakerForBruker(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker, Aktoersroller hovedmottaker) {
         Aktoer avklartKopi = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling);
         if (avklartKopi.getRolle() == BRUKER || hovedmottaker == kopiMottaker) {
+            String aktørID = behandling.getFagsak().hentBrukersAktørID();
             return new MuligMottakerDto.Builder()
                 .medDokumentNavn("Kopi til bruker")
-                .medMottakerNavn(persondataFasade.hentSammensattNavn(behandling.getFagsak().hentBrukersAktørID()))
+                .medMottakerNavn(persondataFasade.hentSammensattNavn(aktørID))
                 .medRolle(BRUKER)
-                .medAktørId(behandling.getFagsak().hentBrukersAktørID())
+                .medAktørId(aktørID)
                 .build();
         } else {
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartKopi.getOrgnr());
@@ -252,25 +253,22 @@ public class BrevbestillingService {
         if (behandling.erInaktiv()) {
             return emptyList();
         }
-        switch (rolle) {
-            case BRUKER:
+
+        return switch (rolle) {
+            case BRUKER -> {
                 List<Produserbaredokumenter> brevmaler = new ArrayList<>();
                 if (behandling.getFagsak().getTema() == Sakstemaer.MEDLEMSKAP_LOVVALG && behandling.getType() == Behandlingstyper.FØRSTEGANG) {
                     brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
                 }
                 brevmaler.addAll(asList(MANGELBREV_BRUKER, GENERELT_FRITEKSTBREV_BRUKER));
-                return brevmaler;
-            case ARBEIDSGIVER:
-                return List.of(MANGELBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
-            case VIRKSOMHET:
-                return List.of(GENERELT_FRITEKSTBREV_VIRKSOMHET);
-            case TRYGDEMYNDIGHET:
-                return List.of(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV);
-            case ETAT:
-                return Collections.singletonList(FRITEKSTBREV);
-            default:
-                throw new FunksjonellException("Rollen " + rolle + " kan ikke sende brev gjennom brevmenyen");
-        }
+                yield brevmaler;
+            }
+            case ARBEIDSGIVER -> List.of(MANGELBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
+            case VIRKSOMHET -> Collections.singletonList(GENERELT_FRITEKSTBREV_VIRKSOMHET);
+            case TRYGDEMYNDIGHET -> Collections.singletonList(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV);
+            case ETAT -> Collections.singletonList(FRITEKSTBREV);
+            default -> throw new FunksjonellException("Rollen " + rolle + " kan ikke sende brev gjennom brevmenyen");
+        };
     }
 
     @Transactional
@@ -357,7 +355,7 @@ public class BrevbestillingService {
         return dokumentServiceFasade.produserUtkast(behandlingID, brevbestillingRequest);
     }
 
-    public List<Etat> hentEtater() {
+    public List<Etat> hentTilgjengeligeEtater() {
         return List.of(Etat.SKATTEETATEN_ORGNR, Etat.SKATTINNKREVER_UTLAND_ORGNR, Etat.HELFO_ORGNR);
     }
 }

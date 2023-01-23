@@ -92,7 +92,7 @@ public class BrevbestillingTjeneste {
     @GetMapping(value = "/tilgjengelige-etater", produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Henter alle tilgjengelige etater", response = Etat.class, responseContainer = "List")
     public List<Etat> hentTilgjengeligeEtater() {
-        return brevbestillingService.hentEtater();
+        return brevbestillingService.hentTilgjengeligeEtater();
     }
 
     private HttpHeaders genPdfHeaders(String navn) {

@@ -1,9 +1,5 @@
 package no.nav.melosys.tjenester.gui.dto.brev;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -11,6 +7,10 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.FritekstvedleggDto;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
 import no.nav.melosys.service.dokument.brev.SaksvedleggDto;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class BrevbestillingDto {
 
@@ -56,7 +56,7 @@ public class BrevbestillingDto {
             .medMottaker(this.getMottaker())
             .medOrgNr(this.getOrgNr())
             .medInstitusjonId(this.getInstitusjonId())
-            .medOrgNrEtater(this.getOrgnrEtater())
+            .medOrgnrEtater(this.getOrgnrEtater())
             .medInnledningFritekst(this.getInnledningFritekst())
             .medManglerFritekst(this.getManglerFritekst())
             .medBegrunnelseFritekst(this.getBegrunnelseFritekst())
@@ -81,7 +81,7 @@ public class BrevbestillingDto {
         this.mottaker = builder.mottaker;
         this.orgNr = builder.orgNr;
         this.innledningFritekst = builder.innledningFritekst;
-        this.orgnrEtater = builder.orgNrEtater;
+        this.orgnrEtater = builder.orgnrEtater;
         this.manglerFritekst = builder.manglerFritekst;
         this.begrunnelseFritekst = builder.begrunnelseFritekst;
         this.ektefelleFritekst = builder.ektefelleFritekst;
@@ -196,7 +196,7 @@ public class BrevbestillingDto {
         private Aktoersroller mottaker;
         private String orgNr;
         private String innledningFritekst;
-        private List<String> orgNrEtater;
+        private List<String> orgnrEtater;
         private String manglerFritekst;
         private String begrunnelseFritekst;
         private String ektefelleFritekst;
@@ -234,8 +234,8 @@ public class BrevbestillingDto {
             return this;
         }
 
-        public Builder medOrgNrEtater(List<String> etater) {
-            this.orgNrEtater = etater;
+        public Builder medOrgnrEtater(List<String> orgnrEtater) {
+            this.orgnrEtater = orgnrEtater;
             return this;
         }
 

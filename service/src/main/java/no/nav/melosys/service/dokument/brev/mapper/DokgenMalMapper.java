@@ -121,9 +121,8 @@ public class DokgenMalMapper {
             case AVSLAG_MANGLENDE_OPPLYSNINGER -> hentAvslagsbrev(brevbestilling);
             case MELDING_HENLAGT_SAK ->
                 Henleggelsesbrev.av(((HenleggelseBrevbestilling) brevbestilling).toBuilder().build());
-            // Aktoersrolle for GENERELT_FRITEKSTVEDLEGG er likegyldig da brevet kun journalføres og distribueres sammen med fritekstbrevet
             case GENERELT_FRITEKSTVEDLEGG ->
-                Fritekstvedlegg.av(((FritekstvedleggBrevbestilling) brevbestilling).toBuilder().build(), Aktoersroller.BRUKER);
+                Fritekstvedlegg.av(((FritekstvedleggBrevbestilling) brevbestilling).toBuilder().build());
             case UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV ->
                 FritekstbrevTrygdemyndighet.av((FritekstbrevBrevbestilling) brevbestilling, Aktoersroller.TRYGDEMYNDIGHET);
             default -> throw new FunksjonellException(
