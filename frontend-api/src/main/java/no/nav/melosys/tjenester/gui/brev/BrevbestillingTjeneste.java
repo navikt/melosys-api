@@ -1,16 +1,18 @@
-package no.nav.melosys.tjenester.gui;
-
-import java.util.List;
+package no.nav.melosys.tjenester.gui.brev;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.brev.Etat;
+import no.nav.melosys.service.brev.BrevbestillingFacade;
 import no.nav.melosys.service.brev.BrevbestillingService;
-import no.nav.melosys.service.dokument.MuligMottakerDto;
+import no.nav.melosys.service.brev.muligemottakere.HentMottakere;
+import no.nav.melosys.service.brev.muligemottakere.MuligMottakerDto;
 import no.nav.melosys.service.dokument.MuligeMottakereDto;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import no.nav.melosys.tjenester.gui.BrevmalListeBygger;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevbestillingDto;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevmalDto;
 import no.nav.melosys.tjenester.gui.dto.brev.HentMuligeMottakereEtaterRequestDto;
@@ -19,6 +21,8 @@ import no.nav.security.token.support.core.api.Protected;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.annotation.RequestScope;
+
+import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
@@ -34,12 +38,19 @@ public class BrevbestillingTjeneste {
     private final BrevmalListeBygger brevmalListeBygger;
     private final Aksesskontroll aksesskontroll;
 
-    public BrevbestillingTjeneste(BrevbestillingService brevbestillingService,
+    private final BrevbestillingFacade brevbestillingFacade;
+
+    private final Unleash unleash;
+
+    public BrevbestillingTjeneste(BrevbestillingFacade brevbestillingFacade,
+                                  BrevbestillingService brevbestillingService,
                                   BrevmalListeBygger brevmalListeBygger,
-                                  Aksesskontroll aksesskontroll) {
+                                  Aksesskontroll aksesskontroll, Unleash unleash) {
+        this.brevbestillingFacade = brevbestillingFacade;
         this.brevbestillingService = brevbestillingService;
         this.brevmalListeBygger = brevmalListeBygger;
         this.aksesskontroll = aksesskontroll;
+        this.unleash = unleash;
     }
 
     @GetMapping(value = "/tilgjengelige-maler/{behandlingID}", produces = APPLICATION_JSON_VALUE)
@@ -54,7 +65,15 @@ public class BrevbestillingTjeneste {
     public MuligeMottakereDto hentTilgjengeligeMottakere(@PathVariable long behandlingID,
                                                          @RequestBody HentMuligeMottakereRequestDto hentMuligeMottakereRequestDto) {
         aksesskontroll.autoriser(behandlingID);
-        return brevbestillingService.hentMuligeMottakere(hentMuligeMottakereRequestDto.produserbartdokument(), behandlingID, hentMuligeMottakereRequestDto.orgnr());
+
+        if (!unleash.isEnabled("melosys.MEL-4835.refactor1")) {
+            return brevbestillingService.hentMuligeMottakere(hentMuligeMottakereRequestDto.produserbartdokument(), behandlingID, hentMuligeMottakereRequestDto.orgnr());
+        }
+
+        var hentMottakerRequestData = new HentMottakere.RequestData(hentMuligeMottakereRequestDto.produserbartdokument(), behandlingID, hentMuligeMottakereRequestDto.orgnr());
+        var hentMottakerResponseData = brevbestillingFacade.hentMuligeMottakere(hentMottakerRequestData);
+        return new MuligeMottakereDto(hentMottakerResponseData.hovedMottaker(), hentMottakerResponseData.kopiMottakere(), hentMottakerResponseData.fasteMottakere());
+
     }
 
     @PostMapping(value = "pdf/brev/utkast/{behandlingID}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_PDF_VALUE)
@@ -63,8 +82,8 @@ public class BrevbestillingTjeneste {
                                                  @RequestBody BrevbestillingDto brevbestillingDto) {
         aksesskontroll.autoriser(behandlingID);
         BrevbestillingRequest brevbestillingRequest = brevbestillingDto.tilRequestBuilder()
-            .medBestillersId(SubjectHandler.getInstance().getUserID())
-            .build();
+                .medBestillersId(SubjectHandler.getInstance().getUserID())
+                .build();
         byte[] pdf = brevbestillingService.produserUtkast(behandlingID, brevbestillingRequest);
         return new ResponseEntity<>(pdf, genPdfHeaders("utkast_" + behandlingID), HttpStatus.OK);
     }
@@ -75,8 +94,8 @@ public class BrevbestillingTjeneste {
                              @RequestBody BrevbestillingDto brevbestillingDto) {
         aksesskontroll.autoriser(behandlingID);
         BrevbestillingRequest brevbestillingRequest = brevbestillingDto.tilRequestBuilder()
-            .medBestillersId(SubjectHandler.getInstance().getUserID())
-            .build();
+                .medBestillersId(SubjectHandler.getInstance().getUserID())
+                .build();
         brevbestillingService.produserBrev(behandlingID, brevbestillingRequest);
     }
 
@@ -86,7 +105,7 @@ public class BrevbestillingTjeneste {
                                                                    @RequestBody HentMuligeMottakereEtaterRequestDto hentMuligeMottakereRequestDto) {
         aksesskontroll.autoriser(behandlingID);
         return brevbestillingService.hentMuligeMottakereEtater(hentMuligeMottakereRequestDto.produserbartdokument(),
-            behandlingID, hentMuligeMottakereRequestDto.orgnrEtater());
+                behandlingID, hentMuligeMottakereRequestDto.orgnrEtater());
     }
 
     @GetMapping(value = "/tilgjengelige-etater", produces = APPLICATION_JSON_VALUE)
