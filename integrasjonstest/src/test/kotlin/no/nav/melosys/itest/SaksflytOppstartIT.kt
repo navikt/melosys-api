@@ -29,7 +29,6 @@ import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.Awaitility
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.context.event.ApplicationReadyEvent
@@ -49,7 +48,8 @@ import java.time.LocalDateTime
     classes = [Application::class, SaksflytTestConfig::class],
     webEnvironment = SpringBootTest.WebEnvironment.NONE
 )
-@EmbeddedKafka(count = 1, controlledShutdown = true, partitions = 1,
+@EmbeddedKafka(
+    count = 1, controlledShutdown = true, partitions = 1,
     topics = ["teammelosys.eessi.v1-local", "teammelosys.soknad-mottak.v1-local", "teammelosys.melosys-utstedt-a1.v1-local", "teammelosys.fattetvedtak.v1-local"],
     brokerProperties = ["offsets.topic.replication.factor=1", "transaction.state.log.replication.factor=1", "transaction.state.log.min.isr=1"]
 )
