@@ -25,8 +25,11 @@ public class SedDataGrunnlagMedSoknad implements SedDataGrunnlag {
         this.behandling = behandling;
         this.mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         this.persondata = persondata;
-        this.bostedGrunnlag = new BostedGrunnlag(mottatteOpplysningerData,
-            this.persondata.finnBostedsadresse().orElse(null), kodeverkService);
+        this.bostedGrunnlag = new BostedGrunnlag(
+            mottatteOpplysningerData,
+            this.persondata.finnBostedsadresse().orElse(null),
+            this.persondata.finnKontaktadresse().orElse(null),
+            kodeverkService);
         this.arbeidsstedGrunnlag = new ArbeidsstedGrunnlag(
             avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(behandling.getId()),
             getAvklarteVirksomheterGrunnlag(),

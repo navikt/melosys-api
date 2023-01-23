@@ -292,8 +292,11 @@ public class Behandling extends RegistreringsInfo {
         return harPeriode;
     }
 
-    private boolean harLand() {
-        return mottatteOpplysninger.getMottatteOpplysningerData().soeknadsland.erGyldig();
+    public boolean harLand() {
+        if (mottatteOpplysninger != null && mottatteOpplysninger.getMottatteOpplysningerData() != null) {
+            return mottatteOpplysninger.getMottatteOpplysningerData().soeknadsland.erGyldig();
+        }
+        return false;
     }
 
     public ErPeriode hentPeriode() {

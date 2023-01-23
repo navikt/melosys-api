@@ -7,7 +7,6 @@ import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
@@ -52,7 +51,6 @@ class BehandlingServiceTest {
     private static final Behandlingstema BEHANDLING_TEMA = Behandlingstema.ARBEID_FLERE_LAND;
     private static final Behandlingsstatus BEHANDLING_STATUS = UNDER_BEHANDLING;
     private static final LocalDate MOTTAKSDATO = LocalDate.now().plusMonths(1);
-    private final Behandlingsresultat BEHANDLINGSRESULTAT = new Behandlingsresultat();
     private static final String SAKSNUMMER = "12";
     private static final List<Long> PERIODE_IDS = Arrays.asList(2L, 3L);
 
@@ -70,14 +68,11 @@ class BehandlingServiceTest {
     private UtledMottaksdato utledMottaksdato;
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
-    private final FakeUnleash fakeUnleash = new FakeUnleash();
     private BehandlingService behandlingService;
     @Captor
     private ArgumentCaptor<Behandling> behandlingCaptor;
     @Captor
     private ArgumentCaptor<BehandlingEvent> behandlingEventCaptor;
-    @Captor
-    private ArgumentCaptor<BehandlingEndretAvSaksbehandlerEvent> behandlingEndretAvSaksbehandlerEventArgumentCaptor;
     @Captor
     private ArgumentCaptor<BehandlingEndretStatusEvent> behandlingEndretStatusEventCaptor;
 
@@ -85,11 +80,10 @@ class BehandlingServiceTest {
 
     @BeforeEach
     public void setUp() {
-        behandlingService = new BehandlingService(behandlingRepository, tidligereMedlemsperiodeRepo, behandlingsresultatService, oppgaveService, lovligeKombinasjonerService, applicationEventPublisher, utledMottaksdato, fakeUnleash);
+        behandlingService = new BehandlingService(behandlingRepository, tidligereMedlemsperiodeRepo, behandlingsresultatService, oppgaveService, lovligeKombinasjonerService, applicationEventPublisher, utledMottaksdato);
 
         behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
-        fakeUnleash.enableAll();
     }
 
     @Test
@@ -139,42 +133,6 @@ class BehandlingServiceTest {
 
         assertThat(behandlingEndretEvents.get(0).getBehandlingID()).isEqualTo(BEHANDLING_ID);
         assertThat(((BehandlingEndretStatusEvent) behandlingEndretEvents.get(0)).getBehandlingsstatus()).isEqualTo(BEHANDLING_STATUS);
-    }
-
-    @Test
-    void endreBehandling_endreTypeToggleDisabled() {
-        fakeUnleash.resetAll();
-        fakeUnleash.disable("melosys.api.endretype");
-        Fagsak fagsak = new Fagsak();
-        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-
-        behandling.setTema(UTSENDT_ARBEIDSTAKER);
-        behandling.setType(ENDRET_PERIODE);
-        behandling.setFagsak(fagsak);
-        behandling.setMottatteOpplysninger(opprettMottatteOpplysninger());
-
-        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
-
-
-        behandlingService.endreBehandling(BEHANDLING_ID, BEHANDLING_TYPE, BEHANDLING_TEMA, BEHANDLING_STATUS, MOTTAKSDATO);
-
-
-        verify(behandlingRepository, times(5)).save(behandlingCaptor.capture());
-        verify(applicationEventPublisher).publishEvent(behandlingEventCaptor.capture());
-
-        var lagredeBehandlinger = behandlingCaptor.getAllValues();
-        assertThat(lagredeBehandlinger.get(0).getId()).isEqualTo(BEHANDLING_ID);
-        assertThat(lagredeBehandlinger.get(0).getStatus()).isEqualTo(BEHANDLING_STATUS);
-        assertThat(lagredeBehandlinger.get(1).getId()).isEqualTo(BEHANDLING_ID);
-        assertThat(lagredeBehandlinger.get(1).getType()).isEqualTo(BEHANDLING_TYPE);
-        assertThat(lagredeBehandlinger.get(2).getId()).isEqualTo(BEHANDLING_ID);
-        assertThat(lagredeBehandlinger.get(2).getBehandlingsfrist()).isEqualTo(Behandling.utledBehandlingsfrist(lagredeBehandlinger.get(2), MOTTAKSDATO));
-        assertThat(lagredeBehandlinger.get(3).getId()).isEqualTo(BEHANDLING_ID);
-        assertThat(lagredeBehandlinger.get(3).getTema()).isEqualTo(BEHANDLING_TEMA);
-
-        var behandlingEvent = behandlingEventCaptor.getValue();
-        assertThat(behandlingEvent.getBehandlingID()).isEqualTo(BEHANDLING_ID);
-        assertThat(((BehandlingEndretStatusEvent) behandlingEvent).getBehandlingsstatus()).isEqualTo(BEHANDLING_STATUS);
     }
 
     @Test

@@ -14,6 +14,7 @@ import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 import no.nav.melosys.service.dokument.VedleggTyper;
 import org.springframework.stereotype.Service;
 
+import static no.nav.melosys.domain.kodeverk.Sakstyper.TRYGDEAVTALE;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.TRYGDEAVTALE_GB;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2;
 
@@ -34,19 +35,23 @@ public class DokumentNavnService {
 
 
     public String utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(Behandling behandling, Produserbaredokumenter produserbaredokumenter, Aktoersroller mottakerRolle) {
-        if (!TRYGDEAVTALE_GB.equals(produserbaredokumenter)) {
-            return produserbaredokumenter.getBeskrivelse();
+        if (erTrygdeavtale(produserbaredokumenter)) {
+            Aktoer mottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(mottakerRolle), behandling);
+            return utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, produserbaredokumenter, mottaker, null);
         }
-        Aktoer mottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(mottakerRolle), behandling);
-        return utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, produserbaredokumenter, mottaker, null);
+        return produserbaredokumenter.getBeskrivelse();
     }
 
     public String utledDokumentNavnForProduserbaredokumenterOgAktoer(Behandling behandling, Produserbaredokumenter produserbaredokumenter, Aktoer mottaker, String standardTekst) {
-        if (!TRYGDEAVTALE_GB.equals(produserbaredokumenter)) {
-            return standardTekst != null ? standardTekst : produserbaredokumenter.getBeskrivelse();
+        if (erTrygdeavtale(produserbaredokumenter)) {
+            DokumentproduksjonsInfo dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(produserbaredokumenter);
+            return utledDokumentNavn(behandling, dokumentproduksjonsInfo, mottaker);
         }
-        DokumentproduksjonsInfo dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(produserbaredokumenter);
-        return utledDokumentNavn(behandling, dokumentproduksjonsInfo, mottaker);
+        return standardTekst != null ? standardTekst : produserbaredokumenter.getBeskrivelse();
+    }
+
+    private boolean erTrygdeavtale(Produserbaredokumenter produserbaredokumenter) {
+        return produserbaredokumenter.getKode().contains("TRYGDEAVTALE");
     }
 
     public String utledDokumentNavn(Behandling behandling, DokumentproduksjonsInfo dokumentproduksjonsInfo, Aktoer mottaker) {

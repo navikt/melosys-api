@@ -1,9 +1,5 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Stream;
-
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.*;
@@ -31,9 +27,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
+
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_OG_JOURNALFØR_BREV;
+import static no.nav.melosys.service.oppgave.OppgaveFactory.utledTema;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Component
@@ -105,7 +106,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
 
         settHovedpart(behandling, bestilling);
 
-        String journalpostId = joarkFasade.opprettJournalpost(OpprettJournalpost.lagJournalpostForBrev(bestilling.build()), true);
+        String journalpostId = joarkFasade.opprettJournalpost(OpprettJournalpost.lagJournalpostForBrev(bestilling.build(), utledTema(behandling.getFagsak().getTema())), true);
 
         log.info("Brev for behandling {} er journalført, journalpostId {}", behandling.getId(), journalpostId);
         prosessinstans.setData(DISTRIBUERBAR_JOURNALPOST_ID, journalpostId);
@@ -185,8 +186,8 @@ public class OpprettOgJournalforBrev implements StegBehandler {
         if (fritekstvedleggBestilling == null) {
             return Collections.emptyList();
         }
-        if(!(brevbestilling instanceof FritekstbrevBrevbestilling fritekstbrevBrevbestilling)) {
-            log.warn("Forsøkte å produsere brev %s med fritekstvedlegg for behandling %d".formatted(brevbestilling.getProduserbartdokument(), brevbestilling.getBehandlingId()));
+        if (!(brevbestilling instanceof FritekstbrevBrevbestilling fritekstbrevBrevbestilling)) {
+            log.warn("Forsøkte å produsere brev {} med fritekstvedlegg for behandling {}", brevbestilling.getProduserbartdokument(), brevbestilling.getBehandlingId());
             return Collections.emptyList();
         }
 
@@ -222,7 +223,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
             if (isEmpty(fritekstTittel)) {
                 throw new FunksjonellException("Tittel til fritekstbrev mangler, behandlingId:" + brevbestilling.getBehandlingId());
             }
-            if("Request to remain subject to Norwegian legislation".equals(fritekstTittel)){
+            if ("Request to remain subject to Norwegian legislation".equals(fritekstTittel)) {
                 return "Søknad om unntak";
             }
             return fritekstTittel;

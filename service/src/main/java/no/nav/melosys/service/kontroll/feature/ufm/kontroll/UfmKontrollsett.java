@@ -3,7 +3,6 @@ package no.nav.melosys.service.kontroll.feature.ufm.kontroll;
 import java.util.Set;
 import java.util.function.Function;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.service.kontroll.feature.ufm.data.UfmKontrollData;
@@ -12,14 +11,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class UfmKontrollsett {
 
-    public static Set<Function<UfmKontrollData, Kontroll_begrunnelser>> hentRegelsettForSedType(final SedType sedType, Unleash unleash) {
+    public static Set<Function<UfmKontrollData, Kontroll_begrunnelser>> hentRegelsettForSedType(final SedType sedType) {
         return switch (sedType) {
             case A001 -> REGELSETT_A001;
             case A003 -> REGELSETT_A003;
             case A009 -> REGELSETT_A009;
             case A010 -> REGELSETT_A010;
-            default ->
-                throw new UnsupportedOperationException("SedType: %s er ikke støttet for automatiske kontroller".formatted(sedType));
+            default -> throw new UnsupportedOperationException("SedType: %s er ikke støttet for automatiske kontroller".formatted(sedType));
         };
     }
 
@@ -50,7 +48,7 @@ public class UfmKontrollsett {
         UfmKontroll::utbetaltBarnetrygdytelser,
         UfmKontroll::arbeidssted,
         UfmKontroll::unntakForA003
-     );
+    );
 
     private static final Set<Function<UfmKontrollData, Kontroll_begrunnelser>> REGELSETT_A009 = Set.of(
         UfmKontroll::periodeErÅpen,

@@ -40,8 +40,12 @@ public class PersonopplysningerObjectFactory {
 
     }
 
-    public static Personopplysninger lagPersonpplysningerUtenKontaktadresse() {
+    public static Personopplysninger lagPersonopplysningerUtenKontaktadresse() {
         return lagPersonopplysninger(false, false, false, true, false);
+    }
+
+    public static Personopplysninger lagPersonopplysningerUtenBostedsadresseOgKontaktadresse() {
+        return lagPersonopplysninger(false, true, false, true, false);
     }
 
     public static Personopplysninger lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse() {
@@ -54,7 +58,7 @@ public class PersonopplysningerObjectFactory {
 
     public static Personopplysninger lagPersonopplysningerKontaktadresseSemistrukturert(boolean erUtenOppholdsadresse){
         return new Personopplysninger(emptyList(), lagBostedsadresse(), null, emptySet(),
-            lagFødesel(), null, lagKjønn(), lagKontaktadresser(true), lagNavn(), erUtenOppholdsadresse ? emptySet() : lagOppholdsadresser(),
+            lagFødsel(), null, lagKjønn(), lagKontaktadresser(true), lagNavn(), erUtenOppholdsadresse ? emptySet() : lagOppholdsadresser(),
             lagStatsborgerskap(false));
     }
 
@@ -62,18 +66,18 @@ public class PersonopplysningerObjectFactory {
                                                             boolean erUtenKontaktadresse, boolean harFamilie) {
         return new Personopplysninger(emptyList(), erUtenBostedsadresse ? null : lagBostedsadresse(), null,
             harFamilie ? Set.of(lagRelatertVedsivilstand(), lagBarn()) : emptySet(),
-            lagFødesel(), null, lagKjønn(), erUtenKontaktadresse ? emptySet() : lagKontaktadresser(false),
+            lagFødsel(), null, lagKjønn(), erUtenKontaktadresse ? emptySet() : lagKontaktadresser(false),
             lagNavn(), erUtenOppholdsadresse ? emptySet() : lagOppholdsadresser(),
             lagStatsborgerskap(erStatløs));
 
     }
 
     public static Personopplysninger lagPersonopplysningerUtenAdresser() {
-        return new Personopplysninger(emptyList(), null, null, emptySet(), lagFødesel(), null,
+        return new Personopplysninger(emptyList(), null, null, emptySet(), lagFødsel(), null,
             lagKjønn(), emptyList(), lagNavn(), emptyList(), lagStatsborgerskap(false));
     }
 
-    private static Foedsel lagFødesel() {
+    private static Foedsel lagFødsel() {
         return new Foedsel(LocalDate.EPOCH, null, null, null);
     }
 

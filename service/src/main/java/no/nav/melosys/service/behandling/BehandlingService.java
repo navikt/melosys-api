@@ -7,7 +7,6 @@ import java.util.*;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.DokumentasjonSvarfrist;
 import no.nav.melosys.domain.kodeverk.behandlinger.*;
@@ -53,7 +52,6 @@ public class BehandlingService {
     private final LovligeKombinasjonerService lovligeKombinasjonerService;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final UtledMottaksdato utledMottaksdato;
-    private final Unleash unleash;
     private final Counter behandlingerAvsluttet = Metrics.counter(BEHANDLINGER_AVSLUTTET);
 
     public BehandlingService(BehandlingRepository behandlingRepository,
@@ -62,7 +60,7 @@ public class BehandlingService {
                              @Lazy OppgaveService oppgaveService,
                              @Lazy LovligeKombinasjonerService lovligeKombinasjonerService,
                              ApplicationEventPublisher applicationEventPublisher,
-                             UtledMottaksdato utledMottaksdato, Unleash unleash) {
+                             UtledMottaksdato utledMottaksdato) {
         this.behandlingRepository = behandlingRepository;
         this.tidligereMedlemsperiodeRepository = tidligereMedlemsperiodeRepository;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -70,7 +68,6 @@ public class BehandlingService {
         this.lovligeKombinasjonerService = lovligeKombinasjonerService;
         this.applicationEventPublisher = applicationEventPublisher;
         this.utledMottaksdato = utledMottaksdato;
-        this.unleash = unleash;
     }
 
     public Behandling hentBehandling(long behandlingId) {
@@ -242,7 +239,7 @@ public class BehandlingService {
             behandlingsreplika = replikerBehandlingUtenMottatteOpplysningerSaksopplysningerOgResultat(tidligsteInaktiveBehandling, behandlingstype);
             behandlingsresultatService.lagreNyttBehandlingsresultat(behandlingsreplika);
         } catch (InvocationTargetException | NoSuchMethodException | InstantiationException |
-                 IllegalAccessException e) {
+            IllegalAccessException e) {
             throw new TekniskException(String.format("Klarte ikke replikere behandling %s for fagsak %s",
                 tidligsteInaktiveBehandling.getId(), tidligsteInaktiveBehandling.getFagsak().getSaksnummer()), e);
         }
@@ -277,7 +274,7 @@ public class BehandlingService {
             behandlingsreplika = replikerBehandling(tidligsteInaktiveBehandling, behandlingstype);
             behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika);
         } catch (InvocationTargetException | NoSuchMethodException | InstantiationException |
-                 IllegalAccessException e) {
+            IllegalAccessException e) {
             throw new TekniskException(String.format("Klarte ikke replikere behandling %s for fagsak %s",
                 tidligsteInaktiveBehandling.getId(), tidligsteInaktiveBehandling.getFagsak().getSaksnummer()), e);
         }
@@ -367,10 +364,6 @@ public class BehandlingService {
     }
 
     public void oppdaterBehandlingsstatusHvisTilhørendeSaksbehandler(Behandling behandling, String saksbehandlerID) {
-        if (!unleash.isEnabled("melosys.MELOSYS-4175_oppdaterstatus")) {
-            endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);
-            return;
-        }
         String saksnummer = behandling.getFagsak().getSaksnummer();
         if (behandlingMedSaksnummerTilhørerSaksbehandlerID(saksnummer, saksbehandlerID)) {
             endreBehandlingsstatusFraOpprettetTilUnderBehandling(behandling);

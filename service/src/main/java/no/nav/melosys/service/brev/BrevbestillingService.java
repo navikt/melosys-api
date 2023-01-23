@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
@@ -311,7 +312,7 @@ public class BrevbestillingService {
                 UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(mottaker.hentMyndighetLandkode());
                 return new BrevAdresse.Builder()
                     .medMottakerNavn(utenlandskMyndighet.navn)
-                    .medAdresselinjer(List.of(utenlandskMyndighet.gateadresse1, utenlandskMyndighet.gateadresse2))
+                    .medAdresselinjer(Stream.of(utenlandskMyndighet.gateadresse1, utenlandskMyndighet.gateadresse2).toList())
                     .medPostnr(utenlandskMyndighet.postnummer)
                     .medPoststed(utenlandskMyndighet.poststed)
                     .medLand(utenlandskMyndighet.land)

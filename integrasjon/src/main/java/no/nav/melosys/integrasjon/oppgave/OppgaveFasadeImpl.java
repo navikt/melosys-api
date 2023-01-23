@@ -8,7 +8,6 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
@@ -49,7 +48,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
 
     private final OppgaveConsumer oppgaveConsumer;
 
-    public OppgaveFasadeImpl(OppgaveConsumer oppgaveConsumer, Unleash unleash) {
+    public OppgaveFasadeImpl(OppgaveConsumer oppgaveConsumer) {
         this.oppgaveConsumer = oppgaveConsumer;
     }
 
