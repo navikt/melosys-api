@@ -69,7 +69,7 @@ class UtbetaldataRestService(
     private fun fjernYtelserFraUtbetalingerSomIkkeErBarnetrygd(response: List<no.nav.melosys.integrasjon.utbetaling.Utbetaling>): List<no.nav.melosys.integrasjon.utbetaling.Utbetaling> {
         response.forEach(Consumer { utbetaling: no.nav.melosys.integrasjon.utbetaling.Utbetaling ->
             utbetaling.ytelseListe
-                .removeIf { ytelse: no.nav.melosys.integrasjon.utbetaling.Ytelse -> ytelse.ytelsestype != BARNETRYGD }
+                .removeIf { ytelse: no.nav.melosys.integrasjon.utbetaling.Ytelse -> ytelse.ytelsestype.uppercase() != BARNETRYGD }
         })
         return response
     }
