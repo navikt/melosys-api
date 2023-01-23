@@ -71,7 +71,7 @@ public class DokumentNavnService {
 
         var vedtaksbrevTittel = dokumentproduksjonsInfo.vedleggsTitler().get(VedleggTyper.VEDTAKSBREV);
 
-        if (FastMottakerMedOrgnr.SKATT.getOrgnr().equals((mottaker.getOrgnr()))) {
+        if (FastMottakerMedOrgnr.SKATTEETATEN.getOrgnr().equals((mottaker.getOrgnr()))) {
             return lagKopiTittel(vedtaksbrevTittel);
         }
 

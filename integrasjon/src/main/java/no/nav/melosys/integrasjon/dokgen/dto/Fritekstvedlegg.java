@@ -4,6 +4,7 @@ import no.nav.melosys.domain.brev.FritekstvedleggBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 
 public class Fritekstvedlegg extends DokgenDto {
+    private static final Aktoersroller IRRELEVANT_AKTØRROLLE = Aktoersroller.BRUKER;
     private final String fritekstTittel;
     private final String fritekst;
 
@@ -13,8 +14,8 @@ public class Fritekstvedlegg extends DokgenDto {
         this.fritekst = brevbestilling.getFritekstvedleggTekst();
     }
 
-    public static Fritekstvedlegg av(FritekstvedleggBrevbestilling brevbestilling, Aktoersroller mottakerType) {
-        return new Fritekstvedlegg(brevbestilling, mottakerType);
+    public static Fritekstvedlegg av(FritekstvedleggBrevbestilling brevbestilling) {
+        return new Fritekstvedlegg(brevbestilling, IRRELEVANT_AKTØRROLLE);
     }
 
     public String getFritekstTittel() {

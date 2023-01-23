@@ -85,7 +85,7 @@ class BrevmalListeByggerTest {
 
 
         assertThat(tilgjengeligeMaler)
-            .hasSize(3)
+            .hasSize(4)
             .extracting(brevmalDto -> brevmalDto.getMottaker().getType())
             .contains(
                 MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.getBeskrivelse(),
@@ -113,6 +113,12 @@ class BrevmalListeByggerTest {
             .contains(
                 Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER,
                 Produserbaredokumenter.GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
+
+        assertThat(tilgjengeligeMaler.get(3).getBrevTyper())
+            .hasSize(1)
+            .extracting(BrevmalTypeDto::getType)
+            .contains(
+                Produserbaredokumenter.FRITEKSTBREV);
     }
 
     @Test
@@ -130,11 +136,12 @@ class BrevmalListeByggerTest {
 
 
         assertThat(tilgjengeligeMaler)
-            .hasSize(2)
+            .hasSize(3)
             .extracting(brevmalDto -> brevmalDto.getMottaker().getType())
             .contains(
                 MottakerType.VIRKSOMHET.getBeskrivelse(),
-                MottakerType.ANNEN_ORGANISASJON.getBeskrivelse());
+                MottakerType.ANNEN_ORGANISASJON.getBeskrivelse(),
+                MottakerType.ANDRE_OFFENTLIGE_ETATER.getBeskrivelse());
 
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper())
             .hasSize(1)
@@ -147,6 +154,12 @@ class BrevmalListeByggerTest {
             .extracting(BrevmalTypeDto::getType)
             .contains(
                 Produserbaredokumenter.GENERELT_FRITEKSTBREV_VIRKSOMHET);
+
+        assertThat(tilgjengeligeMaler.get(2).getBrevTyper())
+            .hasSize(1)
+            .extracting(BrevmalTypeDto::getType)
+            .contains(
+                Produserbaredokumenter.FRITEKSTBREV);
     }
 
     @Test
@@ -160,7 +173,7 @@ class BrevmalListeByggerTest {
 
 
         assertThat(tilgjengeligeMaler)
-            .hasSize(2)
+            .hasSize(3)
             .extracting(brevmalDto -> brevmalDto.getMottaker().getType())
             .contains(
                 MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.getBeskrivelse(),
@@ -180,7 +193,7 @@ class BrevmalListeByggerTest {
         List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
-        assertThat(tilgjengeligeMaler).hasSize(3);
+        assertThat(tilgjengeligeMaler).hasSize(4);
 
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper())
             .hasSize(3)
@@ -209,7 +222,7 @@ class BrevmalListeByggerTest {
         List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
-        assertThat(tilgjengeligeMaler).hasSize(3);
+        assertThat(tilgjengeligeMaler).hasSize(4);
         assertThat(tilgjengeligeMaler.get(0).getMottaker())
             .extracting(
                 MottakerDto::getType,
@@ -230,7 +243,7 @@ class BrevmalListeByggerTest {
         List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
-        assertThat(tilgjengeligeMaler).hasSize(3);
+        assertThat(tilgjengeligeMaler).hasSize(4);
         assertThat(tilgjengeligeMaler.get(1).getMottaker())
             .extracting(
                 MottakerDto::getType,
@@ -366,7 +379,7 @@ class BrevmalListeByggerTest {
         List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
-        assertThat(tilgjengeligeMaler).hasSize(3);
+        assertThat(tilgjengeligeMaler).hasSize(4);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(1).getValg().getValgAlternativer())
             .hasSize(2)
             .flatExtracting(
@@ -389,7 +402,7 @@ class BrevmalListeByggerTest {
 
         List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
-        assertThat(tilgjengeligeMaler).hasSize(3);
+        assertThat(tilgjengeligeMaler).hasSize(4);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
             .hasSize(3)
             .flatExtracting(
@@ -415,7 +428,7 @@ class BrevmalListeByggerTest {
         List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
-        assertThat(tilgjengeligeMaler).hasSize(3);
+        assertThat(tilgjengeligeMaler).hasSize(4);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(1).getValg().getValgAlternativer())
             .hasSize(4)
             .flatExtracting(
@@ -442,7 +455,7 @@ class BrevmalListeByggerTest {
 
         List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
-        assertThat(tilgjengeligeMaler).hasSize(3);
+        assertThat(tilgjengeligeMaler).hasSize(4);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
             .hasSize(3)
             .flatExtracting(
@@ -473,7 +486,7 @@ class BrevmalListeByggerTest {
         List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
-        assertThat(tilgjengeligeMaler).hasSize(4);
+        assertThat(tilgjengeligeMaler).hasSize(5);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(1).getValg().getValgAlternativer())
             .hasSize(3)
             .flatExtracting(
@@ -503,7 +516,7 @@ class BrevmalListeByggerTest {
 
         List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
-        assertThat(tilgjengeligeMaler).hasSize(4);
+        assertThat(tilgjengeligeMaler).hasSize(5);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
             .hasSize(3)
             .flatExtracting(
@@ -530,7 +543,7 @@ class BrevmalListeByggerTest {
         List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
-        assertThat(tilgjengeligeMaler).hasSize(3);
+        assertThat(tilgjengeligeMaler).hasSize(4);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(1).getValg().getValgAlternativer())
             .hasSize(2)
             .flatExtracting(
@@ -554,7 +567,7 @@ class BrevmalListeByggerTest {
 
         List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
-        assertThat(tilgjengeligeMaler).hasSize(3);
+        assertThat(tilgjengeligeMaler).hasSize(4);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
             .hasSize(3)
             .flatExtracting(
@@ -581,7 +594,7 @@ class BrevmalListeByggerTest {
         List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
-        assertThat(tilgjengeligeMaler).hasSize(3);
+        assertThat(tilgjengeligeMaler).hasSize(4);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(1).getValg().getValgAlternativer())
             .hasSize(4)
             .flatExtracting(
@@ -609,7 +622,7 @@ class BrevmalListeByggerTest {
 
         List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
-        assertThat(tilgjengeligeMaler).hasSize(3);
+        assertThat(tilgjengeligeMaler).hasSize(4);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
             .hasSize(3)
             .flatExtracting(
@@ -641,7 +654,7 @@ class BrevmalListeByggerTest {
         List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
 
-        assertThat(tilgjengeligeMaler).hasSize(4);
+        assertThat(tilgjengeligeMaler).hasSize(5);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(1).getValg().getValgAlternativer())
             .hasSize(3)
             .flatExtracting(
@@ -672,7 +685,7 @@ class BrevmalListeByggerTest {
 
         List<BrevmalDto> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
-        assertThat(tilgjengeligeMaler).hasSize(4);
+        assertThat(tilgjengeligeMaler).hasSize(5);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
             .hasSize(3)
             .flatExtracting(

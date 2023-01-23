@@ -2,6 +2,7 @@ package no.nav.melosys.service.brev;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -9,10 +10,7 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
-import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.brev.Mottakerliste;
-import no.nav.melosys.domain.brev.Postadresse;
+import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
@@ -20,6 +18,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
@@ -52,7 +51,8 @@ public class BrevbestillingService {
         GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
         GENERELT_FRITEKSTBREV_VIRKSOMHET,
         AVSLAG_MANGLENDE_OPPLYSNINGER,
-        UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV
+        UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV,
+        FRITEKSTBREV
     );
 
     private final DokumentServiceFasade dokumentServiceFasade;
@@ -84,6 +84,21 @@ public class BrevbestillingService {
     }
 
     @Transactional
+    public List<MuligMottakerDto> hentMuligeMottakereEtater(Produserbaredokumenter produserbaredokumenter,
+                                                            long behandlingId,
+                                                            List<String> orgnrEtater) {
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
+        return orgnrEtater.stream()
+            .map(orgnr -> new MuligMottakerDto.Builder()
+                .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, produserbaredokumenter, ETAT))
+                .medMottakerNavn(hentMottakerNavn(produserbaredokumenter, behandling, ETAT, orgnr))
+                .medRolle(ETAT)
+                .medOrgnr(orgnr)
+                .build())
+            .toList();
+    }
+
+    @Transactional
     public MuligeMottakereDto hentMuligeMottakere(Produserbaredokumenter produserbaredokumenter, long behandlingId, String orgnrTilValgtArbeidsgiver) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         Mottakerliste mottakerliste = brevmottakerService.hentMottakerliste(produserbaredokumenter, behandlingId);
@@ -101,41 +116,52 @@ public class BrevbestillingService {
             .build();
     }
 
-    private String hentMottakerNavn(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller hovedmottaker, String orgnrTilValgtArbeidsgiver) {
-        if (hovedmottaker == BRUKER) {
-            Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(hovedmottaker), behandling);
-            if (avklartMottaker.getRolle() == BRUKER) {
-                return hentSammensattNavn(behandling);
-            } else if (avklartMottaker.erPerson()) {
-                return persondataFasade.hentSammensattNavn(avklartMottaker.getPersonIdent());
-            } else {
-                var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartMottaker.getOrgnr());
-                return orgDokument.getNavn();
+    private String hentMottakerNavn(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller hovedmottaker, String orgnr) {
+        switch (hovedmottaker) {
+            case BRUKER -> {
+                Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(hovedmottaker), behandling);
+                if (avklartMottaker.getRolle() == BRUKER) {
+                    return persondataFasade.hentSammensattNavn(behandling.getFagsak().hentBrukersAktørID());
+                } else if (avklartMottaker.erPerson()) {
+                    return persondataFasade.hentSammensattNavn(avklartMottaker.getPersonIdent());
+                } else {
+                    var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartMottaker.getOrgnr());
+                    return orgDokument.getNavn();
+                }
             }
+            case ARBEIDSGIVER, VIRKSOMHET, ETAT -> {
+                var saksopplysning = eregFasade.finnOrganisasjon(orgnr);
+                if (saksopplysning.isPresent()) {
+                    var orgDokument = (OrganisasjonDokument) saksopplysning.get().getDokument();
+                    return orgDokument.getNavn();
+                } else {
+                    throw new IkkeFunnetException("Kan ikke hente mottakernavn, fant ikke orgnr %s".formatted(orgnr));
+                }
+            }
+            case TRYGDEMYNDIGHET -> {
+                if (produserbaredokumenter == UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV) {
+                    Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(hovedmottaker), behandling);
+                    UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(avklartMottaker.hentMyndighetLandkode());
+                    return utenlandskMyndighet.navn;
+                } else {
+                    throw new FunksjonellException("Melosys støtter ikke hovedmottakere med rollen " + hovedmottaker);
+                }
+            }
+            default ->
+                throw new FunksjonellException("Melosys støtter ikke hovedmottakere med rollen " + hovedmottaker);
         }
-        if (hovedmottaker == ARBEIDSGIVER || hovedmottaker == VIRKSOMHET) {
-            var orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(orgnrTilValgtArbeidsgiver).getDokument();
-            return orgDokument.getNavn();
-        }
-        if(hovedmottaker == TRYGDEMYNDIGHET && produserbaredokumenter == UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV){
-            Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(hovedmottaker), behandling);
-            UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(avklartMottaker.hentMyndighetLandkode());
-            return utenlandskMyndighet.navn;
-        }
-        throw new FunksjonellException("Melosys støtter ikke hovedmottakere med rollen " + hovedmottaker);
-    }
-
-    private String hentSammensattNavn(Behandling behandling) {
-        return persondataFasade.hentSammensattNavn(behandling.getFagsak().hentBrukersAktørID());
     }
 
     private List<MuligMottakerDto> lagKopiMottakereMuligMottakerDtos(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<Aktoersroller> kopiMottakere, Aktoersroller hovedmottaker) {
         List<MuligMottakerDto> muligMottakerDtos = new ArrayList<>();
         for (Aktoersroller kopiMottaker : kopiMottakere) {
             switch (kopiMottaker) {
-                case BRUKER -> muligMottakerDtos.add(lagKopiMottakerForBruker(produserbaredokumenter, behandling, kopiMottaker, hovedmottaker));
-                case ARBEIDSGIVER -> muligMottakerDtos.addAll(lagKopiMottakereForArbeidsgiver(produserbaredokumenter, behandling, kopiMottaker));
-                case TRYGDEMYNDIGHET -> muligMottakerDtos.addAll(lagKopiMottakereForMyndighet(produserbaredokumenter, behandling, kopiMottaker));
+                case BRUKER ->
+                    muligMottakerDtos.add(lagKopiMottakerForBruker(produserbaredokumenter, behandling, kopiMottaker, hovedmottaker));
+                case ARBEIDSGIVER ->
+                    muligMottakerDtos.addAll(lagKopiMottakereForArbeidsgiver(produserbaredokumenter, behandling, kopiMottaker));
+                case TRYGDEMYNDIGHET ->
+                    muligMottakerDtos.addAll(lagKopiMottakereForMyndighet(produserbaredokumenter, behandling, kopiMottaker));
                 default -> throw new IllegalStateException(kopiMottaker + " er ikke en gyldig kopiMottakerrolle");
             }
         }
@@ -145,11 +171,12 @@ public class BrevbestillingService {
     private MuligMottakerDto lagKopiMottakerForBruker(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker, Aktoersroller hovedmottaker) {
         Aktoer avklartKopi = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling);
         if (avklartKopi.getRolle() == BRUKER || hovedmottaker == kopiMottaker) {
+            String aktørID = behandling.getFagsak().hentBrukersAktørID();
             return new MuligMottakerDto.Builder()
                 .medDokumentNavn("Kopi til bruker")
-                .medMottakerNavn(hentSammensattNavn(behandling))
+                .medMottakerNavn(persondataFasade.hentSammensattNavn(aktørID))
                 .medRolle(BRUKER)
-                .medAktørId(behandling.getFagsak().hentBrukersAktørID())
+                .medAktørId(aktørID)
                 .build();
         } else {
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartKopi.getOrgnr());
@@ -226,23 +253,22 @@ public class BrevbestillingService {
         if (behandling.erInaktiv()) {
             return emptyList();
         }
-        switch (rolle) {
-            case BRUKER:
+
+        return switch (rolle) {
+            case BRUKER -> {
                 List<Produserbaredokumenter> brevmaler = new ArrayList<>();
                 if (behandling.getFagsak().getTema() == Sakstemaer.MEDLEMSKAP_LOVVALG && behandling.getType() == Behandlingstyper.FØRSTEGANG) {
                     brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
                 }
                 brevmaler.addAll(asList(MANGELBREV_BRUKER, GENERELT_FRITEKSTBREV_BRUKER));
-                return brevmaler;
-            case ARBEIDSGIVER:
-                return List.of(MANGELBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
-            case VIRKSOMHET:
-                return List.of(GENERELT_FRITEKSTBREV_VIRKSOMHET);
-            case TRYGDEMYNDIGHET:
-                return List.of(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV);
-            default:
-                throw new FunksjonellException("Rollen " + rolle + " kan ikke sende brev gjennom brevmenyen");
-        }
+                yield brevmaler;
+            }
+            case ARBEIDSGIVER -> List.of(MANGELBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
+            case VIRKSOMHET -> Collections.singletonList(GENERELT_FRITEKSTBREV_VIRKSOMHET);
+            case TRYGDEMYNDIGHET -> Collections.singletonList(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV);
+            case ETAT -> Collections.singletonList(FRITEKSTBREV);
+            default -> throw new FunksjonellException("Rollen " + rolle + " kan ikke sende brev gjennom brevmenyen");
+        };
     }
 
     @Transactional
@@ -280,7 +306,7 @@ public class BrevbestillingService {
                 orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();
                 break;
             }
-            case TRYGDEMYNDIGHET:{
+            case TRYGDEMYNDIGHET: {
                 UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(mottaker.hentMyndighetLandkode());
                 return new BrevAdresse.Builder()
                     .medMottakerNavn(utenlandskMyndighet.navn)
@@ -327,5 +353,9 @@ public class BrevbestillingService {
 
     public byte[] produserUtkast(long behandlingID, BrevbestillingRequest brevbestillingRequest) {
         return dokumentServiceFasade.produserUtkast(behandlingID, brevbestillingRequest);
+    }
+
+    public List<Etat> hentTilgjengeligeEtater() {
+        return List.of(Etat.SKATTEETATEN_ORGNR, Etat.SKATTINNKREVER_UTLAND_ORGNR, Etat.HELFO_ORGNR);
     }
 }

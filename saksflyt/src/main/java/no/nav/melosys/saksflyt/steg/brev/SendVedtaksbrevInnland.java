@@ -8,7 +8,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.Mottaker;
@@ -16,6 +15,7 @@ import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -93,7 +93,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
 
         List<Mottaker> mottakerListe;
         if (avslagTypeBruker == AVSLAG_YRKESAKTIV) {
-            mottakerListe = List.of(Mottaker.av(BRUKER), av(HELFO), av(SKATT));
+            mottakerListe = List.of(Mottaker.av(BRUKER), av(HELFO), av(SKATTEETATEN));
         } else {
             mottakerListe = List.of(Mottaker.av(BRUKER));
         }
@@ -126,12 +126,12 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         Produserbaredokumenter innvilgelseType = (resultat.erInnvilgelseFlereLand())
             ? INNVILGELSE_YRKESAKTIV_FLERE_LAND : INNVILGELSE_YRKESAKTIV;
 
-        List<Mottaker> mottakerListe = new ArrayList<>(List.of(Mottaker.av(BRUKER), FastMottakerMedOrgnr.av(SKATT)));
+        List<Mottaker> mottakerListe = new ArrayList<>(List.of(Mottaker.av(BRUKER), FastMottakerMedOrgnr.av(SKATTEETATEN)));
         if (brevSendesTilStatligSkatteoppkreving(
             resultat.hentLovvalgsperiode(),
             behandling.getMottatteOpplysninger()
         )) {
-            mottakerListe.add(FastMottakerMedOrgnr.av(STATLIG_SKATTEOPPKREVING));
+            mottakerListe.add(FastMottakerMedOrgnr.av(SKATTEINNKREVER_UTLAND));
         }
 
         DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProduserbartDokument(innvilgelseType)

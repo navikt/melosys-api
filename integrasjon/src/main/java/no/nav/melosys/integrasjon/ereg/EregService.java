@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.ereg;
 
 import java.io.StringWriter;
+import java.util.Optional;
 import javax.xml.bind.JAXBException;
 
 import no.nav.melosys.domain.Saksopplysning;
@@ -15,12 +16,15 @@ import no.nav.tjeneste.virksomhet.organisasjon.v4.binding.HentOrganisasjonOrgani
 import no.nav.tjeneste.virksomhet.organisasjon.v4.binding.HentOrganisasjonUgyldigInput;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.meldinger.HentOrganisasjonRequest;
 import no.nav.tjeneste.virksomhet.organisasjon.v4.meldinger.HentOrganisasjonResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 @Service
 @Primary
 public class EregService implements EregFasade {
+    private static final Logger log = LoggerFactory.getLogger(EregService.class);
     private static final String ORGANISASJON_VERSJON = "4.0";
 
     private final OrganisasjonConsumer organisasjonConsumer;
@@ -32,8 +36,8 @@ public class EregService implements EregFasade {
     }
 
     @Override
-    public Saksopplysning hentOrganisasjon(String orgnummer) {
-        HentOrganisasjonResponse response = hentOrganisasjonResponse(orgnummer);
+    public Saksopplysning hentOrganisasjon(String orgnr) {
+        HentOrganisasjonResponse response = hentOrganisasjonResponse(orgnr);
 
         StringWriter xmlWriter = new StringWriter();
         try {
@@ -56,23 +60,24 @@ public class EregService implements EregFasade {
     }
 
     @Override
-    public String hentOrganisasjonNavn(String orgnummer) {
-        OrganisasjonDokument organisasjonDokument = (OrganisasjonDokument) hentOrganisasjon(orgnummer).getDokument();
-        return organisasjonDokument.getNavn();
-    }
-
-    @Override
-    public boolean organisasjonFinnes(String orgnummer) {
+    public Optional<Saksopplysning> finnOrganisasjon(String orgnr) {
         try {
-            return hentOrganisasjonResponse(orgnummer) != null;
-        } catch (IkkeFunnetException | IntegrasjonException e) {
-            return false;
+            return Optional.ofNullable(hentOrganisasjon(orgnr));
+        } catch (IkkeFunnetException ex) {
+            log.warn("Fant ikke organisasjon med orgnr {}", orgnr);
+            return Optional.empty();
         }
     }
 
-    private HentOrganisasjonResponse hentOrganisasjonResponse(String orgnummer) {
+    @Override
+    public String hentOrganisasjonNavn(String orgnr) {
+        OrganisasjonDokument organisasjonDokument = (OrganisasjonDokument) hentOrganisasjon(orgnr).getDokument();
+        return organisasjonDokument.getNavn();
+    }
+
+    private HentOrganisasjonResponse hentOrganisasjonResponse(String orgnr) {
         HentOrganisasjonRequest request = new HentOrganisasjonRequest();
-        request.setOrgnummer(orgnummer);
+        request.setOrgnummer(orgnr);
 
         HentOrganisasjonResponse response;
         try {

@@ -10,7 +10,8 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 public class BrevbestillingRequest {
     private Produserbaredokumenter produserbardokument;
     private Aktoersroller mottaker;
-    private String orgNr;
+    private String orgnr;
+    private List<String> orgnrEtater;
     private String institusjonId;
     private String innledningFritekst;
     private String manglerFritekst;
@@ -44,16 +45,12 @@ public class BrevbestillingRequest {
     public BrevbestillingRequest() {
     }
 
-    // Må ha mulighet for å sette produserbartdokument pga bakoverkompabilitet
-    public void setProduserbardokument(Produserbaredokumenter produserbardokument) {
-        this.produserbardokument = produserbardokument;
-    }
-
     public BrevbestillingRequest(Builder builder) {
         this.produserbardokument = builder.produserbardokument;
         this.mottaker = builder.mottaker;
-        this.orgNr = builder.orgNr;
+        this.orgnr = builder.orgNr;
         this.institusjonId = builder.institusjonId;
+        this.orgnrEtater = builder.orgnrEtater;
         this.innledningFritekst = builder.innledningFritekst;
         this.manglerFritekst = builder.manglerFritekst;
         this.ektefelleFritekst = builder.ektefelleFritekst;
@@ -86,12 +83,16 @@ public class BrevbestillingRequest {
         return mottaker;
     }
 
-    public String getOrgNr() {
-        return orgNr;
+    public String getOrgnr() {
+        return orgnr;
     }
 
     public String getInstitusjonId() {
         return institusjonId;
+    }
+
+    public List<String> getOrgnrEtater() {
+        return orgnrEtater;
     }
 
     public String getInnledningFritekst() {
@@ -170,6 +171,7 @@ public class BrevbestillingRequest {
         private Aktoersroller mottaker;
         private String orgNr;
         private String institusjonId;
+        private List<String> orgnrEtater;
         private String innledningFritekst;
         private String manglerFritekst;
         private String begrunnelseFritekst;
@@ -206,6 +208,11 @@ public class BrevbestillingRequest {
 
         public Builder medInstitusjonId(String institusjonId) {
             this.institusjonId = institusjonId;
+            return this;
+        }
+
+        public Builder medOrgnrEtater(List<String> orgnrEtater) {
+            this.orgnrEtater = orgnrEtater;
             return this;
         }
 

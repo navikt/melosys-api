@@ -1,9 +1,5 @@
 package no.nav.melosys.tjenester.gui.dto.brev;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -12,12 +8,17 @@ import no.nav.melosys.service.dokument.brev.FritekstvedleggDto;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
 import no.nav.melosys.service.dokument.brev.SaksvedleggDto;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 public class BrevbestillingDto {
 
     private Produserbaredokumenter produserbardokument;
     private Aktoersroller mottaker;
     private String orgNr;
     private String institusjonId;
+    private List<String> orgnrEtater;
     private String innledningFritekst;
     private String manglerFritekst;
     private String begrunnelseFritekst;
@@ -31,7 +32,7 @@ public class BrevbestillingDto {
     private boolean kontaktopplysninger;
     private String nyVurderingBakgrunn;
     private List<SaksvedleggDto> saksvedlegg;
-    private List <FritekstvedleggDto> fritekstvedlegg;
+    private List<FritekstvedleggDto> fritekstvedlegg;
     private String dokumentTittel;
 
     /**
@@ -50,13 +51,12 @@ public class BrevbestillingDto {
     }
 
     public BrevbestillingRequest.Builder tilRequestBuilder() {
-        var a = this.getDistribusjonstype();
-
         return new BrevbestillingRequest.Builder()
             .medProduserbardokument(this.getProduserbardokument())
             .medMottaker(this.getMottaker())
             .medOrgNr(this.getOrgNr())
             .medInstitusjonId(this.getInstitusjonId())
+            .medOrgnrEtater(this.getOrgnrEtater())
             .medInnledningFritekst(this.getInnledningFritekst())
             .medManglerFritekst(this.getManglerFritekst())
             .medBegrunnelseFritekst(this.getBegrunnelseFritekst())
@@ -81,6 +81,7 @@ public class BrevbestillingDto {
         this.mottaker = builder.mottaker;
         this.orgNr = builder.orgNr;
         this.innledningFritekst = builder.innledningFritekst;
+        this.orgnrEtater = builder.orgnrEtater;
         this.manglerFritekst = builder.manglerFritekst;
         this.begrunnelseFritekst = builder.begrunnelseFritekst;
         this.ektefelleFritekst = builder.ektefelleFritekst;
@@ -113,6 +114,10 @@ public class BrevbestillingDto {
 
     public String getInstitusjonId() {
         return institusjonId;
+    }
+
+    public List<String> getOrgnrEtater() {
+        return orgnrEtater;
     }
 
     public String getInnledningFritekst() {
@@ -191,6 +196,7 @@ public class BrevbestillingDto {
         private Aktoersroller mottaker;
         private String orgNr;
         private String innledningFritekst;
+        private List<String> orgnrEtater;
         private String manglerFritekst;
         private String begrunnelseFritekst;
         private String ektefelleFritekst;
@@ -225,6 +231,11 @@ public class BrevbestillingDto {
 
         public Builder medInnledningFritekst(String innledningFritekst) {
             this.innledningFritekst = innledningFritekst;
+            return this;
+        }
+
+        public Builder medOrgnrEtater(List<String> orgnrEtater) {
+            this.orgnrEtater = orgnrEtater;
             return this;
         }
 
@@ -298,7 +309,7 @@ public class BrevbestillingDto {
             return this;
         }
 
-        public Builder medDokumentTittel(String dokumentTittel){
+        public Builder medDokumentTittel(String dokumentTittel) {
             this.dokumentTittel = dokumentTittel;
             return this;
         }
@@ -316,6 +327,8 @@ public class BrevbestillingDto {
         return kontaktopplysninger == that.kontaktopplysninger && produserbardokument == that.produserbardokument
             && mottaker == that.mottaker
             && Objects.equals(orgNr, that.orgNr)
+            && Objects.equals(institusjonId, that.institusjonId)
+            && Objects.equals(orgnrEtater, that.orgnrEtater)
             && Objects.equals(innledningFritekst, that.innledningFritekst)
             && Objects.equals(manglerFritekst, that.manglerFritekst)
             && Objects.equals(begrunnelseFritekst, that.begrunnelseFritekst)
@@ -335,7 +348,8 @@ public class BrevbestillingDto {
 
     @Override
     public int hashCode() {
-        return Objects.hash(produserbardokument, mottaker, orgNr, innledningFritekst, manglerFritekst,
+        return Objects.hash(produserbardokument, mottaker, orgNr, institusjonId, orgnrEtater, innledningFritekst,
+            manglerFritekst,
             begrunnelseFritekst, ektefelleFritekst, barnFritekst, kontaktpersonNavn, kopiMottakere, distribusjonstype, fritekstTittel,
             fritekst, kontaktopplysninger, begrunnelseKode, ytterligereInformasjon, nyVurderingBakgrunn, saksvedlegg, dokumentTittel);
     }
@@ -346,6 +360,8 @@ public class BrevbestillingDto {
             "produserbardokument=" + produserbardokument +
             ", mottaker=" + mottaker +
             ", orgNr='" + orgNr + '\'' +
+            ", institusjonId='" + institusjonId + '\'' +
+            ", orgnrEtater='" + orgnrEtater + '\'' +
             ", innledningFritekst='" + innledningFritekst + '\'' +
             ", manglerFritekst='" + manglerFritekst + '\'' +
             ", begrunnelseFritekst='" + begrunnelseFritekst + '\'' +

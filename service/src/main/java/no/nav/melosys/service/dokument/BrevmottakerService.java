@@ -31,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static java.util.Optional.ofNullable;
 import static no.nav.melosys.domain.Preferanse.PreferanseEnum.RESERVERT_FRA_A1;
 import static no.nav.melosys.domain.brev.BrevkopiRegel.*;
-import static no.nav.melosys.domain.brev.FastMottakerMedOrgnr.SKATT;
+import static no.nav.melosys.domain.brev.FastMottakerMedOrgnr.SKATTEETATEN;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 
@@ -65,7 +65,8 @@ public class BrevmottakerService {
     Aktoersroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) {
         return switch (produserbartDokument) {
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
-                AVSLAG_YRKESAKTIV, ORIENTERING_ANMODNING_UNNTAK, MELDING_MANGLENDE_OPPLYSNINGER, MELDING_HENLAGT_SAK, INNVILGELSE_YRKESAKTIV -> BRUKER;
+                AVSLAG_YRKESAKTIV, ORIENTERING_ANMODNING_UNNTAK, MELDING_MANGLENDE_OPPLYSNINGER, MELDING_HENLAGT_SAK, INNVILGELSE_YRKESAKTIV ->
+                BRUKER;
             case INNVILGELSE_ARBEIDSGIVER, AVSLAG_ARBEIDSGIVER -> ARBEIDSGIVER;
             case ANMODNING_UNNTAK, ATTEST_A1 -> TRYGDEMYNDIGHET;
             default -> throw new TekniskException("Valg av mottakerRolle støttes ikke for " + produserbartDokument);
@@ -97,6 +98,7 @@ public class BrevmottakerService {
             case VIRKSOMHET -> avklarMottakereForVirksomhet(behandling);
             case ARBEIDSGIVER -> avklarMottakereForArbeidsgiver(behandling, kunAvklarteVirksomheter);
             case TRYGDEMYNDIGHET -> avklarMottakereForMyndigheter(mottaker, behandling, produserbartDokument);
+            case ETAT -> Collections.singletonList(mottaker.getAktør());
             default -> throw new FunksjonellException("%s støttes ikke.".formatted(mottaker.hentAktørsRolle()));
         };
     }
@@ -254,7 +256,7 @@ public class BrevmottakerService {
             mottakerliste.getKopiMottakere().add(ARBEIDSGIVER);
         }
         if (brevkopiRegler.contains(SKATT_FÅR_KOPI)) {
-            mottakerliste.getFasteMottakere().add(SKATT);
+            mottakerliste.getFasteMottakere().add(SKATTEETATEN);
         }
         if (brevkopiRegler.contains(UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI)) {
             mottakerliste.getKopiMottakere().add(TRYGDEMYNDIGHET);
@@ -277,7 +279,7 @@ public class BrevmottakerService {
             }
 
             if (brevkopiRegler.contains(SKATT_FÅR_KOPI_HVIS_AVGIFTSPLIKTIG_INNTEKT) && resultat.harAvgiftspliktigInntekt()) {
-                mottakerliste.getFasteMottakere().add(SKATT);
+                mottakerliste.getFasteMottakere().add(SKATTEETATEN);
             }
         });
     }

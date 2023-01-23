@@ -85,6 +85,11 @@ public class BrevmottakerMapper {
             Map.entry(GENERELT_FRITEKSTBREV_VIRKSOMHET, new Mottakerliste.Builder()
                 .medHovedMottaker(VIRKSOMHET)
                 .build()),
+
+            Map.entry(FRITEKSTBREV, new Mottakerliste.Builder()
+                .medHovedMottaker(ETAT)
+                .build()),
+
             Map.entry(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV, new Mottakerliste.Builder()
                 .medHovedMottaker(TRYGDEMYNDIGHET)
                 .build())

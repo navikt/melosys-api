@@ -104,6 +104,9 @@ public class DokumentproduksjonsInfoMapper {
             .put(GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
                 new DokumentproduksjonsInfo("fritekstbrev",
                     DokumentKategoriKode.IB.getKode()))
+            .put(FRITEKSTBREV,
+                new DokumentproduksjonsInfo("fritekstbrev",
+                    DokumentKategoriKode.IB.getKode()))
             .put(AVSLAG_MANGLENDE_OPPLYSNINGER,
                 new DokumentproduksjonsInfo("avslag_manglende_opplysninger",
                     DokumentKategoriKode.VB.getKode(),

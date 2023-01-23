@@ -1,5 +1,7 @@
 package no.nav.melosys.integrasjon.ereg;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.dokument.DokumentFactory;
 import no.nav.melosys.domain.dokument.XsltTemplatesFactory;
@@ -29,4 +31,15 @@ class EregServiceTest {
         assertThat(organisasjonDokument.getOrganisasjonDetaljer().getNavn().get(0).getRedigertNavn()).isEqualTo("MULTICONSULT ASA");
     }
 
+    @Test
+    void finnOrganisasjon_finnerOrganisasjon_returnererMedVerdi() {
+        Optional<Saksopplysning> saksopplysning = eregService.finnOrganisasjon("873102322");
+        assertThat(saksopplysning).isPresent();
+    }
+
+    @Test
+    void finnOrganisasjon_finnerIkkeOrganisasjon_returnererTomVerdi() {
+        Optional<Saksopplysning> saksopplysning = eregService.finnOrganisasjon("111111111");
+        assertThat(saksopplysning).isNotPresent();
+    }
 }

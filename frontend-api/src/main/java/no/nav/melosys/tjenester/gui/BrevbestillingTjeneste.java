@@ -4,13 +4,16 @@ import java.util.List;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import no.nav.melosys.domain.brev.Etat;
 import no.nav.melosys.service.brev.BrevbestillingService;
+import no.nav.melosys.service.dokument.MuligMottakerDto;
 import no.nav.melosys.service.dokument.MuligeMottakereDto;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevbestillingDto;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevmalDto;
+import no.nav.melosys.tjenester.gui.dto.brev.HentMuligeMottakereEtaterRequestDto;
 import no.nav.melosys.tjenester.gui.dto.brev.HentMuligeMottakereRequestDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.http.*;
@@ -22,7 +25,7 @@ import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 
 @Protected
 @RestController
-@RequestMapping("/dokumenter/v2") //TODO: Endre url når gjennomtestet
+@RequestMapping("/dokumenter/v2")
 @Api(tags = {"dokumenterv2"})
 @RequestScope
 public class BrevbestillingTjeneste {
@@ -75,6 +78,21 @@ public class BrevbestillingTjeneste {
             .medBestillersId(SubjectHandler.getInstance().getUserID())
             .build();
         brevbestillingService.produserBrev(behandlingID, brevbestillingRequest);
+    }
+
+    @PostMapping(value = "/mulige-mottakere-etater/{behandlingID}", produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Henter alle mulige mottakere for valgte etater")
+    public List<MuligMottakerDto> hentTilgjengeligeMottakereEtater(@PathVariable long behandlingID,
+                                                                   @RequestBody HentMuligeMottakereEtaterRequestDto hentMuligeMottakereRequestDto) {
+        aksesskontroll.autoriser(behandlingID);
+        return brevbestillingService.hentMuligeMottakereEtater(hentMuligeMottakereRequestDto.produserbartdokument(),
+            behandlingID, hentMuligeMottakereRequestDto.orgnrEtater());
+    }
+
+    @GetMapping(value = "/tilgjengelige-etater", produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Henter alle tilgjengelige etater", response = Etat.class, responseContainer = "List")
+    public List<Etat> hentTilgjengeligeEtater() {
+        return brevbestillingService.hentTilgjengeligeEtater();
     }
 
     private HttpHeaders genPdfHeaders(String navn) {
