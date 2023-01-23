@@ -3,7 +3,6 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.util.*;
 import java.util.stream.Stream;
 
-import kotlin.Pair;
 import no.nav.dok.melosysbrev._000115.BostedsadresseTypeKode;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
@@ -25,6 +24,7 @@ import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.collections4.map.SingletonMap;
 
 public class BrevDataByggerA001 implements BrevDataBygger {
     private final LovvalgsperiodeService lovvalgsperiodeService;
@@ -66,8 +66,8 @@ public class BrevDataByggerA001 implements BrevDataBygger {
                 dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeSelvstendige());
 
         var adresseOgType = hentBostedsadresseOgTypeKode();
-        brevData.bostedsadresse = adresseOgType.getFirst();
-        brevData.bostedsadresseTypeKode = adresseOgType.getSecond();
+        brevData.bostedsadresse = adresseOgType.getValue();
+        brevData.bostedsadresseTypeKode = adresseOgType.getKey();
 
         brevData.arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder();
 
@@ -117,15 +117,15 @@ public class BrevDataByggerA001 implements BrevDataBygger {
             .findFirst();
     }
 
-    private Pair<StrukturertAdresse, BostedsadresseTypeKode> hentBostedsadresseOgTypeKode() {
+    private SingletonMap<BostedsadresseTypeKode, StrukturertAdresse> hentBostedsadresseOgTypeKode() {
         var bostedsadresse = dataGrunnlag.getBostedGrunnlag().finnBostedsadresse();
         if (bostedsadresse.isPresent()) {
-            return new Pair<>(bostedsadresse.get(), BostedsadresseTypeKode.BOSTEDSLAND);
+            return new SingletonMap<>(BostedsadresseTypeKode.BOSTEDSLAND, bostedsadresse.get());
         }
 
         var kontaktadresse = dataGrunnlag.getBostedGrunnlag().finnKontaktadresse();
         if (kontaktadresse.isPresent()) {
-            return new Pair<>(kontaktadresse.get(), BostedsadresseTypeKode.KONTAKTADRESSE);
+            return new SingletonMap<>(BostedsadresseTypeKode.KONTAKTADRESSE, kontaktadresse.get());
         }
 
         throw new FunksjonellException("Finner verken bostedsadresse eller kontaktadresse");
