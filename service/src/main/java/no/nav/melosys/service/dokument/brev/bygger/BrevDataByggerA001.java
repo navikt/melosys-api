@@ -3,10 +3,12 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.util.*;
 import java.util.stream.Stream;
 
+import no.nav.dok.melosysbrev._000115.BostedsadresseTypeKode;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
@@ -22,6 +24,7 @@ import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.ListUtils;
+import org.apache.commons.collections4.map.SingletonMap;
 
 public class BrevDataByggerA001 implements BrevDataBygger {
     private final LovvalgsperiodeService lovvalgsperiodeService;
@@ -56,15 +59,16 @@ public class BrevDataByggerA001 implements BrevDataBygger {
 
         brevData.arbeidsgivendeVirksomheter =
             ListUtils.union(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere(),
-                            dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeArbeidsgivere());
+                dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeArbeidsgivere());
 
         brevData.selvstendigeVirksomheter =
             ListUtils.union(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeSelvstendige(),
-                            dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeSelvstendige());
+                dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentUtenlandskeSelvstendige());
 
-        brevData.bostedsadresse = dataGrunnlag.getBostedGrunnlag().finnBostedsadresse()
-            .or(() -> dataGrunnlag.getBostedGrunnlag().finnKontaktadresse())
-            .orElseThrow(() -> new FunksjonellException("Finner verken bostedsadresse eller kontaktadresse"));
+        var adresseOgType = hentBostedsadresseOgTypeKode();
+        brevData.bostedsadresse = adresseOgType.getValue();
+        brevData.bostedsadresseTypeKode = adresseOgType.getKey();
+
         brevData.arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder();
 
         brevData.utenlandskIdent = hentUtenlandskIdent(landkode);
@@ -108,9 +112,23 @@ public class BrevDataByggerA001 implements BrevDataBygger {
 
     private Optional<String> hentUtenlandskIdent(Land_iso2 landkode) {
         return dataGrunnlag.getMottatteOpplysningerData().personOpplysninger.utenlandskIdent.stream()
-                .filter(utenlandskIdent -> utenlandskIdent.landkode.equals(landkode.getKode()))
-                .map(utenlandskIdent -> utenlandskIdent.ident)
-                .findFirst();
+            .filter(utenlandskIdent -> utenlandskIdent.landkode.equals(landkode.getKode()))
+            .map(utenlandskIdent -> utenlandskIdent.ident)
+            .findFirst();
+    }
+
+    private SingletonMap<BostedsadresseTypeKode, StrukturertAdresse> hentBostedsadresseOgTypeKode() {
+        var bostedsadresse = dataGrunnlag.getBostedGrunnlag().finnBostedsadresse();
+        if (bostedsadresse.isPresent()) {
+            return new SingletonMap<>(BostedsadresseTypeKode.BOSTEDSLAND, bostedsadresse.get());
+        }
+
+        var kontaktadresse = dataGrunnlag.getBostedGrunnlag().finnKontaktadresse();
+        if (kontaktadresse.isPresent()) {
+            return new SingletonMap<>(BostedsadresseTypeKode.KONTAKTADRESSE, kontaktadresse.get());
+        }
+
+        throw new FunksjonellException("Finner verken bostedsadresse eller kontaktadresse");
     }
 
     private Collection<Anmodningsperiode> hentAnmodningsperioder() {

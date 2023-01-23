@@ -1,8 +1,5 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
-import java.time.LocalDate;
-import java.util.*;
-
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
@@ -44,6 +41,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+
+import java.time.LocalDate;
+import java.util.*;
 
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser.UTSENDELSE_OVER_24_MN;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Art12_2_begrunnelser.NORMALT_IKKE_DRIFT_NORGE;
@@ -344,6 +344,8 @@ class BrevDataByggerA001Test {
         var personopplysninger = lagPersonopplysningerUtenBostedsadresseOgKontaktadresse();
         BrevDataGrunnlag brevdataGrunnlag = lagBrevDataGrunnlag(doksysBrevbestilling, personopplysninger);
 
-        assertThatExceptionOfType(FunksjonellException.class).isThrownBy(() -> brevDataByggerA001.lag(brevdataGrunnlag, SAKSBEHANDLER_ID));
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> brevDataByggerA001.lag(brevdataGrunnlag, SAKSBEHANDLER_ID))
+            .withMessageContaining("Finner verken bostedsadresse eller kontaktadresse");
     }
 }

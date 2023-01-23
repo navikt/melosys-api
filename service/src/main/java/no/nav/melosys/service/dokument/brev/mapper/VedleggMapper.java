@@ -7,7 +7,7 @@ import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataVedlegg;
 
-public class VedleggMapper  {
+public class VedleggMapper {
 
     private Behandling behandling;
     private Behandlingsresultat resultat;

@@ -48,7 +48,8 @@ import java.time.LocalDateTime
     classes = [Application::class, SaksflytTestConfig::class],
     webEnvironment = SpringBootTest.WebEnvironment.NONE
 )
-@EmbeddedKafka(count = 1, controlledShutdown = true, partitions = 1,
+@EmbeddedKafka(
+    count = 1, controlledShutdown = true, partitions = 1,
     topics = ["teammelosys.eessi.v1-local", "teammelosys.soknad-mottak.v1-local", "teammelosys.melosys-utstedt-a1.v1-local", "teammelosys.fattetvedtak.v1-local"],
     brokerProperties = ["offsets.topic.replication.factor=1", "transaction.state.log.replication.factor=1", "transaction.state.log.min.isr=1"]
 )
@@ -127,6 +128,7 @@ internal class SaksflytOppstartIT(
             this.status = status
             sistFullførtSteg = null
             registrertDato = endretDato
+            låsReferanse = if (status === ProsessStatus.PÅ_VENT) "123_dummy_1" else null
             this.endretDato = endretDato
         }
     }

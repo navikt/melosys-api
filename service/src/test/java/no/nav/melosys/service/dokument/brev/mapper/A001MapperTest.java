@@ -2,13 +2,11 @@ package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
+import java.util.*;
 import javax.xml.bind.JAXBElement;
 import javax.xml.bind.JAXBException;
 
+import no.nav.dok.melosysbrev._000115.BostedsadresseTypeKode;
 import no.nav.dok.melosysbrev._000116.BrevdataType;
 import no.nav.dok.melosysbrev._000116.Fag;
 import no.nav.dok.melosysbrev._000116.ObjectFactory;
@@ -18,8 +16,6 @@ import no.nav.dok.melosysbrev.felles.melosys_vedlegg.VedleggType;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -30,6 +26,8 @@ import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
 import org.jeasy.random.EasyRandom;
@@ -46,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class A001MapperTest {
+class A001MapperTest {
 
     private A001Mapper mapper;
 
@@ -87,7 +85,7 @@ public class A001MapperTest {
 
         Behandling behandling = mock(Behandling.class);
         when(behandling.getRegistrertDato()).thenReturn(Instant.now());
-        when(behandling.getSaksopplysninger()).thenReturn(new HashSet<>(Arrays.asList(saksopplysning)));
+        when(behandling.getSaksopplysninger()).thenReturn(new HashSet<>(List.of(saksopplysning)));
         when(behandling.getFagsak()).thenReturn(new Fagsak());
 
         StrukturertAdresse strukturertAdresse = lagStrukturertAdresse();
@@ -95,11 +93,11 @@ public class A001MapperTest {
         FysiskArbeidssted arbeidssted = new FysiskArbeidssted();
         arbeidssted.adresse = strukturertAdresse;
         Soeknad søknad = new Soeknad();
-        søknad.arbeidPaaLand.fysiskeArbeidssteder = Arrays.asList(arbeidssted);
+        søknad.arbeidPaaLand.fysiskeArbeidssteder = List.of(arbeidssted);
 
         AvklartVirksomhet virksomhet = new AvklartVirksomhet("JARLSBERG AS",
-                                               "123456789",
-                                                strukturertAdresse, Yrkesaktivitetstyper.LOENNET_ARBEID);
+            "123456789",
+            strukturertAdresse, Yrkesaktivitetstyper.LOENNET_ARBEID);
 
         no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted fysiskArbeidssted = new no.nav.melosys.service.dokument.brev.mapper.arbeidssted.FysiskArbeidssted("JARLSBERG INTERNATIONAL", "123456789", strukturertAdresse);
 
@@ -110,20 +108,20 @@ public class A001MapperTest {
         myndighet.institusjonskode = "23";
         myndighet.gateadresse1 = "Adresse";
         myndighet.postnummer = "0165";
-        myndighet.poststed ="Stockholm";
+        myndighet.poststed = "Stockholm";
         myndighet.landkode = Land_iso2.SK;
 
         Vilkaarsresultat vilkår16 = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, UTSENDELSE_MELLOM_24_MN_OG_5_AAR);
         Vilkaarsresultat vilkår16Uten12 = lagVilkaarsresultat(Vilkaar.FO_883_2004_ART16_1, true, SJOEMANNSKIRKEN);
 
         brevData = new BrevDataA001();
-        brevData.arbeidsgivendeVirksomheter = new ArrayList<>(Arrays.asList(virksomhet));   // Hovedvirksomhet
+        brevData.arbeidsgivendeVirksomheter = new ArrayList<>(List.of(virksomhet));   // Hovedvirksomhet
         brevData.selvstendigeVirksomheter = new ArrayList<>();
         brevData.arbeidssteder = new ArrayList<>(Arrays.asList(fysiskArbeidssted, maritimtArbeidssted));
         brevData.persondata = person;
         brevData.bostedsadresse = boAdresse;
         brevData.utenlandskMyndighet = myndighet;
-        brevData.anmodningsperioder = Arrays.asList(anmodningsperiode);
+        brevData.anmodningsperioder = List.of(anmodningsperiode);
         brevData.anmodningBegrunnelser = vilkår16.getBegrunnelser();
         brevData.anmodningUtenArt12Begrunnelser = vilkår16Uten12.getBegrunnelser();
         brevData.utenlandskIdent = Optional.empty();
@@ -131,7 +129,7 @@ public class A001MapperTest {
     }
 
     @Test
-    public void mapTilBrevXMLArt16Begrunnelser() throws Exception {
+    void mapTilBrevXMLArt16Begrunnelser() throws Exception {
         FellesType fellesType = new FellesType();
         fellesType.setFagsaksnummer("MELTEST-2");
 
@@ -146,7 +144,7 @@ public class A001MapperTest {
     }
 
     @Test
-    public void mapTilBrevXMLArt16UtenArt12Begrunnelser() throws Exception {
+    void mapTilBrevXMLArt16UtenArt12Begrunnelser() throws Exception {
         FellesType fellesType = new FellesType();
         fellesType.setFagsaksnummer("MELTEST-2");
 
@@ -161,7 +159,7 @@ public class A001MapperTest {
     }
 
     @Test
-    public void mapTilBrevXMLUtenSelvstendigVirksomhet() throws Exception {
+    void mapTilBrevXMLUtenSelvstendigVirksomhet() throws Exception {
         FellesType fellesType = new FellesType();
         fellesType.setFagsaksnummer("MELTEST-2");
 
@@ -171,6 +169,24 @@ public class A001MapperTest {
 
         String xml = mapTilBrevXML(fellesType, navFelles, brevData);
         assertThat(xml).isNotNull();
+    }
+
+    @Test
+    void mapSEDA001_kontaktAdresseType_korrektAdresseType() {
+        brevData.bostedsadresseTypeKode = BostedsadresseTypeKode.KONTAKTADRESSE;
+
+        var SEDA001 = mapper.mapSEDA001(brevData);
+
+        assertThat(SEDA001.getPerson().getBostedsadresse().getAdresseType()).isEqualTo(BostedsadresseTypeKode.KONTAKTADRESSE);
+    }
+
+    @Test
+    void mapSEDA001_ingenAdresseType_korrektAdresseType() {
+        brevData.bostedsadresseTypeKode = null;
+
+        var SEDA001 = mapper.mapSEDA001(brevData);
+
+        assertThat(SEDA001.getPerson().getBostedsadresse().getAdresseType()).isEqualTo(BostedsadresseTypeKode.BOSTEDSLAND);
     }
 
 
