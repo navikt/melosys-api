@@ -15,9 +15,9 @@ public class BrevbestillingFacade {
         this.hentMottakere = hentMottakere;
     }
 
-    public HentMottakere.ResponseData hentMuligeMottakere(HentMottakere.RequestData hentMuligeMottakereRequestData) {
-        log.debug("hentMuligeMottakere med requestData: {}", hentMuligeMottakereRequestData);
-        return hentMottakere.hentMuligeMottakere(hentMuligeMottakereRequestData);
+    public HentMottakere.Response hentMuligeMottakere(HentMottakere.Request hentMuligeMottakereRequest) {
+        log.debug("hentMuligeMottakere med requestData: {}", hentMuligeMottakereRequest);
+        return hentMottakere.hentMuligeMottakere(hentMuligeMottakereRequest);
     }
 }
 

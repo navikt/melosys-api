@@ -1,5 +1,9 @@
 package no.nav.melosys.service.brev.muligemottakere;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.UtenlandskMyndighet;
@@ -20,10 +24,6 @@ import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
@@ -50,16 +50,16 @@ public class HentMottakere {
     }
 
     @Transactional
-    public ResponseData hentMuligeMottakere(RequestData requestData) {
+    public Response hentMuligeMottakere(Request request) {
 
-        Produserbaredokumenter produserbaredokumenter = requestData.produserbartdokument();
-        Mottakerliste mottakerliste = brevmottakerService.hentMottakerliste(produserbaredokumenter, requestData.behandlingID());
+        Produserbaredokumenter produserbaredokumenter = request.produserbartdokument();
+        Mottakerliste mottakerliste = brevmottakerService.hentMottakerliste(produserbaredokumenter, request.behandlingID());
 
-        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(requestData.behandlingID());
-        MuligMottakerDto hovedMottaker = lagHovedMottakerMuligMottakerDto(produserbaredokumenter, behandling, mottakerliste.getHovedMottaker(), requestData.orgnr());
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(request.behandlingID());
+        MuligMottakerDto hovedMottaker = lagHovedMottakerMuligMottakerDto(produserbaredokumenter, behandling, mottakerliste.getHovedMottaker(), request.orgnr());
         List<MuligMottakerDto> kopiMottakere = lagKopiMottakereMuligMottakerDtos(produserbaredokumenter, behandling, mottakerliste.getKopiMottakere(), mottakerliste.getHovedMottaker());
         List<MuligMottakerDto> fasteMottakere = lagFasteMottakereMuligMottakerDtos(produserbaredokumenter, behandling, mottakerliste.getFasteMottakere());
-        return new ResponseData(hovedMottaker, kopiMottakere, fasteMottakere);
+        return new Response(hovedMottaker, kopiMottakere, fasteMottakere);
     }
 
     private MuligMottakerDto lagHovedMottakerMuligMottakerDto(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller hovedmottaker, String orgnrTilValgtArbeidsgiver) {
@@ -122,7 +122,7 @@ public class HentMottakere {
                 }
             }
             default ->
-                    throw new FunksjonellException("Melosys støtter ikke hovedmottakere med rollen " + hovedmottaker);
+                throw new FunksjonellException("Melosys støtter ikke hovedmottakere med rollen " + hovedmottaker);
         }
     }
 
@@ -138,11 +138,11 @@ public class HentMottakere {
         for (Aktoersroller kopiMottaker : kopiMottakere) {
             switch (kopiMottaker) {
                 case BRUKER ->
-                        muligMottakerDtos.add(lagKopiMottakerForBruker(produserbaredokumenter, behandling, kopiMottaker, hovedmottaker));
+                    muligMottakerDtos.add(lagKopiMottakerForBruker(produserbaredokumenter, behandling, kopiMottaker, hovedmottaker));
                 case ARBEIDSGIVER ->
-                        muligMottakerDtos.addAll(lagKopiMottakereForArbeidsgiver(produserbaredokumenter, behandling, kopiMottaker));
+                    muligMottakerDtos.addAll(lagKopiMottakereForArbeidsgiver(produserbaredokumenter, behandling, kopiMottaker));
                 case TRYGDEMYNDIGHET ->
-                        muligMottakerDtos.addAll(lagKopiMottakereForMyndighet(produserbaredokumenter, behandling, kopiMottaker));
+                    muligMottakerDtos.addAll(lagKopiMottakereForMyndighet(produserbaredokumenter, behandling, kopiMottaker));
                 default -> throw new IllegalStateException(kopiMottaker + " er ikke en gyldig kopiMottakerrolle");
             }
         }
@@ -172,10 +172,10 @@ public class HentMottakere {
         return muligMottakerDtos;
     }
 
-    public record RequestData(Produserbaredokumenter produserbartdokument, long behandlingID, String orgnr) {
+    public record Request(Produserbaredokumenter produserbartdokument, long behandlingID, String orgnr) {
     }
 
-    public record ResponseData(MuligMottakerDto hovedMottaker, List<MuligMottakerDto> kopiMottakere,
-                               List<MuligMottakerDto> fasteMottakere) {
+    public record Response(MuligMottakerDto hovedMottaker, List<MuligMottakerDto> kopiMottakere,
+                           List<MuligMottakerDto> fasteMottakere) {
     }
 }

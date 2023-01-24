@@ -1,5 +1,7 @@
 package no.nav.melosys.tjenester.gui.brev;
 
+import java.util.List;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.finn.unleash.Unleash;
@@ -21,8 +23,6 @@ import no.nav.security.token.support.core.api.Protected;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.annotation.RequestScope;
-
-import java.util.List;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
@@ -70,7 +70,7 @@ public class BrevbestillingTjeneste {
             return brevbestillingService.hentMuligeMottakere(hentMuligeMottakereRequestDto.produserbartdokument(), behandlingID, hentMuligeMottakereRequestDto.orgnr());
         }
 
-        var hentMottakerRequestData = new HentMottakere.RequestData(hentMuligeMottakereRequestDto.produserbartdokument(), behandlingID, hentMuligeMottakereRequestDto.orgnr());
+        var hentMottakerRequestData = new HentMottakere.Request(hentMuligeMottakereRequestDto.produserbartdokument(), behandlingID, hentMuligeMottakereRequestDto.orgnr());
         var hentMottakerResponseData = brevbestillingFacade.hentMuligeMottakere(hentMottakerRequestData);
         return new MuligeMottakereDto(hentMottakerResponseData.hovedMottaker(), hentMottakerResponseData.kopiMottakere(), hentMottakerResponseData.fasteMottakere());
 
@@ -82,8 +82,8 @@ public class BrevbestillingTjeneste {
                                                  @RequestBody BrevbestillingDto brevbestillingDto) {
         aksesskontroll.autoriser(behandlingID);
         BrevbestillingRequest brevbestillingRequest = brevbestillingDto.tilRequestBuilder()
-                .medBestillersId(SubjectHandler.getInstance().getUserID())
-                .build();
+            .medBestillersId(SubjectHandler.getInstance().getUserID())
+            .build();
         byte[] pdf = brevbestillingService.produserUtkast(behandlingID, brevbestillingRequest);
         return new ResponseEntity<>(pdf, genPdfHeaders("utkast_" + behandlingID), HttpStatus.OK);
     }
@@ -94,8 +94,8 @@ public class BrevbestillingTjeneste {
                              @RequestBody BrevbestillingDto brevbestillingDto) {
         aksesskontroll.autoriser(behandlingID);
         BrevbestillingRequest brevbestillingRequest = brevbestillingDto.tilRequestBuilder()
-                .medBestillersId(SubjectHandler.getInstance().getUserID())
-                .build();
+            .medBestillersId(SubjectHandler.getInstance().getUserID())
+            .build();
         brevbestillingService.produserBrev(behandlingID, brevbestillingRequest);
     }
 
@@ -105,7 +105,7 @@ public class BrevbestillingTjeneste {
                                                                    @RequestBody HentMuligeMottakereEtaterRequestDto hentMuligeMottakereRequestDto) {
         aksesskontroll.autoriser(behandlingID);
         return brevbestillingService.hentMuligeMottakereEtater(hentMuligeMottakereRequestDto.produserbartdokument(),
-                behandlingID, hentMuligeMottakereRequestDto.orgnrEtater());
+            behandlingID, hentMuligeMottakereRequestDto.orgnrEtater());
     }
 
     @GetMapping(value = "/tilgjengelige-etater", produces = APPLICATION_JSON_VALUE)
