@@ -46,7 +46,7 @@ public class EregService implements EregFasade {
             xmlRoot.setResponse(response);
             dokumentFactory.createMarshaller().marshal(xmlRoot, xmlWriter);
         } catch (SOAPFaultException | JAXBException e) {
-            log.warn("Fant ikke organisasjonsnr {}", orgnr);
+            log.warn("Fant ikke dette orgnr fra Ereg: {}", orgnr);
             throw new IntegrasjonException(e);
         }
 
