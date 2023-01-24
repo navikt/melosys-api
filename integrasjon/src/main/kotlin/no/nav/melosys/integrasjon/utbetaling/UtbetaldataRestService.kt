@@ -37,6 +37,7 @@ class UtbetaldataRestService(
             "RETTIGHETSHAVER")
 
         log.info { "Test med Syntetisk data: " + utbetaldataRestConsumer.hentUtbetalingsInformasjon(utbetalingRequest).joinToString()}
+        log.info { "Test med Syntetisk data raw json: " + utbetaldataRestConsumer.hentUtbetalingsInformasjonBody(utbetalingRequest)}
 
         val utbetalingResponse = if (erTomEldreEnnTreAar(fnr, fom, tom))
             emptyList()

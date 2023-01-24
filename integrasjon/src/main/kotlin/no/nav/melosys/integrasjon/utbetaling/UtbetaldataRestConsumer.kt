@@ -14,4 +14,12 @@ open class UtbetaldataRestConsumer(private val webClient: WebClient) {
         .retrieve()
         .bodyToMono(Array<Utbetaling>::class.java)
         .block()!!.toList()
+
+    open fun hentUtbetalingsInformasjonBody(request: UtbetalingRequest) = webClient.post()
+        .uri("")
+        .accept(MediaType.APPLICATION_JSON)
+        .bodyValue(request)
+        .retrieve()
+        .bodyToMono(String::class.java)
+        .block()
 }
