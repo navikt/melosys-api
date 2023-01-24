@@ -264,7 +264,6 @@ public class JournalfoeringService {
             validerKanTilknytteJournalpostForSedTilSak(journalpost, saksnummer);
         }
 
-        validerKnyttTilEksisterendeSak(fagsak);
         fellesValidering(journalfoeringDto);
 
         log.info("{} knytter journalpost {} til eksisterende sak {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
@@ -275,11 +274,6 @@ public class JournalfoeringService {
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringDto.isIngenVurdering());
 
         prosessinstansService.lagre(prosessinstans);
-    }
-
-    private void validerKnyttTilEksisterendeSak(Fagsak fagsak) {
-        Behandling sisteBehandling = fagsak.hentSistRegistrertBehandling();
-        if (sisteBehandling.erAktiv()) return;
     }
 
     @Transactional
