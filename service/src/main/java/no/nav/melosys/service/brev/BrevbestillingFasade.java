@@ -6,12 +6,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
-public class BrevbestillingFacade {
-    private static final Logger log = LoggerFactory.getLogger(BrevbestillingFacade.class);
+public class BrevbestillingFasade {
+    private static final Logger log = LoggerFactory.getLogger(BrevbestillingFasade.class);
 
     private final HentMottakere hentMottakere;
 
-    public BrevbestillingFacade(HentMottakere hentMottakere) {
+    public BrevbestillingFasade(HentMottakere hentMottakere) {
         this.hentMottakere = hentMottakere;
     }
 

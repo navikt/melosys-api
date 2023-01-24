@@ -6,7 +6,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.brev.Etat;
-import no.nav.melosys.service.brev.BrevbestillingFacade;
+import no.nav.melosys.service.brev.BrevbestillingFasade;
 import no.nav.melosys.service.brev.BrevbestillingService;
 import no.nav.melosys.service.brev.muligemottakere.HentMottakere;
 import no.nav.melosys.service.brev.muligemottakere.MuligMottakerDto;
@@ -38,15 +38,15 @@ public class BrevbestillingTjeneste {
     private final BrevmalListeBygger brevmalListeBygger;
     private final Aksesskontroll aksesskontroll;
 
-    private final BrevbestillingFacade brevbestillingFacade;
+    private final BrevbestillingFasade brevbestillingFasade;
 
     private final Unleash unleash;
 
-    public BrevbestillingTjeneste(BrevbestillingFacade brevbestillingFacade,
+    public BrevbestillingTjeneste(BrevbestillingFasade brevbestillingFasade,
                                   BrevbestillingService brevbestillingService,
                                   BrevmalListeBygger brevmalListeBygger,
                                   Aksesskontroll aksesskontroll, Unleash unleash) {
-        this.brevbestillingFacade = brevbestillingFacade;
+        this.brevbestillingFasade = brevbestillingFasade;
         this.brevbestillingService = brevbestillingService;
         this.brevmalListeBygger = brevmalListeBygger;
         this.aksesskontroll = aksesskontroll;
@@ -71,7 +71,7 @@ public class BrevbestillingTjeneste {
         }
 
         var hentMottakerRequestData = new HentMottakere.Request(hentMuligeMottakereRequestDto.produserbartdokument(), behandlingID, hentMuligeMottakereRequestDto.orgnr());
-        var hentMottakerResponseData = brevbestillingFacade.hentMuligeMottakere(hentMottakerRequestData);
+        var hentMottakerResponseData = brevbestillingFasade.hentMuligeMottakere(hentMottakerRequestData);
         return new MuligeMottakereDto(hentMottakerResponseData.hovedMottaker(), hentMottakerResponseData.kopiMottakere(), hentMottakerResponseData.fasteMottakere());
 
     }
