@@ -24,9 +24,9 @@ import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.brev.muligemottakere.MuligMottakerDto;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
-import no.nav.melosys.service.dokument.MuligMottakerDto;
 import no.nav.melosys.service.dokument.MuligeMottakereDto;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -98,6 +98,7 @@ public class BrevbestillingService {
             .toList();
     }
 
+    @Deprecated(since = "Ta vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
     @Transactional
     public MuligeMottakereDto hentMuligeMottakere(Produserbaredokumenter produserbaredokumenter, long behandlingId, String orgnrTilValgtArbeidsgiver) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
@@ -108,6 +109,7 @@ public class BrevbestillingService {
             lagFasteMottakereMuligMottakerDtos(produserbaredokumenter, behandling, mottakerliste.getFasteMottakere()));
     }
 
+    @Deprecated(since = "Ta vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
     private MuligMottakerDto lagHovedMottakerMuligMottakerDto(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller hovedmottaker, String orgnrTilValgtArbeidsgiver) {
         return new MuligMottakerDto.Builder()
             .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, produserbaredokumenter, hovedmottaker))
@@ -152,6 +154,7 @@ public class BrevbestillingService {
         }
     }
 
+    @Deprecated(since = "Ta vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
     private List<MuligMottakerDto> lagKopiMottakereMuligMottakerDtos(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<Aktoersroller> kopiMottakere, Aktoersroller hovedmottaker) {
         List<MuligMottakerDto> muligMottakerDtos = new ArrayList<>();
         for (Aktoersroller kopiMottaker : kopiMottakere) {
@@ -168,6 +171,7 @@ public class BrevbestillingService {
         return muligMottakerDtos;
     }
 
+    @Deprecated(since = "Ta vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
     private MuligMottakerDto lagKopiMottakerForBruker(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker, Aktoersroller hovedmottaker) {
         Aktoer avklartKopi = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling);
         if (avklartKopi.getRolle() == BRUKER || hovedmottaker == kopiMottaker) {
@@ -189,6 +193,7 @@ public class BrevbestillingService {
         }
     }
 
+    @Deprecated(since = "Ta vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
     private List<MuligMottakerDto> lagKopiMottakereForArbeidsgiver(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker) {
         List<MuligMottakerDto> muligMottakerDtos = new ArrayList<>();
 
@@ -206,6 +211,7 @@ public class BrevbestillingService {
         return muligMottakerDtos;
     }
 
+    @Deprecated(since = "Ta vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
     private List<MuligMottakerDto> lagKopiMottakereForMyndighet(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker) {
         List<MuligMottakerDto> muligMottakerDtos = new ArrayList<>();
 
@@ -222,6 +228,7 @@ public class BrevbestillingService {
         return muligMottakerDtos;
     }
 
+    @Deprecated(since = "Ta vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
     private List<MuligMottakerDto> lagFasteMottakereMuligMottakerDtos(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<FastMottakerMedOrgnr> fasteMottakere) {
         List<MuligMottakerDto> muligMottakerDtos = new ArrayList<>();
 

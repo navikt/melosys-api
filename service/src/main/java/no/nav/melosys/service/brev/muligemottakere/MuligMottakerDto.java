@@ -1,4 +1,4 @@
-package no.nav.melosys.service.dokument;
+package no.nav.melosys.service.brev.muligemottakere;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 
