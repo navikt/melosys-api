@@ -38,10 +38,10 @@ public class EregService implements EregFasade {
 
     @Override
     public Saksopplysning hentOrganisasjon(String orgnr) {
-        HentOrganisasjonResponse response = hentOrganisasjonResponse(orgnr);
-
         StringWriter xmlWriter = new StringWriter();
+
         try {
+            HentOrganisasjonResponse response = hentOrganisasjonResponse(orgnr);
             no.nav.tjeneste.virksomhet.organisasjon.v4.HentOrganisasjonResponse xmlRoot = new no.nav.tjeneste.virksomhet.organisasjon.v4.HentOrganisasjonResponse();
             xmlRoot.setResponse(response);
             dokumentFactory.createMarshaller().marshal(xmlRoot, xmlWriter);
