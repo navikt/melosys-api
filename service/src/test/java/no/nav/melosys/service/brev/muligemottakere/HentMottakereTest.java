@@ -21,6 +21,9 @@ import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.DokumentNavnService;
+import no.nav.melosys.service.brev.muligemottakere.hentmottakere.HentMottakere;
+import no.nav.melosys.service.brev.muligemottakere.hentmottakere.HentMottakereRequest;
+import no.nav.melosys.service.brev.muligemottakere.hentmottakere.HentMottakereResponse;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
@@ -79,10 +82,10 @@ class HentMottakereTest {
         when(persondataFasade.hentSammensattNavn(anyString())).thenReturn("Ola Nordmann");
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
-        var requestData = new HentMottakere.Request(MANGELBREV_BRUKER, 123L, null);
+        var hentMottakereRequest = new HentMottakereRequest(MANGELBREV_BRUKER, 123L, null);
 
 
-        var muligeMottakere = hentMottakere.hentMuligeMottakere(requestData);
+        var muligeMottakere = hentMottakere.hentMuligeMottakere(hentMottakereRequest);
 
 
         assertThat(muligeMottakere.hovedMottaker())
@@ -94,7 +97,7 @@ class HentMottakereTest {
                 MuligMottakerDto::getOrgnr)
             .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
         assertThat(muligeMottakere)
-            .extracting(HentMottakere.Response::kopiMottakere, HentMottakere.Response::fasteMottakere)
+            .extracting(HentMottakereResponse::kopiMottakere, HentMottakereResponse::fasteMottakere)
             .containsExactly(emptyList(), emptyList());
     }
 
@@ -108,10 +111,10 @@ class HentMottakereTest {
         mockHentOrganisasjon("orgnr", "Fullmektig virksomhet");
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
-        var requestData = new HentMottakere.Request(MANGELBREV_BRUKER, 123L, null);
+        var hentMottakereRequest = new HentMottakereRequest(MANGELBREV_BRUKER, 123L, null);
 
 
-        var muligeMottakere = hentMottakere.hentMuligeMottakere(requestData);
+        var muligeMottakere = hentMottakere.hentMuligeMottakere(hentMottakereRequest);
 
 
         assertThat(muligeMottakere.hovedMottaker())
@@ -123,7 +126,7 @@ class HentMottakereTest {
                 MuligMottakerDto::getOrgnr)
             .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Fullmektig virksomhet", BRUKER, null, null);
         assertThat(muligeMottakere)
-            .extracting(HentMottakere.Response::kopiMottakere, HentMottakere.Response::fasteMottakere)
+            .extracting(HentMottakereResponse::kopiMottakere, HentMottakereResponse::fasteMottakere)
             .containsExactly(emptyList(), emptyList());
     }
 
@@ -137,10 +140,10 @@ class HentMottakereTest {
         when(persondataFasade.hentSammensattNavn("fnr")).thenReturn("Ola Nordmann");
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
-        var requestData = new HentMottakere.Request(MANGELBREV_BRUKER, 123L, null);
+        var hentMottakereRequest = new HentMottakereRequest(MANGELBREV_BRUKER, 123L, null);
 
 
-        var muligeMottakere = hentMottakere.hentMuligeMottakere(requestData);
+        var muligeMottakere = hentMottakere.hentMuligeMottakere(hentMottakereRequest);
 
 
         assertThat(muligeMottakere.hovedMottaker())
@@ -152,7 +155,7 @@ class HentMottakereTest {
                 MuligMottakerDto::getOrgnr)
             .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
         assertThat(muligeMottakere)
-            .extracting(HentMottakere.Response::kopiMottakere, HentMottakere.Response::fasteMottakere)
+            .extracting(HentMottakereResponse::kopiMottakere, HentMottakereResponse::fasteMottakere)
             .containsExactly(emptyList(), emptyList());
     }
 
@@ -165,10 +168,10 @@ class HentMottakereTest {
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, GENERELT_FRITEKSTBREV_VIRKSOMHET, VIRKSOMHET))
             .thenReturn(GENERELT_FRITEKSTBREV_VIRKSOMHET.getBeskrivelse());
 
-        var requestData = new HentMottakere.Request(GENERELT_FRITEKSTBREV_VIRKSOMHET, 123L, "orgnr");
+        var hentMottakereRequest = new HentMottakereRequest(GENERELT_FRITEKSTBREV_VIRKSOMHET, 123L, "orgnr");
 
 
-        var muligeMottakere = hentMottakere.hentMuligeMottakere(requestData);
+        var muligeMottakere = hentMottakere.hentMuligeMottakere(hentMottakereRequest);
 
 
         assertThat(muligeMottakere.hovedMottaker())
@@ -180,7 +183,7 @@ class HentMottakereTest {
                 MuligMottakerDto::getOrgnr)
             .containsExactly(GENERELT_FRITEKSTBREV_VIRKSOMHET.getBeskrivelse(), "Equinor AS", VIRKSOMHET, null, null);
         assertThat(muligeMottakere)
-            .extracting(HentMottakere.Response::kopiMottakere, HentMottakere.Response::fasteMottakere)
+            .extracting(HentMottakereResponse::kopiMottakere, HentMottakereResponse::fasteMottakere)
             .containsExactly(emptyList(), emptyList());
     }
 
@@ -192,10 +195,10 @@ class HentMottakereTest {
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(null, MANGELBREV_BRUKER, ARBEIDSGIVER))
             .thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
-        var requestData = new HentMottakere.Request(MANGELBREV_BRUKER, 123L, "orgnr");
+        var hentMottakereRequest = new HentMottakereRequest(MANGELBREV_BRUKER, 123L, "orgnr");
 
 
-        var muligeMottakere = hentMottakere.hentMuligeMottakere(requestData);
+        var muligeMottakere = hentMottakere.hentMuligeMottakere(hentMottakereRequest);
 
 
         assertThat(muligeMottakere.hovedMottaker())
@@ -207,7 +210,7 @@ class HentMottakereTest {
                 MuligMottakerDto::getOrgnr)
             .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Ola Nordmann Rørleggerfirma", ARBEIDSGIVER, null, null);
         assertThat(muligeMottakere)
-            .extracting(HentMottakere.Response::kopiMottakere, HentMottakere.Response::fasteMottakere)
+            .extracting(HentMottakereResponse::kopiMottakere, HentMottakereResponse::fasteMottakere)
             .containsExactly(emptyList(), emptyList());
     }
 
@@ -222,10 +225,10 @@ class HentMottakereTest {
         when(brevmottakerService.avklarMottaker(any(Produserbaredokumenter.class), any(), eq(behandling)))
             .thenReturn(lagAktoerOrg(BRUKER, null));
 
-        var requestData = new HentMottakere.Request(MANGELBREV_BRUKER, 123L, "orgnr");
+        var hentMottakereRequest = new HentMottakereRequest(MANGELBREV_BRUKER, 123L, "orgnr");
 
 
-        var muligeMottakere = hentMottakere.hentMuligeMottakere(requestData);
+        var muligeMottakere = hentMottakere.hentMuligeMottakere(hentMottakereRequest);
 
 
         assertThat(muligeMottakere.kopiMottakere())
@@ -248,10 +251,10 @@ class HentMottakereTest {
         mockFinnOrganisasjon("orgnr", "Ola Nordmann Rørleggerfirma");
         mockHentOrganisasjon("orgnrTilFullmektig", "Fullmektig Virksomhet");
 
-        var requestData = new HentMottakere.Request(MANGELBREV_BRUKER, 123L, "orgnr");
+        var hentMottakereRequest = new HentMottakereRequest(MANGELBREV_BRUKER, 123L, "orgnr");
 
 
-        var muligeMottakere = hentMottakere.hentMuligeMottakere(requestData);
+        var muligeMottakere = hentMottakere.hentMuligeMottakere(hentMottakereRequest);
 
 
         assertThat(muligeMottakere.kopiMottakere())
@@ -275,10 +278,10 @@ class HentMottakereTest {
         mockHentOrganisasjon("orgnrTilFullmektig", "Fullmektig Virksomhet");
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
-        var requestData = new HentMottakere.Request(MANGELBREV_BRUKER, 123L, null);
+        var hentMottakereRequest = new HentMottakereRequest(MANGELBREV_BRUKER, 123L, null);
 
 
-        var muligeMottakere = hentMottakere.hentMuligeMottakere(requestData);
+        var muligeMottakere = hentMottakere.hentMuligeMottakere(hentMottakereRequest);
 
 
         assertThat(muligeMottakere.hovedMottaker())
@@ -316,10 +319,10 @@ class HentMottakereTest {
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, MANGELBREV_BRUKER, orgnr1, "Kopi til arbeidsgiver")).thenReturn("Kopi til arbeidsgiver");
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, MANGELBREV_BRUKER, orgnr2, "Kopi til arbeidsgiver")).thenReturn("Kopi til arbeidsgiver");
 
-        var requestData = new HentMottakere.Request(MANGELBREV_BRUKER, 123L, null);
+        var hentMottakereRequest = new HentMottakereRequest(MANGELBREV_BRUKER, 123L, null);
 
 
-        var muligeMottakere = hentMottakere.hentMuligeMottakere(requestData);
+        var muligeMottakere = hentMottakere.hentMuligeMottakere(hentMottakereRequest);
 
 
         assertThat(muligeMottakere.kopiMottakere())
@@ -348,10 +351,10 @@ class HentMottakereTest {
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, MANGELBREV_BRUKER, orgnr, "Kopi til arbeidsgivers fullmektig")).thenReturn("Kopi til arbeidsgivers fullmektig");
 
-        var requestData = new HentMottakere.Request(MANGELBREV_BRUKER, 123L, null);
+        var hentMottakereRequest = new HentMottakereRequest(MANGELBREV_BRUKER, 123L, null);
 
 
-        var muligeMottakere = hentMottakere.hentMuligeMottakere(requestData);
+        var muligeMottakere = hentMottakere.hentMuligeMottakere(hentMottakereRequest);
 
 
         assertThat(muligeMottakere.kopiMottakere())
@@ -379,10 +382,10 @@ class HentMottakereTest {
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, MANGELBREV_BRUKER, skatteetaten, "Kopi til Skatteetaten")).thenReturn("Kopi til Skatteetaten");
 
-        var requestData = new HentMottakere.Request(MANGELBREV_BRUKER, 123L, null);
+        var hentMottakereRequest = new HentMottakereRequest(MANGELBREV_BRUKER, 123L, null);
 
 
-        var muligeMottakere = hentMottakere.hentMuligeMottakere(requestData);
+        var muligeMottakere = hentMottakere.hentMuligeMottakere(hentMottakereRequest);
 
 
         assertThat(muligeMottakere.fasteMottakere())

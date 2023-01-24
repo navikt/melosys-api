@@ -1,6 +1,8 @@
 package no.nav.melosys.service.brev;
 
-import no.nav.melosys.service.brev.muligemottakere.HentMottakere;
+import no.nav.melosys.service.brev.muligemottakere.hentmottakere.HentMottakere;
+import no.nav.melosys.service.brev.muligemottakere.hentmottakere.HentMottakereRequest;
+import no.nav.melosys.service.brev.muligemottakere.hentmottakere.HentMottakereResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -15,7 +17,7 @@ public class BrevbestillingFasade {
         this.hentMottakere = hentMottakere;
     }
 
-    public HentMottakere.Response hentMuligeMottakere(HentMottakere.Request hentMuligeMottakereRequest) {
+    public HentMottakereResponse hentMuligeMottakere(HentMottakereRequest hentMuligeMottakereRequest) {
         log.debug("hentMuligeMottakere med requestData: {}", hentMuligeMottakereRequest);
         return hentMottakere.hentMuligeMottakere(hentMuligeMottakereRequest);
     }

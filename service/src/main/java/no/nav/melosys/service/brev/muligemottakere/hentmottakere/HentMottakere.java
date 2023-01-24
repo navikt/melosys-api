@@ -1,4 +1,4 @@
-package no.nav.melosys.service.brev.muligemottakere;
+package no.nav.melosys.service.brev.muligemottakere.hentmottakere;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,6 +20,7 @@ import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.DokumentNavnService;
+import no.nav.melosys.service.brev.muligemottakere.MuligMottakerDto;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Component;
@@ -50,16 +51,16 @@ public class HentMottakere {
     }
 
     @Transactional
-    public Response hentMuligeMottakere(Request request) {
+    public HentMottakereResponse hentMuligeMottakere(HentMottakereRequest hentMottakereRequest) {
 
-        Produserbaredokumenter produserbaredokumenter = request.produserbartdokument();
-        Mottakerliste mottakerliste = brevmottakerService.hentMottakerliste(produserbaredokumenter, request.behandlingID());
+        Produserbaredokumenter produserbaredokumenter = hentMottakereRequest.produserbartdokument();
+        Mottakerliste mottakerliste = brevmottakerService.hentMottakerliste(produserbaredokumenter, hentMottakereRequest.behandlingID());
 
-        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(request.behandlingID());
-        MuligMottakerDto hovedMottaker = lagHovedMottakerMuligMottakerDto(produserbaredokumenter, behandling, mottakerliste.getHovedMottaker(), request.orgnr());
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(hentMottakereRequest.behandlingID());
+        MuligMottakerDto hovedMottaker = lagHovedMottakerMuligMottakerDto(produserbaredokumenter, behandling, mottakerliste.getHovedMottaker(), hentMottakereRequest.orgnr());
         List<MuligMottakerDto> kopiMottakere = lagKopiMottakereMuligMottakerDtos(produserbaredokumenter, behandling, mottakerliste.getKopiMottakere(), mottakerliste.getHovedMottaker());
         List<MuligMottakerDto> fasteMottakere = lagFasteMottakereMuligMottakerDtos(produserbaredokumenter, behandling, mottakerliste.getFasteMottakere());
-        return new Response(hovedMottaker, kopiMottakere, fasteMottakere);
+        return new HentMottakereResponse(hovedMottaker, kopiMottakere, fasteMottakere);
     }
 
     private MuligMottakerDto lagHovedMottakerMuligMottakerDto(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller hovedmottaker, String orgnrTilValgtArbeidsgiver) {
@@ -172,10 +173,4 @@ public class HentMottakere {
         return muligMottakerDtos;
     }
 
-    public record Request(Produserbaredokumenter produserbartdokument, long behandlingID, String orgnr) {
-    }
-
-    public record Response(MuligMottakerDto hovedMottaker, List<MuligMottakerDto> kopiMottakere,
-                           List<MuligMottakerDto> fasteMottakere) {
-    }
 }

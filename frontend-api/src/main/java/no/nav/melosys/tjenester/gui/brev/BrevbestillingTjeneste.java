@@ -8,8 +8,8 @@ import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.brev.Etat;
 import no.nav.melosys.service.brev.BrevbestillingFasade;
 import no.nav.melosys.service.brev.BrevbestillingService;
-import no.nav.melosys.service.brev.muligemottakere.HentMottakere;
 import no.nav.melosys.service.brev.muligemottakere.MuligMottakerDto;
+import no.nav.melosys.service.brev.muligemottakere.hentmottakere.HentMottakereRequest;
 import no.nav.melosys.service.dokument.MuligeMottakereDto;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -70,9 +70,9 @@ public class BrevbestillingTjeneste {
             return brevbestillingService.hentMuligeMottakere(hentMuligeMottakereRequestDto.produserbartdokument(), behandlingID, hentMuligeMottakereRequestDto.orgnr());
         }
 
-        var hentMottakerRequestData = new HentMottakere.Request(hentMuligeMottakereRequestDto.produserbartdokument(), behandlingID, hentMuligeMottakereRequestDto.orgnr());
-        var hentMottakerResponseData = brevbestillingFasade.hentMuligeMottakere(hentMottakerRequestData);
-        return new MuligeMottakereDto(hentMottakerResponseData.hovedMottaker(), hentMottakerResponseData.kopiMottakere(), hentMottakerResponseData.fasteMottakere());
+        var hentMottakerRequest = new HentMottakereRequest(hentMuligeMottakereRequestDto.produserbartdokument(), behandlingID, hentMuligeMottakereRequestDto.orgnr());
+        var hentMottakerResponse = brevbestillingFasade.hentMuligeMottakere(hentMottakerRequest);
+        return new MuligeMottakereDto(hentMottakerResponse.hovedMottaker(), hentMottakerResponse.kopiMottakere(), hentMottakerResponse.fasteMottakere());
 
     }
 
