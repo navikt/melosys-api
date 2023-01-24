@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.ereg;
 import java.io.StringWriter;
 import java.util.Optional;
 import javax.xml.bind.JAXBException;
+import javax.xml.ws.soap.SOAPFaultException;
 
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKildesystem;
@@ -44,7 +45,8 @@ public class EregService implements EregFasade {
             no.nav.tjeneste.virksomhet.organisasjon.v4.HentOrganisasjonResponse xmlRoot = new no.nav.tjeneste.virksomhet.organisasjon.v4.HentOrganisasjonResponse();
             xmlRoot.setResponse(response);
             dokumentFactory.createMarshaller().marshal(xmlRoot, xmlWriter);
-        } catch (JAXBException e) {
+        } catch (SOAPFaultException | JAXBException e) {
+            log.warn("Fant ikke organisasjonsnr {}", orgnr);
             throw new IntegrasjonException(e);
         }
 
