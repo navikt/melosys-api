@@ -15,6 +15,11 @@ import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.util.function.Consumer
 
+import mu.KotlinLogging
+
+private val log = KotlinLogging.logger { }
+
+
 @Service
 class UtbetaldataRestService(
     private val utbetaldataRestConsumer: UtbetaldataRestConsumer,
@@ -30,6 +35,8 @@ class UtbetaldataRestService(
             Periode(fom.toString(), tom.toString()),
             "UTBETALINGSPERIODE",
             "RETTIGHETSHAVER")
+
+        log.info { "Test med Syntetisk data: " + utbetaldataRestConsumer.hentUtbetalingsInformasjon(utbetalingRequest).joinToString()}
 
         val utbetalingResponse = if (erTomEldreEnnTreAar(fnr, fom, tom))
             emptyList()
