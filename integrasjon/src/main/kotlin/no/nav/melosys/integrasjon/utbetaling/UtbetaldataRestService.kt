@@ -33,8 +33,8 @@ class UtbetaldataRestService(
     fun hentUtbetalingerBarnetrygd(fnr: String, fom: LocalDate, tom: LocalDate): Saksopplysning {
         val utbetalingRequest = UtbetalingRequest(fnr,
             Periode(fom.toString(), tom.toString()),
-            "UTBETALINGSPERIODE",
-            "RETTIGHETSHAVER")
+            "Ytelsesperiode",
+            "Rettighetshaver")
 
         log.info { "Testrequest: $utbetalingRequest" }
         log.info { "Test med Syntetisk data: " + utbetaldataRestConsumer.hentUtbetalingsInformasjon(utbetalingRequest).joinToString()}
