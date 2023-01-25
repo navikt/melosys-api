@@ -18,7 +18,7 @@
     "utbetalingsstatus": "string",
     "ytelseListe": [
       {
-        "ytelsestype": "BARNETRYGD",
+        "ytelsestype": "Barnetrygd",
         "ytelsesperiode": {
           "fom": "2022-12-19",
           "tom": "2022-12-19"
@@ -61,7 +61,7 @@
         }
       },
       {
-        "ytelsestype": "barnetrygd",
+        "ytelsestype": "Barnetrygd",
         "ytelsesperiode": {
           "fom": "2022-12-19",
           "tom": "2022-12-19"

@@ -33,12 +33,8 @@ class UtbetaldataRestService(
     fun hentUtbetalingerBarnetrygd(fnr: String, fom: LocalDate, tom: LocalDate): Saksopplysning {
         val utbetalingRequest = UtbetalingRequest(fnr,
             Periode(fom.toString(), tom.toString()),
-            "Ytelsesperiode",
-            "Rettighetshaver")
-
-        log.info { "Testrequest: $utbetalingRequest" }
-        log.info { "Test med Syntetisk data: " + utbetaldataRestConsumer.hentUtbetalingsInformasjon(utbetalingRequest).joinToString()}
-        log.info { "Test med Syntetisk data raw json: " + utbetaldataRestConsumer.hentUtbetalingsInformasjonBody(utbetalingRequest)}
+            PERIODE_TYPE,
+            ROLLE)
 
         val utbetalingResponse = if (erTomEldreEnnTreAar(fnr, fom, tom))
             emptyList()
@@ -78,14 +74,16 @@ class UtbetaldataRestService(
     private fun fjernYtelserFraUtbetalingerSomIkkeErBarnetrygd(response: List<no.nav.melosys.integrasjon.utbetaling.Utbetaling>): List<no.nav.melosys.integrasjon.utbetaling.Utbetaling> {
         response.forEach(Consumer { utbetaling: no.nav.melosys.integrasjon.utbetaling.Utbetaling ->
             utbetaling.ytelseListe
-                .removeIf { ytelse: no.nav.melosys.integrasjon.utbetaling.Ytelse -> ytelse.ytelsestype.uppercase() != BARNETRYGD }
+                .removeIf { ytelse: no.nav.melosys.integrasjon.utbetaling.Ytelse -> ytelse.ytelsestype != BARNETRYGD }
         })
         return response
     }
 
     companion object {
         const val BETALINGER_VERSJON = "2.0"
-        const val BARNETRYGD = "BARNETRYGD"
+        const val BARNETRYGD = "Barnetrygd"
+        const val ROLLE = "Rettighetshaver"
+        const val PERIODE_TYPE = "Ytelsesperiode"
     }
 
 }

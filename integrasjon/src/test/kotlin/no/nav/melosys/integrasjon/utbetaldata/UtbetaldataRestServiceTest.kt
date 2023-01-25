@@ -34,12 +34,14 @@ class UtbetaldataRestServiceTest {
 
         val utbetalingRequest = UtbetalingRequest(FNR,
             Periode(fom, tom),
-            "UTBETALINGSPERIODE",
-            "RETTIGHETSHAVER")
+            "Utbetalingsperiode",
+            "Rettighetshaver")
 
         every {
             mockRestConsumer.hentUtbetalingsInformasjon(utbetalingRequest)
         } returns hentUtbetalingListe()
+
+        val test = mockRestConsumer.hentUtbetalingsInformasjon(utbetalingRequest);
 
         val saksopplysning = utbetaldataServiceV2.hentUtbetalingerBarnetrygd(FNR,
             LocalDate.now().minusMonths(2),
@@ -65,7 +67,7 @@ class UtbetaldataRestServiceTest {
             .first()
             .shouldBeEqualToComparingFields(
                 no.nav.melosys.domain.dokument.utbetaling.Ytelse().apply {
-                    type = "BARNETRYGD"
+                    type = "Barnetrygd"
                     periode = Periode(LocalDate.parse("2022-12-19"), LocalDate.parse("2022-12-19"))
                 }
                 , FieldsEqualityCheckConfig(ignorePrivateFields = false)
@@ -79,8 +81,8 @@ class UtbetaldataRestServiceTest {
 
         val utbetalingRequest = UtbetalingRequest(FNR,
             Periode(fom, tom),
-            "UTBETALINGSPERIODE",
-            "RETTIGHETSHAVER")
+            "Utbetalingsperiode",
+            "Rettighetshaver")
 
         every {
             mockRestConsumer.hentUtbetalingsInformasjon(utbetalingRequest)
@@ -104,8 +106,8 @@ class UtbetaldataRestServiceTest {
 
         val utbetalingRequest = UtbetalingRequest(FNR,
             Periode(fom.toString(), tom.toString()),
-            "UTBETALINGSPERIODE",
-            "RETTIGHETSHAVER")
+            "Utbetalingsperiode",
+            "Rettighetshaver")
 
         every {
             mockRestConsumer.hentUtbetalingsInformasjon(utbetalingRequest)
@@ -127,8 +129,8 @@ class UtbetaldataRestServiceTest {
 
         val utbetalingRequest = UtbetalingRequest(FNR,
             Periode(fom.toString(), tom.toString()),
-            "UTBETALINGSPERIODE",
-            "RETTIGHETSHAVER")
+            "Utbetalingsperiode",
+            "Rettighetshaver")
 
         every {
             mockRestConsumer.hentUtbetalingsInformasjon(utbetalingRequest)
