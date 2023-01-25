@@ -41,8 +41,6 @@ class UtbetaldataRestServiceTest {
             mockRestConsumer.hentUtbetalingsInformasjon(utbetalingRequest)
         } returns hentUtbetalingListe()
 
-        val test = mockRestConsumer.hentUtbetalingsInformasjon(utbetalingRequest);
-
         val saksopplysning = utbetaldataServiceV2.hentUtbetalingerBarnetrygd(FNR,
             LocalDate.now().minusMonths(2),
             LocalDate.now())
