@@ -34,7 +34,7 @@ class UtbetaldataRestServiceTest {
 
         val utbetalingRequest = UtbetalingRequest(FNR,
             Periode(fom, tom),
-            "Utbetalingsperiode",
+            "Ytelsesperiode",
             "Rettighetshaver")
 
         every {
@@ -79,7 +79,7 @@ class UtbetaldataRestServiceTest {
 
         val utbetalingRequest = UtbetalingRequest(FNR,
             Periode(fom, tom),
-            "Utbetalingsperiode",
+            "Ytelsesperiode",
             "Rettighetshaver")
 
         every {
@@ -104,7 +104,7 @@ class UtbetaldataRestServiceTest {
 
         val utbetalingRequest = UtbetalingRequest(FNR,
             Periode(fom.toString(), tom.toString()),
-            "Utbetalingsperiode",
+            "Ytelsesperiode",
             "Rettighetshaver")
 
         every {
@@ -127,7 +127,7 @@ class UtbetaldataRestServiceTest {
 
         val utbetalingRequest = UtbetalingRequest(FNR,
             Periode(fom.toString(), tom.toString()),
-            "Utbetalingsperiode",
+            "Ytelsesperiode",
             "Rettighetshaver")
 
         every {
