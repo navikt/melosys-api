@@ -11,6 +11,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.brev.*;
+import no.nav.melosys.domain.brev.muligemottakere.Brevmottaker;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
@@ -24,10 +25,8 @@ import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.brev.muligemottakere.MuligMottakerDto;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
-import no.nav.melosys.service.dokument.MuligeMottakereDto;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Service;
@@ -42,6 +41,7 @@ import static no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper.*;
 @Service
 public class BrevbestillingService {
 
+    @Deprecated(since = "Ta vekk sammens med melosys.MEL-4835.refactor1")
     private static final List<Produserbaredokumenter> BREV_TILGJENGELIG_FOR_MANUELL_BESTILLING = List.of(
         MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
         MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
@@ -84,12 +84,12 @@ public class BrevbestillingService {
     }
 
     @Transactional
-    public List<MuligMottakerDto> hentMuligeMottakereEtater(Produserbaredokumenter produserbaredokumenter,
-                                                            long behandlingId,
-                                                            List<String> orgnrEtater) {
+    public List<Brevmottaker> hentMuligeMottakereEtater(Produserbaredokumenter produserbaredokumenter,
+                                                        long behandlingId,
+                                                        List<String> orgnrEtater) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         return orgnrEtater.stream()
-            .map(orgnr -> new MuligMottakerDto.Builder()
+            .map(orgnr -> new Brevmottaker.Builder()
                 .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, produserbaredokumenter, ETAT))
                 .medMottakerNavn(hentMottakerNavn(produserbaredokumenter, behandling, ETAT, orgnr))
                 .medRolle(ETAT)
@@ -100,18 +100,18 @@ public class BrevbestillingService {
 
     @Deprecated(since = "Ta vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
     @Transactional
-    public MuligeMottakereDto hentMuligeMottakere(Produserbaredokumenter produserbaredokumenter, long behandlingId, String orgnrTilValgtArbeidsgiver) {
+    public MuligeBrevmottakereDto hentMuligeMottakere(Produserbaredokumenter produserbaredokumenter, long behandlingId, String orgnrTilValgtArbeidsgiver) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         Mottakerliste mottakerliste = brevmottakerService.hentMottakerliste(produserbaredokumenter, behandlingId);
-        return new MuligeMottakereDto(
+        return new MuligeBrevmottakereDto(
             lagHovedMottakerMuligMottakerDto(produserbaredokumenter, behandling, mottakerliste.getHovedMottaker(), orgnrTilValgtArbeidsgiver),
             lagKopiMottakereMuligMottakerDtos(produserbaredokumenter, behandling, mottakerliste.getKopiMottakere(), mottakerliste.getHovedMottaker()),
             lagFasteMottakereMuligMottakerDtos(produserbaredokumenter, behandling, mottakerliste.getFasteMottakere()));
     }
 
     @Deprecated(since = "Ta vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
-    private MuligMottakerDto lagHovedMottakerMuligMottakerDto(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller hovedmottaker, String orgnrTilValgtArbeidsgiver) {
-        return new MuligMottakerDto.Builder()
+    private Brevmottaker lagHovedMottakerMuligMottakerDto(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller hovedmottaker, String orgnrTilValgtArbeidsgiver) {
+        return new Brevmottaker.Builder()
             .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, produserbaredokumenter, hovedmottaker))
             .medMottakerNavn(hentMottakerNavn(produserbaredokumenter, behandling, hovedmottaker, orgnrTilValgtArbeidsgiver))
             .medRolle(hovedmottaker)
@@ -155,28 +155,28 @@ public class BrevbestillingService {
     }
 
     @Deprecated(since = "Ta vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
-    private List<MuligMottakerDto> lagKopiMottakereMuligMottakerDtos(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<Aktoersroller> kopiMottakere, Aktoersroller hovedmottaker) {
-        List<MuligMottakerDto> muligMottakerDtos = new ArrayList<>();
+    private List<Brevmottaker> lagKopiMottakereMuligMottakerDtos(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<Aktoersroller> kopiMottakere, Aktoersroller hovedmottaker) {
+        List<Brevmottaker> brevmottakers = new ArrayList<>();
         for (Aktoersroller kopiMottaker : kopiMottakere) {
             switch (kopiMottaker) {
                 case BRUKER ->
-                    muligMottakerDtos.add(lagKopiMottakerForBruker(produserbaredokumenter, behandling, kopiMottaker, hovedmottaker));
+                    brevmottakers.add(lagKopiMottakerForBruker(produserbaredokumenter, behandling, kopiMottaker, hovedmottaker));
                 case ARBEIDSGIVER ->
-                    muligMottakerDtos.addAll(lagKopiMottakereForArbeidsgiver(produserbaredokumenter, behandling, kopiMottaker));
+                    brevmottakers.addAll(lagKopiMottakereForArbeidsgiver(produserbaredokumenter, behandling, kopiMottaker));
                 case TRYGDEMYNDIGHET ->
-                    muligMottakerDtos.addAll(lagKopiMottakereForMyndighet(produserbaredokumenter, behandling, kopiMottaker));
+                    brevmottakers.addAll(lagKopiMottakereForMyndighet(produserbaredokumenter, behandling, kopiMottaker));
                 default -> throw new IllegalStateException(kopiMottaker + " er ikke en gyldig kopiMottakerrolle");
             }
         }
-        return muligMottakerDtos;
+        return brevmottakers;
     }
 
     @Deprecated(since = "Ta vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
-    private MuligMottakerDto lagKopiMottakerForBruker(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker, Aktoersroller hovedmottaker) {
+    private Brevmottaker lagKopiMottakerForBruker(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker, Aktoersroller hovedmottaker) {
         Aktoer avklartKopi = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling);
         if (avklartKopi.getRolle() == BRUKER || hovedmottaker == kopiMottaker) {
             String aktørID = behandling.getFagsak().hentBrukersAktørID();
-            return new MuligMottakerDto.Builder()
+            return new Brevmottaker.Builder()
                 .medDokumentNavn("Kopi til bruker")
                 .medMottakerNavn(persondataFasade.hentSammensattNavn(aktørID))
                 .medRolle(BRUKER)
@@ -184,7 +184,7 @@ public class BrevbestillingService {
                 .build();
         } else {
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartKopi.getOrgnr());
-            return new MuligMottakerDto.Builder()
+            return new Brevmottaker.Builder()
                 .medDokumentNavn("Kopi til brukers fullmektig")
                 .medMottakerNavn(orgDokument.getNavn())
                 .medRolle(avklartKopi.getRolle())
@@ -194,57 +194,57 @@ public class BrevbestillingService {
     }
 
     @Deprecated(since = "Ta vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
-    private List<MuligMottakerDto> lagKopiMottakereForArbeidsgiver(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker) {
-        List<MuligMottakerDto> muligMottakerDtos = new ArrayList<>();
+    private List<Brevmottaker> lagKopiMottakereForArbeidsgiver(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker) {
+        List<Brevmottaker> brevmottakers = new ArrayList<>();
 
         List<Aktoer> avklarteKopier = brevmottakerService.avklarMottakere(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling, false, true);
         for (Aktoer avklartKopi : avklarteKopier) {
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartKopi.getOrgnr());
             String fastTekst = avklartKopi.getRolle() == ARBEIDSGIVER ? "Kopi til arbeidsgiver" : "Kopi til arbeidsgivers fullmektig";
-            muligMottakerDtos.add(new MuligMottakerDto.Builder()
+            brevmottakers.add(new Brevmottaker.Builder()
                 .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, produserbaredokumenter, avklartKopi, fastTekst))
                 .medMottakerNavn(orgDokument.getNavn())
                 .medRolle(avklartKopi.getRolle())
                 .medOrgnr(orgDokument.getOrgnummer())
                 .build());
         }
-        return muligMottakerDtos;
+        return brevmottakers;
     }
 
     @Deprecated(since = "Ta vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
-    private List<MuligMottakerDto> lagKopiMottakereForMyndighet(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker) {
-        List<MuligMottakerDto> muligMottakerDtos = new ArrayList<>();
+    private List<Brevmottaker> lagKopiMottakereForMyndighet(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker) {
+        List<Brevmottaker> brevmottakers = new ArrayList<>();
 
         List<Aktoer> avklarteKopier = brevmottakerService.avklarMottakere(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling);
         for (Aktoer avklartKopi : avklarteKopier) {
             String fastTekst = "Kopi til utenlandsk trygdemyndighet";
-            muligMottakerDtos.add(new MuligMottakerDto.Builder()
+            brevmottakers.add(new Brevmottaker.Builder()
                 .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, produserbaredokumenter, avklartKopi, fastTekst))
                 .medMottakerNavn("Utenlandsk trygdemyndighet")
                 .medRolle(avklartKopi.getRolle())
                 .medInstitusjonId(avklartKopi.getInstitusjonId())
                 .build());
         }
-        return muligMottakerDtos;
+        return brevmottakers;
     }
 
     @Deprecated(since = "Ta vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
-    private List<MuligMottakerDto> lagFasteMottakereMuligMottakerDtos(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<FastMottakerMedOrgnr> fasteMottakere) {
-        List<MuligMottakerDto> muligMottakerDtos = new ArrayList<>();
+    private List<Brevmottaker> lagFasteMottakereMuligMottakerDtos(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<FastMottakerMedOrgnr> fasteMottakere) {
+        List<Brevmottaker> brevmottakers = new ArrayList<>();
 
         for (FastMottakerMedOrgnr fastMottakerMedOrgnr : fasteMottakere) {
             Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, FastMottakerMedOrgnr.av(fastMottakerMedOrgnr), behandling);
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartMottaker.getOrgnr());
 
             String fastTekst = "Kopi til " + orgDokument.getNavn();
-            muligMottakerDtos.add(new MuligMottakerDto.Builder()
+            brevmottakers.add(new Brevmottaker.Builder()
                 .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, produserbaredokumenter, avklartMottaker, fastTekst))
                 .medMottakerNavn(orgDokument.getNavn())
                 .medRolle(avklartMottaker.getRolle())
                 .medOrgnr(orgDokument.getOrgnummer())
                 .build());
         }
-        return muligMottakerDtos;
+        return brevmottakers;
     }
 
     private OrganisasjonDokument hentRettOrganisasjonsdokument(Behandling behandling, String orgnr) {
@@ -350,6 +350,7 @@ public class BrevbestillingService {
         return postadresse.poststed();
     }
 
+    @Deprecated(since = "Ta vekk sammens med melosys.MEL-4835.refactor1 toggle")
     @Transactional
     public void produserBrev(long behandlingId, BrevbestillingRequest brevbestillingRequest) {
         if (!BREV_TILGJENGELIG_FOR_MANUELL_BESTILLING.contains(brevbestillingRequest.getProduserbardokument())) {

@@ -10,6 +10,7 @@ import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
+import no.nav.melosys.domain.brev.muligemottakere.Brevmottaker;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -31,10 +32,8 @@ import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.brev.muligemottakere.MuligMottakerDto;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
-import no.nav.melosys.service.dokument.MuligeMottakereDto;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
@@ -101,14 +100,14 @@ class BrevbestillingServiceTest {
 
         assertThat(muligeMottakere.getHovedMottaker())
             .extracting(
-                MuligMottakerDto::getDokumentNavn,
-                MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getRolle,
-                MuligMottakerDto::getAktørId,
-                MuligMottakerDto::getOrgnr)
+                Brevmottaker::getDokumentNavn,
+                Brevmottaker::getMottakerNavn,
+                Brevmottaker::getRolle,
+                Brevmottaker::getAktørId,
+                Brevmottaker::getOrgnr)
             .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
         assertThat(muligeMottakere)
-            .extracting(MuligeMottakereDto::getKopiMottakere, MuligeMottakereDto::getFasteMottakere)
+            .extracting(MuligeBrevmottakereDto::getKopiMottakere, MuligeBrevmottakereDto::getFasteMottakere)
             .containsExactly(emptyList(), emptyList());
     }
 
@@ -127,14 +126,14 @@ class BrevbestillingServiceTest {
 
         assertThat(muligeMottakere.getHovedMottaker())
             .extracting(
-                MuligMottakerDto::getDokumentNavn,
-                MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getRolle,
-                MuligMottakerDto::getAktørId,
-                MuligMottakerDto::getOrgnr)
+                Brevmottaker::getDokumentNavn,
+                Brevmottaker::getMottakerNavn,
+                Brevmottaker::getRolle,
+                Brevmottaker::getAktørId,
+                Brevmottaker::getOrgnr)
             .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Fullmektig virksomhet", BRUKER, null, null);
         assertThat(muligeMottakere)
-            .extracting(MuligeMottakereDto::getKopiMottakere, MuligeMottakereDto::getFasteMottakere)
+            .extracting(MuligeBrevmottakereDto::getKopiMottakere, MuligeBrevmottakereDto::getFasteMottakere)
             .containsExactly(emptyList(), emptyList());
     }
 
@@ -153,14 +152,14 @@ class BrevbestillingServiceTest {
 
         assertThat(muligeMottakere.getHovedMottaker())
             .extracting(
-                MuligMottakerDto::getDokumentNavn,
-                MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getRolle,
-                MuligMottakerDto::getAktørId,
-                MuligMottakerDto::getOrgnr)
+                Brevmottaker::getDokumentNavn,
+                Brevmottaker::getMottakerNavn,
+                Brevmottaker::getRolle,
+                Brevmottaker::getAktørId,
+                Brevmottaker::getOrgnr)
             .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
         assertThat(muligeMottakere)
-            .extracting(MuligeMottakereDto::getKopiMottakere, MuligeMottakereDto::getFasteMottakere)
+            .extracting(MuligeBrevmottakereDto::getKopiMottakere, MuligeBrevmottakereDto::getFasteMottakere)
             .containsExactly(emptyList(), emptyList());
     }
 
@@ -178,14 +177,14 @@ class BrevbestillingServiceTest {
 
         assertThat(muligeMottakere.getHovedMottaker())
             .extracting(
-                MuligMottakerDto::getDokumentNavn,
-                MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getRolle,
-                MuligMottakerDto::getAktørId,
-                MuligMottakerDto::getOrgnr)
+                Brevmottaker::getDokumentNavn,
+                Brevmottaker::getMottakerNavn,
+                Brevmottaker::getRolle,
+                Brevmottaker::getAktørId,
+                Brevmottaker::getOrgnr)
             .containsExactly(GENERELT_FRITEKSTBREV_VIRKSOMHET.getBeskrivelse(), "Equinor AS", VIRKSOMHET, null, null);
         assertThat(muligeMottakere)
-            .extracting(MuligeMottakereDto::getKopiMottakere, MuligeMottakereDto::getFasteMottakere)
+            .extracting(MuligeBrevmottakereDto::getKopiMottakere, MuligeBrevmottakereDto::getFasteMottakere)
             .containsExactly(emptyList(), emptyList());
     }
 
@@ -202,14 +201,14 @@ class BrevbestillingServiceTest {
 
         assertThat(muligeMottakere.getHovedMottaker())
             .extracting(
-                MuligMottakerDto::getDokumentNavn,
-                MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getRolle,
-                MuligMottakerDto::getAktørId,
-                MuligMottakerDto::getOrgnr)
+                Brevmottaker::getDokumentNavn,
+                Brevmottaker::getMottakerNavn,
+                Brevmottaker::getRolle,
+                Brevmottaker::getAktørId,
+                Brevmottaker::getOrgnr)
             .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Ola Nordmann Rørleggerfirma", ARBEIDSGIVER, null, null);
         assertThat(muligeMottakere)
-            .extracting(MuligeMottakereDto::getKopiMottakere, MuligeMottakereDto::getFasteMottakere)
+            .extracting(MuligeBrevmottakereDto::getKopiMottakere, MuligeBrevmottakereDto::getFasteMottakere)
             .containsExactly(emptyList(), emptyList());
     }
 
@@ -229,11 +228,11 @@ class BrevbestillingServiceTest {
 
         assertThat(muligeMottakere.getKopiMottakere())
             .flatExtracting(
-                MuligMottakerDto::getDokumentNavn,
-                MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getRolle,
-                MuligMottakerDto::getAktørId,
-                MuligMottakerDto::getOrgnr)
+                Brevmottaker::getDokumentNavn,
+                Brevmottaker::getMottakerNavn,
+                Brevmottaker::getRolle,
+                Brevmottaker::getAktørId,
+                Brevmottaker::getOrgnr)
             .containsExactly("Kopi til bruker", "Ola Nordmann", BRUKER, "aktørId", null);
     }
 
@@ -253,11 +252,11 @@ class BrevbestillingServiceTest {
 
         assertThat(muligeMottakere.getKopiMottakere())
             .flatExtracting(
-                MuligMottakerDto::getDokumentNavn,
-                MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getRolle,
-                MuligMottakerDto::getAktørId,
-                MuligMottakerDto::getOrgnr)
+                Brevmottaker::getDokumentNavn,
+                Brevmottaker::getMottakerNavn,
+                Brevmottaker::getRolle,
+                Brevmottaker::getAktørId,
+                Brevmottaker::getOrgnr)
             .containsExactly("Kopi til brukers fullmektig", "Fullmektig Virksomhet", REPRESENTANT, null, "orgnrTilFullmektig");
     }
 
@@ -277,19 +276,19 @@ class BrevbestillingServiceTest {
 
         assertThat(muligeMottakere.getHovedMottaker())
             .extracting(
-                MuligMottakerDto::getDokumentNavn,
-                MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getRolle,
-                MuligMottakerDto::getAktørId,
-                MuligMottakerDto::getOrgnr)
+                Brevmottaker::getDokumentNavn,
+                Brevmottaker::getMottakerNavn,
+                Brevmottaker::getRolle,
+                Brevmottaker::getAktørId,
+                Brevmottaker::getOrgnr)
             .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Fullmektig Virksomhet", BRUKER, null, null);
         assertThat(muligeMottakere.getKopiMottakere())
             .flatExtracting(
-                MuligMottakerDto::getDokumentNavn,
-                MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getRolle,
-                MuligMottakerDto::getAktørId,
-                MuligMottakerDto::getOrgnr)
+                Brevmottaker::getDokumentNavn,
+                Brevmottaker::getMottakerNavn,
+                Brevmottaker::getRolle,
+                Brevmottaker::getAktørId,
+                Brevmottaker::getOrgnr)
             .containsExactly("Kopi til bruker", "Ola Nordmann", BRUKER, "aktørId", null);
     }
 
@@ -316,11 +315,11 @@ class BrevbestillingServiceTest {
 
         assertThat(muligeMottakere.getKopiMottakere())
             .flatExtracting(
-                MuligMottakerDto::getDokumentNavn,
-                MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getRolle,
-                MuligMottakerDto::getAktørId,
-                MuligMottakerDto::getOrgnr)
+                Brevmottaker::getDokumentNavn,
+                Brevmottaker::getMottakerNavn,
+                Brevmottaker::getRolle,
+                Brevmottaker::getAktørId,
+                Brevmottaker::getOrgnr)
             .containsExactly(
                 "Kopi til arbeidsgiver", "Arbeidsgiver 1", ARBEIDSGIVER, null, "orgnr1",
                 "Kopi til arbeidsgiver", "Arbeidsgiver 2", ARBEIDSGIVER, null, "orgnr2");
@@ -346,11 +345,11 @@ class BrevbestillingServiceTest {
 
         assertThat(muligeMottakere.getKopiMottakere())
             .flatExtracting(
-                MuligMottakerDto::getDokumentNavn,
-                MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getRolle,
-                MuligMottakerDto::getAktørId,
-                MuligMottakerDto::getOrgnr)
+                Brevmottaker::getDokumentNavn,
+                Brevmottaker::getMottakerNavn,
+                Brevmottaker::getRolle,
+                Brevmottaker::getAktørId,
+                Brevmottaker::getOrgnr)
             .containsExactly(
                 "Kopi til arbeidsgivers fullmektig", "Fullmektig Virksomhet", REPRESENTANT, null, "orgnr");
     }
@@ -374,11 +373,11 @@ class BrevbestillingServiceTest {
 
         assertThat(muligeMottakere.getFasteMottakere())
             .flatExtracting(
-                MuligMottakerDto::getDokumentNavn,
-                MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getRolle,
-                MuligMottakerDto::getAktørId,
-                MuligMottakerDto::getOrgnr)
+                Brevmottaker::getDokumentNavn,
+                Brevmottaker::getMottakerNavn,
+                Brevmottaker::getRolle,
+                Brevmottaker::getAktørId,
+                Brevmottaker::getOrgnr)
             .containsExactly("Kopi til Skatteetaten", "Skatteetaten", TRYGDEMYNDIGHET, null, "974761076");
     }
 
@@ -737,18 +736,18 @@ class BrevbestillingServiceTest {
 
         assertThat(muligeMottakere.getHovedMottaker())
             .extracting(
-                MuligMottakerDto::getDokumentNavn,
-                MuligMottakerDto::getMottakerNavn,
-                MuligMottakerDto::getRolle,
-                MuligMottakerDto::getAktørId,
-                MuligMottakerDto::getOrgnr)
+                Brevmottaker::getDokumentNavn,
+                Brevmottaker::getMottakerNavn,
+                Brevmottaker::getRolle,
+                Brevmottaker::getAktørId,
+                Brevmottaker::getOrgnr)
             .containsExactly("Vedtak om medlemskap, Attest for utsendt arbeidstaker", "Ola Nordmann", BRUKER, null, null);
 
         assertThat(muligeMottakere.getKopiMottakere())
             .hasSize(2)
             .extracting(
-                MuligMottakerDto::getDokumentNavn,
-                MuligMottakerDto::getMottakerNavn
+                Brevmottaker::getDokumentNavn,
+                Brevmottaker::getMottakerNavn
             )
             .containsExactlyInAnyOrder(
                 tuple("Kopi av vedtak om medlemskap, Attest for utsendt arbeidstaker", "Ståle Stål"),
@@ -758,8 +757,8 @@ class BrevbestillingServiceTest {
         assertThat(muligeMottakere.getFasteMottakere())
             .hasSize(1)
             .extracting(
-                MuligMottakerDto::getDokumentNavn,
-                MuligMottakerDto::getMottakerNavn
+                Brevmottaker::getDokumentNavn,
+                Brevmottaker::getMottakerNavn
             )
             .containsExactly(
                 tuple("Kopi av vedtak om medlemskap", "Skatt")

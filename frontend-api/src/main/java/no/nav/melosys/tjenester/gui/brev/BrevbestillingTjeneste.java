@@ -8,16 +8,16 @@ import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.brev.Etat;
 import no.nav.melosys.service.brev.BrevbestillingFasade;
 import no.nav.melosys.service.brev.BrevbestillingService;
-import no.nav.melosys.service.brev.muligemottakere.MuligMottakerDto;
-import no.nav.melosys.service.dokument.MuligeMottakereDto;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.BrevmalListeBygger;
+import no.nav.melosys.tjenester.gui.brev.dto.HentMuligeBrevmottakereResponseDto;
+import no.nav.melosys.tjenester.gui.brev.dto.MuligBrevmottakerResponseDto;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevbestillingDto;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevmalDto;
+import no.nav.melosys.tjenester.gui.dto.brev.HentMuligeBrevmottakereRequestDto;
 import no.nav.melosys.tjenester.gui.dto.brev.HentMuligeMottakereEtaterRequestDto;
-import no.nav.melosys.tjenester.gui.dto.brev.HentMuligeMottakereRequestDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -33,12 +33,12 @@ import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 @RequestScope
 public class BrevbestillingTjeneste {
 
+    private static final String MELOSYS_MEL_4835 = "melosys.MEL-4835.refactor1";
+
     private final BrevbestillingService brevbestillingService;
     private final BrevmalListeBygger brevmalListeBygger;
     private final Aksesskontroll aksesskontroll;
-
     private final BrevbestillingFasade brevbestillingFasade;
-
     private final Unleash unleash;
 
     public BrevbestillingTjeneste(BrevbestillingFasade brevbestillingFasade,
@@ -61,18 +61,21 @@ public class BrevbestillingTjeneste {
 
     @PostMapping(value = "/mulige-mottakere/{behandlingID}", produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Henter alle mulige mottakere for valgt dokumenttype, og organisasjonsnummer dersom hovedmottaker ikke er bruker")
-    public MuligeMottakereDto hentTilgjengeligeMottakere(@PathVariable long behandlingID,
-                                                         @RequestBody HentMuligeMottakereRequestDto hentMuligeMottakereRequestDto) {
+    public HentMuligeBrevmottakereResponseDto hentMuligeBrevmottakere(@PathVariable long behandlingID,
+                                                                      @RequestBody HentMuligeBrevmottakereRequestDto hentMuligeBrevmottakereRequestDto) {
         aksesskontroll.autoriser(behandlingID);
 
-        if (!unleash.isEnabled("melosys.MEL-4835.refactor1")) {
-            return brevbestillingService.hentMuligeMottakere(hentMuligeMottakereRequestDto.produserbartdokument(), behandlingID, hentMuligeMottakereRequestDto.orgnr());
+        if (!unleash.isEnabled(MELOSYS_MEL_4835)) {
+            var gammelMuligeBrevmottakereDto = brevbestillingService.hentMuligeMottakere(hentMuligeBrevmottakereRequestDto.produserbartdokument(), behandlingID, hentMuligeBrevmottakereRequestDto.orgnr());
+            var hovedMottaker = MuligBrevmottakerResponseDto.byggFraBrevmottakerDto(gammelMuligeBrevmottakereDto.getHovedMottaker());
+            var kopiMottakere = gammelMuligeBrevmottakereDto.getKopiMottakere().stream().map(MuligBrevmottakerResponseDto::byggFraBrevmottakerDto).toList();
+            var fasteMottakere = gammelMuligeBrevmottakereDto.getFasteMottakere().stream().map(MuligBrevmottakerResponseDto::byggFraBrevmottakerDto).toList();
+            return new HentMuligeBrevmottakereResponseDto(hovedMottaker, kopiMottakere, fasteMottakere);
         }
 
-        var hentMottakerRequest = hentMuligeMottakereRequestDto.tilHentMottakereRequest(behandlingID);
+        var hentMottakerRequest = hentMuligeBrevmottakereRequestDto.tilHentMottakereRequest(behandlingID);
         var hentMottakerResponse = brevbestillingFasade.hentMuligeMottakere(hentMottakerRequest);
-        return new MuligeMottakereDto(hentMottakerResponse.hovedMottaker(), hentMottakerResponse.kopiMottakere(), hentMottakerResponse.fasteMottakere());
-
+        return HentMuligeBrevmottakereResponseDto.byggFraHentMottakerResponse(hentMottakerResponse);
     }
 
     @PostMapping(value = "pdf/brev/utkast/{behandlingID}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_PDF_VALUE)
@@ -81,7 +84,7 @@ public class BrevbestillingTjeneste {
                                                  @RequestBody BrevbestillingDto brevbestillingDto) {
         aksesskontroll.autoriser(behandlingID);
 
-        if (!unleash.isEnabled("melosys.MEL-4835.refactor1")) {
+        if (!unleash.isEnabled(MELOSYS_MEL_4835)) {
             BrevbestillingRequest brevbestillingRequest = brevbestillingDto.tilRequestBuilder()
                 .medBestillersId(SubjectHandler.getInstance().getUserID())
                 .build();
@@ -102,16 +105,24 @@ public class BrevbestillingTjeneste {
         BrevbestillingRequest brevbestillingRequest = brevbestillingDto.tilRequestBuilder()
             .medBestillersId(SubjectHandler.getInstance().getUserID())
             .build();
-        brevbestillingService.produserBrev(behandlingID, brevbestillingRequest);
+
+        if (!unleash.isEnabled(MELOSYS_MEL_4835)) {
+            brevbestillingService.produserBrev(behandlingID, brevbestillingRequest);
+            return;
+        }
+        brevbestillingFasade.produserBrev(behandlingID, brevbestillingRequest);
     }
 
     @PostMapping(value = "/mulige-mottakere-etater/{behandlingID}", produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Henter alle mulige mottakere for valgte etater")
-    public List<MuligMottakerDto> hentTilgjengeligeMottakereEtater(@PathVariable long behandlingID,
-                                                                   @RequestBody HentMuligeMottakereEtaterRequestDto hentMuligeMottakereRequestDto) {
+    public List<MuligBrevmottakerResponseDto> hentTilgjengeligeMottakereEtater(@PathVariable long behandlingID,
+                                                                               @RequestBody HentMuligeMottakereEtaterRequestDto hentMuligeMottakereRequestDto) {
         aksesskontroll.autoriser(behandlingID);
-        return brevbestillingService.hentMuligeMottakereEtater(hentMuligeMottakereRequestDto.produserbartdokument(),
-            behandlingID, hentMuligeMottakereRequestDto.orgnrEtater());
+        var muligeBrevmottakere = brevbestillingService.hentMuligeMottakereEtater(
+            hentMuligeMottakereRequestDto.produserbartdokument(),
+            behandlingID,
+            hentMuligeMottakereRequestDto.orgnrEtater());
+        return muligeBrevmottakere.stream().map(MuligBrevmottakerResponseDto::byggFraBrevmottakerDto).toList();
     }
 
     @GetMapping(value = "/tilgjengelige-etater", produces = APPLICATION_JSON_VALUE)
