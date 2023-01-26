@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -602,11 +601,11 @@ class JournalfoeringServiceTest {
         verify(prosessinstansService).lagre(prosessinstansArgumentCaptor.capture());
         var lagretProsessinstans = prosessinstansArgumentCaptor.getValue();
         assertThat(lagretProsessinstans.getBehandling()).isNull();
+        assertThat(lagretProsessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class).getKode())
+            .isEqualTo(tilordneDto.getBehandlingstemaKode());
         assertThat(lagretProsessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class).getKode())
             .isEqualTo(tilordneDto.getBehandlingstypeKode());
         assertThat(lagretProsessinstans.getData(ProsessDataKey.SAKSNUMMER)).isEqualTo(tilordneDto.getSaksnummer());
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.JFR_INGEN_VURDERING, Boolean.class))
-            .isEqualTo(tilordneDto.isIngenVurdering());
     }
 
     @Test
@@ -634,11 +633,11 @@ class JournalfoeringServiceTest {
         verify(prosessinstansService).lagre(prosessinstansArgumentCaptor.capture());
         var lagretProsessinstans = prosessinstansArgumentCaptor.getValue();
         assertThat(lagretProsessinstans.getBehandling()).isNull();
+        assertThat(lagretProsessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class).getKode())
+            .isEqualTo(tilordneDto.getBehandlingstemaKode());
         assertThat(lagretProsessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class).getKode())
             .isEqualTo(tilordneDto.getBehandlingstypeKode());
         assertThat(lagretProsessinstans.getData(ProsessDataKey.SAKSNUMMER)).isEqualTo(tilordneDto.getSaksnummer());
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.JFR_INGEN_VURDERING, Boolean.class))
-            .isEqualTo(tilordneDto.isIngenVurdering());
     }
 
     @Test
@@ -673,11 +672,11 @@ class JournalfoeringServiceTest {
         verify(prosessinstansService).lagre(prosessinstansArgumentCaptor.capture());
         var lagretProsessinstans = prosessinstansArgumentCaptor.getValue();
         assertThat(lagretProsessinstans.getBehandling()).isNull();
+        assertThat(lagretProsessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class).getKode())
+            .isEqualTo(tilordneDto.getBehandlingstemaKode());
         assertThat(lagretProsessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class).getKode())
             .isEqualTo(tilordneDto.getBehandlingstypeKode());
         assertThat(lagretProsessinstans.getData(ProsessDataKey.SAKSNUMMER)).isEqualTo(tilordneDto.getSaksnummer());
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.JFR_INGEN_VURDERING, Boolean.class))
-            .isEqualTo(tilordneDto.isIngenVurdering());
     }
 
     @Test

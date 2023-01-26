@@ -306,11 +306,10 @@ public class JournalfoeringService {
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessTypeForAndregangsbehandling, journalfoeringDto);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, utledÅrsaktype(journalpost, fagsak.getTema(), behandlingstema, behandlingstype));
         prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, utledMottaksdato(journalfoeringDto.getMottattDato(), journalpost));
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
-        prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringDto.isIngenVurdering());
 
         prosessinstansService.lagre(prosessinstans);
     }
