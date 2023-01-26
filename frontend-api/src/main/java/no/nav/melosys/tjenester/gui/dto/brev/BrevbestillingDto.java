@@ -7,6 +7,7 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.dokument.brev.FritekstvedleggDto;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
 import no.nav.melosys.service.dokument.brev.SaksvedleggDto;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,6 +75,12 @@ public class BrevbestillingDto {
             .medSaksvedlegg(this.getSaksvedlegg())
             .medFritekstvedlegg(this.getFritekstvedlegg())
             .medDokumentTittel(this.getDokumentTittel());
+    }
+
+    public BrevbestillingRequest tilBrevbestillingRequest() {
+        return tilRequestBuilder()
+            .medBestillersId(SubjectHandler.getInstance().getUserID())
+            .build();
     }
 
     public BrevbestillingDto(Builder builder) {
