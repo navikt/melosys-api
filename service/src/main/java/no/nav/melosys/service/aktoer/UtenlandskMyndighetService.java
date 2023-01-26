@@ -9,6 +9,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
@@ -56,13 +57,16 @@ public class UtenlandskMyndighetService {
         return eøsLandkodeOptional.flatMap(utenlandskMyndighetRepository::findByLandkode);
     }
 
-    public UtenlandskMyndighet hentUtenlandskMyndighet(Land_iso2 landkode) {
+    public UtenlandskMyndighet hentUtenlandskMyndighet(Land_iso2 landkode, Produserbaredokumenter produserbaredokumenter) {
+        if (landkode == Land_iso2.US && produserbaredokumenter == Produserbaredokumenter.UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV) {
+            return hentUtenlandskMyndighetUnntakUSA();
+        }
         return utenlandskMyndighetRepository.findByLandkode(landkode)
             .orElseThrow(() -> new IkkeFunnetException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."));
     }
 
     public UtenlandskMyndighet hentUtenlandskMyndighetForInstitusjonID(String institusjonID) {
-        return hentUtenlandskMyndighet(UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonID));
+        return hentUtenlandskMyndighet(UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonID), null);
     }
 
     public List<UtenlandskMyndighet> hentAlleUtenlandskMyndigheter() {
@@ -94,7 +98,7 @@ public class UtenlandskMyndighetService {
     }
 
     private String hentEøsInstitusjonID(Land_iso2 landkode) {
-        UtenlandskMyndighet myndighet = hentUtenlandskMyndighet(landkode);
+        UtenlandskMyndighet myndighet = hentUtenlandskMyndighet(landkode, null);
         return myndighet.hentInstitusjonID();
     }
 
@@ -104,5 +108,15 @@ public class UtenlandskMyndighetService {
         }
         return landkoder.stream().findFirst().orElseThrow(
             () -> new FunksjonellException("Fant ingen trygdemyndighetsland for bilaterale trygdeavtaler."));
+    }
+
+    private UtenlandskMyndighet hentUtenlandskMyndighetUnntakUSA() {
+        var utenlandskMyndighet = new UtenlandskMyndighet();
+        utenlandskMyndighet.navn = "Social Security Administration Division of Training and Program Support";
+        utenlandskMyndighet.gateadresse1 = "International Support Branch, NT 03-A-09 6100 Wabash Avenue Baltimore";
+        utenlandskMyndighet.postnummer = "MD 21215";
+        utenlandskMyndighet.land = "USA";
+        utenlandskMyndighet.landkode = Land_iso2.US;
+        return utenlandskMyndighet;
     }
 }

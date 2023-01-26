@@ -44,7 +44,7 @@ public class DistribuerJournalpostUtland implements StegBehandler {
 
             Land_iso2 mottakerLand = Optional.ofNullable(prosessinstans.getData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, Land_iso2.class))
                 .orElseThrow(() -> new IkkeFunnetException("Kan ikke distribuere journalpost da mottakerland ikke er satt"));
-            UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(mottakerLand);
+            UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(mottakerLand, null);
             Distribusjonstype distribusjonstype =  prosessinstans.getData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstype.class);
             log.info("Bestiller distribuering av journalpost {} til land {} i behandling {} med distribusjonstype {}",
                 distribuerbarJournalpost, mottakerLand, prosessinstans.getBehandling().getId(), distribusjonstype);

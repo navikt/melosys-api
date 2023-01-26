@@ -53,7 +53,7 @@ public class BrevDataByggerVideresendTest {
         utenlandskMyndighet.poststed = "Visby";
         utenlandskMyndighet.land = "Sverige";
         utenlandskMyndighet.landkode = Land_iso2.SE;
-        when(utenlandskMyndighetService.hentUtenlandskMyndighet(eq(Land_iso2.SE))).thenReturn(utenlandskMyndighet);
+        when(utenlandskMyndighetService.hentUtenlandskMyndighet(eq(Land_iso2.SE), any())).thenReturn(utenlandskMyndighet);
 
         brevDataByggerVideresend.lag(brevDataGrunnlag, "Saksbehandler");
     }
