@@ -358,7 +358,7 @@ public class BrevbestillingService {
         dokumentServiceFasade.produserDokument(behandlingId, brevbestillingRequest);
     }
 
-    @Deprecated(since = "Tas vekk sammen med melosys.MEL-4835.refactor2 toggle")
+    @Deprecated(since = "Tas vekk sammen med melosys.MEL-4835.refactor1 toggle")
     public byte[] produserUtkast(long behandlingID, BrevbestillingRequest brevbestillingRequest) {
         return dokumentServiceFasade.produserUtkast(behandlingID, brevbestillingRequest);
     }

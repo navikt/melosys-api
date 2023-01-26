@@ -81,7 +81,7 @@ public class BrevbestillingTjeneste {
                                                  @RequestBody BrevbestillingDto brevbestillingDto) {
         aksesskontroll.autoriser(behandlingID);
 
-        if (!unleash.isEnabled("melosys.MEL-4835.refactor2")) {
+        if (!unleash.isEnabled("melosys.MEL-4835.refactor1")) {
             BrevbestillingRequest brevbestillingRequest = brevbestillingDto.tilRequestBuilder()
                 .medBestillersId(SubjectHandler.getInstance().getUserID())
                 .build();
