@@ -7,6 +7,7 @@ import java.util.*;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.SaksvedleggBestilling;
@@ -116,7 +117,7 @@ public class DokgenService {
             settOrganisasjonsOpplysninger(behandling, orgnr, builder);
         }
         if (mottaker != null && mottaker.erUtenlandskMyndighet()) {
-            settUtenlandskMyndighetOpplysninger(mottaker.hentMyndighetLandkode(), builder);
+            settUtenlandskMyndighetOpplysninger(mottaker.hentMyndighetLandkode(), builder, brevbestilling.getProduserbartdokument());
         }
 
         settForsendelseMottattOgAvsender(behandling, builder);
@@ -203,9 +204,10 @@ public class DokgenService {
             .medKontaktopplysning(kontaktopplysning);
     }
 
-    private void settUtenlandskMyndighetOpplysninger(Land_iso2 landkode,
-                                                     DokgenBrevbestilling.Builder<?> brevbestilling) {
-        var utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(landkode);
+    private void settUtenlandskMyndighetOpplysninger(Land_iso2 landkode, DokgenBrevbestilling.Builder<?> brevbestilling,
+                                                     Produserbaredokumenter produserbartdokument) {
+        var utenlandskMyndighet =
+            utenlandskMyndighetService.hentUtenlandskMyndighet(landkode, produserbartdokument);
         brevbestilling.medUtenlandskMyndighet(utenlandskMyndighet);
     }
 

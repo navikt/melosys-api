@@ -150,7 +150,7 @@ class DistribuerJournalpostTest {
         var utenlandskMyndighet = new UtenlandskMyndighet();
         utenlandskMyndighet.landkode = Land_iso2.GB;
 
-        when(mockUtenlandskMyndighetService.hentUtenlandskMyndighetForInstitusjonID(eq(institusjonId))).thenReturn(utenlandskMyndighet);
+        when(mockUtenlandskMyndighetService.hentUtenlandskMyndighet(eq(Land_iso2.GB), any())).thenReturn(utenlandskMyndighet);
 
         distribuerJournalpost.utfør(prosessinstans);
 
