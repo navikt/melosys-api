@@ -9,7 +9,6 @@ import no.nav.melosys.domain.brev.Etat;
 import no.nav.melosys.service.brev.BrevbestillingFasade;
 import no.nav.melosys.service.brev.BrevbestillingService;
 import no.nav.melosys.service.brev.muligemottakere.MuligMottakerDto;
-import no.nav.melosys.service.brev.muligemottakere.hentmottakere.HentMottakereRequest;
 import no.nav.melosys.service.dokument.MuligeMottakereDto;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -70,7 +69,7 @@ public class BrevbestillingTjeneste {
             return brevbestillingService.hentMuligeMottakere(hentMuligeMottakereRequestDto.produserbartdokument(), behandlingID, hentMuligeMottakereRequestDto.orgnr());
         }
 
-        var hentMottakerRequest = new HentMottakereRequest(hentMuligeMottakereRequestDto.produserbartdokument(), behandlingID, hentMuligeMottakereRequestDto.orgnr());
+        var hentMottakerRequest = hentMuligeMottakereRequestDto.tilHentMottakereRequest(behandlingID);
         var hentMottakerResponse = brevbestillingFasade.hentMuligeMottakere(hentMottakerRequest);
         return new MuligeMottakereDto(hentMottakerResponse.hovedMottaker(), hentMottakerResponse.kopiMottakere(), hentMottakerResponse.fasteMottakere());
 
@@ -81,11 +80,18 @@ public class BrevbestillingTjeneste {
     public ResponseEntity<byte[]> produserUtkast(@PathVariable long behandlingID,
                                                  @RequestBody BrevbestillingDto brevbestillingDto) {
         aksesskontroll.autoriser(behandlingID);
-        BrevbestillingRequest brevbestillingRequest = brevbestillingDto.tilRequestBuilder()
-            .medBestillersId(SubjectHandler.getInstance().getUserID())
-            .build();
-        byte[] pdf = brevbestillingService.produserUtkast(behandlingID, brevbestillingRequest);
-        return new ResponseEntity<>(pdf, genPdfHeaders("utkast_" + behandlingID), HttpStatus.OK);
+
+        if (!unleash.isEnabled("melosys.MEL-4835.refactor1")) {
+            BrevbestillingRequest brevbestillingRequest = brevbestillingDto.tilRequestBuilder()
+                .medBestillersId(SubjectHandler.getInstance().getUserID())
+                .build();
+            byte[] pdf = brevbestillingService.produserUtkast(behandlingID, brevbestillingRequest);
+            return new ResponseEntity<>(pdf, genPdfHeaders("utkast_" + behandlingID), HttpStatus.OK);
+        }
+
+        BrevbestillingRequest brevbestillingRequest = brevbestillingDto.tilBrevbestillingRequest();
+        byte[] pdfInBytes = brevbestillingFasade.produserUtkast(behandlingID, brevbestillingRequest);
+        return new ResponseEntity<>(pdfInBytes, genPdfHeaders("utkast_" + behandlingID), HttpStatus.OK);
     }
 
     @PostMapping("opprett/{behandlingID}")

@@ -70,10 +70,7 @@ public class DokumentTjeneste {
         return ResponseEntity.ok(dokumentListe);
     }
 
-    /**
-     * @deprecated Slettes når nytt endepunkt i 'BrevbestillingTjeneste' er klare
-     */
-    @Deprecated
+    @Deprecated(since = "Slettes når nytt endepunkt i 'BrevbestillingTjeneste' er klare")
     @PostMapping(value = "pdf/brev/utkast/{behandlingID}/{produserbartDokument}", produces = {APPLICATION_PDF, APPLICATION_JSON_UTF8})
     public ResponseEntity<byte[]> produserUtkastBrev(@PathVariable("behandlingID") long behandlingID,
                                                      @PathVariable("produserbartDokument") Produserbaredokumenter produserbartDokument,
