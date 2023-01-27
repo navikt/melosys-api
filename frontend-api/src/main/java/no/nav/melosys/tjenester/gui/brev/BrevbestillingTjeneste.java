@@ -6,6 +6,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.brev.Etat;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.brev.BrevbestillingFasade;
 import no.nav.melosys.service.brev.BrevbestillingService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
@@ -32,8 +33,6 @@ import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 @Api(tags = {"dokumenterv2"})
 @RequestScope
 public class BrevbestillingTjeneste {
-
-    private static final String MELOSYS_MEL_4835 = "melosys.MEL-4835.refactor1";
 
     private final BrevbestillingService brevbestillingService;
     private final BrevmalListeBygger brevmalListeBygger;
@@ -65,7 +64,7 @@ public class BrevbestillingTjeneste {
                                                                       @RequestBody HentMuligeBrevmottakereRequestDto hentMuligeBrevmottakereRequestDto) {
         aksesskontroll.autoriser(behandlingID);
 
-        if (!unleash.isEnabled(MELOSYS_MEL_4835)) {
+        if (!unleash.isEnabled(ToggleName.MELOSYS_MEL_4835)) {
             var gammelMuligeBrevmottakereDto = brevbestillingService.hentMuligeMottakere(hentMuligeBrevmottakereRequestDto.produserbartdokument(), behandlingID, hentMuligeBrevmottakereRequestDto.orgnr());
             var hovedMottaker = MuligBrevmottakerResponseDto.byggFraBrevmottakerDto(gammelMuligeBrevmottakereDto.getHovedMottaker());
             var kopiMottakere = gammelMuligeBrevmottakereDto.getKopiMottakere().stream().map(MuligBrevmottakerResponseDto::byggFraBrevmottakerDto).toList();
@@ -84,7 +83,7 @@ public class BrevbestillingTjeneste {
                                                  @RequestBody BrevbestillingDto brevbestillingDto) {
         aksesskontroll.autoriser(behandlingID);
 
-        if (!unleash.isEnabled(MELOSYS_MEL_4835)) {
+        if (!unleash.isEnabled(ToggleName.MELOSYS_MEL_4835)) {
             BrevbestillingRequest brevbestillingRequest = brevbestillingDto.tilRequestBuilder()
                 .medBestillersId(SubjectHandler.getInstance().getUserID())
                 .build();
@@ -106,7 +105,7 @@ public class BrevbestillingTjeneste {
             .medBestillersId(SubjectHandler.getInstance().getUserID())
             .build();
 
-        if (!unleash.isEnabled(MELOSYS_MEL_4835)) {
+        if (!unleash.isEnabled(ToggleName.MELOSYS_MEL_4835)) {
             brevbestillingService.produserBrev(behandlingID, brevbestillingRequest);
             return;
         }
