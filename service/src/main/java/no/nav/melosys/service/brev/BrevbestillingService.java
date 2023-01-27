@@ -13,6 +13,7 @@ import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -143,7 +144,7 @@ public class BrevbestillingService {
             case TRYGDEMYNDIGHET -> {
                 if (produserbaredokumenter == UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV) {
                     Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(hovedmottaker), behandling);
-                    UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(avklartMottaker.hentMyndighetLandkode());
+                    var utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(avklartMottaker.hentMyndighetLandkode(), produserbaredokumenter);
                     return utenlandskMyndighet.navn;
                 } else {
                     throw new FunksjonellException("Melosys støtter ikke hovedmottakere med rollen " + hovedmottaker);
@@ -314,7 +315,8 @@ public class BrevbestillingService {
                 break;
             }
             case TRYGDEMYNDIGHET: {
-                UtenlandskMyndighet utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(mottaker.hentMyndighetLandkode());
+                var utenlandskMyndighet =
+                    utenlandskMyndighetService.hentUtenlandskMyndighet(mottaker.hentMyndighetLandkode(), UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV);
                 return new BrevAdresse.Builder()
                     .medMottakerNavn(utenlandskMyndighet.navn)
                     .medAdresselinjer(Stream.of(utenlandskMyndighet.gateadresse1, utenlandskMyndighet.gateadresse2).toList())
