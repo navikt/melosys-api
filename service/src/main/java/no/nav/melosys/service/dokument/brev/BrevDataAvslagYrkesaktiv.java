@@ -15,7 +15,7 @@ public class BrevDataAvslagYrkesaktiv extends BrevData {
     public Vilkaarsresultat art16Vilkaar;
     public boolean erArt16UtenArt12;
 
-    public BrevDataAvslagYrkesaktiv(BrevbestillingRequest brevbestillingRequest, String saksbehandler) {
-        super(brevbestillingRequest, saksbehandler);
+    public BrevDataAvslagYrkesaktiv(BrevbestillingDto brevbestillingDto, String saksbehandler) {
+        super(brevbestillingDto, saksbehandler);
     }
 }

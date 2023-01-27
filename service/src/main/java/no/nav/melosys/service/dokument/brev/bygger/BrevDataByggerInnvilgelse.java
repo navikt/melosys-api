@@ -5,10 +5,10 @@ import java.util.Map;
 import java.util.Set;
 
 import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
@@ -16,12 +16,12 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
-import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
@@ -29,7 +29,7 @@ import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 public class BrevDataByggerInnvilgelse implements BrevDataBygger {
     private final LandvelgerService landvelgerService;
     private final AvklartefaktaService avklartefaktaService;
-    private final BrevbestillingRequest brevbestillingRequest;
+    private final BrevbestillingDto brevbestillingDto;
     private final BrevDataByggerA1 brevbyggerA1;
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
@@ -41,14 +41,14 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
                                      LandvelgerService landvelgerService,
                                      LovvalgsperiodeService lovvalgsperiodeService,
                                      AnmodningsperiodeService anmodningsperiodeService,
-                                     BrevbestillingRequest brevbestillingRequest,
+                                     BrevbestillingDto brevbestillingDto,
                                      VilkaarsresultatService vilkaarsresultatService,
                                      PersondataFasade persondataFasade,
                                      MottatteOpplysningerService mottatteOpplysningerService) {
         this.landvelgerService = landvelgerService;
         this.avklartefaktaService = avklartefaktaService;
         this.anmodningsperiodeService = anmodningsperiodeService;
-        this.brevbestillingRequest = brevbestillingRequest;
+        this.brevbestillingDto = brevbestillingDto;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.vilkaarsresultatService = vilkaarsresultatService;
         this.brevbyggerA1 = null;
@@ -60,7 +60,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
                                      LandvelgerService landvelgerService,
                                      LovvalgsperiodeService lovvalgsperiodeService,
                                      AnmodningsperiodeService anmodningsperiodeService,
-                                     BrevbestillingRequest brevbestillingRequest,
+                                     BrevbestillingDto brevbestillingDto,
                                      BrevDataByggerA1 brevbyggerA1,
                                      VilkaarsresultatService vilkaarsresultatService,
                                      PersondataFasade persondataFasade,
@@ -68,7 +68,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         this.landvelgerService = landvelgerService;
         this.avklartefaktaService = avklartefaktaService;
         this.anmodningsperiodeService = anmodningsperiodeService;
-        this.brevbestillingRequest = brevbestillingRequest;
+        this.brevbestillingDto = brevbestillingDto;
         this.brevbyggerA1 = brevbyggerA1;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.vilkaarsresultatService = vilkaarsresultatService;
@@ -81,7 +81,7 @@ public class BrevDataByggerInnvilgelse implements BrevDataBygger {
         long behandlingID = dataGrunnlag.getBehandling().getId();
 
         // Bruker skal ha A1 som vedlegg - Arbeidsgiver skal ikke
-        var brevDataInnvilgelse = new BrevDataInnvilgelse(brevbestillingRequest, saksbehandler);
+        var brevDataInnvilgelse = new BrevDataInnvilgelse(brevbestillingDto, saksbehandler);
         if (brevbyggerA1 != null) {
             brevDataInnvilgelse.vedleggA1 = (BrevDataA1) brevbyggerA1.lag(dataGrunnlag, saksbehandler);
         }

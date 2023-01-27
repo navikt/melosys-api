@@ -8,11 +8,10 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
-import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
-import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -67,7 +66,7 @@ class FtrlVedtakServiceTest {
     private ArgumentCaptor<Behandling> behandlingCaptor;
 
     @Captor
-    private ArgumentCaptor<BrevbestillingRequest> brevbestillingRequestCaptor;
+    private ArgumentCaptor<BrevbestillingDto> brevbestillingRequestCaptor;
 
     private FtrlVedtakService ftrlVedtakService;
 
@@ -104,21 +103,21 @@ class FtrlVedtakServiceTest {
         Behandling lagretBehandling = behandlingCaptor.getValue();
         assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
 
-        BrevbestillingRequest brevbestillingRequest = brevbestillingRequestCaptor.getValue();
-        assertThat(brevbestillingRequest)
+        BrevbestillingDto brevbestillingDto = brevbestillingRequestCaptor.getValue();
+        assertThat(brevbestillingDto)
             .extracting(
-                BrevbestillingRequest::getProduserbardokument,
-                BrevbestillingRequest::getBestillersId,
-                BrevbestillingRequest::getMottaker,
-                BrevbestillingRequest::getInnledningFritekst,
-                BrevbestillingRequest::getBegrunnelseFritekst,
-                BrevbestillingRequest::getEktefelleFritekst,
-                BrevbestillingRequest::getBarnFritekst
+                BrevbestillingDto::getProduserbardokument,
+                BrevbestillingDto::getBestillersId,
+                BrevbestillingDto::getMottaker,
+                BrevbestillingDto::getInnledningFritekst,
+                BrevbestillingDto::getBegrunnelseFritekst,
+                BrevbestillingDto::getEktefelleFritekst,
+                BrevbestillingDto::getBarnFritekst
             )
             .containsExactly(INNVILGELSE_FOLKETRYGDLOVEN_2_8, "Z990007", BRUKER, "Innledning",
                 "Begrunnelse", "Ektefelle omfattet", "Barn omfattet");
-        assertThat(brevbestillingRequest.getKopiMottakere().size()).isEqualTo(1);
-        assertThat(brevbestillingRequest.getKopiMottakere().get(0).rolle()).isEqualTo(ARBEIDSGIVER);
+        assertThat(brevbestillingDto.getKopiMottakere().size()).isEqualTo(1);
+        assertThat(brevbestillingDto.getKopiMottakere().get(0).rolle()).isEqualTo(ARBEIDSGIVER);
     }
 
     @Test
@@ -147,16 +146,16 @@ class FtrlVedtakServiceTest {
         Behandling lagretBehandling = behandlingCaptor.getValue();
         assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
 
-        BrevbestillingRequest brevbestillingRequest = brevbestillingRequestCaptor.getValue();
-        assertThat(brevbestillingRequest)
+        BrevbestillingDto brevbestillingDto = brevbestillingRequestCaptor.getValue();
+        assertThat(brevbestillingDto)
             .extracting(
-                BrevbestillingRequest::getProduserbardokument,
-                BrevbestillingRequest::getBestillersId,
-                BrevbestillingRequest::getMottaker,
-                BrevbestillingRequest::getFritekst
+                BrevbestillingDto::getProduserbardokument,
+                BrevbestillingDto::getBestillersId,
+                BrevbestillingDto::getMottaker,
+                BrevbestillingDto::getFritekst
             )
             .containsExactly(AVSLAG_MANGLENDE_OPPLYSNINGER, "Z990007", BRUKER, "fritekst for beskrivelse avslag");
-        assertThat(brevbestillingRequest.getKopiMottakere().size()).isEqualTo(0);
+        assertThat(brevbestillingDto.getKopiMottakere().size()).isEqualTo(0);
     }
 
     private FattVedtakRequest lagFattVedtakRequest() {

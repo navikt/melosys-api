@@ -7,16 +7,16 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
-import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.KopiMottaker;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -68,7 +68,7 @@ class TrygdeavtaleVedtakServiceTest {
     @Captor
     private ArgumentCaptor<Behandling> behandlingCaptor;
     @Captor
-    private ArgumentCaptor<BrevbestillingRequest> brevbestillingRequestCaptor;
+    private ArgumentCaptor<BrevbestillingDto> brevbestillingRequestCaptor;
 
     private TrygdeavtaleVedtakService trygdeavtaleVedtakService;
 
@@ -106,23 +106,23 @@ class TrygdeavtaleVedtakServiceTest {
         Behandling lagretBehandling = behandlingCaptor.getValue();
         assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
 
-        BrevbestillingRequest brevbestillingRequest = brevbestillingRequestCaptor.getValue();
-        assertThat(brevbestillingRequest)
+        BrevbestillingDto brevbestillingDto = brevbestillingRequestCaptor.getValue();
+        assertThat(brevbestillingDto)
             .extracting(
-                BrevbestillingRequest::getProduserbardokument,
-                BrevbestillingRequest::getBestillersId,
-                BrevbestillingRequest::getMottaker,
-                BrevbestillingRequest::getInnledningFritekst,
-                BrevbestillingRequest::getBegrunnelseFritekst,
-                BrevbestillingRequest::getEktefelleFritekst,
-                BrevbestillingRequest::getBarnFritekst,
-                BrevbestillingRequest::getNyVurderingBakgrunn
+                BrevbestillingDto::getProduserbardokument,
+                BrevbestillingDto::getBestillersId,
+                BrevbestillingDto::getMottaker,
+                BrevbestillingDto::getInnledningFritekst,
+                BrevbestillingDto::getBegrunnelseFritekst,
+                BrevbestillingDto::getEktefelleFritekst,
+                BrevbestillingDto::getBarnFritekst,
+                BrevbestillingDto::getNyVurderingBakgrunn
             )
             .containsExactly(TRYGDEAVTALE_GB, "Z990007", BRUKER, "Innledning",
                 "Begrunnelse", "Ektefelle omfattet", "Barn omfattet", null);
-        assertThat(brevbestillingRequest.getKopiMottakere().size()).isEqualTo(2);
-        assertThat(brevbestillingRequest.getKopiMottakere().get(0).rolle()).isEqualTo(ARBEIDSGIVER);
-        assertThat(brevbestillingRequest.getKopiMottakere().get(1).rolle()).isEqualTo(TRYGDEMYNDIGHET);
+        assertThat(brevbestillingDto.getKopiMottakere().size()).isEqualTo(2);
+        assertThat(brevbestillingDto.getKopiMottakere().get(0).rolle()).isEqualTo(ARBEIDSGIVER);
+        assertThat(brevbestillingDto.getKopiMottakere().get(1).rolle()).isEqualTo(TRYGDEMYNDIGHET);
     }
 
     @Test
@@ -152,23 +152,23 @@ class TrygdeavtaleVedtakServiceTest {
         Behandling lagretBehandling = behandlingCaptor.getValue();
         assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
 
-        BrevbestillingRequest brevbestillingRequest = brevbestillingRequestCaptor.getValue();
-        assertThat(brevbestillingRequest)
+        BrevbestillingDto brevbestillingDto = brevbestillingRequestCaptor.getValue();
+        assertThat(brevbestillingDto)
             .extracting(
-                BrevbestillingRequest::getProduserbardokument,
-                BrevbestillingRequest::getBestillersId,
-                BrevbestillingRequest::getMottaker,
-                BrevbestillingRequest::getInnledningFritekst,
-                BrevbestillingRequest::getBegrunnelseFritekst,
-                BrevbestillingRequest::getEktefelleFritekst,
-                BrevbestillingRequest::getBarnFritekst,
-                BrevbestillingRequest::getNyVurderingBakgrunn
+                BrevbestillingDto::getProduserbardokument,
+                BrevbestillingDto::getBestillersId,
+                BrevbestillingDto::getMottaker,
+                BrevbestillingDto::getInnledningFritekst,
+                BrevbestillingDto::getBegrunnelseFritekst,
+                BrevbestillingDto::getEktefelleFritekst,
+                BrevbestillingDto::getBarnFritekst,
+                BrevbestillingDto::getNyVurderingBakgrunn
             )
             .containsExactly(TRYGDEAVTALE_GB, "Z990007", BRUKER, "Innledning",
                 "Begrunnelse", "Ektefelle omfattet", "Barn omfattet", Nyvurderingbakgrunner.FEIL_I_BEHANDLING.getKode());
-        assertThat(brevbestillingRequest.getKopiMottakere().size()).isEqualTo(2);
-        assertThat(brevbestillingRequest.getKopiMottakere().get(0).rolle()).isEqualTo(ARBEIDSGIVER);
-        assertThat(brevbestillingRequest.getKopiMottakere().get(1).rolle()).isEqualTo(TRYGDEMYNDIGHET);
+        assertThat(brevbestillingDto.getKopiMottakere().size()).isEqualTo(2);
+        assertThat(brevbestillingDto.getKopiMottakere().get(0).rolle()).isEqualTo(ARBEIDSGIVER);
+        assertThat(brevbestillingDto.getKopiMottakere().get(1).rolle()).isEqualTo(TRYGDEMYNDIGHET);
     }
 
     @Test
@@ -198,23 +198,23 @@ class TrygdeavtaleVedtakServiceTest {
         Behandling lagretBehandling = behandlingCaptor.getValue();
         assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
 
-        BrevbestillingRequest brevbestillingRequest = brevbestillingRequestCaptor.getValue();
-        assertThat(brevbestillingRequest)
+        BrevbestillingDto brevbestillingDto = brevbestillingRequestCaptor.getValue();
+        assertThat(brevbestillingDto)
             .extracting(
-                BrevbestillingRequest::getProduserbardokument,
-                BrevbestillingRequest::getBestillersId,
-                BrevbestillingRequest::getMottaker,
-                BrevbestillingRequest::getInnledningFritekst,
-                BrevbestillingRequest::getBegrunnelseFritekst,
-                BrevbestillingRequest::getEktefelleFritekst,
-                BrevbestillingRequest::getBarnFritekst,
-                BrevbestillingRequest::getNyVurderingBakgrunn
+                BrevbestillingDto::getProduserbardokument,
+                BrevbestillingDto::getBestillersId,
+                BrevbestillingDto::getMottaker,
+                BrevbestillingDto::getInnledningFritekst,
+                BrevbestillingDto::getBegrunnelseFritekst,
+                BrevbestillingDto::getEktefelleFritekst,
+                BrevbestillingDto::getBarnFritekst,
+                BrevbestillingDto::getNyVurderingBakgrunn
             )
             .containsExactly(TRYGDEAVTALE_GB, "Z990007", BRUKER, "Innledning",
                 "Begrunnelse", "Ektefelle omfattet", "Barn omfattet", Nyvurderingbakgrunner.NYE_OPPLYSNINGER.getKode());
-        assertThat(brevbestillingRequest.getKopiMottakere().size()).isEqualTo(2);
-        assertThat(brevbestillingRequest.getKopiMottakere().get(0).rolle()).isEqualTo(ARBEIDSGIVER);
-        assertThat(brevbestillingRequest.getKopiMottakere().get(1).rolle()).isEqualTo(TRYGDEMYNDIGHET);
+        assertThat(brevbestillingDto.getKopiMottakere().size()).isEqualTo(2);
+        assertThat(brevbestillingDto.getKopiMottakere().get(0).rolle()).isEqualTo(ARBEIDSGIVER);
+        assertThat(brevbestillingDto.getKopiMottakere().get(1).rolle()).isEqualTo(TRYGDEMYNDIGHET);
     }
 
     @Test
@@ -243,16 +243,16 @@ class TrygdeavtaleVedtakServiceTest {
         Behandling lagretBehandling = behandlingCaptor.getValue();
         assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
 
-        BrevbestillingRequest brevbestillingRequest = brevbestillingRequestCaptor.getValue();
-        assertThat(brevbestillingRequest)
+        BrevbestillingDto brevbestillingDto = brevbestillingRequestCaptor.getValue();
+        assertThat(brevbestillingDto)
             .extracting(
-                BrevbestillingRequest::getProduserbardokument,
-                BrevbestillingRequest::getBestillersId,
-                BrevbestillingRequest::getMottaker,
-                BrevbestillingRequest::getFritekst
+                BrevbestillingDto::getProduserbardokument,
+                BrevbestillingDto::getBestillersId,
+                BrevbestillingDto::getMottaker,
+                BrevbestillingDto::getFritekst
             )
             .containsExactly(AVSLAG_MANGLENDE_OPPLYSNINGER, "Z990007", BRUKER, "fritekst for beskrivelse avslag");
-        assertThat(brevbestillingRequest.getKopiMottakere().size()).isEqualTo(0);
+        assertThat(brevbestillingDto.getKopiMottakere().size()).isEqualTo(0);
     }
 
     private FattVedtakRequest lagFattVedtakRequest(Vedtakstyper vedtakstype, String nyVurderingBakgrunn) {

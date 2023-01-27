@@ -7,7 +7,7 @@ import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,7 +37,7 @@ class DokumentServiceFasadeTest {
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
     @Captor
-    private ArgumentCaptor<BrevbestillingRequest> brevbestillingRequestCaptor;
+    private ArgumentCaptor<BrevbestillingDto> brevbestillingRequestCaptor;
 
     private DokumentServiceFasade dokumentServiceFasade;
 
@@ -56,11 +56,11 @@ class DokumentServiceFasadeTest {
     void skalKalleDokgenProduserUtkast() {
         when(mockDokgenService.erTilgjengeligDokgenmal(any(Produserbaredokumenter.class))).thenReturn(true);
 
-        BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
             .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
             .medMottaker(Aktoersroller.BRUKER)
             .build();
-        dokumentServiceFasade.produserUtkast(1, brevbestillingRequest);
+        dokumentServiceFasade.produserUtkast(1, brevbestillingDto);
 
         verify(mockDokgenService).produserUtkast(anyLong(), any());
         verifyNoInteractions(mockDokumentService);
@@ -70,13 +70,13 @@ class DokumentServiceFasadeTest {
     void skalKalleDokumentServiceProduserUtkast() {
         when(mockDokgenService.erTilgjengeligDokgenmal(any(Produserbaredokumenter.class))).thenReturn(false);
 
-        BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
             .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
             .build();
 
-        dokumentServiceFasade.produserUtkast(1, brevbestillingRequest);
+        dokumentServiceFasade.produserUtkast(1, brevbestillingDto);
 
-        verify(mockDokumentService).produserUtkast(anyLong(), eq(brevbestillingRequest));
+        verify(mockDokumentService).produserUtkast(anyLong(), eq(brevbestillingDto));
     }
 
     @Test
@@ -102,7 +102,7 @@ class DokumentServiceFasadeTest {
     void skalKalleDokgenServiceProduserOgDistribuer_dto() {
         when(mockDokgenService.erTilgjengeligDokgenmal(any())).thenReturn(true);
 
-        dokumentServiceFasade.produserDokument(1, new BrevbestillingRequest());
+        dokumentServiceFasade.produserDokument(1, new BrevbestillingDto());
 
         verify(mockDokgenService).produserOgDistribuerBrev(anyLong(), any());
         verifyNoInteractions(mockDokumentService);
@@ -127,9 +127,9 @@ class DokumentServiceFasadeTest {
         var dokgenBrevbestillingRequest = brevbestillingRequestCaptor.getValue();
 
         assertThat(dokgenBrevbestillingRequest).extracting(
-            BrevbestillingRequest::getBestillersId,
-            BrevbestillingRequest::getMottaker,
-            BrevbestillingRequest::getFritekst
+            BrevbestillingDto::getBestillersId,
+            BrevbestillingDto::getMottaker,
+            BrevbestillingDto::getFritekst
         ).containsExactly("Z123456", BRUKER, "avslag fritekst");
     }
 
@@ -145,10 +145,10 @@ class DokumentServiceFasadeTest {
         var dokgenBrevbestillingRequest = brevbestillingRequestCaptor.getValue();
 
         assertThat(dokgenBrevbestillingRequest).extracting(
-            BrevbestillingRequest::getBestillersId,
-            BrevbestillingRequest::getMottaker,
-            BrevbestillingRequest::getFritekst,
-            BrevbestillingRequest::getBegrunnelseKode
+            BrevbestillingDto::getBestillersId,
+            BrevbestillingDto::getMottaker,
+            BrevbestillingDto::getFritekst,
+            BrevbestillingDto::getBegrunnelseKode
         ).containsExactly("Z123456", BRUKER, "henlagt sak fritekst", "ANNET");
     }
 }

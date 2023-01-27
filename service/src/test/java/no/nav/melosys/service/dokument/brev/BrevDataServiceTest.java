@@ -142,7 +142,7 @@ class BrevDataServiceTest {
     @Test
     void lagForvaltningsmelding_representantErNull_tilBruker() {
         Behandling behandling = lagBehandling(lagSøknadDokument());
-        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
         Aktoer mottaker = lagAktør(Aktoersroller.BRUKER);
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
@@ -165,7 +165,8 @@ class BrevDataServiceTest {
             case BRUKER -> aktør.setAktørId(AKTØRID);
             case ARBEIDSGIVER, VIRKSOMHET -> aktør.setOrgnr(ORGNR);
             case TRYGDEMYNDIGHET -> aktør.setInstitusjonId("HR:987");
-            case REPRESENTANT -> throw new IllegalArgumentException("Bruk lagAktørRepresentant() for fullmekitg mottaker");
+            case REPRESENTANT ->
+                throw new IllegalArgumentException("Bruk lagAktørRepresentant() for fullmekitg mottaker");
         }
         return aktør;
     }
@@ -187,7 +188,7 @@ class BrevDataServiceTest {
         Behandling behandling = lagBehandling(lagSøknadDokument());
         behandling.getFagsak().getAktører().add(hentRepresentantOrgAktør());
 
-        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
         Aktoer mottaker = lagAktørRepresentant(Aktoertype.ORGANISASJON);
@@ -211,7 +212,7 @@ class BrevDataServiceTest {
         Behandling behandling = lagBehandling(lagSøknadDokument());
         behandling.getFagsak().getAktører().add(hentRepresentantPersonAktør());
 
-        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
         Aktoer mottaker = lagAktørRepresentant(Aktoertype.PERSON);
@@ -231,7 +232,7 @@ class BrevDataServiceTest {
     @Test
     void lagMangelbrevXml_mottakerErbrukerID() {
         Behandling behandling = lagBehandling(lagSøknadDokument());
-        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
 
@@ -259,7 +260,7 @@ class BrevDataServiceTest {
     @Test
     void lagMangelbrevXml_mottakerErArbeidsgiver() {
         Behandling behandling = lagBehandling(lagSøknadDokument());
-        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
         Aktoer mottakerAktør = lagAktør(Aktoersroller.ARBEIDSGIVER);
@@ -287,7 +288,7 @@ class BrevDataServiceTest {
         Behandling behandling = lagBehandling(lagSøknadDokument());
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
 
-        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
         brevData.fritekst = "Test";
 
@@ -301,7 +302,7 @@ class BrevDataServiceTest {
         Behandling behandling = lagBehandling(lagSøknadDokument());
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
 
-        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingRequest());
+        BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
         brevData.fritekst = "Test";
 

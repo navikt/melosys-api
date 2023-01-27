@@ -5,8 +5,8 @@ import java.util.Optional;
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
+import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 
 public class BrevDataInnvilgelse extends BrevData {
     private AnmodningsperiodeSvar anmodningsperiodesvar;
@@ -22,8 +22,8 @@ public class BrevDataInnvilgelse extends BrevData {
     public boolean erTuristskip;
     public AvklarteMedfolgendeFamilie avklarteMedfolgendeBarn;
 
-    public BrevDataInnvilgelse(BrevbestillingRequest brevbestillingRequest, String saksbehandler) {
-        super(brevbestillingRequest, saksbehandler);
+    public BrevDataInnvilgelse(BrevbestillingDto brevbestillingDto, String saksbehandler) {
+        super(brevbestillingDto, saksbehandler);
     }
 
     public Optional<AnmodningsperiodeSvar> getAnmodningsperiodesvar() {
