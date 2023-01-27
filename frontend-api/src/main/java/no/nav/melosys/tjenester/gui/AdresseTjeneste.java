@@ -33,7 +33,7 @@ public class AdresseTjeneste {
         value = "Henter adressen til en gitt utenlandsk myndighet",
         response = UtenlandskMyndighet.class)
     public ResponseEntity<UtenlandskMyndighet> hentUtenlandskMyndighet(@PathVariable("landkode") Land_iso2 landkode) {
-        return ResponseEntity.ok(utenlandskMyndighetService.hentUtenlandskMyndighet(landkode, null));
+        return ResponseEntity.ok(utenlandskMyndighetService.hentUtenlandskMyndighet(landkode));
     }
 
     @GetMapping("/myndigheter")

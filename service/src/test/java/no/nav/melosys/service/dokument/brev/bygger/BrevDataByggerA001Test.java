@@ -111,7 +111,7 @@ class BrevDataByggerA001Test {
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singletonList(periode));
 
         UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
-        when(myndighetsService.hentUtenlandskMyndighet(any(), any())).thenReturn(utenlandskMyndighet);
+        when(myndighetsService.hentUtenlandskMyndighet(any())).thenReturn(utenlandskMyndighet);
 
         lagVilkårResultat(Vilkaar.FO_883_2004_ART16_1, true, ERSTATTER_EN_ANNEN_UNDER_5_AAR);
 

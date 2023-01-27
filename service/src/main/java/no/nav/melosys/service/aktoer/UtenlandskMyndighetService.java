@@ -25,9 +25,21 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.TRYGDEMYNDIGHET;
 public class UtenlandskMyndighetService {
     private static final Logger log = LoggerFactory.getLogger(UtenlandskMyndighetService.class);
 
+    private static final UtenlandskMyndighet utenlandskMyndighetUnntakUSA;
+
     private final UtenlandskMyndighetRepository utenlandskMyndighetRepository;
     private final LandvelgerService landvelgerService;
     private final FagsakService fagsakService;
+
+    static {
+        var utenlandskMyndighet = new UtenlandskMyndighet();
+        utenlandskMyndighet.navn = "Social Security Administration Division of Training and Program Support";
+        utenlandskMyndighet.gateadresse1 = "International Support Branch, NT 03-A-09 6100 Wabash Avenue Baltimore";
+        utenlandskMyndighet.postnummer = "MD 21215";
+        utenlandskMyndighet.land = "USA";
+        utenlandskMyndighet.landkode = Land_iso2.US;
+        utenlandskMyndighetUnntakUSA = utenlandskMyndighet;
+    }
 
     public UtenlandskMyndighetService(UtenlandskMyndighetRepository utenlandskMyndighetRepository,
                                       LandvelgerService landvelgerService, FagsakService fagsakService) {
@@ -57,6 +69,10 @@ public class UtenlandskMyndighetService {
         return eøsLandkodeOptional.flatMap(utenlandskMyndighetRepository::findByLandkode);
     }
 
+    public UtenlandskMyndighet hentUtenlandskMyndighet(Land_iso2 landkode) {
+        return hentUtenlandskMyndighet(landkode, null);
+    }
+
     public UtenlandskMyndighet hentUtenlandskMyndighet(Land_iso2 landkode, Produserbaredokumenter produserbaredokumenter) {
         if (landkode == Land_iso2.US && produserbaredokumenter == Produserbaredokumenter.UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV) {
             return hentUtenlandskMyndighetUnntakUSA();
@@ -66,7 +82,7 @@ public class UtenlandskMyndighetService {
     }
 
     public UtenlandskMyndighet hentUtenlandskMyndighetForInstitusjonID(String institusjonID) {
-        return hentUtenlandskMyndighet(UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonID), null);
+        return hentUtenlandskMyndighet(UtenlandskMyndighet.konverterInstitusjonIdTilLandkode(institusjonID));
     }
 
     public List<UtenlandskMyndighet> hentAlleUtenlandskMyndigheter() {
@@ -111,12 +127,6 @@ public class UtenlandskMyndighetService {
     }
 
     private UtenlandskMyndighet hentUtenlandskMyndighetUnntakUSA() {
-        var utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.navn = "Social Security Administration Division of Training and Program Support";
-        utenlandskMyndighet.gateadresse1 = "International Support Branch, NT 03-A-09 6100 Wabash Avenue Baltimore";
-        utenlandskMyndighet.postnummer = "MD 21215";
-        utenlandskMyndighet.land = "USA";
-        utenlandskMyndighet.landkode = Land_iso2.US;
-        return utenlandskMyndighet;
+        return utenlandskMyndighetUnntakUSA;
     }
 }

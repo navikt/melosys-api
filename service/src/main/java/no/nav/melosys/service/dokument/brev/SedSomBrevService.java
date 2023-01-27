@@ -45,7 +45,7 @@ public class SedSomBrevService {
                                                        Behandling behandling,
                                                        List<FysiskDokument> vedlegg) {
         var fagsak = behandling.getFagsak();
-        var utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(mottakerland, null);
+        var utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(mottakerland);
         String institusjonID = utenlandskMyndighet.hentInstitusjonID();
         String brukerFnr = persondataFasade.hentFolkeregisterident(fagsak.hentBrukersAktørID());
         byte[] sedPdf = eessiService.genererSedPdf(behandling.getId(), sedType);

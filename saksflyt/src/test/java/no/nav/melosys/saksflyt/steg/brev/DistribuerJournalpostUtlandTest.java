@@ -45,7 +45,7 @@ class DistribuerJournalpostUtlandTest {
         prosessinstans.setData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, Landkoder.SE);
         prosessinstans.setData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstype.VEDTAK);
         prosessinstans.setBehandling(new Behandling());
-        when(utenlandskMyndighetService.hentUtenlandskMyndighet(eq(Land_iso2.SE), any())).thenReturn(lagUtenlandskMyndighet());
+        when(utenlandskMyndighetService.hentUtenlandskMyndighet(eq(Land_iso2.SE))).thenReturn(lagUtenlandskMyndighet());
 
         distribuerJournalpostUtland.utfør(prosessinstans);
 

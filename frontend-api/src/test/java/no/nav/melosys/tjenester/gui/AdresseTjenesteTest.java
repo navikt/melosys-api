@@ -41,8 +41,8 @@ class AdresseTjenesteTest {
         utenlandskMyndighetSverige.land = "Sweden";
         utenlandskMyndighetSverige.landkode = Land_iso2.SE;
 
-        when(utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.DK, null)).thenReturn(utenlandskMyndighetDanmark);
-        when(utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.SE, null)).thenReturn(utenlandskMyndighetSverige);
+        when(utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.DK)).thenReturn(utenlandskMyndighetDanmark);
+        when(utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.SE)).thenReturn(utenlandskMyndighetSverige);
         when(utenlandskMyndighetService.hentAlleUtenlandskMyndigheter()).thenReturn(Arrays.asList(utenlandskMyndighetSverige, utenlandskMyndighetDanmark));
     }
 

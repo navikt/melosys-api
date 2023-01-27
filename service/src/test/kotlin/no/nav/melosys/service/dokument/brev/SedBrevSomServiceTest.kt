@@ -63,7 +63,7 @@ class SedSomBrevServiceTest {
         val utenlandskMyndighet: UtenlandskMyndighet =
             UtenlandskMyndighet().apply { institusjonskode = "X7"; landkode = Land_iso2.AX }
 
-        every { utenlandskMyndighetServiceMock.hentUtenlandskMyndighet(Land_iso2.SE, null) } returns utenlandskMyndighet
+        every { utenlandskMyndighetServiceMock.hentUtenlandskMyndighet(Land_iso2.SE) } returns utenlandskMyndighet
         every { fagsak.hentBrukersAktørID() } returns AKTØR_ID
         every { persondataFasadeMock.hentFolkeregisterident(any()) } returns BRUKER_FNR
         every { fagsak.saksnummer } returns SAKSNUMMER

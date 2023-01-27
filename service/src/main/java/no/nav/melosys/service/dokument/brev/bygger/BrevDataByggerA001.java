@@ -55,7 +55,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
 
         BrevDataA001 brevData = new BrevDataA001();
         brevData.persondata = dataGrunnlag.getPerson();
-        brevData.utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(landkode, null);
+        brevData.utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(landkode);
 
         brevData.arbeidsgivendeVirksomheter =
             ListUtils.union(dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivere(),
