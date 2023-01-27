@@ -1,9 +1,5 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -20,6 +16,10 @@ import no.nav.melosys.service.brev.BrevbestillingService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.tjenester.gui.dto.brev.*;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 import static java.util.Arrays.asList;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
@@ -230,10 +230,17 @@ public class BrevmalListeBygger {
             .build();
     }
 
+    @Deprecated(since = "Når dokumentTittel kan gå ut i prod for alle fritekstbrev kan denne slettes og man bruker heller lagBrevmalTypeDtoForGenereltFritekstbrev")
     private BrevmalTypeDto lagBrevmalTypeDtoForFritekstbrev(Produserbaredokumenter produserbartdokument) {
         return new BrevmalTypeDto.Builder()
             .medType(produserbartdokument)
             .medFelter(asList(
+                new BrevmalFeltDto.Builder()
+                    .medKodeOgBeskrivelse(BrevmalFeltKode.DISTRIBUSJONSTYPE)
+                    .medHjelpetekst("Type brev må angis slik at bruker får riktig varseltekst om brevet som sendes. Gjelder det et vedtak eller en forespørsel, vil bruker få en påminnelse hvis brevet ikke har blitt lest innen 7 dager.")
+                    .medValg(hentDistribusjonstyper())
+                    .erPåkrevd()
+                    .build(),
                 new BrevmalFeltDto.Builder()
                     .medKodeOgBeskrivelse(BrevmalFeltKode.BREV_TITTEL)
                     .medFeltType(FeltType.TEKST)
