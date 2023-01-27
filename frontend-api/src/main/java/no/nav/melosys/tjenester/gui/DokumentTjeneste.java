@@ -1,9 +1,5 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.eessi.SedType;
@@ -11,12 +7,12 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
-import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.SedPdfData;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import no.nav.melosys.tjenester.gui.dto.brev.BrevbestillingDto;
+import no.nav.melosys.tjenester.gui.dto.brev.BrevbestillingRequest;
 import no.nav.melosys.tjenester.gui.dto.dokumentarkiv.JournalpostInfoDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
@@ -25,6 +21,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Protected
 @RestController
@@ -74,16 +74,16 @@ public class DokumentTjeneste {
     @PostMapping(value = "pdf/brev/utkast/{behandlingID}/{produserbartDokument}", produces = {APPLICATION_PDF, APPLICATION_JSON_UTF8})
     public ResponseEntity<byte[]> produserUtkastBrev(@PathVariable("behandlingID") long behandlingID,
                                                      @PathVariable("produserbartDokument") Produserbaredokumenter produserbartDokument,
-                                                     @RequestBody BrevbestillingDto brevBestillingDto) {
+                                                     @RequestBody BrevbestillingRequest brevBestillingRequest) {
         byte[] dokument;
         aksesskontroll.autoriser(behandlingID);
 
-        BrevbestillingRequest brevbestillingRequest = brevBestillingDto.tilRequestBuilder()
+        BrevbestillingDto brevbestillingDto = brevBestillingRequest.tilBrevbestillingDtoBuilder()
             .medProduserbardokument(produserbartDokument)
             .medBestillersId(SubjectHandler.getInstance().getUserID())
             .build();
 
-        dokument = dokumentServiceFasade.produserUtkast(behandlingID, brevbestillingRequest);
+        dokument = dokumentServiceFasade.produserUtkast(behandlingID, brevbestillingDto);
         return lagResponseAvDokument(dokument, produserbartDokument.getKode() + "_utkast.pdf");
     }
 
@@ -104,19 +104,19 @@ public class DokumentTjeneste {
     @PostMapping("opprett/{behandlingID}/{produserbartDokument}")
     public ResponseEntity<Void> produserDokument(@PathVariable("behandlingID") long behandlingID,
                                                  @PathVariable("produserbartDokument") Produserbaredokumenter produserbartDokument,
-                                                 @RequestBody BrevbestillingDto brevBestillingDto) {
-        if (brevBestillingDto.getMottaker() == null) {
+                                                 @RequestBody BrevbestillingRequest brevBestillingRequest) {
+        if (brevBestillingRequest.getMottaker() == null) {
             throw new FunksjonellException("Mottaker trengs for å bestille.");
         }
         aksesskontroll.autoriser(behandlingID);
 
-        BrevbestillingRequest brevbestillingRequest = brevBestillingDto.tilRequestBuilder()
+        BrevbestillingDto brevbestillingDto = brevBestillingRequest.tilBrevbestillingDtoBuilder()
             .medProduserbardokument(produserbartDokument)
             .medBestillersId(SubjectHandler.getInstance().getUserID())
             .build();
         // Produserer utkast for å få eventuelle feil før bestilling i saksflyt.
-        dokumentServiceFasade.produserUtkast(behandlingID, brevbestillingRequest);
-        dokumentServiceFasade.produserDokument(behandlingID, brevbestillingRequest);
+        dokumentServiceFasade.produserUtkast(behandlingID, brevbestillingDto);
+        dokumentServiceFasade.produserDokument(behandlingID, brevbestillingDto);
         return ResponseEntity.noContent().build();
     }
 

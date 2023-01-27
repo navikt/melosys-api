@@ -34,7 +34,7 @@ import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
-import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -767,16 +767,16 @@ class BrevbestillingServiceTest {
 
     @Test
     void skalBestilleProduseringAvBrev() {
-        BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder().medProduserbardokument(MANGELBREV_BRUKER).build();
-        brevbestillingService.produserBrev(333L, brevbestillingRequest);
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().medProduserbardokument(MANGELBREV_BRUKER).build();
+        brevbestillingService.produserBrev(333L, brevbestillingDto);
 
-        verify(dokServiceFasade).produserDokument(anyLong(), any(BrevbestillingRequest.class));
+        verify(dokServiceFasade).produserDokument(anyLong(), any(BrevbestillingDto.class));
     }
 
     @Test
     void produserBrev_InnvilgelseFtrl_skalIkkeTillates() {
-        BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder().medProduserbardokument(INNVILGELSE_FOLKETRYGDLOVEN_2_8).build();
-        assertThatThrownBy(() -> brevbestillingService.produserBrev(333L, brevbestillingRequest))
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().medProduserbardokument(INNVILGELSE_FOLKETRYGDLOVEN_2_8).build();
+        assertThatThrownBy(() -> brevbestillingService.produserBrev(333L, brevbestillingDto))
             .isInstanceOf(FunksjonellException.class)
             .hasMessageContaining("Manuell bestilling av INNVILGELSE_FOLKETRYGDLOVEN_2_8 er ikke støttet.");
     }
@@ -786,12 +786,12 @@ class BrevbestillingServiceTest {
     void skalReturnereUtkast() {
         byte[] pdf = "UTKAST".getBytes(StandardCharsets.UTF_8);
         when(dokServiceFasade.produserUtkast(anyLong(), any())).thenReturn(pdf);
-        BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder().medProduserbardokument(MANGELBREV_BRUKER).build();
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().medProduserbardokument(MANGELBREV_BRUKER).build();
 
-        byte[] utkast = brevbestillingService.produserUtkast(333L, brevbestillingRequest);
+        byte[] utkast = brevbestillingService.produserUtkast(333L, brevbestillingDto);
 
         assertThat(utkast).isEqualTo(pdf);
-        verify(dokServiceFasade).produserUtkast(333L, brevbestillingRequest);
+        verify(dokServiceFasade).produserUtkast(333L, brevbestillingDto);
     }
 
     @Test

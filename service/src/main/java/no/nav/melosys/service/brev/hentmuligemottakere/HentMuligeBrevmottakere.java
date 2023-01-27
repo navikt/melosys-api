@@ -68,16 +68,16 @@ public class HentMuligeBrevmottakere {
     }
 
     private List<Brevmottaker> lagFasteMottakereMuligMottakerDtos(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<FastMottakerMedOrgnr> fasteMottakere) {
-        List<Brevmottaker> brevmottakers = new ArrayList<>();
+        List<Brevmottaker> brevmottakere = new ArrayList<>();
 
         for (FastMottakerMedOrgnr fastMottakerMedOrgnr : fasteMottakere) {
             Aktoer avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, FastMottakerMedOrgnr.av(fastMottakerMedOrgnr), behandling);
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartMottaker.getOrgnr());
 
             String fastTekst = "Kopi til " + orgDokument.getNavn();
-            brevmottakers.add(new Brevmottaker.Builder().medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, produserbaredokumenter, avklartMottaker, fastTekst)).medMottakerNavn(orgDokument.getNavn()).medRolle(avklartMottaker.getRolle()).medOrgnr(orgDokument.getOrgnummer()).build());
+            brevmottakere.add(new Brevmottaker.Builder().medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, produserbaredokumenter, avklartMottaker, fastTekst)).medMottakerNavn(orgDokument.getNavn()).medRolle(avklartMottaker.getRolle()).medOrgnr(orgDokument.getOrgnummer()).build());
         }
-        return brevmottakers;
+        return brevmottakere;
     }
 
     private Brevmottaker lagKopiMottakerForBruker(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker, Aktoersroller hovedmottaker) {
@@ -135,42 +135,42 @@ public class HentMuligeBrevmottakere {
 
 
     private List<Brevmottaker> lagKopiMottakereMuligMottakerDtos(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Collection<Aktoersroller> kopiMottakere, Aktoersroller hovedmottaker) {
-        List<Brevmottaker> brevmottakers = new ArrayList<>();
+        List<Brevmottaker> brevmottakere = new ArrayList<>();
         for (Aktoersroller kopiMottaker : kopiMottakere) {
             switch (kopiMottaker) {
                 case BRUKER ->
-                    brevmottakers.add(lagKopiMottakerForBruker(produserbaredokumenter, behandling, kopiMottaker, hovedmottaker));
+                    brevmottakere.add(lagKopiMottakerForBruker(produserbaredokumenter, behandling, kopiMottaker, hovedmottaker));
                 case ARBEIDSGIVER ->
-                    brevmottakers.addAll(lagKopiMottakereForArbeidsgiver(produserbaredokumenter, behandling, kopiMottaker));
+                    brevmottakere.addAll(lagKopiMottakereForArbeidsgiver(produserbaredokumenter, behandling, kopiMottaker));
                 case TRYGDEMYNDIGHET ->
-                    brevmottakers.addAll(lagKopiMottakereForMyndighet(produserbaredokumenter, behandling, kopiMottaker));
+                    brevmottakere.addAll(lagKopiMottakereForMyndighet(produserbaredokumenter, behandling, kopiMottaker));
                 default -> throw new IllegalStateException(kopiMottaker + " er ikke en gyldig kopiMottakerrolle");
             }
         }
-        return brevmottakers;
+        return brevmottakere;
     }
 
     private List<Brevmottaker> lagKopiMottakereForArbeidsgiver(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker) {
-        List<Brevmottaker> brevmottakers = new ArrayList<>();
+        List<Brevmottaker> brevmottakere = new ArrayList<>();
 
         List<Aktoer> avklarteKopier = brevmottakerService.avklarMottakere(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling, false, true);
         for (Aktoer avklartKopi : avklarteKopier) {
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartKopi.getOrgnr());
             String fastTekst = avklartKopi.getRolle() == ARBEIDSGIVER ? "Kopi til arbeidsgiver" : "Kopi til arbeidsgivers fullmektig";
-            brevmottakers.add(new Brevmottaker.Builder().medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, produserbaredokumenter, avklartKopi, fastTekst)).medMottakerNavn(orgDokument.getNavn()).medRolle(avklartKopi.getRolle()).medOrgnr(orgDokument.getOrgnummer()).build());
+            brevmottakere.add(new Brevmottaker.Builder().medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, produserbaredokumenter, avklartKopi, fastTekst)).medMottakerNavn(orgDokument.getNavn()).medRolle(avklartKopi.getRolle()).medOrgnr(orgDokument.getOrgnummer()).build());
         }
-        return brevmottakers;
+        return brevmottakere;
     }
 
     private List<Brevmottaker> lagKopiMottakereForMyndighet(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller kopiMottaker) {
-        List<Brevmottaker> brevmottakers = new ArrayList<>();
+        List<Brevmottaker> brevmottakere = new ArrayList<>();
 
         List<Aktoer> avklarteKopier = brevmottakerService.avklarMottakere(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling);
         for (Aktoer avklartKopi : avklarteKopier) {
             String fastTekst = "Kopi til utenlandsk trygdemyndighet";
-            brevmottakers.add(new Brevmottaker.Builder().medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, produserbaredokumenter, avklartKopi, fastTekst)).medMottakerNavn("Utenlandsk trygdemyndighet").medRolle(avklartKopi.getRolle()).medInstitusjonId(avklartKopi.getInstitusjonId()).build());
+            brevmottakere.add(new Brevmottaker.Builder().medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, produserbaredokumenter, avklartKopi, fastTekst)).medMottakerNavn("Utenlandsk trygdemyndighet").medRolle(avklartKopi.getRolle()).medInstitusjonId(avklartKopi.getInstitusjonId()).build());
         }
-        return brevmottakers;
+        return brevmottakere;
     }
 
 }

@@ -5,7 +5,7 @@ import no.nav.melosys.service.brev.hentmuligemottakere.HentMuligeBrevmottakereRe
 import no.nav.melosys.service.brev.hentmuligemottakere.HentMuligeBrevmottakereResponseDto;
 import no.nav.melosys.service.brev.produserbrev.ProduserBrev;
 import no.nav.melosys.service.brev.utkast.ProduserUtkast;
-import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -29,14 +29,14 @@ public class BrevbestillingFasade {
         return hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMuligeBrevmottakereRequestDto);
     }
 
-    public byte[] produserUtkast(long behandlingID, BrevbestillingRequest brevbestillingRequest) {
-        log.debug("produserUtkast med BrevbestillingRequest: {}", brevbestillingRequest);
-        return produserUtkast.produserUtkast(behandlingID, brevbestillingRequest);
+    public byte[] produserUtkast(long behandlingID, BrevbestillingDto brevbestillingDto) {
+        log.debug("produserUtkast med BrevbestillingRequest.produserbardokument: {}", brevbestillingDto.getProduserbardokument());
+        return produserUtkast.produserUtkast(behandlingID, brevbestillingDto);
     }
 
-    public void produserBrev(long behandlingID, BrevbestillingRequest brevbestillingRequest) {
-        log.debug("produserBrev med BrevbestillingRequest: {}", brevbestillingRequest);
-        produserBrev.produserBrev(behandlingID, brevbestillingRequest);
+    public void produserBrev(long behandlingID, BrevbestillingDto brevbestillingDto) {
+        log.debug("produserBrev med BrevbestillingRequest.produserbardokument: {}", brevbestillingDto.getProduserbardokument());
+        produserBrev.produserBrev(behandlingID, brevbestillingDto);
     }
 }
 

@@ -3,16 +3,16 @@ package no.nav.melosys.service.dokument.brev.bygger;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
-import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
@@ -20,7 +20,7 @@ import org.apache.commons.collections4.ListUtils;
 
 public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
     private final AvklartefaktaService avklartefaktaService;
-    private final BrevbestillingRequest brevbestillingRequest;
+    private final BrevbestillingDto brevbestillingDto;
     private final BrevDataByggerA1 brevbyggerA1;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final LandvelgerService landvelgerService;
@@ -30,11 +30,11 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
                                               LandvelgerService landvelgerService,
                                               LovvalgsperiodeService lovvalgsperiodeService,
                                               SaksopplysningerService saksopplysningerService,
-                                              BrevbestillingRequest brevbestillingRequest,
+                                              BrevbestillingDto brevbestillingDto,
                                               BrevDataByggerA1 brevbyggerA1) {
 
         this.avklartefaktaService = avklartefaktaService;
-        this.brevbestillingRequest = brevbestillingRequest;
+        this.brevbestillingDto = brevbestillingDto;
         this.brevbyggerA1 = brevbyggerA1;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.landvelgerService = landvelgerService;
@@ -77,7 +77,7 @@ public class BrevDataByggerInnvilgelseFlereLand implements BrevDataBygger {
     }
 
     private BrevDataInnvilgelseFlereLand lagInnvilgelseBrevdataMedA1(BrevDataGrunnlag dataGrunnlag, String saksbehandler) {
-        BrevDataInnvilgelseFlereLand brevdata = new BrevDataInnvilgelseFlereLand(brevbestillingRequest, saksbehandler);
+        BrevDataInnvilgelseFlereLand brevdata = new BrevDataInnvilgelseFlereLand(brevbestillingDto, saksbehandler);
         brevdata.vedleggA1 = (BrevDataA1) brevbyggerA1.lag(dataGrunnlag, saksbehandler);
         return brevdata;
     }

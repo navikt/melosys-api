@@ -14,7 +14,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
-import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
@@ -64,15 +64,15 @@ public class FtrlVedtakService {
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
-    private BrevbestillingRequest lagBrevbestilling(FattVedtakRequest request) {
+    private BrevbestillingDto lagBrevbestilling(FattVedtakRequest request) {
         if (request.getBehandlingsresultatTypeKode() == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
             return lagAvslagMangledeOpplysningerBrevbestilling(request);
         }
         return lagInnvilgelseFolketrygdloven(request);
     }
 
-    private BrevbestillingRequest lagAvslagMangledeOpplysningerBrevbestilling(FattVedtakRequest request) {
-        return new BrevbestillingRequest.Builder()
+    private BrevbestillingDto lagAvslagMangledeOpplysningerBrevbestilling(FattVedtakRequest request) {
+        return new BrevbestillingDto.Builder()
             .medProduserbardokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER)
             .medMottaker(Aktoersroller.BRUKER)
             .medBestillersId(request.getBestillersId())
@@ -80,8 +80,8 @@ public class FtrlVedtakService {
             .build();
     }
 
-    private BrevbestillingRequest lagInnvilgelseFolketrygdloven(FattVedtakRequest request) {
-        return new BrevbestillingRequest.Builder()
+    private BrevbestillingDto lagInnvilgelseFolketrygdloven(FattVedtakRequest request) {
+        return new BrevbestillingDto.Builder()
             .medProduserbardokument(Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN_2_8)
             .medMottaker(Aktoersroller.BRUKER)
             .medKopiMottakere(request.getKopiMottakere())

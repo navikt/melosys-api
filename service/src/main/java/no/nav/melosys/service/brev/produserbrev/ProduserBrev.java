@@ -5,7 +5,7 @@ import java.util.List;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
-import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,9 +33,9 @@ public class ProduserBrev {
     }
 
     @Transactional
-    public void produserBrev(long behandlingId, BrevbestillingRequest brevbestillingRequest) {
-        validerAtBrevKanProduseres(brevbestillingRequest.getProduserbardokument());
-        dokumentServiceFasade.produserDokument(behandlingId, brevbestillingRequest);
+    public void produserBrev(long behandlingId, BrevbestillingDto brevbestillingDto) {
+        validerAtBrevKanProduseres(brevbestillingDto.getProduserbardokument());
+        dokumentServiceFasade.produserDokument(behandlingId, brevbestillingDto);
     }
 
     private void validerAtBrevKanProduseres(Produserbaredokumenter produserbardokument) {

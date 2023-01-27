@@ -2,7 +2,7 @@ package no.nav.melosys.service.brev.utkast;
 
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentService;
-import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,10 +16,10 @@ public class ProduserUtkast {
         this.dokumentService = dokumentService;
     }
 
-    public byte[] produserUtkast(long behandlingID, BrevbestillingRequest brevbestillingRequest) {
-        if (dokgenService.erTilgjengeligDokgenmal(brevbestillingRequest.getProduserbardokument())) {
-            return dokgenService.produserUtkast(behandlingID, brevbestillingRequest);
+    public byte[] produserUtkast(long behandlingID, BrevbestillingDto brevbestillingDto) {
+        if (dokgenService.erTilgjengeligDokgenmal(brevbestillingDto.getProduserbardokument())) {
+            return dokgenService.produserUtkast(behandlingID, brevbestillingDto);
         }
-        return dokumentService.produserUtkast(behandlingID, brevbestillingRequest);
+        return dokumentService.produserUtkast(behandlingID, brevbestillingDto);
     }
 }
