@@ -26,7 +26,7 @@ class ProduserUtkastTest {
     private ProduserUtkast produserUtkast;
 
     @Test
-    void produserUtkast_medTilgjengeligDokgenmal_forventerViBrukerVårDokgen() {
+    void produserUtkast_medTilgjengeligDokgenmal_forventerViBrukerDokgenService() {
         when(dokgenService.erTilgjengeligDokgenmal(Produserbaredokumenter.FRITEKSTBREV))
             .thenReturn(true);
         BrevbestillingRequest brevbestillingRequest = new BrevbestillingRequest.Builder()
