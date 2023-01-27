@@ -7,7 +7,7 @@ import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
-public class BrevbestillingRequest {
+public class BrevbestillingDto {
     private Produserbaredokumenter produserbardokument;
     private Aktoersroller mottaker;
     private String orgnr;
@@ -42,10 +42,10 @@ public class BrevbestillingRequest {
     @Deprecated
     private String ytterligereInformasjon;
 
-    public BrevbestillingRequest() {
+    public BrevbestillingDto() {
     }
 
-    public BrevbestillingRequest(Builder builder) {
+    public BrevbestillingDto(Builder builder) {
         this.produserbardokument = builder.produserbardokument;
         this.mottaker = builder.mottaker;
         this.orgnr = builder.orgNr;
@@ -306,8 +306,8 @@ public class BrevbestillingRequest {
             return this;
         }
 
-        public BrevbestillingRequest build() {
-            return new BrevbestillingRequest(this);
+        public BrevbestillingDto build() {
+            return new BrevbestillingDto(this);
         }
     }
 }

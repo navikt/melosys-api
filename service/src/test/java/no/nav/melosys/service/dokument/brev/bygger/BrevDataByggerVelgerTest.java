@@ -7,9 +7,9 @@ import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
-import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
@@ -95,20 +95,20 @@ public class BrevDataByggerVelgerTest {
 
     @Test
     public void testMangelbrev() {
-        BrevbestillingRequest bestilling = new BrevbestillingRequest();
+        BrevbestillingDto bestilling = new BrevbestillingDto();
         BrevDataBygger bygger = brevDataByggerVelger.hent(Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER, bestilling);
         assertThat(bygger).isInstanceOf(BrevDataByggerMedMottattDato.class);
     }
 
     @Test
     public void testForvaltningsmelding() {
-        BrevbestillingRequest bestilling = new BrevbestillingRequest();
+        BrevbestillingDto bestilling = new BrevbestillingDto();
         BrevDataBygger bygger = brevDataByggerVelger.hent(Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID, bestilling);
         assertThat(bygger).isInstanceOf(BrevDataByggerMedMottattDato.class);
     }
 
     private void testHent(Produserbaredokumenter type, Class<? extends BrevDataBygger> forventetKlasse) {
-        BrevDataBygger resultat = brevDataByggerVelger.hent(type, new BrevbestillingRequest());
+        BrevDataBygger resultat = brevDataByggerVelger.hent(type, new BrevbestillingDto());
         assertThat(resultat).isInstanceOf(forventetKlasse);
     }
 }

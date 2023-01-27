@@ -10,7 +10,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataUtpekingAnnetLand;
-import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,7 +38,7 @@ class BrevDataByggerUtpekingAnnetLandTest {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         when(brevDataGrunnlag.getBehandling()).thenReturn(behandling);
-        brevDataByggerUtpekingAnnetLand = new BrevDataByggerUtpekingAnnetLand(utpekingService, new BrevbestillingRequest());
+        brevDataByggerUtpekingAnnetLand = new BrevDataByggerUtpekingAnnetLand(utpekingService, new BrevbestillingDto());
     }
 
     @Test
@@ -48,7 +48,7 @@ class BrevDataByggerUtpekingAnnetLandTest {
         when(utpekingService.hentUtpekingsperioder(eq(1L))).thenReturn(List.of(utpekingsperiode));
         final BrevData brevData = brevDataByggerUtpekingAnnetLand.lag(brevDataGrunnlag, "sb");
         assertThat(brevData).isInstanceOf(BrevDataUtpekingAnnetLand.class);
-        assertThat(((BrevDataUtpekingAnnetLand)brevData).utpekingsperiode).isEqualTo(utpekingsperiode);
+        assertThat(((BrevDataUtpekingAnnetLand) brevData).utpekingsperiode).isEqualTo(utpekingsperiode);
     }
 
     @Test

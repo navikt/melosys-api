@@ -7,8 +7,8 @@ import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.dokument.brev.bygger.*;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
@@ -57,66 +57,65 @@ public class BrevDataByggerVelger {
         this.mottatteOpplysningerService = mottatteOpplysningerService;
     }
 
-    public BrevDataBygger hent(Produserbaredokumenter produserbartDokument, BrevbestillingRequest brevbestillingRequest) {
+    public BrevDataBygger hent(Produserbaredokumenter produserbartDokument, BrevbestillingDto brevbestillingDto) {
         return switch (produserbartDokument) {
-            case ATTEST_A1 -> lagBrevDataByggerA1(brevbestillingRequest);
+            case ATTEST_A1 -> lagBrevDataByggerA1(brevbestillingDto);
             case AVSLAG_ARBEIDSGIVER -> new BrevDataByggerAvslagArbeidsgiver(landvelgerService, lovvalgsperiodeService,
                 vilkaarsresultatRepository);
             case AVSLAG_YRKESAKTIV ->
-                new BrevDataByggerAvslagYrkesaktiv(landvelgerService, anmodningsperiodeService, brevbestillingRequest,
+                new BrevDataByggerAvslagYrkesaktiv(landvelgerService, anmodningsperiodeService, brevbestillingDto,
                     vilkaarsresultatService);
             case ORIENTERING_ANMODNING_UNNTAK ->
                 new BrevDataByggerAnmodningUnntak(landvelgerService, vilkaarsresultatService);
-            case ANMODNING_UNNTAK -> lagBrevDataByggerA001(brevbestillingRequest);
-            case INNVILGELSE_YRKESAKTIV -> lagBrevDataByggerInnvilgelse(brevbestillingRequest);
-            case INNVILGELSE_YRKESAKTIV_FLERE_LAND -> lagBrevDataByggerInnvilgelseFlereLand(brevbestillingRequest);
+            case ANMODNING_UNNTAK -> lagBrevDataByggerA001(brevbestillingDto);
+            case INNVILGELSE_YRKESAKTIV -> lagBrevDataByggerInnvilgelse(brevbestillingDto);
+            case INNVILGELSE_YRKESAKTIV_FLERE_LAND -> lagBrevDataByggerInnvilgelseFlereLand(brevbestillingDto);
             case INNVILGELSE_ARBEIDSGIVER ->
                 new BrevDataByggerInnvilgelse(avklartefaktaService, landvelgerService, lovvalgsperiodeService,
-                    anmodningsperiodeService, brevbestillingRequest,
+                    anmodningsperiodeService, brevbestillingDto,
                     vilkaarsresultatService, persondataFasade,
                     mottatteOpplysningerService);
-            case ORIENTERING_UTPEKING_UTLAND ->
-                new BrevDataByggerUtpekingAnnetLand(utpekingService, brevbestillingRequest);
+            case ORIENTERING_UTPEKING_UTLAND -> new BrevDataByggerUtpekingAnnetLand(utpekingService, brevbestillingDto);
             case ORIENTERING_VIDERESENDT_SOEKNAD ->
                 new BrevDataByggerVideresend(landvelgerService, utenlandskMyndighetService,
-                    brevbestillingRequest);
+                    brevbestillingDto);
             case MELDING_MANGLENDE_OPPLYSNINGER, MELDING_FORVENTET_SAKSBEHANDLINGSTID ->
                 new BrevDataByggerMedMottattDato(
-                    brevbestillingRequest, joarkService);
-            default -> new BrevDataByggerStandard(brevbestillingRequest);
+                    brevbestillingDto, joarkService);
+            default -> new BrevDataByggerStandard(brevbestillingDto);
         };
     }
 
-    private BrevDataBygger lagBrevDataByggerA1(BrevbestillingRequest brevbestillingRequest) {
+    private BrevDataBygger lagBrevDataByggerA1(BrevbestillingDto brevbestillingDto) {
         BrevDataByggerA1 a1Bygger =
             new BrevDataByggerA1(avklartefaktaService, landvelgerService);
-        return new BrevDataByggerVedlegg(a1Bygger, brevbestillingRequest);
+        return new BrevDataByggerVedlegg(a1Bygger, brevbestillingDto);
     }
 
-    private BrevDataBygger lagBrevDataByggerA001(BrevbestillingRequest brevbestillingRequest) {
+    private BrevDataBygger lagBrevDataByggerA001(BrevbestillingDto brevbestillingDto) {
         BrevDataByggerA001 a001Bygger =
             new BrevDataByggerA001(lovvalgsperiodeService,
                 anmodningsperiodeService,
                 utenlandskMyndighetService,
                 vilkaarsresultatService);
-        return new BrevDataByggerVedlegg(a001Bygger, brevbestillingRequest);
+        return new BrevDataByggerVedlegg(a001Bygger, brevbestillingDto);
     }
 
-    private BrevDataBygger lagBrevDataByggerInnvilgelse(BrevbestillingRequest brevbestillingRequest) {
+    private BrevDataBygger lagBrevDataByggerInnvilgelse(BrevbestillingDto brevbestillingDto) {
         BrevDataByggerA1 brevbyggerA1 =
             new BrevDataByggerA1(avklartefaktaService, landvelgerService);
         return new BrevDataByggerInnvilgelse(avklartefaktaService,
             landvelgerService,
             lovvalgsperiodeService,
             anmodningsperiodeService,
-            brevbestillingRequest,
+            brevbestillingDto,
             brevbyggerA1,
             vilkaarsresultatService,
             persondataFasade,
             mottatteOpplysningerService);
     }
 
-    private BrevDataBygger lagBrevDataByggerInnvilgelseFlereLand(BrevbestillingRequest brevbestillingRequest) {
+    private BrevDataBygger lagBrevDataByggerInnvilgelseFlereLand(BrevbestillingDto brevbestillingDto) {
         BrevDataByggerA1 brevbyggerA1 =
             new BrevDataByggerA1(avklartefaktaService, landvelgerService);
 
@@ -124,7 +123,7 @@ public class BrevDataByggerVelger {
             landvelgerService,
             lovvalgsperiodeService,
             saksopplysningerService,
-            brevbestillingRequest,
+            brevbestillingDto,
             brevbyggerA1);
     }
 }

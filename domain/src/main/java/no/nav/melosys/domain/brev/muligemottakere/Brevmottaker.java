@@ -1,8 +1,8 @@
-package no.nav.melosys.service.brev.muligemottakere;
+package no.nav.melosys.domain.brev.muligemottakere;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 
-public class MuligMottakerDto {
+public class Brevmottaker {
     private final String mottakerNavn;
     private final String dokumentNavn;
     private final Aktoersroller rolle;
@@ -10,7 +10,7 @@ public class MuligMottakerDto {
     private final String aktørId;
     private final String institusjonId;
 
-    private MuligMottakerDto(Builder builder) {
+    private Brevmottaker(Builder builder) {
         this.mottakerNavn = builder.mottakerNavn;
         this.dokumentNavn = builder.dokumentNavn;
         this.rolle = builder.rolle;
@@ -81,8 +81,8 @@ public class MuligMottakerDto {
             return this;
         }
 
-        public MuligMottakerDto build() {
-            return new MuligMottakerDto(this);
+        public Brevmottaker build() {
+            return new Brevmottaker(this);
         }
     }
 }

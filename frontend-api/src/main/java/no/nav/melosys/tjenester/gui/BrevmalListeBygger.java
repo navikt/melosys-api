@@ -37,13 +37,13 @@ public class BrevmalListeBygger {
         this.unleash = unleash;
     }
 
-    public List<BrevmalDto> byggBrevmalDtoListe(long behandlingId) {
+    public List<BrevmalResponse> byggBrevmalDtoListe(long behandlingId) {
         List<MottakerDto> mottakere = hentTilgjengeligeMottakere(behandlingId);
 
         return mottakere.stream().map(mottaker -> mottakerTilBrevmalDto(behandlingId, mottaker)).toList();
     }
 
-    private BrevmalDto mottakerTilBrevmalDto(long behandlingId, MottakerDto mottaker) {
+    private BrevmalResponse mottakerTilBrevmalDto(long behandlingId, MottakerDto mottaker) {
         List<Produserbaredokumenter> produserbareDokumenter = brevbestillingService.hentMuligeProduserbaredokumenter(behandlingId, mottaker.getRolle());
 
         List<BrevmalTypeDto> typer = produserbareDokumenter.stream().map(dokument -> switch (dokument) {
@@ -57,7 +57,7 @@ public class BrevmalListeBygger {
             .filter(Objects::nonNull)
             .toList();
 
-        return new BrevmalDto(mottaker, typer);
+        return new BrevmalResponse(mottaker, typer);
     }
 
     private List<MottakerDto> hentTilgjengeligeMottakere(long behandlingId) {
