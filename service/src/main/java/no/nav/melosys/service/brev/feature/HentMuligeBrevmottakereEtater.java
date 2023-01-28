@@ -4,7 +4,6 @@ import java.util.List;
 
 import no.nav.melosys.domain.brev.muligemottakere.Brevmottaker;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -38,12 +37,8 @@ public class HentMuligeBrevmottakereEtater {
     }
 
     private String hentMottakerNavn(String orgnr) {
-        var saksopplysning = eregFasade.finnOrganisasjon(orgnr);
-        if (saksopplysning.isPresent()) {
-            var orgDokument = (OrganisasjonDokument) saksopplysning.get().getDokument();
-            return orgDokument.getNavn();
-        } else {
-            throw new IkkeFunnetException("Kan ikke hente mottakernavn til etat, fant ikke orgnr %s fra ereg".formatted(orgnr));
-        }
+        var saksopplysning = eregFasade.hentOrganisasjon(orgnr);
+        var orgDokument = (OrganisasjonDokument) saksopplysning.getDokument();
+        return orgDokument.getNavn();
     }
 }

@@ -119,7 +119,7 @@ public class BrevbestillingService {
                     return orgDokument.getNavn();
                 }
             }
-            case ARBEIDSGIVER, VIRKSOMHET, ETAT -> {
+            case ARBEIDSGIVER, VIRKSOMHET -> {
                 var saksopplysning = eregFasade.finnOrganisasjon(orgnr);
                 if (saksopplysning.isPresent()) {
                     var orgDokument = (OrganisasjonDokument) saksopplysning.get().getDokument();
