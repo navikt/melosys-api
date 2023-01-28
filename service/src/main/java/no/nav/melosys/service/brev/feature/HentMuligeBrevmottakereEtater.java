@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.ETAT;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.FRITEKSTBREV;
 
 @Component
 public class HentMuligeBrevmottakereEtater {
@@ -30,7 +31,7 @@ public class HentMuligeBrevmottakereEtater {
     private Brevmottaker mapTilBrevmottaker(String orgnr) {
         return new Brevmottaker.Builder()
             .medRolle(ETAT)
-            .medDokumentNavn(ETAT.getBeskrivelse())
+            .medDokumentNavn(FRITEKSTBREV.getBeskrivelse())
             .medOrgnr(orgnr)
             .medMottakerNavn(hentMottakerNavn(orgnr))
             .build();
