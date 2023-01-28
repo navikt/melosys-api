@@ -14,5 +14,5 @@ public interface EregFasade {
 
     Optional<Saksopplysning> finnOrganisasjon(String orgnr);
 
-    String hentOrganisasjonNavn(String orgnummer);
+    String hentOrganisasjonNavn(String orgnummer) throws IkkeFunnetException;
 }
