@@ -15,7 +15,6 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.brev.BrevbestillingService;
 import no.nav.melosys.service.brev.BrevmalListeService;
 import no.nav.melosys.service.brev.brevmalliste.BrevAdresse;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
@@ -27,14 +26,11 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 
 @Component
 public class BrevmalListeBygger {
-
-    private final BrevbestillingService brevbestillingService;
     private final BrevmalListeService brevmalListeService;
     private final BehandlingService behandlingService;
     private final Unleash unleash;
 
-    public BrevmalListeBygger(BrevbestillingService brevbestillingService, BrevmalListeService brevmalListeService, BehandlingService behandlingService, Unleash unleash) {
-        this.brevbestillingService = brevbestillingService;
+    public BrevmalListeBygger(BrevmalListeService brevmalListeService, BehandlingService behandlingService, Unleash unleash) {
         this.brevmalListeService = brevmalListeService;
         this.behandlingService = behandlingService;
         this.unleash = unleash;

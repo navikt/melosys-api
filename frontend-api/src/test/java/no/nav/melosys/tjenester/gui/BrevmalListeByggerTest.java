@@ -23,7 +23,6 @@ import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.brev.BrevbestillingService;
 import no.nav.melosys.service.brev.BrevmalListeService;
 import no.nav.melosys.service.brev.DokumentNavnService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
@@ -49,10 +48,9 @@ class BrevmalListeByggerTest {
     private BehandlingService behandlingService;
     @Mock
     private DokumentServiceFasade dokServiceFasade;
+
     @Mock
     private BrevmottakerService brevmottakerService;
-    @Mock
-    private BrevmalListeService brevmalListeService;
     @Mock
     private PersondataFasade persondataFasade;
     @Mock
@@ -62,6 +60,7 @@ class BrevmalListeByggerTest {
     @Mock
     private DokumentNavnService dokumentNavnService;
     private UtenlandskMyndighetService utenlandskMyndighetService;
+    private BrevmalListeService brevmalListeService;
 
     private final FakeUnleash unleash = new FakeUnleash();
 
@@ -70,11 +69,15 @@ class BrevmalListeByggerTest {
 
     @BeforeEach
     void init() {
-        BrevbestillingService brevbestillingService = new BrevbestillingService(brevmottakerService,
-            dokServiceFasade, behandlingService, eregFasade, kontaktopplysningService,
-            persondataFasade, dokumentNavnService, utenlandskMyndighetService);
+        brevmalListeService = new BrevmalListeService(brevmottakerService,
+            behandlingService,
+            persondataFasade,
+            kontaktopplysningService,
+            utenlandskMyndighetService,
+            eregFasade);
+
         unleash.enable("melosys.trygdeavtale.fritekstbrev");
-        brevmalListeBygger = new BrevmalListeBygger(brevbestillingService, brevmalListeService, behandlingService, unleash);
+        brevmalListeBygger = new BrevmalListeBygger(brevmalListeService, behandlingService, unleash);
     }
 
     @Test

@@ -43,7 +43,12 @@ public class BrevmalListeService {
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final EregFasade eregFasade;
 
-    public BrevmalListeService(BrevmottakerService brevmottakerService, BehandlingService behandlingService, PersondataFasade persondataFasade, KontaktopplysningService kontaktopplysningService, UtenlandskMyndighetService utenlandskMyndighetService, EregFasade eregFasade) {
+    public BrevmalListeService(BrevmottakerService brevmottakerService,
+                               BehandlingService behandlingService,
+                               PersondataFasade persondataFasade,
+                               KontaktopplysningService kontaktopplysningService,
+                               UtenlandskMyndighetService utenlandskMyndighetService,
+                               EregFasade eregFasade) {
         this.brevmottakerService = brevmottakerService;
         this.behandlingService = behandlingService;
         this.persondataFasade = persondataFasade;
