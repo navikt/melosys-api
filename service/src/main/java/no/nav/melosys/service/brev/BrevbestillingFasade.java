@@ -4,13 +4,9 @@ import java.util.List;
 
 import no.nav.melosys.domain.brev.Etat;
 import no.nav.melosys.domain.brev.muligemottakere.Brevmottaker;
-import no.nav.melosys.service.brev.feature.HentMuligeBrevmottakereEtater;
-import no.nav.melosys.service.brev.feature.HentTilgjengeligeEtater;
-import no.nav.melosys.service.brev.hentmuligemottakere.HentMuligeBrevmottakere;
-import no.nav.melosys.service.brev.hentmuligemottakere.HentMuligeBrevmottakereRequestDto;
-import no.nav.melosys.service.brev.hentmuligemottakere.HentMuligeBrevmottakereResponseDto;
-import no.nav.melosys.service.brev.produserbrev.ProduserBrev;
-import no.nav.melosys.service.brev.utkast.ProduserUtkast;
+import no.nav.melosys.service.brev.feature.*;
+import no.nav.melosys.service.brev.feature.hentmuligebrevmottakere.HentMuligeBrevmottakereRequestDto;
+import no.nav.melosys.service.brev.feature.hentmuligebrevmottakere.HentMuligeBrevmottakereResponseDto;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

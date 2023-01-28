@@ -1,4 +1,4 @@
-package no.nav.melosys.service.brev.etater;
+package no.nav.melosys.service.brev.feature;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -13,7 +13,6 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.service.brev.feature.HentMuligeBrevmottakereEtater;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

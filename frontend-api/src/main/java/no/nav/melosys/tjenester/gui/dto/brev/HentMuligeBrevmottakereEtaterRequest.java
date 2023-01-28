@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.brev.dto;
+package no.nav.melosys.tjenester.gui.dto.brev;
 
 import java.util.List;
 

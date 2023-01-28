@@ -1,4 +1,4 @@
-package no.nav.melosys.service.brev.hentmuligemottakere;
+package no.nav.melosys.service.brev.feature.hentmuligebrevmottakere;
 
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 

@@ -1,4 +1,4 @@
-package no.nav.melosys.service.brev.muligemottakere;
+package no.nav.melosys.service.brev.feature;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -22,9 +22,8 @@ import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.DokumentNavnService;
-import no.nav.melosys.service.brev.hentmuligemottakere.HentMuligeBrevmottakere;
-import no.nav.melosys.service.brev.hentmuligemottakere.HentMuligeBrevmottakereRequestDto;
-import no.nav.melosys.service.brev.hentmuligemottakere.HentMuligeBrevmottakereResponseDto;
+import no.nav.melosys.service.brev.feature.hentmuligebrevmottakere.HentMuligeBrevmottakereRequestDto;
+import no.nav.melosys.service.brev.feature.hentmuligebrevmottakere.HentMuligeBrevmottakereResponseDto;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,9 +35,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static java.util.Collections.emptyList;
 import static no.nav.melosys.domain.brev.FastMottakerMedOrgnr.SKATTEETATEN;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.GENERELT_FRITEKSTBREV_VIRKSOMHET;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_BRUKER;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
@@ -397,6 +396,72 @@ class HentMuligeBrevmottakereTest {
                 Brevmottaker::getAktørId,
                 Brevmottaker::getOrgnr)
             .containsExactly("Kopi til Skatteetaten", "Skatteetaten", TRYGDEMYNDIGHET, null, "974761076");
+    }
+
+    @Test
+    void hentMuligeMottakere_hovedMottakerBruker_storbritanniaArtikkelUlik82() {
+        when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
+        when(brevmottakerService.hentMottakerliste(TRYGDEAVTALE_GB, 123L))
+            .thenReturn(new Mottakerliste.Builder()
+                .medHovedMottaker(BRUKER)
+                .medKopiMottaker(ARBEIDSGIVER)
+                .medKopiMottaker(TRYGDEMYNDIGHET)
+                .medFastMottaker(SKATTEETATEN)
+                .build());
+        when(brevmottakerService.avklarMottaker(eq(TRYGDEAVTALE_GB), any(), eq(behandling)))
+            .thenReturn(lagAktoerOrg(BRUKER, null));
+        Aktoer arbeidsgiver = lagAktoerOrg(ARBEIDSGIVER, "123");
+        when(brevmottakerService.avklarMottakere(TRYGDEAVTALE_GB, Mottaker.av(ARBEIDSGIVER), behandling, false, true))
+            .thenReturn(List.of(arbeidsgiver));
+        Aktoer trygdemyndighet = lagAktoerOrg(TRYGDEMYNDIGHET, "456");
+        when(brevmottakerService.avklarMottakere(TRYGDEAVTALE_GB, Mottaker.av(TRYGDEMYNDIGHET), behandling))
+            .thenReturn(List.of(trygdemyndighet));
+        Aktoer skatteetaten = lagAktoerOrg(TRYGDEMYNDIGHET, "974761076");
+        when(brevmottakerService.avklarMottaker(TRYGDEAVTALE_GB, FastMottakerMedOrgnr.av(SKATTEETATEN), behandling))
+            .thenReturn(skatteetaten);
+        when(persondataFasade.hentSammensattNavn(anyString())).thenReturn("Ola Nordmann");
+        mockHentOrganisasjon("123", "Ståle Stål");
+        mockHentOrganisasjon("974761076", "Skatt");
+        when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, TRYGDEAVTALE_GB, BRUKER)).thenReturn("Vedtak om medlemskap, Attest for utsendt arbeidstaker");
+        when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, TRYGDEAVTALE_GB, arbeidsgiver, "Kopi til arbeidsgiver")).thenReturn("Kopi av vedtak om medlemskap, Attest for utsendt arbeidstaker");
+        when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, TRYGDEAVTALE_GB, trygdemyndighet, "Kopi til utenlandsk trygdemyndighet")).thenReturn("Attest for utsendt arbeidstaker", "Utenlandsk trygdemyndighet");
+        when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, TRYGDEAVTALE_GB, skatteetaten, "Kopi til Skatt")).thenReturn("Kopi av vedtak om medlemskap");
+
+        var request = new HentMuligeBrevmottakereRequestDto(TRYGDEAVTALE_GB, 123L, null);
+
+
+        var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(request);
+
+
+        assertThat(muligeMottakere.hovedMottaker())
+            .extracting(
+                Brevmottaker::getDokumentNavn,
+                Brevmottaker::getMottakerNavn,
+                Brevmottaker::getRolle,
+                Brevmottaker::getAktørId,
+                Brevmottaker::getOrgnr)
+            .containsExactly("Vedtak om medlemskap, Attest for utsendt arbeidstaker", "Ola Nordmann", BRUKER, null, null);
+
+        assertThat(muligeMottakere.kopiMottakere())
+            .hasSize(2)
+            .extracting(
+                Brevmottaker::getDokumentNavn,
+                Brevmottaker::getMottakerNavn
+            )
+            .containsExactlyInAnyOrder(
+                tuple("Kopi av vedtak om medlemskap, Attest for utsendt arbeidstaker", "Ståle Stål"),
+                tuple("Attest for utsendt arbeidstaker", "Utenlandsk trygdemyndighet")
+            );
+
+        assertThat(muligeMottakere.fasteMottakere())
+            .hasSize(1)
+            .extracting(
+                Brevmottaker::getDokumentNavn,
+                Brevmottaker::getMottakerNavn
+            )
+            .containsExactly(
+                tuple("Kopi av vedtak om medlemskap", "Skatt")
+            );
     }
 
 

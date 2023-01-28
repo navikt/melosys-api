@@ -1,4 +1,4 @@
-package no.nav.melosys.service.brev.utkast;
+package no.nav.melosys.service.brev.feature;
 
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentService;

@@ -1,4 +1,4 @@
-package no.nav.melosys.service.brev.produserbrev;
+package no.nav.melosys.service.brev.feature;
 
 import java.util.List;
 

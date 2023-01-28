@@ -1,4 +1,4 @@
-package no.nav.melosys.service.brev.hentmuligemottakere;
+package no.nav.melosys.service.brev.feature;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,6 +20,8 @@ import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.DokumentNavnService;
+import no.nav.melosys.service.brev.feature.hentmuligebrevmottakere.HentMuligeBrevmottakereRequestDto;
+import no.nav.melosys.service.brev.feature.hentmuligebrevmottakere.HentMuligeBrevmottakereResponseDto;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Component;
