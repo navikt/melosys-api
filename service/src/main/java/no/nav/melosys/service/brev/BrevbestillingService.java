@@ -9,12 +9,13 @@ import java.util.stream.Stream;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
-import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.brev.*;
+import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
+import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.brev.Mottakerliste;
+import no.nav.melosys.domain.brev.Postadresse;
 import no.nav.melosys.domain.brev.muligemottakere.Brevmottaker;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -35,7 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper.*;
 
@@ -82,21 +84,6 @@ public class BrevbestillingService {
         this.persondataFasade = persondataFasade;
         this.dokumentNavnService = dokumentNavnService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
-    }
-
-    @Transactional
-    public List<Brevmottaker> hentMuligeMottakereEtater(Produserbaredokumenter produserbaredokumenter,
-                                                        long behandlingId,
-                                                        List<String> orgnrEtater) {
-        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
-        return orgnrEtater.stream()
-            .map(orgnr -> new Brevmottaker.Builder()
-                .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, produserbaredokumenter, ETAT))
-                .medMottakerNavn(hentMottakerNavn(produserbaredokumenter, behandling, ETAT, orgnr))
-                .medRolle(ETAT)
-                .medOrgnr(orgnr)
-                .build())
-            .toList();
     }
 
     @Deprecated(since = "Ta vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
@@ -364,9 +351,5 @@ public class BrevbestillingService {
     @Deprecated(since = "Tas vekk sammen med melosys.MEL-4835.refactor1 toggle")
     public byte[] produserUtkast(long behandlingID, BrevbestillingDto brevbestillingDto) {
         return dokumentServiceFasade.produserUtkast(behandlingID, brevbestillingDto);
-    }
-
-    public List<Etat> hentTilgjengeligeEtater() {
-        return List.of(Etat.SKATTEETATEN_ORGNR, Etat.SKATTINNKREVER_UTLAND_ORGNR, Etat.HELFO_ORGNR);
     }
 }

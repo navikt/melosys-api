@@ -1,5 +1,11 @@
 package no.nav.melosys.service.brev;
 
+import java.util.List;
+
+import no.nav.melosys.domain.brev.Etat;
+import no.nav.melosys.domain.brev.muligemottakere.Brevmottaker;
+import no.nav.melosys.service.brev.feature.HentMuligeBrevmottakereEtater;
+import no.nav.melosys.service.brev.feature.HentTilgjengeligeEtater;
 import no.nav.melosys.service.brev.hentmuligemottakere.HentMuligeBrevmottakere;
 import no.nav.melosys.service.brev.hentmuligemottakere.HentMuligeBrevmottakereRequestDto;
 import no.nav.melosys.service.brev.hentmuligemottakere.HentMuligeBrevmottakereResponseDto;
@@ -15,13 +21,21 @@ public class BrevbestillingFasade {
     private static final Logger log = LoggerFactory.getLogger(BrevbestillingFasade.class);
 
     private final HentMuligeBrevmottakere hentMuligeBrevmottakere;
+    private final HentMuligeBrevmottakereEtater hentMuligeMottakereEtater;
     private final ProduserUtkast produserUtkast;
     private final ProduserBrev produserBrev;
+    private final HentTilgjengeligeEtater hentTilgjengeligeEtater;
 
-    public BrevbestillingFasade(HentMuligeBrevmottakere hentMuligeBrevmottakere, ProduserUtkast produserUtkast, ProduserBrev produserBrev) {
+    public BrevbestillingFasade(HentMuligeBrevmottakere hentMuligeBrevmottakere,
+                                HentMuligeBrevmottakereEtater hentMuligeMottakereEtater,
+                                ProduserUtkast produserUtkast,
+                                ProduserBrev produserBrev,
+                                HentTilgjengeligeEtater hentTilgjengeligeEtater) {
         this.hentMuligeBrevmottakere = hentMuligeBrevmottakere;
+        this.hentMuligeMottakereEtater = hentMuligeMottakereEtater;
         this.produserUtkast = produserUtkast;
         this.produserBrev = produserBrev;
+        this.hentTilgjengeligeEtater = hentTilgjengeligeEtater;
     }
 
     public HentMuligeBrevmottakereResponseDto hentMuligeMottakere(HentMuligeBrevmottakereRequestDto hentMuligeBrevmottakereRequestDto) {
@@ -37,6 +51,14 @@ public class BrevbestillingFasade {
     public void produserBrev(long behandlingID, BrevbestillingDto brevbestillingDto) {
         log.debug("produserBrev med BrevbestillingRequest.produserbardokument: {}", brevbestillingDto.getProduserbardokument());
         produserBrev.produserBrev(behandlingID, brevbestillingDto);
+    }
+
+    public List<Etat> hentTilgjengeligeEtater() {
+        return hentTilgjengeligeEtater.hentTilgjengeligeEtater();
+    }
+
+    public List<Brevmottaker> hentMuligeMottakereEtater(List<String> orgnrEtater) {
+        return hentMuligeMottakereEtater.hentMuligeMottakereEtater(orgnrEtater);
     }
 }
 

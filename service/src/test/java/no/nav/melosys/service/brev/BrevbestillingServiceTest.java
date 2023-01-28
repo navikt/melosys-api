@@ -1,10 +1,5 @@
 package no.nav.melosys.service.brev;
 
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
@@ -27,7 +22,6 @@ import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.Personopplysninger;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
@@ -43,9 +37,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
-import static no.nav.melosys.domain.brev.FastMottakerMedOrgnr.HELFO;
 import static no.nav.melosys.domain.brev.FastMottakerMedOrgnr.SKATTEETATEN;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
@@ -794,38 +792,6 @@ class BrevbestillingServiceTest {
         verify(dokServiceFasade).produserUtkast(333L, brevbestillingDto);
     }
 
-    @Test
-    void hentMuligeMottakereEtater_spørEtterSkatteetatenOgHelfo_fårSkatteetatenOgHelfoMottakere() {
-        var orgnrEtater = List.of(SKATTEETATEN.getOrgnr(), HELFO.getOrgnr());
-        when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
-        mockFinnOrganisasjon(SKATTEETATEN.getOrgnr(), "Skatteetaten-NAVNET");
-        mockFinnOrganisasjon(HELFO.getOrgnr(), "HELFO-NAVNET");
-
-
-        var muligMottakerDto = brevbestillingService.hentMuligeMottakereEtater(MANGELBREV_BRUKER, 123L, orgnrEtater);
-
-
-        assertThat(muligMottakerDto)
-            .hasSize(2)
-            .first()
-            .hasFieldOrPropertyWithValue("mottakerNavn", "Skatteetaten-NAVNET")
-            .hasFieldOrPropertyWithValue("rolle", ETAT)
-            .hasFieldOrPropertyWithValue("orgnr", SKATTEETATEN.getOrgnr());
-        assertThat(muligMottakerDto)
-            .last()
-            .hasFieldOrPropertyWithValue("mottakerNavn", "HELFO-NAVNET")
-            .hasFieldOrPropertyWithValue("rolle", ETAT)
-            .hasFieldOrPropertyWithValue("orgnr", HELFO.getOrgnr());
-    }
-
-    @Test
-    void hentMuligeMottakereEtater_spørEtterSkatteetatenOgUkjentOrgNr_fårIkkeFunnetFeilmelding() {
-        var orgnrEtater = List.of("111111111");
-        when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
-
-        assertThatThrownBy(() -> brevbestillingService.hentMuligeMottakereEtater(MANGELBREV_BRUKER, 123L, orgnrEtater))
-            .isInstanceOf(IkkeFunnetException.class);
-    }
 
     private Aktoer lagAktoerOrg(Aktoersroller aktoersroller, String orgNummer) {
         var aktoer = new Aktoer();

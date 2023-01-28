@@ -13,12 +13,12 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.BrevmalListeBygger;
+import no.nav.melosys.tjenester.gui.brev.dto.HentMuligeBrevmottakereEtaterRequest;
 import no.nav.melosys.tjenester.gui.brev.dto.HentMuligeBrevmottakereResponse;
-import no.nav.melosys.tjenester.gui.brev.dto.MuligBrevmottakerResponse;
+import no.nav.melosys.tjenester.gui.brev.dto.MuligBrevmottaker;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevbestillingRequest;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevmalResponse;
 import no.nav.melosys.tjenester.gui.dto.brev.HentMuligeBrevmottakereRequest;
-import no.nav.melosys.tjenester.gui.dto.brev.HentMuligeMottakereEtaterRequest;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -66,9 +66,9 @@ public class BrevbestillingTjeneste {
 
         if (!unleash.isEnabled(ToggleName.MELOSYS_MEL_4835)) {
             var gammelMuligeBrevmottakereDto = brevbestillingService.hentMuligeMottakere(hentMuligeBrevmottakereRequest.produserbartdokument(), behandlingID, hentMuligeBrevmottakereRequest.orgnr());
-            var hovedMottaker = MuligBrevmottakerResponse.byggFraBrevmottakerDto(gammelMuligeBrevmottakereDto.getHovedMottaker());
-            var kopiMottakere = gammelMuligeBrevmottakereDto.getKopiMottakere().stream().map(MuligBrevmottakerResponse::byggFraBrevmottakerDto).toList();
-            var fasteMottakere = gammelMuligeBrevmottakereDto.getFasteMottakere().stream().map(MuligBrevmottakerResponse::byggFraBrevmottakerDto).toList();
+            var hovedMottaker = MuligBrevmottaker.byggFraBrevmottakerDto(gammelMuligeBrevmottakereDto.getHovedMottaker());
+            var kopiMottakere = gammelMuligeBrevmottakereDto.getKopiMottakere().stream().map(MuligBrevmottaker::byggFraBrevmottakerDto).toList();
+            var fasteMottakere = gammelMuligeBrevmottakereDto.getFasteMottakere().stream().map(MuligBrevmottaker::byggFraBrevmottakerDto).toList();
             return new HentMuligeBrevmottakereResponse(hovedMottaker, kopiMottakere, fasteMottakere);
         }
 
@@ -116,20 +116,17 @@ public class BrevbestillingTjeneste {
 
     @PostMapping(value = "/mulige-mottakere-etater/{behandlingID}", produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Henter alle mulige mottakere for valgte etater")
-    public List<MuligBrevmottakerResponse> hentTilgjengeligeMottakereEtater(@PathVariable long behandlingID,
-                                                                            @RequestBody HentMuligeMottakereEtaterRequest hentMuligeMottakereEtaterRequest) {
+    public List<MuligBrevmottaker> hentTilgjengeligeMottakereEtater(@PathVariable long behandlingID,
+                                                                    @RequestBody HentMuligeBrevmottakereEtaterRequest hentMuligeBrevmottakereEtaterRequest) {
         aksesskontroll.autoriser(behandlingID);
-        var muligeBrevmottakere = brevbestillingService.hentMuligeMottakereEtater(
-            hentMuligeMottakereEtaterRequest.produserbartdokument(),
-            behandlingID,
-            hentMuligeMottakereEtaterRequest.orgnrEtater());
-        return muligeBrevmottakere.stream().map(MuligBrevmottakerResponse::byggFraBrevmottakerDto).toList();
+        var muligeBrevmottakere = brevbestillingFasade.hentMuligeMottakereEtater(hentMuligeBrevmottakereEtaterRequest.orgnrEtater());
+        return muligeBrevmottakere.stream().map(MuligBrevmottaker::byggFraBrevmottakerDto).toList();
     }
 
     @GetMapping(value = "/tilgjengelige-etater", produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Henter alle tilgjengelige etater", response = Etat.class, responseContainer = "List")
     public List<Etat> hentTilgjengeligeEtater() {
-        return brevbestillingService.hentTilgjengeligeEtater();
+        return brevbestillingFasade.hentTilgjengeligeEtater();
     }
 
     private HttpHeaders genPdfHeaders(String navn) {
