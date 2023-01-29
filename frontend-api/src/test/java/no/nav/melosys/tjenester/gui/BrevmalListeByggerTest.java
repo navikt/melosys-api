@@ -60,16 +60,13 @@ class BrevmalListeByggerTest {
     @Mock
     private DokumentNavnService dokumentNavnService;
     private UtenlandskMyndighetService utenlandskMyndighetService;
-    private BrevmalListeService brevmalListeService;
-
     private final FakeUnleash unleash = new FakeUnleash();
-
     private BrevmalListeBygger brevmalListeBygger;
 
 
     @BeforeEach
     void init() {
-        brevmalListeService = new BrevmalListeService(brevmottakerService,
+        BrevmalListeService brevmalListeService = new BrevmalListeService(brevmottakerService,
             behandlingService,
             persondataFasade,
             kontaktopplysningService,
@@ -406,7 +403,9 @@ class BrevmalListeByggerTest {
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingEUEOS);
         when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
+
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
 
         assertThat(tilgjengeligeMaler).hasSize(4);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
@@ -430,6 +429,7 @@ class BrevmalListeByggerTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingFTRL);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingFTRL);
         when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
@@ -459,7 +459,9 @@ class BrevmalListeByggerTest {
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingFTRL);
         when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
+
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
 
         assertThat(tilgjengeligeMaler).hasSize(4);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
@@ -488,6 +490,7 @@ class BrevmalListeByggerTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
         when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
@@ -520,7 +523,9 @@ class BrevmalListeByggerTest {
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
         when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
+
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
 
         assertThat(tilgjengeligeMaler).hasSize(5);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
@@ -545,6 +550,7 @@ class BrevmalListeByggerTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingEUEOS);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingEUEOS);
         when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
@@ -571,7 +577,9 @@ class BrevmalListeByggerTest {
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingEUEOS);
         when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
+
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
 
         assertThat(tilgjengeligeMaler).hasSize(4);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
@@ -596,6 +604,7 @@ class BrevmalListeByggerTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingFTRL);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingFTRL);
         when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
@@ -626,7 +635,9 @@ class BrevmalListeByggerTest {
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingFTRL);
         when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
+
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
 
         assertThat(tilgjengeligeMaler).hasSize(4);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
@@ -656,6 +667,7 @@ class BrevmalListeByggerTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
         when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
@@ -689,8 +701,10 @@ class BrevmalListeByggerTest {
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
         when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
+
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
+        
         assertThat(tilgjengeligeMaler).hasSize(5);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
             .hasSize(3)
