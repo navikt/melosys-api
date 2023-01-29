@@ -21,7 +21,7 @@ public class HentMuligeBrevmottakereEtater {
     }
 
     @Transactional
-    public List<Brevmottaker> hentMuligeMottakereEtater(List<String> orgnrEtater) {
+    public List<Brevmottaker> hentMuligeBrevmottakereEtater(List<String> orgnrEtater) {
         return orgnrEtater.stream().map(this::mapTilBrevmottaker).toList();
     }
 

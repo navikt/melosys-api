@@ -111,10 +111,10 @@ public class BrevbestillingTjeneste {
 
     @PostMapping(value = "/mulige-mottakere-etater/{behandlingID}", produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Henter alle mulige mottakere for valgte etater")
-    public List<MuligBrevmottaker> hentTilgjengeligeMottakereEtater(@PathVariable long behandlingID,
-                                                                    @RequestBody HentMuligeBrevmottakereEtaterRequest hentMuligeBrevmottakereEtaterRequest) {
+    public List<MuligBrevmottaker> hentMuligeBrevmottakereEtater(@PathVariable long behandlingID,
+                                                                 @RequestBody HentMuligeBrevmottakereEtaterRequest hentMuligeBrevmottakereEtaterRequest) {
         aksesskontroll.autoriser(behandlingID);
-        var muligeBrevmottakere = brevbestillingFasade.hentMuligeMottakereEtater(hentMuligeBrevmottakereEtaterRequest.orgnrEtater());
+        var muligeBrevmottakere = brevbestillingFasade.hentMuligeBrevmottakereEtater(hentMuligeBrevmottakereEtaterRequest.orgnrEtater());
         return muligeBrevmottakere.stream().map(MuligBrevmottaker::byggFraBrevmottakerDto).toList();
     }
 

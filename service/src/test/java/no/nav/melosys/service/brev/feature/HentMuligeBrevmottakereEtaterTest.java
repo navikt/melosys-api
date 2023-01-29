@@ -37,17 +37,17 @@ class HentMuligeBrevmottakereEtaterTest {
         var orgnrEtater = List.of(SKATTEETATEN.getOrgnr(), HELFO.getOrgnr());
 
 
-        var muligMottakerDto = hentMuligeBrevmottakereEtater.hentMuligeMottakereEtater(orgnrEtater);
+        var muligeBrevmottakereForEtater = hentMuligeBrevmottakereEtater.hentMuligeBrevmottakereEtater(orgnrEtater);
 
 
-        assertThat(muligMottakerDto)
+        assertThat(muligeBrevmottakereForEtater)
             .hasSize(2)
             .first()
             .hasFieldOrPropertyWithValue("rolle", ETAT)
             .hasFieldOrPropertyWithValue("dokumentNavn", FRITEKSTBREV.getBeskrivelse())
             .hasFieldOrPropertyWithValue("orgnr", SKATTEETATEN.getOrgnr())
             .hasFieldOrPropertyWithValue("mottakerNavn", "Skatteetaten");
-        assertThat(muligMottakerDto)
+        assertThat(muligeBrevmottakereForEtater)
             .last()
             .hasFieldOrPropertyWithValue("rolle", ETAT)
             .hasFieldOrPropertyWithValue("dokumentNavn", FRITEKSTBREV.getBeskrivelse())
@@ -60,7 +60,7 @@ class HentMuligeBrevmottakereEtaterTest {
         when(eregFasade.hentOrganisasjonNavn(anyString())).thenThrow(new IkkeFunnetException("Fant ikke orgnr i testen :)"));
         var orgnrEtater = List.of("111111111");
 
-        assertThatThrownBy(() -> hentMuligeBrevmottakereEtater.hentMuligeMottakereEtater(orgnrEtater))
+        assertThatThrownBy(() -> hentMuligeBrevmottakereEtater.hentMuligeBrevmottakereEtater(orgnrEtater))
             .isInstanceOf(IkkeFunnetException.class);
     }
 }

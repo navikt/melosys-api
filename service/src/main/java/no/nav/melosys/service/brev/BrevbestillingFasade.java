@@ -17,18 +17,18 @@ public class BrevbestillingFasade {
     private static final Logger log = LoggerFactory.getLogger(BrevbestillingFasade.class);
 
     private final HentMuligeBrevmottakere hentMuligeBrevmottakere;
-    private final HentMuligeBrevmottakereEtater hentMuligeMottakereEtater;
+    private final HentMuligeBrevmottakereEtater hentMuligeBrevmottakereEtater;
     private final ProduserUtkast produserUtkast;
     private final ProduserBrev produserBrev;
     private final HentTilgjengeligeEtater hentTilgjengeligeEtater;
 
     public BrevbestillingFasade(HentMuligeBrevmottakere hentMuligeBrevmottakere,
-                                HentMuligeBrevmottakereEtater hentMuligeMottakereEtater,
+                                HentMuligeBrevmottakereEtater hentMuligeBrevmottakereEtater,
                                 ProduserUtkast produserUtkast,
                                 ProduserBrev produserBrev,
                                 HentTilgjengeligeEtater hentTilgjengeligeEtater) {
         this.hentMuligeBrevmottakere = hentMuligeBrevmottakere;
-        this.hentMuligeMottakereEtater = hentMuligeMottakereEtater;
+        this.hentMuligeBrevmottakereEtater = hentMuligeBrevmottakereEtater;
         this.produserUtkast = produserUtkast;
         this.produserBrev = produserBrev;
         this.hentTilgjengeligeEtater = hentTilgjengeligeEtater;
@@ -53,8 +53,8 @@ public class BrevbestillingFasade {
         return hentTilgjengeligeEtater.hentTilgjengeligeEtater();
     }
 
-    public List<Brevmottaker> hentMuligeMottakereEtater(List<String> orgnrEtater) {
-        return hentMuligeMottakereEtater.hentMuligeMottakereEtater(orgnrEtater);
+    public List<Brevmottaker> hentMuligeBrevmottakereEtater(List<String> orgnrEtater) {
+        return hentMuligeBrevmottakereEtater.hentMuligeBrevmottakereEtater(orgnrEtater);
     }
 }
 
