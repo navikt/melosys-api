@@ -11,8 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
-public class BrevbestillingFasade {
-    private static final Logger log = LoggerFactory.getLogger(BrevbestillingFasade.class);
+public class BrevbestillingService {
+    private static final Logger log = LoggerFactory.getLogger(BrevbestillingService.class);
 
     private final HentMuligeBrevmottakereComponent hentMuligeBrevmottakereComponent;
     private final HentBrevmottakereEtaterComponent hentBrevmottakereEtaterComponent;
@@ -20,11 +20,11 @@ public class BrevbestillingFasade {
     private final ProduserBrevComponent produserBrevComponent;
     private final HentTilgjengeligeEtaterComponent hentTilgjengeligeEtaterComponent;
 
-    public BrevbestillingFasade(HentMuligeBrevmottakereComponent hentMuligeBrevmottakereComponent,
-                                HentBrevmottakereEtaterComponent hentBrevmottakereEtaterComponent,
-                                ProduserUtkastComponent produserUtkastComponent,
-                                ProduserBrevComponent produserBrevComponent,
-                                HentTilgjengeligeEtaterComponent hentTilgjengeligeEtaterComponent) {
+    public BrevbestillingService(HentMuligeBrevmottakereComponent hentMuligeBrevmottakereComponent,
+                                 HentBrevmottakereEtaterComponent hentBrevmottakereEtaterComponent,
+                                 ProduserUtkastComponent produserUtkastComponent,
+                                 ProduserBrevComponent produserBrevComponent,
+                                 HentTilgjengeligeEtaterComponent hentTilgjengeligeEtaterComponent) {
         this.hentMuligeBrevmottakereComponent = hentMuligeBrevmottakereComponent;
         this.hentBrevmottakereEtaterComponent = hentBrevmottakereEtaterComponent;
         this.produserUtkastComponent = produserUtkastComponent;

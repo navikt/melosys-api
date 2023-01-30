@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiOperation;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.brev.Etat;
 import no.nav.melosys.featuretoggle.ToggleName;
-import no.nav.melosys.service.brev.BrevbestillingFasade;
+import no.nav.melosys.service.brev.BrevbestillingService;
 import no.nav.melosys.service.brev.BrevbestillingServiceOld;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -32,14 +32,14 @@ public class BrevbestillingTjeneste {
     private final BrevbestillingServiceOld brevbestillingServiceOld;
     private final BrevmalListeBygger brevmalListeBygger;
     private final Aksesskontroll aksesskontroll;
-    private final BrevbestillingFasade brevbestillingFasade;
+    private final BrevbestillingService brevbestillingService;
     private final Unleash unleash;
 
-    public BrevbestillingTjeneste(BrevbestillingFasade brevbestillingFasade,
+    public BrevbestillingTjeneste(BrevbestillingService brevbestillingService,
                                   BrevbestillingServiceOld brevbestillingServiceOld,
                                   BrevmalListeBygger brevmalListeBygger,
                                   Aksesskontroll aksesskontroll, Unleash unleash) {
-        this.brevbestillingFasade = brevbestillingFasade;
+        this.brevbestillingService = brevbestillingService;
         this.brevbestillingServiceOld = brevbestillingServiceOld;
         this.brevmalListeBygger = brevmalListeBygger;
         this.aksesskontroll = aksesskontroll;
@@ -68,7 +68,7 @@ public class BrevbestillingTjeneste {
         }
 
         var hentMuligeMottakereRequestDto = hentMuligeBrevmottakereRequest.tilHentMuligeBrevmottakereRequestDto(behandlingID);
-        var hentMuligeMottakereResponseDto = brevbestillingFasade.hentMuligeMottakere(hentMuligeMottakereRequestDto);
+        var hentMuligeMottakereResponseDto = brevbestillingService.hentMuligeMottakere(hentMuligeMottakereRequestDto);
         return HentMuligeBrevmottakereResponse.av(hentMuligeMottakereResponseDto);
     }
 
@@ -87,7 +87,7 @@ public class BrevbestillingTjeneste {
         }
 
         BrevbestillingDto brevbestillingDto = brevbestillingRequest.tilBrevbestillingDto();
-        byte[] pdfInBytes = brevbestillingFasade.produserUtkast(behandlingID, brevbestillingDto);
+        byte[] pdfInBytes = brevbestillingService.produserUtkast(behandlingID, brevbestillingDto);
         return new ResponseEntity<>(pdfInBytes, genPdfHeaders("utkast_" + behandlingID), HttpStatus.OK);
     }
 
@@ -106,7 +106,7 @@ public class BrevbestillingTjeneste {
         }
 
         BrevbestillingDto brevbestillingDto = brevbestillingRequest.tilBrevbestillingDto();
-        brevbestillingFasade.produserBrev(behandlingID, brevbestillingDto);
+        brevbestillingService.produserBrev(behandlingID, brevbestillingDto);
     }
 
     @PostMapping(value = "/mulige-mottakere-etater/{behandlingID}", produces = APPLICATION_JSON_VALUE)
@@ -114,14 +114,14 @@ public class BrevbestillingTjeneste {
     public List<MuligBrevmottaker> hentMuligeBrevmottakereEtater(@PathVariable long behandlingID,
                                                                  @RequestBody HentMuligeBrevmottakereEtaterRequest hentMuligeBrevmottakereEtaterRequest) {
         aksesskontroll.autoriser(behandlingID);
-        var muligeBrevmottakere = brevbestillingFasade.hentMuligeBrevmottakereEtater(hentMuligeBrevmottakereEtaterRequest.orgnrEtater());
+        var muligeBrevmottakere = brevbestillingService.hentMuligeBrevmottakereEtater(hentMuligeBrevmottakereEtaterRequest.orgnrEtater());
         return muligeBrevmottakere.stream().map(MuligBrevmottaker::tilMuligBrevmottaker).toList();
     }
 
     @GetMapping(value = "/tilgjengelige-etater", produces = APPLICATION_JSON_VALUE)
     @ApiOperation(value = "Henter alle tilgjengelige etater", response = Etat.class, responseContainer = "List")
     public List<Etat> hentTilgjengeligeEtater() {
-        return brevbestillingFasade.hentTilgjengeligeEtater();
+        return brevbestillingService.hentTilgjengeligeEtater();
     }
 
     private HttpHeaders genPdfHeaders(String navn) {
