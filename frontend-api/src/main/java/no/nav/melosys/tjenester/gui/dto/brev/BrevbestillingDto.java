@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.dto.brev;
 
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
+import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
@@ -279,6 +280,11 @@ public class BrevbestillingDto {
             return this;
         }
 
+        public Builder medDistribusjonstype(Distribusjonstype distribusjonstype) {
+            this.distribusjonstype = distribusjonstype;
+            return this;
+        }
+
         public Builder medKontaktopplysninger(boolean kontaktopplysninger) {
             this.kontaktopplysninger = kontaktopplysninger;
             return this;
@@ -317,6 +323,54 @@ public class BrevbestillingDto {
         public BrevbestillingDto build() {
             return new BrevbestillingDto(this);
         }
+    }
+
+    public static BrevbestillingDto av(BrevbestillingUtkast brevbestillingUtkast) {
+        return new BrevbestillingDto.Builder()
+            .medProduserbardokument(brevbestillingUtkast.produserbardokument())
+            .medMottaker(brevbestillingUtkast.mottaker())
+            .medOrgNr(brevbestillingUtkast.orgnr())
+            .medOrgnrEtater(brevbestillingUtkast.orgnrEtater())
+            .medInnledningFritekst(brevbestillingUtkast.innledningFritekst())
+            .medManglerFritekst(brevbestillingUtkast.manglerFritekst())
+            .medBegrunnelseFritekst(brevbestillingUtkast.begrunnelseFritekst())
+            .medEktefelleFritekst(brevbestillingUtkast.ektefelleFritekst())
+            .medBarnFritekst(brevbestillingUtkast.barnFritekst())
+            .medKontaktpersonNavn(brevbestillingUtkast.kontaktpersonNavn())
+            .medKopiMottakere(brevbestillingUtkast.kopiMottakere().stream().map(KopiMottaker::av).toList())
+            .medFritekstTittel(brevbestillingUtkast.fritekstTittel())
+            .medFritekst(brevbestillingUtkast.fritekst())
+            .medDistribusjonstype(brevbestillingUtkast.distribusjonstype())
+            .medKontaktopplysninger(brevbestillingUtkast.kontaktopplysninger())
+            .medNyVurderingBakgrunn(brevbestillingUtkast.nyVurderingBakgrunn())
+            .medSaksvedlegg(brevbestillingUtkast.saksvedlegg().stream().map(SaksvedleggDto::av).toList())
+            .medFritekstvedlegg(brevbestillingUtkast.fritekstVedlegg().stream().map(FritekstvedleggDto::av).toList())
+            .medDokumentTittel(brevbestillingUtkast.dokumentTittel())
+            .build();
+    }
+
+    public BrevbestillingUtkast tilUtkast() {
+        return new BrevbestillingUtkast(
+            this.getProduserbardokument(),
+            this.getMottaker(),
+            this.getOrgNr(),
+            this.getOrgnrEtater(),
+            this.getInnledningFritekst(),
+            this.getManglerFritekst(),
+            this.getBegrunnelseFritekst(),
+            this.getEktefelleFritekst(),
+            this.getBarnFritekst(),
+            this.getKontaktpersonNavn(),
+            this.getKopiMottakere().stream().map(KopiMottaker::tilUtkast).toList(),
+            this.getFritekstTittel(),
+            this.getFritekst(),
+            this.getDistribusjonstype(),
+            this.isKontaktopplysninger(),
+            this.getNyVurderingBakgrunn(),
+            this.getSaksvedlegg().stream().map(SaksvedleggDto::tilUtkast).toList(),
+            this.getFritekstvedlegg().stream().map(FritekstvedleggDto::tilUtkast).toList(),
+            this.getDokumentTittel()
+        );
     }
 
     @Override
