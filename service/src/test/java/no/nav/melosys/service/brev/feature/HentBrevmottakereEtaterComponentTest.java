@@ -20,13 +20,13 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class HentMuligeBrevmottakereEtaterTest {
+class HentBrevmottakereEtaterComponentTest {
 
     @Mock
     private EregFasade eregFasade;
 
     @InjectMocks
-    private HentMuligeBrevmottakereEtater hentMuligeBrevmottakereEtater;
+    private HentBrevmottakereEtaterComponent hentBrevmottakereEtaterComponent;
 
 
     @Test
@@ -37,7 +37,7 @@ class HentMuligeBrevmottakereEtaterTest {
         var orgnrEtater = List.of(SKATTEETATEN.getOrgnr(), HELFO.getOrgnr());
 
 
-        var muligeBrevmottakereForEtater = hentMuligeBrevmottakereEtater.hentMuligeBrevmottakereEtater(orgnrEtater);
+        var muligeBrevmottakereForEtater = hentBrevmottakereEtaterComponent.hentMuligeBrevmottakereEtater(orgnrEtater);
 
 
         assertThat(muligeBrevmottakereForEtater)
@@ -60,7 +60,7 @@ class HentMuligeBrevmottakereEtaterTest {
         when(eregFasade.hentOrganisasjonNavn(anyString())).thenThrow(new IkkeFunnetException("Fant ikke orgnr i testen :)"));
         var orgnrEtater = List.of("111111111");
 
-        assertThatThrownBy(() -> hentMuligeBrevmottakereEtater.hentMuligeBrevmottakereEtater(orgnrEtater))
+        assertThatThrownBy(() -> hentBrevmottakereEtaterComponent.hentMuligeBrevmottakereEtater(orgnrEtater))
             .isInstanceOf(IkkeFunnetException.class);
     }
 }

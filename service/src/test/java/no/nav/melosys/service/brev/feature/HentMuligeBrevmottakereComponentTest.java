@@ -1,6 +1,5 @@
-package no.nav.melosys.service.brev;
+package no.nav.melosys.service.brev.feature;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -18,14 +17,12 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdress
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.brev.DokumentNavnService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
-import no.nav.melosys.service.dokument.DokumentServiceFasade;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,21 +34,24 @@ import static java.util.Collections.emptyList;
 import static no.nav.melosys.domain.brev.FastMottakerMedOrgnr.SKATTEETATEN;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@Deprecated(since = "Tas vekk sammen med melosys.MEL-4835.refactor1 unleash toggle, og tas vekk med BrevbestillingService")
 @ExtendWith(MockitoExtension.class)
-class BrevbestillingServiceTest {
+class HentMuligeBrevmottakereComponentTest {
+
 
     private final Behandling behandling = lagBehandling();
 
+
     @Mock
-    private DokumentServiceFasade dokServiceFasade;
+    private BehandlingService behandlingService;
     @Mock
     private BrevmottakerService brevmottakerService;
+    @Mock
+    private DokumentNavnService dokumentNavnService;
     @Mock
     private PersondataFasade persondataFasade;
     @Mock
@@ -59,21 +59,17 @@ class BrevbestillingServiceTest {
     @Mock
     private KontaktopplysningService kontaktopplysningService;
     @Mock
-    private BehandlingService behandlingService;
-    @Mock
-    private DokumentNavnService dokumentNavnService;
-    @Mock
-
     private UtenlandskMyndighetService utenlandskMyndighetService;
-    private BrevbestillingService brevbestillingService;
+
+    private HentMuligeBrevmottakereComponent hentMuligeBrevmottakere;
+
 
     @BeforeEach
     void init() {
-        brevbestillingService = new BrevbestillingService(brevmottakerService, dokServiceFasade, behandlingService, eregFasade,
-            kontaktopplysningService, persondataFasade, dokumentNavnService, utenlandskMyndighetService);
+        hentMuligeBrevmottakere = new HentMuligeBrevmottakereComponent(behandlingService, brevmottakerService, dokumentNavnService, persondataFasade,
+            eregFasade, kontaktopplysningService, utenlandskMyndighetService);
     }
 
-    @Deprecated(since = "Tas vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
     @Test
     void hentMuligeMottakere_hovedMottakerBruker_returnererBrukerSomHovedMottaker() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
@@ -84,9 +80,13 @@ class BrevbestillingServiceTest {
         when(persondataFasade.hentSammensattNavn(anyString())).thenReturn("Ola Nordmann");
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
-        var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, 123L, null);
+        var hentMottakereRequest = new HentMuligeBrevmottakereComponent.RequestDto(MANGELBREV_BRUKER, 123L, null);
 
-        assertThat(muligeMottakere.getHovedMottaker())
+
+        var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
+
+
+        assertThat(muligeMottakere.hovedMottaker())
             .extracting(
                 Brevmottaker::getDokumentNavn,
                 Brevmottaker::getMottakerNavn,
@@ -95,11 +95,10 @@ class BrevbestillingServiceTest {
                 Brevmottaker::getOrgnr)
             .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
         assertThat(muligeMottakere)
-            .extracting(MuligeBrevmottakereDto::getKopiMottakere, MuligeBrevmottakereDto::getFasteMottakere)
+            .extracting(HentMuligeBrevmottakereComponent.ResponseDto::kopiMottakere, HentMuligeBrevmottakereComponent.ResponseDto::fasteMottakere)
             .containsExactly(emptyList(), emptyList());
     }
 
-    @Deprecated(since = "Erstattes av HentMottakereTest. Ta vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
     @Test
     void hentMuligeMottakere_hovedMottakerBrukerMedFullmektigOrganisasjon_returnererFullmektigOrganisasjonSomHovedMottaker() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
@@ -110,9 +109,13 @@ class BrevbestillingServiceTest {
         mockHentOrganisasjon("orgnr", "Fullmektig virksomhet");
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
-        var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, 123L, null);
+        var hentMottakereRequest = new HentMuligeBrevmottakereComponent.RequestDto(MANGELBREV_BRUKER, 123L, null);
 
-        assertThat(muligeMottakere.getHovedMottaker())
+
+        var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
+
+
+        assertThat(muligeMottakere.hovedMottaker())
             .extracting(
                 Brevmottaker::getDokumentNavn,
                 Brevmottaker::getMottakerNavn,
@@ -121,11 +124,10 @@ class BrevbestillingServiceTest {
                 Brevmottaker::getOrgnr)
             .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Fullmektig virksomhet", BRUKER, null, null);
         assertThat(muligeMottakere)
-            .extracting(MuligeBrevmottakereDto::getKopiMottakere, MuligeBrevmottakereDto::getFasteMottakere)
+            .extracting(HentMuligeBrevmottakereComponent.ResponseDto::kopiMottakere, HentMuligeBrevmottakereComponent.ResponseDto::fasteMottakere)
             .containsExactly(emptyList(), emptyList());
     }
 
-    @Deprecated(since = "Erstattes av HentMottakereTest. Ta vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
     @Test
     void hentMuligeMottakere_hovedMottakerBrukerMedFullmektigPerson_returnererFullmektigPersonSomHovedMottaker() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
@@ -136,9 +138,13 @@ class BrevbestillingServiceTest {
         when(persondataFasade.hentSammensattNavn("fnr")).thenReturn("Ola Nordmann");
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
-        var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, 123L, null);
+        var hentMottakereRequest = new HentMuligeBrevmottakereComponent.RequestDto(MANGELBREV_BRUKER, 123L, null);
 
-        assertThat(muligeMottakere.getHovedMottaker())
+
+        var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
+
+
+        assertThat(muligeMottakere.hovedMottaker())
             .extracting(
                 Brevmottaker::getDokumentNavn,
                 Brevmottaker::getMottakerNavn,
@@ -147,11 +153,10 @@ class BrevbestillingServiceTest {
                 Brevmottaker::getOrgnr)
             .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
         assertThat(muligeMottakere)
-            .extracting(MuligeBrevmottakereDto::getKopiMottakere, MuligeBrevmottakereDto::getFasteMottakere)
+            .extracting(HentMuligeBrevmottakereComponent.ResponseDto::kopiMottakere, HentMuligeBrevmottakereComponent.ResponseDto::fasteMottakere)
             .containsExactly(emptyList(), emptyList());
     }
 
-    @Deprecated(since = "Erstattes av HentMottakereTest. Ta vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
     @Test
     void hentMuligeMottakere_hovedMottakerVirksomhet_returnererVirksomhetSomHovedMottaker() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
@@ -161,9 +166,13 @@ class BrevbestillingServiceTest {
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, GENERELT_FRITEKSTBREV_VIRKSOMHET, VIRKSOMHET))
             .thenReturn(GENERELT_FRITEKSTBREV_VIRKSOMHET.getBeskrivelse());
 
-        var muligeMottakere = brevbestillingService.hentMuligeMottakere(GENERELT_FRITEKSTBREV_VIRKSOMHET, 123L, "orgnr");
+        var hentMottakereRequest = new HentMuligeBrevmottakereComponent.RequestDto(GENERELT_FRITEKSTBREV_VIRKSOMHET, 123L, "orgnr");
 
-        assertThat(muligeMottakere.getHovedMottaker())
+
+        var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
+
+
+        assertThat(muligeMottakere.hovedMottaker())
             .extracting(
                 Brevmottaker::getDokumentNavn,
                 Brevmottaker::getMottakerNavn,
@@ -172,11 +181,10 @@ class BrevbestillingServiceTest {
                 Brevmottaker::getOrgnr)
             .containsExactly(GENERELT_FRITEKSTBREV_VIRKSOMHET.getBeskrivelse(), "Equinor AS", VIRKSOMHET, null, null);
         assertThat(muligeMottakere)
-            .extracting(MuligeBrevmottakereDto::getKopiMottakere, MuligeBrevmottakereDto::getFasteMottakere)
+            .extracting(HentMuligeBrevmottakereComponent.ResponseDto::kopiMottakere, HentMuligeBrevmottakereComponent.ResponseDto::fasteMottakere)
             .containsExactly(emptyList(), emptyList());
     }
 
-    @Deprecated(since = "Erstattes av HentMottakereTest. Ta vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
     @Test
     void hentMuligeMottakere_hovedMottakerArbeidsgiver_returnererArbeidsgiverSomHovedMottaker() {
         when(brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
@@ -185,9 +193,13 @@ class BrevbestillingServiceTest {
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(null, MANGELBREV_BRUKER, ARBEIDSGIVER))
             .thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
-        var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, 123L, "orgnr");
+        var hentMottakereRequest = new HentMuligeBrevmottakereComponent.RequestDto(MANGELBREV_BRUKER, 123L, "orgnr");
 
-        assertThat(muligeMottakere.getHovedMottaker())
+
+        var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
+
+
+        assertThat(muligeMottakere.hovedMottaker())
             .extracting(
                 Brevmottaker::getDokumentNavn,
                 Brevmottaker::getMottakerNavn,
@@ -196,11 +208,10 @@ class BrevbestillingServiceTest {
                 Brevmottaker::getOrgnr)
             .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Ola Nordmann Rørleggerfirma", ARBEIDSGIVER, null, null);
         assertThat(muligeMottakere)
-            .extracting(MuligeBrevmottakereDto::getKopiMottakere, MuligeBrevmottakereDto::getFasteMottakere)
+            .extracting(HentMuligeBrevmottakereComponent.ResponseDto::kopiMottakere, HentMuligeBrevmottakereComponent.ResponseDto::fasteMottakere)
             .containsExactly(emptyList(), emptyList());
     }
 
-    @Deprecated(since = "Erstattes av HentMottakereTest. Ta vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
     @Test
     void hentMuligeMottakere_kopiTilBruker_returnererBrukerSomKopi() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
@@ -212,9 +223,13 @@ class BrevbestillingServiceTest {
         when(brevmottakerService.avklarMottaker(any(Produserbaredokumenter.class), any(), eq(behandling)))
             .thenReturn(lagAktoerOrg(BRUKER, null));
 
-        var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, 123L, "orgnr");
+        var hentMottakereRequest = new HentMuligeBrevmottakereComponent.RequestDto(MANGELBREV_BRUKER, 123L, "orgnr");
 
-        assertThat(muligeMottakere.getKopiMottakere())
+
+        var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
+
+
+        assertThat(muligeMottakere.kopiMottakere())
             .flatExtracting(
                 Brevmottaker::getDokumentNavn,
                 Brevmottaker::getMottakerNavn,
@@ -224,7 +239,6 @@ class BrevbestillingServiceTest {
             .containsExactly("Kopi til bruker", "Ola Nordmann", BRUKER, "aktørId", null);
     }
 
-    @Deprecated(since = "Erstattes av HentMottakereTest. Ta vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
     @Test
     void hentMuligeMottakere_kopiTilBrukerMedFullmektig_returnererFullmektigSomKopi() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
@@ -235,10 +249,13 @@ class BrevbestillingServiceTest {
         mockFinnOrganisasjon("orgnr", "Ola Nordmann Rørleggerfirma");
         mockHentOrganisasjon("orgnrTilFullmektig", "Fullmektig Virksomhet");
 
+        var hentMottakereRequest = new HentMuligeBrevmottakereComponent.RequestDto(MANGELBREV_BRUKER, 123L, "orgnr");
 
-        var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, 123L, "orgnr");
 
-        assertThat(muligeMottakere.getKopiMottakere())
+        var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
+
+
+        assertThat(muligeMottakere.kopiMottakere())
             .flatExtracting(
                 Brevmottaker::getDokumentNavn,
                 Brevmottaker::getMottakerNavn,
@@ -248,7 +265,6 @@ class BrevbestillingServiceTest {
             .containsExactly("Kopi til brukers fullmektig", "Fullmektig Virksomhet", REPRESENTANT, null, "orgnrTilFullmektig");
     }
 
-    @Deprecated(since = "Erstattes av HentMottakereTest. Ta vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
     @Test
     void hentMuligeMottakere_kopiTilBrukerMedFullmektigNårHovedMottakerErBruker_returnererBrukerSomKopi() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
@@ -260,9 +276,13 @@ class BrevbestillingServiceTest {
         mockHentOrganisasjon("orgnrTilFullmektig", "Fullmektig Virksomhet");
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
-        var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, 123L, null);
+        var hentMottakereRequest = new HentMuligeBrevmottakereComponent.RequestDto(MANGELBREV_BRUKER, 123L, null);
 
-        assertThat(muligeMottakere.getHovedMottaker())
+
+        var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
+
+
+        assertThat(muligeMottakere.hovedMottaker())
             .extracting(
                 Brevmottaker::getDokumentNavn,
                 Brevmottaker::getMottakerNavn,
@@ -270,7 +290,7 @@ class BrevbestillingServiceTest {
                 Brevmottaker::getAktørId,
                 Brevmottaker::getOrgnr)
             .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Fullmektig Virksomhet", BRUKER, null, null);
-        assertThat(muligeMottakere.getKopiMottakere())
+        assertThat(muligeMottakere.kopiMottakere())
             .flatExtracting(
                 Brevmottaker::getDokumentNavn,
                 Brevmottaker::getMottakerNavn,
@@ -280,7 +300,6 @@ class BrevbestillingServiceTest {
             .containsExactly("Kopi til bruker", "Ola Nordmann", BRUKER, "aktørId", null);
     }
 
-    @Deprecated(since = "Erstattes av HentMottakereTest. Ta vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
     @Test
     void hentMuligeMottakere_kopiTilArbeidsgiver_returnererArbeidsgiverSomKopi() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
@@ -298,10 +317,13 @@ class BrevbestillingServiceTest {
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, MANGELBREV_BRUKER, orgnr1, "Kopi til arbeidsgiver")).thenReturn("Kopi til arbeidsgiver");
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, MANGELBREV_BRUKER, orgnr2, "Kopi til arbeidsgiver")).thenReturn("Kopi til arbeidsgiver");
 
+        var hentMottakereRequest = new HentMuligeBrevmottakereComponent.RequestDto(MANGELBREV_BRUKER, 123L, null);
 
-        var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, 123L, null);
 
-        assertThat(muligeMottakere.getKopiMottakere())
+        var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
+
+
+        assertThat(muligeMottakere.kopiMottakere())
             .flatExtracting(
                 Brevmottaker::getDokumentNavn,
                 Brevmottaker::getMottakerNavn,
@@ -313,7 +335,6 @@ class BrevbestillingServiceTest {
                 "Kopi til arbeidsgiver", "Arbeidsgiver 2", ARBEIDSGIVER, null, "orgnr2");
     }
 
-    @Deprecated(since = "Erstattes av HentMottakereTest. Ta vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
     @Test
     void hentMuligeMottakere_kopiTilArbeidsgiverMedFullmektig_returnererFullmektigSomKopi() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
@@ -328,10 +349,13 @@ class BrevbestillingServiceTest {
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, MANGELBREV_BRUKER, orgnr, "Kopi til arbeidsgivers fullmektig")).thenReturn("Kopi til arbeidsgivers fullmektig");
 
+        var hentMottakereRequest = new HentMuligeBrevmottakereComponent.RequestDto(MANGELBREV_BRUKER, 123L, null);
 
-        var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, 123L, null);
 
-        assertThat(muligeMottakere.getKopiMottakere())
+        var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
+
+
+        assertThat(muligeMottakere.kopiMottakere())
             .flatExtracting(
                 Brevmottaker::getDokumentNavn,
                 Brevmottaker::getMottakerNavn,
@@ -342,7 +366,6 @@ class BrevbestillingServiceTest {
                 "Kopi til arbeidsgivers fullmektig", "Fullmektig Virksomhet", REPRESENTANT, null, "orgnr");
     }
 
-    @Deprecated(since = "Tas vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
     @Test
     void hentMuligeMottakere_fastTilSkatt_returnererSkattSomFast() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
@@ -357,9 +380,13 @@ class BrevbestillingServiceTest {
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, MANGELBREV_BRUKER, skatteetaten, "Kopi til Skatteetaten")).thenReturn("Kopi til Skatteetaten");
 
-        var muligeMottakere = brevbestillingService.hentMuligeMottakere(MANGELBREV_BRUKER, 123L, null);
+        var hentMottakereRequest = new HentMuligeBrevmottakereComponent.RequestDto(MANGELBREV_BRUKER, 123L, null);
 
-        assertThat(muligeMottakere.getFasteMottakere())
+
+        var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
+
+
+        assertThat(muligeMottakere.fasteMottakere())
             .flatExtracting(
                 Brevmottaker::getDokumentNavn,
                 Brevmottaker::getMottakerNavn,
@@ -369,8 +396,6 @@ class BrevbestillingServiceTest {
             .containsExactly("Kopi til Skatteetaten", "Skatteetaten", TRYGDEMYNDIGHET, null, "974761076");
     }
 
-
-    @Deprecated(since = "Tas vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
     @Test
     void hentMuligeMottakere_hovedMottakerBruker_storbritanniaArtikkelUlik82() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
@@ -400,9 +425,13 @@ class BrevbestillingServiceTest {
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, TRYGDEAVTALE_GB, trygdemyndighet, "Kopi til utenlandsk trygdemyndighet")).thenReturn("Attest for utsendt arbeidstaker", "Utenlandsk trygdemyndighet");
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, TRYGDEAVTALE_GB, skatteetaten, "Kopi til Skatt")).thenReturn("Kopi av vedtak om medlemskap");
 
-        var muligeMottakere = brevbestillingService.hentMuligeMottakere(TRYGDEAVTALE_GB, 123L, null);
+        var request = new HentMuligeBrevmottakereComponent.RequestDto(TRYGDEAVTALE_GB, 123L, null);
 
-        assertThat(muligeMottakere.getHovedMottaker())
+
+        var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(request);
+
+
+        assertThat(muligeMottakere.hovedMottaker())
             .extracting(
                 Brevmottaker::getDokumentNavn,
                 Brevmottaker::getMottakerNavn,
@@ -411,7 +440,7 @@ class BrevbestillingServiceTest {
                 Brevmottaker::getOrgnr)
             .containsExactly("Vedtak om medlemskap, Attest for utsendt arbeidstaker", "Ola Nordmann", BRUKER, null, null);
 
-        assertThat(muligeMottakere.getKopiMottakere())
+        assertThat(muligeMottakere.kopiMottakere())
             .hasSize(2)
             .extracting(
                 Brevmottaker::getDokumentNavn,
@@ -422,7 +451,7 @@ class BrevbestillingServiceTest {
                 tuple("Attest for utsendt arbeidstaker", "Utenlandsk trygdemyndighet")
             );
 
-        assertThat(muligeMottakere.getFasteMottakere())
+        assertThat(muligeMottakere.fasteMottakere())
             .hasSize(1)
             .extracting(
                 Brevmottaker::getDokumentNavn,
@@ -431,37 +460,6 @@ class BrevbestillingServiceTest {
             .containsExactly(
                 tuple("Kopi av vedtak om medlemskap", "Skatt")
             );
-    }
-
-    @Deprecated(since = "Tas vekk sammen med melosys.MEL-4835.refactor1 toggle")
-    @Test
-    void skalBestilleProduseringAvBrev() {
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().medProduserbardokument(MANGELBREV_BRUKER).build();
-        brevbestillingService.produserBrev(333L, brevbestillingDto);
-
-        verify(dokServiceFasade).produserDokument(anyLong(), any(BrevbestillingDto.class));
-    }
-
-    @Deprecated(since = "Tas vekk sammen med melosys.MEL-4835.refactor1 toggle")
-    @Test
-    void produserBrev_InnvilgelseFtrl_skalIkkeTillates() {
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().medProduserbardokument(INNVILGELSE_FOLKETRYGDLOVEN_2_8).build();
-        assertThatThrownBy(() -> brevbestillingService.produserBrev(333L, brevbestillingDto))
-            .isInstanceOf(FunksjonellException.class)
-            .hasMessageContaining("Manuell bestilling av INNVILGELSE_FOLKETRYGDLOVEN_2_8 er ikke støttet.");
-    }
-
-    @Deprecated(since = "Tas vekk sammen med melosys.MEL-4835.refactor1 toggle")
-    @Test
-    void skalReturnereUtkast() {
-        byte[] pdf = "UTKAST".getBytes(StandardCharsets.UTF_8);
-        when(dokServiceFasade.produserUtkast(anyLong(), any())).thenReturn(pdf);
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().medProduserbardokument(MANGELBREV_BRUKER).build();
-
-        byte[] utkast = brevbestillingService.produserUtkast(333L, brevbestillingDto);
-
-        assertThat(utkast).isEqualTo(pdf);
-        verify(dokServiceFasade).produserUtkast(333L, brevbestillingDto);
     }
 
 

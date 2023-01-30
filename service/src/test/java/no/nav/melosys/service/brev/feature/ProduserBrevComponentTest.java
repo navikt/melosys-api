@@ -17,18 +17,18 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class ProduserBrevTest {
+class ProduserBrevComponentTest {
 
     @Mock
     private DokumentServiceFasade dokumentServiceFasade;
 
     @InjectMocks
-    private ProduserBrev produserBrev;
+    private ProduserBrevComponent produserBrevComponent;
 
     @Test
     void skalBestilleProduseringAvBrev() {
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().medProduserbardokument(MANGELBREV_BRUKER).build();
-        produserBrev.produserBrev(333L, brevbestillingDto);
+        produserBrevComponent.produserBrev(333L, brevbestillingDto);
 
         verify(dokumentServiceFasade).produserDokument(anyLong(), any(BrevbestillingDto.class));
     }
@@ -36,7 +36,7 @@ class ProduserBrevTest {
     @Test
     void produserBrev_InnvilgelseFtrl_skalIkkeTillates() {
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().medProduserbardokument(INNVILGELSE_FOLKETRYGDLOVEN_2_8).build();
-        assertThatThrownBy(() -> produserBrev.produserBrev(333L, brevbestillingDto))
+        assertThatThrownBy(() -> produserBrevComponent.produserBrev(333L, brevbestillingDto))
             .isInstanceOf(FunksjonellException.class)
             .hasMessageContaining("Manuell bestilling av INNVILGELSE_FOLKETRYGDLOVEN_2_8 er ikke støttet.");
     }

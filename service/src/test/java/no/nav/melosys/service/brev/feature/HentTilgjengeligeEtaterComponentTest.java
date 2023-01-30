@@ -5,14 +5,14 @@ import org.junit.jupiter.api.Test;
 import static no.nav.melosys.domain.brev.Etat.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class HentTilgjengeligeEtaterTest {
+class HentTilgjengeligeEtaterComponentTest {
 
-    private final HentTilgjengeligeEtater hentTilgjengeligeEtater = new HentTilgjengeligeEtater();
+    private final HentTilgjengeligeEtaterComponent hentTilgjengeligeEtaterComponent = new HentTilgjengeligeEtaterComponent();
 
     @Test
     void hentTilgjengeligeEtater_inneholderBareStøttedeEtater() {
-        
-        var tilgjengeligeEtater = hentTilgjengeligeEtater.hentTilgjengeligeEtater();
+
+        var tilgjengeligeEtater = hentTilgjengeligeEtaterComponent.hentTilgjengeligeEtater();
 
 
         assertThat(tilgjengeligeEtater).containsExactly(

@@ -12,11 +12,11 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.ETAT;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.FRITEKSTBREV;
 
 @Component
-public class HentMuligeBrevmottakereEtater {
+public class HentBrevmottakereEtaterComponent {
 
     private final EregFasade eregFasade;
 
-    public HentMuligeBrevmottakereEtater(EregFasade eregFasade) {
+    public HentBrevmottakereEtaterComponent(EregFasade eregFasade) {
         this.eregFasade = eregFasade;
     }
 

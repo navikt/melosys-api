@@ -20,8 +20,6 @@ import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.DokumentNavnService;
-import no.nav.melosys.service.brev.feature.hentmuligebrevmottakere.HentMuligeBrevmottakereRequestDto;
-import no.nav.melosys.service.brev.feature.hentmuligebrevmottakere.HentMuligeBrevmottakereResponseDto;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Component;
@@ -32,7 +30,7 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV;
 
 @Component
-public class HentMuligeBrevmottakere {
+public class HentMuligeBrevmottakereComponent {
     private final BehandlingService behandlingService;
     private final BrevmottakerService brevmottakerService;
     private final DokumentNavnService dokumentNavnService;
@@ -41,7 +39,7 @@ public class HentMuligeBrevmottakere {
     private final KontaktopplysningService kontaktopplysningService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
 
-    public HentMuligeBrevmottakere(BehandlingService behandlingService, BrevmottakerService brevmottakerService, DokumentNavnService dokumentNavnService, PersondataFasade persondataFasade, EregFasade eregFasade, KontaktopplysningService kontaktopplysningService, UtenlandskMyndighetService utenlandskMyndighetService) {
+    public HentMuligeBrevmottakereComponent(BehandlingService behandlingService, BrevmottakerService brevmottakerService, DokumentNavnService dokumentNavnService, PersondataFasade persondataFasade, EregFasade eregFasade, KontaktopplysningService kontaktopplysningService, UtenlandskMyndighetService utenlandskMyndighetService) {
         this.behandlingService = behandlingService;
         this.brevmottakerService = brevmottakerService;
         this.dokumentNavnService = dokumentNavnService;
@@ -52,16 +50,17 @@ public class HentMuligeBrevmottakere {
     }
 
     @Transactional
-    public HentMuligeBrevmottakereResponseDto hentMuligeBrevmottakere(HentMuligeBrevmottakereRequestDto hentMuligeBrevmottakereRequestDto) {
+    public ResponseDto hentMuligeBrevmottakere(RequestDto requestDto) {
 
-        Produserbaredokumenter produserbaredokumenter = hentMuligeBrevmottakereRequestDto.produserbartdokument();
-        Mottakerliste mottakerliste = brevmottakerService.hentMottakerliste(produserbaredokumenter, hentMuligeBrevmottakereRequestDto.behandlingID());
+        Produserbaredokumenter produserbaredokumenter = requestDto.produserbartdokument();
+        Mottakerliste mottakerliste = brevmottakerService.hentMottakerliste(produserbaredokumenter, requestDto.behandlingID());
 
-        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(hentMuligeBrevmottakereRequestDto.behandlingID());
-        Brevmottaker hovedMottaker = lagHovedMottakerMuligMottakerDto(produserbaredokumenter, behandling, mottakerliste.getHovedMottaker(), hentMuligeBrevmottakereRequestDto.orgnr());
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(requestDto.behandlingID());
+        Brevmottaker hovedMottaker = lagHovedMottakerMuligMottakerDto(produserbaredokumenter, behandling, mottakerliste.getHovedMottaker(), requestDto.orgnr());
         List<Brevmottaker> kopiMottakere = lagKopiMottakereMuligMottakerDtos(produserbaredokumenter, behandling, mottakerliste.getKopiMottakere(), mottakerliste.getHovedMottaker());
         List<Brevmottaker> fasteMottakere = lagFasteMottakereMuligMottakerDtos(produserbaredokumenter, behandling, mottakerliste.getFasteMottakere());
-        return new HentMuligeBrevmottakereResponseDto(hovedMottaker, kopiMottakere, fasteMottakere);
+
+        return new ResponseDto(hovedMottaker, kopiMottakere, fasteMottakere);
     }
 
     private Brevmottaker lagHovedMottakerMuligMottakerDto(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Aktoersroller hovedmottaker, String orgnrTilValgtArbeidsgiver) {
@@ -177,6 +176,17 @@ public class HentMuligeBrevmottakere {
             brevmottakere.add(new Brevmottaker.Builder().medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, produserbaredokumenter, avklartKopi, fastTekst)).medMottakerNavn("Utenlandsk trygdemyndighet").medRolle(avklartKopi.getRolle()).medInstitusjonId(avklartKopi.getInstitusjonId()).build());
         }
         return brevmottakere;
+    }
+
+
+    public record RequestDto(Produserbaredokumenter produserbartdokument,
+                             long behandlingID,
+                             String orgnr) {
+    }
+
+    public record ResponseDto(Brevmottaker hovedMottaker,
+                              List<Brevmottaker> kopiMottakere,
+                              List<Brevmottaker> fasteMottakere) {
     }
 
 }

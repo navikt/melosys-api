@@ -1,10 +1,10 @@
 package no.nav.melosys.tjenester.gui.dto.brev;
 
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.service.brev.feature.hentmuligebrevmottakere.HentMuligeBrevmottakereRequestDto;
+import no.nav.melosys.service.brev.feature.HentMuligeBrevmottakereComponent;
 
 public record HentMuligeBrevmottakereRequest(Produserbaredokumenter produserbartdokument, String orgnr) {
-    public HentMuligeBrevmottakereRequestDto tilHentMottakereRequest(Long behandlingID) {
-        return new HentMuligeBrevmottakereRequestDto(this.produserbartdokument(), behandlingID, this.orgnr());
+    public HentMuligeBrevmottakereComponent.RequestDto tilHentMuligeBrevmottakereRequestDto(Long behandlingID) {
+        return new HentMuligeBrevmottakereComponent.RequestDto(this.produserbartdokument(), behandlingID, this.orgnr());
     }
 }

@@ -8,7 +8,7 @@ import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.brev.Etat;
 import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.brev.BrevbestillingFasade;
-import no.nav.melosys.service.brev.BrevbestillingService;
+import no.nav.melosys.service.brev.BrevbestillingServiceOld;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -29,18 +29,18 @@ import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 @RequestScope
 public class BrevbestillingTjeneste {
 
-    private final BrevbestillingService brevbestillingService;
+    private final BrevbestillingServiceOld brevbestillingServiceOld;
     private final BrevmalListeBygger brevmalListeBygger;
     private final Aksesskontroll aksesskontroll;
     private final BrevbestillingFasade brevbestillingFasade;
     private final Unleash unleash;
 
     public BrevbestillingTjeneste(BrevbestillingFasade brevbestillingFasade,
-                                  BrevbestillingService brevbestillingService,
+                                  BrevbestillingServiceOld brevbestillingServiceOld,
                                   BrevmalListeBygger brevmalListeBygger,
                                   Aksesskontroll aksesskontroll, Unleash unleash) {
         this.brevbestillingFasade = brevbestillingFasade;
-        this.brevbestillingService = brevbestillingService;
+        this.brevbestillingServiceOld = brevbestillingServiceOld;
         this.brevmalListeBygger = brevmalListeBygger;
         this.aksesskontroll = aksesskontroll;
         this.unleash = unleash;
@@ -60,16 +60,16 @@ public class BrevbestillingTjeneste {
         aksesskontroll.autoriser(behandlingID);
 
         if (!unleash.isEnabled(ToggleName.MELOSYS_MEL_4835)) {
-            var gammelMuligeBrevmottakereDto = brevbestillingService.hentMuligeMottakere(hentMuligeBrevmottakereRequest.produserbartdokument(), behandlingID, hentMuligeBrevmottakereRequest.orgnr());
-            var hovedMottaker = MuligBrevmottaker.byggFraBrevmottakerDto(gammelMuligeBrevmottakereDto.getHovedMottaker());
-            var kopiMottakere = gammelMuligeBrevmottakereDto.getKopiMottakere().stream().map(MuligBrevmottaker::byggFraBrevmottakerDto).toList();
-            var fasteMottakere = gammelMuligeBrevmottakereDto.getFasteMottakere().stream().map(MuligBrevmottaker::byggFraBrevmottakerDto).toList();
+            var gammelMuligeBrevmottakereDto = brevbestillingServiceOld.hentMuligeMottakere(hentMuligeBrevmottakereRequest.produserbartdokument(), behandlingID, hentMuligeBrevmottakereRequest.orgnr());
+            var hovedMottaker = MuligBrevmottaker.tilMuligBrevmottaker(gammelMuligeBrevmottakereDto.getHovedMottaker());
+            var kopiMottakere = gammelMuligeBrevmottakereDto.getKopiMottakere().stream().map(MuligBrevmottaker::tilMuligBrevmottaker).toList();
+            var fasteMottakere = gammelMuligeBrevmottakereDto.getFasteMottakere().stream().map(MuligBrevmottaker::tilMuligBrevmottaker).toList();
             return new HentMuligeBrevmottakereResponse(hovedMottaker, kopiMottakere, fasteMottakere);
         }
 
-        var hentMottakerRequest = hentMuligeBrevmottakereRequest.tilHentMottakereRequest(behandlingID);
-        var hentMottakerResponse = brevbestillingFasade.hentMuligeMottakere(hentMottakerRequest);
-        return HentMuligeBrevmottakereResponse.byggFraHentMottakerResponse(hentMottakerResponse);
+        var hentMuligeMottakereRequestDto = hentMuligeBrevmottakereRequest.tilHentMuligeBrevmottakereRequestDto(behandlingID);
+        var hentMuligeMottakereResponseDto = brevbestillingFasade.hentMuligeMottakere(hentMuligeMottakereRequestDto);
+        return HentMuligeBrevmottakereResponse.av(hentMuligeMottakereResponseDto);
     }
 
     @PostMapping(value = "pdf/brev/utkast/{behandlingID}", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_PDF_VALUE)
@@ -82,7 +82,7 @@ public class BrevbestillingTjeneste {
             BrevbestillingDto brevbestillingDto = brevbestillingRequest.tilBrevbestillingDtoBuilder()
                 .medBestillersId(SubjectHandler.getInstance().getUserID())
                 .build();
-            byte[] pdf = brevbestillingService.produserUtkast(behandlingID, brevbestillingDto);
+            byte[] pdf = brevbestillingServiceOld.produserUtkast(behandlingID, brevbestillingDto);
             return new ResponseEntity<>(pdf, genPdfHeaders("utkast_" + behandlingID), HttpStatus.OK);
         }
 
@@ -101,7 +101,7 @@ public class BrevbestillingTjeneste {
             BrevbestillingDto brevbestillingDto = brevbestillingRequest.tilBrevbestillingDtoBuilder()
                 .medBestillersId(SubjectHandler.getInstance().getUserID())
                 .build();
-            brevbestillingService.produserBrev(behandlingID, brevbestillingDto);
+            brevbestillingServiceOld.produserBrev(behandlingID, brevbestillingDto);
             return;
         }
 
@@ -115,7 +115,7 @@ public class BrevbestillingTjeneste {
                                                                  @RequestBody HentMuligeBrevmottakereEtaterRequest hentMuligeBrevmottakereEtaterRequest) {
         aksesskontroll.autoriser(behandlingID);
         var muligeBrevmottakere = brevbestillingFasade.hentMuligeBrevmottakereEtater(hentMuligeBrevmottakereEtaterRequest.orgnrEtater());
-        return muligeBrevmottakere.stream().map(MuligBrevmottaker::byggFraBrevmottakerDto).toList();
+        return muligeBrevmottakere.stream().map(MuligBrevmottaker::tilMuligBrevmottaker).toList();
     }
 
     @GetMapping(value = "/tilgjengelige-etater", produces = APPLICATION_JSON_VALUE)

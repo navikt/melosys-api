@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 
 @Component
-public class ProduserBrev {
+public class ProduserBrevComponent {
 
     private static final List<Produserbaredokumenter> DOKUMENTER_SOM_KAN_MANUELT_PRODUSERES = List.of(
         MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
@@ -28,7 +28,7 @@ public class ProduserBrev {
 
     private final DokumentServiceFasade dokumentServiceFasade;
 
-    public ProduserBrev(DokumentServiceFasade dokumentServiceFasade) {
+    public ProduserBrevComponent(DokumentServiceFasade dokumentServiceFasade) {
         this.dokumentServiceFasade = dokumentServiceFasade;
     }
 

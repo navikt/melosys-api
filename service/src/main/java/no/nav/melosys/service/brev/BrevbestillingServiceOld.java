@@ -32,7 +32,7 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 
 @Deprecated(since = "Ta vekk sammens med melosys.MEL-4835.refactor1 toggle, erstattet av BrevbestillingFasade")
 @Service
-public class BrevbestillingService {
+public class BrevbestillingServiceOld {
 
     @Deprecated(since = "Ta vekk sammens med melosys.MEL-4835.refactor1")
     private static final List<Produserbaredokumenter> BREV_TILGJENGELIG_FOR_MANUELL_BESTILLING = List.of(
@@ -57,14 +57,14 @@ public class BrevbestillingService {
     private final DokumentNavnService dokumentNavnService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
 
-    public BrevbestillingService(BrevmottakerService brevmottakerService,
-                                 DokumentServiceFasade dokumentServiceFasade,
-                                 BehandlingService behandlingService,
-                                 EregFasade eregFasade,
-                                 KontaktopplysningService kontaktopplysningService,
-                                 PersondataFasade persondataFasade,
-                                 DokumentNavnService dokumentNavnService,
-                                 UtenlandskMyndighetService utenlandskMyndighetService
+    public BrevbestillingServiceOld(BrevmottakerService brevmottakerService,
+                                    DokumentServiceFasade dokumentServiceFasade,
+                                    BehandlingService behandlingService,
+                                    EregFasade eregFasade,
+                                    KontaktopplysningService kontaktopplysningService,
+                                    PersondataFasade persondataFasade,
+                                    DokumentNavnService dokumentNavnService,
+                                    UtenlandskMyndighetService utenlandskMyndighetService
     ) {
         this.brevmottakerService = brevmottakerService;
         this.dokumentServiceFasade = dokumentServiceFasade;
