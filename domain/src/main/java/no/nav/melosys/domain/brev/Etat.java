@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 public enum Etat {
-    HELFO_ORGNR("HELFO", "986965610"),
+    HELFO_ORGNR("Helfo", "986965610"),
     SKATTEETATEN_ORGNR("Skatteetaten", "974761076"),
     SKATTINNKREVER_UTLAND_ORGNR("Skatteinnkrever utland", "992187298");
 

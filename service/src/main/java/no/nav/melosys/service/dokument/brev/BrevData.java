@@ -9,17 +9,18 @@ public class BrevData {
 
     public String begrunnelseKode;
 
-    public BrevData(BrevbestillingRequest brevbestillingRequest) {
-        this(brevbestillingRequest, SubjectHandler.getInstance().getUserID());
+    public BrevData(BrevbestillingDto brevbestillingDto) {
+        this(brevbestillingDto, SubjectHandler.getInstance().getUserID());
     }
 
-    public BrevData(BrevbestillingRequest brevbestillingRequest, String saksbehandler) {
+    public BrevData(BrevbestillingDto brevbestillingDto, String saksbehandler) {
         this.saksbehandler = saksbehandler;
-        this.fritekst = brevbestillingRequest.getFritekst();
-        this.begrunnelseKode = brevbestillingRequest.getBegrunnelseKode();
+        this.fritekst = brevbestillingDto.getFritekst();
+        this.begrunnelseKode = brevbestillingDto.getBegrunnelseKode();
     }
 
-    public BrevData() { }
+    public BrevData() {
+    }
 
     // Brukes av saksflyt
     public BrevData(String saksbehandler) {

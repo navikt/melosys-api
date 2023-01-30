@@ -4,8 +4,6 @@ import java.util.Collections;
 import java.util.Set;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
@@ -14,6 +12,8 @@ import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Maritimtyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -22,7 +22,7 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelseFlereLand;
-import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
@@ -54,7 +54,7 @@ class BrevDataByggerInnvilgelseFlereLandTest {
     BrevDataByggerA1 brevDataByggerA1;
 
     private Behandling behandling;
-    private BrevbestillingRequest brevbestillingRequest;
+    private BrevbestillingDto brevbestillingDto;
     private final String saksbehandler = "saksbehandler";
     private BrevDataBygger brevDataByggerInnvilgelse;
 
@@ -74,7 +74,7 @@ class BrevDataByggerInnvilgelseFlereLandTest {
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
         behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new Soeknad());
 
-        brevbestillingRequest = new BrevbestillingRequest.Builder()
+        brevbestillingDto = new BrevbestillingDto.Builder()
             .medMottaker(Aktoersroller.BRUKER)
             .medBegrunnelseKode("BEGRUNNELSEKODE")
             .medFritekst("FRITEKST")
@@ -92,7 +92,7 @@ class BrevDataByggerInnvilgelseFlereLandTest {
             landvelgerService,
             lovvalgsperiodeService,
             saksopplysningerService,
-            brevbestillingRequest,
+            brevbestillingDto,
             brevDataByggerA1);
     }
 
@@ -146,8 +146,8 @@ class BrevDataByggerInnvilgelseFlereLandTest {
     void lag_innvilgelsesBrev_harBestillingsinformasjon() {
         BrevData brevData = brevDataByggerInnvilgelse.lag(lagBrevressurser(), saksbehandler);
 
-        assertThat(brevData.begrunnelseKode).isEqualTo(brevbestillingRequest.getBegrunnelseKode());
-        assertThat(brevData.fritekst).isEqualTo(brevbestillingRequest.getFritekst());
+        assertThat(brevData.begrunnelseKode).isEqualTo(brevbestillingDto.getBegrunnelseKode());
+        assertThat(brevData.fritekst).isEqualTo(brevbestillingDto.getFritekst());
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
     }
 }

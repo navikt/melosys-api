@@ -16,7 +16,7 @@ import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
-import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -76,12 +76,12 @@ public class TrygdeavtaleVedtakService {
 
         prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling, request);
 
-        BrevbestillingRequest brevbestillingRequest = lagBrevbestilling(behandling, request);
-        dokgenService.produserOgDistribuerBrev(behandlingID, brevbestillingRequest);
+        BrevbestillingDto brevbestillingDto = lagBrevbestilling(behandling, request);
+        dokgenService.produserOgDistribuerBrev(behandlingID, brevbestillingDto);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
     }
 
-    private BrevbestillingRequest lagBrevbestilling(Behandling behandling, FattVedtakRequest request) {
+    private BrevbestillingDto lagBrevbestilling(Behandling behandling, FattVedtakRequest request) {
         if (request.getBehandlingsresultatTypeKode() == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
             return lagAvslagMangledeOpplysningerBrevbestilling(request);
         }
@@ -92,8 +92,8 @@ public class TrygdeavtaleVedtakService {
         return lagTrygdeavtaleBrevbestilling(request, produserbaredokumenter.get());
     }
 
-    private BrevbestillingRequest lagAvslagMangledeOpplysningerBrevbestilling(FattVedtakRequest request) {
-        return new BrevbestillingRequest.Builder()
+    private BrevbestillingDto lagAvslagMangledeOpplysningerBrevbestilling(FattVedtakRequest request) {
+        return new BrevbestillingDto.Builder()
             .medProduserbardokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER)
             .medMottaker(Aktoersroller.BRUKER)
             .medBestillersId(request.getBestillersId())
@@ -101,8 +101,8 @@ public class TrygdeavtaleVedtakService {
             .build();
     }
 
-    private BrevbestillingRequest lagTrygdeavtaleBrevbestilling(FattVedtakRequest request, Produserbaredokumenter produserbaredokumenter) {
-        return new BrevbestillingRequest.Builder()
+    private BrevbestillingDto lagTrygdeavtaleBrevbestilling(FattVedtakRequest request, Produserbaredokumenter produserbaredokumenter) {
+        return new BrevbestillingDto.Builder()
             .medProduserbardokument(produserbaredokumenter)
             .medMottaker(Aktoersroller.BRUKER)
             .medKopiMottakere(request.getKopiMottakere())

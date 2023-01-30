@@ -129,7 +129,7 @@ class UtenlandskMyndighetServiceTest {
     @Test
     void hentUtenlandskMyndighet_kasterIkkeFunnetException_nårUtenlandskmyndighetIkkeErFunnet() {
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.SE))
+            .isThrownBy(() -> utenlandskMyndighetService.hentUtenlandskMyndighet(Land_iso2.SE, null))
             .withMessageContaining("Finner ikke utenlandskMyndighet for SE.");
     }
 
