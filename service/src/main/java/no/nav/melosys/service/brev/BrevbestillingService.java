@@ -4,7 +4,7 @@ import java.util.List;
 
 import no.nav.melosys.domain.brev.Etat;
 import no.nav.melosys.domain.brev.muligemottakere.Brevmottaker;
-import no.nav.melosys.service.brev.feature.*;
+import no.nav.melosys.service.brev.components.*;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

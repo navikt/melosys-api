@@ -1,6 +1,4 @@
-package no.nav.melosys.service.brev.feature;
-
-import java.util.List;
+package no.nav.melosys.service.brev.components;
 
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
@@ -8,6 +6,8 @@ import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 

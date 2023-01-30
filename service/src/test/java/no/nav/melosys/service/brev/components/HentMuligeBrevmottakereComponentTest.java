@@ -1,4 +1,4 @@
-package no.nav.melosys.service.brev.feature;
+package no.nav.melosys.service.brev.components;
 
 import java.time.LocalDate;
 import java.util.List;
