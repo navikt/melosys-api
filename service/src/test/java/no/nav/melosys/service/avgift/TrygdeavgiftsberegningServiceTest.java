@@ -134,8 +134,10 @@ class TrygdeavgiftsberegningServiceTest {
         final var forventetTrygdesats = new BigDecimal("12.2");
         when(trygdeavgiftConsumer.beregnTrygdeavgift(eq(new MelosysTrygdeavgfitBeregningDto(
             false, true, medlemskapsperiode.getDekning(), medlemskapsperiode.getBestemmelse(),
-            medlemAvFolketrygden.getFastsattTrygdeavgift().getAvgiftspliktigUtenlandskInntektMnd(), LocalDate.now(), null
-        )))).thenReturn(new TrygdeavgiftDto("kode", forventetTrygdesats, forventetTrygdeavgiftsbeløp));
+            medlemAvFolketrygden.getFastsattTrygdeavgift().getAvgiftspliktigUtenlandskInntektMnd(), null,
+            medlemskapsperiode.getFom(), medlemskapsperiode.getTom())))).thenReturn([])
+
+            //.thenReturn(new TrygdeavgiftDto("kode", forventetTrygdesats, forventetTrygdeavgiftsbeløp));
 
         trygdeavgiftsberegningService.beregnAvgift(behandlingsresultatID);
 

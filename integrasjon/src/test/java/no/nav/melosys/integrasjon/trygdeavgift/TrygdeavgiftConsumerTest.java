@@ -50,15 +50,15 @@ class TrygdeavgiftConsumerTest {
             .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
         );
 
-        TrygdeavgiftDto response = trygdeavgiftConsumer.beregnTrygdeavgift(lagBeregningsgrunnlagDto());
-        assertThat(response)
+        TrygdeavgiftDto[] response = trygdeavgiftConsumer.beregnTrygdeavgift(lagBeregningsgrunnlagDto());
+        assertThat(response[0])
             .extracting(TrygdeavgiftDto::getAvgiftskode, TrygdeavgiftDto::getAvgiftssats, TrygdeavgiftDto::getMaanedsavgift)
             .containsExactly("B2R", new BigDecimal("21.8"), new BigDecimal(21800));
     }
 
     private MelosysTrygdeavgfitBeregningDto lagBeregningsgrunnlagDto() {
         return new MelosysTrygdeavgfitBeregningDto(Boolean.FALSE, Boolean.FALSE, Trygdedekninger.HELSEDEL,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8, 123321, LocalDate.now(), Saerligeavgiftsgrupper.ARBEIDSTAKER_MALAYSIA);
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8, 123321, LocalDate.now(), Saerligeavgiftsgrupper.ARBEIDSTAKER_MALAYSIA, LocalDate.of(2022, 05, 12), LocalDate.of(2023, 11, 03));
     }
 
     private String hentMockRespons() throws URISyntaxException, IOException {

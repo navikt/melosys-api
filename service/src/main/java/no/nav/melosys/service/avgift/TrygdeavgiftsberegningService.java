@@ -1,6 +1,5 @@
 package no.nav.melosys.service.avgift;
 
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -87,25 +86,29 @@ public class TrygdeavgiftsberegningService {
                                     AvgiftsgrunnlagInfo avgiftsgrunnlag,
                                     long inntektPerMd,
                                     boolean erAvgiftForNorskInntekt) {
-        var beregningsresultat = trygdeavgiftConsumer.beregnTrygdeavgift(
+
+        var beregningsresultater = trygdeavgiftConsumer.beregnTrygdeavgift(
             new MelosysTrygdeavgfitBeregningDto(
                 avgiftsgrunnlag.betalerArbeidsgiverAvgift(),
                 avgiftsgrunnlag.erSkattepliktig(),
                 medlemskapsperiode.getDekning(),
                 medlemskapsperiode.getBestemmelse(),
                 inntektPerMd,
-                LocalDate.now(),
-                avgiftsgrunnlag.getSærligAvgiftsgruppe()
+                avgiftsgrunnlag.getSærligAvgiftsgruppe(),
+                medlemskapsperiode.getFom(),
+                medlemskapsperiode.getTom()
             )
         );
 
-        medlemskapsperiode.getTrygdeavgift().add(
-            new Trygdeavgift(
-                medlemskapsperiode,
-                beregningsresultat.getMaanedsavgift(),
-                beregningsresultat.getAvgiftssats(),
-                beregningsresultat.getAvgiftskode(),
-                erAvgiftForNorskInntekt
+        beregningsresultater.stream().forEach(beregningsresultat ->
+            medlemskapsperiode.getTrygdeavgift().add(
+                new Trygdeavgift(
+                    medlemskapsperiode,
+                    beregningsresultat.getMaanedsavgift(),
+                    beregningsresultat.getAvgiftssats(),
+                    beregningsresultat.getAvgiftskode(),
+                    erAvgiftForNorskInntekt
+                )
             )
         );
     }
