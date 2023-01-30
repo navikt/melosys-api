@@ -290,7 +290,7 @@ class BrevbestillingServiceTest {
                         MuligMottakerDto::getRolle,
                         MuligMottakerDto::getAktørId,
                         MuligMottakerDto::getOrgnr)
-                .containsExactly("Kopi til bruker", "Ola Nordmann", BRUKER, "aktørID", null);
+                .containsExactly("Kopi til bruker", "Ola Nordmann", BRUKER, "aktørId", null);
     }
 
     @Deprecated(since = "Erstattes av HentMottakereTest. Ta vekk sammen med melosys.MEL-4835.refactor1 unleash toggle")
@@ -852,7 +852,7 @@ class BrevbestillingServiceTest {
         Fagsak fagsak = new Fagsak();
         Aktoer bruker = new Aktoer();
         bruker.setRolle(BRUKER);
-        bruker.setAktørId("aktørID");
+        bruker.setAktørId("aktørId");
         fagsak.getAktører().add(bruker);
         return fagsak;
     }
