@@ -61,9 +61,9 @@ public class BrevbestillingTjeneste {
 
         if (!unleash.isEnabled(ToggleName.MELOSYS_MEL_4835)) {
             var gammelMuligeBrevmottakereDto = brevbestillingServiceOld.hentMuligeMottakere(hentMuligeBrevmottakereRequest.produserbartdokument(), behandlingID, hentMuligeBrevmottakereRequest.orgnr());
-            var hovedMottaker = MuligBrevmottaker.tilMuligBrevmottaker(gammelMuligeBrevmottakereDto.getHovedMottaker());
-            var kopiMottakere = gammelMuligeBrevmottakereDto.getKopiMottakere().stream().map(MuligBrevmottaker::tilMuligBrevmottaker).toList();
-            var fasteMottakere = gammelMuligeBrevmottakereDto.getFasteMottakere().stream().map(MuligBrevmottaker::tilMuligBrevmottaker).toList();
+            var hovedMottaker = MuligBrevmottaker.av(gammelMuligeBrevmottakereDto.getHovedMottaker());
+            var kopiMottakere = gammelMuligeBrevmottakereDto.getKopiMottakere().stream().map(MuligBrevmottaker::av).toList();
+            var fasteMottakere = gammelMuligeBrevmottakereDto.getFasteMottakere().stream().map(MuligBrevmottaker::av).toList();
             return new HentMuligeBrevmottakereResponse(hovedMottaker, kopiMottakere, fasteMottakere);
         }
 
@@ -115,7 +115,7 @@ public class BrevbestillingTjeneste {
                                                                  @RequestBody HentMuligeBrevmottakereEtaterRequest hentMuligeBrevmottakereEtaterRequest) {
         aksesskontroll.autoriser(behandlingID);
         var muligeBrevmottakere = brevbestillingService.hentMuligeBrevmottakereEtater(hentMuligeBrevmottakereEtaterRequest.orgnrEtater());
-        return muligeBrevmottakere.stream().map(MuligBrevmottaker::tilMuligBrevmottaker).toList();
+        return muligeBrevmottakere.stream().map(MuligBrevmottaker::av).toList();
     }
 
     @GetMapping(value = "/tilgjengelige-etater", produces = APPLICATION_JSON_VALUE)

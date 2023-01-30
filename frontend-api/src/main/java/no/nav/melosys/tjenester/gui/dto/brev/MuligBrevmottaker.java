@@ -9,7 +9,7 @@ public record MuligBrevmottaker(String mottakerNavn,
                                 String orgnr,
                                 String aktørId,
                                 String institusjonId) {
-    public static MuligBrevmottaker tilMuligBrevmottaker(Brevmottaker hovedMottaker) {
+    public static MuligBrevmottaker av(Brevmottaker hovedMottaker) {
         return new MuligBrevmottaker(
             hovedMottaker.getMottakerNavn(),
             hovedMottaker.getDokumentNavn(),
