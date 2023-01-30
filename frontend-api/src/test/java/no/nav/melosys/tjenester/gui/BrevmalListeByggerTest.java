@@ -25,6 +25,8 @@ import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.BrevmalListeService;
 import no.nav.melosys.service.brev.DokumentNavnService;
+import no.nav.melosys.service.brev.components.HentBrevAdresseTilMottakereComponent;
+import no.nav.melosys.service.brev.components.HentMuligeProduserbaredokumenterComponent;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -50,6 +52,10 @@ class BrevmalListeByggerTest {
     private DokumentServiceFasade dokServiceFasade;
 
     @Mock
+    private HentMuligeProduserbaredokumenterComponent hentMuligeProduserbaredokumenterComponent;
+    @Mock
+    private HentBrevAdresseTilMottakereComponent hentBrevAdresseTilMottakereComponent;
+    @Mock
     private BrevmottakerService brevmottakerService;
     @Mock
     private PersondataFasade persondataFasade;
@@ -66,7 +72,7 @@ class BrevmalListeByggerTest {
 
     @BeforeEach
     void init() {
-        BrevmalListeService brevmalListeService = new BrevmalListeService(brevmottakerService,
+        BrevmalListeService brevmalListeService = new BrevmalListeService(hentMuligeProduserbaredokumenterComponent, hentBrevAdresseTilMottakereComponent, brevmottakerService,
             behandlingService,
             persondataFasade,
             kontaktopplysningService,
@@ -704,7 +710,7 @@ class BrevmalListeByggerTest {
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
-        
+
         assertThat(tilgjengeligeMaler).hasSize(5);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
             .hasSize(3)

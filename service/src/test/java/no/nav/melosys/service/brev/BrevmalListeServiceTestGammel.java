@@ -44,8 +44,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
+@Deprecated(since = "Ta vekk med melosys.MEL-4835.refactor1, ertattes av Component tester (som allerede er på plass)")
 @ExtendWith(MockitoExtension.class)
-class BrevmalListeServiceTest {
+class BrevmalListeServiceTestGammel {
 
     @Mock
     private BehandlingService behandlingService;
@@ -74,7 +75,7 @@ class BrevmalListeServiceTest {
     void hentBrevMaler_tilBruker_returnererKorrektListe() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
 
-        List<Produserbaredokumenter> brevMaler = brevmalListeService.hentMuligeProduserbaredokumenter(123L, BRUKER);
+        List<Produserbaredokumenter> brevMaler = brevmalListeService.hentMuligeProduserbaredokumenterGammel(123L, BRUKER);
 
         assertThat(brevMaler)
             .hasSize(2)
@@ -88,7 +89,7 @@ class BrevmalListeServiceTest {
     void hentBrevMaler_tilArbeidsgiver_returnererKorrektListe() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
 
-        List<Produserbaredokumenter> brevMaler = brevmalListeService.hentMuligeProduserbaredokumenter(123L, ARBEIDSGIVER);
+        List<Produserbaredokumenter> brevMaler = brevmalListeService.hentMuligeProduserbaredokumenterGammel(123L, ARBEIDSGIVER);
 
         assertThat(brevMaler)
             .hasSize(2)
@@ -102,7 +103,7 @@ class BrevmalListeServiceTest {
     void hentBrevMaler_tilVirksomhet_returnererKorrektListe() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
 
-        List<Produserbaredokumenter> brevMaler = brevmalListeService.hentMuligeProduserbaredokumenter(123L, VIRKSOMHET);
+        List<Produserbaredokumenter> brevMaler = brevmalListeService.hentMuligeProduserbaredokumenterGammel(123L, VIRKSOMHET);
 
         assertThat(brevMaler).hasSize(1).containsExactly(GENERELT_FRITEKSTBREV_VIRKSOMHET);
     }
@@ -111,7 +112,7 @@ class BrevmalListeServiceTest {
     void hentBrevMaler_behandlingAvsluttet_returnererTomListe() {
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         when(behandlingService.hentBehandlingMedSaksopplysninger(321L)).thenReturn(behandling);
-        List<Produserbaredokumenter> brevMaler = brevmalListeService.hentMuligeProduserbaredokumenter(321L, BRUKER);
+        List<Produserbaredokumenter> brevMaler = brevmalListeService.hentMuligeProduserbaredokumenterGammel(321L, BRUKER);
 
         assertThat(brevMaler).isEmpty();
     }
@@ -121,7 +122,7 @@ class BrevmalListeServiceTest {
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.getFagsak().setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         when(behandlingService.hentBehandlingMedSaksopplysninger(321L)).thenReturn(behandling);
-        List<Produserbaredokumenter> brevMaler = brevmalListeService.hentMuligeProduserbaredokumenter(321L, BRUKER);
+        List<Produserbaredokumenter> brevMaler = brevmalListeService.hentMuligeProduserbaredokumenterGammel(321L, BRUKER);
 
         assertThat(brevMaler)
             .hasSize(3)
@@ -136,7 +137,7 @@ class BrevmalListeServiceTest {
     void hentBrevMaler_behandlingErKlage_returnererKorrekt() {
         behandling.setType(Behandlingstyper.KLAGE);
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
-        List<Produserbaredokumenter> brevMaler = brevmalListeService.hentMuligeProduserbaredokumenter(123L, BRUKER);
+        List<Produserbaredokumenter> brevMaler = brevmalListeService.hentMuligeProduserbaredokumenterGammel(123L, BRUKER);
 
         assertThat(brevMaler)
             .hasSize(2)
@@ -153,7 +154,7 @@ class BrevmalListeServiceTest {
             .thenReturn(List.of(lagAktoerOrg(Aktoersroller.BRUKER, null)));
         when(persondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse());
 
-        var brevAdresser = brevmalListeService.hentBrevAdresseTilMottakere(Aktoersroller.BRUKER, 123);
+        var brevAdresser = brevmalListeService.hentBrevAdresseTilMottakereGammel(Aktoersroller.BRUKER, 123);
 
         assertThat(brevAdresser).hasSize(1);
         assertThat(brevAdresser.get(0))
@@ -184,7 +185,7 @@ class BrevmalListeServiceTest {
             .thenReturn(List.of(lagAktoerOrg(Aktoersroller.REPRESENTANT, "orgNr")));
         when(eregFasade.hentOrganisasjon("orgNr")).thenReturn(lagOrgSaksopplysning("orgNr", "Ola Nordmann Fullmektig"));
 
-        var brevAdresser = brevmalListeService.hentBrevAdresseTilMottakere(Aktoersroller.BRUKER, 123);
+        var brevAdresser = brevmalListeService.hentBrevAdresseTilMottakereGammel(Aktoersroller.BRUKER, 123);
 
         assertThat(brevAdresser).hasSize(1);
         assertThat(brevAdresser.get(0))
@@ -215,7 +216,7 @@ class BrevmalListeServiceTest {
             .thenReturn(List.of(lagAktoerPerson(Aktoersroller.REPRESENTANT, "fnr")));
         when(persondataFasade.hentPerson("fnr")).thenReturn(lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse());
 
-        var brevAdresser = brevmalListeService.hentBrevAdresseTilMottakere(Aktoersroller.BRUKER, 123);
+        var brevAdresser = brevmalListeService.hentBrevAdresseTilMottakereGammel(Aktoersroller.BRUKER, 123);
 
         assertThat(brevAdresser).hasSize(1);
         assertThat(brevAdresser.get(0))
@@ -248,7 +249,7 @@ class BrevmalListeServiceTest {
         when(eregFasade.hentOrganisasjon("orgNr1")).thenReturn(lagOrgSaksopplysning("orgNr1", "Ola Nordmann Rørleggerfirma"));
         when(eregFasade.hentOrganisasjon("orgNr2")).thenReturn(lagOrgSaksopplysning("orgNr2", "Ida Nordmann Rørleggerfirma"));
 
-        var brevAdresser = brevmalListeService.hentBrevAdresseTilMottakere(Aktoersroller.ARBEIDSGIVER, 123);
+        var brevAdresser = brevmalListeService.hentBrevAdresseTilMottakereGammel(Aktoersroller.ARBEIDSGIVER, 123);
 
         assertThat(brevAdresser).hasSize(2);
         assertThat(brevAdresser.get(0))
@@ -292,7 +293,7 @@ class BrevmalListeServiceTest {
         when(brevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Aktoersroller.ARBEIDSGIVER)), any(), eq(false), eq(false)))
             .thenReturn(emptyList());
 
-        var brevAdresser = brevmalListeService.hentBrevAdresseTilMottakere(Aktoersroller.ARBEIDSGIVER, 123L);
+        var brevAdresser = brevmalListeService.hentBrevAdresseTilMottakereGammel(Aktoersroller.ARBEIDSGIVER, 123L);
 
         assertThat(brevAdresser).isEmpty();
     }
@@ -306,7 +307,7 @@ class BrevmalListeServiceTest {
             .thenReturn(List.of(lagAktoerOrg(Aktoersroller.REPRESENTANT, "orgNr")));
         when(eregFasade.hentOrganisasjon("orgNr")).thenReturn(lagOrgSaksopplysning("orgNr", "Ola Nordmann Fullmektig"));
 
-        var brevAdresser = brevmalListeService.hentBrevAdresseTilMottakere(Aktoersroller.ARBEIDSGIVER, 123);
+        var brevAdresser = brevmalListeService.hentBrevAdresseTilMottakereGammel(Aktoersroller.ARBEIDSGIVER, 123);
 
         assertThat(brevAdresser).hasSize(1);
         assertThat(brevAdresser.get(0))
@@ -334,7 +335,7 @@ class BrevmalListeServiceTest {
             .thenReturn(List.of(lagAktoerOrg(VIRKSOMHET, "orgNr1")));
         when(eregFasade.hentOrganisasjon("orgNr1")).thenReturn(lagOrgSaksopplysning("orgNr1", "Ola Nordmann Rørleggerfirma"));
 
-        var brevAdresser = brevmalListeService.hentBrevAdresseTilMottakere(VIRKSOMHET, 123);
+        var brevAdresser = brevmalListeService.hentBrevAdresseTilMottakereGammel(VIRKSOMHET, 123);
 
         assertThat(brevAdresser).hasSize(1);
         assertThat(brevAdresser.get(0))
@@ -364,7 +365,7 @@ class BrevmalListeServiceTest {
         Personopplysninger persondata = PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser();
         when(persondataFasade.hentPerson(anyString())).thenReturn(persondata);
 
-        var brevAdresser = brevmalListeService.hentBrevAdresseTilMottakere(Aktoersroller.BRUKER, 123L);
+        var brevAdresser = brevmalListeService.hentBrevAdresseTilMottakereGammel(Aktoersroller.BRUKER, 123L);
 
         assertThat(brevAdresser).hasSize(1);
         assertThat(brevAdresser.get(0))
@@ -386,7 +387,7 @@ class BrevmalListeServiceTest {
             .thenReturn(List.of(lagAktoerOrg(Aktoersroller.BRUKER, null)));
         when(persondataFasade.hentPerson(anyString())).thenReturn(lagPersondataMedTomCo());
 
-        var brevAdresser = brevmalListeService.hentBrevAdresseTilMottakere(Aktoersroller.BRUKER, 123L);
+        var brevAdresser = brevmalListeService.hentBrevAdresseTilMottakereGammel(Aktoersroller.BRUKER, 123L);
 
         assertThat(brevAdresser).hasSize(1);
         assertThat(brevAdresser.get(0).getAdresselinjer()).isEqualTo(List.of("gatenavnFraBostedsadresse 3"));

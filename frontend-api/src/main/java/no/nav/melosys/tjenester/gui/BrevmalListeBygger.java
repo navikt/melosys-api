@@ -14,6 +14,7 @@ import no.nav.melosys.domain.kodeverk.brev.Distribusjonstype;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.BrevmalListeService;
 import no.nav.melosys.service.brev.brevmalliste.BrevAdresse;
@@ -43,7 +44,12 @@ public class BrevmalListeBygger {
     }
 
     private BrevmalResponse mottakerTilBrevmalDto(long behandlingId, MottakerDto mottaker) {
-        List<Produserbaredokumenter> produserbareDokumenter = brevmalListeService.hentMuligeProduserbaredokumenter(behandlingId, mottaker.getRolle());
+        List<Produserbaredokumenter> produserbareDokumenter = null;
+        if (unleash.isEnabled(ToggleName.MELOSYS_MEL_4835)) {
+            produserbareDokumenter = brevmalListeService.hentMuligeProduserbaredokumenter(behandlingId, mottaker.getRolle());
+        } else {
+            produserbareDokumenter = brevmalListeService.hentMuligeProduserbaredokumenterGammel(behandlingId, mottaker.getRolle());
+        }
 
         List<BrevmalTypeDto> typer = produserbareDokumenter.stream().map(dokument -> switch (dokument) {
                 case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE ->
@@ -129,7 +135,13 @@ public class BrevmalListeBygger {
 
     private void leggTilAdresseOgFeilmelding(MottakerDto.Builder builder, Aktoersroller aktoersroller, long behandlingId) {
         try {
-            var brevAdresser = brevmalListeService.hentBrevAdresseTilMottakere(aktoersroller, behandlingId);
+            List<BrevAdresse> brevAdresser = null;
+            if (unleash.isEnabled(ToggleName.MELOSYS_MEL_4835)) {
+                brevAdresser = brevmalListeService.hentBrevAdresseTilMottakere(behandlingId, aktoersroller);
+            } else {
+                brevAdresser = brevmalListeService.hentBrevAdresseTilMottakereGammel(aktoersroller, behandlingId);
+            }
+            
             if ((aktoersroller == BRUKER || aktoersroller == VIRKSOMHET || aktoersroller == TRYGDEMYNDIGHET) && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty)) {
                 builder.medFeilmelding(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
             } else {
