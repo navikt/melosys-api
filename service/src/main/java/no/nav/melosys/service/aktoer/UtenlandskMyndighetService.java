@@ -33,9 +33,10 @@ public class UtenlandskMyndighetService {
 
     static {
         var utenlandskMyndighet = new UtenlandskMyndighet();
-        utenlandskMyndighet.navn = "Social Security Administration Division of Training and Program Support";
-        utenlandskMyndighet.gateadresse1 = "International Support Branch, NT 03-A-09 6100 Wabash Avenue Baltimore";
-        utenlandskMyndighet.postnummer = "MD 21215";
+        utenlandskMyndighet.navn = "Social Security Administration";
+        utenlandskMyndighet.gateadresse1 = "Division of Training and Program Support";
+        utenlandskMyndighet.gateadresse2 = "International Support Branch, NT 03-A-09 6100 Wabash Avenue";
+        utenlandskMyndighet.poststed = "Baltimore MD 21215";
         utenlandskMyndighet.land = "USA";
         utenlandskMyndighet.landkode = Land_iso2.US;
         utenlandskMyndighetUnntakUSA = utenlandskMyndighet;
