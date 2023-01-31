@@ -27,7 +27,7 @@ public record BrevbestillingUtkast(
     Distribusjonstype distribusjonstype,
     boolean kontaktopplysninger,
     String nyVurderingBakgrunn,
-    List<VedleggUtkast.Saksvedlegg> saksvedlegg,
+    List<VedleggUtkast.Saksvedlegg> saksVedlegg,
     List<VedleggUtkast.FritekstVedlegg> fritekstVedlegg,
     String dokumentTittel
 ) {
