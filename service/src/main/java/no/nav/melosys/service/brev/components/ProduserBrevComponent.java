@@ -1,6 +1,4 @@
-package no.nav.melosys.service.brev.produserbrev;
-
-import java.util.List;
+package no.nav.melosys.service.brev.components;
 
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
@@ -9,10 +7,12 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 
 @Component
-public class ProduserBrev {
+public class ProduserBrevComponent {
 
     private static final List<Produserbaredokumenter> DOKUMENTER_SOM_KAN_MANUELT_PRODUSERES = List.of(
         MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
@@ -28,7 +28,7 @@ public class ProduserBrev {
 
     private final DokumentServiceFasade dokumentServiceFasade;
 
-    public ProduserBrev(DokumentServiceFasade dokumentServiceFasade) {
+    public ProduserBrevComponent(DokumentServiceFasade dokumentServiceFasade) {
         this.dokumentServiceFasade = dokumentServiceFasade;
     }
 

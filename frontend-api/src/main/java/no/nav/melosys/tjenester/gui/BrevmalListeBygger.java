@@ -1,5 +1,9 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -10,29 +14,25 @@ import no.nav.melosys.domain.kodeverk.brev.Distribusjonstype;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.brev.BrevAdresse;
-import no.nav.melosys.service.brev.BrevbestillingService;
+import no.nav.melosys.service.brev.BrevmalListeService;
+import no.nav.melosys.service.brev.brevmalliste.BrevAdresse;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.tjenester.gui.dto.brev.*;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 import static java.util.Arrays.asList;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 
 @Component
 public class BrevmalListeBygger {
-
-    private final BrevbestillingService brevbestillingService;
+    private final BrevmalListeService brevmalListeService;
     private final BehandlingService behandlingService;
     private final Unleash unleash;
 
-    public BrevmalListeBygger(BrevbestillingService brevbestillingService, BehandlingService behandlingService, Unleash unleash) {
-        this.brevbestillingService = brevbestillingService;
+    public BrevmalListeBygger(BrevmalListeService brevmalListeService, BehandlingService behandlingService, Unleash unleash) {
+        this.brevmalListeService = brevmalListeService;
         this.behandlingService = behandlingService;
         this.unleash = unleash;
     }
@@ -44,13 +44,21 @@ public class BrevmalListeBygger {
     }
 
     private BrevmalResponse mottakerTilBrevmalDto(long behandlingId, MottakerDto mottaker) {
-        List<Produserbaredokumenter> produserbareDokumenter = brevbestillingService.hentMuligeProduserbaredokumenter(behandlingId, mottaker.getRolle());
+        List<Produserbaredokumenter> produserbareDokumenter = null;
+        if (unleash.isEnabled(ToggleName.MELOSYS_MEL_4835)) {
+            produserbareDokumenter = brevmalListeService.hentMuligeProduserbaredokumenter(behandlingId, mottaker.getRolle());
+        } else {
+            produserbareDokumenter = brevmalListeService.hentMuligeProduserbaredokumenterGammel(behandlingId, mottaker.getRolle());
+        }
 
         List<BrevmalTypeDto> typer = produserbareDokumenter.stream().map(dokument -> switch (dokument) {
-                case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> lagBrevmalTypeDtoForForventetSaksbehandlingstid(dokument);
+                case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE ->
+                    lagBrevmalTypeDtoForForventetSaksbehandlingstid(dokument);
                 case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevmalTypeDtoForMangelbrev(dokument, behandlingId);
-                case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET -> lagBrevmalTypeDtoForGenereltFritekstbrev(dokument, behandlingId);
-                case UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV -> lagBrevmalTypeDtoForUtenlandskTrygdemyndighetFritekstbrev(dokument, behandlingId);
+                case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET ->
+                    lagBrevmalTypeDtoForGenereltFritekstbrev(dokument, behandlingId);
+                case UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV ->
+                    lagBrevmalTypeDtoForUtenlandskTrygdemyndighetFritekstbrev(dokument, behandlingId);
                 case FRITEKSTBREV -> lagBrevmalTypeDtoForFritekstbrev(dokument);
                 default -> null;
             })
@@ -120,13 +128,20 @@ public class BrevmalListeBygger {
             case VIRKSOMHET -> MottakerType.VIRKSOMHET;
             case ARBEIDSGIVER -> MottakerType.ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG;
             case TRYGDEMYNDIGHET -> MottakerType.UTENLANDSK_TRYGDEMYNDIGHET;
-            default -> throw new FunksjonellException("Vi støtter ikke brev med hovedmottaker: " + hovedmottaker.getKode());
+            default ->
+                throw new FunksjonellException("Vi støtter ikke brev med hovedmottaker: " + hovedmottaker.getKode());
         };
     }
 
     private void leggTilAdresseOgFeilmelding(MottakerDto.Builder builder, Aktoersroller aktoersroller, long behandlingId) {
         try {
-            var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(aktoersroller, behandlingId);
+            List<BrevAdresse> brevAdresser = null;
+            if (unleash.isEnabled(ToggleName.MELOSYS_MEL_4835)) {
+                brevAdresser = brevmalListeService.hentBrevAdresseTilMottakere(behandlingId, aktoersroller);
+            } else {
+                brevAdresser = brevmalListeService.hentBrevAdresseTilMottakereGammel(aktoersroller, behandlingId);
+            }
+            
             if ((aktoersroller == BRUKER || aktoersroller == VIRKSOMHET || aktoersroller == TRYGDEMYNDIGHET) && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty)) {
                 builder.medFeilmelding(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
             } else {
@@ -343,7 +358,8 @@ public class BrevmalListeBygger {
         final List<FeltvalgAlternativDto> valgAlternativer = new ArrayList<>();
 
         switch (fagsak.getType()) {
-            case EU_EOS -> valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.HENVENDELSE_OM_TRYGDETILHØRLIGHET));
+            case EU_EOS ->
+                valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.HENVENDELSE_OM_TRYGDETILHØRLIGHET));
             case FTRL -> {
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.CONFIRMATION_OF_MEMBERSHIP));
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.BEKREFTELSE_PÅ_MEDLEMSKAP));

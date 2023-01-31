@@ -12,7 +12,6 @@ import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.brev.mapper.DokumentproduksjonsInfoMapper;
@@ -40,19 +39,16 @@ import static org.mockito.Mockito.when;
 class DokumentNavnServiceTest {
 
     @Mock
-    private BrevmottakerService mockBrevmottakerService;
+    private BrevmottakerService brevmottakerService;
     @Mock
-    private DokgenService mockDokgenService;
+    private DokgenService dokgenService;
     @Mock
-    private LovvalgsperiodeService mockLovvalgsperiodeService;
-    @Mock
-    private BehandlingService mockBehandlingService;
-
+    private LovvalgsperiodeService lovvalgsperiodeService;
     private DokumentNavnService dokumentNavnService;
 
     @BeforeEach
     void setUp() {
-        dokumentNavnService = new DokumentNavnService(mockBehandlingService, mockBrevmottakerService, mockDokgenService, mockLovvalgsperiodeService);
+        dokumentNavnService = new DokumentNavnService(brevmottakerService, dokgenService, lovvalgsperiodeService);
     }
 
     @Test
@@ -60,7 +56,10 @@ class DokumentNavnServiceTest {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
 
+
         String dokumentNavn = dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, INNVILGELSE_YRKESAKTIV, BRUKER);
+
+
         assertThat(dokumentNavn).isEqualTo("Innvilgelse yrkesaktiv");
     }
 
@@ -69,7 +68,10 @@ class DokumentNavnServiceTest {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
 
+
         String dokumentNavn = dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, INNVILGELSE_YRKESAKTIV, BRUKER);
+
+
         assertThat(dokumentNavn).isEqualTo(INNVILGELSE_YRKESAKTIV.getBeskrivelse());
     }
 
@@ -81,16 +83,18 @@ class DokumentNavnServiceTest {
         behandling.setType(erNyVurdering ? NY_VURDERING : FØRSTEGANG);
 
         if (!mottaker.erUtenlandskMyndighet() && !FastMottakerMedOrgnr.SKATTEETATEN.getOrgnr().equals(mottaker.getOrgnr())) {
-            when(mockLovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
+            when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
         }
 
-        when(mockBrevmottakerService.avklarMottaker(TRYGDEAVTALE_GB, Mottaker.av(mottaker.getRolle()), behandling)).thenReturn(mottaker);
+        when(brevmottakerService.avklarMottaker(TRYGDEAVTALE_GB, Mottaker.av(mottaker.getRolle()), behandling)).thenReturn(mottaker);
 
         DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper = new DokumentproduksjonsInfoMapper(new FakeUnleash());
-        when(mockDokgenService.hentDokumentInfo(TRYGDEAVTALE_GB)).thenReturn(dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(TRYGDEAVTALE_GB));
+        when(dokgenService.hentDokumentInfo(TRYGDEAVTALE_GB)).thenReturn(dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(TRYGDEAVTALE_GB));
 
 
         String dokumentNavn = dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, TRYGDEAVTALE_GB, mottaker.getRolle());
+
+
         assertThat(dokumentNavn).isEqualTo(forventetTittel);
     }
 
@@ -102,14 +106,16 @@ class DokumentNavnServiceTest {
         behandling.setType(erNyVurdering ? NY_VURDERING : FØRSTEGANG);
 
         if (!mottaker.erUtenlandskMyndighet() && !FastMottakerMedOrgnr.SKATTEETATEN.getOrgnr().equals(mottaker.getOrgnr())) {
-            when(mockLovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
+            when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
         }
 
         DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper = new DokumentproduksjonsInfoMapper(new FakeUnleash());
-        when(mockDokgenService.hentDokumentInfo(TRYGDEAVTALE_GB)).thenReturn(dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(TRYGDEAVTALE_GB));
+        when(dokgenService.hentDokumentInfo(TRYGDEAVTALE_GB)).thenReturn(dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(TRYGDEAVTALE_GB));
 
 
         String dokumentNavn = dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, TRYGDEAVTALE_GB, mottaker, null);
+
+
         assertThat(dokumentNavn).isEqualTo(forventetTittel);
     }
 
@@ -121,13 +127,15 @@ class DokumentNavnServiceTest {
         behandling.setType(erNyVurdering ? NY_VURDERING : FØRSTEGANG);
 
         if (!mottaker.erUtenlandskMyndighet() && !FastMottakerMedOrgnr.SKATTEETATEN.getOrgnr().equals(mottaker.getOrgnr())) {
-            when(mockLovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
+            when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
         }
 
         DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper = new DokumentproduksjonsInfoMapper(new FakeUnleash());
 
 
         String dokumentNavn = dokumentNavnService.utledDokumentNavn(behandling, dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(TRYGDEAVTALE_GB), mottaker);
+
+
         assertThat(dokumentNavn).isEqualTo(forventetTittel);
     }
 
