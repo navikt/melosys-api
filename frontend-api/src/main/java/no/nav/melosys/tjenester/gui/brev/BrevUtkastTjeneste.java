@@ -5,10 +5,9 @@ import java.util.List;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.service.brev.UtkastBrevService;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
-import no.nav.melosys.tjenester.gui.dto.brev.BrevbestillingDto;
-import no.nav.melosys.tjenester.gui.dto.brev.BrevmalDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.annotation.RequestScope;
@@ -32,7 +31,7 @@ public class BrevUtkastTjeneste {
     }
 
     @GetMapping(value = "/{behandlingID}", produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Henter alle brevutkast for en behandling", response = BrevmalDto.class, responseContainer = "List")
+    @ApiOperation(value = "Henter alle brevutkast for en behandling", response = BrevbestillingDto.class, responseContainer = "List")
     public List<BrevbestillingDto> hentUtkast(@PathVariable long behandlingID) {
         aksesskontroll.autoriser(behandlingID);
 

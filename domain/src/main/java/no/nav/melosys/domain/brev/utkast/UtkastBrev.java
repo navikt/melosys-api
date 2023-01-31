@@ -22,6 +22,7 @@ public class UtkastBrev {
     @Column(name = "lagret_av_saksbehandler")
     private String lagretAvSaksbehandler;
 
+    @Lob
     private String brevbestillingUtkast;
 
     public Long getId() {
