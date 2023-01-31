@@ -21,7 +21,7 @@ public final class BrevDataInnvilgelseFlereLand extends BrevData {
 
     public BrevDataA1 vedleggA1;
 
-    public BrevDataInnvilgelseFlereLand(BrevbestillingRequest brevbestillingRequest, String saksbehandler) {
-        super(brevbestillingRequest, saksbehandler);
+    public BrevDataInnvilgelseFlereLand(BrevbestillingDto brevbestillingDto, String saksbehandler) {
+        super(brevbestillingDto, saksbehandler);
     }
 }

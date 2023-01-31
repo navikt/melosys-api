@@ -6,7 +6,7 @@ public class BrevDataVideresend extends BrevData {
     public String bostedsland;
     public UtenlandskMyndighet trygdemyndighet;
 
-    public BrevDataVideresend(BrevbestillingRequest brevbestillingRequest, String saksbehandler) {
-        super(brevbestillingRequest, saksbehandler);
+    public BrevDataVideresend(BrevbestillingDto brevbestillingDto, String saksbehandler) {
+        super(brevbestillingDto, saksbehandler);
     }
 }

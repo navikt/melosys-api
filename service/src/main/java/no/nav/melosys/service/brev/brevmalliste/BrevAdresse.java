@@ -1,9 +1,9 @@
-package no.nav.melosys.service.brev;
-
-import org.apache.commons.lang3.StringUtils;
+package no.nav.melosys.service.brev.brevmalliste;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
 
 public class BrevAdresse {
     private final String mottakerNavn;

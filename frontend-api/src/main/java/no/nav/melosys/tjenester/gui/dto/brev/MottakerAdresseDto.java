@@ -1,8 +1,8 @@
 package no.nav.melosys.tjenester.gui.dto.brev;
 
-import no.nav.melosys.service.brev.BrevAdresse;
-
 import java.util.List;
+
+import no.nav.melosys.service.brev.brevmalliste.BrevAdresse;
 
 public record MottakerAdresseDto(Tittel tittel,
                                  List<String> adresselinjer,
@@ -23,5 +23,6 @@ public record MottakerAdresseDto(Tittel tittel,
         );
     }
 
-    public record Tittel(String mottakerNavn, String orgnr) { }
+    public record Tittel(String mottakerNavn, String orgnr) {
+    }
 }

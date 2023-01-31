@@ -7,14 +7,14 @@ import java.util.UUID;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
@@ -24,13 +24,13 @@ import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
-import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
-import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.datagrunnlag.BrevDataGrunnlag;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
@@ -73,7 +73,7 @@ class BrevDataByggerInnvilgelseTest {
     MottatteOpplysningerService mottatteOpplysningerService;
 
     private Behandling behandling;
-    private BrevbestillingRequest brevbestillingRequest;
+    private BrevbestillingDto brevbestillingDto;
 
     private final String saksbehandler = "saksbehandler";
     private BrevDataByggerInnvilgelse brevDataByggerInnvilgelse;
@@ -93,7 +93,7 @@ class BrevDataByggerInnvilgelseTest {
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
         behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new Soeknad());
 
-        brevbestillingRequest = new BrevbestillingRequest.Builder()
+        brevbestillingDto = new BrevbestillingDto.Builder()
             .medMottaker(Aktoersroller.BRUKER)
             .medBegrunnelseKode("BEGRUNNELSEKODE")
             .medFritekst("FRITEKST")
@@ -120,7 +120,7 @@ class BrevDataByggerInnvilgelseTest {
             landvelgerService,
             lovvalgsperiodeService,
             anmodningsperiodeService,
-            brevbestillingRequest,
+            brevbestillingDto,
             brevDataByggerA1,
             vilkaarsresultatService,
             persondataFasade,
@@ -163,8 +163,8 @@ class BrevDataByggerInnvilgelseTest {
     @Test
     void lag_innvilgelsesBrev_harBestillingsinformasjon() {
         BrevData brevData = brevDataByggerInnvilgelse.lag(lagBrevdataGrunnlag(), saksbehandler);
-        assertThat(brevData.begrunnelseKode).isEqualTo(brevbestillingRequest.getBegrunnelseKode());
-        assertThat(brevData.fritekst).isEqualTo(brevbestillingRequest.getFritekst());
+        assertThat(brevData.begrunnelseKode).isEqualTo(brevbestillingDto.getBegrunnelseKode());
+        assertThat(brevData.fritekst).isEqualTo(brevbestillingDto.getFritekst());
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
     }
 

@@ -1,18 +1,18 @@
 package no.nav.melosys.tjenester.gui.dto.brev;
 
-import no.nav.melosys.domain.arkiv.Distribusjonstype;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.service.dokument.brev.BrevbestillingRequest;
-import no.nav.melosys.service.dokument.brev.FritekstvedleggDto;
-import no.nav.melosys.service.dokument.brev.KopiMottaker;
-import no.nav.melosys.service.dokument.brev.SaksvedleggDto;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class BrevbestillingDto {
+import no.nav.melosys.domain.arkiv.Distribusjonstype;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.service.dokument.brev.FritekstvedleggDto;
+import no.nav.melosys.service.dokument.brev.KopiMottaker;
+import no.nav.melosys.service.dokument.brev.SaksvedleggDto;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
+
+public class BrevbestillingRequest {
 
     private Produserbaredokumenter produserbardokument;
     private Aktoersroller mottaker;
@@ -47,11 +47,11 @@ public class BrevbestillingDto {
     @Deprecated
     private String ytterligereInformasjon;
 
-    public BrevbestillingDto() {
+    public BrevbestillingRequest() {
     }
 
-    public BrevbestillingRequest.Builder tilRequestBuilder() {
-        return new BrevbestillingRequest.Builder()
+    public no.nav.melosys.service.dokument.brev.BrevbestillingDto.Builder tilBrevbestillingDtoBuilder() {
+        return new no.nav.melosys.service.dokument.brev.BrevbestillingDto.Builder()
             .medProduserbardokument(this.getProduserbardokument())
             .medMottaker(this.getMottaker())
             .medOrgNr(this.getOrgNr())
@@ -76,7 +76,13 @@ public class BrevbestillingDto {
             .medDokumentTittel(this.getDokumentTittel());
     }
 
-    public BrevbestillingDto(Builder builder) {
+    public no.nav.melosys.service.dokument.brev.BrevbestillingDto tilBrevbestillingDto() {
+        return tilBrevbestillingDtoBuilder()
+            .medBestillersId(SubjectHandler.getInstance().getUserID())
+            .build();
+    }
+
+    public BrevbestillingRequest(Builder builder) {
         this.produserbardokument = builder.produserbardokument;
         this.mottaker = builder.mottaker;
         this.orgNr = builder.orgNr;
@@ -314,8 +320,8 @@ public class BrevbestillingDto {
             return this;
         }
 
-        public BrevbestillingDto build() {
-            return new BrevbestillingDto(this);
+        public BrevbestillingRequest build() {
+            return new BrevbestillingRequest(this);
         }
     }
 
@@ -323,7 +329,7 @@ public class BrevbestillingDto {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        BrevbestillingDto that = (BrevbestillingDto) o;
+        BrevbestillingRequest that = (BrevbestillingRequest) o;
         return kontaktopplysninger == that.kontaktopplysninger && produserbardokument == that.produserbardokument
             && mottaker == that.mottaker
             && Objects.equals(orgNr, that.orgNr)

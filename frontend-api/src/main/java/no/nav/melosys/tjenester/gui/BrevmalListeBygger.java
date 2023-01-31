@@ -14,9 +14,10 @@ import no.nav.melosys.domain.kodeverk.brev.Distribusjonstype;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.brev.BrevAdresse;
-import no.nav.melosys.service.brev.BrevbestillingService;
+import no.nav.melosys.service.brev.BrevmalListeService;
+import no.nav.melosys.service.brev.brevmalliste.BrevAdresse;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.tjenester.gui.dto.brev.*;
 import org.springframework.stereotype.Component;
@@ -26,38 +27,45 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 
 @Component
 public class BrevmalListeBygger {
-
-    private final BrevbestillingService brevbestillingService;
+    private final BrevmalListeService brevmalListeService;
     private final BehandlingService behandlingService;
     private final Unleash unleash;
 
-    public BrevmalListeBygger(BrevbestillingService brevbestillingService, BehandlingService behandlingService, Unleash unleash) {
-        this.brevbestillingService = brevbestillingService;
+    public BrevmalListeBygger(BrevmalListeService brevmalListeService, BehandlingService behandlingService, Unleash unleash) {
+        this.brevmalListeService = brevmalListeService;
         this.behandlingService = behandlingService;
         this.unleash = unleash;
     }
 
-    public List<BrevmalDto> byggBrevmalDtoListe(long behandlingId) {
+    public List<BrevmalResponse> byggBrevmalDtoListe(long behandlingId) {
         List<MottakerDto> mottakere = hentTilgjengeligeMottakere(behandlingId);
 
         return mottakere.stream().map(mottaker -> mottakerTilBrevmalDto(behandlingId, mottaker)).toList();
     }
 
-    private BrevmalDto mottakerTilBrevmalDto(long behandlingId, MottakerDto mottaker) {
-        List<Produserbaredokumenter> produserbareDokumenter = brevbestillingService.hentMuligeProduserbaredokumenter(behandlingId, mottaker.getRolle());
+    private BrevmalResponse mottakerTilBrevmalDto(long behandlingId, MottakerDto mottaker) {
+        List<Produserbaredokumenter> produserbareDokumenter = null;
+        if (unleash.isEnabled(ToggleName.MELOSYS_MEL_4835)) {
+            produserbareDokumenter = brevmalListeService.hentMuligeProduserbaredokumenter(behandlingId, mottaker.getRolle());
+        } else {
+            produserbareDokumenter = brevmalListeService.hentMuligeProduserbaredokumenterGammel(behandlingId, mottaker.getRolle());
+        }
 
         List<BrevmalTypeDto> typer = produserbareDokumenter.stream().map(dokument -> switch (dokument) {
-                case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> lagBrevmalTypeDtoForForventetSaksbehandlingstid(dokument);
+                case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE ->
+                    lagBrevmalTypeDtoForForventetSaksbehandlingstid(dokument);
                 case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevmalTypeDtoForMangelbrev(dokument, behandlingId);
-                case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET -> lagBrevmalTypeDtoForGenereltFritekstbrev(dokument, behandlingId);
-                case UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV -> lagBrevmalTypeDtoForUtenlandskTrygdemyndighetFritekstbrev(dokument, behandlingId);
+                case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET ->
+                    lagBrevmalTypeDtoForGenereltFritekstbrev(dokument, behandlingId);
+                case UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV ->
+                    lagBrevmalTypeDtoForUtenlandskTrygdemyndighetFritekstbrev(dokument, behandlingId);
                 case FRITEKSTBREV -> lagBrevmalTypeDtoForFritekstbrev(dokument);
                 default -> null;
             })
             .filter(Objects::nonNull)
             .toList();
 
-        return new BrevmalDto(mottaker, typer);
+        return new BrevmalResponse(mottaker, typer);
     }
 
     private List<MottakerDto> hentTilgjengeligeMottakere(long behandlingId) {
@@ -120,13 +128,20 @@ public class BrevmalListeBygger {
             case VIRKSOMHET -> MottakerType.VIRKSOMHET;
             case ARBEIDSGIVER -> MottakerType.ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG;
             case TRYGDEMYNDIGHET -> MottakerType.UTENLANDSK_TRYGDEMYNDIGHET;
-            default -> throw new FunksjonellException("Vi støtter ikke brev med hovedmottaker: " + hovedmottaker.getKode());
+            default ->
+                throw new FunksjonellException("Vi støtter ikke brev med hovedmottaker: " + hovedmottaker.getKode());
         };
     }
 
     private void leggTilAdresseOgFeilmelding(MottakerDto.Builder builder, Aktoersroller aktoersroller, long behandlingId) {
         try {
-            var brevAdresser = brevbestillingService.hentBrevAdresseTilMottakere(aktoersroller, behandlingId);
+            List<BrevAdresse> brevAdresser = null;
+            if (unleash.isEnabled(ToggleName.MELOSYS_MEL_4835)) {
+                brevAdresser = brevmalListeService.hentBrevAdresseTilMottakere(behandlingId, aktoersroller);
+            } else {
+                brevAdresser = brevmalListeService.hentBrevAdresseTilMottakereGammel(aktoersroller, behandlingId);
+            }
+            
             if ((aktoersroller == BRUKER || aktoersroller == VIRKSOMHET || aktoersroller == TRYGDEMYNDIGHET) && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty)) {
                 builder.medFeilmelding(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
             } else {
@@ -227,10 +242,17 @@ public class BrevmalListeBygger {
             .build();
     }
 
+    @Deprecated(since = "Når dokumentTittel kan gå ut i prod for alle fritekstbrev kan denne slettes og man bruker heller lagBrevmalTypeDtoForGenereltFritekstbrev")
     private BrevmalTypeDto lagBrevmalTypeDtoForFritekstbrev(Produserbaredokumenter produserbartdokument) {
         return new BrevmalTypeDto.Builder()
             .medType(produserbartdokument)
             .medFelter(asList(
+                new BrevmalFeltDto.Builder()
+                    .medKodeOgBeskrivelse(BrevmalFeltKode.DISTRIBUSJONSTYPE)
+                    .medHjelpetekst("Type brev må angis slik at bruker får riktig varseltekst om brevet som sendes. Gjelder det et vedtak eller en forespørsel, vil bruker få en påminnelse hvis brevet ikke har blitt lest innen 7 dager.")
+                    .medValg(hentDistribusjonstyper())
+                    .erPåkrevd()
+                    .build(),
                 new BrevmalFeltDto.Builder()
                     .medKodeOgBeskrivelse(BrevmalFeltKode.BREV_TITTEL)
                     .medFeltType(FeltType.TEKST)
@@ -336,7 +358,8 @@ public class BrevmalListeBygger {
         final List<FeltvalgAlternativDto> valgAlternativer = new ArrayList<>();
 
         switch (fagsak.getType()) {
-            case EU_EOS -> valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.HENVENDELSE_OM_TRYGDETILHØRLIGHET));
+            case EU_EOS ->
+                valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.HENVENDELSE_OM_TRYGDETILHØRLIGHET));
             case FTRL -> {
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.CONFIRMATION_OF_MEMBERSHIP));
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.BEKREFTELSE_PÅ_MEDLEMSKAP));

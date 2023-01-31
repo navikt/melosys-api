@@ -11,7 +11,7 @@ import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.dokument.brev.SedPdfData;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.tjenester.gui.dto.brev.BrevbestillingDto;
+import no.nav.melosys.tjenester.gui.dto.brev.BrevbestillingRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -69,7 +69,7 @@ class DokumentTjenesteTest {
 
     @Test
     void produserUtkastBrev() throws Exception {
-        var brevBestillingDto = new BrevbestillingDto.Builder()
+        var brevBestillingDto = new BrevbestillingRequest.Builder()
             .medMottaker(Aktoersroller.BRUKER)
             .build();
         when(dokumentServiceFasade.produserUtkast(anyLong(), any())).thenReturn(new byte[1]);
@@ -97,7 +97,7 @@ class DokumentTjenesteTest {
 
     @Test
     void produserDokument() throws Exception {
-        var brevBestillingDto = new BrevbestillingDto.Builder()
+        var brevBestillingDto = new BrevbestillingRequest.Builder()
             .medMottaker(Aktoersroller.BRUKER)
             .build();
 
@@ -112,7 +112,7 @@ class DokumentTjenesteTest {
 
     @Test
     void produserDokumentFeilerMedManglendeMottaker() throws Exception {
-        var brevBestillingDto = new BrevbestillingDto.Builder()
+        var brevBestillingDto = new BrevbestillingRequest.Builder()
             .build();
 
         mockMvc.perform(post(BASE_URL + "/opprett/{behandlingID}/{produserbartDokument}", 1L, Produserbaredokumenter.MELDING_HENLAGT_SAK)
