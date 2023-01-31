@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 
+
 @Component
 @Retryable
 class TrygdeavgiftConsumer(@Value("\${melosystrygdeavgift.url}") url: String?) {
