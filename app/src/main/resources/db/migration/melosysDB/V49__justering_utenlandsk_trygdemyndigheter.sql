@@ -11,6 +11,7 @@ VALUES(46, null, 'PT Operations', 'North East England', 'HM Revenue and Customs'
 INSERT INTO utenlandsk_myndighet_pref(utenlandsk_myndighet_id, preferanse_id) VALUES(46, 1);
 
 -- Endringer i eksisterende rader, gjør alle land til uppercase for å være konsekvent
+UPDATE utenlandsk_myndighet set land = 'STORBRITANNIA' where id = 33;
 UPDATE utenlandsk_myndighet set land = 'CANADA' where id = 35;
 UPDATE utenlandsk_myndighet set land = 'JEOLLABUK-DO, REPUBLIC OF KOREA' where id = 36;
 UPDATE utenlandsk_myndighet set land = 'AUSTRALIA' where id = 37;
