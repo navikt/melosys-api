@@ -1,9 +1,9 @@
 package no.nav.melosys.service.brev;
 
+import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast;
 import no.nav.melosys.domain.brev.utkast.UtkastBrev;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.UtkastBrevRepository;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -69,10 +69,10 @@ class OppdaterUtkastComponentTest {
 
     private OppdaterUtkastComponent.RequestDto lagRequest() {
         return new OppdaterUtkastComponent.RequestDto(
-          UTKAST_BREV_ID,
-          1L,
-          "Z123123",
-            new BrevbestillingDto.Builder().build().tilUtkast()
+            UTKAST_BREV_ID,
+            1L,
+            "Z123123",
+            new BrevbestillingUtkast(null, null, null, null, null, null, null, null, null, null, null, null, null, null, false, null, null, null, null)
         );
     }
 }

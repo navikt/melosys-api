@@ -1,9 +1,7 @@
 package no.nav.melosys.service.dokument.brev;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast;
@@ -341,33 +339,5 @@ public class BrevbestillingDto {
             .medFritekstvedlegg(brevbestillingUtkast.fritekstVedlegg().stream().map(FritekstvedleggDto::av).toList())
             .medDokumentTittel(brevbestillingUtkast.dokumentTittel())
             .build();
-    }
-
-    public BrevbestillingUtkast tilUtkast() {
-        return new BrevbestillingUtkast(
-            this.getProduserbardokument(),
-            this.getMottaker(),
-            this.getOrgnr(),
-            this.getOrgnrEtater(),
-            this.getInnledningFritekst(),
-            this.getManglerFritekst(),
-            this.getBegrunnelseFritekst(),
-            this.getEktefelleFritekst(),
-            this.getBarnFritekst(),
-            this.getKontaktpersonNavn(),
-            this.getKopiMottakere().stream().map(KopiMottaker::tilUtkast).toList(),
-            this.getFritekstTittel(),
-            this.getFritekst(),
-            this.getDistribusjonstype(),
-            this.isKontaktopplysninger(),
-            this.getNyVurderingBakgrunn(),
-            Optional.ofNullable(this.getSaksVedlegg())
-                .orElseGet(Collections::emptyList)
-                .stream().map(SaksvedleggDto::tilUtkast).toList(),
-            Optional.ofNullable(this.getFritekstvedlegg())
-                .orElseGet(Collections::emptyList)
-                .stream().map(FritekstvedleggDto::tilUtkast).toList(),
-            this.getDokumentTittel()
-        );
     }
 }

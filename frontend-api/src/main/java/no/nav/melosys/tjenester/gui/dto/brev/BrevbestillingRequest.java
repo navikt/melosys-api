@@ -1,8 +1,6 @@
 package no.nav.melosys.tjenester.gui.dto.brev;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast;
@@ -331,30 +329,6 @@ public class BrevbestillingRequest {
         }
     }
 
-    public static BrevbestillingRequest av(BrevbestillingUtkast brevbestillingUtkast) {
-        return new BrevbestillingRequest.Builder()
-            .medProduserbardokument(brevbestillingUtkast.produserbardokument())
-            .medMottaker(brevbestillingUtkast.mottaker())
-            .medOrgNr(brevbestillingUtkast.orgnr())
-            .medOrgnrEtater(brevbestillingUtkast.orgnrEtater())
-            .medInnledningFritekst(brevbestillingUtkast.innledningFritekst())
-            .medManglerFritekst(brevbestillingUtkast.manglerFritekst())
-            .medBegrunnelseFritekst(brevbestillingUtkast.begrunnelseFritekst())
-            .medEktefelleFritekst(brevbestillingUtkast.ektefelleFritekst())
-            .medBarnFritekst(brevbestillingUtkast.barnFritekst())
-            .medKontaktpersonNavn(brevbestillingUtkast.kontaktpersonNavn())
-            .medKopiMottakere(brevbestillingUtkast.kopiMottakere().stream().map(KopiMottaker::av).toList())
-            .medFritekstTittel(brevbestillingUtkast.fritekstTittel())
-            .medFritekst(brevbestillingUtkast.fritekst())
-            .medDistribusjonstype(brevbestillingUtkast.distribusjonstype())
-            .medKontaktopplysninger(brevbestillingUtkast.kontaktopplysninger())
-            .medNyVurderingBakgrunn(brevbestillingUtkast.nyVurderingBakgrunn())
-            .medSaksvedlegg(brevbestillingUtkast.saksVedlegg().stream().map(SaksvedleggDto::av).toList())
-            .medFritekstvedlegg(brevbestillingUtkast.fritekstVedlegg().stream().map(FritekstvedleggDto::av).toList())
-            .medDokumentTittel(brevbestillingUtkast.dokumentTittel())
-            .build();
-    }
-
     public BrevbestillingUtkast tilUtkast() {
         return new BrevbestillingUtkast(
             this.getProduserbardokument(),
@@ -373,8 +347,12 @@ public class BrevbestillingRequest {
             this.getDistribusjonstype(),
             this.isKontaktopplysninger(),
             this.getNyVurderingBakgrunn(),
-            this.getSaksvedlegg().stream().map(SaksvedleggDto::tilUtkast).toList(),
-            this.getFritekstvedlegg().stream().map(FritekstvedleggDto::tilUtkast).toList(),
+            Optional.ofNullable(this.getSaksvedlegg())
+                .orElseGet(Collections::emptyList)
+                .stream().map(SaksvedleggDto::tilUtkast).toList(),
+            Optional.ofNullable(this.getFritekstvedlegg())
+                .orElseGet(Collections::emptyList)
+                .stream().map(FritekstvedleggDto::tilUtkast).toList(),
             this.getDokumentTittel()
         );
     }
