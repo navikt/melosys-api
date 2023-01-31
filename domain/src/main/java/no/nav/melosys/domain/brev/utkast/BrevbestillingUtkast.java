@@ -15,6 +15,7 @@ public record BrevbestillingUtkast(
     Aktoersroller mottaker,
     String orgnr,
     List<String> orgnrEtater,
+    String institusjonID,
     String innledningFritekst,
     String manglerFritekst,
     String begrunnelseFritekst,

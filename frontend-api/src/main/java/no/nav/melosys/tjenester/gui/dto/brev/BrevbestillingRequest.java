@@ -335,6 +335,7 @@ public class BrevbestillingRequest {
             this.getMottaker(),
             this.getOrgNr(),
             this.getOrgnrEtater(),
+            this.getInstitusjonId(),
             this.getInnledningFritekst(),
             this.getManglerFritekst(),
             this.getBegrunnelseFritekst(),
