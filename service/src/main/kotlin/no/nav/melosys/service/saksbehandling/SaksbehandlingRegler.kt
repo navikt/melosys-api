@@ -66,7 +66,6 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
             behandlingstema: Behandlingstema,
             ftrlToggleEnabled: Boolean
         ): Boolean {
-            if (behandlingstema == IKKE_YRKESAKTIV) return false;
             if (sakstema == Sakstemaer.TRYGDEAVGIFT) return true
             if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE) return true
 
