@@ -64,8 +64,8 @@ public class Avgiftsperiode {
     private static Avgiftsperiode lagAvgiftsperiode(Medlemskapsperiode medlemskapsperiode,
                                                     Trygdeavgift trygdeavgift) {
         return new Avgiftsperiode(
-            medlemskapsperiode.getFom(),
-            medlemskapsperiode.getTom(),
+            trygdeavgift.getPeriodeFra(),
+            trygdeavgift.getPeriodeTil(),
             medlemskapsperiode.getDekning(),
             trygdeavgift.getTrygdesats(),
             trygdeavgift.getTrygdeavgiftsbeløpMd(),

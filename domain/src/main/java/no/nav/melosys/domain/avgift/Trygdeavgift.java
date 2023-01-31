@@ -1,6 +1,7 @@
 package no.nav.melosys.domain.avgift;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.Medlemskapsperiode;
@@ -29,6 +30,12 @@ public class Trygdeavgift {
     @Column(name = "avgiftskode", nullable = false)
     private String avgiftskode;
 
+    @Column(name = "periode_fra", nullable = false)
+    private LocalDate periodeFra;
+
+    @Column(name = "periode_til", nullable = false)
+    private LocalDate periodeTil;
+
     @Column(name = "avgift_for_inntekt", nullable = false)
     @Enumerated(EnumType.STRING)
     private AvgiftForInntekt avgiftForInntekt;
@@ -40,12 +47,16 @@ public class Trygdeavgift {
                         BigDecimal trygdeavgiftsbeløpMd,
                         BigDecimal trygdesats,
                         String avgiftskode,
-                        boolean erAvgiftForNorskInntekt) {
+                        boolean erAvgiftForNorskInntekt,
+                        LocalDate periodeFra,
+                        LocalDate periodeTil) {
         this.medlemskapsperiode = medlemskapsperiode;
         this.trygdeavgiftsbeløpMd = trygdeavgiftsbeløpMd;
         this.trygdesats = trygdesats;
         this.avgiftskode = avgiftskode;
         this.avgiftForInntekt = erAvgiftForNorskInntekt ? NORSK_INNTEKT : UTENLANDSK_INNTEKT;
+        this.periodeFra = periodeFra;
+        this.periodeTil = periodeTil;
     }
 
     public Long getId() {
@@ -98,6 +109,22 @@ public class Trygdeavgift {
 
     public boolean erAvgiftForNorskInntekt() {
         return avgiftForInntekt == NORSK_INNTEKT;
+    }
+
+    public LocalDate getPeriodeFra() {
+        return periodeFra;
+    }
+
+    public void setPeriodeFra(LocalDate periodeFra) {
+        this.periodeFra = periodeFra;
+    }
+
+    public LocalDate getPeriodeTil() {
+        return periodeTil;
+    }
+
+    public void setPeriodeTil(LocalDate periodeTil) {
+        this.periodeTil = periodeTil;
     }
 
     public enum AvgiftForInntekt {

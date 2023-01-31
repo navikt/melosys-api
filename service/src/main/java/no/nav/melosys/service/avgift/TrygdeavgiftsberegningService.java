@@ -107,7 +107,9 @@ public class TrygdeavgiftsberegningService {
                     beregningsresultat.getMaanedsavgift(),
                     beregningsresultat.getAvgiftssats(),
                     beregningsresultat.getAvgiftskode(),
-                    erAvgiftForNorskInntekt
+                    erAvgiftForNorskInntekt,
+                    beregningsresultat.getAvgiftPeriodeFom(),
+                    beregningsresultat.getAvgiftPeriodeTom()
                 )
             )
         );
