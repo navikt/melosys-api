@@ -10,6 +10,7 @@ import no.nav.melosys.exception.TekniskException;
 @Entity
 @Table(name = "utkast_brev")
 public class UtkastBrev {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,6 +28,10 @@ public class UtkastBrev {
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public long getBehandlingID() {

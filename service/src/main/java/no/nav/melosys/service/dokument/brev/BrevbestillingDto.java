@@ -1,7 +1,9 @@
 package no.nav.melosys.service.dokument.brev;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast;
@@ -359,8 +361,12 @@ public class BrevbestillingDto {
             this.getDistribusjonstype(),
             this.isKontaktopplysninger(),
             this.getNyVurderingBakgrunn(),
-            this.getSaksVedlegg().stream().map(SaksvedleggDto::tilUtkast).toList(),
-            this.getFritekstvedlegg().stream().map(FritekstvedleggDto::tilUtkast).toList(),
+            Optional.ofNullable(this.getSaksVedlegg())
+                .orElseGet(Collections::emptyList)
+                .stream().map(SaksvedleggDto::tilUtkast).toList(),
+            Optional.ofNullable(this.getFritekstvedlegg())
+                .orElseGet(Collections::emptyList)
+                .stream().map(FritekstvedleggDto::tilUtkast).toList(),
             this.getDokumentTittel()
         );
     }

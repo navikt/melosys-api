@@ -4,6 +4,7 @@ import java.util.List;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import no.nav.melosys.service.brev.OppdaterUtkastComponent;
 import no.nav.melosys.service.brev.UtkastBrevService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -12,7 +13,6 @@ import no.nav.melosys.tjenester.gui.dto.brev.HentUtkastResponse;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.annotation.RequestScope;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -20,7 +20,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RestController
 @RequestMapping("/brev/utkast")
 @Api(tags = {"brev", "utkast"})
-@RequestScope
 public class UtkastBrevTjeneste {
 
     private final UtkastBrevService utkastBrevService;
@@ -46,12 +45,26 @@ public class UtkastBrevTjeneste {
     @PostMapping(value = "/{behandlingID}")
     @ApiOperation(value = "Lagrer et brevutkast på en behandling")
     public ResponseEntity<Void> lagreUtkast(@PathVariable long behandlingID,
-                                           @RequestBody BrevbestillingDto brevbestillingDto) {
+                                            @RequestBody BrevbestillingDto brevbestillingDto) {
         aksesskontroll.autoriser(behandlingID);
 
         String saksbehandlerID = SubjectHandler.getInstance().getUserID();
 
         utkastBrevService.lagreUtkast(behandlingID, saksbehandlerID, brevbestillingDto.tilUtkast());
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping(value = "/{behandlingID}/{utkastBrevID}")
+    @ApiOperation(value = "Oppdaterer et eksisterende utkast")
+    public ResponseEntity<Void> oppdaterUtkast(@PathVariable long behandlingID,
+                                               @PathVariable long utkastBrevID,
+                                               @RequestBody BrevbestillingDto brevbestillingDto) {
+        aksesskontroll.autoriser(behandlingID);
+
+        String saksbehandlerID = SubjectHandler.getInstance().getUserID();
+
+        utkastBrevService.oppdaterUtkast(new OppdaterUtkastComponent.RequestDto(utkastBrevID, behandlingID, saksbehandlerID, brevbestillingDto.tilUtkast()));
 
         return ResponseEntity.ok().build();
     }
