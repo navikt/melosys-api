@@ -66,7 +66,7 @@ public class EregService implements EregFasade {
         try {
             return Optional.ofNullable(hentOrganisasjon(orgnr));
         } catch (IkkeFunnetException ex) {
-            log.warn("Fant ikke organisasjon med orgnr {}", orgnr);
+            log.warn(ex.getMessage());
             return Optional.empty();
         }
     }

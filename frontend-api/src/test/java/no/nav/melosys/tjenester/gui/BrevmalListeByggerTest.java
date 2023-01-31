@@ -23,8 +23,10 @@ import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.brev.BrevbestillingService;
+import no.nav.melosys.service.brev.BrevmalListeService;
 import no.nav.melosys.service.brev.DokumentNavnService;
+import no.nav.melosys.service.brev.components.HentBrevAdresseTilMottakereComponent;
+import no.nav.melosys.service.brev.components.HentMuligeProduserbaredokumenterComponent;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -45,40 +47,47 @@ import static org.mockito.Mockito.when;
 class BrevmalListeByggerTest {
 
     @Mock
-    private BehandlingService mockBehandlingService;
+    private BehandlingService behandlingService;
     @Mock
-    private DokumentServiceFasade mockDokServiceFasade;
+    private DokumentServiceFasade dokServiceFasade;
+
     @Mock
-    private BrevmottakerService mockBrevmottakerService;
+    private HentMuligeProduserbaredokumenterComponent hentMuligeProduserbaredokumenterComponent;
     @Mock
-    private PersondataFasade mockPersondataFasade;
+    private HentBrevAdresseTilMottakereComponent hentBrevAdresseTilMottakereComponent;
     @Mock
-    private EregFasade mockEregFasade;
+    private BrevmottakerService brevmottakerService;
     @Mock
-    private KontaktopplysningService mockKontaktopplysningService;
+    private PersondataFasade persondataFasade;
     @Mock
-    private DokumentNavnService mockDokumentNavnService;
+    private EregFasade eregFasade;
+    @Mock
+    private KontaktopplysningService kontaktopplysningService;
+    @Mock
+    private DokumentNavnService dokumentNavnService;
     private UtenlandskMyndighetService utenlandskMyndighetService;
-
     private final FakeUnleash unleash = new FakeUnleash();
-
     private BrevmalListeBygger brevmalListeBygger;
 
 
     @BeforeEach
     void init() {
-        BrevbestillingService brevbestillingService = new BrevbestillingService(mockBrevmottakerService,
-            mockDokServiceFasade, mockBehandlingService, mockEregFasade, mockKontaktopplysningService,
-            mockPersondataFasade, mockDokumentNavnService, utenlandskMyndighetService);
+        BrevmalListeService brevmalListeService = new BrevmalListeService(hentMuligeProduserbaredokumenterComponent, hentBrevAdresseTilMottakereComponent, brevmottakerService,
+            behandlingService,
+            persondataFasade,
+            kontaktopplysningService,
+            utenlandskMyndighetService,
+            eregFasade);
+
         unleash.enable("melosys.trygdeavtale.fritekstbrev");
-        brevmalListeBygger = new BrevmalListeBygger(brevbestillingService, mockBehandlingService, unleash);
+        brevmalListeBygger = new BrevmalListeBygger(brevmalListeService, behandlingService, unleash);
     }
 
     @Test
     void byggBrevmalDtoListe_brukerErHovedpart_returnererTilgjengeligeMaler() {
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
+        when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
@@ -127,9 +136,9 @@ class BrevmalListeByggerTest {
         virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
         var behandling = lagBehandling(Behandlingstyper.FØRSTEGANG);
         behandling.getFagsak().setAktører(Set.of(virksomhet));
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
@@ -164,9 +173,9 @@ class BrevmalListeByggerTest {
 
     @Test
     void byggBrevmalDtoListe_behandlingHarTomFlyt_returnererIkkeArbeidsgiverArbeidsgiversFullmektig() {
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.HENVENDELSE));
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.HENVENDELSE));
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.HENVENDELSE));
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.HENVENDELSE));
+        when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
@@ -185,9 +194,9 @@ class BrevmalListeByggerTest {
     @Test
     void byggBrevmalDtoListe_behandlingErFørstegangMedSakstemaMedlemskapLovvalg_returnererSoeknadMal() {
         var behandling = lagBehandling(Behandlingstyper.FØRSTEGANG);
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
@@ -214,9 +223,9 @@ class BrevmalListeByggerTest {
 
     @Test
     void byggBrevmalDtoListe_brukerAdresseNull_returnererMalMedFeilmelding() {
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
+        when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
@@ -234,9 +243,9 @@ class BrevmalListeByggerTest {
 
     @Test
     void byggBrevmalDtoListe_registerOpplysningerIkkeHentet_returnererMalMedFeilmelding() {
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean()))
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
+        when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean()))
             .thenThrow(new TekniskException("Finner ikke arbeidsforholddokument"));
 
 
@@ -256,9 +265,9 @@ class BrevmalListeByggerTest {
     @Test
     void byggBrevmalDtoListe_mangelbrev_lagerRiktigeValg() {
         var behandling = lagBehandling(Behandlingstyper.FØRSTEGANG);
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
@@ -314,9 +323,9 @@ class BrevmalListeByggerTest {
     @Test
     void byggBrevmalDtoListe_mangelbrevKlage_lagerRiktigeValg() {
         var behandling = lagBehandling(Behandlingstyper.KLAGE);
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
@@ -371,9 +380,9 @@ class BrevmalListeByggerTest {
     void byggBrevmalDtoListe_EUEØS_lagerRiktigeTittelValgForFritekstbrev() {
         Behandling behandlingEUEOS = lagBehandling(Behandlingstyper.FØRSTEGANG);
         behandlingEUEOS.getFagsak().setType(Sakstyper.EU_EOS);
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingEUEOS);
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingEUEOS);
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingEUEOS);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingEUEOS);
+        when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
 
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
@@ -396,11 +405,13 @@ class BrevmalListeByggerTest {
     void byggBrevmalDtoListe_EUEØS_lagerRiktigeDistribusjonstyperForFritekstbrev() {
         Behandling behandlingEUEOS = lagBehandling(Behandlingstyper.FØRSTEGANG);
         behandlingEUEOS.getFagsak().setType(Sakstyper.EU_EOS);
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingEUEOS);
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingEUEOS);
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingEUEOS);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingEUEOS);
+        when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
 
         assertThat(tilgjengeligeMaler).hasSize(4);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
@@ -421,9 +432,10 @@ class BrevmalListeByggerTest {
     void byggBrevmalDtoListe_FTRL_lagerRiktigeTittelValgForFritekstbrev() {
         Behandling behandlingFTRL = lagBehandling(Behandlingstyper.FØRSTEGANG);
         behandlingFTRL.getFagsak().setType(Sakstyper.FTRL);
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingFTRL);
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingFTRL);
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingFTRL);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingFTRL);
+        when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
@@ -449,11 +461,13 @@ class BrevmalListeByggerTest {
     void byggBrevmalDtoListe_FTRL_lagerRiktigeDistribusjonstyperForFritekstbrev() {
         Behandling behandlingFTRL = lagBehandling(Behandlingstyper.FØRSTEGANG);
         behandlingFTRL.getFagsak().setType(Sakstyper.FTRL);
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingFTRL);
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingFTRL);
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingFTRL);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingFTRL);
+        when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
 
         assertThat(tilgjengeligeMaler).hasSize(4);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
@@ -479,9 +493,10 @@ class BrevmalListeByggerTest {
         mottatteOpplysningerData.soeknadsland = new Soeknadsland(Collections.singletonList("GB"), false);
         mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
         behandlingTrygdeavtale.setMottatteOpplysninger(mottatteOpplysninger);
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
+        when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
@@ -510,11 +525,13 @@ class BrevmalListeByggerTest {
         mottatteOpplysningerData.soeknadsland = new Soeknadsland(Collections.singletonList("GB"), false);
         mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
         behandlingTrygdeavtale.setMottatteOpplysninger(mottatteOpplysninger);
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
+        when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
 
         assertThat(tilgjengeligeMaler).hasSize(5);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
@@ -536,9 +553,10 @@ class BrevmalListeByggerTest {
         unleash.disable("melosys.behandle_alle_saker");
         Behandling behandlingEUEOS = lagBehandling(Behandlingstyper.FØRSTEGANG);
         behandlingEUEOS.getFagsak().setType(Sakstyper.EU_EOS);
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingEUEOS);
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingEUEOS);
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingEUEOS);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingEUEOS);
+        when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
@@ -561,11 +579,13 @@ class BrevmalListeByggerTest {
         unleash.disable("melosys.behandle_alle_saker");
         Behandling behandlingEUEOS = lagBehandling(Behandlingstyper.FØRSTEGANG);
         behandlingEUEOS.getFagsak().setType(Sakstyper.EU_EOS);
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingEUEOS);
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingEUEOS);
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingEUEOS);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingEUEOS);
+        when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
 
         assertThat(tilgjengeligeMaler).hasSize(4);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
@@ -587,9 +607,10 @@ class BrevmalListeByggerTest {
         unleash.disable("melosys.behandle_alle_saker");
         Behandling behandlingFTRL = lagBehandling(Behandlingstyper.FØRSTEGANG);
         behandlingFTRL.getFagsak().setType(Sakstyper.FTRL);
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingFTRL);
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingFTRL);
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingFTRL);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingFTRL);
+        when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
@@ -616,11 +637,13 @@ class BrevmalListeByggerTest {
         unleash.disable("melosys.behandle_alle_saker");
         Behandling behandlingFTRL = lagBehandling(Behandlingstyper.FØRSTEGANG);
         behandlingFTRL.getFagsak().setType(Sakstyper.FTRL);
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingFTRL);
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingFTRL);
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingFTRL);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingFTRL);
+        when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
 
         assertThat(tilgjengeligeMaler).hasSize(4);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())
@@ -647,9 +670,10 @@ class BrevmalListeByggerTest {
         mottatteOpplysningerData.soeknadsland = new Soeknadsland(Collections.singletonList("GB"), false);
         mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
         behandlingTrygdeavtale.setMottatteOpplysninger(mottatteOpplysninger);
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
+        when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
@@ -679,11 +703,13 @@ class BrevmalListeByggerTest {
         mottatteOpplysningerData.soeknadsland = new Soeknadsland(Collections.singletonList("GB"), false);
         mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
         behandlingTrygdeavtale.setMottatteOpplysninger(mottatteOpplysninger);
-        when(mockBehandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
-        when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
-        when(mockBrevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
+        when(brevmottakerService.avklarMottakere(any(), any(), any(), anyBoolean(), anyBoolean())).thenReturn(Collections.emptyList());
+
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
 
         assertThat(tilgjengeligeMaler).hasSize(5);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(0).getValg().getValgAlternativer())

@@ -7,15 +7,12 @@ import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 import no.nav.melosys.service.dokument.VedleggTyper;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.domain.kodeverk.Sakstyper.TRYGDEAVTALE;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.TRYGDEAVTALE_GB;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2;
 
 @Service
@@ -24,10 +21,8 @@ public class DokumentNavnService {
     private final BrevmottakerService brevmottakerService;
     private final DokgenService dokgenService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
-    private final BehandlingService behandlingService;
 
-    public DokumentNavnService(BehandlingService behandlingService, BrevmottakerService brevmottakerService, DokgenService dokgenService, LovvalgsperiodeService lovvalgsperiodeService) {
-        this.behandlingService = behandlingService;
+    public DokumentNavnService(BrevmottakerService brevmottakerService, DokgenService dokgenService, LovvalgsperiodeService lovvalgsperiodeService) {
         this.brevmottakerService = brevmottakerService;
         this.dokgenService = dokgenService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
