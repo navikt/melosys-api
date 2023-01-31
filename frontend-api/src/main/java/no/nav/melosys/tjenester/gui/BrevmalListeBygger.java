@@ -325,10 +325,6 @@ public class BrevmalListeBygger {
                     .medTegnBegrensning(60)
                     .build(),
                 new BrevmalFeltDto.Builder()
-                    .medKodeOgBeskrivelse(BrevmalFeltKode.STANDARDTEKST_KONTAKTINFORMASJON)
-                    .medFeltType(FeltType.SJEKKBOKS)
-                    .build(),
-                new BrevmalFeltDto.Builder()
                     .medKodeOgBeskrivelse(BrevmalFeltKode.FRITEKST)
                     .medHjelpetekst("Teksten du skriver inn her vil være hovedteksten i brevet du lager.")
                     .medFeltType(FeltType.FRITEKST)
