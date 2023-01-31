@@ -349,7 +349,7 @@ public class BrevbestillingRequest {
             .medDistribusjonstype(brevbestillingUtkast.distribusjonstype())
             .medKontaktopplysninger(brevbestillingUtkast.kontaktopplysninger())
             .medNyVurderingBakgrunn(brevbestillingUtkast.nyVurderingBakgrunn())
-            .medSaksvedlegg(brevbestillingUtkast.saksvedlegg().stream().map(SaksvedleggDto::av).toList())
+            .medSaksvedlegg(brevbestillingUtkast.saksVedlegg().stream().map(SaksvedleggDto::av).toList())
             .medFritekstvedlegg(brevbestillingUtkast.fritekstVedlegg().stream().map(FritekstvedleggDto::av).toList())
             .medDokumentTittel(brevbestillingUtkast.dokumentTittel())
             .build();

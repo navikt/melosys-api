@@ -17,11 +17,8 @@ public class UtkastBrevService {
         this.utkastBrevRepository = utkastBrevRepository;
     }
 
-    public List<BrevbestillingUtkast> hentUtkast(long behandlingID) {
-        return utkastBrevRepository
-            .findAllByBehandlingIDOrderByLagringsdatoDesc(behandlingID)
-            .stream().map(UtkastBrev::getBrevbestillingUtkast)
-            .toList();
+    public List<UtkastBrev> hentUtkast(long behandlingID) {
+        return utkastBrevRepository.findAllByBehandlingIDOrderByLagringsdatoDesc(behandlingID);
     }
 
     public void lagreUtkast(long behandlingID, String saksbehandler, BrevbestillingUtkast brevbestillingUtkast) {
