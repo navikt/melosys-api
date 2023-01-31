@@ -21,6 +21,11 @@ public class UtkastBrevService {
         return utkastBrevRepository.findAllByBehandlingIDOrderByLagringsdatoDesc(behandlingID);
     }
 
+    public void slettUtkast(long utkastBrevID) {
+        utkastBrevRepository.deleteById(utkastBrevID);
+    }
+
+
     public void lagreUtkast(long behandlingID, String saksbehandler, BrevbestillingUtkast brevbestillingUtkast) {
         var utkast = new UtkastBrev();
         utkast.setBehandlingID(behandlingID);
