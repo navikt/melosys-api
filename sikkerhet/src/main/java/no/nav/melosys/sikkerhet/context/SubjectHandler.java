@@ -6,6 +6,8 @@ import no.nav.security.token.support.spring.SpringTokenValidationContextHolder;
 
 public abstract class SubjectHandler {
 
+    public static String SYSTEMBRUKER = "srvmelosys";
+
     private static class SubjectHandlerHolder {
         private static SubjectHandler SUBJECT_HANDLER = new SpringSubjectHandler(new SpringTokenValidationContextHolder());
     }
@@ -25,5 +27,9 @@ public abstract class SubjectHandler {
     public abstract String getUserName();
 
     public abstract List<String> getGroups();
+
+    public static String getUserIDOrSystemUser() {
+        return getInstance().getUserID() == null ? SYSTEMBRUKER : getInstance().getUserID();
+    }
 
 }
