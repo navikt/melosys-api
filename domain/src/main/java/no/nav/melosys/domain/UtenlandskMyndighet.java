@@ -89,6 +89,6 @@ public class UtenlandskMyndighet {
     }
 
     public static Land_iso2 konverterInstitusjonIdTilLandkode(String institusjonID) {
-        return Land_iso2.valueOf(institusjonID.split(":")[0].replaceAll("[^a-zA-Z]", ""));
+        return Land_iso2.valueOf(institusjonID.split(":")[0].replaceAll("[^a-zA-Z_]", ""));
     }
 }

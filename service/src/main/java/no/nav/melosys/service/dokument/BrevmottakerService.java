@@ -210,6 +210,10 @@ public class BrevmottakerService {
             Map<UtenlandskMyndighet, Aktoer> utenlandskMyndighetAktoerMap
                 = utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling);
 
+            if (produserbartDokument == UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV && utenlandskMyndighetAktoerMap.isEmpty()) {
+                throw new FunksjonellException("Du kan ikke sende brev til trygdemyndigheten i landet du har valgt, fordi korrekt adresse er ukjent.");
+            }
+
             if (produserbartDokument == ATTEST_A1 && kanReservereMotA1(behandling)) {
                 return utenlandskMyndighetAktoerMap.entrySet()
                     .stream()
