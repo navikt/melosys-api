@@ -97,7 +97,7 @@ public class VilkaarsresultatService {
     public void tømVilkårForBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
         var behandling = behandlingsresultat.getBehandling();
         var fagsak = behandling.getFagsak();
-        if (fagsak.erSakstypeEøs() && !SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"))) {
+        if (fagsak.erSakstypeEøs() && !SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled("melosys.ikkeYrkesaktivForenkletFlyt"))) {
             vilkaarsresultatRepo.deleteByBehandlingsresultatAndVilkaarNotIn(behandlingsresultat, IMMUTABLE_VILKAAR);
         } else {
             vilkaarsresultatRepo.deleteByBehandlingsresultatId(behandlingsresultat.getId());

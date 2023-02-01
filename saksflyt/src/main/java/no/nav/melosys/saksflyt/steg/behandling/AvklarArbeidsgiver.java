@@ -81,7 +81,7 @@ public class AvklarArbeidsgiver implements StegBehandler {
     }
 
     private boolean arbeidsgiverIkkeAvklares(Behandling behandling, Behandlingsresultat resultat) {
-        return SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"))
+        return SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled("melosys.ikkeYrkesaktivForenkletFlyt"))
             || resultat.erAvslagManglendeOpplysninger() || erEøsMedArtikkel13(behandling, resultat);
     }
 

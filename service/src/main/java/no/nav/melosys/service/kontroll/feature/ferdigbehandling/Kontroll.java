@@ -87,7 +87,7 @@ class Kontroll {
     private FerdigbehandlingKontrollData hentKontrollDataForAvslagOgHenleggelse(Behandling behandling) {
         MottatteOpplysningerData mottatteOpplysningerData = null;
 
-        if (!SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"))) {
+        if (!SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled("melosys.ikkeYrkesaktivForenkletFlyt"))) {
             mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         }
         Persondata persondata = hentPersondata(behandling);

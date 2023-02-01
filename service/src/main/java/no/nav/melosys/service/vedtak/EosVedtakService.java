@@ -142,7 +142,7 @@ public class EosVedtakService {
     private Set<String> avklarMottakerInstitusjoner(Behandling behandling,
                                                     Set<String> mottakerinstitusjoner,
                                                     Behandlingsresultat behandlingsresultat) {
-        if (SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"))) {
+        if (SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled("melosys.ikkeYrkesaktivForenkletFlyt"))) {
             return Collections.emptySet();
         }
 

@@ -121,7 +121,7 @@ public class SedDataBygger {
         var behandling = grunnlagMedSøknad.getBehandling();
         if (behandling.getFagsak().erSakstypeEøs() &&
             !behandling.erBehandlingAvSed() &&
-            !SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"))
+            !SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled("melosys.ikkeYrkesaktivForenkletFlyt"))
         ) {
             sedDataDto.setSøknadsperiode(new Periode(
                 grunnlagMedSøknad.getMottatteOpplysningerData().periode.getFom(),

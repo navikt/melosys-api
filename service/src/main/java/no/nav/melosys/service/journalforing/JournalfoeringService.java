@@ -213,7 +213,7 @@ public class JournalfoeringService {
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
 
         if (erSakstypeEøs(sakstype) && !SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype,
-            behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"))
+            behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled("melosys.ikkeYrkesaktivForenkletFlyt"))
         ) {
             validerSøknadFelter(journalfoeringDto);
             prosessinstans.setData(ProsessDataKey.SØKNADSLAND, journalfoeringDto.getFagsak().getLand());

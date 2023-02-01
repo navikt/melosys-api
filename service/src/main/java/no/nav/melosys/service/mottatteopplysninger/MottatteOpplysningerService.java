@@ -97,7 +97,8 @@ public class MottatteOpplysningerService {
     public void opprettSøknad(Behandling behandling, Periode periode, Soeknadsland soeknadsland) {
         long behandlingID = behandling.getId();
         boolean ftrlToggleEnabled = unleash.isEnabled("melosys.folketrygden.mvp");
-        boolean skalOppretteSøknad = !SaksbehandlingRegler.harTomFlyt(behandling, ftrlToggleEnabled);
+        boolean ikkeYrkesaktivToggleEnabled = unleash.isEnabled("melosys.ikkeYrkesaktivForenkletFlyt");
+        boolean skalOppretteSøknad = !SaksbehandlingRegler.harTomFlyt(behandling, ftrlToggleEnabled, ikkeYrkesaktivToggleEnabled);
         if (skalOppretteSøknad) {
             Sakstyper sakstype = behandling.getFagsak().getType();
             switch (sakstype) {

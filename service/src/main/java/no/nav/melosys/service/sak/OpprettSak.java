@@ -116,7 +116,7 @@ public class OpprettSak {
             hovedpart, sakstype, sakstema, behandlingstema, behandlingstype);
 
         if (erSakstypeEøs(sakstype)
-            && !SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"))) {
+            && !SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"),  unleash.isEnabled("melosys.ikkeYrkesaktivForenkletFlyt"))) {
             validerSøknadData(opprettSakDto.getSoknadDto());
         }
     }

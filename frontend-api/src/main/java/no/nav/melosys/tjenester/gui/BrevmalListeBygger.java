@@ -76,7 +76,7 @@ public class BrevmalListeBygger {
         switch (fagsak.getHovedpartRolle()) {
             case BRUKER -> {
                 mottakere.add(lagMottakerForRolle(behandlingId, BRUKER));
-                if (!SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"))) {
+                if (!SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled("melosys.ikkeYrkesaktivForenkletFlyt"))) {
                     mottakere.add(lagMottakerForRolle(behandlingId, ARBEIDSGIVER));
                 }
                 if (unleash.isEnabled("melosys.trygdeavtale.fritekstbrev") && fagsak.erSakstypeTrygdeavtale() && behandling.harLand()) {

@@ -59,6 +59,7 @@ public class OppfriskSaksopplysningerService {
     @Transactional
     public void oppfriskSaksopplysning(long behandlingID, boolean medFamilierelasjoner) {
         var folketrygdenToggleEnabled = unleash.isEnabled("melosys.folketrygden.mvp");
+        var ikkeYrkesaktivToggleEnabled = unleash.isEnabled("melosys.ikkeYrkesaktivForenkletFlyt");
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
         if (behandling.erUtsending() && anmodningsperiodeService.harSendtAnmodningsperiode(behandlingID)) {
@@ -79,7 +80,8 @@ public class OppfriskSaksopplysningerService {
                 behandling.getFagsak().getTema(),
                 behandling.getTema(),
                 behandling.getType(),
-                folketrygdenToggleEnabled))
+                folketrygdenToggleEnabled,
+                ikkeYrkesaktivToggleEnabled))
             .fnr(brukerID)
             .fom(periode.getFom())
             .tom(periode.getTom())
@@ -99,7 +101,7 @@ public class OppfriskSaksopplysningerService {
 
         if (behandling.getFagsak().erSakstypeEøs()
             && behandling.harPeriodeOgLand()
-            && !SaksbehandlingRegler.harTomFlyt(behandling, folketrygdenToggleEnabled)
+            && !SaksbehandlingRegler.harTomFlyt(behandling, folketrygdenToggleEnabled, ikkeYrkesaktivToggleEnabled)
             && behandling.kanResultereIVedtak()
             && !inngangsvilkaarService.oppfyllervurderingEF_883_2004(behandlingID)) {
             inngangsvilkaarService.vurderOgLagreInngangsvilkår(
