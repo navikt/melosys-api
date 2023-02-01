@@ -141,7 +141,7 @@ public class BrevmalListeBygger {
             } else {
                 brevAdresser = brevmalListeService.hentBrevAdresseTilMottakereGammel(aktoersroller, behandlingId);
             }
-            
+
             if ((aktoersroller == BRUKER || aktoersroller == VIRKSOMHET || aktoersroller == TRYGDEMYNDIGHET) && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty)) {
                 builder.medFeilmelding(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
             } else {
@@ -325,10 +325,6 @@ public class BrevmalListeBygger {
                     .medTegnBegrensning(60)
                     .build(),
                 new BrevmalFeltDto.Builder()
-                    .medKodeOgBeskrivelse(BrevmalFeltKode.STANDARDTEKST_KONTAKTINFORMASJON)
-                    .medFeltType(FeltType.SJEKKBOKS)
-                    .build(),
-                new BrevmalFeltDto.Builder()
                     .medKodeOgBeskrivelse(BrevmalFeltKode.FRITEKST)
                     .medHjelpetekst("Teksten du skriver inn her vil være hovedteksten i brevet du lager.")
                     .medFeltType(FeltType.FRITEKST)
@@ -365,10 +361,7 @@ public class BrevmalListeBygger {
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.BEKREFTELSE_PÅ_MEDLEMSKAP));
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.HENVENDELSE_OM_MEDLEMSKAP));
             }
-            case TRYGDEAVTALE -> {
-                valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.HENVENDELSE_OM_MEDLEMSKAP));
-                valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.ENGELSK_FRITEKSTBREV));
-            }
+            case TRYGDEAVTALE -> valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.ENGELSK_FRITEKSTBREV));
         }
 
         valgAlternativer.add(fritekstFeltvalgAlternativDto);

@@ -503,13 +503,11 @@ class BrevmalListeByggerTest {
 
         assertThat(tilgjengeligeMaler).hasSize(5);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(1).getValg().getValgAlternativer())
-            .hasSize(3)
+            .hasSize(2)
             .flatExtracting(
                 FeltvalgAlternativDto::getKode,
                 FeltvalgAlternativDto::isVisFelt)
             .containsExactly(
-                HENVENDELSE_OM_MEDLEMSKAP.getKode(),
-                false,
                 ENGELSK_FRITEKSTBREV.getKode(),
                 false,
                 FRITEKST.getKode(),
@@ -680,13 +678,11 @@ class BrevmalListeByggerTest {
 
         assertThat(tilgjengeligeMaler).hasSize(5);
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper().get(2).getFelter().get(1).getValg().getValgAlternativer())
-            .hasSize(3)
+            .hasSize(2)
             .flatExtracting(
                 FeltvalgAlternativDto::getKode,
                 FeltvalgAlternativDto::isVisFelt)
             .containsExactly(
-                HENVENDELSE_OM_MEDLEMSKAP.getKode(),
-                false,
                 ENGELSK_FRITEKSTBREV.getKode(),
                 false,
                 FRITEKST.getKode(),

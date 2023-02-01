@@ -57,16 +57,19 @@ class OpprettBetalingsplan(
         val inntektBelopMnd = avgiftspliktigUtenlandskInntektMnd + avgiftspliktigNorskInntektMnd
         val kontaktopplysning =
             kontaktopplysningService.hentKontaktopplysning(fagsak.saksnummer, fastsattTrygdeavgift.betalesAv.orgnr)
-        val fakturaseriePeriodeDtoListe = medlemskapsperioder.map {
-            val trygdeavgift = it.trygdeavgift.first()
 
+        val alleTrygdeavgiftIMedlemskap = medlemskapsperioder.flatMap {
+            it.trygdeavgift.map { trygdeavgift -> trygdeavgift }
+        }
+        val fakturaseriePeriodeDtoListe = alleTrygdeavgiftIMedlemskap.map {
             FakturaseriePeriodeDto(
-                trygdeavgift.trygdeavgiftsbeløpMd,
-                it.fom,
-                it.tom,
-                "Inntekt: ${inntektBelopMnd}, Dekning: ${it.dekning}, Sats: ${trygdeavgift.trygdesats} %"
+                it.trygdeavgiftsbeløpMd,
+                it.periodeFra,
+                it.periodeTil,
+                "Inntekt: ${inntektBelopMnd}, Dekning: ${it.medlemskapsperiode.dekning}, Sats: ${it.trygdesats} %"
             )
         }
+
         val foedselsNr = pdlService.finnFolkeregisterident(aktoerer.first().aktørId)
             .orElseThrow { FunksjonellException("Kunne ikke finne fødselsnummer fra PDL") }
 
