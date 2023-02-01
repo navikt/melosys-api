@@ -131,19 +131,6 @@ class SaksbehandlingReglerTest {
             }
         ),
         arguments(
-            Sakstyper.EU_EOS,
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Behandlingstyper.NY_VURDERING,
-            Behandlingstema.UTSENDT_ARBEIDSTAKER,
-            BehandlingHolder().apply {
-                add(
-                    Behandlingstyper.FØRSTEGANG,
-                    Behandlingstema.IKKE_YRKESAKTIV,
-                    Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
-                )
-            }
-        ),
-        arguments(
             Sakstyper.FTRL,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstyper.FØRSTEGANG,
@@ -216,6 +203,19 @@ class SaksbehandlingReglerTest {
                     Behandlingstyper.NY_VURDERING,
                     Behandlingstema.YRKESAKTIV,
                     Behandlingsresultattyper.AVVIST_KLAGE
+                )
+            }
+        ),
+        arguments(
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstema.UTSENDT_ARBEIDSTAKER,
+            BehandlingHolder().apply {
+                add(
+                    Behandlingstyper.FØRSTEGANG,
+                    Behandlingstema.IKKE_YRKESAKTIV,
+                    Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
                 )
             }
         ),
