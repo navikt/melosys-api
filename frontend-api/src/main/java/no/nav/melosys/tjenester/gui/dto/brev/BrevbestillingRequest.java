@@ -1,14 +1,13 @@
 package no.nav.melosys.tjenester.gui.dto.brev;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
+import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.dokument.brev.FritekstvedleggDto;
-import no.nav.melosys.service.dokument.brev.KopiMottaker;
+import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
 import no.nav.melosys.service.dokument.brev.SaksvedleggDto;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 
@@ -25,7 +24,7 @@ public class BrevbestillingRequest {
     private String ektefelleFritekst;
     private String barnFritekst;
     private String kontaktpersonNavn;
-    private List<KopiMottaker> kopiMottakere;
+    private List<KopiMottakerDto> kopiMottakere;
     private String fritekstTittel;
     private String fritekst;
     private Distribusjonstype distribusjonstype;
@@ -88,6 +87,7 @@ public class BrevbestillingRequest {
         this.orgNr = builder.orgNr;
         this.innledningFritekst = builder.innledningFritekst;
         this.orgnrEtater = builder.orgnrEtater;
+        this.institusjonId = builder.institusjonID;
         this.manglerFritekst = builder.manglerFritekst;
         this.begrunnelseFritekst = builder.begrunnelseFritekst;
         this.ektefelleFritekst = builder.ektefelleFritekst;
@@ -150,7 +150,7 @@ public class BrevbestillingRequest {
         return kontaktpersonNavn;
     }
 
-    public List<KopiMottaker> getKopiMottakere() {
+    public List<KopiMottakerDto> getKopiMottakere() {
         if (kopiMottakere == null) {
             kopiMottakere = new ArrayList<>();
         }
@@ -203,12 +203,13 @@ public class BrevbestillingRequest {
         private String orgNr;
         private String innledningFritekst;
         private List<String> orgnrEtater;
+        private String institusjonID;
         private String manglerFritekst;
         private String begrunnelseFritekst;
         private String ektefelleFritekst;
         private String barnFritekst;
         private String kontaktpersonNavn;
-        private List<KopiMottaker> kopiMottakere;
+        private List<KopiMottakerDto> kopiMottakere;
         private String fritekstTittel;
         private String fritekst;
         public boolean kontaktopplysninger;
@@ -245,6 +246,11 @@ public class BrevbestillingRequest {
             return this;
         }
 
+        public Builder medInsitusjonID(String institusjonID) {
+            this.institusjonID = institusjonID;
+            return this;
+        }
+
         public Builder medManglerFritekst(String manglerFritekst) {
             this.manglerFritekst = manglerFritekst;
             return this;
@@ -270,7 +276,7 @@ public class BrevbestillingRequest {
             return this;
         }
 
-        public Builder medKopiMottakere(List<KopiMottaker> kopiMottakere) {
+        public Builder medKopiMottakere(List<KopiMottakerDto> kopiMottakere) {
             this.kopiMottakere = kopiMottakere;
             return this;
         }
@@ -282,6 +288,11 @@ public class BrevbestillingRequest {
 
         public Builder medFritekst(String fritekst) {
             this.fritekst = fritekst;
+            return this;
+        }
+
+        public Builder medDistribusjonstype(Distribusjonstype distribusjonstype) {
+            this.distribusjonstype = distribusjonstype;
             return this;
         }
 
@@ -323,6 +334,35 @@ public class BrevbestillingRequest {
         public BrevbestillingRequest build() {
             return new BrevbestillingRequest(this);
         }
+    }
+
+    public BrevbestillingUtkast tilUtkast() {
+        return new BrevbestillingUtkast(
+            this.getProduserbardokument(),
+            this.getMottaker(),
+            this.getOrgNr(),
+            this.getOrgnrEtater(),
+            this.getInstitusjonId(),
+            this.getInnledningFritekst(),
+            this.getManglerFritekst(),
+            this.getBegrunnelseFritekst(),
+            this.getEktefelleFritekst(),
+            this.getBarnFritekst(),
+            this.getKontaktpersonNavn(),
+            this.getKopiMottakere().stream().map(KopiMottakerDto::tilUtkast).toList(),
+            this.getFritekstTittel(),
+            this.getFritekst(),
+            this.getDistribusjonstype(),
+            this.isKontaktopplysninger(),
+            this.getNyVurderingBakgrunn(),
+            Optional.ofNullable(this.getSaksvedlegg())
+                .orElseGet(Collections::emptyList)
+                .stream().map(SaksvedleggDto::tilUtkast).toList(),
+            Optional.ofNullable(this.getFritekstvedlegg())
+                .orElseGet(Collections::emptyList)
+                .stream().map(FritekstvedleggDto::tilUtkast).toList(),
+            this.getDokumentTittel()
+        );
     }
 
     @Override

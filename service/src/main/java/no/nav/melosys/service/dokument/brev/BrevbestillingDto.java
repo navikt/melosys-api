@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
+import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
@@ -19,7 +20,7 @@ public class BrevbestillingDto {
     private String ektefelleFritekst;
     private String barnFritekst;
     private String kontaktpersonNavn;
-    private List<KopiMottaker> kopiMottakere;
+    private List<KopiMottakerDto> kopiMottakere;
     private String bestillersId;
     private String fritekstTittel;
     private Distribusjonstype distribusjonstype;
@@ -123,7 +124,7 @@ public class BrevbestillingDto {
         return kontaktpersonNavn;
     }
 
-    public List<KopiMottaker> getKopiMottakere() {
+    public List<KopiMottakerDto> getKopiMottakere() {
         if (kopiMottakere == null) {
             kopiMottakere = new ArrayList<>();
         }
@@ -178,7 +179,7 @@ public class BrevbestillingDto {
         private String ektefelleFritekst;
         private String barnFritekst;
         private String kontaktpersonNavn;
-        private List<KopiMottaker> kopiMottakere;
+        private List<KopiMottakerDto> kopiMottakere;
         private String bestillersId;
         private String fritekstTittel;
         private String fritekst;
@@ -246,7 +247,7 @@ public class BrevbestillingDto {
             return this;
         }
 
-        public Builder medKopiMottakere(List<KopiMottaker> kopiMottakere) {
+        public Builder medKopiMottakere(List<KopiMottakerDto> kopiMottakere) {
             this.kopiMottakere = kopiMottakere;
             return this;
         }
@@ -281,6 +282,11 @@ public class BrevbestillingDto {
             return this;
         }
 
+        public Builder medDistribusjonstype(Distribusjonstype distribusjonstype) {
+            this.distribusjonstype = distribusjonstype;
+            return this;
+        }
+
         public Builder medYtterligereInformasjon(String ytterligereInformasjon) {
             this.ytterligereInformasjon = ytterligereInformasjon;
             return this;
@@ -309,5 +315,29 @@ public class BrevbestillingDto {
         public BrevbestillingDto build() {
             return new BrevbestillingDto(this);
         }
+    }
+
+    public static BrevbestillingDto av(BrevbestillingUtkast brevbestillingUtkast) {
+        return new BrevbestillingDto.Builder()
+            .medProduserbardokument(brevbestillingUtkast.produserbardokument())
+            .medMottaker(brevbestillingUtkast.mottaker())
+            .medOrgNr(brevbestillingUtkast.orgnr())
+            .medOrgnrEtater(brevbestillingUtkast.orgnrEtater())
+            .medInnledningFritekst(brevbestillingUtkast.innledningFritekst())
+            .medManglerFritekst(brevbestillingUtkast.manglerFritekst())
+            .medBegrunnelseFritekst(brevbestillingUtkast.begrunnelseFritekst())
+            .medEktefelleFritekst(brevbestillingUtkast.ektefelleFritekst())
+            .medBarnFritekst(brevbestillingUtkast.barnFritekst())
+            .medKontaktpersonNavn(brevbestillingUtkast.kontaktpersonNavn())
+            .medKopiMottakere(brevbestillingUtkast.kopiMottakere().stream().map(KopiMottakerDto::av).toList())
+            .medFritekstTittel(brevbestillingUtkast.fritekstTittel())
+            .medFritekst(brevbestillingUtkast.fritekst())
+            .medDistribusjonstype(brevbestillingUtkast.distribusjonstype())
+            .medKontaktopplysninger(brevbestillingUtkast.kontaktopplysninger())
+            .medNyVurderingBakgrunn(brevbestillingUtkast.nyVurderingBakgrunn())
+            .medSaksvedlegg(brevbestillingUtkast.saksVedlegg().stream().map(SaksvedleggDto::av).toList())
+            .medFritekstvedlegg(brevbestillingUtkast.fritekstVedlegg().stream().map(FritekstvedleggDto::av).toList())
+            .medDokumentTittel(brevbestillingUtkast.dokumentTittel())
+            .build();
     }
 }

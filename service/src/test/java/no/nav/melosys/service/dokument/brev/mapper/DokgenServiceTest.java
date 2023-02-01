@@ -35,7 +35,7 @@ import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.FritekstvedleggDto;
-import no.nav.melosys.service.dokument.brev.KopiMottaker;
+import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
 import no.nav.melosys.service.dokument.brev.SaksvedleggDto;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -391,7 +391,7 @@ class DokgenServiceTest {
             .medManglerFritekst("Mangler")
             .medMottaker(Aktoersroller.ARBEIDSGIVER)
             .medOrgNr(ORGNR)
-            .medKopiMottakere(List.of(new KopiMottaker(Aktoersroller.BRUKER, null, "1223", null)))
+            .medKopiMottakere(List.of(new KopiMottakerDto(Aktoersroller.BRUKER, null, "1223", null)))
             .build();
 
 
@@ -498,7 +498,7 @@ class DokgenServiceTest {
         when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
             .medProduserbardokument(GENERELT_FRITEKSTBREV_BRUKER)
-            .medKopiMottakere(List.of(new KopiMottaker(Aktoersroller.BRUKER, null, null, null)))
+            .medKopiMottakere(List.of(new KopiMottakerDto(Aktoersroller.BRUKER, null, null, null)))
             .build();
 
 

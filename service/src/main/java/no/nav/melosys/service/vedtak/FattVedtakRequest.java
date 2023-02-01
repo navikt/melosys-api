@@ -6,7 +6,7 @@ import java.util.Set;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall;
-import no.nav.melosys.service.dokument.brev.KopiMottaker;
+import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
 
 public class FattVedtakRequest {
     private final Behandlingsresultattyper behandlingsresultatTypeKode;
@@ -18,7 +18,7 @@ public class FattVedtakRequest {
     private final String begrunnelseFritekst;
     private final String ektefelleFritekst;
     private final String barnFritekst;
-    private final List<KopiMottaker> kopiMottakere;
+    private final List<KopiMottakerDto> kopiMottakere;
     private final String bestillersId;
     private final String nyVurderingBakgrunn;
     private final FaktureringsIntervall betalingsintervall;
@@ -59,7 +59,7 @@ public class FattVedtakRequest {
         return barnFritekst;
     }
 
-    public List<KopiMottaker> getKopiMottakere() {
+    public List<KopiMottakerDto> getKopiMottakere() {
         return kopiMottakere;
     }
 
@@ -102,7 +102,7 @@ public class FattVedtakRequest {
         private String begrunnelseFritekst;
         private String ektefelleFritekst;
         private String barnFritekst;
-        private List<KopiMottaker> kopiMottakere;
+        private List<KopiMottakerDto> kopiMottakere;
         private String bestillersId;
         private FaktureringsIntervall betalingsintervall;
 
@@ -188,7 +188,7 @@ public class FattVedtakRequest {
             return this;
         }
 
-        public Builder medKopiMottakere(List<KopiMottaker> kopiMottakere) {
+        public Builder medKopiMottakere(List<KopiMottakerDto> kopiMottakere) {
             this.kopiMottakere = kopiMottakere;
             return this;
         }

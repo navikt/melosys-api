@@ -7,7 +7,6 @@ import java.util.*;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.SaksvedleggBestilling;
@@ -26,7 +25,7 @@ import no.nav.melosys.service.behandling.UtledMottaksdato;
 import no.nav.melosys.service.bruker.SaksbehandlerService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.FritekstvedleggDto;
-import no.nav.melosys.service.dokument.brev.KopiMottaker;
+import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
 import no.nav.melosys.service.dokument.brev.SaksvedleggDto;
 import no.nav.melosys.service.dokument.brev.mapper.DokgenMalMapper;
 import no.nav.melosys.service.dokument.brev.mapper.DokumentproduksjonsInfoMapper;
@@ -146,7 +145,7 @@ public class DokgenService {
             produserOgDistribuerBrev(behandling, aktoer, brevbestilling.build());
         }
 
-        for (KopiMottaker kopiMottaker : brevbestillingDto.getKopiMottakere()) {
+        for (KopiMottakerDto kopiMottaker : brevbestillingDto.getKopiMottakere()) {
             var aktoer = new Aktoer();
             aktoer.setRolle(kopiMottaker.rolle());
             aktoer.setOrgnr(kopiMottaker.orgnr());
@@ -229,12 +228,12 @@ public class DokgenService {
         return ident != null ? saksbehandlerService.hentNavnForIdent(ident) : "N/A";
     }
 
-    private boolean inneholderArbeidsgiverSomKopimottaker(Collection<KopiMottaker> kopimottakere) {
-        return kopimottakere.stream().map(KopiMottaker::rolle).anyMatch(kopimottaker -> kopimottaker == Aktoersroller.ARBEIDSGIVER);
+    private boolean inneholderArbeidsgiverSomKopimottaker(Collection<KopiMottakerDto> kopimottakere) {
+        return kopimottakere.stream().map(KopiMottakerDto::rolle).anyMatch(kopimottaker -> kopimottaker == Aktoersroller.ARBEIDSGIVER);
     }
 
-    private boolean inneholderBrukerSomKopimottaker(Collection<KopiMottaker> kopimottakere) {
-        return kopimottakere.stream().map(KopiMottaker::rolle).anyMatch(kopimottaker -> kopimottaker == Aktoersroller.BRUKER);
+    private boolean inneholderBrukerSomKopimottaker(Collection<KopiMottakerDto> kopimottakere) {
+        return kopimottakere.stream().map(KopiMottakerDto::rolle).anyMatch(kopimottaker -> kopimottaker == Aktoersroller.BRUKER);
     }
 
     private List<SaksvedleggBestilling> lagSaksvedleggBestilling(List<SaksvedleggDto> saksvedleggDtoer) {

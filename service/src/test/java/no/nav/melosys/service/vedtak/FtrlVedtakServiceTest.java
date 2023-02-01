@@ -12,7 +12,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import no.nav.melosys.service.dokument.brev.KopiMottaker;
+import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
@@ -166,7 +166,7 @@ class FtrlVedtakServiceTest {
             .medBegrunnelseFritekst("Begrunnelse")
             .medEktefelleFritekst("Ektefelle omfattet")
             .medBarnFritekst("Barn omfattet")
-            .medKopiMottakere(List.of(new KopiMottaker(Aktoersroller.ARBEIDSGIVER, "987654321", null, null)))
+            .medKopiMottakere(List.of(new KopiMottakerDto(Aktoersroller.ARBEIDSGIVER, "987654321", null, null)))
             .medBestillersId(SubjectHandler.getInstance().getUserID())
             .build();
     }
