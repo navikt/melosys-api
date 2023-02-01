@@ -6,6 +6,7 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 public record HentUtkastResponse(
     Long utkastBrevID,
     String lagretAvSaksbehandlerIdent,
+    String dokumenttittel,
     BrevbestillingDto brevbestilling
 ) {
 
@@ -13,6 +14,7 @@ public record HentUtkastResponse(
         return new HentUtkastResponse(
             utkastBrev.getId(),
             utkastBrev.getLagretAvSaksbehandler(),
+            utkastBrev.getBrevbestillingUtkast().getTittel(),
             BrevbestillingDto.av(utkastBrev.getBrevbestillingUtkast())
         );
     }
