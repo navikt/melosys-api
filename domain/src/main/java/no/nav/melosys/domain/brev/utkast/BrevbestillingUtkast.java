@@ -28,8 +28,8 @@ public record BrevbestillingUtkast(
     Distribusjonstype distribusjonstype,
     boolean kontaktopplysninger,
     String nyVurderingBakgrunn,
-    List<VedleggUtkast.Saksvedlegg> saksVedlegg,
-    List<VedleggUtkast.FritekstVedlegg> fritekstVedlegg,
+    List<Utkast.Saksvedlegg> saksVedlegg,
+    List<Utkast.FritekstVedlegg> fritekstVedlegg,
     String dokumentTittel
 ) {
 }

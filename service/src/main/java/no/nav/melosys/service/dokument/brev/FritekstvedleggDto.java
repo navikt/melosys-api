@@ -1,16 +1,16 @@
 package no.nav.melosys.service.dokument.brev;
 
-import no.nav.melosys.domain.brev.utkast.VedleggUtkast;
+import no.nav.melosys.domain.brev.utkast.Utkast;
 
 public record FritekstvedleggDto(
     String tittel,
     String fritekst
 ) {
-    public static FritekstvedleggDto av(VedleggUtkast.FritekstVedlegg fritekstVedlegg) {
+    public static FritekstvedleggDto av(Utkast.FritekstVedlegg fritekstVedlegg) {
         return new FritekstvedleggDto(fritekstVedlegg.tittel(), fritekstVedlegg.fritekst());
     }
 
-    public VedleggUtkast.FritekstVedlegg tilUtkast() {
-        return new VedleggUtkast.FritekstVedlegg(this.tittel(), this.fritekst());
+    public Utkast.FritekstVedlegg tilUtkast() {
+        return new Utkast.FritekstVedlegg(this.tittel(), this.fritekst());
     }
 }

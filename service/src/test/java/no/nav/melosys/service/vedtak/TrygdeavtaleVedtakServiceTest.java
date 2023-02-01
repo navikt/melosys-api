@@ -17,7 +17,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
-import no.nav.melosys.service.dokument.brev.KopiMottaker;
+import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -264,8 +264,8 @@ class TrygdeavtaleVedtakServiceTest {
             .medEktefelleFritekst("Ektefelle omfattet")
             .medBarnFritekst("Barn omfattet")
             .medKopiMottakere(List.of(
-                new KopiMottaker(ARBEIDSGIVER, "987654321", null, null),
-                new KopiMottaker(TRYGDEMYNDIGHET, null, null, "GB:UK010")
+                new KopiMottakerDto(ARBEIDSGIVER, "987654321", null, null),
+                new KopiMottakerDto(TRYGDEMYNDIGHET, null, null, "GB:UK010")
             ))
             .medBestillersId(SubjectHandler.getInstance().getUserID())
             .medNyVurderingBakgrunn(nyVurderingBakgrunn)

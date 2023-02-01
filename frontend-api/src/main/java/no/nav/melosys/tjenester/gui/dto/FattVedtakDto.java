@@ -3,7 +3,7 @@ package no.nav.melosys.tjenester.gui.dto;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall;
-import no.nav.melosys.service.dokument.brev.KopiMottaker;
+import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
 
 import java.util.List;
 import java.util.Set;
@@ -19,7 +19,7 @@ public class FattVedtakDto {
     private String begrunnelseFritekst;
     private String ektefelleFritekst;
     private String barnFritekst;
-    private List<KopiMottaker> kopiMottakere;
+    private List<KopiMottakerDto> kopiMottakere;
     private FaktureringsIntervall betalingsintervall;
 
     public FaktureringsIntervall getBetalingsintervall() {
@@ -82,7 +82,7 @@ public class FattVedtakDto {
         return barnFritekst;
     }
 
-    public List<KopiMottaker> getKopiMottakere() {
+    public List<KopiMottakerDto> getKopiMottakere() {
         return kopiMottakere;
     }
 
@@ -106,7 +106,7 @@ public class FattVedtakDto {
         this.barnFritekst = barnFritekst;
     }
 
-    public void setKopiMottakere(List<KopiMottaker> kopiMottakere) {
+    public void setKopiMottakere(List<KopiMottakerDto> kopiMottakere) {
         this.kopiMottakere = kopiMottakere;
     }
 

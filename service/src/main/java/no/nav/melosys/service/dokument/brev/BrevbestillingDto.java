@@ -20,7 +20,7 @@ public class BrevbestillingDto {
     private String ektefelleFritekst;
     private String barnFritekst;
     private String kontaktpersonNavn;
-    private List<KopiMottaker> kopiMottakere;
+    private List<KopiMottakerDto> kopiMottakere;
     private String bestillersId;
     private String fritekstTittel;
     private Distribusjonstype distribusjonstype;
@@ -124,7 +124,7 @@ public class BrevbestillingDto {
         return kontaktpersonNavn;
     }
 
-    public List<KopiMottaker> getKopiMottakere() {
+    public List<KopiMottakerDto> getKopiMottakere() {
         if (kopiMottakere == null) {
             kopiMottakere = new ArrayList<>();
         }
@@ -179,7 +179,7 @@ public class BrevbestillingDto {
         private String ektefelleFritekst;
         private String barnFritekst;
         private String kontaktpersonNavn;
-        private List<KopiMottaker> kopiMottakere;
+        private List<KopiMottakerDto> kopiMottakere;
         private String bestillersId;
         private String fritekstTittel;
         private String fritekst;
@@ -247,7 +247,7 @@ public class BrevbestillingDto {
             return this;
         }
 
-        public Builder medKopiMottakere(List<KopiMottaker> kopiMottakere) {
+        public Builder medKopiMottakere(List<KopiMottakerDto> kopiMottakere) {
             this.kopiMottakere = kopiMottakere;
             return this;
         }
@@ -329,7 +329,7 @@ public class BrevbestillingDto {
             .medEktefelleFritekst(brevbestillingUtkast.ektefelleFritekst())
             .medBarnFritekst(brevbestillingUtkast.barnFritekst())
             .medKontaktpersonNavn(brevbestillingUtkast.kontaktpersonNavn())
-            .medKopiMottakere(brevbestillingUtkast.kopiMottakere().stream().map(KopiMottaker::av).toList())
+            .medKopiMottakere(brevbestillingUtkast.kopiMottakere().stream().map(KopiMottakerDto::av).toList())
             .medFritekstTittel(brevbestillingUtkast.fritekstTittel())
             .medFritekst(brevbestillingUtkast.fritekst())
             .medDistribusjonstype(brevbestillingUtkast.distribusjonstype())

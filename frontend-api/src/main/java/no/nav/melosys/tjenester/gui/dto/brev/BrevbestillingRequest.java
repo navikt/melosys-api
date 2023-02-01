@@ -7,7 +7,7 @@ import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.dokument.brev.FritekstvedleggDto;
-import no.nav.melosys.service.dokument.brev.KopiMottaker;
+import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
 import no.nav.melosys.service.dokument.brev.SaksvedleggDto;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 
@@ -24,7 +24,7 @@ public class BrevbestillingRequest {
     private String ektefelleFritekst;
     private String barnFritekst;
     private String kontaktpersonNavn;
-    private List<KopiMottaker> kopiMottakere;
+    private List<KopiMottakerDto> kopiMottakere;
     private String fritekstTittel;
     private String fritekst;
     private Distribusjonstype distribusjonstype;
@@ -150,7 +150,7 @@ public class BrevbestillingRequest {
         return kontaktpersonNavn;
     }
 
-    public List<KopiMottaker> getKopiMottakere() {
+    public List<KopiMottakerDto> getKopiMottakere() {
         if (kopiMottakere == null) {
             kopiMottakere = new ArrayList<>();
         }
@@ -209,7 +209,7 @@ public class BrevbestillingRequest {
         private String ektefelleFritekst;
         private String barnFritekst;
         private String kontaktpersonNavn;
-        private List<KopiMottaker> kopiMottakere;
+        private List<KopiMottakerDto> kopiMottakere;
         private String fritekstTittel;
         private String fritekst;
         public boolean kontaktopplysninger;
@@ -276,7 +276,7 @@ public class BrevbestillingRequest {
             return this;
         }
 
-        public Builder medKopiMottakere(List<KopiMottaker> kopiMottakere) {
+        public Builder medKopiMottakere(List<KopiMottakerDto> kopiMottakere) {
             this.kopiMottakere = kopiMottakere;
             return this;
         }
@@ -349,7 +349,7 @@ public class BrevbestillingRequest {
             this.getEktefelleFritekst(),
             this.getBarnFritekst(),
             this.getKontaktpersonNavn(),
-            this.getKopiMottakere().stream().map(KopiMottaker::tilUtkast).toList(),
+            this.getKopiMottakere().stream().map(KopiMottakerDto::tilUtkast).toList(),
             this.getFritekstTittel(),
             this.getFritekst(),
             this.getDistribusjonstype(),
