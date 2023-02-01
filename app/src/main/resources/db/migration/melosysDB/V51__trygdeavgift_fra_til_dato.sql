@@ -1,0 +1,4 @@
+ALTER TABLE trygdeavgift
+    ADD PERIODE_FRA DATE;
+ALTER TABLE trygdeavgift
+    ADD PERIODE_TIL DATE;

@@ -13,23 +13,26 @@ public class MelosysTrygdeavgfitBeregningDto {
     private final Trygdedekninger trygdedekning;
     private final Folketrygdloven_kap2_bestemmelser bestemmelse;
     private final long maanedsbelop;
-    private final LocalDate beregningsdato;
     private final Saerligeavgiftsgrupper saerligAvgiftsGruppe;
+    private final LocalDate beregningsperiodeFom;
+    private final LocalDate beregningsperiodeTom;
 
     public MelosysTrygdeavgfitBeregningDto(Boolean arbeidsgiverBetalerAvgift,
                                            Boolean sokerErSkattepliktig,
                                            Trygdedekninger trygdedekning,
                                            Folketrygdloven_kap2_bestemmelser bestemmelse,
                                            long maanedsbelop,
-                                           LocalDate beregningsdato,
-                                           Saerligeavgiftsgrupper saerligAvgiftsGruppe) {
+                                           Saerligeavgiftsgrupper saerligAvgiftsGruppe,
+                                           LocalDate beregningsperiodeFom,
+                                           LocalDate beregningsperiodeTom) {
         this.arbeidsgiverBetalerAvgift = arbeidsgiverBetalerAvgift;
         this.sokerErSkattepliktig = sokerErSkattepliktig;
         this.trygdedekning = trygdedekning;
         this.bestemmelse = bestemmelse;
         this.maanedsbelop = maanedsbelop;
-        this.beregningsdato = beregningsdato;
         this.saerligAvgiftsGruppe = saerligAvgiftsGruppe;
+        this.beregningsperiodeFom = beregningsperiodeFom;
+        this.beregningsperiodeTom = beregningsperiodeTom;
     }
 
     public Boolean getArbeidsgiverBetalerAvgift() {
@@ -52,12 +55,16 @@ public class MelosysTrygdeavgfitBeregningDto {
         return maanedsbelop;
     }
 
-    public LocalDate getBeregningsdato() {
-        return beregningsdato;
-    }
-
     public Saerligeavgiftsgrupper getSaerligAvgiftsGruppe() {
         return saerligAvgiftsGruppe;
+    }
+
+    public LocalDate getBeregningsperiodeFom() {
+        return beregningsperiodeFom;
+    }
+
+    public LocalDate getBeregningsperiodeTom() {
+        return beregningsperiodeTom;
     }
 
     @Override
@@ -70,12 +77,13 @@ public class MelosysTrygdeavgfitBeregningDto {
             Objects.equals(sokerErSkattepliktig, that.sokerErSkattepliktig) &&
             trygdedekning == that.trygdedekning &&
             bestemmelse == that.bestemmelse &&
-            Objects.equals(beregningsdato, that.beregningsdato) &&
-            saerligAvgiftsGruppe == that.saerligAvgiftsGruppe;
+            saerligAvgiftsGruppe == that.saerligAvgiftsGruppe &&
+            Objects.equals(beregningsperiodeFom, that.beregningsperiodeFom) &&
+            Objects.equals(beregningsperiodeTom, that.beregningsperiodeTom);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(arbeidsgiverBetalerAvgift, sokerErSkattepliktig, trygdedekning, bestemmelse, maanedsbelop, beregningsdato, saerligAvgiftsGruppe);
+        return Objects.hash(arbeidsgiverBetalerAvgift, sokerErSkattepliktig, trygdedekning, bestemmelse, maanedsbelop, saerligAvgiftsGruppe, beregningsperiodeFom, beregningsperiodeTom);
     }
 }

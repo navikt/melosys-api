@@ -208,7 +208,15 @@ class OpprettBetalingsplanTest {
     }
 
     private fun lagTrygdeAvgift(medlemskapsperiode: Medlemskapsperiode): Trygdeavgift {
-        val trygdeavgift = Trygdeavgift(medlemskapsperiode, BigDecimal(5000), BigDecimal(3.5), "Trygda", true)
+        val trygdeavgift = Trygdeavgift(
+            medlemskapsperiode,
+            BigDecimal(5000),
+            BigDecimal(3.5),
+            "Trygda",
+            true,
+            LocalDate.of(2023, 1, 1),
+            LocalDate.of(2023, 5, 1)
+        )
         return trygdeavgift
     }
 

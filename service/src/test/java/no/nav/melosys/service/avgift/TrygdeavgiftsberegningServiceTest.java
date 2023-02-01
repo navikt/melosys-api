@@ -2,13 +2,14 @@ package no.nav.melosys.service.avgift;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.Optional;
 
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.avgift.*;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Loenn_forhold;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer;
@@ -134,8 +135,8 @@ class TrygdeavgiftsberegningServiceTest {
         final var forventetTrygdesats = new BigDecimal("12.2");
         when(trygdeavgiftConsumer.beregnTrygdeavgift(eq(new MelosysTrygdeavgfitBeregningDto(
             false, true, medlemskapsperiode.getDekning(), medlemskapsperiode.getBestemmelse(),
-            medlemAvFolketrygden.getFastsattTrygdeavgift().getAvgiftspliktigUtenlandskInntektMnd(), LocalDate.now(), null
-        )))).thenReturn(new TrygdeavgiftDto("kode", forventetTrygdesats, forventetTrygdeavgiftsbeløp));
+            medlemAvFolketrygden.getFastsattTrygdeavgift().getAvgiftspliktigUtenlandskInntektMnd(), null,
+            medlemskapsperiode.getFom(), medlemskapsperiode.getTom())))).thenReturn(Collections.singletonList(new TrygdeavgiftDto(LocalDate.of(2022, 1, 1), LocalDate.of(2023, 1, 1), "kode", forventetTrygdesats, forventetTrygdeavgiftsbeløp)));
 
         trygdeavgiftsberegningService.beregnAvgift(behandlingsresultatID);
 
@@ -151,7 +152,7 @@ class TrygdeavgiftsberegningServiceTest {
                 "kode",
                 forventetTrygdeavgiftsbeløp,
                 forventetTrygdesats
-        );
+            );
     }
 
     @Test
@@ -176,7 +177,7 @@ class TrygdeavgiftsberegningServiceTest {
         final var forventetTrygdeavgiftsbeløp = new BigDecimal("10");
         final var forventetTrygdesats = new BigDecimal("12.2");
         when(trygdeavgiftConsumer.beregnTrygdeavgift(any(MelosysTrygdeavgfitBeregningDto.class)))
-            .thenReturn(new TrygdeavgiftDto("kode", forventetTrygdesats, forventetTrygdeavgiftsbeløp));
+            .thenReturn(Collections.singletonList(new TrygdeavgiftDto(LocalDate.of(2022, 1, 1), LocalDate.of(2023, 1, 1), "kode", forventetTrygdesats, forventetTrygdeavgiftsbeløp)));
 
         trygdeavgiftsberegningService.beregnAvgift(behandlingsresultatID);
         verify(trygdeavgiftConsumer, times(2)).beregnTrygdeavgift(any(MelosysTrygdeavgfitBeregningDto.class));
@@ -197,7 +198,7 @@ class TrygdeavgiftsberegningServiceTest {
                 "kode",
                 forventetTrygdeavgiftsbeløp,
                 forventetTrygdesats
-        );
+            );
     }
 
     @Test
@@ -313,6 +314,8 @@ class TrygdeavgiftsberegningServiceTest {
         trygdeavgift.setTrygdeavgiftsbeløpMd(new BigDecimal(10));
         trygdeavgift.setAvgiftskode("ABC");
         trygdeavgift.setTrygdesats(new BigDecimal("1.1"));
+        trygdeavgift.setPeriodeFra(LocalDate.now());
+        trygdeavgift.setPeriodeTil(LocalDate.now().plusYears(1));
         return trygdeavgift;
     }
 }
