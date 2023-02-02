@@ -6,7 +6,7 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 public record HentUtkastResponse(
     Long utkastBrevID,
     String lagretAvSaksbehandlerIdent,
-    String dokumenttittel,
+    String tittel,
     BrevbestillingDto brevbestilling
 ) {
 
