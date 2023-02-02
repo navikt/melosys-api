@@ -103,14 +103,14 @@ public class DokumentTjeneste {
     public ResponseEntity<Void> produserDokument(@PathVariable("behandlingID") long behandlingID,
                                                  @PathVariable("produserbartDokument") Produserbaredokumenter produserbartDokument,
                                                  @RequestBody BrevbestillingRequest brevBestillingRequest) {
-        if (brevBestillingRequest.getMottaker() == null) {
+        if (brevBestillingRequest.mottaker() == null) {
             throw new FunksjonellException("Mottaker trengs for å bestille.");
         }
         aksesskontroll.autoriser(behandlingID);
 
         BrevbestillingDto brevbestillingDto = brevBestillingRequest.tilBrevbestillingDto(SubjectHandler.getInstance().getUserID());
         brevbestillingDto.setProduserbardokument(produserbartDokument);
-        
+
         // Produserer utkast for å få eventuelle feil før bestilling i saksflyt.
         dokumentServiceFasade.produserUtkast(behandlingID, brevbestillingDto);
         dokumentServiceFasade.produserDokument(behandlingID, brevbestillingDto);
