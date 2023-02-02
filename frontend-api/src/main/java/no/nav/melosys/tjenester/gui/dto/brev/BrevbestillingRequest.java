@@ -19,7 +19,7 @@ import static java.util.Optional.ofNullable;
 public record BrevbestillingRequest(
     Produserbaredokumenter produserbardokument,
     Aktoersroller mottaker,
-    String orgnr,
+    String orgNr,
     String institusjonId,
     List<String> orgnrEtater,
     String innledningFritekst,
@@ -46,7 +46,7 @@ public record BrevbestillingRequest(
         return new BrevbestillingDto(
             this.produserbardokument,
             this.mottaker,
-            this.orgnr,
+            this.orgNr,
             this.orgnrEtater,
             this.institusjonId,
             this.innledningFritekst,
@@ -78,7 +78,7 @@ public record BrevbestillingRequest(
         return new BrevbestillingUtkast(
             this.produserbardokument(),
             this.mottaker(),
-            this.orgnr(),
+            this.orgNr(),
             this.orgnrEtater(),
             this.institusjonId(),
             this.innledningFritekst(),
