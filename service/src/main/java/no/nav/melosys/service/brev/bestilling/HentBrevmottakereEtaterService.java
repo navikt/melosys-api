@@ -1,4 +1,4 @@
-package no.nav.melosys.service.brev.components;
+package no.nav.melosys.service.brev.bestilling;
 
 import java.util.List;
 
@@ -12,11 +12,11 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.ETAT;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.FRITEKSTBREV;
 
 @Component
-public class HentBrevmottakereEtaterComponent {
+public class HentBrevmottakereEtaterService {
 
     private final EregFasade eregFasade;
 
-    public HentBrevmottakereEtaterComponent(EregFasade eregFasade) {
+    public HentBrevmottakereEtaterService(EregFasade eregFasade) {
         this.eregFasade = eregFasade;
     }
 

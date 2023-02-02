@@ -1,4 +1,4 @@
-package no.nav.melosys.service.brev.components;
+package no.nav.melosys.service.brev.bestilling;
 
 import java.time.LocalDateTime;
 
@@ -9,11 +9,11 @@ import no.nav.melosys.repository.UtkastBrevRepository;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OppdaterUtkastComponent {
+public class OppdaterUtkastService {
 
     private final UtkastBrevRepository utkastBrevRepository;
 
-    public OppdaterUtkastComponent(UtkastBrevRepository utkastBrevRepository) {
+    public OppdaterUtkastService(UtkastBrevRepository utkastBrevRepository) {
         this.utkastBrevRepository = utkastBrevRepository;
     }
 

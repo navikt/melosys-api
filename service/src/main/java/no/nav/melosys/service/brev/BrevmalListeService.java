@@ -22,9 +22,9 @@ import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.brev.bestilling.HentBrevAdresseTilMottakereService;
+import no.nav.melosys.service.brev.bestilling.HentMuligeProduserbaredokumenterService;
 import no.nav.melosys.service.brev.brevmalliste.BrevAdresse;
-import no.nav.melosys.service.brev.components.HentBrevAdresseTilMottakereComponent;
-import no.nav.melosys.service.brev.components.HentMuligeProduserbaredokumenterComponent;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Service;
@@ -38,8 +38,8 @@ import static no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper.*;
 @Service
 public class BrevmalListeService {
 
-    private final HentMuligeProduserbaredokumenterComponent hentMuligeProduserbaredokumenterComponent;
-    private final HentBrevAdresseTilMottakereComponent hentBrevAdresseTilMottakereComponent;
+    private final HentMuligeProduserbaredokumenterService hentMuligeProduserbaredokumenterService;
+    private final HentBrevAdresseTilMottakereService hentBrevAdresseTilMottakereService;
 
     @Deprecated(since = "Ta vekk med melosys.MEL-4835.refactor1, erstattet av komponent")
     private final BrevmottakerService brevmottakerService;
@@ -59,14 +59,14 @@ public class BrevmalListeService {
     @Deprecated(since = "Ta vekk med melosys.MEL-4835.refactor1, erstattet av komponent")
     private final EregFasade eregFasade;
 
-    public BrevmalListeService(HentMuligeProduserbaredokumenterComponent hentMuligeProduserbaredokumenterComponent, HentBrevAdresseTilMottakereComponent hentBrevAdresseTilMottakereComponent, BrevmottakerService brevmottakerService,
+    public BrevmalListeService(HentMuligeProduserbaredokumenterService hentMuligeProduserbaredokumenterService, HentBrevAdresseTilMottakereService hentBrevAdresseTilMottakereService, BrevmottakerService brevmottakerService,
                                BehandlingService behandlingService,
                                PersondataFasade persondataFasade,
                                KontaktopplysningService kontaktopplysningService,
                                UtenlandskMyndighetService utenlandskMyndighetService,
                                EregFasade eregFasade) {
-        this.hentMuligeProduserbaredokumenterComponent = hentMuligeProduserbaredokumenterComponent;
-        this.hentBrevAdresseTilMottakereComponent = hentBrevAdresseTilMottakereComponent;
+        this.hentMuligeProduserbaredokumenterService = hentMuligeProduserbaredokumenterService;
+        this.hentBrevAdresseTilMottakereService = hentBrevAdresseTilMottakereService;
         this.brevmottakerService = brevmottakerService;
         this.behandlingService = behandlingService;
         this.persondataFasade = persondataFasade;
@@ -76,7 +76,7 @@ public class BrevmalListeService {
     }
 
     public List<Produserbaredokumenter> hentMuligeProduserbaredokumenter(long behandlingId, Aktoersroller aktoersroller) {
-        return hentMuligeProduserbaredokumenterComponent.hentMuligeProduserbaredokumenter(behandlingId, aktoersroller);
+        return hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(behandlingId, aktoersroller);
     }
 
     @Deprecated(since = "Ta vekk med melosys.MEL-4835.refactor1, erstattet av komponent")
@@ -107,7 +107,7 @@ public class BrevmalListeService {
 
     @Transactional
     public List<BrevAdresse> hentBrevAdresseTilMottakere(long behandlingId, Aktoersroller aktoersroller) {
-        return hentBrevAdresseTilMottakereComponent.hentBrevAdresseTilMottakere(behandlingId, aktoersroller);
+        return hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(behandlingId, aktoersroller);
     }
 
     @Deprecated(since = "Ta vekk med melosys.MEL-4835.refactor1, erstattet av komponent")

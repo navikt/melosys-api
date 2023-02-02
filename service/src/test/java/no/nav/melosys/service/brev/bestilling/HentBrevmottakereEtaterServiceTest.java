@@ -1,4 +1,4 @@
-package no.nav.melosys.service.brev.components;
+package no.nav.melosys.service.brev.bestilling;
 
 import java.util.List;
 
@@ -20,14 +20,13 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class HentBrevmottakereEtaterComponentTest {
+class HentBrevmottakereEtaterServiceTest {
 
     @Mock
     private EregFasade eregFasade;
 
     @InjectMocks
-    private HentBrevmottakereEtaterComponent hentBrevmottakereEtaterComponent;
-
+    private HentBrevmottakereEtaterService hentBrevmottakereEtaterService;
 
     @Test
     void hentMuligeMottakereEtater_spørEtterSkatteetatenOgHelfo_fårSkatteetatenOgHelfoMottakere() {
@@ -37,7 +36,7 @@ class HentBrevmottakereEtaterComponentTest {
         var orgnrEtater = List.of(SKATTEETATEN.getOrgnr(), HELFO.getOrgnr());
 
 
-        var muligeBrevmottakereForEtater = hentBrevmottakereEtaterComponent.hentMuligeBrevmottakereEtater(orgnrEtater);
+        var muligeBrevmottakereForEtater = hentBrevmottakereEtaterService.hentMuligeBrevmottakereEtater(orgnrEtater);
 
 
         assertThat(muligeBrevmottakereForEtater)
@@ -60,7 +59,7 @@ class HentBrevmottakereEtaterComponentTest {
         when(eregFasade.hentOrganisasjonNavn(anyString())).thenThrow(new IkkeFunnetException("Fant ikke orgnr i testen :)"));
         var orgnrEtater = List.of("111111111");
 
-        assertThatThrownBy(() -> hentBrevmottakereEtaterComponent.hentMuligeBrevmottakereEtater(orgnrEtater))
+        assertThatThrownBy(() -> hentBrevmottakereEtaterService.hentMuligeBrevmottakereEtater(orgnrEtater))
             .isInstanceOf(IkkeFunnetException.class);
     }
 }

@@ -44,7 +44,7 @@ import static org.mockito.Mockito.when;
 
 @Deprecated(since = "Tas vekk sammen med melosys.MEL-4835.refactor1 unleash toggle, og tas vekk med BrevbestillingService")
 @ExtendWith(MockitoExtension.class)
-class BrevbestillingServiceOldTest {
+class BrevbestillingFasadeOldTest {
 
     private final Behandling behandling = lagBehandling();
 
@@ -465,7 +465,7 @@ class BrevbestillingServiceOldTest {
         when(dokServiceFasade.produserUtkast(anyLong(), any())).thenReturn(pdf);
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(MANGELBREV_BRUKER);
-        
+
         byte[] utkast = brevbestillingServiceOld.produserUtkast(333L, brevbestillingDto);
 
         assertThat(utkast).isEqualTo(pdf);

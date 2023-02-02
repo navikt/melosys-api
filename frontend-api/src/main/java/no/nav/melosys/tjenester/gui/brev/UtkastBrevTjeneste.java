@@ -5,7 +5,7 @@ import java.util.List;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.service.brev.UtkastBrevService;
-import no.nav.melosys.service.brev.components.OppdaterUtkastComponent;
+import no.nav.melosys.service.brev.bestilling.OppdaterUtkastService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevbestillingRequest;
@@ -64,7 +64,7 @@ public class UtkastBrevTjeneste {
 
         String saksbehandlerID = SubjectHandler.getInstance().getUserID();
 
-        utkastBrevService.oppdaterUtkast(new OppdaterUtkastComponent.RequestDto(utkastBrevID, behandlingID, saksbehandlerID, brevbestillingRequest.tilUtkast()));
+        utkastBrevService.oppdaterUtkast(new OppdaterUtkastService.RequestDto(utkastBrevID, behandlingID, saksbehandlerID, brevbestillingRequest.tilUtkast()));
 
         return ResponseEntity.ok().build();
     }

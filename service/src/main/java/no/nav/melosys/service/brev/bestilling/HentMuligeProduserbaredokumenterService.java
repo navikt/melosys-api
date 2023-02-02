@@ -1,4 +1,4 @@
-package no.nav.melosys.service.brev.components;
+package no.nav.melosys.service.brev.bestilling;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,11 +19,11 @@ import static java.util.Collections.emptyList;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 
 @Component
-public class HentMuligeProduserbaredokumenterComponent {
+public class HentMuligeProduserbaredokumenterService {
 
     private final BehandlingService behandlingService;
 
-    public HentMuligeProduserbaredokumenterComponent(BehandlingService behandlingService) {
+    public HentMuligeProduserbaredokumenterService(BehandlingService behandlingService) {
         this.behandlingService = behandlingService;
     }
 

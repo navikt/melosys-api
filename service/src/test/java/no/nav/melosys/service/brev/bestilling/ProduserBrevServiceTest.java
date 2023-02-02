@@ -1,4 +1,4 @@
-package no.nav.melosys.service.brev.components;
+package no.nav.melosys.service.brev.bestilling;
 
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
@@ -17,13 +17,13 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class ProduserBrevComponentTest {
+class ProduserBrevServiceTest {
 
     @Mock
     private DokumentServiceFasade dokumentServiceFasade;
 
     @InjectMocks
-    private ProduserBrevComponent produserBrevComponent;
+    private ProduserBrevService produserBrevService;
 
     @Test
     void skalBestilleProduseringAvBrev() {
@@ -31,7 +31,7 @@ class ProduserBrevComponentTest {
         brevbestillingDto.setProduserbardokument(MANGELBREV_BRUKER);
 
 
-        produserBrevComponent.produserBrev(333L, brevbestillingDto);
+        produserBrevService.produserBrev(333L, brevbestillingDto);
 
 
         verify(dokumentServiceFasade).produserDokument(anyLong(), any(BrevbestillingDto.class));
@@ -42,8 +42,8 @@ class ProduserBrevComponentTest {
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(INNVILGELSE_FOLKETRYGDLOVEN_2_8);
 
-        
-        assertThatThrownBy(() -> produserBrevComponent.produserBrev(333L, brevbestillingDto))
+
+        assertThatThrownBy(() -> produserBrevService.produserBrev(333L, brevbestillingDto))
             .isInstanceOf(FunksjonellException.class)
             .hasMessageContaining("Manuell bestilling av INNVILGELSE_FOLKETRYGDLOVEN_2_8 er ikke støttet.");
     }

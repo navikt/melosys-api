@@ -1,4 +1,4 @@
-package no.nav.melosys.service.brev.components;
+package no.nav.melosys.service.brev.bestilling;
 
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.dokument.DokgenService;
@@ -14,7 +14,7 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.FRITEKS
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ProduserUtkastComponentTest {
+class ProduserUtkastServiceTest {
 
     @Mock
     private DokgenService dokgenService;
@@ -23,7 +23,7 @@ class ProduserUtkastComponentTest {
     private DokumentService dokumentService;
 
     @InjectMocks
-    private ProduserUtkastComponent produserUtkastComponent;
+    private ProduserUtkastService produserUtkastService;
 
     @Test
     void produserUtkast_medTilgjengeligDokgenmal_forventerViBrukerVårDokgen() {
@@ -33,7 +33,7 @@ class ProduserUtkastComponentTest {
         brevbestillingDto.setProduserbardokument(FRITEKSTBREV);
 
 
-        produserUtkastComponent.produserUtkast(333L, brevbestillingDto);
+        produserUtkastService.produserUtkast(333L, brevbestillingDto);
 
 
         verify(dokgenService).produserUtkast(333L, brevbestillingDto);
@@ -48,7 +48,7 @@ class ProduserUtkastComponentTest {
         brevbestillingDto.setProduserbardokument(FRITEKSTBREV);
 
 
-        produserUtkastComponent.produserUtkast(333L, brevbestillingDto);
+        produserUtkastService.produserUtkast(333L, brevbestillingDto);
 
 
         verify(dokumentService).produserUtkast(333L, brevbestillingDto);
