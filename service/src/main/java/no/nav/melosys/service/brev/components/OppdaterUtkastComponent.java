@@ -1,4 +1,4 @@
-package no.nav.melosys.service.brev;
+package no.nav.melosys.service.brev.components;
 
 import java.time.LocalDateTime;
 
@@ -33,9 +33,10 @@ public class OppdaterUtkastComponent {
     }
 
     public record RequestDto(
-       long utkastBrevID,
-       long behandlingID,
-       String saksbehandlerIdent,
-       BrevbestillingUtkast brevbestillingUtkast
-    ){}
+        long utkastBrevID,
+        long behandlingID,
+        String saksbehandlerIdent,
+        BrevbestillingUtkast brevbestillingUtkast
+    ) {
+    }
 }

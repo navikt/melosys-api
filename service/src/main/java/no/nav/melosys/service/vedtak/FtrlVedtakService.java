@@ -72,25 +72,25 @@ public class FtrlVedtakService {
     }
 
     private BrevbestillingDto lagAvslagMangledeOpplysningerBrevbestilling(FattVedtakRequest request) {
-        return new BrevbestillingDto.Builder()
-            .medProduserbardokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER)
-            .medMottaker(Aktoersroller.BRUKER)
-            .medBestillersId(request.getBestillersId())
-            .medFritekst(request.getFritekst())
-            .build();
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER);
+        brevbestillingDto.setMottaker(Aktoersroller.BRUKER);
+        brevbestillingDto.setBestillersId(request.getBestillersId());
+        brevbestillingDto.setFritekst(request.getFritekst());
+        return brevbestillingDto;
     }
 
     private BrevbestillingDto lagInnvilgelseFolketrygdloven(FattVedtakRequest request) {
-        return new BrevbestillingDto.Builder()
-            .medProduserbardokument(Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN_2_8)
-            .medMottaker(Aktoersroller.BRUKER)
-            .medKopiMottakere(request.getKopiMottakere())
-            .medInnledningFritekst(request.getInnledningFritekst())
-            .medBegrunnelseFritekst(request.getBegrunnelseFritekst())
-            .medEktefelleFritekst(request.getEktefelleFritekst())
-            .medBarnFritekst(request.getBarnFritekst())
-            .medBestillersId(request.getBestillersId())
-            .build();
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN_2_8);
+        brevbestillingDto.setMottaker(Aktoersroller.BRUKER);
+        brevbestillingDto.setKopiMottakere(request.getKopiMottakere());
+        brevbestillingDto.setInnledningFritekst(request.getInnledningFritekst());
+        brevbestillingDto.setBegrunnelseFritekst(request.getBegrunnelseFritekst());
+        brevbestillingDto.setEktefelleFritekst(request.getEktefelleFritekst());
+        brevbestillingDto.setBarnFritekst(request.getBarnFritekst());
+        brevbestillingDto.setBestillersId(request.getBestillersId());
+        return brevbestillingDto;
     }
 
     private void oppdaterBehandlingsresultat(long behandlingID, FattVedtakRequest request) throws IkkeFunnetException {

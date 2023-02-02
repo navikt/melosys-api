@@ -1,5 +1,9 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.eessi.SedType;
@@ -21,10 +25,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Protected
 @RestController
@@ -78,10 +78,8 @@ public class DokumentTjeneste {
         byte[] dokument;
         aksesskontroll.autoriser(behandlingID);
 
-        BrevbestillingDto brevbestillingDto = brevBestillingRequest.tilBrevbestillingDtoBuilder()
-            .medProduserbardokument(produserbartDokument)
-            .medBestillersId(SubjectHandler.getInstance().getUserID())
-            .build();
+        BrevbestillingDto brevbestillingDto = brevBestillingRequest.tilBrevbestillingDto(SubjectHandler.getInstance().getUserID());
+        brevbestillingDto.setProduserbardokument(produserbartDokument);
 
         dokument = dokumentServiceFasade.produserUtkast(behandlingID, brevbestillingDto);
         return lagResponseAvDokument(dokument, produserbartDokument.getKode() + "_utkast.pdf");
@@ -105,15 +103,14 @@ public class DokumentTjeneste {
     public ResponseEntity<Void> produserDokument(@PathVariable("behandlingID") long behandlingID,
                                                  @PathVariable("produserbartDokument") Produserbaredokumenter produserbartDokument,
                                                  @RequestBody BrevbestillingRequest brevBestillingRequest) {
-        if (brevBestillingRequest.getMottaker() == null) {
+        if (brevBestillingRequest.mottaker() == null) {
             throw new FunksjonellException("Mottaker trengs for å bestille.");
         }
         aksesskontroll.autoriser(behandlingID);
 
-        BrevbestillingDto brevbestillingDto = brevBestillingRequest.tilBrevbestillingDtoBuilder()
-            .medProduserbardokument(produserbartDokument)
-            .medBestillersId(SubjectHandler.getInstance().getUserID())
-            .build();
+        BrevbestillingDto brevbestillingDto = brevBestillingRequest.tilBrevbestillingDto(SubjectHandler.getInstance().getUserID());
+        brevbestillingDto.setProduserbardokument(produserbartDokument);
+
         // Produserer utkast for å få eventuelle feil før bestilling i saksflyt.
         dokumentServiceFasade.produserUtkast(behandlingID, brevbestillingDto);
         dokumentServiceFasade.produserDokument(behandlingID, brevbestillingDto);

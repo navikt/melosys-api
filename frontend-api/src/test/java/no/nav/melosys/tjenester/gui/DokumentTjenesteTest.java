@@ -69,9 +69,7 @@ class DokumentTjenesteTest {
 
     @Test
     void produserUtkastBrev() throws Exception {
-        var brevBestillingDto = new BrevbestillingRequest.Builder()
-            .medMottaker(Aktoersroller.BRUKER)
-            .build();
+        BrevbestillingRequest brevBestillingDto = lagBrevbestillingMedMottaker(Aktoersroller.BRUKER);
         when(dokumentServiceFasade.produserUtkast(anyLong(), any())).thenReturn(new byte[1]);
 
         mockMvc.perform(post(BASE_URL + "/pdf/brev/utkast/{behandlingID}/{produserbartDokument}", 1L, Produserbaredokumenter.MELDING_HENLAGT_SAK)
@@ -97,9 +95,7 @@ class DokumentTjenesteTest {
 
     @Test
     void produserDokument() throws Exception {
-        var brevBestillingDto = new BrevbestillingRequest.Builder()
-            .medMottaker(Aktoersroller.BRUKER)
-            .build();
+        var brevBestillingDto = lagBrevbestillingMedMottaker(Aktoersroller.BRUKER);
 
         mockMvc.perform(post(BASE_URL + "/opprett/{behandlingID}/{produserbartDokument}", 1L, Produserbaredokumenter.MELDING_HENLAGT_SAK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -112,8 +108,7 @@ class DokumentTjenesteTest {
 
     @Test
     void produserDokumentFeilerMedManglendeMottaker() throws Exception {
-        var brevBestillingDto = new BrevbestillingRequest.Builder()
-            .build();
+        var brevBestillingDto = lagBrevbestillingMedMottaker(null);
 
         mockMvc.perform(post(BASE_URL + "/opprett/{behandlingID}/{produserbartDokument}", 1L, Produserbaredokumenter.MELDING_HENLAGT_SAK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -122,4 +117,7 @@ class DokumentTjenesteTest {
             .andExpect(jsonPath("$.message", containsString("Mottaker trengs for å bestille")));
     }
 
+    private BrevbestillingRequest lagBrevbestillingMedMottaker(Aktoersroller mottaker) {
+        return new BrevbestillingRequest(null, mottaker, null, null, null, null, null, null, null, null, null, null, null, null, null, false, null, null, null, null, null, null);
+    }
 }

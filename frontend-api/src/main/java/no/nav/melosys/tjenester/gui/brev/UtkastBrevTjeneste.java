@@ -4,8 +4,8 @@ import java.util.List;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import no.nav.melosys.service.brev.OppdaterUtkastComponent;
 import no.nav.melosys.service.brev.UtkastBrevService;
+import no.nav.melosys.service.brev.components.OppdaterUtkastComponent;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevbestillingRequest;

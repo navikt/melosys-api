@@ -79,9 +79,7 @@ public class BrevbestillingTjeneste {
         aksesskontroll.autoriser(behandlingID);
 
         if (!unleash.isEnabled(ToggleName.MELOSYS_MEL_4835)) {
-            BrevbestillingDto brevbestillingDto = brevbestillingRequest.tilBrevbestillingDtoBuilder()
-                .medBestillersId(SubjectHandler.getInstance().getUserID())
-                .build();
+            BrevbestillingDto brevbestillingDto = brevbestillingRequest.tilBrevbestillingDto(SubjectHandler.getInstance().getUserID());
             byte[] pdf = brevbestillingServiceOld.produserUtkast(behandlingID, brevbestillingDto);
             return new ResponseEntity<>(pdf, genPdfHeaders("utkast_" + behandlingID), HttpStatus.OK);
         }
@@ -98,9 +96,7 @@ public class BrevbestillingTjeneste {
         aksesskontroll.autoriser(behandlingID);
 
         if (!unleash.isEnabled(ToggleName.MELOSYS_MEL_4835)) {
-            BrevbestillingDto brevbestillingDto = brevbestillingRequest.tilBrevbestillingDtoBuilder()
-                .medBestillersId(SubjectHandler.getInstance().getUserID())
-                .build();
+            BrevbestillingDto brevbestillingDto = brevbestillingRequest.tilBrevbestillingDto(SubjectHandler.getInstance().getUserID());
             brevbestillingServiceOld.produserBrev(behandlingID, brevbestillingDto);
             return;
         }

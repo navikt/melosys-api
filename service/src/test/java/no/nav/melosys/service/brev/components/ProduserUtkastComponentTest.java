@@ -29,9 +29,8 @@ class ProduserUtkastComponentTest {
     void produserUtkast_medTilgjengeligDokgenmal_forventerViBrukerVårDokgen() {
         when(dokgenService.erTilgjengeligDokgenmal(Produserbaredokumenter.FRITEKSTBREV))
             .thenReturn(true);
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
-            .medProduserbardokument(FRITEKSTBREV)
-            .build();
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(FRITEKSTBREV);
 
 
         produserUtkastComponent.produserUtkast(333L, brevbestillingDto);
@@ -45,9 +44,8 @@ class ProduserUtkastComponentTest {
     void produserUtkast_medIngenTilgjengeligDokgenmal_forventerViBrukerDokumentService() {
         when(dokgenService.erTilgjengeligDokgenmal(Produserbaredokumenter.FRITEKSTBREV))
             .thenReturn(false);
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
-            .medProduserbardokument(FRITEKSTBREV)
-            .build();
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(FRITEKSTBREV);
 
 
         produserUtkastComponent.produserUtkast(333L, brevbestillingDto);

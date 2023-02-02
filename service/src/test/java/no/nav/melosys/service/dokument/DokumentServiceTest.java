@@ -150,10 +150,10 @@ final class DokumentServiceTest {
     }
 
     private static BrevbestillingDto lagBrevBestillingDto(Produserbaredokumenter produserbartdokument, Aktoersroller rolle) {
-        return new BrevbestillingDto.Builder()
-            .medProduserbardokument(produserbartdokument)
-            .medMottaker(rolle)
-            .build();
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(produserbartdokument);
+        brevbestillingDto.setMottaker(rolle);
+        return brevbestillingDto;
     }
 
     private static BrevData lagBrevDataInnvilgelse() {

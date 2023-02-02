@@ -279,7 +279,7 @@ public class DokgenService {
                 .medFritekstTittel(brevbestillingDto.getFritekstTittel())
                 .medFritekst(brevbestillingDto.getFritekst())
                 .medKontaktpersonNavn(brevbestillingDto.getKontaktpersonNavn())
-                .medKontaktopplysninger(brevbestillingDto.isKontaktopplysninger())
+                .medKontaktopplysninger(brevbestillingDto.getKontaktopplysninger())
                 .medBrukerSkalHaKopi(inneholderBrukerSomKopimottaker(brevbestillingDto.getKopiMottakere()))
                 .medMottakerType(brevbestillingDto.getMottaker())
                 .medDokumentTittel(brevbestillingDto.getDokumentTittel());

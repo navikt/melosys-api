@@ -97,33 +97,31 @@ public class BrevmalListeBygger {
     }
 
     private MottakerDto lagMottakerForRolle(long behandlingId, Aktoersroller rolle) {
-        var builder = new MottakerDto.Builder()
-            .medType(mapType(rolle))
-            .medRolle(rolle);
-
-        leggTilAdresseOgFeilmelding(builder, rolle, behandlingId);
-
-        return builder.build();
+        var mottakerDto = new MottakerDto();
+        mottakerDto.setType(mapTilTypeBeskrivelse(rolle));
+        mottakerDto.setRolle(rolle);
+        leggTilAdresseOgFeilmelding(mottakerDto, rolle, behandlingId);
+        return mottakerDto;
     }
 
     private MottakerDto lagMottakerAnnenOrganisasjon(Aktoersroller tilhørendeRolle) {
-        return new MottakerDto.Builder()
-            .medType(MottakerType.ANNEN_ORGANISASJON)
-            .medRolle(tilhørendeRolle)
-            .orgnrSettesAvSaksbehandler()
-            .build();
+        var mottakerDto = new MottakerDto();
+        mottakerDto.setType(MottakerType.ANNEN_ORGANISASJON.getBeskrivelse());
+        mottakerDto.setRolle(tilhørendeRolle);
+        mottakerDto.setOrgnrSettesAvSaksbehandler(true);
+        return mottakerDto;
     }
 
     private MottakerDto lagMottakerAndreEtater() {
-        return new MottakerDto.Builder()
-            .medType(MottakerType.ANDRE_OFFENTLIGE_ETATER)
-            .medRolle(ETAT)
-            .orgnrSettesAvSaksbehandler()
-            .build();
+        var mottakerDto = new MottakerDto();
+        mottakerDto.setType(MottakerType.ANDRE_OFFENTLIGE_ETATER.getBeskrivelse());
+        mottakerDto.setRolle(ETAT);
+        mottakerDto.setOrgnrSettesAvSaksbehandler(true);
+        return mottakerDto;
     }
 
-    private MottakerType mapType(Aktoersroller hovedmottaker) {
-        return switch (hovedmottaker) {
+    private String mapTilTypeBeskrivelse(Aktoersroller hovedmottaker) {
+        var mottakerType = switch (hovedmottaker) {
             case BRUKER -> MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG;
             case VIRKSOMHET -> MottakerType.VIRKSOMHET;
             case ARBEIDSGIVER -> MottakerType.ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG;
@@ -131,9 +129,10 @@ public class BrevmalListeBygger {
             default ->
                 throw new FunksjonellException("Vi støtter ikke brev med hovedmottaker: " + hovedmottaker.getKode());
         };
+        return mottakerType.getBeskrivelse();
     }
 
-    private void leggTilAdresseOgFeilmelding(MottakerDto.Builder builder, Aktoersroller aktoersroller, long behandlingId) {
+    private void leggTilAdresseOgFeilmelding(MottakerDto mottakerDto, Aktoersroller aktoersroller, long behandlingId) {
         try {
             List<BrevAdresse> brevAdresser = null;
             if (unleash.isEnabled(ToggleName.MELOSYS_MEL_4835)) {
@@ -143,13 +142,13 @@ public class BrevmalListeBygger {
             }
 
             if ((aktoersroller == BRUKER || aktoersroller == VIRKSOMHET || aktoersroller == TRYGDEMYNDIGHET) && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty)) {
-                builder.medFeilmelding(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
+                mottakerDto.setFeilmelding(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
             } else {
-                builder.medAdresse(brevAdresser.stream().map(MottakerAdresseDto::av).toList());
+                mottakerDto.setAdresser(brevAdresser.stream().map(MottakerAdresseDto::av).toList());
             }
         } catch (TekniskException e) {
             if ("Finner ikke arbeidsforholddokument".equals(e.getMessage())) {
-                builder.medFeilmelding(Kontroll_begrunnelser.INGEN_ARBEIDSGIVERE.getBeskrivelse());
+                mottakerDto.setFeilmelding(Kontroll_begrunnelser.INGEN_ARBEIDSGIVERE.getBeskrivelse());
             } else {
                 throw new TekniskException(e);
             }
@@ -361,7 +360,8 @@ public class BrevmalListeBygger {
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.BEKREFTELSE_PÅ_MEDLEMSKAP));
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.HENVENDELSE_OM_MEDLEMSKAP));
             }
-            case TRYGDEAVTALE -> valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.ENGELSK_FRITEKSTBREV));
+            case TRYGDEAVTALE ->
+                valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.ENGELSK_FRITEKSTBREV));
         }
 
         valgAlternativer.add(fritekstFeltvalgAlternativDto);

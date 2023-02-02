@@ -123,11 +123,11 @@ public class DokumentService {
     }
 
     private static BrevbestillingDto lagBrevbestillingDto(DoksysBrevbestilling brevbestilling) {
-        return new BrevbestillingDto.Builder()
-            .medMottaker(brevbestilling.getMottakerRolle())
-            .medBegrunnelseKode(brevbestilling.getBegrunnelseKode())
-            .medFritekst(brevbestilling.getFritekst())
-            .build();
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setMottaker(brevbestilling.getMottakerRolle());
+        brevbestillingDto.setBegrunnelseKode(brevbestilling.getBegrunnelseKode());
+        brevbestillingDto.setFritekst(brevbestilling.getFritekst());
+        return brevbestillingDto;
     }
 
     private void produserIkkeredigerbartDokument(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Behandling behandling, BrevData brevData) {

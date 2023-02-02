@@ -48,14 +48,13 @@ public class BrevDataByggerVedleggTest {
 
     @Test
     public void testByggA1FraForhåndsvisning() {
-        BrevbestillingDto brevbestilling = new BrevbestillingDto.Builder()
-            .medMottaker(Aktoersroller.BRUKER)
-            .medFritekst("FRITEKST")
-            .medBegrunnelseKode("tom")
-            .build();
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setMottaker(Aktoersroller.BRUKER);
+        brevbestillingDto.setFritekst("FRITEKST");
+        brevbestillingDto.setBegrunnelseKode("tom");
 
-        BrevDataBygger brevDataByggerVedlegg = new BrevDataByggerVedlegg(brevDatabyggerA001, brevbestilling);
+        BrevDataBygger brevDataByggerVedlegg = new BrevDataByggerVedlegg(brevDatabyggerA001, brevbestillingDto);
         BrevDataVedlegg brevData = (BrevDataVedlegg) brevDataByggerVedlegg.lag(mock(BrevDataGrunnlag.class), "Z123456");
-        assertThat(brevData).isEqualToComparingOnlyGivenFields(brevbestilling, "begrunnelseKode", "fritekst");
+        assertThat(brevData).isEqualToComparingOnlyGivenFields(brevbestillingDto, "begrunnelseKode", "fritekst");
     }
 }

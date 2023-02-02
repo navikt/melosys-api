@@ -11,17 +11,17 @@ public class BrevDataByggerStandardTest {
 
     @Test
     public void lagBrevData() {
-        BrevbestillingDto bestilling = new BrevbestillingDto.Builder()
-            .medMottaker(Aktoersroller.BRUKER)
-            .medFritekst("FRITEKST")
-            .build();
-        BrevDataByggerStandard brevDataByggerStandard = new BrevDataByggerStandard(bestilling);
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setMottaker(Aktoersroller.BRUKER);
+        brevbestillingDto.setFritekst("FRITEKST");
+
+        BrevDataByggerStandard brevDataByggerStandard = new BrevDataByggerStandard(brevbestillingDto);
 
         String saksbehandler = "Z123456";
         BrevData brevData = brevDataByggerStandard.lag(null, saksbehandler);
         assertThat(brevData).isInstanceOf(BrevData.class);
         assertThat(brevData.saksbehandler).isEqualTo(saksbehandler);
-        assertThat(brevData.fritekst).isEqualTo(bestilling.getFritekst());
-        assertThat(brevData.begrunnelseKode).isEqualTo(bestilling.getBegrunnelseKode());
+        assertThat(brevData.fritekst).isEqualTo(brevbestillingDto.getFritekst());
+        assertThat(brevData.begrunnelseKode).isEqualTo(brevbestillingDto.getBegrunnelseKode());
     }
 }

@@ -53,28 +53,31 @@ class DokumentServiceFasadeTest {
     }
 
     @Test
-    void skalKalleDokgenProduserUtkast() {
+    void produserUtkast_skalKalleDokgenProduserUtkast() {
         when(mockDokgenService.erTilgjengeligDokgenmal(any(Produserbaredokumenter.class))).thenReturn(true);
 
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
-            .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
-            .medMottaker(Aktoersroller.BRUKER)
-            .build();
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID);
+        brevbestillingDto.setMottaker(Aktoersroller.BRUKER);
+
+
         dokumentServiceFasade.produserUtkast(1, brevbestillingDto);
+
 
         verify(mockDokgenService).produserUtkast(anyLong(), any());
         verifyNoInteractions(mockDokumentService);
     }
 
     @Test
-    void skalKalleDokumentServiceProduserUtkast() {
+    void produserUtkast_skalKalleDokumentServiceProduserUtkast() {
         when(mockDokgenService.erTilgjengeligDokgenmal(any(Produserbaredokumenter.class))).thenReturn(false);
 
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
-            .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
-            .build();
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID);
+
 
         dokumentServiceFasade.produserUtkast(1, brevbestillingDto);
+
 
         verify(mockDokumentService).produserUtkast(anyLong(), eq(brevbestillingDto));
     }
