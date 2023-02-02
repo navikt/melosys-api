@@ -247,12 +247,10 @@ class DokgenServiceTest {
             List.of(lagBruker()));
         when(mockUtledMottaksdato.getMottaksdato(any(), any())).thenReturn(LocalDate.now());
 
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
-            .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
-            .medMottaker(Aktoersroller.BRUKER)
-            .medBestillersId("Z123456")
-            .build();
-
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
+        brevbestillingDto.setMottaker(Aktoersroller.BRUKER);
+        brevbestillingDto.setBestillersId("Z123456");
 
         byte[] pdfResponse = dokgenService.produserUtkast(123L, brevbestillingDto);
 
@@ -278,11 +276,10 @@ class DokgenServiceTest {
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(true), eq(false)))
             .thenReturn(List.of(lagRepresentant(ORGNR, Representerer.BRUKER)));
 
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
-            .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
-            .medMottaker(Aktoersroller.BRUKER)
-            .medBestillersId("Z123456")
-            .build();
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
+        brevbestillingDto.setMottaker(Aktoersroller.BRUKER);
+        brevbestillingDto.setBestillersId("Z123456");
 
 
         byte[] pdfResponse = dokgenService.produserUtkast(123L, brevbestillingDto);
@@ -307,11 +304,10 @@ class DokgenServiceTest {
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(true), eq(false)))
             .thenReturn(List.of(lagRepresentant(ORGNR, Representerer.ARBEIDSGIVER)));
 
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
-            .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
-            .medMottaker(Aktoersroller.ARBEIDSGIVER)
-            .medBestillersId("Z123456")
-            .build();
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
+        brevbestillingDto.setMottaker(Aktoersroller.ARBEIDSGIVER);
+        brevbestillingDto.setBestillersId("Z123456");
 
 
         byte[] pdfResponse = dokgenService.produserUtkast(123L, brevbestillingDto);
@@ -332,11 +328,11 @@ class DokgenServiceTest {
         when(mockSaksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Saksbehandler, Ole");
         when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(bruker));
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
-            .medProduserbardokument(MANGELBREV_BRUKER)
-            .medMottaker(Aktoersroller.BRUKER)
-            .medBestillersId("Z123456")
-            .build();
+
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(MANGELBREV_BRUKER);
+        brevbestillingDto.setMottaker(Aktoersroller.BRUKER);
+        brevbestillingDto.setBestillersId("Z123456");
 
 
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
@@ -359,12 +355,11 @@ class DokgenServiceTest {
     void skalProdusereOgDistribuereBrevTilOrgnrUtenKopi() {
         when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
 
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
-            .medProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
-            .medMottaker(Aktoersroller.ARBEIDSGIVER)
-            .medOrgNr(ORGNR)
-            .medBestillersId("Z123456")
-            .build();
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
+        brevbestillingDto.setMottaker(Aktoersroller.ARBEIDSGIVER);
+        brevbestillingDto.setOrgnr(ORGNR);
+        brevbestillingDto.setBestillersId("Z123456");
 
 
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
@@ -385,14 +380,13 @@ class DokgenServiceTest {
     void skalProdusereOgDistribuereBrevTilOrgnrMedKopi() {
         when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
 
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
-            .medProduserbardokument(MANGELBREV_BRUKER)
-            .medBestillersId("Z123456")
-            .medManglerFritekst("Mangler")
-            .medMottaker(Aktoersroller.ARBEIDSGIVER)
-            .medOrgNr(ORGNR)
-            .medKopiMottakere(List.of(new KopiMottakerDto(Aktoersroller.BRUKER, null, "1223", null)))
-            .build();
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(MANGELBREV_BRUKER);
+        brevbestillingDto.setMottaker(Aktoersroller.ARBEIDSGIVER);
+        brevbestillingDto.setOrgnr(ORGNR);
+        brevbestillingDto.setManglerFritekst("Mangler");
+        brevbestillingDto.setBestillersId("Z123456");
+        brevbestillingDto.setKopiMottakere(List.of(new KopiMottakerDto(Aktoersroller.BRUKER, null, "1223", null)));
 
 
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
@@ -424,12 +418,12 @@ class DokgenServiceTest {
         var fritekstvedleggDto = Arrays.asList(
             new FritekstvedleggDto("tittel1", "fritekst1"),
             new FritekstvedleggDto("tittel2", "fritekst2"));
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
-            .medProduserbardokument(GENERELT_FRITEKSTBREV_BRUKER)
-            .medBestillersId("Z123456")
-            .medSaksvedlegg(saksvedleggDto)
-            .medFritekstvedlegg(fritekstvedleggDto)
-            .build();
+
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(GENERELT_FRITEKSTBREV_BRUKER);
+        brevbestillingDto.setSaksVedlegg(saksvedleggDto);
+        brevbestillingDto.setFritekstvedlegg(fritekstvedleggDto);
+        brevbestillingDto.setBestillersId("Z123456");
 
 
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
@@ -463,13 +457,14 @@ class DokgenServiceTest {
         var fritekstvedleggDto = Arrays.asList(
             new FritekstvedleggDto("tittel1", "fritekst1"),
             new FritekstvedleggDto("tittel2", "fritekst2"));
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
-            .medProduserbardokument(GENERELT_FRITEKSTBREV_BRUKER)
-            .medBestillersId("Z123456")
-            .medDistribusjonsType(Distribusjonstype.ANNET)
-            .medSaksvedlegg(saksvedleggDto)
-            .medFritekstvedlegg(fritekstvedleggDto)
-            .build();
+
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(GENERELT_FRITEKSTBREV_BRUKER);
+        brevbestillingDto.setDistribusjonstype(Distribusjonstype.ANNET);
+        brevbestillingDto.setSaksVedlegg(saksvedleggDto);
+        brevbestillingDto.setFritekstvedlegg(fritekstvedleggDto);
+        brevbestillingDto.setBestillersId("Z123456");
+
 
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
 
@@ -496,10 +491,10 @@ class DokgenServiceTest {
         arbeidsgiver.setRolle(Aktoersroller.ARBEIDSGIVER);
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(arbeidsgiver));
         when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
-            .medProduserbardokument(GENERELT_FRITEKSTBREV_BRUKER)
-            .medKopiMottakere(List.of(new KopiMottakerDto(Aktoersroller.BRUKER, null, null, null)))
-            .build();
+
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(GENERELT_FRITEKSTBREV_BRUKER);
+        brevbestillingDto.setKopiMottakere(List.of(new KopiMottakerDto(Aktoersroller.BRUKER, null, null, null)));
 
 
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
@@ -516,9 +511,10 @@ class DokgenServiceTest {
         arbeidsgiver.setRolle(Aktoersroller.ARBEIDSGIVER);
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(arbeidsgiver));
         when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder()
-            .medProduserbardokument(MANGELBREV_ARBEIDSGIVER)
-            .build();
+
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(MANGELBREV_ARBEIDSGIVER);
+        brevbestillingDto.setDistribusjonstype(Distribusjonstype.ANNET);
 
 
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);

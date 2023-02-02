@@ -6,6 +6,7 @@ import java.util.List;
 import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast;
 import no.nav.melosys.domain.brev.utkast.UtkastBrev;
 import no.nav.melosys.repository.UtkastBrevRepository;
+import no.nav.melosys.service.brev.components.OppdaterUtkastComponent;
 import org.springframework.stereotype.Service;
 
 @Service

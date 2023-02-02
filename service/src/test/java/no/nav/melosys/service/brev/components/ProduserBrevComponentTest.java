@@ -27,15 +27,22 @@ class ProduserBrevComponentTest {
 
     @Test
     void skalBestilleProduseringAvBrev() {
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().medProduserbardokument(MANGELBREV_BRUKER).build();
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(MANGELBREV_BRUKER);
+
+
         produserBrevComponent.produserBrev(333L, brevbestillingDto);
+
 
         verify(dokumentServiceFasade).produserDokument(anyLong(), any(BrevbestillingDto.class));
     }
 
     @Test
     void produserBrev_InnvilgelseFtrl_skalIkkeTillates() {
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().medProduserbardokument(INNVILGELSE_FOLKETRYGDLOVEN_2_8).build();
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(INNVILGELSE_FOLKETRYGDLOVEN_2_8);
+
+        
         assertThatThrownBy(() -> produserBrevComponent.produserBrev(333L, brevbestillingDto))
             .isInstanceOf(FunksjonellException.class)
             .hasMessageContaining("Manuell bestilling av INNVILGELSE_FOLKETRYGDLOVEN_2_8 er ikke støttet.");

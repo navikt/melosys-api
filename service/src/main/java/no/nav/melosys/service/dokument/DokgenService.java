@@ -279,7 +279,7 @@ public class DokgenService {
                 .medFritekstTittel(brevbestillingDto.getFritekstTittel())
                 .medFritekst(brevbestillingDto.getFritekst())
                 .medKontaktpersonNavn(brevbestillingDto.getKontaktpersonNavn())
-                .medKontaktopplysninger(brevbestillingDto.isKontaktopplysninger())
+                .medKontaktopplysninger(brevbestillingDto.getKontaktopplysninger())
                 .medBrukerSkalHaKopi(inneholderBrukerSomKopimottaker(brevbestillingDto.getKopiMottakere()))
                 .medMottakerType(brevbestillingDto.getMottaker())
                 .medDokumentTittel(brevbestillingDto.getDokumentTittel());
@@ -291,7 +291,7 @@ public class DokgenService {
                 .medFritekst(brevbestillingDto.getFritekst())
                 .medBegrunnelseKode(brevbestillingDto.getBegrunnelseKode());
             case GENERELT_FRITEKSTVEDLEGG -> new FritekstvedleggBrevbestilling.Builder()
-                .medFritekstvedleggTittel(brevbestillingDto.getFritekstTittel())
+                .medFritekstvedleggTittel(brevbestillingDto.getDokumentTittel())
                 .medFritekstvedleggTekst(brevbestillingDto.getFritekst());
             default -> new DokgenBrevbestilling.Builder<>().medDistribusjonstype(Distribusjonstype.VIKTIG);
         };

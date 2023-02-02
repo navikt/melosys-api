@@ -74,11 +74,10 @@ class BrevDataByggerInnvilgelseFlereLandTest {
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
         behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new Soeknad());
 
-        brevbestillingDto = new BrevbestillingDto.Builder()
-            .medMottaker(Aktoersroller.BRUKER)
-            .medBegrunnelseKode("BEGRUNNELSEKODE")
-            .medFritekst("FRITEKST")
-            .build();
+        brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setMottaker(Aktoersroller.BRUKER);
+        brevbestillingDto.setBegrunnelseKode("BEGRUNNELSEKODE");
+        brevbestillingDto.setFritekst("FRITEKST");
 
         when(brevDataByggerA1.lag(any(), any())).thenReturn(new BrevDataA1());
 

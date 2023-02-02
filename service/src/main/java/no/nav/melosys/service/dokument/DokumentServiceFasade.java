@@ -56,26 +56,24 @@ public class DokumentServiceFasade {
     @Transactional
     public void produserOgDistribuerBrev(Produserbaredokumenter produserbartDokument, Mottaker mottaker, String fritekst,
                                          String begrunnelseKode, String avsenderId, long behandlingId) {
-        var brevbestillingRequest = new BrevbestillingDto.Builder()
-            .medProduserbardokument(produserbartDokument)
-            .medMottaker(mottaker.hentAktørsRolle())
-            .medFritekst(fritekst)
-            .medBegrunnelseKode(begrunnelseKode)
-            .medBestillersId(avsenderId)
-            .build();
+        var brevbestillingRequest = new BrevbestillingDto();
+        brevbestillingRequest.setProduserbardokument(produserbartDokument);
+        brevbestillingRequest.setMottaker(mottaker.hentAktørsRolle());
+        brevbestillingRequest.setFritekst(fritekst);
+        brevbestillingRequest.setBegrunnelseKode(begrunnelseKode);
+        brevbestillingRequest.setBestillersId(avsenderId);
 
         dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingRequest);
     }
 
     @Transactional
     public void produserDokument(Produserbaredokumenter dokumentType, Mottaker mottaker, long behandlingId, DoksysBrevbestilling brevbestilling) {
-        var brevbestillingRequest = new BrevbestillingDto.Builder()
-            .medProduserbardokument(dokumentType)
-            .medMottaker(mottaker.hentAktørsRolle())
-            .medFritekst(hentFritekst(brevbestilling))
-            .medBegrunnelseKode(brevbestilling.getBegrunnelseKode())
-            .medBestillersId(brevbestilling.getAvsenderID())
-            .build();
+        var brevbestillingRequest = new BrevbestillingDto();
+        brevbestillingRequest.setProduserbardokument(dokumentType);
+        brevbestillingRequest.setMottaker(mottaker.hentAktørsRolle());
+        brevbestillingRequest.setFritekst(hentFritekst(brevbestilling));
+        brevbestillingRequest.setBegrunnelseKode(brevbestilling.getBegrunnelseKode());
+        brevbestillingRequest.setBestillersId(brevbestilling.getAvsenderID());
 
         produserDokument(behandlingId, brevbestilling, brevbestillingRequest, mottaker);
     }

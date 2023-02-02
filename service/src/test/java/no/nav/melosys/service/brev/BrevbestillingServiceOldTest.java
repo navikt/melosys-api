@@ -436,8 +436,12 @@ class BrevbestillingServiceOldTest {
     @Deprecated(since = "Tas vekk sammen med melosys.MEL-4835.refactor1 toggle")
     @Test
     void skalBestilleProduseringAvBrev() {
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().medProduserbardokument(MANGELBREV_BRUKER).build();
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(MANGELBREV_BRUKER);
+
+
         brevbestillingServiceOld.produserBrev(333L, brevbestillingDto);
+
 
         verify(dokServiceFasade).produserDokument(anyLong(), any(BrevbestillingDto.class));
     }
@@ -445,7 +449,10 @@ class BrevbestillingServiceOldTest {
     @Deprecated(since = "Tas vekk sammen med melosys.MEL-4835.refactor1 toggle")
     @Test
     void produserBrev_InnvilgelseFtrl_skalIkkeTillates() {
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().medProduserbardokument(INNVILGELSE_FOLKETRYGDLOVEN_2_8).build();
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(INNVILGELSE_FOLKETRYGDLOVEN_2_8);
+
+
         assertThatThrownBy(() -> brevbestillingServiceOld.produserBrev(333L, brevbestillingDto))
             .isInstanceOf(FunksjonellException.class)
             .hasMessageContaining("Manuell bestilling av INNVILGELSE_FOLKETRYGDLOVEN_2_8 er ikke støttet.");
@@ -456,8 +463,9 @@ class BrevbestillingServiceOldTest {
     void skalReturnereUtkast() {
         byte[] pdf = "UTKAST".getBytes(StandardCharsets.UTF_8);
         when(dokServiceFasade.produserUtkast(anyLong(), any())).thenReturn(pdf);
-        BrevbestillingDto brevbestillingDto = new BrevbestillingDto.Builder().medProduserbardokument(MANGELBREV_BRUKER).build();
-
+        BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(MANGELBREV_BRUKER);
+        
         byte[] utkast = brevbestillingServiceOld.produserUtkast(333L, brevbestillingDto);
 
         assertThat(utkast).isEqualTo(pdf);

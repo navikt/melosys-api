@@ -6,6 +6,7 @@ import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.FritekstvedleggDto;
 import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
 import no.nav.melosys.service.dokument.brev.SaksvedleggDto;
@@ -49,61 +50,124 @@ public class BrevbestillingRequest {
     public BrevbestillingRequest() {
     }
 
-    public no.nav.melosys.service.dokument.brev.BrevbestillingDto.Builder tilBrevbestillingDtoBuilder() {
-        return new no.nav.melosys.service.dokument.brev.BrevbestillingDto.Builder()
-            .medProduserbardokument(this.getProduserbardokument())
-            .medMottaker(this.getMottaker())
-            .medOrgNr(this.getOrgNr())
-            .medInstitusjonId(this.getInstitusjonId())
-            .medOrgnrEtater(this.getOrgnrEtater())
-            .medInnledningFritekst(this.getInnledningFritekst())
-            .medManglerFritekst(this.getManglerFritekst())
-            .medBegrunnelseFritekst(this.getBegrunnelseFritekst())
-            .medKontaktpersonNavn(this.getKontaktpersonNavn())
-            .medKopiMottakere(this.getKopiMottakere())
-            .medEktefelleFritekst(this.getEktefelleFritekst())
-            .medBarnFritekst(this.getBarnFritekst())
-            .medFritekstTittel(this.getFritekstTittel())
-            .medFritekst(this.getFritekst())
-            .medDistribusjonsType(this.getDistribusjonstype())
-            .medKontaktopplysninger(this.isKontaktopplysninger())
-            .medBegrunnelseKode(this.getBegrunnelseKode())
-            .medYtterligereInformasjon(this.getYtterligereInformasjon())
-            .medNyVurderingBakgrunn(this.getNyVurderingBakgrunn())
-            .medSaksvedlegg(this.getSaksvedlegg())
-            .medFritekstvedlegg(this.getFritekstvedlegg())
-            .medDokumentTittel(this.getDokumentTittel());
+    public BrevbestillingDto tilBrevbestillingDto(String bestillersId) {
+        return new BrevbestillingDto(
+            this.produserbardokument,
+            this.mottaker,
+            this.orgNr,
+            this.orgnrEtater,
+            this.institusjonId,
+            this.innledningFritekst,
+            this.manglerFritekst,
+            this.begrunnelseFritekst,
+            this.ektefelleFritekst,
+            this.barnFritekst,
+            this.kontaktpersonNavn,
+            this.kopiMottakere,
+            bestillersId,
+            this.fritekstTittel,
+            this.fritekst,
+            this.distribusjonstype,
+            this.kontaktopplysninger,
+            this.nyVurderingBakgrunn,
+            this.saksvedlegg,
+            this.fritekstvedlegg,
+            this.dokumentTittel,
+            this.begrunnelseKode,
+            this.ytterligereInformasjon
+        );
     }
 
-    public no.nav.melosys.service.dokument.brev.BrevbestillingDto tilBrevbestillingDto() {
-        return tilBrevbestillingDtoBuilder()
-            .medBestillersId(SubjectHandler.getInstance().getUserID())
-            .build();
+    public BrevbestillingDto tilBrevbestillingDto() {
+        return tilBrevbestillingDto(SubjectHandler.getInstance().getUserID());
     }
 
-    public BrevbestillingRequest(Builder builder) {
-        this.produserbardokument = builder.produserbardokument;
-        this.mottaker = builder.mottaker;
-        this.orgNr = builder.orgNr;
-        this.innledningFritekst = builder.innledningFritekst;
-        this.orgnrEtater = builder.orgnrEtater;
-        this.institusjonId = builder.institusjonID;
-        this.manglerFritekst = builder.manglerFritekst;
-        this.begrunnelseFritekst = builder.begrunnelseFritekst;
-        this.ektefelleFritekst = builder.ektefelleFritekst;
-        this.barnFritekst = builder.barnFritekst;
-        this.kontaktpersonNavn = builder.kontaktpersonNavn;
-        this.kopiMottakere = builder.kopiMottakere;
-        this.fritekstTittel = builder.fritekstTittel;
-        this.fritekst = builder.fritekst;
-        this.distribusjonstype = builder.distribusjonstype;
-        this.kontaktopplysninger = builder.kontaktopplysninger;
-        this.begrunnelseKode = builder.begrunnelseKode;
-        this.ytterligereInformasjon = builder.ytterligereInformasjon;
-        this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
-        this.saksvedlegg = builder.saksvedlegg;
-        this.fritekstvedlegg = builder.fritekstvedlegg;
-        this.dokumentTittel = builder.dokumentTittel;
+    public void setProduserbardokument(Produserbaredokumenter produserbardokument) {
+        this.produserbardokument = produserbardokument;
+    }
+
+    public void setMottaker(Aktoersroller mottaker) {
+        this.mottaker = mottaker;
+    }
+
+    public void setOrgNr(String orgNr) {
+        this.orgNr = orgNr;
+    }
+
+    public void setInstitusjonId(String institusjonId) {
+        this.institusjonId = institusjonId;
+    }
+
+    public void setOrgnrEtater(List<String> orgnrEtater) {
+        this.orgnrEtater = orgnrEtater;
+    }
+
+    public void setInnledningFritekst(String innledningFritekst) {
+        this.innledningFritekst = innledningFritekst;
+    }
+
+    public void setManglerFritekst(String manglerFritekst) {
+        this.manglerFritekst = manglerFritekst;
+    }
+
+    public void setBegrunnelseFritekst(String begrunnelseFritekst) {
+        this.begrunnelseFritekst = begrunnelseFritekst;
+    }
+
+    public void setEktefelleFritekst(String ektefelleFritekst) {
+        this.ektefelleFritekst = ektefelleFritekst;
+    }
+
+    public void setBarnFritekst(String barnFritekst) {
+        this.barnFritekst = barnFritekst;
+    }
+
+    public void setKontaktpersonNavn(String kontaktpersonNavn) {
+        this.kontaktpersonNavn = kontaktpersonNavn;
+    }
+
+    public void setKopiMottakere(List<KopiMottakerDto> kopiMottakere) {
+        this.kopiMottakere = kopiMottakere;
+    }
+
+    public void setFritekstTittel(String fritekstTittel) {
+        this.fritekstTittel = fritekstTittel;
+    }
+
+    public void setFritekst(String fritekst) {
+        this.fritekst = fritekst;
+    }
+
+    public void setDistribusjonstype(Distribusjonstype distribusjonstype) {
+        this.distribusjonstype = distribusjonstype;
+    }
+
+    public void setKontaktopplysninger(boolean kontaktopplysninger) {
+        this.kontaktopplysninger = kontaktopplysninger;
+    }
+
+    public void setNyVurderingBakgrunn(String nyVurderingBakgrunn) {
+        this.nyVurderingBakgrunn = nyVurderingBakgrunn;
+    }
+
+    public void setSaksvedlegg(List<SaksvedleggDto> saksvedlegg) {
+        this.saksvedlegg = saksvedlegg;
+    }
+
+    public void setFritekstvedlegg(List<FritekstvedleggDto> fritekstvedlegg) {
+        this.fritekstvedlegg = fritekstvedlegg;
+    }
+
+    public void setDokumentTittel(String dokumentTittel) {
+        this.dokumentTittel = dokumentTittel;
+    }
+
+    public void setBegrunnelseKode(String begrunnelseKode) {
+        this.begrunnelseKode = begrunnelseKode;
+    }
+
+    public void setYtterligereInformasjon(String ytterligereInformasjon) {
+        this.ytterligereInformasjon = ytterligereInformasjon;
     }
 
     public Produserbaredokumenter getProduserbardokument() {
@@ -197,145 +261,6 @@ public class BrevbestillingRequest {
         return dokumentTittel;
     }
 
-    public static class Builder {
-        private Produserbaredokumenter produserbardokument;
-        private Aktoersroller mottaker;
-        private String orgNr;
-        private String innledningFritekst;
-        private List<String> orgnrEtater;
-        private String institusjonID;
-        private String manglerFritekst;
-        private String begrunnelseFritekst;
-        private String ektefelleFritekst;
-        private String barnFritekst;
-        private String kontaktpersonNavn;
-        private List<KopiMottakerDto> kopiMottakere;
-        private String fritekstTittel;
-        private String fritekst;
-        public boolean kontaktopplysninger;
-        private String begrunnelseKode;
-        private Distribusjonstype distribusjonstype;
-        private String ytterligereInformasjon;
-        private String nyVurderingBakgrunn;
-        private List<SaksvedleggDto> saksvedlegg;
-        private List<FritekstvedleggDto> fritekstvedlegg;
-        private String dokumentTittel;
-
-        public Builder medProduserbardokument(Produserbaredokumenter produserbardokument) {
-            this.produserbardokument = produserbardokument;
-            return this;
-        }
-
-        public Builder medMottaker(Aktoersroller mottaker) {
-            this.mottaker = mottaker;
-            return this;
-        }
-
-        public Builder medOrgNr(String orgNr) {
-            this.orgNr = orgNr;
-            return this;
-        }
-
-        public Builder medInnledningFritekst(String innledningFritekst) {
-            this.innledningFritekst = innledningFritekst;
-            return this;
-        }
-
-        public Builder medOrgnrEtater(List<String> orgnrEtater) {
-            this.orgnrEtater = orgnrEtater;
-            return this;
-        }
-
-        public Builder medInsitusjonID(String institusjonID) {
-            this.institusjonID = institusjonID;
-            return this;
-        }
-
-        public Builder medManglerFritekst(String manglerFritekst) {
-            this.manglerFritekst = manglerFritekst;
-            return this;
-        }
-
-        public Builder medBegrunnelseFritekst(String begrunnelseFritekst) {
-            this.begrunnelseFritekst = begrunnelseFritekst;
-            return this;
-        }
-
-        public Builder medEktefelleFritekst(String ektefelleFritekst) {
-            this.ektefelleFritekst = ektefelleFritekst;
-            return this;
-        }
-
-        public Builder medBarnFritekst(String barnFritekst) {
-            this.barnFritekst = barnFritekst;
-            return this;
-        }
-
-        public Builder medKontaktpersonNavn(String kontaktpersonNavn) {
-            this.kontaktpersonNavn = kontaktpersonNavn;
-            return this;
-        }
-
-        public Builder medKopiMottakere(List<KopiMottakerDto> kopiMottakere) {
-            this.kopiMottakere = kopiMottakere;
-            return this;
-        }
-
-        public Builder medFritekstTittel(String fritekstTittel) {
-            this.fritekstTittel = fritekstTittel;
-            return this;
-        }
-
-        public Builder medFritekst(String fritekst) {
-            this.fritekst = fritekst;
-            return this;
-        }
-
-        public Builder medDistribusjonstype(Distribusjonstype distribusjonstype) {
-            this.distribusjonstype = distribusjonstype;
-            return this;
-        }
-
-        public Builder medKontaktopplysninger(boolean kontaktopplysninger) {
-            this.kontaktopplysninger = kontaktopplysninger;
-            return this;
-        }
-
-        public Builder medBegrunnelseKode(String begrunnelseKode) {
-            this.begrunnelseKode = begrunnelseKode;
-            return this;
-        }
-
-        public Builder medYtterligereInformasjon(String ytterligereInformasjon) {
-            this.ytterligereInformasjon = ytterligereInformasjon;
-            return this;
-        }
-
-        public Builder medNyVurderingBakgrunn(String nyVurderingBakgrunn) {
-            this.nyVurderingBakgrunn = nyVurderingBakgrunn;
-            return this;
-        }
-
-        public Builder medSaksvedlegg(List<SaksvedleggDto> saksVedlegg) {
-            this.saksvedlegg = saksVedlegg;
-            return this;
-        }
-
-        public Builder medFritekstvedlegg(List<FritekstvedleggDto> fritekstvedlegg) {
-            this.fritekstvedlegg = fritekstvedlegg;
-            return this;
-        }
-
-        public Builder medDokumentTittel(String dokumentTittel) {
-            this.dokumentTittel = dokumentTittel;
-            return this;
-        }
-
-        public BrevbestillingRequest build() {
-            return new BrevbestillingRequest(this);
-        }
-    }
-
     public BrevbestillingUtkast tilUtkast() {
         return new BrevbestillingUtkast(
             this.getProduserbardokument(),
@@ -402,12 +327,12 @@ public class BrevbestillingRequest {
 
     @Override
     public String toString() {
-        return "BrevbestillingDto{" +
+        return "BrevbestillingRequest{" +
             "produserbardokument=" + produserbardokument +
             ", mottaker=" + mottaker +
             ", orgNr='" + orgNr + '\'' +
             ", institusjonId='" + institusjonId + '\'' +
-            ", orgnrEtater='" + orgnrEtater + '\'' +
+            ", orgnrEtater=" + orgnrEtater +
             ", innledningFritekst='" + innledningFritekst + '\'' +
             ", manglerFritekst='" + manglerFritekst + '\'' +
             ", begrunnelseFritekst='" + begrunnelseFritekst + '\'' +
@@ -415,15 +340,16 @@ public class BrevbestillingRequest {
             ", barnFritekst='" + barnFritekst + '\'' +
             ", kontaktpersonNavn='" + kontaktpersonNavn + '\'' +
             ", kopiMottakere=" + kopiMottakere +
-            ", distribusjonstype='" + distribusjonstype + '\'' +
             ", fritekstTittel='" + fritekstTittel + '\'' +
             ", fritekst='" + fritekst + '\'' +
+            ", distribusjonstype=" + distribusjonstype +
             ", kontaktopplysninger=" + kontaktopplysninger +
+            ", nyVurderingBakgrunn='" + nyVurderingBakgrunn + '\'' +
+            ", saksvedlegg=" + saksvedlegg +
+            ", fritekstvedlegg=" + fritekstvedlegg +
+            ", dokumentTittel='" + dokumentTittel + '\'' +
             ", begrunnelseKode='" + begrunnelseKode + '\'' +
             ", ytterligereInformasjon='" + ytterligereInformasjon + '\'' +
-            ", nyVurderingBakgrunn='" + nyVurderingBakgrunn + '\'' +
-            ", saksvedlegg='" + saksvedlegg + '\'' +
-            ", dokumentTittel='" + dokumentTittel + '\'' +
             '}';
     }
 }

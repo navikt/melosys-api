@@ -93,11 +93,10 @@ class BrevDataByggerInnvilgelseTest {
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
         behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new Soeknad());
 
-        brevbestillingDto = new BrevbestillingDto.Builder()
-            .medMottaker(Aktoersroller.BRUKER)
-            .medBegrunnelseKode("BEGRUNNELSEKODE")
-            .medFritekst("FRITEKST")
-            .build();
+        brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setMottaker(Aktoersroller.BRUKER);
+        brevbestillingDto.setBegrunnelseKode("BEGRUNNELSEKODE");
+        brevbestillingDto.setFritekst("FRITEKST");
 
         PersonDokument person = new PersonDokument();
         person.setSammensattNavn("Tom Mestokk");

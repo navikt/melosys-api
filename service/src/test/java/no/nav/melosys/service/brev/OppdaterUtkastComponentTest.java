@@ -4,6 +4,7 @@ import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast;
 import no.nav.melosys.domain.brev.utkast.UtkastBrev;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.UtkastBrevRepository;
+import no.nav.melosys.service.brev.components.OppdaterUtkastComponent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
