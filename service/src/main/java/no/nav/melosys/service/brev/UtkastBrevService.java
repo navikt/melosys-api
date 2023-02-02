@@ -5,6 +5,7 @@ import java.util.List;
 
 import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast;
 import no.nav.melosys.domain.brev.utkast.UtkastBrev;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.UtkastBrevRepository;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,8 @@ public class UtkastBrevService {
     }
 
     public void lagreUtkast(long behandlingID, String saksbehandler, BrevbestillingUtkast brevbestillingUtkast) {
+        validerFinnesAlleredeUtkastForSammeBrev(behandlingID, brevbestillingUtkast.getTittel());
+
         var utkast = new UtkastBrev();
         utkast.setBehandlingID(behandlingID);
         utkast.setLagretAvSaksbehandler(saksbehandler);
@@ -40,5 +43,11 @@ public class UtkastBrevService {
 
     public void slettUtkast(long utkastBrevID) {
         utkastBrevRepository.deleteById(utkastBrevID);
+    }
+
+    private void validerFinnesAlleredeUtkastForSammeBrev(long behandlingID, String tittel) {
+        if (hentUtkast(behandlingID).stream().anyMatch(utkast -> utkast.getBrevbestillingUtkast().getTittel().equals(tittel))) {
+            throw new FunksjonellException("Behandling %s har allerede et brevutkast for samme brev".formatted(behandlingID));
+        }
     }
 }
