@@ -1,4 +1,4 @@
-package no.nav.melosys.service.brev.components;
+package no.nav.melosys.service.brev.bestilling;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,7 +30,7 @@ import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV;
 
 @Component
-public class HentMuligeBrevmottakereComponent {
+public class HentMuligeBrevmottakereService {
     private final BehandlingService behandlingService;
     private final BrevmottakerService brevmottakerService;
     private final DokumentNavnService dokumentNavnService;
@@ -39,7 +39,13 @@ public class HentMuligeBrevmottakereComponent {
     private final KontaktopplysningService kontaktopplysningService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
 
-    public HentMuligeBrevmottakereComponent(BehandlingService behandlingService, BrevmottakerService brevmottakerService, DokumentNavnService dokumentNavnService, PersondataFasade persondataFasade, EregFasade eregFasade, KontaktopplysningService kontaktopplysningService, UtenlandskMyndighetService utenlandskMyndighetService) {
+    public HentMuligeBrevmottakereService(BehandlingService behandlingService,
+                                          BrevmottakerService brevmottakerService,
+                                          DokumentNavnService dokumentNavnService,
+                                          PersondataFasade persondataFasade,
+                                          EregFasade eregFasade,
+                                          KontaktopplysningService kontaktopplysningService,
+                                          UtenlandskMyndighetService utenlandskMyndighetService) {
         this.behandlingService = behandlingService;
         this.brevmottakerService = brevmottakerService;
         this.dokumentNavnService = dokumentNavnService;

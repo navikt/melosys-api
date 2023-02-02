@@ -1,4 +1,4 @@
-package no.nav.melosys.service.brev.components;
+package no.nav.melosys.service.brev.bestilling;
 
 import java.util.List;
 
@@ -21,13 +21,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class HentMuligeProduserbaredokumenterComponentTest {
+class HentMuligeProduserbaredokumenterServiceTest {
 
     @Mock
     private BehandlingService behandlingService;
 
     @InjectMocks
-    private HentMuligeProduserbaredokumenterComponent hentMuligeProduserbaredokumenterComponent;
+    private HentMuligeProduserbaredokumenterService hentMuligeProduserbaredokumenterService;
 
     private final Behandling behandling = lagBehandling();
 
@@ -36,7 +36,7 @@ class HentMuligeProduserbaredokumenterComponentTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
 
 
-        List<Produserbaredokumenter> brevMaler = hentMuligeProduserbaredokumenterComponent.hentMuligeProduserbaredokumenter(123L, BRUKER);
+        List<Produserbaredokumenter> brevMaler = hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(123L, BRUKER);
 
 
         assertThat(brevMaler)
@@ -52,7 +52,7 @@ class HentMuligeProduserbaredokumenterComponentTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
 
 
-        List<Produserbaredokumenter> brevMaler = hentMuligeProduserbaredokumenterComponent.hentMuligeProduserbaredokumenter(123L, ARBEIDSGIVER);
+        List<Produserbaredokumenter> brevMaler = hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(123L, ARBEIDSGIVER);
 
 
         assertThat(brevMaler)
@@ -68,7 +68,7 @@ class HentMuligeProduserbaredokumenterComponentTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
 
 
-        List<Produserbaredokumenter> brevMaler = hentMuligeProduserbaredokumenterComponent.hentMuligeProduserbaredokumenter(123L, VIRKSOMHET);
+        List<Produserbaredokumenter> brevMaler = hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(123L, VIRKSOMHET);
 
 
         assertThat(brevMaler).hasSize(1).containsExactly(GENERELT_FRITEKSTBREV_VIRKSOMHET);
@@ -80,7 +80,7 @@ class HentMuligeProduserbaredokumenterComponentTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(321L)).thenReturn(behandling);
 
 
-        List<Produserbaredokumenter> brevMaler = hentMuligeProduserbaredokumenterComponent.hentMuligeProduserbaredokumenter(321L, BRUKER);
+        List<Produserbaredokumenter> brevMaler = hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(321L, BRUKER);
 
 
         assertThat(brevMaler).isEmpty();
@@ -93,7 +93,7 @@ class HentMuligeProduserbaredokumenterComponentTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(321L)).thenReturn(behandling);
 
 
-        List<Produserbaredokumenter> brevMaler = hentMuligeProduserbaredokumenterComponent.hentMuligeProduserbaredokumenter(321L, BRUKER);
+        List<Produserbaredokumenter> brevMaler = hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(321L, BRUKER);
 
 
         assertThat(brevMaler)
@@ -111,7 +111,7 @@ class HentMuligeProduserbaredokumenterComponentTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
 
 
-        List<Produserbaredokumenter> brevMaler = hentMuligeProduserbaredokumenterComponent.hentMuligeProduserbaredokumenter(123L, BRUKER);
+        List<Produserbaredokumenter> brevMaler = hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(123L, BRUKER);
 
 
         assertThat(brevMaler)

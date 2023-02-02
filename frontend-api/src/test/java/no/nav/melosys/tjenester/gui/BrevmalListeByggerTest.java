@@ -25,8 +25,8 @@ import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.BrevmalListeService;
 import no.nav.melosys.service.brev.DokumentNavnService;
-import no.nav.melosys.service.brev.components.HentBrevAdresseTilMottakereComponent;
-import no.nav.melosys.service.brev.components.HentMuligeProduserbaredokumenterComponent;
+import no.nav.melosys.service.brev.bestilling.HentBrevAdresseTilMottakereService;
+import no.nav.melosys.service.brev.bestilling.HentMuligeProduserbaredokumenterService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -52,9 +52,9 @@ class BrevmalListeByggerTest {
     private DokumentServiceFasade dokServiceFasade;
 
     @Mock
-    private HentMuligeProduserbaredokumenterComponent hentMuligeProduserbaredokumenterComponent;
+    private HentMuligeProduserbaredokumenterService hentMuligeProduserbaredokumenterService;
     @Mock
-    private HentBrevAdresseTilMottakereComponent hentBrevAdresseTilMottakereComponent;
+    private HentBrevAdresseTilMottakereService hentBrevAdresseTilMottakereService;
     @Mock
     private BrevmottakerService brevmottakerService;
     @Mock
@@ -72,7 +72,7 @@ class BrevmalListeByggerTest {
 
     @BeforeEach
     void init() {
-        BrevmalListeService brevmalListeService = new BrevmalListeService(hentMuligeProduserbaredokumenterComponent, hentBrevAdresseTilMottakereComponent, brevmottakerService,
+        BrevmalListeService brevmalListeService = new BrevmalListeService(hentMuligeProduserbaredokumenterService, hentBrevAdresseTilMottakereService, brevmottakerService,
             behandlingService,
             persondataFasade,
             kontaktopplysningService,

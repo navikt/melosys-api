@@ -1,4 +1,4 @@
-package no.nav.melosys.service.brev.components;
+package no.nav.melosys.service.brev.bestilling;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -37,7 +37,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class TilBrevAdresseComponentTest {
+class TilBrevAdresseServiceTest {
 
     @Mock
     private PersondataFasade persondataFasade;
@@ -52,7 +52,7 @@ class TilBrevAdresseComponentTest {
     private EregFasade eregFasade;
 
     @InjectMocks
-    private TilBrevAdresseComponent tilBrevAdresseComponent;
+    private TilBrevAdresseService tilBrevAdresseService;
 
     private final Behandling behandling = lagBehandling();
 
@@ -64,7 +64,7 @@ class TilBrevAdresseComponentTest {
         aktør.setRolle(Aktoersroller.BRUKER);
 
 
-        var brevAdresser = tilBrevAdresseComponent.tilBrevAdresse(aktør, behandling);
+        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(aktør, behandling);
 
 
         assertThat(brevAdresser)
@@ -96,7 +96,7 @@ class TilBrevAdresseComponentTest {
         aktør.setOrgnr("orgnr");
 
 
-        var brevAdresser = tilBrevAdresseComponent.tilBrevAdresse(aktør, behandling);
+        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(aktør, behandling);
 
 
         assertThat(brevAdresser)
@@ -129,7 +129,7 @@ class TilBrevAdresseComponentTest {
         aktør.setPersonIdent("fnr");
 
 
-        var brevAdresser = tilBrevAdresseComponent.tilBrevAdresse(aktør, behandling);
+        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(aktør, behandling);
 
 
         assertThat(brevAdresser)
@@ -162,7 +162,7 @@ class TilBrevAdresseComponentTest {
         aktør.setOrgnr("orgnr");
 
 
-        var brevAdresser = tilBrevAdresseComponent.tilBrevAdresse(aktør, behandling);
+        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(aktør, behandling);
 
 
         assertThat(brevAdresser)
@@ -194,7 +194,7 @@ class TilBrevAdresseComponentTest {
         aktør.setOrgnr("orgnr");
 
 
-        var brevAdresser = tilBrevAdresseComponent.tilBrevAdresse(aktør, behandling);
+        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(aktør, behandling);
 
 
         assertThat(brevAdresser)
@@ -227,7 +227,7 @@ class TilBrevAdresseComponentTest {
         aktør.setOrgnr("orgnr-skatteetaten");
 
 
-        var brevAdresser = tilBrevAdresseComponent.tilBrevAdresse(aktør, behandling);
+        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(aktør, behandling);
 
 
         assertThat(brevAdresser)
@@ -260,7 +260,7 @@ class TilBrevAdresseComponentTest {
         aktør.setOrgnr(null);
 
 
-        var brevAdresser = tilBrevAdresseComponent.tilBrevAdresse(aktør, behandling);
+        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(aktør, behandling);
 
 
         assertThat(brevAdresser)
@@ -285,7 +285,7 @@ class TilBrevAdresseComponentTest {
         aktør.setOrgnr(null);
 
 
-        var brevAdresser = tilBrevAdresseComponent.tilBrevAdresse(aktør, behandling);
+        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(aktør, behandling);
 
 
         assertThat(brevAdresser)

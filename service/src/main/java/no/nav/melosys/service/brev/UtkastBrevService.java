@@ -7,18 +7,18 @@ import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast;
 import no.nav.melosys.domain.brev.utkast.UtkastBrev;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.UtkastBrevRepository;
-import no.nav.melosys.service.brev.components.OppdaterUtkastComponent;
+import no.nav.melosys.service.brev.bestilling.OppdaterUtkastService;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UtkastBrevService {
 
 
-    private final OppdaterUtkastComponent oppdaterUtkastComponent;
+    private final OppdaterUtkastService oppdaterUtkastService;
     private final UtkastBrevRepository utkastBrevRepository;
 
-    public UtkastBrevService(OppdaterUtkastComponent oppdaterUtkastComponent, UtkastBrevRepository utkastBrevRepository) {
-        this.oppdaterUtkastComponent = oppdaterUtkastComponent;
+    public UtkastBrevService(OppdaterUtkastService oppdaterUtkastService, UtkastBrevRepository utkastBrevRepository) {
+        this.oppdaterUtkastService = oppdaterUtkastService;
         this.utkastBrevRepository = utkastBrevRepository;
     }
 
@@ -38,8 +38,8 @@ public class UtkastBrevService {
         utkastBrevRepository.save(utkast);
     }
 
-    public void oppdaterUtkast(OppdaterUtkastComponent.RequestDto request) {
-        oppdaterUtkastComponent.oppdaterUtkast(request);
+    public void oppdaterUtkast(OppdaterUtkastService.RequestDto request) {
+        oppdaterUtkastService.oppdaterUtkast(request);
     }
 
     public void slettUtkast(long utkastBrevID) {

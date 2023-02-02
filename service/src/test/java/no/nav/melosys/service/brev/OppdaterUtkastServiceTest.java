@@ -4,7 +4,7 @@ import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast;
 import no.nav.melosys.domain.brev.utkast.UtkastBrev;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.UtkastBrevRepository;
-import no.nav.melosys.service.brev.components.OppdaterUtkastComponent;
+import no.nav.melosys.service.brev.bestilling.OppdaterUtkastService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -19,7 +19,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class OppdaterUtkastComponentTest {
+class OppdaterUtkastServiceTest {
 
     private final long UTKAST_BREV_ID = 12L;
 
@@ -30,15 +30,15 @@ class OppdaterUtkastComponentTest {
     private ArgumentCaptor<UtkastBrev> utkastBrevCaptor;
 
     @InjectMocks
-    private OppdaterUtkastComponent oppdaterUtkastComponent;
+    private OppdaterUtkastService oppdaterUtkastService;
 
     @Test
     void oppdaterUtkast_mappesRiktig() {
         when(utkastBrevRepository.existsById(UTKAST_BREV_ID)).thenReturn(true);
-        OppdaterUtkastComponent.RequestDto request = lagRequest();
+        OppdaterUtkastService.RequestDto request = lagRequest();
 
 
-        oppdaterUtkastComponent.oppdaterUtkast(request);
+        oppdaterUtkastService.oppdaterUtkast(request);
 
 
         verify(utkastBrevRepository).save(utkastBrevCaptor.capture());
@@ -54,7 +54,7 @@ class OppdaterUtkastComponentTest {
     void oppdaterUtkast_utkastFinnes_oppdatererUtkast() {
         when(utkastBrevRepository.existsById(UTKAST_BREV_ID)).thenReturn(true);
 
-        oppdaterUtkastComponent.oppdaterUtkast(lagRequest());
+        oppdaterUtkastService.oppdaterUtkast(lagRequest());
 
         verify(utkastBrevRepository).save(any());
     }
@@ -63,13 +63,13 @@ class OppdaterUtkastComponentTest {
     void oppdaterUtkast_utkastFinnesIkke_kasterFeil() {
         when(utkastBrevRepository.existsById(UTKAST_BREV_ID)).thenReturn(false);
 
-        assertThrows(FunksjonellException.class, () -> oppdaterUtkastComponent.oppdaterUtkast(lagRequest()));
+        assertThrows(FunksjonellException.class, () -> oppdaterUtkastService.oppdaterUtkast(lagRequest()));
 
         verify(utkastBrevRepository, never()).save(any());
     }
 
-    private OppdaterUtkastComponent.RequestDto lagRequest() {
-        return new OppdaterUtkastComponent.RequestDto(
+    private OppdaterUtkastService.RequestDto lagRequest() {
+        return new OppdaterUtkastService.RequestDto(
             UTKAST_BREV_ID,
             1L,
             "Z123123",

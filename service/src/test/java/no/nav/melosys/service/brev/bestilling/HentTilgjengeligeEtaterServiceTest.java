@@ -1,18 +1,18 @@
-package no.nav.melosys.service.brev.components;
+package no.nav.melosys.service.brev.bestilling;
 
 import org.junit.jupiter.api.Test;
 
 import static no.nav.melosys.domain.brev.Etat.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class HentTilgjengeligeEtaterComponentTest {
+class HentTilgjengeligeEtaterServiceTest {
 
-    private final HentTilgjengeligeEtaterComponent hentTilgjengeligeEtaterComponent = new HentTilgjengeligeEtaterComponent();
+    private final HentTilgjengeligeEtaterService hentTilgjengeligeEtaterService = new HentTilgjengeligeEtaterService();
 
     @Test
     void hentTilgjengeligeEtater_inneholderBareStøttedeEtater() {
 
-        var tilgjengeligeEtater = hentTilgjengeligeEtaterComponent.hentTilgjengeligeEtater();
+        var tilgjengeligeEtater = hentTilgjengeligeEtaterService.hentTilgjengeligeEtater();
 
 
         assertThat(tilgjengeligeEtater).containsExactly(

@@ -1,4 +1,4 @@
-package no.nav.melosys.service.brev.components;
+package no.nav.melosys.service.brev.bestilling;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,16 +14,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
-public class HentBrevAdresseTilMottakereComponent {
+public class HentBrevAdresseTilMottakereService {
 
     private final BehandlingService behandlingService;
     private final BrevmottakerService brevmottakerService;
-    private final TilBrevAdresseComponent tilBrevAdresseComponent;
+    private final TilBrevAdresseService tilBrevAdresseService;
 
-    public HentBrevAdresseTilMottakereComponent(BehandlingService behandlingService, BrevmottakerService brevmottakerService, TilBrevAdresseComponent tilBrevAdresseComponent) {
+    public HentBrevAdresseTilMottakereService(BehandlingService behandlingService, BrevmottakerService brevmottakerService, TilBrevAdresseService tilBrevAdresseService) {
         this.behandlingService = behandlingService;
         this.brevmottakerService = brevmottakerService;
-        this.tilBrevAdresseComponent = tilBrevAdresseComponent;
+        this.tilBrevAdresseService = tilBrevAdresseService;
     }
 
     @Transactional
@@ -33,7 +33,7 @@ public class HentBrevAdresseTilMottakereComponent {
         List<BrevAdresse> brevAdresser = new ArrayList<>();
         var mottakere = brevmottakerService.avklarMottakere(null, Mottaker.av(aktoersroller), behandling, false, false);
         for (Aktoer mottaker : mottakere) {
-            BrevAdresse brevAddresse = tilBrevAdresseComponent.tilBrevAdresse(mottaker, behandling);
+            BrevAdresse brevAddresse = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling);
             brevAdresser.add(brevAddresse);
         }
         return brevAdresser;

@@ -1,4 +1,4 @@
-package no.nav.melosys.service.brev.components;
+package no.nav.melosys.service.brev.bestilling;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -40,7 +40,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class HentMuligeBrevmottakereComponentTest {
+class HentMuligeBrevmottakereServiceTest {
 
 
     private final Behandling behandling = lagBehandling();
@@ -61,12 +61,12 @@ class HentMuligeBrevmottakereComponentTest {
     @Mock
     private UtenlandskMyndighetService utenlandskMyndighetService;
 
-    private HentMuligeBrevmottakereComponent hentMuligeBrevmottakere;
+    private HentMuligeBrevmottakereService hentMuligeBrevmottakere;
 
 
     @BeforeEach
     void init() {
-        hentMuligeBrevmottakere = new HentMuligeBrevmottakereComponent(behandlingService, brevmottakerService, dokumentNavnService, persondataFasade,
+        hentMuligeBrevmottakere = new HentMuligeBrevmottakereService(behandlingService, brevmottakerService, dokumentNavnService, persondataFasade,
             eregFasade, kontaktopplysningService, utenlandskMyndighetService);
     }
 
@@ -80,7 +80,7 @@ class HentMuligeBrevmottakereComponentTest {
         when(persondataFasade.hentSammensattNavn(anyString())).thenReturn("Ola Nordmann");
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
-        var hentMottakereRequest = new HentMuligeBrevmottakereComponent.RequestDto(MANGELBREV_BRUKER, 123L, null);
+        var hentMottakereRequest = new HentMuligeBrevmottakereService.RequestDto(MANGELBREV_BRUKER, 123L, null);
 
 
         var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
@@ -95,7 +95,7 @@ class HentMuligeBrevmottakereComponentTest {
                 Brevmottaker::getOrgnr)
             .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
         assertThat(muligeMottakere)
-            .extracting(HentMuligeBrevmottakereComponent.ResponseDto::kopiMottakere, HentMuligeBrevmottakereComponent.ResponseDto::fasteMottakere)
+            .extracting(HentMuligeBrevmottakereService.ResponseDto::kopiMottakere, HentMuligeBrevmottakereService.ResponseDto::fasteMottakere)
             .containsExactly(emptyList(), emptyList());
     }
 
@@ -109,7 +109,7 @@ class HentMuligeBrevmottakereComponentTest {
         mockHentOrganisasjon("orgnr", "Fullmektig virksomhet");
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
-        var hentMottakereRequest = new HentMuligeBrevmottakereComponent.RequestDto(MANGELBREV_BRUKER, 123L, null);
+        var hentMottakereRequest = new HentMuligeBrevmottakereService.RequestDto(MANGELBREV_BRUKER, 123L, null);
 
 
         var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
@@ -124,7 +124,7 @@ class HentMuligeBrevmottakereComponentTest {
                 Brevmottaker::getOrgnr)
             .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Fullmektig virksomhet", BRUKER, null, null);
         assertThat(muligeMottakere)
-            .extracting(HentMuligeBrevmottakereComponent.ResponseDto::kopiMottakere, HentMuligeBrevmottakereComponent.ResponseDto::fasteMottakere)
+            .extracting(HentMuligeBrevmottakereService.ResponseDto::kopiMottakere, HentMuligeBrevmottakereService.ResponseDto::fasteMottakere)
             .containsExactly(emptyList(), emptyList());
     }
 
@@ -138,7 +138,7 @@ class HentMuligeBrevmottakereComponentTest {
         when(persondataFasade.hentSammensattNavn("fnr")).thenReturn("Ola Nordmann");
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
-        var hentMottakereRequest = new HentMuligeBrevmottakereComponent.RequestDto(MANGELBREV_BRUKER, 123L, null);
+        var hentMottakereRequest = new HentMuligeBrevmottakereService.RequestDto(MANGELBREV_BRUKER, 123L, null);
 
 
         var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
@@ -153,7 +153,7 @@ class HentMuligeBrevmottakereComponentTest {
                 Brevmottaker::getOrgnr)
             .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Ola Nordmann", BRUKER, null, null);
         assertThat(muligeMottakere)
-            .extracting(HentMuligeBrevmottakereComponent.ResponseDto::kopiMottakere, HentMuligeBrevmottakereComponent.ResponseDto::fasteMottakere)
+            .extracting(HentMuligeBrevmottakereService.ResponseDto::kopiMottakere, HentMuligeBrevmottakereService.ResponseDto::fasteMottakere)
             .containsExactly(emptyList(), emptyList());
     }
 
@@ -166,7 +166,7 @@ class HentMuligeBrevmottakereComponentTest {
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, GENERELT_FRITEKSTBREV_VIRKSOMHET, VIRKSOMHET))
             .thenReturn(GENERELT_FRITEKSTBREV_VIRKSOMHET.getBeskrivelse());
 
-        var hentMottakereRequest = new HentMuligeBrevmottakereComponent.RequestDto(GENERELT_FRITEKSTBREV_VIRKSOMHET, 123L, "orgnr");
+        var hentMottakereRequest = new HentMuligeBrevmottakereService.RequestDto(GENERELT_FRITEKSTBREV_VIRKSOMHET, 123L, "orgnr");
 
 
         var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
@@ -181,7 +181,7 @@ class HentMuligeBrevmottakereComponentTest {
                 Brevmottaker::getOrgnr)
             .containsExactly(GENERELT_FRITEKSTBREV_VIRKSOMHET.getBeskrivelse(), "Equinor AS", VIRKSOMHET, null, null);
         assertThat(muligeMottakere)
-            .extracting(HentMuligeBrevmottakereComponent.ResponseDto::kopiMottakere, HentMuligeBrevmottakereComponent.ResponseDto::fasteMottakere)
+            .extracting(HentMuligeBrevmottakereService.ResponseDto::kopiMottakere, HentMuligeBrevmottakereService.ResponseDto::fasteMottakere)
             .containsExactly(emptyList(), emptyList());
     }
 
@@ -193,7 +193,7 @@ class HentMuligeBrevmottakereComponentTest {
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(null, MANGELBREV_BRUKER, ARBEIDSGIVER))
             .thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
-        var hentMottakereRequest = new HentMuligeBrevmottakereComponent.RequestDto(MANGELBREV_BRUKER, 123L, "orgnr");
+        var hentMottakereRequest = new HentMuligeBrevmottakereService.RequestDto(MANGELBREV_BRUKER, 123L, "orgnr");
 
 
         var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
@@ -208,7 +208,7 @@ class HentMuligeBrevmottakereComponentTest {
                 Brevmottaker::getOrgnr)
             .containsExactly(MANGELBREV_BRUKER.getBeskrivelse(), "Ola Nordmann Rørleggerfirma", ARBEIDSGIVER, null, null);
         assertThat(muligeMottakere)
-            .extracting(HentMuligeBrevmottakereComponent.ResponseDto::kopiMottakere, HentMuligeBrevmottakereComponent.ResponseDto::fasteMottakere)
+            .extracting(HentMuligeBrevmottakereService.ResponseDto::kopiMottakere, HentMuligeBrevmottakereService.ResponseDto::fasteMottakere)
             .containsExactly(emptyList(), emptyList());
     }
 
@@ -223,7 +223,7 @@ class HentMuligeBrevmottakereComponentTest {
         when(brevmottakerService.avklarMottaker(any(Produserbaredokumenter.class), any(), eq(behandling)))
             .thenReturn(lagAktoerOrg(BRUKER, null));
 
-        var hentMottakereRequest = new HentMuligeBrevmottakereComponent.RequestDto(MANGELBREV_BRUKER, 123L, "orgnr");
+        var hentMottakereRequest = new HentMuligeBrevmottakereService.RequestDto(MANGELBREV_BRUKER, 123L, "orgnr");
 
 
         var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
@@ -249,7 +249,7 @@ class HentMuligeBrevmottakereComponentTest {
         mockFinnOrganisasjon("orgnr", "Ola Nordmann Rørleggerfirma");
         mockHentOrganisasjon("orgnrTilFullmektig", "Fullmektig Virksomhet");
 
-        var hentMottakereRequest = new HentMuligeBrevmottakereComponent.RequestDto(MANGELBREV_BRUKER, 123L, "orgnr");
+        var hentMottakereRequest = new HentMuligeBrevmottakereService.RequestDto(MANGELBREV_BRUKER, 123L, "orgnr");
 
 
         var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
@@ -276,7 +276,7 @@ class HentMuligeBrevmottakereComponentTest {
         mockHentOrganisasjon("orgnrTilFullmektig", "Fullmektig Virksomhet");
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
 
-        var hentMottakereRequest = new HentMuligeBrevmottakereComponent.RequestDto(MANGELBREV_BRUKER, 123L, null);
+        var hentMottakereRequest = new HentMuligeBrevmottakereService.RequestDto(MANGELBREV_BRUKER, 123L, null);
 
 
         var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
@@ -317,7 +317,7 @@ class HentMuligeBrevmottakereComponentTest {
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, MANGELBREV_BRUKER, orgnr1, "Kopi til arbeidsgiver")).thenReturn("Kopi til arbeidsgiver");
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, MANGELBREV_BRUKER, orgnr2, "Kopi til arbeidsgiver")).thenReturn("Kopi til arbeidsgiver");
 
-        var hentMottakereRequest = new HentMuligeBrevmottakereComponent.RequestDto(MANGELBREV_BRUKER, 123L, null);
+        var hentMottakereRequest = new HentMuligeBrevmottakereService.RequestDto(MANGELBREV_BRUKER, 123L, null);
 
 
         var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
@@ -349,7 +349,7 @@ class HentMuligeBrevmottakereComponentTest {
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, MANGELBREV_BRUKER, orgnr, "Kopi til arbeidsgivers fullmektig")).thenReturn("Kopi til arbeidsgivers fullmektig");
 
-        var hentMottakereRequest = new HentMuligeBrevmottakereComponent.RequestDto(MANGELBREV_BRUKER, 123L, null);
+        var hentMottakereRequest = new HentMuligeBrevmottakereService.RequestDto(MANGELBREV_BRUKER, 123L, null);
 
 
         var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
@@ -380,7 +380,7 @@ class HentMuligeBrevmottakereComponentTest {
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, MANGELBREV_BRUKER, BRUKER)).thenReturn(MANGELBREV_BRUKER.getBeskrivelse());
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, MANGELBREV_BRUKER, skatteetaten, "Kopi til Skatteetaten")).thenReturn("Kopi til Skatteetaten");
 
-        var hentMottakereRequest = new HentMuligeBrevmottakereComponent.RequestDto(MANGELBREV_BRUKER, 123L, null);
+        var hentMottakereRequest = new HentMuligeBrevmottakereService.RequestDto(MANGELBREV_BRUKER, 123L, null);
 
 
         var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(hentMottakereRequest);
@@ -425,7 +425,7 @@ class HentMuligeBrevmottakereComponentTest {
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, TRYGDEAVTALE_GB, trygdemyndighet, "Kopi til utenlandsk trygdemyndighet")).thenReturn("Attest for utsendt arbeidstaker", "Utenlandsk trygdemyndighet");
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, TRYGDEAVTALE_GB, skatteetaten, "Kopi til Skatt")).thenReturn("Kopi av vedtak om medlemskap");
 
-        var request = new HentMuligeBrevmottakereComponent.RequestDto(TRYGDEAVTALE_GB, 123L, null);
+        var request = new HentMuligeBrevmottakereService.RequestDto(TRYGDEAVTALE_GB, 123L, null);
 
 
         var muligeMottakere = hentMuligeBrevmottakere.hentMuligeBrevmottakere(request);
