@@ -56,26 +56,26 @@ public class DokumentServiceFasade {
     @Transactional
     public void produserOgDistribuerBrev(Produserbaredokumenter produserbartDokument, Mottaker mottaker, String fritekst,
                                          String begrunnelseKode, String avsenderId, long behandlingId) {
-        var brevbestillingRequest = new BrevbestillingDto();
-        brevbestillingRequest.setProduserbardokument(produserbartDokument);
-        brevbestillingRequest.setMottaker(mottaker.hentAktørsRolle());
-        brevbestillingRequest.setFritekst(fritekst);
-        brevbestillingRequest.setBegrunnelseKode(begrunnelseKode);
-        brevbestillingRequest.setBestillersId(avsenderId);
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(produserbartDokument);
+        brevbestillingDto.setMottaker(mottaker.hentAktørsRolle());
+        brevbestillingDto.setFritekst(fritekst);
+        brevbestillingDto.setBegrunnelseKode(begrunnelseKode);
+        brevbestillingDto.setBestillersId(avsenderId);
 
-        dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingRequest);
+        dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto);
     }
 
     @Transactional
     public void produserDokument(Produserbaredokumenter dokumentType, Mottaker mottaker, long behandlingId, DoksysBrevbestilling brevbestilling) {
-        var brevbestillingRequest = new BrevbestillingDto();
-        brevbestillingRequest.setProduserbardokument(dokumentType);
-        brevbestillingRequest.setMottaker(mottaker.hentAktørsRolle());
-        brevbestillingRequest.setFritekst(hentFritekst(brevbestilling));
-        brevbestillingRequest.setBegrunnelseKode(brevbestilling.getBegrunnelseKode());
-        brevbestillingRequest.setBestillersId(brevbestilling.getAvsenderID());
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(dokumentType);
+        brevbestillingDto.setMottaker(mottaker.hentAktørsRolle());
+        brevbestillingDto.setFritekst(hentFritekst(brevbestilling));
+        brevbestillingDto.setBegrunnelseKode(brevbestilling.getBegrunnelseKode());
+        brevbestillingDto.setBestillersId(brevbestilling.getAvsenderID());
 
-        produserDokument(behandlingId, brevbestilling, brevbestillingRequest, mottaker);
+        produserDokument(behandlingId, brevbestilling, brevbestillingDto, mottaker);
     }
 
     private String hentFritekst(DoksysBrevbestilling brevbestilling) {
