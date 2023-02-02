@@ -100,7 +100,8 @@ public record BrevbestillingRequest(
     }
 
     private <T, R> List<R> konverterListeTil(List<T> liste, Function<T, R> mapper) {
-        return ofNullable(liste).orElseGet(Collections::emptyList)
+        return ofNullable(liste)
+            .orElseGet(Collections::emptyList)
             .stream()
             .map(mapper)
             .toList();
