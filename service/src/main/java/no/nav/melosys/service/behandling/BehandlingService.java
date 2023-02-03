@@ -18,6 +18,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
+import no.nav.melosys.service.brev.UtkastBrevService;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.apache.commons.beanutils.BeanUtils;
@@ -50,6 +51,7 @@ public class BehandlingService {
     private final BehandlingsresultatService behandlingsresultatService;
     private final OppgaveService oppgaveService;
     private final LovligeKombinasjonerService lovligeKombinasjonerService;
+    private final UtkastBrevService utkastBrevService;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final UtledMottaksdato utledMottaksdato;
     private final Counter behandlingerAvsluttet = Metrics.counter(BEHANDLINGER_AVSLUTTET);
@@ -59,6 +61,7 @@ public class BehandlingService {
                              BehandlingsresultatService behandlingsresultatService,
                              @Lazy OppgaveService oppgaveService,
                              @Lazy LovligeKombinasjonerService lovligeKombinasjonerService,
+                             UtkastBrevService utkastBrevService,
                              ApplicationEventPublisher applicationEventPublisher,
                              UtledMottaksdato utledMottaksdato) {
         this.behandlingRepository = behandlingRepository;
@@ -66,6 +69,7 @@ public class BehandlingService {
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
         this.lovligeKombinasjonerService = lovligeKombinasjonerService;
+        this.utkastBrevService = utkastBrevService;
         this.applicationEventPublisher = applicationEventPublisher;
         this.utledMottaksdato = utledMottaksdato;
     }
@@ -343,9 +347,7 @@ public class BehandlingService {
     }
 
     private void avsluttBehandling(Behandling behandling) {
-        if (behandling.erAvsluttet()) {
-            throw new FunksjonellException("Behandling " + behandling.getId() + " er allerede avsluttet!");
-        }
+        validerKanAvslutteBehandling(behandling);
 
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandlingRepository.save(behandling);
@@ -404,5 +406,14 @@ public class BehandlingService {
         avsluttBehandling(behandling);
 
         behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), nyBehandlingsResultatType);
+    }
+
+    private void validerKanAvslutteBehandling(Behandling behandling) {
+        if (behandling.erAvsluttet()) {
+            throw new FunksjonellException("Behandling %s er allerede avsluttet!".formatted(behandling.getId()));
+        }
+        if (!utkastBrevService.hentUtkast(behandling.getId()).isEmpty()) {
+            throw new FunksjonellException("Det finnes et åpent brevutkast. Du må sende eller forkaste brevet før du avslutter behandlingen");
+        }
     }
 }
