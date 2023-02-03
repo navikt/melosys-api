@@ -28,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN;
 import static no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE;
+import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
 
 @Service
 public class MottatteOpplysningerService {
@@ -97,7 +98,8 @@ public class MottatteOpplysningerService {
     public void opprettSøknad(Behandling behandling, Periode periode, Soeknadsland soeknadsland) {
         long behandlingID = behandling.getId();
         boolean ftrlToggleEnabled = unleash.isEnabled("melosys.folketrygden.mvp");
-        boolean skalOppretteSøknad = !SaksbehandlingRegler.harTomFlyt(behandling, ftrlToggleEnabled);
+        boolean ikkeYrkesaktivToggleEnabled = unleash.isEnabled(IKKEYRKESAKTIV_FLYT);
+        boolean skalOppretteSøknad = !SaksbehandlingRegler.harTomFlyt(behandling, ftrlToggleEnabled, ikkeYrkesaktivToggleEnabled);
         if (skalOppretteSøknad) {
             Sakstyper sakstype = behandling.getFagsak().getType();
             switch (sakstype) {

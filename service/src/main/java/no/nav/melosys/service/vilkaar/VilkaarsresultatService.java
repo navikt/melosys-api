@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.*;
+import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
 
 @Service
 public class VilkaarsresultatService {
@@ -97,7 +98,7 @@ public class VilkaarsresultatService {
     public void tømVilkårForBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
         var behandling = behandlingsresultat.getBehandling();
         var fagsak = behandling.getFagsak();
-        if (fagsak.erSakstypeEøs() && !SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"))) {
+        if (fagsak.erSakstypeEøs() && !SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT))) {
             vilkaarsresultatRepo.deleteByBehandlingsresultatAndVilkaarNotIn(behandlingsresultat, IMMUTABLE_VILKAAR);
         } else {
             vilkaarsresultatRepo.deleteByBehandlingsresultatId(behandlingsresultat.getId());

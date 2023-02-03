@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
+import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
 
 @Service
 public class OpprettSak {
@@ -116,7 +117,7 @@ public class OpprettSak {
             hovedpart, sakstype, sakstema, behandlingstema, behandlingstype);
 
         if (erSakstypeEøs(sakstype)
-            && !SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"))) {
+            && !SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"),  unleash.isEnabled(IKKEYRKESAKTIV_FLYT))) {
             validerSøknadData(opprettSakDto.getSoknadDto());
         }
     }

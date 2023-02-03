@@ -9,6 +9,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import org.springframework.stereotype.Component
 
@@ -21,7 +22,8 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
         behandlingstema: Behandlingstema
     ): Boolean {
         val ftrlToggleEnabled = unleash.isEnabled("melosys.folketrygden.mvp")
-        if (harTomFlyt(fagsak.type, fagsak.tema, behandlingstype, behandlingstema, ftrlToggleEnabled)) return false
+        val ikkeYrkesaktivToggleEnabled = unleash.isEnabled(IKKEYRKESAKTIV_FLYT)
+        if (harTomFlyt(fagsak.type, fagsak.tema, behandlingstype, behandlingstema, ftrlToggleEnabled, ikkeYrkesaktivToggleEnabled)) return false
 
         return finnBehandlingSomKanReplikeres(fagsak) != null
     }
@@ -32,7 +34,7 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
     internal fun finnBehandlingSomKanReplikeres(behandlinger: List<Behandling>) =
         behandlinger
             .filter { it.erInaktiv() }
-            .filter { !harTomFlyt(it, unleash.isEnabled("melosys.folketrygden.mvp")) }
+            .filter { !harTomFlyt(it, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT)) }
             .firstOrNull {
                 val behandlingsresultat = behandlingsresultatRepository.findById(it.id)
                 behandlingstyperSomKanReplikeres.contains(it.type)
@@ -55,8 +57,8 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
         )
 
         @JvmStatic
-        fun harTomFlyt(behandling: Behandling, ftrlToggleEnabled: Boolean): Boolean =
-            harTomFlyt(behandling.fagsak.type, behandling.fagsak.tema, behandling.type, behandling.tema, ftrlToggleEnabled)
+        fun harTomFlyt(behandling: Behandling, ftrlToggleEnabled: Boolean, ikkeYrkesaktivToggleEnabled: Boolean): Boolean =
+            harTomFlyt(behandling.fagsak.type, behandling.fagsak.tema, behandling.type, behandling.tema, ftrlToggleEnabled, ikkeYrkesaktivToggleEnabled)
 
         @JvmStatic
         fun harTomFlyt(
@@ -64,14 +66,14 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
             sakstema: Sakstemaer,
             behandlingstype: Behandlingstyper,
             behandlingstema: Behandlingstema,
-            ftrlToggleEnabled: Boolean
+            ftrlToggleEnabled: Boolean,
+            ikkeYrkesaktivToggleEnabled: Boolean,
         ): Boolean {
             if (sakstema == Sakstemaer.TRYGDEAVGIFT) return true
             if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE) return true
 
             return when (behandlingstema) {
                 ARBEID_KUN_NORGE,
-                IKKE_YRKESAKTIV,
                 PENSJONIST,
                 REGISTRERING_UNNTAK,
                 UNNTAK_MEDLEMSKAP,
@@ -81,6 +83,7 @@ class SaksbehandlingRegler(private val behandlingsresultatRepository: Behandling
 
                 ANMODNING_OM_UNNTAK_HOVEDREGEL -> sakstype == Sakstyper.TRYGDEAVTALE
                 YRKESAKTIV -> (sakstype == Sakstyper.FTRL && !ftrlToggleEnabled)
+                IKKE_YRKESAKTIV -> (!ikkeYrkesaktivToggleEnabled)
 
                 else -> return false
             }

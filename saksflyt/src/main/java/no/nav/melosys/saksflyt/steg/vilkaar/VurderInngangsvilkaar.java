@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
+
 @Component
 public class VurderInngangsvilkaar implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(VurderInngangsvilkaar.class);
@@ -50,7 +52,7 @@ public class VurderInngangsvilkaar implements StegBehandler {
 
     private boolean skalVurdereInngangsvilkår(Behandling behandling) {
         return behandling.getFagsak().erSakstypeEøs()
-            && !SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"))
+            && !SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT))
             && behandling.kanResultereIVedtak()
             && (unleash.isEnabled("melosys.tom_periode_og_land") ? behandling.harPeriodeOgLand() : true);
     }

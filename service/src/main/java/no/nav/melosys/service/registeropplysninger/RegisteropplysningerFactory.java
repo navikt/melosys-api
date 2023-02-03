@@ -17,9 +17,9 @@ public final class RegisteropplysningerFactory {
 
     public static RegisteropplysningerRequest.SaksopplysningTyper utledSaksopplysningTyper(
         Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype,
-        boolean folketrygdenToggleEnabled) {
+        boolean folketrygdenToggleEnabled, boolean ikkeYrkesaktivToggleEnabled) {
 
-        if (SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, folketrygdenToggleEnabled)) {
+        if (SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, folketrygdenToggleEnabled, ikkeYrkesaktivToggleEnabled)) {
                 return ingenSaksopplysningTyper();
         }
 
