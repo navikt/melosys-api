@@ -21,14 +21,17 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.UTENLAN
 import static no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper.*;
 
 @Component
-class TilBrevAdresseService {
+public class TilBrevAdresseService {
     private final PersondataFasade persondataFasade;
     private final KontaktopplysningService kontaktopplysningService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final EregFasade eregFasade;
 
 
-    public TilBrevAdresseService(PersondataFasade persondataFasade, KontaktopplysningService kontaktopplysningService, UtenlandskMyndighetService utenlandskMyndighetService, EregFasade eregFasade) {
+    public TilBrevAdresseService(PersondataFasade persondataFasade,
+                                 KontaktopplysningService kontaktopplysningService,
+                                 UtenlandskMyndighetService utenlandskMyndighetService,
+                                 EregFasade eregFasade) {
         this.persondataFasade = persondataFasade;
         this.kontaktopplysningService = kontaktopplysningService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
