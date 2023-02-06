@@ -6,6 +6,7 @@ public record UtkastBrevResponse(
     Long utkastBrevID,
     String lagretAvSaksbehandlerIdent,
     String tittel,
+    // Vi ønsker lik data som både respons og request, derav bruker vi BrevbestillingRequest også i responsen
     BrevbestillingRequest brevbestilling
 ) {
 
