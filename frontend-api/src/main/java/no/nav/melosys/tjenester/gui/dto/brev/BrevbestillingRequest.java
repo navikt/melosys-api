@@ -99,6 +99,33 @@ public record BrevbestillingRequest(
         );
     }
 
+    public static BrevbestillingRequest av(BrevbestillingUtkast utkast) {
+        return new BrevbestillingRequest(
+            utkast.produserbardokument(),
+            utkast.mottaker(),
+            utkast.orgnr(),
+            utkast.institusjonID(),
+            utkast.orgnrEtater(),
+            utkast.innledningFritekst(),
+            utkast.manglerFritekst(),
+            utkast.begrunnelseFritekst(),
+            utkast.ektefelleFritekst(),
+            utkast.barnFritekst(),
+            utkast.kontaktpersonNavn(),
+            utkast.kopiMottakere().stream().map(KopiMottakerDto::av).toList(),
+            utkast.fritekstTittel(),
+            utkast.fritekst(),
+            utkast.distribusjonstype(),
+            utkast.kontaktopplysninger(),
+            utkast.nyVurderingBakgrunn(),
+            utkast.saksVedlegg().stream().map(SaksvedleggDto::av).toList(),
+            utkast.fritekstVedlegg().stream().map(FritekstvedleggDto::av).toList(),
+            utkast.dokumentTittel(),
+            null,
+            null
+        );
+    }
+
     private <T, R> List<R> konverterListeTil(List<T> liste, Function<T, R> mapper) {
         return ofNullable(liste)
             .orElseGet(Collections::emptyList)

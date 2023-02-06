@@ -9,7 +9,7 @@ import no.nav.melosys.service.brev.bestilling.OppdaterUtkastService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.brev.BrevbestillingRequest;
-import no.nav.melosys.tjenester.gui.dto.brev.HentUtkastResponse;
+import no.nav.melosys.tjenester.gui.dto.brev.UtkastBrevResponse;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,13 +32,13 @@ public class UtkastBrevTjeneste {
     }
 
     @GetMapping(value = "/{behandlingID}", produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Henter alle brevutkast for en behandling", response = HentUtkastResponse.class, responseContainer = "List")
-    public List<HentUtkastResponse> hentUtkast(@PathVariable long behandlingID) {
+    @ApiOperation(value = "Henter alle brevutkast for en behandling", response = UtkastBrevResponse.class, responseContainer = "List")
+    public List<UtkastBrevResponse> hentUtkast(@PathVariable long behandlingID) {
         aksesskontroll.autoriser(behandlingID);
 
         return utkastBrevService.hentUtkast(behandlingID)
             .stream()
-            .map(HentUtkastResponse::av)
+            .map(UtkastBrevResponse::av)
             .toList();
     }
 
