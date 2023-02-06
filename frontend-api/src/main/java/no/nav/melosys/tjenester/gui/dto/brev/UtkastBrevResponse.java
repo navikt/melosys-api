@@ -1,21 +1,20 @@
 package no.nav.melosys.tjenester.gui.dto.brev;
 
 import no.nav.melosys.domain.brev.utkast.UtkastBrev;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 
-public record HentUtkastResponse(
+public record UtkastBrevResponse(
     Long utkastBrevID,
     String lagretAvSaksbehandlerIdent,
     String tittel,
-    BrevbestillingDto brevbestilling
+    BrevbestillingRequest brevbestilling
 ) {
 
-    public static HentUtkastResponse av(UtkastBrev utkastBrev) {
-        return new HentUtkastResponse(
+    public static UtkastBrevResponse av(UtkastBrev utkastBrev) {
+        return new UtkastBrevResponse(
             utkastBrev.getId(),
             utkastBrev.getLagretAvSaksbehandler(),
             utkastBrev.getBrevbestillingUtkast().getTittel(),
-            BrevbestillingDto.av(utkastBrev.getBrevbestillingUtkast())
+            BrevbestillingRequest.tilRequest(utkastBrev.getBrevbestillingUtkast())
         );
     }
 }
