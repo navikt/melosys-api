@@ -14,7 +14,7 @@ public record UtkastBrevResponse(
             utkastBrev.getId(),
             utkastBrev.getLagretAvSaksbehandler(),
             utkastBrev.getBrevbestillingUtkast().getTittel(),
-            BrevbestillingRequest.tilRequest(utkastBrev.getBrevbestillingUtkast())
+            BrevbestillingRequest.av(utkastBrev.getBrevbestillingUtkast())
         );
     }
 }

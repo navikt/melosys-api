@@ -99,7 +99,7 @@ public record BrevbestillingRequest(
         );
     }
 
-    public static BrevbestillingRequest tilRequest(BrevbestillingUtkast utkast) {
+    public static BrevbestillingRequest av(BrevbestillingUtkast utkast) {
         return new BrevbestillingRequest(
             utkast.produserbardokument(),
             utkast.mottaker(),
