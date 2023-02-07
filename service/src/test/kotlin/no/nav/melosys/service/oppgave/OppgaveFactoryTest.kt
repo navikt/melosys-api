@@ -695,6 +695,30 @@ internal class OppgaveFactoryTest {
     }
 
     @Test
+    fun `A1_ANMODNING_OM_UNNTAK_PAPIR skal gi gosys oppgave EU_EOS_LAND, UFM, BEH_SAK_MK`() {
+        val sakstyper = listOf(Sakstyper.EU_EOS)
+        val sakstemaer = listOf(Sakstemaer.UNNTAK)
+        val behandlingstyper =
+            listOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE)
+        val behandlingstemaer = listOf(Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR)
+
+        val expectedBehandlingstema = OppgaveBehandlingstema.EU_EOS_LAND
+        val expectedTema = Tema.UFM
+        val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
+
+        test(
+            sakstyper,
+            sakstemaer,
+            behandlingstyper,
+            behandlingstemaer,
+            expectedBehandlingstema,
+            expectedTema,
+            expectedOppgavetype,
+            Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR.beskrivelse
+        )
+    }
+
+    @Test
     fun ftrl_trygdeavgift_soeknad_arbeidFlereLand_xx() {
         test(
             Sakstyper.FTRL,
