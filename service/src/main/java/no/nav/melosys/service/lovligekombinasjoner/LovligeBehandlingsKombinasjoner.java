@@ -16,20 +16,20 @@ public class LovligeBehandlingsKombinasjoner {
     // EU_EØS
     private static final Set<Behandlingstema> EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGSTEMA_SØKNAD = new LinkedHashSet<>(List.of(UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_FLERE_LAND, ARBEID_TJENESTEPERSON_ELLER_FLY, ARBEID_KUN_NORGE, IKKE_YRKESAKTIV, PENSJONIST));
     private static final Set<Behandlingstema> EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGSTEMA_HENVENDELSER = new LinkedHashSet<>(List.of(FORESPØRSEL_TRYGDEMYNDIGHET, TRYGDETID));
-    private static final Set<Behandlingstema> EU_EOS_UNNTAK_BEHANDLINGSTEMA = Set.of(FORESPØRSEL_TRYGDEMYNDIGHET);
-
+    private static final Set<Behandlingstema> EU_EOS_UNNTAK_BEHANDLINGSTEMA_FORESPØRSEL_TRYGDEMYNDIGHET = Set.of(FORESPØRSEL_TRYGDEMYNDIGHET);
     private static final Set<Behandlingstema> EU_EOS_UNNTAK_BEHANDLINGSTEMA_A1_PAPIR = Set.of(A1_ANMODNING_OM_UNNTAK_PAPIR);
+
     private static final Set<Behandlingstema> EU_EOS_TRYGDEAVGIFT_BEHANDLINGSTEMA = new LinkedHashSet<>(List.of(YRKESAKTIV, PENSJONIST));
     private static final Set<Behandlingstyper> EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGSTYPE_SØKNAD = new LinkedHashSet<>(List.of(FØRSTEGANG, NY_VURDERING, KLAGE, HENVENDELSE));
     private static final Set<Behandlingstyper> EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGSTYPE_HENVENDELSER = Set.of(HENVENDELSE);
-    private static final Set<Behandlingstyper> EU_EOS_UNNTAK_BEHANDLINGSTYPE = Set.of(HENVENDELSE);
+    private static final Set<Behandlingstyper> EU_EOS_UNNTAK_FORESPØRSEL_TRYGDEMYNDIGHET_BEHANDLINGSTYPE = Set.of(HENVENDELSE);
     private static final Set<Behandlingstyper> EU_EOS_UNNTAK_A1_PAPIR_BEHANDLINGSTYPE = new LinkedHashSet<>(List.of(FØRSTEGANG, NY_VURDERING, KLAGE));
     private static final Set<Behandlingstyper> EU_EOS_TRYGDEAVGIFT_BEHANDLINGSTYPE = new LinkedHashSet<>(List.of(FØRSTEGANG, NY_VURDERING, KLAGE, HENVENDELSE));
 
     public static final BehandlingstemaBehandlingstyperKombinasjon EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_SØKNAD = new BehandlingstemaBehandlingstyperKombinasjon(EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGSTEMA_SØKNAD, EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGSTYPE_SØKNAD);
     public static final BehandlingstemaBehandlingstyperKombinasjon EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_HENVENDELSER = new BehandlingstemaBehandlingstyperKombinasjon(EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGSTEMA_HENVENDELSER, EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGSTYPE_HENVENDELSER);
-    public static final BehandlingstemaBehandlingstyperKombinasjon EU_EOS_UNNTAK_BEHANDLINGS_KOMBINASJON = new BehandlingstemaBehandlingstyperKombinasjon(EU_EOS_UNNTAK_BEHANDLINGSTEMA, EU_EOS_UNNTAK_BEHANDLINGSTYPE);
-    public static final BehandlingstemaBehandlingstyperKombinasjon EU_EOS_UNNTAK_BEHANDLINGS_KOMBINASJON_A1_PAPIR = new BehandlingstemaBehandlingstyperKombinasjon(EU_EOS_UNNTAK_BEHANDLINGSTEMA_A1_PAPIR, EU_EOS_UNNTAK_A1_PAPIR_BEHANDLINGSTYPE);
+    public static final BehandlingstemaBehandlingstyperKombinasjon EU_EOS_UNNTAK_BEHANDLINGS_KOMBINASJON = new BehandlingstemaBehandlingstyperKombinasjon(EU_EOS_UNNTAK_BEHANDLINGSTEMA_FORESPØRSEL_TRYGDEMYNDIGHET, EU_EOS_UNNTAK_FORESPØRSEL_TRYGDEMYNDIGHET_BEHANDLINGSTYPE);
+    public static final BehandlingstemaBehandlingstyperKombinasjon EU_EOS_UNNTAK_A1_PAPIR_BEHANDLINGS_KOMBINASJON = new BehandlingstemaBehandlingstyperKombinasjon(EU_EOS_UNNTAK_BEHANDLINGSTEMA_A1_PAPIR, EU_EOS_UNNTAK_A1_PAPIR_BEHANDLINGSTYPE);
     public static final BehandlingstemaBehandlingstyperKombinasjon EU_EOS_TRYGDEAVGIFT_BEHANDLINGS_KOMBINASJON = new BehandlingstemaBehandlingstyperKombinasjon(EU_EOS_TRYGDEAVGIFT_BEHANDLINGSTEMA, EU_EOS_TRYGDEAVGIFT_BEHANDLINGSTYPE);
 
     // FOLKETRYGDLOVEN
