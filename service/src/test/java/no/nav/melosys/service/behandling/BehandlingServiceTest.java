@@ -8,6 +8,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.brev.utkast.UtkastBrev;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
@@ -21,6 +22,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
+import no.nav.melosys.service.brev.UtkastBrevService;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.assertj.core.util.Sets;
@@ -39,8 +41,7 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -65,6 +66,8 @@ class BehandlingServiceTest {
     @Mock
     private LovligeKombinasjonerService lovligeKombinasjonerService;
     @Mock
+    private UtkastBrevService utkastBrevService;
+    @Mock
     private UtledMottaksdato utledMottaksdato;
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
@@ -80,7 +83,7 @@ class BehandlingServiceTest {
 
     @BeforeEach
     public void setUp() {
-        behandlingService = new BehandlingService(behandlingRepository, tidligereMedlemsperiodeRepo, behandlingsresultatService, oppgaveService, lovligeKombinasjonerService, applicationEventPublisher, utledMottaksdato);
+        behandlingService = new BehandlingService(behandlingRepository, tidligereMedlemsperiodeRepo, behandlingsresultatService, oppgaveService, lovligeKombinasjonerService, utkastBrevService, applicationEventPublisher, utledMottaksdato);
 
         behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
@@ -535,6 +538,18 @@ class BehandlingServiceTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> behandlingService.avsluttBehandling(BEHANDLING_ID))
             .withMessageContaining("Behandling " + BEHANDLING_ID + " er allerede avsluttet!");
+    }
+
+    @Test
+    void avsluttBehandling_finnesUtkastBrev_kasterFunksjonellException() {
+        Behandling behandling = new Behandling();
+        behandling.setId(BEHANDLING_ID);
+        when(behandlingRepository.findById(BEHANDLING_ID)).thenReturn(Optional.of(behandling));
+        when(utkastBrevService.hentUtkast(BEHANDLING_ID)).thenReturn(List.of(new UtkastBrev()));
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> behandlingService.avsluttBehandling(BEHANDLING_ID))
+            .withMessageContaining("Det finnes et åpent brevutkast. Du må sende eller forkaste brevet før du avslutter behandlingen");
     }
 
     @Test
