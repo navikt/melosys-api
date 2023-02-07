@@ -93,7 +93,8 @@ class BehandlingfristKriterier : Behandling() {
             behandlingstema: Behandlingstema,
             behandlingstype: Behandlingstyper
         ): Boolean {
-            val behandlingstemaer = setOf(Behandlingstema.REGISTRERING_UNNTAK)
+            val behandlingstemaer =
+                setOf(Behandlingstema.REGISTRERING_UNNTAK, Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR)
             val behandlingstyper = setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING)
             return behandlingstemaer.contains(behandlingstema) && behandlingstyper.contains(behandlingstype)
         }

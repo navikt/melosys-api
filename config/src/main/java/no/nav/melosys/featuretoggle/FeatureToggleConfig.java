@@ -19,7 +19,7 @@ public class FeatureToggleConfig {
 
         if (!Collections.disjoint(List.of(environment.getActiveProfiles()), List.of("local", "local-mock"))) {
             var localUnleash = new LocalUnleash();
-            localUnleash.enableAllExcept(ToggleName.BEHANDLINGSTYPE_KLAGE);
+            localUnleash.enableAll();
             return localUnleash;
         } else if(List.of(environment.getActiveProfiles()).contains("test")) {
             var fakeUnleash = new FakeUnleash();
