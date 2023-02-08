@@ -239,7 +239,7 @@ final class OppgaveFasadeImplTest {
         String oppdateringstidspunkt = LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
         assertThat(oppgaveDtoArgumentCaptor.getValue().getBeskrivelse())
             .isEqualTo(String.format("--- %s (%s, %s) ---\n %s\n",
-                oppdateringstidspunkt, "srvmelosys", "melosys", "Ny beskrivelse"));
+                oppdateringstidspunkt, "srvmelosys", "Melosys", "Ny beskrivelse"));
     }
 
     private Oppgave lagOppgave() {
