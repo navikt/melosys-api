@@ -51,9 +51,9 @@ public class OppgaveTjeneste {
 
         Optional<Oppgave> plukket = oppgaveplukker.plukkOppgave(ident, plukkDto);
 
+        PlukketOppgaveDto dto = new PlukketOppgaveDto();
         if (plukket.isPresent()) {
             Oppgave oppgave = plukket.get();
-            PlukketOppgaveDto dto = new PlukketOppgaveDto();
 
             dto.setOppgaveID(oppgave.getOppgaveId());
             if (oppgave.erBehandling() || oppgave.erVurderDokument() || oppgave.erSedBehandling() || oppgave.erVurderHenvendelse()) {
@@ -68,7 +68,8 @@ public class OppgaveTjeneste {
 
             return ResponseEntity.ok(dto);
         } else {
-            return ResponseEntity.noContent().build();
+            dto.setAntallUtildelteOppgaver(oppgaveplukker.hentUtildelteOppgaver(plukkDto).size());
+            return ResponseEntity.ok(dto);
         }
     }
 

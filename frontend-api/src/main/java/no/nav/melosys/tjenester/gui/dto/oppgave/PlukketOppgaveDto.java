@@ -8,6 +8,7 @@ public class PlukketOppgaveDto {
     private String saksnummer;
     private String journalpostID;
     private Long behandlingID;
+    private int antallUtildelteOppgaver;
 
     public String getOppgaveID() {
         return oppgaveID;
@@ -55,5 +56,13 @@ public class PlukketOppgaveDto {
 
     public Long getBehandlingID() {
         return behandlingID;
+    }
+
+    public int getAntallUtildelteOppgaver() {
+        return antallUtildelteOppgaver;
+    }
+
+    public void setAntallUtildelteOppgaver(int antallUtildelteOppgaver) {
+        this.antallUtildelteOppgaver = antallUtildelteOppgaver;
     }
 }
