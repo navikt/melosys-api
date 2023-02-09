@@ -203,6 +203,22 @@ class AngiBehandlingsresultatServiceTest {
     }
 
     @Test
+    void oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_gyldigScenarioA1_ANMODNING_UNNTAK_PAPIR_kasterKorrekt() {
+        var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.UNNTAK, Sakstyper.EU_EOS, Behandlingstyper.FØRSTEGANG, Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+
+        angiBehandlingsresultatService
+            .oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(BEHANDLING_ID, Behandlingsresultattyper.REGISTRERT_UNNTAK);
+
+
+        verify(fagsakService).avsluttFagsakOgBehandling(behandlingsresultat.getBehandling().getFagsak(), Saksstatuser.LOVVALG_AVKLART);
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(anyString());
+        verify(behandlingsresultatService).lagre(behandlingsresultatArgumentCaptor.capture());
+        assertThat(behandlingsresultatArgumentCaptor.getValue().getType()).isEqualTo(Behandlingsresultattyper.REGISTRERT_UNNTAK);
+    }
+
+    @Test
     void oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling_ugyldigScenario_kasterFeilmelding() {
         var behandlingsresultat = lagBehandlingsresultat(Sakstemaer.UNNTAK, Sakstyper.EU_EOS, Behandlingstyper.HENVENDELSE, Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
