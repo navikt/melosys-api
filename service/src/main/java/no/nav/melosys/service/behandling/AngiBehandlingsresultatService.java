@@ -123,7 +123,7 @@ public class AngiBehandlingsresultatService {
     }
 
     private boolean erGyldigEndringForUnntak(Sakstyper sakstype, Behandlingstema behandlingstema) {
-        return sakstype == TRYGDEAVTALE &&
-            Set.of(ANMODNING_OM_UNNTAK_HOVEDREGEL, REGISTRERING_UNNTAK).contains(behandlingstema);
+        return (sakstype == TRYGDEAVTALE && Set.of(ANMODNING_OM_UNNTAK_HOVEDREGEL, REGISTRERING_UNNTAK).contains(behandlingstema))
+            || (sakstype == EU_EOS && behandlingstema == A1_ANMODNING_OM_UNNTAK_PAPIR);
     }
 }
