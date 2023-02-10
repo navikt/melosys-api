@@ -48,12 +48,8 @@ public class Oppgaveplukker {
     @Transactional
     public synchronized Optional<Oppgave> plukkOppgave(String saksbehandlerID, PlukkOppgaveInnDto plukkDto) {
         log.info("Begynner plukking av oppgave for saksbehandler med følgende kriterier: {}", plukkDto);
-        List<Oppgave> utildelteOppgaver = new ArrayList<>();
-        Set<String> oppgaveBehandlingstemaSet = hentAlleOppgaveBehandlingstemaTilSøk(plukkDto.sakstype(), plukkDto.sakstema(), plukkDto.behandlingstema());
-        for (var oppgaveBehandlingstema : oppgaveBehandlingstemaSet) {
-            utildelteOppgaver.addAll(oppgaveFasade.finnUtildelteOppgaverEtterFrist(oppgaveBehandlingstema));
-        }
-        log.info("Funnet {} oppgaver med oppgaveTema {}", utildelteOppgaver.size(), oppgaveBehandlingstemaSet);
+        List<Oppgave> utildelteOppgaver = hentUtildelteOppgaver(plukkDto);
+        log.info("Funnet {} oppgaver ", utildelteOppgaver.size());
 
         List<Oppgave> filtrerteOppgaver = filtrerOppgaver(plukkDto, utildelteOppgaver);
         Optional<Oppgave> valg = filtrerteOppgaver.stream().max(Oppgave.LAVEST_TIL_HØYEST_PRIORITET);
@@ -66,6 +62,15 @@ public class Oppgaveplukker {
             log.info("Ingen oppgave kunne plukkes med følgende kriterier {}", plukkDto);
         }
         return valg;
+    }
+
+    public List<Oppgave> hentUtildelteOppgaver(PlukkOppgaveInnDto plukkDto){
+        List<Oppgave> utildelteOppgaver = new ArrayList<>();
+        Set<String> oppgaveBehandlingstemaSet = hentAlleOppgaveBehandlingstemaTilSøk(plukkDto.sakstype(), plukkDto.sakstema(), plukkDto.behandlingstema());
+        for (var oppgaveBehandlingstema : oppgaveBehandlingstemaSet) {
+            utildelteOppgaver.addAll(oppgaveFasade.finnUtildelteOppgaverEtterFrist(oppgaveBehandlingstema));
+        }
+        return utildelteOppgaver;
     }
 
     private List<Oppgave> filtrerOppgaver(PlukkOppgaveInnDto plukkDto, List<Oppgave> utildelteOppgaver) {
