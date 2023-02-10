@@ -2,12 +2,14 @@ package no.nav.melosys.service.brev;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast;
 import no.nav.melosys.domain.brev.utkast.UtkastBrev;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.UtkastBrevRepository;
 import no.nav.melosys.service.brev.bestilling.OppdaterUtkastService;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -46,9 +48,19 @@ public class UtkastBrevService {
         utkastBrevRepository.deleteById(utkastBrevID);
     }
 
+
+    public void slettTilhørendeUtkast(long behandlingID, BrevbestillingDto brevbestillingDto) {
+        var tittel = BrevbestillingUtkast.getTittel(brevbestillingDto.getDokumentTittel(), brevbestillingDto.getProduserbardokument());
+        hentBrevbestillingUtkastMedTittel(behandlingID, tittel).ifPresent((utkastBrev -> slettUtkast(utkastBrev.getId())));
+    }
+
     private void validerFinnesAlleredeUtkastForSammeBrev(long behandlingID, String tittel) {
-        if (hentUtkast(behandlingID).stream().anyMatch(utkast -> utkast.getBrevbestillingUtkast().getTittel().equals(tittel))) {
+        if (hentBrevbestillingUtkastMedTittel(behandlingID, tittel).isPresent()) {
             throw new FunksjonellException("Behandling %s har allerede et brevutkast for samme brev".formatted(behandlingID));
         }
+    }
+
+    private Optional<UtkastBrev> hentBrevbestillingUtkastMedTittel(long behandlingID, String tittel) {
+        return hentUtkast(behandlingID).stream().filter(utkast -> utkast.getBrevbestillingUtkast().getTittel().equals(tittel)).findFirst();
     }
 }

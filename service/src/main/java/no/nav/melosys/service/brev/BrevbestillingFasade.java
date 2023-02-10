@@ -19,17 +19,20 @@ public class BrevbestillingFasade {
     private final ProduserUtkastService produserUtkastService;
     private final ProduserBrevService produserBrevService;
     private final HentTilgjengeligeEtaterService hentTilgjengeligeEtaterService;
+    private final UtkastBrevService utkastBrevService;
 
     public BrevbestillingFasade(HentMuligeBrevmottakereService hentMuligeBrevmottakereService,
                                 HentBrevmottakereEtaterService hentBrevmottakereEtaterService,
                                 ProduserUtkastService produserUtkastService,
                                 ProduserBrevService produserBrevService,
-                                HentTilgjengeligeEtaterService hentTilgjengeligeEtaterService) {
+                                HentTilgjengeligeEtaterService hentTilgjengeligeEtaterService,
+                                UtkastBrevService utkastBrevService) {
         this.hentMuligeBrevmottakereService = hentMuligeBrevmottakereService;
         this.hentBrevmottakereEtaterService = hentBrevmottakereEtaterService;
         this.produserUtkastService = produserUtkastService;
         this.produserBrevService = produserBrevService;
         this.hentTilgjengeligeEtaterService = hentTilgjengeligeEtaterService;
+        this.utkastBrevService = utkastBrevService;
     }
 
     public HentMuligeBrevmottakereService.ResponseDto hentMuligeMottakere(HentMuligeBrevmottakereService.RequestDto requestDto) {
@@ -55,6 +58,11 @@ public class BrevbestillingFasade {
     public List<Brevmottaker> hentMuligeBrevmottakereEtater(List<String> orgnrEtater) {
         log.debug("hentMuligeBrevmottakereEtater med orgnr for etater: {}", orgnrEtater);
         return hentBrevmottakereEtaterService.hentMuligeBrevmottakereEtater(orgnrEtater);
+    }
+
+    public void slettTilhørendeUtkast(long behandlingID, BrevbestillingDto brevbestillingDto) {
+        log.debug("slettTilhørendeUtkast for BrevbestillingDto.produserbardokument: {}", brevbestillingDto.getProduserbardokument());
+        utkastBrevService.slettTilhørendeUtkast(behandlingID, brevbestillingDto);
     }
 }
 

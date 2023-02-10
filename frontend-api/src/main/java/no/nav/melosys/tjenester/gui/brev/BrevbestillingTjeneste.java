@@ -103,6 +103,7 @@ public class BrevbestillingTjeneste {
 
         BrevbestillingDto brevbestillingDto = brevbestillingRequest.tilBrevbestillingDto();
         brevbestillingFasade.produserBrev(behandlingID, brevbestillingDto);
+        brevbestillingFasade.slettTilhørendeUtkast(behandlingID, brevbestillingDto);
     }
 
     @PostMapping(value = "/mulige-mottakere-etater/{behandlingID}", produces = APPLICATION_JSON_VALUE)

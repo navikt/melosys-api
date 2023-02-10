@@ -35,9 +35,14 @@ public record BrevbestillingUtkast(
 ) {
     @JsonIgnore
     public String getTittel() {
-        if (dokumentTittel() == null || dokumentTittel().isEmpty()) {
-            return produserbardokument().getBeskrivelse();
+        return getTittel(dokumentTittel(), produserbardokument());
+    }
+
+    @JsonIgnore
+    public static String getTittel(String dokumentTittel, Produserbaredokumenter produserbartdokument) {
+        if (dokumentTittel == null || dokumentTittel.isEmpty()) {
+            return produserbartdokument.getBeskrivelse();
         }
-        return dokumentTittel();
+        return dokumentTittel;
     }
 }
