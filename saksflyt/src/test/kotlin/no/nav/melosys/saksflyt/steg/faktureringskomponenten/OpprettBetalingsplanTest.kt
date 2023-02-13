@@ -6,6 +6,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
+import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Trygdeavgift
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
@@ -52,6 +53,8 @@ class OpprettBetalingsplanTest {
     @RelaxedMockK
     lateinit var pdlService: PersondataService
 
+    private val unleash = FakeUnleash()
+
 
     lateinit var opprettBetalingsplan: OpprettBetalingsplan
 
@@ -61,12 +64,15 @@ class OpprettBetalingsplanTest {
 
     @BeforeEach
     internal fun setUp() {
+        unleash.enable("melosys.folketrygden.mvp")
+
         opprettBetalingsplan = OpprettBetalingsplan(
             behandlingService,
             behandlingsresultatService,
             faktureringskomponentenConsumer,
             kontaktopplysningService,
-            pdlService
+            pdlService,
+            unleash
         )
     }
 
