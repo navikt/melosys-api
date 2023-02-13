@@ -344,8 +344,8 @@ class LovligeKombinasjonerServiceTest {
     void hentMuligeBehandlingstyper_unntakA1AnmodningOmUnntakPåPapir_skalReturnereBehTypeFØRSTEGANG_NY_VURDERING_KLAGE() {
         Set<Behandlingstyper> muligeBehandlingstyper = lovligeKombinasjonerService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, UNNTAK, A1_ANMODNING_OM_UNNTAK_PAPIR, null, null, null);
         assertThat(muligeBehandlingstyper)
-            .hasSize(3)
-            .containsExactlyInAnyOrder(FØRSTEGANG, NY_VURDERING, KLAGE);
+            .hasSize(4)
+            .containsExactly(FØRSTEGANG, NY_VURDERING, KLAGE, HENVENDELSE);
     }
 
     @Test
