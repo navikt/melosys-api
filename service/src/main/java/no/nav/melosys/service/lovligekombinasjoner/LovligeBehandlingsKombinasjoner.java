@@ -23,7 +23,7 @@ public class LovligeBehandlingsKombinasjoner {
     private static final Set<Behandlingstyper> EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGSTYPE_SØKNAD = new LinkedHashSet<>(List.of(FØRSTEGANG, NY_VURDERING, KLAGE, HENVENDELSE));
     private static final Set<Behandlingstyper> EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGSTYPE_HENVENDELSER = Set.of(HENVENDELSE);
     private static final Set<Behandlingstyper> EU_EOS_UNNTAK_FORESPØRSEL_TRYGDEMYNDIGHET_BEHANDLINGSTYPE = Set.of(HENVENDELSE);
-    private static final Set<Behandlingstyper> EU_EOS_UNNTAK_A1_PAPIR_BEHANDLINGSTYPE = new LinkedHashSet<>(List.of(FØRSTEGANG, NY_VURDERING, KLAGE));
+    private static final Set<Behandlingstyper> EU_EOS_UNNTAK_A1_PAPIR_BEHANDLINGSTYPE = new LinkedHashSet<>(List.of(FØRSTEGANG, NY_VURDERING, KLAGE, HENVENDELSE));
     private static final Set<Behandlingstyper> EU_EOS_TRYGDEAVGIFT_BEHANDLINGSTYPE = new LinkedHashSet<>(List.of(FØRSTEGANG, NY_VURDERING, KLAGE, HENVENDELSE));
 
     public static final BehandlingstemaBehandlingstyperKombinasjon EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGS_KOMBINASJON_SØKNAD = new BehandlingstemaBehandlingstyperKombinasjon(EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGSTEMA_SØKNAD, EU_EOS_LOVVALG_MEDLEMSKAP_BEHANDLINGSTYPE_SØKNAD);
