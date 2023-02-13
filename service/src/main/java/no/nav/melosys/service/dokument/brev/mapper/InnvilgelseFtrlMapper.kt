@@ -1,196 +1,226 @@
-package no.nav.melosys.service.dokument.brev.mapper;
+package no.nav.melosys.service.dokument.brev.mapper
 
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Stream;
-import javax.transaction.Transactional;
-
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Medlemskapsperiode;
-import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoNorge;
-import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoUtland;
-import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
-import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
-import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
-import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
-import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
-import no.nav.melosys.domain.kodeverk.Representerer;
-import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
-import no.nav.melosys.domain.person.familie.OmfattetFamilie;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrl;
-import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.*;
-import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
-import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.representant.RepresentantService;
-import org.springframework.stereotype.Component;
-
-import static java.util.Optional.ofNullable;
-import static no.nav.melosys.domain.kodeverk.Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE;
-import static org.springframework.util.StringUtils.hasText;
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.Vilkaarsresultat
+import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoNorge
+import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoUtland
+import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
+import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling
+import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
+import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie
+import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie
+import no.nav.melosys.domain.person.familie.OmfattetFamilie
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrl
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.*
+import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
+import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
+import no.nav.melosys.service.representant.RepresentantService
+import org.springframework.stereotype.Component
+import org.springframework.util.StringUtils
+import java.time.LocalDate
+import java.util.*
+import java.util.stream.Stream
+import javax.transaction.Transactional
 
 @Component
-public class InnvilgelseFtrlMapper {
-
-    private final TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService;
-    private final AvklarteVirksomheterService avklarteVirksomheterService;
-    private final AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
-    private final RepresentantService representantService;
-    private final DokgenMapperDatahenter dokgenMapperDatahenter;
-
-    public InnvilgelseFtrlMapper(TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService,
-                                 AvklarteVirksomheterService avklarteVirksomheterService,
-                                 AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService,
-                                 RepresentantService representantService,
-                                 DokgenMapperDatahenter dokgenMapperDatahenter) {
-        this.trygdeavgiftsgrunnlagService = trygdeavgiftsgrunnlagService;
-        this.avklarteVirksomheterService = avklarteVirksomheterService;
-        this.avklarteMedfolgendeFamilieService = avklarteMedfolgendeFamilieService;
-        this.representantService = representantService;
-        this.dokgenMapperDatahenter = dokgenMapperDatahenter;
-    }
-
+class InnvilgelseFtrlMapper(
+    private val trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService,
+    private val avklarteVirksomheterService: AvklarteVirksomheterService,
+    private val avklarteMedfolgendeFamilieService: AvklarteMedfolgendeFamilieService,
+    private val representantService: RepresentantService,
+    private val dokgenMapperDatahenter: DokgenMapperDatahenter
+) {
     @Transactional
-    public InnvilgelseFtrl map(InnvilgelseBrevbestilling brevbestilling) {
-        long behandlingId = brevbestilling.getBehandlingId();
-        var behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(behandlingId);
-        var medlemAvFolketrygden = behandlingsresultat.getMedlemAvFolketrygden();
-        var trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(behandlingId);
-        var avklarteMedfolgendeBarn = avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingId);
-        var avklarteMedfolgendeEktefelle = avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(behandlingId);
+    fun map(brevbestilling: InnvilgelseBrevbestilling): InnvilgelseFtrl {
+        val behandlingId = brevbestilling.behandlingId
+        val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(behandlingId)
+        val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
+        val trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(behandlingId)
+        val avklarteMedfolgendeBarn = avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingId)
+        val avklarteMedfolgendeEktefelle =
+            avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(behandlingId)
 
         //NOTE Henter i første versjon av FTRL kun en norsk arbeidsgiver og forventer ett registert arbeidsland
-        AvklartVirksomhet norskeArbeidsgivere = avklarteVirksomheterService.hentNorskeArbeidsgivere(brevbestilling.getBehandling()).get(0);
-        MottatteOpplysningerData mottatteOpplysningerData = behandlingsresultat.getBehandling().getMottatteOpplysninger().getMottatteOpplysningerData();
-        Soeknadsland soeknadsland = mottatteOpplysningerData.soeknadsland;
-        String arbeidsland = soeknadsland.landkoder.get(0);
-
-        Collection<Medlemskapsperiode> medlemskapsperioder = medlemAvFolketrygden.getMedlemskapsperioder();
-        FastsattTrygdeavgift fastsattTrygdeavgift = medlemAvFolketrygden.getFastsattTrygdeavgift();
-        return new InnvilgelseFtrl.Builder(brevbestilling)
-            .perioder(medlemskapsperioder.stream().map(Periode::new).toList())
+        val norskeArbeidsgivere = avklarteVirksomheterService.hentNorskeArbeidsgivere(brevbestilling.behandling)[0]
+        val mottatteOpplysningerData = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData
+        val soeknadsland = mottatteOpplysningerData.soeknadsland
+        val arbeidsland = soeknadsland.landkoder[0]
+        val medlemskapsperioder = medlemAvFolketrygden.medlemskapsperioder
+        val fastsattTrygdeavgift = medlemAvFolketrygden.fastsattTrygdeavgift
+        return InnvilgelseFtrl.Builder(brevbestilling)
+            .perioder(
+                medlemskapsperioder.stream()
+                    .map { m: Medlemskapsperiode? -> Periode(m) }
+                    .toList()
+            )
             .erFullstendigInnvilget(erFullstendigInnvilget(medlemskapsperioder))
             .ftrl_2_8_begrunnelse(hentSaerligBegrunnelse(behandlingsresultat))
             .vurderingMedlemskapEktefelle(avklarteMedfolgendeEktefelle.finnes())
             .vurderingLovvalgBarn(avklarteMedfolgendeBarn.finnes())
-            .omfattetFamilie(mapOmfattetFamilie(behandlingId, avklarteMedfolgendeEktefelle.getFamilieOmfattetAvNorskTrygd(), avklarteMedfolgendeBarn.getFamilieOmfattetAvNorskTrygd()))
-            .ikkeOmfattetEktefelle(mapIkkeOmfattetEktefelle(behandlingId, avklarteMedfolgendeEktefelle.getFamilieIkkeOmfattetAvNorskTrygd()))
-            .ikkeOmfattetBarn(mapIkkeOmfattetBarn(behandlingId, avklarteMedfolgendeBarn.getFamilieIkkeOmfattetAvNorskTrygd()))
+            .omfattetFamilie(
+                mapOmfattetFamilie(
+                    behandlingId,
+                    avklarteMedfolgendeEktefelle.familieOmfattetAvNorskTrygd,
+                    avklarteMedfolgendeBarn.familieOmfattetAvNorskTrygd
+                )
+            )
+            .ikkeOmfattetEktefelle(
+                mapIkkeOmfattetEktefelle(
+                    behandlingId,
+                    avklarteMedfolgendeEktefelle.familieIkkeOmfattetAvNorskTrygd
+                )
+            )
+            .ikkeOmfattetBarn(
+                mapIkkeOmfattetBarn(
+                    behandlingId,
+                    avklarteMedfolgendeBarn.familieIkkeOmfattetAvNorskTrygd
+                )
+            )
             .arbeidsgiverNavn(norskeArbeidsgivere.navn)
             .arbeidsland(dokgenMapperDatahenter.hentLandnavnFraLandkode(arbeidsland))
             .trygdeavtaleMedArbeidsland(harTrygdeavtaleMedArbeidsland(arbeidsland))
             .vurderingTrygdeavgift(mapVurderingTrygdeavgift(trygdeavgiftsgrunnlag, fastsattTrygdeavgift))
-            .loennsforhold(trygdeavgiftsgrunnlag.getLønnsforhold().getKode())
-            .arbeidsgiverFullmektigNavn(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.ARBEIDSGIVER))
-            .avgiftssatsAar(String.valueOf(LocalDate.now().getYear()))
-            .loennNorgeSkattepliktig(harLønnNorgeSkattepliktigNorge(trygdeavgiftsgrunnlag.getAvgiftsGrunnlagNorge()))
-            .loennUtlandSkattepliktig(harLønnUtlandSkattepliktigNorge(trygdeavgiftsgrunnlag.getAvgiftsGrunnlagUtland()))
-            .build();
+            .loennsforhold(trygdeavgiftsgrunnlag.lønnsforhold.kode)
+            .arbeidsgiverFullmektigNavn(
+                dokgenMapperDatahenter.hentFullmektigNavn(
+                    brevbestilling.behandling.fagsak,
+                    Representerer.ARBEIDSGIVER
+                )
+            )
+            .avgiftssatsAar(LocalDate.now().year.toString())
+            .loennNorgeSkattepliktig(harLønnNorgeSkattepliktigNorge(trygdeavgiftsgrunnlag.avgiftsGrunnlagNorge))
+            .loennUtlandSkattepliktig(harLønnUtlandSkattepliktigNorge(trygdeavgiftsgrunnlag.avgiftsGrunnlagUtland))
+            .build()
     }
 
-    private boolean erFullstendigInnvilget(Collection<Medlemskapsperiode> medlemskapsperioder) {
+    private fun erFullstendigInnvilget(medlemskapsperioder: Collection<Medlemskapsperiode>): Boolean {
         return medlemskapsperioder.stream()
-            .allMatch(p -> p.getInnvilgelsesresultat() == InnvilgelsesResultat.INNVILGET);
+            .allMatch { p: Medlemskapsperiode -> p.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET }
     }
 
-    private String hentSaerligBegrunnelse(Behandlingsresultat behandlingsresultat) {
-        return behandlingsresultat.getVilkaarsresultater().stream()
+    private fun hentSaerligBegrunnelse(behandlingsresultat: Behandlingsresultat): String? {
+        return behandlingsresultat.vilkaarsresultater.stream()
             .findFirst()
-            .filter(v -> v.getVilkaar() == FTRL_2_8_NÆR_TILKNYTNING_NORGE)
-            .map(vilkaarsresultat -> vilkaarsresultat.getBegrunnelser().iterator().next().getKode())
-            .orElse(null);
+            .filter { v: Vilkaarsresultat -> v.vilkaar == Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE }
+            .map { vilkaarsresultat: Vilkaarsresultat -> vilkaarsresultat.begrunnelser.iterator().next().kode }
+            .orElse(null)
     }
 
-    private List<FamiliemedlemInfo> mapOmfattetFamilie(long behandlingID, Set<OmfattetFamilie> omfattetEktefelle, Set<OmfattetFamilie> omfattetBarn) {
-        Map<String, MedfolgendeFamilie> medfolgendeEktefelle = avklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(behandlingID);
-        Map<String, MedfolgendeFamilie> medfolgendeBarn = avklarteMedfolgendeFamilieService.hentMedfølgendeBarn(behandlingID);
-
+    private fun mapOmfattetFamilie(
+        behandlingID: Long,
+        omfattetEktefelle: Set<OmfattetFamilie>,
+        omfattetBarn: Set<OmfattetFamilie>
+    ): List<FamiliemedlemInfo> {
+        val medfolgendeEktefelle = avklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(behandlingID)
+        val medfolgendeBarn = avklarteMedfolgendeFamilieService.hentMedfølgendeBarn(behandlingID)
         return Stream.concat(
             omfattetEktefelle.stream()
-                .map(ektefelle -> tilFamiliemedlemInfo(medfolgendeEktefelle, ektefelle.getUuid())),
+                .map { ektefelle: OmfattetFamilie -> tilFamiliemedlemInfo(medfolgendeEktefelle, ektefelle.uuid) },
             omfattetBarn.stream()
-                .map(barn -> tilFamiliemedlemInfo(medfolgendeBarn, barn.getUuid()))
-        ).toList();
+                .map { barn: OmfattetFamilie -> tilFamiliemedlemInfo(medfolgendeBarn, barn.uuid) }
+        ).toList()
     }
 
-    private List<IkkeOmfattetBarn> mapIkkeOmfattetBarn(long behandlingID, Set<no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie> barnIkkeOmfattetAvNorskTrygd) {
-        Map<String, MedfolgendeFamilie> medfoelgendeBarn = avklarteMedfolgendeFamilieService.hentMedfølgendeBarn(behandlingID);
+    private fun mapIkkeOmfattetBarn(
+        behandlingID: Long,
+        barnIkkeOmfattetAvNorskTrygd: Set<IkkeOmfattetFamilie>
+    ): List<IkkeOmfattetBarn> {
+        val medfoelgendeBarn = avklarteMedfolgendeFamilieService.hentMedfølgendeBarn(behandlingID)
         return barnIkkeOmfattetAvNorskTrygd.stream()
-            .map(ikkeOmfattetBarn -> new IkkeOmfattetBarn(
-                tilFamiliemedlemInfo(medfoelgendeBarn, ikkeOmfattetBarn.getUuid()),
-                Medfolgende_barn_begrunnelser.valueOf(ikkeOmfattetBarn.getBegrunnelse())))
-            .toList();
+            .map { ikkeOmfattetBarn: IkkeOmfattetFamilie ->
+                IkkeOmfattetBarn(
+                    tilFamiliemedlemInfo(medfoelgendeBarn, ikkeOmfattetBarn.uuid),
+                    Medfolgende_barn_begrunnelser.valueOf(ikkeOmfattetBarn.begrunnelse)
+                )
+            }
+            .toList()
     }
 
-    private IkkeOmfattetEktefelle mapIkkeOmfattetEktefelle(long behandlingId, Set<no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie> ektefelleIkkeOmfattet) {
+    private fun mapIkkeOmfattetEktefelle(
+        behandlingId: Long,
+        ektefelleIkkeOmfattet: Set<IkkeOmfattetFamilie>
+    ): IkkeOmfattetEktefelle? {
         return ektefelleIkkeOmfattet.stream()
             .findFirst()
-            .map(ikkeOmfattet -> new IkkeOmfattetEktefelle(
-                tilFamiliemedlemInfo(avklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(behandlingId), ikkeOmfattet.getUuid()),
-                ikkeOmfattet.getBegrunnelse()))
-            .orElse(null);
+            .map { ikkeOmfattet: IkkeOmfattetFamilie ->
+                IkkeOmfattetEktefelle(
+                    tilFamiliemedlemInfo(
+                        avklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(behandlingId),
+                        ikkeOmfattet.uuid
+                    ),
+                    ikkeOmfattet.begrunnelse
+                )
+            }
+            .orElse(null)
     }
 
-    private FamiliemedlemInfo tilFamiliemedlemInfo(Map<String, MedfolgendeFamilie> avklartMedfolgende, String uuid) {
-        MedfolgendeFamilie medfolgendeFamilie = Optional.of(avklartMedfolgende.get(uuid))
-            .orElseThrow(() -> new FunksjonellException("Avklart medfølgende familie " + uuid + " finnes ikke i mottatteOpplysningeret"));
-        String sammensattNavn = medfolgendeFamilie.getFnr() != null ? dokgenMapperDatahenter.hentSammensattNavn(medfolgendeFamilie.getFnr()) : medfolgendeFamilie.getNavn();
-        return new FamiliemedlemInfo(sammensattNavn, medfolgendeFamilie.getFnr(), medfolgendeFamilie.utledIdentType());
+    private fun tilFamiliemedlemInfo(
+        avklartMedfolgende: Map<String, MedfolgendeFamilie>,
+        uuid: String
+    ): FamiliemedlemInfo {
+        val medfolgendeFamilie = Optional.ofNullable(avklartMedfolgende[uuid])
+            .orElseThrow { FunksjonellException("Avklart medfølgende familie $uuid finnes ikke i mottatteOpplysningeret") }
+        val sammensattNavn = if (medfolgendeFamilie!!.fnr != null) dokgenMapperDatahenter.hentSammensattNavn(
+            medfolgendeFamilie.fnr
+        ) else medfolgendeFamilie.navn
+        return FamiliemedlemInfo(sammensattNavn, medfolgendeFamilie.fnr, medfolgendeFamilie.utledIdentType())
     }
 
-    private VurderingTrygdeavgift mapVurderingTrygdeavgift(Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag, FastsattTrygdeavgift fastsattTrygdeavgift) {
-        TrygdeavgiftInfo norsk = null;
-        TrygdeavgiftInfo utenlandsk = null;
-        if (trygdeavgiftsgrunnlag.getAvgiftsGrunnlagNorge() != null) {
-            AvgiftsgrunnlagInfoNorge avgiftsGrunnlagNorge = trygdeavgiftsgrunnlag.getAvgiftsGrunnlagNorge();
-            norsk = new TrygdeavgiftInfo(
-                ofNullable(fastsattTrygdeavgift.getAvgiftspliktigNorskInntektMnd()).orElse(0L),
+    private fun mapVurderingTrygdeavgift(
+        trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag,
+        fastsattTrygdeavgift: FastsattTrygdeavgift
+    ): VurderingTrygdeavgift {
+        var norsk: TrygdeavgiftInfo? = null
+        var utenlandsk: TrygdeavgiftInfo? = null
+        if (trygdeavgiftsgrunnlag.avgiftsGrunnlagNorge != null) {
+            val avgiftsGrunnlagNorge = trygdeavgiftsgrunnlag.avgiftsGrunnlagNorge
+            norsk = TrygdeavgiftInfo(
+                Optional.ofNullable(fastsattTrygdeavgift.avgiftspliktigNorskInntektMnd).orElse(0L),
                 avgiftsGrunnlagNorge.erAvgiftspliktig(),
                 avgiftsGrunnlagNorge.erSkattepliktig(),
                 avgiftsGrunnlagNorge.betalerArbeidsgiverAvgift(),
-                avgiftsGrunnlagNorge.getSærligAvgiftsgruppe() != null ? avgiftsGrunnlagNorge.getSærligAvgiftsgruppe().getKode() : null
-            );
+                if (avgiftsGrunnlagNorge.særligAvgiftsgruppe != null) avgiftsGrunnlagNorge.særligAvgiftsgruppe.kode else null
+            )
         }
-        if (trygdeavgiftsgrunnlag.getAvgiftsGrunnlagUtland() != null) {
-            AvgiftsgrunnlagInfoUtland avgiftsGrunnlagUtland = trygdeavgiftsgrunnlag.getAvgiftsGrunnlagUtland();
-            utenlandsk = new TrygdeavgiftInfo(
-                ofNullable(fastsattTrygdeavgift.getAvgiftspliktigUtenlandskInntektMnd()).orElse(0L),
+        if (trygdeavgiftsgrunnlag.avgiftsGrunnlagUtland != null) {
+            val avgiftsGrunnlagUtland = trygdeavgiftsgrunnlag.avgiftsGrunnlagUtland
+            utenlandsk = TrygdeavgiftInfo(
+                Optional.ofNullable(fastsattTrygdeavgift.avgiftspliktigUtenlandskInntektMnd).orElse(0L),
                 avgiftsGrunnlagUtland.erAvgiftspliktig(),
                 avgiftsGrunnlagUtland.erSkattepliktig(),
                 avgiftsGrunnlagUtland.betalerArbeidsgiverAvgift(),
-                avgiftsGrunnlagUtland.getSærligAvgiftsgruppe() != null ? avgiftsGrunnlagUtland.getSærligAvgiftsgruppe().getKode() : null
-            );
+                if (avgiftsGrunnlagUtland.særligAvgiftsgruppe != null) avgiftsGrunnlagUtland.særligAvgiftsgruppe.kode else null
+            )
         }
-        return new VurderingTrygdeavgift(
+        return VurderingTrygdeavgift(
             norsk,
             utenlandsk,
-            fastsattTrygdeavgift.getBetalesAv().getRolle() == Aktoersroller.BRUKER,
-            hentRepresentantNavn(fastsattTrygdeavgift.getRepresentantNr())
-        );
+            fastsattTrygdeavgift.betalesAv.rolle == Aktoersroller.BRUKER,
+            hentRepresentantNavn(fastsattTrygdeavgift.representantNr)
+        )
     }
 
-    private boolean harLønnNorgeSkattepliktigNorge(AvgiftsgrunnlagInfoNorge avgiftsgrunnlagInfoNorge) {
-        return avgiftsgrunnlagInfoNorge != null && avgiftsgrunnlagInfoNorge.erSkattepliktig();
+    private fun harLønnNorgeSkattepliktigNorge(avgiftsgrunnlagInfoNorge: AvgiftsgrunnlagInfoNorge?): Boolean {
+        return avgiftsgrunnlagInfoNorge != null && avgiftsgrunnlagInfoNorge.erSkattepliktig()
     }
 
-    private boolean harLønnUtlandSkattepliktigNorge(AvgiftsgrunnlagInfoUtland avgiftsgrunnlagInfoUtland) {
-        return avgiftsgrunnlagInfoUtland != null && avgiftsgrunnlagInfoUtland.erSkattepliktig();
+    private fun harLønnUtlandSkattepliktigNorge(avgiftsgrunnlagInfoUtland: AvgiftsgrunnlagInfoUtland?): Boolean {
+        return avgiftsgrunnlagInfoUtland != null && avgiftsgrunnlagInfoUtland.erSkattepliktig()
     }
 
-    private boolean harTrygdeavtaleMedArbeidsland(String arbeidsland) {
-        return Arrays.stream(Trygdeavtale_myndighetsland.values()).anyMatch(a -> a.name().equals(arbeidsland));
+    private fun harTrygdeavtaleMedArbeidsland(arbeidsland: String): Boolean {
+        return Arrays.stream(Trygdeavtale_myndighetsland.values())
+            .anyMatch { a: Trygdeavtale_myndighetsland -> a.name == arbeidsland }
     }
 
-    private String hentRepresentantNavn(String representantNr) {
-        if (hasText(representantNr)) {
-            return representantService.hentRepresentant(representantNr).navn();
-        }
-        return null;
+    private fun hentRepresentantNavn(representantNr: String): String? {
+        return if (StringUtils.hasText(representantNr)) {
+            representantService.hentRepresentant(representantNr).navn()
+        } else null
     }
 }
