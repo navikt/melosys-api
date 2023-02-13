@@ -12,9 +12,7 @@ import no.nav.melosys.integrasjon.StsMockServer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriodeDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall
-import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FullmektigDto
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
-import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
@@ -114,7 +112,6 @@ class FaktureringskomponentenConsumerTest(
     private fun lagFakturaserieDto(
         vedtaksnummer: String = "MEL-123",
         fodselsnummer: String = "12345678911",
-        fullmektig: FullmektigDto = FullmektigDto("11987654321", "123456789", "Ole Brum"),
         referanseBruker: String = "Nasse Nøff",
         referanseNav: String = "NAV Medlemskap og avgift",
         fakturaGjelder: String = "FTRL",
@@ -131,7 +128,6 @@ class FaktureringskomponentenConsumerTest(
         return FakturaserieDto(
             vedtaksnummer,
             fodselsnummer,
-            fullmektig,
             referanseBruker,
             referanseNav,
             fakturaGjelder,

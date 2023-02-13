@@ -10,9 +10,7 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.Faktureringskomponente
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriodeDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall
-import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FullmektigDto
 import no.nav.melosys.saksflyt.steg.StegBehandler
-import no.nav.melosys.service.aktoer.KontaktopplysningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -25,7 +23,6 @@ class OpprettBetalingsplan(
     @Autowired val behandlingService: BehandlingService,
     @Autowired val behandlingsresultatService: BehandlingsresultatService,
     @Autowired val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
-    @Autowired val kontaktopplysningService: KontaktopplysningService,
     @Autowired val pdlService: PersondataService,
     @Autowired val unleash: Unleash
 ) : StegBehandler {
@@ -54,15 +51,13 @@ class OpprettBetalingsplan(
             throw FunksjonellException("Kunne ikke opprette betalingsplan, det finnes ${aktoerer.size} aktører")
         }
 
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsId);
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsId)
         val vedtaksdato = behandlingsresultat.vedtakMetadata.vedtaksdato.toString()
         val medlemskapsperioder = behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder
         val fastsattTrygdeavgift = behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift
         val avgiftspliktigUtenlandskInntektMnd = fastsattTrygdeavgift.avgiftspliktigUtenlandskInntektMnd ?: 0
         val avgiftspliktigNorskInntektMnd = fastsattTrygdeavgift.avgiftspliktigNorskInntektMnd ?: 0
         val inntektBelopMnd = avgiftspliktigUtenlandskInntektMnd + avgiftspliktigNorskInntektMnd
-        val kontaktopplysning =
-            kontaktopplysningService.hentKontaktopplysning(fagsak.saksnummer, fastsattTrygdeavgift.betalesAv.orgnr)
 
         val alleTrygdeavgiftIMedlemskap = medlemskapsperioder.flatMap {
             it.trygdeavgift.map { trygdeavgift -> trygdeavgift }
@@ -79,28 +74,21 @@ class OpprettBetalingsplan(
         val foedselsNr = pdlService.finnFolkeregisterident(aktoerer.first().aktørId)
             .orElseThrow { FunksjonellException("Kunne ikke finne fødselsnummer fra PDL") }
 
-        val fullmektigDto = FullmektigDto(
-            fodselsnummer = fastsattTrygdeavgift.betalesAv.personIdent,
-            organisasjonsnummer = fastsattTrygdeavgift.betalesAv.orgnr,
-            kontaktperson = kontaktopplysning.map { it.kontaktNavn }.orElse(null)
-        )
-
         val intervall = prosessinstans.getData(
             ProsessDataKey.BETALINGSINTERVALL,
             FaktureringsIntervall::class.java
         )
 
         val fakturaserieDto =
-            FakturaserieDto.builder()
-                .medVedtaksId("${fagsak.saksnummer}-$behandlingsId")
-                .medFodselsnummer(foedselsNr)
-                .medReferanseNAV("Medlemskap og avgift")
-                .medFakturaGjelder("Medlemskapsavgift")
-                .medIntervall(intervall ?: FaktureringsIntervall.MANEDLIG)
-                .medReferanseBruker(vedtaksdato)
-                .medFullmektig(fullmektigDto)
-                .medPerioder(fakturaseriePeriodeDtoListe)
-                .build()
+            FakturaserieDto(
+                vedtaksId = "${fagsak.saksnummer}-$behandlingsId",
+                fodselsnummer = foedselsNr,
+                referanseNAV = "Medlemskap og avgift",
+                fakturaGjelder = "Medlemskapsavgift",
+                intervall = intervall ?: FaktureringsIntervall.MANEDLIG,
+                referanseBruker = vedtaksdato,
+                perioder = fakturaseriePeriodeDtoListe
+            )
 
         log.info("Oppretter betalingsplan for behandling: $behandlingsId")
 
