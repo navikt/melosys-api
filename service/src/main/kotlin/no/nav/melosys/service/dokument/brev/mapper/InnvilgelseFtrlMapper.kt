@@ -198,10 +198,10 @@ class InnvilgelseFtrlMapper(
             )
         }
         return VurderingTrygdeavgift(
-            norsk,
-            utenlandsk,
-            fastsattTrygdeavgift.betalesAv.rolle == Aktoersroller.BRUKER,
-            hentRepresentantNavn(fastsattTrygdeavgift.representantNr)
+            norsk = norsk,
+            utenlandsk = utenlandsk,
+            selvbetalende = fastsattTrygdeavgift.betalesAv.rolle == Aktoersroller.BRUKER,
+            representantNavn = hentRepresentantNavn(fastsattTrygdeavgift.representantNr)
         )
     }
 

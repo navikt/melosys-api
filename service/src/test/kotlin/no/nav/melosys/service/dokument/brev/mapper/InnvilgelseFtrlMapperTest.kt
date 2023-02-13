@@ -118,16 +118,16 @@ internal class InnvilgelseFtrlMapperTest {
         Assertions.assertThat(innvilgelseFtrl.arbeidsland).isEqualTo(Landkoder.AT.beskrivelse)
         Assertions.assertThat(innvilgelseFtrl.isTrygdeavtaleMedArbeidsland).isTrue
         Assertions.assertThat(innvilgelseFtrl.vurderingTrygdeavgift).isNotNull
-        Assertions.assertThat(innvilgelseFtrl.vurderingTrygdeavgift.selvbetalende()).isFalse
-        Assertions.assertThat(innvilgelseFtrl.vurderingTrygdeavgift.representantNavn()).isEqualTo(REPRESENTANT_NAVN)
-        Assertions.assertThat(innvilgelseFtrl.vurderingTrygdeavgift.utenlandsk()).isNull()
-        val trygdeavgiftInfoNorsk = innvilgelseFtrl.vurderingTrygdeavgift.norsk()
+        Assertions.assertThat(innvilgelseFtrl.vurderingTrygdeavgift.selvbetalende).isFalse
+        Assertions.assertThat(innvilgelseFtrl.vurderingTrygdeavgift.representantNavn).isEqualTo(REPRESENTANT_NAVN)
+        Assertions.assertThat(innvilgelseFtrl.vurderingTrygdeavgift.utenlandsk).isNull()
+        val trygdeavgiftInfoNorsk = innvilgelseFtrl.vurderingTrygdeavgift.norsk
         Assertions.assertThat(trygdeavgiftInfoNorsk).isNotNull
-        Assertions.assertThat(trygdeavgiftInfoNorsk.avgiftspliktigInntektMd()).isEqualTo(50000)
-        Assertions.assertThat(trygdeavgiftInfoNorsk.trygdeavgiftNav()).isFalse
-        Assertions.assertThat(trygdeavgiftInfoNorsk.erSkattepliktig()).isTrue
-        Assertions.assertThat(trygdeavgiftInfoNorsk.arbeidsgiverBetalerAvgift()).isTrue
-        Assertions.assertThat(trygdeavgiftInfoNorsk.saerligeavgiftsgruppe()).isNull()
+        Assertions.assertThat(trygdeavgiftInfoNorsk?.avgiftspliktigInntektMd()).isEqualTo(50000)
+        Assertions.assertThat(trygdeavgiftInfoNorsk?.trygdeavgiftNav()).isFalse
+        Assertions.assertThat(trygdeavgiftInfoNorsk?.erSkattepliktig()).isTrue
+        Assertions.assertThat(trygdeavgiftInfoNorsk?.arbeidsgiverBetalerAvgift()).isTrue
+        Assertions.assertThat(trygdeavgiftInfoNorsk?.saerligeavgiftsgruppe()).isNull()
         Assertions.assertThat(innvilgelseFtrl.loennsforhold).isEqualTo(Loenn_forhold.LØNN_FRA_NORGE.kode)
         Assertions.assertThat(innvilgelseFtrl.arbeidsgiverFullmektigNavn).isNull()
         Assertions.assertThat(innvilgelseFtrl.isBrukerHarFullmektig).isFalse
@@ -198,14 +198,14 @@ internal class InnvilgelseFtrlMapperTest {
         val innvilgelseFtrl = innvilgelseFtrlMapper!!.map(lagInnvilgelseBrevbestilling())
         Assertions.assertThat(innvilgelseFtrl.isTrygdeavtaleMedArbeidsland).isTrue
         Assertions.assertThat(innvilgelseFtrl.vurderingTrygdeavgift).isNotNull
-        Assertions.assertThat(innvilgelseFtrl.vurderingTrygdeavgift.norsk()).isNull()
-        val trygdeavgiftInfoUtenlandsk = innvilgelseFtrl.vurderingTrygdeavgift.utenlandsk()
+        Assertions.assertThat(innvilgelseFtrl.vurderingTrygdeavgift.norsk).isNull()
+        val trygdeavgiftInfoUtenlandsk = innvilgelseFtrl.vurderingTrygdeavgift.utenlandsk
         Assertions.assertThat(trygdeavgiftInfoUtenlandsk).isNotNull
-        Assertions.assertThat(trygdeavgiftInfoUtenlandsk.avgiftspliktigInntektMd()).isEqualTo(50000)
-        Assertions.assertThat(trygdeavgiftInfoUtenlandsk.trygdeavgiftNav()).isTrue
-        Assertions.assertThat(trygdeavgiftInfoUtenlandsk.erSkattepliktig()).isTrue
-        Assertions.assertThat(trygdeavgiftInfoUtenlandsk.arbeidsgiverBetalerAvgift()).isFalse
-        Assertions.assertThat(trygdeavgiftInfoUtenlandsk.saerligeavgiftsgruppe())
+        Assertions.assertThat(trygdeavgiftInfoUtenlandsk?.avgiftspliktigInntektMd()).isEqualTo(50000)
+        Assertions.assertThat(trygdeavgiftInfoUtenlandsk?.trygdeavgiftNav()).isTrue
+        Assertions.assertThat(trygdeavgiftInfoUtenlandsk?.erSkattepliktig()).isTrue
+        Assertions.assertThat(trygdeavgiftInfoUtenlandsk?.arbeidsgiverBetalerAvgift()).isFalse
+        Assertions.assertThat(trygdeavgiftInfoUtenlandsk?.saerligeavgiftsgruppe())
             .isEqualTo(Saerligeavgiftsgrupper.ARBEIDSTAKER_MALAYSIA.kode)
     }
 
