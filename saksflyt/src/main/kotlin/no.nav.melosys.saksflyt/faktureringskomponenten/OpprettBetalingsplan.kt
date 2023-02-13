@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.faktureringskomponenten
 
+import no.finn.unleash.Unleash
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.saksflyt.ProsessDataKey
 import no.nav.melosys.domain.saksflyt.ProsessSteg
@@ -25,7 +26,8 @@ class OpprettBetalingsplan(
     @Autowired val behandlingsresultatService: BehandlingsresultatService,
     @Autowired val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
     @Autowired val kontaktopplysningService: KontaktopplysningService,
-    @Autowired val pdlService: PersondataService
+    @Autowired val pdlService: PersondataService,
+    @Autowired val unleash: Unleash
 ) : StegBehandler {
 
     companion object {
@@ -37,6 +39,10 @@ class OpprettBetalingsplan(
     }
 
     override fun utfør(prosessinstans: Prosessinstans) {
+        if (!unleash.isEnabled("melosys.folketrygden.mvp")) {
+            return
+        }
+
         val behandlingsId = prosessinstans.behandling.id
         val behandling = behandlingService.hentBehandling(behandlingsId)
         val fagsak = behandling.fagsak
