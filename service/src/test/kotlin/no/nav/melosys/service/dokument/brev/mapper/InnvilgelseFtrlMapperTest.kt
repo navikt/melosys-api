@@ -1,5 +1,13 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
+import io.kotest.matchers.booleans.shouldBeFalse
+import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.nav.commons.foedselsnummer.Kjoenn
 import no.nav.commons.foedselsnummer.testutils.FoedselsnummerGenerator
 import no.nav.melosys.domain.*
@@ -41,7 +49,6 @@ import org.mockito.stubbing.Answer
 import java.time.Instant
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
-import java.util.Set
 
 @ExtendWith(MockitoExtension::class)
 internal class InnvilgelseFtrlMapperTest {
@@ -74,70 +81,70 @@ internal class InnvilgelseFtrlMapperTest {
     @Test
     fun map_InnvilgetMedOmfattetFamilieKunNorskInntektFullstendigInnvilget_populererFelter() {
         mockHappyCase()
-        val innvilgelseFtrl = innvilgelseFtrlMapper!!.map(lagInnvilgelseBrevbestilling())
-        Assertions.assertThat(innvilgelseFtrl).isNotNull
-        Assertions.assertThat(innvilgelseFtrl.datoMottatt).isEqualTo(LocalDate.EPOCH)
-        Assertions.assertThat(innvilgelseFtrl.perioder).hasSize(1)
-        Assertions.assertThat(innvilgelseFtrl.isErFullstendigInnvilget).isTrue
-        Assertions.assertThat(innvilgelseFtrl.ftrl_2_8_begrunnelse)
-            .isEqualTo(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_NORSK_VIRKSOMHET_IKKE_UTSENDT.kode)
-        Assertions.assertThat(innvilgelseFtrl.isVurderingMedlemskapEktefelle).isTrue
-        Assertions.assertThat(innvilgelseFtrl.isVurderingLovvalgBarn).isTrue
-        Assertions.assertThat(innvilgelseFtrl.omfattetFamilie).hasSize(2)
-        for (familiemedlemInfo in innvilgelseFtrl.omfattetFamilie) {
-            Assertions.assertThat(familiemedlemInfo.ident()).`is`(
-                Condition(
-                    { s: String -> java.util.List.of(EKTEFELLE_FNR, BARN1_FNR, BARN2_FNR).contains(s) }, "fnr"
-                )
-            )
-            Assertions.assertThat(familiemedlemInfo.navn()).`is`(
-                Condition(
-                    { s: String -> java.util.List.of(EKTEFELLE_NAVN, BARN1_NAVN, BARN2_NAVN).contains(s) }, "navn"
-                )
-            )
-            Assertions.assertThat(familiemedlemInfo.identType()).`is`(
-                Condition(
-                    { s: IdentType -> java.util.List.of(IdentType.FNR, IdentType.DNR, IdentType.DATO).contains(s) },
-                    "identType"
-                )
-            )
-        }
-        Assertions.assertThat(innvilgelseFtrl.ikkeOmfattetBarn).isEmpty()
-        Assertions.assertThat(innvilgelseFtrl.ikkeOmfattetEktefelle).isNull()
-        Assertions.assertThat(innvilgelseFtrl.innvilgelse.innledningFritekst()).isNull()
-        Assertions.assertThat(innvilgelseFtrl.innvilgelse.begrunnelseFritekst()).isEqualTo(BEGRUNNELSE_FRITEKST)
-        Assertions.assertThat(innvilgelseFtrl.innvilgelse.ektefelleFritekst()).isNull()
-        Assertions.assertThat(innvilgelseFtrl.innvilgelse.barnFritekst()).isNull()
-        Assertions.assertThat(innvilgelseFtrl.saksbehandlerNavn).isEqualTo(SAKSBEHANDLER_NAVN)
-        Assertions.assertThat(innvilgelseFtrl.arbeidsgiverNavn).isEqualTo(ARBEIDSGIVER_NAVN)
-        Assertions.assertThat(innvilgelseFtrl.arbeidsland).isEqualTo(Landkoder.AT.beskrivelse)
-        Assertions.assertThat(innvilgelseFtrl.isTrygdeavtaleMedArbeidsland).isTrue
-        Assertions.assertThat(innvilgelseFtrl.vurderingTrygdeavgift).isNotNull
-        Assertions.assertThat(innvilgelseFtrl.vurderingTrygdeavgift.selvbetalende).isTrue
-        Assertions.assertThat(innvilgelseFtrl.vurderingTrygdeavgift.representantNavn).isEqualTo(null)
-        Assertions.assertThat(innvilgelseFtrl.vurderingTrygdeavgift.utenlandsk).isNull()
-        val trygdeavgiftInfoNorsk = innvilgelseFtrl.vurderingTrygdeavgift.norsk
-        Assertions.assertThat(trygdeavgiftInfoNorsk).isNotNull
-        Assertions.assertThat(trygdeavgiftInfoNorsk?.avgiftspliktigInntektMd()).isEqualTo(50000)
-        Assertions.assertThat(trygdeavgiftInfoNorsk?.trygdeavgiftNav()).isFalse
-        Assertions.assertThat(trygdeavgiftInfoNorsk?.erSkattepliktig()).isTrue
-        Assertions.assertThat(trygdeavgiftInfoNorsk?.arbeidsgiverBetalerAvgift()).isTrue
-        Assertions.assertThat(trygdeavgiftInfoNorsk?.saerligeavgiftsgruppe()).isNull()
-        Assertions.assertThat(innvilgelseFtrl.loennsforhold).isEqualTo(Loenn_forhold.LØNN_FRA_NORGE.kode)
-        Assertions.assertThat(innvilgelseFtrl.arbeidsgiverFullmektigNavn).isNull()
-        Assertions.assertThat(innvilgelseFtrl.isBrukerHarFullmektig).isFalse
-        Assertions.assertThat(innvilgelseFtrl.avgiftssatsAar).isEqualTo(DateTime.now().year.toString())
-        Assertions.assertThat(innvilgelseFtrl.isLoennNorgeSkattepliktig).isTrue
-        Assertions.assertThat(innvilgelseFtrl.isLoennUtlandSkattepliktig).isFalse
-        Assertions.assertThat(innvilgelseFtrl.saksinfo.fnr()).isEqualTo(DokgenTestData.FNR_BRUKER)
-        Assertions.assertThat(innvilgelseFtrl.saksinfo.saksnummer()).isEqualTo(SAKSNUMMER)
-        Assertions.assertThat(innvilgelseFtrl.dagensDato.truncatedTo(ChronoUnit.DAYS))
-            .isEqualTo(Instant.now().truncatedTo(ChronoUnit.DAYS))
-        Assertions.assertThat(innvilgelseFtrl.saksinfo.navnBruker()).isEqualTo(DokgenTestData.SAMMENSATT_NAVN_BRUKER)
-        Assertions.assertThat(innvilgelseFtrl.mottaker.adresselinjer()).isNotEmpty
-        Assertions.assertThat(innvilgelseFtrl.mottaker.postnr()).isEqualTo(DokgenTestData.POSTNR_BRUKER)
-        Assertions.assertThat(innvilgelseFtrl.mottaker.poststed()).isEqualTo(DokgenTestData.POSTSTED_BRUKER)
-        Assertions.assertThat(innvilgelseFtrl.mottaker.land()).isNull()
+
+        innvilgelseFtrlMapper!!.map(lagInnvilgelseBrevbestilling()).shouldNotBeNull()
+            .apply {
+                datoMottatt.shouldBe(LocalDate.EPOCH)
+                perioder.shouldHaveSize(1)
+                isErFullstendigInnvilget.shouldBeTrue()
+                ftrl_2_8_begrunnelse.shouldBe(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_NORSK_VIRKSOMHET_IKKE_UTSENDT.kode)
+                isVurderingMedlemskapEktefelle.shouldBeTrue()
+                isVurderingLovvalgBarn.shouldBeTrue()
+                omfattetFamilie.shouldHaveSize(2).sortedBy { it.navn }.apply {
+                    first().apply {
+                        ident.shouldBe(BARN1_FNR)
+                        navn.shouldBe(BARN1_NAVN)
+                        identType.shouldBe(IdentType.FNR)
+                    }
+                    last().apply {
+                        ident.shouldBe(EKTEFELLE_FNR)
+                        navn.shouldBe(EKTEFELLE_NAVN)
+                        identType.shouldBe(IdentType.DNR)
+                    }
+                }
+                ikkeOmfattetBarn.shouldBeEmpty()
+                ikkeOmfattetEktefelle.shouldBeNull()
+                innvilgelse.apply {
+                    innledningFritekst().shouldBeNull()
+                    begrunnelseFritekst().shouldBe(BEGRUNNELSE_FRITEKST)
+                    ektefelleFritekst().shouldBeNull()
+                    barnFritekst().shouldBeNull()
+                }
+                saksbehandlerNavn.shouldBe(SAKSBEHANDLER_NAVN)
+                arbeidsgiverNavn.shouldBe(ARBEIDSGIVER_NAVN)
+                arbeidsland.shouldBe(Landkoder.AT.beskrivelse)
+                isTrygdeavtaleMedArbeidsland.shouldBeTrue()
+                vurderingTrygdeavgift.shouldNotBeNull().apply {
+                    selvbetalende.shouldBeTrue()
+                    representantNavn.shouldBeNull()
+                    utenlandsk.shouldBeNull()
+                    norsk.shouldNotBeNull().apply {
+                        avgiftspliktigInntektMd() shouldBe 50000
+                        trygdeavgiftNav().shouldBeFalse()
+                        erSkattepliktig().shouldBeTrue()
+                        arbeidsgiverBetalerAvgift().shouldBeTrue()
+                        saerligeavgiftsgruppe().shouldBeNull()
+                    }
+                }
+                loennsforhold.shouldBe(Loenn_forhold.LØNN_FRA_NORGE.kode)
+                arbeidsgiverFullmektigNavn.shouldBeNull()
+                isBrukerHarFullmektig.shouldBeFalse()
+                avgiftssatsAar.shouldBe(DateTime.now().year.toString())
+                isLoennNorgeSkattepliktig.shouldBeTrue()
+                isLoennUtlandSkattepliktig.shouldBeFalse()
+                saksinfo.apply {
+                    fnr().shouldBe(DokgenTestData.FNR_BRUKER)
+                    saksnummer().shouldBe(SAKSNUMMER)
+                    navnBruker().shouldBe(DokgenTestData.SAMMENSATT_NAVN_BRUKER)
+                }
+                dagensDato.truncatedTo(ChronoUnit.DAYS).shouldBe(Instant.now().truncatedTo(ChronoUnit.DAYS))
+                mottaker.apply {
+                    adresselinjer().shouldNotBeEmpty()
+                    postnr().shouldBe(DokgenTestData.POSTNR_BRUKER)
+                    poststed().shouldBe(DokgenTestData.POSTSTED_BRUKER)
+                    land().shouldBeNull()
+                }
+            }
     }
 
     @Test
@@ -266,8 +273,8 @@ internal class InnvilgelseFtrlMapperTest {
         val vilkaarBegrunnelse = VilkaarBegrunnelse()
         vilkaarBegrunnelse.kode =
             Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_NORSK_VIRKSOMHET_IKKE_UTSENDT.kode
-        vilkaarsresultat.begrunnelser = Set.of(vilkaarBegrunnelse)
-        behandlingsresultat.vilkaarsresultater = Set.of(vilkaarsresultat)
+        vilkaarsresultat.begrunnelser = setOf(vilkaarBegrunnelse)
+        behandlingsresultat.vilkaarsresultater = setOf(vilkaarsresultat)
         behandlingsresultat.behandling = DokgenTestData.lagBehandling()
         return behandlingsresultat
     }
@@ -284,12 +291,12 @@ internal class InnvilgelseFtrlMapperTest {
     }
 
     private fun lagAvklartMedfølgendeBarn(): AvklarteMedfolgendeFamilie {
-        return AvklarteMedfolgendeFamilie(Set.of(OmfattetFamilie(UUID_BARN_1)), Set.of())
+        return AvklarteMedfolgendeFamilie(setOf(OmfattetFamilie(UUID_BARN_1)), setOf())
     }
 
     private fun lagAvklartMedfølgendeEktefelle(): AvklarteMedfolgendeFamilie {
         val ektefelle = OmfattetFamilie(UUID_EKTEFELLE)
-        return AvklarteMedfolgendeFamilie(Set.of(ektefelle), Set.of())
+        return AvklarteMedfolgendeFamilie(setOf(ektefelle), setOf())
     }
 
     private fun lagAvklartIkkeMedfølgendeBarn(): AvklarteMedfolgendeFamilie {
@@ -297,7 +304,7 @@ internal class InnvilgelseFtrlMapperTest {
             IkkeOmfattetFamilie(UUID_BARN_1, Medfolgende_barn_begrunnelser_ftrl.IKKE_SOEKERS_BARN.kode, "Ikke omfattet")
         val barn2 =
             IkkeOmfattetFamilie(UUID_BARN_2, Medfolgende_barn_begrunnelser_ftrl.IKKE_SOEKERS_BARN.kode, "Ikke omfattet")
-        return AvklarteMedfolgendeFamilie(Set.of(), Set.of(barn1, barn2))
+        return AvklarteMedfolgendeFamilie(setOf(), setOf(barn1, barn2))
     }
 
     private fun lagAvklartIkkeMedfølgendeEktefelle(): AvklarteMedfolgendeFamilie {
@@ -306,7 +313,7 @@ internal class InnvilgelseFtrlMapperTest {
             Medfolgende_ektefelle_samboer_begrunnelser_ftrl.IKKE_TRE_AV_FEM_SISTE_ÅR.kode,
             "Ikke omfattet"
         )
-        return AvklarteMedfolgendeFamilie(Set.of(), Set.of(ektefelle))
+        return AvklarteMedfolgendeFamilie(setOf(), setOf(ektefelle))
     }
 
     private fun lagMedfølgendeEktefelle(): Map<String, MedfolgendeFamilie> {
