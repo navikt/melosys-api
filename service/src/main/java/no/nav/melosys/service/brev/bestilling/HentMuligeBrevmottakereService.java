@@ -94,10 +94,15 @@ public class HentMuligeBrevmottakereService {
         Aktoer avklartKopi = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling);
         if (avklartKopi.getRolle() == BRUKER || hovedmottaker == kopiMottaker) {
             String aktørID = behandling.getFagsak().hentBrukersAktørID();
-            return new Brevmottaker.Builder().medDokumentNavn("Kopi til bruker").medMottakerNavn(persondataFasade.hentSammensattNavn(aktørID)).medRolle(BRUKER).medAktørId(aktørID).build();
+            return new Brevmottaker.Builder().medDokumentNavn("Kopi til bruker")
+                .medMottakerNavn(persondataFasade.hentSammensattNavn(aktørID)).medRolle(BRUKER).medAktørId(aktørID).build();
+        } else if (avklartKopi.getOrgnr() == null && avklartKopi.getPersonIdent() != null) { // Fullmektig privatperson
+            return new Brevmottaker.Builder().medDokumentNavn("Kopi til brukers fullmektig")
+                .medMottakerNavn(persondataFasade.hentSammensattNavn(avklartKopi.getPersonIdent())).medRolle(avklartKopi.getRolle()).build();
         } else {
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartKopi.getOrgnr());
-            return new Brevmottaker.Builder().medDokumentNavn("Kopi til brukers fullmektig").medMottakerNavn(orgDokument.getNavn()).medRolle(avklartKopi.getRolle()).medOrgnr(orgDokument.getOrgnummer()).build();
+            return new Brevmottaker.Builder().medDokumentNavn("Kopi til brukers fullmektig")
+                .medMottakerNavn(orgDokument.getNavn()).medRolle(avklartKopi.getRolle()).medOrgnr(orgDokument.getOrgnummer()).build();
         }
     }
 

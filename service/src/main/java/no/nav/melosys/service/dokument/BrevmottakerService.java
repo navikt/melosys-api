@@ -99,6 +99,7 @@ public class BrevmottakerService {
             case ARBEIDSGIVER -> avklarMottakereForArbeidsgiver(behandling, kunAvklarteVirksomheter);
             case TRYGDEMYNDIGHET -> avklarMottakereForMyndigheter(mottaker, behandling, produserbartDokument);
             case ETAT -> Collections.singletonList(mottaker.getAktør());
+            case REPRESENTANT -> avklarMottakereForRepresentant(behandling);
             default -> throw new FunksjonellException("%s støttes ikke.".formatted(mottaker.hentAktørsRolle()));
         };
     }
@@ -144,6 +145,19 @@ public class BrevmottakerService {
             }
         } else {
             mottakere.add(bruker);
+        }
+        return mottakere;
+    }
+
+    private List<Aktoer> avklarMottakereForRepresentant(Behandling behandling) {
+        Fagsak fagsak = behandling.getFagsak();
+
+        List<Aktoer> mottakere = new ArrayList<>();
+        Optional<Aktoer> representant = fagsak.finnRepresentant(Representerer.BRUKER);
+        if (representant.isPresent()) {
+            mottakere.add(representant.get());
+        } else {
+            throw new FunksjonellException("%s støttes kun som mottaker når den representerer %s.".formatted(REPRESENTANT, BRUKER));
         }
         return mottakere;
     }
