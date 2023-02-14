@@ -13,10 +13,7 @@ import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Representerer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
@@ -27,7 +24,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -40,18 +36,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Collections.emptyList;
-import static no.nav.melosys.domain.brev.FastMottakerMedOrgnr.SKATTEETATEN;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
+import static no.nav.melosys.domain.brev.NorskMyndighet.SKATTEETATEN;
+import static no.nav.melosys.domain.kodeverk.Mottakerroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class BrevmottakerServiceTest {
-    @Mock
-    private KontaktopplysningService kontaktopplysningService;
     @Mock
     private AvklarteVirksomheterService avklarteVirksomheterService;
     @Mock
@@ -72,8 +65,9 @@ class BrevmottakerServiceTest {
 
     @BeforeEach
     void setup() {
-        brevmottakerService = new BrevmottakerService(kontaktopplysningService, avklarteVirksomheterService,
-            utenlandskMyndighetService, behandlingsresultatService, trygdeavgiftsberegningService, lovvalgsperiodeService, behandlingService);
+        brevmottakerService = new BrevmottakerService(
+            avklarteVirksomheterService, utenlandskMyndighetService, behandlingsresultatService,
+            trygdeavgiftsberegningService, lovvalgsperiodeService, behandlingService);
 
         behandlingsresultat = new Behandlingsresultat();
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
@@ -83,9 +77,9 @@ class BrevmottakerServiceTest {
 
     @Test
     void avklarMottakere_medRolleSomIkkeErStøttet_feiler() {
-        assertThatThrownBy(() -> brevmottakerService.avklarMottakere(null, Mottaker.av(REPRESENTANT), behandling))
+        assertThatThrownBy(() -> brevmottakerService.avklarMottakere(null, Mottaker.av(FULLMEKTIG), behandling))
             .isInstanceOf(FunksjonellException.class)
-            .hasMessage("REPRESENTANT støttes ikke.");
+            .hasMessage("FULLMEKTIG støttes ikke.");
     }
 
     @Test
@@ -101,30 +95,30 @@ class BrevmottakerServiceTest {
     void avklarMottakere_medBrukerRolleUtenRepresentant_girBrukerAktør() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(null));
 
-        List<Aktoer> aktoers = brevmottakerService.avklarMottakere(null, Mottaker.av(BRUKER), behandling);
+        List<Mottaker> mottakere = brevmottakerService.avklarMottakere(null, Mottaker.av(BRUKER), behandling);
 
-        assertThat(aktoers).hasSize(1);
-        assertThat(aktoers.get(0).getRolle()).isEqualTo(BRUKER);
+        assertThat(mottakere).hasSize(1);
+        assertThat(mottakere.get(0).getRolle()).isEqualTo(BRUKER);
     }
 
     @Test
     void avklarMottakere_medBrukerRolleMedRepresentantOrg_girRepresentantAktør() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(Representerer.BRUKER));
 
-        List<Aktoer> aktoers = brevmottakerService.avklarMottakere(null, Mottaker.av(BRUKER), behandling);
+        List<Mottaker> mottakere = brevmottakerService.avklarMottakere(null, Mottaker.av(BRUKER), behandling);
 
-        assertThat(aktoers).hasSize(1);
-        assertThat(aktoers.get(0).getRolle()).isEqualTo(REPRESENTANT);
+        assertThat(mottakere).hasSize(1);
+        assertThat(mottakere.get(0).getRolle()).isEqualTo(FULLMEKTIG);
     }
 
     @Test
     void avklarMottakere_medBrukerRolleMedRepresentantPerson_girRepresentantAktør() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantPerson(Representerer.BRUKER));
 
-        List<Aktoer> aktoers = brevmottakerService.avklarMottakere(null, Mottaker.av(BRUKER), behandling);
+        List<Mottaker> mottakere = brevmottakerService.avklarMottakere(null, Mottaker.av(BRUKER), behandling);
 
-        assertThat(aktoers).hasSize(1);
-        assertThat(aktoers.get(0).getRolle()).isEqualTo(REPRESENTANT);
+        assertThat(mottakere).hasSize(1);
+        assertThat(mottakere.get(0).getRolle()).isEqualTo(FULLMEKTIG);
     }
 
     @Test
@@ -140,17 +134,17 @@ class BrevmottakerServiceTest {
     @Test
     void avklarMottakere_medVirksomhetRolleOgVirksomhet_girVirksomhetAktør() {
         Aktoer virksomhet = new Aktoer();
-        virksomhet.setRolle(VIRKSOMHET);
+        virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
         virksomhet.setOrgnr("orgnr");
         var fagsak = new Fagsak();
         fagsak.setAktører(Set.of(virksomhet));
         when(behandling.getFagsak()).thenReturn(fagsak);
 
-        List<Aktoer> aktoers = brevmottakerService.avklarMottakere(null, Mottaker.av(VIRKSOMHET), behandling);
+        List<Mottaker> mottakere = brevmottakerService.avklarMottakere(null, Mottaker.av(VIRKSOMHET), behandling);
 
-        assertThat(aktoers)
+        assertThat(mottakere)
             .hasSize(1)
-            .contains(virksomhet);
+            .contains(Mottaker.av(virksomhet));
     }
 
     @Test
@@ -169,10 +163,10 @@ class BrevmottakerServiceTest {
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling)).thenReturn(Sets.newHashSet("123456789", "987654321"));
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(null));
 
-        List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
+        List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
 
         assertThat(arbeidsgivere)
-            .flatExtracting(Aktoer::getOrgnr)
+            .flatExtracting(Mottaker::getOrgnr)
             .containsExactlyInAnyOrder("123456789", "987654321");
     }
 
@@ -183,7 +177,7 @@ class BrevmottakerServiceTest {
         when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling))
             .thenReturn(Collections.singletonList(new AvklartVirksomhet(new ForetakUtland())));
 
-        List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
+        List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
         assertThat(arbeidsgivere).isEmpty();
     }
 
@@ -193,7 +187,7 @@ class BrevmottakerServiceTest {
         when(behandling.getMottatteOpplysninger()).thenReturn(lagMottatteOpplysninger(null, null));
         when(behandling.hentArbeidsforholdDokument()).thenReturn(lagArbeidsforholdDokument(null));
 
-        List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling, false, false);
+        List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling, false, false);
 
         assertThat(arbeidsgivere).isEmpty();
     }
@@ -204,10 +198,10 @@ class BrevmottakerServiceTest {
         when(behandling.getMottatteOpplysninger()).thenReturn(lagMottatteOpplysninger("987654321", null));
         when(behandling.hentArbeidsforholdDokument()).thenReturn(lagArbeidsforholdDokument("123456789"));
 
-        List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling, false, false);
+        List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling, false, false);
 
         assertThat(arbeidsgivere)
-            .flatExtracting(Aktoer::getOrgnr)
+            .flatExtracting(Mottaker::getOrgnr)
             .containsExactlyInAnyOrder("123456789", "987654321");
     }
 
@@ -217,7 +211,7 @@ class BrevmottakerServiceTest {
         when(behandling.getMottatteOpplysninger()).thenReturn(lagMottatteOpplysninger(null, "uuid"));
         when(behandling.hentArbeidsforholdDokument()).thenReturn(lagArbeidsforholdDokument(null));
 
-        List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling, false, false);
+        List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling, false, false);
         assertThat(arbeidsgivere).isEmpty();
     }
 
@@ -226,10 +220,10 @@ class BrevmottakerServiceTest {
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling)).thenReturn(Sets.newHashSet("123456789", "987654321"));
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(Representerer.BRUKER));
 
-        List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
+        List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
 
         assertThat(arbeidsgivere)
-            .flatExtracting(Aktoer::getOrgnr)
+            .flatExtracting(Mottaker::getOrgnr)
             .containsExactlyInAnyOrder("123456789", "987654321");
     }
 
@@ -237,10 +231,10 @@ class BrevmottakerServiceTest {
     void avklarMottakere_medArbeidsgiverRolleOgRepresentantForArbeidsgiver_girRepresentantAktør() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(Representerer.ARBEIDSGIVER));
 
-        List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
+        List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
 
         assertThat(arbeidsgivere)
-            .flatExtracting(Aktoer::getAktørId, Aktoer::getPersonIdent, Aktoer::getOrgnr)
+            .flatExtracting(Mottaker::getAktørId, Mottaker::getPersonIdent, Mottaker::getOrgnr)
             .containsExactly(null, null, "REP-ORGNR");
     }
 
@@ -248,39 +242,39 @@ class BrevmottakerServiceTest {
     void avklarMottakere_medArbeidsgiverRolleOgRepresentantForBegge_girRepresentantAktør() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantPerson(Representerer.BEGGE));
 
-        List<Aktoer> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
+        List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.av(ARBEIDSGIVER), behandling);
 
         assertThat(arbeidsgivere)
-            .flatExtracting(Aktoer::getAktørId, Aktoer::getPersonIdent, Aktoer::getOrgnr)
+            .flatExtracting(Mottaker::getAktørId, Mottaker::getPersonIdent, Mottaker::getOrgnr)
             .containsExactly(null, "REP-FNR", null);
     }
 
     @Test
     void avklarMottakere_art12_1_CZerReservertFraA1_forventerIngenAktør() {
-        when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling)).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagAktoerUtenlandskMyndighet()));
+        when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling)).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagMottakerUtenlandskMyndighet()));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        List<Aktoer> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ATTEST_A1, Mottaker.av(TRYGDEMYNDIGHET), behandling);
+        List<Mottaker> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ATTEST_A1, Mottaker.av(UTENLANDSK_TRYGDEMYNDIGHET), behandling);
         assertThat(myndigheter).isEmpty();
     }
 
     @Test
     void avklarMottakere_art_11_4_2_CZerReservertFraA1_forventerIngenAktør() {
-        when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling)).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagAktoerUtenlandskMyndighet()));
+        when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling)).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagMottakerUtenlandskMyndighet()));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         behandlingsresultat.hentLovvalgsperiode().setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2);
-        List<Aktoer> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ATTEST_A1, Mottaker.av(TRYGDEMYNDIGHET), behandling);
+        List<Mottaker> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ATTEST_A1, Mottaker.av(UTENLANDSK_TRYGDEMYNDIGHET), behandling);
         assertThat(myndigheter).isEmpty();
     }
 
     @Test
     void avklarMottakere_A001_CZerReservertFraA1_forventerMyndighetAktør() {
-        when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling)).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagAktoerUtenlandskMyndighet()));
+        when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling)).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagMottakerUtenlandskMyndighet()));
 
-        List<Aktoer> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ANMODNING_UNNTAK, Mottaker.av(TRYGDEMYNDIGHET), behandling);
+        List<Mottaker> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ANMODNING_UNNTAK, Mottaker.av(UTENLANDSK_TRYGDEMYNDIGHET), behandling);
         assertThat(myndigheter)
-            .flatExtracting(Aktoer::getInstitusjonId)
+            .flatExtracting(Mottaker::getInstitusjonID)
             .containsExactly("CZ:SZUC10416");
     }
 
@@ -461,7 +455,7 @@ class BrevmottakerServiceTest {
             )
             .containsExactly(
                 BRUKER,
-                List.of(ARBEIDSGIVER, TRYGDEMYNDIGHET),
+                List.of(ARBEIDSGIVER, UTENLANDSK_TRYGDEMYNDIGHET),
                 List.of(SKATTEETATEN)
             );
     }
@@ -487,69 +481,27 @@ class BrevmottakerServiceTest {
             );
     }
 
-    @Test
-    void hentKontaktopplysning_utenMottaker_girTomtResultat() {
-        Kontaktopplysning kontaktopplysning = brevmottakerService.hentKontaktopplysning("MEL-123", null);
-        assertThat(kontaktopplysning).isNull();
 
-        verifyNoInteractions(kontaktopplysningService);
-    }
-
-    @Test
-    void hentKontaktopplysning_mottakerBruker_girTomtResultat() {
-        Kontaktopplysning kontaktopplysning = brevmottakerService.hentKontaktopplysning("MEL-123", lagAktoer(BRUKER));
-        assertThat(kontaktopplysning).isNull();
-
-        verifyNoInteractions(kontaktopplysningService);
-    }
-
-    @Test
-    void hentKontaktopplysning_mottakerArbeidsgiver_returnererKontaktopplysning() {
-        String orgnr = "987654321";
-        when(kontaktopplysningService.hentKontaktopplysning(any(), eq(orgnr))).thenReturn(lagKontaktOpplysning(false));
-        Aktoer aktoer = lagAktoer(ARBEIDSGIVER);
-        aktoer.setOrgnr(orgnr);
-
-        Kontaktopplysning kontaktopplysning = brevmottakerService.hentKontaktopplysning("MEL-123", aktoer);
-        assertThat(kontaktopplysning).isNotNull();
-        assertThat(kontaktopplysning.getKontaktNavn()).isEqualTo("Kari Arbeidsgiver");
-
-        verify(kontaktopplysningService).hentKontaktopplysning("MEL-123", orgnr);
-    }
-
-    @Test
-    void hentKontaktopplysning_mottakerRepresentant_returnererKontaktopplysning() {
-        String orgnr = "123456789";
-        when(kontaktopplysningService.hentKontaktopplysning(any(), eq(orgnr))).thenReturn(lagKontaktOpplysning(true));
-        Aktoer aktoer = lagAktoer(REPRESENTANT);
-        aktoer.setOrgnr(orgnr);
-
-        Kontaktopplysning kontaktopplysning = brevmottakerService.hentKontaktopplysning("MEL-123", aktoer);
-        assertThat(kontaktopplysning).isNotNull();
-        assertThat(kontaktopplysning.getKontaktNavn()).isEqualTo("Ole Fullmektig");
-
-        verify(kontaktopplysningService).hentKontaktopplysning("MEL-123", orgnr);
-    }
 
     @Test
     void avklarMottakerRolleFraDokument_tilBruker_girRolleBruker() {
-        Aktoersroller mottakerRolle = brevmottakerService.avklarMottakerRolleFraDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
+        Mottakerroller mottakerRolle = brevmottakerService.avklarMottakerRolleFraDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
 
         assertThat(mottakerRolle).isEqualTo(BRUKER);
     }
 
     @Test
     void avklarMottakerRolleFraDokument_tilArbeidsgiver_girRolleArbeidsgiver() {
-        Aktoersroller mottakerRolle = brevmottakerService.avklarMottakerRolleFraDokument(INNVILGELSE_ARBEIDSGIVER);
+        Mottakerroller mottakerRolle = brevmottakerService.avklarMottakerRolleFraDokument(INNVILGELSE_ARBEIDSGIVER);
 
         assertThat(mottakerRolle).isEqualTo(ARBEIDSGIVER);
     }
 
     @Test
     void avklarMottakerRolleFraDokument_tilMyndighet_girRolleMyndighet() {
-        Aktoersroller mottakerRolle = brevmottakerService.avklarMottakerRolleFraDokument(ATTEST_A1);
+        Mottakerroller mottakerRolle = brevmottakerService.avklarMottakerRolleFraDokument(ATTEST_A1);
 
-        assertThat(mottakerRolle).isEqualTo(TRYGDEMYNDIGHET);
+        assertThat(mottakerRolle).isEqualTo(UTENLANDSK_TRYGDEMYNDIGHET);
     }
 
     @Test
@@ -561,7 +513,7 @@ class BrevmottakerServiceTest {
 
     private void initMocksForFtrlVedtaksbrev(Representerer representerer, long norskinntekt, boolean selvbetalende) {
         Optional<Trygdeavgiftsberegningsresultat> trygdeavgiftsberegningsresultat = Optional.of(
-            new Trygdeavgiftsberegningsresultat(norskinntekt, null, lagAktoer(selvbetalende ? BRUKER : REPRESENTANT_TRYGDEAVGIFT), emptyList())
+            new Trygdeavgiftsberegningsresultat(norskinntekt, null, lagAktoer(selvbetalende ? Aktoersroller.BRUKER : Aktoersroller.REPRESENTANT_TRYGDEAVGIFT), emptyList())
         );
 
         when(trygdeavgiftsberegningService.finnBeregningsresultat(anyLong())).thenReturn(trygdeavgiftsberegningsresultat);
@@ -580,10 +532,10 @@ class BrevmottakerServiceTest {
 
     private Fagsak lagFagsakMedRepresentantOrg(Representerer representerer) {
         Fagsak fagsak = new Fagsak();
-        fagsak.getAktører().add(lagAktoer(BRUKER));
+        fagsak.getAktører().add(lagAktoer(Aktoersroller.BRUKER));
 
         if (representerer != null) {
-            Aktoer representant = lagAktoer(REPRESENTANT);
+            Aktoer representant = lagAktoer(Aktoersroller.REPRESENTANT);
             representant.setRepresenterer(representerer);
             representant.setOrgnr("REP-ORGNR");
             fagsak.getAktører().add(representant);
@@ -593,10 +545,10 @@ class BrevmottakerServiceTest {
 
     private Fagsak lagFagsakMedRepresentantPerson(Representerer representerer) {
         Fagsak fagsak = new Fagsak();
-        fagsak.getAktører().add(lagAktoer(BRUKER));
+        fagsak.getAktører().add(lagAktoer(Aktoersroller.BRUKER));
 
         if (representerer != null) {
-            Aktoer representant = lagAktoer(REPRESENTANT);
+            Aktoer representant = lagAktoer(Aktoersroller.REPRESENTANT);
             representant.setRepresenterer(representerer);
             representant.setPersonIdent("REP-FNR");
             fagsak.getAktører().add(representant);
@@ -632,10 +584,10 @@ class BrevmottakerServiceTest {
         return utenlandskMyndighet;
     }
 
-    private Aktoer lagAktoerUtenlandskMyndighet() {
-        Aktoer aktoer = lagAktoer(TRYGDEMYNDIGHET);
-        aktoer.setInstitusjonId("CZ:SZUC10416");
-        return aktoer;
+    private Mottaker lagMottakerUtenlandskMyndighet() {
+        Mottaker mottaker = new Mottaker(UTENLANDSK_TRYGDEMYNDIGHET);
+        mottaker.setInstitusjonID("CZ:SZUC10416");
+        return mottaker;
     }
 
 

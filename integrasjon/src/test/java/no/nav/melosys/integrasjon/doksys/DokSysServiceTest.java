@@ -4,14 +4,14 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
+import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.DistribuerJournalpostConsumer;
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostRequest;
 import no.nav.melosys.integrasjon.doksys.distribuerjournalpost.dto.DistribuerJournalpostResponse;
@@ -364,7 +364,7 @@ class DokSysServiceTest {
         metadata.dokumenttypeID = "dok_1234";
         metadata.brukerNavn = "Kim Se";
         metadata.brukerID = FNR;
-        metadata.mottaker = lagAktør(Aktoersroller.BRUKER);
+        metadata.mottaker = lagMottaker(Mottakerroller.BRUKER);
         metadata.postadresse = postadresse;
         if (postadresse == null) {
             metadata.berik = true;
@@ -372,32 +372,32 @@ class DokSysServiceTest {
         return metadata;
     }
 
-    private Aktoer lagAktør(Aktoersroller rolle) {
-        Aktoer aktør = new Aktoer();
-        aktør.setRolle(rolle);
+    private Mottaker lagMottaker(Mottakerroller rolle) {
+        Mottaker mottaker = new Mottaker();
+        mottaker.setRolle(rolle);
         switch (rolle) {
-            case BRUKER -> aktør.setAktørId(FNR);
-            case TRYGDEMYNDIGHET -> aktør.setInstitusjonId(INSITUSJON_ID);
-            case REPRESENTANT -> throw new IllegalArgumentException("For representant, bruk lagAktørRepresentant()");
-            default -> aktør.setOrgnr(ORGNR);
+            case BRUKER -> mottaker.setAktørId(FNR);
+            case UTENLANDSK_TRYGDEMYNDIGHET -> mottaker.setInstitusjonID(INSITUSJON_ID);
+            case FULLMEKTIG -> throw new IllegalArgumentException("For FULLMEKTIG, bruk lagMottakerFullmektig()");
+            default -> mottaker.setOrgnr(ORGNR);
         }
-        return aktør;
+        return mottaker;
     }
 
-    private Aktoer lagAktørRepresentant(Aktoertype mottakerType) {
-        Aktoer aktør = new Aktoer();
-        aktør.setRolle(Aktoersroller.REPRESENTANT);
+    private Mottaker lagMottakerFullmektig(Aktoertype mottakerType) {
+        Mottaker mottaker = new Mottaker();
+        mottaker.setRolle(Mottakerroller.FULLMEKTIG);
         switch (mottakerType) {
-            case PERSON -> aktør.setPersonIdent(REP_FNR);
-            case ORGANISASJON -> aktør.setOrgnr(REP_ORGNR);
+            case PERSON -> mottaker.setPersonIdent(REP_FNR);
+            case ORGANISASJON -> mottaker.setOrgnr(REP_ORGNR);
             default -> throw new IllegalArgumentException("Mottakertype må være person eller organisasjon");
         }
-        return aktør;
+        return mottaker;
     }
 
     private DokumentbestillingMetadata lagMetadataMedArbeidsgiver() {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
-        metadata.mottaker = lagAktør(Aktoersroller.ARBEIDSGIVER);
+        metadata.mottaker = lagMottaker(Mottakerroller.ARBEIDSGIVER);
         metadata.mottakerID = ORGNR;
         metadata.dokumenttypeID = "dok_1234";
         return metadata;
@@ -405,7 +405,7 @@ class DokSysServiceTest {
 
     private DokumentbestillingMetadata lagMetadataMedRepresentant(Aktoertype representantType) {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
-        metadata.mottaker = lagAktørRepresentant(representantType);
+        metadata.mottaker = lagMottakerFullmektig(representantType);
         metadata.mottakerID = switch (representantType) {
             case PERSON -> REP_FNR;
             case ORGANISASJON -> REP_ORGNR;
@@ -417,7 +417,7 @@ class DokSysServiceTest {
 
     private DokumentbestillingMetadata lagMetadataMedMyndighet() {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
-        metadata.mottaker = lagAktør(Aktoersroller.TRYGDEMYNDIGHET);
+        metadata.mottaker = lagMottaker(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
         metadata.mottakerID = ORGNR;
         metadata.utenlandskMyndighet = lagUtenlandskMyndighet();
         metadata.dokumenttypeID = "dok_1234";

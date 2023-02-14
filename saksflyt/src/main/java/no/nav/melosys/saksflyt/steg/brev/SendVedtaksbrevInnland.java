@@ -9,9 +9,11 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
-import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.brev.NorskMyndighet;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -29,9 +31,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.brev.FastMottakerMedOrgnr.*;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1;
@@ -93,9 +92,9 @@ public class SendVedtaksbrevInnland implements StegBehandler {
 
         List<Mottaker> mottakerListe;
         if (avslagTypeBruker == AVSLAG_YRKESAKTIV) {
-            mottakerListe = List.of(Mottaker.av(BRUKER), av(HELFO), av(SKATTEETATEN));
+            mottakerListe = List.of(Mottaker.av(Mottakerroller.BRUKER), Mottaker.av(NorskMyndighet.HELFO), Mottaker.av(NorskMyndighet.SKATTEETATEN));
         } else {
-            mottakerListe = List.of(Mottaker.av(BRUKER));
+            mottakerListe = List.of(Mottaker.av(Mottakerroller.BRUKER));
         }
 
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
@@ -105,7 +104,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             .build();
         prosessinstansService.opprettProsessinstanserSendBrev(behandling, brevbestilling, mottakerListe);
 
-        if (behandling.getFagsak().harAktørMedRolleType(ARBEIDSGIVER)
+        if (behandling.getFagsak().harAktørMedRolleType(Aktoersroller.ARBEIDSGIVER)
             && behandlingsresultatType != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
 
             DoksysBrevbestilling brevbestillingArbeidsgiver = new DoksysBrevbestilling.Builder()
@@ -114,7 +113,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
                 .medFritekst(fritekst)
                 .build();
 
-            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestillingArbeidsgiver, Mottaker.av(ARBEIDSGIVER));
+            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestillingArbeidsgiver, Mottaker.av(Mottakerroller.ARBEIDSGIVER));
         }
     }
 
@@ -126,12 +125,12 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         Produserbaredokumenter innvilgelseType = (resultat.erInnvilgelseFlereLand())
             ? INNVILGELSE_YRKESAKTIV_FLERE_LAND : INNVILGELSE_YRKESAKTIV;
 
-        List<Mottaker> mottakerListe = new ArrayList<>(List.of(Mottaker.av(BRUKER), FastMottakerMedOrgnr.av(SKATTEETATEN)));
+        List<Mottaker> mottakerListe = new ArrayList<>(List.of(Mottaker.av(Mottakerroller.BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN)));
         if (brevSendesTilStatligSkatteoppkreving(
             resultat.hentLovvalgsperiode(),
             behandling.getMottatteOpplysninger()
         )) {
-            mottakerListe.add(FastMottakerMedOrgnr.av(SKATTEINNKREVER_UTLAND));
+            mottakerListe.add(Mottaker.av(NorskMyndighet.SKATTEINNKREVER_UTLAND));
         }
 
         DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProduserbartDokument(innvilgelseType)
@@ -147,20 +146,20 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             .medAvsenderID(saksbehandler)
             .medFritekst(fritekst)
             .build();
-        prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.av(BRUKER));
+        prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.av(Mottakerroller.BRUKER));
     }
 
     private void sendOrienteringTilArbeidsgiver(Behandling behandling, Behandlingsresultat resultat, String saksbehandler) {
         final Lovvalgsperiode lovvalgsperiode = resultat.hentLovvalgsperiode();
         // Saker med kun selvstendig næringsdrivende skal ikke sende brevet INNVILGESE_ARBEIDSGIVER
-        if (behandling.getFagsak().harAktørMedRolleType(ARBEIDSGIVER)
+        if (behandling.getFagsak().harAktørMedRolleType(Aktoersroller.ARBEIDSGIVER)
             && !lovvalgsperiode.erArtikkel13()
             && !lovvalgsperiode.erArtikkel11_4()) {
             DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
                 .medProduserbartDokument(INNVILGELSE_ARBEIDSGIVER)
                 .medAvsenderID(saksbehandler)
                 .build();
-            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.av(ARBEIDSGIVER));
+            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.av(Mottakerroller.ARBEIDSGIVER));
         }
     }
 

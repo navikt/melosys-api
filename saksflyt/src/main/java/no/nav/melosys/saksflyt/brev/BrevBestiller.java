@@ -23,7 +23,7 @@ public class BrevBestiller {
 
     public void bestill(Produserbaredokumenter dokumentType, Collection<Mottaker> mottakere, String fritekst,
                         String saksbehandler, String begrunnelseKode, Behandling behandling) {
-        for(Mottaker mottaker : mottakere) {
+        for (Mottaker mottaker : mottakere) {
             dokumentServiceFasade.produserOgDistribuerBrev(dokumentType, mottaker, fritekst, begrunnelseKode,
                 saksbehandler, behandling.getId());
             log.info("Brevet '{}' er bestillt for sak {} og behandling {}", dokumentType,

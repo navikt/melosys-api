@@ -8,6 +8,8 @@ import java.util.Objects;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
+import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.person.Persondata;
@@ -82,14 +84,14 @@ public class DokgenMapperDatahenter {
         return behandlingsresultatService.hentBehandlingsresultat(behandlingId);
     }
 
-    Persondata hentPersondata(Behandling behandling, Aktoer mottaker) {
-        if (mottaker.erVirksomhet()) {
+    Persondata hentPersondata(Behandling behandling) {
+        if (behandling.getFagsak().getHovedpartRolle() == Aktoersroller.VIRKSOMHET) {
             return null;
         }
         return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
     }
 
-    Persondata hentPersonMottaker(Aktoer mottaker) {
+    Persondata hentPersonMottaker(Mottaker mottaker) {
         if (mottaker.erOrganisasjon()) {
             return null;
         }

@@ -15,7 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
+import static no.nav.melosys.domain.kodeverk.Mottakerroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -124,12 +124,7 @@ class HentMuligeProduserbaredokumenterServiceTest {
 
     private Behandling lagBehandling() {
         Behandling behandling = new Behandling();
-        behandling.setFagsak(lagFagsak());
+        behandling.setFagsak(new Fagsak());
         return behandling;
-    }
-
-    private Fagsak lagFagsak() {
-        Fagsak fagsak = new Fagsak();
-        return fagsak;
     }
 }

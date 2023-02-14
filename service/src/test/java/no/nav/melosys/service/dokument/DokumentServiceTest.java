@@ -1,8 +1,5 @@
 package no.nav.melosys.service.dokument;
 
-import java.time.LocalDate;
-import java.util.*;
-
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
@@ -70,7 +67,11 @@ import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.jupiter.api.Test;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
+import java.time.LocalDate;
+import java.util.*;
+
+import static no.nav.melosys.domain.kodeverk.Mottakerroller.ARBEIDSGIVER;
+import static no.nav.melosys.domain.kodeverk.Mottakerroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.*;
 import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger;
@@ -149,7 +150,7 @@ final class DokumentServiceTest {
         assertThat(unntak).isInstanceOf(IllegalArgumentException.class).hasNoCause().hasMessageContaining("Ingen gyldig");
     }
 
-    private static BrevbestillingDto lagBrevBestillingDto(Produserbaredokumenter produserbartdokument, Aktoersroller rolle) {
+    private static BrevbestillingDto lagBrevBestillingDto(Produserbaredokumenter produserbartdokument, Mottakerroller rolle) {
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(produserbartdokument);
         brevbestillingDto.setMottaker(rolle);
@@ -209,7 +210,7 @@ final class DokumentServiceTest {
     }
 
     private DokumentService lagDokumentService(BrevDataByggerVelger brevdatabyggervelger) {
-        Aktoer aktør = lagAktør(BRUKER);
+        Aktoer aktør = lagAktør(Aktoersroller.BRUKER);
         Behandling behandling = lagBehandling();
         BehandlingService behandlingService = mockBehandlingService(behandling);
         PersondataFasade persondataFasade = mockPersondataFasade(aktør);
@@ -231,13 +232,21 @@ final class DokumentServiceTest {
         when(saksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Bob Lastname");
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
         BrevDataService brevDataService = new BrevDataService(behandlingsresultatRepository, persondataFasade, saksbehandlerService, utenlandskMyndighetRepository);
-        BrevmottakerService brevmottakerService = new BrevmottakerService(mock(KontaktopplysningService.class),
+        BrevmottakerService brevmottakerService = new BrevmottakerService(
             avklarteVirksomheterService,
             mock(UtenlandskMyndighetService.class),
             behandlingsresultatService,
             mock(TrygdeavgiftsberegningService.class),
-            mock(LovvalgsperiodeService.class), behandlingService);
-        return new DokumentService(behandlingService, brevDataService, dokSysFasade, brevmottakerService, brevdatabyggervelger, lagBrevinput(avklartefaktaService));
+            mock(LovvalgsperiodeService.class),
+            behandlingService);
+        return new DokumentService(
+            behandlingService,
+            brevDataService,
+            dokSysFasade,
+            brevmottakerService,
+            brevdatabyggervelger,
+            lagBrevinput(avklartefaktaService),
+            mock(KontaktopplysningService.class));
     }
 
     private BrevdataGrunnlagFactory lagBrevinput(AvklartefaktaService avklartefaktaService) {
@@ -259,8 +268,8 @@ final class DokumentServiceTest {
         Behandling behandling = new Behandling();
         Fagsak fagsak = new Fagsak();
         fagsak.setGsakSaksnummer(GSAKSNUMMER);
-        Set<Aktoer> aktører = new HashSet<>(Arrays.asList(lagAktør(BRUKER),
-            lagAktør(REPRESENTANT)));
+        Set<Aktoer> aktører = new HashSet<>(Arrays.asList(lagAktør(Aktoersroller.BRUKER),
+            lagAktør(Aktoersroller.REPRESENTANT)));
         fagsak.setAktører(aktører);
         fagsak.setType(Sakstyper.EU_EOS);
         fagsak.setSaksnummer("123");
@@ -451,7 +460,7 @@ final class DokumentServiceTest {
         aktør.setAktørId("123");
         aktør.setOrgnr("999");
         aktør.setRolle(type);
-        if (type == REPRESENTANT) {
+        if (type == Aktoersroller.REPRESENTANT) {
             aktør.setRepresenterer(Representerer.BRUKER);
         }
         return aktør;

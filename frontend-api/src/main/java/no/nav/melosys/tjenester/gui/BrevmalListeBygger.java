@@ -6,7 +6,7 @@ import java.util.Objects;
 
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -23,7 +23,7 @@ import no.nav.melosys.tjenester.gui.dto.brev.*;
 import org.springframework.stereotype.Component;
 
 import static java.util.Arrays.asList;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
+import static no.nav.melosys.domain.kodeverk.Aktoersroller.VIRKSOMHET;
 import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
 
 @Component
@@ -45,7 +45,7 @@ public class BrevmalListeBygger {
     }
 
     private BrevmalResponse mottakerTilBrevmalDto(long behandlingId, MottakerDto mottaker) {
-        List<Produserbaredokumenter> produserbareDokumenter = null;
+        List<Produserbaredokumenter> produserbareDokumenter;
         if (unleash.isEnabled(ToggleName.MELOSYS_MEL_4835)) {
             produserbareDokumenter = brevmalListeService.hentMuligeProduserbaredokumenter(behandlingId, mottaker.getRolle());
         } else {
@@ -55,12 +55,14 @@ public class BrevmalListeBygger {
         List<BrevmalTypeDto> typer = produserbareDokumenter.stream().map(dokument -> switch (dokument) {
                 case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE ->
                     lagBrevmalTypeDtoForForventetSaksbehandlingstid(dokument);
-                case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevmalTypeDtoForMangelbrev(dokument, behandlingId);
+                case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER ->
+                    lagBrevmalTypeDtoForMangelbrev(dokument, behandlingId);
                 case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET ->
                     lagBrevmalTypeDtoForGenereltFritekstbrev(dokument, behandlingId);
                 case UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV ->
                     lagBrevmalTypeDtoForUtenlandskTrygdemyndighetFritekstbrev(dokument, behandlingId);
-                case FRITEKSTBREV -> lagBrevmalTypeDtoForFritekstbrev(dokument);
+                case FRITEKSTBREV ->
+                    lagBrevmalTypeDtoForFritekstbrev(dokument);
                 default -> null;
             })
             .filter(Objects::nonNull)
@@ -76,20 +78,20 @@ public class BrevmalListeBygger {
 
         switch (fagsak.getHovedpartRolle()) {
             case BRUKER -> {
-                mottakere.add(lagMottakerForRolle(behandlingId, BRUKER));
+                mottakere.add(lagMottakerMedAdresseOgFeilmelding(behandlingId, Mottakerroller.BRUKER));
                 if (!SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT))) {
-                    mottakere.add(lagMottakerForRolle(behandlingId, ARBEIDSGIVER));
+                    mottakere.add(lagMottakerMedAdresseOgFeilmelding(behandlingId, Mottakerroller.ARBEIDSGIVER));
                 }
                 if (unleash.isEnabled("melosys.trygdeavtale.fritekstbrev") && fagsak.erSakstypeTrygdeavtale() && behandling.harLand()) {
-                    mottakere.add(lagMottakerForRolle(behandlingId, TRYGDEMYNDIGHET));
+                    mottakere.add(lagMottakerMedRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
                 }
-                mottakere.add(lagMottakerAnnenOrganisasjon(ARBEIDSGIVER));
-                mottakere.add(lagMottakerAndreEtater());
+                mottakere.add(lagMottakerMedRolle(Mottakerroller.ANNEN_ORGANISASJON));
+                mottakere.add(lagMottakerMedRolle(Mottakerroller.NORSK_MYNDIGHET));
             }
             case VIRKSOMHET -> {
-                mottakere.add(lagMottakerForRolle(behandlingId, VIRKSOMHET));
-                mottakere.add(lagMottakerAnnenOrganisasjon(VIRKSOMHET));
-                mottakere.add(lagMottakerAndreEtater());
+                mottakere.add(lagMottakerMedAdresseOgFeilmelding(behandlingId, Mottakerroller.VIRKSOMHET));
+                mottakere.add(lagMottakerMedRolle(Mottakerroller.ANNEN_ORGANISASJON));
+                mottakere.add(lagMottakerMedRolle(Mottakerroller.NORSK_MYNDIGHET));
             }
             default -> throw new FunksjonellException("Sak må ha hovedpart for å kunne sende brev");
 
@@ -97,52 +99,44 @@ public class BrevmalListeBygger {
         return mottakere;
     }
 
-    private MottakerDto lagMottakerForRolle(long behandlingId, Aktoersroller rolle) {
+    private MottakerDto lagMottakerMedAdresseOgFeilmelding(long behandlingId, Mottakerroller rolle) {
         var mottakerDto = new MottakerDto();
-        mottakerDto.setType(mapTilTypeBeskrivelse(rolle));
+        mottakerDto.setType(mapRolleTilType(rolle));
         mottakerDto.setRolle(rolle);
         leggTilAdresseOgFeilmelding(mottakerDto, rolle, behandlingId);
         return mottakerDto;
     }
 
-    private MottakerDto lagMottakerAnnenOrganisasjon(Aktoersroller tilhørendeRolle) {
+    private MottakerDto lagMottakerMedRolle(Mottakerroller rolle) {
         var mottakerDto = new MottakerDto();
-        mottakerDto.setType(MottakerType.ANNEN_ORGANISASJON.getBeskrivelse());
-        mottakerDto.setRolle(tilhørendeRolle);
-        mottakerDto.setOrgnrSettesAvSaksbehandler(true);
+        mottakerDto.setRolle(rolle);
+        mottakerDto.setType(mapRolleTilType(rolle));
         return mottakerDto;
     }
 
-    private MottakerDto lagMottakerAndreEtater() {
-        var mottakerDto = new MottakerDto();
-        mottakerDto.setType(MottakerType.ANDRE_OFFENTLIGE_ETATER.getBeskrivelse());
-        mottakerDto.setRolle(ETAT);
-        mottakerDto.setOrgnrSettesAvSaksbehandler(true);
-        return mottakerDto;
-    }
-
-    private String mapTilTypeBeskrivelse(Aktoersroller hovedmottaker) {
-        var mottakerType = switch (hovedmottaker) {
+    private String mapRolleTilType(Mottakerroller rolle) {
+        var mottakerType = switch (rolle) {
             case BRUKER -> MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG;
             case VIRKSOMHET -> MottakerType.VIRKSOMHET;
             case ARBEIDSGIVER -> MottakerType.ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG;
-            case TRYGDEMYNDIGHET -> MottakerType.UTENLANDSK_TRYGDEMYNDIGHET;
-            default ->
-                throw new FunksjonellException("Vi støtter ikke brev med hovedmottaker: " + hovedmottaker.getKode());
+            case ANNEN_ORGANISASJON -> MottakerType.ANNEN_ORGANISASJON;
+            case UTENLANDSK_TRYGDEMYNDIGHET -> MottakerType.UTENLANDSK_TRYGDEMYNDIGHET;
+            case NORSK_MYNDIGHET -> MottakerType.NORSK_MYNDIGHET;
+            default -> throw new FunksjonellException("Vi støtter ikke brev med mottakerrolle: " + rolle.getKode());
         };
         return mottakerType.getBeskrivelse();
     }
 
-    private void leggTilAdresseOgFeilmelding(MottakerDto mottakerDto, Aktoersroller aktoersroller, long behandlingId) {
+    private void leggTilAdresseOgFeilmelding(MottakerDto mottakerDto, Mottakerroller rolle, long behandlingId) {
         try {
-            List<BrevAdresse> brevAdresser = null;
+            List<BrevAdresse> brevAdresser;
             if (unleash.isEnabled(ToggleName.MELOSYS_MEL_4835)) {
-                brevAdresser = brevmalListeService.hentBrevAdresseTilMottakere(behandlingId, aktoersroller);
+                brevAdresser = brevmalListeService.hentBrevAdresseTilMottakere(behandlingId, rolle);
             } else {
-                brevAdresser = brevmalListeService.hentBrevAdresseTilMottakereGammel(aktoersroller, behandlingId);
+                brevAdresser = brevmalListeService.hentBrevAdresseTilMottakereGammel(rolle, behandlingId);
             }
 
-            if ((aktoersroller == BRUKER || aktoersroller == VIRKSOMHET || aktoersroller == TRYGDEMYNDIGHET) && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty)) {
+            if ((rolle == Mottakerroller.BRUKER || rolle == Mottakerroller.VIRKSOMHET) && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty)) {
                 mottakerDto.setFeilmelding(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
             } else {
                 mottakerDto.setAdresser(brevAdresser.stream().map(MottakerAdresseDto::av).toList());
@@ -354,15 +348,13 @@ public class BrevmalListeBygger {
         final List<FeltvalgAlternativDto> valgAlternativer = new ArrayList<>();
 
         switch (fagsak.getType()) {
-            case EU_EOS ->
-                valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.HENVENDELSE_OM_TRYGDETILHØRLIGHET));
+            case EU_EOS -> valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.HENVENDELSE_OM_TRYGDETILHØRLIGHET));
             case FTRL -> {
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.CONFIRMATION_OF_MEMBERSHIP));
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.BEKREFTELSE_PÅ_MEDLEMSKAP));
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.HENVENDELSE_OM_MEDLEMSKAP));
             }
-            case TRYGDEAVTALE ->
-                valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.ENGELSK_FRITEKSTBREV));
+            case TRYGDEAVTALE -> valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.ENGELSK_FRITEKSTBREV));
         }
 
         valgAlternativer.add(fritekstFeltvalgAlternativDto);

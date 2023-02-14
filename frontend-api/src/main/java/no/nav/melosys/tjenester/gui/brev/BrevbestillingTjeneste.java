@@ -5,7 +5,7 @@ import java.util.List;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.finn.unleash.Unleash;
-import no.nav.melosys.domain.brev.Etat;
+import no.nav.melosys.domain.brev.NorskMyndighet;
 import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.brev.BrevbestillingFasade;
 import no.nav.melosys.service.brev.BrevbestillingServiceOld;
@@ -105,19 +105,19 @@ public class BrevbestillingTjeneste {
         brevbestillingFasade.produserBrev(behandlingID, brevbestillingDto);
     }
 
-    @PostMapping(value = "/mulige-mottakere-etater/{behandlingID}", produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Henter alle mulige mottakere for valgte etater")
-    public List<MuligBrevmottaker> hentMuligeBrevmottakereEtater(@PathVariable long behandlingID,
-                                                                 @RequestBody HentMuligeBrevmottakereEtaterRequest hentMuligeBrevmottakereEtaterRequest) {
+    @PostMapping(value = "/mulige-mottakere-norske-myndigheter/{behandlingID}", produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Henter alle mulige mottakere for valgte norske myndigheter")
+    public List<MuligBrevmottaker> hentMuligeBrevmottakereNorskMyndighet(@PathVariable long behandlingID,
+                                                                         @RequestBody HentMuligeBrevmottakereNorskMyndighetRequest hentMuligeBrevmottakereNorskMyndighetRequest) {
         aksesskontroll.autoriser(behandlingID);
-        var muligeBrevmottakere = brevbestillingFasade.hentMuligeBrevmottakereEtater(hentMuligeBrevmottakereEtaterRequest.orgnrEtater());
+        var muligeBrevmottakere = brevbestillingFasade.hentMuligeBrevmottakereNorskMyndighet(hentMuligeBrevmottakereNorskMyndighetRequest.orgnrNorskMyndighet());
         return muligeBrevmottakere.stream().map(MuligBrevmottaker::av).toList();
     }
 
-    @GetMapping(value = "/tilgjengelige-etater", produces = APPLICATION_JSON_VALUE)
-    @ApiOperation(value = "Henter alle tilgjengelige etater", response = Etat.class, responseContainer = "List")
-    public List<Etat> hentTilgjengeligeEtater() {
-        return brevbestillingFasade.hentTilgjengeligeEtater();
+    @GetMapping(value = "/tilgjengelige-norske-myndigheter", produces = APPLICATION_JSON_VALUE)
+    @ApiOperation(value = "Henter alle tilgjengelige norske myndigheter", response = NorskMyndighet.class, responseContainer = "List")
+    public List<NorskMyndighet> hentTilgjengeligeNorskeMyndigheter() {
+        return brevbestillingFasade.hentTilgjengeligeNorskeMyndigheter();
     }
 
     private HttpHeaders genPdfHeaders(String navn) {

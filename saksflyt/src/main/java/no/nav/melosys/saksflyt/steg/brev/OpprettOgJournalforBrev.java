@@ -1,13 +1,10 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.*;
-import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.brev.FritekstbrevBrevbestilling;
-import no.nav.melosys.domain.brev.FritekstvedleggBestilling;
-import no.nav.melosys.domain.brev.FritekstvedleggBrevbestilling;
+import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -81,7 +78,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
 
         MottakerType mottakerType = utledMottakerType(prosessinstans);
         String mottakerID = utledMottakerID(mottakerType, prosessinstans);
-        Aktoer mottaker = lagMottaker(mottakerType, mottakerID, prosessinstans);
+        Mottaker mottaker = lagMottaker(mottakerType, mottakerID, prosessinstans);
 
         var brevbestilling = prosessinstans.getData(BREVBESTILLING, DokgenBrevbestilling.class);
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
@@ -134,14 +131,14 @@ public class OpprettOgJournalforBrev implements StegBehandler {
         };
     }
 
-    private Aktoer lagMottaker(MottakerType mottakerType, String mottakerID, Prosessinstans prosessinstans) {
-        var mottaker = new Aktoer();
-        mottaker.setRolle(prosessinstans.getData(MOTTAKER, Aktoersroller.class, null));
+    private Mottaker lagMottaker(MottakerType mottakerType, String mottakerID, Prosessinstans prosessinstans) {
+        var mottaker = new Mottaker();
+        mottaker.setRolle(prosessinstans.getData(MOTTAKER, Mottakerroller.class, null));
         switch (mottakerType) {
             case PERSON_MED_AKTØR_ID -> mottaker.setAktørId(mottakerID);
             case PERSON_MED_FNR -> mottaker.setPersonIdent(mottakerID);
             case ORGANISASJON -> mottaker.setOrgnr(mottakerID);
-            case INSTITUSJON -> mottaker.setInstitusjonId(mottakerID);
+            case INSTITUSJON -> mottaker.setInstitusjonID(mottakerID);
         }
         return mottaker;
     }
@@ -175,13 +172,13 @@ public class OpprettOgJournalforBrev implements StegBehandler {
         };
     }
 
-    private List<Vedlegg> hentVedlegg(DokgenBrevbestilling brevbestilling, String saksnummer, Aktoer mottaker) {
+    private List<Vedlegg> hentVedlegg(DokgenBrevbestilling brevbestilling, String saksnummer, Mottaker mottaker) {
         List<Vedlegg> fritekstvedlegg = produserFritekstvedlegg(brevbestilling, mottaker);
         List<Vedlegg> vedleggFraJoark = hentVedleggDokumenterFraJoark(brevbestilling, saksnummer);
         return Stream.concat(fritekstvedlegg.stream(), vedleggFraJoark.stream()).toList();
     }
 
-    private List<Vedlegg> produserFritekstvedlegg(DokgenBrevbestilling brevbestilling, Aktoer mottaker) {
+    private List<Vedlegg> produserFritekstvedlegg(DokgenBrevbestilling brevbestilling, Mottaker mottaker) {
         List<FritekstvedleggBestilling> fritekstvedleggBestilling = brevbestilling.getFritekstvedleggBestilling();
         if (fritekstvedleggBestilling == null) {
             return Collections.emptyList();
@@ -217,7 +214,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
             }).toList();
     }
 
-    private String utledJournalføringsTittel(Behandling behandling, DokumentproduksjonsInfo dokumentproduksjonsInfo, DokgenBrevbestilling brevbestilling, Aktoer mottaker) {
+    private String utledJournalføringsTittel(Behandling behandling, DokumentproduksjonsInfo dokumentproduksjonsInfo, DokgenBrevbestilling brevbestilling, Mottaker mottaker) {
         if (brevbestilling instanceof FritekstbrevBrevbestilling fritekstbrevBrevbestilling) {
             String fritekstTittel = fritekstbrevBrevbestilling.getDokumentTittel() != null ? fritekstbrevBrevbestilling.getDokumentTittel() : fritekstbrevBrevbestilling.getFritekstTittel();
             if (isEmpty(fritekstTittel)) {

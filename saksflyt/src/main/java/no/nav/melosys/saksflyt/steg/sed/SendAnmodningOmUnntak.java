@@ -1,5 +1,11 @@
 package no.nav.melosys.saksflyt.steg.sed;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
@@ -9,6 +15,7 @@ import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.BucType;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -22,13 +29,6 @@ import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
-
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.TRYGDEMYNDIGHET;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.YTTERLIGERE_INFO_SED;
 
 @Component
@@ -86,7 +86,7 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
         return new DoksysBrevbestilling.Builder().medProduserbartDokument(Produserbaredokumenter.ANMODNING_UNNTAK)
             .medAvsenderID(hentSaksbehandler(prosessinstans))
-            .medMottakere(Mottaker.av(TRYGDEMYNDIGHET))
+            .medMottakere(Mottaker.av(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET))
             .medBehandling(behandling)
             .medYtterligereInformasjon(prosessinstans.getData(YTTERLIGERE_INFO_SED))
             .build();

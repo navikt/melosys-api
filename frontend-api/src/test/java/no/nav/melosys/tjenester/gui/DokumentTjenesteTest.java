@@ -1,10 +1,8 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.util.Collections;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
@@ -18,6 +16,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Collections;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
@@ -69,7 +69,7 @@ class DokumentTjenesteTest {
 
     @Test
     void produserUtkastBrev() throws Exception {
-        BrevbestillingRequest brevBestillingDto = lagBrevbestillingMedMottaker(Aktoersroller.BRUKER);
+        BrevbestillingRequest brevBestillingDto = lagBrevbestillingMedMottaker(Mottakerroller.BRUKER);
         when(dokumentServiceFasade.produserUtkast(anyLong(), any())).thenReturn(new byte[1]);
 
         mockMvc.perform(post(BASE_URL + "/pdf/brev/utkast/{behandlingID}/{produserbartDokument}", 1L, Produserbaredokumenter.MELDING_HENLAGT_SAK)
@@ -95,7 +95,7 @@ class DokumentTjenesteTest {
 
     @Test
     void produserDokument() throws Exception {
-        var brevBestillingDto = lagBrevbestillingMedMottaker(Aktoersroller.BRUKER);
+        var brevBestillingDto = lagBrevbestillingMedMottaker(Mottakerroller.BRUKER);
 
         mockMvc.perform(post(BASE_URL + "/opprett/{behandlingID}/{produserbartDokument}", 1L, Produserbaredokumenter.MELDING_HENLAGT_SAK)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -117,7 +117,7 @@ class DokumentTjenesteTest {
             .andExpect(jsonPath("$.message", containsString("Mottaker trengs for å bestille")));
     }
 
-    private BrevbestillingRequest lagBrevbestillingMedMottaker(Aktoersroller mottaker) {
-        return new BrevbestillingRequest(null, mottaker, null, null, null, null, null, null, null, null, null, null, null, null, null, false, null, null, null, null, null, null);
+    private BrevbestillingRequest lagBrevbestillingMedMottaker(Mottakerroller rolle) {
+        return new BrevbestillingRequest(null, rolle, null, null, null, null, null, null, null, null, null, null, null, null, null, false, null, null, null, null, null, null);
     }
 }

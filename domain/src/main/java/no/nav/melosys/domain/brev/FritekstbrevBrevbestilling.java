@@ -1,6 +1,6 @@
 package no.nav.melosys.domain.brev;
 
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 
 public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
@@ -9,7 +9,7 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
     private boolean kontaktopplysninger;
     private String navnFullmektig;
     private boolean brukerSkalHaKopi;
-    private Aktoersroller mottakerType;
+    private Mottakerroller mottakerType;
     private Representerer representerer;
     private String dokumentTittel;
 
@@ -54,7 +54,7 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
         return dokumentTittel;
     }
 
-    public Aktoersroller getMottakerType() {
+    public Mottakerroller getMottakerType() {
         return mottakerType;
     }
 
@@ -72,7 +72,7 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
         private boolean kontaktopplysninger;
         private String navnFullmektig;
         private boolean brukerSkalHaKopi;
-        private Aktoersroller mottakerType;
+        private Mottakerroller mottakerType;
         private Representerer representerer;
         private String dokumentTittel;
 
@@ -121,7 +121,7 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
             return this;
         }
 
-        public Builder medMottakerType(Aktoersroller mottakerType) {
+        public Builder medMottakerType(Mottakerroller mottakerType) {
             this.mottakerType = mottakerType;
             return this;
         }

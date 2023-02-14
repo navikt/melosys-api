@@ -7,7 +7,8 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsberegningsresultat;
 import no.nav.melosys.domain.brev.BrevkopiRegel;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.brev.NorskMyndighet;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -16,7 +17,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -31,15 +31,12 @@ import org.springframework.transaction.annotation.Transactional;
 import static java.util.Optional.ofNullable;
 import static no.nav.melosys.domain.Preferanse.PreferanseEnum.RESERVERT_FRA_A1;
 import static no.nav.melosys.domain.brev.BrevkopiRegel.*;
-import static no.nav.melosys.domain.brev.FastMottakerMedOrgnr.SKATTEETATEN;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 
 @Service
 public class BrevmottakerService {
     private static final Logger log = LoggerFactory.getLogger(BrevmottakerService.class);
 
-    private final KontaktopplysningService kontaktopplysningService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final BehandlingsresultatService behandlingsresultatService;
@@ -47,13 +44,11 @@ public class BrevmottakerService {
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final BehandlingService behandlingService;
 
-    public BrevmottakerService(KontaktopplysningService kontaktopplysningService,
-                               AvklarteVirksomheterService avklarteVirksomheterService,
+    public BrevmottakerService(AvklarteVirksomheterService avklarteVirksomheterService,
                                UtenlandskMyndighetService utenlandskMyndighetService,
                                BehandlingsresultatService behandlingsresultatService,
                                TrygdeavgiftsberegningService trygdeavgiftsberegningService,
                                LovvalgsperiodeService lovvalgsperiodeService, BehandlingService behandlingService) {
-        this.kontaktopplysningService = kontaktopplysningService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -62,46 +57,16 @@ public class BrevmottakerService {
         this.behandlingService = behandlingService;
     }
 
-    Aktoersroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) {
+    Mottakerroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) {
         return switch (produserbartDokument) {
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
-                AVSLAG_YRKESAKTIV, ORIENTERING_ANMODNING_UNNTAK, MELDING_MANGLENDE_OPPLYSNINGER, MELDING_HENLAGT_SAK, INNVILGELSE_YRKESAKTIV ->
-                BRUKER;
-            case INNVILGELSE_ARBEIDSGIVER, AVSLAG_ARBEIDSGIVER -> ARBEIDSGIVER;
-            case ANMODNING_UNNTAK, ATTEST_A1 -> TRYGDEMYNDIGHET;
+                AVSLAG_YRKESAKTIV, ORIENTERING_ANMODNING_UNNTAK, MELDING_MANGLENDE_OPPLYSNINGER, MELDING_HENLAGT_SAK, INNVILGELSE_YRKESAKTIV -> Mottakerroller.BRUKER;
+            case INNVILGELSE_ARBEIDSGIVER, AVSLAG_ARBEIDSGIVER -> Mottakerroller.ARBEIDSGIVER;
+            case ANMODNING_UNNTAK, ATTEST_A1 -> Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET;
             default -> throw new TekniskException("Valg av mottakerRolle støttes ikke for " + produserbartDokument);
         };
     }
 
-    public Aktoer avklarMottaker(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling) {
-        List<Aktoer> mottakere = avklarMottakere(produserbartDokument, mottaker, behandling, false, false);
-        if (mottakere.size() < 1) {
-            throw new FunksjonellException("Finner ikke avklart mottaker for produserbart dokument " + produserbartDokument.getKode() + " og rolle " + mottaker.hentAktørsRolle() + " for behandling " + behandling.getId());
-        }
-        if (mottakere.size() > 1) {
-            throw new FunksjonellException("Flere enn én mottaker ble funnet for produserbart dokument " + produserbartDokument.getKode() + " og rolle " + mottaker.hentAktørsRolle() + " for behandling " + behandling.getId());
-        }
-        return mottakere.get(0);
-    }
-
-    public List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling) {
-        return avklarMottakere(produserbartDokument, mottaker, behandling, false);
-    }
-
-    public List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling, boolean forhåndsvisning) {
-        return avklarMottakere(produserbartDokument, mottaker, behandling, forhåndsvisning, true);
-    }
-
-    public List<Aktoer> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling, boolean forhåndsvisning, boolean kunAvklarteVirksomheter) {
-        return switch (mottaker.hentAktørsRolle()) {
-            case BRUKER -> avklarMottakereForBruker(produserbartDokument, behandling, forhåndsvisning);
-            case VIRKSOMHET -> avklarMottakereForVirksomhet(behandling);
-            case ARBEIDSGIVER -> avklarMottakereForArbeidsgiver(behandling, kunAvklarteVirksomheter);
-            case TRYGDEMYNDIGHET -> avklarMottakereForMyndigheter(mottaker, behandling, produserbartDokument);
-            case ETAT -> Collections.singletonList(mottaker.getAktør());
-            default -> throw new FunksjonellException("%s støttes ikke.".formatted(mottaker.hentAktørsRolle()));
-        };
-    }
 
     @Transactional
     public Mottakerliste hentMottakerliste(Produserbaredokumenter produserbartdokument, long behandlingId) {
@@ -119,7 +84,77 @@ public class BrevmottakerService {
         return mottakerListeKopi;
     }
 
-    private List<Aktoer> avklarMottakereForBruker(Produserbaredokumenter produserbartDokument, Behandling behandling, boolean forhåndsvisning) {
+    private void leggTilKopier(long behandlingId, Mottakerliste mottakerliste, Collection<BrevkopiRegel> brevkopiRegler) {
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
+        boolean brukerHarFullmektig = behandling.getFagsak().finnRepresentant(Representerer.BRUKER).isPresent();
+
+        if (brevkopiRegler.contains(BRUKER_FÅR_KOPI) ||
+            (brevkopiRegler.contains(BRUKER_FÅR_KOPI_HVIS_FULLMEKTIG_FINNES) && brukerHarFullmektig)) {
+            mottakerliste.getKopiMottakere().add(Mottakerroller.BRUKER);
+        }
+        if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI)) {
+            mottakerliste.getKopiMottakere().add(Mottakerroller.ARBEIDSGIVER);
+        }
+        if (brevkopiRegler.contains(SKATT_FÅR_KOPI)) {
+            mottakerliste.getFasteMottakere().add(NorskMyndighet.SKATTEETATEN);
+        }
+        if (brevkopiRegler.contains(UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI)) {
+            mottakerliste.getKopiMottakere().add(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
+        }
+
+        if (brevkopiRegler.contains(UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI_HVIS_IKKE_ART_8_2)) {
+            Optional.ofNullable(lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId())).ifPresent(lovvalgsperiode -> {
+                    if (lovvalgsperiode.getBestemmelse() != Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2) {
+                        mottakerliste.getKopiMottakere().add(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
+                    }
+                }
+            );
+        }
+
+        Optional<Trygdeavgiftsberegningsresultat> trygdeavgiftsberegningsresultat = trygdeavgiftsberegningService.finnBeregningsresultat(behandling.getId());
+
+        trygdeavgiftsberegningsresultat.ifPresent(resultat -> {
+            if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI_HVIS_IKKE_SELVBETALENDE_BRUKER) && resultat.erIkkeSelvbetalendeBruker()) {
+                mottakerliste.getKopiMottakere().add(Mottakerroller.ARBEIDSGIVER);
+            }
+
+            if (brevkopiRegler.contains(SKATT_FÅR_KOPI_HVIS_AVGIFTSPLIKTIG_INNTEKT) && resultat.harAvgiftspliktigInntekt()) {
+                mottakerliste.getFasteMottakere().add(NorskMyndighet.SKATTEETATEN);
+            }
+        });
+    }
+
+    public Mottaker avklarMottaker(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling) {
+        List<Mottaker> mottakere = avklarMottakere(produserbartDokument, mottaker, behandling, false, false);
+        if (mottakere.isEmpty()) {
+            throw new FunksjonellException("Finner ikke avklart mottaker for produserbart dokument " + produserbartDokument.getKode() + " og rolle " + mottaker.getRolle() + " for behandling " + behandling.getId());
+        }
+        if (mottakere.size() > 1) {
+            throw new FunksjonellException("Flere enn én mottaker ble funnet for produserbart dokument " + produserbartDokument.getKode() + " og rolle " + mottaker.getRolle() + " for behandling " + behandling.getId());
+        }
+        return mottakere.get(0);
+    }
+
+    public List<Mottaker> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling) {
+        return avklarMottakere(produserbartDokument, mottaker, behandling, false);
+    }
+
+    public List<Mottaker> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling, boolean forhåndsvisning) {
+        return avklarMottakere(produserbartDokument, mottaker, behandling, forhåndsvisning, true);
+    }
+
+    public List<Mottaker> avklarMottakere(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling, boolean forhåndsvisning, boolean kunAvklarteVirksomheter) {
+        return switch (mottaker.getRolle()) {
+            case BRUKER -> avklarMottakereForBruker(produserbartDokument, behandling, forhåndsvisning);
+            case VIRKSOMHET -> avklarMottakereForVirksomhet(behandling);
+            case ARBEIDSGIVER -> avklarMottakereForArbeidsgiver(behandling, kunAvklarteVirksomheter);
+            case UTENLANDSK_TRYGDEMYNDIGHET -> avklarMottakereForUtenlandskTrygdeyndighet(mottaker, behandling, produserbartDokument);
+            case NORSK_MYNDIGHET -> avklarMottakereForNorskMyndighet(mottaker);
+            default -> throw new FunksjonellException("%s støttes ikke.".formatted(mottaker.getRolle()));
+        };
+    }
+
+    private List<Mottaker> avklarMottakereForBruker(Produserbaredokumenter produserbartDokument, Behandling behandling, boolean forhåndsvisning) {
         Fagsak fagsak = behandling.getFagsak();
         Aktoer bruker = fagsak.hentBruker();
         if (bruker == null) {
@@ -135,38 +170,38 @@ public class BrevmottakerService {
             tilBegge = !forhåndsvisning;
         }
 
-        List<Aktoer> mottakere = new ArrayList<>();
+        List<Mottaker> mottakere = new ArrayList<>();
         Optional<Aktoer> representant = fagsak.finnRepresentant(Representerer.BRUKER);
         if (representant.isPresent()) {
-            mottakere.add(representant.get());
+            mottakere.add(Mottaker.av(representant.get()));
             if (tilBegge) {
-                mottakere.add(bruker);
+                mottakere.add(Mottaker.av(bruker));
             }
         } else {
-            mottakere.add(bruker);
+            mottakere.add(Mottaker.av(bruker));
         }
         return mottakere;
     }
 
-    private List<Aktoer> avklarMottakereForVirksomhet(Behandling behandling) {
+    private List<Mottaker> avklarMottakereForVirksomhet(Behandling behandling) {
         Aktoer virksomhet = behandling.getFagsak().hentVirksomhet();
         if (virksomhet == null) {
             throw new FunksjonellException("Virksomhet er ikke registrert.");
         }
-        return List.of(virksomhet);
+        return List.of(Mottaker.av(virksomhet));
     }
 
-    private List<Aktoer> avklarMottakereForArbeidsgiver(Behandling behandling, boolean kunAvklarteVirksomheter) {
+    private List<Mottaker> avklarMottakereForArbeidsgiver(Behandling behandling, boolean kunAvklarteVirksomheter) {
         Fagsak fagsak = behandling.getFagsak();
         Optional<Aktoer> representant = fagsak.finnRepresentant(Representerer.ARBEIDSGIVER);
         if (representant.isPresent()) {
-            return Collections.singletonList(representant.get());
+            return Collections.singletonList(Mottaker.av(representant.get()));
         } else {
             return kunAvklarteVirksomheter ? avklarArbeidsgiverFraAvklarteVirksomheter(behandling) : avklarArbeidsgiverFraAlleVirksomheter(behandling);
         }
     }
 
-    private List<Aktoer> avklarArbeidsgiverFraAvklarteVirksomheter(Behandling behandling) {
+    private List<Mottaker> avklarArbeidsgiverFraAvklarteVirksomheter(Behandling behandling) {
         Set<String> arbeidsgivendeOrgnumre = avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling);
         if (arbeidsgivendeOrgnumre.isEmpty()) {
             if (avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling).isEmpty()) {
@@ -179,49 +214,46 @@ public class BrevmottakerService {
         return avklarArbeidsgiver(arbeidsgivendeOrgnumre);
     }
 
-    private List<Aktoer> avklarArbeidsgiverFraAlleVirksomheter(Behandling behandling) {
+    private List<Mottaker> avklarArbeidsgiverFraAlleVirksomheter(Behandling behandling) {
         Set<String> arbeidsgiverOrgnumre = new HashSet<>();
         arbeidsgiverOrgnumre.addAll(behandling.hentArbeidsforholdDokument().hentOrgnumre());
         arbeidsgiverOrgnumre.addAll(behandling.getMottatteOpplysninger().getMottatteOpplysningerData().hentAlleOrganisasjonsnumre());
         return avklarArbeidsgiver(arbeidsgiverOrgnumre);
     }
 
-    private List<Aktoer> avklarArbeidsgiver(Set<String> arbeidsgiverOrgnumre) {
+    private List<Mottaker> avklarArbeidsgiver(Set<String> arbeidsgiverOrgnumre) {
         return arbeidsgiverOrgnumre.stream()
-            .map(BrevmottakerService::lagAktoerForArbeidsgiver)
+            .map(BrevmottakerService::lagMottakerForArbeidsgiver)
             .toList();
     }
 
-    private static Aktoer lagAktoerForArbeidsgiver(String orgnr) {
-        Aktoer arbeidsgiver = new Aktoer();
-        arbeidsgiver.setRolle(ARBEIDSGIVER);
+    private static Mottaker lagMottakerForArbeidsgiver(String orgnr) {
+        Mottaker arbeidsgiver = new Mottaker(Mottakerroller.ARBEIDSGIVER);
         arbeidsgiver.setOrgnr(orgnr);
         return arbeidsgiver;
     }
 
-    private List<Aktoer> avklarMottakereForMyndigheter(Mottaker mottaker,
-                                                       Behandling behandling,
-                                                       Produserbaredokumenter produserbartDokument) {
-        if (mottaker.getAktør().getOrgnr() != null) {
+    private List<Mottaker> avklarMottakereForUtenlandskTrygdeyndighet(Mottaker mottaker, Behandling behandling, Produserbaredokumenter produserbartDokument) {
+        if (mottaker.getOrgnr() != null) {
             // Norsk myndighet har orgnummer.
-            return Collections.singletonList(mottaker.getAktør());
+            return Collections.singletonList(mottaker);
         } else {
             // Utenlandsk myndighet
-            Map<UtenlandskMyndighet, Aktoer> utenlandskMyndighetAktoerMap
+            Map<UtenlandskMyndighet, Mottaker> utenlandskMyndighetMottakerMap
                 = utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling);
 
-            if (produserbartDokument == UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV && utenlandskMyndighetAktoerMap.isEmpty()) {
+            if (produserbartDokument == UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV && utenlandskMyndighetMottakerMap.isEmpty()) {
                 throw new FunksjonellException("Du kan ikke sende brev til trygdemyndigheten i landet du har valgt, fordi korrekt adresse er ukjent.");
             }
 
             if (produserbartDokument == ATTEST_A1 && kanReservereMotA1(behandling)) {
-                return utenlandskMyndighetAktoerMap.entrySet()
+                return utenlandskMyndighetMottakerMap.entrySet()
                     .stream()
                     .filter(e -> myndighetØnskerA1(e.getKey()))
                     .map(Map.Entry::getValue)
                     .toList();
             } else {
-                return new ArrayList<>(utenlandskMyndighetAktoerMap.values());
+                return new ArrayList<>(utenlandskMyndighetMottakerMap.values());
             }
         }
     }
@@ -241,50 +273,10 @@ public class BrevmottakerService {
             .noneMatch(RESERVERT_FRA_A1::equals);
     }
 
-    public Kontaktopplysning hentKontaktopplysning(String saksnummer, Aktoer mottaker) {
-        if (mottaker != null && mottaker.erOrganisasjon()) {
-            return kontaktopplysningService.hentKontaktopplysning(saksnummer, mottaker.getOrgnr()).orElse(null);
+    private List<Mottaker> avklarMottakereForNorskMyndighet(Mottaker mottaker) {
+        if (mottaker.getOrgnr() != null) {
+            return Collections.singletonList(mottaker);
         }
-        return null;
-    }
-
-    private void leggTilKopier(long behandlingId, Mottakerliste mottakerliste, Collection<BrevkopiRegel> brevkopiRegler) {
-        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
-        boolean brukerHarFullmektig = behandling.getFagsak().finnRepresentant(Representerer.BRUKER).isPresent();
-
-        if (brevkopiRegler.contains(BRUKER_FÅR_KOPI) ||
-            (brevkopiRegler.contains(BRUKER_FÅR_KOPI_HVIS_FULLMEKTIG_FINNES) && brukerHarFullmektig)) {
-            mottakerliste.getKopiMottakere().add(BRUKER);
-        }
-        if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI)) {
-            mottakerliste.getKopiMottakere().add(ARBEIDSGIVER);
-        }
-        if (brevkopiRegler.contains(SKATT_FÅR_KOPI)) {
-            mottakerliste.getFasteMottakere().add(SKATTEETATEN);
-        }
-        if (brevkopiRegler.contains(UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI)) {
-            mottakerliste.getKopiMottakere().add(TRYGDEMYNDIGHET);
-        }
-
-        if (brevkopiRegler.contains(UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI_HVIS_IKKE_ART_8_2)) {
-            Optional.ofNullable(lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId())).ifPresent(lovvalgsperiode -> {
-                    if (lovvalgsperiode.getBestemmelse() != Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2) {
-                        mottakerliste.getKopiMottakere().add(TRYGDEMYNDIGHET);
-                    }
-                }
-            );
-        }
-
-        Optional<Trygdeavgiftsberegningsresultat> trygdeavgiftsberegningsresultat = trygdeavgiftsberegningService.finnBeregningsresultat(behandling.getId());
-
-        trygdeavgiftsberegningsresultat.ifPresent(resultat -> {
-            if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI_HVIS_IKKE_SELVBETALENDE_BRUKER) && resultat.erIkkeSelvbetalendeBruker()) {
-                mottakerliste.getKopiMottakere().add(ARBEIDSGIVER);
-            }
-
-            if (brevkopiRegler.contains(SKATT_FÅR_KOPI_HVIS_AVGIFTSPLIKTIG_INNTEKT) && resultat.harAvgiftspliktigInntekt()) {
-                mottakerliste.getFasteMottakere().add(SKATTEETATEN);
-            }
-        });
+        throw new FunksjonellException("Forventer orgnr i mottaker med rolle NORSK_MYNDIGHET");
     }
 }

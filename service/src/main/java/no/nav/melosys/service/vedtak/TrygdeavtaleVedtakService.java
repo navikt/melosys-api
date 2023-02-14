@@ -95,7 +95,7 @@ public class TrygdeavtaleVedtakService {
     private BrevbestillingDto lagAvslagMangledeOpplysningerBrevbestilling(FattVedtakRequest request) {
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER);
-        brevbestillingDto.setMottaker(Aktoersroller.BRUKER);
+        brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
         brevbestillingDto.setBestillersId(request.getBestillersId());
         brevbestillingDto.setFritekst(request.getFritekst());
         return brevbestillingDto;
@@ -104,7 +104,7 @@ public class TrygdeavtaleVedtakService {
     private BrevbestillingDto lagTrygdeavtaleBrevbestilling(FattVedtakRequest request, Produserbaredokumenter produserbaredokumenter) {
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(produserbaredokumenter);
-        brevbestillingDto.setMottaker(Aktoersroller.BRUKER);
+        brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
         brevbestillingDto.setKopiMottakere(request.getKopiMottakere());
         brevbestillingDto.setInnledningFritekst(request.getInnledningFritekst());
         brevbestillingDto.setBegrunnelseFritekst(request.getBegrunnelseFritekst());
@@ -121,8 +121,7 @@ public class TrygdeavtaleVedtakService {
             case US -> Produserbaredokumenter.TRYGDEAVTALE_US;
             case CA -> Produserbaredokumenter.TRYGDEAVTALE_CAN;
             case AU -> Produserbaredokumenter.TRYGDEAVTALE_AU;
-            default ->
-                throw new TekniskException("Søknadsland er ikke implementert som produsertbart dokument : " + soeknadsland);
+            default -> throw new TekniskException("Søknadsland er ikke implementert som produsertbart dokument : " + soeknadsland);
         };
     }
 

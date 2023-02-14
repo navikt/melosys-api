@@ -1,11 +1,11 @@
 package no.nav.melosys.domain.brev.muligemottakere;
 
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 
 public class Brevmottaker {
     private final String mottakerNavn;
     private final String dokumentNavn;
-    private final Aktoersroller rolle;
+    private final Mottakerroller rolle;
     private final String orgnr;
     private final String aktørId;
     private final String institusjonId;
@@ -27,7 +27,7 @@ public class Brevmottaker {
         return dokumentNavn;
     }
 
-    public Aktoersroller getRolle() {
+    public Mottakerroller getRolle() {
         return rolle;
     }
 
@@ -46,7 +46,7 @@ public class Brevmottaker {
     public static final class Builder {
         private String mottakerNavn;
         private String dokumentNavn;
-        private Aktoersroller rolle;
+        private Mottakerroller rolle;
         private String orgnr;
         private String aktørId;
         private String institusjonId;
@@ -61,7 +61,7 @@ public class Brevmottaker {
             return this;
         }
 
-        public Builder medRolle(Aktoersroller aktoerrolle) {
+        public Builder medRolle(Mottakerroller aktoerrolle) {
             this.rolle = aktoerrolle;
             return this;
         }

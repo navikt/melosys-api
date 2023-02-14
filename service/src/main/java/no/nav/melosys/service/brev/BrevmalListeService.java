@@ -3,15 +3,14 @@ package no.nav.melosys.service.brev;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Stream;
 
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Postadresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -20,7 +19,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
-import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.bestilling.HentBrevAdresseTilMottakereService;
 import no.nav.melosys.service.brev.bestilling.HentMuligeProduserbaredokumenterService;
@@ -54,16 +52,14 @@ public class BrevmalListeService {
     private final KontaktopplysningService kontaktopplysningService;
 
     @Deprecated(since = "Ta vekk med melosys.MEL-4835.refactor1, erstattet av komponent")
-    private final UtenlandskMyndighetService utenlandskMyndighetService;
-
-    @Deprecated(since = "Ta vekk med melosys.MEL-4835.refactor1, erstattet av komponent")
     private final EregFasade eregFasade;
 
-    public BrevmalListeService(HentMuligeProduserbaredokumenterService hentMuligeProduserbaredokumenterService, HentBrevAdresseTilMottakereService hentBrevAdresseTilMottakereService, BrevmottakerService brevmottakerService,
+    public BrevmalListeService(HentMuligeProduserbaredokumenterService hentMuligeProduserbaredokumenterService,
+                               HentBrevAdresseTilMottakereService hentBrevAdresseTilMottakereService,
+                               BrevmottakerService brevmottakerService,
                                BehandlingService behandlingService,
                                PersondataFasade persondataFasade,
                                KontaktopplysningService kontaktopplysningService,
-                               UtenlandskMyndighetService utenlandskMyndighetService,
                                EregFasade eregFasade) {
         this.hentMuligeProduserbaredokumenterService = hentMuligeProduserbaredokumenterService;
         this.hentBrevAdresseTilMottakereService = hentBrevAdresseTilMottakereService;
@@ -71,17 +67,16 @@ public class BrevmalListeService {
         this.behandlingService = behandlingService;
         this.persondataFasade = persondataFasade;
         this.kontaktopplysningService = kontaktopplysningService;
-        this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.eregFasade = eregFasade;
     }
 
-    public List<Produserbaredokumenter> hentMuligeProduserbaredokumenter(long behandlingId, Aktoersroller aktoersroller) {
-        return hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(behandlingId, aktoersroller);
+    public List<Produserbaredokumenter> hentMuligeProduserbaredokumenter(long behandlingId, Mottakerroller rolle) {
+        return hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(behandlingId, rolle);
     }
 
     @Deprecated(since = "Ta vekk med melosys.MEL-4835.refactor1, erstattet av komponent")
     @Transactional
-    public List<Produserbaredokumenter> hentMuligeProduserbaredokumenterGammel(long behandlingId, Aktoersroller rolle) {
+    public List<Produserbaredokumenter> hentMuligeProduserbaredokumenterGammel(long behandlingId, Mottakerroller rolle) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
 
         if (behandling.erInaktiv()) {
@@ -97,34 +92,37 @@ public class BrevmalListeService {
                 brevmaler.addAll(asList(MANGELBREV_BRUKER, GENERELT_FRITEKSTBREV_BRUKER));
                 yield brevmaler;
             }
-            case ARBEIDSGIVER -> List.of(MANGELBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
             case VIRKSOMHET -> Collections.singletonList(GENERELT_FRITEKSTBREV_VIRKSOMHET);
-            case TRYGDEMYNDIGHET -> Collections.singletonList(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV);
-            case ETAT -> Collections.singletonList(FRITEKSTBREV);
+            case ARBEIDSGIVER -> List.of(MANGELBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
+            case ANNEN_ORGANISASJON -> behandling.getFagsak().getHovedpartRolle() == Aktoersroller.VIRKSOMHET
+                ? Collections.singletonList(GENERELT_FRITEKSTBREV_VIRKSOMHET)
+                : List.of(MANGELBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
+            case UTENLANDSK_TRYGDEMYNDIGHET -> Collections.singletonList(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV);
+            case NORSK_MYNDIGHET -> Collections.singletonList(FRITEKSTBREV);
             default -> throw new FunksjonellException("Rollen " + rolle + " kan ikke sende brev gjennom brevmenyen");
         };
     }
 
     @Transactional
-    public List<BrevAdresse> hentBrevAdresseTilMottakere(long behandlingId, Aktoersroller aktoersroller) {
-        return hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(behandlingId, aktoersroller);
+    public List<BrevAdresse> hentBrevAdresseTilMottakere(long behandlingId, Mottakerroller rolle) {
+        return hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(behandlingId, rolle);
     }
 
     @Deprecated(since = "Ta vekk med melosys.MEL-4835.refactor1, erstattet av komponent")
     @Transactional
-    public List<BrevAdresse> hentBrevAdresseTilMottakereGammel(Aktoersroller aktoersroller, long behandlingId) {
+    public List<BrevAdresse> hentBrevAdresseTilMottakereGammel(Mottakerroller rolle, long behandlingId) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
-        var mottakere = brevmottakerService.avklarMottakere(null, Mottaker.av(aktoersroller), behandling, false, false);
+        var mottakere = brevmottakerService.avklarMottakere(null, Mottaker.av(rolle), behandling, false, false);
         List<BrevAdresse> brevAdresser = new ArrayList<>();
 
-        for (Aktoer mottaker : mottakere) {
+        for (Mottaker mottaker : mottakere) {
             brevAdresser.add(tilBrevAdresse(mottaker, behandling));
         }
         return brevAdresser;
     }
 
     @Deprecated(since = "Ta vekk med melosys.MEL-4835.refactor1, erstattet av komponent")
-    private BrevAdresse tilBrevAdresse(Aktoer mottaker, Behandling behandling) {
+    private BrevAdresse tilBrevAdresse(Mottaker mottaker, Behandling behandling) {
         Persondata persondata = null;
         Kontaktopplysning kontaktopplysning = null;
         OrganisasjonDokument orgDokument = null;
@@ -134,8 +132,8 @@ public class BrevmalListeService {
                 persondata = persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
                 break;
             }
-            case REPRESENTANT: {
-                if (mottaker.erPerson()) {
+            case FULLMEKTIG: {
+                if (mottaker.getPersonIdent() != null) {
                     persondata = persondataFasade.hentPerson(mottaker.getPersonIdent());
                     break;
                 }
@@ -146,17 +144,6 @@ public class BrevmalListeService {
                 String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null ? kontaktopplysning.getKontaktOrgnr() : mottaker.getOrgnr();
                 orgDokument = (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();
                 break;
-            }
-            case TRYGDEMYNDIGHET: {
-                var utenlandskMyndighet =
-                    utenlandskMyndighetService.hentUtenlandskMyndighet(mottaker.hentMyndighetLandkode(), UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV);
-                return new BrevAdresse.Builder()
-                    .medMottakerNavn(utenlandskMyndighet.navn)
-                    .medAdresselinjer(Stream.of(utenlandskMyndighet.gateadresse1, utenlandskMyndighet.gateadresse2).toList())
-                    .medPostnr(utenlandskMyndighet.postnummer)
-                    .medPoststed(utenlandskMyndighet.poststed)
-                    .medLand(utenlandskMyndighet.land)
-                    .build();
             }
             default:
                 throw new FunksjonellException("Mottakersrolle støttes ikke: " + mottaker.getRolle());

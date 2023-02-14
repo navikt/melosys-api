@@ -1,8 +1,8 @@
 package no.nav.melosys.integrasjon.doksys;
 
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.brev.Mottaker;
 
 public class DokumentbestillingMetadata {
 
@@ -15,7 +15,7 @@ public class DokumentbestillingMetadata {
     // Brukernavn må settes hvis dokprod ikke utleder registerInfo
     public String brukerNavn;
 
-    public Aktoer mottaker;
+    public Mottaker mottaker;
 
     // Fødselsnummer/tss id/ org.nr. til personen/ organisasjonen som er mottaker av dokumentet.
     public String mottakerID;

@@ -2,9 +2,9 @@ package no.nav.melosys.service.brev;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.brev.NorskMyndighet;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
@@ -29,23 +29,23 @@ public class DokumentNavnService {
     }
 
 
-    public String utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(Behandling behandling, Produserbaredokumenter produserbaredokumenter, Aktoersroller mottakerRolle) {
-        if (erTrygdeavtale(produserbaredokumenter)) {
-            Aktoer mottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(mottakerRolle), behandling);
-            return utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, produserbaredokumenter, mottaker, null);
+    public String utledDokumentNavnForProduserbaredokumenterOgMottakerrolle(Behandling behandling, Produserbaredokumenter produserbaredokumenter, Mottakerroller mottakerRolle) {
+        if (erTrygdeavtaleVedtaksbrev(produserbaredokumenter)) {
+            Mottaker mottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(mottakerRolle), behandling);
+            return utledDokumentNavnForProduserbaredokumenterOgMottaker(behandling, produserbaredokumenter, mottaker, null);
         }
         return produserbaredokumenter.getBeskrivelse();
     }
 
-    public String utledDokumentNavnForProduserbaredokumenterOgAktoer(Behandling behandling, Produserbaredokumenter produserbaredokumenter, Aktoer mottaker, String standardTekst) {
-        if (erTrygdeavtale(produserbaredokumenter)) {
+    public String utledDokumentNavnForProduserbaredokumenterOgMottaker(Behandling behandling, Produserbaredokumenter produserbaredokumenter, Mottaker mottaker, String standardTekst) {
+        if (erTrygdeavtaleVedtaksbrev(produserbaredokumenter)) {
             DokumentproduksjonsInfo dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(produserbaredokumenter);
             return utledDokumentNavn(behandling, dokumentproduksjonsInfo, mottaker);
         }
         return standardTekst != null ? standardTekst : produserbaredokumenter.getBeskrivelse();
     }
 
-    private boolean erTrygdeavtale(Produserbaredokumenter produserbaredokumenter) {
+    private boolean erTrygdeavtaleVedtaksbrev(Produserbaredokumenter produserbaredokumenter) {
         return produserbaredokumenter.getKode().contains("TRYGDEAVTALE");
     }
 
@@ -66,13 +66,43 @@ public class DokumentNavnService {
 
         var vedtaksbrevTittel = dokumentproduksjonsInfo.vedleggsTitler().get(VedleggTyper.VEDTAKSBREV);
 
-        if (FastMottakerMedOrgnr.SKATTEETATEN.getOrgnr().equals((mottaker.getOrgnr()))) {
+        if (NorskMyndighet.SKATTEETATEN.getOrgnr().equals((mottaker.getOrgnr()))) {
             return lagKopiTittel(vedtaksbrevTittel);
         }
 
         boolean erArtikkel8_2 = lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId()).getBestemmelse() == UK_ART8_2;
 
         if (mottaker.erBruker()) {
+            return erArtikkel8_2 ? vedtaksbrevTittel : dokumentproduksjonsInfo.journalføringsTittel();
+        } else {
+            return lagKopiTittel(erArtikkel8_2 ? vedtaksbrevTittel : dokumentproduksjonsInfo.journalføringsTittel());
+        }
+    }
+
+    public String utledDokumentNavn(Behandling behandling, DokumentproduksjonsInfo dokumentproduksjonsInfo, Mottaker mottaker) {
+        String tittel = utledTittel(behandling, dokumentproduksjonsInfo, mottaker);
+
+        if (behandling.erNyVurdering()) {
+            return lagEndringTittel(tittel);
+        }
+
+        return tittel;
+    }
+
+    private String utledTittel(Behandling behandling, DokumentproduksjonsInfo dokumentproduksjonsInfo, Mottaker mottaker) {
+        if (mottaker.erUtenlandskMyndighet()) {
+            return dokumentproduksjonsInfo.vedleggsTitler().get(VedleggTyper.ATTEST);
+        }
+
+        var vedtaksbrevTittel = dokumentproduksjonsInfo.vedleggsTitler().get(VedleggTyper.VEDTAKSBREV);
+
+        if (NorskMyndighet.SKATTEETATEN.getOrgnr().equals((mottaker.getOrgnr()))) {
+            return lagKopiTittel(vedtaksbrevTittel);
+        }
+
+        boolean erArtikkel8_2 = lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId()).getBestemmelse() == UK_ART8_2;
+
+        if (mottaker.getRolle() == Mottakerroller.BRUKER) {
             return erArtikkel8_2 ? vedtaksbrevTittel : dokumentproduksjonsInfo.journalføringsTittel();
         } else {
             return lagKopiTittel(erArtikkel8_2 ? vedtaksbrevTittel : dokumentproduksjonsInfo.journalføringsTittel());
