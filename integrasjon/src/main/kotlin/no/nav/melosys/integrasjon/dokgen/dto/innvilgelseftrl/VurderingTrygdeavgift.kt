@@ -6,6 +6,6 @@ import com.fasterxml.jackson.annotation.JsonInclude
 data class VurderingTrygdeavgift(
     val norsk: TrygdeavgiftInfo?,
     val utenlandsk: TrygdeavgiftInfo?,
-    val selvbetalende: Boolean,
-    val representantNavn: String?
+    val selvbetalende: Boolean = true,
+    val representantNavn: String? = null
 )

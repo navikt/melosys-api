@@ -19,9 +19,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.*
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
-import no.nav.melosys.service.representant.RepresentantService
 import org.springframework.stereotype.Component
-import org.springframework.util.StringUtils
 import java.time.LocalDate
 import java.util.*
 import java.util.stream.Stream
@@ -32,7 +30,6 @@ class InnvilgelseFtrlMapper(
     private val trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService,
     private val avklarteVirksomheterService: AvklarteVirksomheterService,
     private val avklarteMedfolgendeFamilieService: AvklarteMedfolgendeFamilieService,
-    private val representantService: RepresentantService,
     private val dokgenMapperDatahenter: DokgenMapperDatahenter
 ) {
     @Transactional
@@ -54,7 +51,7 @@ class InnvilgelseFtrlMapper(
         val fastsattTrygdeavgift = medlemAvFolketrygden.fastsattTrygdeavgift
         return InnvilgelseFtrl.Builder(brevbestilling)
             .perioder(
-                medlemskapsperioder.stream()
+                medlemskapsperioder
                     .map { m: Medlemskapsperiode? -> Periode(m) }
                     .toList()
             )
@@ -99,16 +96,15 @@ class InnvilgelseFtrlMapper(
     }
 
     private fun erFullstendigInnvilget(medlemskapsperioder: Collection<Medlemskapsperiode>): Boolean {
-        return medlemskapsperioder.stream()
-            .allMatch { p: Medlemskapsperiode -> p.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET }
+        return medlemskapsperioder
+            .all { p: Medlemskapsperiode -> p.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET }
     }
 
     private fun hentSaerligBegrunnelse(behandlingsresultat: Behandlingsresultat): String? {
-        return behandlingsresultat.vilkaarsresultater.stream()
-            .findFirst()
+        return behandlingsresultat.vilkaarsresultater
             .filter { v: Vilkaarsresultat -> v.vilkaar == Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE }
             .map { vilkaarsresultat: Vilkaarsresultat -> vilkaarsresultat.begrunnelser.iterator().next().kode }
-            .orElse(null)
+            .firstOrNull()
     }
 
     private fun mapOmfattetFamilie(
@@ -199,9 +195,7 @@ class InnvilgelseFtrlMapper(
         }
         return VurderingTrygdeavgift(
             norsk = norsk,
-            utenlandsk = utenlandsk,
-            selvbetalende = fastsattTrygdeavgift.betalesAv.rolle == Aktoersroller.BRUKER,
-            representantNavn = hentRepresentantNavn(fastsattTrygdeavgift.representantNr)
+            utenlandsk = utenlandsk
         )
     }
 
@@ -216,11 +210,5 @@ class InnvilgelseFtrlMapper(
     private fun harTrygdeavtaleMedArbeidsland(arbeidsland: String): Boolean {
         return Arrays.stream(Trygdeavtale_myndighetsland.values())
             .anyMatch { a: Trygdeavtale_myndighetsland -> a.name == arbeidsland }
-    }
-
-    private fun hentRepresentantNavn(representantNr: String): String? {
-        return if (StringUtils.hasText(representantNr)) {
-            representantService.hentRepresentant(representantNr).navn()
-        } else null
     }
 }

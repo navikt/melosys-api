@@ -26,8 +26,6 @@ import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.dokument.DokgenTestData
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
-import no.nav.melosys.service.representant.RepresentantService
-import no.nav.melosys.service.representant.dto.RepresentantDataDto
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Condition
 import org.joda.time.DateTime
@@ -56,8 +54,6 @@ internal class InnvilgelseFtrlMapperTest {
     @Mock
     private val mockAvklarteMedfolgendeFamilieService: AvklarteMedfolgendeFamilieService? = null
 
-    @Mock
-    private val mockRepresentantService: RepresentantService? = null
 
     @Mock
     private val mockDokgenMapperDatahenter: DokgenMapperDatahenter? = null
@@ -71,7 +67,6 @@ internal class InnvilgelseFtrlMapperTest {
             mockTrygdeavgiftsgrunnlagService!!,
             mockAvklarteVirksomheterService!!,
             mockAvklarteMedfolgendeFamilieService!!,
-            mockRepresentantService!!,
             mockDokgenMapperDatahenter!!
         )
     }
@@ -118,8 +113,8 @@ internal class InnvilgelseFtrlMapperTest {
         Assertions.assertThat(innvilgelseFtrl.arbeidsland).isEqualTo(Landkoder.AT.beskrivelse)
         Assertions.assertThat(innvilgelseFtrl.isTrygdeavtaleMedArbeidsland).isTrue
         Assertions.assertThat(innvilgelseFtrl.vurderingTrygdeavgift).isNotNull
-        Assertions.assertThat(innvilgelseFtrl.vurderingTrygdeavgift.selvbetalende).isFalse
-        Assertions.assertThat(innvilgelseFtrl.vurderingTrygdeavgift.representantNavn).isEqualTo(REPRESENTANT_NAVN)
+        Assertions.assertThat(innvilgelseFtrl.vurderingTrygdeavgift.selvbetalende).isTrue
+        Assertions.assertThat(innvilgelseFtrl.vurderingTrygdeavgift.representantNavn).isEqualTo(null)
         Assertions.assertThat(innvilgelseFtrl.vurderingTrygdeavgift.utenlandsk).isNull()
         val trygdeavgiftInfoNorsk = innvilgelseFtrl.vurderingTrygdeavgift.norsk
         Assertions.assertThat(trygdeavgiftInfoNorsk).isNotNull
@@ -389,8 +384,6 @@ internal class InnvilgelseFtrlMapperTest {
             .thenReturn(lagMedfølgendeEktefelle())
         whenever(mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(ArgumentMatchers.anyLong()))
             .thenReturn(lagMedfølgendeBarn())
-        whenever(mockRepresentantService!!.hentRepresentant(ArgumentMatchers.anyString()))
-            .thenReturn(RepresentantDataDto("1234", REPRESENTANT_NAVN, null, null, null))
         whenever(mockDokgenMapperDatahenter!!.hentBehandlingsresultat(ArgumentMatchers.anyLong()))
             .thenReturn(lagBehandlingsResultat())
         whenever(mockDokgenMapperDatahenter.hentLandnavnFraLandkode(ArgumentMatchers.anyString())).thenAnswer(
@@ -427,6 +420,5 @@ internal class InnvilgelseFtrlMapperTest {
         const val EKTEFELLE_NAVN = "Dolly Duck"
         const val BARN1_NAVN = "Doffen Duck"
         const val BARN2_NAVN = "Ole Duck"
-        const val REPRESENTANT_NAVN = "Representant AS"
     }
 }
