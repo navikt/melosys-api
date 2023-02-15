@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.oppgave;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -36,6 +37,8 @@ final class OppgaveFasadeImplTest {
     private ArgumentCaptor<OpprettOppgaveDto> opprettOppgaveDtoCaptor;
     @Captor
     private ArgumentCaptor<OppgaveSearchRequest> oppgaveSearchRequestCaptor;
+    @Captor
+    private ArgumentCaptor<OppgaveDto> oppgaveDtoArgumentCaptor;
 
     private OppgaveFasadeImpl oppgaveFasadeImpl;
 
@@ -150,6 +153,93 @@ final class OppgaveFasadeImplTest {
 
         assertThat(oppgaver).hasSize(1);
         assertThat(oppgaver.get(0).getSaksnummer()).isEqualTo("MEL-123");
+    }
+
+    @Test
+    void oppdaterOppgave_mapperOppgaveOppdateringTilOppgaveDtoRiktig() {
+        OppgaveDto oppgaveDto = new OppgaveDto();
+        when(oppgaveConsumer.hentOppgave("123")).thenReturn(oppgaveDto);
+
+        OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder()
+            .oppgavetype(Oppgavetyper.JFR)
+            .tema(Tema.MED)
+            .behandlesAvApplikasjon(Fagsystem.MELOSYS)
+            .saksnummer("saksnr")
+            .behandlingstema("behandlingstema")
+            .prioritet("prioritet #1")
+            .status("heeelt ferdig")
+            .tilordnetRessurs("Z133337")
+            .fristFerdigstillelse(LocalDate.now())
+            .build();
+
+
+        oppgaveFasadeImpl.oppdaterOppgave("123", oppgaveOppdatering);
+
+
+        verify(oppgaveConsumer).oppdaterOppgave(oppgaveDtoArgumentCaptor.capture());
+        assertThat(oppgaveDtoArgumentCaptor.getValue()).extracting(
+            OppgaveDto::getOppgavetype,
+            OppgaveDto::getTema,
+            OppgaveDto::getBehandlesAvApplikasjon,
+            OppgaveDto::getSaksreferanse,
+            OppgaveDto::getBehandlingstema,
+            OppgaveDto::getPrioritet,
+            OppgaveDto::getStatus,
+            OppgaveDto::getTilordnetRessurs,
+            OppgaveDto::getFristFerdigstillelse
+            )
+            .contains(Oppgavetyper.JFR.getKode(),
+                Tema.MED.getKode(),
+                Fagsystem.MELOSYS.getKode(),
+                "saksnr",
+                "behandlingstema",
+                "prioritet #1",
+                "heeelt ferdig",
+                "Z133337",
+                LocalDate.now());
+    }
+
+    @Test
+    void oppdaterOppgave_formatererBeskrivelsesloggRiktig_nårBeskrivelseEksisterer() {
+        OppgaveDto oppgaveDto = new OppgaveDto();
+        oppgaveDto.setBeskrivelse("Testy test");
+        when(oppgaveConsumer.hentOppgave("123")).thenReturn(oppgaveDto);
+
+        OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder()
+            .behandlingstema("UTSENDT_ARBEIDSTAKER")
+            .beskrivelse("Ny beskrivelse")
+            .build();
+
+
+        oppgaveFasadeImpl.oppdaterOppgave("123", oppgaveOppdatering);
+
+
+        verify(oppgaveConsumer).oppdaterOppgave(oppgaveDtoArgumentCaptor.capture());
+        String oppdateringstidspunkt = LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        assertThat(oppgaveDtoArgumentCaptor.getValue().getBeskrivelse())
+            .isEqualTo(String.format("--- %s (%s, %s) ---\n %s\n\nTesty test",
+                oppdateringstidspunkt, "srvmelosys", Fagsystem.MELOSYS.getBeskrivelse(), "Ny beskrivelse"));
+    }
+
+    @Test
+    void oppdaterOppgave_FormatererBeskrivelsesloggRiktig_nårBeskrivelseIkkeEksisterer() {
+        OppgaveDto oppgaveDto = new OppgaveDto();
+        when(oppgaveConsumer.hentOppgave("123")).thenReturn(oppgaveDto);
+
+        OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder()
+            .behandlingstema("UTSENDT_ARBEIDSTAKER")
+            .beskrivelse("Ny beskrivelse")
+            .build();
+
+
+        oppgaveFasadeImpl.oppdaterOppgave("123", oppgaveOppdatering);
+
+
+        verify(oppgaveConsumer).oppdaterOppgave(oppgaveDtoArgumentCaptor.capture());
+        String oppdateringstidspunkt = LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        assertThat(oppgaveDtoArgumentCaptor.getValue().getBeskrivelse())
+            .isEqualTo(String.format("--- %s (%s, %s) ---\n %s\n",
+                oppdateringstidspunkt, "srvmelosys", "Melosys", "Ny beskrivelse"));
     }
 
     private Oppgave lagOppgave() {
