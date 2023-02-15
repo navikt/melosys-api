@@ -2,14 +2,11 @@ package no.nav.melosys.service.dokument.brev.mapper
 
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
-import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import no.nav.commons.foedselsnummer.Kjoenn
-import no.nav.commons.foedselsnummer.testutils.FoedselsnummerGenerator
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoNorge
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoUtland
@@ -20,22 +17,13 @@ import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
-import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl
-import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
-import no.nav.melosys.domain.mottatteopplysninger.data.IdentType
-import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
-import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie
-import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie
-import no.nav.melosys.domain.person.familie.OmfattetFamilie
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
-import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.dokument.DokgenTestData
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
 import org.assertj.core.api.Assertions
-import org.assertj.core.api.Condition
 import org.joda.time.DateTime
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -58,22 +46,15 @@ internal class InnvilgelseFtrlMapperTest {
     @Mock
     private val mockAvklarteVirksomheterService: AvklarteVirksomheterService? = null
 
-    @Mock
-    private val mockAvklarteMedfolgendeFamilieService: AvklarteMedfolgendeFamilieService? = null
-
 
     @Mock
     private val mockDokgenMapperDatahenter: DokgenMapperDatahenter? = null
-    private val foedselsnummerGenerator = FoedselsnummerGenerator()
-    private val EKTEFELLE_FNR = foedselsnummerGenerator.foedselsnummer(null, Kjoenn.KVINNE, true).asString
-    private val BARN1_FNR = foedselsnummerGenerator.foedselsnummer(null, Kjoenn.MANN, false).asString
     private var innvilgelseFtrlMapper: InnvilgelseFtrlMapper? = null
     @BeforeEach
     fun setup() {
         innvilgelseFtrlMapper = InnvilgelseFtrlMapper(
             mockTrygdeavgiftsgrunnlagService!!,
             mockAvklarteVirksomheterService!!,
-            mockAvklarteMedfolgendeFamilieService!!,
             mockDokgenMapperDatahenter!!
         )
     }
@@ -88,22 +69,6 @@ internal class InnvilgelseFtrlMapperTest {
                 perioder.shouldHaveSize(1)
                 isErFullstendigInnvilget.shouldBeTrue()
                 ftrl_2_8_begrunnelse.shouldBe(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_NORSK_VIRKSOMHET_IKKE_UTSENDT.kode)
-                isVurderingMedlemskapEktefelle.shouldBeTrue()
-                isVurderingLovvalgBarn.shouldBeTrue()
-                omfattetFamilie.shouldHaveSize(2).sortedBy { it.navn }.apply {
-                    first().apply {
-                        ident.shouldBe(BARN1_FNR)
-                        navn.shouldBe(BARN1_NAVN)
-                        identType.shouldBe(IdentType.FNR)
-                    }
-                    last().apply {
-                        ident.shouldBe(EKTEFELLE_FNR)
-                        navn.shouldBe(EKTEFELLE_NAVN)
-                        identType.shouldBe(IdentType.DNR)
-                    }
-                }
-                ikkeOmfattetBarn.shouldBeEmpty()
-                ikkeOmfattetEktefelle.shouldBeNull()
                 innvilgelse.apply {
                     innledningFritekst().shouldBeNull()
                     begrunnelseFritekst().shouldBe(BEGRUNNELSE_FRITEKST)
@@ -145,46 +110,6 @@ internal class InnvilgelseFtrlMapperTest {
                     land().shouldBeNull()
                 }
             }
-    }
-
-    @Test
-    fun map_InnvilgetMedIkkeOmfattetFamilie_populererFelter() {
-        mockHappyCase()
-        whenever(mockAvklarteMedfolgendeFamilieService!!.hentAvklartMedfølgendeEktefelle(ArgumentMatchers.anyLong()))
-            .thenReturn(lagAvklartIkkeMedfølgendeEktefelle())
-        whenever(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(ArgumentMatchers.anyLong()))
-            .thenReturn(lagAvklartIkkeMedfølgendeBarn())
-        val innvilgelseFtrl = innvilgelseFtrlMapper!!.map(lagInnvilgelseBrevbestilling())
-        Assertions.assertThat(innvilgelseFtrl.omfattetFamilie).isEmpty()
-        Assertions.assertThat(innvilgelseFtrl.ikkeOmfattetBarn).hasSize(2)
-        for (familiemedlemInfo in innvilgelseFtrl.ikkeOmfattetBarn) {
-            Assertions.assertThat(familiemedlemInfo.info().ident()).`is`(
-                Condition(
-                    { s: String -> java.util.List.of(BARN1_FNR, BARN2_FNR).contains(s) }, "fnr"
-                )
-            )
-            Assertions.assertThat(familiemedlemInfo.info().navn()).`is`(
-                Condition(
-                    { s: String -> java.util.List.of(BARN1_NAVN, BARN2_NAVN).contains(s) }, "navn"
-                )
-            )
-            Assertions.assertThat(familiemedlemInfo.info().identType()).`is`(
-                Condition(
-                    { s: IdentType -> java.util.List.of(IdentType.FNR, IdentType.DATO).contains(s) }, "identType"
-                )
-            )
-            Assertions.assertThat(familiemedlemInfo.begrunnelse().kode)
-                .isEqualTo(Medfolgende_barn_begrunnelser_ftrl.IKKE_SOEKERS_BARN.kode)
-        }
-        Assertions.assertThat(innvilgelseFtrl.ikkeOmfattetEktefelle).isNotNull
-        Assertions.assertThat(innvilgelseFtrl.ikkeOmfattetEktefelle)
-            .extracting("info.ident", "info.navn", "info.identType", "begrunnelse")
-            .containsExactly(
-                EKTEFELLE_FNR,
-                EKTEFELLE_NAVN,
-                IdentType.DNR,
-                Medfolgende_ektefelle_samboer_begrunnelser_ftrl.IKKE_TRE_AV_FEM_SISTE_ÅR.kode
-            )
     }
 
     @Test
@@ -290,58 +215,6 @@ internal class InnvilgelseFtrlMapperTest {
         )
     }
 
-    private fun lagAvklartMedfølgendeBarn(): AvklarteMedfolgendeFamilie {
-        return AvklarteMedfolgendeFamilie(setOf(OmfattetFamilie(UUID_BARN_1)), setOf())
-    }
-
-    private fun lagAvklartMedfølgendeEktefelle(): AvklarteMedfolgendeFamilie {
-        val ektefelle = OmfattetFamilie(UUID_EKTEFELLE)
-        return AvklarteMedfolgendeFamilie(setOf(ektefelle), setOf())
-    }
-
-    private fun lagAvklartIkkeMedfølgendeBarn(): AvklarteMedfolgendeFamilie {
-        val barn1 =
-            IkkeOmfattetFamilie(UUID_BARN_1, Medfolgende_barn_begrunnelser_ftrl.IKKE_SOEKERS_BARN.kode, "Ikke omfattet")
-        val barn2 =
-            IkkeOmfattetFamilie(UUID_BARN_2, Medfolgende_barn_begrunnelser_ftrl.IKKE_SOEKERS_BARN.kode, "Ikke omfattet")
-        return AvklarteMedfolgendeFamilie(setOf(), setOf(barn1, barn2))
-    }
-
-    private fun lagAvklartIkkeMedfølgendeEktefelle(): AvklarteMedfolgendeFamilie {
-        val ektefelle = IkkeOmfattetFamilie(
-            UUID_EKTEFELLE,
-            Medfolgende_ektefelle_samboer_begrunnelser_ftrl.IKKE_TRE_AV_FEM_SISTE_ÅR.kode,
-            "Ikke omfattet"
-        )
-        return AvklarteMedfolgendeFamilie(setOf(), setOf(ektefelle))
-    }
-
-    private fun lagMedfølgendeEktefelle(): Map<String, MedfolgendeFamilie> {
-        val ektefelle = MedfolgendeFamilie.tilMedfolgendeFamilie(
-            UUID_EKTEFELLE,
-            EKTEFELLE_FNR,
-            EKTEFELLE_NAVN,
-            MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER
-        )
-        return java.util.Map.of(UUID_EKTEFELLE, ektefelle)
-    }
-
-    private fun lagMedfølgendeBarn(): Map<String, MedfolgendeFamilie> {
-        val medfolgendeBarn1 = MedfolgendeFamilie.tilMedfolgendeFamilie(
-            UUID_BARN_1,
-            BARN1_FNR,
-            BARN1_NAVN,
-            MedfolgendeFamilie.Relasjonsrolle.BARN
-        )
-        val medfolgendeBarn2 = MedfolgendeFamilie.tilMedfolgendeFamilie(
-            UUID_BARN_2,
-            BARN2_FNR,
-            BARN2_NAVN,
-            MedfolgendeFamilie.Relasjonsrolle.BARN
-        )
-        return java.util.Map.of(UUID_BARN_1, medfolgendeBarn1, UUID_BARN_2, medfolgendeBarn2)
-    }
-
     private fun lagMedlemAvFolketrygden(): MedlemAvFolketrygden {
         val medlemAvFolketrygden = MedlemAvFolketrygden()
         medlemAvFolketrygden.medlemskapsperioder = lagMedlemskapsperioder()
@@ -374,10 +247,6 @@ internal class InnvilgelseFtrlMapperTest {
     }
 
     private fun mockHappyCase() {
-        whenever(mockAvklarteMedfolgendeFamilieService!!.hentAvklartMedfølgendeEktefelle(ArgumentMatchers.anyLong()))
-            .thenReturn(lagAvklartMedfølgendeEktefelle())
-        whenever(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(ArgumentMatchers.anyLong()))
-            .thenReturn(lagAvklartMedfølgendeBarn())
         whenever(mockTrygdeavgiftsgrunnlagService!!.hentAvgiftsgrunnlag(ArgumentMatchers.anyLong()))
             .thenReturn(lagNorskTrygdeAvgiftsgrunnlag())
         whenever(
@@ -387,10 +256,6 @@ internal class InnvilgelseFtrlMapperTest {
                 )
             )
         ).thenReturn(lagAvklarteVirksomheter())
-        whenever(mockAvklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(ArgumentMatchers.anyLong()))
-            .thenReturn(lagMedfølgendeEktefelle())
-        whenever(mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(ArgumentMatchers.anyLong()))
-            .thenReturn(lagMedfølgendeBarn())
         whenever(mockDokgenMapperDatahenter!!.hentBehandlingsresultat(ArgumentMatchers.anyLong()))
             .thenReturn(lagBehandlingsResultat())
         whenever(mockDokgenMapperDatahenter.hentLandnavnFraLandkode(ArgumentMatchers.anyString())).thenAnswer(
@@ -401,31 +266,12 @@ internal class InnvilgelseFtrlMapperTest {
                     )
                 ).beskrivelse
             } as Answer<String>)
-        whenever(mockDokgenMapperDatahenter.hentSammensattNavn(ArgumentMatchers.anyString())).thenAnswer { invocationOnMock: InvocationOnMock ->
-            val fnr = invocationOnMock.getArgument<String>(0)
-            var navn: String? = null
-            if (fnr == EKTEFELLE_FNR) {
-                navn = EKTEFELLE_NAVN
-            } else if (fnr == BARN1_FNR) {
-                navn = BARN1_NAVN
-            } else if (fnr == BARN2_FNR) {
-                navn = BARN2_NAVN
-            }
-            navn
-        }
     }
 
     companion object {
-        private const val UUID_EKTEFELLE = "uuidEktefelle"
-        private const val UUID_BARN_1 = "uuidBarn1"
-        private const val UUID_BARN_2 = "uuidBarn2"
-        private const val BARN2_FNR = "02.05.11"
         const val BEGRUNNELSE_FRITEKST = "Begrunnelse fritekst"
         const val SAKSBEHANDLER_NAVN = "Fetter Anton"
         const val ARBEIDSGIVER_NAVN = "Bang Hansen"
         const val SAKSNUMMER = "MEL-123"
-        const val EKTEFELLE_NAVN = "Dolly Duck"
-        const val BARN1_NAVN = "Doffen Duck"
-        const val BARN2_NAVN = "Ole Duck"
     }
 }

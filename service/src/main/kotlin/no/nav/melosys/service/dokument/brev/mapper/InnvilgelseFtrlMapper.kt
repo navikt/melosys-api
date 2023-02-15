@@ -9,27 +9,19 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.kodeverk.*
-import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser
-import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie
-import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie
-import no.nav.melosys.domain.person.familie.OmfattetFamilie
-import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrl
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.*
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
-import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.util.*
-import java.util.stream.Stream
 import javax.transaction.Transactional
 
 @Component
 class InnvilgelseFtrlMapper(
     private val trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService,
     private val avklarteVirksomheterService: AvklarteVirksomheterService,
-    private val avklarteMedfolgendeFamilieService: AvklarteMedfolgendeFamilieService,
     private val dokgenMapperDatahenter: DokgenMapperDatahenter
 ) {
     @Transactional
@@ -38,9 +30,6 @@ class InnvilgelseFtrlMapper(
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(behandlingId)
         val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
         val trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(behandlingId)
-        val avklarteMedfolgendeBarn = avklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(behandlingId)
-        val avklarteMedfolgendeEktefelle =
-            avklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(behandlingId)
 
         //NOTE Henter i første versjon av FTRL kun en norsk arbeidsgiver og forventer ett registert arbeidsland
         val norskeArbeidsgivere = avklarteVirksomheterService.hentNorskeArbeidsgivere(brevbestilling.behandling)[0]
@@ -57,27 +46,6 @@ class InnvilgelseFtrlMapper(
             )
             .erFullstendigInnvilget(erFullstendigInnvilget(medlemskapsperioder))
             .ftrl_2_8_begrunnelse(hentSaerligBegrunnelse(behandlingsresultat))
-            .vurderingMedlemskapEktefelle(avklarteMedfolgendeEktefelle.finnes())
-            .vurderingLovvalgBarn(avklarteMedfolgendeBarn.finnes())
-            .omfattetFamilie(
-                mapOmfattetFamilie(
-                    behandlingId,
-                    avklarteMedfolgendeEktefelle.familieOmfattetAvNorskTrygd,
-                    avklarteMedfolgendeBarn.familieOmfattetAvNorskTrygd
-                )
-            )
-            .ikkeOmfattetEktefelle(
-                mapIkkeOmfattetEktefelle(
-                    behandlingId,
-                    avklarteMedfolgendeEktefelle.familieIkkeOmfattetAvNorskTrygd
-                )
-            )
-            .ikkeOmfattetBarn(
-                mapIkkeOmfattetBarn(
-                    behandlingId,
-                    avklarteMedfolgendeBarn.familieIkkeOmfattetAvNorskTrygd
-                )
-            )
             .arbeidsgiverNavn(norskeArbeidsgivere.navn)
             .arbeidsland(dokgenMapperDatahenter.hentLandnavnFraLandkode(arbeidsland))
             .trygdeavtaleMedArbeidsland(harTrygdeavtaleMedArbeidsland(arbeidsland))
@@ -107,65 +75,6 @@ class InnvilgelseFtrlMapper(
             .firstOrNull()
     }
 
-    private fun mapOmfattetFamilie(
-        behandlingID: Long,
-        omfattetEktefelle: Set<OmfattetFamilie>,
-        omfattetBarn: Set<OmfattetFamilie>
-    ): List<FamiliemedlemInfo> {
-        val medfolgendeEktefelle = avklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(behandlingID)
-        val medfolgendeBarn = avklarteMedfolgendeFamilieService.hentMedfølgendeBarn(behandlingID)
-        return Stream.concat(
-            omfattetEktefelle.stream()
-                .map { ektefelle: OmfattetFamilie -> tilFamiliemedlemInfo(medfolgendeEktefelle, ektefelle.uuid) },
-            omfattetBarn.stream()
-                .map { barn: OmfattetFamilie -> tilFamiliemedlemInfo(medfolgendeBarn, barn.uuid) }
-        ).toList()
-    }
-
-    private fun mapIkkeOmfattetBarn(
-        behandlingID: Long,
-        barnIkkeOmfattetAvNorskTrygd: Set<IkkeOmfattetFamilie>
-    ): List<IkkeOmfattetBarn> {
-        val medfoelgendeBarn = avklarteMedfolgendeFamilieService.hentMedfølgendeBarn(behandlingID)
-        return barnIkkeOmfattetAvNorskTrygd.stream()
-            .map { ikkeOmfattetBarn: IkkeOmfattetFamilie ->
-                IkkeOmfattetBarn(
-                    tilFamiliemedlemInfo(medfoelgendeBarn, ikkeOmfattetBarn.uuid),
-                    Medfolgende_barn_begrunnelser.valueOf(ikkeOmfattetBarn.begrunnelse)
-                )
-            }
-            .toList()
-    }
-
-    private fun mapIkkeOmfattetEktefelle(
-        behandlingId: Long,
-        ektefelleIkkeOmfattet: Set<IkkeOmfattetFamilie>
-    ): IkkeOmfattetEktefelle? {
-        return ektefelleIkkeOmfattet.stream()
-            .findFirst()
-            .map { ikkeOmfattet: IkkeOmfattetFamilie ->
-                IkkeOmfattetEktefelle(
-                    tilFamiliemedlemInfo(
-                        avklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(behandlingId),
-                        ikkeOmfattet.uuid
-                    ),
-                    ikkeOmfattet.begrunnelse
-                )
-            }
-            .orElse(null)
-    }
-
-    private fun tilFamiliemedlemInfo(
-        avklartMedfolgende: Map<String, MedfolgendeFamilie>,
-        uuid: String
-    ): FamiliemedlemInfo {
-        val medfolgendeFamilie = Optional.ofNullable(avklartMedfolgende[uuid])
-            .orElseThrow { FunksjonellException("Avklart medfølgende familie $uuid finnes ikke i mottatteOpplysningeret") }
-        val sammensattNavn = if (medfolgendeFamilie!!.fnr != null) dokgenMapperDatahenter.hentSammensattNavn(
-            medfolgendeFamilie.fnr
-        ) else medfolgendeFamilie.navn
-        return FamiliemedlemInfo(sammensattNavn, medfolgendeFamilie.fnr, medfolgendeFamilie.utledIdentType())
-    }
 
     private fun mapVurderingTrygdeavgift(
         trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag,
