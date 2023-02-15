@@ -40,23 +40,22 @@ import java.time.temporal.ChronoUnit
 @ExtendWith(MockitoExtension::class)
 internal class InnvilgelseFtrlMapperTest {
     @Mock
-    private val mockTrygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService? = null
+    private lateinit var mockTrygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService
 
     @Mock
-    private val mockAvklarteVirksomheterService: AvklarteVirksomheterService? = null
-
+    private lateinit var mockAvklarteVirksomheterService: AvklarteVirksomheterService
 
     @Mock
-    private val mockDokgenMapperDatahenter: DokgenMapperDatahenter? = null
+    private lateinit var mockDokgenMapperDatahenter: DokgenMapperDatahenter
 
-    private var innvilgelseFtrlMapper: InnvilgelseFtrlMapper? = null
+    private lateinit var innvilgelseFtrlMapper: InnvilgelseFtrlMapper
 
     @BeforeEach
     fun setup() {
         innvilgelseFtrlMapper = InnvilgelseFtrlMapper(
-            mockTrygdeavgiftsgrunnlagService!!,
-            mockAvklarteVirksomheterService!!,
-            mockDokgenMapperDatahenter!!
+            mockTrygdeavgiftsgrunnlagService,
+            mockAvklarteVirksomheterService,
+            mockDokgenMapperDatahenter
         )
     }
 
@@ -64,7 +63,7 @@ internal class InnvilgelseFtrlMapperTest {
     fun map_InnvilgetMedOmfattetFamilieKunNorskInntektFullstendigInnvilget_populererFelter() {
         mockHappyCase()
 
-        innvilgelseFtrlMapper!!.map(lagInnvilgelseBrevbestilling()).shouldNotBeNull()
+        innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling()).shouldNotBeNull()
             .apply {
                 datoMottatt.shouldBe(LocalDate.EPOCH)
                 perioder.shouldHaveSize(1)
@@ -116,15 +115,15 @@ internal class InnvilgelseFtrlMapperTest {
     @Test
     fun map_InnvilgetMedUtenlandskInntekt_harTrygdeavtaleMedLand_populererFelter() {
         mockHappyCase()
-        whenever(mockTrygdeavgiftsgrunnlagService!!.hentAvgiftsgrunnlag(ArgumentMatchers.anyLong()))
+        whenever(mockTrygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(ArgumentMatchers.anyLong()))
             .thenReturn(lagUtenlandskTrygdeAvgiftsgrunnlag())
         val behandlingsresultat = lagBehandlingsResultat()
         behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland =
             Soeknadsland(listOf("GB"), false)
-        whenever(mockDokgenMapperDatahenter!!.hentBehandlingsresultat(ArgumentMatchers.anyLong()))
+        whenever(mockDokgenMapperDatahenter.hentBehandlingsresultat(ArgumentMatchers.anyLong()))
             .thenReturn(behandlingsresultat)
 
-        innvilgelseFtrlMapper!!.map(lagInnvilgelseBrevbestilling()).apply {
+        innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling()).apply {
             isTrygdeavtaleMedArbeidsland.shouldBeTrue()
             vurderingTrygdeavgift.shouldNotBeNull().apply {
                 norsk.shouldBeNull()
@@ -153,9 +152,10 @@ internal class InnvilgelseFtrlMapperTest {
             medlemAvFolketrygden.medlemskapsperioder.iterator().next(),
             delvisInnvilgetPeriode
         )
-        whenever(mockDokgenMapperDatahenter!!.hentBehandlingsresultat(ArgumentMatchers.anyLong()))
+        whenever(mockDokgenMapperDatahenter.hentBehandlingsresultat(ArgumentMatchers.anyLong()))
             .thenReturn(behandlingsresultat)
-        innvilgelseFtrlMapper!!.map(lagInnvilgelseBrevbestilling()).apply {
+
+        innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling()).apply {
             perioder.shouldHaveSize(2)
             isErFullstendigInnvilget.shouldBeFalse()
         }
@@ -172,95 +172,76 @@ internal class InnvilgelseFtrlMapperTest {
             .build()
     }
 
-    private fun lagNorskTrygdeAvgiftsgrunnlag(): Trygdeavgiftsgrunnlag {
-        return Trygdeavgiftsgrunnlag(Loenn_forhold.LØNN_FRA_NORGE, lagAvgiftsGrunnlagNorge(), null)
-    }
+    private fun lagNorskTrygdeAvgiftsgrunnlag(): Trygdeavgiftsgrunnlag =
+        Trygdeavgiftsgrunnlag(Loenn_forhold.LØNN_FRA_NORGE, lagAvgiftsGrunnlagNorge(), null)
 
-    private fun lagUtenlandskTrygdeAvgiftsgrunnlag(): Trygdeavgiftsgrunnlag {
-        return Trygdeavgiftsgrunnlag(Loenn_forhold.LØNN_FRA_UTLANDET, null, lagAvgiftsGrunnlagUtland())
-    }
+    private fun lagUtenlandskTrygdeAvgiftsgrunnlag(): Trygdeavgiftsgrunnlag =
+        Trygdeavgiftsgrunnlag(Loenn_forhold.LØNN_FRA_UTLANDET, null, lagAvgiftsGrunnlagUtland())
 
-    private fun lagAvgiftsGrunnlagNorge(): AvgiftsgrunnlagInfoNorge {
-        return AvgiftsgrunnlagInfoNorge(
-            true, true, null,
-            Vurderingsutfall_trygdeavgift_norsk_inntekt.NORSK_INNTEKT_TRYGDEAVGIFT_NAV
-        )
-    }
+    private fun lagAvgiftsGrunnlagNorge(): AvgiftsgrunnlagInfoNorge = AvgiftsgrunnlagInfoNorge(
+        true, true, null,
+        Vurderingsutfall_trygdeavgift_norsk_inntekt.NORSK_INNTEKT_TRYGDEAVGIFT_NAV
+    )
 
-    private fun lagAvgiftsGrunnlagUtland(): AvgiftsgrunnlagInfoUtland {
-        return AvgiftsgrunnlagInfoUtland(
-            true, false, Saerligeavgiftsgrupper.ARBEIDSTAKER_MALAYSIA,
-            Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV
-        )
-    }
+    private fun lagAvgiftsGrunnlagUtland(): AvgiftsgrunnlagInfoUtland = AvgiftsgrunnlagInfoUtland(
+        true, false, Saerligeavgiftsgrupper.ARBEIDSTAKER_MALAYSIA,
+        Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV
+    )
 
     private fun lagBehandlingsResultat(): Behandlingsresultat {
-        val behandlingsresultat = Behandlingsresultat()
-        behandlingsresultat.medlemAvFolketrygden = lagMedlemAvFolketrygden()
-        val vilkaarsresultat = Vilkaarsresultat()
-        vilkaarsresultat.vilkaar = Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE
-        val vilkaarBegrunnelse = VilkaarBegrunnelse()
-        vilkaarBegrunnelse.kode =
-            Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_NORSK_VIRKSOMHET_IKKE_UTSENDT.kode
-        vilkaarsresultat.begrunnelser = setOf(vilkaarBegrunnelse)
-        behandlingsresultat.vilkaarsresultater = setOf(vilkaarsresultat)
-        behandlingsresultat.behandling = DokgenTestData.lagBehandling()
-        return behandlingsresultat
+        return Behandlingsresultat().apply {
+            medlemAvFolketrygden = lagMedlemAvFolketrygden()
+            vilkaarsresultater = setOf(Vilkaarsresultat().apply {
+                vilkaar = Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE
+                begrunnelser = setOf(VilkaarBegrunnelse().apply {
+                    kode = Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_NORSK_VIRKSOMHET_IKKE_UTSENDT.kode
+                })
+            })
+            behandling = DokgenTestData.lagBehandling()
+        }
     }
 
-    private fun lagAvklarteVirksomheter(): List<AvklartVirksomhet> {
-        return listOf(
-            AvklartVirksomhet(
-                ARBEIDSGIVER_NAVN,
-                "987654321",
-                BrevDataTestUtils.lagStrukturertAdresse(),
-                Yrkesaktivitetstyper.LOENNET_ARBEID
-            )
+    private fun lagAvklarteVirksomheter(): List<AvklartVirksomhet> = listOf(
+        AvklartVirksomhet(
+            ARBEIDSGIVER_NAVN,
+            "987654321",
+            BrevDataTestUtils.lagStrukturertAdresse(),
+            Yrkesaktivitetstyper.LOENNET_ARBEID
         )
+    )
+
+    private fun lagMedlemAvFolketrygden(): MedlemAvFolketrygden = MedlemAvFolketrygden().apply {
+        medlemskapsperioder = lagMedlemskapsperioder()
+        fastsattTrygdeavgift = lagFastsattTrygdeavgift()
     }
 
-    private fun lagMedlemAvFolketrygden(): MedlemAvFolketrygden {
-        val medlemAvFolketrygden = MedlemAvFolketrygden()
-        medlemAvFolketrygden.medlemskapsperioder = lagMedlemskapsperioder()
-        medlemAvFolketrygden.fastsattTrygdeavgift = lagFastsattTrygdeavgift()
-        return medlemAvFolketrygden
-    }
+    private fun lagMedlemskapsperioder(): List<Medlemskapsperiode> = listOf(Medlemskapsperiode().apply {
+        bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        medlemskapstype = Medlemskapstyper.FRIVILLIG
+        setTrygdedekning(Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER)
+    })
 
-    private fun lagMedlemskapsperioder(): List<Medlemskapsperiode> {
-        val periode1 = Medlemskapsperiode()
-        periode1.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
-        periode1.innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-        periode1.medlemskapstype = Medlemskapstyper.FRIVILLIG
-        periode1.setTrygdedekning(Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER)
-        return listOf(periode1)
-    }
-
-    private fun lagFastsattTrygdeavgift(): FastsattTrygdeavgift {
-        val fastsattTrygdeavgift = FastsattTrygdeavgift()
-        fastsattTrygdeavgift.avgiftspliktigNorskInntektMnd = 50000L
-        fastsattTrygdeavgift.avgiftspliktigUtenlandskInntektMnd = 50000L
-        fastsattTrygdeavgift.betalesAv = lagBetalesAv()
-        fastsattTrygdeavgift.representantNr = "1234"
-        return fastsattTrygdeavgift
-    }
-
-    private fun lagBetalesAv(): Aktoer {
-        val aktoer = Aktoer()
-        aktoer.rolle = Aktoersroller.REPRESENTANT_TRYGDEAVGIFT
-        return aktoer
+    private fun lagFastsattTrygdeavgift(): FastsattTrygdeavgift = FastsattTrygdeavgift().apply {
+        avgiftspliktigNorskInntektMnd = 50000L
+        avgiftspliktigUtenlandskInntektMnd = 50000L
+        betalesAv = Aktoer().apply {
+            rolle = Aktoersroller.REPRESENTANT_TRYGDEAVGIFT
+        }
+        representantNr = "1234"
     }
 
     private fun mockHappyCase() {
-        whenever(mockTrygdeavgiftsgrunnlagService!!.hentAvgiftsgrunnlag(ArgumentMatchers.anyLong()))
+        whenever(mockTrygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(ArgumentMatchers.anyLong()))
             .thenReturn(lagNorskTrygdeAvgiftsgrunnlag())
         whenever(
-            mockAvklarteVirksomheterService!!.hentNorskeArbeidsgivere(
+            mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(
                 ArgumentMatchers.any(
                     Behandling::class.java
                 )
             )
         ).thenReturn(lagAvklarteVirksomheter())
-        whenever(mockDokgenMapperDatahenter!!.hentBehandlingsresultat(ArgumentMatchers.anyLong()))
+        whenever(mockDokgenMapperDatahenter.hentBehandlingsresultat(ArgumentMatchers.anyLong()))
             .thenReturn(lagBehandlingsResultat())
         whenever(mockDokgenMapperDatahenter.hentLandnavnFraLandkode(ArgumentMatchers.anyString())).thenAnswer(
             Answer { invocationOnMock: InvocationOnMock ->
