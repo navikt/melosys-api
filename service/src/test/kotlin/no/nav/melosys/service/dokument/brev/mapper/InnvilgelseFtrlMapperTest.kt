@@ -23,7 +23,6 @@ import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.dokument.DokgenTestData
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
-import org.assertj.core.api.Assertions
 import org.joda.time.DateTime
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -49,7 +48,9 @@ internal class InnvilgelseFtrlMapperTest {
 
     @Mock
     private val mockDokgenMapperDatahenter: DokgenMapperDatahenter? = null
+
     private var innvilgelseFtrlMapper: InnvilgelseFtrlMapper? = null
+
     @BeforeEach
     fun setup() {
         innvilgelseFtrlMapper = InnvilgelseFtrlMapper(
@@ -119,21 +120,23 @@ internal class InnvilgelseFtrlMapperTest {
             .thenReturn(lagUtenlandskTrygdeAvgiftsgrunnlag())
         val behandlingsresultat = lagBehandlingsResultat()
         behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland =
-            Soeknadsland(java.util.List.of("GB"), false)
+            Soeknadsland(listOf("GB"), false)
         whenever(mockDokgenMapperDatahenter!!.hentBehandlingsresultat(ArgumentMatchers.anyLong()))
             .thenReturn(behandlingsresultat)
-        val innvilgelseFtrl = innvilgelseFtrlMapper!!.map(lagInnvilgelseBrevbestilling())
-        Assertions.assertThat(innvilgelseFtrl.isTrygdeavtaleMedArbeidsland).isTrue
-        Assertions.assertThat(innvilgelseFtrl.vurderingTrygdeavgift).isNotNull
-        Assertions.assertThat(innvilgelseFtrl.vurderingTrygdeavgift.norsk).isNull()
-        val trygdeavgiftInfoUtenlandsk = innvilgelseFtrl.vurderingTrygdeavgift.utenlandsk
-        Assertions.assertThat(trygdeavgiftInfoUtenlandsk).isNotNull
-        Assertions.assertThat(trygdeavgiftInfoUtenlandsk?.avgiftspliktigInntektMd()).isEqualTo(50000)
-        Assertions.assertThat(trygdeavgiftInfoUtenlandsk?.trygdeavgiftNav()).isTrue
-        Assertions.assertThat(trygdeavgiftInfoUtenlandsk?.erSkattepliktig()).isTrue
-        Assertions.assertThat(trygdeavgiftInfoUtenlandsk?.arbeidsgiverBetalerAvgift()).isFalse
-        Assertions.assertThat(trygdeavgiftInfoUtenlandsk?.saerligeavgiftsgruppe())
-            .isEqualTo(Saerligeavgiftsgrupper.ARBEIDSTAKER_MALAYSIA.kode)
+
+        innvilgelseFtrlMapper!!.map(lagInnvilgelseBrevbestilling()).apply {
+            isTrygdeavtaleMedArbeidsland.shouldBeTrue()
+            vurderingTrygdeavgift.shouldNotBeNull().apply {
+                norsk.shouldBeNull()
+                utenlandsk.shouldNotBeNull().apply {
+                    avgiftspliktigInntektMd.shouldBe(50000)
+                    trygdeavgiftNav.shouldBeTrue()
+                    erSkattepliktig.shouldBeTrue()
+                    arbeidsgiverBetalerAvgift.shouldBeFalse()
+                    saerligeavgiftsgruppe.shouldBe(Saerligeavgiftsgrupper.ARBEIDSTAKER_MALAYSIA.kode)
+                }
+            }
+        }
     }
 
     @Test
@@ -146,15 +149,16 @@ internal class InnvilgelseFtrlMapperTest {
         delvisInnvilgetPeriode.setTrygdedekning(Trygdedekninger.HELSEDEL)
         val behandlingsresultat = lagBehandlingsResultat()
         val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
-        medlemAvFolketrygden.medlemskapsperioder = java.util.List.of(
+        medlemAvFolketrygden.medlemskapsperioder = listOf(
             medlemAvFolketrygden.medlemskapsperioder.iterator().next(),
             delvisInnvilgetPeriode
         )
         whenever(mockDokgenMapperDatahenter!!.hentBehandlingsresultat(ArgumentMatchers.anyLong()))
             .thenReturn(behandlingsresultat)
-        val innvilgelseFtrl = innvilgelseFtrlMapper!!.map(lagInnvilgelseBrevbestilling())
-        Assertions.assertThat(innvilgelseFtrl.perioder).hasSize(2)
-        Assertions.assertThat(innvilgelseFtrl.isErFullstendigInnvilget).isFalse
+        innvilgelseFtrlMapper!!.map(lagInnvilgelseBrevbestilling()).apply {
+            perioder.shouldHaveSize(2)
+            isErFullstendigInnvilget.shouldBeFalse()
+        }
     }
 
     private fun lagInnvilgelseBrevbestilling(): InnvilgelseBrevbestilling {
@@ -205,7 +209,7 @@ internal class InnvilgelseFtrlMapperTest {
     }
 
     private fun lagAvklarteVirksomheter(): List<AvklartVirksomhet> {
-        return java.util.List.of(
+        return listOf(
             AvklartVirksomhet(
                 ARBEIDSGIVER_NAVN,
                 "987654321",
@@ -228,7 +232,7 @@ internal class InnvilgelseFtrlMapperTest {
         periode1.innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
         periode1.medlemskapstype = Medlemskapstyper.FRIVILLIG
         periode1.setTrygdedekning(Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER)
-        return java.util.List.of(periode1)
+        return listOf(periode1)
     }
 
     private fun lagFastsattTrygdeavgift(): FastsattTrygdeavgift {
