@@ -112,16 +112,15 @@ internal class InnvilgelseFtrlMapperTest {
     @Test
     fun map_InnvilgetMedUtenlandskInntekt_harTrygdeavtaleMedLand_populererFelter() {
         mockHappyCase()
-
+        every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.GB.kode) } returns Landkoder.GB.beskrivelse
         every { mockTrygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(ofType()) } returns lagUtenlandskTrygdeAvgiftsgrunnlag()
-
-        val behandlingsresultat = lagBehandlingsResultat()
-        behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland =
-            Soeknadsland(listOf("GB"), false)
-
-        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat().apply {
+            behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland =
+                Soeknadsland(listOf("GB"), false)
+        }
 
         innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling()).apply {
+            arbeidsland.shouldBe(Landkoder.GB.beskrivelse)
             isTrygdeavtaleMedArbeidsland.shouldBeTrue()
             vurderingTrygdeavgift.shouldNotBeNull().apply {
                 norsk.shouldBeNull()
@@ -139,18 +138,18 @@ internal class InnvilgelseFtrlMapperTest {
     @Test
     fun map_delvisInnvilget_populererFelter() {
         mockHappyCase()
-        val delvisInnvilgetPeriode = Medlemskapsperiode()
-        delvisInnvilgetPeriode.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
-        delvisInnvilgetPeriode.innvilgelsesresultat = InnvilgelsesResultat.DELVIS_INNVILGET
-        delvisInnvilgetPeriode.medlemskapstype = Medlemskapstyper.FRIVILLIG
-        delvisInnvilgetPeriode.setTrygdedekning(Trygdedekninger.HELSEDEL)
-        val behandlingsresultat = lagBehandlingsResultat()
-        val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
-        medlemAvFolketrygden.medlemskapsperioder = listOf(
-            medlemAvFolketrygden.medlemskapsperioder.iterator().next(),
-            delvisInnvilgetPeriode
-        )
-        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
+
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat().apply {
+            medlemAvFolketrygden.medlemskapsperioder = listOf(
+                medlemAvFolketrygden.medlemskapsperioder.iterator().next(),
+                Medlemskapsperiode().apply {
+                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+                    innvilgelsesresultat = InnvilgelsesResultat.DELVIS_INNVILGET
+                    medlemskapstype = Medlemskapstyper.FRIVILLIG
+                    setTrygdedekning(Trygdedekninger.HELSEDEL)
+                }
+            )
+        }
 
         innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling()).apply {
             perioder.shouldHaveSize(2)
@@ -232,29 +231,8 @@ internal class InnvilgelseFtrlMapperTest {
         every { mockTrygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(ofType()) } returns lagNorskTrygdeAvgiftsgrunnlag()
         every { mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(ofType()) } returns lagAvklarteVirksomheter()
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat()
-        every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(ofType()) } returns "Østerrike"
+        every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.AT.kode) } returns Landkoder.AT.beskrivelse
         every { mockDokgenMapperDatahenter.hentFullmektigNavn(any(), any()) } returns null
-
-//        whenever(mockTrygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(ArgumentMatchers.anyLong()))
-//            .thenReturn(lagNorskTrygdeAvgiftsgrunnlag())
-//        whenever(
-//            mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(
-//                ArgumentMatchers.any(
-//                    Behandling::class.java
-//                )
-//            )
-//        ).thenReturn(lagAvklarteVirksomheter())
-//        whenever(mockDokgenMapperDatahenter.hentBehandlingsresultat(ArgumentMatchers.anyLong()))
-//            .thenReturn(lagBehandlingsResultat())
-//        whenever(mockDokgenMapperDatahenter.hentLandnavnFraLandkode(ArgumentMatchers.anyString())).thenAnswer(
-//            Answer { invocationOnMock: InvocationOnMock ->
-//                Trygdeavtale_myndighetsland.valueOf(
-//                    invocationOnMock.getArgument(
-//                        0
-//                    )
-//                ).beskrivelse
-//            } as Answer<String>)
-
     }
 
     companion object {
