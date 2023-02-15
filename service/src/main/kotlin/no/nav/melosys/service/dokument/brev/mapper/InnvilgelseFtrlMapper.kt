@@ -2,20 +2,24 @@ package no.nav.melosys.service.dokument.brev.mapper
 
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.Vilkaarsresultat
+import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfo
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoNorge
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoUtland
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
-import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Representerer
+import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland
+import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrl
-import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.*
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.Periode
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.TrygdeavgiftInfo
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.VurderingTrygdeavgift
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import org.springframework.stereotype.Component
 import java.time.LocalDate
-import java.util.*
 import javax.transaction.Transactional
 
 @Component
@@ -63,61 +67,47 @@ class InnvilgelseFtrlMapper(
             .build()
     }
 
-    private fun erFullstendigInnvilget(medlemskapsperioder: Collection<Medlemskapsperiode>): Boolean {
-        return medlemskapsperioder
-            .all { p: Medlemskapsperiode -> p.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET }
-    }
+    private fun erFullstendigInnvilget(medlemskapsperioder: Collection<Medlemskapsperiode>): Boolean =
+        medlemskapsperioder.all { it.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET }
 
-    private fun hentSaerligBegrunnelse(behandlingsresultat: Behandlingsresultat): String? {
-        return behandlingsresultat.vilkaarsresultater
-            .filter { v: Vilkaarsresultat -> v.vilkaar == Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE }
-            .map { vilkaarsresultat: Vilkaarsresultat -> vilkaarsresultat.begrunnelser.iterator().next().kode }
+    private fun hentSaerligBegrunnelse(behandlingsresultat: Behandlingsresultat): String? =
+        behandlingsresultat.vilkaarsresultater
+            .filter { it.vilkaar == Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE }
+            .map { it.begrunnelser.iterator().next().kode }
             .firstOrNull()
-    }
 
 
     private fun mapVurderingTrygdeavgift(
         trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag,
         fastsattTrygdeavgift: FastsattTrygdeavgift
-    ): VurderingTrygdeavgift {
-        var norsk: TrygdeavgiftInfo? = null
-        var utenlandsk: TrygdeavgiftInfo? = null
-        if (trygdeavgiftsgrunnlag.avgiftsGrunnlagNorge != null) {
-            val avgiftsGrunnlagNorge = trygdeavgiftsgrunnlag.avgiftsGrunnlagNorge
-            norsk = TrygdeavgiftInfo(
-                Optional.ofNullable(fastsattTrygdeavgift.avgiftspliktigNorskInntektMnd).orElse(0L),
-                avgiftsGrunnlagNorge.erAvgiftspliktig(),
-                avgiftsGrunnlagNorge.erSkattepliktig(),
-                avgiftsGrunnlagNorge.betalerArbeidsgiverAvgift(),
-                if (avgiftsGrunnlagNorge.særligAvgiftsgruppe != null) avgiftsGrunnlagNorge.særligAvgiftsgruppe.kode else null
-            )
-        }
-        if (trygdeavgiftsgrunnlag.avgiftsGrunnlagUtland != null) {
-            val avgiftsGrunnlagUtland = trygdeavgiftsgrunnlag.avgiftsGrunnlagUtland
-            utenlandsk = TrygdeavgiftInfo(
-                Optional.ofNullable(fastsattTrygdeavgift.avgiftspliktigUtenlandskInntektMnd).orElse(0L),
-                avgiftsGrunnlagUtland.erAvgiftspliktig(),
-                avgiftsGrunnlagUtland.erSkattepliktig(),
-                avgiftsGrunnlagUtland.betalerArbeidsgiverAvgift(),
-                if (avgiftsGrunnlagUtland.særligAvgiftsgruppe != null) avgiftsGrunnlagUtland.særligAvgiftsgruppe.kode else null
-            )
-        }
-        return VurderingTrygdeavgift(
-            norsk = norsk,
-            utenlandsk = utenlandsk
-        )
-    }
+    ) = VurderingTrygdeavgift(
+        norsk = trygdeavgiftsgrunnlag.tilAvgiftsGrunnlagNorge(fastsattTrygdeavgift),
+        utenlandsk = trygdeavgiftsgrunnlag.tilAvgiftsGrunnlagUtland(fastsattTrygdeavgift),
+    )
 
-    private fun harLønnNorgeSkattepliktigNorge(avgiftsgrunnlagInfoNorge: AvgiftsgrunnlagInfoNorge?): Boolean {
-        return avgiftsgrunnlagInfoNorge != null && avgiftsgrunnlagInfoNorge.erSkattepliktig()
-    }
+    private fun Trygdeavgiftsgrunnlag.tilAvgiftsGrunnlagNorge(fastsattTrygdeavgift: FastsattTrygdeavgift): TrygdeavgiftInfo? =
+        if (avgiftsGrunnlagNorge != null) trygdeavgiftInfo(avgiftsGrunnlagNorge, fastsattTrygdeavgift) else null
 
-    private fun harLønnUtlandSkattepliktigNorge(avgiftsgrunnlagInfoUtland: AvgiftsgrunnlagInfoUtland?): Boolean {
-        return avgiftsgrunnlagInfoUtland != null && avgiftsgrunnlagInfoUtland.erSkattepliktig()
-    }
+    private fun Trygdeavgiftsgrunnlag.tilAvgiftsGrunnlagUtland(fastsattTrygdeavgift: FastsattTrygdeavgift): TrygdeavgiftInfo? =
+        if (avgiftsGrunnlagUtland != null) trygdeavgiftInfo(avgiftsGrunnlagUtland, fastsattTrygdeavgift) else null
 
-    private fun harTrygdeavtaleMedArbeidsland(arbeidsland: String): Boolean {
-        return Arrays.stream(Trygdeavtale_myndighetsland.values())
-            .anyMatch { a: Trygdeavtale_myndighetsland -> a.name == arbeidsland }
-    }
+    private fun trygdeavgiftInfo(
+        avgiftsGrunnlag: AvgiftsgrunnlagInfo,
+        fastsattTrygdeavgift: FastsattTrygdeavgift
+    ) = TrygdeavgiftInfo(
+        fastsattTrygdeavgift.avgiftspliktigUtenlandskInntektMnd ?: 0L,
+        avgiftsGrunnlag.erAvgiftspliktig(),
+        avgiftsGrunnlag.erSkattepliktig(),
+        avgiftsGrunnlag.betalerArbeidsgiverAvgift(),
+        avgiftsGrunnlag.særligAvgiftsgruppe?.kode
+    )
+
+    private fun harLønnNorgeSkattepliktigNorge(avgiftsgrunnlagInfoNorge: AvgiftsgrunnlagInfoNorge?): Boolean =
+        avgiftsgrunnlagInfoNorge != null && avgiftsgrunnlagInfoNorge.erSkattepliktig()
+
+    private fun harLønnUtlandSkattepliktigNorge(avgiftsgrunnlagInfoUtland: AvgiftsgrunnlagInfoUtland?): Boolean =
+        avgiftsgrunnlagInfoUtland != null && avgiftsgrunnlagInfoUtland.erSkattepliktig()
+
+    private fun harTrygdeavtaleMedArbeidsland(arbeidsland: String): Boolean =
+        Trygdeavtale_myndighetsland.values().any() { it.name == arbeidsland }
 }
