@@ -7,6 +7,9 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoNorge
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoUtland
@@ -27,25 +30,19 @@ import org.joda.time.DateTime
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers
-import org.mockito.Mock
-import org.mockito.invocation.InvocationOnMock
-import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.whenever
-import org.mockito.stubbing.Answer
 import java.time.Instant
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 internal class InnvilgelseFtrlMapperTest {
-    @Mock
+    @MockK
     private lateinit var mockTrygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService
 
-    @Mock
+    @MockK
     private lateinit var mockAvklarteVirksomheterService: AvklarteVirksomheterService
 
-    @Mock
+    @MockK
     private lateinit var mockDokgenMapperDatahenter: DokgenMapperDatahenter
 
     private lateinit var innvilgelseFtrlMapper: InnvilgelseFtrlMapper
@@ -115,13 +112,14 @@ internal class InnvilgelseFtrlMapperTest {
     @Test
     fun map_InnvilgetMedUtenlandskInntekt_harTrygdeavtaleMedLand_populererFelter() {
         mockHappyCase()
-        whenever(mockTrygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(ArgumentMatchers.anyLong()))
-            .thenReturn(lagUtenlandskTrygdeAvgiftsgrunnlag())
+
+        every { mockTrygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(ofType()) } returns lagUtenlandskTrygdeAvgiftsgrunnlag()
+
         val behandlingsresultat = lagBehandlingsResultat()
         behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland =
             Soeknadsland(listOf("GB"), false)
-        whenever(mockDokgenMapperDatahenter.hentBehandlingsresultat(ArgumentMatchers.anyLong()))
-            .thenReturn(behandlingsresultat)
+
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
 
         innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling()).apply {
             isTrygdeavtaleMedArbeidsland.shouldBeTrue()
@@ -152,8 +150,7 @@ internal class InnvilgelseFtrlMapperTest {
             medlemAvFolketrygden.medlemskapsperioder.iterator().next(),
             delvisInnvilgetPeriode
         )
-        whenever(mockDokgenMapperDatahenter.hentBehandlingsresultat(ArgumentMatchers.anyLong()))
-            .thenReturn(behandlingsresultat)
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat
 
         innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling()).apply {
             perioder.shouldHaveSize(2)
@@ -232,25 +229,32 @@ internal class InnvilgelseFtrlMapperTest {
     }
 
     private fun mockHappyCase() {
-        whenever(mockTrygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(ArgumentMatchers.anyLong()))
-            .thenReturn(lagNorskTrygdeAvgiftsgrunnlag())
-        whenever(
-            mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(
-                ArgumentMatchers.any(
-                    Behandling::class.java
-                )
-            )
-        ).thenReturn(lagAvklarteVirksomheter())
-        whenever(mockDokgenMapperDatahenter.hentBehandlingsresultat(ArgumentMatchers.anyLong()))
-            .thenReturn(lagBehandlingsResultat())
-        whenever(mockDokgenMapperDatahenter.hentLandnavnFraLandkode(ArgumentMatchers.anyString())).thenAnswer(
-            Answer { invocationOnMock: InvocationOnMock ->
-                Trygdeavtale_myndighetsland.valueOf(
-                    invocationOnMock.getArgument(
-                        0
-                    )
-                ).beskrivelse
-            } as Answer<String>)
+        every { mockTrygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(ofType()) } returns lagNorskTrygdeAvgiftsgrunnlag()
+        every { mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(ofType()) } returns lagAvklarteVirksomheter()
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat()
+        every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(ofType()) } returns "Østerrike"
+        every { mockDokgenMapperDatahenter.hentFullmektigNavn(any(), any()) } returns null
+
+//        whenever(mockTrygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(ArgumentMatchers.anyLong()))
+//            .thenReturn(lagNorskTrygdeAvgiftsgrunnlag())
+//        whenever(
+//            mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(
+//                ArgumentMatchers.any(
+//                    Behandling::class.java
+//                )
+//            )
+//        ).thenReturn(lagAvklarteVirksomheter())
+//        whenever(mockDokgenMapperDatahenter.hentBehandlingsresultat(ArgumentMatchers.anyLong()))
+//            .thenReturn(lagBehandlingsResultat())
+//        whenever(mockDokgenMapperDatahenter.hentLandnavnFraLandkode(ArgumentMatchers.anyString())).thenAnswer(
+//            Answer { invocationOnMock: InvocationOnMock ->
+//                Trygdeavtale_myndighetsland.valueOf(
+//                    invocationOnMock.getArgument(
+//                        0
+//                    )
+//                ).beskrivelse
+//            } as Answer<String>)
+
     }
 
     companion object {
