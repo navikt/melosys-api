@@ -70,6 +70,7 @@ class OpprettBetalingsplanTest {
             behandlingService,
             behandlingsresultatService,
             faktureringskomponentenConsumer,
+            kontaktopplysningService,
             pdlService,
             unleash
         )
