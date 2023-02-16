@@ -1,8 +1,5 @@
 package no.nav.melosys.integrasjon.dokgen.dto;
 
-import java.time.LocalDate;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
@@ -12,6 +9,9 @@ import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Innvilgelse;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
@@ -100,6 +100,28 @@ public class InnvilgelseFtrl extends DokgenDto {
     @Override
     public SaksinfoBruker getSaksinfo() {
         return (SaksinfoBruker) super.getSaksinfo();
+    }
+
+    // Har kun disse med for å kunne sende brev frem til vi har en ny mal klar
+    // https://jira.adeo.no/browse/MELOSYS-5737
+    public boolean isVurderingMedlemskapEktefelle() {
+        return false;
+    }
+
+    public boolean isVurderingLovvalgBarn() {
+        return false;
+    }
+
+    public List<FamiliemedlemInfo> getOmfattetFamilie() {
+        return List.of();
+    }
+
+    public List<IkkeOmfattetBarn> getIkkeOmfattetBarn() {
+        return List.of();
+    }
+
+    public IkkeOmfattetEktefelle getIkkeOmfattetEktefelle() {
+        return null;
     }
 
     public InnvilgelseFtrl(Builder builder) {
