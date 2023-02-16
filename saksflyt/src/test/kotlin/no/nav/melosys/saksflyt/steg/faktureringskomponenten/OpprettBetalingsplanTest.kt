@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.faktureringskomponenten;
+package no.nav.melosys.saksflyt.steg.faktureringskomponenten
 
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.string.shouldContain
@@ -226,7 +226,7 @@ class OpprettBetalingsplanTest {
         return trygdeavgift
     }
 
-    private fun lagFastsattTrygdeavgift(): FastsattTrygdeavgift? {
+    private fun lagFastsattTrygdeavgift(): FastsattTrygdeavgift {
         val fastsattTrygdeavgift = FastsattTrygdeavgift()
         fastsattTrygdeavgift.avgiftspliktigNorskInntektMnd = 50000L
         fastsattTrygdeavgift.avgiftspliktigUtenlandskInntektMnd = 50000L
@@ -242,21 +242,21 @@ class OpprettBetalingsplanTest {
     }
 
 
-    private fun lagBetalesAv(): Aktoer? {
+    private fun lagBetalesAv(): Aktoer {
         val aktoer = Aktoer()
         aktoer.rolle = Aktoersroller.REPRESENTANT_TRYGDEAVGIFT
         return aktoer
     }
 
 
-    private fun lagAktoerOrg(aktoersroller: Aktoersroller, orgNummer: String): Aktoer? {
+    private fun lagAktoerOrg(aktoersroller: Aktoersroller, orgNummer: String): Aktoer {
         val aktoer = Aktoer()
         aktoer.rolle = aktoersroller
         aktoer.orgnr = orgNummer
         return aktoer
     }
 
-    private fun lagAktoerPerson(aktoersroller: Aktoersroller, aktørId: String): Aktoer? {
+    private fun lagAktoerPerson(aktoersroller: Aktoersroller, aktørId: String): Aktoer {
         val aktoer = Aktoer()
         aktoer.rolle = aktoersroller
         aktoer.aktørId = aktørId

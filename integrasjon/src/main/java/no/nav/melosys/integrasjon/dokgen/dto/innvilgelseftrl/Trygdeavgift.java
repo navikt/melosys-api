@@ -1,8 +1,10 @@
 package no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl;
 
+import java.math.BigDecimal;
+
 public record Trygdeavgift(
-    String beloepMd,
-    String sats,
+    BigDecimal beloepMd,
+    BigDecimal sats,
     String avgiftskode,
     String forInntekt
 ) {

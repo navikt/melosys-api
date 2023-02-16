@@ -1,11 +1,11 @@
 package no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl;
 
-import java.time.LocalDate;
-import java.util.List;
-
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import no.nav.melosys.domain.Medlemskapsperiode;
+
+import java.time.LocalDate;
+import java.util.List;
 
 public class Periode {
 
@@ -31,8 +31,8 @@ public class Periode {
         this.dekning = m.getDekning().getKode();
         this.dekningBeskrivelse = m.getDekning().getBeskrivelse();
         this.trygdeavgift = m.getTrygdeavgift().stream().map(t -> new Trygdeavgift(
-            t.getTrygdeavgiftsbeløpMd().toPlainString(),
-            t.getTrygdesats().toPlainString(),
+            t.getTrygdeavgiftsbeløpMd(),
+            t.getTrygdesats(),
             t.getAvgiftskode(),
             t.getAvgiftForInntekt().name())
         ).toList();
