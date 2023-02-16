@@ -83,6 +83,10 @@ class InnvilgelseFtrlMapper(
     ) = VurderingTrygdeavgift(
         norsk = trygdeavgiftsgrunnlag.tilAvgiftsGrunnlagNorge(fastsattTrygdeavgift),
         utenlandsk = trygdeavgiftsgrunnlag.tilAvgiftsGrunnlagUtland(fastsattTrygdeavgift),
+
+        // MELOSYS-5732 - Skal disse fjernes, eller er dette koblet til fullmemektig?
+        selvbetalende = fastsattTrygdeavgift.betalesAv?.rolle == null,
+        representantNavn = fastsattTrygdeavgift.representantNr
     )
 
     private fun Trygdeavgiftsgrunnlag.tilAvgiftsGrunnlagNorge(fastsattTrygdeavgift: FastsattTrygdeavgift): TrygdeavgiftInfo? =
