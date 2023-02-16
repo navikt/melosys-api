@@ -77,8 +77,8 @@ internal class InnvilgelseFtrlMapperTest {
                 arbeidsland.shouldBe(Landkoder.AT.beskrivelse)
                 isTrygdeavtaleMedArbeidsland.shouldBeTrue()
                 vurderingTrygdeavgift.shouldNotBeNull().apply {
-                    selvbetalende.shouldBeTrue()
-                    representantNavn.shouldBeNull()
+                    selvbetalende.shouldBeFalse()
+                    representantNavn.equals("1234")
                     utenlandsk.shouldBeNull()
                     norsk.shouldNotBeNull().apply {
                         avgiftspliktigInntektMd() shouldBe 50000
