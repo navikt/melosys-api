@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 
 public class MelosysEessiMelding {
     private String sedId;
+    private Integer sequenceId;
     private String rinaSaksnummer;
     private Avsender avsender;
     private String journalpostId;
@@ -37,6 +38,14 @@ public class MelosysEessiMelding {
 
     public void setSedId(String sedId) {
         this.sedId = sedId;
+    }
+
+    public Integer getSequenceId() {
+        return sequenceId;
+    }
+
+    public void setSequenceId(Integer sequenceId) {
+        this.sequenceId = sequenceId;
     }
 
     public String getRinaSaksnummer() {
@@ -191,7 +200,7 @@ public class MelosysEessiMelding {
         return sedVersjon;
     }
 
-    public boolean isX006NavErFjernet(){
+    public boolean isX006NavErFjernet() {
         return x006NavErFjernet;
     }
 
@@ -203,6 +212,7 @@ public class MelosysEessiMelding {
     public String toString() {
         return "MelosysEessiMelding{" +
             "sedId='" + sedId + '\'' +
+            ", sequenceId='" + sequenceId + '\'' +
             ", rinaSaksnummer='" + rinaSaksnummer + '\'' +
             ", avsender='" + avsender + '\'' +
             ", journalpostId='" + journalpostId + '\'' +
@@ -228,6 +238,7 @@ public class MelosysEessiMelding {
         return erEndring == that.erEndring &&
             midlertidigBestemmelse == that.midlertidigBestemmelse &&
             Objects.equals(sedId, that.sedId) &&
+            Objects.equals(sequenceId, that.sequenceId) &&
             Objects.equals(rinaSaksnummer, that.rinaSaksnummer) &&
             Objects.equals(avsender, that.avsender) &&
             Objects.equals(journalpostId, that.journalpostId) &&
@@ -249,7 +260,7 @@ public class MelosysEessiMelding {
 
     @Override
     public int hashCode() {
-        return Objects.hash(sedId, rinaSaksnummer, avsender, journalpostId, dokumentId, gsakSaksnummer, aktoerId, statsborgerskap, arbeidssteder, periode, lovvalgsland, artikkel, erEndring, midlertidigBestemmelse, ytterligereInformasjon, bucType, sedType, svarAnmodningUnntak, anmodningUnntak, x006NavErFjernet);
+        return Objects.hash(sedId, sequenceId, rinaSaksnummer, avsender, journalpostId, dokumentId, gsakSaksnummer, aktoerId, statsborgerskap, arbeidssteder, periode, lovvalgsland, artikkel, erEndring, midlertidigBestemmelse, ytterligereInformasjon, bucType, sedType, svarAnmodningUnntak, anmodningUnntak, x006NavErFjernet);
     }
 
     public boolean inneholderYtterligereInformasjon() {

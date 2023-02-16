@@ -21,8 +21,8 @@ import no.nav.melosys.domain.eessi.sed.SedDataDto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagA003Dto
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto
 import no.nav.melosys.exception.TekniskException
-import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.MetricsTestConfig
+import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.StsMockServer
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
@@ -48,7 +48,7 @@ import java.util.*
     CorrelationIdOutgoingFilter::class,
 
     GenericAuthFilterFactory::class,
-    EessiConsumerProducer::class,
+    EessiConsumerProducerConfig::class,
     StsMockServer::class,
     MetricsTestConfig::class
 )
