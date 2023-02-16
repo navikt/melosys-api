@@ -10,6 +10,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT
+import no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_ANMODNING_UNNTAK
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import org.springframework.stereotype.Component
 
@@ -26,13 +27,15 @@ class SaksbehandlingRegler(
     ): Boolean {
         val ftrlToggleEnabled = unleash.isEnabled("melosys.folketrygden.mvp")
         val ikkeYrkesaktivToggleEnabled = unleash.isEnabled(IKKEYRKESAKTIV_FLYT)
+        val registreringAnmodningUnntakToggleEnabled = unleash.isEnabled(REGISTRERING_ANMODNING_UNNTAK)
         if (harTomFlyt(
                 fagsak.type,
                 fagsak.tema,
                 behandlingstype,
                 behandlingstema,
                 ftrlToggleEnabled,
-                ikkeYrkesaktivToggleEnabled
+                ikkeYrkesaktivToggleEnabled,
+                registreringAnmodningUnntakToggleEnabled
             )
         ) return false
 
@@ -49,7 +52,8 @@ class SaksbehandlingRegler(
                 !harTomFlyt(
                     it,
                     unleash.isEnabled("melosys.folketrygden.mvp"),
-                    unleash.isEnabled(IKKEYRKESAKTIV_FLYT)
+                    unleash.isEnabled(IKKEYRKESAKTIV_FLYT),
+                    unleash.isEnabled(REGISTRERING_ANMODNING_UNNTAK)
                 )
             }
             .firstOrNull {
@@ -77,7 +81,8 @@ class SaksbehandlingRegler(
         fun harTomFlyt(
             behandling: Behandling,
             ftrlToggleEnabled: Boolean,
-            ikkeYrkesaktivToggleEnabled: Boolean
+            ikkeYrkesaktivToggleEnabled: Boolean,
+            registreringAnmodningUnntakToggleEnabled: Boolean
         ): Boolean =
             harTomFlyt(
                 behandling.fagsak.type,
@@ -85,7 +90,8 @@ class SaksbehandlingRegler(
                 behandling.type,
                 behandling.tema,
                 ftrlToggleEnabled,
-                ikkeYrkesaktivToggleEnabled
+                ikkeYrkesaktivToggleEnabled,
+                registreringAnmodningUnntakToggleEnabled
             )
 
         @JvmStatic
@@ -96,7 +102,16 @@ class SaksbehandlingRegler(
             behandlingstema: Behandlingstema,
             ftrlToggleEnabled: Boolean,
             ikkeYrkesaktivToggleEnabled: Boolean,
+            registreringAnmodningUnntakToggleEnabled: Boolean
         ): Boolean {
+            if (erAnmodningOmUnntakEllerRegistreringUnntak(
+                    sakstype,
+                    sakstema,
+                    behandlingstema,
+                    registreringAnmodningUnntakToggleEnabled
+                )
+            ) return false
+
             if (sakstema == Sakstemaer.TRYGDEAVGIFT) return true
             if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE) return true
 
@@ -116,6 +131,31 @@ class SaksbehandlingRegler(
 
                 else -> return false
             }
+        }
+
+        @JvmStatic
+        fun erAnmodningOmUnntakEllerRegistreringUnntak(
+            sakstype: Sakstyper,
+            sakstema: Sakstemaer,
+            behandlingstema: Behandlingstema,
+            registreringAnmodningUnntakToggleEnabled: Boolean
+        ): Boolean {
+            if (!registreringAnmodningUnntakToggleEnabled || sakstema != Sakstemaer.UNNTAK) {
+                return false;
+            }
+
+            if (sakstype == Sakstyper.EU_EOS && behandlingstema == A1_ANMODNING_OM_UNNTAK_PAPIR) {
+                return true;
+            }
+
+            if (sakstype == Sakstyper.TRYGDEAVTALE && listOf(
+                    REGISTRERING_UNNTAK,
+                    ANMODNING_OM_UNNTAK_HOVEDREGEL
+                ).contains(behandlingstema)
+            ) {
+                return true
+            }
+            return false
         }
     }
 }

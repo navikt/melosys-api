@@ -7,6 +7,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 
+import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_ANMODNING_UNNTAK;
+
 
 // Setter saksopplysningtyper per behandlingstema,
 // iht. https://confluence.adeo.no/display/TEESSI/Saksopplysninger+per+behandlingstema
@@ -17,9 +19,9 @@ public final class RegisteropplysningerFactory {
 
     public static RegisteropplysningerRequest.SaksopplysningTyper utledSaksopplysningTyper(
         Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype,
-        boolean folketrygdenToggleEnabled, boolean ikkeYrkesaktivToggleEnabled) {
+        boolean folketrygdenToggleEnabled, boolean ikkeYrkesaktivToggleEnabled, boolean registreringAnmodningUnntakToggleEnabled) {
 
-        if (SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, folketrygdenToggleEnabled, ikkeYrkesaktivToggleEnabled)) {
+        if (SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, folketrygdenToggleEnabled, ikkeYrkesaktivToggleEnabled, registreringAnmodningUnntakToggleEnabled)) {
                 return ingenSaksopplysningTyper();
         }
 

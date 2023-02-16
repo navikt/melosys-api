@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
+import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_ANMODNING_UNNTAK;
 import static no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory.utledSaksopplysningTyper;
 
 @Service
@@ -60,6 +61,7 @@ public class OppfriskSaksopplysningerService {
     public void oppfriskSaksopplysning(long behandlingID, boolean medFamilierelasjoner) {
         var folketrygdenToggleEnabled = unleash.isEnabled("melosys.folketrygden.mvp");
         var ikkeYrkesaktivToggleEnabled = unleash.isEnabled(IKKEYRKESAKTIV_FLYT);
+        var registreringAnmodningUnntakToggleEnabled = unleash.isEnabled(REGISTRERING_ANMODNING_UNNTAK);
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
         if (behandling.erUtsending() && anmodningsperiodeService.harSendtAnmodningsperiode(behandlingID)) {
@@ -81,7 +83,8 @@ public class OppfriskSaksopplysningerService {
                 behandling.getTema(),
                 behandling.getType(),
                 folketrygdenToggleEnabled,
-                ikkeYrkesaktivToggleEnabled))
+                ikkeYrkesaktivToggleEnabled,
+                registreringAnmodningUnntakToggleEnabled))
             .fnr(brukerID)
             .fom(periode.getFom())
             .tom(periode.getTom())
@@ -101,7 +104,7 @@ public class OppfriskSaksopplysningerService {
 
         if (behandling.getFagsak().erSakstypeEøs()
             && behandling.harPeriodeOgLand()
-            && !SaksbehandlingRegler.harTomFlyt(behandling, folketrygdenToggleEnabled, ikkeYrkesaktivToggleEnabled)
+            && !SaksbehandlingRegler.harTomFlyt(behandling, folketrygdenToggleEnabled, ikkeYrkesaktivToggleEnabled, registreringAnmodningUnntakToggleEnabled)
             && behandling.kanResultereIVedtak()
             && !inngangsvilkaarService.oppfyllervurderingEF_883_2004(behandlingID)) {
             inngangsvilkaarService.vurderOgLagreInngangsvilkår(
