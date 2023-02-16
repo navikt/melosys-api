@@ -60,6 +60,9 @@ public class SendVedtakUtland extends AbstraktSendUtland {
         if (behandling.erNorgeUtpekt()) {
             var bucer = eessiService.hentTilknyttedeBucer(behandling.getFagsak().getGsakSaksnummer(), Collections.emptyList());
             if (bucer.stream().anyMatch(buc -> buc.getBucType().equals(BucType.LA_BUC_02.name()) && buc.erÅpen())) {
+                if (behandling.erNyVurdering()) {
+                    annullerSedForNyVurderingMedSendtVedtak(behandling);
+                }
                 eessiService.sendGodkjenningArbeidFlereLand(behandling.getId(), prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
             } else {
                 log.info("Sender ikke godkjenning av utpeking da behandling {} ikke er tilknyttet en åpen LA_BUC_02", behandling.getId());
@@ -111,6 +114,23 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             .map(Lovvalgsperiode::getBestemmelse)
             .map(BucType::fraBestemmelse)
             .orElseThrow(() -> new TekniskException("Finner ikke lovvalgsbestemmelse for behandling " + behandling.getId()));
+    }
+
+    public void annullerSedForNyVurderingMedSendtVedtak(Behandling behandling) {
+        if (harSendtVedtak(behandling.getFagsak().getGsakSaksnummer())) {
+            log.info("Invaliderer sendt vedtak SED for behandling %d  med rina saksnummer %d"
+                .formatted(behandling.getId(), behandling.getFagsak().getGsakSaksnummer()));
+            eessiService.sendInvalideringSed(behandling.getId(), "");
+        }
+    }
+
+    private boolean harSendtVedtak(long rinasaksnummer) {
+        var sedTypeList = List.of(SedType.A004, SedType.A012);
+        return eessiService.hentTilknyttedeBucer(rinasaksnummer, Collections.emptyList())
+            .stream()
+            .filter(BucInformasjon::erÅpen)
+            .flatMap(b -> b.getSeder().stream())
+            .anyMatch(s -> sedTypeList.contains(SedType.valueOf(s.getSedType())));
     }
 
     private void finnOgLukkTilhørendeBUC(Behandlingsresultat behandlingsresultat) {
