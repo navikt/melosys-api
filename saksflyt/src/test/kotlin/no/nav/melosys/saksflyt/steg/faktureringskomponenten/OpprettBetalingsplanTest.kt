@@ -55,12 +55,13 @@ class OpprettBetalingsplanTest {
 
     private val unleash = FakeUnleash()
 
-
     lateinit var opprettBetalingsplan: OpprettBetalingsplan
 
-    companion object {
-        val behandlingsId = 1L
-    }
+    private lateinit var behandling: Behandling
+    private lateinit var fagsak: Fagsak
+    private lateinit var prosessinstans: Prosessinstans
+    private lateinit var fastsattTrygdeavgift: FastsattTrygdeavgift
+    private lateinit var behandlingsresultat: Behandlingsresultat
 
     @BeforeEach
     internal fun setUp() {
@@ -76,20 +77,25 @@ class OpprettBetalingsplanTest {
         )
     }
 
+    private fun lagTestData(fagsak: Fagsak = lagFagsak(), behandling: Behandling = lagBehandling(fagsak)) {
+        this.fagsak = fagsak
+        this.behandling = behandling
+        prosessinstans = Prosessinstans().apply {
+            setData(ProsessDataKey.BETALINGSINTERVALL, FaktureringsIntervall.KVARTAL)
+            this.behandling = behandling
+        }
+        behandlingsresultat = lagBehandlingsresultat()
+        fastsattTrygdeavgift = behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift
+    }
+
     @Test
     fun `Opprett betalingsplan med riktige verdier`() {
-        val behandling = lagBehandling().apply {
-            fagsak.aktører = setOf(
+        lagTestData(lagFagsak().apply {
+            aktører = setOf(
                 lagAktoerOrg(Aktoersroller.REPRESENTANT, "123456789"),
                 lagAktoerPerson(Aktoersroller.BRUKER, "11111111111")
             )
-        }
-        val prosessinstans = Prosessinstans()
-        prosessinstans.setData(ProsessDataKey.BETALINGSINTERVALL, FaktureringsIntervall.KVARTAL)
-        prosessinstans.behandling = behandling
-        val behandlingsresultat = lagBehandlingsresultat()
-        val fastsattTrygdeavgift = behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift
-        val fagsak = prosessinstans.behandling.fagsak
+        })
 
         every {
             behandlingsresultatService.hentBehandlingsresultat(prosessinstans.behandling.id)
@@ -112,21 +118,51 @@ class OpprettBetalingsplanTest {
 
         opprettBetalingsplan.utfør(prosessinstans)
 
-        verify {
+        verify(exactly = 1) {
+            faktureringskomponentenConsumer.lagFakturaSerie(any())
+        }
+    }
+
+    @Test
+    fun `Opprett betalingsplan uten kontaktopplysning skal fungere`() {
+        lagTestData(lagFagsak().apply {
+            aktører = setOf(
+                lagAktoerOrg(Aktoersroller.REPRESENTANT, "123456789"),
+                lagAktoerPerson(Aktoersroller.BRUKER, "11111111111")
+            )
+        })
+
+        every {
+            behandlingsresultatService.hentBehandlingsresultat(prosessinstans.behandling.id)
+        } returns behandlingsresultat
+
+        every {
+            behandlingService.hentBehandling(behandlingsId)
+        } returns behandling
+
+        every {
+            kontaktopplysningService.hentKontaktopplysning(
+                fagsak.saksnummer,
+                fastsattTrygdeavgift.betalesAv.orgnr
+            )
+        } returns Optional.empty()
+
+        every {
+            pdlService.finnFolkeregisterident("11111111111")
+        } returns Optional.of("12345678911")
+
+        opprettBetalingsplan.utfør(prosessinstans)
+
+        verify(exactly = 1) {
             faktureringskomponentenConsumer.lagFakturaSerie(any())
         }
     }
 
     @Test
     fun `Opprett betalingsplan uten aktoer feiler`() {
-        val behandling = lagBehandling().apply {
-            fagsak.apply {
-                aktører = setOf(lagAktoerOrg(Aktoersroller.REPRESENTANT, "123456789"))
-            }
-        }
-        val prosessinstans = Prosessinstans()
-        prosessinstans.setData(ProsessDataKey.BETALINGSINTERVALL, FaktureringsIntervall.KVARTAL)
-        prosessinstans.behandling = behandling
+        lagTestData(lagFagsak().apply {
+            aktører = setOf(lagAktoerOrg(Aktoersroller.REPRESENTANT, "123456789"))
+        })
 
         every {
             behandlingService.hentBehandling(behandlingsId)
@@ -140,17 +176,12 @@ class OpprettBetalingsplanTest {
 
     @Test
     fun `Opprett betalingsplan med to BRUKER aktoer feiler`() {
-        val behandling = lagBehandling().apply {
-            fagsak.apply {
-                aktører = setOf(
-                    lagAktoerOrg(Aktoersroller.BRUKER, "123456789"),
-                    lagAktoerOrg(Aktoersroller.BRUKER, "123456781")
-                )
-            }
-        }
-        val prosessinstans = Prosessinstans()
-        prosessinstans.setData(ProsessDataKey.BETALINGSINTERVALL, FaktureringsIntervall.KVARTAL)
-        prosessinstans.behandling = behandling
+        lagTestData(lagFagsak().apply {
+            aktører = setOf(
+                lagAktoerOrg(Aktoersroller.BRUKER, "123456789"),
+                lagAktoerOrg(Aktoersroller.BRUKER, "123456781")
+            )
+        })
 
         every {
             behandlingService.hentBehandling(behandlingsId)
@@ -162,13 +193,13 @@ class OpprettBetalingsplanTest {
         }.message.shouldContain("Kunne ikke opprette betalingsplan, det finnes 2 aktører med rolle BRUKER")
     }
 
-    private fun lagBehandling(): Behandling {
+    private fun lagBehandling(fagsak: Fagsak = lagFagsak()): Behandling {
         val behandling = Behandling()
         behandling.id = behandlingsId
         behandling.tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
         behandling.type = Behandlingstyper.FØRSTEGANG
         behandling.status = Behandlingsstatus.AVSLUTTET
-        behandling.fagsak = lagFagsak()
+        behandling.fagsak = fagsak
         return behandling
     }
 
@@ -263,4 +294,7 @@ class OpprettBetalingsplanTest {
         return aktoer
     }
 
+    companion object {
+        const val behandlingsId = 1L
+    }
 }

@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.faktureringskomponenten
 import mu.KotlinLogging
 import no.finn.unleash.Unleash
 import no.nav.melosys.domain.Aktoer
+import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Kontaktopplysning
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.saksflyt.ProsessDataKey
@@ -19,7 +20,6 @@ import no.nav.melosys.service.aktoer.KontaktopplysningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.util.*
 
@@ -27,12 +27,12 @@ private val log = KotlinLogging.logger { }
 
 @Component
 class OpprettBetalingsplan(
-    @Autowired val behandlingService: BehandlingService,
-    @Autowired val behandlingsresultatService: BehandlingsresultatService,
-    @Autowired val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
-    @Autowired val kontaktopplysningService: KontaktopplysningService,
-    @Autowired val pdlService: PersondataService,
-    @Autowired val unleash: Unleash
+    private val behandlingService: BehandlingService,
+    private val behandlingsresultatService: BehandlingsresultatService,
+    private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
+    private val kontaktopplysningService: KontaktopplysningService,
+    private val pdlService: PersondataService,
+    private val unleash: Unleash
 ) : StegBehandler {
 
     override fun inngangsSteg(): ProsessSteg {
@@ -62,8 +62,7 @@ class OpprettBetalingsplan(
         val avgiftspliktigUtenlandskInntektMnd = fastsattTrygdeavgift.avgiftspliktigUtenlandskInntektMnd ?: 0
         val avgiftspliktigNorskInntektMnd = fastsattTrygdeavgift.avgiftspliktigNorskInntektMnd ?: 0
         val inntektBelopMnd = avgiftspliktigUtenlandskInntektMnd + avgiftspliktigNorskInntektMnd
-        val kontaktopplysning =
-            kontaktopplysningService.hentKontaktopplysning(fagsak.saksnummer, fastsattTrygdeavgift.betalesAv.orgnr)
+        val kontaktopplysning = hentKontaktopplysning(fagsak, fastsattTrygdeavgift.betalesAv)
 
         val alleTrygdeavgiftIMedlemskap = medlemskapsperioder.flatMap {
             it.trygdeavgift.map { trygdeavgift -> trygdeavgift }
@@ -102,12 +101,20 @@ class OpprettBetalingsplan(
         faktureringskomponentenConsumer.lagFakturaSerie(fakturaserieDto)
     }
 
+    private fun hentKontaktopplysning(
+        fagsak: Fagsak,
+        betalesAv: Aktoer?
+    ): Optional<Kontaktopplysning> {
+        if (betalesAv == null) return Optional.empty()
+        return kontaktopplysningService.hentKontaktopplysning(fagsak.saksnummer, betalesAv.orgnr)
+    }
+
     private fun fullmektigDto(
         betalesAv: Aktoer?,
         kontaktopplysning: Optional<Kontaktopplysning>
     ) = FullmektigDto(
         fodselsnummer = betalesAv?.personIdent,
         organisasjonsnummer = betalesAv?.orgnr,
-        kontaktperson = kontaktopplysning.orElse(null).kontaktNavn
+        kontaktperson = kontaktopplysning.orElse(null)?.kontaktNavn
     )
 }
