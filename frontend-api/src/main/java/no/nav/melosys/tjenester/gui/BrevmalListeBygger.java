@@ -101,7 +101,7 @@ public class BrevmalListeBygger {
 
     private MottakerDto lagMottakerMedAdresseOgFeilmelding(long behandlingId, Mottakerroller rolle) {
         var mottakerDto = new MottakerDto();
-        mottakerDto.setType(mapRolleTilType(rolle));
+        mottakerDto.setType(hentTypeFraRolle(rolle));
         mottakerDto.setRolle(rolle);
         leggTilAdresseOgFeilmelding(mottakerDto, rolle, behandlingId);
         return mottakerDto;
@@ -110,11 +110,11 @@ public class BrevmalListeBygger {
     private MottakerDto lagMottakerMedRolle(Mottakerroller rolle) {
         var mottakerDto = new MottakerDto();
         mottakerDto.setRolle(rolle);
-        mottakerDto.setType(mapRolleTilType(rolle));
+        mottakerDto.setType(hentTypeFraRolle(rolle));
         return mottakerDto;
     }
 
-    private String mapRolleTilType(Mottakerroller rolle) {
+    private String hentTypeFraRolle(Mottakerroller rolle) {
         var mottakerType = switch (rolle) {
             case BRUKER -> MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG;
             case VIRKSOMHET -> MottakerType.VIRKSOMHET;
