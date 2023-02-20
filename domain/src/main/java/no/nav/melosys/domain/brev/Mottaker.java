@@ -40,7 +40,7 @@ public final class Mottaker {
         return new Mottaker(mottakerrolleAv(aktoer.getRolle()), aktoer.getAktørId(), aktoer.getPersonIdent(), aktoer.getOrgnr(), aktoer.getInstitusjonId(), aktoer.getTrygdemyndighetLand());
     }
 
-    public static Mottakerroller mottakerrolleAv(Aktoersroller aktoersrolle) {
+    private static Mottakerroller mottakerrolleAv(Aktoersroller aktoersrolle) {
         return switch (aktoersrolle) {
             case BRUKER -> Mottakerroller.BRUKER;
             case VIRKSOMHET -> Mottakerroller.VIRKSOMHET;

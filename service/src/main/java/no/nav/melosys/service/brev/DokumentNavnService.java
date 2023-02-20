@@ -1,6 +1,5 @@
 package no.nav.melosys.service.brev;
 
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.NorskMyndighet;
@@ -47,36 +46,6 @@ public class DokumentNavnService {
 
     private boolean erTrygdeavtaleVedtaksbrev(Produserbaredokumenter produserbaredokumenter) {
         return produserbaredokumenter.getKode().contains("TRYGDEAVTALE");
-    }
-
-    public String utledDokumentNavn(Behandling behandling, DokumentproduksjonsInfo dokumentproduksjonsInfo, Aktoer mottaker) {
-        String tittel = utledTittel(behandling, dokumentproduksjonsInfo, mottaker);
-
-        if (behandling.erNyVurdering()) {
-            return lagEndringTittel(tittel);
-        }
-
-        return tittel;
-    }
-
-    private String utledTittel(Behandling behandling, DokumentproduksjonsInfo dokumentproduksjonsInfo, Aktoer mottaker) {
-        if (mottaker.erUtenlandskMyndighet()) {
-            return dokumentproduksjonsInfo.vedleggsTitler().get(VedleggTyper.ATTEST);
-        }
-
-        var vedtaksbrevTittel = dokumentproduksjonsInfo.vedleggsTitler().get(VedleggTyper.VEDTAKSBREV);
-
-        if (NorskMyndighet.SKATTEETATEN.getOrgnr().equals((mottaker.getOrgnr()))) {
-            return lagKopiTittel(vedtaksbrevTittel);
-        }
-
-        boolean erArtikkel8_2 = lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId()).getBestemmelse() == UK_ART8_2;
-
-        if (mottaker.erBruker()) {
-            return erArtikkel8_2 ? vedtaksbrevTittel : dokumentproduksjonsInfo.journalføringsTittel();
-        } else {
-            return lagKopiTittel(erArtikkel8_2 ? vedtaksbrevTittel : dokumentproduksjonsInfo.journalføringsTittel());
-        }
     }
 
     public String utledDokumentNavn(Behandling behandling, DokumentproduksjonsInfo dokumentproduksjonsInfo, Mottaker mottaker) {

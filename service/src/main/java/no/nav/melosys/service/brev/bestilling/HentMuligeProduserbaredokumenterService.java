@@ -29,14 +29,14 @@ public class HentMuligeProduserbaredokumenterService {
     }
 
     @Transactional
-    public List<Produserbaredokumenter> hentMuligeProduserbaredokumenter(long behandlingId, Mottakerroller rolle) {
+    public List<Produserbaredokumenter> hentMuligeProduserbaredokumenter(long behandlingId, Mottakerroller mottakerroller) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
 
         if (behandling.erInaktiv()) {
             return emptyList();
         }
 
-        return switch (rolle) {
+        return switch (mottakerroller) {
             case BRUKER -> {
                 List<Produserbaredokumenter> brevmaler = new ArrayList<>();
                 if (behandling.getFagsak().getTema() == Sakstemaer.MEDLEMSKAP_LOVVALG && behandling.getType() == Behandlingstyper.FØRSTEGANG) {
@@ -52,7 +52,7 @@ public class HentMuligeProduserbaredokumenterService {
                 : List.of(MANGELBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
             case UTENLANDSK_TRYGDEMYNDIGHET -> Collections.singletonList(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV);
             case NORSK_MYNDIGHET -> Collections.singletonList(FRITEKSTBREV);
-            default -> throw new FunksjonellException("Rollen " + rolle + " kan ikke sende brev gjennom brevmenyen");
+            default -> throw new FunksjonellException("Mottakerrollen " + mottakerroller + " kan ikke sende brev gjennom brevmenyen");
         };
     }
 }
