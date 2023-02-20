@@ -45,7 +45,7 @@ public class DokumentNavnService {
     }
 
     private boolean erTrygdeavtaleVedtaksbrev(Produserbaredokumenter produserbaredokumenter) {
-        return produserbaredokumenter.getKode().contains("TRYGDEAVTALE");
+        return produserbaredokumenter.getKode().contains("TRYGDEAVTALE") && produserbaredokumenter.getBeskrivelse().contains("Vedtaksbrev");
     }
 
     public String utledDokumentNavn(Behandling behandling, DokumentproduksjonsInfo dokumentproduksjonsInfo, Mottaker mottaker) {
