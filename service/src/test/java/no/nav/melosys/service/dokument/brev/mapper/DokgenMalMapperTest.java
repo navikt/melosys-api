@@ -4,7 +4,6 @@ import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.Journalpost;
@@ -642,24 +641,6 @@ class DokgenMalMapperTest {
         assertThat(dokgenDto.getMottaker().type()).isEqualTo(BRUKER.getKode());
     }
 
-    private Aktoer lagMottakerBruker() {
-        var mottaker = new Aktoer();
-        mottaker.setAktørId("123");
-        return mottaker;
-    }
-
-    private Aktoer lagMottakerOrg() {
-        var mottaker = new Aktoer();
-        mottaker.setOrgnr("87654321");
-        return mottaker;
-    }
-
-    private Aktoer lagMottakerPerson() {
-        var mottaker = new Aktoer();
-        mottaker.setPersonIdent("12345678901");
-        return mottaker;
-    }
-
     private Journalpost lagJournalpost(LocalDate forsendelseJournalfoertDato) {
         Instant forsteDato = forsendelseJournalfoertDato.atStartOfDay(ZoneId.of("Europe/Paris")).toInstant();
         ArkivDokument arkivDokument = new ArkivDokument();
@@ -686,11 +667,6 @@ class DokgenMalMapperTest {
             .perioder(null)
             .erFullstendigInnvilget(true)
             .ftrl_2_8_begrunnelse(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_MULTINASJONALT_SELSKAP.getBeskrivelse())
-            .vurderingMedlemskapEktefelle(false)
-            .vurderingLovvalgBarn(false)
-            .omfattetFamilie(null)
-            .ikkeOmfattetEktefelle(null)
-            .ikkeOmfattetBarn(null)
             .arbeidsgiverNavn("Egon Olsen AS")
             .arbeidsland("USA")
             .trygdeavtaleMedArbeidsland(false)

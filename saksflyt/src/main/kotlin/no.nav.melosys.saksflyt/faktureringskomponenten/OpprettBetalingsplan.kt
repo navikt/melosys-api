@@ -1,6 +1,10 @@
 package no.nav.melosys.saksflyt.faktureringskomponenten
 
+import mu.KotlinLogging
 import no.finn.unleash.Unleash
+import no.nav.melosys.domain.Aktoer
+import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.Kontaktopplysning
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.saksflyt.ProsessDataKey
 import no.nav.melosys.domain.saksflyt.ProsessSteg
@@ -16,23 +20,20 @@ import no.nav.melosys.service.aktoer.KontaktopplysningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
-import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import java.util.*
+
+private val log = KotlinLogging.logger { }
 
 @Component
 class OpprettBetalingsplan(
-    @Autowired val behandlingService: BehandlingService,
-    @Autowired val behandlingsresultatService: BehandlingsresultatService,
-    @Autowired val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
-    @Autowired val kontaktopplysningService: KontaktopplysningService,
-    @Autowired val pdlService: PersondataService,
-    @Autowired val unleash: Unleash
+    private val behandlingService: BehandlingService,
+    private val behandlingsresultatService: BehandlingsresultatService,
+    private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
+    private val kontaktopplysningService: KontaktopplysningService,
+    private val pdlService: PersondataService,
+    private val unleash: Unleash
 ) : StegBehandler {
-
-    companion object {
-        val log = LoggerFactory.getLogger(OpprettBetalingsplan::class.java)
-    }
 
     override fun inngangsSteg(): ProsessSteg {
         return ProsessSteg.OPPRETT_BETALINGSPLAN
@@ -54,15 +55,14 @@ class OpprettBetalingsplan(
             throw FunksjonellException("Kunne ikke opprette betalingsplan, det finnes ${aktoerer.size} aktører")
         }
 
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsId);
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsId)
         val vedtaksdato = behandlingsresultat.vedtakMetadata.vedtaksdato.toString()
         val medlemskapsperioder = behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder
         val fastsattTrygdeavgift = behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift
         val avgiftspliktigUtenlandskInntektMnd = fastsattTrygdeavgift.avgiftspliktigUtenlandskInntektMnd ?: 0
         val avgiftspliktigNorskInntektMnd = fastsattTrygdeavgift.avgiftspliktigNorskInntektMnd ?: 0
         val inntektBelopMnd = avgiftspliktigUtenlandskInntektMnd + avgiftspliktigNorskInntektMnd
-        val kontaktopplysning =
-            kontaktopplysningService.hentKontaktopplysning(fagsak.saksnummer, fastsattTrygdeavgift.betalesAv.orgnr)
+        val kontaktopplysning = hentKontaktopplysning(fagsak, fastsattTrygdeavgift.betalesAv)
 
         val alleTrygdeavgiftIMedlemskap = medlemskapsperioder.flatMap {
             it.trygdeavgift.map { trygdeavgift -> trygdeavgift }
@@ -79,31 +79,42 @@ class OpprettBetalingsplan(
         val foedselsNr = pdlService.finnFolkeregisterident(aktoerer.first().aktørId)
             .orElseThrow { FunksjonellException("Kunne ikke finne fødselsnummer fra PDL") }
 
-        val fullmektigDto = FullmektigDto(
-            fodselsnummer = fastsattTrygdeavgift.betalesAv.personIdent,
-            organisasjonsnummer = fastsattTrygdeavgift.betalesAv.orgnr,
-            kontaktperson = kontaktopplysning.map { it.kontaktNavn }.orElse(null)
-        )
-
         val intervall = prosessinstans.getData(
             ProsessDataKey.BETALINGSINTERVALL,
             FaktureringsIntervall::class.java
         )
 
         val fakturaserieDto =
-            FakturaserieDto.builder()
-                .medVedtaksId("${fagsak.saksnummer}-$behandlingsId")
-                .medFodselsnummer(foedselsNr)
-                .medReferanseNAV("Medlemskap og avgift")
-                .medFakturaGjelder("Medlemskapsavgift")
-                .medIntervall(intervall ?: FaktureringsIntervall.MANEDLIG)
-                .medReferanseBruker(vedtaksdato)
-                .medFullmektig(fullmektigDto)
-                .medPerioder(fakturaseriePeriodeDtoListe)
-                .build()
+            FakturaserieDto(
+                vedtaksId = "${fagsak.saksnummer}-$behandlingsId",
+                fodselsnummer = foedselsNr,
+                referanseNAV = "Medlemskap og avgift",
+                fullmektig = fullmektigDto(fastsattTrygdeavgift.betalesAv, kontaktopplysning),
+                fakturaGjelder = "Medlemskapsavgift",
+                intervall = intervall ?: FaktureringsIntervall.MANEDLIG,
+                referanseBruker = vedtaksdato,
+                perioder = fakturaseriePeriodeDtoListe
+            )
 
         log.info("Oppretter betalingsplan for behandling: $behandlingsId")
 
         faktureringskomponentenConsumer.lagFakturaSerie(fakturaserieDto)
     }
+
+    private fun hentKontaktopplysning(
+        fagsak: Fagsak,
+        betalesAv: Aktoer?
+    ): Optional<Kontaktopplysning> {
+        if (betalesAv == null) return Optional.empty()
+        return kontaktopplysningService.hentKontaktopplysning(fagsak.saksnummer, betalesAv.orgnr)
+    }
+
+    private fun fullmektigDto(
+        betalesAv: Aktoer?,
+        kontaktopplysning: Optional<Kontaktopplysning>
+    ) = FullmektigDto(
+        fodselsnummer = betalesAv?.personIdent,
+        organisasjonsnummer = betalesAv?.orgnr,
+        kontaktperson = kontaktopplysning.orElse(null)?.kontaktNavn
+    )
 }

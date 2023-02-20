@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.oppgave;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -22,6 +23,7 @@ import no.nav.melosys.integrasjon.oppgave.konsument.OppgaveConsumer;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveDto;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OppgaveSearchRequest;
 import no.nav.melosys.integrasjon.oppgave.konsument.dto.OpprettOppgaveDto;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -167,9 +169,11 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
 
         if (StringUtils.isNotEmpty(oppgaveOppdatering.getBeskrivelse())) {
             if (StringUtils.isEmpty(oppgaveDto.getBeskrivelse())) {
-                oppgaveDto.setBeskrivelse(oppgaveOppdatering.getBeskrivelse());
+                oppgaveDto.setBeskrivelse(hentNyBeskrivelseHendelseslogg(oppgaveOppdatering.getBeskrivelse()));
             } else {
-                oppgaveDto.setBeskrivelse(StringUtils.joinWith("\n", oppgaveDto.getBeskrivelse(), oppgaveOppdatering.getBeskrivelse()));
+                oppgaveDto.setBeskrivelse(StringUtils.joinWith("\n",
+                    hentNyBeskrivelseHendelseslogg(oppgaveOppdatering.getBeskrivelse()),
+                    oppgaveDto.getBeskrivelse()));
             }
         }
 
@@ -334,6 +338,13 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .setBehandlesAvApplikasjon(mapTilEnumFraKode(Fagsystem.class, StringUtils.defaultString(oppgaveDto.getBehandlesAvApplikasjon()), oppgaveId));
 
         return domainOppgaveBuilder.build();
+    }
+
+    private static String hentNyBeskrivelseHendelseslogg(String beskrivelse) {
+        String userID = SubjectHandler.getUserIDOrSystemUser();
+        String oppdateringstidspunkt = LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        return String.format("--- %s (%s, %s) ---\n %s\n",
+            oppdateringstidspunkt, userID, Fagsystem.MELOSYS.getBeskrivelse(), beskrivelse);
     }
 
     private static <K extends Kodeverk> K mapTilEnumFraKode(Class<K> clazz, String verdi, String oppgaveId) {

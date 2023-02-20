@@ -11,12 +11,12 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
-public class EessiConsumerProducer implements WebClientConfig {
+public class EessiConsumerProducerConfig implements WebClientConfig {
     private static final String CLIENT_NAME = "melosys-eessi";
     private final String url;
     private final GenericAuthFilterFactory genericAuthFilterFactory;
 
-    public EessiConsumerProducer(
+    public EessiConsumerProducerConfig(
         @Value("${MelosysEessi.url}") String url, GenericAuthFilterFactory genericAuthFilterFactory
     ) {
         this.url = url;
