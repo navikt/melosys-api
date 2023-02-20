@@ -153,7 +153,6 @@ internal class SaksflytOppstartIT(
     }
 
     private fun lagBehandling(fagsak: Fagsak): Behandling = Behandling().apply {
-        id = 1
         this.fagsak = fagsak
         type = Behandlingstyper.FØRSTEGANG
         tema = Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET
