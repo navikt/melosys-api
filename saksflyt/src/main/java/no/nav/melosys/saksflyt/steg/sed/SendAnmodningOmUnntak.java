@@ -86,7 +86,7 @@ public class SendAnmodningOmUnntak extends AbstraktSendUtland {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
         return new DoksysBrevbestilling.Builder().medProduserbartDokument(Produserbaredokumenter.ANMODNING_UNNTAK)
             .medAvsenderID(hentSaksbehandler(prosessinstans))
-            .medMottakere(Mottaker.av(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET))
+            .medMottakere(Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET))
             .medBehandling(behandling)
             .medYtterligereInformasjon(prosessinstans.getData(YTTERLIGERE_INFO_SED))
             .build();

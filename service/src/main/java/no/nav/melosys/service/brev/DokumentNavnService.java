@@ -31,7 +31,7 @@ public class DokumentNavnService {
 
     public String utledDokumentNavnForProduserbaredokumenterOgMottakerrolle(Behandling behandling, Produserbaredokumenter produserbaredokumenter, Mottakerroller mottakerRolle) {
         if (erTrygdeavtaleVedtaksbrev(produserbaredokumenter)) {
-            Mottaker mottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(mottakerRolle), behandling);
+            Mottaker mottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.medRolle(mottakerRolle), behandling);
             return utledDokumentNavnForProduserbaredokumenterOgMottaker(behandling, produserbaredokumenter, mottaker, null);
         }
         return produserbaredokumenter.getBeskrivelse();

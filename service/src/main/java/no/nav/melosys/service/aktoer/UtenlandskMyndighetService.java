@@ -103,7 +103,7 @@ public class UtenlandskMyndighetService {
     }
 
     private Mottaker lagMottaker(UtenlandskMyndighet utenlandskMyndighet) {
-        Mottaker mottaker = new Mottaker(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
+        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
         mottaker.setInstitusjonID(utenlandskMyndighet.hentInstitusjonID());
         return mottaker;
     }

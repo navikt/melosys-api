@@ -84,7 +84,7 @@ class DokumentNavnServiceTest {
             when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
         }
 
-        when(brevmottakerService.avklarMottaker(TRYGDEAVTALE_GB, Mottaker.av(mottaker.getRolle()), behandling)).thenReturn(mottaker);
+        when(brevmottakerService.avklarMottaker(TRYGDEAVTALE_GB, Mottaker.medRolle(mottaker.getRolle()), behandling)).thenReturn(mottaker);
 
         DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper = new DokumentproduksjonsInfoMapper(new FakeUnleash());
         when(dokgenService.hentDokumentInfo(TRYGDEAVTALE_GB)).thenReturn(dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(TRYGDEAVTALE_GB));
@@ -162,8 +162,7 @@ class DokumentNavnServiceTest {
     }
 
     private static Mottaker lagMottaker(Mottakerroller rolle, String aktørID, String orgnr, String institusjonsID) {
-        Mottaker mottaker = new Mottaker();
-        mottaker.setRolle(rolle);
+        Mottaker mottaker = Mottaker.medRolle(rolle);
         mottaker.setAktørId(aktørID);
         mottaker.setOrgnr(orgnr);
         mottaker.setInstitusjonID(institusjonsID);

@@ -63,9 +63,7 @@ class TilBrevAdresseServiceTest {
     void tilBrevAdresse_brukerSomMottaker_returnererBrukeradresse() {
         when(persondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse());
 
-        Mottaker mottaker = new Mottaker();
-        mottaker.setRolle(Mottakerroller.BRUKER);
-
+        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.BRUKER);
 
         var brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling);
 
@@ -94,8 +92,7 @@ class TilBrevAdresseServiceTest {
     void tilBrevAdresse_brukersFullmaktOrganisasjonSomMottaker_returnererFullmektigsAdresse() {
         when(eregFasade.hentOrganisasjon("orgnr")).thenReturn(lagOrgSaksopplysning("orgnr", "Ola Nordmann Fullmektig"));
 
-        Mottaker mottaker = new Mottaker();
-        mottaker.setRolle(Mottakerroller.FULLMEKTIG);
+        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.FULLMEKTIG);
         mottaker.setOrgnr("orgnr");
 
 
@@ -127,8 +124,7 @@ class TilBrevAdresseServiceTest {
     void tilBrevAdresse_brukersFullmaktPersonSomMottaker_returnererFullmektigsAdresse() {
         when(persondataFasade.hentPerson("fnr")).thenReturn(lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse());
 
-        Mottaker mottaker = new Mottaker();
-        mottaker.setRolle(Mottakerroller.FULLMEKTIG);
+        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.FULLMEKTIG);
         mottaker.setPersonIdent("fnr");
 
 
@@ -160,8 +156,7 @@ class TilBrevAdresseServiceTest {
     void tilBrevAdresse_arbeidsgiverSomMottaker_returnererArbeidsgiverAdresser() {
         when(eregFasade.hentOrganisasjon("orgnr")).thenReturn(lagOrgSaksopplysning("orgnr", "Ola Nordmann Rørleggerfirma"));
 
-        Mottaker mottaker = new Mottaker();
-        mottaker.setRolle(Mottakerroller.ARBEIDSGIVER);
+        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER);
         mottaker.setOrgnr("orgnr");
 
 
@@ -192,8 +187,7 @@ class TilBrevAdresseServiceTest {
     void tilBrevAdresse_virksomhetSomMottaker_returnererVirksomhetAdresser() {
         when(eregFasade.hentOrganisasjon("orgnr")).thenReturn(lagOrgSaksopplysning("orgnr", "Ola Nordmann Rørleggerfirma"));
 
-        Mottaker mottaker = new Mottaker();
-        mottaker.setRolle(Mottakerroller.VIRKSOMHET);
+        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.VIRKSOMHET);
         mottaker.setOrgnr("orgnr");
 
 
@@ -223,8 +217,7 @@ class TilBrevAdresseServiceTest {
 
     @Test
     void tilBrevAdresse_norskMyndighetSomMottaker_kasterFeil() {
-        Mottaker mottaker = new Mottaker();
-        mottaker.setRolle(Mottakerroller.NORSK_MYNDIGHET);
+        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.NORSK_MYNDIGHET);
 
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -234,8 +227,7 @@ class TilBrevAdresseServiceTest {
 
     @Test
     void tilBrevAdresse_utenlandsakTrygdemyndighetSomMottaker_kasterFeil() {
-        Mottaker mottaker = new Mottaker();
-        mottaker.setRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
+        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
 
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -248,8 +240,7 @@ class TilBrevAdresseServiceTest {
         Personopplysninger persondata = PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser();
         when(persondataFasade.hentPerson(anyString())).thenReturn(persondata);
 
-        Mottaker mottaker = new Mottaker();
-        mottaker.setRolle(Mottakerroller.BRUKER);
+        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.BRUKER);
         mottaker.setOrgnr(null);
 
 
@@ -273,8 +264,7 @@ class TilBrevAdresseServiceTest {
     void hentBrevAdresseTilMottakere_returnererAdresseMedKorrektAdresselinjer_nårCoAdresseErTomStreng() {
         when(persondataFasade.hentPerson(anyString())).thenReturn(lagPersondataMedTomCo());
 
-        Mottaker mottaker = new Mottaker();
-        mottaker.setRolle(Mottakerroller.BRUKER);
+        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.BRUKER);
         mottaker.setOrgnr(null);
 
 

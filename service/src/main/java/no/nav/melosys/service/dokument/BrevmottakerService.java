@@ -228,7 +228,7 @@ public class BrevmottakerService {
     }
 
     private static Mottaker lagMottakerForArbeidsgiver(String orgnr) {
-        Mottaker arbeidsgiver = new Mottaker(Mottakerroller.ARBEIDSGIVER);
+        Mottaker arbeidsgiver = Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER);
         arbeidsgiver.setOrgnr(orgnr);
         return arbeidsgiver;
     }

@@ -709,7 +709,7 @@ class ProsessinstansServiceTest {
     void opprettProsessinstansSendBrev_oppretterNyProsessinstans() {
         var behandling = new Behandling();
         var doksysbrevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(INNVILGELSE_YRKESAKTIV).build();
-        var mottaker = Mottaker.av(Mottakerroller.BRUKER);
+        var mottaker = Mottaker.medRolle(Mottakerroller.BRUKER);
 
 
         prosessinstansService.opprettProsessinstansSendBrev(behandling, doksysbrevbestilling, mottaker);
@@ -726,7 +726,7 @@ class ProsessinstansServiceTest {
     void opprettProsessinstanserSendBrev_flereMottakere_oppretterNyProsessinstansPerMottaker() {
         var behandling = new Behandling();
         var doksysbrevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(INNVILGELSE_YRKESAKTIV).build();
-        var mottakere = List.of(Mottaker.av(Mottakerroller.BRUKER), Mottaker.av(Mottakerroller.ARBEIDSGIVER), Mottaker.av(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
+        var mottakere = List.of(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER), Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
 
 
         prosessinstansService.opprettProsessinstanserSendBrev(behandling, doksysbrevbestilling, mottakere);
@@ -734,11 +734,11 @@ class ProsessinstansServiceTest {
 
         verify(prosessinstansRepo, times(3)).save(piCaptor.capture());
         assertThat(piCaptor.getAllValues().get(0).getData(ProsessDataKey.BREVBESTILLING, DoksysBrevbestilling.class).getMottakere())
-            .isEqualTo(List.of(Mottaker.av(Mottakerroller.BRUKER)));
+            .isEqualTo(List.of(Mottaker.medRolle(Mottakerroller.BRUKER)));
         assertThat(piCaptor.getAllValues().get(1).getData(ProsessDataKey.BREVBESTILLING, DoksysBrevbestilling.class).getMottakere())
-            .isEqualTo(List.of(Mottaker.av(Mottakerroller.ARBEIDSGIVER)));
+            .isEqualTo(List.of(Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER)));
         assertThat(piCaptor.getAllValues().get(2).getData(ProsessDataKey.BREVBESTILLING, DoksysBrevbestilling.class).getMottakere())
-            .isEqualTo(List.of(Mottaker.av(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET)));
+            .isEqualTo(List.of(Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET)));
     }
 
     private MelosysEessiMelding lagMelosysEessiMelding() {

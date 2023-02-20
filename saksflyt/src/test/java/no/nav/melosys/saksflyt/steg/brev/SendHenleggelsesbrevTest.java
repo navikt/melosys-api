@@ -69,7 +69,7 @@ class SendHenleggelsesbrevTest {
         sendHenleggelsesbrev.utfør(prosessinstans);
 
         verify(brevBestiller).bestill(eq(Produserbaredokumenter.MELDING_HENLAGT_SAK),
-            eq(Collections.singleton(Mottaker.av(Mottakerroller.BRUKER))),
+            eq(Collections.singleton(Mottaker.medRolle(Mottakerroller.BRUKER))),
             eq(behandlingsresultat.getBegrunnelseFritekst()), any(String.class),
             eq(Henleggelsesgrunner.ANNET.getKode()), eq(behandling));
     }

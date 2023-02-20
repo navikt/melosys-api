@@ -88,9 +88,9 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
 
 
-        verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(List.of(Mottaker.av(BRUKER))));
+        verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(List.of(Mottaker.medRolle(BRUKER))));
         assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(AVSLAG_MANGLENDE_OPPLYSNINGER);
-        verify(prosessinstansService, never()).opprettProsessinstansSendBrev(eq(behandling), any(DoksysBrevbestilling.class), eq(Mottaker.av(ARBEIDSGIVER)));
+        verify(prosessinstansService, never()).opprettProsessinstansSendBrev(eq(behandling), any(DoksysBrevbestilling.class), eq(Mottaker.medRolle(ARBEIDSGIVER)));
     }
 
     @Test
@@ -114,7 +114,7 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
 
 
-        var mottakere = List.of(Mottaker.av(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN));
+        var mottakere = List.of(Mottaker.medRolle(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN));
         verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
         assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(INNVILGELSE_YRKESAKTIV);
     }
@@ -128,10 +128,10 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
 
 
-        var mottakere = List.of(Mottaker.av(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN));
+        var mottakere = List.of(Mottaker.medRolle(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN));
         verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
         assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(INNVILGELSE_YRKESAKTIV);
-        verify(prosessinstansService, never()).opprettProsessinstansSendBrev(eq(behandling), any(DoksysBrevbestilling.class), eq(Mottaker.av(ARBEIDSGIVER)));
+        verify(prosessinstansService, never()).opprettProsessinstansSendBrev(eq(behandling), any(DoksysBrevbestilling.class), eq(Mottaker.medRolle(ARBEIDSGIVER)));
     }
 
     @Test
@@ -143,7 +143,7 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
 
 
-        var mottakere = List.of(Mottaker.av(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN));
+        var mottakere = List.of(Mottaker.medRolle(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN));
         verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
         assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(INNVILGELSE_YRKESAKTIV_FLERE_LAND);
     }
@@ -157,7 +157,7 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
 
 
-        verify(prosessinstansService).opprettProsessinstansSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(Mottaker.av(BRUKER)));
+        verify(prosessinstansService).opprettProsessinstansSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(Mottaker.medRolle(BRUKER)));
         assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(ORIENTERING_UTPEKING_UTLAND);
     }
 
@@ -171,7 +171,7 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(prosessinstans);
 
 
-        verify(prosessinstansService, never()).opprettProsessinstansSendBrev(eq(behandling), any(DoksysBrevbestilling.class), eq(Mottaker.av(ARBEIDSGIVER)));
+        verify(prosessinstansService, never()).opprettProsessinstansSendBrev(eq(behandling), any(DoksysBrevbestilling.class), eq(Mottaker.medRolle(ARBEIDSGIVER)));
     }
 
     @Test
@@ -186,7 +186,7 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
 
 
-        var mottakere = List.of(Mottaker.av(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN), Mottaker.av(NorskMyndighet.SKATTEINNKREVER_UTLAND));
+        var mottakere = List.of(Mottaker.medRolle(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN), Mottaker.av(NorskMyndighet.SKATTEINNKREVER_UTLAND));
         verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
         assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(INNVILGELSE_YRKESAKTIV_FLERE_LAND);
     }
@@ -204,7 +204,7 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
 
 
-        var mottakere = List.of(Mottaker.av(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN));
+        var mottakere = List.of(Mottaker.medRolle(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN));
         verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), any(DoksysBrevbestilling.class), eq(mottakere));
     }
 
@@ -220,7 +220,7 @@ class SendVedtaksbrevInnlandTest {
 
 
         assertThat(prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)).isNull();
-        var mottakere = List.of(Mottaker.av(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN));
+        var mottakere = List.of(Mottaker.medRolle(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN));
         verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
         assertThat(doksysBrevbestillingArgumentCaptor.getValue().getAvsenderID()).isEqualTo("Z111111");
     }
@@ -235,7 +235,7 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
 
 
-        var mottakere = List.of(Mottaker.av(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN));
+        var mottakere = List.of(Mottaker.medRolle(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN));
         verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), any(DoksysBrevbestilling.class), eq(mottakere));
     }
 
@@ -248,7 +248,7 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
 
 
-        verify(prosessinstansService).opprettProsessinstansSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(Mottaker.av(ARBEIDSGIVER)));
+        verify(prosessinstansService).opprettProsessinstansSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(Mottaker.medRolle(ARBEIDSGIVER)));
         assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(INNVILGELSE_ARBEIDSGIVER);
     }
 
@@ -261,7 +261,7 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
 
 
-        var mottakere = List.of(Mottaker.av(BRUKER), Mottaker.av(NorskMyndighet.HELFO), Mottaker.av(NorskMyndighet.SKATTEETATEN));
+        var mottakere = List.of(Mottaker.medRolle(BRUKER), Mottaker.av(NorskMyndighet.HELFO), Mottaker.av(NorskMyndighet.SKATTEETATEN));
         verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
         assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(AVSLAG_YRKESAKTIV);
     }
@@ -279,7 +279,7 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
 
 
-        verify(prosessinstansService).opprettProsessinstansSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(Mottaker.av(ARBEIDSGIVER)));
+        verify(prosessinstansService).opprettProsessinstansSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(Mottaker.medRolle(ARBEIDSGIVER)));
         assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(AVSLAG_ARBEIDSGIVER);
     }
 
@@ -293,9 +293,9 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
 
 
-        var mottakere = List.of(Mottaker.av(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN));
+        var mottakere = List.of(Mottaker.medRolle(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN));
         verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), any(DoksysBrevbestilling.class), eq(mottakere));
-        verify(prosessinstansService).opprettProsessinstansSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(Mottaker.av(ARBEIDSGIVER)));
+        verify(prosessinstansService).opprettProsessinstansSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(Mottaker.medRolle(ARBEIDSGIVER)));
         assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(INNVILGELSE_ARBEIDSGIVER);
     }
 
@@ -328,7 +328,7 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
 
 
-        var mottakere = List.of(Mottaker.av(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN));
+        var mottakere = List.of(Mottaker.medRolle(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN));
         verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
         assertThat(doksysBrevbestillingArgumentCaptor.getValue().getBegrunnelseKode()).isEqualTo(Endretperiode.ENDRINGER_ARBEIDSSITUASJON.getKode());
     }

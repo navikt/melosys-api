@@ -42,7 +42,7 @@ public class SendForvaltningsmelding implements StegBehandler {
         if (skalSendeForvaltningsmelding(prosessinstans)) {
             Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
             String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
-            brevBestiller.bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID, List.of(Mottaker.av(Mottakerroller.BRUKER)), null, saksbehandler, null, behandling);
+            brevBestiller.bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID, List.of(Mottaker.medRolle(Mottakerroller.BRUKER)), null, saksbehandler, null, behandling);
             log.info("Sendt forvaltningsmelding for behandling {}", prosessinstans.getBehandling().getId());
         } else {
             log.info("Ikke sendt forvaltningsmelding for behandling {}", prosessinstans.getBehandling().getId());

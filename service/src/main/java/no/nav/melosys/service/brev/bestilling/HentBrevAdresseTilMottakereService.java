@@ -30,7 +30,7 @@ public class HentBrevAdresseTilMottakereService {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
 
         List<BrevAdresse> brevAdresser = new ArrayList<>();
-        var mottakere = brevmottakerService.avklarMottakere(null, Mottaker.av(rolle), behandling, false, false);
+        var mottakere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(rolle), behandling, false, false);
         for (Mottaker mottaker : mottakere) {
             BrevAdresse brevAddresse = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling);
             brevAdresser.add(brevAddresse);

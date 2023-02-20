@@ -44,13 +44,13 @@ public class DokumentServiceFasade {
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
             .medProduserbartDokument(brevbestillingDto.getProduserbardokument())
             .medAvsenderID(saksbehandlerID)
-            .medMottakere(new Mottaker(brevbestillingDto.getMottaker()))
+            .medMottakere(Mottaker.medRolle(brevbestillingDto.getMottaker()))
             .medBegrunnelseKode(brevbestillingDto.getBegrunnelseKode())
             .medYtterligereInformasjon(brevbestillingDto.getYtterligereInformasjon())
             .medBehandling(behandling)
             .medDistribusjonsType(brevbestillingDto.getDistribusjonstype())
             .medFritekst(brevbestillingDto.getFritekst()).build();
-        produserDokument(behandlingId, brevbestilling, brevbestillingDto, new Mottaker(brevbestillingDto.getMottaker()));
+        produserDokument(behandlingId, brevbestilling, brevbestillingDto, Mottaker.medRolle(brevbestillingDto.getMottaker()));
     }
 
     @Transactional

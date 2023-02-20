@@ -102,7 +102,7 @@ final class DokumentServiceTest {
     void produserInnvilgelsesbrev_medFullmektig_senderTilBrukerOgFullmektig() {
         DokumentService dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock());
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(INNVILGELSE_YRKESAKTIV).build();
-        dokumentServiceMedMockVelger.produserDokument(INNVILGELSE_YRKESAKTIV, Mottaker.av(BRUKER), BEHANDLINGSID, brevbestilling);
+        dokumentServiceMedMockVelger.produserDokument(INNVILGELSE_YRKESAKTIV, Mottaker.medRolle(BRUKER), BEHANDLINGSID, brevbestilling);
         verify(dokSysFasade, times(2)).produserIkkeredigerbartDokument(any(Dokumentbestilling.class));
     }
 
@@ -112,7 +112,7 @@ final class DokumentServiceTest {
         Set<String> arbeidsgivendeOrgnumre = Collections.singleton("987654321");
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any(Behandling.class))).thenReturn(arbeidsgivendeOrgnumre);
         DokumentService dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock());
-        dokumentServiceMedMockVelger.produserDokument(AVSLAG_ARBEIDSGIVER, Mottaker.av(ARBEIDSGIVER), BEHANDLINGSID, brevbestilling);
+        dokumentServiceMedMockVelger.produserDokument(AVSLAG_ARBEIDSGIVER, Mottaker.medRolle(ARBEIDSGIVER), BEHANDLINGSID, brevbestilling);
         verify(dokSysFasade).produserIkkeredigerbartDokument(any(Dokumentbestilling.class));
     }
 
@@ -140,13 +140,13 @@ final class DokumentServiceTest {
 
     @Test
     void produserDokumentUtenBehandlingKasterUnntak() {
-        Throwable unntak = catchThrowable(() -> dokumentService.produserDokument(ATTEST_A1, Mottaker.av(ARBEIDSGIVER), ~BEHANDLINGSID, new DoksysBrevbestilling.Builder().build()));
+        Throwable unntak = catchThrowable(() -> dokumentService.produserDokument(ATTEST_A1, Mottaker.medRolle(ARBEIDSGIVER), ~BEHANDLINGSID, new DoksysBrevbestilling.Builder().build()));
         assertThat(unntak).isInstanceOf(IkkeFunnetException.class).hasNoCause().hasMessageContaining("finnes ikke");
     }
 
     @Test
     void produserDokumentUtenDokumenttypeKasterUnntak() {
-        Throwable unntak = catchThrowable(() -> dokumentService.produserDokument(null, Mottaker.av(ARBEIDSGIVER), BEHANDLINGSID, new DoksysBrevbestilling.Builder().build()));
+        Throwable unntak = catchThrowable(() -> dokumentService.produserDokument(null, Mottaker.medRolle(ARBEIDSGIVER), BEHANDLINGSID, new DoksysBrevbestilling.Builder().build()));
         assertThat(unntak).isInstanceOf(IllegalArgumentException.class).hasNoCause().hasMessageContaining("Ingen gyldig");
     }
 

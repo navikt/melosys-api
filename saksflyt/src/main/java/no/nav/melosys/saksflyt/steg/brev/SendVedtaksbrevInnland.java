@@ -92,9 +92,9 @@ public class SendVedtaksbrevInnland implements StegBehandler {
 
         List<Mottaker> mottakerListe;
         if (avslagTypeBruker == AVSLAG_YRKESAKTIV) {
-            mottakerListe = List.of(Mottaker.av(Mottakerroller.BRUKER), Mottaker.av(NorskMyndighet.HELFO), Mottaker.av(NorskMyndighet.SKATTEETATEN));
+            mottakerListe = List.of(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.av(NorskMyndighet.HELFO), Mottaker.av(NorskMyndighet.SKATTEETATEN));
         } else {
-            mottakerListe = List.of(Mottaker.av(Mottakerroller.BRUKER));
+            mottakerListe = List.of(Mottaker.medRolle(Mottakerroller.BRUKER));
         }
 
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
@@ -113,7 +113,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
                 .medFritekst(fritekst)
                 .build();
 
-            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestillingArbeidsgiver, Mottaker.av(Mottakerroller.ARBEIDSGIVER));
+            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestillingArbeidsgiver, Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER));
         }
     }
 
@@ -125,7 +125,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         Produserbaredokumenter innvilgelseType = (resultat.erInnvilgelseFlereLand())
             ? INNVILGELSE_YRKESAKTIV_FLERE_LAND : INNVILGELSE_YRKESAKTIV;
 
-        List<Mottaker> mottakerListe = new ArrayList<>(List.of(Mottaker.av(Mottakerroller.BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN)));
+        List<Mottaker> mottakerListe = new ArrayList<>(List.of(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN)));
         if (brevSendesTilStatligSkatteoppkreving(
             resultat.hentLovvalgsperiode(),
             behandling.getMottatteOpplysninger()
@@ -146,7 +146,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             .medAvsenderID(saksbehandler)
             .medFritekst(fritekst)
             .build();
-        prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.av(Mottakerroller.BRUKER));
+        prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.medRolle(Mottakerroller.BRUKER));
     }
 
     private void sendOrienteringTilArbeidsgiver(Behandling behandling, Behandlingsresultat resultat, String saksbehandler) {
@@ -159,7 +159,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
                 .medProduserbartDokument(INNVILGELSE_ARBEIDSGIVER)
                 .medAvsenderID(saksbehandler)
                 .build();
-            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.av(Mottakerroller.ARBEIDSGIVER));
+            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER));
         }
     }
 

@@ -1,5 +1,9 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.domain.brev.*;
@@ -23,10 +27,6 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Stream;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
@@ -132,8 +132,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
     }
 
     private Mottaker lagMottaker(MottakerType mottakerType, String mottakerID, Prosessinstans prosessinstans) {
-        var mottaker = new Mottaker();
-        mottaker.setRolle(prosessinstans.getData(MOTTAKER, Mottakerroller.class, null));
+        var mottaker = Mottaker.medRolle(prosessinstans.getData(MOTTAKER, Mottakerroller.class, null));
         switch (mottakerType) {
             case PERSON_MED_AKTØR_ID -> mottaker.setAktørId(mottakerID);
             case PERSON_MED_FNR -> mottaker.setPersonIdent(mottakerID);

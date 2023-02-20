@@ -112,7 +112,7 @@ public class BrevmalListeService {
     @Transactional
     public List<BrevAdresse> hentBrevAdresseTilMottakereGammel(Mottakerroller rolle, long behandlingId) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
-        var mottakere = brevmottakerService.avklarMottakere(null, Mottaker.av(rolle), behandling, false, false);
+        var mottakere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(rolle), behandling, false, false);
         List<BrevAdresse> brevAdresser = new ArrayList<>();
 
         for (Mottaker mottaker : mottakere) {

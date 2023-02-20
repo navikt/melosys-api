@@ -74,7 +74,7 @@ class SendOrienteringAnmodningUnntakTest {
                 ORIENTERING_ANMODNING_UNNTAK,
                 behandling,
                 SAKSBEHANDLER,
-                List.of(Mottaker.av(Mottakerroller.BRUKER))
+                List.of(Mottaker.medRolle(Mottakerroller.BRUKER))
             );
     }
 }

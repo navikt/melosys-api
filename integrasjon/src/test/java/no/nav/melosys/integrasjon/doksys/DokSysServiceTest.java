@@ -373,8 +373,7 @@ class DokSysServiceTest {
     }
 
     private Mottaker lagMottaker(Mottakerroller rolle) {
-        Mottaker mottaker = new Mottaker();
-        mottaker.setRolle(rolle);
+        Mottaker mottaker = Mottaker.medRolle(rolle);
         switch (rolle) {
             case BRUKER -> mottaker.setAktørId(FNR);
             case UTENLANDSK_TRYGDEMYNDIGHET -> mottaker.setInstitusjonID(INSITUSJON_ID);
@@ -385,8 +384,7 @@ class DokSysServiceTest {
     }
 
     private Mottaker lagMottakerFullmektig(Aktoertype mottakerType) {
-        Mottaker mottaker = new Mottaker();
-        mottaker.setRolle(Mottakerroller.FULLMEKTIG);
+        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.FULLMEKTIG);
         switch (mottakerType) {
             case PERSON -> mottaker.setPersonIdent(REP_FNR);
             case ORGANISASJON -> mottaker.setOrgnr(REP_ORGNR);

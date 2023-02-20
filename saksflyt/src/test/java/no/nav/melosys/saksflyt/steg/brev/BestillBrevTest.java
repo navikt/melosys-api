@@ -40,7 +40,7 @@ class BestillBrevTest {
         prosessinstans.setBehandling(behandling);
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
             .medProduserbartDokument(INNVILGELSE_YRKESAKTIV)
-            .medMottakere(Mottaker.av(Mottakerroller.BRUKER))
+            .medMottakere(Mottaker.medRolle(Mottakerroller.BRUKER))
             .build();
         prosessinstans.setData(ProsessDataKey.BREVBESTILLING, brevbestilling);
         ArgumentCaptor<DoksysBrevbestilling> captor = ArgumentCaptor.forClass(DoksysBrevbestilling.class);
@@ -83,7 +83,7 @@ class BestillBrevTest {
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.BREVBESTILLING,
             new DoksysBrevbestilling.Builder()
-                .medMottakere(Mottaker.av(Mottakerroller.BRUKER), Mottaker.av(Mottakerroller.ARBEIDSGIVER))
+                .medMottakere(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER))
                 .build());
 
         assertThatExceptionOfType(FunksjonellException.class)

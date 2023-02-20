@@ -76,7 +76,7 @@ public class DokumentService {
         BrevData brevData = lagBrevData(brevbestilling);
 
         List<Mottaker> avklarteMottakere =
-            brevmottakerService.avklarMottakere(produserbartDokument, Mottaker.av(mottakerRolle), behandling, true);
+            brevmottakerService.avklarMottakere(produserbartDokument, Mottaker.medRolle(mottakerRolle), behandling, true);
 
         if (avklarteMottakere.isEmpty()) {
             final var saksnummer = behandling.getFagsak().getSaksnummer();

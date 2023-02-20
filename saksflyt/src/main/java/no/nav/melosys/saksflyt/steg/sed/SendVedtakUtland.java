@@ -96,7 +96,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
                 .medAvsenderID(hentSaksbehandler(prosessinstans))
                 .medBegrunnelseKode(hentBegrunnelsekodeTilForkortetPeriode(prosessinstans))
                 .build();
-            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.av(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
+            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
         }
     }
 

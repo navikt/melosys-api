@@ -171,8 +171,7 @@ class OpprettOgJournalforBrevTest {
         when(mockJoarkFasade.opprettJournalpost(any(), anyBoolean())).thenReturn("12234");
         when(mockEregFasade.hentOrganisasjonNavn(any())).thenReturn("Advokatene AS");
 
-        Mottaker mottaker = new Mottaker();
-        mottaker.setRolle(Mottakerroller.FULLMEKTIG);
+        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.FULLMEKTIG);
         mottaker.setOrgnr("987654321");
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
@@ -534,8 +533,7 @@ class OpprettOgJournalforBrevTest {
     }
 
     private static Mottaker lagMottaker(String aktørID) {
-        Mottaker mottaker = new Mottaker();
-        mottaker.setRolle(Mottakerroller.BRUKER);
+        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.BRUKER);
         mottaker.setAktørId(aktørID);
         mottaker.setOrgnr(null);
         mottaker.setInstitusjonID(null);

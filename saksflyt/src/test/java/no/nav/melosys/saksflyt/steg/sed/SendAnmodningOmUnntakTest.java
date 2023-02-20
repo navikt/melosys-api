@@ -99,7 +99,7 @@ class SendAnmodningOmUnntakTest {
         sendAnmodningOmUnntak.utfør(prosessinstans);
 
         verify(brevBestiller).bestill(brevbestillingArgumentCaptor.capture());
-        assertThat(brevbestillingArgumentCaptor.getValue().getMottakere()).contains(Mottaker.av(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
+        assertThat(brevbestillingArgumentCaptor.getValue().getMottakere()).contains(Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
         assertThat(brevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(Produserbaredokumenter.ANMODNING_UNNTAK);
         assertThat(brevbestillingArgumentCaptor.getValue().getYtterligereInformasjon()).isEqualTo("Mer info");
         verify(anmodningsperiodeService).oppdaterAnmodningsperiodeSendtForBehandling(BEHANDLING_ID);

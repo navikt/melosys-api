@@ -318,8 +318,7 @@ class DokgenServiceTest {
 
     @Test
     void skalProdusereOgDistribuereBrevTilBruker() {
-        Mottaker bruker = new Mottaker();
-        bruker.setRolle(Mottakerroller.BRUKER);
+        Mottaker bruker = Mottaker.medRolle(Mottakerroller.BRUKER);
 
         when(mockSaksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Saksbehandler, Ole");
         when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
@@ -403,8 +402,7 @@ class DokgenServiceTest {
 
     @Test
     void produserOgDistribuerBrev_skalDistribuereBrevMedVedlegg_nårBrevbestillingInneholderVedlegg() {
-        Mottaker bruker = new Mottaker();
-        bruker.setRolle(Mottakerroller.BRUKER);
+        Mottaker bruker = Mottaker.medRolle(Mottakerroller.BRUKER);
 
         when(mockSaksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Saksbehandler, Ole");
         when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
@@ -442,8 +440,7 @@ class DokgenServiceTest {
 
     @Test
     void produserOgDistribuerBrev_skalDistribuereBrevMedDistribusjonstype_når_fritekstbrev() {
-        Mottaker bruker = new Mottaker();
-        bruker.setRolle(Mottakerroller.BRUKER);
+        Mottaker bruker = Mottaker.medRolle(Mottakerroller.BRUKER);
 
         when(mockSaksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Saksbehandler, Ole");
         when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
@@ -483,8 +480,7 @@ class DokgenServiceTest {
 
     @Test
     void produserOgDistribuerBrev_brukerSkalHaKopi_setterFeltKorrekt() {
-        Mottaker arbeidsgiver = new Mottaker();
-        arbeidsgiver.setRolle(Mottakerroller.ARBEIDSGIVER);
+        Mottaker arbeidsgiver = Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER);
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(arbeidsgiver));
         when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
 
@@ -503,8 +499,7 @@ class DokgenServiceTest {
 
     @Test
     void produserOgDistribuerBrev_brukerSkalIkkeHaKopi_setterFeltKorrekt() {
-        Mottaker arbeidsgiver = new Mottaker();
-        arbeidsgiver.setRolle(Mottakerroller.ARBEIDSGIVER);
+        Mottaker arbeidsgiver = Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER);
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(arbeidsgiver));
         when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
 
@@ -553,15 +548,13 @@ class DokgenServiceTest {
     }
 
     private Mottaker lagBruker() {
-        var mottaker = new Mottaker();
-        mottaker.setRolle(Mottakerroller.BRUKER);
+        var mottaker = Mottaker.medRolle(Mottakerroller.BRUKER);
         mottaker.setAktørId(FNR);
         return mottaker;
     }
 
     private Mottaker lagRepresentant(String mottakerID) {
-        var mott = new Mottaker();
-        mott.setRolle(Mottakerroller.FULLMEKTIG);
+        var mott = Mottaker.medRolle(Mottakerroller.FULLMEKTIG);
         if (mottakerID.equals(ORGNR)) {
             mott.setOrgnr(ORGNR);
         } else if (mottakerID.equals(FNR)) {

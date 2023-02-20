@@ -371,7 +371,7 @@ class HentMuligeBrevmottakereServiceTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(brevmottakerService.hentMottakerliste(MANGELBREV_BRUKER, 123))
             .thenReturn(new Mottakerliste.Builder().medHovedMottaker(BRUKER).medFastMottaker(SKATTEETATEN).build());
-        when(brevmottakerService.avklarMottaker(MANGELBREV_BRUKER, Mottaker.av(BRUKER), behandling))
+        when(brevmottakerService.avklarMottaker(MANGELBREV_BRUKER, Mottaker.medRolle(BRUKER), behandling))
             .thenReturn(lagMottakerOrg(BRUKER, null));
         Mottaker skatteetaten = Mottaker.av(SKATTEETATEN);
         when(brevmottakerService.avklarMottaker(MANGELBREV_BRUKER, Mottaker.av(SKATTEETATEN), behandling))
@@ -409,10 +409,10 @@ class HentMuligeBrevmottakereServiceTest {
         when(brevmottakerService.avklarMottaker(eq(TRYGDEAVTALE_GB), any(), eq(behandling)))
             .thenReturn(lagMottakerOrg(BRUKER, null));
         Mottaker arbeidsgiver = lagMottakerOrg(ARBEIDSGIVER, "123");
-        when(brevmottakerService.avklarMottakere(TRYGDEAVTALE_GB, Mottaker.av(ARBEIDSGIVER), behandling, false, true))
+        when(brevmottakerService.avklarMottakere(TRYGDEAVTALE_GB, Mottaker.medRolle(ARBEIDSGIVER), behandling, false, true))
             .thenReturn(List.of(arbeidsgiver));
         Mottaker trygdemyndighet = lagMottakerOrg(UTENLANDSK_TRYGDEMYNDIGHET, "456");
-        when(brevmottakerService.avklarMottakere(TRYGDEAVTALE_GB, Mottaker.av(UTENLANDSK_TRYGDEMYNDIGHET), behandling))
+        when(brevmottakerService.avklarMottakere(TRYGDEAVTALE_GB, Mottaker.medRolle(UTENLANDSK_TRYGDEMYNDIGHET), behandling))
             .thenReturn(List.of(trygdemyndighet));
         Mottaker skatteetaten = lagMottakerOrg(UTENLANDSK_TRYGDEMYNDIGHET, "974761076");
         when(brevmottakerService.avklarMottaker(TRYGDEAVTALE_GB, Mottaker.av(SKATTEETATEN), behandling))
@@ -464,15 +464,13 @@ class HentMuligeBrevmottakereServiceTest {
 
 
     private Mottaker lagMottakerOrg(Mottakerroller rolle, String orgNummer) {
-        var mottaker = new Mottaker();
-        mottaker.setRolle(rolle);
+        var mottaker = Mottaker.medRolle(rolle);
         mottaker.setOrgnr(orgNummer);
         return mottaker;
     }
 
     private Mottaker lagMottakerPerson(Mottakerroller rolle, String personIdent) {
-        var mottaker = new Mottaker();
-        mottaker.setRolle(rolle);
+        var mottaker = Mottaker.medRolle(rolle);
         mottaker.setPersonIdent(personIdent);
         return mottaker;
     }

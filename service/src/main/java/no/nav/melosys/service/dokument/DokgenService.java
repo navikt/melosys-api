@@ -82,12 +82,12 @@ public class DokgenService {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         Mottaker mottaker;
         if (hasText(brevbestillingDto.getOrgnr()) || hasText(brevbestillingDto.getInstitusjonId())) {
-            mottaker = new Mottaker(brevbestillingDto.getMottaker());
+            mottaker = Mottaker.medRolle(brevbestillingDto.getMottaker());
             mottaker.setOrgnr(brevbestillingDto.getOrgnr());
             mottaker.setInstitusjonID(brevbestillingDto.getInstitusjonId());
         } else {
             mottaker = brevmottakerService.avklarMottakere(produserbartdokument,
-                Mottaker.av(brevbestillingDto.getMottaker()), behandling, true, false).get(0);
+                Mottaker.medRolle(brevbestillingDto.getMottaker()), behandling, true, false).get(0);
         }
 
         DokgenBrevbestilling.Builder<?> brevbestilling = lagDokgenBrevbestilling(brevbestillingDto);
@@ -144,7 +144,7 @@ public class DokgenService {
         }
 
         for (KopiMottakerDto kopiMottaker : brevbestillingDto.getKopiMottakere()) {
-            var mottaker = new Mottaker(kopiMottaker.rolle());
+            var mottaker = Mottaker.medRolle(kopiMottaker.rolle());
             mottaker.setOrgnr(kopiMottaker.orgnr());
             mottaker.setAktørId(kopiMottaker.aktørId());
             mottaker.setInstitusjonID(kopiMottaker.institusjonId());
@@ -160,18 +160,18 @@ public class DokgenService {
             && !brevbestillingDto.getOrgnrNorskMyndighet().isEmpty();
 
         if (erBrevTilOrganisasjon) {
-            Mottaker mottaker = new Mottaker(brevbestillingDto.getMottaker());
+            Mottaker mottaker = Mottaker.medRolle(brevbestillingDto.getMottaker());
             mottaker.setOrgnr(brevbestillingDto.getOrgnr());
             mottakere.add(mottaker);
         } else if (erBrevTilNorskMyndighet) {
             for (String orgNr : brevbestillingDto.getOrgnrNorskMyndighet()) {
-                Mottaker mottaker = new Mottaker(brevbestillingDto.getMottaker());
+                Mottaker mottaker = Mottaker.medRolle(brevbestillingDto.getMottaker());
                 mottaker.setOrgnr(orgNr);
                 mottakere.add(mottaker);
             }
         } else {
             mottakere = brevmottakerService.avklarMottakere(produserbartDokument,
-                Mottaker.av(brevbestillingDto.getMottaker()), behandling, false, false);
+                Mottaker.medRolle(brevbestillingDto.getMottaker()), behandling, false, false);
         }
         return mottakere;
     }

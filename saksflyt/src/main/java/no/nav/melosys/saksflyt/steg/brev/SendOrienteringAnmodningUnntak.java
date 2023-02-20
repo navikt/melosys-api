@@ -41,7 +41,7 @@ public class SendOrienteringAnmodningUnntak implements StegBehandler {
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
             .medProduserbartDokument(ORIENTERING_ANMODNING_UNNTAK)
             .medAvsenderID(saksbehandler)
-            .medMottakere(Mottaker.av(Mottakerroller.BRUKER))
+            .medMottakere(Mottaker.medRolle(Mottakerroller.BRUKER))
             .medBehandling(behandling)
             .build();
         brevBestiller.bestill(brevbestilling);

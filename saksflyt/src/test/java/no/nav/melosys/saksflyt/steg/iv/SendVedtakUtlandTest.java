@@ -110,7 +110,7 @@ class SendVedtakUtlandTest {
 
         sendVedtakUtland.utfør(prosessinstans);
 
-        verify(prosessinstansService).opprettProsessinstansSendBrev(eq(behandling), brevbestillingArgumentCaptor.capture(), eq(Mottaker.av(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET)));
+        verify(prosessinstansService).opprettProsessinstansSendBrev(eq(behandling), brevbestillingArgumentCaptor.capture(), eq(Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET)));
         assertThat(brevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(Produserbaredokumenter.ATTEST_A1);
     }
 

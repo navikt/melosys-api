@@ -151,7 +151,7 @@ class BrevmalListeServiceTestGammel {
     @Test
     void hentBrevAdresseTilMottakere_brukerSomMottaker_returnererBrukeradresse() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
-        when(brevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Mottakerroller.BRUKER)), any(), eq(false), eq(false)))
+        when(brevmottakerService.avklarMottakere(any(), eq(Mottaker.medRolle(Mottakerroller.BRUKER)), any(), eq(false), eq(false)))
             .thenReturn(List.of(lagMottakerOrg(Mottakerroller.BRUKER, null)));
         when(persondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse());
 
@@ -182,7 +182,7 @@ class BrevmalListeServiceTestGammel {
         var behandling = new Behandling();
         behandling.setFagsak(new Fagsak());
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
-        when(brevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Mottakerroller.BRUKER)), any(), eq(false), eq(false)))
+        when(brevmottakerService.avklarMottakere(any(), eq(Mottaker.medRolle(Mottakerroller.BRUKER)), any(), eq(false), eq(false)))
             .thenReturn(List.of(lagMottakerOrg(FULLMEKTIG, "orgNr")));
         when(eregFasade.hentOrganisasjon("orgNr")).thenReturn(lagOrgSaksopplysning("orgNr", "Ola Nordmann Fullmektig"));
 
@@ -213,7 +213,7 @@ class BrevmalListeServiceTestGammel {
         var behandling = new Behandling();
         behandling.setFagsak(new Fagsak());
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
-        when(brevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Mottakerroller.BRUKER)), any(), eq(false), eq(false)))
+        when(brevmottakerService.avklarMottakere(any(), eq(Mottaker.medRolle(Mottakerroller.BRUKER)), any(), eq(false), eq(false)))
             .thenReturn(List.of(lagMottakerPerson(Mottakerroller.FULLMEKTIG, "fnr")));
         when(persondataFasade.hentPerson("fnr")).thenReturn(lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse());
 
@@ -245,7 +245,7 @@ class BrevmalListeServiceTestGammel {
         behandling.setFagsak(new Fagsak());
 
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
-        when(brevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Mottakerroller.ARBEIDSGIVER)), any(), eq(false), eq(false)))
+        when(brevmottakerService.avklarMottakere(any(), eq(Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER)), any(), eq(false), eq(false)))
             .thenReturn(List.of(lagMottakerOrg(Mottakerroller.ARBEIDSGIVER, "orgNr1"), lagMottakerOrg(Mottakerroller.ARBEIDSGIVER, "orgNr2")));
         when(eregFasade.hentOrganisasjon("orgNr1")).thenReturn(lagOrgSaksopplysning("orgNr1", "Ola Nordmann Rørleggerfirma"));
         when(eregFasade.hentOrganisasjon("orgNr2")).thenReturn(lagOrgSaksopplysning("orgNr2", "Ida Nordmann Rørleggerfirma"));
@@ -291,7 +291,7 @@ class BrevmalListeServiceTestGammel {
 
     @Test
     void hentBrevAdresseTilMottakere_arbeidsgiverSomMottakerMenIngenArbeidsgivere_returnererTomListe() {
-        when(brevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Mottakerroller.ARBEIDSGIVER)), any(), eq(false), eq(false)))
+        when(brevmottakerService.avklarMottakere(any(), eq(Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER)), any(), eq(false), eq(false)))
             .thenReturn(emptyList());
 
         var brevAdresser = brevmalListeService.hentBrevAdresseTilMottakereGammel(Mottakerroller.ARBEIDSGIVER, 123L);
@@ -304,7 +304,7 @@ class BrevmalListeServiceTestGammel {
         var behandling = new Behandling();
         behandling.setFagsak(new Fagsak());
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
-        when(brevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Mottakerroller.ARBEIDSGIVER)), any(), eq(false), eq(false)))
+        when(brevmottakerService.avklarMottakere(any(), eq(Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER)), any(), eq(false), eq(false)))
             .thenReturn(List.of(lagMottakerOrg(FULLMEKTIG, "orgNr")));
         when(eregFasade.hentOrganisasjon("orgNr")).thenReturn(lagOrgSaksopplysning("orgNr", "Ola Nordmann Fullmektig"));
 
@@ -332,7 +332,7 @@ class BrevmalListeServiceTestGammel {
     @Test
     void hentBrevAdresseTilMottakere_virksomhetSomMottaker_returnererVirksomhetAdresse() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
-        when(brevmottakerService.avklarMottakere(any(), eq(Mottaker.av(VIRKSOMHET)), any(), eq(false), eq(false)))
+        when(brevmottakerService.avklarMottakere(any(), eq(Mottaker.medRolle(VIRKSOMHET)), any(), eq(false), eq(false)))
             .thenReturn(List.of(lagMottakerOrg(VIRKSOMHET, "orgNr1")));
         when(eregFasade.hentOrganisasjon("orgNr1")).thenReturn(lagOrgSaksopplysning("orgNr1", "Ola Nordmann Rørleggerfirma"));
 
@@ -361,7 +361,7 @@ class BrevmalListeServiceTestGammel {
     @Test
     void hentBrevAdresseTilMottakere_returnererAdresseFelterSomNull_nårGjeldendePostadresseErNull() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
-        when(brevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Mottakerroller.BRUKER)), any(), eq(false), eq(false)))
+        when(brevmottakerService.avklarMottakere(any(), eq(Mottaker.medRolle(Mottakerroller.BRUKER)), any(), eq(false), eq(false)))
             .thenReturn(List.of(lagMottakerOrg(Mottakerroller.BRUKER, null)));
         Personopplysninger persondata = PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser();
         when(persondataFasade.hentPerson(anyString())).thenReturn(persondata);
@@ -384,7 +384,7 @@ class BrevmalListeServiceTestGammel {
     @Test
     void hentBrevAdresseTilMottakere_returnererAdresseMedKorrektAdresselinjer_nårCoAdresseErTomStreng() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
-        when(brevmottakerService.avklarMottakere(any(), eq(Mottaker.av(Mottakerroller.BRUKER)), any(), eq(false), eq(false)))
+        when(brevmottakerService.avklarMottakere(any(), eq(Mottaker.medRolle(Mottakerroller.BRUKER)), any(), eq(false), eq(false)))
             .thenReturn(List.of(lagMottakerOrg(Mottakerroller.BRUKER, null)));
         when(persondataFasade.hentPerson(anyString())).thenReturn(lagPersondataMedTomCo());
 
@@ -420,8 +420,7 @@ class BrevmalListeServiceTestGammel {
     }
 
     private Mottaker lagMottakerOrg(Mottakerroller rolle, String orgNummer) {
-        var mottaker = new Mottaker();
-        mottaker.setRolle(rolle);
+        var mottaker = Mottaker.medRolle(rolle);
         mottaker.setOrgnr(orgNummer);
         return mottaker;
     }
@@ -459,8 +458,7 @@ class BrevmalListeServiceTestGammel {
     }
 
     private Mottaker lagMottakerPerson(Mottakerroller rolle, String personIdent) {
-        var mottaker = new Mottaker();
-        mottaker.setRolle(rolle);
+        var mottaker = Mottaker.medRolle(rolle);
         mottaker.setPersonIdent(personIdent);
         return mottaker;
     }

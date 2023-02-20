@@ -93,7 +93,7 @@ public class HentMuligeBrevmottakereService {
     }
 
     private Brevmottaker lagKopiMottakerForBruker(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Mottakerroller kopiMottaker, Mottakerroller hovedmottaker) {
-        Mottaker avklartKopi = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling);
+        Mottaker avklartKopi = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.medRolle(kopiMottaker), behandling);
         if (avklartKopi.getRolle() == Mottakerroller.BRUKER || hovedmottaker == kopiMottaker) {
             String aktørID = behandling.getFagsak().hentBrukersAktørID();
             return new Brevmottaker.Builder()
@@ -116,7 +116,7 @@ public class HentMuligeBrevmottakereService {
     private String hentMottakerNavn(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Mottakerroller hovedmottaker, String orgnr) {
         switch (hovedmottaker) {
             case BRUKER -> {
-                Mottaker avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(Mottakerroller.BRUKER), behandling);
+                Mottaker avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.medRolle(Mottakerroller.BRUKER), behandling);
                 if (avklartMottaker.getRolle() == Mottakerroller.BRUKER) {
                     return persondataFasade.hentSammensattNavn(behandling.getFagsak().hentBrukersAktørID());
                 } else if (avklartMottaker.getPersonIdent() != null) {
@@ -137,7 +137,7 @@ public class HentMuligeBrevmottakereService {
             }
             case UTENLANDSK_TRYGDEMYNDIGHET -> {
                 if (produserbaredokumenter == UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV) {
-                    Mottaker avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET), behandling);
+                    Mottaker avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET), behandling);
                     var utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(avklartMottaker.hentMyndighetLandkode(), produserbaredokumenter);
                     return utenlandskMyndighet.navn;
                 } else {
@@ -172,7 +172,7 @@ public class HentMuligeBrevmottakereService {
     private List<Brevmottaker> lagKopiMottakereForArbeidsgiver(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Mottakerroller kopiMottaker) {
         List<Brevmottaker> brevmottakere = new ArrayList<>();
 
-        List<Mottaker> avklarteKopier = brevmottakerService.avklarMottakere(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling, false, true);
+        List<Mottaker> avklarteKopier = brevmottakerService.avklarMottakere(produserbaredokumenter, Mottaker.medRolle(kopiMottaker), behandling, false, true);
         for (Mottaker avklartKopi : avklarteKopier) {
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartKopi.getOrgnr());
             String fastTekst = avklartKopi.getRolle() == Mottakerroller.ARBEIDSGIVER ? "Kopi til arbeidsgiver" : "Kopi til arbeidsgivers fullmektig";
@@ -189,7 +189,7 @@ public class HentMuligeBrevmottakereService {
     private List<Brevmottaker> lagKopiMottakereForUtenlandskTrygdemyndighet(Produserbaredokumenter produserbaredokumenter, Behandling behandling, Mottakerroller kopiMottaker) {
         List<Brevmottaker> brevmottakere = new ArrayList<>();
 
-        List<Mottaker> avklarteKopier = brevmottakerService.avklarMottakere(produserbaredokumenter, Mottaker.av(kopiMottaker), behandling);
+        List<Mottaker> avklarteKopier = brevmottakerService.avklarMottakere(produserbaredokumenter, Mottaker.medRolle(kopiMottaker), behandling);
         for (Mottaker avklartKopi : avklarteKopier) {
             String fastTekst = "Kopi til utenlandsk trygdemyndighet";
             brevmottakere.add(new Brevmottaker.Builder()

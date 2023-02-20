@@ -86,7 +86,7 @@ class DokumentServiceFasadeTest {
     void skalKalleDokumentServiceProduserDokument() {
         when(mockDokgenService.erTilgjengeligDokgenmal(any())).thenReturn(false);
 
-        dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.av(BRUKER), 123L, new DoksysBrevbestilling.Builder().build());
+        dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.medRolle(BRUKER), 123L, new DoksysBrevbestilling.Builder().build());
 
         verify(mockDokumentService).produserDokument(any(), any(), anyLong(), any());
     }
@@ -95,7 +95,7 @@ class DokumentServiceFasadeTest {
     void skalKalleDokgenServiceProduserOgDistribuer() {
         when(mockDokgenService.erTilgjengeligDokgenmal(any())).thenReturn(true);
 
-        dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.av(BRUKER), 123L, new DoksysBrevbestilling.Builder().build());
+        dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.medRolle(BRUKER), 123L, new DoksysBrevbestilling.Builder().build());
 
         verify(mockDokgenService).produserOgDistribuerBrev(anyLong(), any());
         verifyNoInteractions(mockDokumentService);
@@ -118,11 +118,11 @@ class DokumentServiceFasadeTest {
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
             .medProduserbartDokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER)
             .medAvsenderID("Z123456")
-            .medMottakere(List.of(Mottaker.av(BRUKER)))
+            .medMottakere(List.of(Mottaker.medRolle(BRUKER)))
             .medFritekst("avslag fritekst")
             .build();
 
-        dokumentServiceFasade.produserDokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER, Mottaker.av(BRUKER), 1L, brevbestilling);
+        dokumentServiceFasade.produserDokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER, Mottaker.medRolle(BRUKER), 1L, brevbestilling);
 
         verify(mockDokgenService).produserOgDistribuerBrev(eq(1L), brevbestillingRequestCaptor.capture());
         verifyNoInteractions(mockDokumentService);
@@ -139,7 +139,7 @@ class DokumentServiceFasadeTest {
     @Test
     void skal_lageRiktigDokgenBrevRequest_ved_meldingHenleggSak_() {
 
-        dokumentServiceFasade.produserOgDistribuerBrev(Produserbaredokumenter.MELDING_HENLAGT_SAK, Mottaker.av(BRUKER),
+        dokumentServiceFasade.produserOgDistribuerBrev(Produserbaredokumenter.MELDING_HENLAGT_SAK, Mottaker.medRolle(BRUKER),
             "henlagt sak fritekst", "ANNET", "Z123456", 1L);
 
         verify(mockDokgenService).produserOgDistribuerBrev(eq(1L), brevbestillingRequestCaptor.capture());

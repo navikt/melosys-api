@@ -51,7 +51,7 @@ class SendForvaltningsmeldingTest {
 
 
         verify(behandlingService).hentBehandlingMedSaksopplysninger(behandlingID);
-        verify(brevBestiller).bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID, List.of(Mottaker.av(BRUKER)), null, "TEST", null, behandling);
+        verify(brevBestiller).bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID, List.of(Mottaker.medRolle(BRUKER)), null, "TEST", null, behandling);
     }
 
     @Test

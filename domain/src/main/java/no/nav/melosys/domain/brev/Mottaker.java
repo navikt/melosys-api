@@ -1,5 +1,7 @@
 package no.nav.melosys.domain.brev;
 
+import java.util.Objects;
+
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -7,8 +9,6 @@ import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-
-import java.util.Objects;
 
 public final class Mottaker {
     private Mottakerroller rolle;
@@ -21,10 +21,6 @@ public final class Mottaker {
     public Mottaker() {
     }
 
-    public Mottaker(Mottakerroller rolle) {
-        this.rolle = rolle;
-    }
-
     public Mottaker(Mottakerroller rolle, String aktørId, String personIdent, String orgnr, String institusjonID, Land_iso2 trygdemyndighetLand) {
         this.rolle = rolle;
         this.aktørId = aktørId;
@@ -34,8 +30,10 @@ public final class Mottaker {
         this.trygdemyndighetLand = trygdemyndighetLand;
     }
 
-    public static Mottaker av(Mottakerroller rolle) {
-        return new Mottaker(rolle);
+    public static Mottaker medRolle(Mottakerroller rolle) {
+        var mottaker = new Mottaker();
+        mottaker.setRolle(rolle);
+        return mottaker;
     }
 
     public static Mottaker av(Aktoer aktoer) {
@@ -48,7 +46,8 @@ public final class Mottaker {
             case VIRKSOMHET -> Mottakerroller.VIRKSOMHET;
             case ARBEIDSGIVER -> Mottakerroller.ARBEIDSGIVER;
             case REPRESENTANT -> Mottakerroller.FULLMEKTIG;
-            default -> throw new FunksjonellException("Nogo yet");
+            case TRYGDEMYNDIGHET -> Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET;
+            default -> throw new FunksjonellException("Støtter ikke mapping av aktoersrolle" + aktoersrolle);
         };
     }
 
@@ -61,7 +60,7 @@ public final class Mottaker {
     }
 
     private static Mottaker mottakerNorskMyndighet(String orgnr) {
-        var mottaker = new Mottaker(Mottakerroller.NORSK_MYNDIGHET);
+        var mottaker = Mottaker.medRolle(Mottakerroller.NORSK_MYNDIGHET);
         mottaker.setOrgnr(orgnr);
         return mottaker;
     }
