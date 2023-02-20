@@ -32,7 +32,7 @@ public class Mangelbrev extends DokgenDto {
     private final String innledningFritekst;
 
     protected Mangelbrev(MangelbrevBrevbestilling brevbestilling, Instant datoInnsendingsfrist) {
-        super(brevbestilling, Mottakerroller.BRUKER); // TODO : Dette stemmer da vel ikke
+        super(brevbestilling, Mottakerroller.BRUKER); // TODO i MELOSYS-5738
         var fagsak = brevbestilling.getBehandling().getFagsak();
 
         this.datoMottatt = brevbestilling.getForsendelseMottatt();
