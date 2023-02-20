@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.oppgave;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
@@ -169,10 +170,11 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
 
         if (StringUtils.isNotEmpty(oppgaveOppdatering.getBeskrivelse())) {
             if (StringUtils.isEmpty(oppgaveDto.getBeskrivelse())) {
-                oppgaveDto.setBeskrivelse(hentNyBeskrivelseHendelseslogg(oppgaveOppdatering.getBeskrivelse()));
+                oppgaveDto.setBeskrivelse(hentNyBeskrivelseHendelseslogg(oppgaveOppdatering.getBeskrivelse(),
+                    oppgaveOppdatering.getSaksnummer()));
             } else {
                 oppgaveDto.setBeskrivelse(StringUtils.joinWith("\n",
-                    hentNyBeskrivelseHendelseslogg(oppgaveOppdatering.getBeskrivelse()),
+                    hentNyBeskrivelseHendelseslogg(oppgaveOppdatering.getBeskrivelse(), oppgaveDto.getSaksreferanse()),
                     oppgaveDto.getBeskrivelse()));
             }
         }
@@ -340,11 +342,11 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         return domainOppgaveBuilder.build();
     }
 
-    private static String hentNyBeskrivelseHendelseslogg(String beskrivelse) {
+    public static String hentNyBeskrivelseHendelseslogg(String beskrivelse, String saksnummer) {
         String userID = SubjectHandler.getUserIDOrSystemUser();
-        String oppdateringstidspunkt = LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        String oppdateringstidspunkt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
         return String.format("--- %s (%s, %s) ---\n %s\n",
-            oppdateringstidspunkt, userID, Fagsystem.MELOSYS.getBeskrivelse(), beskrivelse);
+            oppdateringstidspunkt, userID, Fagsystem.MELOSYS.getBeskrivelse(), beskrivelse + " - " + saksnummer);
     }
 
     private static <K extends Kodeverk> K mapTilEnumFraKode(Class<K> clazz, String verdi, String oppgaveId) {

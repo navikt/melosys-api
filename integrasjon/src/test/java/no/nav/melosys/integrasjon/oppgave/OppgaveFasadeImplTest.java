@@ -1,6 +1,7 @@
 package no.nav.melosys.integrasjon.oppgave;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -208,6 +209,7 @@ final class OppgaveFasadeImplTest {
         OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder()
             .behandlingstema("UTSENDT_ARBEIDSTAKER")
             .beskrivelse("Ny beskrivelse")
+            .saksnummer("MEL-123")
             .build();
 
 
@@ -215,10 +217,10 @@ final class OppgaveFasadeImplTest {
 
 
         verify(oppgaveConsumer).oppdaterOppgave(oppgaveDtoArgumentCaptor.capture());
-        String oppdateringstidspunkt = LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        String oppdateringstidspunkt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
         assertThat(oppgaveDtoArgumentCaptor.getValue().getBeskrivelse())
             .isEqualTo(String.format("--- %s (%s, %s) ---\n %s\n\nTesty test",
-                oppdateringstidspunkt, "srvmelosys", Fagsystem.MELOSYS.getBeskrivelse(), "Ny beskrivelse"));
+                oppdateringstidspunkt, "srvmelosys", Fagsystem.MELOSYS.getBeskrivelse(), "Ny beskrivelse - MEL-123"));
     }
 
     @Test
@@ -229,6 +231,7 @@ final class OppgaveFasadeImplTest {
         OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder()
             .behandlingstema("UTSENDT_ARBEIDSTAKER")
             .beskrivelse("Ny beskrivelse")
+            .saksnummer("MEL-123")
             .build();
 
 
@@ -236,10 +239,10 @@ final class OppgaveFasadeImplTest {
 
 
         verify(oppgaveConsumer).oppdaterOppgave(oppgaveDtoArgumentCaptor.capture());
-        String oppdateringstidspunkt = LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        String oppdateringstidspunkt = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"));
         assertThat(oppgaveDtoArgumentCaptor.getValue().getBeskrivelse())
             .isEqualTo(String.format("--- %s (%s, %s) ---\n %s\n",
-                oppdateringstidspunkt, "srvmelosys", "Melosys", "Ny beskrivelse"));
+                oppdateringstidspunkt, "srvmelosys", "Melosys", "Ny beskrivelse - MEL-123"));
     }
 
     private Oppgave lagOppgave() {

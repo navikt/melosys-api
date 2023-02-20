@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.eessi.SedType;
@@ -16,7 +15,6 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
-import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
@@ -24,6 +22,8 @@ import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import static no.nav.melosys.integrasjon.oppgave.OppgaveFasadeImpl.hentNyBeskrivelseHendelseslogg;
 
 @Service
 public class SvarAnmodningUnntakSedRuter implements SedRuterForSedTyper {
@@ -92,18 +92,20 @@ public class SvarAnmodningUnntakSedRuter implements SedRuterForSedTyper {
         if (oppgave.isEmpty()) {
             opprettOppgave(behandling, sedType);
         } else {
-            oppgaveService.oppdaterOppgave(oppgave.get().getOppgaveId(), OppgaveOppdatering.builder().beskrivelse(lagMottattSedBeskrivelse(sedType)).build());
+            oppgaveService.oppdaterOppgave(oppgave.get().getOppgaveId(),
+                OppgaveOppdatering.builder().beskrivelse(lagMottattSedBeskrivelse(sedType)).build());
         }
     }
 
     private void opprettOppgave(Behandling behandling, String sedType) {
         String aktørID = behandling.getFagsak().hentBrukersAktørID();
+        String saksnummer = behandling.getFagsak().getSaksnummer();
 
         Oppgave.Builder oppgaveBuilder = oppgaveService.lagBehandlingsoppgave(behandling)
             .setAktørId(aktørID)
             .setJournalpostId(behandling.getInitierendeJournalpostId())
-            .setSaksnummer(behandling.getFagsak().getSaksnummer())
-            .setBeskrivelse(lagMottattSedBeskrivelse(sedType));
+            .setSaksnummer(saksnummer)
+            .setBeskrivelse(hentNyBeskrivelseHendelseslogg(lagMottattSedBeskrivelse(sedType), saksnummer));
 
         String oppgaveID = oppgaveService.opprettOppgave(oppgaveBuilder.build());
         log.info("Opprettet behandlingsoppgave med id {} for behandling {}", oppgaveID, behandling.getId());
