@@ -16,10 +16,6 @@ import no.nav.melosys.domain.adresse.Adresse;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
-import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Periode;
@@ -27,10 +23,15 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
+import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -227,7 +228,7 @@ class AvklarteVirksomheterServiceTest {
     }
 
     @Test
-    void testHentAvklarteNorskeForetak_girAvklarteSelvstendigeForetak() {
+    void hentAvklarteNorskeForetak_girAvklarteSelvstendigeForetak() {
         List<String> selvstendigeForetak = Collections.singletonList(orgnr1);
 
         Set<Saksopplysning> saksopplysninger =
@@ -246,6 +247,22 @@ class AvklarteVirksomheterServiceTest {
         assertThat(avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, INGEN_ADRESSE).stream()
             .map(nv -> nv.orgnr)
             .collect(Collectors.toList())).contains(orgnr1);
+    }
+
+    @Test
+    void harOpphørtAvklartVirksomhet_eregKasterFeil_girTrue() {
+        String feilmeldingFraEreg = "Organisasjon har opphørt, opphørsdato=2023-02-01, orgnr=99999999";
+
+        when(organisasjonOppslagService.hentOrganisasjoner(any())).thenThrow(new IntegrasjonException(feilmeldingFraEreg));
+
+        behandling.setSaksopplysninger(lagArbeidsforholdOpplysninger(Collections.emptyList()));
+        behandling.setMottatteOpplysninger(lagMottatteOpplysninger(Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
+
+
+        boolean harOpphørtAvklartVirksomhet = avklarteVirksomheterService.harOpphørtAvklartVirksomhet(behandling);
+
+
+        assertThat(harOpphørtAvklartVirksomhet).isTrue();
     }
 
     @Test

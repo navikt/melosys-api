@@ -267,6 +267,18 @@ class KontrollTest {
     }
 
     @Test
+    void utførKontroller_avklartVirksomhetErOpphørt_returnererKode() {
+        mockReturnertLovvalgsperiode();
+        when(avklarteVirksomheterService.harOpphørtAvklartVirksomhet(behandling)).thenReturn(true);
+
+        Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
+
+        assertThat(resultat)
+            .extracting(Kontrollfeil::getKode)
+            .contains(Kontroll_begrunnelser.OPPHØRT_ARBEIDSGIVER);
+    }
+
+    @Test
     void utførKontroller_representantIUtlandetMangler_returnererKode() {
         mockReturnertLovvalgsperiode();
 
