@@ -16,6 +16,7 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
@@ -127,6 +128,19 @@ public class AvklarteVirksomheterService {
         return hentNorskeArbeidsgivendeOrgnumre(behandling).size()
             + hentNorskeSelvstendigeForetakOrgnumre(behandling).size()
             + hentUtenlandskeVirksomheter(behandling).size();
+    }
+
+    public boolean harOpphørtAvklartVirksomhet(Behandling behandling) {
+        try {
+            hentAlleNorskeVirksomheter(behandling);
+        } catch (IntegrasjonException e) {
+            if (e.getMessage().contains("Organisasjon har opphørt")) {
+                log.warn(e.getMessage());
+                return true;
+            }
+            throw e;
+        }
+        return false;
     }
 
     @Transactional

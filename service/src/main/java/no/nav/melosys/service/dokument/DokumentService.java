@@ -65,7 +65,8 @@ public class DokumentService {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         Mottakerroller mottakerRolle = brevbestillingDto.getMottaker() == null ?
             brevmottakerService.avklarMottakerRolleFraDokument(produserbartDokument) : brevbestillingDto.getMottaker();
-        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(produserbartDokument)
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
+            .medProduserbartDokument(produserbartDokument)
             .medAvsenderID(SubjectHandler.getInstance().getUserID())
             .medMottakerRolle(mottakerRolle)
             .medBehandling(behandling)
