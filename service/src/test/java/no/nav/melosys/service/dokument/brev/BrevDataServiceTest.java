@@ -1,11 +1,16 @@
 package no.nav.melosys.service.dokument.brev;
 
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.Optional;
+
 import no.nav.dok.brevdata.felles.v1.navfelles.*;
 import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType;
 import no.nav.dok.brevdata.felles.v1.simpletypes.Spraakkode;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.brev.NorskMyndighet;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
@@ -32,10 +37,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.w3c.dom.Element;
-
-import java.time.Instant;
-import java.util.HashSet;
-import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
@@ -105,6 +106,21 @@ class BrevDataServiceTest {
         assertThat(metadata.brukerNavn).isEqualTo(sammensattNavn);
 
         Element element = service.lagBrevXML(ATTEST_A1, mottakerMyndighet, null, behandling, brevData);
+
+        assertThat(element).isNotNull();
+    }
+
+    @Test
+    void lagBrevXML_tilUtenlandskMyndighet() {
+        Behandling behandling = lagBehandling(lagSøknadDokument());
+        BrevDataVedlegg brevData = new BrevDataVedlegg("Z123456");
+        no.nav.melosys.domain.brev.Mottaker mottakerNorskMyndighet = no.nav.melosys.domain.brev.Mottaker.av(NorskMyndighet.SKATTEETATEN);
+        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(ATTEST_A1, mottakerNorskMyndighet, null,
+            behandling, brevData);
+
+        assertThat(metadata.mottakerID).isEqualTo(mottakerNorskMyndighet.getOrgnr());
+
+        Element element = service.lagBrevXML(ATTEST_A1, mottakerNorskMyndighet, null, behandling, brevData);
 
         assertThat(element).isNotNull();
     }
