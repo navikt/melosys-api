@@ -31,9 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 import static java.util.Optional.ofNullable;
 import static no.nav.melosys.domain.Preferanse.PreferanseEnum.RESERVERT_FRA_A1;
 import static no.nav.melosys.domain.brev.BrevkopiRegel.*;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.REPRESENTANT;
-import static no.nav.melosys.domain.kodeverk.Mottakerroller.FULLMEKTIG;
-import static no.nav.melosys.domain.kodeverk.Representerer.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 
 @Service
@@ -89,7 +86,7 @@ public class BrevmottakerService {
 
     private void leggTilKopier(long behandlingId, Mottakerliste mottakerliste, Collection<BrevkopiRegel> brevkopiRegler) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
-        boolean brukerHarFullmektig = behandling.getFagsak().finnRepresentant(BRUKER).isPresent();
+        boolean brukerHarFullmektig = behandling.getFagsak().finnRepresentant(Representerer.BRUKER).isPresent();
 
         if (brevkopiRegler.contains(BRUKER_FÅR_KOPI) ||
             (brevkopiRegler.contains(BRUKER_FÅR_KOPI_HVIS_FULLMEKTIG_FINNES) && brukerHarFullmektig)) {
@@ -175,7 +172,7 @@ public class BrevmottakerService {
         }
 
         List<Mottaker> mottakere = new ArrayList<>();
-        Optional<Aktoer> representant = fagsak.finnRepresentant(BRUKER);
+        Optional<Aktoer> representant = fagsak.finnRepresentant(Representerer.BRUKER);
         if (representant.isPresent()) {
             mottakere.add(Mottaker.av(representant.get()));
             if (tilBegge) {
@@ -188,7 +185,7 @@ public class BrevmottakerService {
     }
 
     private List<Mottaker> avklarMottakereForFullmektig(Fagsak fagsak) {
-        Optional<Aktoer> representant = fagsak.finnRepresentant(BRUKER);
+        Optional<Aktoer> representant = fagsak.finnRepresentant(Representerer.BRUKER);
         if (representant.isPresent()) {
             return List.of(Mottaker.av(representant.get()));
         } else {

@@ -102,7 +102,7 @@ public class HentMuligeBrevmottakereService {
                 .medRolle(Mottakerroller.BRUKER)
                 .medAktørId(aktørID)
                 .build();
-        } else if (avklartKopi.getPersonIdent() != null) { // Fullmektig privatperson
+        } else if (avklartKopi.getPersonIdent() != null) {
             return new Brevmottaker.Builder()
                 .medDokumentNavn("Kopi til brukers fullmektig")
                 .medMottakerNavn(persondataFasade.hentSammensattNavn(avklartKopi.getPersonIdent()))
