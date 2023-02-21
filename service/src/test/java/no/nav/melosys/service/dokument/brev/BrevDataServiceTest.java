@@ -1,9 +1,5 @@
 package no.nav.melosys.service.dokument.brev;
 
-import java.time.Instant;
-import java.util.HashSet;
-import java.util.Optional;
-
 import no.nav.dok.brevdata.felles.v1.navfelles.*;
 import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType;
 import no.nav.dok.brevdata.felles.v1.simpletypes.Spraakkode;
@@ -36,6 +32,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.w3c.dom.Element;
+
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
@@ -172,7 +172,7 @@ class BrevDataServiceTest {
         mottaker.setRolle(rolle);
         switch (rolle) {
             case BRUKER -> mottaker.setAktørId(AKTØRID);
-            case ARBEIDSGIVER, VIRKSOMHET -> mottaker.setOrgnr(ORGNR);
+            case ARBEIDSGIVER, VIRKSOMHET, NORSK_MYNDIGHET -> mottaker.setOrgnr(ORGNR);
             case UTENLANDSK_TRYGDEMYNDIGHET -> mottaker.setInstitusjonID("HR:987");
             case FULLMEKTIG -> throw new IllegalArgumentException("Bruk lagMottakerFullmektig() for fullmekitg mottaker");
         }
@@ -401,6 +401,18 @@ class BrevDataServiceTest {
         assertThat(metadata.brukerNavn).isEqualTo(sammensattNavn);
         assertThat(metadata.utenlandskMyndighet).isNotNull();
         assertThat(metadata.berik).isFalse();
+    }
+
+    @Test
+    void lagBestillingMetadata_medNorskMyndighet_skalSeteOrgnrSomMottakerID() {
+        var mottaker = lagMottaker(Mottakerroller.NORSK_MYNDIGHET);
+
+
+        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, mottaker,
+            null, lagBehandling(lagSøknadDokument()), new BrevData("Z123456"));
+
+
+        assertThat(metadata.mottakerID).isEqualTo(mottaker.getOrgnr());
     }
 
     @Test
