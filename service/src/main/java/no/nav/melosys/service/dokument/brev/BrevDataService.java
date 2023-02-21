@@ -174,7 +174,7 @@ public class BrevDataService {
 
         return switch (mottaker.getRolle()) {
             case BRUKER -> lagMottakerForBruker(behandling, mottakerID);
-            case ARBEIDSGIVER -> lagMottakerForOrganisasjon(mottakerID);
+            case ARBEIDSGIVER, NORSK_MYNDIGHET -> lagMottakerForOrganisasjon(mottakerID);
             case UTENLANDSK_TRYGDEMYNDIGHET -> mottaker.erUtenlandskMyndighet() ? lagMottakerForUtenlandskTrygdemyndighet(mottaker) : lagMottakerForOrganisasjon(mottakerID);
             case FULLMEKTIG -> mottaker.erOrganisasjon() ? lagMottakerForOrganisasjon(mottakerID) : lagMottakerForRepresentantPerson(behandling, mottakerID);
             default -> throw new TekniskException(mottaker.getRolle() + " støttes ikke.");
