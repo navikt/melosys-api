@@ -169,7 +169,7 @@ class DokSysServiceTest {
 
     @Test
     void produserIkkeredigerbartDokument_tilUtenlandskMyndighet() throws Exception {
-        DokumentbestillingMetadata metadata = lagMetadataMedMyndighet();
+        DokumentbestillingMetadata metadata = lagMetadataMedUtenlandskMyndighet();
         when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
 
         dokSysService.produserIkkeredigerbartDokument(new Dokumentbestilling(metadata, lagBrevData()));
@@ -186,6 +186,23 @@ class DokSysServiceTest {
         UtenlandskPostadresse utenlandskPostadresse = (UtenlandskPostadresse) dokInfo.getAdresse();
         assertThat(utenlandskPostadresse.getAdresselinje1()).isEqualTo(metadata.utenlandskMyndighet.gateadresse1);
         assertThat(utenlandskPostadresse.getLand().getValue()).isEqualTo(metadata.utenlandskMyndighet.landkode.getKode());
+    }
+
+    @Test
+    void produserIkkeredigerbartDokument_tilNorskMyndighet() throws Exception {
+        DokumentbestillingMetadata metadata = lagMetadataMedNorskMyndighet();
+        when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
+
+
+        dokSysService.produserIkkeredigerbartDokument(new Dokumentbestilling(metadata, lagBrevData()));
+
+
+        ArgumentCaptor<ProduserIkkeredigerbartDokumentRequest> captor = ArgumentCaptor.forClass(ProduserIkkeredigerbartDokumentRequest.class);
+        verify(dokumentproduksjonConsumer).produserIkkeredigerbartDokument(captor.capture());
+
+        Dokumentbestillingsinformasjon dokInfo = hentDokumentBestillingInfoFraCaptor(captor);
+        assertThat(dokInfo.getMottaker()).isInstanceOf(Organisasjon.class);
+        assertThat(((Organisasjon) dokInfo.getMottaker()).getOrgnummer()).isEqualTo(metadata.mottakerID);
     }
 
     @Test
@@ -413,7 +430,7 @@ class DokSysServiceTest {
         return metadata;
     }
 
-    private DokumentbestillingMetadata lagMetadataMedMyndighet() {
+    private DokumentbestillingMetadata lagMetadataMedUtenlandskMyndighet() {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
         metadata.mottaker = lagMottaker(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
         metadata.mottakerID = ORGNR;
@@ -430,6 +447,14 @@ class DokSysServiceTest {
         utenlandskMyndighet.landkode = Land_iso2.GL;
         utenlandskMyndighet.institusjonskode = "INST-023%zdf";
         return utenlandskMyndighet;
+    }
+
+    private DokumentbestillingMetadata lagMetadataMedNorskMyndighet() {
+        DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
+        metadata.mottaker = lagMottaker(Mottakerroller.NORSK_MYNDIGHET);
+        metadata.mottakerID = ORGNR;
+        metadata.dokumenttypeID = "dok_1234";
+        return metadata;
     }
 
     private static Element lagBrevData() {
