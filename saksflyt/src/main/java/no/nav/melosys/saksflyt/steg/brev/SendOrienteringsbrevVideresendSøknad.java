@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.steg.brev;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -44,7 +44,7 @@ public class SendOrienteringsbrevVideresendSøknad implements StegBehandler {
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
             .medAvsenderID(saksbehandler)
             .medProduserbartDokument(Produserbaredokumenter.ORIENTERING_VIDERESENDT_SOEKNAD)
-            .medMottakere(Mottaker.av(Aktoersroller.BRUKER))
+            .medMottakere(Mottaker.medRolle(Mottakerroller.BRUKER))
             .medBehandling(behandling)
             .medFritekst(fritekst)
             .build();

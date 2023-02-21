@@ -6,11 +6,11 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
 public class DoksysBrevbestilling extends Brevbestilling {
-    private Aktoersroller mottakerRolle;
+    private Mottakerroller mottakerRolle;
     private Collection<Mottaker> mottakere;
     private String begrunnelseKode;
     private String fritekst;
@@ -23,7 +23,7 @@ public class DoksysBrevbestilling extends Brevbestilling {
 
     protected DoksysBrevbestilling(Produserbaredokumenter produserbartdokument,
                                    String avsenderID,
-                                   Aktoersroller mottakerRolle,
+                                   Mottakerroller mottakerRolle,
                                    Collection<Mottaker> mottakere,
                                    Behandling behandling,
                                    String begrunnelseKode,
@@ -40,7 +40,7 @@ public class DoksysBrevbestilling extends Brevbestilling {
         this.distribusjonstype = distribusjonstype;
     }
 
-    public Aktoersroller getMottakerRolle() {
+    public Mottakerroller getMottakerRolle() {
         return mottakerRolle;
     }
 
@@ -71,7 +71,7 @@ public class DoksysBrevbestilling extends Brevbestilling {
     public static class Builder {
         private Produserbaredokumenter produserbartdokument;
         private String avsenderID;
-        private Aktoersroller mottakerRolle;
+        private Mottakerroller mottakerRolle;
         private Collection<Mottaker> mottakere;
         private Behandling behandling;
         private String begrunnelseKode;
@@ -89,7 +89,7 @@ public class DoksysBrevbestilling extends Brevbestilling {
             return this;
         }
 
-        public Builder medMottakerRolle(Aktoersroller mottakerRolle) {
+        public Builder medMottakerRolle(Mottakerroller mottakerRolle) {
             this.mottakerRolle = mottakerRolle;
             return this;
         }

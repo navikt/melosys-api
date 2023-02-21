@@ -13,6 +13,7 @@ import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -94,7 +95,8 @@ class BrevDataServiceTest {
         behandling.getFagsak().getAktører().add(aktoerMyndighet);
         BrevDataVedlegg brevData = new BrevDataVedlegg("Z123456");
         UtenlandskMyndighet myndighet = lagUtenlandskMyndighet();
-        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(ATTEST_A1, aktoerMyndighet, null,
+        no.nav.melosys.domain.brev.Mottaker mottakerMyndighet = lagMottakerMyndighet();
+        DokumentbestillingMetadata metadata = service.lagBestillingMetadata(ATTEST_A1, mottakerMyndighet, null,
             behandling, brevData);
 
         assertThat(metadata.brukerID).isEqualTo(FNR);
@@ -102,7 +104,7 @@ class BrevDataServiceTest {
         assertThat(metadata.utenlandskMyndighet).isEqualTo(myndighet);
         assertThat(metadata.brukerNavn).isEqualTo(sammensattNavn);
 
-        Element element = service.lagBrevXML(ATTEST_A1, aktoerMyndighet, null, behandling, brevData);
+        Element element = service.lagBrevXML(ATTEST_A1, mottakerMyndighet, null, behandling, brevData);
 
         assertThat(element).isNotNull();
     }
@@ -114,16 +116,23 @@ class BrevDataServiceTest {
         return myndighet;
     }
 
+    private static no.nav.melosys.domain.brev.Mottaker lagMottakerMyndighet() {
+        var myndighet = new no.nav.melosys.domain.brev.Mottaker();
+        myndighet.setRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
+        myndighet.setInstitusjonID(INSTITUSJON_ID);
+        return myndighet;
+    }
+
     @Test
-    void lagMyndighetFraAktoer() {
-        Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
-        aktoer.setInstitusjonId("DE:TEST");
+    void hentUtenlandskTrygdemyndighetFraMottaker() {
+        var mottaker = new no.nav.melosys.domain.brev.Mottaker();
+        mottaker.setRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
+        mottaker.setInstitusjonID("DE:TEST");
         UtenlandskMyndighet tyskMyndighet = new UtenlandskMyndighet();
         tyskMyndighet.institusjonskode = "TEST";
         when(utenlandskMyndighetRepository.findByLandkode(Land_iso2.DE)).thenReturn(Optional.of(tyskMyndighet));
 
-        UtenlandskMyndighet utenlandskMyndighet = service.hentMyndighetFraAktoer(aktoer);
+        UtenlandskMyndighet utenlandskMyndighet = service.hentUtenlandskTrygdemyndighetFraMottaker(mottaker);
 
         assertThat(utenlandskMyndighet.institusjonskode).isEqualTo(tyskMyndighet.institusjonskode);
     }
@@ -131,11 +140,11 @@ class BrevDataServiceTest {
     @Test
     void lagMottaker_personUtenRegistrertAdresseGirFunksjonellException() {
         Behandling behandling = lagBehandling(lagSøknadDokumentTomAdresse());
-        Aktoer aktoer = lagAktør(Aktoersroller.BRUKER);
+        var mottaker = lagMottaker(Mottakerroller.BRUKER);
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser());
 
         assertThatExceptionOfType(FunksjonellException.class).isThrownBy(
-            () -> service.lagMottaker(aktoer, null, behandling)).withMessageContaining(
+            () -> service.lagMottaker(mottaker, null, behandling)).withMessageContaining(
             Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
     }
 
@@ -144,7 +153,7 @@ class BrevDataServiceTest {
         Behandling behandling = lagBehandling(lagSøknadDokument());
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
-        Aktoer mottaker = lagAktør(Aktoersroller.BRUKER);
+        var mottaker = lagMottaker(Mottakerroller.BRUKER);
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_FORVENTET_SAKSBEHANDLINGSTID,
@@ -158,28 +167,27 @@ class BrevDataServiceTest {
         assertThat(element).isNotNull();
     }
 
-    private static Aktoer lagAktør(Aktoersroller type) {
-        Aktoer aktør = new Aktoer();
-        aktør.setRolle(type);
-        switch (type) {
-            case BRUKER -> aktør.setAktørId(AKTØRID);
-            case ARBEIDSGIVER, VIRKSOMHET -> aktør.setOrgnr(ORGNR);
-            case TRYGDEMYNDIGHET -> aktør.setInstitusjonId("HR:987");
-            case REPRESENTANT ->
-                throw new IllegalArgumentException("Bruk lagAktørRepresentant() for fullmekitg mottaker");
+    private static no.nav.melosys.domain.brev.Mottaker lagMottaker(Mottakerroller rolle) {
+        var mottaker = new no.nav.melosys.domain.brev.Mottaker();
+        mottaker.setRolle(rolle);
+        switch (rolle) {
+            case BRUKER -> mottaker.setAktørId(AKTØRID);
+            case ARBEIDSGIVER, VIRKSOMHET -> mottaker.setOrgnr(ORGNR);
+            case UTENLANDSK_TRYGDEMYNDIGHET -> mottaker.setInstitusjonID("HR:987");
+            case FULLMEKTIG -> throw new IllegalArgumentException("Bruk lagMottakerFullmektig() for fullmekitg mottaker");
         }
-        return aktør;
+        return mottaker;
     }
 
-    private static Aktoer lagAktørRepresentant(Aktoertype mottakerType) {
-        Aktoer aktør = new Aktoer();
-        aktør.setRolle(Aktoersroller.REPRESENTANT);
+    private static no.nav.melosys.domain.brev.Mottaker lagMottakerFullmektig(Aktoertype mottakerType) {
+        var mottaker = new no.nav.melosys.domain.brev.Mottaker();
+        mottaker.setRolle(Mottakerroller.FULLMEKTIG);
         switch (mottakerType) {
-            case PERSON -> aktør.setPersonIdent(REP_FNR);
-            case ORGANISASJON -> aktør.setOrgnr(REP_ORGNR);
+            case PERSON -> mottaker.setPersonIdent(REP_FNR);
+            case ORGANISASJON -> mottaker.setOrgnr(REP_ORGNR);
             default -> throw new IllegalArgumentException("Mottakertype må være person eller organisasjon");
         }
-        return aktør;
+        return mottaker;
     }
 
     @Test
@@ -191,7 +199,7 @@ class BrevDataServiceTest {
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
-        Aktoer mottaker = lagAktørRepresentant(Aktoertype.ORGANISASJON);
+        var mottaker = lagMottakerFullmektig(Aktoertype.ORGANISASJON);
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_FORVENTET_SAKSBEHANDLINGSTID,
             mottaker, null, behandling, brevData);
@@ -215,7 +223,7 @@ class BrevDataServiceTest {
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
-        Aktoer mottaker = lagAktørRepresentant(Aktoertype.PERSON);
+        var mottaker = lagMottakerFullmektig(Aktoertype.PERSON);
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_FORVENTET_SAKSBEHANDLINGSTID,
             mottaker, null, behandling, brevData);
@@ -236,11 +244,11 @@ class BrevDataServiceTest {
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
 
-        Aktoer mottakerAktør = lagAktør(Aktoersroller.BRUKER);
+        var mottakerBruker = lagMottaker(Mottakerroller.BRUKER);
         brevData.fritekst = "Test";
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER,
-            mottakerAktør, null, behandling, brevData);
+            mottakerBruker, null, behandling, brevData);
 
         assertThat(metadata.brukerID).isEqualTo(FNR);
         assertThat(metadata.mottakerID).isEqualTo(FNR);
@@ -252,7 +260,7 @@ class BrevDataServiceTest {
             return mottaker;
         }).when(service).lagMottaker(any(), any(), any());
 
-        Element element = service.lagBrevXML(MELDING_MANGLENDE_OPPLYSNINGER, mottakerAktør, null, behandling, brevData);
+        Element element = service.lagBrevXML(MELDING_MANGLENDE_OPPLYSNINGER, mottakerBruker, null, behandling, brevData);
 
         assertThat(element).isNotNull();
     }
@@ -263,7 +271,7 @@ class BrevDataServiceTest {
         BrevDataMottattDato brevData = new BrevDataMottattDato("Z123456", new BrevbestillingDto());
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
 
-        Aktoer mottakerAktør = lagAktør(Aktoersroller.ARBEIDSGIVER);
+        var mottakerAktør = lagMottaker(Mottakerroller.ARBEIDSGIVER);
         brevData.fritekst = "Test";
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER,
@@ -292,7 +300,7 @@ class BrevDataServiceTest {
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
         brevData.fritekst = "Test";
 
-        Aktoer mottaker = lagAktør(Aktoersroller.BRUKER);
+        var mottaker = lagMottaker(Mottakerroller.BRUKER);
         Element element = service.lagBrevXML(MELDING_MANGLENDE_OPPLYSNINGER, mottaker, null, behandling, brevData);
         assertThat(element).isNotNull();
     }
@@ -306,24 +314,24 @@ class BrevDataServiceTest {
         brevData.initierendeJournalpostForsendelseMottattTidspunkt = Instant.now();
         brevData.fritekst = "Test";
 
-        Aktoer mottaker = lagAktør(Aktoersroller.BRUKER);
+        var mottaker = lagMottaker(Mottakerroller.BRUKER);
         Element element = service.lagBrevXML(MELDING_MANGLENDE_OPPLYSNINGER, mottaker, null, behandling, brevData);
         assertThat(element).isNotNull();
     }
 
     @Test
     void lagMetadataForInnvilgelsesbrevAngirDokTypeLikInnvilgelseYrkesaktiv() {
-        testLagDokumentMetadata(INNVILGELSE_YRKESAKTIV, Aktoersroller.BRUKER);
+        testLagDokumentMetadata(INNVILGELSE_YRKESAKTIV, Mottakerroller.BRUKER);
     }
 
     @Test
     void lagMetadataForMangelbrevAngirDokTypeLikMangelbrev() {
-        testLagDokumentMetadata(MELDING_MANGLENDE_OPPLYSNINGER, Aktoersroller.ARBEIDSGIVER);
+        testLagDokumentMetadata(MELDING_MANGLENDE_OPPLYSNINGER, Mottakerroller.ARBEIDSGIVER);
     }
 
     @Test
     void lagMetadataForInnvilgelseArbeidsgiverBrevAngirDokTypeLikArbeidsgiver() {
-        testLagDokumentMetadata(INNVILGELSE_ARBEIDSGIVER, Aktoersroller.ARBEIDSGIVER);
+        testLagDokumentMetadata(INNVILGELSE_ARBEIDSGIVER, Mottakerroller.ARBEIDSGIVER);
     }
 
     @Test
@@ -337,7 +345,7 @@ class BrevDataServiceTest {
         kontaktopplysning.setKontaktOrgnr("KONTAKTORG_999");
 
         BrevData brevData = new BrevData("Z123456");
-        Aktoer mottaker = lagAktørRepresentant(Aktoertype.ORGANISASJON);
+        var mottaker = lagMottakerFullmektig(Aktoertype.ORGANISASJON);
         brevData.fritekst = "Test";
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, mottaker,
@@ -359,7 +367,7 @@ class BrevDataServiceTest {
         Behandling behandling = lagBehandling(lagSøknadDokument());
         BrevData brevData = new BrevData("Z123456");
 
-        Aktoer mottaker = lagAktør(Aktoersroller.BRUKER);
+        var mottaker = lagMottaker(Mottakerroller.BRUKER);
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, mottaker,
             null, behandling, brevData);
         assertThat(metadata.postadresse.getGatenavn()).isEqualTo("Strukturert Gate");
@@ -371,7 +379,7 @@ class BrevDataServiceTest {
     void lagBestillingMetadata_medBrukerMedAdresseIRegister_skalIkkeHaBrukerNavnEllerPostAdresse() {
         Behandling behandling = lagBehandling(lagSøknadDokument());
         BrevData brevData = new BrevData("Z123456");
-        Aktoer mottaker = lagAktør(Aktoersroller.BRUKER);
+        var mottaker = lagMottaker(Mottakerroller.BRUKER);
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
 
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, mottaker,
@@ -386,7 +394,7 @@ class BrevDataServiceTest {
         Behandling behandling = lagBehandling(lagSøknadDokument());
         BrevData brevData = new BrevData("Z123456");
 
-        Aktoer mottaker = lagAktør(Aktoersroller.TRYGDEMYNDIGHET);
+        var mottaker = lagMottaker(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
         DokumentbestillingMetadata metadata = service.lagBestillingMetadata(MELDING_MANGLENDE_OPPLYSNINGER, mottaker,
             null, behandling, brevData);
         assertThat(metadata.postadresse).isNull();
@@ -403,7 +411,7 @@ class BrevDataServiceTest {
         kontaktopplysning.setKontaktOrgnr("KONTAKTORG_999");
 
         BrevData brevData = new BrevData("Z123456");
-        Aktoer mottaker = lagAktør(Aktoersroller.ARBEIDSGIVER);
+        var mottaker = lagMottaker(Mottakerroller.ARBEIDSGIVER);
         brevData.fritekst = "Test";
 
         Behandling behandling = lagBehandling(lagSøknadDokument());
@@ -419,8 +427,8 @@ class BrevDataServiceTest {
     @Test
     void lagMottaker_bruker_riktigeVerdier() {
         when(persondataFasade.hentPerson(AKTØRID)).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
-        var mottaker = new Aktoer();
-        mottaker.setRolle(Aktoersroller.BRUKER);
+        var mottaker = new no.nav.melosys.domain.brev.Mottaker();
+        mottaker.setRolle(Mottakerroller.BRUKER);
         mottaker.setAktørId(AKTØRID);
 
         var behandling = lagBehandling(new MottatteOpplysningerData());
@@ -441,8 +449,8 @@ class BrevDataServiceTest {
 
     @Test
     void lagMottaker_arbeidsgiver_riktigeVerdier() {
-        var mottaker = new Aktoer();
-        mottaker.setRolle(Aktoersroller.ARBEIDSGIVER);
+        var mottaker = new no.nav.melosys.domain.brev.Mottaker();
+        mottaker.setRolle(Mottakerroller.ARBEIDSGIVER);
         mottaker.setOrgnr(ORGNR);
 
         var behandling = lagBehandling(new MottatteOpplysningerData());
@@ -462,7 +470,7 @@ class BrevDataServiceTest {
 
     @Test
     void lagMottaker_trygdemyndighetUtenlandsk_riktigeVerdier() {
-        var mottaker = lagAktoerMyndighet();
+        var mottaker = lagMottakerMyndighet();
         var behandling = lagBehandling(new MottatteOpplysningerData());
 
         var brevMottaker = service.lagMottaker(mottaker, null, behandling);
@@ -487,8 +495,8 @@ class BrevDataServiceTest {
 
     @Test
     void lagMottaker_trygdemyndighetIkkeUtenlandsk_riktigeVerdier() {
-        var mottaker = new Aktoer();
-        mottaker.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
+        var mottaker = new no.nav.melosys.domain.brev.Mottaker();
+        mottaker.setRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
         mottaker.setOrgnr(ORGNR);
 
         var behandling = lagBehandling(new MottatteOpplysningerData());
@@ -509,8 +517,8 @@ class BrevDataServiceTest {
     @Test
     void lagMottaker_representantPerson_riktigeVerdier() {
         when(persondataFasade.hentPerson(REP_FNR)).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
-        var mottaker = new Aktoer();
-        mottaker.setRolle(Aktoersroller.REPRESENTANT);
+        var mottaker = new no.nav.melosys.domain.brev.Mottaker();
+        mottaker.setRolle(Mottakerroller.FULLMEKTIG);
         mottaker.setPersonIdent(REP_FNR);
 
         var behandling = lagBehandling(new MottatteOpplysningerData());
@@ -531,8 +539,8 @@ class BrevDataServiceTest {
 
     @Test
     void lagMottaker_representantOrganisasjon_riktigeVerdier() {
-        var mottaker = new Aktoer();
-        mottaker.setRolle(Aktoersroller.REPRESENTANT);
+        var mottaker = new no.nav.melosys.domain.brev.Mottaker();
+        mottaker.setRolle(Mottakerroller.FULLMEKTIG);
         mottaker.setOrgnr(REP_ORGNR);
 
         var behandling = lagBehandling(new MottatteOpplysningerData());
@@ -550,12 +558,12 @@ class BrevDataServiceTest {
         assertThat(brevMottaker).isEqualTo(expectedBrevMottaker);
     }
 
-    private void testLagDokumentMetadata(Produserbaredokumenter doktype, Aktoersroller rolle) {
+    private void testLagDokumentMetadata(Produserbaredokumenter doktype, Mottakerroller rolle) {
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
-        testLagDokumentMetadata(doktype, lagAktør(rolle), rolle);
+        testLagDokumentMetadata(doktype, lagMottaker(rolle), rolle);
     }
 
-    private void testLagDokumentMetadata(Produserbaredokumenter doktype, Aktoer mottaker, Aktoersroller rolle) {
+    private void testLagDokumentMetadata(Produserbaredokumenter doktype, no.nav.melosys.domain.brev.Mottaker mottaker, Mottakerroller rolle) {
         DokumentbestillingMetadata resultat = service.lagBestillingMetadata(doktype, mottaker, null,
             lagBehandling(lagSøknadDokument()), lagBrevData());
         DokumentbestillingMetadata forventet = lagDokumentbestillingMetadata(doktype, rolle);
@@ -563,11 +571,11 @@ class BrevDataServiceTest {
     }
 
     private static DokumentbestillingMetadata lagDokumentbestillingMetadata(Produserbaredokumenter doktype,
-                                                                            Aktoersroller rolle) {
+                                                                            Mottakerroller rolle) {
         DokumentbestillingMetadata forventet = new DokumentbestillingMetadata();
         forventet.brukerID = FNR;
-        forventet.mottaker = lagAktør(rolle);
-        if (rolle == Aktoersroller.BRUKER) {
+        forventet.mottaker = lagMottaker(rolle);
+        if (rolle == Mottakerroller.BRUKER) {
             forventet.mottakerID = FNR;
         } else {
             forventet.mottakerID = ORGNR;

@@ -5,7 +5,7 @@ public enum MottakerType {
     VIRKSOMHET("Virksomheten saken er tilknyttet"),
     ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG("Arbeidsgiver eller arbeidsgivers fullmektig"),
     ANNEN_ORGANISASJON("Annen organisasjon"),
-    ANDRE_OFFENTLIGE_ETATER("Andre offentlige etater"),
+    NORSK_MYNDIGHET("Norske myndigheter"),
     UTENLANDSK_TRYGDEMYNDIGHET("Utenlandsk trygdemyndighet i avtaleland");
 
     MottakerType(String beskrivelse) {

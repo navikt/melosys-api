@@ -6,7 +6,7 @@ import no.nav.melosys.domain.brev.Mottakerliste;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
 import static no.nav.melosys.domain.brev.BrevkopiRegel.*;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
+import static no.nav.melosys.domain.kodeverk.Mottakerroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 
 public class BrevmottakerMapper {
@@ -87,11 +87,11 @@ public class BrevmottakerMapper {
                 .build()),
 
             Map.entry(FRITEKSTBREV, new Mottakerliste.Builder()
-                .medHovedMottaker(ETAT)
+                .medHovedMottaker(NORSK_MYNDIGHET)
                 .build()),
 
             Map.entry(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV, new Mottakerliste.Builder()
-                .medHovedMottaker(TRYGDEMYNDIGHET)
+                .medHovedMottaker(UTENLANDSK_TRYGDEMYNDIGHET)
                 .build())
         );
     }

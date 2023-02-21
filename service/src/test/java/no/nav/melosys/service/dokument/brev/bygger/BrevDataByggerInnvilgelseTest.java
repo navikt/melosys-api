@@ -94,7 +94,7 @@ class BrevDataByggerInnvilgelseTest {
         behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new Soeknad());
 
         brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setMottaker(Aktoersroller.BRUKER);
+        brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
         brevbestillingDto.setBegrunnelseKode("BEGRUNNELSEKODE");
         brevbestillingDto.setFritekst("FRITEKST");
 

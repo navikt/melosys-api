@@ -9,8 +9,8 @@ import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -86,7 +86,7 @@ class DistribuerJournalpostTest {
     @Test
     void utførDistribuerJournalpostUtenAdresse() {
         String journalpostId = "12345";
-        Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.BRUKER, Distribusjonstype.VIKTIG);
+        Prosessinstans prosessinstans = setupHappypath(journalpostId, Mottakerroller.BRUKER, Distribusjonstype.VIKTIG);
 
         distribuerJournalpost.utfør(prosessinstans);
 
@@ -97,7 +97,7 @@ class DistribuerJournalpostTest {
     void utførDistribuerJournalpostMedPostadresse() {
         String journalpostId = "12345";
 
-        Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.REPRESENTANT, Distribusjonstype.ANNET);
+        Prosessinstans prosessinstans = setupHappypath(journalpostId, Mottakerroller.FULLMEKTIG, Distribusjonstype.ANNET);
         prosessinstans.setData(ProsessDataKey.ORGNR, "123456789");
 
         Saksopplysning saksopplysning = new Saksopplysning();
@@ -114,7 +114,7 @@ class DistribuerJournalpostTest {
     @Test
     void utførDistribuerJournalpostMedForretningsadresse() {
         String journalpostId = "12345";
-        Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.REPRESENTANT, Distribusjonstype.VEDTAK);
+        Prosessinstans prosessinstans = setupHappypath(journalpostId, Mottakerroller.FULLMEKTIG, Distribusjonstype.VEDTAK);
         prosessinstans.setData(ProsessDataKey.ORGNR, "123456789");
 
         Saksopplysning saksopplysning = new Saksopplysning();
@@ -132,7 +132,7 @@ class DistribuerJournalpostTest {
     @Test
     void utførDistribuerJournalpostMedReperesentantPerson() {
         String journalpostId = "12345";
-        Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.REPRESENTANT, Distribusjonstype.ANNET);
+        Prosessinstans prosessinstans = setupHappypath(journalpostId, Mottakerroller.FULLMEKTIG, Distribusjonstype.ANNET);
         prosessinstans.setData(ProsessDataKey.AKTØR_ID, "12345678901");
 
         distribuerJournalpost.utfør(prosessinstans);
@@ -144,7 +144,7 @@ class DistribuerJournalpostTest {
     void utførDistribuerJournalpostMedUtenlandskMyndighet() {
         final String journalpostId = "12345";
         final String institusjonId = "GB:A100";
-        Prosessinstans prosessinstans = setupHappypath(journalpostId, Aktoersroller.TRYGDEMYNDIGHET, Distribusjonstype.VIKTIG);
+        Prosessinstans prosessinstans = setupHappypath(journalpostId, Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET, Distribusjonstype.VIKTIG);
         prosessinstans.setData(ProsessDataKey.INSTITUSJON_ID, institusjonId);
 
         var utenlandskMyndighet = new UtenlandskMyndighet();
@@ -157,7 +157,7 @@ class DistribuerJournalpostTest {
         verify(mockDoksysFasade).distribuerJournalpost(eq(journalpostId), any(StrukturertAdresse.class), eq(Distribusjonstype.VIKTIG));
     }
 
-    private Prosessinstans setupHappypath(String journalpostId, Aktoersroller rolle, Distribusjonstype distribusjonstype) {
+    private Prosessinstans setupHappypath(String journalpostId, Mottakerroller rolle, Distribusjonstype distribusjonstype) {
         Behandling behandling = TestdataFactory.lagBehandling();
         Prosessinstans prosessinstans = new Prosessinstans();
         DokgenBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()

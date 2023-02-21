@@ -6,7 +6,7 @@ import java.util.function.Function;
 
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.FritekstvedleggDto;
@@ -18,10 +18,10 @@ import static java.util.Optional.ofNullable;
 
 public record BrevbestillingRequest(
     Produserbaredokumenter produserbardokument,
-    Aktoersroller mottaker,
+    Mottakerroller mottaker,
     String orgNr,
     String institusjonId,
-    List<String> orgnrEtater,
+    List<String> orgnrNorskMyndighet,
     String innledningFritekst,
     String manglerFritekst,
     String begrunnelseFritekst,
@@ -47,7 +47,7 @@ public record BrevbestillingRequest(
             this.produserbardokument,
             this.mottaker,
             this.orgNr,
-            this.orgnrEtater,
+            this.orgnrNorskMyndighet,
             this.institusjonId,
             this.innledningFritekst,
             this.manglerFritekst,
@@ -79,7 +79,7 @@ public record BrevbestillingRequest(
             this.produserbardokument(),
             this.mottaker(),
             this.orgNr(),
-            this.orgnrEtater(),
+            this.orgnrNorskMyndighet(),
             this.institusjonId(),
             this.innledningFritekst(),
             this.manglerFritekst(),
@@ -105,7 +105,7 @@ public record BrevbestillingRequest(
             utkast.mottaker(),
             utkast.orgnr(),
             utkast.institusjonID(),
-            utkast.orgnrEtater(),
+            utkast.orgnrNorskMyndighet(),
             utkast.innledningFritekst(),
             utkast.manglerFritekst(),
             utkast.begrunnelseFritekst(),

@@ -2,7 +2,7 @@ package no.nav.melosys.service.brev;
 
 import java.util.List;
 
-import no.nav.melosys.domain.brev.Etat;
+import no.nav.melosys.domain.brev.NorskMyndighet;
 import no.nav.melosys.domain.brev.muligemottakere.Brevmottaker;
 import no.nav.melosys.service.brev.bestilling.*;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
@@ -15,21 +15,21 @@ public class BrevbestillingFasade {
     private static final Logger log = LoggerFactory.getLogger(BrevbestillingFasade.class);
 
     private final HentMuligeBrevmottakereService hentMuligeBrevmottakereService;
-    private final HentBrevmottakereEtaterService hentBrevmottakereEtaterService;
+    private final HentBrevmottakereNorskMyndighetService hentBrevmottakereNorskMyndighetService;
     private final ProduserUtkastService produserUtkastService;
     private final ProduserBrevService produserBrevService;
-    private final HentTilgjengeligeEtaterService hentTilgjengeligeEtaterService;
+    private final HentTilgjengeligeNorskeMyndigheterService hentTilgjengeligeNorskeMyndigheterService;
 
     public BrevbestillingFasade(HentMuligeBrevmottakereService hentMuligeBrevmottakereService,
-                                HentBrevmottakereEtaterService hentBrevmottakereEtaterService,
+                                HentBrevmottakereNorskMyndighetService hentBrevmottakereNorskMyndighetService,
                                 ProduserUtkastService produserUtkastService,
                                 ProduserBrevService produserBrevService,
-                                HentTilgjengeligeEtaterService hentTilgjengeligeEtaterService) {
+                                HentTilgjengeligeNorskeMyndigheterService hentTilgjengeligeNorskeMyndigheterService) {
         this.hentMuligeBrevmottakereService = hentMuligeBrevmottakereService;
-        this.hentBrevmottakereEtaterService = hentBrevmottakereEtaterService;
+        this.hentBrevmottakereNorskMyndighetService = hentBrevmottakereNorskMyndighetService;
         this.produserUtkastService = produserUtkastService;
         this.produserBrevService = produserBrevService;
-        this.hentTilgjengeligeEtaterService = hentTilgjengeligeEtaterService;
+        this.hentTilgjengeligeNorskeMyndigheterService = hentTilgjengeligeNorskeMyndigheterService;
     }
 
     public HentMuligeBrevmottakereService.ResponseDto hentMuligeMottakere(HentMuligeBrevmottakereService.RequestDto requestDto) {
@@ -47,14 +47,14 @@ public class BrevbestillingFasade {
         produserBrevService.produserBrev(behandlingID, brevbestillingDto);
     }
 
-    public List<Etat> hentTilgjengeligeEtater() {
-        log.debug("hentTilgjengeligeEtater");
-        return hentTilgjengeligeEtaterService.hentTilgjengeligeEtater();
+    public List<NorskMyndighet> hentTilgjengeligeNorskeMyndigheter() {
+        log.debug("hentTilgjengeligeNorskeMyndigheter");
+        return hentTilgjengeligeNorskeMyndigheterService.hentTilgjengeligeNorskeMyndigheter();
     }
 
-    public List<Brevmottaker> hentMuligeBrevmottakereEtater(List<String> orgnrEtater) {
-        log.debug("hentMuligeBrevmottakereEtater med orgnr for etater: {}", orgnrEtater);
-        return hentBrevmottakereEtaterService.hentMuligeBrevmottakereEtater(orgnrEtater);
+    public List<Brevmottaker> hentMuligeBrevmottakereNorskMyndighet(List<String> orgnrNorskMyndighet) {
+        log.debug("hentMuligeBrevmottakereNorskMyndighet med orgnr for norske myndigheter: {}", orgnrNorskMyndighet);
+        return hentBrevmottakereNorskMyndighetService.hentMuligeBrevmottakereNorskMyndighet(orgnrNorskMyndighet);
     }
 }
 

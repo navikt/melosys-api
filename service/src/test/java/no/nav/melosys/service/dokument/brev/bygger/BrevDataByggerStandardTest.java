@@ -1,18 +1,18 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-public class BrevDataByggerStandardTest {
+class BrevDataByggerStandardTest {
 
     @Test
-    public void lagBrevData() {
+    void lagBrevData() {
         var brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setMottaker(Aktoersroller.BRUKER);
+        brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
         brevbestillingDto.setFritekst("FRITEKST");
 
         BrevDataByggerStandard brevDataByggerStandard = new BrevDataByggerStandard(brevbestillingDto);

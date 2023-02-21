@@ -11,8 +11,8 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
+import no.nav.melosys.domain.brev.NorskMyndighet;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
@@ -287,7 +287,7 @@ public class TrygdeavtaleMapper {
 
     private boolean erSkatteetaten(OrganisasjonDokument org) {
         // Skatteetaten skal ikke ha attest
-        return org != null && FastMottakerMedOrgnr.SKATTEETATEN.getOrgnr().equals(org.getOrgnummer());
+        return org != null && NorskMyndighet.SKATTEETATEN.getOrgnr().equals(org.getOrgnummer());
     }
 
     private boolean skalIkkeHaInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {

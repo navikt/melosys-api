@@ -1,16 +1,16 @@
 package no.nav.melosys.domain.brev;
 
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-
 public class Mottakerliste {
-    private final Aktoersroller hovedMottaker;
+    private final Mottakerroller hovedMottaker;
     private final Collection<BrevkopiRegel> brevkopiRegler;
-    private final Collection<Aktoersroller> kopiMottakere;
-    private final Collection<FastMottakerMedOrgnr> fasteMottakere;
+    private final Collection<Mottakerroller> kopiMottakere;
+    private final Collection<NorskMyndighet> fasteMottakere;
 
     private Mottakerliste(Builder builder) {
         this.hovedMottaker = builder.hovedMottaker;
@@ -19,20 +19,20 @@ public class Mottakerliste {
         this.fasteMottakere = builder.fasteMottakere;
     }
 
-    public Aktoersroller getHovedMottaker() {
+    public Mottakerroller getHovedMottaker() {
         return hovedMottaker;
-    }
-
-    public Collection<Aktoersroller> getKopiMottakere() {
-        return kopiMottakere;
-    }
-
-    public Collection<FastMottakerMedOrgnr> getFasteMottakere() {
-        return fasteMottakere;
     }
 
     public Collection<BrevkopiRegel> getBrevkopiRegler() {
         return brevkopiRegler;
+    }
+
+    public Collection<Mottakerroller> getKopiMottakere() {
+        return kopiMottakere;
+    }
+
+    public Collection<NorskMyndighet> getFasteMottakere() {
+        return fasteMottakere;
     }
 
     public boolean kanHaKopier() {
@@ -40,12 +40,12 @@ public class Mottakerliste {
     }
 
     public static class Builder {
-        private Aktoersroller hovedMottaker;
+        private Mottakerroller hovedMottaker;
         private Collection<BrevkopiRegel> brevkopiRegler = new ArrayList<>();
-        private Collection<Aktoersroller> kopiMottakere = new ArrayList<>();
-        private Collection<FastMottakerMedOrgnr> fasteMottakere = new ArrayList<>();
+        private final Collection<Mottakerroller> kopiMottakere = new ArrayList<>();
+        private final Collection<NorskMyndighet> fasteMottakere = new ArrayList<>();
 
-        public Builder medHovedMottaker(Aktoersroller hovedMottaker) {
+        public Builder medHovedMottaker(Mottakerroller hovedMottaker) {
             this.hovedMottaker = hovedMottaker;
             return this;
         }
@@ -55,13 +55,13 @@ public class Mottakerliste {
             return this;
         }
 
-        public Builder medKopiMottaker(Aktoersroller kopiMottaker) {
+        public Builder medKopiMottaker(Mottakerroller kopiMottaker) {
             this.kopiMottakere.add(kopiMottaker);
             return this;
         }
 
-        public Builder medFastMottaker(FastMottakerMedOrgnr fastMottakerMedOrgnr) {
-            this.fasteMottakere.add(fastMottakerMedOrgnr);
+        public Builder medFastMottaker(NorskMyndighet fastMottaker) {
+            this.fasteMottakere.add(fastMottaker);
             return this;
         }
 

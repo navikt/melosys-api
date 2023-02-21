@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.steg.brev;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -40,7 +40,7 @@ class BestillBrevTest {
         prosessinstans.setBehandling(behandling);
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
             .medProduserbartDokument(INNVILGELSE_YRKESAKTIV)
-            .medMottakere(Mottaker.av(Aktoersroller.BRUKER))
+            .medMottakere(Mottaker.medRolle(Mottakerroller.BRUKER))
             .build();
         prosessinstans.setData(ProsessDataKey.BREVBESTILLING, brevbestilling);
         ArgumentCaptor<DoksysBrevbestilling> captor = ArgumentCaptor.forClass(DoksysBrevbestilling.class);
@@ -83,7 +83,7 @@ class BestillBrevTest {
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.BREVBESTILLING,
             new DoksysBrevbestilling.Builder()
-                .medMottakere(Mottaker.av(Aktoersroller.BRUKER), Mottaker.av(Aktoersroller.ARBEIDSGIVER))
+                .medMottakere(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER))
                 .build());
 
         assertThatExceptionOfType(FunksjonellException.class)
