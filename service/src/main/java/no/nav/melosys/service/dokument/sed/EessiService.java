@@ -369,7 +369,6 @@ public class EessiService {
     }
 
     public void sendInvalideringSed(long behandlingId, String ytterligereInformasjon) {
-        log.info("Sender invalideringssed på behandling {}", behandlingId);
         sendSedPåEksisterendeBehandling(behandlingId,PeriodeType.INGEN, br -> SedType.X008, ytterligereInformasjon);
     }
 }
