@@ -27,7 +27,8 @@ public class FerdigbehandlingKontrollsett {
         FerdigbehandlingKontroll::periodeOver24Mnd,
         FerdigbehandlingKontroll::periodeManglerSluttdato,
         FerdigbehandlingKontroll::arbeidsstedManglerFelter,
-        FerdigbehandlingKontroll::foretakUtlandManglerFelter
+        FerdigbehandlingKontroll::foretakUtlandManglerFelter,
+        FerdigbehandlingKontroll::orgnrErOpphørt
     );
 
     private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_TRYGDEAVTALER = Set.of(

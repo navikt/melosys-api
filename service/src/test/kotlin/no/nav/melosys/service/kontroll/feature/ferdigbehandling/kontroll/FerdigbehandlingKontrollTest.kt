@@ -22,7 +22,7 @@ class FerdigbehandlingKontrollTest {
             fom = NOW
             tom = NOW.plusMonths(12)
         }
-        val kontrollData = FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null)
+        val kontrollData = FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null)
 
 
         val kontrollfeil = FerdigbehandlingKontroll.periodeOver12Måneder(kontrollData)
@@ -38,7 +38,7 @@ class FerdigbehandlingKontrollTest {
             fom = NOW
             tom = NOW.plusYears(5)
         }
-        val kontrollData = FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null)
+        val kontrollData = FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null)
 
 
         val kontrollfeil = FerdigbehandlingKontroll.periodeOverFemÅr(kontrollData)
@@ -54,7 +54,7 @@ class FerdigbehandlingKontrollTest {
             fom = NOW
             tom = NOW.plusYears(5)
         }
-        val kontrollData = FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null)
+        val kontrollData = FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null)
 
 
         val kontrollfeil = FerdigbehandlingKontroll.periodeOverFemÅr(kontrollData)

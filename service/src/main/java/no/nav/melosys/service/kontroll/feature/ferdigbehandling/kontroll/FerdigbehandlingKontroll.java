@@ -93,6 +93,12 @@ final class FerdigbehandlingKontroll {
             ? new Kontrollfeil(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED) : null;
     }
 
+    public static Kontrollfeil orgnrErOpphørt(FerdigbehandlingKontrollData kontrollData) {
+        return kontrollData.saksopplysningerData().harOpphørtAvklartVirksomhet()
+            ? new Kontrollfeil(Kontroll_begrunnelser.OPPHØRT_ARBEIDSGIVER)
+            : null;
+    }
+
     static Kontrollfeil adresseRegistrert(FerdigbehandlingKontrollData kontrollData) {
         return PersonRegler.harRegistrertAdresse(kontrollData.persondata(), kontrollData.mottatteOpplysningerData())
             ? null : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);

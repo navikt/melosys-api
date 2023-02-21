@@ -13,8 +13,10 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData;
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.SaksopplysningerData;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
@@ -27,12 +29,14 @@ import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
 class Kontroll {
     private final BehandlingService behandlingService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
+    private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final PersondataFasade persondataFasade;
     private final Unleash unleash;
 
-    public Kontroll(BehandlingService behandlingService, LovvalgsperiodeService lovvalgsperiodeService, PersondataFasade persondataFasade, Unleash unleash) {
+    public Kontroll(BehandlingService behandlingService, LovvalgsperiodeService lovvalgsperiodeService, AvklarteVirksomheterService avklarteVirksomheterService, PersondataFasade persondataFasade, Unleash unleash) {
         this.behandlingService = behandlingService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
+        this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.persondataFasade = persondataFasade;
         this.unleash = unleash;
     }
@@ -93,7 +97,9 @@ class Kontroll {
             mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         }
         Persondata persondata = hentPersondata(behandling);
-        return FerdigbehandlingKontrollData.lagKontrollDataForAvslag(persondata, mottatteOpplysningerData);
+        SaksopplysningerData saksopplysningerData = hentSaksopplysningerData(behandling);
+
+        return FerdigbehandlingKontrollData.lagKontrollDataForAvslag(persondata, mottatteOpplysningerData, saksopplysningerData);
     }
 
     private FerdigbehandlingKontrollData hentVedtakKontrollData(Behandling behandling) {
@@ -102,19 +108,24 @@ class Kontroll {
         MottatteOpplysningerData mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();
         Persondata persondata = hentPersondata(behandling);
+        SaksopplysningerData saksopplysningerData = hentSaksopplysningerData(behandling);
 
         return new FerdigbehandlingKontrollData(medlemskapDokument, persondata, mottatteOpplysningerData,
-            lovvalgsperiode, opprinneligLovvalgsperiode);
+            lovvalgsperiode, opprinneligLovvalgsperiode, saksopplysningerData);
     }
 
     private FerdigbehandlingKontrollData hentVedtakKontrollDataFTRL(Behandling behandling) {
         MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();
         MottatteOpplysningerData mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         Persondata persondata = hentPersondata(behandling);
-        return FerdigbehandlingKontrollData.lagKontrollDataForFTRL(medlemskapDokument, persondata, mottatteOpplysningerData);
+        return FerdigbehandlingKontrollData.lagKontrollDataForFTRL(persondata, mottatteOpplysningerData, medlemskapDokument);
     }
 
     private Persondata hentPersondata(Behandling behandling) {
         return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
+    }
+
+    private SaksopplysningerData hentSaksopplysningerData(Behandling behandling) {
+        return new SaksopplysningerData(avklarteVirksomheterService.harOpphørtAvklartVirksomhet(behandling));
     }
 }

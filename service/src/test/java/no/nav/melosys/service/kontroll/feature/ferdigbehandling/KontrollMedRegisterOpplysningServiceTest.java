@@ -14,6 +14,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.exception.validering.KontrollfeilDto;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -43,6 +44,8 @@ class KontrollMedRegisterOpplysningServiceTest {
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
+    private AvklarteVirksomheterService avklarteVirksomheterService;
+    @Mock
     private PersondataFasade persondataFasade;
     @Mock
     private RegisteropplysningerService registeropplysningerService;
@@ -68,7 +71,7 @@ class KontrollMedRegisterOpplysningServiceTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         when(lovvalgsperiodeService.hentLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
-        Kontroll kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, persondataFasade, unleash);
+        Kontroll kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, avklarteVirksomheterService, persondataFasade, unleash);
         kontrollMedRegisterOpplysning = new KontrollMedRegisteropplysning(behandlingService, behandlingsresultatService, persondataFasade,
             registeropplysningerService, kontroll, unleash);
 
