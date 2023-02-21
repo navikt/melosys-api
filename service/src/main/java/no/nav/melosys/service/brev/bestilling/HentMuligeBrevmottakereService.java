@@ -102,6 +102,12 @@ public class HentMuligeBrevmottakereService {
                 .medRolle(Mottakerroller.BRUKER)
                 .medAktørId(aktørID)
                 .build();
+        } else if (avklartKopi.getPersonIdent() != null) {
+            return new Brevmottaker.Builder()
+                .medDokumentNavn("Kopi til brukers fullmektig")
+                .medMottakerNavn(persondataFasade.hentSammensattNavn(avklartKopi.getPersonIdent()))
+                .medRolle(avklartKopi.getRolle())
+                .build();
         } else {
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartKopi.getOrgnr());
             return new Brevmottaker.Builder()

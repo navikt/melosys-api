@@ -150,6 +150,7 @@ public class BrevmottakerService {
             case ARBEIDSGIVER -> avklarMottakereForArbeidsgiver(behandling, kunAvklarteVirksomheter);
             case UTENLANDSK_TRYGDEMYNDIGHET -> avklarMottakereForUtenlandskTrygdeyndighet(mottaker, behandling, produserbartDokument);
             case NORSK_MYNDIGHET -> avklarMottakereForNorskMyndighet(mottaker);
+            case FULLMEKTIG -> avklarMottakereForFullmektig(behandling.getFagsak());
             default -> throw new FunksjonellException("%s støttes ikke.".formatted(mottaker.getRolle()));
         };
     }
@@ -181,6 +182,15 @@ public class BrevmottakerService {
             mottakere.add(Mottaker.av(bruker));
         }
         return mottakere;
+    }
+
+    private List<Mottaker> avklarMottakereForFullmektig(Fagsak fagsak) {
+        Optional<Aktoer> representant = fagsak.finnRepresentant(Representerer.BRUKER);
+        if (representant.isPresent()) {
+            return List.of(Mottaker.av(representant.get()));
+        } else {
+            throw new FunksjonellException("Finner ikke fullmektig som representerer bruker");
+        }
     }
 
     private List<Mottaker> avklarMottakereForVirksomhet(Behandling behandling) {

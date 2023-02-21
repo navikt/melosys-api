@@ -76,10 +76,22 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_medRolleSomIkkeErStøttet_feiler() {
+    void avklarMottakere_medFullmektigRepresentererOrg_feiler() {
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigPerson(Representerer.ARBEIDSGIVER));
+
         assertThatThrownBy(() -> brevmottakerService.avklarMottakere(null, Mottaker.medRolle(FULLMEKTIG), behandling))
             .isInstanceOf(FunksjonellException.class)
-            .hasMessage("FULLMEKTIG støttes ikke.");
+            .hasMessage("Finner ikke fullmektig som representerer bruker");
+    }
+
+    @Test
+    void avklarMottakere_medFullmektigRepresentererBruker_girFullmektigMottaker() {
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigPerson(Representerer.BRUKER));
+
+        List<Mottaker> mottakere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(BRUKER), behandling);
+
+        assertThat(mottakere).hasSize(1);
+        assertThat(mottakere.get(0).getRolle()).isEqualTo(FULLMEKTIG);
     }
 
     @Test
@@ -92,8 +104,8 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_medBrukerRolleUtenRepresentant_girBrukerAktør() {
-        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(null));
+    void avklarMottakere_medBrukerRolleUtenFullmektig_girBrukerMottaker() {
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigOrg(null));
 
         List<Mottaker> mottakere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(BRUKER), behandling);
 
@@ -102,8 +114,8 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_medBrukerRolleMedRepresentantOrg_girRepresentantAktør() {
-        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(Representerer.BRUKER));
+    void avklarMottakere_medBrukerRolleMedFullmektigOrg_girFullmektigMottaker() {
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigOrg(Representerer.BRUKER));
 
         List<Mottaker> mottakere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(BRUKER), behandling);
 
@@ -112,8 +124,8 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_medBrukerRolleMedRepresentantPerson_girRepresentantAktør() {
-        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantPerson(Representerer.BRUKER));
+    void avklarMottakere_medBrukerRolleMedFullmektigPerson_girFullmektigMottaker() {
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigPerson(Representerer.BRUKER));
 
         List<Mottaker> mottakere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(BRUKER), behandling);
 
@@ -132,7 +144,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_medVirksomhetRolleOgVirksomhet_girVirksomhetAktør() {
+    void avklarMottakere_medVirksomhetRolleOgVirksomhet_girVirksomhetMottaker() {
         Aktoer virksomhet = new Aktoer();
         virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
         virksomhet.setOrgnr("orgnr");
@@ -149,7 +161,7 @@ class BrevmottakerServiceTest {
 
     @Test
     void avklarMottakere_medArbeidsgiverRolleOgIngenArbeidsgivere_feiler() {
-        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(null));
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigOrg(null));
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling)).thenReturn(Collections.emptySet());
         when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling)).thenReturn(Collections.emptyList());
 
@@ -159,9 +171,9 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_medArbeidsgiverRolle_girArbeidsgiverAktører() {
+    void avklarMottakere_medArbeidsgiverRolle_girArbeidsgiverMottakere() {
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling)).thenReturn(Sets.newHashSet("123456789", "987654321"));
-        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(null));
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigOrg(null));
 
         List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(ARBEIDSGIVER), behandling);
 
@@ -172,7 +184,7 @@ class BrevmottakerServiceTest {
 
     @Test
     void avklarMottakere_medBareUtenlandskeArbeidsgivere_girIngenMottakere() {
-        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(null));
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigOrg(null));
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling)).thenReturn(Collections.emptySet());
         when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling))
             .thenReturn(Collections.singletonList(new AvklartVirksomhet(new ForetakUtland())));
@@ -183,7 +195,7 @@ class BrevmottakerServiceTest {
 
     @Test
     void avklarMottakere_medArbeidsgiverRolleIkkeKunAvklarteVirksomheterOgIngenArbeidsgivere_girTomListe() {
-        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(null));
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigOrg(null));
         when(behandling.getMottatteOpplysninger()).thenReturn(lagMottatteOpplysninger(null, null));
         when(behandling.hentArbeidsforholdDokument()).thenReturn(lagArbeidsforholdDokument(null));
 
@@ -193,8 +205,8 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_medArbeidsgiverRolleIkkeKunAvklarteVirksomheter_girArbeidsgiverAktører() {
-        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(null));
+    void avklarMottakere_medArbeidsgiverRolleIkkeKunAvklarteVirksomheter_girArbeidsgiverMottakere() {
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigOrg(null));
         when(behandling.getMottatteOpplysninger()).thenReturn(lagMottatteOpplysninger("987654321", null));
         when(behandling.hentArbeidsforholdDokument()).thenReturn(lagArbeidsforholdDokument("123456789"));
 
@@ -207,7 +219,7 @@ class BrevmottakerServiceTest {
 
     @Test
     void avklarMottakere_medBareUtenlandskeArbeidsgivereIkkeKunAvklarteVirksomheter_girIngenMottakere() {
-        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(null));
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigOrg(null));
         when(behandling.getMottatteOpplysninger()).thenReturn(lagMottatteOpplysninger(null, "uuid"));
         when(behandling.hentArbeidsforholdDokument()).thenReturn(lagArbeidsforholdDokument(null));
 
@@ -216,9 +228,9 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_medArbeidsgiverRolleOgRepresentantForBruker_girArbeidsgiverAktører() {
+    void avklarMottakere_medArbeidsgiverRolleOgFullmektigForBruker_girArbeidsgiverMottakere() {
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling)).thenReturn(Sets.newHashSet("123456789", "987654321"));
-        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(Representerer.BRUKER));
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigOrg(Representerer.BRUKER));
 
         List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(ARBEIDSGIVER), behandling);
 
@@ -228,8 +240,8 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_medArbeidsgiverRolleOgRepresentantForArbeidsgiver_girRepresentantAktør() {
-        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(Representerer.ARBEIDSGIVER));
+    void avklarMottakere_medArbeidsgiverRolleOgFullmektigForArbeidsgiver_girFullmektigMottakere() {
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigOrg(Representerer.ARBEIDSGIVER));
 
         List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(ARBEIDSGIVER), behandling);
 
@@ -239,8 +251,8 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_medArbeidsgiverRolleOgRepresentantForBegge_girRepresentantAktør() {
-        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantPerson(Representerer.BEGGE));
+    void avklarMottakere_medArbeidsgiverRolleOgFullmektigForBegge_girFullmektigMottakere() {
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigPerson(Representerer.BEGGE));
 
         List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(ARBEIDSGIVER), behandling);
 
@@ -250,7 +262,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_art12_1_CZerReservertFraA1_forventerIngenAktør() {
+    void avklarMottakere_art12_1_CZerReservertFraA1_forventerIngenMottaker() {
         when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling)).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagMottakerUtenlandskMyndighet()));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
@@ -259,7 +271,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_art_11_4_2_CZerReservertFraA1_forventerIngenAktør() {
+    void avklarMottakere_art_11_4_2_CZerReservertFraA1_forventerIngenMottaker() {
         when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling)).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagMottakerUtenlandskMyndighet()));
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
@@ -269,7 +281,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
-    void avklarMottakere_A001_CZerReservertFraA1_forventerMyndighetAktør() {
+    void avklarMottakere_A001_CZerReservertFraA1_forventerMyndighetMottaker() {
         when(utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling)).thenReturn(Collections.singletonMap(lagUtenlandskMyndighet(), lagMottakerUtenlandskMyndighet()));
 
         List<Mottaker> myndigheter = brevmottakerService.avklarMottakere(Produserbaredokumenter.ANMODNING_UNNTAK, Mottaker.medRolle(UTENLANDSK_TRYGDEMYNDIGHET), behandling);
@@ -322,7 +334,7 @@ class BrevmottakerServiceTest {
     @Test
     void gittMangelbrevArbeidsgiver_skalHovedmottakerVæreArbeidsgiverMedKopi() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
-        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(null));
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigOrg(null));
 
         assertThat(brevmottakerService.hentMottakerliste(MANGELBREV_ARBEIDSGIVER, 123))
             .extracting(
@@ -444,7 +456,7 @@ class BrevmottakerServiceTest {
         var lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
-        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(null));
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigOrg(null));
         when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
 
         assertThat(brevmottakerService.hentMottakerliste(TRYGDEAVTALE_GB, 123))
@@ -465,7 +477,7 @@ class BrevmottakerServiceTest {
         var lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2);
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
-        when(behandling.getFagsak()).thenReturn(lagFagsakMedRepresentantOrg(null));
+        when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigOrg(null));
         when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
 
         assertThat(brevmottakerService.hentMottakerliste(TRYGDEAVTALE_GB, 123))
@@ -519,7 +531,7 @@ class BrevmottakerServiceTest {
         when(trygdeavgiftsberegningService.finnBeregningsresultat(anyLong())).thenReturn(trygdeavgiftsberegningsresultat);
 
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
-        Fagsak fagsak = lagFagsakMedRepresentantOrg(representerer);
+        Fagsak fagsak = lagFagsakMedFullmektigOrg(representerer);
         fagsak.setType(Sakstyper.FTRL);
         when(behandling.getFagsak()).thenReturn(fagsak);
     }
@@ -530,28 +542,28 @@ class BrevmottakerServiceTest {
         return aktoer;
     }
 
-    private Fagsak lagFagsakMedRepresentantOrg(Representerer representerer) {
+    private Fagsak lagFagsakMedFullmektigOrg(Representerer representerer) {
         Fagsak fagsak = new Fagsak();
         fagsak.getAktører().add(lagAktoer(Aktoersroller.BRUKER));
 
         if (representerer != null) {
-            Aktoer representant = lagAktoer(Aktoersroller.REPRESENTANT);
-            representant.setRepresenterer(representerer);
-            representant.setOrgnr("REP-ORGNR");
-            fagsak.getAktører().add(representant);
+            Aktoer aktoer = lagAktoer(Aktoersroller.REPRESENTANT);
+            aktoer.setRepresenterer(representerer);
+            aktoer.setOrgnr("REP-ORGNR");
+            fagsak.getAktører().add(aktoer);
         }
         return fagsak;
     }
 
-    private Fagsak lagFagsakMedRepresentantPerson(Representerer representerer) {
+    private Fagsak lagFagsakMedFullmektigPerson(Representerer representerer) {
         Fagsak fagsak = new Fagsak();
         fagsak.getAktører().add(lagAktoer(Aktoersroller.BRUKER));
 
         if (representerer != null) {
-            Aktoer representant = lagAktoer(Aktoersroller.REPRESENTANT);
-            representant.setRepresenterer(representerer);
-            representant.setPersonIdent("REP-FNR");
-            fagsak.getAktører().add(representant);
+            Aktoer aktoer = lagAktoer(Aktoersroller.REPRESENTANT);
+            aktoer.setRepresenterer(representerer);
+            aktoer.setPersonIdent("REP-FNR");
+            fagsak.getAktører().add(aktoer);
         }
         return fagsak;
     }
@@ -588,12 +600,5 @@ class BrevmottakerServiceTest {
         Mottaker mottaker = Mottaker.medRolle(UTENLANDSK_TRYGDEMYNDIGHET);
         mottaker.setInstitusjonID("CZ:SZUC10416");
         return mottaker;
-    }
-
-
-    private Optional<Kontaktopplysning> lagKontaktOpplysning(boolean representant) {
-        Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
-        kontaktopplysning.setKontaktNavn(representant ? "Ole Fullmektig" : "Kari Arbeidsgiver");
-        return Optional.of(kontaktopplysning);
     }
 }
