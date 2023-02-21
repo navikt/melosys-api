@@ -20,6 +20,7 @@ public class FattVedtakDto {
     private String ektefelleFritekst;
     private String barnFritekst;
     private List<KopiMottakerDto> kopiMottakere;
+    private boolean kopiTilArbeidsgiver;
     private FaktureringsIntervall betalingsintervall;
 
     public FaktureringsIntervall getBetalingsintervall() {
@@ -108,6 +109,10 @@ public class FattVedtakDto {
 
     public void setKopiMottakere(List<KopiMottakerDto> kopiMottakere) {
         this.kopiMottakere = kopiMottakere;
+    }
+
+    public boolean erKopiTilArbeidsgiver() {
+        return kopiTilArbeidsgiver;
     }
 
     public Vedtakstyper getVedtakstype() {

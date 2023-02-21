@@ -92,7 +92,7 @@ class TrygdeavtaleVedtakServiceTest {
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
         verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
-        verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), any(Behandlingsresultat.class), eq(Sakstyper.TRYGDEAVTALE), any(Behandlingsresultattyper.class));
+        verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), any(Behandlingsresultat.class), eq(Sakstyper.TRYGDEAVTALE), any(Behandlingsresultattyper.class), eq(null));
 
         Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
         assertThat(lagretBehandlingsresultat)
@@ -138,7 +138,7 @@ class TrygdeavtaleVedtakServiceTest {
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
         verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
-        verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), any(Behandlingsresultat.class), eq(Sakstyper.TRYGDEAVTALE), any(Behandlingsresultattyper.class));
+        verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), any(Behandlingsresultat.class), eq(Sakstyper.TRYGDEAVTALE), any(Behandlingsresultattyper.class), eq(null));
 
         Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
         assertThat(lagretBehandlingsresultat)
@@ -184,7 +184,7 @@ class TrygdeavtaleVedtakServiceTest {
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
         verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
-        verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), any(Behandlingsresultat.class), eq(Sakstyper.TRYGDEAVTALE), any(Behandlingsresultattyper.class));
+        verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), any(Behandlingsresultat.class), eq(Sakstyper.TRYGDEAVTALE), any(Behandlingsresultattyper.class), eq(null));
 
         Behandlingsresultat lagretBehandlingsresultat = behandlingsresultatCaptor.getValue();
         assertThat(lagretBehandlingsresultat)

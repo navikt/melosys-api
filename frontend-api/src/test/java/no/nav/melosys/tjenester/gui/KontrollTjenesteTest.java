@@ -37,7 +37,7 @@ public class KontrollTjenesteTest {
     @Test
     void kontrollerFerdigbehandling() throws Exception {
         var dto = new FerdigbehandlingKontrollerDto(1L, Vedtakstyper.FØRSTEGANGSVEDTAK,
-            Behandlingsresultattyper.HENLEGGELSE, false);
+            Behandlingsresultattyper.HENLEGGELSE, null, false);
 
         mockMvc.perform(post(BASE_URL + "/ferdigbehandling")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -48,7 +48,7 @@ public class KontrollTjenesteTest {
     @Test
     void kontrollerFerdigbehandlingUtenVedtakstypeGirBadRequest() throws Exception {
         var dto = new FerdigbehandlingKontrollerDto(1L, null, Behandlingsresultattyper.HENLEGGELSE,
-            false);
+            null, false);
 
         mockMvc.perform(post(BASE_URL + "/ferdigbehandling")
                 .contentType(MediaType.APPLICATION_JSON)

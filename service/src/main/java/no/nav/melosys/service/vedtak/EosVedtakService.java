@@ -84,7 +84,13 @@ public class EosVedtakService {
         behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
 
         if (behandlingsresultat.erInnvilgelse()) {
-            ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(behandling, behandlingsresultat, Sakstyper.EU_EOS, request.getBehandlingsresultatTypeKode());
+            ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
+                behandling,
+                behandlingsresultat,
+                Sakstyper.EU_EOS,
+                request.getBehandlingsresultatTypeKode(),
+                null //TODO: Ignorer opphørt arbeidsgiver
+            );
         }
 
         oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), request.getFritekst(), request.getNyVurderingBakgrunn());

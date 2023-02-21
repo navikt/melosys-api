@@ -2,12 +2,14 @@ package no.nav.melosys.service.kontroll.feature.ferdigbehandling;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.Set;
 
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.person.Persondata;
@@ -41,14 +43,16 @@ class Kontroll {
         this.unleash = unleash;
     }
 
-    public void kontroller(long behandlingId, Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
+    public void kontroller(long behandlingId, Behandlingsresultattyper behandlingsresultattype, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) throws ValideringException {
         var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         var sakstype = behandling.getFagsak().getType();
-        kontrollerVedtak(behandlingId, sakstype, behandlingsresultattype);
+        kontrollerVedtak(behandlingId, sakstype, behandlingsresultattype, kontrollerSomSkalIgnoreres);
     }
 
-    public void kontrollerVedtak(long behandlingID, Sakstyper sakstype, Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
-        Collection<Kontrollfeil> kontrollfeil = utførKontroller(behandlingID, sakstype, behandlingsresultattype);
+    public void kontrollerVedtak(long behandlingID, Sakstyper sakstype, Behandlingsresultattyper behandlingsresultattype, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) throws ValideringException {
+        Collection<Kontrollfeil> kontrollfeil = utførKontroller(behandlingID, sakstype, behandlingsresultattype).stream()
+            .filter(feil -> kontrollerSomSkalIgnoreres == null || !kontrollerSomSkalIgnoreres.contains(feil.getKode()))
+            .toList();
 
         if (!kontrollfeil.isEmpty()) {
             throw new ValideringException("Feil i validering. Kan ikke fatte vedtak.",

@@ -3,6 +3,7 @@ package no.nav.melosys.service.kontroll.feature.ferdigbehandling;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
@@ -22,6 +23,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
+import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -37,6 +39,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
