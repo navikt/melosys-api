@@ -3,8 +3,8 @@ package no.nav.melosys.service.vedtak;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -74,7 +74,7 @@ public class FtrlVedtakService {
     private BrevbestillingDto lagAvslagMangledeOpplysningerBrevbestilling(FattVedtakRequest request) {
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER);
-        brevbestillingDto.setMottaker(Aktoersroller.BRUKER);
+        brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
         brevbestillingDto.setBestillersId(request.getBestillersId());
         brevbestillingDto.setFritekst(request.getFritekst());
         return brevbestillingDto;
@@ -83,7 +83,7 @@ public class FtrlVedtakService {
     private BrevbestillingDto lagInnvilgelseFolketrygdloven(FattVedtakRequest request) {
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN_2_8);
-        brevbestillingDto.setMottaker(Aktoersroller.BRUKER);
+        brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
         brevbestillingDto.setKopiMottakere(request.getKopiMottakere());
         brevbestillingDto.setInnledningFritekst(request.getInnledningFritekst());
         brevbestillingDto.setBegrunnelseFritekst(request.getBegrunnelseFritekst());

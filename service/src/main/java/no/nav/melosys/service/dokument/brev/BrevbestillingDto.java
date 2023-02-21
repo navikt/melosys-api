@@ -6,14 +6,14 @@ import java.util.Objects;
 
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
 public final class BrevbestillingDto {
     private Produserbaredokumenter produserbardokument;
-    private Aktoersroller mottaker;
+    private Mottakerroller mottaker;
     private String orgnr;
-    private List<String> orgnrEtater;
+    private List<String> orgnrNorskMyndighet;
     private String institusjonId;
     private String innledningFritekst;
     private String manglerFritekst;
@@ -41,9 +41,9 @@ public final class BrevbestillingDto {
 
     public BrevbestillingDto(
         Produserbaredokumenter produserbardokument,
-        Aktoersroller mottaker,
+        Mottakerroller mottaker,
         String orgnr,
-        List<String> orgnrEtater,
+        List<String> orgnrNorskMyndighet,
         String institusjonId,
         String innledningFritekst,
         String manglerFritekst,
@@ -62,14 +62,14 @@ public final class BrevbestillingDto {
         List<FritekstvedleggDto> fritekstvedlegg,
         String dokumentTittel,
         @Deprecated(since = "Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel")
-        String begrunnelseKode,
+            String begrunnelseKode,
         @Deprecated(since = "Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel")
-        String ytterligereInformasjon) {
+            String ytterligereInformasjon) {
 
         this.produserbardokument = produserbardokument;
         this.mottaker = mottaker;
         this.orgnr = orgnr;
-        this.orgnrEtater = orgnrEtater;
+        this.orgnrNorskMyndighet = orgnrNorskMyndighet;
         this.institusjonId = institusjonId;
         this.innledningFritekst = innledningFritekst;
         this.manglerFritekst = manglerFritekst;
@@ -102,7 +102,7 @@ public final class BrevbestillingDto {
             brevbestillingUtkast.produserbardokument(),
             brevbestillingUtkast.mottaker(),
             brevbestillingUtkast.orgnr(),
-            brevbestillingUtkast.orgnrEtater(),
+            brevbestillingUtkast.orgnrNorskMyndighet(),
             institusjonId,
             brevbestillingUtkast.innledningFritekst(),
             brevbestillingUtkast.manglerFritekst(),
@@ -129,7 +129,7 @@ public final class BrevbestillingDto {
         this.produserbardokument = produserbardokument;
     }
 
-    public void setMottaker(Aktoersroller mottaker) {
+    public void setMottaker(Mottakerroller mottaker) {
         this.mottaker = mottaker;
     }
 
@@ -137,8 +137,8 @@ public final class BrevbestillingDto {
         this.orgnr = orgnr;
     }
 
-    public void setOrgnrEtater(List<String> orgnrEtater) {
-        this.orgnrEtater = orgnrEtater;
+    public void setOrgnrNorskMyndighet(List<String> orgnrNorskMyndighet) {
+        this.orgnrNorskMyndighet = orgnrNorskMyndighet;
     }
 
     public void setInstitusjonId(String institusjonId) {
@@ -221,7 +221,7 @@ public final class BrevbestillingDto {
         return produserbardokument;
     }
 
-    public Aktoersroller getMottaker() {
+    public Mottakerroller getMottaker() {
         return mottaker;
     }
 
@@ -229,11 +229,11 @@ public final class BrevbestillingDto {
         return orgnr;
     }
 
-    public List<String> getOrgnrEtater() {
-        if (orgnrEtater == null) {
-            orgnrEtater = new ArrayList<>();
+    public List<String> getOrgnrNorskMyndighet() {
+        if (orgnrNorskMyndighet == null) {
+            orgnrNorskMyndighet = new ArrayList<>();
         }
-        return orgnrEtater;
+        return orgnrNorskMyndighet;
     }
 
     public String getInstitusjonId() {
@@ -331,7 +331,7 @@ public final class BrevbestillingDto {
         return Objects.equals(this.produserbardokument, that.produserbardokument) &&
             Objects.equals(this.mottaker, that.mottaker) &&
             Objects.equals(this.orgnr, that.orgnr) &&
-            Objects.equals(this.orgnrEtater, that.orgnrEtater) &&
+            Objects.equals(this.orgnrNorskMyndighet, that.orgnrNorskMyndighet) &&
             Objects.equals(this.institusjonId, that.institusjonId) &&
             Objects.equals(this.innledningFritekst, that.innledningFritekst) &&
             Objects.equals(this.manglerFritekst, that.manglerFritekst) &&
@@ -355,7 +355,7 @@ public final class BrevbestillingDto {
 
     @Override
     public int hashCode() {
-        return Objects.hash(produserbardokument, mottaker, orgnr, orgnrEtater, institusjonId, innledningFritekst, manglerFritekst, begrunnelseFritekst, ektefelleFritekst, barnFritekst, kontaktpersonNavn, kopiMottakere, bestillersId, fritekstTittel, fritekst, distribusjonstype, kontaktopplysninger, nyVurderingBakgrunn, saksVedlegg, fritekstvedlegg, dokumentTittel, begrunnelseKode, ytterligereInformasjon);
+        return Objects.hash(produserbardokument, mottaker, orgnr, orgnrNorskMyndighet, institusjonId, innledningFritekst, manglerFritekst, begrunnelseFritekst, ektefelleFritekst, barnFritekst, kontaktpersonNavn, kopiMottakere, bestillersId, fritekstTittel, fritekst, distribusjonstype, kontaktopplysninger, nyVurderingBakgrunn, saksVedlegg, fritekstvedlegg, dokumentTittel, begrunnelseKode, ytterligereInformasjon);
     }
 
     @Override
@@ -364,7 +364,7 @@ public final class BrevbestillingDto {
             "produserbardokument=" + produserbardokument + ", " +
             "mottaker=" + mottaker + ", " +
             "orgnr=" + orgnr + ", " +
-            "orgnrEtater=" + orgnrEtater + ", " +
+            "orgnrNorskMyndighet=" + orgnrNorskMyndighet + ", " +
             "institusjonId=" + institusjonId + ", " +
             "innledningFritekst=" + innledningFritekst + ", " +
             "manglerFritekst=" + manglerFritekst + ", " +

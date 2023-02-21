@@ -2,11 +2,11 @@ package no.nav.melosys.tjenester.gui.dto.brev;
 
 import java.util.Collection;
 
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 
 public class MottakerDto {
     private String type;
-    private Aktoersroller rolle;
+    private Mottakerroller rolle;
     private boolean orgnrSettesAvSaksbehandler;
     private Collection<MottakerAdresseDto> adresser;
     private String feilmelding;
@@ -14,7 +14,7 @@ public class MottakerDto {
     public MottakerDto() {
     }
 
-    public MottakerDto(String type, Aktoersroller rolle, boolean orgnrSettesAvSaksbehandler, Collection<MottakerAdresseDto> adresser, String feilmelding) {
+    public MottakerDto(String type, Mottakerroller rolle, boolean orgnrSettesAvSaksbehandler, Collection<MottakerAdresseDto> adresser, String feilmelding) {
         this.type = type;
         this.rolle = rolle;
         this.orgnrSettesAvSaksbehandler = orgnrSettesAvSaksbehandler;
@@ -26,7 +26,7 @@ public class MottakerDto {
         this.type = type;
     }
 
-    public void setRolle(Aktoersroller rolle) {
+    public void setRolle(Mottakerroller rolle) {
         this.rolle = rolle;
     }
 
@@ -46,7 +46,7 @@ public class MottakerDto {
         return type;
     }
 
-    public Aktoersroller getRolle() {
+    public Mottakerroller getRolle() {
         return rolle;
     }
 

@@ -2,12 +2,14 @@ package no.nav.melosys.service.aktoer;
 
 import java.util.*;
 
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Preferanse;
 import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
@@ -18,6 +20,8 @@ import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -29,14 +33,15 @@ class UtenlandskMyndighetServiceTest {
 
     @Mock
     private UtenlandskMyndighetRepository utenlandskMyndighetRepositoryMock;
-
     @Mock
     private FagsakService fagsakServiceMock;
-
     @Mock
     private LandvelgerService landvelgerServiceMock;
 
     private UtenlandskMyndighetService utenlandskMyndighetService;
+
+    @Captor
+    ArgumentCaptor<List<String>> stringListArgumentCaptor;
 
     private final long BEHANDLING_ID = 1L;
     private final String SAKSNUMMER = "MEL-1";
@@ -143,6 +148,24 @@ class UtenlandskMyndighetServiceTest {
     }
 
     @Test
+    void avklarUtenlandskMyndighetSomAktørOgLagre_forventkorrektInstitusjonsId() {
+        var utenlandskMyndighet = lagUtenlandskMyndighet(Land_iso2.IT, "IT123", null);
+        var utenlandskMyndighetReservert = lagUtenlandskMyndighet(Land_iso2.CZ, "CZ123", Preferanse.PreferanseEnum.RESERVERT_FRA_A1);
+        behandling.getFagsak().setType(Sakstyper.EU_EOS);
+
+        when(utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.IT)).thenReturn(Optional.of(utenlandskMyndighet));
+        when(utenlandskMyndighetRepositoryMock.findByLandkode(Land_iso2.CZ)).thenReturn(Optional.of(utenlandskMyndighetReservert));
+        when(landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(anyLong())).thenReturn(Arrays.asList(Land_iso2.IT, Land_iso2.CZ));
+
+
+        utenlandskMyndighetService.avklarUtenlandskMyndighetSomAktørOgLagre(behandling);
+
+
+        verify(fagsakServiceMock).oppdaterMyndigheterForEuEos(eq(behandling.getFagsak().getSaksnummer()), stringListArgumentCaptor.capture());
+        assertThat(stringListArgumentCaptor.getValue()).containsExactlyInAnyOrder(Landkoder.IT + ":" + utenlandskMyndighet.institusjonskode, Landkoder.CZ + ":" + utenlandskMyndighetReservert.institusjonskode);
+    }
+
+    @Test
     void lagUtenlandskeMyndigheterFraBehandling_mapperUtenlandskmyndighetTilAktør() {
         Collection<Land_iso2> utenlandskeMyndigheterLandkoder = List.of(Land_iso2.SE, Land_iso2.DK);
         when(landvelgerServiceMock.hentUtenlandskTrygdemyndighetsland(BEHANDLING_ID))
@@ -162,34 +185,60 @@ class UtenlandskMyndighetServiceTest {
         );
 
 
-        Map<UtenlandskMyndighet, Aktoer> resultat = utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling);
+        Map<UtenlandskMyndighet, Mottaker> resultat = utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling);
 
 
         assertThat(resultat).extractingFromEntries(
                 Map.Entry::getKey,
                 entry -> entry.getValue().getRolle(),
-                entry -> entry.getValue().getInstitusjonId()
+                entry -> entry.getValue().getInstitusjonID()
             )
             .containsExactly(Tuple.tuple(
                     svenskUtenlandskMyndighet,
-                    Aktoersroller.TRYGDEMYNDIGHET,
+                    Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET,
                     "SE:INSTSE"
                 ),
                 Tuple.tuple(
                     danskUtenlandskMyndighet,
-                    Aktoersroller.TRYGDEMYNDIGHET,
+                    Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET,
                     "DK:INSTDK"
                 )
             );
     }
 
+    @Test
+    void lagUtenlandskeMyndigheterFraBehandling_forventAktoerMedGyldigInstitusjonsId() {
+        var utenlandskMyndighet = lagUtenlandskMyndighet(Land_iso2.IT, "IT123", null);
+        var utenlandskMyndighetReservert = lagUtenlandskMyndighet(Land_iso2.CZ, "CZ123", Preferanse.PreferanseEnum.RESERVERT_FRA_A1);
+
+        when(utenlandskMyndighetRepositoryMock.findByLandkodeIsIn(anyCollection())).thenReturn(Arrays.asList(utenlandskMyndighet, utenlandskMyndighetReservert));
+
+
+        Map<UtenlandskMyndighet, Mottaker> mottakere = utenlandskMyndighetService.lagUtenlandskeMyndigheterFraBehandling(behandling);
+
+
+        assertThat(mottakere).isNotEmpty();
+        assertThat(mottakere.values().iterator().next().getInstitusjonID()).isEqualTo(Landkoder.IT + ":" + utenlandskMyndighet.institusjonskode);
+    }
+
+
     private Behandling lagBehandling() {
         Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-1");
+        fagsak.setSaksnummer(SAKSNUMMER);
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
         behandling.setFagsak(fagsak);
 
         return behandling;
+    }
+
+    private UtenlandskMyndighet lagUtenlandskMyndighet(Land_iso2 landkode, String institusjonId, Preferanse.PreferanseEnum preferanse) {
+        UtenlandskMyndighet utenlandskMyndighet = new UtenlandskMyndighet();
+        utenlandskMyndighet.institusjonskode = institusjonId;
+        utenlandskMyndighet.landkode = landkode;
+        if (preferanse != null) {
+            utenlandskMyndighet.preferanser.add(new Preferanse(1L, preferanse));
+        }
+        return utenlandskMyndighet;
     }
 }

@@ -7,8 +7,8 @@ import no.nav.melosys.domain.UtenlandskMyndighet;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -65,7 +65,7 @@ public class DistribuerJournalpost implements StegBehandler {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
         String journalpostId = prosessinstans.getData(DISTRIBUERBAR_JOURNALPOST_ID);
         var brevbestilling = prosessinstans.getData(BREVBESTILLING, DokgenBrevbestilling.class);
-        Aktoersroller mottaker = prosessinstans.getData(MOTTAKER, Aktoersroller.class);
+        Mottakerroller mottaker = prosessinstans.getData(MOTTAKER, Mottakerroller.class);
         String orgnr = prosessinstans.getData(ORGNR);
         String institusjonId = prosessinstans.getData(INSTITUSJON_ID);
 
@@ -80,7 +80,7 @@ public class DistribuerJournalpost implements StegBehandler {
         OrganisasjonDokument org = null;
         Kontaktopplysning kontaktopplysning = null;
 
-        if (mottaker != Aktoersroller.BRUKER && hasText(orgnr)) {
+        if (mottaker != Mottakerroller.BRUKER && hasText(orgnr)) {
             kontaktopplysning = kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), orgnr).orElse(null);
             String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null ? kontaktopplysning.getKontaktOrgnr() : orgnr;
             org = (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();

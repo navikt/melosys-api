@@ -6,16 +6,16 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @JsonSerialize
 public record BrevbestillingUtkast(
     Produserbaredokumenter produserbardokument,
-    Aktoersroller mottaker,
+    Mottakerroller mottaker,
     String orgnr,
-    List<String> orgnrEtater,
+    List<String> orgnrNorskMyndighet,
     String institusjonID,
     String innledningFritekst,
     String manglerFritekst,

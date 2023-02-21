@@ -100,7 +100,7 @@ class SendVedtakUtlandTest {
     void utfør_artikkel12Suksessfull_statusErOppdaterResultat() {
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
         sendVedtakUtland.utfør(prosessinstans);
-        verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_04),eq(Collections.emptySet()), isNull());
+        verify(eessiService).opprettOgSendSed(anyLong(), eq(List.of(MOTTAKER_INSTITUSJON)), eq(BucType.LA_BUC_04), eq(Collections.emptySet()), isNull());
     }
 
     @Test
@@ -110,7 +110,7 @@ class SendVedtakUtlandTest {
 
         sendVedtakUtland.utfør(prosessinstans);
 
-        verify(prosessinstansService).opprettProsessinstansSendBrev(eq(behandling), brevbestillingArgumentCaptor.capture(), eq(Mottaker.av(Aktoersroller.TRYGDEMYNDIGHET)));
+        verify(prosessinstansService).opprettProsessinstansSendBrev(eq(behandling), brevbestillingArgumentCaptor.capture(), eq(Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET)));
         assertThat(brevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(Produserbaredokumenter.ATTEST_A1);
     }
 
@@ -126,11 +126,6 @@ class SendVedtakUtlandTest {
     void utfør_utenOppgittMottakerinstitusjon_forventHenterMottakerinstitusjonFraTidligereBuc() {
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITUSJON));
 
-        Aktoer myndighet = new Aktoer();
-        myndighet.setInstitusjonId(MOTTAKER_INSTITUSJON);
-        myndighet.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
-
-        fagsak.setAktører(Set.of(myndighet));
         behandling.setFagsak(fagsak);
 
         sendVedtakUtland.utfør(prosessinstans);

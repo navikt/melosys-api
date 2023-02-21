@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.dokgen.dto;
 
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker;
 import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.attest.AttestTrygdeavtale;
 import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse.InnvilgelseTrygdeavtale;
@@ -13,7 +13,7 @@ public class InnvilgelseOgAttestTrygdeavtale extends DokgenDto {
     private final boolean skalHaInfoOmRettigheter;
     private final String nyVurderingBakgrunn;
 
-    public InnvilgelseOgAttestTrygdeavtale(Builder builder, Aktoersroller mottaker) {
+    public InnvilgelseOgAttestTrygdeavtale(Builder builder, Mottakerroller mottaker) {
         super(builder.brevbestilling, mottaker);
         this.innvilgelse = builder.innvilgelse;
         this.attest = builder.attest;
@@ -53,9 +53,9 @@ public class InnvilgelseOgAttestTrygdeavtale extends DokgenDto {
         }
 
         public InnvilgelseOgAttestTrygdeavtale build() {
-            Aktoersroller mottaker = brevbestilling.getUtenlandskMyndighet() == null
-                ? Aktoersroller.BRUKER
-                : Aktoersroller.TRYGDEMYNDIGHET;
+            Mottakerroller mottaker = brevbestilling.getUtenlandskMyndighet() == null
+                ? Mottakerroller.BRUKER
+                : Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET;
             return new InnvilgelseOgAttestTrygdeavtale(this, mottaker);
         }
     }

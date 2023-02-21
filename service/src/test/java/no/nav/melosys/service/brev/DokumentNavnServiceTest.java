@@ -3,14 +3,12 @@ package no.nav.melosys.service.brev;
 import java.util.stream.Stream;
 
 import no.finn.unleash.FakeUnleash;
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.brev.Etat;
-import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.brev.NorskMyndighet;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokgenService;
@@ -24,7 +22,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
+import static no.nav.melosys.domain.kodeverk.Mottakerroller.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.INNVILGELSE_YRKESAKTIV;
@@ -57,7 +55,7 @@ class DokumentNavnServiceTest {
         behandling.setId(1L);
 
 
-        String dokumentNavn = dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, INNVILGELSE_YRKESAKTIV, BRUKER);
+        String dokumentNavn = dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottakerrolle(behandling, INNVILGELSE_YRKESAKTIV, BRUKER);
 
 
         assertThat(dokumentNavn).isEqualTo("Innvilgelse yrkesaktiv");
@@ -69,7 +67,7 @@ class DokumentNavnServiceTest {
         behandling.setId(1L);
 
 
-        String dokumentNavn = dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, INNVILGELSE_YRKESAKTIV, BRUKER);
+        String dokumentNavn = dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottakerrolle(behandling, INNVILGELSE_YRKESAKTIV, BRUKER);
 
 
         assertThat(dokumentNavn).isEqualTo(INNVILGELSE_YRKESAKTIV.getBeskrivelse());
@@ -77,22 +75,22 @@ class DokumentNavnServiceTest {
 
     @ParameterizedTest
     @MethodSource("testparametre")
-    void utledDokumentNavnForProduserbaredokumenterOgAktoerRolle_StorbritanniaInnvilgelseOgAttestMedUlikeParametre_korrektTittel(boolean skalHaAttest, boolean erNyVurdering, Aktoer mottaker, String forventetTittel) {
+    void utledDokumentNavnForProduserbaredokumenterOgAktoerRolle_StorbritanniaInnvilgelseOgAttestMedUlikeParametre_korrektTittel(boolean skalHaAttest, boolean erNyVurdering, Mottaker mottaker, String forventetTittel) {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setType(erNyVurdering ? NY_VURDERING : FØRSTEGANG);
 
-        if (!mottaker.erUtenlandskMyndighet() && !FastMottakerMedOrgnr.SKATTEETATEN.getOrgnr().equals(mottaker.getOrgnr())) {
+        if (!mottaker.erUtenlandskMyndighet() && !NorskMyndighet.SKATTEETATEN.getOrgnr().equals(mottaker.getOrgnr())) {
             when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
         }
 
-        when(brevmottakerService.avklarMottaker(TRYGDEAVTALE_GB, Mottaker.av(mottaker.getRolle()), behandling)).thenReturn(mottaker);
+        when(brevmottakerService.avklarMottaker(TRYGDEAVTALE_GB, Mottaker.medRolle(mottaker.getRolle()), behandling)).thenReturn(mottaker);
 
         DokumentproduksjonsInfoMapper dokumentproduksjonsInfoMapper = new DokumentproduksjonsInfoMapper(new FakeUnleash());
         when(dokgenService.hentDokumentInfo(TRYGDEAVTALE_GB)).thenReturn(dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(TRYGDEAVTALE_GB));
 
 
-        String dokumentNavn = dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoerRolle(behandling, TRYGDEAVTALE_GB, mottaker.getRolle());
+        String dokumentNavn = dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottakerrolle(behandling, TRYGDEAVTALE_GB, mottaker.getRolle());
 
 
         assertThat(dokumentNavn).isEqualTo(forventetTittel);
@@ -100,12 +98,12 @@ class DokumentNavnServiceTest {
 
     @ParameterizedTest
     @MethodSource("testparametre")
-    void utledDokumentNavnForProduserbaredokumenterOgAktoer_StorbritanniaInnvilgelseOgAttestMedUlikeParametre_korrektTittel(boolean skalHaAttest, boolean erNyVurdering, Aktoer mottaker, String forventetTittel) {
+    void utledDokumentNavnForProduserbaredokumenterOgAktoer_StorbritanniaInnvilgelseOgAttestMedUlikeParametre_korrektTittel(boolean skalHaAttest, boolean erNyVurdering, Mottaker mottaker, String forventetTittel) {
         Behandling behandling = new Behandling();
         behandling.setId(1L);
         behandling.setType(erNyVurdering ? NY_VURDERING : FØRSTEGANG);
 
-        if (!mottaker.erUtenlandskMyndighet() && !FastMottakerMedOrgnr.SKATTEETATEN.getOrgnr().equals(mottaker.getOrgnr())) {
+        if (!mottaker.erUtenlandskMyndighet() && !NorskMyndighet.SKATTEETATEN.getOrgnr().equals(mottaker.getOrgnr())) {
             when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
         }
 
@@ -113,7 +111,7 @@ class DokumentNavnServiceTest {
         when(dokgenService.hentDokumentInfo(TRYGDEAVTALE_GB)).thenReturn(dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(TRYGDEAVTALE_GB));
 
 
-        String dokumentNavn = dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgAktoer(behandling, TRYGDEAVTALE_GB, mottaker, null);
+        String dokumentNavn = dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottaker(behandling, TRYGDEAVTALE_GB, mottaker, null);
 
 
         assertThat(dokumentNavn).isEqualTo(forventetTittel);
@@ -121,12 +119,12 @@ class DokumentNavnServiceTest {
 
     @ParameterizedTest
     @MethodSource("testparametre")
-    void utledDokumentNavn_StorbritanniaInnvilgelseOgAttestMedUlikeParametre_korrektTittel(boolean skalHaAttest, boolean erNyVurdering, Aktoer mottaker, String forventetTittel) {
+    void utledDokumentNavn_StorbritanniaInnvilgelseOgAttestMedUlikeParametre_korrektTittel(boolean skalHaAttest, boolean erNyVurdering, Mottaker mottaker, String forventetTittel) {
         Behandling behandling = new Behandling();
         behandling.setId(123L);
         behandling.setType(erNyVurdering ? NY_VURDERING : FØRSTEGANG);
 
-        if (!mottaker.erUtenlandskMyndighet() && !FastMottakerMedOrgnr.SKATTEETATEN.getOrgnr().equals(mottaker.getOrgnr())) {
+        if (!mottaker.erUtenlandskMyndighet() && !NorskMyndighet.SKATTEETATEN.getOrgnr().equals(mottaker.getOrgnr())) {
             when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalsperiode(skalHaAttest ? UK_ART6_1 : UK_ART8_2));
         }
 
@@ -145,15 +143,15 @@ class DokumentNavnServiceTest {
             Arguments.of(false, false, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap"),
             Arguments.of(true, false, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap, Attest for utsendt arbeidstaker"),
             Arguments.of(false, false, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap"),
-            Arguments.of(false, false, lagMottaker(TRYGDEMYNDIGHET, null, Etat.SKATTEETATEN_ORGNR.getOrgnr(), null), "Kopi av vedtak om medlemskap"),
-            Arguments.of(true, false, lagMottaker(TRYGDEMYNDIGHET, null, null, "1234"), "Attest for utsendt arbeidstaker"),
+            Arguments.of(false, false, lagMottaker(UTENLANDSK_TRYGDEMYNDIGHET, null, NorskMyndighet.SKATTEETATEN.getOrgnr(), null), "Kopi av vedtak om medlemskap"),
+            Arguments.of(true, false, lagMottaker(UTENLANDSK_TRYGDEMYNDIGHET, null, null, "1234"), "Attest for utsendt arbeidstaker"),
 
             Arguments.of(true, true, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap, Attest for utsendt arbeidstaker - endring"),
             Arguments.of(false, true, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap - endring"),
             Arguments.of(true, true, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap, Attest for utsendt arbeidstaker - endring"),
             Arguments.of(false, true, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap - endring"),
-            Arguments.of(false, true, lagMottaker(TRYGDEMYNDIGHET, null, Etat.SKATTEETATEN_ORGNR.getOrgnr(), null), "Kopi av vedtak om medlemskap - endring"),
-            Arguments.of(true, true, lagMottaker(TRYGDEMYNDIGHET, null, null, "1234"), "Attest for utsendt arbeidstaker - endring")
+            Arguments.of(false, true, lagMottaker(UTENLANDSK_TRYGDEMYNDIGHET, null, NorskMyndighet.SKATTEETATEN.getOrgnr(), null), "Kopi av vedtak om medlemskap - endring"),
+            Arguments.of(true, true, lagMottaker(UTENLANDSK_TRYGDEMYNDIGHET, null, null, "1234"), "Attest for utsendt arbeidstaker - endring")
         );
     }
 
@@ -163,12 +161,11 @@ class DokumentNavnServiceTest {
         return lovvalgsperiode;
     }
 
-    private static Aktoer lagMottaker(Aktoersroller rolle, String aktørID, String orgnr, String institusjonsID) {
-        Aktoer mottaker = new Aktoer();
-        mottaker.setRolle(rolle);
+    private static Mottaker lagMottaker(Mottakerroller rolle, String aktørID, String orgnr, String institusjonsID) {
+        Mottaker mottaker = Mottaker.medRolle(rolle);
         mottaker.setAktørId(aktørID);
         mottaker.setOrgnr(orgnr);
-        mottaker.setInstitusjonId(institusjonsID);
+        mottaker.setInstitusjonID(institusjonsID);
         return mottaker;
     }
 }

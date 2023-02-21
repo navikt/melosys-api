@@ -17,8 +17,8 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
@@ -38,7 +38,6 @@ import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.REPRESENTANT;
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
 
 @Service
@@ -63,7 +62,7 @@ public class BrevDataService {
         this.utenlandskMyndighetRepository = utenlandskMyndighetRepository;
     }
 
-    public DokumentbestillingMetadata lagBestillingMetadata(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling, BrevData brevData) {
+    public DokumentbestillingMetadata lagBestillingMetadata(Produserbaredokumenter produserbartDokument, no.nav.melosys.domain.brev.Mottaker mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling, BrevData brevData) {
         Fagsak fagsak = behandling.getFagsak();
 
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
@@ -77,7 +76,7 @@ public class BrevDataService {
         metadata.saksbehandler = brevData.saksbehandler;
         metadata.berik = true;
 
-        if (mottaker.erBruker()) {
+        if (mottaker.getRolle() == Mottakerroller.BRUKER) {
             if (personManglerAdresseFraRegister(behandling.getFagsak().hentBrukersAktørID())) {
                 MottatteOpplysningerData grunnlagData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
                 StrukturertAdresse oppgittAdresse = grunnlagData.bosted.oppgittAdresse;
@@ -89,28 +88,29 @@ public class BrevDataService {
             }
         } else if (mottaker.erUtenlandskMyndighet()) {
             metadata.berik = false;
-            metadata.utenlandskMyndighet = hentMyndighetFraAktoer(mottaker);
+            metadata.utenlandskMyndighet = hentUtenlandskTrygdemyndighetFraMottaker(mottaker);
             metadata.brukerNavn = persondataFasade.hentSammensattNavn(metadata.brukerID);
         }
         return metadata;
     }
 
-    private String avklarMottakerId(Aktoer mottaker, Kontaktopplysning kontaktopplysning) {
+    private String avklarMottakerId(no.nav.melosys.domain.brev.Mottaker mottaker, Kontaktopplysning kontaktopplysning) {
         return switch (mottaker.getRolle()) {
             case ARBEIDSGIVER -> avklarMottakerIDForOrg(mottaker, kontaktopplysning);
-            case REPRESENTANT -> mottaker.erOrganisasjon() ? avklarMottakerIDForOrg(mottaker, kontaktopplysning) : mottaker.getPersonIdent();
+            case FULLMEKTIG -> mottaker.erOrganisasjon() ? avklarMottakerIDForOrg(mottaker, kontaktopplysning) : mottaker.getPersonIdent();
             case BRUKER -> persondataFasade.hentFolkeregisterident(mottaker.getAktørId());
-            case TRYGDEMYNDIGHET -> mottaker.erUtenlandskMyndighet() ? mottaker.getInstitusjonId() : mottaker.getOrgnr();
+            case UTENLANDSK_TRYGDEMYNDIGHET -> mottaker.erUtenlandskMyndighet() ? mottaker.getInstitusjonID() : mottaker.getOrgnr();
+            case NORSK_MYNDIGHET -> mottaker.getOrgnr();
             default -> throw new TekniskException(mottaker.getRolle() + " støttes ikke.");
         };
     }
 
-    private String avklarMottakerIDForOrg(Aktoer mottaker, Kontaktopplysning kontaktopplysning) {
+    private String avklarMottakerIDForOrg(no.nav.melosys.domain.brev.Mottaker mottaker, Kontaktopplysning kontaktopplysning) {
         return (kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null) ? kontaktopplysning.getKontaktOrgnr() : mottaker.getOrgnr();
     }
 
-    UtenlandskMyndighet hentMyndighetFraAktoer(Aktoer aktoer) {
-        Land_iso2 landkode = aktoer.hentMyndighetLandkode();
+    UtenlandskMyndighet hentUtenlandskTrygdemyndighetFraMottaker(no.nav.melosys.domain.brev.Mottaker mottaker) {
+        Land_iso2 landkode = mottaker.hentMyndighetLandkode();
         return utenlandskMyndighetRepository.findByLandkode(landkode)
             .orElseThrow(() -> new TekniskException("Finner ikke utenlandskMyndighet for " + landkode.getKode() + "."));
     }
@@ -119,7 +119,7 @@ public class BrevDataService {
      * Genererer XML i hensyn til mal og validere mot xsd.
      */
     @Transactional(propagation = Propagation.MANDATORY, readOnly = true)
-    public Element lagBrevXML(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling, BrevData brevData) {
+    public Element lagBrevXML(Produserbaredokumenter produserbartDokument, no.nav.melosys.domain.brev.Mottaker mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling, BrevData brevData) {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepository.findById(behandling.getId())
             .orElseThrow(() -> new TekniskException("Finner ingen behandlingsresultat for behandlingid " + behandling.getId()));
 
@@ -142,10 +142,10 @@ public class BrevDataService {
         return brevXmlElement;
     }
 
-    private FellesType mapFellesType(Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling) {
+    private FellesType mapFellesType(no.nav.melosys.domain.brev.Mottaker mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling) {
         final FellesType fellesType = new FellesType();
         fellesType.setFagsaksnummer(behandling.getFagsak().getSaksnummer());
-        if (mottaker.getRolle() == REPRESENTANT) {
+        if (mottaker.getRolle() == Mottakerroller.FULLMEKTIG) {
             fellesType.setFullmektig(mottaker.erOrganisasjon() ? mottaker.getOrgnr() : mottaker.getPersonIdent());
         }
         if (kontaktopplysning != null) {
@@ -155,7 +155,7 @@ public class BrevDataService {
         return fellesType;
     }
 
-    private MelosysNAVFelles mapNAVFelles(Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling, BrevData brevData) {
+    private MelosysNAVFelles mapNAVFelles(no.nav.melosys.domain.brev.Mottaker mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling, BrevData brevData) {
         final MelosysNAVFelles navFelles = new MelosysNAVFelles();
 
         navFelles.setBehandlendeEnhet(lagNavEnhet());
@@ -169,16 +169,15 @@ public class BrevDataService {
         return navFelles;
     }
 
-    Mottaker lagMottaker(Aktoer mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling) {
-        Aktoersroller mottakerRolle = mottaker.getRolle();
+    Mottaker lagMottaker(no.nav.melosys.domain.brev.Mottaker mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling) {
         String mottakerID = avklarMottakerId(mottaker, kontaktopplysning);
 
-        return switch (mottakerRolle) {
+        return switch (mottaker.getRolle()) {
             case BRUKER -> lagMottakerForBruker(behandling, mottakerID);
             case ARBEIDSGIVER -> lagMottakerForOrganisasjon(mottakerID);
-            case TRYGDEMYNDIGHET -> mottaker.erUtenlandskMyndighet() ? lagMottakerForUtenlandskTrygdemyndighet(mottaker) : lagMottakerForOrganisasjon(mottakerID);
-            case REPRESENTANT -> mottaker.erOrganisasjon() ? lagMottakerForOrganisasjon(mottakerID) : lagMottakerForRepresentantPerson(behandling, mottakerID);
-            default -> throw new TekniskException(mottakerRolle + " støttes ikke.");
+            case UTENLANDSK_TRYGDEMYNDIGHET -> mottaker.erUtenlandskMyndighet() ? lagMottakerForUtenlandskTrygdemyndighet(mottaker) : lagMottakerForOrganisasjon(mottakerID);
+            case FULLMEKTIG -> mottaker.erOrganisasjon() ? lagMottakerForOrganisasjon(mottakerID) : lagMottakerForRepresentantPerson(behandling, mottakerID);
+            default -> throw new TekniskException(mottaker.getRolle() + " støttes ikke.");
         };
     }
 
@@ -228,13 +227,13 @@ public class BrevDataService {
         return mottaker;
     }
 
-    private Mottaker lagMottakerForUtenlandskTrygdemyndighet(Aktoer aktoer) {
+    private Mottaker lagMottakerForUtenlandskTrygdemyndighet(no.nav.melosys.domain.brev.Mottaker mottakerUtenlandskTrygdemyndighet) {
         Mottaker mottaker = new Person();
         mottaker.setBerik(false);
         mottaker.setTypeKode(AktoerType.PERSON);
-        mottaker.setId(aktoer.getInstitusjonId());
+        mottaker.setId(mottakerUtenlandskTrygdemyndighet.getInstitusjonID());
 
-        UtenlandskMyndighet utenlandskMyndighet = hentMyndighetFraAktoer(aktoer);
+        UtenlandskMyndighet utenlandskMyndighet = hentUtenlandskTrygdemyndighetFraMottaker(mottakerUtenlandskTrygdemyndighet);
         mottaker.setNavn(utenlandskMyndighet.navn);
         mottaker.setKortNavn(utenlandskMyndighet.navn);
         mottaker.setSpraakkode(Spraakkode.NB);

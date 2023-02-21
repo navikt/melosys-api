@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
@@ -32,7 +32,7 @@ public class Mangelbrev extends DokgenDto {
     private final String innledningFritekst;
 
     protected Mangelbrev(MangelbrevBrevbestilling brevbestilling, Instant datoInnsendingsfrist) {
-        super(brevbestilling, Aktoersroller.BRUKER);
+        super(brevbestilling, Mottakerroller.BRUKER); // TODO i MELOSYS-5738
         var fagsak = brevbestilling.getBehandling().getFagsak();
 
         this.datoMottatt = brevbestilling.getForsendelseMottatt();

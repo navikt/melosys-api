@@ -1,7 +1,6 @@
 package no.nav.melosys.integrasjon.dokgen;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.domain.Kontaktopplysning;
@@ -9,7 +8,7 @@ import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.Postadresse;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
 
@@ -87,7 +86,7 @@ public final class DokgenAdresseMapper {
 
     public static String mapRegionForAdresse(OrganisasjonDokument org, Persondata persondata) {
         String region;
-        if(org == null) {
+        if (org == null) {
             Postadresse postadresse = persondata.hentGjeldendePostadresse();
             region = postadresse != null ? postadresse.region() : null;
         } else {
@@ -97,8 +96,8 @@ public final class DokgenAdresseMapper {
         return region;
     }
 
-    public static Mottaker mapMottaker(DokgenBrevbestilling brevbestilling, Aktoersroller mottakerType) {
-        if (mottakerType == Aktoersroller.TRYGDEMYNDIGHET && brevbestilling.getUtenlandskMyndighet() != null) {
+    public static Mottaker mapMottaker(DokgenBrevbestilling brevbestilling, Mottakerroller mottakerType) {
+        if (mottakerType == Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET && brevbestilling.getUtenlandskMyndighet() != null) {
             var utenlandskMyndighet = brevbestilling.getUtenlandskMyndighet();
             return new Mottaker(
                 utenlandskMyndighet.navn,

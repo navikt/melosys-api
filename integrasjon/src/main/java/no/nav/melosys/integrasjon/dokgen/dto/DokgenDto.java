@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Saksinfo;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker;
@@ -29,14 +29,14 @@ public abstract class DokgenDto {
     private final String saksbehandlerNavn;
     private Mottaker mottaker;
 
-    protected DokgenDto(DokgenBrevbestilling brevbestilling, Aktoersroller mottakerType, Saksinfo saksinfo) {
+    protected DokgenDto(DokgenBrevbestilling brevbestilling, Mottakerroller mottakerType, Saksinfo saksinfo) {
         this.saksinfo = saksinfo;
         this.dagensDato = Instant.now();
         this.saksbehandlerNavn = brevbestilling.getSaksbehandlerNavn();
         this.mottaker = mapMottaker(brevbestilling, mottakerType);
     }
 
-    protected DokgenDto(DokgenBrevbestilling brevbestilling, Aktoersroller mottakerType) {
+    protected DokgenDto(DokgenBrevbestilling brevbestilling, Mottakerroller mottakerType) {
         this(brevbestilling, mottakerType, SaksinfoBruker.av(brevbestilling));
     }
 

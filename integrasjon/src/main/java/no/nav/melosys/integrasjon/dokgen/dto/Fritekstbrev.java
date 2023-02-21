@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.dokgen.dto;
 
 import no.nav.melosys.domain.brev.FritekstbrevBrevbestilling;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Saksinfo;
 
 public class Fritekstbrev extends DokgenDto {
@@ -11,7 +11,7 @@ public class Fritekstbrev extends DokgenDto {
     private final String navnFullmektig;
     private final boolean brukerSkalHaKopi;
 
-    protected Fritekstbrev(FritekstbrevBrevbestilling brevbestilling, Aktoersroller mottakerType, Saksinfo saksinfo) {
+    protected Fritekstbrev(FritekstbrevBrevbestilling brevbestilling, Mottakerroller mottakerType, Saksinfo saksinfo) {
         super(brevbestilling, mottakerType, saksinfo);
         this.fritekstTittel = brevbestilling.getFritekstTittel();
         this.fritekst = brevbestilling.getFritekst();

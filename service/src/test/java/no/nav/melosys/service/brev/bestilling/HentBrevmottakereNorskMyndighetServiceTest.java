@@ -1,7 +1,5 @@
 package no.nav.melosys.service.brev.bestilling;
 
-import java.util.List;
-
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import org.junit.jupiter.api.Test;
@@ -10,9 +8,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.brev.FastMottakerMedOrgnr.HELFO;
-import static no.nav.melosys.domain.brev.FastMottakerMedOrgnr.SKATTEETATEN;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.ETAT;
+import java.util.List;
+
+import static no.nav.melosys.domain.brev.NorskMyndighet.HELFO;
+import static no.nav.melosys.domain.brev.NorskMyndighet.SKATTEETATEN;
+import static no.nav.melosys.domain.kodeverk.Mottakerroller.NORSK_MYNDIGHET;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.FRITEKSTBREV;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -20,46 +20,46 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class HentBrevmottakereEtaterServiceTest {
+class HentBrevmottakereNorskMyndighetServiceTest {
 
     @Mock
     private EregFasade eregFasade;
 
     @InjectMocks
-    private HentBrevmottakereEtaterService hentBrevmottakereEtaterService;
+    private HentBrevmottakereNorskMyndighetService hentBrevmottakereNorskMyndighetService;
 
     @Test
-    void hentMuligeMottakereEtater_spørEtterSkatteetatenOgHelfo_fårSkatteetatenOgHelfoMottakere() {
+    void hentMuligeBrevmottakereNorskMyndighet_spørEtterSkatteetatenOgHelfo_fårSkatteetatenOgHelfoMottakere() {
         when(eregFasade.hentOrganisasjonNavn(SKATTEETATEN.getOrgnr())).thenReturn("Skatteetaten");
         when(eregFasade.hentOrganisasjonNavn(HELFO.getOrgnr())).thenReturn("Helfo");
 
-        var orgnrEtater = List.of(SKATTEETATEN.getOrgnr(), HELFO.getOrgnr());
+        var orgnrNorskeMyndigheter = List.of(SKATTEETATEN.getOrgnr(), HELFO.getOrgnr());
 
 
-        var muligeBrevmottakereForEtater = hentBrevmottakereEtaterService.hentMuligeBrevmottakereEtater(orgnrEtater);
+        var muligeBrevmottakereForNorskMyndighet = hentBrevmottakereNorskMyndighetService.hentMuligeBrevmottakereNorskMyndighet(orgnrNorskeMyndigheter);
 
 
-        assertThat(muligeBrevmottakereForEtater)
+        assertThat(muligeBrevmottakereForNorskMyndighet)
             .hasSize(2)
             .first()
-            .hasFieldOrPropertyWithValue("rolle", ETAT)
+            .hasFieldOrPropertyWithValue("rolle", NORSK_MYNDIGHET)
             .hasFieldOrPropertyWithValue("dokumentNavn", FRITEKSTBREV.getBeskrivelse())
             .hasFieldOrPropertyWithValue("orgnr", SKATTEETATEN.getOrgnr())
             .hasFieldOrPropertyWithValue("mottakerNavn", "Skatteetaten");
-        assertThat(muligeBrevmottakereForEtater)
+        assertThat(muligeBrevmottakereForNorskMyndighet)
             .last()
-            .hasFieldOrPropertyWithValue("rolle", ETAT)
+            .hasFieldOrPropertyWithValue("rolle", NORSK_MYNDIGHET)
             .hasFieldOrPropertyWithValue("dokumentNavn", FRITEKSTBREV.getBeskrivelse())
             .hasFieldOrPropertyWithValue("orgnr", HELFO.getOrgnr())
             .hasFieldOrPropertyWithValue("mottakerNavn", "Helfo");
     }
 
     @Test
-    void hentMuligeMottakereEtater_spørEtterSkatteetatenOgUkjentOrgNr_fårIkkeFunnetFeilmelding() {
+    void hentMuligeBrevmottakereNorskMyndighet_spørEtterSkatteetatenOgUkjentOrgNr_fårIkkeFunnetFeilmelding() {
         when(eregFasade.hentOrganisasjonNavn(anyString())).thenThrow(new IkkeFunnetException("Fant ikke orgnr i testen :)"));
-        var orgnrEtater = List.of("111111111");
+        var orgnrNorskeMyndigheter = List.of("111111111");
 
-        assertThatThrownBy(() -> hentBrevmottakereEtaterService.hentMuligeBrevmottakereEtater(orgnrEtater))
+        assertThatThrownBy(() -> hentBrevmottakereNorskMyndighetService.hentMuligeBrevmottakereNorskMyndighet(orgnrNorskeMyndigheter))
             .isInstanceOf(IkkeFunnetException.class);
     }
 }

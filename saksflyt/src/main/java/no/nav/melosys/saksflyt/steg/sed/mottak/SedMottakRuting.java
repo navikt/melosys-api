@@ -45,6 +45,7 @@ public class SedMottakRuting implements StegBehandler {
         return ProsessSteg.SED_MOTTAK_RUTING;
     }
 
+
     @Override
     public void utfør(Prosessinstans prosessinstans) {
         final MelosysEessiMelding eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);

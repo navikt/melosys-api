@@ -27,7 +27,7 @@ import org.springframework.test.context.ActiveProfiles
     OAuthMockServer::class,
 
     GenericAuthFilterFactory::class,
-    EessiConsumerProducer::class,
+    EessiConsumerProducerConfig::class,
 )
 @WebMvcTest
 @AutoConfigureWebClient

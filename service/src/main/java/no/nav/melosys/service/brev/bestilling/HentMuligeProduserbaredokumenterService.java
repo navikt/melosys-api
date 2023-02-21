@@ -6,6 +6,7 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -28,14 +29,14 @@ public class HentMuligeProduserbaredokumenterService {
     }
 
     @Transactional
-    public List<Produserbaredokumenter> hentMuligeProduserbaredokumenter(long behandlingId, Aktoersroller aktoersroller) {
+    public List<Produserbaredokumenter> hentMuligeProduserbaredokumenter(long behandlingId, Mottakerroller mottakerroller) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
 
         if (behandling.erInaktiv()) {
             return emptyList();
         }
 
-        return switch (aktoersroller) {
+        return switch (mottakerroller) {
             case BRUKER -> {
                 List<Produserbaredokumenter> brevmaler = new ArrayList<>();
                 if (behandling.getFagsak().getTema() == Sakstemaer.MEDLEMSKAP_LOVVALG && behandling.getType() == Behandlingstyper.FØRSTEGANG) {
@@ -44,12 +45,14 @@ public class HentMuligeProduserbaredokumenterService {
                 brevmaler.addAll(asList(MANGELBREV_BRUKER, GENERELT_FRITEKSTBREV_BRUKER));
                 yield brevmaler;
             }
-            case ARBEIDSGIVER -> List.of(MANGELBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
             case VIRKSOMHET -> Collections.singletonList(GENERELT_FRITEKSTBREV_VIRKSOMHET);
-            case TRYGDEMYNDIGHET -> Collections.singletonList(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV);
-            case ETAT -> Collections.singletonList(FRITEKSTBREV);
-            default ->
-                throw new FunksjonellException("Rollen " + aktoersroller + " kan ikke sende brev gjennom brevmenyen");
+            case ARBEIDSGIVER -> List.of(MANGELBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
+            case ANNEN_ORGANISASJON -> behandling.getFagsak().getHovedpartRolle() == Aktoersroller.VIRKSOMHET
+                ? Collections.singletonList(GENERELT_FRITEKSTBREV_VIRKSOMHET)
+                : List.of(MANGELBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER);
+            case UTENLANDSK_TRYGDEMYNDIGHET -> Collections.singletonList(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV);
+            case NORSK_MYNDIGHET -> Collections.singletonList(FRITEKSTBREV);
+            default -> throw new FunksjonellException("Mottakerrollen " + mottakerroller + " kan ikke sende brev gjennom brevmenyen");
         };
     }
 }

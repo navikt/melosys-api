@@ -7,10 +7,7 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Maritimtyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
@@ -75,7 +72,7 @@ class BrevDataByggerInnvilgelseFlereLandTest {
         behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new Soeknad());
 
         brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setMottaker(Aktoersroller.BRUKER);
+        brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
         brevbestillingDto.setBegrunnelseKode("BEGRUNNELSEKODE");
         brevbestillingDto.setFritekst("FRITEKST");
 

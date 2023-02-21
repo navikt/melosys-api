@@ -9,7 +9,6 @@ import javax.annotation.Nullable;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
@@ -373,7 +372,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansOpprettOgDistribuerBrev(Behandling behandling, Aktoer mottaker, DokgenBrevbestilling brevbestilling) {
+    public void opprettProsessinstansOpprettOgDistribuerBrev(Behandling behandling, Mottaker mottaker, DokgenBrevbestilling brevbestilling) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
         prosessinstans.setData(BREVBESTILLING, brevbestilling);
@@ -387,9 +386,9 @@ public class ProsessinstansService {
         if (hasText(mottaker.getOrgnr())) {
             prosessinstans.setData(ORGNR, mottaker.getOrgnr());
         }
-        if (hasText(mottaker.getInstitusjonId())) {
+        if (hasText(mottaker.getInstitusjonID())) {
             // TODO Parsing av variabelen feiler pga ":". Burde fikses på en skikkelig måte
-            prosessinstans.setData(INSTITUSJON_ID, String.format("\"%s\"", mottaker.getInstitusjonId()));
+            prosessinstans.setData(INSTITUSJON_ID, String.format("\"%s\"", mottaker.getInstitusjonID()));
         }
         prosessinstans.setBehandling(behandling);
         lagre(prosessinstans);

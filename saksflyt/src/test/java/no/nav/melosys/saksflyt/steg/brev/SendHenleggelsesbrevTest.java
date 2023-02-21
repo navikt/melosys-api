@@ -7,7 +7,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -69,7 +69,7 @@ class SendHenleggelsesbrevTest {
         sendHenleggelsesbrev.utfør(prosessinstans);
 
         verify(brevBestiller).bestill(eq(Produserbaredokumenter.MELDING_HENLAGT_SAK),
-            eq(Collections.singleton(Mottaker.av(Aktoersroller.BRUKER))),
+            eq(Collections.singleton(Mottaker.medRolle(Mottakerroller.BRUKER))),
             eq(behandlingsresultat.getBegrunnelseFritekst()), any(String.class),
             eq(Henleggelsesgrunner.ANNET.getKode()), eq(behandling));
     }

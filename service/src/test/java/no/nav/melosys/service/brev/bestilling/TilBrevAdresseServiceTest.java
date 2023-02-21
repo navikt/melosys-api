@@ -5,6 +5,7 @@ import java.util.List;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -12,10 +13,12 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.person.Navn;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.Personopplysninger;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
@@ -30,9 +33,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -60,11 +63,9 @@ class TilBrevAdresseServiceTest {
     void tilBrevAdresse_brukerSomMottaker_returnererBrukeradresse() {
         when(persondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse());
 
-        Aktoer aktør = new Aktoer();
-        aktør.setRolle(Aktoersroller.BRUKER);
+        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.BRUKER);
 
-
-        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(aktør, behandling);
+        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling);
 
 
         assertThat(brevAdresser)
@@ -91,12 +92,11 @@ class TilBrevAdresseServiceTest {
     void tilBrevAdresse_brukersFullmaktOrganisasjonSomMottaker_returnererFullmektigsAdresse() {
         when(eregFasade.hentOrganisasjon("orgnr")).thenReturn(lagOrgSaksopplysning("orgnr", "Ola Nordmann Fullmektig"));
 
-        Aktoer aktør = new Aktoer();
-        aktør.setRolle(Aktoersroller.REPRESENTANT);
-        aktør.setOrgnr("orgnr");
+        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.FULLMEKTIG);
+        mottaker.setOrgnr("orgnr");
 
 
-        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(aktør, behandling);
+        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling);
 
 
         assertThat(brevAdresser)
@@ -124,12 +124,11 @@ class TilBrevAdresseServiceTest {
     void tilBrevAdresse_brukersFullmaktPersonSomMottaker_returnererFullmektigsAdresse() {
         when(persondataFasade.hentPerson("fnr")).thenReturn(lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse());
 
-        Aktoer aktør = new Aktoer();
-        aktør.setRolle(Aktoersroller.REPRESENTANT);
-        aktør.setPersonIdent("fnr");
+        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.FULLMEKTIG);
+        mottaker.setPersonIdent("fnr");
 
 
-        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(aktør, behandling);
+        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling);
 
 
         assertThat(brevAdresser)
@@ -157,12 +156,11 @@ class TilBrevAdresseServiceTest {
     void tilBrevAdresse_arbeidsgiverSomMottaker_returnererArbeidsgiverAdresser() {
         when(eregFasade.hentOrganisasjon("orgnr")).thenReturn(lagOrgSaksopplysning("orgnr", "Ola Nordmann Rørleggerfirma"));
 
-        Aktoer aktør = new Aktoer();
-        aktør.setRolle(Aktoersroller.ARBEIDSGIVER);
-        aktør.setOrgnr("orgnr");
+        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER);
+        mottaker.setOrgnr("orgnr");
 
 
-        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(aktør, behandling);
+        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling);
 
 
         assertThat(brevAdresser)
@@ -189,12 +187,11 @@ class TilBrevAdresseServiceTest {
     void tilBrevAdresse_virksomhetSomMottaker_returnererVirksomhetAdresser() {
         when(eregFasade.hentOrganisasjon("orgnr")).thenReturn(lagOrgSaksopplysning("orgnr", "Ola Nordmann Rørleggerfirma"));
 
-        Aktoer aktør = new Aktoer();
-        aktør.setRolle(Aktoersroller.VIRKSOMHET);
-        aktør.setOrgnr("orgnr");
+        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.VIRKSOMHET);
+        mottaker.setOrgnr("orgnr");
 
 
-        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(aktør, behandling);
+        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling);
 
 
         assertThat(brevAdresser)
@@ -219,35 +216,23 @@ class TilBrevAdresseServiceTest {
 
 
     @Test
-    void tilBrevAdresse_etatSomMottaker_returnererEtatAdresser() {
-        when(eregFasade.hentOrganisasjon("orgnr-skatteetaten")).thenReturn(lagOrgSaksopplysning("orgnr-skatteetaten", "SKATTEETATEN"));
-
-        Aktoer aktør = new Aktoer();
-        aktør.setRolle(Aktoersroller.ETAT);
-        aktør.setOrgnr("orgnr-skatteetaten");
+    void tilBrevAdresse_norskMyndighetSomMottaker_kasterFeil() {
+        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.NORSK_MYNDIGHET);
 
 
-        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(aktør, behandling);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> tilBrevAdresseService.tilBrevAdresse(mottaker, behandling))
+            .withMessageContaining("Mottakersrolle støttes ikke: NORSK_MYNDIGHET");
+    }
+
+    @Test
+    void tilBrevAdresse_utenlandsakTrygdemyndighetSomMottaker_kasterFeil() {
+        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
 
 
-        assertThat(brevAdresser)
-            .isNotNull()
-            .extracting(
-                BrevAdresse::getMottakerNavn,
-                BrevAdresse::getOrgnr,
-                BrevAdresse::getAdresselinjer,
-                BrevAdresse::getPostnr,
-                BrevAdresse::getPoststed,
-                BrevAdresse::getRegion,
-                BrevAdresse::getLand)
-            .containsExactly(
-                "SKATTEETATEN",
-                "orgnr-skatteetaten",
-                List.of("Gateadresse 43A"),
-                "0123",
-                "Oslo",
-                null,
-                Land.NORGE);
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> tilBrevAdresseService.tilBrevAdresse(mottaker, behandling))
+            .withMessageContaining("Mottakersrolle støttes ikke: UTENLANDSK_TRYGDEMYNDIGHET");
     }
 
     @Test
@@ -255,12 +240,11 @@ class TilBrevAdresseServiceTest {
         Personopplysninger persondata = PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser();
         when(persondataFasade.hentPerson(anyString())).thenReturn(persondata);
 
-        Aktoer aktør = new Aktoer();
-        aktør.setRolle(Aktoersroller.BRUKER);
-        aktør.setOrgnr(null);
+        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.BRUKER);
+        mottaker.setOrgnr(null);
 
 
-        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(aktør, behandling);
+        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling);
 
 
         assertThat(brevAdresser)
@@ -280,12 +264,11 @@ class TilBrevAdresseServiceTest {
     void hentBrevAdresseTilMottakere_returnererAdresseMedKorrektAdresselinjer_nårCoAdresseErTomStreng() {
         when(persondataFasade.hentPerson(anyString())).thenReturn(lagPersondataMedTomCo());
 
-        Aktoer aktør = new Aktoer();
-        aktør.setRolle(Aktoersroller.BRUKER);
-        aktør.setOrgnr(null);
+        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.BRUKER);
+        mottaker.setOrgnr(null);
 
 
-        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(aktør, behandling);
+        var brevAdresser = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling);
 
 
         assertThat(brevAdresser)
@@ -304,7 +287,7 @@ class TilBrevAdresseServiceTest {
     private Fagsak lagFagsak() {
         Fagsak fagsak = new Fagsak();
         Aktoer bruker = new Aktoer();
-        bruker.setRolle(BRUKER);
+        bruker.setRolle(Aktoersroller.BRUKER);
         bruker.setAktørId("aktørId");
         fagsak.getAktører().add(bruker);
         return fagsak;

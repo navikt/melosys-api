@@ -21,7 +21,6 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
-import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.BrevmalListeService;
 import no.nav.melosys.service.brev.DokumentNavnService;
@@ -65,18 +64,19 @@ class BrevmalListeByggerTest {
     private KontaktopplysningService kontaktopplysningService;
     @Mock
     private DokumentNavnService dokumentNavnService;
-    private UtenlandskMyndighetService utenlandskMyndighetService;
     private final FakeUnleash unleash = new FakeUnleash();
     private BrevmalListeBygger brevmalListeBygger;
 
 
     @BeforeEach
     void init() {
-        BrevmalListeService brevmalListeService = new BrevmalListeService(hentMuligeProduserbaredokumenterService, hentBrevAdresseTilMottakereService, brevmottakerService,
+        BrevmalListeService brevmalListeService = new BrevmalListeService(
+            hentMuligeProduserbaredokumenterService,
+            hentBrevAdresseTilMottakereService,
+            brevmottakerService,
             behandlingService,
             persondataFasade,
             kontaktopplysningService,
-            utenlandskMyndighetService,
             eregFasade);
 
         unleash.enable("melosys.trygdeavtale.fritekstbrev");
@@ -150,7 +150,7 @@ class BrevmalListeByggerTest {
             .contains(
                 MottakerType.VIRKSOMHET.getBeskrivelse(),
                 MottakerType.ANNEN_ORGANISASJON.getBeskrivelse(),
-                MottakerType.ANDRE_OFFENTLIGE_ETATER.getBeskrivelse());
+                MottakerType.NORSK_MYNDIGHET.getBeskrivelse());
 
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper())
             .hasSize(1)
