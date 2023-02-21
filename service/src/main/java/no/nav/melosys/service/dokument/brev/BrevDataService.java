@@ -100,6 +100,7 @@ public class BrevDataService {
             case FULLMEKTIG -> mottaker.erOrganisasjon() ? avklarMottakerIDForOrg(mottaker, kontaktopplysning) : mottaker.getPersonIdent();
             case BRUKER -> persondataFasade.hentFolkeregisterident(mottaker.getAktørId());
             case UTENLANDSK_TRYGDEMYNDIGHET -> mottaker.erUtenlandskMyndighet() ? mottaker.getInstitusjonID() : mottaker.getOrgnr();
+            case NORSK_MYNDIGHET -> mottaker.getOrgnr();
             default -> throw new TekniskException(mottaker.getRolle() + " støttes ikke.");
         };
     }
