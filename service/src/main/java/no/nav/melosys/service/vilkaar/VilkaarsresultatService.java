@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.*;
 import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
-import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_MEDLEMSKAP;
+import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP;
 import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
 
 @Service
@@ -99,7 +99,7 @@ public class VilkaarsresultatService {
     public void tømVilkårForBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
         var behandling = behandlingsresultat.getBehandling();
         var fagsak = behandling.getFagsak();
-        if (fagsak.erSakstypeEøs() && !harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), unleash.isEnabled(REGISTRERING_UNNTAK_MEDLEMSKAP))) {
+        if (fagsak.erSakstypeEøs() && !harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP))) {
             vilkaarsresultatRepo.deleteByBehandlingsresultatAndVilkaarNotIn(behandlingsresultat, IMMUTABLE_VILKAAR);
         } else {
             vilkaarsresultatRepo.deleteByBehandlingsresultatId(behandlingsresultat.getId());
@@ -108,7 +108,7 @@ public class VilkaarsresultatService {
 
     private void validerVilkår(List<VilkaarDto> vilkaarDtoer) {
 
-        final Collection<String> nyeVilkår = vilkaarDtoer.stream().map(VilkaarDto::getVilkaar).collect(Collectors.toList());
+        final Collection<String> nyeVilkår = vilkaarDtoer.stream().map(VilkaarDto::getVilkaar).toList();
 
         for (Vilkaar immutableVilkår : IMMUTABLE_VILKAAR) {
             if (nyeVilkår.contains(immutableVilkår.getKode())) {

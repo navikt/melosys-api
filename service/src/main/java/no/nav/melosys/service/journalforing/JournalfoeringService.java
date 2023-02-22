@@ -216,12 +216,12 @@ public class JournalfoeringService {
         prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, utledMottaksdato(journalfoeringDto.getMottattDato(), journalpost));
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
 
-        var registreringUnntakMedlemskapToggleEnabled = unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_MEDLEMSKAP);
+        var registreringUnntakFraMedlemskapToggleEnabled = unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP);
 
-        var erAnmodningOmUnntakEllerRegistreringUnntak = harRegistreringUnntakMedlemskapFlyt(sakstype, sakstema, behandlingstema, registreringUnntakMedlemskapToggleEnabled);
+        var erAnmodningOmUnntakEllerRegistreringUnntak = harRegistreringUnntakMedlemskapFlyt(sakstype, sakstema, behandlingstema, registreringUnntakFraMedlemskapToggleEnabled);
 
         if (erSakstypeEøs(sakstype)
-            && !harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), registreringUnntakMedlemskapToggleEnabled)
+            && !harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), registreringUnntakFraMedlemskapToggleEnabled)
             && !erAnmodningOmUnntakEllerRegistreringUnntak
         ) {
             validerSøknadFelter(journalfoeringDto);

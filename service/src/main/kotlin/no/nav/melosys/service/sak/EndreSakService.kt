@@ -87,7 +87,7 @@ class EndreSakService(
                     nyBehandlingstema,
                     unleash.isEnabled("melosys.folketrygden.mvp"),
                     unleash.isEnabled(IKKEYRKESAKTIV_FLYT),
-                    unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_MEDLEMSKAP)
+                    unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP)
                 )
             ) {
                 mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id)

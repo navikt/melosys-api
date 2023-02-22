@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.AVKLAR_ARBEIDSGIVER;
 import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
-import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_MEDLEMSKAP;
+import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP;
 import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
 
 @Component
@@ -83,7 +83,7 @@ public class AvklarArbeidsgiver implements StegBehandler {
     }
 
     private boolean arbeidsgiverIkkeAvklares(Behandling behandling, Behandlingsresultat resultat) {
-        return harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), unleash.isEnabled(REGISTRERING_UNNTAK_MEDLEMSKAP))
+        return harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP))
             || resultat.erAvslagManglendeOpplysninger() || erEøsMedArtikkel13(behandling, resultat);
     }
 

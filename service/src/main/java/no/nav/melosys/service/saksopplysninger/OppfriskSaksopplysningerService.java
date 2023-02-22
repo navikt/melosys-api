@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
-import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_MEDLEMSKAP;
+import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP;
 import static no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory.utledSaksopplysningTyper;
 import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
 
@@ -61,7 +61,7 @@ public class OppfriskSaksopplysningerService {
     public void oppfriskSaksopplysning(long behandlingID, boolean medFamilierelasjoner) {
         var folketrygdenToggleEnabled = unleash.isEnabled("melosys.folketrygden.mvp");
         var ikkeYrkesaktivToggleEnabled = unleash.isEnabled(IKKEYRKESAKTIV_FLYT);
-        var registreringUnntakMedlemskapToggleEnabled = unleash.isEnabled(REGISTRERING_UNNTAK_MEDLEMSKAP);
+        var registreringUnntakFraMedlemskapToggleEnabled = unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP);
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
         if (behandling.erUtsending() && anmodningsperiodeService.harSendtAnmodningsperiode(behandlingID)) {
@@ -84,7 +84,7 @@ public class OppfriskSaksopplysningerService {
                 behandling.getType(),
                 folketrygdenToggleEnabled,
                 ikkeYrkesaktivToggleEnabled,
-                registreringUnntakMedlemskapToggleEnabled))
+                registreringUnntakFraMedlemskapToggleEnabled))
             .fnr(brukerID)
             .fom(periode.getFom())
             .tom(periode.getTom())
@@ -104,7 +104,7 @@ public class OppfriskSaksopplysningerService {
 
         if (behandling.getFagsak().erSakstypeEøs()
             && behandling.harPeriodeOgLand()
-            && !harTomFlyt(behandling, folketrygdenToggleEnabled, ikkeYrkesaktivToggleEnabled, registreringUnntakMedlemskapToggleEnabled)
+            && !harTomFlyt(behandling, folketrygdenToggleEnabled, ikkeYrkesaktivToggleEnabled, registreringUnntakFraMedlemskapToggleEnabled)
             && behandling.kanResultereIVedtak()
             && !inngangsvilkaarService.oppfyllervurderingEF_883_2004(behandlingID)) {
             inngangsvilkaarService.vurderOgLagreInngangsvilkår(

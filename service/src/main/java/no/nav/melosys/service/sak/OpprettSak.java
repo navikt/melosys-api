@@ -118,11 +118,11 @@ public class OpprettSak {
         lovligeKombinasjonerService.validerOpprettelseOgEndring(
             hovedpart, sakstype, sakstema, behandlingstema, behandlingstype);
 
-        var registreringUnntakMedlemskapToggleEnabled = unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_MEDLEMSKAP);
+        var registreringUnntakFraMedlemskapToggleEnabled = unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP);
 
         if (erSakstypeEøs(sakstype)
-            && !harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), registreringUnntakMedlemskapToggleEnabled)
-            && !harRegistreringUnntakMedlemskapFlyt(sakstype, sakstema, behandlingstema, registreringUnntakMedlemskapToggleEnabled)) {
+            && !harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), registreringUnntakFraMedlemskapToggleEnabled)
+            && !harRegistreringUnntakMedlemskapFlyt(sakstype, sakstema, behandlingstema, registreringUnntakFraMedlemskapToggleEnabled)) {
             validerSøknadData(opprettSakDto.getSoknadDto());
         }
     }

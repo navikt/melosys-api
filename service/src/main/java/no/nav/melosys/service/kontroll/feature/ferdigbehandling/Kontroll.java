@@ -23,7 +23,7 @@ import no.nav.melosys.service.validering.Kontrollfeil;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
-import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_MEDLEMSKAP;
+import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP;
 import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
 
 @Component
@@ -94,7 +94,7 @@ class Kontroll {
     private FerdigbehandlingKontrollData hentKontrollDataForAvslagOgHenleggelse(Behandling behandling) {
         MottatteOpplysningerData mottatteOpplysningerData = null;
 
-        if (!harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), unleash.isEnabled(REGISTRERING_UNNTAK_MEDLEMSKAP))) {
+        if (!harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP))) {
             mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         }
         Persondata persondata = hentPersondata(behandling);

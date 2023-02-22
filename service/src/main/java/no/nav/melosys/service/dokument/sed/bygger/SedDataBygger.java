@@ -37,7 +37,7 @@ import static java.util.function.Predicate.not;
 import static no.nav.melosys.domain.eessi.sed.Adresse.fraStrukturertAdresse;
 import static no.nav.melosys.domain.eessi.sed.Adresse.lagAdresse;
 import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
-import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_MEDLEMSKAP;
+import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP;
 import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
 
 @Service
@@ -123,7 +123,7 @@ public class SedDataBygger {
         var behandling = grunnlagMedSøknad.getBehandling();
         if (behandling.getFagsak().erSakstypeEøs() &&
             !behandling.erBehandlingAvSed() &&
-            !harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), unleash.isEnabled(REGISTRERING_UNNTAK_MEDLEMSKAP))
+            !harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP))
         ) {
             sedDataDto.setSøknadsperiode(new Periode(
                 grunnlagMedSøknad.getMottatteOpplysningerData().periode.getFom(),

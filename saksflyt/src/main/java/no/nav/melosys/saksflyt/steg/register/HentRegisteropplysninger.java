@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.HENT_REGISTEROPPLYSNINGER;
 import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
-import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_MEDLEMSKAP;
+import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP;
 import static no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory.utledSaksopplysningTyper;
 
 @Component
@@ -57,7 +57,7 @@ public class HentRegisteropplysninger implements StegBehandler {
 
         var folketrygdenToggleEnabled = unleash.isEnabled("melosys.folketrygden.mvp");
         var ikkeYrkesaktivToggleEnabled =  unleash.isEnabled(IKKEYRKESAKTIV_FLYT);
-        var registreringUnntakMedlemskapToggleEnabled =  unleash.isEnabled(REGISTRERING_UNNTAK_MEDLEMSKAP);
+        var registreringUnntakFraMedlemskapToggleEnabled =  unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP);
 
         var aktørId = behandling.getFagsak().finnBrukersAktørID().orElseThrow(
             () -> new FunksjonellException("Kan ikke hente registreopplysninger når bruker ikke har aktørID")
@@ -73,7 +73,7 @@ public class HentRegisteropplysninger implements StegBehandler {
                     behandling.getType(),
                     folketrygdenToggleEnabled,
                     ikkeYrkesaktivToggleEnabled,
-                    registreringUnntakMedlemskapToggleEnabled));
+                    registreringUnntakFraMedlemskapToggleEnabled));
 
         behandling.finnPeriode().ifPresent(periode -> {
             registeropplysningerRequestBuilder.fom(periode.getFom());
