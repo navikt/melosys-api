@@ -38,6 +38,7 @@ public class MottatteOpplysningerService {
 
     private static final String VERSJON_SED_GRUNNLAG = "1";
     private static final String VERSJON_SOEKNAD_GRUNNLAG = "1.2";
+    private static final String VERSJON_ANMODNING_ATTEST_GRUNNLAG = "1";
 
     private final MottatteOpplysningerRepository mottatteOpplysningerRepository;
     private final BehandlingService behandlingService;
@@ -75,8 +76,20 @@ public class MottatteOpplysningerService {
         opprettMottatteOpplysninger(behandlingID, sedGrunnlag, Mottatteopplysningertyper.SED, VERSJON_SED_GRUNNLAG);
     }
 
-    public void opprettSøknad(Prosessinstans prosessinstans) {
+    public void opprettSøknadEllerAnmodningEllerAttest(Prosessinstans prosessinstans) {
         Behandling behandling = prosessinstans.getBehandling();
+        if (harRegistreringUnntakMedlemskapFlyt(behandling, unleash.isEnabled(REGISTRERING_UNNTAK_MEDLEMSKAP))) {
+            opprettMottatteOpplysninger(
+                behandling.getId(),
+                new AnmodningEllerAttest(),
+                Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST,
+                VERSJON_ANMODNING_ATTEST_GRUNNLAG);
+        } else {
+            opprettSøknad(prosessinstans, behandling);
+        }
+    }
+
+    public void opprettSøknad(Prosessinstans prosessinstans, Behandling behandling) {
         Soeknadsland soeknadsland;
         Periode periode;
         Sakstyper sakstype = behandling.getFagsak().getType();

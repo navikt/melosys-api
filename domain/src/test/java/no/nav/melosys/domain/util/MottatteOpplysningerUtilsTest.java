@@ -6,20 +6,20 @@ import java.util.Collections;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Bostedsland;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class MottatteOpplysningerUtilsTest {
+class MottatteOpplysningerUtilsTest {
 
     @Test
-    public void hentSoeknadsland() {
+    void hentSoeknadsland() {
         Soeknad soeknad = new Soeknad();
         soeknad.soeknadsland.landkoder = Arrays.asList(Landkoder.BE.getKode(), Landkoder.BG.getKode());
         soeknad.soeknadsland.erUkjenteEllerAlleEosLand = true;
@@ -30,7 +30,7 @@ public class MottatteOpplysningerUtilsTest {
     }
 
     @Test
-    public void hentOppgittAdresse_medGatenavnOgLand_ErIkkeNull() {
+    void hentOppgittAdresse_medGatenavnOgLand_ErIkkeNull() {
         Soeknad søknad = new Soeknad();
         StrukturertAdresse oppgittAdresse = new StrukturertAdresse();
         oppgittAdresse.setGatenavn("HjemGata");
@@ -40,14 +40,14 @@ public class MottatteOpplysningerUtilsTest {
     }
 
     @Test
-    public void hentOppgittAdresse_somErTom_ErNull() {
+    void hentOppgittAdresse_somErTom_ErNull() {
         Soeknad søknad = new Soeknad();
         søknad.bosted.oppgittAdresse = new StrukturertAdresse();
         assertThat(MottatteOpplysningerUtils.hentBostedsadresse(søknad)).isNull();
     }
 
     @Test
-    public void hentPeriode_opphold() {
+    void hentPeriode_opphold() {
         Soeknad soeknad = new Soeknad();
         leggTilFysiskArbeidssted(soeknad);
 
@@ -59,7 +59,7 @@ public class MottatteOpplysningerUtilsTest {
     }
 
     @Test
-    public void hentOppgittBostedsland_landkodeSverige_girLandkode() {
+    void hentOppgittBostedsland_landkodeSverige_girLandkode() {
         Soeknad soeknad = new Soeknad();
         soeknad.bosted.oppgittAdresse.setLandkode("SE");
 
@@ -69,7 +69,7 @@ public class MottatteOpplysningerUtilsTest {
     }
 
     @Test
-    public void hentOppgittBostedsland_eksistererIkke_girEmpty() {
+    void hentOppgittBostedsland_eksistererIkke_girEmpty() {
         Soeknad soeknad = new Soeknad();
 
         Optional<Bostedsland> landkoder = MottatteOpplysningerUtils.hentOppgittBostedsland(soeknad);

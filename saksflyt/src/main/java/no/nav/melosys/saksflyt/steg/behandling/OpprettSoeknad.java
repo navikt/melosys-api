@@ -23,6 +23,6 @@ public class OpprettSoeknad implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
-        mottatteOpplysningerService.opprettSøknad(prosessinstans);
+        mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(prosessinstans);
     }
 }
