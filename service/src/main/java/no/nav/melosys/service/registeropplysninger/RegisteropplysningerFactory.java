@@ -6,6 +6,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.TekniskException;
 
+import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt;
 import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
 
 
@@ -22,6 +23,9 @@ public final class RegisteropplysningerFactory {
 
         if (harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, folketrygdenToggleEnabled, ikkeYrkesaktivToggleEnabled, registreringUnntakFraMedlemskapToggleEnabled)) {
             return ingenSaksopplysningTyper();
+        }
+        if (harRegistreringUnntakFraMedlemskapFlyt(sakstype, sakstema, behandlingstema, registreringUnntakFraMedlemskapToggleEnabled)) {
+            return hentSaksopplysningTyperForRegistreringUnntakFraMedlemskap();
         }
 
         return switch (behandlingstema) {
@@ -70,6 +74,10 @@ public final class RegisteropplysningerFactory {
             .organisasjonsopplysninger()
             .utbetalingsopplysninger()
             .build();
+    }
+
+    private static RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForRegistreringUnntakFraMedlemskap() {
+        return hentSaksopplysningTyperForBeslutningOmLovvalg();
     }
 
     private static RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForBeslutningOmLovvalg() {
