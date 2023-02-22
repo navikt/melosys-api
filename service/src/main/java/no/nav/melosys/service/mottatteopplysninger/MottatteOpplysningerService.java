@@ -29,7 +29,7 @@ import static no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper.SØKNAD_F
 import static no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE;
 import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
 import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP;
-import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harRegistreringUnntakMedlemskapFlyt;
+import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt;
 import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
 
 @Service
@@ -78,7 +78,7 @@ public class MottatteOpplysningerService {
 
     public void opprettSøknadEllerAnmodningEllerAttest(Prosessinstans prosessinstans) {
         Behandling behandling = prosessinstans.getBehandling();
-        if (harRegistreringUnntakMedlemskapFlyt(behandling, unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP))) {
+        if (harRegistreringUnntakFraMedlemskapFlyt(behandling, unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP))) {
             opprettMottatteOpplysninger(
                 behandling.getId(),
                 new AnmodningEllerAttest(),

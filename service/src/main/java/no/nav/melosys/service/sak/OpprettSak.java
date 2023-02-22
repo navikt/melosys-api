@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
 import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
-import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harRegistreringUnntakMedlemskapFlyt;
+import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt;
 import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
 
 @Service
@@ -122,7 +122,7 @@ public class OpprettSak {
 
         if (erSakstypeEøs(sakstype)
             && !harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), registreringUnntakFraMedlemskapToggleEnabled)
-            && !harRegistreringUnntakMedlemskapFlyt(sakstype, sakstema, behandlingstema, registreringUnntakFraMedlemskapToggleEnabled)) {
+            && !harRegistreringUnntakFraMedlemskapFlyt(sakstype, sakstema, behandlingstema, registreringUnntakFraMedlemskapToggleEnabled)) {
             validerSøknadData(opprettSakDto.getSoknadDto());
         }
     }

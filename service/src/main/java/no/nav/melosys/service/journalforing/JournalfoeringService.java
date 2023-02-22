@@ -43,7 +43,7 @@ import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
 import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
 import static no.nav.melosys.service.journalforing.UtledBehandlingsaarsak.utledÅrsaktype;
-import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harRegistreringUnntakMedlemskapFlyt;
+import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt;
 import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
 
 @Service
@@ -218,7 +218,7 @@ public class JournalfoeringService {
 
         var registreringUnntakFraMedlemskapToggleEnabled = unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP);
 
-        var erAnmodningOmUnntakEllerRegistreringUnntak = harRegistreringUnntakMedlemskapFlyt(sakstype, sakstema, behandlingstema, registreringUnntakFraMedlemskapToggleEnabled);
+        var erAnmodningOmUnntakEllerRegistreringUnntak = harRegistreringUnntakFraMedlemskapFlyt(sakstype, sakstema, behandlingstema, registreringUnntakFraMedlemskapToggleEnabled);
 
         if (erSakstypeEøs(sakstype)
             && !harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), registreringUnntakFraMedlemskapToggleEnabled)

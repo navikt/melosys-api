@@ -104,7 +104,7 @@ class SaksbehandlingRegler(
             ikkeYrkesaktivToggleEnabled: Boolean,
             registreringUnntakFraMedlemskapToggleEnabled: Boolean
         ): Boolean {
-            if (harRegistreringUnntakMedlemskapFlyt(
+            if (harRegistreringUnntakFraMedlemskapFlyt(
                     sakstype,
                     sakstema,
                     behandlingstema,
@@ -134,11 +134,11 @@ class SaksbehandlingRegler(
         }
 
         @JvmStatic
-        fun harRegistreringUnntakMedlemskapFlyt(
+        fun harRegistreringUnntakFraMedlemskapFlyt(
             behandling: Behandling,
             registreringUnntakFraMedlemskapToggleEnabled: Boolean
         ): Boolean {
-            return harRegistreringUnntakMedlemskapFlyt(
+            return harRegistreringUnntakFraMedlemskapFlyt(
                 behandling.fagsak.type,
                 behandling.fagsak.tema,
                 behandling.tema,
@@ -147,18 +147,18 @@ class SaksbehandlingRegler(
         }
 
         @JvmStatic
-        fun harRegistreringUnntakMedlemskapFlyt(
+        fun harRegistreringUnntakFraMedlemskapFlyt(
             sakstype: Sakstyper,
             sakstema: Sakstemaer,
             behandlingstema: Behandlingstema,
             registreringUnntakFraMedlemskapToggleEnabled: Boolean
         ): Boolean {
             if (!registreringUnntakFraMedlemskapToggleEnabled || sakstema != Sakstemaer.UNNTAK) {
-                return false;
+                return false
             }
 
             if (sakstype == Sakstyper.EU_EOS && behandlingstema == A1_ANMODNING_OM_UNNTAK_PAPIR) {
-                return true;
+                return true
             }
 
             if (sakstype == Sakstyper.TRYGDEAVTALE && listOf(
