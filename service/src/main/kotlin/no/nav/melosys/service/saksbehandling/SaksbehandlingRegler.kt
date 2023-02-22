@@ -10,7 +10,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT
-import no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_ANMODNING_UNNTAK
+import no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_MEDLEMSKAP
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import org.springframework.stereotype.Component
 
@@ -27,7 +27,7 @@ class SaksbehandlingRegler(
     ): Boolean {
         val ftrlToggleEnabled = unleash.isEnabled("melosys.folketrygden.mvp")
         val ikkeYrkesaktivToggleEnabled = unleash.isEnabled(IKKEYRKESAKTIV_FLYT)
-        val registreringAnmodningUnntakToggleEnabled = unleash.isEnabled(REGISTRERING_ANMODNING_UNNTAK)
+        val registreringUnntakMedlemskapToggleEnabled = unleash.isEnabled(REGISTRERING_UNNTAK_MEDLEMSKAP)
         if (harTomFlyt(
                 fagsak.type,
                 fagsak.tema,
@@ -35,7 +35,7 @@ class SaksbehandlingRegler(
                 behandlingstema,
                 ftrlToggleEnabled,
                 ikkeYrkesaktivToggleEnabled,
-                registreringAnmodningUnntakToggleEnabled
+                registreringUnntakMedlemskapToggleEnabled
             )
         ) return false
 
@@ -53,7 +53,7 @@ class SaksbehandlingRegler(
                     it,
                     unleash.isEnabled("melosys.folketrygden.mvp"),
                     unleash.isEnabled(IKKEYRKESAKTIV_FLYT),
-                    unleash.isEnabled(REGISTRERING_ANMODNING_UNNTAK)
+                    unleash.isEnabled(REGISTRERING_UNNTAK_MEDLEMSKAP)
                 )
             }
             .firstOrNull {
@@ -82,7 +82,7 @@ class SaksbehandlingRegler(
             behandling: Behandling,
             ftrlToggleEnabled: Boolean,
             ikkeYrkesaktivToggleEnabled: Boolean,
-            registreringAnmodningUnntakToggleEnabled: Boolean
+            registreringUnntakMedlemskapToggleEnabled: Boolean
         ): Boolean =
             harTomFlyt(
                 behandling.fagsak.type,
@@ -91,7 +91,7 @@ class SaksbehandlingRegler(
                 behandling.tema,
                 ftrlToggleEnabled,
                 ikkeYrkesaktivToggleEnabled,
-                registreringAnmodningUnntakToggleEnabled
+                registreringUnntakMedlemskapToggleEnabled
             )
 
         @JvmStatic
@@ -102,13 +102,13 @@ class SaksbehandlingRegler(
             behandlingstema: Behandlingstema,
             ftrlToggleEnabled: Boolean,
             ikkeYrkesaktivToggleEnabled: Boolean,
-            registreringAnmodningUnntakToggleEnabled: Boolean
+            registreringUnntakMedlemskapToggleEnabled: Boolean
         ): Boolean {
-            if (erAnmodningOmUnntakEllerRegistreringUnntak(
+            if (harRegistreringUnntakMedlemskapFlyt(
                     sakstype,
                     sakstema,
                     behandlingstema,
-                    registreringAnmodningUnntakToggleEnabled
+                    registreringUnntakMedlemskapToggleEnabled
                 )
             ) return false
 
@@ -134,13 +134,26 @@ class SaksbehandlingRegler(
         }
 
         @JvmStatic
-        fun erAnmodningOmUnntakEllerRegistreringUnntak(
+        fun harRegistreringUnntakMedlemskapFlyt(
+            behandling: Behandling,
+            registreringUnntakMedlemskapToggleEnabled: Boolean
+        ): Boolean {
+            return harRegistreringUnntakMedlemskapFlyt(
+                behandling.fagsak.type,
+                behandling.fagsak.tema,
+                behandling.tema,
+                registreringUnntakMedlemskapToggleEnabled
+            )
+        }
+
+        @JvmStatic
+        fun harRegistreringUnntakMedlemskapFlyt(
             sakstype: Sakstyper,
             sakstema: Sakstemaer,
             behandlingstema: Behandlingstema,
-            registreringAnmodningUnntakToggleEnabled: Boolean
+            registreringUnntakMedlemskapToggleEnabled: Boolean
         ): Boolean {
-            if (!registreringAnmodningUnntakToggleEnabled || sakstema != Sakstemaer.UNNTAK) {
+            if (!registreringUnntakMedlemskapToggleEnabled || sakstema != Sakstemaer.UNNTAK) {
                 return false;
             }
 

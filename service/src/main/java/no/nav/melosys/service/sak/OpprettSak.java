@@ -22,7 +22,6 @@ import no.nav.melosys.service.journalforing.UtledBehandlingsaarsak;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
@@ -31,7 +30,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
 import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
-import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_ANMODNING_UNNTAK;
+import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harRegistreringUnntakMedlemskapFlyt;
+import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
 
 @Service
 public class OpprettSak {
@@ -118,10 +118,11 @@ public class OpprettSak {
         lovligeKombinasjonerService.validerOpprettelseOgEndring(
             hovedpart, sakstype, sakstema, behandlingstema, behandlingstype);
 
+        var registreringUnntakMedlemskapToggleEnabled = unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_MEDLEMSKAP);
+
         if (erSakstypeEøs(sakstype)
-            && !SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), unleash.isEnabled(REGISTRERING_ANMODNING_UNNTAK))
-            && !SaksbehandlingRegler.erAnmodningOmUnntakEllerRegistreringUnntak(sakstype, sakstema, behandlingstema, unleash.isEnabled(ToggleName.REGISTRERING_ANMODNING_UNNTAK)))
-        {
+            && !harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), registreringUnntakMedlemskapToggleEnabled)
+            && !harRegistreringUnntakMedlemskapFlyt(sakstype, sakstema, behandlingstema, registreringUnntakMedlemskapToggleEnabled)) {
             validerSøknadData(opprettSakDto.getSoknadDto());
         }
     }

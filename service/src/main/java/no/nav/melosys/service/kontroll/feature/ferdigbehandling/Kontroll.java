@@ -19,12 +19,12 @@ import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.Ferdigbehan
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.SaksopplysningerData;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
-import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_ANMODNING_UNNTAK;
+import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_MEDLEMSKAP;
+import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
 
 @Component
 class Kontroll {
@@ -94,7 +94,7 @@ class Kontroll {
     private FerdigbehandlingKontrollData hentKontrollDataForAvslagOgHenleggelse(Behandling behandling) {
         MottatteOpplysningerData mottatteOpplysningerData = null;
 
-        if (!SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), unleash.isEnabled(REGISTRERING_ANMODNING_UNNTAK))) {
+        if (!harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), unleash.isEnabled(REGISTRERING_UNNTAK_MEDLEMSKAP))) {
             mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         }
         Persondata persondata = hentPersondata(behandling);

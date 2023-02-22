@@ -6,4 +6,6 @@ public class ToggleName {
     public static final String MELOSYS_MEL_4835 = "melosys.MEL-4835.refactor1";
 
     public static final String IKKEYRKESAKTIV_FLYT = "melosys.ikkeYrkesaktivForenkletFlyt";
+
+    public static final String REGISTRERING_UNNTAK_MEDLEMSKAP = "melosys.registrering_anmodning_unntak_MELOSYS-5684";
 }

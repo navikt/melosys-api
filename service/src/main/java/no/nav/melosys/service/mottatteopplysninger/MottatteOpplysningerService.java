@@ -20,7 +20,6 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.MottatteOpplysningerRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -29,7 +28,9 @@ import org.springframework.transaction.annotation.Transactional;
 import static no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN;
 import static no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE;
 import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
-import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_ANMODNING_UNNTAK;
+import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_MEDLEMSKAP;
+import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harRegistreringUnntakMedlemskapFlyt;
+import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
 
 @Service
 public class MottatteOpplysningerService {
@@ -98,10 +99,11 @@ public class MottatteOpplysningerService {
 
     public void opprettSøknad(Behandling behandling, Periode periode, Soeknadsland soeknadsland) {
         long behandlingID = behandling.getId();
-        boolean ftrlToggleEnabled = unleash.isEnabled("melosys.folketrygden.mvp");
-        boolean ikkeYrkesaktivToggleEnabled = unleash.isEnabled(IKKEYRKESAKTIV_FLYT);
-        boolean registreringAnmodningUnntakToggleEnabled = unleash.isEnabled(REGISTRERING_ANMODNING_UNNTAK);
-        boolean skalOppretteSøknad = !SaksbehandlingRegler.harTomFlyt(behandling, ftrlToggleEnabled, ikkeYrkesaktivToggleEnabled, registreringAnmodningUnntakToggleEnabled);
+        boolean skalOppretteSøknad = !harTomFlyt(
+            behandling,
+            unleash.isEnabled("melosys.folketrygden.mvp"),
+            unleash.isEnabled(IKKEYRKESAKTIV_FLYT),
+            unleash.isEnabled(REGISTRERING_UNNTAK_MEDLEMSKAP));
         if (skalOppretteSøknad) {
             Sakstyper sakstype = behandling.getFagsak().getType();
             switch (sakstype) {

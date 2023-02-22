@@ -18,14 +18,14 @@ import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.BrevmalListeService;
 import no.nav.melosys.service.brev.brevmalliste.BrevAdresse;
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.tjenester.gui.dto.brev.*;
 import org.springframework.stereotype.Component;
 
 import static java.util.Arrays.asList;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.VIRKSOMHET;
 import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
-import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_ANMODNING_UNNTAK;
+import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_MEDLEMSKAP;
+import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
 
 @Component
 public class BrevmalListeBygger {
@@ -80,7 +80,7 @@ public class BrevmalListeBygger {
         switch (fagsak.getHovedpartRolle()) {
             case BRUKER -> {
                 mottakere.add(lagMottakerMedAdresseOgFeilmelding(behandlingId, Mottakerroller.BRUKER));
-                if (!SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), unleash.isEnabled(REGISTRERING_ANMODNING_UNNTAK))) {
+                if (!harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), unleash.isEnabled(REGISTRERING_UNNTAK_MEDLEMSKAP))) {
                     mottakere.add(lagMottakerMedAdresseOgFeilmelding(behandlingId, Mottakerroller.ARBEIDSGIVER));
                 }
                 if (unleash.isEnabled("melosys.trygdeavtale.fritekstbrev") && fagsak.erSakstypeTrygdeavtale() && behandling.harLand()) {

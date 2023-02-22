@@ -14,7 +14,6 @@ import no.nav.melosys.service.kontroll.feature.ufm.UfmKontrollService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import org.slf4j.Logger;
@@ -23,8 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
-import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_ANMODNING_UNNTAK;
+import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_MEDLEMSKAP;
 import static no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory.utledSaksopplysningTyper;
+import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
 
 @Service
 public class OppfriskSaksopplysningerService {
@@ -61,7 +61,7 @@ public class OppfriskSaksopplysningerService {
     public void oppfriskSaksopplysning(long behandlingID, boolean medFamilierelasjoner) {
         var folketrygdenToggleEnabled = unleash.isEnabled("melosys.folketrygden.mvp");
         var ikkeYrkesaktivToggleEnabled = unleash.isEnabled(IKKEYRKESAKTIV_FLYT);
-        var registreringAnmodningUnntakToggleEnabled = unleash.isEnabled(REGISTRERING_ANMODNING_UNNTAK);
+        var registreringUnntakMedlemskapToggleEnabled = unleash.isEnabled(REGISTRERING_UNNTAK_MEDLEMSKAP);
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
         if (behandling.erUtsending() && anmodningsperiodeService.harSendtAnmodningsperiode(behandlingID)) {
@@ -84,7 +84,7 @@ public class OppfriskSaksopplysningerService {
                 behandling.getType(),
                 folketrygdenToggleEnabled,
                 ikkeYrkesaktivToggleEnabled,
-                registreringAnmodningUnntakToggleEnabled))
+                registreringUnntakMedlemskapToggleEnabled))
             .fnr(brukerID)
             .fom(periode.getFom())
             .tom(periode.getTom())
@@ -104,7 +104,7 @@ public class OppfriskSaksopplysningerService {
 
         if (behandling.getFagsak().erSakstypeEøs()
             && behandling.harPeriodeOgLand()
-            && !SaksbehandlingRegler.harTomFlyt(behandling, folketrygdenToggleEnabled, ikkeYrkesaktivToggleEnabled, registreringAnmodningUnntakToggleEnabled)
+            && !harTomFlyt(behandling, folketrygdenToggleEnabled, ikkeYrkesaktivToggleEnabled, registreringUnntakMedlemskapToggleEnabled)
             && behandling.kanResultereIVedtak()
             && !inngangsvilkaarService.oppfyllervurderingEF_883_2004(behandlingID)) {
             inngangsvilkaarService.vurderOgLagreInngangsvilkår(
