@@ -32,7 +32,7 @@ class ProsessinstansAdminServiceTest {
     // Viktig at forrige og current er steg som kommer rett etter hverandre i samme prosess(type)
     private static final ProsessType PROSESS_TYPE = ProsessType.JFR_NY_SAK_BRUKER;
     private static final ProsessSteg FORSTE_PROSSESS_STEG = ProsessSteg.OPPRETT_SAK_OG_BEH;
-    private static final ProsessSteg FORRIGE_PROSSESS_STEG = ProsessSteg.OPPRETT_SØKNAD;
+    private static final ProsessSteg FORRIGE_PROSSESS_STEG = ProsessSteg.OPPRETT_SØKNAD_ELLER_ANMODNING_ELLER_ATTEST;
     private static final ProsessSteg CURRENT_PROSESS_STEG = ProsessSteg.OPPRETT_ARKIVSAK;
 
     @Mock

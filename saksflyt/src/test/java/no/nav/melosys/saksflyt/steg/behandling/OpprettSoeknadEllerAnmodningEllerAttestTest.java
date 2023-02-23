@@ -11,23 +11,23 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class OpprettSoeknadTest {
+class OpprettSoeknadEllerAnmodningEllerAttestTest {
 
     @Mock
     private MottatteOpplysningerService mottatteOpplysningerService;
 
-    private OpprettSoeknad opprettSoeknad;
+    private OpprettSoeknadEllerAnmodningEllerAttest opprettSoeknadEllerAnmodningEllerAttest;
 
     @BeforeEach
     public void setUp() {
-        opprettSoeknad = new OpprettSoeknad(mottatteOpplysningerService);
+        opprettSoeknadEllerAnmodningEllerAttest = new OpprettSoeknadEllerAnmodningEllerAttest(mottatteOpplysningerService);
     }
 
     @Test
     void utfør_kallerOpprettSøknadEllerAnmodningEllerAttest() {
         Prosessinstans prosessinstans = new Prosessinstans();
 
-        opprettSoeknad.utfør(prosessinstans);
+        opprettSoeknadEllerAnmodningEllerAttest.utfør(prosessinstans);
 
         verify(mottatteOpplysningerService).opprettSøknadEllerAnmodningEllerAttest(prosessinstans);
     }
