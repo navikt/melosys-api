@@ -138,7 +138,6 @@ public class AvklarteVirksomheterService {
                 log.warn(e.getMessage());
                 return true;
             }
-            throw e;
         }
         return false;
     }
