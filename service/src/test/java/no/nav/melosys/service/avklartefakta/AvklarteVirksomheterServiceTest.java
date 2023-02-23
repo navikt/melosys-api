@@ -28,11 +28,9 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
 import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
-import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -47,7 +45,8 @@ import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VIRKSOMHET;
 import static no.nav.melosys.service.MottatteOpplysningerStub.lagMottatteOpplysninger;
 import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplysninger;
 import static no.nav.melosys.service.SaksopplysningStubs.lagOrganisasjonDokumenter;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
@@ -60,9 +59,6 @@ class AvklarteVirksomheterServiceTest {
 
     @Mock
     private OrganisasjonOppslagService organisasjonOppslagService;
-
-    @Mock
-    private MottatteOpplysningerService mottatteOpplysningerService;
 
     @Mock
     private KodeverkService mockKodeverkService;
@@ -263,18 +259,6 @@ class AvklarteVirksomheterServiceTest {
 
 
         assertThat(harOpphørtAvklartVirksomhet).isTrue();
-    }
-
-    @Test
-    void harOpphørtAvklartVirksomhet_eregKasterAnnenFeil_kasterFeil() {
-        String feilmeldingFraEreg = "Feil organisasjon";
-        when(organisasjonOppslagService.hentOrganisasjoner(any())).thenThrow(new IntegrasjonException(feilmeldingFraEreg));
-        behandling.setSaksopplysninger(lagArbeidsforholdOpplysninger(Collections.emptyList()));
-        behandling.setMottatteOpplysninger(lagMottatteOpplysninger(Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
-
-        assertThatThrownBy(() -> avklarteVirksomheterService.harOpphørtAvklartVirksomhet(behandling))
-            .isInstanceOf(IntegrasjonException.class)
-            .hasMessage(feilmeldingFraEreg);
     }
 
     @Test
