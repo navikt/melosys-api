@@ -7,6 +7,7 @@ public enum ProsessDataKey {
 
     AKTØR_ID("aktoerID"),
     ARBEIDSGIVER("arbeidsgiver"),
+    ARBEIDSGIVER_SKAL_HA_KOPI("arbeidsgiverSkalHaKopi"),
     ARKIVSYSTEM("arkivsystem"),
     ARKIV_ID("arkivId"),
     AVSENDER_ID("avsenderID"),

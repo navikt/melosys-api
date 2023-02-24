@@ -76,7 +76,9 @@ public class SendVedtaksbrevInnland implements StegBehandler {
             log.info("Sendt utpekingsbrev for behandling {}", behandling.getId());
         } else if (resultat.erInnvilgelse()) {
             sendInnvilgelsesbrev(behandling, resultat, saksbehandler, begrunnelseKode, fritekst);
-            sendOrienteringTilArbeidsgiver(behandling, resultat, saksbehandler);
+            if (prosessinstans.getData(ProsessDataKey.ARBEIDSGIVER_SKAL_HA_KOPI, Boolean.class, true)) {
+                sendOrienteringTilArbeidsgiver(behandling, resultat, saksbehandler);
+            }
             log.info("Sendt innvilgelsesbrev for behandling {}", behandling.getId());
         } else {
             throw new FunksjonellException("Vedtaksbrev kan ikke sendes for behandling " + behandling.getId());

@@ -251,7 +251,8 @@ public class ProsessinstansService {
     }
 
     public void opprettProsessinstansIverksettVedtakEos(Behandling behandling, Behandlingsresultattyper behandlingsresultatType,
-                                                        String fritekst, String fritekstSed, Set<String> mottakerinstitusjoner) {
+                                                        String fritekst, String fritekstSed, Set<String> mottakerinstitusjoner,
+                                                        boolean arbeidsgiverSkalHaKopi) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK_EOS)
             .medBehandling(behandling)
@@ -262,6 +263,7 @@ public class ProsessinstansService {
 
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, behandlingsresultatType.getKode());
         prosessinstans.setData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstype.VEDTAK);
+        prosessinstans.setData(ARBEIDSGIVER_SKAL_HA_KOPI, arbeidsgiverSkalHaKopi);
 
         lagre(prosessinstans);
     }

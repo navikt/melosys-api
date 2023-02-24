@@ -115,7 +115,8 @@ class EosVedtakServiceTest {
             eq(FASTSATT_LOVVALGSLAND),
             eq(behandlingsresultatFritekst),
             isNull(),
-            eq(mottakerinstitusjoner)
+            eq(mottakerinstitusjoner),
+            eq(true)
         );
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
         verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), any(Behandlingsresultat.class), eq(Sakstyper.EU_EOS), any(Behandlingsresultattyper.class), eq(null));
@@ -145,7 +146,8 @@ class EosVedtakServiceTest {
             eq(FASTSATT_LOVVALGSLAND),
             eq(behandlingsresultatFritekst),
             eq("FRITEKST_SED"),
-            eq(mottakerinstitusjoner)
+            eq(mottakerinstitusjoner),
+            eq(true)
         );
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
     }
@@ -171,7 +173,9 @@ class EosVedtakServiceTest {
             any(Behandling.class),
             eq(FASTSATT_LOVVALGSLAND),
             eq(behandlingsresultatFritekst),
-            eq("FRITEKST_SED"), anySet()
+            eq("FRITEKST_SED"),
+            anySet(),
+            eq(true)
         );
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
     }
@@ -203,7 +207,8 @@ class EosVedtakServiceTest {
             eq(FASTSATT_LOVVALGSLAND),
             eq(behandlingsresultatFritekst),
             eq("FRITEKST_SED"),
-            anySet()
+            anySet(),
+            eq(true)
         );
     }
 
@@ -229,7 +234,8 @@ class EosVedtakServiceTest {
             eq(resultatType),
             isNull(),
             isNull(),
-            anySet()
+            anySet(),
+            eq(true)
         );
     }
 
@@ -247,7 +253,8 @@ class EosVedtakServiceTest {
             eq(AVSLAG_SØKNAD),
             isNull(),
             isNull(),
-            anySet()
+            anySet(),
+            eq(true)
         );
         verifyNoInteractions(eessiService);
     }
