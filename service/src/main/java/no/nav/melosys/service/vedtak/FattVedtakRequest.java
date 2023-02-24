@@ -19,7 +19,7 @@ public class FattVedtakRequest {
     private final String ektefelleFritekst;
     private final String barnFritekst;
     private final List<KopiMottakerDto> kopiMottakere;
-    private boolean kopiTilArbeidsgiver;
+    private final Boolean kopiTilArbeidsgiver;
     private final String bestillersId;
     private final String nyVurderingBakgrunn;
     private final FaktureringsIntervall betalingsintervall;
@@ -65,7 +65,7 @@ public class FattVedtakRequest {
     }
 
     public boolean isKopiTilArbeidsgiver() {
-        return kopiTilArbeidsgiver;
+        return kopiTilArbeidsgiver == null || kopiTilArbeidsgiver;
     }
 
     public String getBestillersId() {
@@ -109,7 +109,7 @@ public class FattVedtakRequest {
         private String ektefelleFritekst;
         private String barnFritekst;
         private List<KopiMottakerDto> kopiMottakere;
-        private boolean kopiTilArbeidsgiver;
+        private Boolean kopiTilArbeidsgiver;
         private String bestillersId;
         private FaktureringsIntervall betalingsintervall;
 
@@ -200,7 +200,7 @@ public class FattVedtakRequest {
             return this;
         }
 
-        public Builder medKopiTilArbeidsgiver(boolean kopiTilArbeidsgiver) {
+        public Builder medKopiTilArbeidsgiver(Boolean kopiTilArbeidsgiver) {
             this.kopiTilArbeidsgiver = kopiTilArbeidsgiver;
             return this;
         }
