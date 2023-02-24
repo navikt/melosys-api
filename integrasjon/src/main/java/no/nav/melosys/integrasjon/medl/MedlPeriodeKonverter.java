@@ -7,11 +7,17 @@ import java.util.Set;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import no.nav.melosys.domain.PeriodeOmLovvalg;
-import no.nav.melosys.domain.eessi.sed.Bestemmelse;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.*;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_au;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us;
 import no.nav.melosys.exception.TekniskException;
 
 import static java.util.Optional.ofNullable;
@@ -56,25 +62,25 @@ public final class MedlPeriodeKonverter {
         tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1, GrunnlagMedl.FO_16);
         tbl.put(Lovvalgbestemmelser_987_2009.FO_987_2009_ART14_11, GrunnlagMedl.FO_987_2009_14_11);
 
-        tbl.put(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1, GrunnlagMedl.Storbrit_NIrland_6_1);
-        tbl.put(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_5, GrunnlagMedl.Storbrit_NIrland_6_5);
-        tbl.put(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART7_3, GrunnlagMedl.Storbrit_NIrland_7_3);
-        tbl.put(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2, GrunnlagMedl.Storbrit_NIrland_8_2);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1, GrunnlagMedl.Storbrit_NIrland_6_1);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_5, GrunnlagMedl.Storbrit_NIrland_6_5);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART7_3, GrunnlagMedl.Storbrit_NIrland_7_3);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART8_2, GrunnlagMedl.Storbrit_NIrland_8_2);
 
-        tbl.put(Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_2, GrunnlagMedl.USA_ART5_2);
-        tbl.put(Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_4, GrunnlagMedl.USA_ART5_4);
-        tbl.put(Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_5, GrunnlagMedl.USA_ART5_5);
-        tbl.put(Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_6, GrunnlagMedl.USA_ART5_6);
-        tbl.put(Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_9, GrunnlagMedl.USA_ART5_9);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_2, GrunnlagMedl.USA_ART5_2);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_4, GrunnlagMedl.USA_ART5_4);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_5, GrunnlagMedl.USA_ART5_5);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_6, GrunnlagMedl.USA_ART5_6);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_9, GrunnlagMedl.USA_ART5_9);
 
-        tbl.put(Lovvalgbestemmelser_trygdeavtale_ca.CAN_ART6_2, GrunnlagMedl.CAN_ART6_2);
-        tbl.put(Lovvalgbestemmelser_trygdeavtale_ca.CAN_ART7, GrunnlagMedl.CAN_ART7);
-        tbl.put(Lovvalgbestemmelser_trygdeavtale_ca.CAN_ART9, GrunnlagMedl.CAN_ART9);
-        tbl.put(Lovvalgbestemmelser_trygdeavtale_ca.CAN_ART10, GrunnlagMedl.CAN_ART10);
-        tbl.put(Lovvalgbestemmelser_trygdeavtale_ca.CAN_ART11, GrunnlagMedl.CAN_ART11);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART6_2, GrunnlagMedl.CAN_ART6_2);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART7, GrunnlagMedl.CAN_ART7);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART9, GrunnlagMedl.CAN_ART9);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART10, GrunnlagMedl.CAN_ART10);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART11, GrunnlagMedl.CAN_ART11);
 
-        tbl.put(Lovvalgbestemmelser_trygdeavtale_au.AUS_ART9_2, GrunnlagMedl.AUS_ART9_2);
-        tbl.put(Lovvalgbestemmelser_trygdeavtale_au.AUS_ART9_3, GrunnlagMedl.AUS_ART9_3);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART9_2, GrunnlagMedl.AUS_ART9_2);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART9_3, GrunnlagMedl.AUS_ART9_3);
 
         tbl.put(Overgangsregelbestemmelser.FO_1408_1971_ART14_2_A, GrunnlagMedl.FO_1408_14_2_A);
         tbl.put(Overgangsregelbestemmelser.FO_1408_1971_ART14_2_B, GrunnlagMedl.FO_1408_14_2_B);

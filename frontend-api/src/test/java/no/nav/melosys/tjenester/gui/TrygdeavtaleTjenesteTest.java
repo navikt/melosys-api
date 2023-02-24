@@ -8,10 +8,6 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
-import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland;
@@ -20,7 +16,11 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_b
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
@@ -328,7 +328,7 @@ class TrygdeavtaleTjenesteTest {
     private TrygdeavtaleResultatDto lagTrygdeavtaleResultatDto() {
         return new TrygdeavtaleResultatDto.Builder()
             .virksomhet(ORGNR_1)
-            .bestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1.getKode())
+            .bestemmelse(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1.getKode())
             .lovvalgsperiodeFom(LocalDate.now())
             .lovvalgsperiodeTom(LocalDate.now().plusYears(1))
             .addBarn(
@@ -351,7 +351,7 @@ class TrygdeavtaleTjenesteTest {
             .virksomhet(ORGNR_1)
             .lovvalgsperiodeFom(LocalDate.now())
             .lovvalgsperiodeTom(LocalDate.now().plusYears(1))
-            .bestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1.getKode())
+            .bestemmelse(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1.getKode())
             .familie(lagAvklartMedfølgendeBarn()).build();
     }
 

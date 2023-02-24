@@ -1,13 +1,14 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll;
 
+import java.util.Arrays;
+
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.PeriodeOmLovvalg;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_ca;
-import no.nav.melosys.domain.mottatteopplysninger.SoeknadTrygdeavtale;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca;
+import no.nav.melosys.domain.mottatteopplysninger.SoeknadTrygdeavtale;
 import no.nav.melosys.service.kontroll.feature.arbeidutland.kontroll.ArbeidUtlandKontroll;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData;
 import no.nav.melosys.service.kontroll.regler.ArbeidsstedRegler;
@@ -16,12 +17,12 @@ import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 import no.nav.melosys.service.kontroll.regler.PersonRegler;
 import no.nav.melosys.service.validering.Kontrollfeil;
 
-import java.util.Arrays;
-
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1;
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_usa.*;
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_ca.*;
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_au.*;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART9_2;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART9_3;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART6_2;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART7;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb.*;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us.*;
 
 
 final class FerdigbehandlingKontroll {
@@ -112,9 +113,9 @@ final class FerdigbehandlingKontroll {
     }
 
     private static boolean erBestemmelseDerTrygdeavtaleAttestSendesUK(LovvalgBestemmelse bestemmelse) {
-        return bestemmelse == Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1
-            || bestemmelse == Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_5
-            || bestemmelse == Lovvalgbestemmelser_trygdeavtale_uk.UK_ART7_3;
+        return bestemmelse == UK_ART6_1
+            || bestemmelse == UK_ART6_5
+            || bestemmelse == UK_ART7_3;
     }
 
     private static boolean erBestemmelseDerTrygdeavtaleAttestSendesUSA(LovvalgBestemmelse bestemmelse) {
@@ -131,6 +132,6 @@ final class FerdigbehandlingKontroll {
     }
 
     private static boolean erBestemmelseDerTrygdeavtaleAttestSendesCanada(LovvalgBestemmelse bestemmelse) {
-        return Arrays.stream(Lovvalgbestemmelser_trygdeavtale_ca.values()).anyMatch(p -> p.equals(bestemmelse));
+        return Arrays.stream(Lovvalgsbestemmelser_trygdeavtale_ca.values()).anyMatch(p -> p.equals(bestemmelse));
     }
 }
