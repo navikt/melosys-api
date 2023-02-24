@@ -20,7 +20,7 @@ import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Innvilgelse;
@@ -423,7 +423,7 @@ class DokgenMalMapperTest {
             InnvilgelseTrygdeavtale::isVirksomhetArbeidsgiverSkalHaKopi
         ).containsExactly(
             "Innledning",
-            Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1,
+            Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1,
             "Virksomhetsnavn",
             true
         );
@@ -443,7 +443,7 @@ class DokgenMalMapperTest {
                 "01010119901",
                 List.of("Nordmannsveg 200", "Norge"),
                 "Virksomhetsnavn",
-                Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1,
+                Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1,
                 "Kone",
                 List.of(),
                 "Mrs. London"
@@ -690,7 +690,7 @@ class DokgenMalMapperTest {
     private InnvilgelseTrygdeavtale lagInnvilgelseStorbritannia() {
         return new InnvilgelseTrygdeavtale.Builder()
             .innvilgelse(Innvilgelse.av(lagInnvilgelseBrevbestilling()))
-            .artikkel(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1)
+            .artikkel(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1)
             .soknad(new Soknad(SOKNADSDATO,
                 LOVVALGSPERIODE_FOM,
                 LOVVALGSPERIODE_TOM,
@@ -729,7 +729,7 @@ class DokgenMalMapperTest {
                 List.of("UK Street 1337"))
             )
             .utsendelse(new Utsendelse(
-                Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1,
+                Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1,
                 List.of("UK Street 1337"),
                 LOVVALGSPERIODE_FOM,
                 LOVVALGSPERIODE_TOM

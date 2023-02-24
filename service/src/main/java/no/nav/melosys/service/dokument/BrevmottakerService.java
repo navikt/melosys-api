@@ -12,7 +12,7 @@ import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -104,7 +104,7 @@ public class BrevmottakerService {
 
         if (brevkopiRegler.contains(UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI_HVIS_IKKE_ART_8_2)) {
             Optional.ofNullable(lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId())).ifPresent(lovvalgsperiode -> {
-                    if (lovvalgsperiode.getBestemmelse() != Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2) {
+                    if (lovvalgsperiode.getBestemmelse() != Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART8_2) {
                         mottakerliste.getKopiMottakere().add(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
                     }
                 }
@@ -150,6 +150,7 @@ public class BrevmottakerService {
             case ARBEIDSGIVER -> avklarMottakereForArbeidsgiver(behandling, kunAvklarteVirksomheter);
             case UTENLANDSK_TRYGDEMYNDIGHET -> avklarMottakereForUtenlandskTrygdeyndighet(mottaker, behandling, produserbartDokument);
             case NORSK_MYNDIGHET -> avklarMottakereForNorskMyndighet(mottaker);
+            case FULLMEKTIG -> avklarMottakereForFullmektig(behandling.getFagsak());
             default -> throw new FunksjonellException("%s støttes ikke.".formatted(mottaker.getRolle()));
         };
     }
@@ -181,6 +182,15 @@ public class BrevmottakerService {
             mottakere.add(Mottaker.av(bruker));
         }
         return mottakere;
+    }
+
+    private List<Mottaker> avklarMottakereForFullmektig(Fagsak fagsak) {
+        Optional<Aktoer> representant = fagsak.finnRepresentant(Representerer.BRUKER);
+        if (representant.isPresent()) {
+            return List.of(Mottaker.av(representant.get()));
+        } else {
+            throw new FunksjonellException("Finner ikke fullmektig som representerer bruker");
+        }
     }
 
     private List<Mottaker> avklarMottakereForVirksomhet(Behandling behandling) {

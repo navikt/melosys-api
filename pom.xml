@@ -40,7 +40,7 @@
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <!-- Melosys -->
-        <melosys.internt.kodeverk.version>5.15.168</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.15.170</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.124</melosys.brev.version>
 
         <!-- NAV -->
@@ -63,7 +63,7 @@
         <guava.version>31.1-jre</guava.version>
         <graphql-java.version>17.4</graphql-java.version>
         <logback.version>1.2.11</logback.version>
-        <logstash.version>7.1</logstash.version>
+        <logstash.version>7.3</logstash.version>
         <hikaricp.version>5.0.1</hikaricp.version>
         <jackson.version>2.13.2.20220328</jackson.version>
         <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>

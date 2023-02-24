@@ -145,9 +145,13 @@ public class DokgenService {
 
         for (KopiMottakerDto kopiMottaker : brevbestillingDto.getKopiMottakere()) {
             var mottaker = Mottaker.medRolle(kopiMottaker.rolle());
-            mottaker.setOrgnr(kopiMottaker.orgnr());
-            mottaker.setAktørId(kopiMottaker.aktørId());
-            mottaker.setInstitusjonID(kopiMottaker.institusjonId());
+            if (kopimottakerErFullmektigPrivatperson(kopiMottaker)) {
+                mottaker = brevmottakerService.avklarMottaker(brevbestillingDto.getProduserbardokument(), mottaker, behandling);
+            } else {
+                mottaker.setOrgnr(kopiMottaker.orgnr());
+                mottaker.setAktørId(kopiMottaker.aktørId());
+                mottaker.setInstitusjonID(kopiMottaker.institusjonId());
+            }
             brevbestilling.medBestillKopi(true);
             produserOgDistribuerBrev(behandling, mottaker, brevbestilling.build());
         }
@@ -229,6 +233,10 @@ public class DokgenService {
 
     private boolean inneholderBrukerSomKopimottaker(Collection<KopiMottakerDto> kopimottakere) {
         return kopimottakere.stream().map(KopiMottakerDto::rolle).anyMatch(kopimottaker -> kopimottaker == Mottakerroller.BRUKER);
+    }
+
+    private boolean kopimottakerErFullmektigPrivatperson(KopiMottakerDto kopiMottaker) {
+        return kopiMottaker.orgnr() == null && kopiMottaker.rolle() == Mottakerroller.FULLMEKTIG;
     }
 
     private List<SaksvedleggBestilling> lagSaksvedleggBestilling(List<SaksvedleggDto> saksvedleggDtoer) {

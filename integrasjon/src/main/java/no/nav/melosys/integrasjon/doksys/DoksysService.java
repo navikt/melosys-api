@@ -257,11 +257,11 @@ public class DoksysService implements DoksysFasade {
         switch (mottakerRolle) {
             case BRUKER:
                 return lagPerson(mottakerID, brukerNavn, berik);
-            case ARBEIDSGIVER, FULLMEKTIG:
+            case ARBEIDSGIVER, NORSK_MYNDIGHET:
+                return lagOrganisasjon(mottakerID);
+            case FULLMEKTIG:
                 if (metadata.mottaker.erOrganisasjon()) {
-                    Organisasjon organisasjon = objectFactory.createOrganisasjon();
-                    organisasjon.setOrgnummer(mottakerID);
-                    return organisasjon;
+                    return lagOrganisasjon(mottakerID);
                 } else {
                     Person person = objectFactory.createPerson();
                     person.setIdent(mottakerID);
@@ -273,14 +273,18 @@ public class DoksysService implements DoksysFasade {
                     // med mottakerId="11111111111" og dermed blir AvsendMottakId i Joark tom.
                     return lagPerson(FALSK_MOTTAKER_ID, metadata.utenlandskMyndighet.navn, false);
                 } else {
-                    Organisasjon myndighet = objectFactory.createOrganisasjon();
-                    myndighet.setOrgnummer(mottakerID);
-                    return myndighet;
+                    return lagOrganisasjon(mottakerID);
                 }
             default:
                 log.warn("MottakersRolle {} er ukjent. PERSON brukes som standard.", mottakerRolle);
                 return lagPerson(mottakerID, brukerNavn, berik);
         }
+    }
+
+    private Organisasjon lagOrganisasjon(String mottakerID) {
+        Organisasjon organisasjon = objectFactory.createOrganisasjon();
+        organisasjon.setOrgnummer(mottakerID);
+        return organisasjon;
     }
 
     private Aktoer lagPerson(String personID, String navn, boolean berik) {

@@ -1,7 +1,7 @@
 package no.nav.melosys.domain.util;
 
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,6 +20,6 @@ class LovvalgBestemmelseUtilsTest {
     void dbDataTilLovvalgBestemmelse() {
         LovvalgBestemmelse lovvalgBestemmelse = LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse("UK_ART7_3");
         assertThat(lovvalgBestemmelse.getKode()).isEqualTo("UK_ART7_3");
-        assertThat(lovvalgBestemmelse).isInstanceOf(Lovvalgbestemmelser_trygdeavtale_uk.class);
+        assertThat(lovvalgBestemmelse).isInstanceOf(Lovvalgsbestemmelser_trygdeavtale_gb.class);
     }
 }
