@@ -77,7 +77,14 @@ public final class RegisteropplysningerFactory {
     }
 
     private static RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForRegistreringUnntakFraMedlemskap() {
-        return hentSaksopplysningTyperForBeslutningOmLovvalg();
+        return RegisteropplysningerRequest.SaksopplysningTyper.builder()
+            .arbeidsforholdopplysninger()
+            .inntektsopplysninger()
+            .medlemskapsopplysninger()
+            .organisasjonsopplysninger()
+            .sakOgBehandlingopplysninger()
+            .utbetalingsopplysninger()
+            .build();
     }
 
     private static RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForBeslutningOmLovvalg() {
