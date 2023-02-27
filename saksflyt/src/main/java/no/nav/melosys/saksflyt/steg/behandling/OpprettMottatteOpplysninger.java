@@ -6,19 +6,19 @@ import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_SØKNAD_ELLER_ANMODNING_ELLER_ATTEST;
+import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_MOTTATTEOPPLYSNINGER;
 
 @Component
-public class OpprettSoeknadEllerAnmodningEllerAttest implements StegBehandler {
+public class OpprettMottatteOpplysninger implements StegBehandler {
     private final MottatteOpplysningerService mottatteOpplysningerService;
 
-    public OpprettSoeknadEllerAnmodningEllerAttest(MottatteOpplysningerService mottatteOpplysningerService) {
+    public OpprettMottatteOpplysninger(MottatteOpplysningerService mottatteOpplysningerService) {
         this.mottatteOpplysningerService = mottatteOpplysningerService;
     }
 
     @Override
     public ProsessSteg inngangsSteg() {
-        return OPPRETT_SØKNAD_ELLER_ANMODNING_ELLER_ATTEST;
+        return OPPRETT_MOTTATTEOPPLYSNINGER;
     }
 
     @Override
