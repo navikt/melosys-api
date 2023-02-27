@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import no.finn.unleash.FakeUnleash;
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Saksopplysning;
@@ -14,6 +13,7 @@ import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.SaksvedleggBestilling;
 import no.nav.melosys.domain.brev.*;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
@@ -514,6 +514,36 @@ class DokgenServiceTest {
         verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Mottaker.class), brevbestillingCaptor.capture());
         MangelbrevBrevbestilling brevbestilling = (MangelbrevBrevbestilling) brevbestillingCaptor.getValue();
         assertThat(brevbestilling.isBrukerSkalHaKopi()).isFalse();
+    }
+
+    @Test
+    void skalProdusereOgDistribuereBrevTilFullmektigPrivatpersonMedKopi() {
+        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
+
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(MANGELBREV_ARBEIDSGIVER);
+        brevbestillingDto.setMottaker(Mottakerroller.ARBEIDSGIVER);
+        brevbestillingDto.setOrgnr(ORGNR);
+        brevbestillingDto.setManglerFritekst("Mangler");
+        brevbestillingDto.setBestillersId("Z123456");
+        brevbestillingDto.setKopiMottakere(List.of(new KopiMottakerDto(Mottakerroller.FULLMEKTIG, null, null, null)));
+
+        var mottaker = new Mottaker(Mottakerroller.FULLMEKTIG, null, "12345678999", null, null, Land_iso2.NO);
+        when(mockBrevMottakerService.avklarMottaker(any(), any(), any())).thenReturn(mottaker);
+
+        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
+
+
+        verify(mockProsessinstansService, times(1)).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class),
+            eq(mottaker), brevbestillingCaptor.capture());
+
+        var brevbestilling = (MangelbrevBrevbestilling) brevbestillingCaptor.getValue();
+        assertThat(brevbestilling).extracting(
+            MangelbrevBrevbestilling::getProduserbartdokument,
+            MangelbrevBrevbestilling::getBehandlingId,
+            MangelbrevBrevbestilling::getManglerInfoFritekst,
+            MangelbrevBrevbestilling::isBestillKopi
+        ).containsExactly(MANGELBREV_ARBEIDSGIVER, 123L, "Mangler", true);
     }
 
     @Test

@@ -6,7 +6,10 @@ import java.util.Map;
 import java.util.Optional;
 
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.*;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.*;
 
 public final class LovvalgBestemmelseUtils {
 
@@ -21,11 +24,11 @@ public final class LovvalgBestemmelseUtils {
             Lovvalgbestemmelser_883_2004.values(),
             Lovvalgbestemmelser_987_2009.values(),
             Tilleggsbestemmelser_883_2004.values(),
-            Lovvalgbestemmelser_trygdeavtale_uk.values(),
-            Lovvalgbestemmelser_trygdeavtale_usa.values(),
-            Lovvalgbestemmelser_trygdeavtale_ca.values(),
+            Lovvalgsbestemmelser_trygdeavtale_gb.values(),
+            Lovvalgsbestemmelser_trygdeavtale_us.values(),
+            Lovvalgsbestemmelser_trygdeavtale_ca.values(),
             Tilleggsbestemmelser_trygdeavtale_ca.values(),
-            Lovvalgbestemmelser_trygdeavtale_au.values()
+            Lovvalgsbestemmelser_trygdeavtale_au.values()
         )) {
             for (var lovBestemmelse : lovBestemelser) {
                 kodeTilLovvalgBestemmelse.put(lovBestemmelse.getKode(), lovBestemmelse);
