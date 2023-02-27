@@ -12,7 +12,7 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -31,7 +31,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class AnmodningOmUnntakSedRuterTest {
+class AnmodningOmUnntakSedRuterTest {
 
     @Mock
     private ProsessinstansService prosessinstansService;
@@ -53,18 +53,18 @@ public class AnmodningOmUnntakSedRuterTest {
     }
 
     @Test
-    public void finnSakOgBestemRuting_gsakSaksnummerErNull_NySak() {
+    void finnSakOgBestemRuting_gsakSaksnummerErNull_NySak() {
         Prosessinstans prosessinstans = new Prosessinstans();
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setAktoerId(AKTØR_ID);
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
         anmodningOmUnntakSedRuter.rutSedTilBehandling(prosessinstans, null);
-        verify(prosessinstansService).opprettProsessinstansNySakMottattAnmodningOmUnntak(eq(melosysEessiMelding), eq(melosysEessiMelding.getAktoerId()));
+        verify(prosessinstansService).opprettProsessinstansNySakMottattAnmodningOmUnntak(melosysEessiMelding, melosysEessiMelding.getAktoerId());
     }
 
     @Test
-    public void finnSakOgBestemRuting_sakEksistererPeriodeEndret_nyBehandling() {
+    void finnSakOgBestemRuting_sakEksistererPeriodeEndret_nyBehandling() {
         Fagsak fagsak = opprettFagsak();
         Prosessinstans prosessinstans = new Prosessinstans();
         MelosysEessiMelding melosysEessiMelding = opprettMelosysEessiMelding(NÅ, NESTE_ÅR);
@@ -75,11 +75,11 @@ public class AnmodningOmUnntakSedRuterTest {
         when(fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER)).thenReturn(Optional.of(fagsak));
 
         anmodningOmUnntakSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER);
-        verify(prosessinstansService).opprettProsessinstansNyBehandlingMottattAnmodningUnntak(eq(melosysEessiMelding), eq(GSAK_SAKSNUMMER));
+        verify(prosessinstansService).opprettProsessinstansNyBehandlingMottattAnmodningUnntak(melosysEessiMelding, GSAK_SAKSNUMMER);
     }
 
     @Test
-    public void finnSakOgBestemRuting_sakEksistererPeriodeIkkeEndret_ikkeNyBehandling() {
+    void finnSakOgBestemRuting_sakEksistererPeriodeIkkeEndret_ikkeNyBehandling() {
         Fagsak fagsak = opprettFagsak();
         Prosessinstans prosessinstans = new Prosessinstans();
         MelosysEessiMelding melosysEessiMelding = opprettMelosysEessiMelding(NÅ, NESTE_ÅR);
@@ -91,11 +91,11 @@ public class AnmodningOmUnntakSedRuterTest {
 
         anmodningOmUnntakSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER);
         verify(prosessinstansService, never()).opprettProsessinstansNyBehandlingMottattAnmodningUnntak(any(), any());
-        verify(prosessinstansService).opprettProsessinstansSedJournalføring(eq(fagsak.getBehandlinger().get(0)), eq(melosysEessiMelding));
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(fagsak.getBehandlinger().get(0), melosysEessiMelding);
     }
 
     @Test
-    public void finnSakOgBestemRuting_sakEksistererIkke_nySak() {
+    void finnSakOgBestemRuting_sakEksistererIkke_nySak() {
         Prosessinstans prosessinstans = new Prosessinstans();
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
@@ -103,12 +103,12 @@ public class AnmodningOmUnntakSedRuterTest {
 
         when(fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER)).thenReturn(Optional.empty());
         anmodningOmUnntakSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER);
-        verify(prosessinstansService).opprettProsessinstansNySakMottattAnmodningOmUnntak(eq(melosysEessiMelding), eq(AKTØR_ID));
+        verify(prosessinstansService).opprettProsessinstansNySakMottattAnmodningOmUnntak(melosysEessiMelding, AKTØR_ID);
     }
 
     private Behandlingsresultat opprettBehandlingsresultatMedLovvalgsperiode(LocalDate fom, LocalDate tom) {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setLovvalgsland(Landkoder.SE);
+        lovvalgsperiode.setLovvalgsland(Land_iso2.SE);
         lovvalgsperiode.setFom(fom);
         lovvalgsperiode.setTom(tom);
 

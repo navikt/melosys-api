@@ -1,6 +1,6 @@
 package no.nav.melosys.domain;
 
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
@@ -11,7 +11,7 @@ import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestem
 public interface PeriodeOmLovvalg extends ErPeriode, HarBestemmelse<LovvalgBestemmelse> {
     LovvalgBestemmelse getBestemmelse();
 
-    Landkoder getLovvalgsland();
+    Land_iso2 getLovvalgsland();
 
     LovvalgBestemmelse getTilleggsbestemmelse();
 

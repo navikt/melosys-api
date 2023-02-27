@@ -5,7 +5,7 @@ import java.util.Objects;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
@@ -28,7 +28,7 @@ public class Utpekingsperiode implements PeriodeOmLovvalg {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "lovvalgsland", updatable = false)
-    private Landkoder lovvalgsland;
+    private Land_iso2 lovvalgsland;
 
     @Column(name = "lovvalgsbestemmelse", updatable = false)
     @Convert(converter = LovvalgBestemmelsekonverterer.class)
@@ -48,7 +48,7 @@ public class Utpekingsperiode implements PeriodeOmLovvalg {
     public Utpekingsperiode() {
     }
 
-    public Utpekingsperiode(LocalDate fom, LocalDate tom, Landkoder lovvalgsland,
+    public Utpekingsperiode(LocalDate fom, LocalDate tom, Land_iso2 lovvalgsland,
                             LovvalgBestemmelse bestemmelse, LovvalgBestemmelse tilleggsbestemmelse) {
         this.fom = fom;
         this.tom = tom;
@@ -91,11 +91,11 @@ public class Utpekingsperiode implements PeriodeOmLovvalg {
         this.tom = tom;
     }
 
-    public Landkoder getLovvalgsland() {
+    public Land_iso2 getLovvalgsland() {
         return lovvalgsland;
     }
 
-    public void setLovvalgsland(Landkoder lovvalgsland) {
+    public void setLovvalgsland(Land_iso2 lovvalgsland) {
         this.lovvalgsland = lovvalgsland;
     }
 

@@ -27,7 +27,7 @@ public class Lovvalgsperiode implements PeriodeOmLovvalg {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "lovvalgsland", updatable = false)
-    private Landkoder lovvalgsland;
+    private Land_iso2 lovvalgsland;
 
     @Column(name = "lovvalg_bestemmelse", updatable = false)
     @Convert(converter = LovvalgBestemmelsekonverterer.class)
@@ -86,11 +86,11 @@ public class Lovvalgsperiode implements PeriodeOmLovvalg {
         this.tom = tom;
     }
 
-    public Landkoder getLovvalgsland() {
+    public Land_iso2 getLovvalgsland() {
         return lovvalgsland;
     }
 
-    public void setLovvalgsland(Landkoder lovvalgsland) {
+    public void setLovvalgsland(Land_iso2 lovvalgsland) {
         this.lovvalgsland = lovvalgsland;
     }
 

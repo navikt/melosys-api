@@ -8,7 +8,7 @@ import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -50,7 +50,7 @@ class LagreAnmodningsperiodeIMedlTest {
         behandling = new Behandling();
         behandling.setId(1L);
 
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode(null, null, Landkoder.CH,
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode(null, null, Land_iso2.CH,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, null, null, null, Trygdedekninger.FULL_DEKNING_EOSFO);
 
         behandlingsresultat = new Behandlingsresultat();

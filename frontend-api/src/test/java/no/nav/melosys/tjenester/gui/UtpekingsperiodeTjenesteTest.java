@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Utpekingsperiode;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -16,8 +16,6 @@ import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.jeasy.random.randomizers.misc.EnumRandomizer;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -85,7 +83,7 @@ class UtpekingsperiodeTjenesteTest {
         Utpekingsperiode utpekingsperiodeUtenTilleggsbestemmelse = new Utpekingsperiode(
             LocalDate.now(),
             LocalDate.now(),
-            Landkoder.SE,
+            Land_iso2.SE,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A,
             null
         );

@@ -12,7 +12,7 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -32,7 +32,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class UnntaksperiodeSedRuterTest {
+class UnntaksperiodeSedRuterTest {
 
     @Mock
     private ProsessinstansService prosessinstansService;
@@ -51,7 +51,7 @@ public class UnntaksperiodeSedRuterTest {
     }
 
     @Test
-    public void finnSakOgBestemRuting_nySak_verifiserResultatNySak() {
+    void finnSakOgBestemRuting_nySak_verifiserResultatNySak() {
         Prosessinstans prosessinstans = hentProsessinstans(LocalDate.now(), LocalDate.now().plusYears(1));
 
         unntaksperiodeSedRuter.rutSedTilBehandling(prosessinstans, 1L);
@@ -62,14 +62,14 @@ public class UnntaksperiodeSedRuterTest {
     }
 
     @Test
-    public void finnSakOgBestemRuting_oppdatertSedPåEksisterendeSakIkkeEndretPeriode_skalIkkeBehandles() throws Exception {
+    void finnSakOgBestemRuting_oppdatertSedPåEksisterendeSakIkkeEndretPeriode_skalIkkeBehandles() throws Exception {
 
         LocalDate fom = LocalDate.now();
         LocalDate tom = LocalDate.now().plusYears(1);
         Prosessinstans prosessinstans = hentProsessinstans(fom, tom);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setLovvalgsland(Landkoder.SE);
+        lovvalgsperiode.setLovvalgsland(Land_iso2.SE);
         lovvalgsperiode.setFom(fom);
         lovvalgsperiode.setTom(tom);
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
@@ -86,7 +86,7 @@ public class UnntaksperiodeSedRuterTest {
     }
 
     @Test
-    public void finnSakOgBestemRuting_oppdatertSedPåEksisterendeSakErEndretPeriode_skalBehandles() throws Exception {
+    void finnSakOgBestemRuting_oppdatertSedPåEksisterendeSakErEndretPeriode_skalBehandles() throws Exception {
         final long arkivsakID = 12321L;
         LocalDate fom = LocalDate.now();
         LocalDate tom = null;

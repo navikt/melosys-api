@@ -94,24 +94,24 @@ class UtpekingServiceTest {
         behandlingsresultat.setId(behandlingID);
         behandlingsresultat.setType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
 
-        when(behandlingService.hentBehandling(eq(behandlingID))).thenReturn(behandling);
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(behandlingID))).thenReturn(behandlingsresultat);
+        when(behandlingService.hentBehandling(behandlingID)).thenReturn(behandling);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
     }
 
     @Test
     void utpekLovvalgsland_harUtpekingsperiode_lovvalgsperiodeOgProsessinstansOpprettes() {
         behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
-        Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.MIN, LocalDate.MAX, Landkoder.SE,
+        Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.MIN, LocalDate.MAX, Land_iso2.SE,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
         utpekingsperiode.setId(1111L);
         behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
 
         final Set<String> mottakerInstitusjoner = Set.of("SE:123");
-        when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(eq(mottakerInstitusjoner), eq(Set.of(Land_iso2.SE)), eq(BucType.LA_BUC_02)))
+        when(eessiService.validerOgAvklarMottakerInstitusjonerForBuc(mottakerInstitusjoner, Set.of(Land_iso2.SE), BucType.LA_BUC_02))
             .thenReturn(mottakerInstitusjoner);
         when(lovvalgsperiodeService.lagreLovvalgsperioder(eq(behandlingID), anyCollection()))
             .thenReturn(Collections.singletonList(new Lovvalgsperiode()));
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID)))
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID))
             .thenReturn(Set.of(Land_iso2.SE));
 
 
@@ -119,7 +119,7 @@ class UtpekingServiceTest {
 
 
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(behandlingID), lovvalgsperiodeCaptor.capture());
-        verify(prosessinstansService).opprettProsessinstansUtpekAnnetLand(eq(behandling), eq(Landkoder.SE), eq(mottakerInstitusjoner), isNull(), isNull());
+        verify(prosessinstansService).opprettProsessinstansUtpekAnnetLand(eq(behandling), eq(Land_iso2.SE), eq(mottakerInstitusjoner), isNull(), isNull());
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
         verify(ferdigbehandlingKontrollFacade).kontroller(behandlingID, behandlingsresultat.getType());
 
@@ -145,7 +145,7 @@ class UtpekingServiceTest {
     @Test
     void utpekLovvalgsland_feilBehandlingstema_kasterException() {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
-        Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.now(), LocalDate.now(), Landkoder.SE,
+        Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.now(), LocalDate.now(), Land_iso2.SE,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
         behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
         final Set<String> mottakerInstitusjoner = Set.of("SE:123");
@@ -157,7 +157,7 @@ class UtpekingServiceTest {
     @Test
     void utpekLovvalgsland_lovvalgslandValideres() {
         behandling.setTema(Behandlingstema.ARBEID_FLERE_LAND);
-        Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.MIN, LocalDate.MAX, Landkoder.SE,
+        Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.MIN, LocalDate.MAX, Land_iso2.SE,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
         utpekingsperiode.setId(111L);
         behandlingsresultat.getUtpekingsperioder().add(utpekingsperiode);
@@ -167,7 +167,7 @@ class UtpekingServiceTest {
             .thenReturn(mottakerInstitusjoner);
         when(lovvalgsperiodeService.lagreLovvalgsperioder(eq(behandlingID), anyCollection()))
             .thenReturn(Collections.singletonList(new Lovvalgsperiode()));
-        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(eq(behandlingID)))
+        when(landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID))
             .thenReturn(List.of(Land_iso2.SE, Land_iso2.DK, Land_iso2.FI));
 
 
@@ -202,7 +202,7 @@ class UtpekingServiceTest {
         utpekingService.avvisUtpeking(behandlingID, lagUtpekingAvvis());
 
 
-        verify(behandlingsresultatService).oppdaterUtfallRegistreringUnntak(eq(behandlingID), eq(Utfallregistreringunntak.IKKE_GODKJENT));
+        verify(behandlingsresultatService).oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);
         verify(prosessinstansService).opprettProsessinstansAvvisUtpeking(eq(behandling), any(UtpekingAvvis.class));
     }
 
@@ -224,9 +224,9 @@ class UtpekingServiceTest {
         utpekingService.avvisUtpeking(behandlingID, lagUtpekingAvvis());
 
 
-        verify(behandlingsresultatService).oppdaterUtfallUtpeking(eq(behandlingID), eq(Utfallregistreringunntak.IKKE_GODKJENT));
+        verify(behandlingsresultatService).oppdaterUtfallUtpeking(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);
         verify(prosessinstansService).opprettProsessinstansAvvisUtpeking(eq(behandling), any(UtpekingAvvis.class));
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(eq(fagsak.getSaksnummer()));
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
 
     @Test

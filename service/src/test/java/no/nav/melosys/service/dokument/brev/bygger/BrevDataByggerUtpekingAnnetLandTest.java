@@ -5,7 +5,7 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Utpekingsperiode;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.dokument.brev.BrevData;
@@ -43,7 +43,7 @@ class BrevDataByggerUtpekingAnnetLandTest {
 
     @Test
     void lag_medUtpekingPeriode_girBrevdata() {
-        Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.now(), null, Landkoder.CY,
+        Utpekingsperiode utpekingsperiode = new Utpekingsperiode(LocalDate.now(), null, Land_iso2.CY,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
         when(utpekingService.hentUtpekingsperioder(eq(1L))).thenReturn(List.of(utpekingsperiode));
         final BrevData brevData = brevDataByggerUtpekingAnnetLand.lag(brevDataGrunnlag, "sb");
