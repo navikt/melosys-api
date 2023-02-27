@@ -30,6 +30,7 @@ public enum ProsessSteg implements Kodeverk {
     OPPRETT_ARKIVSAK("OPPRETT_ARKIVSAK", "Oppretter arkivsak"),
     OPPRETT_AVGIFTSOPPGAVE("OPPRETT_AVGIFTSOPPGAVE", "Oppretter en vurderingsoppgave for innregistrering i avgiftsystemet"),
     OPPRETT_BETALINGSPLAN("OPPRETT_BETALINGSPLAN", "Oppretter betalingsplan i faktureringskomponenten"),
+    OPPRETT_MOTTATTEOPPLYSNINGER("OPPRETT_MOTTATTEOPPLYSNINGER", "Oppretter mottatteopplysninger"),
     OPPRETT_OG_JOURNALFØR_BREV("OPPRETT_BREV", "Opprett nytt brev"),
     OPPRETT_OG_FERDIGSTILL_JOURNALPOST_FRA_ALTINN("OPPRETT_OG_FERDIGSTILL_JOURNALPOST_FRA_ALTINN", "Oppretter og ferdigstiller journalpost fra Altinn"),
     OPPRETT_OPPGAVE("OPPRETT_OPPGAVE", "Oppretter behandlingsoppgave"),
@@ -38,7 +39,6 @@ public enum ProsessSteg implements Kodeverk {
     OPPRETT_SAK_OG_BEHANDLING_FRA_ALTINN_SØKNAD("OPPRETT_SAK_OG_BEHANDLING_FRA_ALTINN_SØKNAD", "Oppretter fagsak og behandling fra mottatt Altinn-søknad"),
     OPPRETT_SEDDOKUMENT("OPPRETT_SEDDOKUMENT", "Oppretter saksopplysning fra SED"),
     OPPRETT_SED_GRUNNLAG("OPPRETT_SED_GRUNNLAG", "Oppretter mottatteopplysninger fra SED"),
-    OPPRETT_SØKNAD("OPPRETT_SØKNAD", "Oppretter ny søknad i Melosys"),
     PUBLISER_VEDTAK("PUBLISER_VEDTAK", "Publiserer vedtak på Kafka"), // Er ikke i bruk i dag, men mulig vi vil bruke dette i fremtiden
     REGISTERKONTROLL("REGISTERKONTROLL", "Utfører registerkontroll for en behandling"),
     REPLIKER_BEHANDLING("REPLIKER_BEHANDLING", "Replikerer den første, avsluttede behandlingen i Melosys og setter den til OPPRETTET"),

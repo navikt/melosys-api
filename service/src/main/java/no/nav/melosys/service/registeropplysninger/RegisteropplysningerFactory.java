@@ -5,7 +5,9 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
+
+import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt;
+import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
 
 
 // Setter saksopplysningtyper per behandlingstema,
@@ -17,10 +19,13 @@ public final class RegisteropplysningerFactory {
 
     public static RegisteropplysningerRequest.SaksopplysningTyper utledSaksopplysningTyper(
         Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype,
-        boolean folketrygdenToggleEnabled, boolean ikkeYrkesaktivToggleEnabled) {
+        boolean folketrygdenToggleEnabled, boolean ikkeYrkesaktivToggleEnabled, boolean registreringUnntakFraMedlemskapToggleEnabled) {
 
-        if (SaksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, folketrygdenToggleEnabled, ikkeYrkesaktivToggleEnabled)) {
-                return ingenSaksopplysningTyper();
+        if (harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, folketrygdenToggleEnabled, ikkeYrkesaktivToggleEnabled, registreringUnntakFraMedlemskapToggleEnabled)) {
+            return ingenSaksopplysningTyper();
+        }
+        if (harRegistreringUnntakFraMedlemskapFlyt(sakstype, sakstema, behandlingstema, registreringUnntakFraMedlemskapToggleEnabled)) {
+            return hentSaksopplysningTyperForRegistreringUnntakFraMedlemskap();
         }
 
         return switch (behandlingstema) {
@@ -67,6 +72,17 @@ public final class RegisteropplysningerFactory {
             .inntektsopplysninger()
             .medlemskapsopplysninger()
             .organisasjonsopplysninger()
+            .utbetalingsopplysninger()
+            .build();
+    }
+
+    private static RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForRegistreringUnntakFraMedlemskap() {
+        return RegisteropplysningerRequest.SaksopplysningTyper.builder()
+            .arbeidsforholdopplysninger()
+            .inntektsopplysninger()
+            .medlemskapsopplysninger()
+            .organisasjonsopplysninger()
+            .sakOgBehandlingopplysninger()
             .utbetalingsopplysninger()
             .build();
     }
