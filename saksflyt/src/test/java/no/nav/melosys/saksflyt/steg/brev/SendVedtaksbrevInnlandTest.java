@@ -415,7 +415,7 @@ class SendVedtaksbrevInnlandTest {
     private static Behandlingsresultat lagBehandlingsresultat(Lovvalgsperiode periode) {
         return lagBehandlingsresultat(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND,
             Collections.singleton(periode),
-            Landkoder.NO
+            Land_iso2.NO
         );
     }
 
@@ -424,13 +424,13 @@ class SendVedtaksbrevInnlandTest {
         utpekingsresultat.setUtpekingsperioder(Set.of(utpekingsperiode));
         utpekingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
         utpekingsresultat.setType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
-        utpekingsresultat.setFastsattAvLand(Landkoder.NO);
+        utpekingsresultat.setFastsattAvLand(Land_iso2.NO);
         return utpekingsresultat;
     }
 
     private static Behandlingsresultat lagBehandlingsresultat(Behandlingsresultattyper type,
                                                               Set<Lovvalgsperiode> perioder,
-                                                              Landkoder land) {
+                                                              Land_iso2 land) {
         Behandlingsresultat utenlandskLovvalgResultat = new Behandlingsresultat();
         utenlandskLovvalgResultat.setLovvalgsperioder(perioder);
         utenlandskLovvalgResultat.setType(type);
@@ -440,6 +440,6 @@ class SendVedtaksbrevInnlandTest {
     }
 
     private static Behandlingsresultat lagBehandlingsresultatUtenPerioder(Behandlingsresultattyper behandlingstype) {
-        return lagBehandlingsresultat(behandlingstype, Collections.emptySet(), Landkoder.NO);
+        return lagBehandlingsresultat(behandlingstype, Collections.emptySet(), Land_iso2.NO);
     }
 }
