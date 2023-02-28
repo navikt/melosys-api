@@ -125,7 +125,7 @@ class UtpekingServiceTest {
 
         assertThat(behandlingsresultat)
             .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst, Behandlingsresultat::getFastsattAvLand)
-            .containsExactly(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND, null, Landkoder.NO);
+            .containsExactly(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND, null, Land_iso2.NO);
         assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull()
             .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getNyVurderingBakgrunn, VedtakMetadata::getVedtakKlagefrist)
             .containsExactly(Vedtakstyper.FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
@@ -178,7 +178,7 @@ class UtpekingServiceTest {
         assertThat(landkoderCaptor.getValue()).containsExactlyInAnyOrder(Land_iso2.SE, Land_iso2.DK, Land_iso2.FI);
         assertThat(behandlingsresultat)
             .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst, Behandlingsresultat::getFastsattAvLand)
-            .containsExactly(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND, null, Landkoder.NO);
+            .containsExactly(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND, null, Land_iso2.NO);
         assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull()
             .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getNyVurderingBakgrunn, VedtakMetadata::getVedtakKlagefrist)
             .containsExactly(Vedtakstyper.FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
