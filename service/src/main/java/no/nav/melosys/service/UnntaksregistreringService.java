@@ -2,7 +2,6 @@ package no.nav.melosys.service;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -52,7 +51,7 @@ public class UnntaksregistreringService {
             ? Behandlingsresultattyper.FERDIGBEHANDLET
             : Behandlingsresultattyper.REGISTRERT_UNNTAK;
 
-        behandlingsresultat.setFastsattAvLand(Landkoder.valueOf(fastsattAvLand.getKode())); // TODO: fiks Land_iso2
+        behandlingsresultat.setFastsattAvLand(fastsattAvLand);
         behandlingsresultat.setType(type);
         behandlingsresultatService.lagre(behandlingsresultat);
     }
