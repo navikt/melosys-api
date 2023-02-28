@@ -48,10 +48,10 @@ public class OpprettAnmodningsperiodeFraSed implements StegBehandler {
         return new Anmodningsperiode(
             sedDokument.getLovvalgsperiode().getFom(),
             sedDokument.getLovvalgsperiode().getTom(),
-            sedDokument.getLovvalgslandKode() != null ? Land_iso2.valueOf(sedDokument.getLovvalgslandKode().name()) : null,
+            sedDokument.getLovvalgslandKode() != null ? Land_iso2.valueOf(sedDokument.getLovvalgslandKode().getKode()) : null,
             sedDokument.getLovvalgBestemmelse(),
             null,
-            sedDokument.getUnntakFraLovvalgslandKode() != null ? Land_iso2.valueOf(sedDokument.getUnntakFraLovvalgslandKode().name()) : null,
+            sedDokument.getUnntakFraLovvalgslandKode() != null ? Land_iso2.valueOf(sedDokument.getUnntakFraLovvalgslandKode().getKode()) : null,
             sedDokument.getUnntakFraLovvalgBestemmelse(),
             avjørTrygdedekning(sedDokument.getLovvalgslandKode())
         );
