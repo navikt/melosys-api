@@ -342,7 +342,7 @@ class EosVedtakServiceTest {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         lovvalgsperiode.setInnvilgelsesresultat(innvilgelsesResultat);
-        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
+        lovvalgsperiode.setLovvalgsland(Land_iso2.NO);
         lovvalgsperiode.setMedlPeriodeID(123L);
         lovvalgsperiode.setFom(LocalDate.now());
         behandlingsresultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));

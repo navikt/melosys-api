@@ -15,7 +15,6 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
@@ -25,6 +24,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
 import no.nav.melosys.service.dokument.brev.BrevDataVedlegg;
 import org.jeasy.random.EasyRandom;
@@ -39,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class AttestMapperTest {
+class AttestMapperTest {
 
     private AttestMapper mapper;
 
@@ -56,7 +56,7 @@ public class AttestMapperTest {
         easyRandom = EasyRandomConfigurer.randomForDokProd();
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
+        lovvalgsperiode.setLovvalgsland(Land_iso2.NO);
 
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2);
         lovvalgsperiode.setFom(LocalDate.now());
@@ -128,7 +128,7 @@ public class AttestMapperTest {
     }
 
     @Test
-    public void mapTilBrevXML() throws Exception {
+    void mapTilBrevXML() throws Exception {
         FellesType fellesType = new FellesType();
         fellesType.setFagsaksnummer("MELTEST-1");
 

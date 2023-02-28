@@ -68,7 +68,7 @@ class SendVedtaksbrevInnlandTest {
     @Test
     void utfør_medFlereLovvalgsperioder_girUnntak() {
         Lovvalgsperiode lovvalgsperiode1 = lagLovvalgsperiodeArt16_1();
-        Lovvalgsperiode lovvalgsperiode2 = lagLovvalgsperiode(FO_883_2004_ART12_1, LocalDate.now().plusDays(30), Landkoder.DK, false);
+        Lovvalgsperiode lovvalgsperiode2 = lagLovvalgsperiode(FO_883_2004_ART12_1, LocalDate.now().plusDays(30), Land_iso2.DK, false);
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
             .thenReturn(lagBehandlingsresultat(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, Set.of(lovvalgsperiode1, lovvalgsperiode2), null));
         var prosessinstans = lagProsessinstans();
@@ -151,7 +151,7 @@ class SendVedtaksbrevInnlandTest {
     @Test
     void utfør_utpeking13_1B1_senderOrienteringsbrev() {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
-            .thenReturn(lagBehandlingsresultat(lagUtpekingsperiode(), lagLovvalgsperiode(FO_883_2004_ART13_1B1, LocalDate.now(), Landkoder.SE, true)));
+            .thenReturn(lagBehandlingsresultat(lagUtpekingsperiode(), lagLovvalgsperiode(FO_883_2004_ART13_1B1, LocalDate.now(), Land_iso2.SE, true)));
 
 
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
@@ -255,7 +255,7 @@ class SendVedtaksbrevInnlandTest {
     @Test
     void utfør_avslag12_1_senderTilHelfoOgSkatt() {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
-            .thenReturn(lagBehandlingsresultat(lagLovvalgsperiode(FO_883_2004_ART12_1, LocalDate.now(), Landkoder.HR, false)));
+            .thenReturn(lagBehandlingsresultat(lagLovvalgsperiode(FO_883_2004_ART12_1, LocalDate.now(), Land_iso2.HR, false)));
 
 
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
@@ -269,7 +269,7 @@ class SendVedtaksbrevInnlandTest {
     @Test
     void utfør_avslag12_1MedArbeidsgiver_senderTilArbeidsgiver() {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
-            .thenReturn(lagBehandlingsresultat(lagLovvalgsperiode(FO_883_2004_ART12_1, LocalDate.now(), Landkoder.HR, false)));
+            .thenReturn(lagBehandlingsresultat(lagLovvalgsperiode(FO_883_2004_ART12_1, LocalDate.now(), Land_iso2.HR, false)));
         Aktoer arbeidsgiver = new Aktoer();
         arbeidsgiver.setRolle(Aktoersroller.ARBEIDSGIVER);
         arbeidsgiver.setOrgnr("123456789");
@@ -386,10 +386,10 @@ class SendVedtaksbrevInnlandTest {
     }
 
     private static Lovvalgsperiode lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_883_2004 bestemmelse) {
-        return lagLovvalgsperiode(bestemmelse, LocalDate.now(), Landkoder.NO, true);
+        return lagLovvalgsperiode(bestemmelse, LocalDate.now(), Land_iso2.NO, true);
     }
 
-    private static Lovvalgsperiode lagLovvalgsperiode(Lovvalgbestemmelser_883_2004 bestemmelse, LocalDate fom, Landkoder land, boolean innvilget) {
+    private static Lovvalgsperiode lagLovvalgsperiode(Lovvalgbestemmelser_883_2004 bestemmelse, LocalDate fom, Land_iso2 land, boolean innvilget) {
         Lovvalgsperiode periode = new Lovvalgsperiode();
         periode.setFom(fom);
         periode.setTom(fom.plusDays(1));
@@ -407,7 +407,7 @@ class SendVedtaksbrevInnlandTest {
         Utpekingsperiode utpekingsperiode = new Utpekingsperiode();
         utpekingsperiode.setFom(LocalDate.MIN);
         utpekingsperiode.setTom(LocalDate.MIN.plusDays(1));
-        utpekingsperiode.setLovvalgsland(Landkoder.PL);
+        utpekingsperiode.setLovvalgsland(Land_iso2.PL);
         utpekingsperiode.setBestemmelse(FO_883_2004_ART13_1B1);
         return utpekingsperiode;
     }

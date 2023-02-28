@@ -57,9 +57,9 @@ class A001MapperTest {
         mapper = new A001Mapper();
         easyRandom = EasyRandomConfigurer.randomForDokProd();
 
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now(), Landkoder.NO,
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now(), Land_iso2.NO,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2, Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5,
-            Landkoder.NO, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Trygdedekninger.FULL_DEKNING_EOSFO);
+            Land_iso2.NO, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Trygdedekninger.FULL_DEKNING_EOSFO);
 
         Behandlingsresultat behandlingsresultat = mock(Behandlingsresultat.class);
         when(behandlingsresultat.getRegistrertDato()).thenReturn(Instant.now());

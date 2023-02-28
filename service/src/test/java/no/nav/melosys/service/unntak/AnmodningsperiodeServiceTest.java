@@ -9,7 +9,7 @@ import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.AnmodningsperiodeSvar;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
@@ -212,9 +212,9 @@ class AnmodningsperiodeServiceTest {
 
     private Anmodningsperiode lagAnmodningsperiode() {
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now().plusYears(2),
-            Landkoder.NO,
+            Land_iso2.NO,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1,
-            null, Landkoder.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, Trygdedekninger.FULL_DEKNING_EOSFO);
+            null, Land_iso2.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, Trygdedekninger.FULL_DEKNING_EOSFO);
         anmodningsperiode.setId(ANMODNINGSPERIODE_ID);
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(BEHANDLINGS_ID);

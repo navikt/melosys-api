@@ -3,9 +3,12 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import java.util.Collections;
 import java.util.Set;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -64,29 +67,29 @@ class AvsluttFagsakOgBehandlingTest {
         prosessinstans.setBehandling(behandling);
 
         lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
+        lovvalgsperiode.setLovvalgsland(Land_iso2.NO);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
 
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(behandling.getId())))
+        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
             .thenReturn(behandlingsresultat);
     }
 
     @Test
     void utfør_erArtikkel12_behandlingOgFagsakAvsluttet() {
-        when(fagsakService.hentFagsak(eq(saksnummer))).thenReturn(fagsak);
+        when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         avsluttFagsakOgBehandling.utfør(prosessinstans);
-        verify(fagsakService).avsluttFagsakOgBehandling(eq(fagsak), eq(Saksstatuser.LOVVALG_AVKLART));
+        verify(fagsakService).avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART);
     }
 
     @Test
     void utfør_erArtikkel13_behandlingsstatusMidlertidigLovvalgsbeslutning() {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
         avsluttFagsakOgBehandling.utfør(prosessinstans);
-        verify(behandlingService).endreStatus(eq(behandling.getId()), eq(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING));
+        verify(behandlingService).endreStatus(behandling.getId(), Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
     }
 }

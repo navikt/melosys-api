@@ -2,7 +2,7 @@ package no.nav.melosys.domain;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import org.junit.jupiter.api.Test;
@@ -49,7 +49,7 @@ class PeriodeOmLovvalgTest {
         }
 
         @Override
-        public Landkoder getLovvalgsland() {
+        public Land_iso2 getLovvalgsland() {
             return null;
         }
 

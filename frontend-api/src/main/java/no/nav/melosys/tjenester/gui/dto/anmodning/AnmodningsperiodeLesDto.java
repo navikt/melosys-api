@@ -4,7 +4,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import no.nav.melosys.domain.Anmodningsperiode;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
@@ -16,9 +16,9 @@ public final class AnmodningsperiodeLesDto extends AnmodningsperiodeSkrivDto {
                                     PeriodeDto periodeDto,
                                     LovvalgBestemmelse bestemmelse,
                                     LovvalgBestemmelse tilleggsbestemmelse,
-                                    Landkoder lovvalgsland,
+                                    Land_iso2 lovvalgsland,
                                     LovvalgBestemmelse unntakFraBestemmelse,
-                                    Landkoder unntakFraLovvalgsland,
+                                    Land_iso2 unntakFraLovvalgsland,
                                     Trygdedekninger trygdedekning,
                                     String medlemskapsperiodeID,
                                     boolean sendtUtland) {

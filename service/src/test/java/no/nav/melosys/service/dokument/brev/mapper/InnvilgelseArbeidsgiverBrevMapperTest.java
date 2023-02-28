@@ -15,7 +15,7 @@ import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.KjoennsType;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -28,7 +28,7 @@ import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.l
 import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class InnvilgelseArbeidsgiverBrevMapperTest {
+class InnvilgelseArbeidsgiverBrevMapperTest {
 
     private final InnvilgelseArbeidsgiverMapper instans;
 
@@ -37,7 +37,7 @@ public class InnvilgelseArbeidsgiverBrevMapperTest {
     }
 
     @Test
-    public void mapArbeidsLandSammensattNavnLovvalgsperiodeFraSøkandTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
+    void mapArbeidsLandSammensattNavnLovvalgsperiodeFraSøkandTilBrevXmlGirIkkeTomXmlStreng() throws Exception {
         testMapTilBrevXml(lagBehandlingsresultat(Collections.singleton(lagLovvalgsperiode()),
             Collections.singleton(lagAvklarteFakta())));
     }
@@ -78,7 +78,7 @@ public class InnvilgelseArbeidsgiverBrevMapperTest {
         periode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         periode.setFom(fom);
         periode.setTom(LocalDate.now());
-        periode.setLovvalgsland(Landkoder.AT);
+        periode.setLovvalgsland(Land_iso2.AT);
         return periode;
     }
 

@@ -12,7 +12,7 @@ import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_vesentlig_virksomhet;
@@ -27,10 +27,10 @@ import static no.nav.melosys.service.dokument.brev.BrevDataUtils.lagNorskPostadr
 import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.lagNAVFelles;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class AvslagArbeidsgiverMapperTest {
+class AvslagArbeidsgiverMapperTest {
 
     @Test
-    public void mapTilBrevXML() throws JAXBException, SAXException {
+    void mapTilBrevXML() throws JAXBException, SAXException {
         FellesType fellesType = new FellesType();
         fellesType.setFagsaksnummer("MELTEST-2");
 
@@ -50,7 +50,7 @@ public class AvslagArbeidsgiverMapperTest {
         brevData.hovedvirksomhet = new AvklartVirksomhet("Test AS", "123456789", null, Yrkesaktivitetstyper.SELVSTENDIG);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setLovvalgsland(Landkoder.DE);
+        lovvalgsperiode.setLovvalgsland(Land_iso2.DE);
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now());
         brevData.lovvalgsperiode = lovvalgsperiode;

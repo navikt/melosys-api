@@ -11,6 +11,7 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
@@ -133,7 +134,7 @@ class TrygdeavtaleServiceTest {
                 FULL_DEKNING_FTRL,
                 INNVILGET,
                 LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.bestemmelse()),
-                Landkoder.NO,
+                Land_iso2.NO,
                 null
             );
     }
@@ -170,7 +171,7 @@ class TrygdeavtaleServiceTest {
                 INNVILGET,
                 LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.bestemmelse()),
                 LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.tilleggsbestemmelse()),
-                Landkoder.NO,
+                Land_iso2.NO,
                 null
             );
     }
@@ -222,7 +223,7 @@ class TrygdeavtaleServiceTest {
                 FULL_DEKNING_FTRL,
                 INNVILGET,
                 LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.bestemmelse()),
-                Landkoder.NO,
+                Land_iso2.NO,
                 111L
             );
     }

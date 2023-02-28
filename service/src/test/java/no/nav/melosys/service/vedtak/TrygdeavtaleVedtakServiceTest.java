@@ -297,7 +297,7 @@ class TrygdeavtaleVedtakServiceTest {
     private Behandlingsresultat lagBehandlingsresultat() {
         var lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
-        lovvalgsperiode.setLovvalgsland(Landkoder.GB);
+        lovvalgsperiode.setLovvalgsland(Land_iso2.GB);
         var behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
         return behandlingsresultat;

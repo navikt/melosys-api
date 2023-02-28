@@ -18,7 +18,7 @@ import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -438,7 +438,7 @@ public class ProsessinstansService {
     }
 
     public void opprettProsessinstansUtpekAnnetLand(Behandling behandling,
-                                                    Landkoder utpektLand,
+                                                    Land_iso2 utpektLand,
                                                     Set<String> mottakerinstitusjoner,
                                                     String ytterligereInformasjonSed,
                                                     String fritekstBrev) {

@@ -10,6 +10,7 @@ import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -45,7 +46,7 @@ class OpprettAnmodningsperiodeFraSedTest {
     @BeforeEach
     public void setup() {
         opprettAnmodningsperiodeFraSed = new OpprettAnmodningsperiodeFraSed(anmodningsperiodeService,
-                                                                            behandlingService);
+            behandlingService);
     }
 
     @Test
@@ -102,9 +103,9 @@ class OpprettAnmodningsperiodeFraSedTest {
     private static Anmodningsperiode lagForventetAnmodningsperiode(SedDokument sedDokument,
                                                                    Trygdedekninger trygdedekning) {
         return new Anmodningsperiode(sedDokument.getLovvalgsperiode().getFom(),
-                                     sedDokument.getLovvalgsperiode().getTom(), sedDokument.getLovvalgslandKode(),
-                                     sedDokument.getLovvalgBestemmelse(), null,
-                                     sedDokument.getUnntakFraLovvalgslandKode(),
-                                     sedDokument.getUnntakFraLovvalgBestemmelse(), trygdedekning);
+            sedDokument.getLovvalgsperiode().getTom(), Land_iso2.valueOf(sedDokument.getLovvalgslandKode().name()),
+            sedDokument.getLovvalgBestemmelse(), null,
+            Land_iso2.valueOf(sedDokument.getUnntakFraLovvalgslandKode().name()),
+            sedDokument.getUnntakFraLovvalgBestemmelse(), trygdedekning);
     }
 }

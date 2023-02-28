@@ -108,7 +108,7 @@ class EessiServiceTest {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        lovvalgsperiode.setLovvalgsland(Landkoder.SK);
+        lovvalgsperiode.setLovvalgsland(Land_iso2.SK);
         behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
         AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();

@@ -16,7 +16,7 @@ import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -126,9 +126,9 @@ class SendAnmodningOmUnntakTest {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(BEHANDLING_ID);
         behandlingsresultat.setBehandling(lagBehandling());
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now(), Landkoder.NO,
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now(), Land_iso2.NO,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2, Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5,
-            Landkoder.NO, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Trygdedekninger.FULL_DEKNING_EOSFO);
+            Land_iso2.NO, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Trygdedekninger.FULL_DEKNING_EOSFO);
         behandlingsresultat.setAnmodningsperioder(Sets.newHashSet(anmodningsperiode));
         behandlingsresultat.setType(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
         return behandlingsresultat;
