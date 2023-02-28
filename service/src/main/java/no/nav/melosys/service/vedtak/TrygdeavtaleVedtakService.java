@@ -5,7 +5,10 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -129,7 +132,7 @@ public class TrygdeavtaleVedtakService {
         behandlingsresultat.settVedtakMetadata(request.getVedtakstype(), request.getNyVurderingBakgrunn(), LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
         behandlingsresultat.setBegrunnelseFritekst(request.getBegrunnelseFritekst());
         behandlingsresultat.setInnledningFritekst(request.getInnledningFritekst());
-        behandlingsresultat.setFastsattAvLand(Landkoder.NO);
+        behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
 
         behandlingsresultatService.lagre(behandlingsresultat);
     }

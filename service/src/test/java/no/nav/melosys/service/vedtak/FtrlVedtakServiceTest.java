@@ -5,7 +5,7 @@ import java.util.List;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -98,7 +98,7 @@ class FtrlVedtakServiceTest {
                 Behandlingsresultat::getBegrunnelseFritekst,
                 Behandlingsresultat::getFastsattAvLand
             )
-            .containsExactly(MEDLEM_I_FOLKETRYGDEN, "Begrunnelse", Landkoder.NO);
+            .containsExactly(MEDLEM_I_FOLKETRYGDEN, "Begrunnelse", Land_iso2.NO);
 
         Behandling lagretBehandling = behandlingCaptor.getValue();
         assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);

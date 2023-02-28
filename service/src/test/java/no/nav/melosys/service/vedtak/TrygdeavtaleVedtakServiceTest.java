@@ -7,7 +7,10 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
@@ -101,7 +104,7 @@ class TrygdeavtaleVedtakServiceTest {
                 Behandlingsresultat::getBegrunnelseFritekst,
                 Behandlingsresultat::getFastsattAvLand
             )
-            .containsExactly(FASTSATT_LOVVALGSLAND, "Begrunnelse", Landkoder.NO);
+            .containsExactly(FASTSATT_LOVVALGSLAND, "Begrunnelse", Land_iso2.NO);
 
         Behandling lagretBehandling = behandlingCaptor.getValue();
         assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
@@ -147,7 +150,7 @@ class TrygdeavtaleVedtakServiceTest {
                 Behandlingsresultat::getBegrunnelseFritekst,
                 Behandlingsresultat::getFastsattAvLand
             )
-            .containsExactly(FASTSATT_LOVVALGSLAND, "Begrunnelse", Landkoder.NO);
+            .containsExactly(FASTSATT_LOVVALGSLAND, "Begrunnelse", Land_iso2.NO);
 
         Behandling lagretBehandling = behandlingCaptor.getValue();
         assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
@@ -193,7 +196,7 @@ class TrygdeavtaleVedtakServiceTest {
                 Behandlingsresultat::getBegrunnelseFritekst,
                 Behandlingsresultat::getFastsattAvLand
             )
-            .containsExactly(FASTSATT_LOVVALGSLAND, "Begrunnelse", Landkoder.NO);
+            .containsExactly(FASTSATT_LOVVALGSLAND, "Begrunnelse", Land_iso2.NO);
 
         Behandling lagretBehandling = behandlingCaptor.getValue();
         assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
