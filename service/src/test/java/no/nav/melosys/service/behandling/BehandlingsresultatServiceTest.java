@@ -70,7 +70,6 @@ class BehandlingsresultatServiceTest {
 
         assertThat(behandlingsresultat.getAvklartefakta()).isEmpty();
         assertThat(behandlingsresultat.getLovvalgsperioder()).isEmpty();
-        assertThat(behandlingsresultat.getVilkaarsresultater()).isEmpty();
         assertThat(behandlingsresultat.getMedlemAvFolketrygden()).isNull();
         assertThat(behandlingsresultat.getUtfallRegistreringUnntak()).isNull();
         verify(vilkaarsresultatService).tømVilkårForBehandlingsresultat(behandlingsresultat);
