@@ -79,7 +79,6 @@ class BrevmalListeByggerTest {
             kontaktopplysningService,
             eregFasade);
 
-        unleash.enable("melosys.trygdeavtale.fritekstbrev");
         brevmalListeBygger = new BrevmalListeBygger(brevmalListeService, behandlingService, unleash);
     }
 
