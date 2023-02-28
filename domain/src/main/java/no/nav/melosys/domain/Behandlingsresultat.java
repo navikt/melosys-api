@@ -40,7 +40,7 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "fastsatt_av_land")
-    private Landkoder fastsattAvLand;
+    private Land_iso2 fastsattAvLand;
 
     @Column(name = "begrunnelse_fritekst")
     private String begrunnelseFritekst;
@@ -115,11 +115,11 @@ public class Behandlingsresultat extends RegistreringsInfo {
         this.type = type;
     }
 
-    public Landkoder getFastsattAvLand() {
+    public Land_iso2 getFastsattAvLand() {
         return fastsattAvLand;
     }
 
-    public void setFastsattAvLand(Landkoder fastsattAvLand) {
+    public void setFastsattAvLand(Land_iso2 fastsattAvLand) {
         this.fastsattAvLand = fastsattAvLand;
     }
 
