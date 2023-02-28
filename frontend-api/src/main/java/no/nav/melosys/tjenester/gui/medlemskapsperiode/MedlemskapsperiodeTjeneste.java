@@ -7,13 +7,11 @@ import java.util.stream.Collectors;
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
 import no.nav.melosys.service.medlemskapsperiode.OpprettMedlemskapsperiodeService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.tjenester.gui.dto.FolketrygdlovenbestemmelseMedVilkaarDto;
-import no.nav.melosys.tjenester.gui.dto.MedlemskapsperiodeDto;
-import no.nav.melosys.tjenester.gui.dto.MedlemskapsperiodeOppdatering;
-import no.nav.melosys.tjenester.gui.dto.UtledMedlemskapsperiodeDto;
+import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
@@ -90,15 +88,22 @@ public class MedlemskapsperiodeTjeneste {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/behandlinger/medlemskapsperioder/bestemmelser")
-    public ResponseEntity<Collection<FolketrygdlovenbestemmelseMedVilkaarDto>> hentBestemmelserMedVilkaar() {
-        return ResponseEntity.ok(
-            opprettMedlemskapsperiodeService.hentBestemmelserMedVilkaar()
-                .entrySet()
-                .stream()
-                .map(this::tilBestemmelseMedVilkårDto)
-                .collect(Collectors.toSet())
-        );
+    @GetMapping("/behandlinger/medlemskapsperioder/bestemmelser/{behandlingstema}")
+    public ResponseEntity<FolketrygdlovenStøttetIkkeStøttetBestemmelserDto> hentBestemmelserMedVilkaar(@PathVariable("behandlingstema") Behandlingstema behandlingstema) {
+        var støttede = tilCollectionAvBestemmelseMedVilkår(opprettMedlemskapsperiodeService.hentBestemmelserMedVilkaar(behandlingstema, true));
+        var ikkeStøttede = tilCollectionAvBestemmelseMedVilkår(opprettMedlemskapsperiodeService.hentBestemmelserMedVilkaar(behandlingstema, false));
+
+        FolketrygdlovenStøttetIkkeStøttetBestemmelserDto folketrygdlovenStøttetIkkeStøttetBestemmelserDto = new FolketrygdlovenStøttetIkkeStøttetBestemmelserDto(støttede, ikkeStøttede);
+
+        return ResponseEntity.ok(folketrygdlovenStøttetIkkeStøttetBestemmelserDto);
+    }
+
+    private Collection<FolketrygdlovenbestemmelseMedVilkaarDto> tilCollectionAvBestemmelseMedVilkår(Map<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> bestemmelseMedVilkår) {
+        return bestemmelseMedVilkår
+            .entrySet()
+            .stream()
+            .map(this::tilBestemmelseMedVilkårDto)
+            .collect(Collectors.toSet());
     }
 
     private FolketrygdlovenbestemmelseMedVilkaarDto tilBestemmelseMedVilkårDto(Map.Entry<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> bestemmelseMedVilkår) {
@@ -109,7 +114,7 @@ public class MedlemskapsperiodeTjeneste {
                     vilkår,
                     opprettMedlemskapsperiodeService.hentMuligeBegrunnelser(vilkår))
                 ).collect(Collectors.toSet()
-            ));
+                ));
     }
 
     @PostMapping("/behandlinger/{behandlingID}/medlemskapsperioder/bestemmelser")
