@@ -43,6 +43,7 @@ public class BehandlingsresultatService {
             behandlingsresultat.getAvklartefakta().clear();
             behandlingsresultat.getLovvalgsperioder().clear();
             behandlingsresultat.setMedlemAvFolketrygden(null);
+            behandlingsresultat.setUtfallRegistreringUnntak(null);
             vilkaarsresultatService.tømVilkårForBehandlingsresultat(behandlingsresultat);
             behandlingsresultatRepository.save(behandlingsresultat);
         }
@@ -223,15 +224,20 @@ public class BehandlingsresultatService {
         behandlingsresultatRepository.save(behandlingsresultat);
     }
 
-    public void oppdaterUtfallRegistreringUnntak(long behandlingID, Utfallregistreringunntak utfallRegistreringUnntak) {
+    public void settUtfallRegistreringUnntakOgType(long behandlingID, Utfallregistreringunntak utfallRegistreringUnntak) {
         final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
         if (behandlingsresultat.getUtfallRegistreringUnntak() != null) {
             throw new FunksjonellException("Utfall for registrering av unntak er allerede satt for behandlingsresultat " + behandlingID);
         }
 
         behandlingsresultat.setType(Behandlingsresultattyper.REGISTRERT_UNNTAK);
-        behandlingsresultat.setUtfallRegistreringUnntak(utfallRegistreringUnntak);
-        behandlingsresultatRepository.save(behandlingsresultat);
+        oppdaterUtfallRegistreringUnntak(behandlingID, utfallRegistreringUnntak);
+    }
+
+    public Behandlingsresultat oppdaterUtfallRegistreringUnntak(long behandlingID, Utfallregistreringunntak utfallUtpeking) {
+        final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
+        behandlingsresultat.setUtfallRegistreringUnntak(utfallUtpeking);
+        return behandlingsresultatRepository.save(behandlingsresultat);
     }
 
     public void oppdaterUtfallUtpeking(long behandlingID, Utfallregistreringunntak utfallUtpeking) {

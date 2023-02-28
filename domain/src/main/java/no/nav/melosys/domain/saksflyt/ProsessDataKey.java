@@ -55,6 +55,7 @@ public enum ProsessDataKey {
     SAKSBEHANDLER("saksbehandler"),
     SAKSBEHANDLER_NAVN("saksbehandlerNavn"),
     SAKSNUMMER("saksnummer"),
+    SAKSSTATUS("saksstatus"),
     SAKSTYPE("sakstype"),
     SAKSTEMA("sakstema"),
     SED_DOKUMENT("sedDokument"),

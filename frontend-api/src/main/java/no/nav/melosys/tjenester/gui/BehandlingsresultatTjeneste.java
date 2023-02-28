@@ -9,6 +9,7 @@ import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.AngiBehandlingsresultattypeDto;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsresultatDto;
 import no.nav.melosys.tjenester.gui.dto.LagreFritekstDto;
+import no.nav.melosys.tjenester.gui.dto.OppdaterUtfallRegistreringUnntakDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
@@ -59,11 +60,25 @@ public class BehandlingsresultatTjeneste {
         ));
     }
 
+    @Transactional
+    @PostMapping("{behandlingID}/resultat/utfallregistreringunntak")
+    @ApiOperation(value = "Oppdater utfallRegistreringUnntak i behandlingsresultatet", response = BehandlingsresultatDto.class)
+    public ResponseEntity<BehandlingsresultatDto> oppdaterUtfallRegistreringUnntak(@PathVariable("behandlingID") long behandlingID,
+                                                                                   @RequestBody OppdaterUtfallRegistreringUnntakDto oppdaterUtfallRegistreringUnntakDto) {
+        aksesskontroll.autoriserSkrivOgTilordnet(behandlingID);
+
+        return ResponseEntity.ok(BehandlingsresultatDto.av(
+            behandlingsresultatService.oppdaterUtfallRegistreringUnntak(
+                behandlingID,
+                oppdaterUtfallRegistreringUnntakDto.utfallRegistreringUnntak())
+        ));
+    }
+
     @PostMapping("{behandlingID}/resultat/type")
     @ApiOperation(value = "Angir behandlingsresultattype og avslutter behandling og sak")
     public ResponseEntity<Void> angiBehandlingsresultattype(
-            @PathVariable("behandlingID") long behandlingID,
-            @RequestBody AngiBehandlingsresultattypeDto angiBehandlingsresultattypeDto) {
+        @PathVariable("behandlingID") long behandlingID,
+        @RequestBody AngiBehandlingsresultattypeDto angiBehandlingsresultattypeDto) {
         aksesskontroll.autoriserSkriv(behandlingID);
 
         angiBehandlingsresultatService.oppdaterBehandlingsresultattypeOgAvsluttFagsakOgBehandling(behandlingID, angiBehandlingsresultattypeDto.type());

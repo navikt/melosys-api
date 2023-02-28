@@ -5,6 +5,7 @@ import com.google.common.collect.Sets;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
 import no.nav.melosys.domain.VedtakMetadata;
+import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner;
@@ -15,6 +16,7 @@ import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.AngiBehandlingsresultattypeDto;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsresultatDto;
 import no.nav.melosys.tjenester.gui.dto.LagreFritekstDto;
+import no.nav.melosys.tjenester.gui.dto.OppdaterUtfallRegistreringUnntakDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -31,7 +33,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {BehandlingsresultatTjeneste.class})
-public class BehandlingsresultatTjenesteTest {
+class BehandlingsresultatTjenesteTest {
 
     @MockBean
     private BehandlingsresultatService behandlingsresultatService;
@@ -69,6 +71,16 @@ public class BehandlingsresultatTjenesteTest {
                 .content(objectMapper.writeValueAsString(dto)))
             .andExpect(status().isOk())
             .andExpect(responseBody(objectMapper).containsObjectAsJson(BehandlingsresultatDto.av(behandlingsresultat), BehandlingsresultatDto.class));
+    }
+
+    @Test
+    void oppdaterUtfallRegistreringUnntak() throws Exception {
+        var dto = new OppdaterUtfallRegistreringUnntakDto(Utfallregistreringunntak.DELVIS_GODKJENT);
+
+        mockMvc.perform(post(BASE_URL + "/{behandlingID}/resultat/utfallregistreringunntak", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+            .andExpect(status().isNoContent());
     }
 
     @Test

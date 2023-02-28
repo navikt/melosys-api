@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.BucType;
@@ -162,7 +161,7 @@ public class UtpekingService {
         }
 
         if (behandling.erBeslutningLovvalgAnnetLand()) {
-            behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);
+            behandlingsresultatService.settUtfallRegistreringUnntakOgType(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);
         } else if (behandling.erNorgeUtpekt()) {
             if (sedDokument.getSedType().equals(SedType.A003) && sedDokument.getLovvalgslandKode().equals(Landkoder.NO)) {
                 behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, Behandlingsresultattyper.UTPEKING_NORGE_AVVIST);

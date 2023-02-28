@@ -277,7 +277,7 @@ class BehandlingsresultatServiceTest {
         when(behandlingsresultatRepo.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
 
 
-        behandlingsresultatService.oppdaterUtfallRegistreringUnntak(1, Utfallregistreringunntak.GODKJENT);
+        behandlingsresultatService.settUtfallRegistreringUnntakOgType(1, Utfallregistreringunntak.GODKJENT);
 
 
         verify(behandlingsresultatRepo).save(behandlingsresultat);
@@ -293,7 +293,7 @@ class BehandlingsresultatServiceTest {
 
         when(behandlingsresultatRepo.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> behandlingsresultatService.oppdaterUtfallRegistreringUnntak(1, Utfallregistreringunntak.GODKJENT))
+            .isThrownBy(() -> behandlingsresultatService.settUtfallRegistreringUnntakOgType(1, Utfallregistreringunntak.GODKJENT))
             .withMessageContaining("Utfall for registrering av unntak er allerede satt for behandlingsresultat");
     }
 

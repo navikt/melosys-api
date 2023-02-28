@@ -42,7 +42,7 @@ class MedlPeriodeKonverterTest {
         assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8)).isEqualTo(GrunnlagMedl.FTL_2_8);
 
         assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(() -> MedlPeriodeKonverter.tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1))
+            .isThrownBy(() -> MedlPeriodeKonverter.tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1_FØRSTE_LEDD))
             .withMessageContaining("Folketrygdloven bestemmelse støttes ikke. Kode: FTRL_KAP2_2_1");
     }
 
