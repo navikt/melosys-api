@@ -1,6 +1,8 @@
 package no.nav.melosys.service.mottatteopplysninger;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,7 +11,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsaarsak;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -23,6 +27,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.MottatteOpplysningerRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.UtledMottaksdato;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,7 +61,8 @@ class MottatteOpplysningerServiceTest {
 
     @BeforeEach
     public void setup() {
-        mottatteOpplysningerService = new MottatteOpplysningerService(mottatteOpplysningerRepository, behandlingService, joarkFasade, unleash);
+        UtledMottaksdato utledMottaksdato = new UtledMottaksdato(joarkFasade);
+        mottatteOpplysningerService = new MottatteOpplysningerService(mottatteOpplysningerRepository, behandlingService, utledMottaksdato, unleash);
 
         unleash.enableAll();
     }
@@ -131,7 +137,7 @@ class MottatteOpplysningerServiceTest {
     void opprettEøsSøknadGrunnlag_finnesIkkeFraFør_blirOpprettet() {
         Behandling behandling = lagBehandling(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.UTSENDT_ARBEIDSTAKER);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
-        when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
+        when(joarkFasade.hentJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(lagJournalpost(behandling));
         Periode periode = new Periode();
         Soeknadsland soeknadsland = new Soeknadsland();
 
@@ -215,7 +221,7 @@ class MottatteOpplysningerServiceTest {
     void opprettSedGrunnlag_harRettType() {
         Behandling behandling = lagBehandling(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
-        when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
+        when(joarkFasade.hentJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(lagJournalpost(behandling));
         SedGrunnlag sedGrunnlag = new SedGrunnlag();
 
 
@@ -236,7 +242,7 @@ class MottatteOpplysningerServiceTest {
     void opprettSøknadFolketrygden_harPeriodeOgLand_setterPeriodeOgLandOgHarRettType() {
         Behandling behandling = lagBehandling(Sakstyper.FTRL, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.ARBEID_I_UTLANDET);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
-        when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
+        when(joarkFasade.hentJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(lagJournalpost(behandling));
         var periode = new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 12, 31));
         var soeknadsland = new Soeknadsland(List.of("UK"), false);
 
@@ -260,7 +266,7 @@ class MottatteOpplysningerServiceTest {
     void opprettSøknadTrygdeavtale_harPeriodeOgLand_setterPeriodeOgLandOgHarRettType() {
         Behandling behandling = lagBehandling(Sakstyper.TRYGDEAVTALE, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.YRKESAKTIV);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
-        when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
+        when(joarkFasade.hentJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(lagJournalpost(behandling));
         var periode = new Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 12, 31));
         var soeknadsland = new Soeknadsland(List.of("UK"), false);
 
@@ -294,7 +300,7 @@ class MottatteOpplysningerServiceTest {
     void opprettSøknad_mottatteOpplysningerBlirOpprettet() {
         Behandling behandling = lagBehandling(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.YRKESAKTIV);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
-        when(joarkFasade.hentMottaksDatoForJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(LocalDate.now());
+        when(joarkFasade.hentJournalpost(behandling.getInitierendeJournalpostId())).thenReturn(lagJournalpost(behandling));
 
         mottatteOpplysningerService.opprettSøknad(behandling, null, null);
 
@@ -306,6 +312,32 @@ class MottatteOpplysningerServiceTest {
         assertThat(opprettet.getType()).isEqualTo(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS);
         assertThat(opprettet.getBehandling()).isEqualTo(behandling);
         assertThat(opprettet.getMottaksdato()).isNotNull();
+    }
+
+    @Test
+    void opprettSøknad_FTRL_brukbBehandlingsårsak() {
+        Behandling behandling = lagBehandling(Sakstyper.FTRL, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.YRKESAKTIV);
+        Behandlingsaarsak behandlingsaarsak = new Behandlingsaarsak();
+        behandlingsaarsak.setMottaksdato(LocalDate.now());
+        behandling.setBehandlingsårsak(behandlingsaarsak);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
+
+        mottatteOpplysningerService.opprettSøknad(behandling, null, null);
+
+        verify(mottatteOpplysningerRepository).save(mottatteOpplysningerArgumentCaptor.capture());
+        MottatteOpplysninger opprettet = mottatteOpplysningerArgumentCaptor.getValue();
+
+        assertThat(opprettet).isNotNull();
+        assertThat(opprettet.getMottatteOpplysningerData()).isInstanceOf(Soeknad.class);
+        assertThat(opprettet.getType()).isEqualTo(Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN);
+        assertThat(opprettet.getBehandling()).isEqualTo(behandling);
+        assertThat(opprettet.getMottaksdato()).isNotNull();
+    }
+
+    private Journalpost lagJournalpost(Behandling behandling) {
+        Journalpost journalpost = new Journalpost(behandling.getInitierendeJournalpostId());
+        journalpost.setForsendelseMottatt(LocalDateTime.now().toInstant(ZoneOffset.UTC));
+        return journalpost;
     }
 
     private Behandling lagBehandling(Sakstyper sakstype, Sakstemaer sakstemaer, Behandlingstema tema) {

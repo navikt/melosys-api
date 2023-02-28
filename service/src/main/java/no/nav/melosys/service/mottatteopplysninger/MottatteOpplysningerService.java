@@ -17,9 +17,9 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.MottatteOpplysningerRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.UtledMottaksdato;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -42,17 +42,16 @@ public class MottatteOpplysningerService {
 
     private final MottatteOpplysningerRepository mottatteOpplysningerRepository;
     private final BehandlingService behandlingService;
-    private final JoarkFasade joarkFasade;
+    private final UtledMottaksdato utledMottaksdato;
 
     private final Unleash unleash;
 
     public MottatteOpplysningerService(MottatteOpplysningerRepository mottatteOpplysningerRepository,
                                        BehandlingService behandlingService,
-                                       JoarkFasade joarkFasade,
-                                       Unleash unleash) {
+                                       UtledMottaksdato utledMottaksdato, Unleash unleash) {
         this.mottatteOpplysningerRepository = mottatteOpplysningerRepository;
         this.behandlingService = behandlingService;
-        this.joarkFasade = joarkFasade;
+        this.utledMottaksdato = utledMottaksdato;
         this.unleash = unleash;
     }
 
@@ -194,7 +193,7 @@ public class MottatteOpplysningerService {
         mottatteOpplysninger.setEndretDato(nå);
         mottatteOpplysninger.setType(type);
         mottatteOpplysninger.setVersjon(versjon);
-        mottatteOpplysninger.setMottaksdato(hentMottaksdato(type, behandling.getInitierendeJournalpostId()));
+        mottatteOpplysninger.setMottaksdato(hentMottaksdato(behandling));
         mottatteOpplysninger.setOriginalData(originalData);
         mottatteOpplysninger.setEksternReferanseID(eksternReferanseID);
         mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
@@ -202,20 +201,8 @@ public class MottatteOpplysningerService {
         mottatteOpplysningerRepository.save(mottatteOpplysninger);
     }
 
-    // Gjør mottaksdato nødvendig for kun folketrygden da nåværende journalpost-oppslag kun støtter inngående
-    // dokumenter og fordi mottaksdato ikke er like viktig for andre grunnlagstyper.
-    private LocalDate hentMottaksdato(Mottatteopplysningertyper grunnlagtype, String journalpostID) {
-        if (grunnlagtype == SØKNAD_FOLKETRYGDEN) {
-            return finnMottaksdato(journalpostID).orElseThrow(
-                () -> new FunksjonellException("Mottaksdato trenges for " + SØKNAD_FOLKETRYGDEN.getKode()));
-        } else {
-            return finnMottaksdato(journalpostID).orElse(null);
-        }
-    }
-
-    private Optional<LocalDate> finnMottaksdato(String journalpostID) {
-        return Optional.ofNullable(journalpostID)
-            .map(joarkFasade::hentMottaksDatoForJournalpost);
+    private LocalDate hentMottaksdato(Behandling behandling) {
+        return utledMottaksdato.getMottaksdato(behandling);
     }
 
     @Transactional
