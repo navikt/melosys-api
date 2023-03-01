@@ -83,7 +83,7 @@ public class BrevmalListeBygger {
                 if (!harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP))) {
                     mottakere.add(lagMottakerMedAdresseOgFeilmelding(behandlingId, Mottakerroller.ARBEIDSGIVER));
                 }
-                if (unleash.isEnabled("melosys.trygdeavtale.fritekstbrev") && fagsak.erSakstypeTrygdeavtale() && behandling.harLand()) {
+                if (fagsak.erSakstypeTrygdeavtale() && behandling.harLand()) {
                     mottakere.add(lagMottakerMedRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
                 }
                 mottakere.add(lagMottakerMedRolle(Mottakerroller.ANNEN_ORGANISASJON));
@@ -292,10 +292,6 @@ public class BrevmalListeBygger {
 
     @Deprecated(since = "Når toggle melosys.trygdeavtale.fritekstbrev er enabled og dokumentTittel klart til å brukes i alle brev kan denne kombineres med lagBrevmalTypeDtoForGenereltFritekstbrev")
     private BrevmalTypeDto lagBrevmalTypeDtoForUtenlandskTrygdemyndighetFritekstbrev(Produserbaredokumenter produserbartdokument, long behandlingId) {
-        if (!unleash.isEnabled("melosys.trygdeavtale.fritekstbrev")) {
-            return null;
-        }
-
         return new BrevmalTypeDto.Builder()
             .medType(produserbartdokument)
             .medFelter(asList(
