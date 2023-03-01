@@ -280,6 +280,7 @@ class BehandlingsresultatServiceTest {
     void settUtfallRegistreringUnntakOgType_ikkeSatt_lagres() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatRepo.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
+        when(behandlingsresultatRepo.findWithKontrollresultaterById(1L)).thenReturn(Optional.of(behandlingsresultat));
 
 
         behandlingsresultatService.settUtfallRegistreringUnntakOgType(1, Utfallregistreringunntak.GODKJENT);
@@ -306,7 +307,7 @@ class BehandlingsresultatServiceTest {
     void oppdaterUtfallRegistreringUnntak_alleredeSatt_oppdaterer() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.GODKJENT);
-        when(behandlingsresultatRepo.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
+        when(behandlingsresultatRepo.findWithKontrollresultaterById(1L)).thenReturn(Optional.of(behandlingsresultat));
 
 
         behandlingsresultatService.oppdaterUtfallRegistreringUnntak(1, Utfallregistreringunntak.DELVIS_GODKJENT);
