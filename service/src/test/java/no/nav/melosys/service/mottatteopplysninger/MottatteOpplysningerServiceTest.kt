@@ -396,28 +396,25 @@ internal class MottatteOpplysningerServiceTest {
         mottatteOpplysningerService.opprettSøknad(behandling, null, null)
     }
 
-    private fun lagJournalpost(behandling: Behandling): Journalpost {
-        val journalpost = Journalpost(behandling.initierendeJournalpostId)
-        journalpost.forsendelseMottatt = LocalDateTime.of(2000, 1, 1, 0, 0).toInstant(ZoneOffset.UTC)
-        return journalpost
-    }
+    private fun lagJournalpost(behandling: Behandling) =
+        Journalpost(behandling.initierendeJournalpostId).apply {
+            forsendelseMottatt = LocalDateTime.of(2000, 1, 1, 0, 0).toInstant(ZoneOffset.UTC)
+        }
 
-    private fun lagBehandling(sakstype: Sakstyper, sakstemaer: Sakstemaer, tema: Behandlingstema): Behandling {
-        val behandling = Behandling()
-        behandling.fagsak = lagFagsak(sakstype, sakstemaer)
-        behandling.id = behandlingID
-        behandling.initierendeJournalpostId = "123321"
-        behandling.tema = tema
-        behandling.type = Behandlingstyper.FØRSTEGANG
-        return behandling
-    }
+    private fun lagBehandling(sakstype: Sakstyper, sakstemaer: Sakstemaer, tema: Behandlingstema) =
+        Behandling().apply {
+            fagsak = lagFagsak(sakstype, sakstemaer)
+            id = behandlingID
+            initierendeJournalpostId = "123321"
+            type = Behandlingstyper.FØRSTEGANG
+            this.tema = tema
+        }
 
-    private fun lagFagsak(sakstype: Sakstyper, sakstemaer: Sakstemaer): Fagsak {
-        val fagsak = Fagsak()
-        fagsak.type = sakstype
-        fagsak.tema = sakstemaer
-        return fagsak
-    }
+    private fun lagFagsak(sakstype: Sakstyper, sakstemaer: Sakstemaer) =
+        Fagsak().apply {
+            type = sakstype
+            tema = sakstemaer
+        }
 
     private val String.toJsonNode: JsonNode
         get() {
