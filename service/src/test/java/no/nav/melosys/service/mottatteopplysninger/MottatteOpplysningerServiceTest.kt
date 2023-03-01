@@ -1,7 +1,19 @@
 package no.nav.melosys.service.mottatteopplysninger
 
-import com.fasterxml.jackson.core.JsonProcessingException
+import io.kotest.matchers.shouldBe
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldNotBe
+import io.kotest.matchers.throwable.shouldHaveMessage
+import io.kotest.matchers.types.shouldBeInstanceOf
+import io.kotest.matchers.types.shouldNotBeInstanceOf
+import io.mockk.Called
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.verify
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsaarsak
@@ -21,35 +33,30 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.repository.MottatteOpplysningerRepository
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.UtledMottaksdato
-import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.*
-import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.whenever
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
 
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 internal class MottatteOpplysningerServiceTest {
-    @Mock
+    @MockK
     private lateinit var mottatteOpplysningerRepository: MottatteOpplysningerRepository
 
-    @Mock
+    @MockK
     private lateinit var behandlingService: BehandlingService
 
-    @Mock
+    @MockK
     private lateinit var joarkFasade: JoarkFasade
 
     private lateinit var mottatteOpplysningerService: MottatteOpplysningerService
 
-    @Captor
-    private val mottatteOpplysningerArgumentCaptor: ArgumentCaptor<MottatteOpplysninger>? = null
-    private val behandlingID: Long = 123332211
     private val unleash = FakeUnleash()
+
     @BeforeEach
     fun setup() {
         val utledMottaksdato = UtledMottaksdato(joarkFasade)
@@ -64,158 +71,182 @@ internal class MottatteOpplysningerServiceTest {
 
     @Test
     fun hentMottatteOpplysningerForBehandlingID_finnes_returnerMottatteOpplysninger() {
-        whenever(mottatteOpplysningerRepository.findByBehandling_Id(behandlingID))
-            .thenReturn(Optional.of(MottatteOpplysninger()))
-        Assertions.assertThat(mottatteOpplysningerService.hentMottatteOpplysninger(behandlingID)).isNotNull
+        every { mottatteOpplysningerRepository.findByBehandling_Id(behandlingID) } returns Optional.of(
+            MottatteOpplysninger()
+        )
+
+        mottatteOpplysningerService.hentMottatteOpplysninger(behandlingID).shouldNotBeNull()
     }
 
     @Test
     fun hentMottatteOpplysningerForBehandlingID_finnesIkke_kastException() {
-        Assertions.assertThatExceptionOfType(IkkeFunnetException::class.java)
-            .isThrownBy { mottatteOpplysningerService.hentMottatteOpplysninger(1) }
-            .withMessageContaining("Finner ikke mottatteOpplysninger for behandling 1")
+        every { mottatteOpplysningerRepository.findByBehandling_Id(1) } returns Optional.empty()
+
+        shouldThrow<IkkeFunnetException> {
+            mottatteOpplysningerService.hentMottatteOpplysninger(1)
+        }.shouldHaveMessage("Finner ikke mottatteOpplysninger for behandling 1")
     }
 
     @Test
     fun opprettSøknadEllerAnmodningEllerAttest_toggleErAv_lagerIkkeAnmodningEllerAttest() {
         unleash.disableAll()
-        val behandling =
-            lagBehandling(Sakstyper.EU_EOS, Sakstemaer.UNNTAK, Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR)
+        val behandling = lagBehandling(
+            Sakstyper.EU_EOS,
+            Sakstemaer.UNNTAK,
+            Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR
+        )
         val prosessinstans = Prosessinstans()
         prosessinstans.behandling = behandling
+
+
         mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(prosessinstans)
-        Mockito.verify(mottatteOpplysningerRepository, Mockito.never())!!.save(
-            mottatteOpplysningerArgumentCaptor!!.capture()
-        )
+
+
+        verify(exactly = 0) {
+            mottatteOpplysningerRepository.save(any())
+        }
     }
 
     @Test
     fun opprettSøknadEllerAnmodningEllerAttest_erAnmodningOmUnntakEllerRegistreringUnntak_lagerAnmodningEllerAttest() {
-        val behandling =
-            lagBehandling(Sakstyper.EU_EOS, Sakstemaer.UNNTAK, Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR)
-        val prosessinstans = Prosessinstans()
-        prosessinstans.behandling = behandling
-        whenever(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling)
-        mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(prosessinstans)
-        Mockito.verify(mottatteOpplysningerRepository)!!.save(
-            mottatteOpplysningerArgumentCaptor!!.capture()
+        val behandling = lagBehandling(
+            Sakstyper.EU_EOS,
+            Sakstemaer.UNNTAK,
+            Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR
         )
-        val opprettet = mottatteOpplysningerArgumentCaptor.value
-        Assertions.assertThat(opprettet).isNotNull
-        Assertions.assertThat(opprettet.type).isEqualTo(Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST)
-        Assertions.assertThat(opprettet.mottatteOpplysningerData).isInstanceOf(
-            AnmodningEllerAttest::class.java
-        )
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
+        every { mottatteOpplysningerRepository.save(any()) } answers {
+            firstArg<MottatteOpplysninger>().shouldNotBeNull().apply {
+                type.shouldBe(Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST)
+                mottatteOpplysningerData.shouldBeInstanceOf<AnmodningEllerAttest>()
+            }
+        }
+
+        mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(Prosessinstans().apply {
+            this.behandling = behandling
+        })
     }
 
     @Test
     fun opprettSøknadEllerAnmodningEllerAttest_erIkkeAnmodningOmUnntakEllerRegistreringUnntak_lagerIkkeAnmodningEllerAttest() {
-        val behandling =
-            lagBehandling(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.UTSENDT_ARBEIDSTAKER)
-        val prosessinstans = Prosessinstans()
-        prosessinstans.behandling = behandling
-        whenever(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling)
-        mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(prosessinstans)
-        Mockito.verify(mottatteOpplysningerRepository)!!.save(
-            mottatteOpplysningerArgumentCaptor!!.capture()
+        val behandling = lagBehandling(
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.UTSENDT_ARBEIDSTAKER
         )
-        val opprettet = mottatteOpplysningerArgumentCaptor.value
-        Assertions.assertThat(opprettet).isNotNull
-        Assertions.assertThat(opprettet.type).isNotEqualTo(Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST)
-        Assertions.assertThat(opprettet.mottatteOpplysningerData).isNotInstanceOf(
-            AnmodningEllerAttest::class.java
-        )
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
+        every { mottatteOpplysningerRepository.save(any()) } answers {
+            firstArg<MottatteOpplysninger>().shouldNotBeNull().apply {
+                type.shouldNotBe(Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST)
+                mottatteOpplysningerData.shouldNotBeInstanceOf<AnmodningEllerAttest>()
+            }
+        }
+
+        mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(Prosessinstans().apply {
+            this.behandling = behandling
+        })
     }
 
     @Test
     fun opprettEøsSøknadGrunnlag_finnesIkkeFraFør_blirOpprettet() {
-        val behandling =
-            lagBehandling(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.UTSENDT_ARBEIDSTAKER)
-        whenever(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling)
-        whenever(joarkFasade.hentJournalpost(behandling.initierendeJournalpostId))
-            .thenReturn(lagJournalpost(behandling))
+        val behandling = lagBehandling(
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.UTSENDT_ARBEIDSTAKER
+        )
         val periode = Periode()
         val soeknadsland = Soeknadsland()
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
+        every { mottatteOpplysningerRepository.save(any()) } answers {
+            firstArg<MottatteOpplysninger>().shouldNotBeNull().apply {
+                type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS)
+                mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
+                mottatteOpplysningerData.apply {
+                    periode.shouldBe(periode)
+                    soeknadsland.shouldBe(soeknadsland)
+                }
+                mottaksdato.shouldBe(LocalDate.of(2000, 1, 1))
+            }
+        }
+
         mottatteOpplysningerService.opprettSøknad(behandling, periode, soeknadsland)
-        Mockito.verify(mottatteOpplysningerRepository)!!.save(
-            mottatteOpplysningerArgumentCaptor!!.capture()
-        )
-        val opprettet = mottatteOpplysningerArgumentCaptor.value
-        Assertions.assertThat(opprettet).isNotNull
-        Assertions.assertThat(opprettet.mottatteOpplysningerData).isInstanceOf(
-            Soeknad::class.java
-        )
-        Assertions.assertThat(opprettet.mottatteOpplysningerData.periode).isEqualTo(periode)
-        Assertions.assertThat(opprettet.mottatteOpplysningerData.soeknadsland).isEqualTo(soeknadsland)
-        Assertions.assertThat(opprettet.type).isEqualTo(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS)
-        Assertions.assertThat(opprettet.behandling).isEqualTo(behandling)
-        Assertions.assertThat(opprettet.mottaksdato).isNotNull
     }
 
     @Test
-    @Throws(JsonProcessingException::class)
     fun oppdaterMottatteOpplysningerJson_mottatteopplysningerEksisterer_oppdatererMottatteOpplysningerData() {
-        val objectMapper = ObjectMapper()
-        val mottatteOpplysninger = MottatteOpplysninger()
-        val originalData = MottatteOpplysningerData()
-        val originalJsonData = objectMapper.writeValueAsString(originalData)
-        mottatteOpplysninger.jsonData = originalJsonData
-        mottatteOpplysninger.setMottatteOpplysningerdata(MottatteOpplysningerData())
-        whenever(mottatteOpplysningerRepository.findByBehandling_Id(behandlingID))
-            .thenReturn(Optional.of(mottatteOpplysninger))
-        val nyData: MottatteOpplysningerData = Soeknad()
-        val jsonNode = objectMapper.readTree(objectMapper.writeValueAsString(nyData))
-        mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandlingID, jsonNode)
-        Mockito.verify(mottatteOpplysningerRepository).saveAndFlush(
-            ArgumentMatchers.any(
-                MottatteOpplysninger::class.java
-            )
+        val originalJsonData = "Dette skal erstattes"
+        val mottatteOpplysninger = MottatteOpplysninger().apply {
+            jsonData = originalJsonData
+        }
+        val soeknadJsonNode = Soeknad().toJsonNode
+        every { mottatteOpplysningerRepository.findByBehandling_Id(behandlingID) } returns Optional.of(
+            mottatteOpplysninger
         )
-        Assertions.assertThat(mottatteOpplysninger.jsonData).isNotEqualTo(originalJsonData)
+        every { mottatteOpplysningerRepository.saveAndFlush(any()) } returns MottatteOpplysninger()
+
+
+        mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandlingID, soeknadJsonNode)
+
+
+        verify(exactly = 1) { mottatteOpplysningerRepository.saveAndFlush(any()) }
+        mottatteOpplysninger.jsonData.shouldNotBe(originalJsonData)
+        mottatteOpplysninger.jsonData.shouldBe(soeknadJsonNode.toPrettyString())
     }
 
     @Test
-    @Throws(JsonProcessingException::class)
     fun oppdaterMottatteOpplysninger_mottatteopplysningerJsonDataIkkeSatt_setterJsonDataOgLagrerMottatteOpplysninger() {
-        val mottatteOpplysningerData = MottatteOpplysningerData()
-        mottatteOpplysningerData.periode = Periode(
-            LocalDate.of(2000, 1, 1),
-            LocalDate.of(2010, 1, 1)
-        )
-        val mottatteOpplysninger = MottatteOpplysninger()
-        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData)
+        val mottatteOpplysninger = MottatteOpplysninger().apply {
+            setMottatteOpplysningerdata(MottatteOpplysningerData().apply {
+                periode = Periode(
+                    LocalDate.of(2000, 1, 1),
+                    LocalDate.of(2010, 1, 1)
+                )
+            })
+        }
+
+        every { mottatteOpplysningerRepository.saveAndFlush(any()) } answers {
+            firstArg<MottatteOpplysninger>().shouldNotBeNull().apply {
+                jsonData.toJsonNode["periode"].apply {
+                    this["fom"].toString().shouldBe("[2000,1,1]")
+                    this["tom"].toString().shouldBe("[2010,1,1]")
+                }
+            }
+        }
+
         mottatteOpplysningerService.oppdaterMottatteOpplysninger(mottatteOpplysninger)
-        Mockito.verify(mottatteOpplysningerRepository)!!.saveAndFlush(
-            mottatteOpplysningerArgumentCaptor!!.capture()
-        )
-        val jsonNode = ObjectMapper().readTree(
-            mottatteOpplysningerArgumentCaptor.value.jsonData
-        )
-        val periode = jsonNode["periode"].toString()
-        Assertions.assertThat(periode)
-            .isEqualTo(
-                "{" +
-                        "\"fom\":[2000,1,1]," +
-                        "\"tom\":[2010,1,1]" +
-                        "}"
-            )
     }
+
 
     @Test
     fun oppdaterMottatteOpplysningerPeriodeOgLand_eksisterer_oppdatererPeriodeOgLand() {
-        val captor = ArgumentCaptor.forClass(
-            MottatteOpplysninger::class.java
+        val mottatteOpplysninger = MottatteOpplysninger().apply {
+            setMottatteOpplysningerdata(MottatteOpplysningerData())
+        }
+        val periode = Periode(
+            LocalDate.of(2021, 1, 1),
+            LocalDate.of(2021, 12, 31)
         )
-        val mottatteOpplysninger = MottatteOpplysninger()
-        mottatteOpplysninger.setMottatteOpplysningerdata(MottatteOpplysningerData())
-        whenever(mottatteOpplysningerRepository.findByBehandling_Id(behandlingID))
-            .thenReturn(Optional.of(mottatteOpplysninger))
-        val periode = Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 12, 31))
         val soeknadsland = Soeknadsland(listOf("UK"), false)
+
+        every { mottatteOpplysningerRepository.findByBehandling_Id(behandlingID) } returns Optional.of(
+            mottatteOpplysninger
+        )
+        every { mottatteOpplysningerRepository.saveAndFlush(any()) } answers {
+            firstArg<MottatteOpplysninger>().apply {
+                mottatteOpplysningerData.apply {
+                    this.periode.shouldBe(periode)
+                    this.soeknadsland.shouldBe(soeknadsland)
+                }
+            }
+        }
+
         mottatteOpplysningerService.oppdaterMottatteOpplysningerPeriodeOgLand(behandlingID, periode, soeknadsland)
-        Mockito.verify(mottatteOpplysningerRepository).saveAndFlush(captor.capture())
-        Assertions.assertThat(captor.value.mottatteOpplysningerData.periode).isEqualTo(periode)
-        Assertions.assertThat(captor.value.mottatteOpplysningerData.soeknadsland).isEqualTo(soeknadsland)
     }
 
     @Test
@@ -225,71 +256,83 @@ internal class MottatteOpplysningerServiceTest {
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
         )
-        whenever(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling)
-        whenever(joarkFasade.hentJournalpost(behandling.initierendeJournalpostId))
-            .thenReturn(lagJournalpost(behandling))
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
+
         val sedGrunnlag = SedGrunnlag()
+
+        every { mottatteOpplysningerRepository.save(any()) } answers {
+            firstArg<MottatteOpplysninger>().apply {
+                type.shouldBe(Mottatteopplysningertyper.SED)
+                behandling.shouldBe(behandling)
+                mottaksdato.shouldBe(LocalDate.of(2000, 1, 1))
+                mottatteOpplysningerData.shouldBeInstanceOf<SedGrunnlag>()
+            }
+        }
+
         mottatteOpplysningerService.opprettSedGrunnlag(behandlingID, sedGrunnlag)
-        Mockito.verify(mottatteOpplysningerRepository)!!.save(
-            mottatteOpplysningerArgumentCaptor!!.capture()
-        )
-        val opprettet = mottatteOpplysningerArgumentCaptor.value
-        Assertions.assertThat(opprettet).isNotNull
-        Assertions.assertThat(opprettet.mottatteOpplysningerData).isInstanceOf(
-            SedGrunnlag::class.java
-        )
-        Assertions.assertThat(opprettet.type).isEqualTo(Mottatteopplysningertyper.SED)
-        Assertions.assertThat(opprettet.behandling).isEqualTo(behandling)
-        Assertions.assertThat(opprettet.mottaksdato).isNotNull
     }
 
     @Test
     fun opprettSøknadFolketrygden_harPeriodeOgLand_setterPeriodeOgLandOgHarRettType() {
-        val behandling = lagBehandling(Sakstyper.FTRL, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.ARBEID_I_UTLANDET)
-        whenever(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling)
-        whenever(joarkFasade.hentJournalpost(behandling.initierendeJournalpostId))
-            .thenReturn(lagJournalpost(behandling))
-        val periode = Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 12, 31))
+        val behandling = lagBehandling(
+            Sakstyper.FTRL,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.ARBEID_I_UTLANDET
+        )
+        val periode = Periode(
+            LocalDate.of(2021, 1, 1),
+            LocalDate.of(2021, 12, 31)
+        )
         val soeknadsland = Soeknadsland(listOf("UK"), false)
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
+        every { mottatteOpplysningerRepository.save(any()) } answers {
+            firstArg<MottatteOpplysninger>().apply {
+                mottatteOpplysningerData.shouldBeInstanceOf<SoeknadFtrl>()
+                this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN)
+                this.behandling.shouldBe(behandling)
+                mottaksdato.shouldBe(LocalDate.of(2000, 1, 1))
+                mottatteOpplysningerData.apply {
+                    this.periode.shouldBe(periode)
+                    this.soeknadsland.shouldBe(soeknadsland)
+                }
+            }
+        }
+
         mottatteOpplysningerService.opprettSøknad(behandling, periode, soeknadsland)
-        Mockito.verify(mottatteOpplysningerRepository)!!.save(
-            mottatteOpplysningerArgumentCaptor!!.capture()
-        )
-        val opprettet = mottatteOpplysningerArgumentCaptor.value
-        Assertions.assertThat(opprettet).isNotNull
-        Assertions.assertThat(opprettet.mottatteOpplysningerData).isInstanceOf(
-            SoeknadFtrl::class.java
-        )
-        Assertions.assertThat(opprettet.mottatteOpplysningerData.periode).isEqualTo(periode)
-        Assertions.assertThat(opprettet.mottatteOpplysningerData.soeknadsland).isEqualTo(soeknadsland)
-        Assertions.assertThat(opprettet.type).isEqualTo(Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN)
-        Assertions.assertThat(opprettet.behandling).isEqualTo(behandling)
-        Assertions.assertThat(opprettet.mottaksdato).isNotNull
     }
 
     @Test
     fun opprettSøknadTrygdeavtale_harPeriodeOgLand_setterPeriodeOgLandOgHarRettType() {
-        val behandling =
-            lagBehandling(Sakstyper.TRYGDEAVTALE, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.YRKESAKTIV)
-        whenever(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling)
-        whenever(joarkFasade.hentJournalpost(behandling.initierendeJournalpostId))
-            .thenReturn(lagJournalpost(behandling))
-        val periode = Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 12, 31))
+        val behandling = lagBehandling(
+            Sakstyper.TRYGDEAVTALE,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.YRKESAKTIV
+        )
+        val periode = Periode(
+            LocalDate.of(2021, 1, 1),
+            LocalDate.of(2021, 12, 31)
+        )
         val soeknadsland = Soeknadsland(listOf("UK"), false)
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
+        every { mottatteOpplysningerRepository.save(any()) } answers {
+            firstArg<MottatteOpplysninger>().apply {
+                mottatteOpplysningerData.shouldBeInstanceOf<SoeknadTrygdeavtale>()
+                this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE)
+                this.behandling.shouldBe(behandling)
+                mottaksdato.shouldBe(LocalDate.of(2000, 1, 1))
+                mottatteOpplysningerData.apply {
+                    this.periode.shouldBe(periode)
+                    this.soeknadsland.shouldBe(soeknadsland)
+                }
+            }
+        }
+
         mottatteOpplysningerService.opprettSøknad(behandling, periode, soeknadsland)
-        Mockito.verify(mottatteOpplysningerRepository)!!.save(
-            mottatteOpplysningerArgumentCaptor!!.capture()
-        )
-        val opprettet = mottatteOpplysningerArgumentCaptor.value
-        Assertions.assertThat(opprettet).isNotNull
-        Assertions.assertThat(opprettet.mottatteOpplysningerData).isInstanceOf(
-            SoeknadTrygdeavtale::class.java
-        )
-        Assertions.assertThat(opprettet.mottatteOpplysningerData.periode).isEqualTo(periode)
-        Assertions.assertThat(opprettet.mottatteOpplysningerData.soeknadsland).isEqualTo(soeknadsland)
-        Assertions.assertThat(opprettet.type).isEqualTo(Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE)
-        Assertions.assertThat(opprettet.behandling).isEqualTo(behandling)
-        Assertions.assertThat(opprettet.mottaksdato).isNotNull
     }
 
     @Test
@@ -300,54 +343,62 @@ internal class MottatteOpplysningerServiceTest {
             Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
         )
         mottatteOpplysningerService.opprettSøknad(behandling, null, null)
-        Mockito.verifyNoInteractions(behandlingService)
-        Mockito.verifyNoInteractions(mottatteOpplysningerRepository)
+
+        verify {
+            behandlingService wasNot Called
+            mottatteOpplysningerRepository wasNot Called
+        }
     }
 
     @Test
     fun opprettSøknad_mottatteOpplysningerBlirOpprettet() {
         val behandling = lagBehandling(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.YRKESAKTIV)
-        whenever(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling)
-        whenever(joarkFasade.hentJournalpost(behandling.initierendeJournalpostId))
-            .thenReturn(lagJournalpost(behandling))
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
+
+
+        every { mottatteOpplysningerRepository.save(any()) } answers {
+            firstArg<MottatteOpplysninger>().apply {
+                mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
+                this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS)
+                this.behandling.shouldBe(behandling)
+                mottaksdato.shouldBe(LocalDate.of(2000, 1, 1))
+            }
+        }
+
         mottatteOpplysningerService.opprettSøknad(behandling, null, null)
-        Mockito.verify(mottatteOpplysningerRepository)!!.save(
-            mottatteOpplysningerArgumentCaptor!!.capture()
-        )
-        val opprettet = mottatteOpplysningerArgumentCaptor.value
-        Assertions.assertThat(opprettet).isNotNull
-        Assertions.assertThat(opprettet.mottatteOpplysningerData).isInstanceOf(
-            Soeknad::class.java
-        )
-        Assertions.assertThat(opprettet.type).isEqualTo(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS)
-        Assertions.assertThat(opprettet.behandling).isEqualTo(behandling)
-        Assertions.assertThat(opprettet.mottaksdato).isNotNull
     }
 
     @Test
     fun opprettSøknad_FTRL_brukbBehandlingsårsak() {
-        val behandling = lagBehandling(Sakstyper.FTRL, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.YRKESAKTIV)
-        val behandlingsaarsak = Behandlingsaarsak()
-        behandlingsaarsak.mottaksdato = LocalDate.now()
-        behandling.behandlingsårsak = behandlingsaarsak
-        whenever(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling)
+        val dagensDato = LocalDate.now()
+        val behandling = lagBehandling(
+            Sakstyper.FTRL,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.YRKESAKTIV
+        ).apply {
+            behandlingsårsak = Behandlingsaarsak().apply {
+                mottaksdato = dagensDato
+            }
+        }
+
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { mottatteOpplysningerRepository.save(any()) } answers {
+            firstArg<MottatteOpplysninger>().apply {
+                mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
+                this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN)
+                this.behandling.shouldBe(behandling)
+                mottaksdato.shouldBe(dagensDato)
+            }
+        }
+
         mottatteOpplysningerService.opprettSøknad(behandling, null, null)
-        Mockito.verify(mottatteOpplysningerRepository)!!.save(
-            mottatteOpplysningerArgumentCaptor!!.capture()
-        )
-        val opprettet = mottatteOpplysningerArgumentCaptor.value
-        Assertions.assertThat(opprettet).isNotNull
-        Assertions.assertThat(opprettet.mottatteOpplysningerData).isInstanceOf(
-            Soeknad::class.java
-        )
-        Assertions.assertThat(opprettet.type).isEqualTo(Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN)
-        Assertions.assertThat(opprettet.behandling).isEqualTo(behandling)
-        Assertions.assertThat(opprettet.mottaksdato).isNotNull
     }
 
     private fun lagJournalpost(behandling: Behandling): Journalpost {
         val journalpost = Journalpost(behandling.initierendeJournalpostId)
-        journalpost.forsendelseMottatt = LocalDateTime.now().toInstant(ZoneOffset.UTC)
+        journalpost.forsendelseMottatt = LocalDateTime.of(2000, 1, 1, 0, 0).toInstant(ZoneOffset.UTC)
         return journalpost
     }
 
@@ -366,5 +417,19 @@ internal class MottatteOpplysningerServiceTest {
         fagsak.type = sakstype
         fagsak.tema = sakstemaer
         return fagsak
+    }
+
+    private val String.toJsonNode: JsonNode
+        get() {
+            return ObjectMapper().readTree(this)
+        }
+
+    private val Any.toJsonNode: JsonNode
+        get() {
+            return ObjectMapper().valueToTree(this)
+        }
+
+    companion object {
+        private const val behandlingID: Long = 123332211
     }
 }
