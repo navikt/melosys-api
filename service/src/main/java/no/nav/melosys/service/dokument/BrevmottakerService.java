@@ -246,7 +246,6 @@ public class BrevmottakerService {
     private List<Mottaker> avklarMottakereForUtenlandskTrygdeyndighet(Mottaker mottaker, Behandling behandling, Produserbaredokumenter produserbartDokument) {
         if (mottaker.getOrgnr() != null) {
             // Norsk myndighet har orgnummer.
-            log.warn("Mottaker med orgnr {} har rolle UTENLANDSK_TRYGDEMYNDIGHET istedenfor NORSK_MYNDIGHET", mottaker.getOrgnr());
             return Collections.singletonList(mottaker);
         } else {
             // Utenlandsk myndighet
