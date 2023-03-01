@@ -97,7 +97,7 @@ public class AvklarteVirksomheterService {
     public List<AvklartVirksomhet> hentNorskeArbeidsgivere(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer) {
         Set<String> arbeidsgivendeOrgnumre = hentNorskeArbeidsgivendeOrgnumre(behandling);
         return organisasjonOppslagService.hentOrganisasjoner(arbeidsgivendeOrgnumre).stream()
-            .map(org -> new AvklartVirksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), adressekonverterer.apply(org), Yrkesaktivitetstyper.LOENNET_ARBEID))
+            .map(org -> new AvklartVirksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), adressekonverterer.apply(org), Yrkesaktivitetstyper.LOENNET_ARBEID, org.getOrganisasjonDetaljer().getOpphoersdato()))
             .collect(Collectors.toList());
     }
 
@@ -130,15 +130,7 @@ public class AvklarteVirksomheterService {
     }
 
     public boolean harOpphørtAvklartVirksomhet(Behandling behandling) {
-        try {
-            hentAlleNorskeVirksomheter(behandling);
-        } catch (Exception e) {
-            if (e.getMessage().contains("Organisasjon har opphørt")) {
-                log.warn(e.getMessage());
-                return true;
-            }
-        }
-        return false;
+        return hentAlleNorskeVirksomheter(behandling).stream().anyMatch(AvklartVirksomhet::erOpphoert);
     }
 
     @Transactional
