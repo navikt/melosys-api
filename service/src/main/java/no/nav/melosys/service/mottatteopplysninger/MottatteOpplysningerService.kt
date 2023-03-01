@@ -1,0 +1,246 @@
+package no.nav.melosys.service.mottatteopplysninger
+
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.JsonNode
+import no.finn.unleash.Unleash
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.mottatteopplysninger.*
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode
+import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.domain.saksflyt.ProsessDataKey
+import no.nav.melosys.domain.saksflyt.Prosessinstans
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.featuretoggle.ToggleName
+import no.nav.melosys.repository.MottatteOpplysningerRepository
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.UtledMottaksdato
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.Companion.harRegistreringUnntakFraMedlemskapFlyt
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.Companion.harTomFlyt
+import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.time.Instant
+import java.time.LocalDate
+import java.util.*
+
+@Service
+ class MottatteOpplysningerService(
+    private val mottatteOpplysningerRepository: MottatteOpplysningerRepository,
+    private val behandlingService: BehandlingService,
+    private val utledMottaksdato: UtledMottaksdato, private val unleash: Unleash
+) {
+    @Transactional(readOnly = true)
+    fun hentMottatteOpplysninger(behandlingID: Long): MottatteOpplysninger {
+        return finnMottatteOpplysninger(behandlingID)
+            .orElseThrow { IkkeFunnetException("Finner ikke mottatteOpplysninger for behandling $behandlingID") }
+    }
+
+    @Transactional(readOnly = true)
+    fun finnMottatteOpplysningerData(behandlingID: Long): Optional<MottatteOpplysningerData> {
+        val mottatteOpplysninger = finnMottatteOpplysninger(behandlingID).orElse(null)
+            ?: return Optional.empty()
+        return Optional.of(mottatteOpplysninger.mottatteOpplysningerData)
+    }
+
+    fun opprettSedGrunnlag(
+        behandlingID: Long,
+        sedGrunnlag: SedGrunnlag
+    ) {
+        opprettMottatteOpplysninger(behandlingID, sedGrunnlag, Mottatteopplysningertyper.SED, VERSJON_SED_GRUNNLAG)
+    }
+
+    fun opprettSøknadEllerAnmodningEllerAttest(prosessinstans: Prosessinstans) {
+        val behandling = prosessinstans.behandling
+        if (harRegistreringUnntakFraMedlemskapFlyt(
+                behandling,
+                unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP)
+            )
+        ) {
+            opprettMottatteOpplysninger(
+                behandling.id,
+                AnmodningEllerAttest(),
+                Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST,
+                VERSJON_ANMODNING_ATTEST_GRUNNLAG
+            )
+        } else {
+            opprettSøknad(prosessinstans, behandling)
+        }
+    }
+
+    fun opprettSøknad(prosessinstans: Prosessinstans, behandling: Behandling) {
+        val soeknadsland: Soeknadsland?
+        val periode: Periode?
+        val sakstype = behandling.fagsak.type
+        if (unleash.isEnabled("melosys.tom_periode_og_land") || sakstype == Sakstyper.TRYGDEAVTALE) {
+            soeknadsland = prosessinstans.getData(
+                ProsessDataKey.SØKNADSLAND,
+                object : TypeReference<Soeknadsland>() {},
+                Soeknadsland()
+            )
+            periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode::class.java, Periode())
+        } else {
+            soeknadsland = prosessinstans.getData(
+                ProsessDataKey.SØKNADSLAND,
+                object : TypeReference<Soeknadsland>() {})
+            periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode::class.java)
+        }
+        opprettSøknad(behandling, periode, soeknadsland)
+    }
+
+    fun opprettSøknad(behandling: Behandling, periode: Periode?, soeknadsland: Soeknadsland?) {
+        val behandlingID = behandling.id
+        val skalOppretteSøknad = !harTomFlyt(
+            behandling,
+            unleash.isEnabled("melosys.folketrygden.mvp"),
+            unleash.isEnabled(ToggleName.IKKEYRKESAKTIV_FLYT),
+            unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP)
+        )
+        if (skalOppretteSøknad) {
+            val sakstype = behandling.fagsak.type
+            when (sakstype) {
+                Sakstyper.EU_EOS -> opprettSøknadYrkesaktiveEøs(behandlingID, periode, soeknadsland)
+                Sakstyper.FTRL -> opprettSøknadFolketrygden(behandlingID, periode, soeknadsland)
+                Sakstyper.TRYGDEAVTALE -> opprettSøknadTrygdeavtale(behandlingID, periode, soeknadsland)
+            }
+            log.info("Opprettet søknad for behandling {}.", behandlingID)
+        } else {
+            log.info(
+                "Søknad trengs ikke og opprettes ikke for behandling {} med tema {}", behandlingID,
+                behandling.tema
+            )
+        }
+    }
+
+    private fun opprettSøknadYrkesaktiveEøs(behandlingID: Long, periode: Periode?, soeknadsland: Soeknadsland?) {
+        val soeknad = Soeknad()
+        soeknad.periode = periode
+        soeknad.soeknadsland = soeknadsland
+        opprettMottatteOpplysninger(
+            behandlingID, soeknad, Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS,
+            VERSJON_SOEKNAD_GRUNNLAG
+        )
+    }
+
+    fun opprettSøknadUtsendteArbeidstakereEøs(
+        behandlingID: Long,
+        orginalData: String?,
+        soeknad: Soeknad,
+        eksternReferanseID: String?
+    ) {
+        opprettMottatteOpplysninger(
+            behandlingID, orginalData, soeknad,
+            Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS, VERSJON_SOEKNAD_GRUNNLAG,
+            eksternReferanseID
+        )
+    }
+
+    private fun opprettSøknadFolketrygden(behandlingID: Long, periode: Periode?, soeknadsland: Soeknadsland?) {
+        val soeknadFtrl = SoeknadFtrl()
+        soeknadFtrl.periode = periode
+        soeknadFtrl.soeknadsland = soeknadsland
+        opprettMottatteOpplysninger(
+            behandlingID, soeknadFtrl, Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN,
+            VERSJON_SOEKNAD_GRUNNLAG
+        )
+    }
+
+    private fun opprettSøknadTrygdeavtale(behandlingID: Long, periode: Periode?, soeknadsland: Soeknadsland?) {
+        val soeknadTrygdeavtale = SoeknadTrygdeavtale()
+        soeknadTrygdeavtale.periode = periode
+        soeknadTrygdeavtale.soeknadsland = soeknadsland
+        opprettMottatteOpplysninger(
+            behandlingID, soeknadTrygdeavtale, Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE,
+            VERSJON_SOEKNAD_GRUNNLAG
+        )
+    }
+
+    private fun opprettMottatteOpplysninger(
+        behandlingID: Long,
+        mottatteOpplysningerData: MottatteOpplysningerData,
+        type: Mottatteopplysningertyper,
+        versjon: String
+    ) {
+        opprettMottatteOpplysninger(behandlingID, null, mottatteOpplysningerData, type, versjon, null)
+    }
+
+    private fun opprettMottatteOpplysninger(
+        behandlingID: Long,
+        originalData: String?,
+        mottatteOpplysningerData: MottatteOpplysningerData,
+        type: Mottatteopplysningertyper,
+        versjon: String,
+        eksternReferanseID: String?
+    ) {
+        val behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)
+        if (behandling.mottatteOpplysninger != null) {
+            throw FunksjonellException("Finnes allerede mottatteOpplysninger for behandling " + behandling.id)
+        }
+        if (eksternReferanseID != null && harMottattSøknadMedEksternReferanseID(eksternReferanseID)) {
+            throw FunksjonellException("Det finnes allerede mottatteOpplysninger med eksterReferanseID $eksternReferanseID")
+        }
+        val nå = Instant.now()
+        val mottatteOpplysninger = MottatteOpplysninger()
+        mottatteOpplysninger.behandling = behandling
+        mottatteOpplysninger.registrertDato = nå
+        mottatteOpplysninger.endretDato = nå
+        mottatteOpplysninger.type = type
+        mottatteOpplysninger.versjon = versjon
+        mottatteOpplysninger.mottaksdato = hentMottaksdato(behandling)
+        mottatteOpplysninger.originalData = originalData
+        mottatteOpplysninger.eksternReferanseID = eksternReferanseID
+        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData)
+        behandling.mottatteOpplysninger = mottatteOpplysninger
+        mottatteOpplysningerRepository.save(mottatteOpplysninger)
+    }
+
+    private fun hentMottaksdato(behandling: Behandling): LocalDate? {
+        return utledMottaksdato.getMottaksdato(behandling)
+    }
+
+    @Transactional
+    fun oppdaterMottatteOpplysninger(behandlingID: Long, mottatteOpplysningerDataJson: JsonNode): MottatteOpplysninger? {
+        val mottatteOpplysninger = hentMottatteOpplysninger(behandlingID)
+        mottatteOpplysninger.jsonData = mottatteOpplysningerDataJson.toPrettyString()
+        return mottatteOpplysningerRepository.saveAndFlush(mottatteOpplysninger)
+    }
+
+    @Transactional
+    fun oppdaterMottatteOpplysninger(mottatteOpplysninger: MottatteOpplysninger) {
+        MottatteOpplysningerKonverterer.oppdaterMottatteOpplysninger(mottatteOpplysninger)
+        mottatteOpplysningerRepository.saveAndFlush(mottatteOpplysninger)
+    }
+
+    @Transactional
+    fun oppdaterMottatteOpplysningerPeriodeOgLand(behandlingID: Long, periode: Periode?, soeknadsland: Soeknadsland?) {
+        val mottatteOpplysninger = hentMottatteOpplysninger(behandlingID)!!
+        mottatteOpplysninger.mottatteOpplysningerData.periode = periode
+        mottatteOpplysninger.mottatteOpplysningerData.soeknadsland = soeknadsland
+        MottatteOpplysningerKonverterer.oppdaterMottatteOpplysninger(mottatteOpplysninger)
+        mottatteOpplysningerRepository.saveAndFlush(mottatteOpplysninger)
+    }
+
+    @Transactional
+    fun slettOpplysninger(behandlingID: Long) {
+        val behandling = behandlingService.hentBehandling(behandlingID)
+        behandling.mottatteOpplysninger = null
+        mottatteOpplysningerRepository.deleteByBehandling_Id(behandlingID)
+    }
+
+    fun finnMottatteOpplysninger(behandlingID: Long?): Optional<MottatteOpplysninger> {
+        return mottatteOpplysningerRepository.findByBehandling_Id(behandlingID!!)
+    }
+
+    fun harMottattSøknadMedEksternReferanseID(eksternReferanseID: String): Boolean {
+        return !mottatteOpplysningerRepository.findByEksternReferanseID(eksternReferanseID).isEmpty()
+    }
+
+    companion object {
+        private val log = LoggerFactory.getLogger(MottatteOpplysningerService::class.java)
+        private const val VERSJON_SED_GRUNNLAG = "1"
+        private const val VERSJON_SOEKNAD_GRUNNLAG = "1.2"
+        private const val VERSJON_ANMODNING_ATTEST_GRUNNLAG = "1"
+    }
+}
