@@ -36,14 +36,15 @@ import java.util.*
 @ExtendWith(MockitoExtension::class)
 internal class MottatteOpplysningerServiceTest {
     @Mock
-    private val mottatteOpplysningerRepository: MottatteOpplysningerRepository? = null
+    private lateinit var mottatteOpplysningerRepository: MottatteOpplysningerRepository
 
     @Mock
-    private val behandlingService: BehandlingService? = null
+    private lateinit var behandlingService: BehandlingService
 
     @Mock
-    private val joarkFasade: JoarkFasade? = null
-    private var mottatteOpplysningerService: MottatteOpplysningerService? = null
+    private lateinit var joarkFasade: JoarkFasade
+
+    private lateinit var mottatteOpplysningerService: MottatteOpplysningerService
 
     @Captor
     private val mottatteOpplysningerArgumentCaptor: ArgumentCaptor<MottatteOpplysninger>? = null
@@ -51,10 +52,10 @@ internal class MottatteOpplysningerServiceTest {
     private val unleash = FakeUnleash()
     @BeforeEach
     fun setup() {
-        val utledMottaksdato = UtledMottaksdato(joarkFasade!!)
+        val utledMottaksdato = UtledMottaksdato(joarkFasade)
         mottatteOpplysningerService = MottatteOpplysningerService(
-            mottatteOpplysningerRepository!!,
-            behandlingService!!,
+            mottatteOpplysningerRepository,
+            behandlingService,
             utledMottaksdato,
             unleash
         )
@@ -63,15 +64,15 @@ internal class MottatteOpplysningerServiceTest {
 
     @Test
     fun hentMottatteOpplysningerForBehandlingID_finnes_returnerMottatteOpplysninger() {
-        whenever(mottatteOpplysningerRepository!!.findByBehandling_Id(behandlingID))
+        whenever(mottatteOpplysningerRepository.findByBehandling_Id(behandlingID))
             .thenReturn(Optional.of(MottatteOpplysninger()))
-        Assertions.assertThat(mottatteOpplysningerService!!.hentMottatteOpplysninger(behandlingID)).isNotNull
+        Assertions.assertThat(mottatteOpplysningerService.hentMottatteOpplysninger(behandlingID)).isNotNull
     }
 
     @Test
     fun hentMottatteOpplysningerForBehandlingID_finnesIkke_kastException() {
         Assertions.assertThatExceptionOfType(IkkeFunnetException::class.java)
-            .isThrownBy { mottatteOpplysningerService!!.hentMottatteOpplysninger(1) }
+            .isThrownBy { mottatteOpplysningerService.hentMottatteOpplysninger(1) }
             .withMessageContaining("Finner ikke mottatteOpplysninger for behandling 1")
     }
 
@@ -82,7 +83,7 @@ internal class MottatteOpplysningerServiceTest {
             lagBehandling(Sakstyper.EU_EOS, Sakstemaer.UNNTAK, Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR)
         val prosessinstans = Prosessinstans()
         prosessinstans.behandling = behandling
-        mottatteOpplysningerService!!.opprettSøknadEllerAnmodningEllerAttest(prosessinstans)
+        mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(prosessinstans)
         Mockito.verify(mottatteOpplysningerRepository, Mockito.never())!!.save(
             mottatteOpplysningerArgumentCaptor!!.capture()
         )
@@ -94,8 +95,8 @@ internal class MottatteOpplysningerServiceTest {
             lagBehandling(Sakstyper.EU_EOS, Sakstemaer.UNNTAK, Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR)
         val prosessinstans = Prosessinstans()
         prosessinstans.behandling = behandling
-        whenever(behandlingService!!.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling)
-        mottatteOpplysningerService!!.opprettSøknadEllerAnmodningEllerAttest(prosessinstans)
+        whenever(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling)
+        mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(prosessinstans)
         Mockito.verify(mottatteOpplysningerRepository)!!.save(
             mottatteOpplysningerArgumentCaptor!!.capture()
         )
@@ -113,8 +114,8 @@ internal class MottatteOpplysningerServiceTest {
             lagBehandling(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.UTSENDT_ARBEIDSTAKER)
         val prosessinstans = Prosessinstans()
         prosessinstans.behandling = behandling
-        whenever(behandlingService!!.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling)
-        mottatteOpplysningerService!!.opprettSøknadEllerAnmodningEllerAttest(prosessinstans)
+        whenever(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling)
+        mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(prosessinstans)
         Mockito.verify(mottatteOpplysningerRepository)!!.save(
             mottatteOpplysningerArgumentCaptor!!.capture()
         )
@@ -130,12 +131,12 @@ internal class MottatteOpplysningerServiceTest {
     fun opprettEøsSøknadGrunnlag_finnesIkkeFraFør_blirOpprettet() {
         val behandling =
             lagBehandling(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.UTSENDT_ARBEIDSTAKER)
-        whenever(behandlingService!!.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling)
-        whenever(joarkFasade!!.hentJournalpost(behandling.initierendeJournalpostId))
+        whenever(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling)
+        whenever(joarkFasade.hentJournalpost(behandling.initierendeJournalpostId))
             .thenReturn(lagJournalpost(behandling))
         val periode = Periode()
         val soeknadsland = Soeknadsland()
-        mottatteOpplysningerService!!.opprettSøknad(behandling, periode, soeknadsland)
+        mottatteOpplysningerService.opprettSøknad(behandling, periode, soeknadsland)
         Mockito.verify(mottatteOpplysningerRepository)!!.save(
             mottatteOpplysningerArgumentCaptor!!.capture()
         )
@@ -160,11 +161,11 @@ internal class MottatteOpplysningerServiceTest {
         val originalJsonData = objectMapper.writeValueAsString(originalData)
         mottatteOpplysninger.jsonData = originalJsonData
         mottatteOpplysninger.setMottatteOpplysningerdata(MottatteOpplysningerData())
-        whenever(mottatteOpplysningerRepository!!.findByBehandling_Id(behandlingID))
+        whenever(mottatteOpplysningerRepository.findByBehandling_Id(behandlingID))
             .thenReturn(Optional.of(mottatteOpplysninger))
         val nyData: MottatteOpplysningerData = Soeknad()
         val jsonNode = objectMapper.readTree(objectMapper.writeValueAsString(nyData))
-        mottatteOpplysningerService!!.oppdaterMottatteOpplysninger(behandlingID, jsonNode)
+        mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandlingID, jsonNode)
         Mockito.verify(mottatteOpplysningerRepository).saveAndFlush(
             ArgumentMatchers.any(
                 MottatteOpplysninger::class.java
@@ -183,7 +184,7 @@ internal class MottatteOpplysningerServiceTest {
         )
         val mottatteOpplysninger = MottatteOpplysninger()
         mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData)
-        mottatteOpplysningerService!!.oppdaterMottatteOpplysninger(mottatteOpplysninger)
+        mottatteOpplysningerService.oppdaterMottatteOpplysninger(mottatteOpplysninger)
         Mockito.verify(mottatteOpplysningerRepository)!!.saveAndFlush(
             mottatteOpplysningerArgumentCaptor!!.capture()
         )
@@ -207,11 +208,11 @@ internal class MottatteOpplysningerServiceTest {
         )
         val mottatteOpplysninger = MottatteOpplysninger()
         mottatteOpplysninger.setMottatteOpplysningerdata(MottatteOpplysningerData())
-        whenever(mottatteOpplysningerRepository!!.findByBehandling_Id(behandlingID))
+        whenever(mottatteOpplysningerRepository.findByBehandling_Id(behandlingID))
             .thenReturn(Optional.of(mottatteOpplysninger))
         val periode = Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 12, 31))
         val soeknadsland = Soeknadsland(listOf("UK"), false)
-        mottatteOpplysningerService!!.oppdaterMottatteOpplysningerPeriodeOgLand(behandlingID, periode, soeknadsland)
+        mottatteOpplysningerService.oppdaterMottatteOpplysningerPeriodeOgLand(behandlingID, periode, soeknadsland)
         Mockito.verify(mottatteOpplysningerRepository).saveAndFlush(captor.capture())
         Assertions.assertThat(captor.value.mottatteOpplysningerData.periode).isEqualTo(periode)
         Assertions.assertThat(captor.value.mottatteOpplysningerData.soeknadsland).isEqualTo(soeknadsland)
@@ -224,11 +225,11 @@ internal class MottatteOpplysningerServiceTest {
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
         )
-        whenever(behandlingService!!.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling)
-        whenever(joarkFasade!!.hentJournalpost(behandling.initierendeJournalpostId))
+        whenever(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling)
+        whenever(joarkFasade.hentJournalpost(behandling.initierendeJournalpostId))
             .thenReturn(lagJournalpost(behandling))
         val sedGrunnlag = SedGrunnlag()
-        mottatteOpplysningerService!!.opprettSedGrunnlag(behandlingID, sedGrunnlag)
+        mottatteOpplysningerService.opprettSedGrunnlag(behandlingID, sedGrunnlag)
         Mockito.verify(mottatteOpplysningerRepository)!!.save(
             mottatteOpplysningerArgumentCaptor!!.capture()
         )
@@ -245,12 +246,12 @@ internal class MottatteOpplysningerServiceTest {
     @Test
     fun opprettSøknadFolketrygden_harPeriodeOgLand_setterPeriodeOgLandOgHarRettType() {
         val behandling = lagBehandling(Sakstyper.FTRL, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.ARBEID_I_UTLANDET)
-        whenever(behandlingService!!.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling)
-        whenever(joarkFasade!!.hentJournalpost(behandling.initierendeJournalpostId))
+        whenever(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling)
+        whenever(joarkFasade.hentJournalpost(behandling.initierendeJournalpostId))
             .thenReturn(lagJournalpost(behandling))
         val periode = Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 12, 31))
         val soeknadsland = Soeknadsland(listOf("UK"), false)
-        mottatteOpplysningerService!!.opprettSøknad(behandling, periode, soeknadsland)
+        mottatteOpplysningerService.opprettSøknad(behandling, periode, soeknadsland)
         Mockito.verify(mottatteOpplysningerRepository)!!.save(
             mottatteOpplysningerArgumentCaptor!!.capture()
         )
@@ -270,12 +271,12 @@ internal class MottatteOpplysningerServiceTest {
     fun opprettSøknadTrygdeavtale_harPeriodeOgLand_setterPeriodeOgLandOgHarRettType() {
         val behandling =
             lagBehandling(Sakstyper.TRYGDEAVTALE, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.YRKESAKTIV)
-        whenever(behandlingService!!.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling)
-        whenever(joarkFasade!!.hentJournalpost(behandling.initierendeJournalpostId))
+        whenever(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling)
+        whenever(joarkFasade.hentJournalpost(behandling.initierendeJournalpostId))
             .thenReturn(lagJournalpost(behandling))
         val periode = Periode(LocalDate.of(2021, 1, 1), LocalDate.of(2021, 12, 31))
         val soeknadsland = Soeknadsland(listOf("UK"), false)
-        mottatteOpplysningerService!!.opprettSøknad(behandling, periode, soeknadsland)
+        mottatteOpplysningerService.opprettSøknad(behandling, periode, soeknadsland)
         Mockito.verify(mottatteOpplysningerRepository)!!.save(
             mottatteOpplysningerArgumentCaptor!!.capture()
         )
@@ -298,7 +299,7 @@ internal class MottatteOpplysningerServiceTest {
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
         )
-        mottatteOpplysningerService!!.opprettSøknad(behandling, null, null)
+        mottatteOpplysningerService.opprettSøknad(behandling, null, null)
         Mockito.verifyNoInteractions(behandlingService)
         Mockito.verifyNoInteractions(mottatteOpplysningerRepository)
     }
@@ -306,10 +307,10 @@ internal class MottatteOpplysningerServiceTest {
     @Test
     fun opprettSøknad_mottatteOpplysningerBlirOpprettet() {
         val behandling = lagBehandling(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.YRKESAKTIV)
-        whenever(behandlingService!!.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling)
-        whenever(joarkFasade!!.hentJournalpost(behandling.initierendeJournalpostId))
+        whenever(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling)
+        whenever(joarkFasade.hentJournalpost(behandling.initierendeJournalpostId))
             .thenReturn(lagJournalpost(behandling))
-        mottatteOpplysningerService!!.opprettSøknad(behandling, null, null)
+        mottatteOpplysningerService.opprettSøknad(behandling, null, null)
         Mockito.verify(mottatteOpplysningerRepository)!!.save(
             mottatteOpplysningerArgumentCaptor!!.capture()
         )
@@ -329,8 +330,8 @@ internal class MottatteOpplysningerServiceTest {
         val behandlingsaarsak = Behandlingsaarsak()
         behandlingsaarsak.mottaksdato = LocalDate.now()
         behandling.behandlingsårsak = behandlingsaarsak
-        whenever(behandlingService!!.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling)
-        mottatteOpplysningerService!!.opprettSøknad(behandling, null, null)
+        whenever(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling)
+        mottatteOpplysningerService.opprettSøknad(behandling, null, null)
         Mockito.verify(mottatteOpplysningerRepository)!!.save(
             mottatteOpplysningerArgumentCaptor!!.capture()
         )
