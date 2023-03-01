@@ -45,7 +45,7 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
             behandlingService.endreStatus(behandlingID, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         } else {
             var saksstatus = prosessinstans.getData(ProsessDataKey.SAKSSTATUS, Saksstatuser.class, Saksstatuser.LOVVALG_AVKLART);
-            log.info("Avslutter behandling {} og fagsak {}", behandlingID, saksstatus);
+            log.info("Avslutter behandling {}, og setter saksstatus til {} på tilhørende fagsak", behandlingID, saksstatus);
             fagsakService.avsluttFagsakOgBehandling(
                 fagsakService.hentFagsak(prosessinstans.getBehandling().getFagsak().getSaksnummer()), saksstatus
             );

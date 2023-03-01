@@ -60,7 +60,6 @@ public class BehandlingsresultatTjeneste {
         ));
     }
 
-    @Transactional
     @PutMapping("{behandlingID}/resultat/utfallregistreringunntak")
     @ApiOperation(value = "Oppdater utfallRegistreringUnntak i behandlingsresultatet", response = BehandlingsresultatDto.class)
     public ResponseEntity<BehandlingsresultatDto> oppdaterUtfallRegistreringUnntak(@PathVariable("behandlingID") long behandlingID,

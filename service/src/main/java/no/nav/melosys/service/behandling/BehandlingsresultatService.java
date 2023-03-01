@@ -235,7 +235,7 @@ public class BehandlingsresultatService {
     }
 
     public Behandlingsresultat oppdaterUtfallRegistreringUnntak(long behandlingID, Utfallregistreringunntak utfallUtpeking) {
-        final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
+        final Behandlingsresultat behandlingsresultat = hentBehandlingsresultatMedKontrollresultat(behandlingID);
         behandlingsresultat.setUtfallRegistreringUnntak(utfallUtpeking);
         return behandlingsresultatRepository.save(behandlingsresultat);
     }
