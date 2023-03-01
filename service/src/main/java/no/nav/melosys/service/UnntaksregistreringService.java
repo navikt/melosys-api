@@ -6,6 +6,7 @@ import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -43,16 +44,19 @@ public class UnntaksregistreringService {
     }
 
     private void oppdaterBehandlingsresultatet(Behandling behandling, Behandlingsresultat behandlingsresultat) {
-        var anmodningEllerAttest = (AnmodningEllerAttest) behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
-        var fastsattAvLand = behandling.getFagsak().getType() == Sakstyper.TRYGDEAVTALE
-            ? anmodningEllerAttest.getLovvalgsland()
-            : anmodningEllerAttest.getAvsenderland();
-        var type = behandlingsresultat.getUtfallRegistreringUnntak() == IKKE_GODKJENT
-            ? Behandlingsresultattyper.FERDIGBEHANDLET
-            : Behandlingsresultattyper.REGISTRERT_UNNTAK;
+        if (behandling.getMottatteOpplysninger().getMottatteOpplysningerData() instanceof AnmodningEllerAttest anmodningEllerAttest) {
+            var fastsattAvLand = behandling.getFagsak().getType() == Sakstyper.TRYGDEAVTALE
+                ? anmodningEllerAttest.getLovvalgsland()
+                : anmodningEllerAttest.getAvsenderland();
+            var type = behandlingsresultat.getUtfallRegistreringUnntak() == IKKE_GODKJENT
+                ? Behandlingsresultattyper.FERDIGBEHANDLET
+                : Behandlingsresultattyper.REGISTRERT_UNNTAK;
 
-        behandlingsresultat.setFastsattAvLand(fastsattAvLand);
-        behandlingsresultat.setType(type);
-        behandlingsresultatService.lagre(behandlingsresultat);
+            behandlingsresultat.setFastsattAvLand(fastsattAvLand);
+            behandlingsresultat.setType(type);
+            behandlingsresultatService.lagre(behandlingsresultat);
+        } else {
+            throw new FunksjonellException("Unntaksregistrering er kun tilgjengelig for behandlinger med AnmodningEllerAttest. Det har ikke behandling " + behandling.getId());
+        }
     }
 }

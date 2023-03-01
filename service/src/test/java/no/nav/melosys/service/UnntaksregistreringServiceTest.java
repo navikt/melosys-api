@@ -10,6 +10,8 @@ import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.SoeknadFtrl;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -23,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -116,6 +119,21 @@ class UnntaksregistreringServiceTest {
         var capturedBehandlingsresultat = captor.getValue();
         assertThat(capturedBehandlingsresultat).isNotNull();
         assertThat(capturedBehandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.FERDIGBEHANDLET);
+    }
+
+    @Test
+    void registrerUnntakFraMedlemskap_mottatteOpplysningerDataIkkeAnmodningEllerAttest_kasterFeil() {
+        var behandling = lagBehandling(null, null, null);
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new SoeknadFtrl());
+        var behandlingsresultat = new Behandlingsresultat();
+
+        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> unntaksregistreringService.registrerUnntakFraMedlemskap(BEHANDLING_ID))
+            .withMessageContaining("Unntaksregistrering er kun tilgjengelig for behandlinger med AnmodningEllerAttest. Det har ikke behandling");
     }
 
     private Behandling lagBehandling(Sakstyper sakstype, Land_iso2 avsenderland, Land_iso2 lovvalgsland) {

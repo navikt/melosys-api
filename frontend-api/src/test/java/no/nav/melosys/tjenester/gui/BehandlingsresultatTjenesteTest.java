@@ -27,8 +27,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {BehandlingsresultatTjeneste.class})
@@ -77,7 +76,7 @@ class BehandlingsresultatTjenesteTest {
         var dto = new OppdaterUtfallRegistreringUnntakDto(Utfallregistreringunntak.DELVIS_GODKJENT);
         when(behandlingsresultatService.oppdaterUtfallRegistreringUnntak(anyLong(), any())).thenReturn(behandlingsresultat);
 
-        mockMvc.perform(post(BASE_URL + "/{behandlingID}/resultat/utfallregistreringunntak", 1L)
+        mockMvc.perform(put(BASE_URL + "/{behandlingID}/resultat/utfallregistreringunntak", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
             .andExpect(status().isOk())
