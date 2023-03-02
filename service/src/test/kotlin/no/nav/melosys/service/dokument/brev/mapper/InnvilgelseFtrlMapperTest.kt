@@ -75,7 +75,7 @@ internal class InnvilgelseFtrlMapperTest {
                 saksbehandlerNavn.shouldBe(SAKSBEHANDLER_NAVN)
                 arbeidsgiverNavn.shouldBe(ARBEIDSGIVER_NAVN)
                 arbeidsland.shouldBe(Landkoder.AT.beskrivelse)
-                isTrygdeavtaleMedArbeidsland.shouldBeTrue()
+                isTrygdeavtaleMedArbeidsland.shouldBeFalse()
                 vurderingTrygdeavgift.shouldNotBeNull().apply {
                     selvbetalende.shouldBeFalse()
                     representantNavn.equals("1234")
