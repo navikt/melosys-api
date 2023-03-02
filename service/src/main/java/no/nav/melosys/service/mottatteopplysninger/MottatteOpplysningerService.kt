@@ -11,6 +11,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.domain.saksflyt.ProsessDataKey
 import no.nav.melosys.domain.saksflyt.Prosessinstans
+import no.nav.melosys.domain.saksflyt.getData
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.featuretoggle.ToggleName
@@ -76,10 +77,6 @@ class MottatteOpplysningerService(
             periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, defaultPeriode),
             soeknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, defaultSoeknadsland)
         )
-    }
-
-    private inline fun <reified T> Prosessinstans.getData(key: ProsessDataKey, default: T? = null): T? {
-        return this.getData(key, T::class.java, default)
     }
 
     fun opprettSøknadUtsendteArbeidstakereEøs(
