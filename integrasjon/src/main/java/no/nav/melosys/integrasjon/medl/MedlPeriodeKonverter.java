@@ -14,10 +14,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_au;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.*;
 import no.nav.melosys.exception.TekniskException;
 
 import static java.util.Optional.ofNullable;
@@ -62,25 +59,139 @@ public final class MedlPeriodeKonverter {
         tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1, GrunnlagMedl.FO_16);
         tbl.put(Lovvalgbestemmelser_987_2009.FO_987_2009_ART14_11, GrunnlagMedl.FO_987_2009_14_11);
 
-        tbl.put(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1, GrunnlagMedl.Storbrit_NIrland_6_1);
-        tbl.put(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_5, GrunnlagMedl.Storbrit_NIrland_6_5);
-        tbl.put(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART7_3, GrunnlagMedl.Storbrit_NIrland_7_3);
-        tbl.put(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART8_2, GrunnlagMedl.Storbrit_NIrland_8_2);
+        // Storbritannia og Nord-Irland
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_gb.UK, GrunnlagMedl.STORBRIT_NIRLAND);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1, GrunnlagMedl.STORBRIT_NIRLAND_6_1);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_5, GrunnlagMedl.STORBRIT_NIRLAND_6_5);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_10, GrunnlagMedl.STORBRIT_NIRLAND_6_10);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART7_1, GrunnlagMedl.STORBRIT_NIRLAND_7_1);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART7_3, GrunnlagMedl.STORBRIT_NIRLAND_7_3);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART8_2, GrunnlagMedl.STORBRIT_NIRLAND_8_2);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART9, GrunnlagMedl.STORBRIT_NIRLAND_9);
 
+        // USA
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA, GrunnlagMedl.USA);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_2, GrunnlagMedl.USA_ART5_2);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_4, GrunnlagMedl.USA_ART5_4);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_5, GrunnlagMedl.USA_ART5_5);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_6, GrunnlagMedl.USA_ART5_6);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_9, GrunnlagMedl.USA_ART5_9);
 
+        // Canada
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca.CAN, GrunnlagMedl.CANADA);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART6_2, GrunnlagMedl.CAN_ART6_2);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART7, GrunnlagMedl.CAN_ART7);
-        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART9, GrunnlagMedl.CAN_ART9);
-        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART10, GrunnlagMedl.CAN_ART10);
-        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART11, GrunnlagMedl.CAN_ART11);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART7_4, GrunnlagMedl.CAN_ART7_4);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART9, GrunnlagMedl.CANADA_9);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART10, GrunnlagMedl.CANADA_10);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART10_4, GrunnlagMedl.CANADA_10_4);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART11, GrunnlagMedl.CANADA_11);
 
+        //Australia
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_au.AUS, GrunnlagMedl.AUSTRALIA);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART9_2, GrunnlagMedl.AUS_ART9_2);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART9_3, GrunnlagMedl.AUS_ART9_3);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART11, GrunnlagMedl.AUS_ART11);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART14_1, GrunnlagMedl.AUS_ART14_1);
+
+        //Bosnia og Hercegovina
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ba.BIH, GrunnlagMedl.BOSNIA_HERCEGOVINA);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ba.BIH_ART3, GrunnlagMedl.BOSNIA_HERCEGOVINA_3);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ba.BIH_ART4, GrunnlagMedl.BOSNIA_HERCEGOVINA_4);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ba.BIH_ART4_A, GrunnlagMedl.BOSNIA_HERCEGOVINA_4_A);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ba.BIH_ART5, GrunnlagMedl.BOSNIA_HERCEGOVINA_5);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ba.BIH_ART6, GrunnlagMedl.BOSNIA_HERCEGOVINA_6);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ba.BIH_ART7, GrunnlagMedl.BOSNIA_HERCEGOVINA_7);
+
+        //Chile
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_cl.CHL, GrunnlagMedl.CHILE);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_cl.CHL_ART5_2, GrunnlagMedl.CHILE_5_2);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_cl.CHL_ART6, GrunnlagMedl.CHILE_6);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_cl.CHL_ART6_4, GrunnlagMedl.CHILE_6_4);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_cl.CHL_ART8, GrunnlagMedl.CHILE_8);
+
+        //Frankrike
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_fr.FRA, GrunnlagMedl.FRANKRIKE);
+
+        //Hellas
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_gr.GRC, GrunnlagMedl.HELLAS);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_gr.GRC_ART4_A, GrunnlagMedl.HELLAS_4_A);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_gr.GRC_ART7, GrunnlagMedl.HELLAS_7);
+
+        //Italia
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_it.ITA, GrunnlagMedl.ITALIA);
+
+        //India
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_in.IND, GrunnlagMedl.INDIA);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_in.IND_ART8, GrunnlagMedl.INDIA_8);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_in.IND_ART8_1, GrunnlagMedl.INDIA_8_1);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_in.IND_ART9, GrunnlagMedl.INDIA_9);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_in.IND_ART9_1, GrunnlagMedl.INDIA_9_1);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_in.IND_ART10, GrunnlagMedl.INDIA_10);
+
+        //Israel
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_il.ISR, GrunnlagMedl.ISRAEL);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_il.ISR_ART6_4, GrunnlagMedl.ISRAEL_6_4);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_il.ISR_ART6_5, GrunnlagMedl.ISRAEL_6_5);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_il.ISR_ART6_7, GrunnlagMedl.ISRAEL_6_7);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_il.ISR_ART7, GrunnlagMedl.ISRAEL_7);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_il.ISR_ART8, GrunnlagMedl.ISRAEL_8);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_il.ISR_ART9_1, GrunnlagMedl.ISRAEL_9_1);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_il.ISR_ART9_2, GrunnlagMedl.ISRAEL_9_2);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_il.ISR_ART9_3, GrunnlagMedl.ISRAEL_9_3);
+
+        // Montenegro
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_me.MNE, GrunnlagMedl.MONTENEGRO);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_me.MNE_ART3, GrunnlagMedl.MONTENEGRO_3);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_me.MNE_ART4, GrunnlagMedl.MONTENEGRO_4);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_me.MNE_ART4_A, GrunnlagMedl.MONTENEGRO_4_A);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_me.MNE_ART5, GrunnlagMedl.MONTENEGRO_5);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_me.MNE_ART6, GrunnlagMedl.MONTENEGRO_6);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_me.MNE_ART7, GrunnlagMedl.MONTENEGRO_7);
+
+        //Portugal
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_pt.PRT, GrunnlagMedl.PORTUGAL);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_pt.PRT_ART8, GrunnlagMedl.PORTUGAL_8);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_pt.PRT_ART8_1, GrunnlagMedl.PORTUGAL_8_1);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_pt.PRT_ART9, GrunnlagMedl.PORTUGAL_9);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_pt.PRT_ART10, GrunnlagMedl.PORTUGAL_10);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_pt.PRT_ART11, GrunnlagMedl.PORTUGAL_11);
+
+        //Québec
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca_qc.QUE, GrunnlagMedl.QUEBEC);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca_qc.QUE_ART6_3, GrunnlagMedl.QUEBEC_6_3);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca_qc.QUE_ART7, GrunnlagMedl.QUEBEC_7);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca_qc.QUE_ART7_3, GrunnlagMedl.QUEBEC_7_3);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca_qc.QUE_ART8, GrunnlagMedl.QUEBEC_8);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca_qc.QUE_ART9, GrunnlagMedl.QUEBEC_9);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca_qc.QUE_ART9_3, GrunnlagMedl.QUEBEC_9_3);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca_qc.QUE_ART10, GrunnlagMedl.QUEBEC_10);
+
+        //Serbia
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_rs.SRB, GrunnlagMedl.SERBIA);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_rs.SRB_ART3, GrunnlagMedl.SERBIA_3);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_rs.SRB_ART4, GrunnlagMedl.SERBIA_4);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_rs.SRB_ART4_A, GrunnlagMedl.SERBIA_4_A);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_rs.SRB_ART5, GrunnlagMedl.SERBIA_5);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_rs.SRB_ART6, GrunnlagMedl.SERBIA_6);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_rs.SRB_ART7, GrunnlagMedl.SERBIA_7);
+
+        //Sveits
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ch.CHE, GrunnlagMedl.SVEITS);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ch.CHE_ART8, GrunnlagMedl.SVEITS_8);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ch.CHE_ART8_1_A, GrunnlagMedl.SVEITS_8_1_A);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ch.CHE_ART9, GrunnlagMedl.SVEITS_9);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ch.CHE_ART10, GrunnlagMedl.SVEITS_10);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ch.CHE_ART11, GrunnlagMedl.SVEITS_11);
+
+        // Tyrkia
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_tr.TUR, GrunnlagMedl.TYRKIA);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_tr.TUR_ART3, GrunnlagMedl.TYRKIA_3);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_tr.TUR_ART4, GrunnlagMedl.TYRKIA_4);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_tr.TUR_ART4_A, GrunnlagMedl.TYRKIA_4_A);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_tr.TUR_ART5, GrunnlagMedl.TYRKIA_5);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_tr.TUR_ART6, GrunnlagMedl.TYRKIA_6);
+
 
         tbl.put(Overgangsregelbestemmelser.FO_1408_1971_ART14_2_A, GrunnlagMedl.FO_1408_14_2_A);
         tbl.put(Overgangsregelbestemmelser.FO_1408_1971_ART14_2_B, GrunnlagMedl.FO_1408_14_2_B);
@@ -105,10 +216,11 @@ public final class MedlPeriodeKonverter {
     }
 
 
-    public static DekningMedl tilMedlTrygdeDekningEos(Trygdedekninger dekning) {
+    public static DekningMedl tilMedlTrygdeDekning(Trygdedekninger dekning) {
         return switch (dekning) {
             case FULL_DEKNING_EOSFO, FULL_DEKNING_FTRL -> DekningMedl.FULL;
             case UTEN_DEKNING -> DekningMedl.UNNTATT;
+            case UNNTATT_CAN_7_5_B, UNNTATT_USA_5_2_G -> DekningMedl.IKKEPENDEL;
             default -> throw new TekniskException("Dekningstype støttes ikke for EØS:" + dekning.getKode());
         };
     }
@@ -117,7 +229,8 @@ public final class MedlPeriodeKonverter {
         return switch (bestemmelse) {
             case FTRL_KAP2_2_8, FTRL_KAP2_2_8_FØRSTE_LEDD_A, FTRL_KAP2_2_8_FØRSTE_LEDD_B,
                 FTRL_KAP2_2_8_FØRSTE_LEDD_C, FTRL_KAP2_2_8_FØRSTE_LEDD_D, FTRL_KAP2_2_8_ANDRE_LEDD,
-                FTRL_KAP2_2_8_TREDJE_LEDD, FTRL_KAP2_2_8_FJERDE_LEDD, FTRL_KAP2_2_8_FEMTE_LEDD -> mapForFtrlKap2_8(dekning);
+                FTRL_KAP2_2_8_TREDJE_LEDD, FTRL_KAP2_2_8_FJERDE_LEDD, FTRL_KAP2_2_8_FEMTE_LEDD ->
+                mapForFtrlKap2_8(dekning);
             default -> throw new TekniskException("Bestemmelse støttes ikke for FTRL: " + bestemmelse.getKode());
         };
     }

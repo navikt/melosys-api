@@ -39,7 +39,7 @@ class LagreAnmodningsperiodeIMedlTest {
     private Prosessinstans prosessinstans;
     private Behandlingsresultat behandlingsresultat;
     private Behandling behandling;
-    private LocalDate NOW = LocalDate.now();
+    private final LocalDate NOW = LocalDate.now();
 
     @BeforeEach
     public void setUp() {
@@ -121,7 +121,7 @@ class LagreAnmodningsperiodeIMedlTest {
         lagreAnmodningsperiodeIMedl.utfør(prosessinstans);
 
 
-        verify(medlPeriodeService).oppdaterPeriodeUnderAvklaring(anmodningsperiode, false);
+        verify(medlPeriodeService).oppdaterPeriodeUnderAvklaring(anmodningsperiode, false, behandling.getId());
     }
 
     private Set<Anmodningsperiode> lagAnmodningsperioderMedDato(LocalDate fom, LocalDate tom) {

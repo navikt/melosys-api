@@ -7,9 +7,12 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
+import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.kodeverk.Aktoersroller
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl
 import no.nav.melosys.integrasjon.medl.MedlService
@@ -18,6 +21,7 @@ import no.nav.melosys.repository.AnmodningsperiodeRepository
 import no.nav.melosys.repository.LovvalgsperiodeRepository
 import no.nav.melosys.repository.MedlemskapsperiodeRepository
 import no.nav.melosys.repository.UtpekingsperiodeRepository
+import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataFasade
 import org.junit.jupiter.api.BeforeEach
@@ -37,6 +41,9 @@ class MedlPeriodeServiceTest {
     lateinit var behandlingsresultatService: BehandlingsresultatService
 
     @MockK
+    lateinit var behandlingService: BehandlingService
+
+    @MockK
     lateinit var lovvalgsperiodeRepository: LovvalgsperiodeRepository
 
     @MockK
@@ -53,16 +60,23 @@ class MedlPeriodeServiceTest {
 
     lateinit var medlPeriodeService: MedlPeriodeService
 
+    private val fakeUnleash = FakeUnleash()
+
+
     @BeforeEach
     fun setUp() {
+        fakeUnleash.enableAll()
+
         medlPeriodeService = MedlPeriodeService(
             persondataFasade,
             medlService,
             behandlingsresultatService,
+            behandlingService,
             lovvalgsperiodeRepository,
             medlAnmodningsperiodeService,
             utpekingsperiodeRepository,
-            medlemskapsperiodeRepository
+            medlemskapsperiodeRepository,
+            fakeUnleash
         )
     }
 
@@ -138,20 +152,129 @@ class MedlPeriodeServiceTest {
 
     @Test
     fun oppdaterPeriodeEndelig() {
-        val lovvalgsperiode = Lovvalgsperiode().apply { medlPeriodeID = MEDL_PERIODE_ID }
+        setupHappyPathBehandling()
+
+        val lovvalgsperiode = Lovvalgsperiode().apply {
+            medlPeriodeID = MEDL_PERIODE_ID
+            behandlingsresultat = lagBehandlingsResultat()
+        }
+
 
         medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode, false)
+
 
         verify { medlService.oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD) }
     }
 
     @Test
     fun oppdaterPeriodeForeløpig() {
-        val lovvalgsperiode = Lovvalgsperiode().apply { medlPeriodeID = MEDL_PERIODE_ID }
+        setupHappyPathBehandling()
+        val lovvalgsperiode = Lovvalgsperiode().apply {
+            medlPeriodeID = MEDL_PERIODE_ID
+            behandlingsresultat = lagBehandlingsResultat()
+        }
+
 
         medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode, false)
 
+
         verify { medlService.oppdaterPeriodeForeløpig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD) }
+    }
+
+    @Test
+    fun `oppdaterPeriodeForeløpig bruker KildedokumenttypeMedl DOKUMENT når TRYGDEAVTALE og REGISTRERING_UNNTAK`() {
+        every { behandlingService.hentBehandling(any()) } returns Behandling().apply {
+            tema = Behandlingstema.REGISTRERING_UNNTAK
+            fagsak = Fagsak().apply {
+                type = Sakstyper.TRYGDEAVTALE
+                aktører.add(Aktoer().apply {
+                    rolle = Aktoersroller.BRUKER
+                    aktørId = "456"
+                })
+            }
+        }
+        val lovvalgsperiode = Lovvalgsperiode().apply {
+            medlPeriodeID = MEDL_PERIODE_ID
+            behandlingsresultat = lagBehandlingsResultat()
+        }
+
+
+        medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode, false)
+
+
+        verify { medlService.oppdaterPeriodeForeløpig(lovvalgsperiode, KildedokumenttypeMedl.DOKUMENT) }
+    }
+
+    @Test
+    fun `oppdaterPeriodeForeløpig bruker KildedokumenttypeMedl HENV_SOKNAD når TRYGDEAVTALE og ANMODNING_OM_UNNTAK`() {
+        every { behandlingService.hentBehandling(any()) } returns Behandling().apply {
+            tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
+            fagsak = Fagsak().apply {
+                type = Sakstyper.TRYGDEAVTALE
+                aktører.add(Aktoer().apply {
+                    rolle = Aktoersroller.BRUKER
+                    aktørId = "456"
+                })
+            }
+        }
+        val lovvalgsperiode = Lovvalgsperiode().apply {
+            medlPeriodeID = MEDL_PERIODE_ID
+            behandlingsresultat = lagBehandlingsResultat()
+        }
+
+
+        medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode, false)
+
+
+        verify { medlService.oppdaterPeriodeForeløpig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD) }
+    }
+
+    @Test
+    fun `oppdaterPeriodeForeløpig bruker KildedokumenttypeMedl A1 når EU_EOS og ANMODNING_OM_UNNTAK_HOVEDREGEL`() {
+        every { behandlingService.hentBehandling(any()) } returns Behandling().apply {
+            tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
+            fagsak = Fagsak().apply {
+                type = Sakstyper.EU_EOS
+                aktører.add(Aktoer().apply {
+                    rolle = Aktoersroller.BRUKER
+                    aktørId = "456"
+                })
+            }
+        }
+        val lovvalgsperiode = Lovvalgsperiode().apply {
+            medlPeriodeID = MEDL_PERIODE_ID
+            behandlingsresultat = lagBehandlingsResultat()
+        }
+
+
+        medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode, false)
+
+
+        verify { medlService.oppdaterPeriodeForeløpig(lovvalgsperiode, KildedokumenttypeMedl.PortBlank_A1) }
+    }
+
+    @Test
+    fun `oppdaterPeriodeForeløpig bruker KildedokumenttypeMedl A1 når EU_EOS og A1_ANMODNING_OM_UNNTAK_PAPIR`() {
+        every { behandlingService.hentBehandling(any()) } returns Behandling().apply {
+            tema = Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR
+            fagsak = Fagsak().apply {
+                type = Sakstyper.EU_EOS
+                aktører.add(Aktoer().apply {
+                    rolle = Aktoersroller.BRUKER
+                    aktørId = "456"
+                })
+            }
+        }
+        val lovvalgsperiode = Lovvalgsperiode().apply {
+            medlPeriodeID = MEDL_PERIODE_ID
+            behandlingsresultat = lagBehandlingsResultat()
+        }
+
+
+        medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode, false)
+
+
+        verify { medlService.oppdaterPeriodeForeløpig(lovvalgsperiode, KildedokumenttypeMedl.PortBlank_A1) }
     }
 
     @Test
@@ -213,11 +336,14 @@ class MedlPeriodeServiceTest {
     }
 
     private fun setupHappyPathBehandling() {
-        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns lagBehandlingsResultat()
+        val behandlingResultat = lagBehandlingsResultat()
+        every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingResultat
         every { persondataFasade.hentFolkeregisterident(any()) } returns FNR
+        every { behandlingService.hentBehandling(any()) } returns behandlingResultat.behandling
     }
 
     private fun lagBehandlingsResultat(): Behandlingsresultat = Behandlingsresultat().apply {
+        id = 1L
         behandling = Behandling().apply {
             fagsak = Fagsak().apply {
                 aktører.add(Aktoer().apply {

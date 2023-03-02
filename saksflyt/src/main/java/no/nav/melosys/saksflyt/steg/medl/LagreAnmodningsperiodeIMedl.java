@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.medl;
 
-import java.util.Collection;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Anmodningsperiode;
@@ -17,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.ANMODNING_OM_UNNTAK;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.LAGRE_ANMODNINGSPERIODE_MEDL;
 
 @Component
@@ -57,7 +55,7 @@ public class LagreAnmodningsperiodeIMedl implements StegBehandler {
         if (anmodningsperiode.getMedlPeriodeID() == null) {
             medlPeriodeService.opprettPeriodeUnderAvklaring(anmodningsperiode, behandling.getId(), behandling.erBehandlingAvSed());
         } else {
-            medlPeriodeService.oppdaterPeriodeUnderAvklaring(anmodningsperiode, behandling.erBehandlingAvSed());
+            medlPeriodeService.oppdaterPeriodeUnderAvklaring(anmodningsperiode, behandling.erBehandlingAvSed(), behandling.getId());
         }
     }
 
