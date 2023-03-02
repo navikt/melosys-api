@@ -22,7 +22,6 @@ import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.Companion.harT
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
-import java.time.LocalDate
 import java.util.*
 
 private val log = KotlinLogging.logger { }
@@ -149,30 +148,28 @@ class MottatteOpplysningerService(
         versjon: String,
         eksternReferanseID: String? = null
     ) {
-        val behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)
-        if (behandling.mottatteOpplysninger != null) {
-            throw FunksjonellException("Finnes allerede mottatteOpplysninger for behandling " + behandling.id)
-        }
         if (eksternReferanseID != null && harMottattSøknadMedEksternReferanseID(eksternReferanseID)) {
             throw FunksjonellException("Det finnes allerede mottatteOpplysninger med eksterReferanseID $eksternReferanseID")
         }
+        val behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID).apply {
+            if (mottatteOpplysninger != null) {
+                throw FunksjonellException("Finnes allerede mottatteOpplysninger for behandling $id")
+            }
+        }
         val nå = Instant.now()
-        val mottatteOpplysninger = MottatteOpplysninger()
-        mottatteOpplysninger.behandling = behandling
-        mottatteOpplysninger.registrertDato = nå
-        mottatteOpplysninger.endretDato = nå
-        mottatteOpplysninger.type = type
-        mottatteOpplysninger.versjon = versjon
-        mottatteOpplysninger.mottaksdato = hentMottaksdato(behandling)
-        mottatteOpplysninger.originalData = originalData
-        mottatteOpplysninger.eksternReferanseID = eksternReferanseID
-        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData)
+        val mottatteOpplysninger = MottatteOpplysninger().apply {
+            this.behandling = behandling
+            this.registrertDato = nå
+            this.endretDato = nå
+            this.type = type
+            this.versjon = versjon
+            this.mottaksdato = utledMottaksdato.getMottaksdato(behandling)
+            this.originalData = originalData
+            this.eksternReferanseID = eksternReferanseID
+            this.setMottatteOpplysningerdata(mottatteOpplysningerData)
+        }
         behandling.mottatteOpplysninger = mottatteOpplysninger
         mottatteOpplysningerRepository.save(mottatteOpplysninger)
-    }
-
-    private fun hentMottaksdato(behandling: Behandling): LocalDate? {
-        return utledMottaksdato.getMottaksdato(behandling)
     }
 
     @Transactional
@@ -193,27 +190,27 @@ class MottatteOpplysningerService(
 
     @Transactional
     fun oppdaterMottatteOpplysningerPeriodeOgLand(behandlingID: Long, periode: Periode?, soeknadsland: Soeknadsland?) {
-        val mottatteOpplysninger = hentMottatteOpplysninger(behandlingID)
-        mottatteOpplysninger.mottatteOpplysningerData.periode = periode
-        mottatteOpplysninger.mottatteOpplysningerData.soeknadsland = soeknadsland
+        val mottatteOpplysninger = hentMottatteOpplysninger(behandlingID).apply {
+            mottatteOpplysningerData.periode = periode
+            mottatteOpplysningerData.soeknadsland = soeknadsland
+        }
         MottatteOpplysningerKonverterer.oppdaterMottatteOpplysninger(mottatteOpplysninger)
         mottatteOpplysningerRepository.saveAndFlush(mottatteOpplysninger)
     }
 
     @Transactional
     fun slettOpplysninger(behandlingID: Long) {
-        val behandling = behandlingService.hentBehandling(behandlingID)
-        behandling.mottatteOpplysninger = null
+        behandlingService.hentBehandling(behandlingID).apply {
+            mottatteOpplysninger = null
+        }
         mottatteOpplysningerRepository.deleteByBehandling_Id(behandlingID)
     }
 
-    fun finnMottatteOpplysninger(behandlingID: Long?): Optional<MottatteOpplysninger> {
-        return mottatteOpplysningerRepository.findByBehandling_Id(behandlingID!!)
-    }
+    fun finnMottatteOpplysninger(behandlingID: Long): Optional<MottatteOpplysninger> =
+        mottatteOpplysningerRepository.findByBehandling_Id(behandlingID)
 
-    fun harMottattSøknadMedEksternReferanseID(eksternReferanseID: String): Boolean {
-        return !mottatteOpplysningerRepository.findByEksternReferanseID(eksternReferanseID).isEmpty()
-    }
+    fun harMottattSøknadMedEksternReferanseID(eksternReferanseID: String): Boolean =
+        mottatteOpplysningerRepository.findByEksternReferanseID(eksternReferanseID).isNotEmpty()
 
     companion object {
         private const val VERSJON_SED_GRUNNLAG = "1"
