@@ -13,17 +13,14 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.service.SaksbehandlingDataFactory;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntak;
 import org.junit.jupiter.api.BeforeEach;
@@ -120,7 +117,7 @@ class AnmodningUnntakMapperTest {
         BrevDataAnmodningUnntak brevData = new BrevDataAnmodningUnntak("Z999999");
         Anmodningsperiode anmodningsperiode =
             new Anmodningsperiode(LocalDate.now(), LocalDate.now(),
-                Landkoder.NO, null, null, Landkoder.DK,
+                Land_iso2.NO, null, null, Land_iso2.DK,
                 unntakFraBestemmelse, null);
         resultat.setAnmodningsperioder(Sets.newHashSet(anmodningsperiode));
 
@@ -170,7 +167,7 @@ class AnmodningUnntakMapperTest {
     private Behandlingsresultat lagBehandlingsresultat() {
         Behandlingsresultat resultat = new Behandlingsresultat();
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
+        lovvalgsperiode.setLovvalgsland(Land_iso2.NO);
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now());
         resultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));

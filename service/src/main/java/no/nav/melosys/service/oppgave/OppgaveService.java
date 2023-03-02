@@ -4,7 +4,6 @@ package no.nav.melosys.service.oppgave;
 import java.util.*;
 import javax.annotation.Nullable;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RegistreringsInfo;
@@ -12,7 +11,7 @@ import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.domain.oppgave.Oppgave;
@@ -329,10 +328,10 @@ public class OppgaveService {
 
         Optional<MottatteOpplysninger> mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.getId());
         if (mottatteOpplysninger.isPresent()) {
-            Soeknad søknadDokument = (Soeknad) mottatteOpplysninger.get().getMottatteOpplysningerData();
-            Soeknadsland søknadsland = hentSøknadsland(søknadDokument);
+            var mottatteOpplysningerData = mottatteOpplysninger.get().getMottatteOpplysningerData();
+            Soeknadsland søknadsland = hentSøknadsland(mottatteOpplysningerData);
             behOppgaveDto.setLand(SoeknadslandDto.av(søknadsland));
-            behOppgaveDto.setPeriode(mapPeriode(søknadDokument));
+            behOppgaveDto.setPeriode(mapPeriode(mottatteOpplysningerData));
         }
 
         return behOppgaveDto;
@@ -361,8 +360,8 @@ public class OppgaveService {
         return behandlingDto;
     }
 
-    private static PeriodeDto mapPeriode(Soeknad soeknad) {
-        Periode periode = hentPeriode(soeknad);
+    private static PeriodeDto mapPeriode(MottatteOpplysningerData mottatteOpplysningerData) {
+        Periode periode = hentPeriode(mottatteOpplysningerData);
         return new PeriodeDto(periode.getFom(), periode.getTom());
     }
 

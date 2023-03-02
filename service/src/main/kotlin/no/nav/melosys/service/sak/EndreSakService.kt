@@ -17,11 +17,12 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.Companion.harTomFlyt
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
@@ -79,8 +80,18 @@ class EndreSakService(
         )
 
         if (sakEndres || behandlingTemaEllerTypeEndres) {
-            if (SaksbehandlingRegler.harTomFlyt(nySakstype, nySakstema, nyBehandlingstype, nyBehandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT))) {
-                mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id).ifPresent { mottatteOpplysningerService.slettOpplysninger(behandling.id) }
+            if (harTomFlyt(
+                    nySakstype,
+                    nySakstema,
+                    nyBehandlingstype,
+                    nyBehandlingstema,
+                    unleash.isEnabled("melosys.folketrygden.mvp"),
+                    unleash.isEnabled(IKKEYRKESAKTIV_FLYT),
+                    unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP)
+                )
+            ) {
+                mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id)
+                    .ifPresent { mottatteOpplysningerService.slettOpplysninger(behandling.id) }
             } else {
                 gjenopprettMottatteOpplysninger(nySakstype, behandling)
             }

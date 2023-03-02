@@ -153,7 +153,7 @@ public class SedDokument implements SaksopplysningDokument {
         nyLovvalgsperiode.setBestemmelse(getLovvalgBestemmelse());
         nyLovvalgsperiode.setFom(getLovvalgsperiode().getFom());
         nyLovvalgsperiode.setTom(getLovvalgsperiode().getTom());
-        nyLovvalgsperiode.setLovvalgsland(getLovvalgslandKode());
+        nyLovvalgsperiode.setLovvalgsland(getLovvalgslandKode() != null ? Land_iso2.valueOf(getLovvalgslandKode().getKode()) : null);
         nyLovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
         if (Landkoder.NO != lovvalgslandKode) {
             nyLovvalgsperiode.setMedlemskapstype(Medlemskapstyper.UNNTATT);

@@ -5,10 +5,10 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.Bostedsland;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -20,8 +20,8 @@ public final class MottatteOpplysningerUtils {
         throw new UnsupportedOperationException();
     }
 
-    public static Periode hentPeriode(MottatteOpplysningerData soeknadDokument) {
-        return soeknadDokument.periode;
+    public static Periode hentPeriode(MottatteOpplysningerData mottatteopplysnignerData) {
+        return mottatteopplysnignerData.periode;
     }
 
     /**
@@ -39,12 +39,12 @@ public final class MottatteOpplysningerUtils {
             .toList();
     }
 
-    public static Soeknadsland hentSøknadsland(MottatteOpplysningerData grunnlagdata) {
-        return grunnlagdata.soeknadsland;
+    public static Soeknadsland hentSøknadsland(MottatteOpplysningerData mottatteOpplysningerData) {
+        return mottatteOpplysningerData.soeknadsland;
     }
 
-    public static StrukturertAdresse hentBostedsadresse(MottatteOpplysningerData grunnlagdata) {
-        StrukturertAdresse oppgittAdresse = grunnlagdata.bosted.oppgittAdresse;
+    public static StrukturertAdresse hentBostedsadresse(MottatteOpplysningerData mottatteOpplysningerData) {
+        StrukturertAdresse oppgittAdresse = mottatteOpplysningerData.bosted.oppgittAdresse;
         if ((StringUtils.isNotEmpty(oppgittAdresse.getGatenavn()) ||
             StringUtils.isNotEmpty(oppgittAdresse.getHusnummerEtasjeLeilighet()) ||
             StringUtils.isNotEmpty(oppgittAdresse.getRegion()) ||
@@ -57,7 +57,7 @@ public final class MottatteOpplysningerUtils {
         }
     }
 
-    public static Optional<Bostedsland> hentOppgittBostedsland(MottatteOpplysningerData grunnlagdata) {
-        return Optional.ofNullable(grunnlagdata.bosted.oppgittAdresse.getLandkode()).map(Bostedsland::new);
+    public static Optional<Bostedsland> hentOppgittBostedsland(MottatteOpplysningerData mottatteOpplysningerData) {
+        return Optional.ofNullable(mottatteOpplysningerData.bosted.oppgittAdresse.getLandkode()).map(Bostedsland::new);
     }
 }

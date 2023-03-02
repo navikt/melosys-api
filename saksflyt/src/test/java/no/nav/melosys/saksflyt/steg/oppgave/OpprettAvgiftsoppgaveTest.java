@@ -130,7 +130,7 @@ class OpprettAvgiftsoppgaveTest {
     private static Lovvalgsperiode lagLovvalgsperiode(LovvalgBestemmelse bestemmelse) {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(bestemmelse);
-        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
+        lovvalgsperiode.setLovvalgsland(Land_iso2.NO);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
         return lovvalgsperiode;
     }

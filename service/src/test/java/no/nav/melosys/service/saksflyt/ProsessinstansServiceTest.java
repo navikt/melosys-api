@@ -15,10 +15,7 @@ import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
-import no.nav.melosys.domain.kodeverk.Avsendertyper;
-import no.nav.melosys.domain.kodeverk.Mottakerroller;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -464,6 +461,19 @@ class ProsessinstansServiceTest {
         assertThat(prosessinstans.getData(ProsessDataKey.FYSISKE_VEDLEGG, fysiskeVedleggTypeReference))
             .containsKeys(fysiskVedlegg.getDokumentID(), fysiskVedlegg2.getDokumentID())
             .containsValues(fysiskVedlegg.getTittel(), fysiskVedlegg2.getTittel());
+    }
+
+    @Test
+    void opprettProsessinstansRegistrerUnntakFraMedlemskap_altOk_lagrerProsessinstans() {
+        var behandling = lagBehandling();
+
+
+        prosessinstansService.opprettProsessinstansRegistrerUnntakFraMedlemskap(behandling, Saksstatuser.AVSLUTTET);
+
+
+        verify(prosessinstansRepo).save(piCaptor.capture());
+        assertThat(piCaptor.getValue().getBehandling()).isEqualTo(behandling);
+        assertThat(piCaptor.getValue().getData(ProsessDataKey.SAKSSTATUS, Saksstatuser.class)).isEqualTo(Saksstatuser.AVSLUTTET);
     }
 
     @Test

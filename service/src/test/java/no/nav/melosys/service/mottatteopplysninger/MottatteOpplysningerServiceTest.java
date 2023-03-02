@@ -18,6 +18,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.mottatteopplysninger.*;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
+import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.MottatteOpplysningerRepository;
@@ -72,6 +73,58 @@ class MottatteOpplysningerServiceTest {
         assertThatExceptionOfType(IkkeFunnetException.class)
             .isThrownBy(() -> mottatteOpplysningerService.hentMottatteOpplysninger(1))
             .withMessageContaining("Finner ikke mottatteOpplysninger for behandling 1");
+    }
+
+    @Test
+    void opprettSøknadEllerAnmodningEllerAttest_toggleErAv_lagerIkkeAnmodningEllerAttest() {
+        unleash.disableAll();
+        var behandling = lagBehandling(Sakstyper.EU_EOS, Sakstemaer.UNNTAK, Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR);
+        var prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+
+        mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(prosessinstans);
+
+
+        verify(mottatteOpplysningerRepository, never()).save(mottatteOpplysningerArgumentCaptor.capture());
+    }
+
+    @Test
+    void opprettSøknadEllerAnmodningEllerAttest_erAnmodningOmUnntakEllerRegistreringUnntak_lagerAnmodningEllerAttest() {
+        var behandling = lagBehandling(Sakstyper.EU_EOS, Sakstemaer.UNNTAK, Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR);
+        var prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
+
+
+        mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(prosessinstans);
+
+
+        verify(mottatteOpplysningerRepository).save(mottatteOpplysningerArgumentCaptor.capture());
+        MottatteOpplysninger opprettet = mottatteOpplysningerArgumentCaptor.getValue();
+
+        assertThat(opprettet).isNotNull();
+        assertThat(opprettet.getType()).isEqualTo(Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST);
+        assertThat(opprettet.getMottatteOpplysningerData()).isInstanceOf(AnmodningEllerAttest.class);
+    }
+
+    @Test
+    void opprettSøknadEllerAnmodningEllerAttest_erIkkeAnmodningOmUnntakEllerRegistreringUnntak_lagerIkkeAnmodningEllerAttest() {
+        var behandling = lagBehandling(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        var prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
+
+
+        mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(prosessinstans);
+
+
+        verify(mottatteOpplysningerRepository).save(mottatteOpplysningerArgumentCaptor.capture());
+        MottatteOpplysninger opprettet = mottatteOpplysningerArgumentCaptor.getValue();
+
+        assertThat(opprettet).isNotNull();
+        assertThat(opprettet.getType()).isNotEqualTo(Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST);
+        assertThat(opprettet.getMottatteOpplysningerData()).isNotInstanceOf(AnmodningEllerAttest.class);
     }
 
     @Test

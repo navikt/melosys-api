@@ -20,7 +20,6 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.MottatteOpplysningerRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -29,6 +28,9 @@ import org.springframework.transaction.annotation.Transactional;
 import static no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN;
 import static no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE;
 import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
+import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP;
+import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt;
+import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
 
 @Service
 public class MottatteOpplysningerService {
@@ -36,6 +38,7 @@ public class MottatteOpplysningerService {
 
     private static final String VERSJON_SED_GRUNNLAG = "1";
     private static final String VERSJON_SOEKNAD_GRUNNLAG = "1.2";
+    private static final String VERSJON_ANMODNING_ATTEST_GRUNNLAG = "1";
 
     private final MottatteOpplysningerRepository mottatteOpplysningerRepository;
     private final BehandlingService behandlingService;
@@ -73,8 +76,20 @@ public class MottatteOpplysningerService {
         opprettMottatteOpplysninger(behandlingID, sedGrunnlag, Mottatteopplysningertyper.SED, VERSJON_SED_GRUNNLAG);
     }
 
-    public void opprettSøknad(Prosessinstans prosessinstans) {
+    public void opprettSøknadEllerAnmodningEllerAttest(Prosessinstans prosessinstans) {
         Behandling behandling = prosessinstans.getBehandling();
+        if (harRegistreringUnntakFraMedlemskapFlyt(behandling, unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP))) {
+            opprettMottatteOpplysninger(
+                behandling.getId(),
+                new AnmodningEllerAttest(),
+                Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST,
+                VERSJON_ANMODNING_ATTEST_GRUNNLAG);
+        } else {
+            opprettSøknad(prosessinstans, behandling);
+        }
+    }
+
+    public void opprettSøknad(Prosessinstans prosessinstans, Behandling behandling) {
         Soeknadsland soeknadsland;
         Periode periode;
         Sakstyper sakstype = behandling.getFagsak().getType();
@@ -97,9 +112,11 @@ public class MottatteOpplysningerService {
 
     public void opprettSøknad(Behandling behandling, Periode periode, Soeknadsland soeknadsland) {
         long behandlingID = behandling.getId();
-        boolean ftrlToggleEnabled = unleash.isEnabled("melosys.folketrygden.mvp");
-        boolean ikkeYrkesaktivToggleEnabled = unleash.isEnabled(IKKEYRKESAKTIV_FLYT);
-        boolean skalOppretteSøknad = !SaksbehandlingRegler.harTomFlyt(behandling, ftrlToggleEnabled, ikkeYrkesaktivToggleEnabled);
+        boolean skalOppretteSøknad = !harTomFlyt(
+            behandling,
+            unleash.isEnabled("melosys.folketrygden.mvp"),
+            unleash.isEnabled(IKKEYRKESAKTIV_FLYT),
+            unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP));
         if (skalOppretteSøknad) {
             Sakstyper sakstype = behandling.getFagsak().getType();
             switch (sakstype) {

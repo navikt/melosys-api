@@ -174,8 +174,8 @@ internal class BehandlingsresultatServiceIT(
                     behandlingsresultat = br
                     fom = LocalDate.now()
                     tom = LocalDate.now().plusYears(1L)
-                    lovvalgsland = Landkoder.SE
-                    unntakFraLovvalgsland = Landkoder.NO
+                    lovvalgsland = Land_iso2.SE
+                    unntakFraLovvalgsland = Land_iso2.NO
                     bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1
                     unntakFraBestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1
                     tilleggsbestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_1
@@ -194,7 +194,7 @@ internal class BehandlingsresultatServiceIT(
                 Utpekingsperiode(
                     LocalDate.now(),
                     LocalDate.now().plusYears(1),
-                    Landkoder.SE,
+                    Land_iso2.SE,
                     Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A,
                     Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
                 ).apply {

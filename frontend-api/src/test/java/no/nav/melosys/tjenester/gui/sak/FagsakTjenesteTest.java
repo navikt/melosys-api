@@ -68,7 +68,7 @@ class FagsakTjenesteTest {
     private static final LovvalgsperiodeDto FORVENTET_LOVVALGSPERIODE = new LovvalgsperiodeDto(new PeriodeDto(FOM, TOM),
         Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2,
         Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1,
-        Landkoder.SK,
+        Land_iso2.SK,
         InnvilgelsesResultat.AVSLAATT,
         Trygdedekninger.FULL_DEKNING_EOSFO,
         Medlemskapstyper.FRIVILLIG,
@@ -362,7 +362,7 @@ class FagsakTjenesteTest {
         lovvalgsperiode.setFom(FORVENTET_LOVVALGSPERIODE.periode.getFom());
         lovvalgsperiode.setTom(FORVENTET_LOVVALGSPERIODE.periode.getTom());
         lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);
-        lovvalgsperiode.setLovvalgsland(Landkoder.valueOf(FORVENTET_LOVVALGSPERIODE.lovvalgsland));
+        lovvalgsperiode.setLovvalgsland(Land_iso2.valueOf(FORVENTET_LOVVALGSPERIODE.lovvalgsland));
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.valueOf(FORVENTET_LOVVALGSPERIODE.lovvalgsbestemmelse));
         lovvalgsperiode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.valueOf(FORVENTET_LOVVALGSPERIODE.tilleggBestemmelse));
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.valueOf(FORVENTET_LOVVALGSPERIODE.innvilgelsesResultat));
