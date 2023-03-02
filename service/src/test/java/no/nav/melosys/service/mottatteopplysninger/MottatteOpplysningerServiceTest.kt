@@ -108,14 +108,11 @@ internal class MottatteOpplysningerServiceTest {
 
     @Test
     fun opprettSøknadEllerAnmodningEllerAttest_erAnmodningOmUnntakEllerRegistreringUnntak_lagerAnmodningEllerAttest() {
-        val behandling = lagBehandling(
+        val behandling = setupMock(
             Sakstyper.EU_EOS,
             Sakstemaer.UNNTAK,
             Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR
         )
-        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
-        every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
-        every { mottatteOpplysningerRepository.save(any()) } returns mockk()
 
 
         mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(Prosessinstans().apply {
@@ -135,14 +132,11 @@ internal class MottatteOpplysningerServiceTest {
 
     @Test
     fun opprettSøknadEllerAnmodningEllerAttest_erIkkeAnmodningOmUnntakEllerRegistreringUnntak_lagerIkkeAnmodningEllerAttest() {
-        val behandling = lagBehandling(
+        val behandling = setupMock(
             Sakstyper.EU_EOS,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstema.UTSENDT_ARBEIDSTAKER
         )
-        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
-        every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
-        every { mottatteOpplysningerRepository.save(any()) } returns mockk()
 
 
         mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(Prosessinstans().apply {
@@ -162,16 +156,13 @@ internal class MottatteOpplysningerServiceTest {
 
     @Test
     fun opprettEøsSøknadGrunnlag_finnesIkkeFraFør_blirOpprettet() {
-        val behandling = lagBehandling(
+        val behandling = setupMock(
             Sakstyper.EU_EOS,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstema.UTSENDT_ARBEIDSTAKER
         )
         val periode = Periode()
         val soeknadsland = Soeknadsland()
-        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
-        every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
-        every { mottatteOpplysningerRepository.save(any()) } returns mockk()
 
 
         mottatteOpplysningerService.opprettSøknad(behandling, periode, soeknadsland)
@@ -275,15 +266,12 @@ internal class MottatteOpplysningerServiceTest {
 
     @Test
     fun opprettSedGrunnlag_harRettType() {
-        val behandling = lagBehandling(
+        val behandling = setupMock(
             Sakstyper.EU_EOS,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
         )
         val sedGrunnlag = SedGrunnlag()
-        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
-        every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
-        every { mottatteOpplysningerRepository.save(any()) } returns mockk()
 
 
         mottatteOpplysningerService.opprettSedGrunnlag(behandlingID, sedGrunnlag)
@@ -303,7 +291,7 @@ internal class MottatteOpplysningerServiceTest {
 
     @Test
     fun opprettSøknadFolketrygden_harPeriodeOgLand_setterPeriodeOgLandOgHarRettType() {
-        val behandling = lagBehandling(
+        val behandling = setupMock(
             Sakstyper.FTRL,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstema.ARBEID_I_UTLANDET
@@ -313,9 +301,6 @@ internal class MottatteOpplysningerServiceTest {
             LocalDate.of(2021, 12, 31)
         )
         val soeknadsland = Soeknadsland(listOf("UK"), false)
-        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
-        every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
-        every { mottatteOpplysningerRepository.save(any()) } returns mockk()
 
 
         mottatteOpplysningerService.opprettSøknad(behandling, periode, soeknadsland)
@@ -349,9 +334,7 @@ internal class MottatteOpplysningerServiceTest {
             LocalDate.of(2021, 12, 31)
         )
         val soeknadsland = Soeknadsland(listOf("UK"), false)
-        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
-        every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
-        every { mottatteOpplysningerRepository.save(any()) } returns mockk()
+        setupMock(behandling)
 
 
         mottatteOpplysningerService.opprettSøknad(behandling, periode, soeknadsland)
@@ -394,10 +377,11 @@ internal class MottatteOpplysningerServiceTest {
 
     @Test
     fun opprettSøknad_mottatteOpplysningerBlirOpprettet() {
-        val behandling = lagBehandling(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.YRKESAKTIV)
-        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
-        every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
-        every { mottatteOpplysningerRepository.save(any()) } returns mockk()
+        val behandling = setupMock(
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.YRKESAKTIV
+        )
 
 
         mottatteOpplysningerService.opprettSøknad(behandling, null, null)
@@ -448,10 +432,11 @@ internal class MottatteOpplysningerServiceTest {
 
     @Test
     fun `default objekter skal lages for periode og land om toggle melosys tom_periode_og_land er aktiv`() {
-        val behandling = lagBehandling(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.YRKESAKTIV)
-        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
-        every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
-        every { mottatteOpplysningerRepository.save(any()) } returns mockk()
+        val behandling = setupMock(
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.YRKESAKTIV
+        )
 
 
         mottatteOpplysningerService.opprettSøknad(Prosessinstans(), behandling)
@@ -465,10 +450,11 @@ internal class MottatteOpplysningerServiceTest {
     @Test
     fun `default objekter skal ikke lages for periode og land om toggle melosys tom_periode_og_land er aktiv`() {
         unleash.disableAll()
-        val behandling = lagBehandling(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.YRKESAKTIV)
-        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
-        every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
-        every { mottatteOpplysningerRepository.save(any()) } returns mockk()
+        val behandling = setupMock(
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.YRKESAKTIV
+        )
 
 
         mottatteOpplysningerService.opprettSøknad(Prosessinstans(), behandling)
@@ -478,6 +464,17 @@ internal class MottatteOpplysningerServiceTest {
             mottatteOpplysningerService.opprettSøknad(any(), isNull(), isNull())
         }
     }
+
+    private fun setupMock(behandling: Behandling) {
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
+        every { mottatteOpplysningerRepository.save(any()) } returns mockk()
+    }
+
+    private fun setupMock(sakstype: Sakstyper, sakstemaer: Sakstemaer, tema: Behandlingstema): Behandling =
+        lagBehandling(sakstype, sakstemaer, tema).apply {
+            setupMock(this)
+        }
 
 
     private fun lagJournalpost(behandling: Behandling) =
