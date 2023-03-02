@@ -9,12 +9,9 @@ import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.throwable.shouldHaveMessage
 import io.kotest.matchers.types.shouldBeInstanceOf
 import io.kotest.matchers.types.shouldNotBeInstanceOf
-import io.mockk.Called
-import io.mockk.every
+import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.mockk
-import io.mockk.verify
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsaarsak
@@ -39,7 +36,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.*
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
 
@@ -61,11 +57,13 @@ internal class MottatteOpplysningerServiceTest {
     @BeforeEach
     fun setup() {
         val utledMottaksdato = UtledMottaksdato(joarkFasade)
-        mottatteOpplysningerService = MottatteOpplysningerService(
-            mottatteOpplysningerRepository,
-            behandlingService,
-            utledMottaksdato,
-            unleash
+        mottatteOpplysningerService = spyk(
+            MottatteOpplysningerService(
+                mottatteOpplysningerRepository,
+                behandlingService,
+                utledMottaksdato,
+                unleash
+            )
         )
         unleash.enableAll()
     }
@@ -447,6 +445,40 @@ internal class MottatteOpplysningerServiceTest {
             })
         }
     }
+
+    @Test
+    fun `default objekter skal lages for periode og land om toggle melosys tom_periode_og_land er aktiv`() {
+        val behandling = lagBehandling(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.YRKESAKTIV)
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
+        every { mottatteOpplysningerRepository.save(any()) } returns mockk()
+
+
+        mottatteOpplysningerService.opprettSøknad(Prosessinstans(), behandling)
+
+
+        verify {
+            mottatteOpplysningerService.opprettSøknad(any(), isNull(true), isNull(true))
+        }
+    }
+
+    @Test
+    fun `default objekter skal ikke lages for periode og land om toggle melosys tom_periode_og_land er aktiv`() {
+        unleash.disableAll()
+        val behandling = lagBehandling(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.YRKESAKTIV)
+        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
+        every { mottatteOpplysningerRepository.save(any()) } returns mockk()
+
+
+        mottatteOpplysningerService.opprettSøknad(Prosessinstans(), behandling)
+
+
+        verify {
+            mottatteOpplysningerService.opprettSøknad(any(), isNull(), isNull())
+        }
+    }
+
 
     private fun lagJournalpost(behandling: Behandling) =
         Journalpost(behandling.initierendeJournalpostId).apply {
