@@ -13,6 +13,7 @@ import io.mockk.Called
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.mockk
 import io.mockk.verify
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Behandling
@@ -114,19 +115,24 @@ internal class MottatteOpplysningerServiceTest {
             Sakstemaer.UNNTAK,
             Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR
         )
-
         every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
         every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
-        every { mottatteOpplysningerRepository.save(any()) } answers {
-            firstArg<MottatteOpplysninger>().shouldNotBeNull().apply {
-                type.shouldBe(Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST)
-                mottatteOpplysningerData.shouldBeInstanceOf<AnmodningEllerAttest>()
-            }
-        }
+        every { mottatteOpplysningerRepository.save(any()) } returns mockk()
+
 
         mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(Prosessinstans().apply {
             this.behandling = behandling
         })
+
+
+        verify {
+            mottatteOpplysningerRepository.save(withArg {
+                it.apply {
+                    type.shouldBe(Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST)
+                    mottatteOpplysningerData.shouldBeInstanceOf<AnmodningEllerAttest>()
+                }
+            })
+        }
     }
 
     @Test
@@ -136,19 +142,24 @@ internal class MottatteOpplysningerServiceTest {
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstema.UTSENDT_ARBEIDSTAKER
         )
-
         every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
         every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
-        every { mottatteOpplysningerRepository.save(any()) } answers {
-            firstArg<MottatteOpplysninger>().shouldNotBeNull().apply {
-                type.shouldNotBe(Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST)
-                mottatteOpplysningerData.shouldNotBeInstanceOf<AnmodningEllerAttest>()
-            }
-        }
+        every { mottatteOpplysningerRepository.save(any()) } returns mockk()
+
 
         mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(Prosessinstans().apply {
             this.behandling = behandling
         })
+
+
+        verify {
+            mottatteOpplysningerRepository.save(withArg {
+                it.apply {
+                    type.shouldNotBe(Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST)
+                    mottatteOpplysningerData.shouldNotBeInstanceOf<AnmodningEllerAttest>()
+                }
+            })
+        }
     }
 
     @Test
@@ -160,22 +171,27 @@ internal class MottatteOpplysningerServiceTest {
         )
         val periode = Periode()
         val soeknadsland = Soeknadsland()
-
         every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
         every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
-        every { mottatteOpplysningerRepository.save(any()) } answers {
-            firstArg<MottatteOpplysninger>().shouldNotBeNull().apply {
-                type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS)
-                mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
-                mottatteOpplysningerData.apply {
-                    periode.shouldBe(periode)
-                    soeknadsland.shouldBe(soeknadsland)
-                }
-                mottaksdato.shouldBe(LocalDate.of(2000, 1, 1))
-            }
-        }
+        every { mottatteOpplysningerRepository.save(any()) } returns mockk()
+
 
         mottatteOpplysningerService.opprettSøknad(behandling, periode, soeknadsland)
+
+
+        verify {
+            mottatteOpplysningerRepository.save(withArg {
+                it.apply {
+                    type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS)
+                    mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
+                    mottatteOpplysningerData.apply {
+                        periode.shouldBe(periode)
+                        soeknadsland.shouldBe(soeknadsland)
+                    }
+                    mottaksdato.shouldBe(mottatDato)
+                }
+            })
+        }
     }
 
     @Test
@@ -188,7 +204,7 @@ internal class MottatteOpplysningerServiceTest {
         every { mottatteOpplysningerRepository.findByBehandling_Id(behandlingID) } returns Optional.of(
             mottatteOpplysninger
         )
-        every { mottatteOpplysningerRepository.saveAndFlush(any()) } returns MottatteOpplysninger()
+        every { mottatteOpplysningerRepository.saveAndFlush(any()) } returns mockk()
 
 
         mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandlingID, soeknadJsonNode)
@@ -209,17 +225,22 @@ internal class MottatteOpplysningerServiceTest {
                 )
             })
         }
+        every { mottatteOpplysningerRepository.saveAndFlush(any()) } returns mockk()
 
-        every { mottatteOpplysningerRepository.saveAndFlush(any()) } answers {
-            firstArg<MottatteOpplysninger>().shouldNotBeNull().apply {
-                jsonData.toJsonNode["periode"].apply {
-                    this["fom"].toString().shouldBe("[2000,1,1]")
-                    this["tom"].toString().shouldBe("[2010,1,1]")
-                }
-            }
-        }
 
         mottatteOpplysningerService.oppdaterMottatteOpplysninger(mottatteOpplysninger)
+
+
+        verify {
+            mottatteOpplysningerRepository.saveAndFlush(withArg {
+                it.apply {
+                    jsonData.toJsonNode["periode"].apply {
+                        this["fom"].toString().shouldBe("[2000,1,1]")
+                        this["tom"].toString().shouldBe("[2010,1,1]")
+                    }
+                }
+            })
+        }
     }
 
 
@@ -233,20 +254,25 @@ internal class MottatteOpplysningerServiceTest {
             LocalDate.of(2021, 12, 31)
         )
         val soeknadsland = Soeknadsland(listOf("UK"), false)
-
         every { mottatteOpplysningerRepository.findByBehandling_Id(behandlingID) } returns Optional.of(
             mottatteOpplysninger
         )
-        every { mottatteOpplysningerRepository.saveAndFlush(any()) } answers {
-            firstArg<MottatteOpplysninger>().apply {
-                mottatteOpplysningerData.apply {
-                    this.periode.shouldBe(periode)
-                    this.soeknadsland.shouldBe(soeknadsland)
-                }
-            }
-        }
+        every { mottatteOpplysningerRepository.saveAndFlush(any()) } returns mockk()
+
 
         mottatteOpplysningerService.oppdaterMottatteOpplysningerPeriodeOgLand(behandlingID, periode, soeknadsland)
+
+
+        verify {
+            mottatteOpplysningerRepository.saveAndFlush(withArg {
+                it.apply {
+                    mottatteOpplysningerData.apply {
+                        this.periode.shouldBe(periode)
+                        this.soeknadsland.shouldBe(soeknadsland)
+                    }
+                }
+            })
+        }
     }
 
     @Test
@@ -256,21 +282,25 @@ internal class MottatteOpplysningerServiceTest {
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
         )
+        val sedGrunnlag = SedGrunnlag()
         every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
         every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
+        every { mottatteOpplysningerRepository.save(any()) } returns mockk()
 
-        val sedGrunnlag = SedGrunnlag()
-
-        every { mottatteOpplysningerRepository.save(any()) } answers {
-            firstArg<MottatteOpplysninger>().apply {
-                type.shouldBe(Mottatteopplysningertyper.SED)
-                behandling.shouldBe(behandling)
-                mottaksdato.shouldBe(LocalDate.of(2000, 1, 1))
-                mottatteOpplysningerData.shouldBeInstanceOf<SedGrunnlag>()
-            }
-        }
 
         mottatteOpplysningerService.opprettSedGrunnlag(behandlingID, sedGrunnlag)
+
+
+        verify {
+            mottatteOpplysningerRepository.save(withArg {
+                it.apply {
+                    type.shouldBe(Mottatteopplysningertyper.SED)
+                    behandling.shouldBe(behandling)
+                    mottaksdato.shouldBe(mottatDato)
+                    mottatteOpplysningerData.shouldBeInstanceOf<SedGrunnlag>()
+                }
+            })
+        }
     }
 
     @Test
@@ -285,23 +315,28 @@ internal class MottatteOpplysningerServiceTest {
             LocalDate.of(2021, 12, 31)
         )
         val soeknadsland = Soeknadsland(listOf("UK"), false)
-
         every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
         every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
-        every { mottatteOpplysningerRepository.save(any()) } answers {
-            firstArg<MottatteOpplysninger>().apply {
-                mottatteOpplysningerData.shouldBeInstanceOf<SoeknadFtrl>()
-                this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN)
-                this.behandling.shouldBe(behandling)
-                mottaksdato.shouldBe(LocalDate.of(2000, 1, 1))
-                mottatteOpplysningerData.apply {
-                    this.periode.shouldBe(periode)
-                    this.soeknadsland.shouldBe(soeknadsland)
-                }
-            }
-        }
+        every { mottatteOpplysningerRepository.save(any()) } returns mockk()
+
 
         mottatteOpplysningerService.opprettSøknad(behandling, periode, soeknadsland)
+
+
+        verify {
+            mottatteOpplysningerRepository.save(withArg {
+                it.apply {
+                    mottatteOpplysningerData.shouldBeInstanceOf<SoeknadFtrl>()
+                    this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN)
+                    this.behandling.shouldBe(behandling)
+                    mottaksdato.shouldBe(mottatDato)
+                    mottatteOpplysningerData.apply {
+                        this.periode.shouldBe(periode)
+                        this.soeknadsland.shouldBe(soeknadsland)
+                    }
+                }
+            })
+        }
     }
 
     @Test
@@ -316,23 +351,28 @@ internal class MottatteOpplysningerServiceTest {
             LocalDate.of(2021, 12, 31)
         )
         val soeknadsland = Soeknadsland(listOf("UK"), false)
-
         every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
         every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
-        every { mottatteOpplysningerRepository.save(any()) } answers {
-            firstArg<MottatteOpplysninger>().apply {
-                mottatteOpplysningerData.shouldBeInstanceOf<SoeknadTrygdeavtale>()
-                this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE)
-                this.behandling.shouldBe(behandling)
-                mottaksdato.shouldBe(LocalDate.of(2000, 1, 1))
-                mottatteOpplysningerData.apply {
-                    this.periode.shouldBe(periode)
-                    this.soeknadsland.shouldBe(soeknadsland)
-                }
-            }
-        }
+        every { mottatteOpplysningerRepository.save(any()) } returns mockk()
+
 
         mottatteOpplysningerService.opprettSøknad(behandling, periode, soeknadsland)
+
+
+        verify {
+            mottatteOpplysningerRepository.save(withArg {
+                it.apply {
+                    mottatteOpplysningerData.shouldBeInstanceOf<SoeknadTrygdeavtale>()
+                    this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE)
+                    this.behandling.shouldBe(behandling)
+                    mottaksdato.shouldBe(mottatDato)
+                    mottatteOpplysningerData.apply {
+                        this.periode.shouldBe(periode)
+                        this.soeknadsland.shouldBe(soeknadsland)
+                    }
+                }
+            })
+        }
     }
 
     @Test
@@ -342,32 +382,39 @@ internal class MottatteOpplysningerServiceTest {
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
         )
+
+
         mottatteOpplysningerService.opprettSøknad(behandling, null, null)
+
 
         verify {
             behandlingService wasNot Called
             mottatteOpplysningerRepository wasNot Called
+            joarkFasade wasNot Called
         }
     }
 
     @Test
     fun opprettSøknad_mottatteOpplysningerBlirOpprettet() {
         val behandling = lagBehandling(Sakstyper.EU_EOS, Sakstemaer.MEDLEMSKAP_LOVVALG, Behandlingstema.YRKESAKTIV)
-
         every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
         every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
+        every { mottatteOpplysningerRepository.save(any()) } returns mockk()
 
-
-        every { mottatteOpplysningerRepository.save(any()) } answers {
-            firstArg<MottatteOpplysninger>().apply {
-                mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
-                this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS)
-                this.behandling.shouldBe(behandling)
-                mottaksdato.shouldBe(LocalDate.of(2000, 1, 1))
-            }
-        }
 
         mottatteOpplysningerService.opprettSøknad(behandling, null, null)
+
+
+        verify {
+            mottatteOpplysningerRepository.save(withArg {
+                it.apply {
+                    mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
+                    this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS)
+                    this.behandling.shouldBe(behandling)
+                    mottaksdato.shouldBe(mottatDato)
+                }
+            })
+        }
     }
 
     @Test
@@ -382,23 +429,28 @@ internal class MottatteOpplysningerServiceTest {
                 mottaksdato = dagensDato
             }
         }
-
         every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
-        every { mottatteOpplysningerRepository.save(any()) } answers {
-            firstArg<MottatteOpplysninger>().apply {
-                mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
-                this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN)
-                this.behandling.shouldBe(behandling)
-                mottaksdato.shouldBe(dagensDato)
-            }
-        }
+        every { mottatteOpplysningerRepository.save(any()) } returns mockk()
+
 
         mottatteOpplysningerService.opprettSøknad(behandling, null, null)
+
+
+        verify {
+            mottatteOpplysningerRepository.save(withArg {
+                it.apply {
+                    mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
+                    this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN)
+                    this.behandling.shouldBe(behandling)
+                    mottaksdato.shouldBe(dagensDato)
+                }
+            })
+        }
     }
 
     private fun lagJournalpost(behandling: Behandling) =
         Journalpost(behandling.initierendeJournalpostId).apply {
-            forsendelseMottatt = LocalDateTime.of(2000, 1, 1, 0, 0).toInstant(ZoneOffset.UTC)
+            forsendelseMottatt = mottatDato.atStartOfDay().toInstant(ZoneOffset.UTC)
         }
 
     private fun lagBehandling(sakstype: Sakstyper, sakstemaer: Sakstemaer, tema: Behandlingstema) =
@@ -428,5 +480,6 @@ internal class MottatteOpplysningerServiceTest {
 
     companion object {
         private const val behandlingID: Long = 123332211
+        private val mottatDato = LocalDate.of(2003, 3, 3)
     }
 }
