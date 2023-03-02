@@ -65,17 +65,17 @@ class MottatteOpplysningerService(
     }
 
     fun opprettSøknad(prosessinstans: Prosessinstans, behandling: Behandling) {
-        val soeknadsland: Soeknadsland?
-        val periode: Periode?
         val sakstype = behandling.fagsak.type
-        if (unleash.isEnabled("melosys.tom_periode_og_land") || sakstype == Sakstyper.TRYGDEAVTALE) {
-            soeknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, Soeknadsland())
-            periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode())
-        } else {
-            soeknadsland = prosessinstans.getData<Soeknadsland>(ProsessDataKey.SØKNADSLAND)
-            periode = prosessinstans.getData<Periode>(ProsessDataKey.SØKNADSPERIODE)
-        }
-        opprettSøknad(behandling, periode, soeknadsland)
+        val lagDefaultOjekter = unleash.isEnabled("melosys.tom_periode_og_land") || sakstype == Sakstyper.TRYGDEAVTALE
+
+        val defaultSoeknadsland = if (lagDefaultOjekter) Soeknadsland() else null
+        val defaultPeriode = if (lagDefaultOjekter) Periode() else null
+
+        opprettSøknad(
+            behandling = behandling,
+            periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, defaultPeriode),
+            soeknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, defaultSoeknadsland)
+        )
     }
 
     private inline fun <reified T> Prosessinstans.getData(key: ProsessDataKey, default: T? = null): T? {
