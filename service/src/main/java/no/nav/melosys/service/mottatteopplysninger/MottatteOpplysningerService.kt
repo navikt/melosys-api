@@ -97,38 +97,36 @@ class MottatteOpplysningerService(
 
     fun opprettSøknad(behandling: Behandling, periode: Periode?, soeknadsland: Soeknadsland?) {
         val behandlingID = behandling.id
-        val skalOppretteSøknad = !harTomFlyt(
+        val harTomFlyt = harTomFlyt(
             behandling,
             unleash.isEnabled("melosys.folketrygden.mvp"),
             unleash.isEnabled(ToggleName.IKKEYRKESAKTIV_FLYT),
             unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP)
         )
-        if (skalOppretteSøknad) {
-            val sakstype: Sakstyper = behandling.fagsak.type
-            opprettMottatteOpplysninger(
-                behandlingID = behandlingID,
-                mottatteOpplysningerData = when (sakstype) {
-                    Sakstyper.EU_EOS -> Soeknad()
-                    Sakstyper.FTRL -> SoeknadFtrl()
-                    Sakstyper.TRYGDEAVTALE -> SoeknadTrygdeavtale()
-                }.apply {
-                    this.periode = periode
-                    this.soeknadsland = soeknadsland
-                },
-                type = when (sakstype) {
-                    Sakstyper.EU_EOS -> Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
-                    Sakstyper.FTRL -> Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN
-                    Sakstyper.TRYGDEAVTALE -> Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE
-                },
-                versjon = VERSJON_SOEKNAD_GRUNNLAG
-            )
-            log.info("Opprettet søknad for behandling {}.", behandlingID)
-        } else {
-            log.info(
-                "Søknad trengs ikke og opprettes ikke for behandling {} med tema {}", behandlingID,
-                behandling.tema
-            )
+        if (harTomFlyt) {
+            log.info { "Søknad trengs ikke og opprettes ikke for behandling $behandlingID med tema ${behandling.tema}" }
+            return
         }
+
+        val sakstype: Sakstyper = behandling.fagsak.type
+        opprettMottatteOpplysninger(
+            behandlingID = behandlingID,
+            mottatteOpplysningerData = when (sakstype) {
+                Sakstyper.EU_EOS -> Soeknad()
+                Sakstyper.FTRL -> SoeknadFtrl()
+                Sakstyper.TRYGDEAVTALE -> SoeknadTrygdeavtale()
+            }.apply {
+                this.periode = periode
+                this.soeknadsland = soeknadsland
+            },
+            type = when (sakstype) {
+                Sakstyper.EU_EOS -> Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
+                Sakstyper.FTRL -> Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN
+                Sakstyper.TRYGDEAVTALE -> Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE
+            },
+            versjon = VERSJON_SOEKNAD_GRUNNLAG
+        )
+        log.info("Opprettet søknad for behandling {}.", behandlingID)
     }
 
     private fun opprettMottatteOpplysninger(
@@ -189,7 +187,11 @@ class MottatteOpplysningerService(
     }
 
     @Transactional
-    fun oppdaterMottatteOpplysningerPeriodeOgLand(behandlingID: Long, periode: Periode?, soeknadsland: Soeknadsland?) {
+    fun oppdaterMottatteOpplysningerPeriodeOgLand(
+        behandlingID: Long,
+        periode: Periode?,
+        soeknadsland: Soeknadsland?
+    ) {
         val mottatteOpplysninger = hentMottatteOpplysninger(behandlingID).apply {
             mottatteOpplysningerData.periode = periode
             mottatteOpplysningerData.soeknadsland = soeknadsland
