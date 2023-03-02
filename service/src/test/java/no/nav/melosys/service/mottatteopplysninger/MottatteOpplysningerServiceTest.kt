@@ -400,7 +400,7 @@ internal class MottatteOpplysningerServiceTest {
     @Test
     fun opprettSøknad_FTRL_brukbBehandlingsårsak() {
         val dagensDato = LocalDate.now()
-        val behandling = lagBehandling(
+        val behandling = setupMock(
             Sakstyper.FTRL,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstema.YRKESAKTIV
@@ -409,8 +409,6 @@ internal class MottatteOpplysningerServiceTest {
                 mottaksdato = dagensDato
             }
         }
-        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
-        every { mottatteOpplysningerRepository.save(any()) } returns mockk()
 
 
         mottatteOpplysningerService.opprettSøknad(behandling, null, null)
@@ -425,6 +423,7 @@ internal class MottatteOpplysningerServiceTest {
                     mottaksdato.shouldBe(dagensDato)
                 }
             })
+            joarkFasade wasNot Called
         }
     }
 
@@ -482,17 +481,14 @@ internal class MottatteOpplysningerServiceTest {
 
     private fun lagBehandling(sakstype: Sakstyper, sakstemaer: Sakstemaer, tema: Behandlingstema) =
         Behandling().apply {
-            fagsak = lagFagsak(sakstype, sakstemaer)
+            fagsak = Fagsak().apply {
+                type = sakstype
+                this.tema = sakstemaer
+            }
             id = behandlingID
             initierendeJournalpostId = "123321"
             type = Behandlingstyper.FØRSTEGANG
             this.tema = tema
-        }
-
-    private fun lagFagsak(sakstype: Sakstyper, sakstemaer: Sakstemaer) =
-        Fagsak().apply {
-            type = sakstype
-            tema = sakstemaer
         }
 
     private val String.toJsonNode: JsonNode
