@@ -8,6 +8,7 @@ import java.util.*;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
@@ -58,6 +59,8 @@ class BehandlingsresultatServiceTest {
         behandlingsresultat.setAvklartefakta(new HashSet<>(Collections.singletonList(new Avklartefakta())));
         behandlingsresultat.setLovvalgsperioder(new HashSet<>(Collections.singletonList(new Lovvalgsperiode())));
         behandlingsresultat.setVilkaarsresultater(new HashSet<>(Collections.singleton(new Vilkaarsresultat())));
+        behandlingsresultat.setMedlemAvFolketrygden(new MedlemAvFolketrygden());
+        behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.GODKJENT);
 
         when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
 
@@ -67,6 +70,8 @@ class BehandlingsresultatServiceTest {
 
         assertThat(behandlingsresultat.getAvklartefakta()).isEmpty();
         assertThat(behandlingsresultat.getLovvalgsperioder()).isEmpty();
+        assertThat(behandlingsresultat.getMedlemAvFolketrygden()).isNull();
+        assertThat(behandlingsresultat.getUtfallRegistreringUnntak()).isNull();
         verify(vilkaarsresultatService).tømVilkårForBehandlingsresultat(behandlingsresultat);
     }
 
@@ -272,19 +277,20 @@ class BehandlingsresultatServiceTest {
     }
 
     @Test
-    void oppdaterUtfallRegistreringUnntak_ikkeSatt_lagres() {
+    void settUtfallRegistreringUnntakOgType_ikkeSatt_lagres() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatRepo.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
+        when(behandlingsresultatRepo.findWithKontrollresultaterById(1L)).thenReturn(Optional.of(behandlingsresultat));
 
 
-        behandlingsresultatService.oppdaterUtfallRegistreringUnntak(1, Utfallregistreringunntak.GODKJENT);
+        behandlingsresultatService.settUtfallRegistreringUnntakOgType(1, Utfallregistreringunntak.GODKJENT);
 
 
         verify(behandlingsresultatRepo).save(behandlingsresultat);
     }
 
     @Test
-    void oppdaterUtfallRegistreringUnntak_alleredeSatt_kasterException() {
+    void settUtfallRegistreringUnntakOgType_alleredeSatt_kasterException() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
 
 
@@ -293,8 +299,21 @@ class BehandlingsresultatServiceTest {
 
         when(behandlingsresultatRepo.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> behandlingsresultatService.oppdaterUtfallRegistreringUnntak(1, Utfallregistreringunntak.GODKJENT))
+            .isThrownBy(() -> behandlingsresultatService.settUtfallRegistreringUnntakOgType(1, Utfallregistreringunntak.GODKJENT))
             .withMessageContaining("Utfall for registrering av unntak er allerede satt for behandlingsresultat");
+    }
+
+    @Test
+    void oppdaterUtfallRegistreringUnntak_alleredeSatt_oppdaterer() {
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.GODKJENT);
+        when(behandlingsresultatRepo.findWithKontrollresultaterById(1L)).thenReturn(Optional.of(behandlingsresultat));
+
+
+        behandlingsresultatService.oppdaterUtfallRegistreringUnntak(1, Utfallregistreringunntak.DELVIS_GODKJENT);
+
+
+        verify(behandlingsresultatRepo).save(behandlingsresultat);
     }
 
     @Test
