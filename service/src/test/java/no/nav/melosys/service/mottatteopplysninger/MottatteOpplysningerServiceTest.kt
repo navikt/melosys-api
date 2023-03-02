@@ -56,12 +56,11 @@ internal class MottatteOpplysningerServiceTest {
 
     @BeforeEach
     fun setup() {
-        val utledMottaksdato = UtledMottaksdato(joarkFasade)
         mottatteOpplysningerService = spyk(
             MottatteOpplysningerService(
                 mottatteOpplysningerRepository,
                 behandlingService,
-                utledMottaksdato,
+                UtledMottaksdato(joarkFasade),
                 unleash
             )
         )
@@ -89,13 +88,13 @@ internal class MottatteOpplysningerServiceTest {
     @Test
     fun opprettSøknadEllerAnmodningEllerAttest_toggleErAv_lagerIkkeAnmodningEllerAttest() {
         unleash.disableAll()
-        val behandling = lagBehandling(
-            Sakstyper.EU_EOS,
-            Sakstemaer.UNNTAK,
-            Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR
-        )
-        val prosessinstans = Prosessinstans()
-        prosessinstans.behandling = behandling
+        val prosessinstans = Prosessinstans().apply {
+            behandling = lagBehandling(
+                Sakstyper.EU_EOS,
+                Sakstemaer.UNNTAK,
+                Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR
+            )
+        }
 
 
         mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(prosessinstans)
@@ -108,16 +107,16 @@ internal class MottatteOpplysningerServiceTest {
 
     @Test
     fun opprettSøknadEllerAnmodningEllerAttest_erAnmodningOmUnntakEllerRegistreringUnntak_lagerAnmodningEllerAttest() {
-        val behandling = setupMock(
-            Sakstyper.EU_EOS,
-            Sakstemaer.UNNTAK,
-            Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR
-        )
+        val prosessinstans = Prosessinstans().apply {
+            behandling = setupMock(
+                Sakstyper.EU_EOS,
+                Sakstemaer.UNNTAK,
+                Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR
+            )
+        }
 
 
-        mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(Prosessinstans().apply {
-            this.behandling = behandling
-        })
+        mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(prosessinstans)
 
 
         verify {
@@ -132,16 +131,16 @@ internal class MottatteOpplysningerServiceTest {
 
     @Test
     fun opprettSøknadEllerAnmodningEllerAttest_erIkkeAnmodningOmUnntakEllerRegistreringUnntak_lagerIkkeAnmodningEllerAttest() {
-        val behandling = setupMock(
-            Sakstyper.EU_EOS,
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Behandlingstema.UTSENDT_ARBEIDSTAKER
-        )
+        val prosessinstans = Prosessinstans().apply {
+            behandling = setupMock(
+                Sakstyper.EU_EOS,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
+                Behandlingstema.UTSENDT_ARBEIDSTAKER
+            )
+        }
 
 
-        mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(Prosessinstans().apply {
-            this.behandling = behandling
-        })
+        mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(prosessinstans)
 
 
         verify {
@@ -271,10 +270,9 @@ internal class MottatteOpplysningerServiceTest {
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
         )
-        val sedGrunnlag = SedGrunnlag()
 
 
-        mottatteOpplysningerService.opprettSedGrunnlag(behandlingID, sedGrunnlag)
+        mottatteOpplysningerService.opprettSedGrunnlag(behandlingID, SedGrunnlag())
 
 
         verify {
