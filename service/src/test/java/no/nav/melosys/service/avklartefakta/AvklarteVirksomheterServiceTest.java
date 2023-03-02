@@ -246,7 +246,7 @@ class AvklarteVirksomheterServiceTest {
     }
 
     @Test
-    void harOpphørtAvklartVirksomhet_eregKasterOrgOpphørtFeil_girTrue() {
+    void harOpphørtAvklartVirksomhet_opphoersdatoTilbakeITid_girTrue() {
         OrganisasjonDokument orgDok = lagOrganisasjonDokument("0011", "Gatenavn 1");
         orgDok.organisasjonDetaljer.opphoersdato = LocalDate.now().minusYears(1);
         when(organisasjonOppslagService.hentOrganisasjoner(any())).thenReturn(Collections.singleton(orgDok));

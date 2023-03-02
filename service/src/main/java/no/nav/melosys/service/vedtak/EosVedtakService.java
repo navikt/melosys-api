@@ -89,13 +89,16 @@ public class EosVedtakService {
         behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
 
         if (behandlingsresultat.erInnvilgelse()) {
-            var kontrollerOpphørtArbeidsgiverBareOmDeSkalHaKopi = request.isKopiTilArbeidsgiver() ? null : Collections.singleton(Kontroll_begrunnelser.OPPHØRT_ARBEIDSGIVER);
+            var kontrollerSomSkalIgnoreres = request.isKopiTilArbeidsgiver()
+                ? null
+                : Collections.singleton(Kontroll_begrunnelser.OPPHØRT_ARBEIDSGIVER);
+
             ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
                 behandling,
                 behandlingsresultat,
                 Sakstyper.EU_EOS,
                 request.getBehandlingsresultatTypeKode(),
-                kontrollerOpphørtArbeidsgiverBareOmDeSkalHaKopi
+                kontrollerSomSkalIgnoreres
             );
         }
 
