@@ -202,7 +202,7 @@ class UtpekingServiceTest {
         utpekingService.avvisUtpeking(behandlingID, lagUtpekingAvvis());
 
 
-        verify(behandlingsresultatService).oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);
+        verify(behandlingsresultatService).settUtfallRegistreringUnntakOgType(eq(behandlingID), eq(Utfallregistreringunntak.IKKE_GODKJENT));
         verify(prosessinstansService).opprettProsessinstansAvvisUtpeking(eq(behandling), any(UtpekingAvvis.class));
     }
 
