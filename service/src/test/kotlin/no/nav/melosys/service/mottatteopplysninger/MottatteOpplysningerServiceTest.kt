@@ -3,6 +3,7 @@ package no.nav.melosys.service.mottatteopplysninger
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -118,13 +119,13 @@ internal class MottatteOpplysningerServiceTest {
         mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(prosessinstans)
 
 
+        val slot = slot<MottatteOpplysninger>()
         verify {
-            mottatteOpplysningerRepository.save(withArg {
-                it.apply {
-                    type.shouldBe(Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST)
-                    mottatteOpplysningerData.shouldBeInstanceOf<AnmodningEllerAttest>()
-                }
-            })
+            mottatteOpplysningerRepository.save(capture(slot))
+        }
+        slot.captured.apply {
+            type.shouldBe(Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST)
+            mottatteOpplysningerData.shouldBeInstanceOf<AnmodningEllerAttest>()
         }
     }
 
@@ -142,13 +143,13 @@ internal class MottatteOpplysningerServiceTest {
         mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(prosessinstans)
 
 
+        val slot = slot<MottatteOpplysninger>()
         verify {
-            mottatteOpplysningerRepository.save(withArg {
-                it.apply {
-                    type.shouldNotBe(Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST)
-                    mottatteOpplysningerData.shouldNotBeInstanceOf<AnmodningEllerAttest>()
-                }
-            })
+            mottatteOpplysningerRepository.save(capture(slot))
+        }
+        slot.captured.apply {
+            type.shouldNotBe(Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST)
+            mottatteOpplysningerData.shouldNotBeInstanceOf<AnmodningEllerAttest>()
         }
     }
 
@@ -166,18 +167,18 @@ internal class MottatteOpplysningerServiceTest {
         mottatteOpplysningerService.opprettSøknad(behandling, periode, soeknadsland)
 
 
+        val slot = slot<MottatteOpplysninger>()
         verify {
-            mottatteOpplysningerRepository.save(withArg {
-                it.apply {
-                    type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS)
-                    mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
-                    mottatteOpplysningerData.apply {
-                        periode.shouldBe(periode)
-                        soeknadsland.shouldBe(soeknadsland)
-                    }
-                    mottaksdato.shouldBe(mottatDato)
-                }
-            })
+            mottatteOpplysningerRepository.save(capture(slot))
+        }
+        slot.captured.apply {
+            type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS)
+            mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
+            mottatteOpplysningerData.apply {
+                periode.shouldBe(periode)
+                soeknadsland.shouldBe(soeknadsland)
+            }
+            mottaksdato.shouldBe(mottatDato)
         }
     }
 
@@ -218,18 +219,17 @@ internal class MottatteOpplysningerServiceTest {
         mottatteOpplysningerService.oppdaterMottatteOpplysninger(mottatteOpplysninger)
 
 
+        val slot = slot<MottatteOpplysninger>()
         verify {
-            mottatteOpplysningerRepository.saveAndFlush(withArg {
-                it.apply {
-                    jsonData.toJsonNode["periode"].apply {
-                        this["fom"].toString().shouldBe("[2000,1,1]")
-                        this["tom"].toString().shouldBe("[2010,1,1]")
-                    }
-                }
-            })
+            mottatteOpplysningerRepository.saveAndFlush(capture(slot))
+        }
+        slot.captured.apply {
+            jsonData.toJsonNode["periode"].apply {
+                this["fom"].toString().shouldBe("[2000,1,1]")
+                this["tom"].toString().shouldBe("[2010,1,1]")
+            }
         }
     }
-
 
     @Test
     fun oppdaterMottatteOpplysningerPeriodeOgLand_eksisterer_oppdatererPeriodeOgLand() {
@@ -250,15 +250,15 @@ internal class MottatteOpplysningerServiceTest {
         mottatteOpplysningerService.oppdaterMottatteOpplysningerPeriodeOgLand(behandlingID, periode, soeknadsland)
 
 
+        val slot = slot<MottatteOpplysninger>()
         verify {
-            mottatteOpplysningerRepository.saveAndFlush(withArg {
-                it.apply {
-                    mottatteOpplysningerData.apply {
-                        this.periode.shouldBe(periode)
-                        this.soeknadsland.shouldBe(soeknadsland)
-                    }
-                }
-            })
+            mottatteOpplysningerRepository.saveAndFlush(capture(slot))
+        }
+        slot.captured.apply {
+            mottatteOpplysningerData.apply {
+                this.periode.shouldBe(periode)
+                this.soeknadsland.shouldBe(soeknadsland)
+            }
         }
     }
 
@@ -274,15 +274,15 @@ internal class MottatteOpplysningerServiceTest {
         mottatteOpplysningerService.opprettSedGrunnlag(behandlingID, SedGrunnlag())
 
 
+        val slot = slot<MottatteOpplysninger>()
         verify {
-            mottatteOpplysningerRepository.save(withArg {
-                it.apply {
-                    type.shouldBe(Mottatteopplysningertyper.SED)
-                    behandling.shouldBe(behandling)
-                    mottaksdato.shouldBe(mottatDato)
-                    mottatteOpplysningerData.shouldBeInstanceOf<SedGrunnlag>()
-                }
-            })
+            mottatteOpplysningerRepository.save(capture(slot))
+        }
+        slot.captured.apply {
+            type.shouldBe(Mottatteopplysningertyper.SED)
+            behandling.shouldBe(behandling)
+            mottaksdato.shouldBe(mottatDato)
+            mottatteOpplysningerData.shouldBeInstanceOf<SedGrunnlag>()
         }
     }
 
@@ -303,19 +303,19 @@ internal class MottatteOpplysningerServiceTest {
         mottatteOpplysningerService.opprettSøknad(behandling, periode, soeknadsland)
 
 
+        val slot = slot<MottatteOpplysninger>()
         verify {
-            mottatteOpplysningerRepository.save(withArg {
-                it.apply {
-                    mottatteOpplysningerData.shouldBeInstanceOf<SoeknadFtrl>()
-                    this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN)
-                    this.behandling.shouldBe(behandling)
-                    mottaksdato.shouldBe(mottatDato)
-                    mottatteOpplysningerData.apply {
-                        this.periode.shouldBe(periode)
-                        this.soeknadsland.shouldBe(soeknadsland)
-                    }
-                }
-            })
+            mottatteOpplysningerRepository.save(capture(slot))
+        }
+        slot.captured.apply {
+            mottatteOpplysningerData.shouldBeInstanceOf<SoeknadFtrl>()
+            this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN)
+            this.behandling.shouldBe(behandling)
+            mottaksdato.shouldBe(mottatDato)
+            mottatteOpplysningerData.apply {
+                this.periode.shouldBe(periode)
+                this.soeknadsland.shouldBe(soeknadsland)
+            }
         }
     }
 
@@ -337,19 +337,19 @@ internal class MottatteOpplysningerServiceTest {
         mottatteOpplysningerService.opprettSøknad(behandling, periode, soeknadsland)
 
 
+        val slot = slot<MottatteOpplysninger>()
         verify {
-            mottatteOpplysningerRepository.save(withArg {
-                it.apply {
-                    mottatteOpplysningerData.shouldBeInstanceOf<SoeknadTrygdeavtale>()
-                    this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE)
-                    this.behandling.shouldBe(behandling)
-                    mottaksdato.shouldBe(mottatDato)
-                    mottatteOpplysningerData.apply {
-                        this.periode.shouldBe(periode)
-                        this.soeknadsland.shouldBe(soeknadsland)
-                    }
-                }
-            })
+            mottatteOpplysningerRepository.save(capture(slot))
+        }
+        slot.captured.apply {
+            mottatteOpplysningerData.shouldBeInstanceOf<SoeknadTrygdeavtale>()
+            this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE)
+            this.behandling.shouldBe(behandling)
+            mottaksdato.shouldBe(mottatDato)
+            mottatteOpplysningerData.apply {
+                this.periode.shouldBe(periode)
+                this.soeknadsland.shouldBe(soeknadsland)
+            }
         }
     }
 
@@ -384,15 +384,14 @@ internal class MottatteOpplysningerServiceTest {
         mottatteOpplysningerService.opprettSøknad(behandling, null, null)
 
 
+        val slot = slot<MottatteOpplysninger>()
         verify {
-            mottatteOpplysningerRepository.save(withArg {
-                it.apply {
-                    mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
-                    this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS)
-                    this.behandling.shouldBe(behandling)
-                    mottaksdato.shouldBe(mottatDato)
-                }
-            })
+            mottatteOpplysningerRepository.save(capture(slot))
+        }
+        slot.captured.apply {
+            mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
+            this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS)
+            this.behandling.shouldBe(behandling)
         }
     }
 
@@ -413,16 +412,16 @@ internal class MottatteOpplysningerServiceTest {
         mottatteOpplysningerService.opprettSøknad(behandling, null, null)
 
 
+        val slot = slot<MottatteOpplysninger>()
         verify {
-            mottatteOpplysningerRepository.save(withArg {
-                it.apply {
-                    mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
-                    this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN)
-                    this.behandling.shouldBe(behandling)
-                    mottaksdato.shouldBe(dagensDato)
-                }
-            })
+            mottatteOpplysningerRepository.save(capture(slot))
             joarkFasade wasNot Called
+        }
+        slot.captured.apply {
+            mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
+            this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN)
+            this.behandling.shouldBe(behandling)
+            mottaksdato.shouldBe(dagensDato)
         }
     }
 
@@ -461,11 +460,10 @@ internal class MottatteOpplysningerServiceTest {
         }
     }
 
-    private val slot = slot<MottatteOpplysninger>()
     private fun setupMock(behandling: Behandling) {
         every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
         every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
-        every { mottatteOpplysningerRepository.save(capture(slot)) } returns mockk()
+        every { mottatteOpplysningerRepository.save(any()) } returns mockk()
     }
 
     private fun setupMock(sakstype: Sakstyper, sakstemaer: Sakstemaer, tema: Behandlingstema): Behandling =
