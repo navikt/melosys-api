@@ -1,7 +1,6 @@
 package no.nav.melosys.service.mottatteopplysninger
 
 import com.fasterxml.jackson.databind.JsonNode
-import mu.KotlinLogging
 import no.finn.unleash.Unleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
@@ -18,15 +17,14 @@ import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.MottatteOpplysningerRepository
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.UtledMottaksdato
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.Companion.harRegistreringUnntakFraMedlemskapFlyt
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.Companion.harTomFlyt
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 import java.util.*
+import mu.KotlinLogging
 
 private val log = KotlinLogging.logger { }
-
 @Service
 class MottatteOpplysningerService(
     private val mottatteOpplysningerRepository: MottatteOpplysningerRepository,
@@ -49,7 +47,7 @@ class MottatteOpplysningerService(
 
     fun opprettSøknadEllerAnmodningEllerAttest(prosessinstans: Prosessinstans) {
         val behandling = prosessinstans.behandling
-        if (harRegistreringUnntakFraMedlemskapFlyt(
+        if (SaksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(
                 behandling,
                 unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP)
             )
@@ -94,7 +92,7 @@ class MottatteOpplysningerService(
 
     fun opprettSøknad(behandling: Behandling, periode: Periode?, soeknadsland: Soeknadsland?) {
         val behandlingID = behandling.id
-        val harTomFlyt = harTomFlyt(
+        val harTomFlyt = SaksbehandlingRegler.harTomFlyt(
             behandling,
             unleash.isEnabled("melosys.folketrygden.mvp"),
             unleash.isEnabled(ToggleName.IKKEYRKESAKTIV_FLYT),

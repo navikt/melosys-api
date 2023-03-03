@@ -1,10 +1,10 @@
 package no.nav.melosys.service.mottatteopplysninger
 
-import io.kotest.matchers.shouldBe
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.throwable.shouldHaveMessage
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -34,7 +34,6 @@ import no.nav.melosys.service.behandling.UtledMottaksdato
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.*
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.util.*
@@ -462,10 +461,11 @@ internal class MottatteOpplysningerServiceTest {
         }
     }
 
+    private val slot = slot<MottatteOpplysninger>()
     private fun setupMock(behandling: Behandling) {
         every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
         every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
-        every { mottatteOpplysningerRepository.save(any()) } returns mockk()
+        every { mottatteOpplysningerRepository.save(capture(slot)) } returns mockk()
     }
 
     private fun setupMock(sakstype: Sakstyper, sakstemaer: Sakstemaer, tema: Behandlingstema): Behandling =
