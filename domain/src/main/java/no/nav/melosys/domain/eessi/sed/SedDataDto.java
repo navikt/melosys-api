@@ -30,6 +30,8 @@ public class SedDataDto extends SedGrunnlagDto {
 
     private VedtakDto vedtakDto;
 
+    private InvalideringSedDto invalideringSedDto;
+
     public List<FamilieMedlem> getFamilieMedlem() {
         return familieMedlem;
     }
@@ -124,5 +126,13 @@ public class SedDataDto extends SedGrunnlagDto {
 
     public void setOppholdsadresse(Adresse oppholdsadresse) {
         this.oppholdsadresse = oppholdsadresse;
+    }
+
+    public InvalideringSedDto getInvalideringSedDto() {
+        return invalideringSedDto;
+    }
+
+    public void setInvalideringSedDto(InvalideringSedDto invalideringSedDto) {
+        this.invalideringSedDto = invalideringSedDto;
     }
 }

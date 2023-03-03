@@ -1,7 +1,9 @@
 package no.nav.melosys.saksflyt.steg.sed;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -10,6 +12,7 @@ import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
+import no.nav.melosys.domain.eessi.SedInformasjon;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -117,20 +120,19 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     }
 
     public void annullerSedForNyVurderingMedSendtVedtak(Behandling behandling) {
-        if (harSendtVedtak(behandling.getFagsak().getGsakSaksnummer())) {
-            log.info("Invaliderer sendt vedtak SED for behandling %d  med rina saksnummer %d"
-                .formatted(behandling.getId(), behandling.getFagsak().getGsakSaksnummer()));
-            eessiService.sendInvalideringSed(behandling.getId(), "");
-        }
+        finnSedSomSkalInvalideres(behandling.getFagsak().getGsakSaksnummer()).ifPresent(sedInformasjon ->
+            eessiService.sendInvalideringSed(behandling.getId(), sedInformasjon.getSedType(), sedInformasjon.getOpprettetDato()));
     }
 
-    private boolean harSendtVedtak(long rinasaksnummer) {
+    private Optional<SedInformasjon> finnSedSomSkalInvalideres(long rinasaksnummer) {
         var sedTypeList = List.of(SedType.A004, SedType.A012);
         return eessiService.hentTilknyttedeBucer(rinasaksnummer, Collections.emptyList())
             .stream()
             .filter(BucInformasjon::erÅpen)
             .flatMap(b -> b.getSeder().stream())
-            .anyMatch(s -> sedTypeList.contains(SedType.valueOf(s.getSedType())));
+            .filter(s -> sedTypeList.contains(SedType.valueOf(s.getSedType())))
+            .sorted(Comparator.comparing(SedInformasjon::getOpprettetDato).reversed())
+            .findFirst();
     }
 
     private void finnOgLukkTilhørendeBUC(Behandlingsresultat behandlingsresultat) {
