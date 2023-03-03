@@ -1,9 +1,5 @@
 package no.nav.melosys.service.mottatteopplysninger;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.Optional;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import no.finn.unleash.Unleash;
@@ -24,6 +20,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Optional;
 
 import static no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN;
 import static no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE;
@@ -90,23 +90,12 @@ public class MottatteOpplysningerService {
     }
 
     public void opprettSøknad(Prosessinstans prosessinstans, Behandling behandling) {
-        Soeknadsland soeknadsland;
-        Periode periode;
-        Sakstyper sakstype = behandling.getFagsak().getType();
-        if (unleash.isEnabled("melosys.tom_periode_og_land") || sakstype == Sakstyper.TRYGDEAVTALE) {
-            soeknadsland = prosessinstans.getData(
-                ProsessDataKey.SØKNADSLAND,
-                new TypeReference<>() {
-                },
-                new Soeknadsland());
-            periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class, new Periode());
-        } else {
-            soeknadsland = prosessinstans.getData(
-                ProsessDataKey.SØKNADSLAND,
-                new TypeReference<>() {
-                });
-            periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class);
-        }
+        Soeknadsland soeknadsland = prosessinstans.getData(
+            ProsessDataKey.SØKNADSLAND,
+            new TypeReference<>() {
+            },
+            new Soeknadsland());
+        Periode periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class, new Periode());
         opprettSøknad(behandling, periode, soeknadsland);
     }
 
