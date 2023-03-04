@@ -3,7 +3,6 @@ package no.nav.melosys.service.mottatteopplysninger
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -42,25 +41,25 @@ import java.util.*
 @ExtendWith(MockKExtension::class)
 internal class MottatteOpplysningerServiceTest {
     @MockK
-    private lateinit var mottatteOpplysningerRepository: MottatteOpplysningerRepository
+    private lateinit var mottatteOpplysningerRepositoryMock: MottatteOpplysningerRepository
 
     @MockK
-    private lateinit var behandlingService: BehandlingService
+    private lateinit var behandlingServiceMock: BehandlingService
 
     @MockK
-    private lateinit var joarkFasade: JoarkFasade
+    private lateinit var joarkFasadeMock: JoarkFasade
 
-    private lateinit var mottatteOpplysningerService: MottatteOpplysningerService
+    private lateinit var mottatteOpplysningerServiceSpy: MottatteOpplysningerService
 
     private val unleash = FakeUnleash()
 
     @BeforeEach
     fun setup() {
-        mottatteOpplysningerService = spyk(
+        mottatteOpplysningerServiceSpy = spyk(
             MottatteOpplysningerService(
-                mottatteOpplysningerRepository,
-                behandlingService,
-                UtledMottaksdato(joarkFasade),
+                mottatteOpplysningerRepositoryMock,
+                behandlingServiceMock,
+                UtledMottaksdato(joarkFasadeMock),
                 unleash
             )
         )
@@ -69,19 +68,19 @@ internal class MottatteOpplysningerServiceTest {
 
     @Test
     fun hentMottatteOpplysningerForBehandlingID_finnes_returnerMottatteOpplysninger() {
-        every { mottatteOpplysningerRepository.findByBehandling_Id(behandlingID) } returns Optional.of(
+        every { mottatteOpplysningerRepositoryMock.findByBehandling_Id(behandlingID) } returns Optional.of(
             MottatteOpplysninger()
         )
 
-        mottatteOpplysningerService.hentMottatteOpplysninger(behandlingID).shouldNotBeNull()
+        mottatteOpplysningerServiceSpy.hentMottatteOpplysninger(behandlingID).shouldNotBeNull()
     }
 
     @Test
     fun hentMottatteOpplysningerForBehandlingID_finnesIkke_kastException() {
-        every { mottatteOpplysningerRepository.findByBehandling_Id(1) } returns Optional.empty()
+        every { mottatteOpplysningerRepositoryMock.findByBehandling_Id(1) } returns Optional.empty()
 
         shouldThrow<IkkeFunnetException> {
-            mottatteOpplysningerService.hentMottatteOpplysninger(1)
+            mottatteOpplysningerServiceSpy.hentMottatteOpplysninger(1)
         }.shouldHaveMessage("Finner ikke mottatteOpplysninger for behandling 1")
     }
 
@@ -97,11 +96,11 @@ internal class MottatteOpplysningerServiceTest {
         }
 
 
-        mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(prosessinstans)
+        mottatteOpplysningerServiceSpy.opprettSøknadEllerAnmodningEllerAttest(prosessinstans)
 
 
         verify(exactly = 0) {
-            mottatteOpplysningerRepository.save(any())
+            mottatteOpplysningerRepositoryMock.save(any())
         }
     }
 
@@ -116,12 +115,12 @@ internal class MottatteOpplysningerServiceTest {
         }
 
 
-        mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(prosessinstans)
+        mottatteOpplysningerServiceSpy.opprettSøknadEllerAnmodningEllerAttest(prosessinstans)
 
 
         val slot = slot<MottatteOpplysninger>()
         verify {
-            mottatteOpplysningerRepository.save(capture(slot))
+            mottatteOpplysningerRepositoryMock.save(capture(slot))
         }
         slot.captured.apply {
             type.shouldBe(Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST)
@@ -140,12 +139,12 @@ internal class MottatteOpplysningerServiceTest {
         }
 
 
-        mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(prosessinstans)
+        mottatteOpplysningerServiceSpy.opprettSøknadEllerAnmodningEllerAttest(prosessinstans)
 
 
         val slot = slot<MottatteOpplysninger>()
         verify {
-            mottatteOpplysningerRepository.save(capture(slot))
+            mottatteOpplysningerRepositoryMock.save(capture(slot))
         }
         slot.captured.apply {
             type.shouldNotBe(Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST)
@@ -164,12 +163,12 @@ internal class MottatteOpplysningerServiceTest {
         val soeknadsland = Soeknadsland()
 
 
-        mottatteOpplysningerService.opprettSøknad(behandling, periode, soeknadsland)
+        mottatteOpplysningerServiceSpy.opprettSøknad(behandling, periode, soeknadsland)
 
 
         val slot = slot<MottatteOpplysninger>()
         verify {
-            mottatteOpplysningerRepository.save(capture(slot))
+            mottatteOpplysningerRepositoryMock.save(capture(slot))
         }
         slot.captured.apply {
             type.shouldBe(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS)
@@ -189,16 +188,16 @@ internal class MottatteOpplysningerServiceTest {
             jsonData = originalJsonData
         }
         val soeknadJsonNode = Soeknad().toJsonNode
-        every { mottatteOpplysningerRepository.findByBehandling_Id(behandlingID) } returns Optional.of(
+        every { mottatteOpplysningerRepositoryMock.findByBehandling_Id(behandlingID) } returns Optional.of(
             mottatteOpplysninger
         )
-        every { mottatteOpplysningerRepository.saveAndFlush(any()) } returns mockk()
+        every { mottatteOpplysningerRepositoryMock.saveAndFlush(any()) } returns mockk()
 
 
-        mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandlingID, soeknadJsonNode)
+        mottatteOpplysningerServiceSpy.oppdaterMottatteOpplysninger(behandlingID, soeknadJsonNode)
 
 
-        verify(exactly = 1) { mottatteOpplysningerRepository.saveAndFlush(any()) }
+        verify(exactly = 1) { mottatteOpplysningerRepositoryMock.saveAndFlush(any()) }
         mottatteOpplysninger.jsonData.shouldNotBe(originalJsonData)
         mottatteOpplysninger.jsonData.shouldBe(soeknadJsonNode.toPrettyString())
     }
@@ -213,15 +212,15 @@ internal class MottatteOpplysningerServiceTest {
                 )
             })
         }
-        every { mottatteOpplysningerRepository.saveAndFlush(any()) } returns mockk()
+        every { mottatteOpplysningerRepositoryMock.saveAndFlush(any()) } returns mockk()
 
 
-        mottatteOpplysningerService.oppdaterMottatteOpplysninger(mottatteOpplysninger)
+        mottatteOpplysningerServiceSpy.oppdaterMottatteOpplysninger(mottatteOpplysninger)
 
 
         val slot = slot<MottatteOpplysninger>()
         verify {
-            mottatteOpplysningerRepository.saveAndFlush(capture(slot))
+            mottatteOpplysningerRepositoryMock.saveAndFlush(capture(slot))
         }
         slot.captured.apply {
             jsonData.toJsonNode["periode"].apply {
@@ -241,18 +240,18 @@ internal class MottatteOpplysningerServiceTest {
             LocalDate.of(2021, 12, 31)
         )
         val soeknadsland = Soeknadsland(listOf("UK"), false)
-        every { mottatteOpplysningerRepository.findByBehandling_Id(behandlingID) } returns Optional.of(
+        every { mottatteOpplysningerRepositoryMock.findByBehandling_Id(behandlingID) } returns Optional.of(
             mottatteOpplysninger
         )
-        every { mottatteOpplysningerRepository.saveAndFlush(any()) } returns mockk()
+        every { mottatteOpplysningerRepositoryMock.saveAndFlush(any()) } returns mockk()
 
 
-        mottatteOpplysningerService.oppdaterMottatteOpplysningerPeriodeOgLand(behandlingID, periode, soeknadsland)
+        mottatteOpplysningerServiceSpy.oppdaterMottatteOpplysningerPeriodeOgLand(behandlingID, periode, soeknadsland)
 
 
         val slot = slot<MottatteOpplysninger>()
         verify {
-            mottatteOpplysningerRepository.saveAndFlush(capture(slot))
+            mottatteOpplysningerRepositoryMock.saveAndFlush(capture(slot))
         }
         slot.captured.apply {
             mottatteOpplysningerData.apply {
@@ -271,12 +270,12 @@ internal class MottatteOpplysningerServiceTest {
         )
 
 
-        mottatteOpplysningerService.opprettSedGrunnlag(behandlingID, SedGrunnlag())
+        mottatteOpplysningerServiceSpy.opprettSedGrunnlag(behandlingID, SedGrunnlag())
 
 
         val slot = slot<MottatteOpplysninger>()
         verify {
-            mottatteOpplysningerRepository.save(capture(slot))
+            mottatteOpplysningerRepositoryMock.save(capture(slot))
         }
         slot.captured.apply {
             type.shouldBe(Mottatteopplysningertyper.SED)
@@ -300,12 +299,12 @@ internal class MottatteOpplysningerServiceTest {
         val soeknadsland = Soeknadsland(listOf("UK"), false)
 
 
-        mottatteOpplysningerService.opprettSøknad(behandling, periode, soeknadsland)
+        mottatteOpplysningerServiceSpy.opprettSøknad(behandling, periode, soeknadsland)
 
 
         val slot = slot<MottatteOpplysninger>()
         verify {
-            mottatteOpplysningerRepository.save(capture(slot))
+            mottatteOpplysningerRepositoryMock.save(capture(slot))
         }
         slot.captured.apply {
             mottatteOpplysningerData.shouldBeInstanceOf<SoeknadFtrl>()
@@ -334,12 +333,12 @@ internal class MottatteOpplysningerServiceTest {
         setupMock(behandling)
 
 
-        mottatteOpplysningerService.opprettSøknad(behandling, periode, soeknadsland)
+        mottatteOpplysningerServiceSpy.opprettSøknad(behandling, periode, soeknadsland)
 
 
         val slot = slot<MottatteOpplysninger>()
         verify {
-            mottatteOpplysningerRepository.save(capture(slot))
+            mottatteOpplysningerRepositoryMock.save(capture(slot))
         }
         slot.captured.apply {
             mottatteOpplysningerData.shouldBeInstanceOf<SoeknadTrygdeavtale>()
@@ -362,13 +361,13 @@ internal class MottatteOpplysningerServiceTest {
         )
 
 
-        mottatteOpplysningerService.opprettSøknad(behandling, null, null)
+        mottatteOpplysningerServiceSpy.opprettSøknad(behandling, null, null)
 
 
         verify {
-            behandlingService wasNot Called
-            mottatteOpplysningerRepository wasNot Called
-            joarkFasade wasNot Called
+            behandlingServiceMock wasNot Called
+            mottatteOpplysningerRepositoryMock wasNot Called
+            joarkFasadeMock wasNot Called
         }
     }
 
@@ -381,12 +380,12 @@ internal class MottatteOpplysningerServiceTest {
         )
 
 
-        mottatteOpplysningerService.opprettSøknad(behandling, null, null)
+        mottatteOpplysningerServiceSpy.opprettSøknad(behandling, null, null)
 
 
         val slot = slot<MottatteOpplysninger>()
         verify {
-            mottatteOpplysningerRepository.save(capture(slot))
+            mottatteOpplysningerRepositoryMock.save(capture(slot))
         }
         slot.captured.apply {
             mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
@@ -409,13 +408,13 @@ internal class MottatteOpplysningerServiceTest {
         }
 
 
-        mottatteOpplysningerService.opprettSøknad(behandling, null, null)
+        mottatteOpplysningerServiceSpy.opprettSøknad(behandling, null, null)
 
 
         val slot = slot<MottatteOpplysninger>()
         verify {
-            mottatteOpplysningerRepository.save(capture(slot))
-            joarkFasade wasNot Called
+            mottatteOpplysningerRepositoryMock.save(capture(slot))
+            joarkFasadeMock wasNot Called
         }
         slot.captured.apply {
             mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
@@ -434,11 +433,11 @@ internal class MottatteOpplysningerServiceTest {
         )
 
 
-        mottatteOpplysningerService.opprettSøknad(Prosessinstans(), behandling)
+        mottatteOpplysningerServiceSpy.opprettSøknad(Prosessinstans(), behandling)
 
 
         verify {
-            mottatteOpplysningerService.opprettSøknad(any(), isNull(true), isNull(true))
+            mottatteOpplysningerServiceSpy.opprettSøknad(any(), isNull(inverse = true), isNull(inverse = true))
         }
     }
 
@@ -452,18 +451,18 @@ internal class MottatteOpplysningerServiceTest {
         )
 
 
-        mottatteOpplysningerService.opprettSøknad(Prosessinstans(), behandling)
+        mottatteOpplysningerServiceSpy.opprettSøknad(Prosessinstans(), behandling)
 
 
         verify {
-            mottatteOpplysningerService.opprettSøknad(any(), isNull(), isNull())
+            mottatteOpplysningerServiceSpy.opprettSøknad(any(), isNull(), isNull())
         }
     }
 
     private fun setupMock(behandling: Behandling) {
-        every { behandlingService.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
-        every { joarkFasade.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
-        every { mottatteOpplysningerRepository.save(any()) } returns mockk()
+        every { behandlingServiceMock.hentBehandlingMedSaksopplysninger(behandlingID) } returns behandling
+        every { joarkFasadeMock.hentJournalpost(behandling.initierendeJournalpostId) } returns lagJournalpost(behandling)
+        every { mottatteOpplysningerRepositoryMock.save(any()) } returns mockk()
     }
 
     private fun setupMock(sakstype: Sakstyper, sakstemaer: Sakstemaer, tema: Behandlingstema): Behandling =
