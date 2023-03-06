@@ -1,6 +1,7 @@
 package no.nav.melosys.service.mottatteopplysninger
 
 import com.fasterxml.jackson.databind.JsonNode
+import mu.KotlinLogging
 import no.finn.unleash.Unleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
@@ -10,7 +11,6 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.domain.saksflyt.ProsessDataKey
 import no.nav.melosys.domain.saksflyt.Prosessinstans
-import no.nav.melosys.domain.saksflyt.getData
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.featuretoggle.ToggleName
@@ -22,9 +22,9 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 import java.util.*
-import mu.KotlinLogging
 
 private val log = KotlinLogging.logger { }
+
 @Service
 class MottatteOpplysningerService(
     private val mottatteOpplysningerRepository: MottatteOpplysningerRepository,
@@ -43,20 +43,26 @@ class MottatteOpplysningerService(
     }
 
     fun opprettSedGrunnlag(behandlingID: Long, sedGrunnlag: SedGrunnlag) =
-        opprettMottatteOpplysninger(behandlingID, sedGrunnlag, Mottatteopplysningertyper.SED, VERSJON_SED_GRUNNLAG)
+        opprettMottatteOpplysninger(
+            behandlingID = behandlingID,
+            mottatteOpplysningerData = sedGrunnlag,
+            type = Mottatteopplysningertyper.SED,
+            versjon = VERSJON_SED_GRUNNLAG
+        )
 
     fun opprettSøknadEllerAnmodningEllerAttest(prosessinstans: Prosessinstans) {
         val behandling = prosessinstans.behandling
-        if (SaksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(
-                behandling,
-                unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP)
-            )
-        ) {
+        val harRegistreringUnntakFraMedlemskapFlyt = SaksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(
+            behandling,
+            unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP)
+        )
+
+        if (harRegistreringUnntakFraMedlemskapFlyt) {
             opprettMottatteOpplysninger(
-                behandling.id,
-                AnmodningEllerAttest(),
-                Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST,
-                VERSJON_ANMODNING_ATTEST_GRUNNLAG
+                behandlingID = behandling.id,
+                mottatteOpplysningerData = AnmodningEllerAttest(),
+                type = Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST,
+                versjon = VERSJON_ANMODNING_ATTEST_GRUNNLAG
             )
         } else {
             opprettSøknad(prosessinstans, behandling)
@@ -71,9 +77,9 @@ class MottatteOpplysningerService(
         val defaultPeriode = if (lagDefaultOjekter) Periode() else null
 
         opprettSøknad(
-            behandling = behandling,
-            periode = prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, defaultPeriode),
-            soeknadsland = prosessinstans.getData(ProsessDataKey.SØKNADSLAND, defaultSoeknadsland)
+            behandling,
+            prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode::class.java, defaultPeriode),
+            prosessinstans.getData(ProsessDataKey.SØKNADSLAND, Soeknadsland::class.java, defaultSoeknadsland)
         )
     }
 
@@ -104,21 +110,26 @@ class MottatteOpplysningerService(
         }
 
         val sakstype: Sakstyper = behandling.fagsak.type
+
+        val mottatteOpplysningerData = when (sakstype) {
+            Sakstyper.EU_EOS -> Soeknad()
+            Sakstyper.FTRL -> SoeknadFtrl()
+            Sakstyper.TRYGDEAVTALE -> SoeknadTrygdeavtale()
+        }.apply {
+            this.periode = periode
+            this.soeknadsland = soeknadsland
+        }
+
+        val type = when (sakstype) {
+            Sakstyper.EU_EOS -> Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
+            Sakstyper.FTRL -> Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN
+            Sakstyper.TRYGDEAVTALE -> Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE
+        }
+
         opprettMottatteOpplysninger(
             behandlingID = behandlingID,
-            mottatteOpplysningerData = when (sakstype) {
-                Sakstyper.EU_EOS -> Soeknad()
-                Sakstyper.FTRL -> SoeknadFtrl()
-                Sakstyper.TRYGDEAVTALE -> SoeknadTrygdeavtale()
-            }.apply {
-                this.periode = periode
-                this.soeknadsland = soeknadsland
-            },
-            type = when (sakstype) {
-                Sakstyper.EU_EOS -> Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
-                Sakstyper.FTRL -> Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN
-                Sakstyper.TRYGDEAVTALE -> Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE
-            },
+            mottatteOpplysningerData = mottatteOpplysningerData,
+            type = type,
             versjon = VERSJON_SOEKNAD_GRUNNLAG
         )
         log.info("Opprettet søknad for behandling {}.", behandlingID)
@@ -126,16 +137,7 @@ class MottatteOpplysningerService(
 
     private fun opprettMottatteOpplysninger(
         behandlingID: Long,
-        mottatteOpplysningerData: MottatteOpplysningerData,
-        type: Mottatteopplysningertyper,
-        versjon: String
-    ) {
-        opprettMottatteOpplysninger(behandlingID, null, mottatteOpplysningerData, type, versjon, null)
-    }
-
-    private fun opprettMottatteOpplysninger(
-        behandlingID: Long,
-        originalData: String?,
+        originalData: String? = null,
         mottatteOpplysningerData: MottatteOpplysningerData,
         type: Mottatteopplysningertyper,
         versjon: String,
@@ -144,11 +146,13 @@ class MottatteOpplysningerService(
         if (eksternReferanseID != null && harMottattSøknadMedEksternReferanseID(eksternReferanseID)) {
             throw FunksjonellException("Det finnes allerede mottatteOpplysninger med eksterReferanseID $eksternReferanseID")
         }
+
         val behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID).apply {
             if (mottatteOpplysninger != null) {
                 throw FunksjonellException("Finnes allerede mottatteOpplysninger for behandling $id")
             }
         }
+
         val nå = Instant.now()
         val mottatteOpplysninger = MottatteOpplysninger().apply {
             this.behandling = behandling
@@ -161,6 +165,7 @@ class MottatteOpplysningerService(
             this.eksternReferanseID = eksternReferanseID
             this.setMottatteOpplysningerdata(mottatteOpplysningerData)
         }
+
         behandling.mottatteOpplysninger = mottatteOpplysninger
         mottatteOpplysningerRepository.save(mottatteOpplysninger)
     }
@@ -197,9 +202,8 @@ class MottatteOpplysningerService(
 
     @Transactional
     fun slettOpplysninger(behandlingID: Long) {
-        behandlingService.hentBehandling(behandlingID).apply {
-            mottatteOpplysninger = null
-        }
+        val behandling = behandlingService.hentBehandling(behandlingID)
+        behandling.mottatteOpplysninger = null
         mottatteOpplysningerRepository.deleteByBehandling_Id(behandlingID)
     }
 
