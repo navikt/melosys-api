@@ -71,12 +71,12 @@ public final class MedlPeriodeKonverter {
 
         // USA
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA, GrunnlagMedl.USA);
-        tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_1, GrunnlagMedl.USA_ART5_1);
-        tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_2, GrunnlagMedl.USA_ART5_2);
-        tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_4, GrunnlagMedl.USA_ART5_4);
-        tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_5, GrunnlagMedl.USA_ART5_5);
-        tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_6, GrunnlagMedl.USA_ART5_6);
-        tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_9, GrunnlagMedl.USA_ART5_9);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_1, GrunnlagMedl.USA_5_1);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_2, GrunnlagMedl.USA_5_2);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_4, GrunnlagMedl.USA_5_4);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_5, GrunnlagMedl.USA_5_5);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_6, GrunnlagMedl.USA_5_6);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_9, GrunnlagMedl.USA_5_9);
 
         // Canada
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca.CAN, GrunnlagMedl.CANADA);
@@ -90,10 +90,10 @@ public final class MedlPeriodeKonverter {
 
         //Australia
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_au.AUS, GrunnlagMedl.AUSTRALIA);
-        tbl.put(Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART9_2, GrunnlagMedl.AUS_ART9_2);
-        tbl.put(Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART9_3, GrunnlagMedl.AUS_ART9_3);
-        tbl.put(Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART11, GrunnlagMedl.AUS_ART11);
-        tbl.put(Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART14_1, GrunnlagMedl.AUS_ART14_1);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART9_2, GrunnlagMedl.AUS_9_2);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART9_3, GrunnlagMedl.AUS_9_3);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART11, GrunnlagMedl.AUS_11);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART14_1, GrunnlagMedl.AUS_14_1);
 
         //Bosnia og Hercegovina
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_ba.BIH, GrunnlagMedl.BOSNIA_HERCEGOVINA);
