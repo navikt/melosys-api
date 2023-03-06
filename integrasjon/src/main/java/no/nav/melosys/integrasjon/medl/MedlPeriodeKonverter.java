@@ -30,7 +30,9 @@ public final class MedlPeriodeKonverter {
 
     private static final Collection<LovvalgBestemmelse> TILLEGGSBESTEMMELSER_MAPPES_TIL_MEDL = Set.of(
         Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1,
-        Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5
+        Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5,
+        Tilleggsbestemmelser_trygdeavtale_ca.CAN_ART8,
+        Tilleggsbestemmelser_trygdeavtale_cl.CHL_ART7
     );
 
     static {
@@ -71,6 +73,7 @@ public final class MedlPeriodeKonverter {
 
         // USA
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA, GrunnlagMedl.USA);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_1, GrunnlagMedl.USA_ART5_1);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_2, GrunnlagMedl.USA_ART5_2);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_4, GrunnlagMedl.USA_ART5_4);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_5, GrunnlagMedl.USA_ART5_5);
@@ -220,7 +223,7 @@ public final class MedlPeriodeKonverter {
         return switch (dekning) {
             case FULL_DEKNING_EOSFO, FULL_DEKNING_FTRL -> DekningMedl.FULL;
             case UTEN_DEKNING -> DekningMedl.UNNTATT;
-            case UNNTATT_CAN_7_5_B, UNNTATT_USA_5_2_G -> DekningMedl.IKKEPENDEL;
+            case UNNTATT_CAN_7_5_B, UNNTATT_USA_5_2_G -> DekningMedl.IKKE_PENSJONSDEL;
             default -> throw new TekniskException("Dekningstype støttes ikke for EØS:" + dekning.getKode());
         };
     }

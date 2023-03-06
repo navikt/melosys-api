@@ -201,16 +201,18 @@ public class MedlPeriodeService {
     private KildedokumenttypeMedl hentKildedokumenttype(boolean erSed, Long behandlingID) {
         if (unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP)) {
             Behandling behandling = behandlingService.hentBehandling(behandlingID);
+            var fagsaktype = behandling.getFagsak().getType();
+            var behandlingstema = behandling.getTema();
 
-            if (behandling.getFagsak().getType() == Sakstyper.TRYGDEAVTALE) {
-                if (behandling.getTema() == Behandlingstema.REGISTRERING_UNNTAK) {
+            if (fagsaktype.equals(Sakstyper.TRYGDEAVTALE)) {
+                if (behandlingstema == Behandlingstema.REGISTRERING_UNNTAK) {
                     return KildedokumenttypeMedl.DOKUMENT;
-                } else if (behandling.getTema() == Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL) {
+                } else if (behandlingstema == Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL) {
                     return KildedokumenttypeMedl.HENV_SOKNAD;
                 }
-            } else if (behandling.getFagsak().getType() == Sakstyper.EU_EOS &&
-                (behandling.getTema() == Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR ||
-                    behandling.getTema() == Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)) {
+            } else if (fagsaktype.equals(Sakstyper.EU_EOS) &&
+                (behandlingstema == Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR ||
+                    behandlingstema == Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)) {
                 return KildedokumenttypeMedl.PortBlank_A1;
             }
         }

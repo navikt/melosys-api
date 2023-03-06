@@ -42,6 +42,7 @@ public enum GrunnlagMedl {
     STORBRIT_NIRLAND_8_2("Storbrit_NIrland_8_2"),
     STORBRIT_NIRLAND_9("Storbrit_NIrland_9"),
     USA("USA"),
+    USA_ART5_1("USA_5_1"),
     USA_ART5_2("USA_5_2"),
     USA_ART5_4("USA_5_4"),
     USA_ART5_5("USA_5_5"),
@@ -59,12 +60,11 @@ public enum GrunnlagMedl {
     AUSTRALIA("Australia"),
     AUS_ART9_2("Australia_9_2"),
     AUS_ART9_3("Australia_9_3"),
-    AUS_ART11("AUS_ART11"),
+    AUS_ART11("Australia_11"),
     AUS_ART14_1("Australia_14_1"),
     BOSNIA_HERCEGOVINA("Bosnia_Hercegovina"),
     BOSNIA_HERCEGOVINA_3("Bosnia_Hercegovina_3"),
     BOSNIA_HERCEGOVINA_4("Bosnia_Hercegovina_4"),
-
     BOSNIA_HERCEGOVINA_4_A("Bosnia_Hercegovina_4_a"),
     BOSNIA_HERCEGOVINA_5("Bosnia_Hercegovina_5"),
     BOSNIA_HERCEGOVINA_6("Bosnia_Hercegovina_6"),
@@ -132,7 +132,7 @@ public enum GrunnlagMedl {
     TYRKIA_3("Tyrkia_3"),
     TYRKIA_4("Tyrkia_4"),
     TYRKIA_4_A("Tyrkia_4_a"),
-    TYRKIA_5("Tyrkia_4"),
+    TYRKIA_5("Tyrkia_5"),
     TYRKIA_6("Tyrkia_6");
 
     private final String kode;
