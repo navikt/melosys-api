@@ -80,7 +80,7 @@ public final class MedlPeriodeKonverter {
 
         // Canada
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca.CAN, GrunnlagMedl.CANADA);
-        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART6_2, GrunnlagMedl.Canada_6_2);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART6_2, GrunnlagMedl.CANADA_6_2);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART7, GrunnlagMedl.CANADA_7);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART7_4, GrunnlagMedl.CANADA_7_4);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART9, GrunnlagMedl.CANADA_9);

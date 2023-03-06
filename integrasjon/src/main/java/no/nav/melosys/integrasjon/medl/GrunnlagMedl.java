@@ -49,7 +49,7 @@ public enum GrunnlagMedl {
     USA_ART5_6("USA_5_6"),
     USA_ART5_9("USA_5_9"),
     CANADA("Canada"),
-    Canada_6_2("Canada_6_2"),
+    CANADA_6_2("Canada_6_2"),
     CANADA_7("Canada_7"),
     CANADA_7_4("Canada_7_4"),
     CANADA_8("Canada_8"),
