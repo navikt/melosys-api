@@ -67,31 +67,30 @@ public class MedlPeriodeService {
         return medlService.hentPeriodeListe(fnr, fom, tom);
     }
 
-    public void opprettPeriodeForeløpig(PeriodeOmLovvalg periodeOmLovvalg, Long behandlingID, boolean erSed) {
+    public void opprettPeriodeForeløpig(PeriodeOmLovvalg periodeOmLovvalg, Long behandlingID) {
         log.info("Oppretter foreløpig periode i MEDL for behandling {}", behandlingID);
         String fnr = hentFnr(behandlingID);
         Long medlPeriodeID =
-            medlService.opprettPeriodeForeløpig(fnr, periodeOmLovvalg, hentKildedokumenttype(erSed, behandlingID));
+            medlService.opprettPeriodeForeløpig(fnr, periodeOmLovvalg, hentKildedokumenttype(behandlingID));
         lagreMedlPeriodeId(medlPeriodeID, periodeOmLovvalg, behandlingID);
     }
 
-    public void opprettPeriodeUnderAvklaring(PeriodeOmLovvalg periodeOmLovvalg, Long behandlingID, boolean erSed) {
+    public void opprettPeriodeUnderAvklaring(PeriodeOmLovvalg periodeOmLovvalg, Long behandlingID) {
         log.info("Oppretter periode under avklaring i MEDL for behandling {}", behandlingID);
         String fnr = hentFnr(behandlingID);
         Long medlPeriodeID =
-            medlService.opprettPeriodeUnderAvklaring(fnr, periodeOmLovvalg, hentKildedokumenttype(erSed, behandlingID));
+            medlService.opprettPeriodeUnderAvklaring(fnr, periodeOmLovvalg, hentKildedokumenttype(behandlingID));
         lagreMedlPeriodeId(medlPeriodeID, periodeOmLovvalg, behandlingID);
     }
 
-    public void oppdaterPeriodeUnderAvklaring(PeriodeOmLovvalg periodeOmLovvalg, boolean erSed, Long behandlingID) {
-        medlService.oppdaterPeriodeUnderAvklaring(periodeOmLovvalg, hentKildedokumenttype(erSed, behandlingID));
+    public void oppdaterPeriodeUnderAvklaring(PeriodeOmLovvalg periodeOmLovvalg, Long behandlingID) {
+        medlService.oppdaterPeriodeUnderAvklaring(periodeOmLovvalg, hentKildedokumenttype(behandlingID));
     }
 
-    public void opprettPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, Long behandlingID, boolean erSed) {
+    public void opprettPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, Long behandlingID) {
         String fnr = hentFnr(behandlingID);
         log.info("Oppretter endelig periode i MEDL for behandling {}", behandlingID);
-        Long medlPeriodeID = medlService.opprettPeriodeEndelig(fnr, lovvalgsperiode,
-            hentKildedokumenttype(erSed, behandlingID));
+        Long medlPeriodeID = medlService.opprettPeriodeEndelig(fnr, lovvalgsperiode, hentKildedokumenttype(behandlingID));
         lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandlingID);
     }
 
@@ -108,16 +107,16 @@ public class MedlPeriodeService {
         lagreMedlPeriodeId(medlPeriodeId, medlemskapsperiode);
     }
 
-    public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, boolean erSed) {
+    public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode) {
         log.info("Oppdaterer MEDL-periode {} til status endelig", lovvalgsperiode.getMedlPeriodeID());
         medlService.oppdaterPeriodeEndelig(lovvalgsperiode,
-            hentKildedokumenttype(erSed, lovvalgsperiode.getBehandlingsresultat().getId()));
+            hentKildedokumenttype(lovvalgsperiode.getBehandlingsresultat().getId()));
     }
 
-    public void oppdaterPeriodeForeløpig(Lovvalgsperiode lovvalgsperiode, boolean erSed) {
+    public void oppdaterPeriodeForeløpig(Lovvalgsperiode lovvalgsperiode) {
         log.info("Oppdaterer MEDL-periode {} til status foreløpig", lovvalgsperiode.getMedlPeriodeID());
         medlService.oppdaterPeriodeForeløpig(lovvalgsperiode,
-            hentKildedokumenttype(erSed, lovvalgsperiode.getBehandlingsresultat().getId()));
+            hentKildedokumenttype(lovvalgsperiode.getBehandlingsresultat().getId()));
     }
 
     public void avvisPeriode(Long medlPeriodeID) {
@@ -198,9 +197,10 @@ public class MedlPeriodeService {
         medlemskapsperiodeRepository.save(medlemskapsperiode);
     }
 
-    private KildedokumenttypeMedl hentKildedokumenttype(boolean erSed, Long behandlingID) {
+    private KildedokumenttypeMedl hentKildedokumenttype(Long behandlingID) {
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        boolean erSed = behandling.erBehandlingAvSed();
         if (unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP)) {
-            Behandling behandling = behandlingService.hentBehandling(behandlingID);
             var fagsaktype = behandling.getFagsak().getType();
             var behandlingstema = behandling.getTema();
 
@@ -211,8 +211,7 @@ public class MedlPeriodeService {
                     return KildedokumenttypeMedl.HENV_SOKNAD;
                 }
             } else if (fagsaktype.equals(Sakstyper.EU_EOS) &&
-                (behandlingstema == Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR ||
-                    behandlingstema == Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL)) {
+                behandlingstema == Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR) {
                 return KildedokumenttypeMedl.PortBlank_A1;
             }
         }

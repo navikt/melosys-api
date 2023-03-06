@@ -97,7 +97,7 @@ class MedlPeriodeServiceTest {
         every { medlService.opprettPeriodeForeløpig(any(), any(), any()) } returns MEDL_PERIODE_ID
         every { utpekingsperiodeRepository.save(any()) } returns utpekingsperiode
 
-        medlPeriodeService.opprettPeriodeForeløpig(utpekingsperiode, 1L, true)
+        medlPeriodeService.opprettPeriodeForeløpig(utpekingsperiode, 1)
 
         verify { medlService.opprettPeriodeForeløpig(FNR, any(), KildedokumenttypeMedl.SED) }
         verify { utpekingsperiodeRepository.save(utpekingsperiode) }
@@ -105,11 +105,11 @@ class MedlPeriodeServiceTest {
 
     @Test
     fun opprettPeriodeUnderAvklaring() {
-        setupHappyPathBehandling()
+        setupHappyPathBehandling(Sakstyper.EU_EOS, Behandlingstema.UTSENDT_ARBEIDSTAKER)
         every { medlService.opprettPeriodeUnderAvklaring(any(), any(), any()) } returns MEDL_PERIODE_ID
         every { anmodningsperiodeRepository.save(any()) } returns Anmodningsperiode()
 
-        medlPeriodeService.opprettPeriodeUnderAvklaring(Anmodningsperiode(), 1L, false)
+        medlPeriodeService.opprettPeriodeUnderAvklaring(Anmodningsperiode(), 1L)
         verify { medlService.opprettPeriodeUnderAvklaring(FNR, any(), KildedokumenttypeMedl.HENV_SOKNAD) }
         verify { medlAnmodningsperiodeService.lagreAnmodningsperiode(any()) }
     }
@@ -120,7 +120,7 @@ class MedlPeriodeServiceTest {
         every { medlService.opprettPeriodeEndelig(any(), any(), any()) } returns MEDL_PERIODE_ID
         every { lovvalgsperiodeRepository.save(any()) } returns Lovvalgsperiode()
 
-        medlPeriodeService.opprettPeriodeEndelig(Lovvalgsperiode(), 1L, true)
+        medlPeriodeService.opprettPeriodeEndelig(Lovvalgsperiode(), 1L)
 
         verify { medlService.opprettPeriodeEndelig(FNR, any(), KildedokumenttypeMedl.SED) }
         verify { lovvalgsperiodeRepository.save(any()) }
@@ -152,7 +152,7 @@ class MedlPeriodeServiceTest {
 
     @Test
     fun oppdaterPeriodeEndelig() {
-        setupHappyPathBehandling()
+        setupHappyPathBehandling(Sakstyper.EU_EOS, Behandlingstema.UTSENDT_ARBEIDSTAKER)
 
         val lovvalgsperiode = Lovvalgsperiode().apply {
             medlPeriodeID = MEDL_PERIODE_ID
@@ -160,7 +160,7 @@ class MedlPeriodeServiceTest {
         }
 
 
-        medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode, false)
+        medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode)
 
 
         verify { medlService.oppdaterPeriodeEndelig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD) }
@@ -168,14 +168,14 @@ class MedlPeriodeServiceTest {
 
     @Test
     fun oppdaterPeriodeForeløpig() {
-        setupHappyPathBehandling()
+        setupHappyPathBehandling(Sakstyper.EU_EOS, Behandlingstema.UTSENDT_ARBEIDSTAKER)
         val lovvalgsperiode = Lovvalgsperiode().apply {
             medlPeriodeID = MEDL_PERIODE_ID
             behandlingsresultat = lagBehandlingsResultat()
         }
 
 
-        medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode, false)
+        medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode)
 
 
         verify { medlService.oppdaterPeriodeForeløpig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD) }
@@ -199,7 +199,7 @@ class MedlPeriodeServiceTest {
         }
 
 
-        medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode, false)
+        medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode)
 
 
         verify { medlService.oppdaterPeriodeForeløpig(lovvalgsperiode, KildedokumenttypeMedl.DOKUMENT) }
@@ -223,7 +223,7 @@ class MedlPeriodeServiceTest {
         }
 
 
-        medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode, false)
+        medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode)
 
 
         verify { medlService.oppdaterPeriodeForeløpig(lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD) }
@@ -231,23 +231,15 @@ class MedlPeriodeServiceTest {
 
     @Test
     fun `oppdaterPeriodeForeløpig bruker KildedokumenttypeMedl A1 når EU_EOS og ANMODNING_OM_UNNTAK_HOVEDREGEL`() {
-        every { behandlingService.hentBehandling(any()) } returns Behandling().apply {
-            tema = Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
-            fagsak = Fagsak().apply {
-                type = Sakstyper.EU_EOS
-                aktører.add(Aktoer().apply {
-                    rolle = Aktoersroller.BRUKER
-                    aktørId = "456"
-                })
-            }
-        }
+        setupHappyPathBehandling(Sakstyper.EU_EOS, Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR)
+
         val lovvalgsperiode = Lovvalgsperiode().apply {
             medlPeriodeID = MEDL_PERIODE_ID
             behandlingsresultat = lagBehandlingsResultat()
         }
 
 
-        medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode, false)
+        medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode)
 
 
         verify { medlService.oppdaterPeriodeForeløpig(lovvalgsperiode, KildedokumenttypeMedl.PortBlank_A1) }
@@ -271,7 +263,7 @@ class MedlPeriodeServiceTest {
         }
 
 
-        medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode, false)
+        medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode)
 
 
         verify { medlService.oppdaterPeriodeForeløpig(lovvalgsperiode, KildedokumenttypeMedl.PortBlank_A1) }
@@ -335,21 +327,29 @@ class MedlPeriodeServiceTest {
         verify(exactly = 0) { medlService.avvisPeriode(any(), any()) }
     }
 
-    private fun setupHappyPathBehandling() {
-        val behandlingResultat = lagBehandlingsResultat()
+    private fun setupHappyPathBehandling(
+        sakstype: Sakstyper = Sakstyper.EU_EOS,
+        behandlingstema: Behandlingstema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
+    ) {
+        val behandlingResultat = lagBehandlingsResultat(sakstype, behandlingstema)
         every { behandlingsresultatService.hentBehandlingsresultat(any()) } returns behandlingResultat
         every { persondataFasade.hentFolkeregisterident(any()) } returns FNR
         every { behandlingService.hentBehandling(any()) } returns behandlingResultat.behandling
     }
 
-    private fun lagBehandlingsResultat(): Behandlingsresultat = Behandlingsresultat().apply {
+    private fun lagBehandlingsResultat(
+        sakstype: Sakstyper = Sakstyper.EU_EOS,
+        behandlingstema: Behandlingstema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
+    ):
+        Behandlingsresultat = Behandlingsresultat().apply {
         id = 1L
         behandling = Behandling().apply {
+            tema = behandlingstema
             fagsak = Fagsak().apply {
                 aktører.add(Aktoer().apply {
                     rolle = Aktoersroller.BRUKER
                     aktørId = "456"
-                    type = Sakstyper.EU_EOS
+                    type = sakstype
                 })
             }
         }

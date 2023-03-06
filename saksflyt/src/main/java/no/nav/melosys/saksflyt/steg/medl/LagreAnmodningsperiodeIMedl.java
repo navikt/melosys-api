@@ -53,9 +53,9 @@ public class LagreAnmodningsperiodeIMedl implements StegBehandler {
 
     private void opprettEllerOppdaterMedlPeriode(Behandling behandling, Anmodningsperiode anmodningsperiode) {
         if (anmodningsperiode.getMedlPeriodeID() == null) {
-            medlPeriodeService.opprettPeriodeUnderAvklaring(anmodningsperiode, behandling.getId(), behandling.erBehandlingAvSed());
+            medlPeriodeService.opprettPeriodeUnderAvklaring(anmodningsperiode, behandling.getId());
         } else {
-            medlPeriodeService.oppdaterPeriodeUnderAvklaring(anmodningsperiode, behandling.erBehandlingAvSed(), behandling.getId());
+            medlPeriodeService.oppdaterPeriodeUnderAvklaring(anmodningsperiode, behandling.getId());
         }
     }
 

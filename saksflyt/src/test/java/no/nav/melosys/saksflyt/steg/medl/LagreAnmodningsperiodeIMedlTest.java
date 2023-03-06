@@ -68,7 +68,7 @@ class LagreAnmodningsperiodeIMedlTest {
         behandlingsresultat.setAnmodningsperioder(lagAnmodningsperioderMedDato(NOW, NOW.plusMonths(1)));
 
         lagreAnmodningsperiodeIMedl.utfør(prosessinstans);
-        verify(medlPeriodeService).opprettPeriodeUnderAvklaring(any(Anmodningsperiode.class), anyLong(), eq(false));
+        verify(medlPeriodeService).opprettPeriodeUnderAvklaring(any(Anmodningsperiode.class), anyLong());
     }
 
     @Test
@@ -85,7 +85,7 @@ class LagreAnmodningsperiodeIMedlTest {
         behandlingsresultat.setAnmodningsperioder(lagAnmodningsperioderMedDato(NOW, NOW.minusMonths(1)));
 
         lagreAnmodningsperiodeIMedl.utfør(prosessinstans);
-        verify(medlPeriodeService, never()).opprettPeriodeUnderAvklaring(any(Anmodningsperiode.class), anyLong(), anyBoolean());
+        verify(medlPeriodeService, never()).opprettPeriodeUnderAvklaring(any(Anmodningsperiode.class), anyLong());
     }
 
     @Test
@@ -121,7 +121,7 @@ class LagreAnmodningsperiodeIMedlTest {
         lagreAnmodningsperiodeIMedl.utfør(prosessinstans);
 
 
-        verify(medlPeriodeService).oppdaterPeriodeUnderAvklaring(anmodningsperiode, false, behandling.getId());
+        verify(medlPeriodeService).oppdaterPeriodeUnderAvklaring(anmodningsperiode,  behandling.getId());
     }
 
     private Set<Anmodningsperiode> lagAnmodningsperioderMedDato(LocalDate fom, LocalDate tom) {
