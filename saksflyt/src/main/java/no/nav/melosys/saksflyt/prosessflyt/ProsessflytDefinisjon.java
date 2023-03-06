@@ -60,6 +60,14 @@ public final class ProsessflytDefinisjon {
             )
         );
 
+        PROSESS_FLYT_MAP.put(
+            ProsessType.REGISTRERE_UNNTAK_FRA_MEDLEMSKAP,
+            new ProsessFlyt(ProsessType.REGISTRERE_UNNTAK_FRA_MEDLEMSKAP,
+//                LAGRE_LOVVALGSPERIODE_MEDL,
+                AVSLUTT_SAK_OG_BEHANDLING
+            )
+        );
+
         PROSESS_FLYT_MAP.put(ProsessType.JFR_NY_SAK_BRUKER,
             new ProsessFlyt(ProsessType.JFR_NY_SAK_BRUKER,
                 OPPRETT_SAK_OG_BEH,

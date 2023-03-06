@@ -11,10 +11,7 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.domain.kodeverk.Kodeverk;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_anmodning;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Art16_1_avslag;
@@ -36,7 +33,7 @@ import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.l
 import static no.nav.melosys.service.dokument.brev.mapper.felles.VilkaarbegrunnelseFactoryTest.lagAlleVilkaarBegrunnelser;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class AvslagYrkesaktivMapperTest {
+class AvslagYrkesaktivMapperTest {
 
     private FellesType fellesType;
     private Behandling behandling;
@@ -59,7 +56,7 @@ public class AvslagYrkesaktivMapperTest {
     }
 
     @Test
-    public void mapTilBrevXML() throws JAXBException, SAXException {
+    void mapTilBrevXML() throws JAXBException, SAXException {
 
         FysiskArbeidssted fysiskArbeidssted = new FysiskArbeidssted();
         fysiskArbeidssted.adresse = new StrukturertAdresse();
@@ -76,13 +73,13 @@ public class AvslagYrkesaktivMapperTest {
         Behandlingsresultat resultat = new Behandlingsresultat();
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
+        lovvalgsperiode.setLovvalgsland(Land_iso2.NO);
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now());
         resultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
 
         Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
-        anmodningsperiode.setUnntakFraLovvalgsland(Landkoder.DE);
+        anmodningsperiode.setUnntakFraLovvalgsland(Land_iso2.DE);
 
         resultat.setVilkaarsresultater(new HashSet<>());
 
@@ -112,7 +109,7 @@ public class AvslagYrkesaktivMapperTest {
     }
 
     @Test
-    public void mapTilBrevXML_medOppfyltArt16OgAnmodningsperiode_brukerAnmodningsperiode() throws JAXBException, SAXException {
+    void mapTilBrevXML_medOppfyltArt16OgAnmodningsperiode_brukerAnmodningsperiode() throws JAXBException, SAXException {
         AvslagYrkesaktivMapper spy = Mockito.spy(new AvslagYrkesaktivMapper());
 
         BrevDataAvslagYrkesaktiv brevData = new BrevDataAvslagYrkesaktiv(new BrevbestillingDto(), "Z999999");
@@ -133,7 +130,7 @@ public class AvslagYrkesaktivMapperTest {
     }
 
     @Test
-    public void mapTilBrevXml_kanMappeAlleKodeverksverdierForArt16_1_avslag() throws Exception {
+    void mapTilBrevXml_kanMappeAlleKodeverksverdierForArt16_1_avslag() throws Exception {
         AvslagYrkesaktivMapper spy = Mockito.spy(new AvslagYrkesaktivMapper());
         BrevDataAvslagYrkesaktiv brevdata = new BrevDataAvslagYrkesaktiv(new BrevbestillingDto(), "");
         Set<VilkaarBegrunnelse> begrunnelser = lagAlleVilkaarBegrunnelser(Art16_1_avslag.class);
@@ -163,7 +160,7 @@ public class AvslagYrkesaktivMapperTest {
         Behandlingsresultat resultat = new Behandlingsresultat();
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
+        lovvalgsperiode.setLovvalgsland(Land_iso2.NO);
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now());
         resultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));

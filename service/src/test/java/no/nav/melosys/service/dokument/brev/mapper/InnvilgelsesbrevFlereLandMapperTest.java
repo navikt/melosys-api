@@ -12,6 +12,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -108,7 +109,7 @@ class InnvilgelsesbrevFlereLandMapperTest {
         periode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
         periode.setFom(fom);
         periode.setTom(LocalDate.now());
-        periode.setLovvalgsland(Landkoder.AT);
+        periode.setLovvalgsland(Land_iso2.AT);
         periode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
         return periode;
     }

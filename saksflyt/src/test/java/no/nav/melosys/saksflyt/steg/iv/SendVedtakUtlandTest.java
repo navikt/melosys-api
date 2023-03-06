@@ -85,7 +85,7 @@ class SendVedtakUtlandTest {
         behandlingsresultat.setId(BEHANDLING_ID);
         lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
-        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
+        lovvalgsperiode.setLovvalgsland(Land_iso2.NO);
         lovvalgsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
         behandlingsresultat.setLovvalgsperioder(Sets.newHashSet(lovvalgsperiode));
         behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
@@ -140,7 +140,7 @@ class SendVedtakUtlandTest {
         behandlingsresultat.getUtpekingsperioder().add(new Utpekingsperiode());
         behandlingsresultat.setId(BEHANDLING_ID);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B2);
-        lovvalgsperiode.setLovvalgsland(Landkoder.AT);
+        lovvalgsperiode.setLovvalgsland(Land_iso2.AT);
 
         prosessinstans.setData(ProsessDataKey.UTPEKT_LAND, Landkoder.AT);
         when(sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(eq(SedType.A003), any(), any()))

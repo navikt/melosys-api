@@ -1,5 +1,8 @@
 package no.nav.melosys.service.dokument.brev.bygger;
 
+import java.time.LocalDate;
+import java.util.*;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
@@ -9,10 +12,7 @@ import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Kodeverk;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
@@ -41,9 +41,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-
-import java.time.LocalDate;
-import java.util.*;
 
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Art12_1_begrunnelser.UTSENDELSE_OVER_24_MN;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.Art12_2_begrunnelser.NORMALT_IKKE_DRIFT_NORGE;
@@ -104,7 +101,7 @@ class BrevDataByggerA001Test {
         avklarteOrganisasjoner = new HashSet<>();
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(anyLong())).thenReturn(avklarteOrganisasjoner);
 
-        Landkoder unntakFraLovvalgsland = Landkoder.SE;
+        Land_iso2 unntakFraLovvalgsland = Land_iso2.SE;
         Anmodningsperiode periode = new Anmodningsperiode();
         periode.setUnntakFraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         periode.setUnntakFraLovvalgsland(unntakFraLovvalgsland);

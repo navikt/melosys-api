@@ -15,10 +15,7 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Maritimtyper;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -127,7 +124,7 @@ class InnvilgelsesbrevMapperTest {
         periode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         periode.setFom(fom);
         periode.setTom(NOW);
-        periode.setLovvalgsland(Landkoder.AT);
+        periode.setLovvalgsland(Land_iso2.AT);
         periode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
         return periode;
     }

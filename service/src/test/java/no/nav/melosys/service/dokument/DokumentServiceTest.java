@@ -1,5 +1,8 @@
 package no.nav.melosys.service.dokument;
 
+import java.time.LocalDate;
+import java.util.*;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
@@ -66,9 +69,6 @@ import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.junit.jupiter.api.Test;
-
-import java.time.LocalDate;
-import java.util.*;
 
 import static no.nav.melosys.domain.kodeverk.Mottakerroller.ARBEIDSGIVER;
 import static no.nav.melosys.domain.kodeverk.Mottakerroller.BRUKER;
@@ -407,7 +407,7 @@ final class DokumentServiceTest {
         periode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         periode.setFom(LocalDate.now());
         periode.setTom(LocalDate.now());
-        periode.setLovvalgsland(Landkoder.NO);
+        periode.setLovvalgsland(Land_iso2.NO);
         periode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
         return periode;
     }

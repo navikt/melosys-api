@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 import no.nav.melosys.domain.Utpekingsperiode;
 import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 
 public record UtpekingsperiodeDto(LocalDate fomDato,
                                   LocalDate tomDato,
@@ -27,7 +27,7 @@ public record UtpekingsperiodeDto(LocalDate fomDato,
         return new Utpekingsperiode(
             fomDato,
             tomDato,
-            enumVerdiEllerNull(Landkoder.class, lovvalgsland),
+            enumVerdiEllerNull(Land_iso2.class, lovvalgsland),
             konverterer.convertToEntityAttribute(lovvalgsbestemmelse),
             konverterer.convertToEntityAttribute(tilleggsbestemmelse));
     }

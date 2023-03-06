@@ -14,7 +14,6 @@ import no.nav.melosys.domain.kodeverk.brev.Distribusjonstype;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.BrevmalListeService;
 import no.nav.melosys.service.brev.brevmalliste.BrevAdresse;
@@ -46,12 +45,7 @@ public class BrevmalListeBygger {
     }
 
     private BrevmalResponse mottakerTilBrevmalDto(long behandlingId, MottakerDto mottaker) {
-        List<Produserbaredokumenter> produserbareDokumenter;
-        if (unleash.isEnabled(ToggleName.MELOSYS_MEL_4835)) {
-            produserbareDokumenter = brevmalListeService.hentMuligeProduserbaredokumenter(behandlingId, mottaker.getRolle());
-        } else {
-            produserbareDokumenter = brevmalListeService.hentMuligeProduserbaredokumenterGammel(behandlingId, mottaker.getRolle());
-        }
+        List<Produserbaredokumenter> produserbareDokumenter = brevmalListeService.hentMuligeProduserbaredokumenter(behandlingId, mottaker.getRolle());
 
         List<BrevmalTypeDto> typer = produserbareDokumenter.stream().map(dokument -> switch (dokument) {
                 case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE ->
@@ -83,7 +77,7 @@ public class BrevmalListeBygger {
                 if (!harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP))) {
                     mottakere.add(lagMottakerMedAdresseOgFeilmelding(behandlingId, Mottakerroller.ARBEIDSGIVER));
                 }
-                if (unleash.isEnabled("melosys.trygdeavtale.fritekstbrev") && fagsak.erSakstypeTrygdeavtale() && behandling.harLand()) {
+                if (fagsak.erSakstypeTrygdeavtale() && behandling.harLand()) {
                     mottakere.add(lagMottakerMedRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
                 }
                 mottakere.add(lagMottakerMedRolle(Mottakerroller.ANNEN_ORGANISASJON));
@@ -130,12 +124,7 @@ public class BrevmalListeBygger {
 
     private void leggTilAdresseOgFeilmelding(MottakerDto mottakerDto, Mottakerroller rolle, long behandlingId) {
         try {
-            List<BrevAdresse> brevAdresser;
-            if (unleash.isEnabled(ToggleName.MELOSYS_MEL_4835)) {
-                brevAdresser = brevmalListeService.hentBrevAdresseTilMottakere(behandlingId, rolle);
-            } else {
-                brevAdresser = brevmalListeService.hentBrevAdresseTilMottakereGammel(rolle, behandlingId);
-            }
+            List<BrevAdresse> brevAdresser = brevmalListeService.hentBrevAdresseTilMottakere(behandlingId, rolle);
 
             if ((rolle == Mottakerroller.BRUKER || rolle == Mottakerroller.VIRKSOMHET) && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty)) {
                 mottakerDto.setFeilmelding(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
@@ -292,10 +281,6 @@ public class BrevmalListeBygger {
 
     @Deprecated(since = "Når toggle melosys.trygdeavtale.fritekstbrev er enabled og dokumentTittel klart til å brukes i alle brev kan denne kombineres med lagBrevmalTypeDtoForGenereltFritekstbrev")
     private BrevmalTypeDto lagBrevmalTypeDtoForUtenlandskTrygdemyndighetFritekstbrev(Produserbaredokumenter produserbartdokument, long behandlingId) {
-        if (!unleash.isEnabled("melosys.trygdeavtale.fritekstbrev")) {
-            return null;
-        }
-
         return new BrevmalTypeDto.Builder()
             .medType(produserbartdokument)
             .medFelter(asList(

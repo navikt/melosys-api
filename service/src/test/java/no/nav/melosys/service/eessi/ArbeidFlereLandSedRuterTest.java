@@ -9,6 +9,7 @@ import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -191,7 +192,7 @@ class ArbeidFlereLandSedRuterTest {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
-        lovvalgsperiode.setLovvalgsland(Landkoder.SE);
+        lovvalgsperiode.setLovvalgsland(Land_iso2.SE);
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
         melosysEessiMelding.setLovvalgsland(Landkoder.SE.getKode());
         melosysEessiMelding.setPeriode(new Periode(lovvalgsperiode.getFom(), lovvalgsperiode.getTom()));
@@ -209,7 +210,7 @@ class ArbeidFlereLandSedRuterTest {
         behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setLovvalgsland(Landkoder.SE);
+        lovvalgsperiode.setLovvalgsland(Land_iso2.SE);
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);

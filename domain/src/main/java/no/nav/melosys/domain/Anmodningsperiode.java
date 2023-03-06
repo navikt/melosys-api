@@ -5,7 +5,7 @@ import java.util.Objects;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
@@ -34,7 +34,7 @@ public class Anmodningsperiode implements PeriodeOmLovvalg {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "lovvalgsland", updatable = false)
-    private Landkoder lovvalgsland;
+    private Land_iso2 lovvalgsland;
 
     @Column(name = "lovvalg_bestemmelse", updatable = false)
     @Convert(converter = LovvalgBestemmelsekonverterer.class)
@@ -46,7 +46,7 @@ public class Anmodningsperiode implements PeriodeOmLovvalg {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "unntak_fra_lovvalgsland", updatable = false)
-    private Landkoder unntakFraLovvalgsland;
+    private Land_iso2 unntakFraLovvalgsland;
 
     @Column(name = "unntak_fra_bestemmelse", updatable = false)
     @Convert(converter = LovvalgBestemmelsekonverterer.class)
@@ -71,8 +71,8 @@ public class Anmodningsperiode implements PeriodeOmLovvalg {
     public Anmodningsperiode() {
     }
 
-    public Anmodningsperiode(LocalDate fom, LocalDate tom, Landkoder lovvalgsland, LovvalgBestemmelse bestemmelse, LovvalgBestemmelse tilleggsbestemmelse,
-                             Landkoder unntakFraLovvalgsland, LovvalgBestemmelse unntakFraBestemmelse, Trygdedekninger dekning) {
+    public Anmodningsperiode(LocalDate fom, LocalDate tom, Land_iso2 lovvalgsland, LovvalgBestemmelse bestemmelse, LovvalgBestemmelse tilleggsbestemmelse,
+                             Land_iso2 unntakFraLovvalgsland, LovvalgBestemmelse unntakFraBestemmelse, Trygdedekninger dekning) {
         this.fom = fom;
         this.tom = tom;
         this.lovvalgsland = lovvalgsland;
@@ -117,11 +117,11 @@ public class Anmodningsperiode implements PeriodeOmLovvalg {
         this.tom = tom;
     }
 
-    public Landkoder getLovvalgsland() {
+    public Land_iso2 getLovvalgsland() {
         return lovvalgsland;
     }
 
-    public void setLovvalgsland(Landkoder lovvalgsland) {
+    public void setLovvalgsland(Land_iso2 lovvalgsland) {
         this.lovvalgsland = lovvalgsland;
     }
 
@@ -141,11 +141,11 @@ public class Anmodningsperiode implements PeriodeOmLovvalg {
         this.tilleggsbestemmelse = tilleggsbestemmelse;
     }
 
-    public Landkoder getUnntakFraLovvalgsland() {
+    public Land_iso2 getUnntakFraLovvalgsland() {
         return unntakFraLovvalgsland;
     }
 
-    public void setUnntakFraLovvalgsland(Landkoder unntakFraLovvalgsland) {
+    public void setUnntakFraLovvalgsland(Land_iso2 unntakFraLovvalgsland) {
         this.unntakFraLovvalgsland = unntakFraLovvalgsland;
     }
 

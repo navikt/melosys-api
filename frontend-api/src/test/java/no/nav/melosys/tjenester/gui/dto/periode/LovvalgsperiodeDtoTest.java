@@ -6,7 +6,7 @@ import java.util.Map;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import static no.nav.melosys.tjenester.gui.dto.periode.LovvalgsperiodeDto.enumVerdiEllerNull;
 
-public class LovvalgsperiodeDtoTest {
+class LovvalgsperiodeDtoTest {
 
     private static final String JSON_MAL = "" +
             "{" +
@@ -36,7 +36,7 @@ public class LovvalgsperiodeDtoTest {
     private static final String JSON_EKSEMPEL = String.format(JSON_MAL, "\"FO_883_2004_ART11_1\"", "\"NO\"", "\"FULL_DEKNING_EOSFO\"");
 
     @Test
-    public void mapKonstruktørLagerSammeObjektSomOrdinærKonstruktør() throws Exception {
+    void mapKonstruktørLagerSammeObjektSomOrdinærKonstruktør() throws Exception {
         Map<String, String> json = new ObjectMapper().readValue(JSON_EKSEMPEL, new TypeReference<Map<String, String>>() {
         });
         LovvalgsperiodeDto resultat = new LovvalgsperiodeDto(json);
@@ -45,7 +45,7 @@ public class LovvalgsperiodeDtoTest {
     }
 
     @Test
-    public void mapKonstruktørLagerSammeObjektSomOrdinærKonstruktørUtenLandkodeUtenMedlemskapstypeOgLovvalgsbestemmelse() throws Exception {
+    void mapKonstruktørLagerSammeObjektSomOrdinærKonstruktørUtenLandkodeUtenMedlemskapstypeOgLovvalgsbestemmelse() throws Exception {
         Map<String, String> json = new ObjectMapper().readValue(JSON_EKSEMPEL, new TypeReference<Map<String, String>>() {
         });
         json.remove("lovvalgsland");
@@ -62,7 +62,7 @@ public class LovvalgsperiodeDtoTest {
             new PeriodeDto(LocalDate.parse(json.get("fomDato")), LocalDate.parse(json.get("tomDato"))),
             enumVerdiEllerNull(Lovvalgbestemmelser_883_2004.class, json.get("lovvalgsbestemmelse")),
             Tilleggsbestemmelser_883_2004.valueOf(json.get("tilleggBestemmelse")),
-            enumVerdiEllerNull(Landkoder.class, json.get("lovvalgsland")),
+            enumVerdiEllerNull(Land_iso2.class, json.get("lovvalgsland")),
             InnvilgelsesResultat.valueOf(json.get("innvilgelsesResultat")),
             enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdeDekning")),
             enumVerdiEllerNull(Medlemskapstyper.class, json.get("medlemskapstype")),
