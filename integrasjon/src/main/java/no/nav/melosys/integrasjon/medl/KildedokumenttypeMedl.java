@@ -2,9 +2,11 @@ package no.nav.melosys.integrasjon.medl;
 
 public enum KildedokumenttypeMedl {
     HENV_SOKNAD("Henv_Soknad"),
-    SED("SED");
+    SED("SED"),
+    DOKUMENT("DOKUMENT"),
+    PortBlank_A1("A1");
 
-    String kode;
+    final String kode;
 
     KildedokumenttypeMedl(String kode) {
         this.kode = kode;

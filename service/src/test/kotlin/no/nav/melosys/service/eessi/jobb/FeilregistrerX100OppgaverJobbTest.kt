@@ -45,7 +45,7 @@ internal class FeilregistrerX100OppgaverJobbTest {
     fun feilregistrerX100Behandlingsoppgaver() {
         val prosessMedX100 = lagProsessinstansMedEessiMelding()
         Mockito.`when`(prosessinstansRepository!!.findAllWithSedX100()).thenReturn(setOf(prosessMedX100))
-        Mockito.`when`(prosessinstansRepository!!.findAllByBehandling_IdAndTypeIn(anyLong(), eq(ProsessType.MOTTAK_SED))).thenReturn(setOf(prosessMedX100))
+        Mockito.`when`(prosessinstansRepository.findAllByBehandling_IdAndTypeIn(anyLong(), eq(ProsessType.MOTTAK_SED))).thenReturn(setOf(prosessMedX100))
         val oppgave = Oppgave.Builder().setOppgaveId(OPPGAVE_ID_X100).build()
         Mockito.`when`(oppgaveService!!.finnÅpenBehandlingsoppgaveMedFagsaksnummer("MEL-1"))
             .thenReturn(Optional.of(oppgave))
