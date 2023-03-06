@@ -30,9 +30,7 @@ public final class MedlPeriodeKonverter {
 
     private static final Collection<LovvalgBestemmelse> TILLEGGSBESTEMMELSER_MAPPES_TIL_MEDL = Set.of(
         Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1,
-        Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5,
-        Tilleggsbestemmelser_trygdeavtale_ca.CAN_ART8,
-        Tilleggsbestemmelser_trygdeavtale_cl.CHL_ART7
+        Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5
     );
 
     static {
