@@ -230,22 +230,6 @@ class MedlPeriodeServiceTest {
     }
 
     @Test
-    fun `oppdaterPeriodeForeløpig bruker KildedokumenttypeMedl A1 når EU_EOS og ANMODNING_OM_UNNTAK_HOVEDREGEL`() {
-        setupHappyPathBehandling(Sakstyper.EU_EOS, Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR)
-
-        val lovvalgsperiode = Lovvalgsperiode().apply {
-            medlPeriodeID = MEDL_PERIODE_ID
-            behandlingsresultat = lagBehandlingsResultat()
-        }
-
-
-        medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode)
-
-
-        verify { medlService.oppdaterPeriodeForeløpig(lovvalgsperiode, KildedokumenttypeMedl.PortBlank_A1) }
-    }
-
-    @Test
     fun `oppdaterPeriodeForeløpig bruker KildedokumenttypeMedl A1 når EU_EOS og A1_ANMODNING_OM_UNNTAK_PAPIR`() {
         every { behandlingService.hentBehandling(any()) } returns Behandling().apply {
             tema = Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR
