@@ -20,8 +20,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = {UnntakTjeneste.class})
-class UnntakTjenesteTest {
+@WebMvcTest(controllers = {UnntaksperiodeTjeneste.class})
+class UnntaksperiodeTjenesteTest {
 
     @MockBean
     private UnntaksperiodeService unntaksperiodeService;

@@ -19,6 +19,7 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -346,6 +347,17 @@ public class ProsessinstansService {
             .build();
 
         prosessinstans.setData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstype.VEDTAK);
+
+        lagre(prosessinstans);
+    }
+
+    public void opprettProsessinstansRegistrerUnntakFraMedlemskap(Behandling behandling, Saksstatuser saksstatus) {
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medBehandling(behandling)
+            .medType(ProsessType.REGISTRERE_UNNTAK_FRA_MEDLEMSKAP)
+            .build();
+
+        prosessinstans.setData(SAKSSTATUS, saksstatus);
 
         lagre(prosessinstans);
     }
