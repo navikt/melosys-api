@@ -349,6 +349,7 @@ class MedlPeriodeServiceTest {
                 aktører.add(Aktoer().apply {
                     rolle = Aktoersroller.BRUKER
                     aktørId = "456"
+                    type = Sakstyper.EU_EOS
                 })
             }
         }
