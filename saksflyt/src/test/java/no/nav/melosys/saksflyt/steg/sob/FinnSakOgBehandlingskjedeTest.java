@@ -59,7 +59,6 @@ class FinnSakOgBehandlingskjedeTest {
 
         SobSakDokument dokument = (SobSakDokument) saksopplysning.getDokument();
         assertThat(dokument.getSakstema()).isEqualTo("BAR");
-        assertThat(dokument.harEøsBarnetrygd()).isTrue();
         assertThat(dokument.getBehandlingskjede()).hasSize(2);
 
         assertThat(dokument.getBehandlingskjede())

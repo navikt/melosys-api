@@ -3,8 +3,6 @@ package no.nav.melosys.service.kontroll.regler;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon;
@@ -12,9 +10,6 @@ import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned;
 import no.nav.melosys.domain.dokument.inntekt.Inntekt;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.inntekt.inntektstype.YtelseFraOffentlige;
-import no.nav.melosys.domain.dokument.utbetaling.Utbetaling;
-import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
-import no.nav.melosys.service.kontroll.regler.YtelseRegler;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -77,29 +72,6 @@ public class YtelseReglerTest {
         assertThat(YtelseRegler.utbetaltYtelserFraOffentligIPeriode(hentInntektDokument(true, fom), fom, tom))
             .isTrue();
     }
-
-    @Test
-    public void utbetaltBarnetrygdytelserIPeriode_harIngenUtbetalingDokument_forventFalse() {
-        assertThat(YtelseRegler.utbetaltBarnetrygdytelser(null)).isFalse();
-    }
-
-    @Test
-    public void utbetaltBarnetrygdytelserIPeriode_harIngenUtbetalinger_forventFalse() {
-        UtbetalingDokument utbetalingDokument = new UtbetalingDokument();
-        utbetalingDokument.utbetalinger = Collections.emptyList();
-
-        assertThat(YtelseRegler.utbetaltBarnetrygdytelser(utbetalingDokument)).isFalse();
-        assertThat(YtelseRegler.utbetaltBarnetrygdytelser(new UtbetalingDokument())).isFalse();
-    }
-
-    @Test
-    public void utbetaltBarnetrygdytelserIPeriode_harUtbetalinger_forventTrue() {
-        UtbetalingDokument utbetalingDokument = new UtbetalingDokument();
-        utbetalingDokument.utbetalinger = Arrays.asList(new Utbetaling(), new Utbetaling());
-
-        assertThat(YtelseRegler.utbetaltBarnetrygdytelser(utbetalingDokument)).isTrue();
-    }
-
 
     private InntektDokument hentInntektDokument(boolean medYtelserFraOffentlig, LocalDate fom) {
         InntektDokument inntektDokument = new InntektDokument();

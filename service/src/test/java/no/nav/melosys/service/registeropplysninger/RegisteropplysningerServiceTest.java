@@ -17,7 +17,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.inntk.InntektService;
-import no.nav.melosys.integrasjon.utbetaldata.UtbetaldataService;
 import no.nav.melosys.integrasjon.utbetaling.UtbetaldataRestService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
@@ -58,8 +57,6 @@ class RegisteropplysningerServiceTest {
     @Mock
     private InntektService inntektService;
     @Mock
-    private UtbetaldataService utbetaldataService;
-    @Mock
     private SaksopplysningerService saksopplysningerService;
     @Mock
     private RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory;
@@ -74,13 +71,12 @@ class RegisteropplysningerServiceTest {
     public void setUp() throws Exception {
         unleash.enableAll();
         registeropplysningerService = new RegisteropplysningerService(persondataFasade, medlPeriodeService, eregFasade, aaregFasade, behandlingService,
-            sobService, inntektService, utbetaldataService, saksopplysningerService, registeropplysningerPeriodeFactory, unleash, utbetaldataRestService);
+            sobService, inntektService, saksopplysningerService, registeropplysningerPeriodeFactory, unleash, utbetaldataRestService);
         when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(AKTØR_ID);
 
         when(aaregFasade.finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.ARBFORH));
         when(medlPeriodeService.hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.MEDL));
         when(inntektService.hentInntektListe(anyString(), anyYearMonth(), anyYearMonth())).thenReturn(lagSaksopplysning(SaksopplysningType.INNTK));
-        when(utbetaldataRestService.hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.UTBETAL));
         when(eregFasade.hentOrganisasjon(anyString())).thenReturn(lagSaksopplysning(SaksopplysningType.ORG));
         when(sobService.finnSakOgBehandlingskjedeListe(anyString())).thenReturn(lagSaksopplysning(SaksopplysningType.SOB_SAK));
 
@@ -95,6 +91,8 @@ class RegisteropplysningerServiceTest {
 
     @Test
     void hentOgLagreOpplysninger_medAlleOpplysninger_alleBlirHentetOgLagret() {
+        unleash.disableAll();
+
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
                 .behandlingID(2L)
@@ -118,11 +116,12 @@ class RegisteropplysningerServiceTest {
         verify(medlPeriodeService).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
         verify(eregFasade).hentOrganisasjon(anyString());
         verify(sobService).finnSakOgBehandlingskjedeListe(AKTØR_ID);
-        verify(utbetaldataRestService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
     }
 
     @Test
     void hentOgLagreOpplysninger_medAlleOpplysningerIVilkårligRekkefølge_alleBlirHentetOgLagretIRettRekkefølge() {
+        unleash.disableAll();
+        
         Arbeidsforhold arbeidsforhold = new Arbeidsforhold();
         arbeidsforhold.arbeidsgiverID = "123456789";
 
@@ -158,7 +157,6 @@ class RegisteropplysningerServiceTest {
 
         verify(medlPeriodeService).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
         verify(sobService).finnSakOgBehandlingskjedeListe(AKTØR_ID);
-        verify(utbetaldataRestService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
     }
 
     @Test
@@ -207,34 +205,6 @@ class RegisteropplysningerServiceTest {
 
 
     @Test
-    void hentUtbetalingsopplysninger() {
-        LocalDate fom = LocalDate.now().minusYears(1);
-        LocalDate tom = LocalDate.now().plusYears(1);
-        Saksopplysning saksopplysning = hentSedSaksopplysning(fom, tom);
-        when(utbetaldataService.hentUtbetalingerBarnetrygd(anyString(), any(), any())).thenReturn(saksopplysning);
-
-        registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequest(fom, tom)
-            .saksopplysningTyper(saksopplysningstyper().utbetalingsopplysninger().build())
-            .build());
-
-        verify(utbetaldataRestService).hentUtbetalingerBarnetrygd(anyString(), anyLocalDate(), anyLocalDate());
-        verify(behandlingService).lagre(any(Behandling.class));
-    }
-
-    @Test
-    void hentUtbetalingsopplysninger_periode5ÅrTilbakeITid_kanIkkeHenteUtbetalOpplysninger() {
-        LocalDate fom = LocalDate.now().minusYears(5);
-        LocalDate tom = LocalDate.now().minusYears(4);
-
-        registeropplysningerService.hentOgLagreOpplysninger(registeropplysningerRequest(fom, tom)
-            .saksopplysningTyper(saksopplysningstyper().utbetalingsopplysninger().build())
-            .build());
-
-        verify(utbetaldataService, never()).hentUtbetalingerBarnetrygd(anyString(), any(), any());
-        verify(behandlingService).lagre(any(Behandling.class));
-    }
-
-    @Test
     void hentOgLagreOpplysninger_feilIPeriode_kanIkkeHenteOpplysningerSomBrukerPeriode() {
         LocalDate fom = LocalDate.now().plusYears(2);
         LocalDate tom = LocalDate.now();
@@ -250,7 +220,6 @@ class RegisteropplysningerServiceTest {
         verify(aaregFasade, never()).finnArbeidsforholdPrArbeidstaker(anyString(), any(), any());
         verify(inntektService, never()).hentInntektListe(anyString(), any(), any());
         verify(medlPeriodeService, never()).hentPeriodeListe(anyString(), any(), any());
-        verify(utbetaldataService, never()).hentUtbetalingerBarnetrygd(anyString(), any(), any());
 
         verify(eregFasade).hentOrganisasjon(anyString());
         verify(sobService).finnSakOgBehandlingskjedeListe(AKTØR_ID);

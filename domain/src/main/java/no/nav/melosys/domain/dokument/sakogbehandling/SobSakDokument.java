@@ -6,7 +6,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
@@ -15,23 +14,11 @@ import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class SobSakDokument implements SaksopplysningDokument {
 
-    // Blir utledet av saksopplysningene
-    @JsonProperty("eosBarnetrygd")
-    private boolean eøsBarnetrygd;
-
     @JsonView(DokumentView.Database.class)
     private String sakstema; // http://nav.no/kodeverk/Kodeverk/Sakstemaer
 
     @JsonView(DokumentView.Database.class)
     private List<Behandlingskjede> behandlingskjede = new ArrayList<>();
-
-    public boolean harEøsBarnetrygd() {
-        return eøsBarnetrygd;
-    }
-
-    public void setEøsBarnetrygd(boolean eøsBarnetrygd) {
-        this.eøsBarnetrygd = eøsBarnetrygd;
-    }
 
     public String getSakstema() {
         return sakstema;

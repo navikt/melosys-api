@@ -10,7 +10,6 @@ import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon;
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.inntekt.inntektstype.YtelseFraOffentlige;
-import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 
 public final class YtelseRegler {
 
@@ -33,10 +32,6 @@ public final class YtelseRegler {
         }
 
         return false;
-    }
-
-    public static boolean utbetaltBarnetrygdytelser(UtbetalingDokument utbetalingDokument) {
-        return utbetalingDokument != null && utbetalingDokument.utbetalinger != null && !utbetalingDokument.utbetalinger.isEmpty();
     }
 
     private static boolean erUtbetaltIPeriode(YtelseFraOffentlige ytelseFraOffentlige, YearMonth fom, YearMonth tom) {

@@ -86,11 +86,6 @@ class UfmKontrollTest {
     }
 
     @Test
-    void utbetaltBarnetrygdytelser_erFeil_verifiserBegrunnelse() {
-        assertThat(UfmKontroll.utbetaltBarnetrygdytelser(kontrollData())).isEqualTo(Kontroll_begrunnelser.MOTTAR_YTELSER);
-    }
-
-    @Test
     void lovvalgslandErNorge_erFeil_verifiserBegrunnelse() {
         assertThat(UfmKontroll.lovvalgslandErNorge(kontrollData())).isEqualTo(Kontroll_begrunnelser.LOVVALGSLAND_NORGE);
     }
