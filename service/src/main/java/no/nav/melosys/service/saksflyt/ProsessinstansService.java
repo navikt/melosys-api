@@ -362,11 +362,12 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansGodkjennUnntaksperiode(Behandling behandling, boolean varsleUtland, String fritekst) {
+    public void opprettProsessinstansGodkjennUnntaksperiode(Behandling behandling, boolean varsleUtland, String fritekst, MelosysEessiMelding melosysEessiMelding) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
             .medType(ProsessType.REGISTRERING_UNNTAK_GODKJENN)
             .medYtterligereinformasjonSed(fritekst)
+            .medEessiMelding(melosysEessiMelding)
             .build();
 
         prosessinstans.setData(ProsessDataKey.VARSLE_UTLAND, varsleUtland);
