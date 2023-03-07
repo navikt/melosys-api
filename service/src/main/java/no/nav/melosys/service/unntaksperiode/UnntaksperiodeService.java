@@ -60,7 +60,8 @@ public class UnntaksperiodeService {
         prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(
             behandling,
             unntaksperiodeGodkjenning.varsleUtland(),
-            unntaksperiodeGodkjenning.fritekst()
+            unntaksperiodeGodkjenning.fritekst(),
+            unntaksperiodeGodkjenning.melosysEessiMelding()
         );
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
