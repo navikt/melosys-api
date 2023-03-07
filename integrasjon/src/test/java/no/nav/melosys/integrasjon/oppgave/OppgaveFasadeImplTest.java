@@ -81,7 +81,7 @@ final class OppgaveFasadeImplTest {
         assertThat(oppgaveDto.getAktørId()).isEqualTo(oppgave.getAktørId());
         assertThat(oppgaveDto.getOrgnr()).isEqualTo(oppgave.getOrgnr());
         assertThat(oppgaveDto.getBehandlesAvApplikasjon()).isEqualTo(Fagsystem.MELOSYS.getKode());
-        assertThat(oppgaveDto.getBeskrivelse()).isEqualTo("bla bla");
+        assertThat(oppgaveDto.getBeskrivelse()).isEqualTo(OppgaveFasadeImpl.hentNyBeskrivelseHendelseslogg("bla bla", "sak123"));
         assertThat(oppgaveDto.getOppgavetype()).isEqualTo(oppgave.getOppgavetype().getKode());
         assertThat(oppgaveDto.getPrioritet()).isEqualTo(PrioritetType.NORM.toString());
         assertThat(oppgaveDto.getTema()).isEqualTo(oppgave.getTema().getKode());
