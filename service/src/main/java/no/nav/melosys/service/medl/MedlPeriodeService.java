@@ -212,7 +212,7 @@ public class MedlPeriodeService {
                 }
             } else if (fagsaktype.equals(Sakstyper.EU_EOS) &&
                 behandlingstema == Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR) {
-                return KildedokumenttypeMedl.PortBlank_A1;
+                return KildedokumenttypeMedl.A1;
             }
         }
 

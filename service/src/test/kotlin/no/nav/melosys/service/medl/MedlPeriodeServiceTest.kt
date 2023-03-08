@@ -250,7 +250,7 @@ class MedlPeriodeServiceTest {
         medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode)
 
 
-        verify { medlService.oppdaterPeriodeForeløpig(lovvalgsperiode, KildedokumenttypeMedl.PortBlank_A1) }
+        verify { medlService.oppdaterPeriodeForeløpig(lovvalgsperiode, KildedokumenttypeMedl.A1) }
     }
 
     @Test
