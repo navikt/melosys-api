@@ -4,16 +4,20 @@ import io.kotest.assertions.extracting
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainInOrder
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.arkiv.*
 import no.nav.melosys.domain.eessi.*
 import no.nav.melosys.domain.eessi.melding.Avsender
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
+import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.saksflyt.ProsessStatus
 import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.melosysmock.melosyseessi.MelosysEessiRepo
 import no.nav.melosys.melosysmock.sak.SakRepo
+import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.ProsessinstansRepository
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.BeforeEach
@@ -54,7 +58,7 @@ class SedMottakTestIT(
         MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
 
         val eessiMeldingA009 = melosysEessiMelding(
-            BucType.LA_BUC_04, ref, SedType.A009, Periode(LocalDate.now(), LocalDate.now().plusYears(6)),
+            BucType.LA_BUC_04, ref, SedType.A009, Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
             "12_1", opprettEessiJournalpost(SedType.A009)
         )
         val eessiMeldingX008 = melosysEessiMelding(
@@ -86,6 +90,10 @@ class SedMottakTestIT(
                 eessiMeldingX008.lagUnikIdentifikator(),
                 eessiMeldingX008.lagUnikIdentifikator(),
             )
+
+        prosessinstanserSortert.filter { it.behandling != null }[0]
+            .apply { behandling.status.shouldBe(Behandlingsstatus.AVSLUTTET) }
+            .apply { behandling.fagsak.status.shouldBe(Saksstatuser.ANNULLERT) }
     }
 
     @Test
