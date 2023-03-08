@@ -7,9 +7,11 @@ public enum DekningMedl {
     FTRL_2_9_2_LEDD_1A("FTL_2-9_2_ld_jfr_1a"),
     FTRL_2_9_1_LEDD_B("FTL_2-9_1_ledd_b"),
     FTRL_2_9_1_LEDD_C("FTL_2-9_1_ledd_c"),
-    FTRL_2_9_2_LEDD_1C("FTL_2-9_2_ld_jfr_1c");
+    FTRL_2_9_2_LEDD_1C("FTL_2-9_2_ld_jfr_1c"),
+    IKKE_PENSJONSDEL("IKKEPENDEL");
 
-    private String kode;
+
+    private final String kode;
 
     DekningMedl(String kode) {
         this.kode = kode;
