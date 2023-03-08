@@ -63,7 +63,7 @@ public final class ProsessflytDefinisjon {
         PROSESS_FLYT_MAP.put(
             ProsessType.REGISTRERE_UNNTAK_FRA_MEDLEMSKAP,
             new ProsessFlyt(ProsessType.REGISTRERE_UNNTAK_FRA_MEDLEMSKAP,
-//                LAGRE_LOVVALGSPERIODE_MEDL,
+                LAGRE_LOVVALGSPERIODE_MEDL,
                 AVSLUTT_SAK_OG_BEHANDLING
             )
         );

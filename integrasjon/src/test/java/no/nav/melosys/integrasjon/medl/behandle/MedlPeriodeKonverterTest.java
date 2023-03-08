@@ -28,7 +28,7 @@ class MedlPeriodeKonverterTest {
         assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2))
             .isEqualTo(GrunnlagMedl.FO_16);
         assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART7_3))
-            .isEqualTo(GrunnlagMedl.Storbrit_NIrland_7_3);
+            .isEqualTo(GrunnlagMedl.STORBRIT_NIRLAND_7_3);
         assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Lovvalgbestemmelser_987_2009.FO_987_2009_ART14_11))
             .isEqualTo(GrunnlagMedl.FO_987_2009_14_11);
 
@@ -61,7 +61,7 @@ class MedlPeriodeKonverterTest {
     @Test
     void hentFellesKodeForDekningtype() {
         Trygdedekninger trygdeDekning = Trygdedekninger.UTEN_DEKNING;
-        DekningMedl dekningMedl = MedlPeriodeKonverter.tilMedlTrygdeDekningEos(trygdeDekning);
+        DekningMedl dekningMedl = MedlPeriodeKonverter.tilMedlTrygdeDekning(trygdeDekning);
         assertThat(dekningMedl).isEqualTo(DekningMedl.UNNTATT);
     }
 

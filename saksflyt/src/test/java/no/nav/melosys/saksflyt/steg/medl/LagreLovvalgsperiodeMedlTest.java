@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.medl;
 
 import java.util.NoSuchElementException;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -79,7 +78,7 @@ class LagreLovvalgsperiodeMedlTest {
         lagreLovvalgsperiodeMedl.utfør(prosessinstans);
 
 
-        verify(medlPeriodeService).opprettPeriodeForeløpig(lovvalgsperiode, behandlingID, false);
+        verify(medlPeriodeService).opprettPeriodeForeløpig(lovvalgsperiode, behandlingID);
     }
 
     @Test
@@ -92,7 +91,7 @@ class LagreLovvalgsperiodeMedlTest {
         lagreLovvalgsperiodeMedl.utfør(prosessinstans);
 
 
-        verify(medlPeriodeService).oppdaterPeriodeForeløpig(lovvalgsperiode, false);
+        verify(medlPeriodeService).oppdaterPeriodeForeløpig(lovvalgsperiode);
     }
 
     @Test
@@ -105,7 +104,7 @@ class LagreLovvalgsperiodeMedlTest {
         lagreLovvalgsperiodeMedl.utfør(prosessinstans);
 
 
-        verify(medlPeriodeService).opprettPeriodeEndelig(lovvalgsperiode, behandlingID, false);
+        verify(medlPeriodeService).opprettPeriodeEndelig(lovvalgsperiode, behandlingID);
     }
 
     @Test
@@ -118,7 +117,7 @@ class LagreLovvalgsperiodeMedlTest {
         lagreLovvalgsperiodeMedl.utfør(prosessinstans);
 
 
-        verify(medlPeriodeService).oppdaterPeriodeEndelig(lovvalgsperiode, false);
+        verify(medlPeriodeService).oppdaterPeriodeEndelig(lovvalgsperiode);
     }
 
     @Test
@@ -141,7 +140,7 @@ class LagreLovvalgsperiodeMedlTest {
         lagreLovvalgsperiodeMedl.utfør(prosessinstans);
 
 
-        verify(medlPeriodeService).oppdaterPeriodeEndelig(lovvalgsperiodeArgumentCaptor.capture(), eq(false));
+        verify(medlPeriodeService).oppdaterPeriodeEndelig(lovvalgsperiodeArgumentCaptor.capture());
         assertThat(lovvalgsperiodeArgumentCaptor.getValue().getMedlPeriodeID()).isEqualTo((opprinneligLovvalgsperiode.getMedlPeriodeID()));
     }
 
@@ -163,7 +162,7 @@ class LagreLovvalgsperiodeMedlTest {
         lagreLovvalgsperiodeMedl.utfør(prosessinstans);
 
 
-        verify(medlPeriodeService).opprettPeriodeEndelig(nyLovvalgsperiode, behandling.getId(), false);
+        verify(medlPeriodeService).opprettPeriodeEndelig(nyLovvalgsperiode, behandling.getId());
     }
 
     @Test
@@ -180,7 +179,7 @@ class LagreLovvalgsperiodeMedlTest {
         lagreLovvalgsperiodeMedl.utfør(prosessinstans);
 
 
-        verify(medlPeriodeService).opprettPeriodeEndelig(nyLovvalgsperiode, behandling.getId(), false);
+        verify(medlPeriodeService).opprettPeriodeEndelig(nyLovvalgsperiode, behandling.getId());
     }
 
     @Test
