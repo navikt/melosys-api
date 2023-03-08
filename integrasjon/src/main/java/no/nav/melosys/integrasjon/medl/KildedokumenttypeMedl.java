@@ -4,7 +4,7 @@ public enum KildedokumenttypeMedl {
     HENV_SOKNAD("Henv_Soknad"),
     SED("SED"),
     DOKUMENT("DOKUMENT"),
-    PortBlank_A1("PortBlank_A1");
+    A1("PortBlank_A1");
 
     final String kode;
 
