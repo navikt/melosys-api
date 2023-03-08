@@ -36,7 +36,7 @@ class MelosysEessiApi {
         val map = saksrelasjoner.filter { s -> s.gsakSaksnummer == arkivSakId.toLong() }.map { p -> p.rinaSaksnummer }
         return MelosysEessiRepo.repo.filter { s -> s.id in map }
             .map { b ->
-                b.toDomain()
+                b.toDto()
             }
     }
 }
@@ -56,7 +56,7 @@ data class BucinfoDto(
     val seder: List<SedinfoDto>? = null
 )
 
-fun BucInformasjon.toDomain() = BucinfoDto(
+fun BucInformasjon.toDto() = BucinfoDto(
     id = this.id,
     erÅpen = this.erÅpen(),
     bucType = this.bucType,
