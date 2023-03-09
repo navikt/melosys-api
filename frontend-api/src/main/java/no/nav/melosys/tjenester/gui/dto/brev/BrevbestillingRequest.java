@@ -37,6 +37,7 @@ public record BrevbestillingRequest(
     List<SaksvedleggDto> saksvedlegg,
     List<FritekstvedleggDto> fritekstvedlegg,
     String dokumentTittel,
+    String saksbehandlerNrToIdent,
     @Deprecated(since = "Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel")
     String begrunnelseKode,
     @Deprecated(since = "Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel")
@@ -65,6 +66,7 @@ public record BrevbestillingRequest(
             this.saksvedlegg,
             this.fritekstvedlegg,
             this.dokumentTittel,
+            this.saksbehandlerNrToIdent,
             this.begrunnelseKode,
             this.ytterligereInformasjon
         );
@@ -121,6 +123,7 @@ public record BrevbestillingRequest(
             utkast.saksVedlegg().stream().map(SaksvedleggDto::av).toList(),
             utkast.fritekstVedlegg().stream().map(FritekstvedleggDto::av).toList(),
             utkast.dokumentTittel(),
+            null,
             null,
             null
         );

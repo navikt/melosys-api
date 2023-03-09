@@ -40,6 +40,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
     private boolean bestillUtkast;
     private Instant vedtaksdato;
     private String saksbehandlerNavn;
+    private String saksbehandlerNrToNavn;
     private Persondata persondokument;
     private Persondata personMottaker;
     private List<SaksvedleggBestilling> saksvedleggBestilling;
@@ -65,6 +66,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         this.bestillUtkast = builder.bestillUtkast;
         this.vedtaksdato = builder.vedtaksdato;
         this.saksbehandlerNavn = builder.saksbehandlerNavn;
+        this.saksbehandlerNrToNavn = builder.saksbehandlerNrToNavn;
         this.persondokument = builder.persondokument;
         this.personMottaker = builder.personMottaker;
         this.saksvedleggBestilling = builder.saksvedleggBestilling;
@@ -120,6 +122,10 @@ public class DokgenBrevbestilling extends Brevbestilling {
         return saksbehandlerNavn;
     }
 
+    public String getSaksbehandlerNrToNavn() {
+        return saksbehandlerNrToNavn;
+    }
+
     public Persondata getPersondokument() {
         return persondokument;
     }
@@ -160,6 +166,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
         private boolean bestillUtkast;
         private Instant vedtaksdato;
         private String saksbehandlerNavn;
+        private String saksbehandlerNrToNavn;
         private Persondata persondokument;
         private Persondata personMottaker;
         private List<SaksvedleggBestilling> saksvedleggBestilling;
@@ -186,6 +193,7 @@ public class DokgenBrevbestilling extends Brevbestilling {
             this.bestillUtkast = brevbestilling.bestillUtkast;
             this.vedtaksdato = brevbestilling.vedtaksdato;
             this.saksbehandlerNavn = brevbestilling.saksbehandlerNavn;
+            this.saksbehandlerNrToNavn = brevbestilling.saksbehandlerNrToNavn;
             this.persondokument = brevbestilling.persondokument;
             this.personMottaker = brevbestilling.personMottaker;
             this.saksvedleggBestilling = brevbestilling.saksvedleggBestilling;
@@ -272,6 +280,11 @@ public class DokgenBrevbestilling extends Brevbestilling {
 
         public T medSaksbehandlerNavn(String saksbehandlerNavn) {
             this.saksbehandlerNavn = saksbehandlerNavn;
+            return (T) this;
+        }
+
+        public T medSaksbehandlerNrToNavn(String saksbehandlerNrToNavn) {
+            this.saksbehandlerNrToNavn = saksbehandlerNrToNavn;
             return (T) this;
         }
 
