@@ -105,7 +105,7 @@ class AvsluttArt13BehandlingServiceTest {
 
 
         verify(fagsakService).avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART);
-        verify(medlPeriodeService).oppdaterPeriodeEndelig(lovvalgsperiode, true);
+        verify(medlPeriodeService).oppdaterPeriodeEndelig(lovvalgsperiode);
     }
 
     @Test
@@ -128,7 +128,7 @@ class AvsluttArt13BehandlingServiceTest {
 
 
         verify(fagsakService).avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART);
-        verify(medlPeriodeService).oppdaterPeriodeEndelig(lovvalgsperiode, false);
+        verify(medlPeriodeService).oppdaterPeriodeEndelig(lovvalgsperiode);
     }
 
     @Test
@@ -149,7 +149,7 @@ class AvsluttArt13BehandlingServiceTest {
 
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(behandlingID), anyCollection());
         verify(fagsakService).avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART);
-        verify(medlPeriodeService).oppdaterPeriodeEndelig(any(Lovvalgsperiode.class), eq(false));
+        verify(medlPeriodeService).oppdaterPeriodeEndelig(any(Lovvalgsperiode.class));
     }
 
     private Instant månederOgDagerSiden(long mnd, long dager) {

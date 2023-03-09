@@ -140,7 +140,7 @@ class MedlService(
         MedlemskapsunntakForPost(
             fraOgMed = periodeOmLovvalg.fom,
             tilOgMed = periodeOmLovvalg.tom,
-            dekning = MedlPeriodeKonverter.tilMedlTrygdeDekningEos(periodeOmLovvalg.dekning).kode,
+            dekning = MedlPeriodeKonverter.tilMedlTrygdeDekning(periodeOmLovvalg.dekning).kode,
             lovvalgsland = IsoLandkodeKonverterer.tilIso3(periodeOmLovvalg.lovvalgsland.kode),
             grunnlag = MedlPeriodeKonverter.tilGrunnlagMedltype(
                 MedlPeriodeKonverter.hentLovvalgBestemmelse(
@@ -162,8 +162,10 @@ class MedlService(
         )
 
     private fun oppdaterPeriode(
-        periodeOmLovvalg: PeriodeOmLovvalg, periodestatusMedl: PeriodestatusMedl,
-        lovvalgMedl: LovvalgMedl, kildedokumenttypeMedl: KildedokumenttypeMedl
+        periodeOmLovvalg: PeriodeOmLovvalg,
+        periodestatusMedl: PeriodestatusMedl,
+        lovvalgMedl: LovvalgMedl,
+        kildedokumenttypeMedl: KildedokumenttypeMedl
     ) {
         val medlPeriodeID = periodeOmLovvalg.medlPeriodeID
             ?: throw TekniskException("Det er ikke lagret noen medlPeriodeID på lovvalgsperiode som skal oppdateres i MEDL")
@@ -174,7 +176,7 @@ class MedlService(
             fraOgMed = periodeOmLovvalg.fom,
             tilOgMed = periodeOmLovvalg.tom,
             status = periodestatusMedl.kode,
-            dekning = MedlPeriodeKonverter.tilMedlTrygdeDekningEos(periodeOmLovvalg.dekning).kode,
+            dekning = MedlPeriodeKonverter.tilMedlTrygdeDekning(periodeOmLovvalg.dekning).kode,
             lovvalgsland = IsoLandkodeKonverterer.tilIso3(periodeOmLovvalg.lovvalgsland.kode),
             lovvalg = lovvalgMedl.kode,
             grunnlag = MedlPeriodeKonverter.tilGrunnlagMedltype(

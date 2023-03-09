@@ -334,6 +334,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .setTilordnetRessurs(oppgaveDto.getTilordnetRessurs())
             .setVersjon(oppgaveDto.getVersjon())
             .setBehandlingstema(oppgaveDto.getBehandlingstema())
+            .setBehandlingstype(oppgaveDto.getBehandlingstype())
             .setTema(mapTilEnumFraKode(Tema.class, oppgaveDto.getTema(), oppgaveId))
             .setOppgavetype(mapTilEnumFraKode(Oppgavetyper.class, oppgaveDto.getOppgavetype(), oppgaveId))
             .setPrioritet(StringUtils.isNotEmpty(oppgaveDto.getPrioritet()) ? PrioritetType.valueOf(oppgaveDto.getPrioritet()) : null)
