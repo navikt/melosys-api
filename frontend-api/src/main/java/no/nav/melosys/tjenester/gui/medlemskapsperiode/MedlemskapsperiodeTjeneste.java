@@ -1,9 +1,5 @@
 package no.nav.melosys.tjenester.gui.medlemskapsperiode;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
@@ -17,6 +13,10 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
+
+import java.util.Collection;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Protected
 @RestController
@@ -89,11 +89,11 @@ public class MedlemskapsperiodeTjeneste {
     }
 
     @GetMapping("/behandlinger/medlemskapsperioder/bestemmelser/{behandlingstema}")
-    public ResponseEntity<FolketrygdlovenStøttetIkkeStøttetBestemmelserDto> hentBestemmelserMedVilkaar(@PathVariable("behandlingstema") Behandlingstema behandlingstema) {
+    public ResponseEntity<FolketrygdlovenBestemmelserDto> hentBestemmelserMedVilkaar(@PathVariable("behandlingstema") Behandlingstema behandlingstema) {
         var støttede = tilCollectionAvBestemmelseMedVilkår(opprettMedlemskapsperiodeService.hentStøttedeBestemmelserMedVilkaar(behandlingstema));
         var ikkeStøttede = tilCollectionAvBestemmelseMedVilkår(opprettMedlemskapsperiodeService.hentIkkeStøttedeBestemmelserMedVilkaar(behandlingstema));
 
-        return ResponseEntity.ok(new FolketrygdlovenStøttetIkkeStøttetBestemmelserDto(støttede, ikkeStøttede));
+        return ResponseEntity.ok(new FolketrygdlovenBestemmelserDto(støttede, ikkeStøttede));
     }
 
     private Collection<FolketrygdlovenbestemmelseMedVilkaarDto> tilCollectionAvBestemmelseMedVilkår(Map<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> bestemmelseMedVilkår) {
