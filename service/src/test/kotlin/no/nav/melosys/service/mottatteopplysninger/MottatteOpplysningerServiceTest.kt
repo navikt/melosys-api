@@ -425,7 +425,7 @@ internal class MottatteOpplysningerServiceTest {
     }
 
     @Test
-    fun `default objekter skal lages for periode og land om toggle melosys tom_periode_og_land er aktiv`() {
+    fun `default objekter skal lages for periode og land`() {
         val behandling = setupMock(
             Sakstyper.EU_EOS,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
@@ -438,24 +438,6 @@ internal class MottatteOpplysningerServiceTest {
 
         verify {
             mottatteOpplysningerServiceSpy.opprettSøknad(any(), isNull(inverse = true), isNull(inverse = true))
-        }
-    }
-
-    @Test
-    fun `default objekter skal ikke lages for periode og land om toggle melosys tom_periode_og_land er aktiv`() {
-        unleash.disableAll()
-        val behandling = setupMock(
-            Sakstyper.EU_EOS,
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Behandlingstema.YRKESAKTIV
-        )
-
-
-        mottatteOpplysningerServiceSpy.opprettSøknad(Prosessinstans(), behandling)
-
-
-        verify {
-            mottatteOpplysningerServiceSpy.opprettSøknad(any(), isNull(), isNull())
         }
     }
 
