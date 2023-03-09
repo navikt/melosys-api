@@ -1,11 +1,11 @@
 package no.nav.melosys.melosysmock.medl
 
-import no.nav.melosys.melosysmock.person.PersonRepo
-import no.nav.melosys.melosysmock.utils.lagRandomLongId
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForGet
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPost
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPut
 import no.nav.melosys.integrasjon.medl.api.v1.Sporingsinformasjon
+import no.nav.melosys.melosysmock.person.PersonRepo
+import no.nav.melosys.melosysmock.utils.lagRandomLongId
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -90,7 +90,7 @@ fun MedlemskapsunntakForPost.tilGet(): MedlemskapsunntakForGet =
             lovvalg = it.lovvalg
             grunnlag = it.grunnlag
             medlem = true
-            Sporingsinformasjon().apply {
+            sporingsinformasjon = Sporingsinformasjon().apply {
                 versjon = 0
                 registrert = LocalDate.now()
                 besluttet = LocalDate.now()

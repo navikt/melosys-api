@@ -2,17 +2,22 @@ package no.nav.melosys.itest
 
 import io.kotest.assertions.extracting
 import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainInOrder
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
+import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.arkiv.*
-import no.nav.melosys.domain.eessi.BucType
-import no.nav.melosys.domain.eessi.Periode
-import no.nav.melosys.domain.eessi.SedType
+import no.nav.melosys.domain.eessi.*
 import no.nav.melosys.domain.eessi.melding.Avsender
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
+import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.saksflyt.ProsessStatus
 import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.integrasjon.joark.JoarkFasade
+import no.nav.melosys.melosysmock.melosyseessi.MelosysEessiRepo
 import no.nav.melosys.melosysmock.sak.SakRepo
+import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.ProsessinstansRepository
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.BeforeEach
@@ -31,6 +36,7 @@ class SedMottakTestIT(
     @Autowired private val joarkFasade: JoarkFasade,
     @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
     @Autowired private val prosessinstansRepository: ProsessinstansRepository,
+    @Autowired private val unleash: FakeUnleash
 ) : ComponentTestBase() {
 
     lateinit var rinaSaksnummer: String
@@ -43,17 +49,65 @@ class SedMottakTestIT(
     }
 
     @Test
+    fun `A009 med etterfølgende X008 skal gi fagsak annulert`() {
+        unleash.enable("melosys.sed.x008")
+        val ref = Random().nextInt(100000).toString()
+
+        val sedInfo = SedInformasjon(ref, SedType.A009.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
+        val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
+        MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
+
+        val eessiMeldingA009 = melosysEessiMelding(
+            BucType.LA_BUC_04, ref, SedType.A009, Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
+            "12_1", opprettEessiJournalpost(SedType.A009)
+        )
+        val eessiMeldingX008 = melosysEessiMelding(
+            BucType.LA_BUC_04, ref, SedType.X008, null, null, opprettEessiJournalpost(SedType.X008)
+        )
+
+        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
+        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX008)
+
+        await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(3))
+            .until {
+                prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
+                    listOf(ProsessStatus.FERDIG),
+                    ref
+                ).isEmpty()
+            }
+
+        val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
+            .stream()
+            .sorted(Comparator.comparing { obj: Prosessinstans -> obj.endretDato })
+            .collect(Collectors.toList())
+
+        extracting(prosessinstanserSortert) { låsReferanse }
+            .shouldHaveSize(5)
+            .shouldContainInOrder(
+                eessiMeldingA009.lagUnikIdentifikator(),
+                eessiMeldingA009.lagUnikIdentifikator(),
+                eessiMeldingA009.lagUnikIdentifikator(),
+                eessiMeldingX008.lagUnikIdentifikator(),
+                eessiMeldingX008.lagUnikIdentifikator(),
+            )
+
+        prosessinstanserSortert.filter { it.behandling != null }[0]
+            .apply { behandling.status.shouldBe(Behandlingsstatus.AVSLUTTET) }
+            .apply { behandling.fagsak.status.shouldBe(Saksstatuser.ANNULLERT) }
+    }
+
+    @Test
     fun mottaSED_mottar3SED_blirBehandletEtterHverandre() {
         //Periode på 6 år - fører til et kontrolltreff
         val eessiMeldingA009 = melosysEessiMelding(
-            BucType.LA_BUC_04, SedType.A009, Periode(LocalDate.now(), LocalDate.now().plusYears(6)),
+            BucType.LA_BUC_04, rinaSaksnummer, SedType.A009, Periode(LocalDate.now(), LocalDate.now().plusYears(6)),
             "12_1", opprettEessiJournalpost(SedType.A009)
         )
         val eessiMeldingX001 = melosysEessiMelding(
-            BucType.LA_BUC_04, SedType.X001, null, null, opprettEessiJournalpost(SedType.X001)
+            BucType.LA_BUC_04, rinaSaksnummer, SedType.X001, null, null, opprettEessiJournalpost(SedType.X001)
         )
         val eessiMeldingX007 = melosysEessiMelding(
-            BucType.LA_BUC_04, SedType.X007, null, null, opprettEessiJournalpost(SedType.X007)
+            BucType.LA_BUC_04, rinaSaksnummer, SedType.X007, null, null, opprettEessiJournalpost(SedType.X007)
         )
 
 
@@ -90,10 +144,11 @@ class SedMottakTestIT(
 
     private fun melosysEessiMelding(
         bucType: BucType,
+        rinaSaksnummer: String?,
         sedType: SedType,
         periode: Periode?,
         artikkel: String?,
-        journalpostID: String
+        journalpostID: String,
     ): MelosysEessiMelding {
         val eessiMelding = MelosysEessiMelding()
         eessiMelding.aktoerId = "1111111111111"
