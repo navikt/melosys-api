@@ -97,7 +97,8 @@ public record BrevbestillingRequest(
             this.nyVurderingBakgrunn(),
             konverterListeTil(this.saksvedlegg(), SaksvedleggDto::tilUtkast),
             konverterListeTil(this.fritekstvedlegg(), FritekstvedleggDto::tilUtkast),
-            this.dokumentTittel()
+            this.dokumentTittel(),
+            this.saksbehandlerNrToIdent()
         );
     }
 
@@ -123,7 +124,7 @@ public record BrevbestillingRequest(
             utkast.saksVedlegg().stream().map(SaksvedleggDto::av).toList(),
             utkast.fritekstVedlegg().stream().map(FritekstvedleggDto::av).toList(),
             utkast.dokumentTittel(),
-            null,
+            utkast.saksbehandlerNrToIdent(),
             null,
             null
         );

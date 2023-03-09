@@ -123,7 +123,7 @@ public final class BrevbestillingDto {
             brevbestillingUtkast.saksVedlegg().stream().map(SaksvedleggDto::av).toList(),
             brevbestillingUtkast.fritekstVedlegg().stream().map(FritekstvedleggDto::av).toList(),
             brevbestillingUtkast.dokumentTittel(),
-            null,
+            brevbestillingUtkast.saksbehandlerNrToIdent(),
             deprecatedBegrunnelseKode,
             deprecatedYtterligereInformasjon
         );
