@@ -95,17 +95,21 @@ public class OpprettMedlemskapsperiodeService {
         }
     }
 
-    public Map<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> hentBestemmelserMedVilkaar(Behandlingstema behandlingstema, Boolean kunStøttet) {
-        return new UtledBestemmelserOgVilkaar().hentRiktigBestemmelserOgVilkår(behandlingstema, kunStøttet);
+    public Map<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> hentStøttedeBestemmelserMedVilkaar(Behandlingstema behandlingstema) {
+        return new UtledBestemmelserOgVilkaar().hentStøttedeBestemmelserOgVilkår(behandlingstema);
+    }
+
+    public Map<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> hentIkkeStøttedeBestemmelserMedVilkaar(Behandlingstema behandlingstema) {
+        return new UtledBestemmelserOgVilkaar().hentIkkeStøttedeBestemmelserOgVilkår(behandlingstema);
     }
 
     private Collection<Vilkaar> hentVilkårForBestemmelse(Folketrygdloven_kap2_bestemmelser bestemmelse, Behandlingstema behandlingstema) {
-        return Optional.ofNullable(hentBestemmelserMedVilkaar(behandlingstema, true).get(bestemmelse))
+        return Optional.ofNullable(hentStøttedeBestemmelserMedVilkaar(behandlingstema).get(bestemmelse))
             .orElseThrow(() -> new FunksjonellException("Finner ikke vilkår for bestemmelse " + bestemmelse));
     }
 
     private boolean støtterBestemmelse(Folketrygdloven_kap2_bestemmelser bestemmelse, Behandlingstema behandlingstema) {
-        return hentBestemmelserMedVilkaar(behandlingstema, true).containsKey(bestemmelse);
+        return hentStøttedeBestemmelserMedVilkaar(behandlingstema).containsKey(bestemmelse);
     }
 
     public Collection<String> hentMuligeBegrunnelser(Vilkaar vilkår) {

@@ -6,8 +6,7 @@ import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 
 class UtledBestemmelserOgVilkaar {
-    val støttetBestemmelserOgVilkaar =
-        listOf<Folketrygdloven_kap2_bestemmelser>(FTRL_KAP2_2_8_FØRSTE_LEDD_A, FTRL_KAP2_2_8_ANDRE_LEDD)
+    val støttetBestemmelserOgVilkaar = listOf(FTRL_KAP2_2_8_FØRSTE_LEDD_A, FTRL_KAP2_2_8_ANDRE_LEDD)
 
     val yrkesaktivBestemmelser = mapOf<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>>(
         Pair(FTRL_KAP2_2_1_FØRSTE_LEDD, setOf()),
@@ -85,21 +84,17 @@ class UtledBestemmelserOgVilkaar {
 
         )
 
-    fun hentRiktigBestemmelserOgVilkår(
-        behandlingstema: Behandlingstema,
-        kunStøttet: Boolean = true
-    ): Map<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> {
-
-        val bestemmelserOgVilkaar = when (behandlingstema) {
+    private fun bestemmelseOgVilkaarFraBehandlingstema(behandlingstema: Behandlingstema): Map<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> =
+        when (behandlingstema) {
             Behandlingstema.YRKESAKTIV -> yrkesaktivBestemmelser
             Behandlingstema.IKKE_YRKESAKTIV -> ikkeYrkesaktivBestemmelser
             Behandlingstema.PENSJONIST -> pensjonistBestemmelser
             else -> defaultBestemmelser
         }
 
-        return bestemmelserOgVilkaar.filter {
-            if (kunStøttet) støttetBestemmelserOgVilkaar.contains(it.key)
-            else !støttetBestemmelserOgVilkaar.contains(it.key)
-        }
-    }
+    fun hentStøttedeBestemmelserOgVilkår(behandlingstema: Behandlingstema): Map<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> =
+        bestemmelseOgVilkaarFraBehandlingstema(behandlingstema).filter { støttetBestemmelserOgVilkaar.contains(it.key) }
+
+    fun hentIkkeStøttedeBestemmelserOgVilkår(behandlingstema: Behandlingstema): Map<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> =
+        bestemmelseOgVilkaarFraBehandlingstema(behandlingstema).filter { !støttetBestemmelserOgVilkaar.contains(it.key) }
 }

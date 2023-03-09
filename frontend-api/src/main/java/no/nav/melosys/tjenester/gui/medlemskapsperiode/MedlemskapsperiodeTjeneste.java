@@ -90,12 +90,10 @@ public class MedlemskapsperiodeTjeneste {
 
     @GetMapping("/behandlinger/medlemskapsperioder/bestemmelser/{behandlingstema}")
     public ResponseEntity<FolketrygdlovenStøttetIkkeStøttetBestemmelserDto> hentBestemmelserMedVilkaar(@PathVariable("behandlingstema") Behandlingstema behandlingstema) {
-        var støttede = tilCollectionAvBestemmelseMedVilkår(opprettMedlemskapsperiodeService.hentBestemmelserMedVilkaar(behandlingstema, true));
-        var ikkeStøttede = tilCollectionAvBestemmelseMedVilkår(opprettMedlemskapsperiodeService.hentBestemmelserMedVilkaar(behandlingstema, false));
+        var støttede = tilCollectionAvBestemmelseMedVilkår(opprettMedlemskapsperiodeService.hentStøttedeBestemmelserMedVilkaar(behandlingstema));
+        var ikkeStøttede = tilCollectionAvBestemmelseMedVilkår(opprettMedlemskapsperiodeService.hentIkkeStøttedeBestemmelserMedVilkaar(behandlingstema));
 
-        FolketrygdlovenStøttetIkkeStøttetBestemmelserDto folketrygdlovenStøttetIkkeStøttetBestemmelserDto = new FolketrygdlovenStøttetIkkeStøttetBestemmelserDto(støttede, ikkeStøttede);
-
-        return ResponseEntity.ok(folketrygdlovenStøttetIkkeStøttetBestemmelserDto);
+        return ResponseEntity.ok(new FolketrygdlovenStøttetIkkeStøttetBestemmelserDto(støttede, ikkeStøttede));
     }
 
     private Collection<FolketrygdlovenbestemmelseMedVilkaarDto> tilCollectionAvBestemmelseMedVilkår(Map<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> bestemmelseMedVilkår) {
