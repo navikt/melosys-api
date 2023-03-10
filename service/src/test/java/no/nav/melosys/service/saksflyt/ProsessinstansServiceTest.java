@@ -143,7 +143,7 @@ class ProsessinstansServiceTest {
         String mottakerInstitusjon = "DE:2332";
 
 
-        prosessinstansService.opprettProsessinstansIverksettVedtakEos(behandling, resultatType, "FRITEKST", "FRITEKST_SED", Set.of(mottakerInstitusjon));
+        prosessinstansService.opprettProsessinstansIverksettVedtakEos(behandling, resultatType, "FRITEKST", "FRITEKST_SED", Set.of(mottakerInstitusjon), true);
 
 
         verify(prosessinstansRepo).save(piCaptor.capture());

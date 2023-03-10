@@ -1,14 +1,18 @@
 package no.nav.melosys.domain.dokument.organisasjon;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Periode;
+import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
+import no.nav.melosys.domain.dokument.jaxb.OffsetDateTimeToLocalDateXmlAdapter;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Epost;
@@ -32,6 +36,9 @@ public class OrganisasjonsDetaljer {
     public List<Epost> epostadresse = new ArrayList<>();
 
     public List<String> naering = new ArrayList<>(); //"http://nav.no/kodeverk/Kodeverk/Næringskoder"
+
+    @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
+    public LocalDate opphoersdato = null;
 
     public String getOrgnummer() {
         return orgnummer;
@@ -82,6 +89,10 @@ public class OrganisasjonsDetaljer {
 
     public List<String> getNaering() {
         return naering;
+    }
+
+    public LocalDate getOpphoersdato() {
+        return opphoersdato;
     }
 
     private GeografiskAdresse hentFørsteGyldigeAdresse(List<GeografiskAdresse> adresser) {

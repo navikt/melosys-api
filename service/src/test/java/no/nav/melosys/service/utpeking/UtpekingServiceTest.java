@@ -121,7 +121,7 @@ class UtpekingServiceTest {
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(behandlingID), lovvalgsperiodeCaptor.capture());
         verify(prosessinstansService).opprettProsessinstansUtpekAnnetLand(eq(behandling), eq(Land_iso2.SE), eq(mottakerInstitusjoner), isNull(), isNull());
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
-        verify(ferdigbehandlingKontrollFacade).kontroller(behandlingID, behandlingsresultat.getType());
+        verify(ferdigbehandlingKontrollFacade).kontroller(behandlingID, behandlingsresultat.getType(), null);
 
         assertThat(behandlingsresultat)
             .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst, Behandlingsresultat::getFastsattAvLand)

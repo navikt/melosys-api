@@ -15,6 +15,7 @@ import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -88,7 +89,17 @@ public class EosVedtakService {
         behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
 
         if (behandlingsresultat.erInnvilgelse()) {
-            ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(behandling, behandlingsresultat, Sakstyper.EU_EOS, request.getBehandlingsresultatTypeKode());
+            var kontrollerSomSkalIgnoreres = request.isKopiTilArbeidsgiver()
+                ? null
+                : Collections.singleton(Kontroll_begrunnelser.OPPHØRT_ARBEIDSGIVER);
+
+            ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
+                behandling,
+                behandlingsresultat,
+                Sakstyper.EU_EOS,
+                request.getBehandlingsresultatTypeKode(),
+                kontrollerSomSkalIgnoreres
+            );
         }
 
         oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), request.getFritekst(), request.getNyVurderingBakgrunn());
@@ -99,7 +110,7 @@ public class EosVedtakService {
         }
         behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
         prosessinstansService.opprettProsessinstansIverksettVedtakEos(behandling, request.getBehandlingsresultatTypeKode(),
-            request.getFritekst(), request.getFritekstSed(), mottakerinstitusjoner);
+            request.getFritekst(), request.getFritekstSed(), mottakerinstitusjoner, request.isKopiTilArbeidsgiver());
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }
 
