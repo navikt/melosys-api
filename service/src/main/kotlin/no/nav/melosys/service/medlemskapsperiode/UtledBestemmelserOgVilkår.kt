@@ -1,4 +1,4 @@
-package no.nav.melosys.service.medlemskapsperiode;
+package no.nav.melosys.service.medlemskapsperiode
 
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser.*
@@ -30,7 +30,7 @@ class UtledBestemmelserOgVilkår {
         Pair(FTRL_KAP2_2_8_FØRSTE_LEDD_A, setOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID)),
         Pair(
             FTRL_KAP2_2_8_ANDRE_LEDD,
-            setOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID, Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE)
+            LinkedHashSet(listOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID, Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE))
         ),
         Pair(FTRL_KAP2_2_8_TREDJE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_8_FEMTE_LEDD, emptySet()),
@@ -50,7 +50,7 @@ class UtledBestemmelserOgVilkår {
         Pair(FTRL_KAP2_2_8_FØRSTE_LEDD_C, emptySet()),
         Pair(
             FTRL_KAP2_2_8_ANDRE_LEDD,
-            setOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID, Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE)
+            LinkedHashSet(listOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID, Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE))
         ),
         Pair(FTRL_KAP2_2_8_TREDJE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_8_FJERDE_LEDD, emptySet()),
@@ -68,7 +68,7 @@ class UtledBestemmelserOgVilkår {
         Pair(FTRL_KAP2_2_8_FØRSTE_LEDD_D, emptySet()),
         Pair(
             FTRL_KAP2_2_8_ANDRE_LEDD,
-            setOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID, Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE)
+            LinkedHashSet(listOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID, Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE))
         ),
         Pair(FTRL_KAP2_2_8_TREDJE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_8_FJERDE_LEDD, emptySet()),
@@ -79,10 +79,9 @@ class UtledBestemmelserOgVilkår {
         Pair(FTRL_KAP2_2_8_FØRSTE_LEDD_A, setOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID)),
         Pair(
             FTRL_KAP2_2_8_ANDRE_LEDD,
-            setOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID, Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE)
+            LinkedHashSet(listOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID, Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE))
         ),
-
-        )
+    )
 
     private fun bestemmelseOgVilkårFraBehandlingstema(behandlingstema: Behandlingstema): Map<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> =
         when (behandlingstema) {

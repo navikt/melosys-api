@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -104,7 +105,7 @@ public class MedlemskapsperiodeTjeneste {
             bestemmelseMedVilkår.getKey(),
             bestemmelseMedVilkår.getValue().stream()
                 .map(vilkår -> new VilkårOgBegrunnelserDto(vilkår, opprettMedlemskapsperiodeService.hentMuligeBegrunnelser(vilkår)))
-                .collect(Collectors.toSet())
+                .collect(Collectors.toCollection(LinkedHashSet::new))
         );
     }
 
