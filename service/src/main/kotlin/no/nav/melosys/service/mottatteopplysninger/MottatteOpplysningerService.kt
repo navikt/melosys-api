@@ -70,16 +70,10 @@ class MottatteOpplysningerService(
     }
 
     fun opprettSøknad(prosessinstans: Prosessinstans, behandling: Behandling) {
-        val sakstype = behandling.fagsak.type
-        val lagDefaultOjekter = unleash.isEnabled("melosys.tom_periode_og_land") || sakstype == Sakstyper.TRYGDEAVTALE
-
-        val defaultSoeknadsland = if (lagDefaultOjekter) Soeknadsland() else null
-        val defaultPeriode = if (lagDefaultOjekter) Periode() else null
-
         opprettSøknad(
             behandling,
-            prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode::class.java, defaultPeriode),
-            prosessinstans.getData(ProsessDataKey.SØKNADSLAND, Soeknadsland::class.java, defaultSoeknadsland)
+            prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode::class.java, Periode()),
+            prosessinstans.getData(ProsessDataKey.SØKNADSLAND, Soeknadsland::class.java, Soeknadsland())
         )
     }
 

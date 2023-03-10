@@ -55,6 +55,6 @@ public class VurderInngangsvilkaar implements StegBehandler {
         return behandling.getFagsak().erSakstypeEøs()
             && !harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP))
             && behandling.kanResultereIVedtak()
-            && (unleash.isEnabled("melosys.tom_periode_og_land") ? behandling.harPeriodeOgLand() : true);
+            && behandling.harPeriodeOgLand();
     }
 }
