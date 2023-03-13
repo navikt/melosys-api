@@ -17,7 +17,7 @@ public abstract class AdminSedRuter {
     private static final Logger log = LoggerFactory.getLogger(AdminSedRuter.class);
 
     private final FagsakService fagsakService;
-    private final BehandlingsresultatService behandlingsresultatService;
+    protected final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
     private final ProsessinstansService prosessinstansService;
 

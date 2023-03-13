@@ -11,13 +11,14 @@ import no.nav.melosys.domain.eessi.*
 import no.nav.melosys.domain.eessi.melding.Avsender
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.kodeverk.Saksstatuser
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.saksflyt.ProsessStatus
 import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.melosysmock.melosyseessi.MelosysEessiRepo
 import no.nav.melosys.melosysmock.sak.SakRepo
-import no.nav.melosys.repository.BehandlingRepository
+import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.ProsessinstansRepository
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.BeforeEach
@@ -36,6 +37,7 @@ class SedMottakTestIT(
     @Autowired private val joarkFasade: JoarkFasade,
     @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
     @Autowired private val prosessinstansRepository: ProsessinstansRepository,
+    @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired private val unleash: FakeUnleash
 ) : ComponentTestBase() {
 
@@ -94,6 +96,67 @@ class SedMottakTestIT(
         prosessinstanserSortert.filter { it.behandling != null }[0]
             .apply { behandling.status.shouldBe(Behandlingsstatus.AVSLUTTET) }
             .apply { behandling.fagsak.status.shouldBe(Saksstatuser.ANNULLERT) }
+            .apply {
+                behandlingsresultatRepository.findWithLovvalgsperioderById(behandling.id).get().type.shouldBe(
+                    Behandlingsresultattyper.HENLEGGELSE
+                )
+            }
+
+
+    }
+
+    @Test
+    fun `A009 med etterfølgende X006 skal gi fagsak annulert`() {
+        unleash.enable("melosys.sed.x006")
+        val ref = Random().nextInt(100000).toString()
+
+        val sedInfo = SedInformasjon(ref, SedType.A009.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
+        val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
+        MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
+
+        val eessiMeldingA009 = melosysEessiMelding(
+            BucType.LA_BUC_04, ref, SedType.A009, Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
+            "12_1", opprettEessiJournalpost(SedType.A009)
+        )
+        val eessiMeldingX006 = melosysEessiMelding(
+            BucType.LA_BUC_04, ref, SedType.X006, null, null, opprettEessiJournalpost(SedType.X008)
+        )
+        eessiMeldingX006.apply { isX006NavErFjernet = true }
+
+        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
+        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX006)
+
+        await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(3))
+            .until {
+                prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
+                    listOf(ProsessStatus.FERDIG),
+                    ref
+                ).isEmpty()
+            }
+
+        val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
+            .stream()
+            .sorted(Comparator.comparing { obj: Prosessinstans -> obj.endretDato })
+            .collect(Collectors.toList())
+
+        extracting(prosessinstanserSortert) { låsReferanse }
+            .shouldHaveSize(5)
+            .shouldContainInOrder(
+                eessiMeldingA009.lagUnikIdentifikator(),
+                eessiMeldingA009.lagUnikIdentifikator(),
+                eessiMeldingA009.lagUnikIdentifikator(),
+                eessiMeldingX006.lagUnikIdentifikator(),
+                eessiMeldingX006.lagUnikIdentifikator(),
+            )
+
+        prosessinstanserSortert.filter { it.behandling != null }[0]
+            .apply { behandling.status.shouldBe(Behandlingsstatus.AVSLUTTET) }
+            .apply { behandling.fagsak.status.shouldBe(Saksstatuser.ANNULLERT) }
+            .apply {
+                behandlingsresultatRepository.findWithLovvalgsperioderById(behandling.id).get().type.shouldBe(
+                    Behandlingsresultattyper.HENLEGGELSE
+                )
+            }
     }
 
     @Test
