@@ -22,7 +22,6 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
-import no.nav.melosys.service.sob.SobService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,8 +52,6 @@ class RegisteropplysningerServiceTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
-    private SobService sobService;
-    @Mock
     private InntektService inntektService;
     @Mock
     private SaksopplysningerService saksopplysningerService;
@@ -71,14 +68,13 @@ class RegisteropplysningerServiceTest {
     public void setUp() throws Exception {
         unleash.enableAll();
         registeropplysningerService = new RegisteropplysningerService(persondataFasade, medlPeriodeService, eregFasade, aaregFasade, behandlingService,
-            sobService, inntektService, saksopplysningerService, registeropplysningerPeriodeFactory, unleash, utbetaldataRestService);
+            inntektService, saksopplysningerService, registeropplysningerPeriodeFactory, unleash, utbetaldataRestService);
         when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(AKTØR_ID);
 
         when(aaregFasade.finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.ARBFORH));
         when(medlPeriodeService.hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.MEDL));
         when(inntektService.hentInntektListe(anyString(), anyYearMonth(), anyYearMonth())).thenReturn(lagSaksopplysning(SaksopplysningType.INNTK));
         when(eregFasade.hentOrganisasjon(anyString())).thenReturn(lagSaksopplysning(SaksopplysningType.ORG));
-        when(sobService.finnSakOgBehandlingskjedeListe(anyString())).thenReturn(lagSaksopplysning(SaksopplysningType.SOB_SAK));
 
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(hentBehandling());
         when(saksopplysningerService.finnArbeidsforholdsopplysninger(anyLong())).thenReturn(Optional.of(lagArbeidsforholdDokument()));
@@ -101,7 +97,6 @@ class RegisteropplysningerServiceTest {
                     .inntektsopplysninger()
                     .medlemskapsopplysninger()
                     .organisasjonsopplysninger()
-                    .sakOgBehandlingopplysninger()
                     .utbetalingsopplysninger()
                     .build())
                 .fom(LocalDate.now().minusYears(1))
@@ -115,13 +110,12 @@ class RegisteropplysningerServiceTest {
         verify(inntektService).hentInntektListe(anyString(), anyYearMonth(), anyYearMonth());
         verify(medlPeriodeService).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
         verify(eregFasade).hentOrganisasjon(anyString());
-        verify(sobService).finnSakOgBehandlingskjedeListe(AKTØR_ID);
     }
 
     @Test
     void hentOgLagreOpplysninger_medAlleOpplysningerIVilkårligRekkefølge_alleBlirHentetOgLagretIRettRekkefølge() {
         unleash.disableAll();
-        
+
         Arbeidsforhold arbeidsforhold = new Arbeidsforhold();
         arbeidsforhold.arbeidsgiverID = "123456789";
 
@@ -156,7 +150,6 @@ class RegisteropplysningerServiceTest {
         arbeidsforholdFørOrg.verify(eregFasade).hentOrganisasjon(anyString());
 
         verify(medlPeriodeService).hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate());
-        verify(sobService).finnSakOgBehandlingskjedeListe(AKTØR_ID);
     }
 
     @Test
@@ -222,7 +215,6 @@ class RegisteropplysningerServiceTest {
         verify(medlPeriodeService, never()).hentPeriodeListe(anyString(), any(), any());
 
         verify(eregFasade).hentOrganisasjon(anyString());
-        verify(sobService).finnSakOgBehandlingskjedeListe(AKTØR_ID);
         verify(behandlingService).lagre(any(Behandling.class));
     }
 

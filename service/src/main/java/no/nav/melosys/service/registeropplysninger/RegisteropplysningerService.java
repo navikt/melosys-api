@@ -23,7 +23,6 @@ import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
-import no.nav.melosys.service.sob.SobService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -45,7 +44,6 @@ public class RegisteropplysningerService {
             .put(SaksopplysningType.INNTK, this::hentInntektsopplysninger)
             .put(SaksopplysningType.MEDL, this::hentMedlemskapsopplysninger)
             .put(SaksopplysningType.ORG, this::hentOrganisasjonsopplysninger)
-            .put(SaksopplysningType.SOB_SAK, this::hentSakOgBehandlingSaker)
             .put(SaksopplysningType.UTBETAL, this::hentUtbetalingsopplysninger)
             .build());
 
@@ -54,7 +52,6 @@ public class RegisteropplysningerService {
     private final EregFasade eregFasade;
     private final AaregFasade aaregFasade;
     private final BehandlingService behandlingService;
-    private final SobService sobService;
     private final InntektService inntektService;
     private final SaksopplysningerService saksopplysningerService;
     private final RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory;
@@ -66,7 +63,7 @@ public class RegisteropplysningerService {
                                        EregFasade eregFasade,
                                        AaregFasade aaregFasade,
                                        BehandlingService behandlingService,
-                                       SobService sobService, InntektService inntektService,
+                                       InntektService inntektService,
                                        SaksopplysningerService saksopplysningerService,
                                        RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory,
                                        Unleash unleash,
@@ -76,7 +73,6 @@ public class RegisteropplysningerService {
         this.eregFasade = eregFasade;
         this.aaregFasade = aaregFasade;
         this.behandlingService = behandlingService;
-        this.sobService = sobService;
         this.inntektService = inntektService;
         this.saksopplysningerService = saksopplysningerService;
         this.registeropplysningerPeriodeFactory = registeropplysningerPeriodeFactory;
@@ -211,13 +207,6 @@ public class RegisteropplysningerService {
         }
 
         return saksopplysninger;
-    }
-
-    private List<Saksopplysning> hentSakOgBehandlingSaker(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {
-        String aktørId = persondataFasade.hentAktørIdForIdent(registeropplysningerRequest.getFnr());
-        Saksopplysning saksopplysning = sobService.finnSakOgBehandlingskjedeListe(aktørId);
-
-        return List.of(saksopplysning);
     }
 
     @Transactional

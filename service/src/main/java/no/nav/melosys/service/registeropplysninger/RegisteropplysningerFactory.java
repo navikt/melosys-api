@@ -54,7 +54,6 @@ public final class RegisteropplysningerFactory {
             .inntektsopplysninger()
             .medlemskapsopplysninger()
             .organisasjonsopplysninger()
-            .sakOgBehandlingopplysninger()
             .build();
     }
 
@@ -82,7 +81,6 @@ public final class RegisteropplysningerFactory {
             .inntektsopplysninger()
             .medlemskapsopplysninger()
             .organisasjonsopplysninger()
-            .sakOgBehandlingopplysninger()
             .utbetalingsopplysninger()
             .build();
     }
@@ -93,7 +91,6 @@ public final class RegisteropplysningerFactory {
             .inntektsopplysninger()
             .medlemskapsopplysninger()
             .organisasjonsopplysninger()
-            .sakOgBehandlingopplysninger()
             .utbetalingsopplysninger()
             .build();
     }

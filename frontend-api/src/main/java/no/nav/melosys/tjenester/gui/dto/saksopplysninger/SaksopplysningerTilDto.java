@@ -12,7 +12,6 @@ import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.tjenester.gui.dto.SaksopplysningerDto;
 import no.nav.melosys.tjenester.gui.dto.eessi.SedDokumentDto;
@@ -49,7 +48,6 @@ public class SaksopplysningerTilDto {
                     dto.setMedlemskap(medlemskapDokument);
                 }
                 case INNTK -> dto.setInntekt(new InntektDto((InntektDokument) dokument));
-                case SOB_SAK -> dto.setSakOgBehandling((SobSakDokument) dokument);
                 case SEDOPPL -> dto.setSed(SedDokumentDto.fra((SedDokument) dokument));
             }
         }
