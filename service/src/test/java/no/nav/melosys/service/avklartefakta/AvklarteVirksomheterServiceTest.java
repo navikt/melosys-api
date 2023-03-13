@@ -246,10 +246,10 @@ class AvklarteVirksomheterServiceTest {
     }
 
     @Test
-    void harOpphørtAvklartVirksomhet_eregKasterOrgOpphørtFeil_girTrue() {
-        String feilmeldingFraEreg = "Organisasjon har opphørt, opphørsdato=2023-02-01, orgnr=99999999";
-
-        when(organisasjonOppslagService.hentOrganisasjoner(any())).thenThrow(new IntegrasjonException(feilmeldingFraEreg));
+    void harOpphørtAvklartVirksomhet_opphoersdatoTilbakeITid_girTrue() {
+        OrganisasjonDokument orgDok = lagOrganisasjonDokument("0011", "Gatenavn 1");
+        orgDok.organisasjonDetaljer.opphoersdato = LocalDate.now().minusYears(1);
+        when(organisasjonOppslagService.hentOrganisasjoner(any())).thenReturn(Collections.singleton(orgDok));
 
         behandling.setSaksopplysninger(lagArbeidsforholdOpplysninger(Collections.emptyList()));
         behandling.setMottatteOpplysninger(lagMottatteOpplysninger(Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));

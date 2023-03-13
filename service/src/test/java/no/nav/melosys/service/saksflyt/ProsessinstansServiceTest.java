@@ -143,7 +143,7 @@ class ProsessinstansServiceTest {
         String mottakerInstitusjon = "DE:2332";
 
 
-        prosessinstansService.opprettProsessinstansIverksettVedtakEos(behandling, resultatType, "FRITEKST", "FRITEKST_SED", Set.of(mottakerInstitusjon));
+        prosessinstansService.opprettProsessinstansIverksettVedtakEos(behandling, resultatType, "FRITEKST", "FRITEKST_SED", Set.of(mottakerInstitusjon), true);
 
 
         verify(prosessinstansRepo).save(piCaptor.capture());
@@ -477,8 +477,9 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    void opprettProsessinstansGodkjennUnntaksperiode() {
-        prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(new Behandling(), false, "fritekst");
+    void opprettProsessinstansGodkjennUnntaksperiodeMedEessiMelding() {
+        MelosysEessiMelding melosysEessiMelding = lagMelosysEessiMelding();
+        prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(new Behandling(), false, "fritekst", melosysEessiMelding);
 
 
         verify(prosessinstansRepo).save(piCaptor.capture());
@@ -486,6 +487,21 @@ class ProsessinstansServiceTest {
         Prosessinstans prosessinstans = piCaptor.getValue();
         assertThat(prosessinstans.getType()).isEqualTo(ProsessType.REGISTRERING_UNNTAK_GODKJENN);
         assertThat(prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED)).isEqualTo("fritekst");
+        assertThat(prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class)).isEqualTo(melosysEessiMelding);
+        assertThat(prosessinstans.getLåsReferanse()).isEqualTo(melosysEessiMelding.lagUnikIdentifikator());
+    }
+
+    @Test
+    void opprettProsessinstansGodkjennUnntaksperiode() {
+        prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(new Behandling(), false, "fritekst", null);
+
+
+        verify(prosessinstansRepo).save(piCaptor.capture());
+
+        Prosessinstans prosessinstans = piCaptor.getValue();
+        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.REGISTRERING_UNNTAK_GODKJENN);
+        assertThat(prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED)).isEqualTo("fritekst");
+        assertThat(prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class)).isNull();
     }
 
     @Test

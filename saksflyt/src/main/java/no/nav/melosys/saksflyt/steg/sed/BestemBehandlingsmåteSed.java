@@ -3,6 +3,8 @@ package no.nav.melosys.saksflyt.steg.sed;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsmaate;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -50,9 +52,11 @@ public class BestemBehandlingsmåteSed implements StegBehandler {
         if (skalGodkjenneUnntaksperiode(behandling, behandlingsresultat)) {
             log.info("Behandling {} tema {} behandles automatisk", behandlingID, behandling.getTema());
             behandlingsresultatService.oppdaterBehandlingsMaate(behandlingID, Behandlingsmaate.AUTOMATISERT);
+            MelosysEessiMelding eessiMelding = prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
             UnntaksperiodeGodkjenning unntaksperiodeGodkjenning = UnntaksperiodeGodkjenning.builder()
                 .varsleUtland(false)
                 .fritekst(null)
+                .eessiMelding(eessiMelding)
                 .build();
             unntaksperiodeService.godkjennPeriode(behandling.getId(), unntaksperiodeGodkjenning);
         } else {

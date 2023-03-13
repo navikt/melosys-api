@@ -1,22 +1,13 @@
 package no.nav.melosys.service.vilkaar;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
-import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.inngangsvilkar.Feilmelding;
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Inngangsvilkaar;
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.person.Statsborgerskap;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.inngangsvilkar.InngangsvilkaarConsumer;
@@ -26,6 +17,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_INNGANGSVILKAAR;
 import static no.nav.melosys.domain.util.IsoLandkodeKonverterer.tilIso3;
@@ -39,18 +38,15 @@ public class InngangsvilkaarService {
     private final InngangsvilkaarConsumer inngangsvilkaarConsumer;
     private final PersondataFasade persondataFasade;
     private final VilkaarsresultatService vilkaarsresultatService;
-    private final Unleash unleash;
 
     public InngangsvilkaarService(BehandlingService behandlingService,
                                   InngangsvilkaarConsumer inngangsvilkaarConsumer,
                                   PersondataFasade persondataFasade,
-                                  VilkaarsresultatService vilkaarsresultatService,
-                                  Unleash unleash) {
+                                  VilkaarsresultatService vilkaarsresultatService) {
         this.behandlingService = behandlingService;
         this.inngangsvilkaarConsumer = inngangsvilkaarConsumer;
         this.persondataFasade = persondataFasade;
         this.vilkaarsresultatService = vilkaarsresultatService;
-        this.unleash = unleash;
     }
 
     public boolean oppfyllervurderingEF_883_2004(long behandlingID) {
@@ -123,11 +119,9 @@ public class InngangsvilkaarService {
         if (inngangsvilkaar.isEmpty()) {
             throw new FunksjonellException("Inngangsvilkår er ikke vurdert for behandling " + behandlingID);
         }
-        if (unleash.isEnabled("melosys.tom_periode_og_land")) {
-            var behandling = behandlingService.hentBehandling(behandlingID);
-            if (!behandling.harPeriodeOgLand()) {
-                throw new FunksjonellException("Mangler land eller periode for behandling " + behandlingID);
-            }
+        var behandling = behandlingService.hentBehandling(behandlingID);
+        if (!behandling.harPeriodeOgLand()) {
+            throw new FunksjonellException("Mangler land eller periode for behandling " + behandlingID);
         }
         final var inngangsvilkaarBegrunnelseKoder = inngangsvilkaar.get().getBegrunnelser().stream()
             .map(VilkaarBegrunnelse::getKode)

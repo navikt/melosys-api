@@ -142,7 +142,7 @@ public class Oppgaveplukker {
 
     private Set<String> hentAlleOppgaveBehandlingstemaTilSøk(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema) {
         return Arrays.stream(Behandlingstyper.values())
-            .map(behandlingstype -> OppgaveFactory.utledBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype).getKode())
+            .map(behandlingstype -> OppgaveFactory.utledOppgaveBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype).getKode())
             .collect(Collectors.toSet());
     }
 

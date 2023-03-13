@@ -45,7 +45,8 @@ public class KontrollTjeneste {
         ferdigbehandlingKontrollFacade.kontroller(
             ferdigbehandlingKontrollerDto.behandlingID(),
             ferdigbehandlingKontrollerDto.skalRegisteropplysningerOppdateres(),
-            ferdigbehandlingKontrollerDto.behandlingsresultattype()
+            ferdigbehandlingKontrollerDto.behandlingsresultattype(),
+            ferdigbehandlingKontrollerDto.kontrollerSomSkalIgnoreres()
         );
 
         return ResponseEntity.noContent().build();

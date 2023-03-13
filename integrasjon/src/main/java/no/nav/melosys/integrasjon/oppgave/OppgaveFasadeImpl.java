@@ -121,7 +121,9 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         oppgaveDto.setAktørId(oppgave.getAktørId());
         oppgaveDto.setOrgnr(oppgave.getOrgnr());
         oppgaveDto.setBehandlingstema(oppgave.getBehandlingstema());
-        oppgaveDto.setBeskrivelse(oppgave.getBeskrivelse());
+        oppgaveDto.setBeskrivelse(
+            hentNyBeskrivelseHendelseslogg(oppgave.getBeskrivelse(), oppgave.getSaksnummer())
+        );
 
         if (oppgave.getFristFerdigstillelse() != null) {
             oppgaveDto.setFristFerdigstillelse(oppgave.getFristFerdigstillelse());
@@ -334,6 +336,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .setTilordnetRessurs(oppgaveDto.getTilordnetRessurs())
             .setVersjon(oppgaveDto.getVersjon())
             .setBehandlingstema(oppgaveDto.getBehandlingstema())
+            .setBehandlingstype(oppgaveDto.getBehandlingstype())
             .setTema(mapTilEnumFraKode(Tema.class, oppgaveDto.getTema(), oppgaveId))
             .setOppgavetype(mapTilEnumFraKode(Oppgavetyper.class, oppgaveDto.getOppgavetype(), oppgaveId))
             .setPrioritet(StringUtils.isNotEmpty(oppgaveDto.getPrioritet()) ? PrioritetType.valueOf(oppgaveDto.getPrioritet()) : null)

@@ -164,10 +164,6 @@ class EndreSakService(
     private fun gjenopprettMottatteOpplysninger(
         nySakstype: Sakstyper, behandling: Behandling
     ) {
-        if (nySakstype == EU_EOS && !unleash.isEnabled("melosys.tom_periode_og_land")) {
-            validerPeriodeOgLand(behandling)
-        }
-
         val mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id).orElse(null)
         mottatteOpplysningerService.slettOpplysninger(behandling.id)
         mottatteOpplysningerService.opprettSøknad(
@@ -175,16 +171,6 @@ class EndreSakService(
             mottatteOpplysninger?.mottatteOpplysningerData?.periode ?: Periode(),
             søknadslandTilGjenoppretting(nySakstype, mottatteOpplysninger?.mottatteOpplysningerData?.soeknadsland)
         )
-    }
-
-    private fun validerPeriodeOgLand(behandling: Behandling) {
-        if (!behandling.harPeriodeOgLand()) {
-            throw FunksjonellException("Du må legge inn periode og land i flyten for å kunne bytte til sakstype EU/EØS")
-        }
-        val landkoder = behandling.mottatteOpplysninger?.mottatteOpplysningerData?.soeknadsland?.landkoder!!
-        if (!landkoder.all { land -> landkodeErGyldigForSakstype(land, EU_EOS) }) {
-            throw FunksjonellException("Du må legge til støttet EU/EØS-land for å kunne bytte til sakstype EU/EØS")
-        }
     }
 
     private fun søknadslandTilGjenoppretting(nySakstype: Sakstyper, soeknadsland: Soeknadsland?): Soeknadsland {
