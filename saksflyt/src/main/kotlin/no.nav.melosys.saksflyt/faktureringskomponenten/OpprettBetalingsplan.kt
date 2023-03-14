@@ -11,10 +11,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg
 import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
-import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
-import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriodeDto
-import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall
-import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FullmektigDto
+import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.service.aktoer.KontaktopplysningService
 import no.nav.melosys.service.behandling.BehandlingService
@@ -90,7 +87,7 @@ class OpprettBetalingsplan(
                 fodselsnummer = foedselsNr,
                 referanseNAV = "Medlemskap og avgift",
                 fullmektig = fullmektigDto(fastsattTrygdeavgift.betalesAv, kontaktopplysning),
-                fakturaGjelder = "Medlemskapsavgift",
+                fakturaGjelder = FakturaGjelder.TRYGDEAVGIFT,
                 intervall = intervall ?: FaktureringsIntervall.MANEDLIG,
                 referanseBruker = vedtaksdato,
                 perioder = fakturaseriePeriodeDtoListe

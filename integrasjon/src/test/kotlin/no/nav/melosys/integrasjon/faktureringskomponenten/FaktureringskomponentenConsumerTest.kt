@@ -9,10 +9,7 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.StsMockServer
-import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
-import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriodeDto
-import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall
-import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FullmektigDto
+import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
@@ -116,7 +113,7 @@ class FaktureringskomponentenConsumerTest(
         fullmektig: FullmektigDto = FullmektigDto("11987654321", "123456789", "Ole Brum"),
         referanseBruker: String = "Nasse Nøff",
         referanseNav: String = "NAV Medlemskap og avgift",
-        fakturaGjelder: String = "FTRL",
+        fakturaGjelder: FakturaGjelder = FakturaGjelder.TRYGDEAVGIFT,
         intervall: FaktureringsIntervall = FaktureringsIntervall.KVARTAL,
         fakturaseriePeriode: List<FakturaseriePeriodeDto> = listOf(
             FakturaseriePeriodeDto(
