@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.SoeknadFtrl;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
@@ -77,6 +78,9 @@ class OpprettMedlemskapsperiodeServiceTest {
 
     @Test
     void utledMedlemskapsperioderFraSøknad_støtterIkkeBestemmelse_kasterFeil() {
+        Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
+
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettMedlemskapsperiodeService.utledMedlemskapsperioderFraSøknad(
                 behandlingsresultatID, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_D))
@@ -89,6 +93,7 @@ class OpprettMedlemskapsperiodeServiceTest {
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Sakstyper.FTRL);
         behandling.setFagsak(fagsak);
+        behandling.setTema(Behandlingstema.YRKESAKTIV);
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         SoeknadFtrl søknad = new SoeknadFtrl();
 
