@@ -99,7 +99,7 @@ class FaktureringskomponentenConsumerTokenTest(
         fullmektig: FullmektigDto = FullmektigDto("11987654321", "123456789", "Ole Brum"),
         referanseBruker: String = "Nasse Nøff",
         referanseNav: String = "NAV Medlemskap og avgift",
-        fakturaGjelder: FakturaGjelder = FakturaGjelder.TRYGDEAVGIFT,
+        fakturaGjelder: Innbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
         intervall: FaktureringsIntervall = FaktureringsIntervall.KVARTAL,
         fakturaseriePeriode: List<FakturaseriePeriodeDto> = listOf(
             FakturaseriePeriodeDto(

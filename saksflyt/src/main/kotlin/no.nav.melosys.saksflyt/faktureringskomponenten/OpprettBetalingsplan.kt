@@ -87,7 +87,7 @@ class OpprettBetalingsplan(
                 fodselsnummer = foedselsNr,
                 referanseNAV = "Medlemskap og avgift",
                 fullmektig = fullmektigDto(fastsattTrygdeavgift.betalesAv, kontaktopplysning),
-                fakturaGjelder = FakturaGjelder.TRYGDEAVGIFT,
+                fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
                 intervall = intervall ?: FaktureringsIntervall.MANEDLIG,
                 referanseBruker = vedtaksdato,
                 perioder = fakturaseriePeriodeDtoListe
