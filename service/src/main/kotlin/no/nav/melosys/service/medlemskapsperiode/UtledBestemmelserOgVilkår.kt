@@ -14,7 +14,6 @@ class UtledBestemmelserOgVilkår {
         Pair(FTRL_KAP2_2_2, emptySet()),
         Pair(FTRL_KAP2_2_3_FØRSTE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_3_ANDRE_LEDD, emptySet()),
-        Pair(FTRL_KAP2_2_5, emptySet()),
         Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_A, emptySet()),
         Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_B, emptySet()),
         Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_C, emptySet()),
@@ -27,12 +26,13 @@ class UtledBestemmelserOgVilkår {
         Pair(FTRL_KAP2_2_6_FØRSTE_LEDD_C, emptySet()),
         Pair(FTRL_KAP2_2_7_FØRSTE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_7A, emptySet()),
-        Pair(FTRL_KAP2_2_8_FØRSTE_LEDD_A, setOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID)),
+        Pair(
+            FTRL_KAP2_2_8_FØRSTE_LEDD_A,
+            setOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID)),
         Pair(
             FTRL_KAP2_2_8_ANDRE_LEDD,
             LinkedHashSet(listOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID, Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE))
         ),
-        Pair(FTRL_KAP2_2_8_TREDJE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_8_FEMTE_LEDD, emptySet()),
     )
 
@@ -40,7 +40,6 @@ class UtledBestemmelserOgVilkår {
         Pair(FTRL_KAP2_2_1_FØRSTE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_1_FJERDE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_3_FØRSTE_LEDD, emptySet()),
-        Pair(FTRL_KAP2_2_5, emptySet()),
         Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_C, emptySet()),
         Pair(FTRL_KAP2_2_5_FØRSTE_LEDD_H, emptySet()),
         Pair(FTRL_KAP2_2_5_ANDRE_LEDD, emptySet()),
@@ -52,7 +51,6 @@ class UtledBestemmelserOgVilkår {
             FTRL_KAP2_2_8_ANDRE_LEDD,
             LinkedHashSet(listOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID, Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE))
         ),
-        Pair(FTRL_KAP2_2_8_TREDJE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_8_FJERDE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_8_FEMTE_LEDD, emptySet()),
     )
@@ -61,7 +59,6 @@ class UtledBestemmelserOgVilkår {
         Pair(FTRL_KAP2_2_1_FØRSTE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_1_FJERDE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_3_FØRSTE_LEDD, emptySet()),
-        Pair(FTRL_KAP2_2_5, emptySet()),
         Pair(FTRL_KAP2_2_5_ANDRE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_7_FØRSTE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_7_FJERDE_LEDD, emptySet()),
@@ -70,7 +67,6 @@ class UtledBestemmelserOgVilkår {
             FTRL_KAP2_2_8_ANDRE_LEDD,
             LinkedHashSet(listOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID, Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE))
         ),
-        Pair(FTRL_KAP2_2_8_TREDJE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_8_FJERDE_LEDD, emptySet()),
         Pair(FTRL_KAP2_2_8_FEMTE_LEDD, emptySet()),
     )
