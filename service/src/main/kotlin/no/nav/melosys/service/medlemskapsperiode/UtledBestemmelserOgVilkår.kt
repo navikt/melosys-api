@@ -28,12 +28,12 @@ class UtledBestemmelserOgVilkår {
         Pair(FTRL_KAP2_2_7A, emptySet()),
         Pair(
             FTRL_KAP2_2_8_FØRSTE_LEDD_A,
-            setOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID)),
+            setOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID)
+        ),
         Pair(
             FTRL_KAP2_2_8_ANDRE_LEDD,
             LinkedHashSet(listOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID, Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE))
         ),
-        Pair(FTRL_KAP2_2_8_FEMTE_LEDD, emptySet()),
     )
 
     val ikkeYrkesaktivBestemmelserOgVilkår = mapOf<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>>(
@@ -52,7 +52,6 @@ class UtledBestemmelserOgVilkår {
             LinkedHashSet(listOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID, Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE))
         ),
         Pair(FTRL_KAP2_2_8_FJERDE_LEDD, emptySet()),
-        Pair(FTRL_KAP2_2_8_FEMTE_LEDD, emptySet()),
     )
 
     val pensjonistBestemmelserOgVilkår = mapOf<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>>(
@@ -68,7 +67,6 @@ class UtledBestemmelserOgVilkår {
             LinkedHashSet(listOf(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID, Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE))
         ),
         Pair(FTRL_KAP2_2_8_FJERDE_LEDD, emptySet()),
-        Pair(FTRL_KAP2_2_8_FEMTE_LEDD, emptySet()),
     )
 
     val defaultBestemmelserOgVilkår = mapOf<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>>(
