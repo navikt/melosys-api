@@ -47,8 +47,8 @@ class ExceptionMapperTest {
 
     @Test
     void jwtTokenUnauthorizedException_SkalLoggesSomWarn_ReturnerStatusForbidden() {
-        JwtTokenUnauthorizedException funksjonellException = new JwtTokenUnauthorizedException();
-        assertResponse(exceptionMapper.håndter(funksjonellException, request), HttpStatus.FORBIDDEN, "JwtTokenUnauthorizedException");
+        JwtTokenUnauthorizedException jwtTokenUnauthorizedException = new JwtTokenUnauthorizedException();
+        assertResponse(exceptionMapper.håndter(jwtTokenUnauthorizedException, request), HttpStatus.UNAUTHORIZED, "JwtTokenUnauthorizedException");
     }
 
     @Test

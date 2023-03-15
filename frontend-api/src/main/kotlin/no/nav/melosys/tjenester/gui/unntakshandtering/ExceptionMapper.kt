@@ -32,7 +32,7 @@ class ExceptionMapper {
 
     @ExceptionHandler(JwtTokenUnauthorizedException::class)
     fun håndter(e: JwtTokenUnauthorizedException, request: HttpServletRequest): ResponseEntity<Map<String, Any?>> =
-        håndter(e, request, HttpStatus.FORBIDDEN, Level.WARN)
+        håndter(e, request, HttpStatus.UNAUTHORIZED, Level.WARN)
 
     @ExceptionHandler(ValideringException::class)
     fun håndter(e: ValideringException, request: HttpServletRequest): ResponseEntity<Map<String, Any?>> =
