@@ -31,6 +31,10 @@ class ExceptionMapper {
     fun håndter(e: SikkerhetsbegrensningException, request: HttpServletRequest): ResponseEntity<Map<String, Any?>> =
         håndter(e, request, HttpStatus.FORBIDDEN, Level.WARN)
 
+    @ExceptionHandler(JwtTokenUnauthorizedException::class)
+    fun håndter(e: JwtTokenUnauthorizedException, request: HttpServletRequest): ResponseEntity<Map<String, Any?>> =
+        håndter(e, request, HttpStatus.FORBIDDEN, Level.WARN)
+
     @ExceptionHandler(ValideringException::class)
     fun håndter(e: ValideringException, request: HttpServletRequest): ResponseEntity<Map<String, Any?>> =
         håndter(e, request, HttpStatus.BAD_REQUEST, Level.INFO, e.feilkoder)
@@ -50,12 +54,10 @@ class ExceptionMapper {
         val errorMessage =
             "API kall feilet: $message\nremoteHost:${request.remoteHost}\nrequestURI :${request.requestURI}"
 
-        finnLoggnivå(e, loggnivå).let {
-            if (it == Level.ERROR) {
-                log.error(errorMessage, e)
-            } else if (it == Level.WARN) {
-                log.warn(errorMessage, e)
-            }
+        if (loggnivå == Level.ERROR) {
+            log.error(errorMessage, e)
+        } else if (loggnivå == Level.WARN) {
+            log.warn(errorMessage, e)
         }
 
         val entity = mutableMapOf<String, Any?>(
@@ -70,7 +72,4 @@ class ExceptionMapper {
         }
         return ResponseEntity(entity, httpStatus)
     }
-
-    private fun finnLoggnivå(e: Exception, loggnivå: Level) =
-        if (loggnivå == Level.ERROR && e is JwtTokenUnauthorizedException) Level.WARN else loggnivå
 }
