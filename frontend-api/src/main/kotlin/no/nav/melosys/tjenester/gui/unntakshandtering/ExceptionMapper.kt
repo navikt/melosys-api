@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import javax.servlet.http.HttpServletRequest
 
 private val log = KotlinLogging.logger { }
-
 @ControllerAdvice
 class ExceptionMapper {
     @ExceptionHandler(IkkeFunnetException::class)
