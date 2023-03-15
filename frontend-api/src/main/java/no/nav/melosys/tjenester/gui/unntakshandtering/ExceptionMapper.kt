@@ -6,6 +6,7 @@ import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.exception.SikkerhetsbegrensningException
 import no.nav.melosys.exception.ValideringException
 import no.nav.melosys.integrasjon.felles.mdc.MDCOperations
+import no.nav.security.token.support.spring.validation.interceptor.JwtTokenUnauthorizedException
 import org.slf4j.MDC
 import org.slf4j.event.Level
 import org.springframework.http.HttpStatus
@@ -19,29 +20,24 @@ private val log = KotlinLogging.logger { }
 @ControllerAdvice
 class ExceptionMapper {
     @ExceptionHandler(IkkeFunnetException::class)
-    fun håndter(e: IkkeFunnetException, request: HttpServletRequest): ResponseEntity<Map<String, Any?>> {
-        return håndter(e, request, HttpStatus.NOT_FOUND, Level.WARN)
-    }
+    fun håndter(e: IkkeFunnetException, request: HttpServletRequest): ResponseEntity<Map<String, Any?>> =
+        håndter(e, request, HttpStatus.NOT_FOUND, Level.WARN)
 
     @ExceptionHandler(FunksjonellException::class)
-    fun håndter(e: FunksjonellException, request: HttpServletRequest): ResponseEntity<Map<String, Any?>> {
-        return håndter(e, request, HttpStatus.BAD_REQUEST, Level.WARN)
-    }
+    fun håndter(e: FunksjonellException, request: HttpServletRequest): ResponseEntity<Map<String, Any?>> =
+        håndter(e, request, HttpStatus.BAD_REQUEST, Level.WARN)
 
     @ExceptionHandler(SikkerhetsbegrensningException::class)
-    fun håndter(e: SikkerhetsbegrensningException, request: HttpServletRequest): ResponseEntity<Map<String, Any?>> {
-        return håndter(e, request, HttpStatus.FORBIDDEN, Level.WARN)
-    }
+    fun håndter(e: SikkerhetsbegrensningException, request: HttpServletRequest): ResponseEntity<Map<String, Any?>> =
+        håndter(e, request, HttpStatus.FORBIDDEN, Level.WARN)
 
     @ExceptionHandler(ValideringException::class)
-    fun håndter(e: ValideringException, request: HttpServletRequest): ResponseEntity<Map<String, Any?>> {
-        return håndter(e, request, HttpStatus.BAD_REQUEST, Level.INFO, e.feilkoder)
-    }
+    fun håndter(e: ValideringException, request: HttpServletRequest): ResponseEntity<Map<String, Any?>> =
+        håndter(e, request, HttpStatus.BAD_REQUEST, Level.INFO, e.feilkoder)
 
     @ExceptionHandler(Exception::class)
-    fun håndter(e: Exception, request: HttpServletRequest): ResponseEntity<Map<String, Any?>> {
-        return håndter(e, request, HttpStatus.INTERNAL_SERVER_ERROR, Level.ERROR)
-    }
+    fun håndter(e: Exception, request: HttpServletRequest): ResponseEntity<Map<String, Any?>> =
+        håndter(e, request, HttpStatus.INTERNAL_SERVER_ERROR, Level.ERROR)
 
     private fun håndter(
         e: Exception,
@@ -51,12 +47,15 @@ class ExceptionMapper {
         begrunnelser: Collection<*>? = emptyList<Any>()
     ): ResponseEntity<Map<String, Any?>> {
         val message = e.message ?: e.javaClass.simpleName
-        val logMessage =
+        val errorMessage =
             "API kall feilet: $message\nremoteHost:${request.remoteHost}\nrequestURI :${request.requestURI}"
-        if (loggnivå == Level.ERROR) {
-            log.error(logMessage, e)
-        } else if (loggnivå == Level.WARN) {
-            log.warn(logMessage, e)
+
+        finnLoggnivå(e, loggnivå).let {
+            if (it == Level.ERROR) {
+                log.error(errorMessage, e)
+            } else if (it == Level.WARN) {
+                log.warn(errorMessage, e)
+            }
         }
 
         val entity = mutableMapOf<String, Any?>(
@@ -71,4 +70,7 @@ class ExceptionMapper {
         }
         return ResponseEntity(entity, httpStatus)
     }
+
+    private fun finnLoggnivå(e: Exception, loggnivå: Level) =
+        if (loggnivå == Level.ERROR && e is JwtTokenUnauthorizedException) Level.WARN else loggnivå
 }
