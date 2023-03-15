@@ -1,80 +1,83 @@
-package no.nav.melosys.tjenester.gui.unntakshandtering;
+package no.nav.melosys.tjenester.gui.unntakshandtering
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import javax.servlet.http.HttpServletRequest;
-
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.exception.SikkerhetsbegrensningException;
-import no.nav.melosys.exception.ValideringException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-import org.slf4j.event.Level;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-
-import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.CORRELATION_ID;
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.exception.SikkerhetsbegrensningException
+import no.nav.melosys.exception.ValideringException
+import no.nav.melosys.integrasjon.felles.mdc.MDCOperations
+import org.slf4j.LoggerFactory
+import org.slf4j.MDC
+import org.slf4j.event.Level
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.ControllerAdvice
+import org.springframework.web.bind.annotation.ExceptionHandler
+import javax.servlet.http.HttpServletRequest
 
 @ControllerAdvice
-public class ExceptionMapper {
-
-    private static final Logger log = LoggerFactory.getLogger(ExceptionMapper.class);
-
-    @ExceptionHandler(value = IkkeFunnetException.class)
-    public ResponseEntity<Map<String, Object>> håndter(IkkeFunnetException e, HttpServletRequest request) {
-        return håndter(e, request, HttpStatus.NOT_FOUND, Level.WARN);
+class ExceptionMapper {
+    @ExceptionHandler(value = [IkkeFunnetException::class])
+    fun håndter(e: IkkeFunnetException, request: HttpServletRequest): ResponseEntity<Map<String, Any?>> {
+        return håndter(e, request, HttpStatus.NOT_FOUND, Level.WARN)
     }
 
-    @ExceptionHandler(value = FunksjonellException.class)
-    public ResponseEntity<Map<String, Object>> håndter(FunksjonellException e, HttpServletRequest request) {
-        return håndter(e, request, HttpStatus.BAD_REQUEST, Level.WARN);
+    @ExceptionHandler(value = [FunksjonellException::class])
+    fun håndter(e: FunksjonellException, request: HttpServletRequest): ResponseEntity<Map<String, Any?>> {
+        return håndter(e, request, HttpStatus.BAD_REQUEST, Level.WARN)
     }
 
-    @ExceptionHandler(value = SikkerhetsbegrensningException.class)
-    public ResponseEntity<Map<String, Object>> håndter(SikkerhetsbegrensningException e, HttpServletRequest request) {
-        return håndter(e, request, HttpStatus.FORBIDDEN, Level.WARN);
+    @ExceptionHandler(value = [SikkerhetsbegrensningException::class])
+    fun håndter(e: SikkerhetsbegrensningException, request: HttpServletRequest): ResponseEntity<Map<String, Any?>> {
+        return håndter(e, request, HttpStatus.FORBIDDEN, Level.WARN)
     }
 
-    @ExceptionHandler(value = ValideringException.class)
-    public ResponseEntity<Map<String, Object>> håndter(ValideringException e, HttpServletRequest request) {
-        return håndter(e, request, HttpStatus.BAD_REQUEST, Level.INFO, e.getFeilkoder());
+    @ExceptionHandler(value = [ValideringException::class])
+    fun håndter(e: ValideringException, request: HttpServletRequest): ResponseEntity<Map<String, Any?>> {
+        return håndter(e, request, HttpStatus.BAD_REQUEST, Level.INFO, e.feilkoder)
     }
 
-    @ExceptionHandler(value = Exception.class)
-    public ResponseEntity<Map<String, Object>> håndter(Exception e, HttpServletRequest request) {
-        return håndter(e, request, HttpStatus.INTERNAL_SERVER_ERROR, Level.ERROR);
+    @ExceptionHandler(value = [Exception::class])
+    fun håndter(e: Exception, request: HttpServletRequest): ResponseEntity<Map<String, Any?>> {
+        return håndter(e, request, HttpStatus.INTERNAL_SERVER_ERROR, Level.ERROR)
     }
 
-    private ResponseEntity<Map<String, Object>> håndter(Exception e, HttpServletRequest request, HttpStatus httpStatus, Level loggnivå) {
-        return håndter(e, request, httpStatus, loggnivå, Collections.emptyList());
-    }
-
-    private ResponseEntity<Map<String, Object>> håndter(Exception e,
-                                                        HttpServletRequest request,
-                                                        HttpStatus httpStatus,
-                                                        Level loggnivå,
-                                                        Collection begrunnelser) {
-        String message = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
-        if (loggnivå.equals(Level.ERROR)) {
-            log.error("API kall feilet: {}\nremoteHost:{}\nrequestURI :{}", message, request.getRemoteHost(), request.getRequestURI(), e);
-        } else if (loggnivå.equals(Level.WARN)) {
-            log.warn("API kall feilet: {}\nremoteHost:{}\nrequestURI :{}", message, request.getRemoteHost(), request.getRequestURI(), e);
+    private fun håndter(
+        e: Exception,
+        request: HttpServletRequest,
+        httpStatus: HttpStatus,
+        loggnivå: Level,
+        begrunnelser: Collection<*>? = emptyList<Any>()
+    ): ResponseEntity<Map<String, Any?>> {
+        val message = if (e.message != null) e.message else e.javaClass.simpleName
+        if (loggnivå == Level.ERROR) {
+            log.error(
+                "API kall feilet: {}\nremoteHost:{}\nrequestURI :{}",
+                message,
+                request.remoteHost,
+                request.requestURI,
+                e
+            )
+        } else if (loggnivå == Level.WARN) {
+            log.warn(
+                "API kall feilet: {}\nremoteHost:{}\nrequestURI :{}",
+                message,
+                request.remoteHost,
+                request.requestURI,
+                e
+            )
         }
-
-        Map<String, Object> entity = new HashMap<>();
-        entity.put("status", httpStatus.value());
-        entity.put("error", httpStatus.getReasonPhrase());
-        entity.put("message", message);
-        entity.put("correlationId", MDC.get(CORRELATION_ID));
+        val entity: MutableMap<String, Any?> = HashMap()
+        entity["status"] = httpStatus.value()
+        entity["error"] = httpStatus.reasonPhrase
+        entity["message"] = message
+        entity["correlationId"] = MDC.get(MDCOperations.CORRELATION_ID)
         if (begrunnelser != null && !begrunnelser.isEmpty()) {
-            entity.put("feilkoder", begrunnelser);
+            entity["feilkoder"] = begrunnelser
         }
-        return new ResponseEntity<>(entity, httpStatus);
+        return ResponseEntity(entity, httpStatus)
+    }
+
+    companion object {
+        private val log = LoggerFactory.getLogger(ExceptionMapper::class.java)
     }
 }
