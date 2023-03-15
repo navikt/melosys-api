@@ -1,11 +1,11 @@
 package no.nav.melosys.tjenester.gui.unntakshandtering
 
+import mu.KotlinLogging
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.exception.SikkerhetsbegrensningException
 import no.nav.melosys.exception.ValideringException
 import no.nav.melosys.integrasjon.felles.mdc.MDCOperations
-import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.slf4j.event.Level
 import org.springframework.http.HttpStatus
@@ -14,29 +14,31 @@ import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import javax.servlet.http.HttpServletRequest
 
+private val log = KotlinLogging.logger { }
+
 @ControllerAdvice
 class ExceptionMapper {
-    @ExceptionHandler(value = [IkkeFunnetException::class])
+    @ExceptionHandler(IkkeFunnetException::class)
     fun håndter(e: IkkeFunnetException, request: HttpServletRequest): ResponseEntity<Map<String, Any?>> {
         return håndter(e, request, HttpStatus.NOT_FOUND, Level.WARN)
     }
 
-    @ExceptionHandler(value = [FunksjonellException::class])
+    @ExceptionHandler(FunksjonellException::class)
     fun håndter(e: FunksjonellException, request: HttpServletRequest): ResponseEntity<Map<String, Any?>> {
         return håndter(e, request, HttpStatus.BAD_REQUEST, Level.WARN)
     }
 
-    @ExceptionHandler(value = [SikkerhetsbegrensningException::class])
+    @ExceptionHandler(SikkerhetsbegrensningException::class)
     fun håndter(e: SikkerhetsbegrensningException, request: HttpServletRequest): ResponseEntity<Map<String, Any?>> {
         return håndter(e, request, HttpStatus.FORBIDDEN, Level.WARN)
     }
 
-    @ExceptionHandler(value = [ValideringException::class])
+    @ExceptionHandler(ValideringException::class)
     fun håndter(e: ValideringException, request: HttpServletRequest): ResponseEntity<Map<String, Any?>> {
         return håndter(e, request, HttpStatus.BAD_REQUEST, Level.INFO, e.feilkoder)
     }
 
-    @ExceptionHandler(value = [Exception::class])
+    @ExceptionHandler(Exception::class)
     fun håndter(e: Exception, request: HttpServletRequest): ResponseEntity<Map<String, Any?>> {
         return håndter(e, request, HttpStatus.INTERNAL_SERVER_ERROR, Level.ERROR)
     }
@@ -48,36 +50,25 @@ class ExceptionMapper {
         loggnivå: Level,
         begrunnelser: Collection<*>? = emptyList<Any>()
     ): ResponseEntity<Map<String, Any?>> {
-        val message = if (e.message != null) e.message else e.javaClass.simpleName
+        val message = e.message ?: e.javaClass.simpleName
+        val logMessage =
+            "API kall feilet: $message\nremoteHost:${request.remoteHost}\nrequestURI :${request.requestURI}"
         if (loggnivå == Level.ERROR) {
-            log.error(
-                "API kall feilet: {}\nremoteHost:{}\nrequestURI :{}",
-                message,
-                request.remoteHost,
-                request.requestURI,
-                e
-            )
+            log.error(logMessage, e)
         } else if (loggnivå == Level.WARN) {
-            log.warn(
-                "API kall feilet: {}\nremoteHost:{}\nrequestURI :{}",
-                message,
-                request.remoteHost,
-                request.requestURI,
-                e
-            )
+            log.warn(logMessage, e)
         }
-        val entity: MutableMap<String, Any?> = HashMap()
-        entity["status"] = httpStatus.value()
-        entity["error"] = httpStatus.reasonPhrase
-        entity["message"] = message
-        entity["correlationId"] = MDC.get(MDCOperations.CORRELATION_ID)
-        if (begrunnelser != null && !begrunnelser.isEmpty()) {
-            entity["feilkoder"] = begrunnelser
+
+        val entity = mutableMapOf<String, Any?>(
+            "status" to httpStatus.value(),
+            "error" to httpStatus.reasonPhrase,
+            "message" to message,
+            "correlationId" to MDC.get(MDCOperations.CORRELATION_ID),
+        ).apply {
+            if (!begrunnelser.isNullOrEmpty()) {
+                this["feilkoder"] = begrunnelser
+            }
         }
         return ResponseEntity(entity, httpStatus)
-    }
-
-    companion object {
-        private val log = LoggerFactory.getLogger(ExceptionMapper::class.java)
     }
 }
