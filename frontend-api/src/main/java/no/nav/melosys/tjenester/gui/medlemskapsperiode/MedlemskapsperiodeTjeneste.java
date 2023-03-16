@@ -1,24 +1,23 @@
 package no.nav.melosys.tjenester.gui.medlemskapsperiode;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
 import no.nav.melosys.service.medlemskapsperiode.OpprettMedlemskapsperiodeService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.tjenester.gui.dto.FolketrygdlovenbestemmelseMedVilkaarDto;
-import no.nav.melosys.tjenester.gui.dto.MedlemskapsperiodeDto;
-import no.nav.melosys.tjenester.gui.dto.MedlemskapsperiodeOppdatering;
-import no.nav.melosys.tjenester.gui.dto.UtledMedlemskapsperiodeDto;
+import no.nav.melosys.tjenester.gui.medlemskapsperiode.dto.*;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
+
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Protected
 @RestController
@@ -49,16 +48,16 @@ public class MedlemskapsperiodeTjeneste {
 
     @PostMapping("/behandlinger/{behandlingID}/medlemskapsperioder")
     public ResponseEntity<MedlemskapsperiodeDto> opprettMedlemskapsperiode(@PathVariable("behandlingID") long behandlingID,
-                                                                           @RequestBody MedlemskapsperiodeOppdatering medlemskapsperiodeOppdatering) {
+                                                                           @RequestBody MedlemskapsperiodeOppdateringDto medlemskapsperiodeOppdateringDto) {
         aksesskontroll.autoriserSkriv(behandlingID);
         return ResponseEntity.ok(
             MedlemskapsperiodeDto.av(
                 medlemskapsperiodeService.opprettMedlemskapsperiode(
                     behandlingID,
-                    medlemskapsperiodeOppdatering.fomDato(),
-                    medlemskapsperiodeOppdatering.tomDato(),
-                    medlemskapsperiodeOppdatering.innvilgelsesResultat(),
-                    medlemskapsperiodeOppdatering.trygdedekning())
+                    medlemskapsperiodeOppdateringDto.fomDato(),
+                    medlemskapsperiodeOppdateringDto.tomDato(),
+                    medlemskapsperiodeOppdateringDto.innvilgelsesResultat(),
+                    medlemskapsperiodeOppdateringDto.trygdedekning())
             )
         );
     }
@@ -66,17 +65,17 @@ public class MedlemskapsperiodeTjeneste {
     @PutMapping("/behandlinger/{behandlingID}/medlemskapsperioder/{medlemskapsperiodeID}")
     public ResponseEntity<MedlemskapsperiodeDto> oppdaterMedlemskapsperiode(@PathVariable("behandlingID") long behandlingID,
                                                                             @PathVariable("medlemskapsperiodeID") long medlemskapsperiodeID,
-                                                                            @RequestBody MedlemskapsperiodeOppdatering medlemskapsperiodeOppdatering) {
+                                                                            @RequestBody MedlemskapsperiodeOppdateringDto medlemskapsperiodeOppdateringDto) {
         aksesskontroll.autoriserSkriv(behandlingID);
         return ResponseEntity.ok(
             MedlemskapsperiodeDto.av(
                 medlemskapsperiodeService.oppdaterMedlemskapsperiode(
                     behandlingID,
                     medlemskapsperiodeID,
-                    medlemskapsperiodeOppdatering.fomDato(),
-                    medlemskapsperiodeOppdatering.tomDato(),
-                    medlemskapsperiodeOppdatering.innvilgelsesResultat(),
-                    medlemskapsperiodeOppdatering.trygdedekning()
+                    medlemskapsperiodeOppdateringDto.fomDato(),
+                    medlemskapsperiodeOppdateringDto.tomDato(),
+                    medlemskapsperiodeOppdateringDto.innvilgelsesResultat(),
+                    medlemskapsperiodeOppdateringDto.trygdedekning()
                 )
             )
         );
@@ -90,26 +89,24 @@ public class MedlemskapsperiodeTjeneste {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/behandlinger/medlemskapsperioder/bestemmelser")
-    public ResponseEntity<Collection<FolketrygdlovenbestemmelseMedVilkaarDto>> hentBestemmelserMedVilkaar() {
-        return ResponseEntity.ok(
-            opprettMedlemskapsperiodeService.hentBestemmelserMedVilkaar()
-                .entrySet()
-                .stream()
-                .map(this::tilBestemmelseMedVilkårDto)
-                .collect(Collectors.toSet())
-        );
+    @GetMapping("/behandlinger/medlemskapsperioder/bestemmelser/{behandlingstema}")
+    public ResponseEntity<FolketrygdlovenBestemmelserDto> hentBestemmelserMedVilkaar(@PathVariable("behandlingstema") Behandlingstema behandlingstema) {
+        var støttede = opprettMedlemskapsperiodeService.hentStøttedeBestemmelserMedVilkår(behandlingstema)
+            .entrySet().stream()
+            .map(this::tilBestemmelseMedVilkårOgBegrunnelser)
+            .collect(Collectors.toSet());
+        var ikkeStøttede = opprettMedlemskapsperiodeService.hentIkkeStøttedeBestemmelser(behandlingstema);
+
+        return ResponseEntity.ok(new FolketrygdlovenBestemmelserDto(støttede, ikkeStøttede));
     }
 
-    private FolketrygdlovenbestemmelseMedVilkaarDto tilBestemmelseMedVilkårDto(Map.Entry<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> bestemmelseMedVilkår) {
-        return new FolketrygdlovenbestemmelseMedVilkaarDto(
+    private BestemmelseMedVilkårOgBegrunnelserDto tilBestemmelseMedVilkårOgBegrunnelser(Map.Entry<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> bestemmelseMedVilkår) {
+        return new BestemmelseMedVilkårOgBegrunnelserDto(
             bestemmelseMedVilkår.getKey(),
             bestemmelseMedVilkår.getValue().stream()
-                .map(vilkår -> new FolketrygdlovenbestemmelseMedVilkaarDto.VilkårOgBegrunnelse(
-                    vilkår,
-                    opprettMedlemskapsperiodeService.hentMuligeBegrunnelser(vilkår))
-                ).collect(Collectors.toSet()
-            ));
+                .map(vilkår -> new VilkårOgBegrunnelserDto(vilkår, opprettMedlemskapsperiodeService.hentMuligeBegrunnelser(vilkår)))
+                .collect(Collectors.toCollection(LinkedHashSet::new))
+        );
     }
 
     @PostMapping("/behandlinger/{behandlingID}/medlemskapsperioder/bestemmelser")
