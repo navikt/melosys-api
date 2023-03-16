@@ -1,26 +1,39 @@
 package no.nav.melosys.itest
 
 import io.kotest.assertions.extracting
+import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainInOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import no.finn.unleash.FakeUnleash
+import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.arkiv.*
 import no.nav.melosys.domain.eessi.*
 import no.nav.melosys.domain.eessi.melding.Avsender
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
-import no.nav.melosys.domain.kodeverk.Saksstatuser
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.eessi.melding.UtpekingAvvis
+import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.behandlinger.*
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.saksflyt.ProsessStatus
+import no.nav.melosys.domain.saksflyt.ProsessType
 import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.melosysmock.melosyseessi.MelosysEessiRepo
 import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.ProsessinstansRepository
+import no.nav.melosys.service.LovvalgsperiodeService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.sak.OpprettBehandlingForSak
+import no.nav.melosys.service.sak.OpprettSakDto
+import no.nav.melosys.service.utpeking.UtpekingService
+import no.nav.melosys.service.vedtak.FattVedtakRequest
+import no.nav.melosys.service.vedtak.VedtaksfattingFasade
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.awaitility.kotlin.await
+import org.awaitility.kotlin.untilNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -29,7 +42,9 @@ import org.springframework.context.annotation.Import
 import org.springframework.kafka.core.KafkaTemplate
 import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.*
+import java.util.concurrent.TimeUnit
 import java.util.stream.Collectors
 
 @Import(KodeverkStub::class)
@@ -37,6 +52,10 @@ class SedMottakTestIT(
     @Autowired private val joarkFasade: JoarkFasade,
     @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
     @Autowired private val prosessinstansRepository: ProsessinstansRepository,
+    @Autowired private val utpekingService: UtpekingService,
+    @Autowired private val vedtaksfattingFasade: VedtaksfattingFasade,
+    @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
+    @Autowired private val lovvalgsperiodeService: LovvalgsperiodeService,
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired private val unleash: FakeUnleash
 ) : ComponentTestBase() {
@@ -203,6 +222,113 @@ class SedMottakTestIT(
                 eessiMeldingX007.lagUnikIdentifikator(),
                 eessiMeldingX007.lagUnikIdentifikator(),
             )
+    }
+
+    @Test
+    fun `A003`() {
+        val randomUUID = UUID.randomUUID()
+        ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "steg")
+        val ref = Random().nextInt(100000).toString()
+
+        val eessiMeldingA003 = melosysEessiMelding(
+            BucType.LA_BUC_02, ref, SedType.A003, Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
+            "13_1_a", opprettEessiJournalpost(SedType.A003)
+        )
+        eessiMeldingA003.apply { lovvalgsland = "NO" }
+
+
+        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
+
+        await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(3))
+            .until {
+                prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
+                    listOf(ProsessStatus.FERDIG),
+                    ref
+                ).isEmpty()
+            }
+
+        val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
+            .stream()
+            .sorted(Comparator.comparing { obj: Prosessinstans -> obj.endretDato })
+            .collect(Collectors.toList())
+
+
+        val id = executeAndWait(ProsessType.UTPEKING_AVVIS) {
+            utpekingService.avvisUtpeking(prosessinstanserSortert.get(1).behandling.id, UtpekingAvvis().apply {
+                begrunnelse = "lol"
+                isEtterspørInformasjon = false
+            })
+        }
+
+        val id2 = executeAndWait(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
+            opprettBehandlingForSak.opprettBehandling(
+                prosessinstanserSortert.get(1).behandling.fagsak.saksnummer,
+                OpprettSakDto().apply {
+                    behandlingstema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
+                    behandlingstype = Behandlingstyper.NY_VURDERING
+                    mottaksdato = LocalDate.now()
+                    behandlingsaarsakType = Behandlingsaarsaktyper.HENVENDELSE
+                    virksomhetOrgnr = "123456789"
+                })
+        }
+
+        lovvalgsperiodeService.lagreLovvalgsperioder(id2.behandling.id, listOf(Lovvalgsperiode().apply {
+            fom = LocalDate.now()
+            tom = LocalDate.now().plusYears(1)
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            dekning = Trygdedekninger.FULL_DEKNING_EOSFO
+            lovvalgsland = Land_iso2.NO
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
+        }))
+
+        val id4 = executeAndWait(ProsessType.IVERKSETT_VEDTAK_EOS) {
+            vedtaksfattingFasade.fattVedtak(
+                id2.behandling.id, FattVedtakRequest.Builder()
+                    .medBehandlingsresultat(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND)
+                    .medVedtakstype(Vedtakstyper.KORRIGERT_VEDTAK)
+                    .build()
+            )
+        }
+
+//        await.timeout(Duration.ofSeconds(10))
+
+//        extracting(prosessinstanserSortert) { låsReferanse }
+//            .shouldHaveSize(4)
+//            .shouldContainInOrder(
+//                eessiMeldingA003.lagUnikIdentifikator(),
+//                eessiMeldingA003.lagUnikIdentifikator(),
+//                eessiMeldingA003.lagUnikIdentifikator(),
+//            )
+
+        ThreadLocalAccessInfo.afterExecuteProcess(randomUUID)
+    }
+
+    protected fun executeAndWait(
+        waitForprosessType: ProsessType,
+        alsoWaitForprosessType: List<ProsessType> = listOf(),
+        process: () -> Unit
+    ): Prosessinstans {
+        val startTime = LocalDateTime.now()
+        process()
+        val journalføringProsessID = finnProsess(waitForprosessType, startTime)
+        alsoWaitForprosessType.forEach { finnProsess(it, startTime) }
+        return prosessinstansRepository.findById(journalføringProsessID).get()
+    }
+
+    protected fun finnProsess(prosessType: ProsessType, startTid: LocalDateTime): UUID {
+        await.pollDelay(1, TimeUnit.SECONDS)
+            .timeout(20, TimeUnit.SECONDS)
+            .untilNotNull {
+                prosessinstansRepository.findAllAfterDate(startTid)
+            }.map { it.type }.shouldContain(prosessType)
+
+        return await
+            .timeout(30, TimeUnit.SECONDS)
+            .pollInterval(1, TimeUnit.SECONDS)
+            .untilNotNull {
+                prosessinstansRepository.findAllAfterDate(startTid)
+                    .find { it.type == prosessType && it.status == ProsessStatus.FERDIG }?.id
+            }
     }
 
     private fun melosysEessiMelding(
