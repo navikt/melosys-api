@@ -17,7 +17,7 @@ import java.net.URI
 @Configuration
 class AzureAdConsumerProducer(
     @Value("\${microsoft.graph.rest.url}") private val url: String,
-    @Value("\${http.proxy}") private val httpProxy: String?,
+    @Value("\${http.proxy:#{null}}") private val httpProxy: String?,
     private val genericAuthFilterFactory: GenericAuthFilterFactory,
 ) : CallIdAware, WebClientConfig {
 
