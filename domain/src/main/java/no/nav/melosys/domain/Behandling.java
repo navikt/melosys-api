@@ -428,10 +428,6 @@ public class Behandling extends RegistreringsInfo {
                 BESLUTNING_LOVVALG_NORGE.equals(tema));
     }
 
-    public  boolean erBehandlingAvA1AnmodningOmUnntakPapir() {
-        return tema != null && tema == A1_ANMODNING_OM_UNNTAK_PAPIR;
-    }
-
     public static boolean erBehandlingAvSøknadUtsendtArbeidstaker(String behandlingstemaKode) {
         return UTSENDT_ARBEIDSTAKER.getKode().equalsIgnoreCase(behandlingstemaKode)
             || UTSENDT_SELVSTENDIG.getKode().equalsIgnoreCase(behandlingstemaKode);
