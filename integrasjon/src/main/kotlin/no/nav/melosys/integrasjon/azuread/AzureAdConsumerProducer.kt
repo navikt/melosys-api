@@ -32,8 +32,8 @@ class AzureAdConsumerProducer(
                 .filter(genericAuthFilterFactory.getAzureFilter(CLIENT_NAME))
                 .filter(errorFilter("Kall mot microsoft graph feilet"))
                 .apply {
-                    if (httpProxy != null) {
-                        val proxyURI = URI(httpProxy)
+                    try {
+                        val proxyURI = URI(httpProxy!!)
                         val httpClient = HttpClient.create()
                             .proxy { proxy: TypeSpec ->
                                 proxy.type(ProxyProvider.Proxy.HTTP)
@@ -41,6 +41,7 @@ class AzureAdConsumerProducer(
                                     .port(proxyURI.port)
                             }
                         it.clientConnector(ReactorClientHttpConnector(httpClient))
+                    } catch (_: Exception) {
                     }
                 }
                 .build()
