@@ -23,7 +23,6 @@ open class AzureAdConsumer(
             .retrieve()
             .bodyToMono(JsonNode::class.java)
             .map { jsonNode ->
-                println(jsonNode)
                 val displayName = jsonNode["value"][0]["displayName"].asText()
                 DisplayNameDTO(displayName).displayName
             }
