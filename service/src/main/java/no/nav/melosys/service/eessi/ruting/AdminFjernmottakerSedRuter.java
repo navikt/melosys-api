@@ -8,6 +8,7 @@ import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
@@ -65,6 +66,7 @@ public class AdminFjernmottakerSedRuter extends AdminSedRuter implements SedRute
         if (melosysEessiMelding.isX006NavErFjernet()) {
             log.info("Nav er fjernet på sed {} i RINA-sak {}, og behandlingen vil bli avsluttet", melosysEessiMelding.getSedId(), melosysEessiMelding.getRinaSaksnummer());
             annullerSakOgBehandling(sistAktiveBehandling);
+            behandlingsresultatService.oppdaterBehandlingsresultattype(sistAktiveBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE);
         } else {
             log.info("Mottakerinstitusjon på sed {} i RINA-sak {} er ikke Nav", melosysEessiMelding.getSedId(), melosysEessiMelding.getRinaSaksnummer());
         }

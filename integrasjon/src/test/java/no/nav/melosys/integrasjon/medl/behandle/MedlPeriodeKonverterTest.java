@@ -6,8 +6,8 @@ import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.medl.DekningMedl;
 import no.nav.melosys.integrasjon.medl.GrunnlagMedl;
@@ -27,8 +27,8 @@ class MedlPeriodeKonverterTest {
             .isEqualTo(GrunnlagMedl.FO_16);
         assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2))
             .isEqualTo(GrunnlagMedl.FO_16);
-        assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART7_3))
-            .isEqualTo(GrunnlagMedl.Storbrit_NIrland_7_3);
+        assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART7_3))
+            .isEqualTo(GrunnlagMedl.STORBRIT_NIRLAND_7_3);
         assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Lovvalgbestemmelser_987_2009.FO_987_2009_ART14_11))
             .isEqualTo(GrunnlagMedl.FO_987_2009_14_11);
 
@@ -42,8 +42,8 @@ class MedlPeriodeKonverterTest {
         assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8)).isEqualTo(GrunnlagMedl.FTL_2_8);
 
         assertThatExceptionOfType(TekniskException.class)
-            .isThrownBy(() -> MedlPeriodeKonverter.tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_1))
-            .withMessageContaining("Folketrygdloven bestemmelse støttes ikke. Kode: FTRL_KAP2_2_1");
+            .isThrownBy(() -> MedlPeriodeKonverter.tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5))
+            .withMessageContaining("Folketrygdloven bestemmelse støttes ikke.");
     }
 
     @Test
@@ -61,7 +61,7 @@ class MedlPeriodeKonverterTest {
     @Test
     void hentFellesKodeForDekningtype() {
         Trygdedekninger trygdeDekning = Trygdedekninger.UTEN_DEKNING;
-        DekningMedl dekningMedl = MedlPeriodeKonverter.tilMedlTrygdeDekningEos(trygdeDekning);
+        DekningMedl dekningMedl = MedlPeriodeKonverter.tilMedlTrygdeDekning(trygdeDekning);
         assertThat(dekningMedl).isEqualTo(DekningMedl.UNNTATT);
     }
 

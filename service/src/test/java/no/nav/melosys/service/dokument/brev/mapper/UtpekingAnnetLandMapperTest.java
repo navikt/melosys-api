@@ -8,6 +8,7 @@ import no.nav.dok.melosysbrev.felles.melosys_felles.MelosysNAVFelles;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Utpekingsperiode;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.service.dokument.brev.BrevDataUtpekingAnnetLand;
@@ -21,7 +22,7 @@ import static no.nav.melosys.service.dokument.brev.mapper.BrevMappingTestUtils.l
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-public class UtpekingAnnetLandMapperTest {
+class UtpekingAnnetLandMapperTest {
     private UtpekingAnnetLandMapper utpekingAnnetLandMapper;
 
     @BeforeEach
@@ -42,7 +43,7 @@ public class UtpekingAnnetLandMapperTest {
 
     private BrevDataUtpekingAnnetLand lagDataUtpekingAnnetLand() {
         BrevDataUtpekingAnnetLand brevDataUtpekingAnnetLand = new BrevDataUtpekingAnnetLand(new BrevbestillingDto(), "Saksbehandler");
-        brevDataUtpekingAnnetLand.utpekingsperiode = new Utpekingsperiode(LocalDate.now(), null, Landkoder.EE,
+        brevDataUtpekingAnnetLand.utpekingsperiode = new Utpekingsperiode(LocalDate.now(), null, Land_iso2.EE,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_3, null);
         return brevDataUtpekingAnnetLand;
     }

@@ -4,7 +4,6 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
@@ -15,7 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.Mottakerroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -52,7 +51,7 @@ class SendForvaltningsmeldingTest {
 
 
         verify(behandlingService).hentBehandlingMedSaksopplysninger(behandlingID);
-        verify(brevBestiller).bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID, List.of(Mottaker.av(BRUKER)), null, "TEST", null, behandling);
+        verify(brevBestiller).bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID, List.of(Mottaker.medRolle(BRUKER)), null, "TEST", null, behandling);
     }
 
     @Test

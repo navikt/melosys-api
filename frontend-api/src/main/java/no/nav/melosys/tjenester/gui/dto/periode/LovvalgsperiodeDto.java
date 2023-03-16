@@ -5,13 +5,9 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
-import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.domain.kodeverk.*;
 import org.apache.commons.lang3.StringUtils;
 
 public final class LovvalgsperiodeDto {
@@ -29,13 +25,13 @@ public final class LovvalgsperiodeDto {
     public final String medlemskapsperiodeID;
 
     public LovvalgsperiodeDto(PeriodeDto periode,
-            LovvalgBestemmelse lovvalgsbestemmelse,
-            LovvalgBestemmelse tilleggBestemmelse,
-            Landkoder lovvalgsland,
-            InnvilgelsesResultat innvilgelsesResultat,
-            Trygdedekninger trygdeDekning,
-            Medlemskapstyper medlemskapstype,
-            String medlemskapsperiodeID) {
+                              LovvalgBestemmelse lovvalgsbestemmelse,
+                              LovvalgBestemmelse tilleggBestemmelse,
+                              Land_iso2 lovvalgsland,
+                              InnvilgelsesResultat innvilgelsesResultat,
+                              Trygdedekninger trygdeDekning,
+                              Medlemskapstyper medlemskapstype,
+                              String medlemskapsperiodeID) {
         this.periode = periode;
         this.lovvalgsbestemmelse = lovvalgsbestemmelse != null ? lovvalgsbestemmelse.name() : null;
         this.tilleggBestemmelse = tilleggBestemmelse != null ? tilleggBestemmelse.name() : null;
@@ -50,13 +46,13 @@ public final class LovvalgsperiodeDto {
     LovvalgsperiodeDto(Map<String, String> json) {
         this(new PeriodeDto(LocalDate.parse(json.get("fomDato")),
                 StringUtils.isEmpty(json.get("tomDato")) ? null : LocalDate.parse(json.get("tomDato"))),
-                konverterLovvalgsBestemmelse(json.get("lovvalgsbestemmelse")),
-                konverterLovvalgsBestemmelse(json.get("tilleggBestemmelse")),
-                enumVerdiEllerNull(Landkoder.class, json.get("lovvalgsland")),
-                InnvilgelsesResultat.valueOf(json.get("innvilgelsesResultat")),
-                enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdeDekning")),
-                enumVerdiEllerNull(Medlemskapstyper.class, json.get("medlemskapstype")),
-                json.get("medlemskapsperiodeID"));
+            konverterLovvalgsBestemmelse(json.get("lovvalgsbestemmelse")),
+            konverterLovvalgsBestemmelse(json.get("tilleggBestemmelse")),
+            enumVerdiEllerNull(Land_iso2.class, json.get("lovvalgsland")),
+            InnvilgelsesResultat.valueOf(json.get("innvilgelsesResultat")),
+            enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdeDekning")),
+            enumVerdiEllerNull(Medlemskapstyper.class, json.get("medlemskapstype")),
+            json.get("medlemskapsperiodeID"));
     }
 
     /**
@@ -87,7 +83,7 @@ public final class LovvalgsperiodeDto {
         Lovvalgsperiode resultat = new Lovvalgsperiode();
         resultat.setFom(periode.getFom());
         resultat.setTom(periode.getTom());
-        resultat.setLovvalgsland(enumVerdiEllerNull(Landkoder.class, lovvalgsland));
+        resultat.setLovvalgsland(enumVerdiEllerNull(Land_iso2.class, lovvalgsland));
         resultat.setBestemmelse(konverterer.convertToEntityAttribute(lovvalgsbestemmelse));
         resultat.setTilleggsbestemmelse(konverterer.convertToEntityAttribute(tilleggBestemmelse));
         resultat.setInnvilgelsesresultat(enumVerdiEllerNull(InnvilgelsesResultat.class, innvilgelsesResultat));

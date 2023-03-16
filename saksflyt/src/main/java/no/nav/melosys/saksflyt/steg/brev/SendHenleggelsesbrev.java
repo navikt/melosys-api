@@ -8,8 +8,8 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.BehandlingsresultatBegrunnelse;
 import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Kodeverk;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -58,7 +58,7 @@ public class SendHenleggelsesbrev implements StegBehandler {
             .filter(henleggelsesGrunnerKoder::contains)
             .findFirst().orElseThrow(() -> new IkkeFunnetException("Finner ingen henleggelsesgrunn"));
 
-        brevBestiller.bestill(MELDING_HENLAGT_SAK, Collections.singleton(Mottaker.av(Aktoersroller.BRUKER)), fritekst,
+        brevBestiller.bestill(MELDING_HENLAGT_SAK, Collections.singleton(Mottaker.medRolle(Mottakerroller.BRUKER)), fritekst,
             saksbehandler, begrunnelseKode, behandling);
     }
 }

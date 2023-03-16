@@ -16,6 +16,7 @@ import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstema;
+import no.nav.melosys.service.oppgave.OppgaveBehandlingstype;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,6 +68,7 @@ class GjenbrukOppgaveTest {
             .hasFieldOrPropertyWithValue("behandlesAvApplikasjon", Fagsystem.MELOSYS)
             .hasFieldOrPropertyWithValue("oppgavetype", Oppgavetyper.BEH_SAK_MK)
             .hasFieldOrPropertyWithValue("behandlingstema", OppgaveBehandlingstema.EU_EOS_LAND.getKode())
+            .hasFieldOrPropertyWithValue("behandlingstype", null)
             .hasFieldOrPropertyWithValue("tilordnetRessurs", "Deg321")
             .hasFieldOrPropertyWithValue("aktørId", "123321");
     }
@@ -92,6 +94,7 @@ class GjenbrukOppgaveTest {
             .hasFieldOrPropertyWithValue("behandlesAvApplikasjon", Fagsystem.MELOSYS)
             .hasFieldOrPropertyWithValue("oppgavetype", Oppgavetyper.BEH_SAK_MK)
             .hasFieldOrPropertyWithValue("behandlingstema", OppgaveBehandlingstema.EU_EOS_LAND.getKode())
+            .hasFieldOrPropertyWithValue("behandlingstype", null)
             .hasFieldOrPropertyWithValue("tilordnetRessurs", "Deg321")
             .hasFieldOrPropertyWithValue("orgnr", "999999999");
     }

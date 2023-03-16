@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
@@ -43,9 +44,10 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
         if (behandlingsresultat.erGodkjenningEllerInnvilgelseArt13()) {
             behandlingService.endreStatus(behandlingID, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         } else {
-            log.info("Avslutter behandling {}", behandlingID);
+            var saksstatus = prosessinstans.getData(ProsessDataKey.SAKSSTATUS, Saksstatuser.class, Saksstatuser.LOVVALG_AVKLART);
+            log.info("Avslutter behandling {}, og setter saksstatus til {} på tilhørende fagsak", behandlingID, saksstatus);
             fagsakService.avsluttFagsakOgBehandling(
-                fagsakService.hentFagsak(prosessinstans.getBehandling().getFagsak().getSaksnummer()), Saksstatuser.LOVVALG_AVKLART
+                fagsakService.hentFagsak(prosessinstans.getBehandling().getFagsak().getSaksnummer()), saksstatus
             );
         }
     }

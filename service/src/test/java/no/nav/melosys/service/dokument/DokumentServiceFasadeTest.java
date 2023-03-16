@@ -4,7 +4,7 @@ import java.util.List;
 
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
@@ -18,7 +18,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.Mottakerroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -58,7 +58,7 @@ class DokumentServiceFasadeTest {
 
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID);
-        brevbestillingDto.setMottaker(Aktoersroller.BRUKER);
+        brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
 
 
         dokumentServiceFasade.produserUtkast(1, brevbestillingDto);
@@ -86,7 +86,7 @@ class DokumentServiceFasadeTest {
     void skalKalleDokumentServiceProduserDokument() {
         when(mockDokgenService.erTilgjengeligDokgenmal(any())).thenReturn(false);
 
-        dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.av(Aktoersroller.BRUKER), 123L, new DoksysBrevbestilling.Builder().build());
+        dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.medRolle(BRUKER), 123L, new DoksysBrevbestilling.Builder().build());
 
         verify(mockDokumentService).produserDokument(any(), any(), anyLong(), any());
     }
@@ -95,7 +95,7 @@ class DokumentServiceFasadeTest {
     void skalKalleDokgenServiceProduserOgDistribuer() {
         when(mockDokgenService.erTilgjengeligDokgenmal(any())).thenReturn(true);
 
-        dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.av(Aktoersroller.BRUKER), 123L, new DoksysBrevbestilling.Builder().build());
+        dokumentServiceFasade.produserDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID, Mottaker.medRolle(BRUKER), 123L, new DoksysBrevbestilling.Builder().build());
 
         verify(mockDokgenService).produserOgDistribuerBrev(anyLong(), any());
         verifyNoInteractions(mockDokumentService);
@@ -118,11 +118,11 @@ class DokumentServiceFasadeTest {
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
             .medProduserbartDokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER)
             .medAvsenderID("Z123456")
-            .medMottakere(List.of(Mottaker.av(BRUKER)))
+            .medMottakere(List.of(Mottaker.medRolle(BRUKER)))
             .medFritekst("avslag fritekst")
             .build();
 
-        dokumentServiceFasade.produserDokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER, Mottaker.av(BRUKER), 1L, brevbestilling);
+        dokumentServiceFasade.produserDokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER, Mottaker.medRolle(BRUKER), 1L, brevbestilling);
 
         verify(mockDokgenService).produserOgDistribuerBrev(eq(1L), brevbestillingRequestCaptor.capture());
         verifyNoInteractions(mockDokumentService);
@@ -139,7 +139,7 @@ class DokumentServiceFasadeTest {
     @Test
     void skal_lageRiktigDokgenBrevRequest_ved_meldingHenleggSak_() {
 
-        dokumentServiceFasade.produserOgDistribuerBrev(Produserbaredokumenter.MELDING_HENLAGT_SAK, Mottaker.av(BRUKER),
+        dokumentServiceFasade.produserOgDistribuerBrev(Produserbaredokumenter.MELDING_HENLAGT_SAK, Mottaker.medRolle(BRUKER),
             "henlagt sak fritekst", "ANNET", "Z123456", 1L);
 
         verify(mockDokgenService).produserOgDistribuerBrev(eq(1L), brevbestillingRequestCaptor.capture());

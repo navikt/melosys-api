@@ -60,10 +60,18 @@ public final class ProsessflytDefinisjon {
             )
         );
 
+        PROSESS_FLYT_MAP.put(
+            ProsessType.REGISTRERE_UNNTAK_FRA_MEDLEMSKAP,
+            new ProsessFlyt(ProsessType.REGISTRERE_UNNTAK_FRA_MEDLEMSKAP,
+                LAGRE_LOVVALGSPERIODE_MEDL,
+                AVSLUTT_SAK_OG_BEHANDLING
+            )
+        );
+
         PROSESS_FLYT_MAP.put(ProsessType.JFR_NY_SAK_BRUKER,
             new ProsessFlyt(ProsessType.JFR_NY_SAK_BRUKER,
                 OPPRETT_SAK_OG_BEH,
-                OPPRETT_SØKNAD,
+                OPPRETT_MOTTATTEOPPLYSNINGER,
                 OPPRETT_ARKIVSAK,
                 OPPDATER_SAKSRELASJON,
                 OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
@@ -95,7 +103,7 @@ public final class ProsessflytDefinisjon {
         PROSESS_FLYT_MAP.put(ProsessType.JFR_ANDREGANG_NY_BEHANDLING,
             new ProsessFlyt(ProsessType.JFR_ANDREGANG_NY_BEHANDLING,
                 OPPRETT_NY_BEHANDLING,
-                OPPRETT_SØKNAD,
+                OPPRETT_MOTTATTEOPPLYSNINGER,
                 OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
                 OPPDATER_SAKSRELASJON,
                 HENT_REGISTEROPPLYSNINGER,
@@ -116,7 +124,7 @@ public final class ProsessflytDefinisjon {
         PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_NY_SAK_EOS_FRA_OPPGAVE,
             new ProsessFlyt(ProsessType.OPPRETT_NY_SAK_EOS_FRA_OPPGAVE,
                 OPPRETT_SAK_OG_BEH,
-                OPPRETT_SØKNAD,
+                OPPRETT_MOTTATTEOPPLYSNINGER,
                 OPPRETT_ARKIVSAK,
                 OPPDATER_SAKSRELASJON,
                 HENT_REGISTEROPPLYSNINGER,
@@ -128,7 +136,7 @@ public final class ProsessflytDefinisjon {
         PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE_FRA_OPPGAVE,
             new ProsessFlyt(ProsessType.OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE_FRA_OPPGAVE,
                 OPPRETT_SAK_OG_BEH,
-                OPPRETT_SØKNAD,
+                OPPRETT_MOTTATTEOPPLYSNINGER,
                 OPPRETT_ARKIVSAK,
                 GJENBRUK_OPPGAVE
             )
@@ -137,7 +145,7 @@ public final class ProsessflytDefinisjon {
         PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_SAK,
             new ProsessFlyt(ProsessType.OPPRETT_SAK,
                 OPPRETT_SAK_OG_BEH,
-                OPPRETT_SØKNAD,
+                OPPRETT_MOTTATTEOPPLYSNINGER,
                 OPPRETT_ARKIVSAK,
                 HENT_REGISTEROPPLYSNINGER,
                 VURDER_INNGANGSVILKÅR,
@@ -155,7 +163,7 @@ public final class ProsessflytDefinisjon {
         PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK,
             new ProsessFlyt(ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK,
                 OPPRETT_NY_BEHANDLING,
-                OPPRETT_SØKNAD,
+                OPPRETT_MOTTATTEOPPLYSNINGER,
                 HENT_REGISTEROPPLYSNINGER,
                 VURDER_INNGANGSVILKÅR,
                 OPPRETT_OPPGAVE

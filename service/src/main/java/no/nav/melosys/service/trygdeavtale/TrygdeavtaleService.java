@@ -9,10 +9,10 @@ import java.util.stream.Stream;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.util.LovvalgBestemmelseUtils;
 import no.nav.melosys.exception.TekniskException;
@@ -134,7 +134,7 @@ public class TrygdeavtaleService {
         lovvalgsperiode.setInnvilgelsesresultat(INNVILGET);
         lovvalgsperiode.setBestemmelse(LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.bestemmelse()));
         lovvalgsperiode.setTilleggsbestemmelse(LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.tilleggsbestemmelse()));
-        lovvalgsperiode.setLovvalgsland(Landkoder.NO);
+        lovvalgsperiode.setLovvalgsland(Land_iso2.NO);
 
         return lovvalgsperiode;
     }

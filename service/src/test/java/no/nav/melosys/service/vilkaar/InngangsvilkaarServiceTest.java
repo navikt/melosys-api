@@ -1,19 +1,8 @@
 package no.nav.melosys.service.vilkaar;
 
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
-import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.inngangsvilkar.Feilmelding;
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse;
@@ -21,6 +10,10 @@ import no.nav.melosys.domain.inngangsvilkar.Kategori;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Inngangsvilkaar;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
+import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.domain.person.Statsborgerskap;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.inngangsvilkar.InngangsvilkaarConsumerImpl;
@@ -33,11 +26,18 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
 import static no.nav.melosys.domain.dokument.felles.Land.FINLAND;
 import static no.nav.melosys.domain.dokument.felles.Land.SVERIGE;
 import static no.nav.melosys.domain.util.IsoLandkodeKonverterer.tilIso3;
 import static no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -53,14 +53,12 @@ class InngangsvilkaarServiceTest {
     @Mock
     private VilkaarsresultatService vilkaarsresultatService;
 
-    private final FakeUnleash unleash = new FakeUnleash();
     private InngangsvilkaarService inngangsvilkaarService;
 
     @BeforeEach
     void setUp() {
         inngangsvilkaarService = new InngangsvilkaarService(behandlingService, inngangsvilkaarConsumer,
-            persondataFasade, vilkaarsresultatService, unleash);
-        unleash.enable("melosys.tom_periode_og_land");
+            persondataFasade, vilkaarsresultatService);
     }
 
     @Test
@@ -215,15 +213,6 @@ class InngangsvilkaarServiceTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(1L))
             .withMessage("Mangler land eller periode for behandling 1");
-    }
-
-    @Test
-    void overstyrInngangsvilkårTilOppfylt_manglerLandOgPeriodeToggleAv_kasterIkkeException() {
-        unleash.disable("melosys.tom_periode_og_land");
-        when(vilkaarsresultatService.finnVilkaarsresultat(anyLong(), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR))).thenReturn(Optional.of(new Vilkaarsresultat()));
-
-        assertThatNoException()
-            .isThrownBy(() -> inngangsvilkaarService.overstyrInngangsvilkårTilOppfylt(1L));
     }
 
     @Test

@@ -3,10 +3,9 @@ package no.nav.melosys.service.brev.bestilling;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.brevmalliste.BrevAdresse;
 import no.nav.melosys.service.dokument.BrevmottakerService;
@@ -27,12 +26,12 @@ public class HentBrevAdresseTilMottakereService {
     }
 
     @Transactional
-    public List<BrevAdresse> hentBrevAdresseTilMottakere(long behandlingId, Aktoersroller aktoersroller) {
+    public List<BrevAdresse> hentBrevAdresseTilMottakere(long behandlingId, Mottakerroller rolle) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
 
         List<BrevAdresse> brevAdresser = new ArrayList<>();
-        var mottakere = brevmottakerService.avklarMottakere(null, Mottaker.av(aktoersroller), behandling, false, false);
-        for (Aktoer mottaker : mottakere) {
+        var mottakere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(rolle), behandling, false, false);
+        for (Mottaker mottaker : mottakere) {
             BrevAdresse brevAddresse = tilBrevAdresseService.tilBrevAdresse(mottaker, behandling);
             brevAdresser.add(brevAddresse);
         }

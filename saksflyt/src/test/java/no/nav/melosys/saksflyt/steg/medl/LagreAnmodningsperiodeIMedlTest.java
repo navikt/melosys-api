@@ -8,7 +8,7 @@ import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -39,7 +39,7 @@ class LagreAnmodningsperiodeIMedlTest {
     private Prosessinstans prosessinstans;
     private Behandlingsresultat behandlingsresultat;
     private Behandling behandling;
-    private LocalDate NOW = LocalDate.now();
+    private final LocalDate NOW = LocalDate.now();
 
     @BeforeEach
     public void setUp() {
@@ -50,7 +50,7 @@ class LagreAnmodningsperiodeIMedlTest {
         behandling = new Behandling();
         behandling.setId(1L);
 
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode(null, null, Landkoder.CH,
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode(null, null, Land_iso2.CH,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, null, null, null, Trygdedekninger.FULL_DEKNING_EOSFO);
 
         behandlingsresultat = new Behandlingsresultat();
@@ -68,7 +68,7 @@ class LagreAnmodningsperiodeIMedlTest {
         behandlingsresultat.setAnmodningsperioder(lagAnmodningsperioderMedDato(NOW, NOW.plusMonths(1)));
 
         lagreAnmodningsperiodeIMedl.utfør(prosessinstans);
-        verify(medlPeriodeService).opprettPeriodeUnderAvklaring(any(Anmodningsperiode.class), anyLong(), eq(false));
+        verify(medlPeriodeService).opprettPeriodeUnderAvklaring(any(Anmodningsperiode.class), anyLong());
     }
 
     @Test
@@ -85,7 +85,7 @@ class LagreAnmodningsperiodeIMedlTest {
         behandlingsresultat.setAnmodningsperioder(lagAnmodningsperioderMedDato(NOW, NOW.minusMonths(1)));
 
         lagreAnmodningsperiodeIMedl.utfør(prosessinstans);
-        verify(medlPeriodeService, never()).opprettPeriodeUnderAvklaring(any(Anmodningsperiode.class), anyLong(), anyBoolean());
+        verify(medlPeriodeService, never()).opprettPeriodeUnderAvklaring(any(Anmodningsperiode.class), anyLong());
     }
 
     @Test
@@ -121,7 +121,7 @@ class LagreAnmodningsperiodeIMedlTest {
         lagreAnmodningsperiodeIMedl.utfør(prosessinstans);
 
 
-        verify(medlPeriodeService).oppdaterPeriodeUnderAvklaring(anmodningsperiode, false);
+        verify(medlPeriodeService).oppdaterPeriodeUnderAvklaring(anmodningsperiode,  behandling.getId());
     }
 
     private Set<Anmodningsperiode> lagAnmodningsperioderMedDato(LocalDate fom, LocalDate tom) {

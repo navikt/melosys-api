@@ -78,7 +78,6 @@ internal class EndreSakServiceTest {
 
     @Test
     fun `endring av sak, ikke tom flyt - oppdater, opprett ny søknad og oppfrisk saksopplysninger`() {
-        unleash.enable("melosys.tom_periode_og_land")
         val saksnummer = "MEL-123"
         val opprinneligFagsak = lagFagsak(saksnummer, TRYGDEAVTALE, TRYGDEAVGIFT)
         val mottatteOpplysningerData = MottatteOpplysningerData().apply {
@@ -140,7 +139,6 @@ internal class EndreSakServiceTest {
 
     @Test
     fun `endring av sak, land gyldig for både ny og gammel flyt - bruker eksisterende soeknadsland`() {
-        unleash.enable("melosys.tom_periode_og_land")
         val saksnummer = "MEL-123"
         val fagsak = SaksbehandlingDataFactory.lagFagsak(saksnummer)
         val mottatteOpplysningerData = MottatteOpplysningerData().apply {
@@ -179,7 +177,6 @@ internal class EndreSakServiceTest {
 
     @Test
     fun `endring av sak, land ikke gyldig for ny flyt - bruker tomt soeknadsland`() {
-        unleash.enable("melosys.tom_periode_og_land")
         val saksnummer = "MEL-123"
         val fagsak = SaksbehandlingDataFactory.lagFagsak(saksnummer)
         val mottatteOpplysningerData = MottatteOpplysningerData().apply {
@@ -214,29 +211,6 @@ internal class EndreSakServiceTest {
             )
         }
         assertThat(soeknadslandSlot.captured.landkoder).isEmpty()
-    }
-
-    @Test
-    fun `endring av sak til EØS, toggle av og sak mangler periode og land - feiler`() {
-        unleash.disableAll()
-        val saksnummer = "MEL-124"
-        val opprinneligFagsak = lagFagsak(saksnummer, FTRL, UNNTAK)
-        opprinneligFagsak.behandlinger.add(SaksbehandlingDataFactory.lagBehandling(opprinneligFagsak))
-        every { fagsakService.hentFagsak(saksnummer) } returns opprinneligFagsak
-        every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(MottatteOpplysninger())
-
-        shouldThrow<FunksjonellException>
-        {
-            endreSakService.endre(
-                saksnummer,
-                EU_EOS,
-                MEDLEMSKAP_LOVVALG,
-                ANMODNING_OM_UNNTAK_HOVEDREGEL,
-                FØRSTEGANG,
-                AVVENT_DOK_PART,
-                null
-            )
-        }.message.shouldBe("Du må legge inn periode og land i flyten for å kunne bytte til sakstype EU/EØS")
     }
 
     @Test

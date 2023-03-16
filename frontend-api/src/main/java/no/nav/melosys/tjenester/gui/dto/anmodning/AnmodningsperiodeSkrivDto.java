@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.jpa.LovvalgBestemmelsekonverterer;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
@@ -32,9 +32,9 @@ public class AnmodningsperiodeSkrivDto {
                                         PeriodeDto periode,
                                         LovvalgBestemmelse lovvalgBestemmelse,
                                         LovvalgBestemmelse tilleggBestemmelse,
-                                        Landkoder lovvalgsland,
+                                        Land_iso2 lovvalgsland,
                                         LovvalgBestemmelse unntakFraBestemmelse,
-                                        Landkoder unntakFraLovvalgsland,
+                                        Land_iso2 unntakFraLovvalgsland,
                                         Trygdedekninger trygdeDekning,
                                         String medlemskapsperiodeID) {
         this.id = id;
@@ -56,9 +56,9 @@ public class AnmodningsperiodeSkrivDto {
                 StringUtils.isEmpty(json.get("tomDato")) ? null : LocalDate.parse(json.get("tomDato"))),
             konverterLovvalgsBestemmelse(json.get("lovvalgBestemmelse")),
             konverterLovvalgsBestemmelse(json.get("tilleggBestemmelse")),
-            enumVerdiEllerNull(Landkoder.class, json.get("lovvalgsland")),
+            enumVerdiEllerNull(Land_iso2.class, json.get("lovvalgsland")),
             konverterLovvalgsBestemmelse(json.get("unntakFraBestemmelse")),
-            enumVerdiEllerNull(Landkoder.class, json.get("unntakFraLovvalgsland")),
+            enumVerdiEllerNull(Land_iso2.class, json.get("unntakFraLovvalgsland")),
             enumVerdiEllerNull(Trygdedekninger.class, json.get("trygdeDekning")),
             json.get("medlemskapsperiodeID"));
     }
@@ -77,10 +77,10 @@ public class AnmodningsperiodeSkrivDto {
 
     public final Anmodningsperiode til() {
         return new Anmodningsperiode(periode.getFom(), periode.getTom(),
-            enumVerdiEllerNull(Landkoder.class, lovvalgsland),
+            enumVerdiEllerNull(Land_iso2.class, lovvalgsland),
             konverterer.convertToEntityAttribute(lovvalgBestemmelse),
             konverterer.convertToEntityAttribute(tilleggBestemmelse),
-            enumVerdiEllerNull(Landkoder.class, unntakFraLovvalgsland),
+            enumVerdiEllerNull(Land_iso2.class, unntakFraLovvalgsland),
             konverterer.convertToEntityAttribute(unntakFraBestemmelse),
             enumVerdiEllerNull(Trygdedekninger.class, trygdeDekning));
     }

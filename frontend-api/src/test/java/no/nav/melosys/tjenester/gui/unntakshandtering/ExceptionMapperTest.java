@@ -7,6 +7,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
+import no.nav.security.token.support.spring.validation.interceptor.JwtTokenUnauthorizedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SuppressWarnings("unchecked")
 @ExtendWith(MockitoExtension.class)
 class ExceptionMapperTest {
 
@@ -46,6 +46,12 @@ class ExceptionMapperTest {
     }
 
     @Test
+    void jwtTokenUnauthorizedException_SkalLoggesSomWarn_ReturnerStatusForbidden() {
+        JwtTokenUnauthorizedException jwtTokenUnauthorizedException = new JwtTokenUnauthorizedException();
+        assertResponse(exceptionMapper.håndter(jwtTokenUnauthorizedException, request), HttpStatus.UNAUTHORIZED, "JwtTokenUnauthorizedException");
+    }
+
+    @Test
     void sikkerhetsBegrensningException() {
         final String melding = "Sikkerhetsfeil";
         SikkerhetsbegrensningException funksjonellException = new SikkerhetsbegrensningException(melding);
@@ -59,10 +65,10 @@ class ExceptionMapperTest {
         assertResponse(exceptionMapper.håndter(funksjonellException, request), HttpStatus.NOT_FOUND, melding);
     }
 
-    private void assertResponse(ResponseEntity responseEntity, HttpStatus forventetStatus, String forventetMelding) {
+    private void assertResponse(ResponseEntity<Map<String, Object>> responseEntity, HttpStatus forventetStatus, String forventetMelding) {
         assertThat(responseEntity.getStatusCode()).isEqualTo(forventetStatus);
         assertThat(responseEntity.getBody()).isInstanceOf(Map.class);
-        Map<String, String> body = (Map<String, String>) responseEntity.getBody();
+        Map<String, Object> body = responseEntity.getBody();
         assertThat(body).containsEntry("message", forventetMelding);
     }
 

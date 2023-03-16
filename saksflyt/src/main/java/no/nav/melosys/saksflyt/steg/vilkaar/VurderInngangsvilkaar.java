@@ -6,13 +6,14 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
+import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP;
+import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
 
 @Component
 public class VurderInngangsvilkaar implements StegBehandler {
@@ -52,8 +53,8 @@ public class VurderInngangsvilkaar implements StegBehandler {
 
     private boolean skalVurdereInngangsvilkår(Behandling behandling) {
         return behandling.getFagsak().erSakstypeEøs()
-            && !SaksbehandlingRegler.harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT))
+            && !harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP))
             && behandling.kanResultereIVedtak()
-            && (unleash.isEnabled("melosys.tom_periode_og_land") ? behandling.harPeriodeOgLand() : true);
+            && behandling.harPeriodeOgLand();
     }
 }

@@ -1,6 +1,7 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
@@ -8,6 +9,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.PeriodeOmLovvalg;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -40,18 +42,20 @@ class KontrollMedRegisteropplysning {
         this.unleash = unleash;
     }
 
-    public void kontroller(long behandlingId, Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
+    public void kontroller(long behandlingId, Behandlingsresultattyper behandlingsresultattype, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) throws ValideringException {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         Sakstyper sakstype = behandling.getFagsak().getType();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
-        kontrollerVedtak(behandling, behandlingsresultat, sakstype, behandlingsresultattype);
+        kontrollerVedtak(behandling, behandlingsresultat, sakstype, behandlingsresultattype, kontrollerSomSkalIgnoreres);
     }
 
     public void kontrollerVedtak(Behandling behandling,
-                                 Behandlingsresultat behandlingsresultat, Sakstyper sakstype,
-                                 Behandlingsresultattyper behandlingsresultattype) throws ValideringException {
+                                 Behandlingsresultat behandlingsresultat,
+                                 Sakstyper sakstype,
+                                 Behandlingsresultattyper behandlingsresultattype,
+                                 Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) throws ValideringException {
         hentNyeRegisteropplysninger(behandlingsresultat, behandling);
-        kontroll.kontrollerVedtak(behandling.getId(), sakstype, behandlingsresultattype);
+        kontroll.kontrollerVedtak(behandling.getId(), sakstype, behandlingsresultattype, kontrollerSomSkalIgnoreres);
     }
 
     private void hentNyeRegisteropplysninger(Behandlingsresultat behandlingsresultat, Behandling behandling) {

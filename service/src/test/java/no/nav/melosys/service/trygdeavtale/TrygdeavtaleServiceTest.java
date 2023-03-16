@@ -7,14 +7,15 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.domain.mottatteopplysninger.data.*;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.data.*;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.IkkeOmfattetFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
@@ -32,20 +33,21 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static java.util.Collections.*;
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_ca.CAN_ART7;
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_trygdeavtale_ca.CAN_ART8;
-import static no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie.Relasjonsrolle.BARN;
-import static no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER;
-import static no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie.tilMedfolgendeFamilie;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 import static no.nav.melosys.domain.kodeverk.InnvilgelsesResultat.INNVILGET;
 import static no.nav.melosys.domain.kodeverk.Medlemskapstyper.PLIKTIG;
 import static no.nav.melosys.domain.kodeverk.Trygdedekninger.FULL_DEKNING_FTRL;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl.OVER_18_AR;
 import static no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl.EGEN_INNTEKT;
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1;
-import static org.assertj.core.api.Assertions.*;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART7;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Tilleggsbestemmelser_trygdeavtale_ca.CAN_ART8;
+import static no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie.Relasjonsrolle.BARN;
+import static no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie.Relasjonsrolle.EKTEFELLE_SAMBOER;
+import static no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie.tilMedfolgendeFamilie;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -132,7 +134,7 @@ class TrygdeavtaleServiceTest {
                 FULL_DEKNING_FTRL,
                 INNVILGET,
                 LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.bestemmelse()),
-                Landkoder.NO,
+                Land_iso2.NO,
                 null
             );
     }
@@ -169,7 +171,7 @@ class TrygdeavtaleServiceTest {
                 INNVILGET,
                 LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.bestemmelse()),
                 LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.tilleggsbestemmelse()),
-                Landkoder.NO,
+                Land_iso2.NO,
                 null
             );
     }
@@ -221,7 +223,7 @@ class TrygdeavtaleServiceTest {
                 FULL_DEKNING_FTRL,
                 INNVILGET,
                 LovvalgBestemmelseUtils.dbDataTilLovvalgBestemmelse(trygdeavtaleResultat.bestemmelse()),
-                Landkoder.NO,
+                Land_iso2.NO,
                 111L
             );
     }
@@ -417,17 +419,6 @@ class TrygdeavtaleServiceTest {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setId(11L);
         lovvalgsperiode.setBestemmelse(UK_ART6_1);
-        lovvalgsperiode.setFom(PERIODE_FOM);
-        lovvalgsperiode.setTom(PERIODE_TOM);
-        lovvalgsperiode.setMedlPeriodeID(111L);
-        return lovvalgsperiode;
-    }
-
-    private Lovvalgsperiode lagLovvalgsperiodeMedTilleggsbestemmelse() {
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setId(11L);
-        lovvalgsperiode.setBestemmelse(CAN_ART7);
-        lovvalgsperiode.setTilleggsbestemmelse(CAN_ART8);
         lovvalgsperiode.setFom(PERIODE_FOM);
         lovvalgsperiode.setTom(PERIODE_TOM);
         lovvalgsperiode.setMedlPeriodeID(111L);

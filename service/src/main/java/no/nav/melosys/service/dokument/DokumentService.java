@@ -2,17 +2,17 @@ package no.nav.melosys.service.dokument;
 
 import java.util.List;
 
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.doksys.Dokumentbestilling;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
+import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataByggerVelger;
@@ -41,28 +41,32 @@ public class DokumentService {
     private final BrevmottakerService brevmottakerService;
     private final BrevDataByggerVelger brevDataByggerVelger;
     private final BrevdataGrunnlagFactory brevdataGrunnlagFactory;
+    private final KontaktopplysningService kontaktopplysningService;
 
     public DokumentService(BehandlingService behandlingService,
                            BrevDataService brevDataService,
                            DoksysFasade dokSysFasade,
                            BrevmottakerService brevmottakerService,
                            BrevDataByggerVelger brevDataByggerVelger,
-                           BrevdataGrunnlagFactory brevdataGrunnlagFactory) {
+                           BrevdataGrunnlagFactory brevdataGrunnlagFactory,
+                           KontaktopplysningService kontaktopplysningService) {
         this.behandlingService = behandlingService;
         this.brevDataService = brevDataService;
         this.dokSysFasade = dokSysFasade;
         this.brevmottakerService = brevmottakerService;
         this.brevDataByggerVelger = brevDataByggerVelger;
         this.brevdataGrunnlagFactory = brevdataGrunnlagFactory;
+        this.kontaktopplysningService = kontaktopplysningService;
     }
 
     @Transactional(readOnly = true)
     public byte[] produserUtkast(long behandlingID, BrevbestillingDto brevbestillingDto) {
         Produserbaredokumenter produserbartDokument = brevbestillingDto.getProduserbardokument();
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
-        Aktoersroller mottakerRolle = brevbestillingDto.getMottaker() == null ?
+        Mottakerroller mottakerRolle = brevbestillingDto.getMottaker() == null ?
             brevmottakerService.avklarMottakerRolleFraDokument(produserbartDokument) : brevbestillingDto.getMottaker();
-        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(produserbartDokument)
+        DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
+            .medProduserbartDokument(produserbartDokument)
             .medAvsenderID(SubjectHandler.getInstance().getUserID())
             .medMottakerRolle(mottakerRolle)
             .medBehandling(behandling)
@@ -72,13 +76,13 @@ public class DokumentService {
             .build();
         BrevData brevData = lagBrevData(brevbestilling);
 
-        List<Aktoer> avklarteMottakere =
-            brevmottakerService.avklarMottakere(produserbartDokument, Mottaker.av(mottakerRolle), behandling, true);
+        List<Mottaker> avklarteMottakere =
+            brevmottakerService.avklarMottakere(produserbartDokument, Mottaker.medRolle(mottakerRolle), behandling, true);
 
         if (avklarteMottakere.isEmpty()) {
             final var saksnummer = behandling.getFagsak().getSaksnummer();
             log.info("Ingen mottaker funnet for {}, {}", saksnummer, produserbartDokument);
-            if (mottakerRolle == Aktoersroller.ARBEIDSGIVER) {
+            if (mottakerRolle == Mottakerroller.ARBEIDSGIVER) {
                 throw new FunksjonellException("Melosys sender ikke brev til utenlandske arbeidsgivere uten orgnr."
                     + System.lineSeparator() + "Ingen orgn funnet for sak " + saksnummer);
             }
@@ -106,9 +110,9 @@ public class DokumentService {
             .build();
         BrevData brevData = lagBrevData(nyBrevbestilling);
 
-        List<Aktoer> mottakere = brevmottakerService.avklarMottakere(produserbartDokument, mottaker, behandling);
-        for (Aktoer aktør : mottakere) {
-            produserIkkeredigerbartDokument(produserbartDokument, aktør, behandling, brevData);
+        List<Mottaker> mottakere = brevmottakerService.avklarMottakere(produserbartDokument, mottaker, behandling);
+        for (Mottaker avklartMottaker : mottakere) {
+            produserIkkeredigerbartDokument(produserbartDokument, avklartMottaker, behandling, brevData);
         }
     }
 
@@ -130,14 +134,21 @@ public class DokumentService {
         return brevbestillingDto;
     }
 
-    private void produserIkkeredigerbartDokument(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Behandling behandling, BrevData brevData) {
+    private void produserIkkeredigerbartDokument(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling, BrevData brevData) {
         dokSysFasade.produserIkkeredigerbartDokument(lagDokumentbestilling(produserbartDokument, mottaker, behandling, brevData));
     }
 
-    private Dokumentbestilling lagDokumentbestilling(Produserbaredokumenter produserbartDokument, Aktoer mottaker, Behandling behandling, BrevData brevData) {
-        Kontaktopplysning kontaktopplysning = brevmottakerService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), mottaker);
+    private Dokumentbestilling lagDokumentbestilling(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling, BrevData brevData) {
+        Kontaktopplysning kontaktopplysning = hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), mottaker);
         DokumentbestillingMetadata metadata = brevDataService.lagBestillingMetadata(produserbartDokument, mottaker, kontaktopplysning, behandling, brevData);
         Element brevinnhold = brevDataService.lagBrevXML(produserbartDokument, mottaker, kontaktopplysning, behandling, brevData);
         return new Dokumentbestilling(metadata, brevinnhold);
+    }
+
+    private Kontaktopplysning hentKontaktopplysning(String saksnummer, Mottaker mottaker) {
+        if (mottaker != null && mottaker.erOrganisasjon()) {
+            return kontaktopplysningService.hentKontaktopplysning(saksnummer, mottaker.getOrgnr()).orElse(null);
+        }
+        return null;
     }
 }

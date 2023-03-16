@@ -20,7 +20,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_barn_begrunnelser_ftrl;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Medfolgende_ektefelle_samboer_begrunnelser_ftrl;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
@@ -349,7 +349,7 @@ class TrygdeavtaleMapperTest {
         lovvalgsperiode.setFom(LOVVALGSPERIODE_FOM);
         lovvalgsperiode.setTom(LOVVALGSPERIODE_TOM);
         lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_FTRL);
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
+        lovvalgsperiode.setBestemmelse(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1);
         return lovvalgsperiode;
     }
 

@@ -12,12 +12,12 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
+import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.arkiv.Vedlegg;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -74,7 +74,7 @@ class SendAnmodningOmUnntakTest {
     }
 
     @Test
-    void utfør_artikkel16_sendSedMedVedlegg() throws Exception {
+    void utfør_artikkel16_sendSedMedVedlegg() {
         prosessinstans.setData(ProsessDataKey.EESSI_MOTTAKERE, List.of(MOTTAKER_INSTITSJON));
         final var dokumentReferanse = new DokumentReferanse("", "");
         prosessinstans.setData(ProsessDataKey.VEDLEGG_SED, Set.of(dokumentReferanse));
@@ -91,7 +91,7 @@ class SendAnmodningOmUnntakTest {
     }
 
     @Test
-    void utfør_ingenInstitusjonEessiKlar_senderBrev() throws Exception {
+    void utfør_ingenInstitusjonEessiKlar_senderBrev() {
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
         prosessinstans.setData(YTTERLIGERE_INFO_SED, "Mer info");
@@ -99,14 +99,14 @@ class SendAnmodningOmUnntakTest {
         sendAnmodningOmUnntak.utfør(prosessinstans);
 
         verify(brevBestiller).bestill(brevbestillingArgumentCaptor.capture());
-        assertThat(brevbestillingArgumentCaptor.getValue().getMottakere()).contains(Mottaker.av(Aktoersroller.TRYGDEMYNDIGHET));
+        assertThat(brevbestillingArgumentCaptor.getValue().getMottakere()).contains(Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
         assertThat(brevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(Produserbaredokumenter.ANMODNING_UNNTAK);
         assertThat(brevbestillingArgumentCaptor.getValue().getYtterligereInformasjon()).isEqualTo("Mer info");
         verify(anmodningsperiodeService).oppdaterAnmodningsperiodeSendtForBehandling(BEHANDLING_ID);
     }
 
     @Test
-    void utfør_ingenBestemmelse_verifiserSedIkkeSendt() throws Exception {
+    void utfør_ingenBestemmelse_verifiserSedIkkeSendt() {
         Behandlingsresultat behandlingsresultat = hentBehandlingsresultat();
         behandlingsresultat.setAnmodningsperioder(Collections.singleton(new Anmodningsperiode()));
         when(behandlingsresultatService.hentBehandlingsresultat(2L)).thenReturn(behandlingsresultat);
@@ -126,9 +126,9 @@ class SendAnmodningOmUnntakTest {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(BEHANDLING_ID);
         behandlingsresultat.setBehandling(lagBehandling());
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now(), Landkoder.NO,
+        Anmodningsperiode anmodningsperiode = new Anmodningsperiode(LocalDate.now(), LocalDate.now(), Land_iso2.NO,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2, Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5,
-            Landkoder.NO, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Trygdedekninger.FULL_DEKNING_EOSFO);
+            Land_iso2.NO, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, Trygdedekninger.FULL_DEKNING_EOSFO);
         behandlingsresultat.setAnmodningsperioder(Sets.newHashSet(anmodningsperiode));
         behandlingsresultat.setType(Behandlingsresultattyper.ANMODNING_OM_UNNTAK);
         return behandlingsresultat;

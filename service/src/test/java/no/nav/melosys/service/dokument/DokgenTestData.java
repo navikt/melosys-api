@@ -7,6 +7,8 @@ import java.util.List;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.SoeknadTrygdeavtale;
@@ -22,13 +24,12 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdress
 import no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
 import no.nav.melosys.domain.person.*;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 
 import static java.util.Collections.singletonList;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
+import static no.nav.melosys.domain.kodeverk.Mottakerroller.*;
 
 public final class DokgenTestData {
     public static final String FNR_BRUKER = "05058892382";
@@ -74,7 +75,7 @@ public final class DokgenTestData {
         fagsak.setEndretAv("L12345");
         fagsak.setSaksnummer(SAKSNUMMER);
         Aktoer bruker = new Aktoer();
-        bruker.setRolle(BRUKER);
+        bruker.setRolle(Aktoersroller.BRUKER);
         bruker.setAktørId("aktørId");
         fagsak.getAktører().add(bruker);
         if (medRepresentant) {
@@ -192,12 +193,12 @@ public final class DokgenTestData {
         lovvalgsperiode.setFom(LOVVALGSPERIODE_FOM);
         lovvalgsperiode.setTom(LOVVALGSPERIODE_TOM);
         lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_FTRL);
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
+        lovvalgsperiode.setBestemmelse(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1);
         return lovvalgsperiode;
     }
 
-    public static Aktoer lagMottaker(Aktoersroller rolle) {
-        Aktoer mottaker = new Aktoer();
+    public static Mottaker lagMottaker(Mottakerroller rolle) {
+        Mottaker mottaker = new Mottaker();
         switch (rolle) {
             case BRUKER -> {
                 mottaker.setRolle(BRUKER);
@@ -211,20 +212,19 @@ public final class DokgenTestData {
                 mottaker.setRolle(ARBEIDSGIVER);
                 mottaker.setOrgnr(ORGNR_REPRESENTANT);
             }
-            default -> throw new IllegalArgumentException("Støtter ikke aktoersrolle " + rolle.getKode());
+            default -> throw new IllegalArgumentException("Støtter ikke mottakerrolle " + rolle.getKode());
         }
         return mottaker;
     }
 
-    public static Aktoer lagMottakerRepresentant(Aktoertype aktoertype, Representerer representerer) {
-        Aktoer representant = new Aktoer();
+    public static Mottaker lagMottakerRepresentant(Aktoertype aktoertype) {
+        Mottaker representant = new Mottaker();
         switch (aktoertype) {
             case PERSON -> representant.setPersonIdent(FNR_REPRESENTANT);
             case ORGANISASJON -> representant.setOrgnr(ORGNR_REPRESENTANT);
             default -> throw new IllegalArgumentException("Representant må være person eller organisasjon");
         }
-        representant.setRolle(Aktoersroller.REPRESENTANT);
-        representant.setRepresenterer(representerer);
+        representant.setRolle(FULLMEKTIG);
         return representant;
     }
 }

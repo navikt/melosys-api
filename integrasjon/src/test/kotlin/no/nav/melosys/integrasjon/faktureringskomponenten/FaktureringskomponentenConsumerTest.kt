@@ -14,7 +14,6 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriod
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FullmektigDto
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
-import no.nav.melosys.integrasjon.felles.GenericContextExchangeFilter
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer

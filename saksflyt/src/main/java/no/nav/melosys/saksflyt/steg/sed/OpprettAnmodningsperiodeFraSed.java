@@ -5,6 +5,7 @@ import java.util.Collections;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -47,10 +48,10 @@ public class OpprettAnmodningsperiodeFraSed implements StegBehandler {
         return new Anmodningsperiode(
             sedDokument.getLovvalgsperiode().getFom(),
             sedDokument.getLovvalgsperiode().getTom(),
-            sedDokument.getLovvalgslandKode(),
+            sedDokument.getLovvalgslandKode() != null ? Land_iso2.valueOf(sedDokument.getLovvalgslandKode().getKode()) : null,
             sedDokument.getLovvalgBestemmelse(),
             null,
-            sedDokument.getUnntakFraLovvalgslandKode(),
+            sedDokument.getUnntakFraLovvalgslandKode() != null ? Land_iso2.valueOf(sedDokument.getUnntakFraLovvalgslandKode().getKode()) : null,
             sedDokument.getUnntakFraLovvalgBestemmelse(),
             avjørTrygdedekning(sedDokument.getLovvalgslandKode())
         );

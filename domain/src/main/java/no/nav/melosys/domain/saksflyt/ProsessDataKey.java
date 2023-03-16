@@ -7,6 +7,7 @@ public enum ProsessDataKey {
 
     AKTØR_ID("aktoerID"),
     ARBEIDSGIVER("arbeidsgiver"),
+    ARBEIDSGIVER_SKAL_HA_KOPI("arbeidsgiverSkalHaKopi"),
     ARKIVSYSTEM("arkivsystem"),
     ARKIV_ID("arkivId"),
     AVSENDER_ID("avsenderID"),
@@ -55,6 +56,7 @@ public enum ProsessDataKey {
     SAKSBEHANDLER("saksbehandler"),
     SAKSBEHANDLER_NAVN("saksbehandlerNavn"),
     SAKSNUMMER("saksnummer"),
+    SAKSSTATUS("saksstatus"),
     SAKSTYPE("sakstype"),
     SAKSTEMA("sakstema"),
     SED_DOKUMENT("sedDokument"),

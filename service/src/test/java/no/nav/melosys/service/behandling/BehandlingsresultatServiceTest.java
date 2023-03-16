@@ -8,8 +8,9 @@ import java.util.*;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Henleggelsesgrunner;
@@ -58,6 +59,8 @@ class BehandlingsresultatServiceTest {
         behandlingsresultat.setAvklartefakta(new HashSet<>(Collections.singletonList(new Avklartefakta())));
         behandlingsresultat.setLovvalgsperioder(new HashSet<>(Collections.singletonList(new Lovvalgsperiode())));
         behandlingsresultat.setVilkaarsresultater(new HashSet<>(Collections.singleton(new Vilkaarsresultat())));
+        behandlingsresultat.setMedlemAvFolketrygden(new MedlemAvFolketrygden());
+        behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.GODKJENT);
 
         when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
 
@@ -67,6 +70,8 @@ class BehandlingsresultatServiceTest {
 
         assertThat(behandlingsresultat.getAvklartefakta()).isEmpty();
         assertThat(behandlingsresultat.getLovvalgsperioder()).isEmpty();
+        assertThat(behandlingsresultat.getMedlemAvFolketrygden()).isNull();
+        assertThat(behandlingsresultat.getUtfallRegistreringUnntak()).isNull();
         verify(vilkaarsresultatService).tømVilkårForBehandlingsresultat(behandlingsresultat);
     }
 
@@ -179,7 +184,7 @@ class BehandlingsresultatServiceTest {
             .matches(a -> a.getId() == null)
             .matches(a -> a.getFom() != null)
             .matches(a -> a.getTom() != null)
-            .matches(a -> a.getLovvalgsland() == Landkoder.SE)
+            .matches(a -> a.getLovvalgsland() == Land_iso2.SE)
             .matches(a -> a.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1)
             .matches(a -> a.getAnmodningsperiodeSvar() == null)
             .matches(a -> !a.erSendtUtland())
@@ -191,7 +196,7 @@ class BehandlingsresultatServiceTest {
             .matches(u -> u.getId() == null)
             .matches(u -> u.getFom() != null)
             .matches(u -> u.getTom() != null)
-            .matches(u -> u.getLovvalgsland() == Landkoder.SE)
+            .matches(u -> u.getLovvalgsland() == Land_iso2.SE)
             .matches(u -> u.getBestemmelse() == Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A)
             .matches(u -> u.getSendtUtland() == null)
             .matches(u -> u.getBehandlingsresultat() == behandlingsresultatreplika);
@@ -272,19 +277,20 @@ class BehandlingsresultatServiceTest {
     }
 
     @Test
-    void oppdaterUtfallRegistreringUnntak_ikkeSatt_lagres() {
+    void settUtfallRegistreringUnntakOgType_ikkeSatt_lagres() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatRepo.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
+        when(behandlingsresultatRepo.findWithKontrollresultaterById(1L)).thenReturn(Optional.of(behandlingsresultat));
 
 
-        behandlingsresultatService.oppdaterUtfallRegistreringUnntak(1, Utfallregistreringunntak.GODKJENT);
+        behandlingsresultatService.settUtfallRegistreringUnntakOgType(1, Utfallregistreringunntak.GODKJENT);
 
 
         verify(behandlingsresultatRepo).save(behandlingsresultat);
     }
 
     @Test
-    void oppdaterUtfallRegistreringUnntak_alleredeSatt_kasterException() {
+    void settUtfallRegistreringUnntakOgType_alleredeSatt_kasterException() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
 
 
@@ -293,8 +299,21 @@ class BehandlingsresultatServiceTest {
 
         when(behandlingsresultatRepo.findById(1L)).thenReturn(Optional.of(behandlingsresultat));
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> behandlingsresultatService.oppdaterUtfallRegistreringUnntak(1, Utfallregistreringunntak.GODKJENT))
+            .isThrownBy(() -> behandlingsresultatService.settUtfallRegistreringUnntakOgType(1, Utfallregistreringunntak.GODKJENT))
             .withMessageContaining("Utfall for registrering av unntak er allerede satt for behandlingsresultat");
+    }
+
+    @Test
+    void oppdaterUtfallRegistreringUnntak_alleredeSatt_oppdaterer() {
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.GODKJENT);
+        when(behandlingsresultatRepo.findWithKontrollresultaterById(1L)).thenReturn(Optional.of(behandlingsresultat));
+
+
+        behandlingsresultatService.oppdaterUtfallRegistreringUnntak(1, Utfallregistreringunntak.DELVIS_GODKJENT);
+
+
+        verify(behandlingsresultatRepo).save(behandlingsresultat);
     }
 
     @Test
@@ -346,8 +365,8 @@ class BehandlingsresultatServiceTest {
         anmodningsperiode.setId(32L);
         anmodningsperiode.setFom(LocalDate.now());
         anmodningsperiode.setTom(LocalDate.now().plusYears(1L));
-        anmodningsperiode.setLovvalgsland(Landkoder.SE);
-        anmodningsperiode.setUnntakFraLovvalgsland(Landkoder.NO);
+        anmodningsperiode.setLovvalgsland(Land_iso2.SE);
+        anmodningsperiode.setUnntakFraLovvalgsland(Land_iso2.NO);
         anmodningsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1);
         anmodningsperiode.setUnntakFraBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         anmodningsperiode.setTilleggsbestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_1);
@@ -360,7 +379,7 @@ class BehandlingsresultatServiceTest {
 
     private Utpekingsperiode opprettUtpekingsperiode() {
         Utpekingsperiode utpekingsperiode = new Utpekingsperiode(
-            LocalDate.now(), LocalDate.now().plusYears(1), Landkoder.SE,
+            LocalDate.now(), LocalDate.now().plusYears(1), Land_iso2.SE,
             Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_2A, Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
         utpekingsperiode.setId(11111L);
         utpekingsperiode.setMedlPeriodeID(1242L);

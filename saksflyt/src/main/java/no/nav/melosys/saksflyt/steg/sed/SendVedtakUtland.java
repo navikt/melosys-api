@@ -15,6 +15,7 @@ import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedInformasjon;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -28,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.TRYGDEMYNDIGHET;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ATTEST_A1;
 
 
@@ -102,7 +102,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
                 .medAvsenderID(hentSaksbehandler(prosessinstans))
                 .medBegrunnelseKode(hentBegrunnelsekodeTilForkortetPeriode(prosessinstans))
                 .build();
-            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.av(TRYGDEMYNDIGHET));
+            prosessinstansService.opprettProsessinstansSendBrev(behandling, brevbestilling, Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
         }
     }
 

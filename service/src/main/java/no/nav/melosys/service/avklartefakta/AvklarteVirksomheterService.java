@@ -11,10 +11,10 @@ import no.nav.melosys.domain.adresse.Adresse;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -97,7 +97,7 @@ public class AvklarteVirksomheterService {
     public List<AvklartVirksomhet> hentNorskeArbeidsgivere(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer) {
         Set<String> arbeidsgivendeOrgnumre = hentNorskeArbeidsgivendeOrgnumre(behandling);
         return organisasjonOppslagService.hentOrganisasjoner(arbeidsgivendeOrgnumre).stream()
-            .map(org -> new AvklartVirksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), adressekonverterer.apply(org), Yrkesaktivitetstyper.LOENNET_ARBEID))
+            .map(org -> new AvklartVirksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), adressekonverterer.apply(org), Yrkesaktivitetstyper.LOENNET_ARBEID, org.getOrganisasjonDetaljer().getOpphoersdato()))
             .collect(Collectors.toList());
     }
 
@@ -127,6 +127,10 @@ public class AvklarteVirksomheterService {
         return hentNorskeArbeidsgivendeOrgnumre(behandling).size()
             + hentNorskeSelvstendigeForetakOrgnumre(behandling).size()
             + hentUtenlandskeVirksomheter(behandling).size();
+    }
+
+    public boolean harOpphørtAvklartVirksomhet(Behandling behandling) {
+        return hentAlleNorskeVirksomheter(behandling).stream().anyMatch(AvklartVirksomhet::erOpphoert);
     }
 
     @Transactional

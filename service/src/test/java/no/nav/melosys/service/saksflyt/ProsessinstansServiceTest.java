@@ -8,7 +8,6 @@ import java.util.*;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.collect.Lists;
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
@@ -16,10 +15,7 @@ import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.eessi.Periode;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.Statsborgerskap;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Avsendertyper;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -44,7 +40,6 @@ import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -148,7 +143,7 @@ class ProsessinstansServiceTest {
         String mottakerInstitusjon = "DE:2332";
 
 
-        prosessinstansService.opprettProsessinstansIverksettVedtakEos(behandling, resultatType, "FRITEKST", "FRITEKST_SED", Set.of(mottakerInstitusjon));
+        prosessinstansService.opprettProsessinstansIverksettVedtakEos(behandling, resultatType, "FRITEKST", "FRITEKST_SED", Set.of(mottakerInstitusjon), true);
 
 
         verify(prosessinstansRepo).save(piCaptor.capture());
@@ -215,8 +210,8 @@ class ProsessinstansServiceTest {
     void opprettProsessinstansOpprettOgDistribuerBrevBruker() {
         String saksbehandler = settInnloggetSaksbehandler();
         Behandling behandling = lagBehandling();
-        Aktoer mottaker = new Aktoer();
-        mottaker.setRolle(Aktoersroller.BRUKER);
+        Mottaker mottaker = new Mottaker();
+        mottaker.setRolle(Mottakerroller.BRUKER);
         mottaker.setAktørId("123");
         mottaker.setPersonIdent(null);
         mottaker.setOrgnr(null);
@@ -244,8 +239,8 @@ class ProsessinstansServiceTest {
     void opprettProsessinstansOpprettOgDistribuerBrevArbeidsgiver() {
         String saksbehandler = settInnloggetSaksbehandler();
         Behandling behandling = lagBehandling();
-        Aktoer mottaker = new Aktoer();
-        mottaker.setRolle(Aktoersroller.ARBEIDSGIVER);
+        Mottaker mottaker = new Mottaker();
+        mottaker.setRolle(Mottakerroller.ARBEIDSGIVER);
         mottaker.setAktørId(null);
         mottaker.setPersonIdent(null);
         mottaker.setOrgnr("987654321");
@@ -273,8 +268,8 @@ class ProsessinstansServiceTest {
     void opprettProsessinstansOpprettOgDistribuerBrevRepresentantPerson() {
         String saksbehandler = settInnloggetSaksbehandler();
         Behandling behandling = lagBehandling();
-        Aktoer mottaker = new Aktoer();
-        mottaker.setRolle(Aktoersroller.REPRESENTANT);
+        Mottaker mottaker = new Mottaker();
+        mottaker.setRolle(Mottakerroller.FULLMEKTIG);
         mottaker.setAktørId(null);
         mottaker.setPersonIdent("123");
         mottaker.setOrgnr(null);
@@ -302,8 +297,8 @@ class ProsessinstansServiceTest {
     void opprettProsessinstansOpprettOgDistribuerBrevRepresentantOrganisasjon() {
         String saksbehandler = settInnloggetSaksbehandler();
         Behandling behandling = lagBehandling();
-        Aktoer mottaker = new Aktoer();
-        mottaker.setRolle(Aktoersroller.REPRESENTANT);
+        Mottaker mottaker = new Mottaker();
+        mottaker.setRolle(Mottakerroller.FULLMEKTIG);
         mottaker.setAktørId(null);
         mottaker.setPersonIdent(null);
         mottaker.setOrgnr("987654321");
@@ -469,8 +464,22 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    void opprettProsessinstansGodkjennUnntaksperiode() {
-        prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(new Behandling(), false, "fritekst");
+    void opprettProsessinstansRegistrerUnntakFraMedlemskap_altOk_lagrerProsessinstans() {
+        var behandling = lagBehandling();
+
+
+        prosessinstansService.opprettProsessinstansRegistrerUnntakFraMedlemskap(behandling, Saksstatuser.AVSLUTTET);
+
+
+        verify(prosessinstansRepo).save(piCaptor.capture());
+        assertThat(piCaptor.getValue().getBehandling()).isEqualTo(behandling);
+        assertThat(piCaptor.getValue().getData(ProsessDataKey.SAKSSTATUS, Saksstatuser.class)).isEqualTo(Saksstatuser.AVSLUTTET);
+    }
+
+    @Test
+    void opprettProsessinstansGodkjennUnntaksperiodeMedEessiMelding() {
+        MelosysEessiMelding melosysEessiMelding = lagMelosysEessiMelding();
+        prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(new Behandling(), false, "fritekst", melosysEessiMelding);
 
 
         verify(prosessinstansRepo).save(piCaptor.capture());
@@ -478,6 +487,21 @@ class ProsessinstansServiceTest {
         Prosessinstans prosessinstans = piCaptor.getValue();
         assertThat(prosessinstans.getType()).isEqualTo(ProsessType.REGISTRERING_UNNTAK_GODKJENN);
         assertThat(prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED)).isEqualTo("fritekst");
+        assertThat(prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class)).isEqualTo(melosysEessiMelding);
+        assertThat(prosessinstans.getLåsReferanse()).isEqualTo(melosysEessiMelding.lagUnikIdentifikator());
+    }
+
+    @Test
+    void opprettProsessinstansGodkjennUnntaksperiode() {
+        prosessinstansService.opprettProsessinstansGodkjennUnntaksperiode(new Behandling(), false, "fritekst", null);
+
+
+        verify(prosessinstansRepo).save(piCaptor.capture());
+
+        Prosessinstans prosessinstans = piCaptor.getValue();
+        assertThat(prosessinstans.getType()).isEqualTo(ProsessType.REGISTRERING_UNNTAK_GODKJENN);
+        assertThat(prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED)).isEqualTo("fritekst");
+        assertThat(prosessinstans.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class)).isNull();
     }
 
     @Test
@@ -711,7 +735,7 @@ class ProsessinstansServiceTest {
     void opprettProsessinstansSendBrev_oppretterNyProsessinstans() {
         var behandling = new Behandling();
         var doksysbrevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(INNVILGELSE_YRKESAKTIV).build();
-        var mottaker = Mottaker.av(Aktoersroller.BRUKER);
+        var mottaker = Mottaker.medRolle(Mottakerroller.BRUKER);
 
 
         prosessinstansService.opprettProsessinstansSendBrev(behandling, doksysbrevbestilling, mottaker);
@@ -728,7 +752,7 @@ class ProsessinstansServiceTest {
     void opprettProsessinstanserSendBrev_flereMottakere_oppretterNyProsessinstansPerMottaker() {
         var behandling = new Behandling();
         var doksysbrevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(INNVILGELSE_YRKESAKTIV).build();
-        var mottakere = List.of(Mottaker.av(Aktoersroller.BRUKER), Mottaker.av(Aktoersroller.ARBEIDSGIVER), Mottaker.av(Aktoersroller.TRYGDEMYNDIGHET));
+        var mottakere = List.of(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER), Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET));
 
 
         prosessinstansService.opprettProsessinstanserSendBrev(behandling, doksysbrevbestilling, mottakere);
@@ -736,11 +760,11 @@ class ProsessinstansServiceTest {
 
         verify(prosessinstansRepo, times(3)).save(piCaptor.capture());
         assertThat(piCaptor.getAllValues().get(0).getData(ProsessDataKey.BREVBESTILLING, DoksysBrevbestilling.class).getMottakere())
-            .isEqualTo(List.of(Mottaker.av(Aktoersroller.BRUKER)));
+            .isEqualTo(List.of(Mottaker.medRolle(Mottakerroller.BRUKER)));
         assertThat(piCaptor.getAllValues().get(1).getData(ProsessDataKey.BREVBESTILLING, DoksysBrevbestilling.class).getMottakere())
-            .isEqualTo(List.of(Mottaker.av(Aktoersroller.ARBEIDSGIVER)));
+            .isEqualTo(List.of(Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER)));
         assertThat(piCaptor.getAllValues().get(2).getData(ProsessDataKey.BREVBESTILLING, DoksysBrevbestilling.class).getMottakere())
-            .isEqualTo(List.of(Mottaker.av(Aktoersroller.TRYGDEMYNDIGHET)));
+            .isEqualTo(List.of(Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET)));
     }
 
     private MelosysEessiMelding lagMelosysEessiMelding() {

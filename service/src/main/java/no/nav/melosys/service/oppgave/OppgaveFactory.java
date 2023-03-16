@@ -43,21 +43,23 @@ public final class OppgaveFactory {
         Behandlingstema behandlingstema = behandling.getTema();
         Behandlingstyper behandlingstype = behandling.getType();
 
-        var oppgaveBehandlingstema = utledBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype);
+        var oppgaveBehandlingstema = utledOppgaveBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype);
+        var oppgaveBehandlingstype = utledOppgaveBehandlingstype(sakstype, sakstema, behandlingstema);
         return new Oppgave.Builder()
             .setBehandlesAvApplikasjon(Fagsystem.MELOSYS)
             .setPrioritet(PrioritetType.NORM)
             .setBehandlingstema(oppgaveBehandlingstema.getKode())
+            .setBehandlingstype(oppgaveBehandlingstype == null ? null : oppgaveBehandlingstype.getKode())
             .setTema(utledTema(sakstema))
             .setOppgavetype(utledOppgavetype(sakstype, behandlingstema, behandlingstype))
             .setBeskrivelse(utledBeskrivelse(oppgaveBehandlingstema, sakstype, sakstema, behandlingstema, behandlingstype))
             .setFristFerdigstillelse(utledBehandlingsfrist(behandling, mottaksdato));
     }
 
-    static OppgaveBehandlingstema utledBehandlingstema(Sakstyper sakstype, Sakstemaer sakstema,
-                                                       Behandlingstema behandlingstema,
-                                                       Behandlingstyper behandlingstype) {
-        if (skalBrukeMelosysBehandlingstemaForBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype)) {
+    static OppgaveBehandlingstema utledOppgaveBehandlingstema(Sakstyper sakstype, Sakstemaer sakstema,
+                                                              Behandlingstema behandlingstema,
+                                                              Behandlingstyper behandlingstype) {
+        if (skalBrukeMelosysBehandlingstemaForOppgaveBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype)) {
             return switch (behandlingstema) {
                 case PENSJONIST -> OppgaveBehandlingstema.PENSJONIST_ELLER_UFORETRYGDET;
                 case YRKESAKTIV -> OppgaveBehandlingstema.YRKESAKTIV;
@@ -76,7 +78,7 @@ public final class OppgaveFactory {
         };
     }
 
-    private static boolean skalBrukeMelosysBehandlingstemaForBehandlingstema(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+    private static boolean skalBrukeMelosysBehandlingstemaForOppgaveBehandlingstema(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
         if (behandlingstype == null) return false;
 
         return switch (behandlingstema) {
@@ -102,6 +104,14 @@ public final class OppgaveFactory {
                 sakstype == Sakstyper.TRYGDEAVTALE && sakstema == Sakstemaer.UNNTAK && List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE).contains(behandlingstype);
             default -> false;
         };
+    }
+
+    static OppgaveBehandlingstype utledOppgaveBehandlingstype(Sakstyper sakstype, Sakstemaer sakstema,
+                                                              Behandlingstema behandlingstema) {
+        if (sakstype == Sakstyper.EU_EOS && sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG && behandlingstema == Behandlingstema.BESLUTNING_LOVVALG_NORGE) {
+            return OppgaveBehandlingstype.EOS_LOVVALG_NORGE;
+        }
+        return null;
     }
 
     public static Tema utledTema(Sakstemaer sakstema) {

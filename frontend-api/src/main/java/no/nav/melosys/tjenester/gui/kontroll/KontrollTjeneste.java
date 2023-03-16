@@ -37,8 +37,18 @@ public class KontrollTjeneste {
         if (ferdigbehandlingKontrollerDto.vedtakstype() == null) {
             throw new FunksjonellException("Vedtakstype mangler.");
         }
-        aksesskontroll.autoriser(ferdigbehandlingKontrollerDto.behandlingID(), ferdigbehandlingKontrollerDto.skalRegisteropplysningerOppdateres() ? Aksesstype.SKRIV : Aksesstype.LES);
-        ferdigbehandlingKontrollFacade.kontroller(ferdigbehandlingKontrollerDto.behandlingID(), ferdigbehandlingKontrollerDto.skalRegisteropplysningerOppdateres(), ferdigbehandlingKontrollerDto.behandlingsresultattype());
+        aksesskontroll.autoriser(
+            ferdigbehandlingKontrollerDto.behandlingID(),
+            ferdigbehandlingKontrollerDto.skalRegisteropplysningerOppdateres() ? Aksesstype.SKRIV : Aksesstype.LES
+        );
+
+        ferdigbehandlingKontrollFacade.kontroller(
+            ferdigbehandlingKontrollerDto.behandlingID(),
+            ferdigbehandlingKontrollerDto.skalRegisteropplysningerOppdateres(),
+            ferdigbehandlingKontrollerDto.behandlingsresultattype(),
+            ferdigbehandlingKontrollerDto.kontrollerSomSkalIgnoreres()
+        );
+
         return ResponseEntity.noContent().build();
     }
 }

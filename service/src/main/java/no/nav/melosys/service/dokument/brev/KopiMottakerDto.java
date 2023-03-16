@@ -1,9 +1,9 @@
 package no.nav.melosys.service.dokument.brev;
 
 import no.nav.melosys.domain.brev.utkast.KopiMottakerUtkast;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 
-public record KopiMottakerDto(Aktoersroller rolle,
+public record KopiMottakerDto(Mottakerroller rolle,
                               String orgnr,
                               String aktørId,
                               String institusjonId) {

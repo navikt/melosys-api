@@ -1,17 +1,17 @@
 package no.nav.melosys.integrasjon.dokgen.dto;
 
-import java.time.LocalDate;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Innvilgelse;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker;
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
@@ -25,11 +25,6 @@ public class InnvilgelseFtrl extends DokgenDto {
     private final List<Periode> perioder;
     private final boolean erFullstendigInnvilget;
     private final String ftrl_2_8_begrunnelse;
-    private final boolean vurderingMedlemskapEktefelle;
-    private final boolean vurderingLovvalgBarn;
-    private final List<FamiliemedlemInfo> omfattetFamilie;
-    private final List<IkkeOmfattetBarn> ikkeOmfattetBarn;
-    private final IkkeOmfattetEktefelle ikkeOmfattetEktefelle;
     private final String arbeidsgiverNavn;
     private final String arbeidsland;
     private final boolean trygdeavtaleMedArbeidsland;
@@ -57,25 +52,6 @@ public class InnvilgelseFtrl extends DokgenDto {
         return ftrl_2_8_begrunnelse;
     }
 
-    public boolean isVurderingMedlemskapEktefelle() {
-        return vurderingMedlemskapEktefelle;
-    }
-
-    public boolean isVurderingLovvalgBarn() {
-        return vurderingLovvalgBarn;
-    }
-
-    public List<FamiliemedlemInfo> getOmfattetFamilie() {
-        return omfattetFamilie;
-    }
-
-    public List<IkkeOmfattetBarn> getIkkeOmfattetBarn() {
-        return ikkeOmfattetBarn;
-    }
-
-    public IkkeOmfattetEktefelle getIkkeOmfattetEktefelle() {
-        return ikkeOmfattetEktefelle;
-    }
 
     public Innvilgelse getInnvilgelse() {
         return innvilgelse;
@@ -126,19 +102,36 @@ public class InnvilgelseFtrl extends DokgenDto {
         return (SaksinfoBruker) super.getSaksinfo();
     }
 
+    // Har kun disse med for å kunne sende brev frem til vi har en ny mal klar
+    // https://jira.adeo.no/browse/MELOSYS-5737
+    public boolean isVurderingMedlemskapEktefelle() {
+        return false;
+    }
+
+    public boolean isVurderingLovvalgBarn() {
+        return false;
+    }
+
+    public List<FamiliemedlemInfo> getOmfattetFamilie() {
+        return List.of();
+    }
+
+    public List<IkkeOmfattetBarn> getIkkeOmfattetBarn() {
+        return List.of();
+    }
+
+    public IkkeOmfattetEktefelle getIkkeOmfattetEktefelle() {
+        return null;
+    }
+
     public InnvilgelseFtrl(Builder builder) {
-        super(builder.brevbestilling, Aktoersroller.BRUKER);
+        super(builder.brevbestilling, Mottakerroller.BRUKER);
         this.innvilgelse = Innvilgelse.av(builder.brevbestilling);
         this.datoMottatt = builder.brevbestilling.getForsendelseMottatt() != null
-            ? instantTilLocalDate(builder.brevbestilling.getForsendelseMottatt()): null;
+            ? instantTilLocalDate(builder.brevbestilling.getForsendelseMottatt()) : null;
         this.perioder = builder.perioder;
         this.erFullstendigInnvilget = builder.erFullstendigInnvilget;
         this.ftrl_2_8_begrunnelse = builder.ftrl_2_8_begrunnelse;
-        this.vurderingMedlemskapEktefelle = builder.vurderingMedlemskapEktefelle;
-        this.vurderingLovvalgBarn = builder.vurderingLovvalgBarn;
-        this.omfattetFamilie = builder.omfattetFamilie;
-        this.ikkeOmfattetBarn = builder.ikkeOmfattetBarn;
-        this.ikkeOmfattetEktefelle = builder.ikkeOmfattetEktefelle;
         this.arbeidsgiverNavn = builder.arbeidsgiverNavn;
         this.arbeidsland = builder.arbeidsland;
         this.trygdeavtaleMedArbeidsland = builder.trygdeavtaleMedArbeidsland;
@@ -155,11 +148,6 @@ public class InnvilgelseFtrl extends DokgenDto {
         private List<Periode> perioder;
         private boolean erFullstendigInnvilget;
         private String ftrl_2_8_begrunnelse;
-        private boolean vurderingMedlemskapEktefelle;
-        private boolean vurderingLovvalgBarn;
-        private List<FamiliemedlemInfo> omfattetFamilie;
-        private List<IkkeOmfattetBarn> ikkeOmfattetBarn;
-        private IkkeOmfattetEktefelle ikkeOmfattetEktefelle;
         private String arbeidsgiverNavn;
         private String arbeidsland;
         private boolean trygdeavtaleMedArbeidsland;
@@ -187,31 +175,6 @@ public class InnvilgelseFtrl extends DokgenDto {
 
         public Builder ftrl_2_8_begrunnelse(String ftrl_2_8_begrunnelse) {
             this.ftrl_2_8_begrunnelse = ftrl_2_8_begrunnelse;
-            return this;
-        }
-
-        public Builder vurderingMedlemskapEktefelle(boolean vurderingMedlemskapEktefelle) {
-            this.vurderingMedlemskapEktefelle = vurderingMedlemskapEktefelle;
-            return this;
-        }
-
-        public Builder vurderingLovvalgBarn(boolean vurderingLovvalgBarn) {
-            this.vurderingLovvalgBarn = vurderingLovvalgBarn;
-            return this;
-        }
-
-        public Builder omfattetFamilie(List<FamiliemedlemInfo> omfattetFamilie) {
-            this.omfattetFamilie = omfattetFamilie;
-            return this;
-        }
-
-        public Builder ikkeOmfattetBarn(List<IkkeOmfattetBarn> ikkeOmfattetBarn) {
-            this.ikkeOmfattetBarn = ikkeOmfattetBarn;
-            return this;
-        }
-
-        public Builder ikkeOmfattetEktefelle(IkkeOmfattetEktefelle ikkeOmfattetEktefelle) {
-            this.ikkeOmfattetEktefelle = ikkeOmfattetEktefelle;
             return this;
         }
 

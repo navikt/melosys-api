@@ -6,19 +6,15 @@ import java.util.Arrays;
 import java.util.List;
 
 import no.finn.unleash.FakeUnleash;
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.SaksvedleggBestilling;
-import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.brev.FritekstbrevBrevbestilling;
-import no.nav.melosys.domain.brev.FritekstvedleggBestilling;
-import no.nav.melosys.domain.brev.MangelbrevBrevbestilling;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.brev.*;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
@@ -125,7 +121,7 @@ class DokgenServiceTest {
             .medProduserbartdokument(ATTEST_A1)
             .build();
 
-        assertThatThrownBy(() -> dokgenService.produserBrev(new Aktoer(), brevbestilling))
+        assertThatThrownBy(() -> dokgenService.produserBrev(new Mottaker(), brevbestilling))
             .isInstanceOf(FunksjonellException.class)
             .hasMessage("ProduserbartDokument ATTEST_A1 er ikke støttet");
     }
@@ -138,7 +134,7 @@ class DokgenServiceTest {
         when(mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "0123")).thenReturn("Aker");
         when(mockKodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, "NO")).thenReturn("Norge");
 
-        Aktoer mottaker = lagBruker();
+        Mottaker mottaker = lagBruker();
 
         MangelbrevBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
             .medProduserbartdokument(MANGELBREV_BRUKER)
@@ -168,7 +164,7 @@ class DokgenServiceTest {
         when(mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "0123")).thenReturn("Aker");
         when(mockKodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, "NO")).thenReturn("Norge");
 
-        Aktoer mottaker = lagBruker();
+        Mottaker mottaker = lagBruker();
 
         MangelbrevBrevbestilling brevbestilling = new MangelbrevBrevbestilling.Builder()
             .medProduserbartdokument(MANGELBREV_BRUKER)
@@ -196,7 +192,7 @@ class DokgenServiceTest {
         when(mockKontaktOpplysningService.hentKontaktopplysning(any(), any())).thenReturn(of(lagKontaktOpplysning()));
         when(mockUtledMottaksdato.getMottaksdato(any(), any())).thenReturn(LocalDate.now());
 
-        Aktoer mottaker = lagRepresentant(ORGNR, Representerer.BRUKER);
+        Mottaker mottaker = lagRepresentant(ORGNR);
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
             .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
@@ -228,7 +224,7 @@ class DokgenServiceTest {
             .medBehandlingId(123)
             .build();
 
-        byte[] pdfResponse = dokgenService.produserBrev(lagRepresentant(FNR, Representerer.BRUKER), brevbestilling);
+        byte[] pdfResponse = dokgenService.produserBrev(lagRepresentant(FNR), brevbestilling);
 
         assertThat(pdfResponse).isNotNull().isEqualTo(expectedPdf);
 
@@ -249,7 +245,7 @@ class DokgenServiceTest {
 
         BrevbestillingDto brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-        brevbestillingDto.setMottaker(Aktoersroller.BRUKER);
+        brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
         brevbestillingDto.setBestillersId("Z123456");
 
         byte[] pdfResponse = dokgenService.produserUtkast(123L, brevbestillingDto);
@@ -274,11 +270,11 @@ class DokgenServiceTest {
         when(mockUtledMottaksdato.getMottaksdato(any(), any())).thenReturn(LocalDate.now());
 
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(true), eq(false)))
-            .thenReturn(List.of(lagRepresentant(ORGNR, Representerer.BRUKER)));
+            .thenReturn(List.of(lagRepresentant(ORGNR)));
 
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-        brevbestillingDto.setMottaker(Aktoersroller.BRUKER);
+        brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
         brevbestillingDto.setBestillersId("Z123456");
 
 
@@ -302,11 +298,11 @@ class DokgenServiceTest {
         when(mockUtledMottaksdato.getMottaksdato(any(), any())).thenReturn(LocalDate.now());
 
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(true), eq(false)))
-            .thenReturn(List.of(lagRepresentant(ORGNR, Representerer.ARBEIDSGIVER)));
+            .thenReturn(List.of(lagRepresentant(ORGNR)));
 
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-        brevbestillingDto.setMottaker(Aktoersroller.ARBEIDSGIVER);
+        brevbestillingDto.setMottaker(Mottakerroller.ARBEIDSGIVER);
         brevbestillingDto.setBestillersId("Z123456");
 
 
@@ -322,8 +318,7 @@ class DokgenServiceTest {
 
     @Test
     void skalProdusereOgDistribuereBrevTilBruker() {
-        Aktoer bruker = new Aktoer();
-        bruker.setRolle(Aktoersroller.BRUKER);
+        Mottaker bruker = Mottaker.medRolle(Mottakerroller.BRUKER);
 
         when(mockSaksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Saksbehandler, Ole");
         when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
@@ -331,14 +326,14 @@ class DokgenServiceTest {
 
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(MANGELBREV_BRUKER);
-        brevbestillingDto.setMottaker(Aktoersroller.BRUKER);
+        brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
         brevbestillingDto.setBestillersId("Z123456");
 
 
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
 
 
-        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Aktoer.class), brevbestillingCaptor.capture());
+        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Mottaker.class), brevbestillingCaptor.capture());
         verify(mockBrevMottakerService).avklarMottakere(any(), any(), any(), eq(false), eq(false));
         verify(mockSaksbehandlerService).hentNavnForIdent(anyString());
 
@@ -357,7 +352,7 @@ class DokgenServiceTest {
 
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-        brevbestillingDto.setMottaker(Aktoersroller.ARBEIDSGIVER);
+        brevbestillingDto.setMottaker(Mottakerroller.ARBEIDSGIVER);
         brevbestillingDto.setOrgnr(ORGNR);
         brevbestillingDto.setBestillersId("Z123456");
 
@@ -365,7 +360,7 @@ class DokgenServiceTest {
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
 
 
-        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Aktoer.class), brevbestillingCaptor.capture());
+        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Mottaker.class), brevbestillingCaptor.capture());
         verifyNoInteractions(mockBrevMottakerService);
 
         DokgenBrevbestilling brevbestilling = brevbestillingCaptor.getValue();
@@ -382,18 +377,18 @@ class DokgenServiceTest {
 
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(MANGELBREV_BRUKER);
-        brevbestillingDto.setMottaker(Aktoersroller.ARBEIDSGIVER);
+        brevbestillingDto.setMottaker(Mottakerroller.ARBEIDSGIVER);
         brevbestillingDto.setOrgnr(ORGNR);
         brevbestillingDto.setManglerFritekst("Mangler");
         brevbestillingDto.setBestillersId("Z123456");
-        brevbestillingDto.setKopiMottakere(List.of(new KopiMottakerDto(Aktoersroller.BRUKER, null, "1223", null)));
+        brevbestillingDto.setKopiMottakere(List.of(new KopiMottakerDto(Mottakerroller.BRUKER, null, "1223", null)));
 
 
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
 
 
         verify(mockProsessinstansService, times(2)).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class),
-            any(Aktoer.class), brevbestillingCaptor.capture());
+            any(Mottaker.class), brevbestillingCaptor.capture());
         verifyNoInteractions(mockBrevMottakerService);
 
         MangelbrevBrevbestilling brevbestilling = (MangelbrevBrevbestilling) brevbestillingCaptor.getValue();
@@ -407,8 +402,7 @@ class DokgenServiceTest {
 
     @Test
     void produserOgDistribuerBrev_skalDistribuereBrevMedVedlegg_nårBrevbestillingInneholderVedlegg() {
-        Aktoer bruker = new Aktoer();
-        bruker.setRolle(Aktoersroller.BRUKER);
+        Mottaker bruker = Mottaker.medRolle(Mottakerroller.BRUKER);
 
         when(mockSaksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Saksbehandler, Ole");
         when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
@@ -429,7 +423,7 @@ class DokgenServiceTest {
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
 
 
-        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Aktoer.class), brevbestillingCaptor.capture());
+        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Mottaker.class), brevbestillingCaptor.capture());
         verify(mockBrevMottakerService).avklarMottakere(any(), any(), any(), eq(false), eq(false));
         verify(mockSaksbehandlerService).hentNavnForIdent(anyString());
 
@@ -446,8 +440,7 @@ class DokgenServiceTest {
 
     @Test
     void produserOgDistribuerBrev_skalDistribuereBrevMedDistribusjonstype_når_fritekstbrev() {
-        Aktoer bruker = new Aktoer();
-        bruker.setRolle(Aktoersroller.BRUKER);
+        Mottaker bruker = Mottaker.medRolle(Mottakerroller.BRUKER);
 
         when(mockSaksbehandlerService.hentNavnForIdent(anyString())).thenReturn("Saksbehandler, Ole");
         when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
@@ -469,7 +462,7 @@ class DokgenServiceTest {
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
 
 
-        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Aktoer.class), brevbestillingCaptor.capture());
+        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Mottaker.class), brevbestillingCaptor.capture());
         verify(mockBrevMottakerService).avklarMottakere(any(), any(), any(), eq(false), eq(false));
         verify(mockSaksbehandlerService).hentNavnForIdent(anyString());
 
@@ -487,28 +480,26 @@ class DokgenServiceTest {
 
     @Test
     void produserOgDistribuerBrev_brukerSkalHaKopi_setterFeltKorrekt() {
-        Aktoer arbeidsgiver = new Aktoer();
-        arbeidsgiver.setRolle(Aktoersroller.ARBEIDSGIVER);
+        Mottaker arbeidsgiver = Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER);
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(arbeidsgiver));
         when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
 
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(GENERELT_FRITEKSTBREV_BRUKER);
-        brevbestillingDto.setKopiMottakere(List.of(new KopiMottakerDto(Aktoersroller.BRUKER, null, null, null)));
+        brevbestillingDto.setKopiMottakere(List.of(new KopiMottakerDto(Mottakerroller.BRUKER, null, null, null)));
 
 
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
 
 
-        verify(mockProsessinstansService, times(2)).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Aktoer.class), brevbestillingCaptor.capture());
+        verify(mockProsessinstansService, times(2)).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Mottaker.class), brevbestillingCaptor.capture());
         FritekstbrevBrevbestilling brevbestilling = (FritekstbrevBrevbestilling) brevbestillingCaptor.getValue();
         assertThat(brevbestilling.isBrukerSkalHaKopi()).isTrue();
     }
 
     @Test
     void produserOgDistribuerBrev_brukerSkalIkkeHaKopi_setterFeltKorrekt() {
-        Aktoer arbeidsgiver = new Aktoer();
-        arbeidsgiver.setRolle(Aktoersroller.ARBEIDSGIVER);
+        Mottaker arbeidsgiver = Mottaker.medRolle(Mottakerroller.ARBEIDSGIVER);
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(false), eq(false))).thenReturn(List.of(arbeidsgiver));
         when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
 
@@ -520,9 +511,39 @@ class DokgenServiceTest {
         dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
 
 
-        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Aktoer.class), brevbestillingCaptor.capture());
+        verify(mockProsessinstansService).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class), any(Mottaker.class), brevbestillingCaptor.capture());
         MangelbrevBrevbestilling brevbestilling = (MangelbrevBrevbestilling) brevbestillingCaptor.getValue();
         assertThat(brevbestilling.isBrukerSkalHaKopi()).isFalse();
+    }
+
+    @Test
+    void skalProdusereOgDistribuereBrevTilFullmektigPrivatpersonMedKopi() {
+        when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(new Behandling());
+
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(MANGELBREV_ARBEIDSGIVER);
+        brevbestillingDto.setMottaker(Mottakerroller.ARBEIDSGIVER);
+        brevbestillingDto.setOrgnr(ORGNR);
+        brevbestillingDto.setManglerFritekst("Mangler");
+        brevbestillingDto.setBestillersId("Z123456");
+        brevbestillingDto.setKopiMottakere(List.of(new KopiMottakerDto(Mottakerroller.FULLMEKTIG, null, null, null)));
+
+        var mottaker = new Mottaker(Mottakerroller.FULLMEKTIG, null, "12345678999", null, null, Land_iso2.NO);
+        when(mockBrevMottakerService.avklarMottaker(any(), any(), any())).thenReturn(mottaker);
+
+        dokgenService.produserOgDistribuerBrev(123L, brevbestillingDto);
+
+
+        verify(mockProsessinstansService, times(1)).opprettProsessinstansOpprettOgDistribuerBrev(any(Behandling.class),
+            eq(mottaker), brevbestillingCaptor.capture());
+
+        var brevbestilling = (MangelbrevBrevbestilling) brevbestillingCaptor.getValue();
+        assertThat(brevbestilling).extracting(
+            MangelbrevBrevbestilling::getProduserbartdokument,
+            MangelbrevBrevbestilling::getBehandlingId,
+            MangelbrevBrevbestilling::getManglerInfoFritekst,
+            MangelbrevBrevbestilling::isBestillKopi
+        ).containsExactly(MANGELBREV_ARBEIDSGIVER, 123L, "Mangler", true);
     }
 
     @Test
@@ -556,22 +577,19 @@ class DokgenServiceTest {
         return saksopplysning;
     }
 
-    private Aktoer lagBruker() {
-        var aktoer = new Aktoer();
-        aktoer.setRolle(Aktoersroller.BRUKER);
-        aktoer.setAktørId(FNR);
-        return aktoer;
+    private Mottaker lagBruker() {
+        var mottaker = Mottaker.medRolle(Mottakerroller.BRUKER);
+        mottaker.setAktørId(FNR);
+        return mottaker;
     }
 
-    private Aktoer lagRepresentant(String mottakerID, Representerer representerer) {
-        var aktoer = new Aktoer();
-        aktoer.setRolle(Aktoersroller.REPRESENTANT);
-        aktoer.setRepresenterer(representerer);
+    private Mottaker lagRepresentant(String mottakerID) {
+        var mott = Mottaker.medRolle(Mottakerroller.FULLMEKTIG);
         if (mottakerID.equals(ORGNR)) {
-            aktoer.setOrgnr(ORGNR);
+            mott.setOrgnr(ORGNR);
         } else if (mottakerID.equals(FNR)) {
-            aktoer.setPersonIdent(FNR);
+            mott.setPersonIdent(FNR);
         }
-        return aktoer;
+        return mott;
     }
 }

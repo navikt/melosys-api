@@ -5,7 +5,10 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -62,7 +65,13 @@ public class TrygdeavtaleVedtakService {
         behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
 
         if (behandlingsresultat.erInnvilgelse()) {
-            ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(behandling, behandlingsresultat, Sakstyper.TRYGDEAVTALE, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
+            ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
+                behandling,
+                behandlingsresultat,
+                Sakstyper.TRYGDEAVTALE,
+                Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN,
+                null
+            );
         }
 
         oppdaterBehandlingsresultat(behandlingsresultat, request);
@@ -95,7 +104,7 @@ public class TrygdeavtaleVedtakService {
     private BrevbestillingDto lagAvslagMangledeOpplysningerBrevbestilling(FattVedtakRequest request) {
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER);
-        brevbestillingDto.setMottaker(Aktoersroller.BRUKER);
+        brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
         brevbestillingDto.setBestillersId(request.getBestillersId());
         brevbestillingDto.setFritekst(request.getFritekst());
         return brevbestillingDto;
@@ -104,7 +113,7 @@ public class TrygdeavtaleVedtakService {
     private BrevbestillingDto lagTrygdeavtaleBrevbestilling(FattVedtakRequest request, Produserbaredokumenter produserbaredokumenter) {
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(produserbaredokumenter);
-        brevbestillingDto.setMottaker(Aktoersroller.BRUKER);
+        brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
         brevbestillingDto.setKopiMottakere(request.getKopiMottakere());
         brevbestillingDto.setInnledningFritekst(request.getInnledningFritekst());
         brevbestillingDto.setBegrunnelseFritekst(request.getBegrunnelseFritekst());
@@ -121,8 +130,7 @@ public class TrygdeavtaleVedtakService {
             case US -> Produserbaredokumenter.TRYGDEAVTALE_US;
             case CA -> Produserbaredokumenter.TRYGDEAVTALE_CAN;
             case AU -> Produserbaredokumenter.TRYGDEAVTALE_AU;
-            default ->
-                throw new TekniskException("Søknadsland er ikke implementert som produsertbart dokument : " + soeknadsland);
+            default -> throw new TekniskException("Søknadsland er ikke implementert som produsertbart dokument : " + soeknadsland);
         };
     }
 
@@ -130,7 +138,7 @@ public class TrygdeavtaleVedtakService {
         behandlingsresultat.settVedtakMetadata(request.getVedtakstype(), request.getNyVurderingBakgrunn(), LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
         behandlingsresultat.setBegrunnelseFritekst(request.getBegrunnelseFritekst());
         behandlingsresultat.setInnledningFritekst(request.getInnledningFritekst());
-        behandlingsresultat.setFastsattAvLand(Landkoder.NO);
+        behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
 
         behandlingsresultatService.lagre(behandlingsresultat);
     }

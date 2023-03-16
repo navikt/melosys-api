@@ -3,13 +3,22 @@ package no.nav.melosys.integrasjon.medl
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.equality.FieldsEqualityCheckConfig
+import io.kotest.matchers.equality.shouldBeEqualToComparingFields
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
+import io.kotest.matchers.types.shouldBeInstanceOf
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.slot
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
-import no.nav.melosys.domain.kodeverk.Landkoder
-import no.nav.melosys.domain.kodeverk.Medlemskapstyper
-import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
+import no.nav.melosys.domain.dokument.medlemskap.Periode
+import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForGet
@@ -19,18 +28,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.LocalDate
 import java.util.*
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.slot
-import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.equality.FieldsEqualityCheckConfig
-import io.kotest.matchers.equality.shouldBeEqualToComparingFields
-import io.kotest.matchers.nulls.shouldNotBeNull
-import io.kotest.matchers.shouldBe
-import io.kotest.matchers.string.shouldContain
-import io.kotest.matchers.types.shouldBeInstanceOf
-import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
-import no.nav.melosys.domain.dokument.medlemskap.Periode
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class MedlServiceTest {
@@ -314,7 +311,7 @@ internal class MedlServiceTest {
         fom = LocalDate.now()
         tom = LocalDate.now().plusYears(1)
         dekning = Trygdedekninger.FULL_DEKNING_EOSFO
-        lovvalgsland = Landkoder.BE
+        lovvalgsland = Land_iso2.BE
         tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1
     }
 

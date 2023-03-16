@@ -9,10 +9,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.domain.mottatteopplysninger.SoeknadTrygdeavtale;
-import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
@@ -21,9 +17,14 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.SoeknadTrygdeavtale;
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
@@ -48,6 +49,8 @@ class KontrollTest {
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
+    private AvklarteVirksomheterService avklarteVirksomheterService;
+    @Mock
     private PersondataFasade persondataFasade;
 
     private final long behandlingID = 1L;
@@ -70,7 +73,7 @@ class KontrollTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
 
         unleash.enableAll();
-        kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, persondataFasade, unleash);
+        kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, avklarteVirksomheterService, persondataFasade, unleash);
     }
 
     @Test
@@ -184,7 +187,7 @@ class KontrollTest {
 
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now().plusYears(3).plusDays(1));
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
+        lovvalgsperiode.setBestemmelse(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1);
 
         behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new SoeknadTrygdeavtale());
 
@@ -264,10 +267,22 @@ class KontrollTest {
     }
 
     @Test
+    void utførKontroller_avklartVirksomhetErOpphørt_returnererKode() {
+        mockReturnertLovvalgsperiode();
+        when(avklarteVirksomheterService.harOpphørtAvklartVirksomhet(behandling)).thenReturn(true);
+
+        Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
+
+        assertThat(resultat)
+            .extracting(Kontrollfeil::getKode)
+            .contains(Kontroll_begrunnelser.OPPHØRT_ARBEIDSGIVER);
+    }
+
+    @Test
     void utførKontroller_representantIUtlandetMangler_returnererKode() {
         mockReturnertLovvalgsperiode();
 
-        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_trygdeavtale_uk.UK_ART6_1);
+        lovvalgsperiode.setBestemmelse(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1);
 
         behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new SoeknadTrygdeavtale());
 

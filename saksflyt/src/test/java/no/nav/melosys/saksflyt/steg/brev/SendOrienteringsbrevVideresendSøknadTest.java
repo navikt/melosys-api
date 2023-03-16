@@ -3,7 +3,7 @@ package no.nav.melosys.saksflyt.steg.brev;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class SendOrienteringsbrevVideresendSøknadTest {
+class SendOrienteringsbrevVideresendSøknadTest {
 
     @Mock
     private BehandlingService behandlingService;
@@ -39,7 +39,7 @@ public class SendOrienteringsbrevVideresendSøknadTest {
 
     @BeforeEach
     public void setup() {
-        steg = new SendOrienteringsbrevVideresendSøknad(behandlingService , brevBestiller);
+        steg = new SendOrienteringsbrevVideresendSøknad(behandlingService, brevBestiller);
 
         behandling = new Behandling();
         behandling.setId(1L);
@@ -49,12 +49,12 @@ public class SendOrienteringsbrevVideresendSøknadTest {
     }
 
     @Test
-    public void utfør_brevbestilling_harRiktigBrevTypeOgMottaker() {
+    void utfør_brevbestilling_harRiktigBrevTypeOgMottaker() {
         steg.utfør(prosessinstans);
         verify(brevBestiller).bestill(captor.capture());
         DoksysBrevbestilling brevbestilling = captor.getValue();
         assertThat(brevbestilling.getProduserbartdokument()).isEqualTo(Produserbaredokumenter.ORIENTERING_VIDERESENDT_SOEKNAD);
-        assertThat(brevbestilling.getMottakere().stream().map(Mottaker::hentAktørsRolle)).containsExactly(Aktoersroller.BRUKER);
+        assertThat(brevbestilling.getMottakere().stream().map(Mottaker::getRolle)).containsExactly(Mottakerroller.BRUKER);
         assertThat(brevbestilling.getBehandling()).isEqualTo(behandling);
     }
 }

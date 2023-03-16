@@ -9,7 +9,6 @@ import javax.annotation.Nullable;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
@@ -19,7 +18,8 @@ import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -252,7 +252,8 @@ public class ProsessinstansService {
     }
 
     public void opprettProsessinstansIverksettVedtakEos(Behandling behandling, Behandlingsresultattyper behandlingsresultatType,
-                                                        String fritekst, String fritekstSed, Set<String> mottakerinstitusjoner) {
+                                                        String fritekst, String fritekstSed, Set<String> mottakerinstitusjoner,
+                                                        boolean arbeidsgiverSkalHaKopi) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK_EOS)
             .medBehandling(behandling)
@@ -263,6 +264,7 @@ public class ProsessinstansService {
 
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTATTYPE, behandlingsresultatType.getKode());
         prosessinstans.setData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstype.VEDTAK);
+        prosessinstans.setData(ARBEIDSGIVER_SKAL_HA_KOPI, arbeidsgiverSkalHaKopi);
 
         lagre(prosessinstans);
     }
@@ -351,11 +353,23 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansGodkjennUnntaksperiode(Behandling behandling, boolean varsleUtland, String fritekst) {
+    public void opprettProsessinstansRegistrerUnntakFraMedlemskap(Behandling behandling, Saksstatuser saksstatus) {
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medBehandling(behandling)
+            .medType(ProsessType.REGISTRERE_UNNTAK_FRA_MEDLEMSKAP)
+            .build();
+
+        prosessinstans.setData(SAKSSTATUS, saksstatus);
+
+        lagre(prosessinstans);
+    }
+
+    public void opprettProsessinstansGodkjennUnntaksperiode(Behandling behandling, boolean varsleUtland, String fritekst, MelosysEessiMelding melosysEessiMelding) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
             .medType(ProsessType.REGISTRERING_UNNTAK_GODKJENN)
             .medYtterligereinformasjonSed(fritekst)
+            .medEessiMelding(melosysEessiMelding)
             .build();
 
         prosessinstans.setData(ProsessDataKey.VARSLE_UTLAND, varsleUtland);
@@ -373,7 +387,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansOpprettOgDistribuerBrev(Behandling behandling, Aktoer mottaker, DokgenBrevbestilling brevbestilling) {
+    public void opprettProsessinstansOpprettOgDistribuerBrev(Behandling behandling, Mottaker mottaker, DokgenBrevbestilling brevbestilling) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_OG_DISTRIBUER_BREV);
         prosessinstans.setData(BREVBESTILLING, brevbestilling);
@@ -387,9 +401,9 @@ public class ProsessinstansService {
         if (hasText(mottaker.getOrgnr())) {
             prosessinstans.setData(ORGNR, mottaker.getOrgnr());
         }
-        if (hasText(mottaker.getInstitusjonId())) {
+        if (hasText(mottaker.getInstitusjonID())) {
             // TODO Parsing av variabelen feiler pga ":". Burde fikses på en skikkelig måte
-            prosessinstans.setData(INSTITUSJON_ID, String.format("\"%s\"", mottaker.getInstitusjonId()));
+            prosessinstans.setData(INSTITUSJON_ID, String.format("\"%s\"", mottaker.getInstitusjonID()));
         }
         prosessinstans.setBehandling(behandling);
         lagre(prosessinstans);
@@ -439,7 +453,7 @@ public class ProsessinstansService {
     }
 
     public void opprettProsessinstansUtpekAnnetLand(Behandling behandling,
-                                                    Landkoder utpektLand,
+                                                    Land_iso2 utpektLand,
                                                     Set<String> mottakerinstitusjoner,
                                                     String ytterligereInformasjonSed,
                                                     String fritekstBrev) {

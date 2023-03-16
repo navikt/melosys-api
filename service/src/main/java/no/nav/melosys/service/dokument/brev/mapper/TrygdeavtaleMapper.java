@@ -11,8 +11,8 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
-import no.nav.melosys.domain.brev.FastMottakerMedOrgnr;
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling;
+import no.nav.melosys.domain.brev.NorskMyndighet;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
@@ -35,9 +35,9 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.UtledMottaksdato;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_uk.UK_ART8_2;
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_1;
-import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_trygdeavtale_usa.USA_ART5_9;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART8_2;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_1;
+import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_9;
 import static no.nav.melosys.domain.mottatteopplysninger.data.IdentType.DNR;
 import static no.nav.melosys.domain.mottatteopplysninger.data.IdentType.FNR;
 import static org.springframework.util.ObjectUtils.isEmpty;
@@ -287,7 +287,7 @@ public class TrygdeavtaleMapper {
 
     private boolean erSkatteetaten(OrganisasjonDokument org) {
         // Skatteetaten skal ikke ha attest
-        return org != null && FastMottakerMedOrgnr.SKATTEETATEN.getOrgnr().equals(org.getOrgnummer());
+        return org != null && NorskMyndighet.SKATTEETATEN.getOrgnr().equals(org.getOrgnummer());
     }
 
     private boolean skalIkkeHaInnvilgelse(InnvilgelseBrevbestilling brevbestilling) {

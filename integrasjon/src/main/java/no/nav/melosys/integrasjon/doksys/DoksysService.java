@@ -4,7 +4,7 @@ import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.arkiv.Distribusjonstidspunkt;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
@@ -249,7 +249,7 @@ public class DoksysService implements DoksysFasade {
             throw new FunksjonellException("Brev kan ikke sendes, mottaker er ikke satt.");
         }
 
-        Aktoersroller mottakerRolle = metadata.mottaker.getRolle();
+        Mottakerroller mottakerRolle = metadata.mottaker.getRolle();
         String mottakerID = metadata.mottakerID;
         String brukerNavn = metadata.brukerNavn;
         boolean berik = metadata.berik;
@@ -257,31 +257,34 @@ public class DoksysService implements DoksysFasade {
         switch (mottakerRolle) {
             case BRUKER:
                 return lagPerson(mottakerID, brukerNavn, berik);
-            case ARBEIDSGIVER:
-            case REPRESENTANT:
+            case ARBEIDSGIVER, NORSK_MYNDIGHET:
+                return lagOrganisasjon(mottakerID);
+            case FULLMEKTIG:
                 if (metadata.mottaker.erOrganisasjon()) {
-                    Organisasjon organisasjon = objectFactory.createOrganisasjon();
-                    organisasjon.setOrgnummer(mottakerID);
-                    return organisasjon;
+                    return lagOrganisasjon(mottakerID);
                 } else {
                     Person person = objectFactory.createPerson();
                     person.setIdent(mottakerID);
                     return person;
                 }
-            case TRYGDEMYNDIGHET:
+            case UTENLANDSK_TRYGDEMYNDIGHET:
                 if (metadata.mottaker.erUtenlandskMyndighet()) {
                     // Dokprod støtter ikke utenlandske myndigheter så vi lager en falsk person
                     // med mottakerId="11111111111" og dermed blir AvsendMottakId i Joark tom.
                     return lagPerson(FALSK_MOTTAKER_ID, metadata.utenlandskMyndighet.navn, false);
                 } else {
-                    Organisasjon myndighet = objectFactory.createOrganisasjon();
-                    myndighet.setOrgnummer(mottakerID);
-                    return myndighet;
+                    return lagOrganisasjon(mottakerID);
                 }
             default:
                 log.warn("MottakersRolle {} er ukjent. PERSON brukes som standard.", mottakerRolle);
                 return lagPerson(mottakerID, brukerNavn, berik);
         }
+    }
+
+    private Organisasjon lagOrganisasjon(String mottakerID) {
+        Organisasjon organisasjon = objectFactory.createOrganisasjon();
+        organisasjon.setOrgnummer(mottakerID);
+        return organisasjon;
     }
 
     private Aktoer lagPerson(String personID, String navn, boolean berik) {

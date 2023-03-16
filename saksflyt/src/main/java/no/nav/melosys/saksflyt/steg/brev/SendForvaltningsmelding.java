@@ -4,6 +4,7 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
@@ -13,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING;
@@ -42,7 +42,7 @@ public class SendForvaltningsmelding implements StegBehandler {
         if (skalSendeForvaltningsmelding(prosessinstans)) {
             Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
             String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
-            brevBestiller.bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID, List.of(Mottaker.av(BRUKER)), null, saksbehandler, null, behandling);
+            brevBestiller.bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID, List.of(Mottaker.medRolle(Mottakerroller.BRUKER)), null, saksbehandler, null, behandling);
             log.info("Sendt forvaltningsmelding for behandling {}", prosessinstans.getBehandling().getId());
         } else {
             log.info("Ikke sendt forvaltningsmelding for behandling {}", prosessinstans.getBehandling().getId());

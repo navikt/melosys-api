@@ -1,12 +1,10 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
-import java.util.List;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.Brevbestilling;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -20,6 +18,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.ORIENTERING_ANMODNING_UNNTAK;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -74,7 +74,7 @@ class SendOrienteringAnmodningUnntakTest {
                 ORIENTERING_ANMODNING_UNNTAK,
                 behandling,
                 SAKSBEHANDLER,
-                List.of(Mottaker.av(Aktoersroller.BRUKER))
+                List.of(Mottaker.medRolle(Mottakerroller.BRUKER))
             );
     }
 }

@@ -5,8 +5,8 @@ import java.util.List;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -26,8 +26,8 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.ARBEIDSGIVER;
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.Mottakerroller.ARBEIDSGIVER;
+import static no.nav.melosys.domain.kodeverk.Mottakerroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.Saksstatuser.MEDLEMSKAP_AVKLART;
 import static no.nav.melosys.domain.kodeverk.Vedtakstyper.FØRSTEGANGSVEDTAK;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL;
@@ -35,7 +35,7 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyp
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.IVERKSETTER_VEDTAK;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN_2_8;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -98,7 +98,7 @@ class FtrlVedtakServiceTest {
                 Behandlingsresultat::getBegrunnelseFritekst,
                 Behandlingsresultat::getFastsattAvLand
             )
-            .containsExactly(MEDLEM_I_FOLKETRYGDEN, "Begrunnelse", Landkoder.NO);
+            .containsExactly(MEDLEM_I_FOLKETRYGDEN, "Begrunnelse", Land_iso2.NO);
 
         Behandling lagretBehandling = behandlingCaptor.getValue();
         assertThat(lagretBehandling.getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
@@ -116,7 +116,7 @@ class FtrlVedtakServiceTest {
             )
             .containsExactly(INNVILGELSE_FOLKETRYGDLOVEN_2_8, "Z990007", BRUKER, "Innledning",
                 "Begrunnelse", "Ektefelle omfattet", "Barn omfattet");
-        assertThat(brevbestillingDto.getKopiMottakere().size()).isEqualTo(1);
+        assertThat(brevbestillingDto.getKopiMottakere()).hasSize(1);
         assertThat(brevbestillingDto.getKopiMottakere().get(0).rolle()).isEqualTo(ARBEIDSGIVER);
     }
 
@@ -155,7 +155,7 @@ class FtrlVedtakServiceTest {
                 BrevbestillingDto::getFritekst
             )
             .containsExactly(AVSLAG_MANGLENDE_OPPLYSNINGER, "Z990007", BRUKER, "fritekst for beskrivelse avslag");
-        assertThat(brevbestillingDto.getKopiMottakere().size()).isEqualTo(0);
+        assertThat(brevbestillingDto.getKopiMottakere()).isEmpty();
     }
 
     private FattVedtakRequest lagFattVedtakRequest() {
@@ -166,7 +166,7 @@ class FtrlVedtakServiceTest {
             .medBegrunnelseFritekst("Begrunnelse")
             .medEktefelleFritekst("Ektefelle omfattet")
             .medBarnFritekst("Barn omfattet")
-            .medKopiMottakere(List.of(new KopiMottakerDto(Aktoersroller.ARBEIDSGIVER, "987654321", null, null)))
+            .medKopiMottakere(List.of(new KopiMottakerDto(Mottakerroller.ARBEIDSGIVER, "987654321", null, null)))
             .medBestillersId(SubjectHandler.getInstance().getUserID())
             .build();
     }

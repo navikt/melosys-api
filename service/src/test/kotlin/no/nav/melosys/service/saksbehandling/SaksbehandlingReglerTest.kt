@@ -32,7 +32,7 @@ class SaksbehandlingReglerTest {
     @MockK
     lateinit var behandlingsresultatRepository: BehandlingsresultatRepository
 
-    private val unleash = FakeUnleash();
+    private val unleash = FakeUnleash()
 
     @ParameterizedTest(name = "{0} - {1} - {2} - {3}")
     @MethodSource("tidligereBehandlingSkalIkkeReplikeresData")
@@ -360,9 +360,44 @@ class SaksbehandlingReglerTest {
         )
     }
 
+    @ParameterizedTest()
+    @MethodSource("harRegistreringUnntakFraMedlemskapFlytData")
+    fun harRegistreringUnntakFraMedlemskapFlyt_forventetResultat(
+        sakstype: Sakstyper,
+        sakstema: Sakstemaer,
+        behandlingstema: Behandlingstema,
+        toggle: Boolean,
+        forventetResultat: Boolean
+    ) {
+        SaksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(
+            sakstype, sakstema, behandlingstema, toggle
+        ).shouldBe(forventetResultat)
+    }
+
+    private fun harRegistreringUnntakFraMedlemskapFlytData() = listOf(
+        arguments(Sakstyper.EU_EOS, Sakstemaer.UNNTAK, Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR, true, true),
+        arguments(
+            Sakstyper.TRYGDEAVTALE,
+            Sakstemaer.UNNTAK,
+            Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL,
+            true,
+            true
+        ),
+        arguments(Sakstyper.TRYGDEAVTALE, Sakstemaer.UNNTAK, Behandlingstema.REGISTRERING_UNNTAK, true, true),
+        arguments(Sakstyper.EU_EOS, Sakstemaer.UNNTAK, Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR, false, false),
+        arguments(
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR,
+            true,
+            false
+        ),
+        arguments(Sakstyper.TRYGDEAVTALE, Sakstemaer.UNNTAK, Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR, true, false)
+    )
+
     class BehandlingHolder {
         private val behandlingerMedType: ArrayList<Pair<Behandling, Behandlingsresultattyper?>> = ArrayList()
-        private val unleash = FakeUnleash();
+        private val unleash = FakeUnleash()
 
         fun setup(behandlingsresultatRepository: BehandlingsresultatRepository): SaksbehandlingRegler {
             unleash.enableAll()

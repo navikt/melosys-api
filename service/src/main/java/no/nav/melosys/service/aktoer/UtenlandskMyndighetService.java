@@ -4,10 +4,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Enums;
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.UtenlandskMyndighet;
+import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
@@ -18,8 +19,6 @@ import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import static no.nav.melosys.domain.kodeverk.Aktoersroller.TRYGDEMYNDIGHET;
 
 @Service
 public class UtenlandskMyndighetService {
@@ -90,7 +89,7 @@ public class UtenlandskMyndighetService {
         return utenlandskMyndighetRepository.findAll();
     }
 
-    public Map<UtenlandskMyndighet, Aktoer> lagUtenlandskeMyndigheterFraBehandling(Behandling behandling) {
+    public Map<UtenlandskMyndighet, Mottaker> lagUtenlandskeMyndigheterFraBehandling(Behandling behandling) {
         Collection<Land_iso2> utenlandskeMyndigheterLandkoder = new ArrayList<>();
         try {
             utenlandskeMyndigheterLandkoder = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandling.getId());
@@ -100,14 +99,13 @@ public class UtenlandskMyndighetService {
         List<UtenlandskMyndighet> utenlandskMyndighetList = utenlandskMyndighetRepository.findByLandkodeIsIn(utenlandskeMyndigheterLandkoder);
 
         return utenlandskMyndighetList.stream()
-            .collect(Collectors.toMap(utenlandskMyndighet -> utenlandskMyndighet, this::lagAktoer));
+            .collect(Collectors.toMap(utenlandskMyndighet -> utenlandskMyndighet, this::lagMottaker));
     }
 
-    private Aktoer lagAktoer(UtenlandskMyndighet utenlandskMyndighet) {
-        Aktoer aktoer = new Aktoer();
-        aktoer.setRolle(TRYGDEMYNDIGHET);
-        aktoer.setInstitusjonId(utenlandskMyndighet.hentInstitusjonID());
-        return aktoer;
+    private Mottaker lagMottaker(UtenlandskMyndighet utenlandskMyndighet) {
+        Mottaker mottaker = Mottaker.medRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
+        mottaker.setInstitusjonID(utenlandskMyndighet.hentInstitusjonID());
+        return mottaker;
     }
 
     public Optional<String> finnInstitusjonID(String landkode) {

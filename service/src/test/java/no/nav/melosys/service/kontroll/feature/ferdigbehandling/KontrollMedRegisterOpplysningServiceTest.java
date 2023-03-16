@@ -14,6 +14,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.exception.validering.KontrollfeilDto;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -28,6 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
@@ -42,6 +44,8 @@ class KontrollMedRegisterOpplysningServiceTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
+    @Mock
+    private AvklarteVirksomheterService avklarteVirksomheterService;
     @Mock
     private PersondataFasade persondataFasade;
     @Mock
@@ -66,9 +70,8 @@ class KontrollMedRegisterOpplysningServiceTest {
 
         behandling.getSaksopplysninger().add(medlSaksopplysning);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
-        when(lovvalgsperiodeService.hentLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
-        Kontroll kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, persondataFasade, unleash);
+        Kontroll kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, avklarteVirksomheterService, persondataFasade, unleash);
         kontrollMedRegisterOpplysning = new KontrollMedRegisteropplysning(behandlingService, behandlingsresultatService, persondataFasade,
             registeropplysningerService, kontroll, unleash);
 
@@ -79,11 +82,12 @@ class KontrollMedRegisterOpplysningServiceTest {
     void kontrollerVedtakMedNyeRegisteropplysninger_feilFraKontroller_kasterExceptionMedFeilkode() {
         var behandlingsresultat = lagBehandlingsresultat();
         when(persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID())).thenReturn("fnr");
+        when(lovvalgsperiodeService.hentLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
         Consumer<ValideringException> medFeilkode = v -> assertThat(v.getFeilkoder())
             .extracting(KontrollfeilDto::getKode).containsExactly(Kontroll_begrunnelser.INGEN_SLUTTDATO.getKode());
 
-        assertThatThrownBy(() -> kontrollMedRegisterOpplysning.kontrollerVedtak(behandling, behandlingsresultat, Sakstyper.EU_EOS, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN))
+        assertThatThrownBy(() -> kontrollMedRegisterOpplysning.kontrollerVedtak(behandling, behandlingsresultat, Sakstyper.EU_EOS, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, null))
             .isInstanceOfSatisfying(ValideringException.class, medFeilkode)
             .hasMessage("Feil i validering. Kan ikke fatte vedtak.");
     }
@@ -94,9 +98,30 @@ class KontrollMedRegisterOpplysningServiceTest {
         var behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
         when(persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID())).thenReturn("fnr");
+        when(lovvalgsperiodeService.hentLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
-        kontrollMedRegisterOpplysning.kontroller(behandling.getId(), Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
+        kontrollMedRegisterOpplysning.kontroller(behandling.getId(), Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, null);
         verify(registeropplysningerService).hentOgLagreOpplysninger(any());
+    }
+
+    @Test
+    void kontrollerVedtak_AvslagPersonUtenRegistrertAdresse_returnererKode() {
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(lagBehandlingsresultat());
+        when(persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID())).thenReturn("fnr");
+        when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser());
+
+        var feilIgnoreres = Set.of(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
+        var annenFeilIgnoreres = Set.of(Kontroll_begrunnelser.MANGLER_VIRKSOMHET);
+
+
+        assertDoesNotThrow(
+            () -> kontrollMedRegisterOpplysning.kontroller(behandlingID, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, feilIgnoreres)
+        );
+
+        assertThatThrownBy(() ->
+            kontrollMedRegisterOpplysning.kontroller(behandlingID, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, annenFeilIgnoreres))
+            .isInstanceOf(ValideringException.class)
+            .hasMessage("Feil i validering. Kan ikke fatte vedtak.");
     }
 
     private Behandlingsresultat lagBehandlingsresultat() {

@@ -6,7 +6,7 @@ import java.time.ZoneId;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -105,7 +105,7 @@ class AvsluttArt13BehandlingServiceTest {
 
 
         verify(fagsakService).avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART);
-        verify(medlPeriodeService).oppdaterPeriodeEndelig(lovvalgsperiode, true);
+        verify(medlPeriodeService).oppdaterPeriodeEndelig(lovvalgsperiode);
     }
 
     @Test
@@ -128,13 +128,13 @@ class AvsluttArt13BehandlingServiceTest {
 
 
         verify(fagsakService).avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART);
-        verify(medlPeriodeService).oppdaterPeriodeEndelig(lovvalgsperiode, false);
+        verify(medlPeriodeService).oppdaterPeriodeEndelig(lovvalgsperiode);
     }
 
     @Test
     void avsluttBehandlingArt13_søknad3MndSidenEndretDatoUtpekingUtenVedtak_lovvalgsperiodeOpprettetOgBehandlingAvsluttet() {
         Utpekingsperiode utpekingsperiode = new Utpekingsperiode(
-            LocalDate.now(), LocalDate.now(), Landkoder.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
+            LocalDate.now(), LocalDate.now(), Land_iso2.SE, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B1, null);
         utpekingsperiode.setMedlPeriodeID(123L);
 
         behandlingsresultat.setEndretDato(månederOgDagerSiden(3, 0));
@@ -149,7 +149,7 @@ class AvsluttArt13BehandlingServiceTest {
 
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(behandlingID), anyCollection());
         verify(fagsakService).avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART);
-        verify(medlPeriodeService).oppdaterPeriodeEndelig(any(Lovvalgsperiode.class), eq(false));
+        verify(medlPeriodeService).oppdaterPeriodeEndelig(any(Lovvalgsperiode.class));
     }
 
     private Instant månederOgDagerSiden(long mnd, long dager) {

@@ -101,6 +101,10 @@ class DokumentFactoryTest {
         Telefonnummer telefon = organisasjonDokument.getOrganisasjonDetaljer().getTelefon().get(0);
         assertThat(telefon).isInstanceOf(Telefonnummer.class);
         assertThat(telefon.getIdentifikator()).isEqualTo("55 58 75 00");
+
+        LocalDate opphoersdato = organisasjonDokument.getOrganisasjonDetaljer().getOpphoersdato();
+        assertThat(opphoersdato).isInstanceOf(LocalDate.class);
+        assertThat(opphoersdato).isEqualTo(LocalDate.of(2019, 12, 8));
     }
 
     @Test

@@ -6,12 +6,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
@@ -122,7 +122,7 @@ public class UtpekingService {
         validerUtpekingsperiode(utpekingsperiode);
 
         opprettLovvalgsperiode(behandlingID, utpekingsperiode);
-        ferdigbehandlingKontrollFacade.kontroller(behandlingID, behandlingsresultat.getType());
+        ferdigbehandlingKontrollFacade.kontroller(behandlingID, behandlingsresultat.getType(), null);
         oppdaterBehandlingsresultat(behandlingsresultat);
         prosessinstansService.opprettProsessinstansUtpekAnnetLand(
             behandling, utpekingsperiode.getLovvalgsland(), mottakerinstitusjoner, ytterligereInformasjonSed, fritekstBrev
@@ -132,7 +132,7 @@ public class UtpekingService {
 
     private void oppdaterBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
         behandlingsresultat.setType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
-        behandlingsresultat.setFastsattAvLand(Landkoder.NO);
+        behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
         behandlingsresultat.settVedtakMetadata(Vedtakstyper.FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(
             VedtaksfattingFasade.FRIST_KLAGE_UKER));
         behandlingsresultatService.lagre(behandlingsresultat);
@@ -162,7 +162,7 @@ public class UtpekingService {
         }
 
         if (behandling.erBeslutningLovvalgAnnetLand()) {
-            behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);
+            behandlingsresultatService.settUtfallRegistreringUnntakOgType(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);
         } else if (behandling.erNorgeUtpekt()) {
             if (sedDokument.getSedType().equals(SedType.A003) && sedDokument.getLovvalgslandKode().equals(Landkoder.NO)) {
                 behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, Behandlingsresultattyper.UTPEKING_NORGE_AVVIST);
