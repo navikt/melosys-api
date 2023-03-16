@@ -41,7 +41,8 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
         final long behandlingID = prosessinstans.getBehandling().getId();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 
-        if (behandlingsresultat.erGodkjenningEllerInnvilgelseArt13()) {
+        if (behandlingsresultat.erGodkjenningEllerInnvilgelseArt13()
+            && !behandlingsresultat.getBehandling().erBehandlingAvA1AnmodningOmUnntakPapir()) {
             behandlingService.endreStatus(behandlingID, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         } else {
             var saksstatus = prosessinstans.getData(ProsessDataKey.SAKSSTATUS, Saksstatuser.class, Saksstatuser.LOVVALG_AVKLART);

@@ -12,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -73,6 +74,7 @@ class AvsluttFagsakOgBehandlingTest {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
+        behandlingsresultat.setBehandling(behandling);
 
         when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
             .thenReturn(behandlingsresultat);
@@ -82,15 +84,30 @@ class AvsluttFagsakOgBehandlingTest {
     void utfør_erArtikkel12_behandlingOgFagsakAvsluttet() {
         when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+
         avsluttFagsakOgBehandling.utfør(prosessinstans);
+
         verify(fagsakService).avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART);
     }
 
     @Test
     void utfør_erArtikkel13_behandlingsstatusMidlertidigLovvalgsbeslutning() {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
+
         avsluttFagsakOgBehandling.utfør(prosessinstans);
+
         verify(behandlingService).endreStatus(behandling.getId(), Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
+    }
+
+    @Test
+    void utfør_erArtikkel13OgBehandlingstemaA1AnmodningOmUnntakPapir_behandlingOgFagsakAvsluttet() {
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
+        behandling.setTema(Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR);
+        when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
+
+        avsluttFagsakOgBehandling.utfør(prosessinstans);
+
+        verify(fagsakService).avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART);
     }
 
     @Test
