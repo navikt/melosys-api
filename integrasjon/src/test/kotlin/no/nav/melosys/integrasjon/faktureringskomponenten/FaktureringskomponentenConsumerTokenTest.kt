@@ -27,7 +27,6 @@ import java.time.LocalDate
     StsWebClientProducer::class,
     RestTokenServiceClient::class,
     OAuthMockServer::class,
-
     GenericAuthFilterFactory::class,
     FaktureringskomponentenConsumerProducer::class,
 )

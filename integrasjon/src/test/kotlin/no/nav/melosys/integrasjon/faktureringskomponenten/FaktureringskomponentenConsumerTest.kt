@@ -35,7 +35,6 @@ import java.util.*
     OAuthMockServer::class,
     CorrelationIdOutgoingFilter::class,
     StsMockServer::class,
-
     GenericAuthFilterFactory::class,
     FaktureringskomponentenConsumerProducer::class,
 )
