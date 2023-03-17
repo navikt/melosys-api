@@ -42,8 +42,7 @@ import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
 import static no.nav.melosys.service.journalforing.UtledBehandlingsaarsak.utledÅrsaktype;
-import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt;
-import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
+import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.*;
 
 @Service
 public class JournalfoeringService {
@@ -321,12 +320,14 @@ public class JournalfoeringService {
 
     private boolean skalSetteSøknadslandOgPeriode(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
         var registreringUnntakFraMedlemskapToggleEnabled = unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP);
+        var ikkeYrkesaktivFlytToggleEnabled = unleash.isEnabled(ToggleName.IKKEYRKESAKTIV_FLYT);
         var erAnmodningOmUnntakEllerRegistreringUnntak = harRegistreringUnntakFraMedlemskapFlyt(sakstype, sakstema, behandlingstema, registreringUnntakFraMedlemskapToggleEnabled);
+        var erIkkeYrkesaktiv = harIkkeYrkesaktivFlyt(sakstype, behandlingstema, ikkeYrkesaktivFlytToggleEnabled);
 
         return erSakstypeEøs(sakstype)
-            && !harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(ToggleName.IKKEYRKESAKTIV_FLYT), registreringUnntakFraMedlemskapToggleEnabled)
+            && !harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"), ikkeYrkesaktivFlytToggleEnabled, registreringUnntakFraMedlemskapToggleEnabled)
             && !erAnmodningOmUnntakEllerRegistreringUnntak
-            && behandlingstema != Behandlingstema.IKKE_YRKESAKTIV;
+            && !erIkkeYrkesaktiv;
     }
 
     private ProsessType finnProsessTypeForAndregangsbehandling(Behandlingstyper behandlingstype, Behandlingstema behandlingstema, Fagsak fagsak) {
