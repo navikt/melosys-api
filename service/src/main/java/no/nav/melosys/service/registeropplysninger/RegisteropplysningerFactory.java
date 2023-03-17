@@ -35,14 +35,16 @@ public final class RegisteropplysningerFactory {
                 ARBEID_TJENESTEPERSON_ELLER_FLY,
                 ARBEID_NORGE_BOSATT_ANNET_LAND,
                 ARBEID_I_UTLANDET,
-                YRKESAKTIV ->
-                hentSaksopplysningTyperForBehandlingAvSøknad();
+                YRKESAKTIV -> hentSaksopplysningTyperForBehandlingAvSøknad();
             case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE ->
                 hentSaksopplysningTyperForRegistreringAvUnntak();
-            case ANMODNING_OM_UNNTAK_HOVEDREGEL ->
-                hentSaksopplysningTyperForAnmodningOmUnntak();
+            case ANMODNING_OM_UNNTAK_HOVEDREGEL -> hentSaksopplysningTyperForAnmodningOmUnntak();
             case BESLUTNING_LOVVALG_NORGE, BESLUTNING_LOVVALG_ANNET_LAND ->
                 hentSaksopplysningTyperForBeslutningOmLovvalg();
+            case IKKE_YRKESAKTIV -> {
+                if (ikkeYrkesaktivToggleEnabled) yield hentSaksopplysningTyperForBehandlingAvSøknad();
+                throw new TekniskException("Kan ikke utlede relevante saksopplysninger fra behandlingstema " + behandlingstema);
+            }
             default -> throw new TekniskException(
                 "Kan ikke utlede relevante saksopplysninger fra behandlingstema " + behandlingstema);
         };

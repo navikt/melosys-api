@@ -170,5 +170,17 @@ class SaksbehandlingRegler(
             }
             return false
         }
+
+        @JvmStatic
+        fun harIkkeYrkesaktivFlyt(
+            sakstype: Sakstyper,
+            behandlingstema: Behandlingstema,
+            ikkeYrkesaktivFlytToggleEnabled: Boolean
+        ): Boolean {
+            if (ikkeYrkesaktivFlytToggleEnabled && sakstype == Sakstyper.EU_EOS && behandlingstema == IKKE_YRKESAKTIV) {
+                return true
+            }
+            return false
+        }
     }
 }
