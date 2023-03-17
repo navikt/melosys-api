@@ -64,15 +64,6 @@ final class UfmKontroll {
             Kontroll_begrunnelser.MOTTAR_YTELSER : null;
     }
 
-    static Kontroll_begrunnelser utbetaltBarnetrygdytelser(UfmKontrollData kontrollData) {
-        if (kontrollData.utbetalingDokument() == null) {
-            return null;
-        }
-
-        return YtelseRegler.utbetaltBarnetrygdytelser(kontrollData.utbetalingDokument()) ?
-            Kontroll_begrunnelser.MOTTAR_YTELSER : null;
-    }
-
     static Kontroll_begrunnelser lovvalgslandErNorge(UfmKontrollData kontrollData) {
         return UfmRegler.lovvalgslandErNorge(kontrollData.sedDokument().getLovvalgslandKode()) ?
             Kontroll_begrunnelser.LOVVALGSLAND_NORGE : null;

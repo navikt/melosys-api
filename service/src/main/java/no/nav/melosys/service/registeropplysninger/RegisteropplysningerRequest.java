@@ -178,11 +178,6 @@ public class RegisteropplysningerRequest {
                 return this;
             }
 
-            public SaksopplysningTyperBuilder sakOgBehandlingopplysninger() {
-                this.opplysningstyper.add(SaksopplysningType.SOB_SAK);
-                return this;
-            }
-
             public SaksopplysningTyperBuilder utbetalingsopplysninger() {
                 this.opplysningstyper.add(SaksopplysningType.UTBETAL);
                 return this;

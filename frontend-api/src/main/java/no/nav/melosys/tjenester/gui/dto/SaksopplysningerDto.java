@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
 import no.nav.melosys.tjenester.gui.dto.eessi.SedDokumentDto;
 import no.nav.melosys.tjenester.gui.dto.inntekt.InntektDto;
 
@@ -22,7 +21,6 @@ public class SaksopplysningerDto {
 
     private InntektDto inntekt;
 
-    private SobSakDokument sakOgBehandling;
 
     private SedDokumentDto sed;
 
@@ -32,7 +30,6 @@ public class SaksopplysningerDto {
         this.organisasjoner = new ArrayList<>();
         this.medlemskap = new MedlemskapDokument();
         this.inntekt = new InntektDto();
-        this.sakOgBehandling = new SobSakDokument();
         this.sed = new SedDokumentDto();
     }
 
@@ -66,14 +63,6 @@ public class SaksopplysningerDto {
 
     public void setInntekt(InntektDto inntekt) {
         this.inntekt = inntekt;
-    }
-
-    public SobSakDokument getSakOgBehandling() {
-        return sakOgBehandling;
-    }
-
-    public void setSakOgBehandling(SobSakDokument sakOgBehandling) {
-        this.sakOgBehandling = sakOgBehandling;
     }
 
     public SedDokumentDto getSed() {
