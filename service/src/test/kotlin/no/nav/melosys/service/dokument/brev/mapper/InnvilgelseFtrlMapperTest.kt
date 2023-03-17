@@ -65,7 +65,7 @@ internal class InnvilgelseFtrlMapperTest {
                 datoMottatt.shouldBe(LocalDate.EPOCH)
                 perioder.shouldHaveSize(1)
                 isErFullstendigInnvilget.shouldBeTrue()
-                ftrl_2_8_begrunnelse.shouldBe(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_NORSK_VIRKSOMHET_IKKE_UTSENDT.kode)
+                ftrl_2_8_begrunnelse.shouldBe(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_MULTINASJONALT_SELSKAP.kode)
                 innvilgelse.apply {
                     innledningFritekst().shouldBeNull()
                     begrunnelseFritekst().shouldBe(BEGRUNNELSE_FRITEKST)
@@ -190,7 +190,7 @@ internal class InnvilgelseFtrlMapperTest {
             vilkaarsresultater = setOf(Vilkaarsresultat().apply {
                 vilkaar = Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE
                 begrunnelser = setOf(VilkaarBegrunnelse().apply {
-                    kode = Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_NORSK_VIRKSOMHET_IKKE_UTSENDT.kode
+                    kode = Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_MULTINASJONALT_SELSKAP.kode
                 })
             })
             behandling = DokgenTestData.lagBehandling()

@@ -94,7 +94,7 @@ public class MedlemskapsperiodeTjeneste {
         var støttede = opprettMedlemskapsperiodeService.hentStøttedeBestemmelserMedVilkår(behandlingstema)
             .entrySet().stream()
             .map(this::tilBestemmelseMedVilkårOgBegrunnelser)
-            .collect(Collectors.toSet());
+            .collect(Collectors.toCollection(LinkedHashSet::new));
         var ikkeStøttede = opprettMedlemskapsperiodeService.hentIkkeStøttedeBestemmelser(behandlingstema);
 
         return ResponseEntity.ok(new FolketrygdlovenBestemmelserDto(støttede, ikkeStøttede));
