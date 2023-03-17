@@ -71,6 +71,11 @@ public class AdminInnvalideringSedRuter extends AdminSedRuter implements SedRute
         var sedDokument = sistAktiveBehandling.finnSedDokument();
         boolean aktivBehandlingErInvalidert = erAktivBehandlingInvalidert(sedDokument, arkivsakID);
 
+        if (sistAktiveBehandling.erNorgeUtpekt()) {
+            oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(sistAktiveBehandling, melosysEessiMelding.getJournalpostId(), melosysEessiMelding.getAktoerId(), null);
+            return;
+        }
+
         if (aktivBehandlingErInvalidert && (sistAktiveBehandling.erRegisteringAvUnntak() || sistAktiveBehandling.erAnmodningOmUnntak())) {
             annullerSakOgBehandling(sistAktiveBehandling);
             behandlingsresultatService.oppdaterBehandlingsresultattype(sistAktiveBehandling.getId(), Behandlingsresultattyper.HENLEGGELSE);

@@ -2,6 +2,8 @@ package no.nav.melosys.melosysmock.melosyseessi
 
 import no.nav.melosys.domain.eessi.BucInformasjon
 import no.nav.melosys.domain.eessi.SedInformasjon
+import no.nav.melosys.domain.eessi.sed.Lovvalgsperiode
+import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.web.bind.annotation.*
 import java.time.ZoneOffset
@@ -38,6 +40,21 @@ class MelosysEessiApi {
             .map { b ->
                 b.toDto()
             }
+    }
+
+    @GetMapping("/buc/{rinaSaksnummer}/sed/{rinaDokumentId}/grunnlag")
+    fun hentSedGrunnlag(
+        @PathVariable rinaSaksnummer: String,
+        @PathVariable rinaDokumentId: String
+    ): SedGrunnlagDto {
+        val sedGrunnlagDto = SedGrunnlagDto().apply {
+            lovvalgsperioder = listOf(Lovvalgsperiode().apply {
+                lovvalgsland = "NO"
+            })
+
+        }
+//        ReflectionTestUtils.setField(sedGrunnlagDto, "sedType", "A003")
+        return sedGrunnlagDto
     }
 }
 

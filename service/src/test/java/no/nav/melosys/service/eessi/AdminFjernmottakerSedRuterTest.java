@@ -79,7 +79,7 @@ class AdminFjernmottakerSedRuterTest {
 
     @Test
     void rutSedTilBehandling_erIkkeX006MottakerPåÅpenA003_blirIkkeAvsluttetEllerSattTilAnnullert() {
-        var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING);
+        var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, Behandlingsstatus.UNDER_BEHANDLING);
         melosysEessiMelding.setX006NavErFjernet(false);
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
 
@@ -92,7 +92,7 @@ class AdminFjernmottakerSedRuterTest {
 
     @Test
     void rutSedTilBehandling_erX006MottakerErIkkeTilstedePåSed_opprettJournalFøringsProsess() {
-        var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING);
+        var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, Behandlingsstatus.UNDER_BEHANDLING);
 
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
         Behandling sistAktiveBehandling = fagsak.hentSistAktivBehandling();
@@ -106,7 +106,7 @@ class AdminFjernmottakerSedRuterTest {
 
     @Test
     void rutSedTilBehandling_erX006MottakerPåÅpenA003_blirAvsluttetOgSattTilAnnullert() {
-        var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING);
+        var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, Behandlingsstatus.UNDER_BEHANDLING);
         melosysEessiMelding.setX006NavErFjernet(true);
 
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
@@ -130,7 +130,7 @@ class AdminFjernmottakerSedRuterTest {
 
     @Test
     void rutSedTilBehandling_erX006MottakerPåAvsluttetBehandling_oppdaterStatusPåFagsakTilAnnulert() {
-        var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.AVSLUTTET);
+        var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, Behandlingsstatus.AVSLUTTET);
         melosysEessiMelding.setX006NavErFjernet(true);
 
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
