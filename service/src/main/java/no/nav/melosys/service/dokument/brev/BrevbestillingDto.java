@@ -31,6 +31,7 @@ public final class BrevbestillingDto {
     private List<SaksvedleggDto> saksVedlegg;
     private List<FritekstvedleggDto> fritekstvedlegg;
     private String dokumentTittel;
+    private String saksbehandlerNrToIdent;
     @Deprecated(since = "Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel")
     private String begrunnelseKode;
     @Deprecated(since = "Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel")
@@ -61,6 +62,7 @@ public final class BrevbestillingDto {
         List<SaksvedleggDto> saksVedlegg,
         List<FritekstvedleggDto> fritekstvedlegg,
         String dokumentTittel,
+        String saksbehandlerNrToIdent,
         @Deprecated(since = "Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel")
             String begrunnelseKode,
         @Deprecated(since = "Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel")
@@ -87,6 +89,7 @@ public final class BrevbestillingDto {
         this.saksVedlegg = saksVedlegg;
         this.fritekstvedlegg = fritekstvedlegg;
         this.dokumentTittel = dokumentTittel;
+        this.saksbehandlerNrToIdent = saksbehandlerNrToIdent;
         this.begrunnelseKode = begrunnelseKode;
         this.ytterligereInformasjon = ytterligereInformasjon;
     }
@@ -120,6 +123,7 @@ public final class BrevbestillingDto {
             brevbestillingUtkast.saksVedlegg().stream().map(SaksvedleggDto::av).toList(),
             brevbestillingUtkast.fritekstVedlegg().stream().map(FritekstvedleggDto::av).toList(),
             brevbestillingUtkast.dokumentTittel(),
+            brevbestillingUtkast.saksbehandlerNrToIdent(),
             deprecatedBegrunnelseKode,
             deprecatedYtterligereInformasjon
         );
@@ -207,6 +211,10 @@ public final class BrevbestillingDto {
 
     public void setDokumentTittel(String dokumentTittel) {
         this.dokumentTittel = dokumentTittel;
+    }
+
+    public void setSaksbehandlerNrToIdent(String saksbehandlerNrToIdent) {
+        this.saksbehandlerNrToIdent = saksbehandlerNrToIdent;
     }
 
     public void setBegrunnelseKode(String begrunnelseKode) {
@@ -313,6 +321,10 @@ public final class BrevbestillingDto {
         return dokumentTittel;
     }
 
+    public String getSaksbehandlerNrToIdent() {
+        return saksbehandlerNrToIdent;
+    }
+
     @Deprecated(since = "Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel")
     public String getBegrunnelseKode() {
         return begrunnelseKode;
@@ -349,6 +361,7 @@ public final class BrevbestillingDto {
             Objects.equals(this.saksVedlegg, that.saksVedlegg) &&
             Objects.equals(this.fritekstvedlegg, that.fritekstvedlegg) &&
             Objects.equals(this.dokumentTittel, that.dokumentTittel) &&
+            Objects.equals(this.saksbehandlerNrToIdent, that.saksbehandlerNrToIdent) &&
             Objects.equals(this.begrunnelseKode, that.begrunnelseKode) &&
             Objects.equals(this.ytterligereInformasjon, that.ytterligereInformasjon);
     }
@@ -382,6 +395,7 @@ public final class BrevbestillingDto {
             "saksVedlegg=" + saksVedlegg + ", " +
             "fritekstvedlegg=" + fritekstvedlegg + ", " +
             "dokumentTittel=" + dokumentTittel + ", " +
+            "saksbehandlerNrToIdent=" + saksbehandlerNrToIdent + ", " +
             "begrunnelseKode=" + begrunnelseKode + ", " +
             "ytterligereInformasjon=" + ytterligereInformasjon + ']';
     }

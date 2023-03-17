@@ -118,6 +118,6 @@ class DokumentTjenesteTest {
     }
 
     private BrevbestillingRequest lagBrevbestillingMedMottaker(Mottakerroller rolle) {
-        return new BrevbestillingRequest(null, rolle, null, null, null, null, null, null, null, null, null, null, null, null, null, false, null, null, null, null, null, null);
+        return new BrevbestillingRequest(null, rolle, null, null, null, null, null, null, null, null, null, null, null, null, null, false, null, null, null, null, null, null, null);
     }
 }

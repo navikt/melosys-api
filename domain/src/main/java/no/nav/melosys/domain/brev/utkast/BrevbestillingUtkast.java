@@ -31,7 +31,8 @@ public record BrevbestillingUtkast(
     String nyVurderingBakgrunn,
     List<Utkast.Saksvedlegg> saksVedlegg,
     List<Utkast.FritekstVedlegg> fritekstVedlegg,
-    String dokumentTittel
+    String dokumentTittel,
+    String saksbehandlerNrToIdent
 ) {
     @JsonIgnore
     public String getTittel() {

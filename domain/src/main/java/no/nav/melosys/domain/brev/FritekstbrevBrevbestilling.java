@@ -8,6 +8,7 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
     private String fritekst;
     private boolean kontaktopplysninger;
     private String navnFullmektig;
+    private String saksbehandlerNrToNavn;
     private boolean brukerSkalHaKopi;
     private Mottakerroller mottakerType;
     private Representerer representerer;
@@ -24,6 +25,7 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
         this.fritekst = builder.fritekst;
         this.kontaktopplysninger = builder.kontaktopplysninger;
         this.navnFullmektig = builder.navnFullmektig;
+        this.saksbehandlerNrToNavn = builder.saksbehandlerNrToNavn;
         this.brukerSkalHaKopi = builder.brukerSkalHaKopi;
         this.mottakerType = builder.mottakerType;
         this.representerer = builder.representerer;
@@ -44,6 +46,10 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
 
     public String getNavnFullmektig() {
         return navnFullmektig;
+    }
+
+    public String getSaksbehandlerNrToNavn() {
+        return saksbehandlerNrToNavn;
     }
 
     public boolean isBrukerSkalHaKopi() {
@@ -71,6 +77,7 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
         private String fritekst;
         private boolean kontaktopplysninger;
         private String navnFullmektig;
+        private String saksbehandlerNrToNavn;
         private boolean brukerSkalHaKopi;
         private Mottakerroller mottakerType;
         private Representerer representerer;
@@ -85,6 +92,7 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
             this.fritekst = fritekstbrevBrevbestilling.fritekst;
             this.kontaktopplysninger = fritekstbrevBrevbestilling.kontaktopplysninger;
             this.navnFullmektig = fritekstbrevBrevbestilling.navnFullmektig;
+            this.saksbehandlerNrToNavn = fritekstbrevBrevbestilling.saksbehandlerNrToNavn;
             this.brukerSkalHaKopi = fritekstbrevBrevbestilling.brukerSkalHaKopi;
             this.mottakerType = fritekstbrevBrevbestilling.mottakerType;
             this.representerer = fritekstbrevBrevbestilling.representerer;
@@ -108,6 +116,11 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
 
         public Builder medNavnFullmektig(String navnFullmektig) {
             this.navnFullmektig = navnFullmektig;
+            return this;
+        }
+
+        public Builder medSaksbehandlerNrToNavn(String saksbehandlerNrToNavn) {
+            this.saksbehandlerNrToNavn = saksbehandlerNrToNavn;
             return this;
         }
 
