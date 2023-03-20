@@ -195,9 +195,7 @@ class SedMottakTestIT(
             }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
-            .stream()
-            .sorted(Comparator.comparing { obj: Prosessinstans -> obj.endretDato })
-            .collect(Collectors.toList())
+            .sortedBy { it.endretDato }
 
         extracting(prosessinstanserSortert) { låsReferanse }
             .shouldHaveSize(3)
@@ -207,14 +205,13 @@ class SedMottakTestIT(
                 eessiMeldingX006.lagUnikIdentifikator(),
             )
 
-        prosessinstanserSortert.filter { it.behandling != null }[0]
-            .apply { behandling.status.shouldBe(Behandlingsstatus.OPPRETTET) }
-            .apply { behandling.fagsak.status.shouldBe(Saksstatuser.OPPRETTET) }
-            .apply {
-                behandlingsresultatRepository.findWithLovvalgsperioderById(behandling.id).get().type.shouldBe(
-                    Behandlingsresultattyper.IKKE_FASTSATT
-                )
-            }
+        prosessinstanserSortert.filter { it.behandling != null }[0].behandling.apply {
+            status.shouldBe(Behandlingsstatus.OPPRETTET)
+            fagsak.status.shouldBe(Saksstatuser.OPPRETTET)
+            behandlingsresultatRepository.findWithLovvalgsperioderById(id).get().type.shouldBe(
+                Behandlingsresultattyper.IKKE_FASTSATT
+            )
+        }
     }
 
     @Test
@@ -246,9 +243,7 @@ class SedMottakTestIT(
             }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
-            .stream()
-            .sorted(Comparator.comparing { obj: Prosessinstans -> obj.endretDato })
-            .collect(Collectors.toList())
+            .sortedBy { it.endretDato }
 
         extracting(prosessinstanserSortert) { låsReferanse }
             .shouldHaveSize(3)
@@ -258,14 +253,13 @@ class SedMottakTestIT(
                 eessiMeldingX008.lagUnikIdentifikator(),
             )
 
-        prosessinstanserSortert.filter { it.behandling != null }[0]
-            .apply { behandling.status.shouldBe(Behandlingsstatus.OPPRETTET) }
-            .apply { behandling.fagsak.status.shouldBe(Saksstatuser.OPPRETTET) }
-            .apply {
-                behandlingsresultatRepository.findWithLovvalgsperioderById(behandling.id).get().type.shouldBe(
-                    Behandlingsresultattyper.IKKE_FASTSATT
-                )
-            }
+        prosessinstanserSortert.filter { it.behandling != null }[0].behandling.apply {
+            status.shouldBe(Behandlingsstatus.OPPRETTET)
+            fagsak.status.shouldBe(Saksstatuser.OPPRETTET)
+            behandlingsresultatRepository.findWithLovvalgsperioderById(id).get().type.shouldBe(
+                Behandlingsresultattyper.IKKE_FASTSATT
+            )
+        }
     }
 
     @Test
