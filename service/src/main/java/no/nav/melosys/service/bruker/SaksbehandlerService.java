@@ -35,13 +35,18 @@ public class SaksbehandlerService {
         return Optional.empty();
     }
 
-    public String finnNavnForIdentFraAzure(String ident) {
-        return azureAdService.hentSaksbehandlerNavn(ident);
+    public Optional<String> finnNavnForIdentFraAzure(String ident) {
+        return Optional.ofNullable(azureAdService.hentSaksbehandlerNavn(ident));
     }
 
     public Optional<String> finnNavnForIdent(String ident) {
-        String saksbehandlerNavn = finnNavnForIdentFraToken(ident).orElseGet(() -> finnNavnForIdentFraAzure(ident));
-        return Optional.of(saksbehandlerNavn);
+        var saksbehandlerNavnFraToken = finnNavnForIdentFraToken(ident);
+
+        if (saksbehandlerNavnFraToken.isPresent()) {
+            return saksbehandlerNavnFraToken;
+        } else {
+            return finnNavnForIdentFraAzure(ident);
+        }
     }
 
     public String hentNavnForIdent(String ident) {
