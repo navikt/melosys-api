@@ -1,10 +1,10 @@
 package no.nav.melosys.integrasjon.azuread
 
-import com.fasterxml.jackson.databind.JsonNode
-import no.nav.melosys.integrasjon.azuread.dto.DisplayNameDTO
+import no.nav.melosys.integrasjon.azuread.dto.AzureAdGraphResponseDTO
 import org.springframework.http.MediaType
 import org.springframework.retry.annotation.Retryable
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.util.UriBuilder
 
 @Retryable
@@ -21,11 +21,14 @@ open class AzureAdConsumer(
         }
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
-            .bodyToMono(JsonNode::class.java)
-            .map { jsonNode ->
-                val displayName = jsonNode["value"][0]["displayName"].asText()
-                DisplayNameDTO(displayName).displayName
+            .bodyToMono<AzureAdGraphResponseDTO>()
+            .mapNotNull { response ->
+                if (response.value.isNotEmpty()) {
+                    response.value[0].displayName
+                } else {
+                    null
+                }
             }
-            .block()!!
+            .block()
     }
 }
