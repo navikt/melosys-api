@@ -4,15 +4,20 @@ import java.util.Objects;
 import java.util.Optional;
 
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.integrasjon.azuread.AzureAdService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SaksbehandlerService {
+    private AzureAdService azureAdService;
 
-    public Optional<String> finnNavnForIdent(String ident) {
-        // Midlertidig løsning før vi legger inn støtte for å slå dette opp i azure ad
+    public SaksbehandlerService(AzureAdService azureAdService) {
+        this.azureAdService = azureAdService;
+    }
+
+    public Optional<String> finnNavnForIdentFraToken(String ident) {
         SubjectHandler instance = SubjectHandler.getInstance();
         String userID = instance.getUserID();
         if (userID != null) {
@@ -30,8 +35,22 @@ public class SaksbehandlerService {
         return Optional.empty();
     }
 
+    public Optional<String> finnNavnForIdentFraAzure(String ident) {
+        return Optional.ofNullable(azureAdService.hentSaksbehandlerNavn(ident));
+    }
+
+    public Optional<String> finnNavnForIdent(String ident) {
+        var saksbehandlerNavnFraToken = finnNavnForIdentFraToken(ident);
+
+        if (saksbehandlerNavnFraToken.isPresent()) {
+            return saksbehandlerNavnFraToken;
+        } else {
+            return finnNavnForIdentFraAzure(ident);
+        }
+    }
+
     public String hentNavnForIdent(String ident) {
         return finnNavnForIdent(ident)
-            .orElseThrow(() -> new IkkeFunnetException("Finner ikke navn for ident " + ident));
+            .orElseThrow(() -> new IkkeFunnetException("Finner ikke saksbehandler navn for ident " + ident));
     }
 }

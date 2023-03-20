@@ -15,7 +15,6 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdress
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
-import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
@@ -90,11 +89,6 @@ class SaksopplysningDokumentConverterTest {
     @Test
     void konverterTilOgFraDatabase_medSedDokument_erUendret() {
         testKonvertering(SedDokument.class);
-    }
-
-    @Test
-    void konverterTilOgFraDatabase_medSobSakDokument_erUendret() {
-        testKonvertering(SobSakDokument.class);
     }
 
     @Test

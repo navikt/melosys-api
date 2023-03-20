@@ -31,7 +31,6 @@ public class UfmKontrollsett {
         UfmKontroll::personDød,
         UfmKontroll::personBosattINorge,
         UfmKontroll::utbetaltYtelserFraOffentligIPeriode,
-        UfmKontroll::utbetaltBarnetrygdytelser,
         UfmKontroll::arbeidssted
     );
 
@@ -45,7 +44,6 @@ public class UfmKontrollsett {
         UfmKontroll::personDød,
         UfmKontroll::personBosattINorge,
         UfmKontroll::utbetaltYtelserFraOffentligIPeriode,
-        UfmKontroll::utbetaltBarnetrygdytelser,
         UfmKontroll::arbeidssted,
         UfmKontroll::unntakForA003
     );
@@ -60,7 +58,6 @@ public class UfmKontrollsett {
         UfmKontroll::statsborgerskapIkkeMedlemsland,
         UfmKontroll::personDød,
         UfmKontroll::utbetaltYtelserFraOffentligIPeriode,
-        UfmKontroll::utbetaltBarnetrygdytelser,
         UfmKontroll::arbeidssted
     );
 
@@ -74,7 +71,6 @@ public class UfmKontrollsett {
         UfmKontroll::statsborgerskapIkkeMedlemsland,
         UfmKontroll::personDød,
         UfmKontroll::utbetaltYtelserFraOffentligIPeriode,
-        UfmKontroll::utbetaltBarnetrygdytelser,
         UfmKontroll::arbeidssted
     );
 }

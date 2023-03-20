@@ -280,6 +280,20 @@ class JournalfoeringServiceTest {
     }
 
     @Test
+    void journalførOgOpprettSak_behandlingstemaIkkeYrkesaktivUtenLandOgPeriode_prosessinstansBlirOpprettet() {
+        FagsakDto fagsakDto = lagFagsakDto(null, null, null, Sakstyper.EU_EOS);
+        opprettDto.setFagsak(fagsakDto);
+        opprettDto.setBehandlingstemaKode(Behandlingstema.IKKE_YRKESAKTIV.getKode());
+        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK_BRUKER), any()))
+            .thenReturn(new Prosessinstans());
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+
+        journalfoeringService.journalførOgOpprettSak(opprettDto);
+
+        verify(prosessinstansService).lagre(any(Prosessinstans.class));
+    }
+
+    @Test
     void journalførOgOpprettSak_sakstypeFtrlUtenLandOgPeriode_prosessinstansBlirOpprettet() {
         FagsakDto fagsakDto = lagFagsakDto(null, null, null, Sakstyper.FTRL);
         opprettDto.setFagsak(fagsakDto);

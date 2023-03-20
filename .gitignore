@@ -24,3 +24,4 @@ app/src/main/resources/public/
 .DS_Store
 http-client.private.env.json
 .sdkmanrc
+local-q2.env
