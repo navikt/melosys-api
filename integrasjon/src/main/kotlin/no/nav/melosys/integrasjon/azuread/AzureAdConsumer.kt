@@ -12,7 +12,7 @@ open class AzureAdConsumer(
     private val webClient: WebClient,
 ) {
 
-    open fun hentSaksbehandlerNavn(ident: String): String? {
+    private fun hentSaksbehandler(ident: String): AzureAdGraphResponseDTO? {
         return webClient.get().uri("/users") { uriBuilder: UriBuilder ->
             uriBuilder
                 .queryParam("\$filter", "mailnickname eq '$ident'")
@@ -22,13 +22,15 @@ open class AzureAdConsumer(
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .bodyToMono<AzureAdGraphResponseDTO>()
-            .mapNotNull { response ->
-                if (response.value.isNotEmpty()) {
-                    response.value[0].displayName
-                } else {
-                    null
-                }
-            }
-            .block()
+            .block()!!
+    }
+
+    open fun hentSaksbehandlerNavn(ident: String): String? {
+        val saksbehandlerListe = hentSaksbehandler(ident)?.value
+        return if (saksbehandlerListe == null || saksbehandlerListe.isEmpty()) {
+            ""
+        } else {
+            saksbehandlerListe[0].displayName
+        }
     }
 }
