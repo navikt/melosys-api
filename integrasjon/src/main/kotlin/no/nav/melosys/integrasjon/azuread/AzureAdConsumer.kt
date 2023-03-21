@@ -15,7 +15,8 @@ open class AzureAdConsumer(
     open fun hentSaksbehandlerNavn(ident: String): String? {
         return webClient.get().uri("/users") { uriBuilder: UriBuilder ->
             uriBuilder
-                .queryParam("\$filter", "mailnickname eq '$ident'")
+                .queryParam("\$filter", "onPremisesSamAccountName eq '$ident'")
+                .queryParam("\$count", true)
                 .queryParam("\$select", "displayName")
                 .build()
         }
