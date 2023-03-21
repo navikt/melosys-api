@@ -85,7 +85,7 @@ class AzureAdConsumerTest(
             } ]
         }"""
         serviceUnderTestMockServer.stubFor(
-            get("/graph/v1.0/users?\$filter=mailnickname%20eq%20'Z123456'&\$select=displayName")
+            get("/graph/v1.0/users?\$filter=onPremisesSamAccountName%20eq%20'Z123456'&\$count=true&\$select=displayName")
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(200)
@@ -107,7 +107,7 @@ class AzureAdConsumerTest(
             "value" : []
         }"""
         serviceUnderTestMockServer.stubFor(
-            get("/graph/v1.0/users?\$filter=mailnickname%20eq%20'Z123456'&\$select=displayName")
+            get("/graph/v1.0/users?\$filter=onPremisesSamAccountName%20eq%20'Z123456'&\$count=true&\$select=displayName")
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(200)
