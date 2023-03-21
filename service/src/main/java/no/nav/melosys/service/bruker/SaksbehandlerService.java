@@ -40,7 +40,7 @@ public class SaksbehandlerService {
     }
 
     public Optional<String> finnNavnForIdentFraAzure(String ident) {
-        return Optional.of(azureAdService.hentSaksbehandlerNavn(ident));
+        return Optional.ofNullable(azureAdService.hentSaksbehandlerNavn(ident));
     }
 
     public Optional<String> finnNavnForIdent(String ident) {
