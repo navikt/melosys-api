@@ -119,9 +119,14 @@ class SedMottakTestIT(
             "12_1", opprettEessiJournalpost(SedType.A009)
         )
         val eessiMeldingX006 = melosysEessiMelding(
-            BucType.LA_BUC_04, ref, SedType.X006, null, null, opprettEessiJournalpost(SedType.X008)
+            BucType.LA_BUC_04,
+            ref,
+            SedType.X006,
+            null,
+            null,
+            opprettEessiJournalpost(SedType.X008),
+            isX006NavErFjernet = true
         )
-        eessiMeldingX006.apply { isX006NavErFjernet = true }
 
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX006)
@@ -157,6 +162,104 @@ class SedMottakTestIT(
                     Behandlingsresultattyper.HENLEGGELSE
                 )
             }
+    }
+
+    @Test
+    fun `A003 med etterfølgende X006 og lovvalgsland er NO skal gi manuelt behandling`() {
+        unleash.enable("melosys.sed.x006")
+        val ref = Random().nextInt(100000).toString()
+
+        val eessiMeldingA003 = melosysEessiMelding(
+            BucType.LA_BUC_02, ref, SedType.A003, Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
+            "13_1_a", opprettEessiJournalpost(SedType.A003), "NO"
+        )
+        val eessiMeldingX006 = melosysEessiMelding(
+            BucType.LA_BUC_02,
+            ref,
+            SedType.X006,
+            null,
+            null,
+            opprettEessiJournalpost(SedType.X006),
+            isX006NavErFjernet = true
+        )
+
+        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
+        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX006)
+
+        await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(3))
+            .until {
+                prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
+                    listOf(ProsessStatus.FERDIG),
+                    ref
+                ).isEmpty()
+            }
+
+        val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
+            .sortedBy { it.endretDato }
+
+        extracting(prosessinstanserSortert) { låsReferanse }
+            .shouldHaveSize(3)
+            .shouldContainInOrder(
+                eessiMeldingA003.lagUnikIdentifikator(),
+                eessiMeldingA003.lagUnikIdentifikator(),
+                eessiMeldingX006.lagUnikIdentifikator(),
+            )
+
+        prosessinstanserSortert.filter { it.behandling != null }[0].behandling.apply {
+            status.shouldBe(Behandlingsstatus.OPPRETTET)
+            fagsak.status.shouldBe(Saksstatuser.OPPRETTET)
+            behandlingsresultatRepository.findWithLovvalgsperioderById(id).get().type.shouldBe(
+                Behandlingsresultattyper.IKKE_FASTSATT
+            )
+        }
+    }
+
+    @Test
+    fun `A003 med etterfølgende X008 og lovvalgsland er NO skal gi manuelt behandling`() {
+        unleash.enable("melosys.sed.x008")
+        val ref = Random().nextInt(100000).toString()
+
+        val sedInfo = SedInformasjon(ref, SedType.A003.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
+        val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
+        MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
+
+        val eessiMeldingA003 = melosysEessiMelding(
+            BucType.LA_BUC_02, ref, SedType.A003, Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
+            "13_1_a", opprettEessiJournalpost(SedType.A003), "NO"
+        )
+        val eessiMeldingX008 = melosysEessiMelding(
+            BucType.LA_BUC_02, ref, SedType.X008, null, null, opprettEessiJournalpost(SedType.X008)
+        )
+
+        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
+        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingX008)
+
+        await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(3))
+            .until {
+                prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
+                    listOf(ProsessStatus.FERDIG),
+                    ref
+                ).isEmpty()
+            }
+
+        val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
+            .sortedBy { it.endretDato }
+
+        extracting(prosessinstanserSortert) { låsReferanse }
+            .shouldHaveSize(3)
+            .shouldContainInOrder(
+                eessiMeldingA003.lagUnikIdentifikator(),
+                eessiMeldingA003.lagUnikIdentifikator(),
+                eessiMeldingX008.lagUnikIdentifikator(),
+            )
+
+        prosessinstanserSortert.filter { it.behandling != null }[0].behandling.apply {
+            status.shouldBe(Behandlingsstatus.OPPRETTET)
+            fagsak.status.shouldBe(Saksstatuser.OPPRETTET)
+            behandlingsresultatRepository.findWithLovvalgsperioderById(id).get().type.shouldBe(
+                Behandlingsresultattyper.IKKE_FASTSATT
+            )
+        }
     }
 
     @Test
@@ -212,6 +315,8 @@ class SedMottakTestIT(
         periode: Periode?,
         artikkel: String?,
         journalpostID: String,
+        lovvalgsland: String = "SE",
+        isX006NavErFjernet: Boolean = false,
     ): MelosysEessiMelding {
         val eessiMelding = MelosysEessiMelding()
         eessiMelding.aktoerId = "1111111111111"
@@ -223,13 +328,14 @@ class SedMottakTestIT(
         eessiMelding.avsender = Avsender("SE:123", "SE")
         eessiMelding.dokumentId = null
         eessiMelding.journalpostId = journalpostID
-        eessiMelding.lovvalgsland = "SE"
+        eessiMelding.lovvalgsland = lovvalgsland
         eessiMelding.periode = periode
         eessiMelding.sedType = sedType.name
         eessiMelding.sedId = sedType.name
         eessiMelding.rinaSaksnummer = rinaSaksnummer
         eessiMelding.statsborgerskap = emptyList()
         eessiMelding.sedVersjon = "1"
+        eessiMelding.isX006NavErFjernet = isX006NavErFjernet
         return eessiMelding
     }
 
