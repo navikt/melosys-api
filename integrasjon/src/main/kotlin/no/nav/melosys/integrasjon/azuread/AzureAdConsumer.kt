@@ -22,12 +22,10 @@ open class AzureAdConsumer(
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .bodyToMono<AzureAdGraphResponseDTO>()
-            .mapNotNull { response ->
-                if (response.value.isNotEmpty()) {
-                    response.value[0].displayName
-                } else {
-                    null
-                }
+            .mapNotNull {
+                if (!it.value.isEmpty()) {
+                    it.value[0].displayName
+                } else null
             }
             .block()
     }

@@ -75,7 +75,7 @@ class AzureAdConsumerTest(
 
 
     @Test
-    fun hentSaksbehandlerNavn() {
+    fun `hent saksbehandler navn hvor ident finnes i graph`() {
         val ident = "Z123456"
         val saksbehandlerNavn = "Lokal Testbruker"
         val graphUsersResponse = """
@@ -97,6 +97,28 @@ class AzureAdConsumerTest(
         val saksbehandlerNavnResponse = azureAdConsumer.hentSaksbehandlerNavn(ident)
 
         saksbehandlerNavnResponse.shouldBe(saksbehandlerNavn)
+    }
+
+    @Test
+    fun `hent saksbehandler navn hvis ident ikke finnes i graph`() {
+        val ident = "Z123456"
+        val graphUsersResponse = """
+        {
+            "value" : []
+        }"""
+        serviceUnderTestMockServer.stubFor(
+            get("/graph/v1.0/users?\$filter=mailnickname%20eq%20'Z123456'&\$select=displayName")
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withBody(graphUsersResponse)
+                        .withHeader("Content-Type", "application/json")
+                )
+        )
+
+        val saksbehandlerNavnResponse = azureAdConsumer.hentSaksbehandlerNavn(ident)
+
+        saksbehandlerNavnResponse.shouldBe(null)
     }
 
     fun get(url: String): MappingBuilder =
