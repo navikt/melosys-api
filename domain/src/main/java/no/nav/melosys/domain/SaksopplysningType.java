@@ -15,7 +15,6 @@ public enum SaksopplysningType implements Kodeverk {
     PERSHIST("PERSHIST", "Personhistorikk fra TPS"),
     PERSOPL("PERSOPL", "Personopplysning fra TPS"),
     SEDOPPL("SEDOPPL", "SED-opplysninger"),
-    SOB_SAK("SOB_SAK", "Sak og behandling-sak"),
     UTBETAL("UTBETAL", "Utbetaldata");
 
     private final String kode;
@@ -37,13 +36,13 @@ public enum SaksopplysningType implements Kodeverk {
     }
 
     public static final Set<SaksopplysningType> KREVER_FNR = Set.of(
-        ARBFORH, INNTK, MEDL, PERSHIST, PERSOPL, SOB_SAK, UTBETAL
+        ARBFORH, INNTK, MEDL, PERSHIST, PERSOPL, UTBETAL
     );
 
     public static final Set<SaksopplysningType> KREVER_PERIODE = Set.of(
         ARBFORH, INNTK, MEDL, PERSHIST, UTBETAL
     );
 
-    public static final Set<SaksopplysningType> TYPER_SOM_LAGRES_INITIELT = Set.of(ARBFORH, INNTK, MEDL, ORG, SOB_SAK, UTBETAL);
+    public static final Set<SaksopplysningType> TYPER_SOM_LAGRES_INITIELT = Set.of(ARBFORH, INNTK, MEDL, ORG, UTBETAL);
 }
 

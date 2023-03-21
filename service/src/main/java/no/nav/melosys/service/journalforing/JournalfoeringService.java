@@ -41,10 +41,8 @@ import org.springframework.transaction.annotation.Transactional;
 import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
-import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
 import static no.nav.melosys.service.journalforing.UtledBehandlingsaarsak.utledÅrsaktype;
-import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt;
-import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
+import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.*;
 
 @Service
 public class JournalfoeringService {
@@ -216,14 +214,7 @@ public class JournalfoeringService {
         prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, utledMottaksdato(journalfoeringDto.getMottattDato(), journalpost));
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
 
-        var registreringUnntakFraMedlemskapToggleEnabled = unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP);
-
-        var erAnmodningOmUnntakEllerRegistreringUnntak = harRegistreringUnntakFraMedlemskapFlyt(sakstype, sakstema, behandlingstema, registreringUnntakFraMedlemskapToggleEnabled);
-
-        if (erSakstypeEøs(sakstype)
-            && !harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), registreringUnntakFraMedlemskapToggleEnabled)
-            && !erAnmodningOmUnntakEllerRegistreringUnntak
-        ) {
+        if (skalSetteSøknadslandOgPeriode(sakstype, sakstema, behandlingstema, behandlingstype)) {
             validerSøknadFelter(journalfoeringDto);
             prosessinstans.setData(ProsessDataKey.SØKNADSLAND, journalfoeringDto.getFagsak().getLand());
             prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalfoeringDto.getFagsak().getSoknadsperiode());
@@ -325,6 +316,18 @@ public class JournalfoeringService {
 
     private static LocalDate utledMottaksdato(LocalDate datoFraSaksbehandler, Journalpost journalpost) {
         return datoFraSaksbehandler != null ? datoFraSaksbehandler : LocalDate.ofInstant(journalpost.getForsendelseMottatt(), ZoneId.systemDefault());
+    }
+
+    private boolean skalSetteSøknadslandOgPeriode(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
+        var registreringUnntakFraMedlemskapToggleEnabled = unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP);
+        var ikkeYrkesaktivFlytToggleEnabled = unleash.isEnabled(ToggleName.IKKEYRKESAKTIV_FLYT);
+        var erAnmodningOmUnntakEllerRegistreringUnntak = harRegistreringUnntakFraMedlemskapFlyt(sakstype, sakstema, behandlingstema, registreringUnntakFraMedlemskapToggleEnabled);
+        var erIkkeYrkesaktiv = harIkkeYrkesaktivFlyt(sakstype, behandlingstema, ikkeYrkesaktivFlytToggleEnabled);
+
+        return erSakstypeEøs(sakstype)
+            && !harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"), ikkeYrkesaktivFlytToggleEnabled, registreringUnntakFraMedlemskapToggleEnabled)
+            && !erAnmodningOmUnntakEllerRegistreringUnntak
+            && !erIkkeYrkesaktiv;
     }
 
     private ProsessType finnProsessTypeForAndregangsbehandling(Behandlingstyper behandlingstype, Behandlingstema behandlingstema, Fagsak fagsak) {

@@ -227,6 +227,10 @@ public class DokgenService {
         return ident != null ? saksbehandlerService.hentNavnForIdent(ident) : "N/A";
     }
 
+    private String hentSaksbehandlerNavnEllerNull(String ident) {
+        return ident != null ? saksbehandlerService.hentNavnForIdent(ident) : null;
+    }
+
     private boolean inneholderArbeidsgiverSomKopimottaker(Collection<KopiMottakerDto> kopimottakere) {
         return kopimottakere.stream().map(KopiMottakerDto::rolle).anyMatch(kopimottaker -> kopimottaker == Mottakerroller.ARBEIDSGIVER);
     }
@@ -284,7 +288,8 @@ public class DokgenService {
                 .medKontaktopplysninger(brevbestillingDto.getKontaktopplysninger())
                 .medBrukerSkalHaKopi(inneholderBrukerSomKopimottaker(brevbestillingDto.getKopiMottakere()))
                 .medMottakerType(brevbestillingDto.getMottaker())
-                .medDokumentTittel(brevbestillingDto.getDokumentTittel());
+                .medDokumentTittel(brevbestillingDto.getDokumentTittel())
+                .medSaksbehandlerNrToNavn(hentSaksbehandlerNavnEllerNull(brevbestillingDto.getSaksbehandlerNrToIdent()));
             case AVSLAG_MANGLENDE_OPPLYSNINGER -> new AvslagBrevbestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK)
                 .medFritekst(brevbestillingDto.getFritekst());

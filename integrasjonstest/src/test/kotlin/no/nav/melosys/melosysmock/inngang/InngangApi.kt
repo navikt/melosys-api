@@ -33,4 +33,4 @@ data class Request(
 data class ErPeriode(
     val fom: LocalDate? = null,
     val tom: LocalDate? = null,
-    )
+)

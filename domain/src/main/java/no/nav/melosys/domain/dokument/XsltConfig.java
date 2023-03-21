@@ -20,8 +20,6 @@ public final class XsltConfig {
 
     public static final String INNTK_MAPPE= "inntk";
 
-    private static final String SOB_MAPPE = "sob";
-
     public static final String TPS_MAPPE = "tps";
 
     /* Tjenester */
@@ -58,7 +56,6 @@ public final class XsltConfig {
             case ORG -> XsltConfig.ORGANISASJON_TJENESTE;
             case ARBFORH -> XsltConfig.ARBEIDSFORHOLD_TJENESTE;
             case INNTK -> XsltConfig.INNTEKT_TJENESTE;
-            case SOB_SAK -> XsltConfig.SAKOGBEHANDLING_TJENESTE;
             default -> throw new IllegalStateException("SaksopplysningType " + type + " er ikke støttet");
         };
     }
@@ -69,7 +66,6 @@ public final class XsltConfig {
             case ORG -> XsltConfig.EREG_MAPPE;
             case ARBFORH -> XsltConfig.AAREG_MAPPE;
             case INNTK -> XsltConfig.INNTK_MAPPE;
-            case SOB_SAK -> XsltConfig.SOB_MAPPE;
             default -> throw new IllegalStateException("SaksopplysningType " + type + " er ikke støttet");
         };
     }

@@ -5,10 +5,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
-import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
-import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaseriePeriodeDto
-import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall
-import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FullmektigDto
+import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
@@ -25,13 +22,11 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import java.math.BigDecimal
 import java.time.LocalDate
-import java.util.*
 
 @Import(
     StsWebClientProducer::class,
     RestTokenServiceClient::class,
     OAuthMockServer::class,
-
     GenericAuthFilterFactory::class,
     FaktureringskomponentenConsumerProducer::class,
 )
@@ -103,7 +98,7 @@ class FaktureringskomponentenConsumerTokenTest(
         fullmektig: FullmektigDto = FullmektigDto("11987654321", "123456789", "Ole Brum"),
         referanseBruker: String = "Nasse Nøff",
         referanseNav: String = "NAV Medlemskap og avgift",
-        fakturaGjelder: String = "FTRL",
+        fakturaGjelder: Innbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
         intervall: FaktureringsIntervall = FaktureringsIntervall.KVARTAL,
         fakturaseriePeriode: List<FakturaseriePeriodeDto> = listOf(
             FakturaseriePeriodeDto(

@@ -5,7 +5,7 @@ import java.sql.Clob;
 import java.sql.SQLException;
 import java.sql.Statement;
 import javax.xml.bind.helpers.DefaultValidationEventHandler;
-import javax.xml.transform.*;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.stream.StreamSource;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -16,7 +16,6 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
-import no.nav.melosys.domain.dokument.sakogbehandling.SobSakDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import no.nav.melosys.domain.jpa.SaksopplysningDokumentConverter;
@@ -95,10 +94,6 @@ public class V7_1_08__SAKSOPPLYSNING_XML_TIL_DOKUMENT_JSON extends BaseJavaMigra
             case "SEDOPPL":
                 dokumentJson = lagDokumentJson(
                     SedDokument.class, xmlString, null, null);
-                break;
-            case "SOB_SAK":
-                dokumentJson = lagDokumentJson(
-                    SobSakDokument.class, xmlString, "sob/sakogbehandling_"+ versjon + ".xslt", versjon);
                 break;
             case "UTBETAL":
                 dokumentJson = lagDokumentJson(

@@ -14,19 +14,12 @@
         </sobSakDokument>
     </xsl:template>
 
-    <xsl:variable name="SAKSTEMA_BARNETRYGD">BAR</xsl:variable>
     <xsl:variable name="BEHANDLINGSKJEDETYPE_BEHANDLE_SAK">ad0003</xsl:variable>
-    <xsl:variable name="BEHANDLINGSTEMA_BARNETRYGD_EØS">ab0058</xsl:variable>
 
     <xsl:template match="behandlingskjede">
         <behandlingskjede>
             <xsl:apply-templates/>
         </behandlingskjede>
-        <xsl:if test="../sakstema = $SAKSTEMA_BARNETRYGD
-                      and behandlingskjedetype = $BEHANDLINGSKJEDETYPE_BEHANDLE_SAK
-                      and behandlingstema = $BEHANDLINGSTEMA_BARNETRYGD_EØS">
-            <xsl:element name="eøsBarnetrygd">true</xsl:element>
-        </xsl:if>
     </xsl:template>
 
     <xsl:template match="sakstema|behandlingskjedetype|behandlingstema">
