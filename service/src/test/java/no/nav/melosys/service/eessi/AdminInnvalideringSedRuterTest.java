@@ -30,6 +30,7 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -101,16 +102,38 @@ class AdminInnvalideringSedRuterTest {
     }
 
     @Test
-    void rutSedTilBehandling_tilhørendeFagsakFinnesOgBehandlingErNorgeUtpekt_opprettesEllerOppdatererOgBehandlingsoppgave() {
+    void rutSedTilBehandling_tilhørendeFagsakFinnesOgBehandlingErNorgeUtpekt_eksisterendeOppgaveOppdateres() {
         when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING)));
         Oppgave oppgave = new Oppgave.Builder()
             .setOppgaveId("123")
             .build();
         when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(any())).thenReturn(Optional.of(oppgave));
 
+
         adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
 
-        verify(oppgaveService).oppdaterOppgave(eq("123"), any(OppgaveOppdatering.class));
+
+        ArgumentCaptor<OppgaveOppdatering> argumentCaptor = ArgumentCaptor.forClass(OppgaveOppdatering.class);
+        verify(oppgaveService).oppdaterOppgave(eq("123"), argumentCaptor.capture());
+        assertThat(argumentCaptor.getValue())
+            .extracting(OppgaveOppdatering::getBeskrivelse)
+            .isEqualTo("Mottatt SED X008");
+    }
+
+    @Test
+    void rutSedTilBehandling_tilhørendeFagsakFinnesOgBehandlingErNorgeUtpekt_oppgaveOpprettes() {
+        when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING)));
+        when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(any())).thenReturn(Optional.empty());
+        when(oppgaveService.lagBehandlingsoppgave(any(Behandling.class))).thenReturn(new Oppgave.Builder());
+
+        adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
+
+
+        ArgumentCaptor<Oppgave> argumentCaptor = ArgumentCaptor.forClass(Oppgave.class);
+        verify(oppgaveService).opprettOppgave(argumentCaptor.capture());
+        assertThat(argumentCaptor.getValue())
+            .extracting(Oppgave::getBeskrivelse)
+            .isEqualTo("Mottatt SED X008");
     }
 
     @Test

@@ -7,8 +7,6 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
@@ -69,33 +67,22 @@ public abstract class AdminSedRuter {
         avvisMedPeriodeOpphørt(behandling);
     }
 
-    protected void oppdaterEllerOpprettOppgave(Behandling behandling, Prosessinstans prosessinstans, SedType sedType) {
-        Optional<Oppgave> oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer());
-
-        String oppgaveID;
-        if (oppgave.isEmpty()) {
-            oppgaveID = opprettBehandlingsoppgave(behandling, prosessinstans.getData(ProsessDataKey.AKTØR_ID));
-        } else {
-            oppgaveID = oppgave.get().getOppgaveId();
-        }
-
-        var oppdaterOppgaveBuilder = OppgaveOppdatering.builder();
-
-        if (sedType.erPurring()) {
-            log.info("Setter prioritet til HØY for oppgave {}", oppgaveID);
-            oppdaterOppgaveBuilder.beskrivelse("PURRING SED X009")
-                .prioritet(PrioritetType.HOY.name());
-        } else {
-            oppdaterOppgaveBuilder.beskrivelse("Mottatt SED " + sedType);
-        }
-
-        oppgaveService.oppdaterOppgave(oppgaveID, oppdaterOppgaveBuilder.build());
+    protected void oppdaterEllerOpprettBehandlingsOppgave(Behandling behandling, Prosessinstans prosessinstans, SedType sedType) {
+        oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())
+            .ifPresentOrElse(oppgave -> {
+                    OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder()
+                        .beskrivelse("Mottatt SED " + sedType)
+                        .build();
+                    oppgaveService.oppdaterOppgave(oppgave.getOppgaveId(), oppgaveOppdatering);
+                },
+                () -> opprettBehandlingsoppgave(behandling, prosessinstans.getData(ProsessDataKey.AKTØR_ID), sedType));
     }
 
-    private String opprettBehandlingsoppgave(Behandling behandling, String aktørID) {
+    private String opprettBehandlingsoppgave(Behandling behandling, String aktørID, SedType sedType) {
         var oppgave = oppgaveService.lagBehandlingsoppgave(behandling)
             .setAktørId(aktørID)
             .setSaksnummer(behandling.getFagsak().getSaksnummer())
+            .setBeskrivelse("Mottatt SED " + sedType)
             .build();
         return oppgaveService.opprettOppgave(oppgave);
     }

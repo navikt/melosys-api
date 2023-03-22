@@ -14,8 +14,10 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.eessi.ruting.AdminFjernmottakerSedRuter;
 import no.nav.melosys.service.medl.MedlPeriodeService;
@@ -25,9 +27,11 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
@@ -51,8 +55,6 @@ class AdminFjernmottakerSedRuterTest {
     private final long arkivsakID = 123321;
     private final Prosessinstans prosessinstans = new Prosessinstans();
     private final MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
-    private final String rinaSaksnummer = "1233333";
-    private final String sedID = "2414";
 
     @BeforeEach
     void setup() {
@@ -150,6 +152,41 @@ class AdminFjernmottakerSedRuterTest {
         verify(fagsakService).oppdaterStatus(fagsak, Saksstatuser.ANNULLERT);
         verify(medlPeriodeService).avvisPeriodeOpphørt(anmodningsperiode.getMedlPeriodeID());
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(sistAktiveBehandling, melosysEessiMelding);
+    }
+
+    @Test
+    void rutSedTilBehandling_tilhørendeFagsakFinnesOgBehandlingErNorgeUtpekt_eksisterendeOppgaveOppdateres() {
+        when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING)));
+        Oppgave oppgave = new Oppgave.Builder()
+            .setOppgaveId("123")
+            .build();
+        when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(any())).thenReturn(Optional.of(oppgave));
+
+
+        adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
+
+
+        ArgumentCaptor<OppgaveOppdatering> argumentCaptor = ArgumentCaptor.forClass(OppgaveOppdatering.class);
+        verify(oppgaveService).oppdaterOppgave(eq("123"), argumentCaptor.capture());
+        assertThat(argumentCaptor.getValue())
+            .extracting(OppgaveOppdatering::getBeskrivelse)
+            .isEqualTo("Mottatt SED X006");
+    }
+
+    @Test
+    void rutSedTilBehandling_tilhørendeFagsakFinnesOgBehandlingErNorgeUtpekt_oppgaveOpprettes() {
+        when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING)));
+        when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(any())).thenReturn(Optional.empty());
+        when(oppgaveService.lagBehandlingsoppgave(any(Behandling.class))).thenReturn(new Oppgave.Builder());
+
+        adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
+
+
+        ArgumentCaptor<Oppgave> argumentCaptor = ArgumentCaptor.forClass(Oppgave.class);
+        verify(oppgaveService).opprettOppgave(argumentCaptor.capture());
+        assertThat(argumentCaptor.getValue())
+            .extracting(Oppgave::getBeskrivelse)
+            .isEqualTo("Mottatt SED X006");
     }
 
     private Behandling lagBehandling(Fagsak fagsak, Behandlingstema behandlingstema, Behandlingsstatus behandlingsstatus) {

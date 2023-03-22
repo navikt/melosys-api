@@ -65,7 +65,7 @@ public class AdminFjernmottakerSedRuter extends AdminSedRuter implements SedRute
         var sistAktiveBehandling = fagsak.get().hentSistAktivBehandling();
 
         if (sistAktiveBehandling.erNorgeUtpekt()) {
-            oppdaterEllerOpprettOppgave(sistAktiveBehandling, prosessinstans, SedType.X006);
+            oppdaterEllerOpprettBehandlingsOppgave(sistAktiveBehandling, prosessinstans, SedType.X006);
             return;
         }
 
