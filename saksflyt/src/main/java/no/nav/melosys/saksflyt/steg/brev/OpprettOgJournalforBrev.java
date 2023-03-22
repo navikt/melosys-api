@@ -183,7 +183,6 @@ public class OpprettOgJournalforBrev implements StegBehandler {
             return Collections.emptyList();
         }
         if (!(brevbestilling instanceof FritekstbrevBrevbestilling fritekstbrevBrevbestilling)) {
-            log.warn("Forsøkte å produsere brev {} med fritekstvedlegg for behandling {}", brevbestilling.getProduserbartdokument(), brevbestilling.getBehandlingId());
             return Collections.emptyList();
         }
 
