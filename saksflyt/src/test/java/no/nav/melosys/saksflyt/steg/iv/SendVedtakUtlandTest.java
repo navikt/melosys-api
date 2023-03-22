@@ -77,7 +77,7 @@ class SendVedtakUtlandTest {
         behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingsresultatService, sedSomBrevService, utpekingService, prosessinstansService);
+        sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingsresultatService, sedSomBrevService, utpekingService, prosessinstansService, unleash);
     }
 
     private Behandlingsresultat lagBehandlingsresultat() {

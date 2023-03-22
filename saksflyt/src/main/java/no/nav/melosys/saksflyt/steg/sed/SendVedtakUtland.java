@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -39,15 +40,17 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     private final SedSomBrevService sedSomBrevService;
     private final UtpekingService utpekingService;
     private final ProsessinstansService prosessinstansService;
+    private final Unleash unleash;
 
     public SendVedtakUtland(EessiService eessiService,
                             BehandlingsresultatService behandlingsresultatService,
                             SedSomBrevService sedSomBrevService,
-                            UtpekingService utpekingService, ProsessinstansService prosessinstansService) {
+                            UtpekingService utpekingService, ProsessinstansService prosessinstansService, Unleash unleash) {
         super(eessiService, behandlingsresultatService);
         this.sedSomBrevService = sedSomBrevService;
         this.utpekingService = utpekingService;
         this.prosessinstansService = prosessinstansService;
+        this.unleash = unleash;
     }
 
     @Override
@@ -63,7 +66,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
         if (behandling.erNorgeUtpekt()) {
             var bucer = eessiService.hentTilknyttedeBucer(behandling.getFagsak().getGsakSaksnummer(), Collections.emptyList());
             if (bucer.stream().anyMatch(buc -> buc.getBucType().equals(BucType.LA_BUC_02.name()) && buc.erÅpen())) {
-                if (behandling.erNyVurdering()) {
+                if (behandling.erNyVurdering() && unleash.isEnabled("melosys.annuller.sed.ny.vurdering")) {
                     annullerSedForNyVurderingMedSendtVedtak(behandling);
                 }
                 eessiService.sendGodkjenningArbeidFlereLand(behandling.getId(), prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
