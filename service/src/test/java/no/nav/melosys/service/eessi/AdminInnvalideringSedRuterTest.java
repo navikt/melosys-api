@@ -16,8 +16,10 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.eessi.ruting.AdminInnvalideringSedRuter;
@@ -99,11 +101,16 @@ class AdminInnvalideringSedRuterTest {
     }
 
     @Test
-    void rutSedTilBehandling_tilhørendeFagsakFinnesOgBehandlingErNorgeUtpekt_opprettesJfrProsessOgBehandlingsoppgave() {
+    void rutSedTilBehandling_tilhørendeFagsakFinnesOgBehandlingErNorgeUtpekt_opprettesEllerOppdatererOgBehandlingsoppgave() {
         when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING)));
+        Oppgave oppgave = new Oppgave.Builder()
+            .setOppgaveId("123")
+            .build();
+        when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(any())).thenReturn(Optional.of(oppgave));
+
         adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
 
-        verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(any(Behandling.class), eq(melosysEessiMelding.getJournalpostId()), eq(melosysEessiMelding.getAktoerId()), isNull());
+        verify(oppgaveService).oppdaterOppgave(eq("123"), any(OppgaveOppdatering.class));
     }
 
     @Test

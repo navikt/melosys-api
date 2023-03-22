@@ -35,7 +35,7 @@ public class AdminFjernmottakerSedRuter extends AdminSedRuter implements SedRute
         super(fagsakService,
             behandlingsresultatService,
             medlPeriodeService,
-            prosessinstansService);
+            prosessinstansService, oppgaveService);
 
         this.oppgaveService = oppgaveService;
         this.unleash = unleash;
@@ -65,7 +65,7 @@ public class AdminFjernmottakerSedRuter extends AdminSedRuter implements SedRute
         var sistAktiveBehandling = fagsak.get().hentSistAktivBehandling();
 
         if (sistAktiveBehandling.erNorgeUtpekt()) {
-            oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(sistAktiveBehandling, melosysEessiMelding.getJournalpostId(), melosysEessiMelding.getAktoerId(), null);
+            oppdaterEllerOpprettOppgave(sistAktiveBehandling, prosessinstans, SedType.X006);
             return;
         }
 

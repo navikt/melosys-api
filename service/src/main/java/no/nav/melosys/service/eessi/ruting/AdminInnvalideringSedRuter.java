@@ -25,7 +25,6 @@ public class AdminInnvalideringSedRuter extends AdminSedRuter implements SedRute
 
     private static final Logger log = LoggerFactory.getLogger(AdminInnvalideringSedRuter.class);
 
-    private final OppgaveService oppgaveService;
     private final EessiService eessiService;
     private final Unleash unleash;
 
@@ -39,9 +38,8 @@ public class AdminInnvalideringSedRuter extends AdminSedRuter implements SedRute
         super(fagsakService,
             behandlingsresultatService,
             medlPeriodeService,
-            prosessinstansService);
+            prosessinstansService, oppgaveService);
 
-        this.oppgaveService = oppgaveService;
         this.eessiService = eessiService;
         this.unleash = unleash;
     }
@@ -72,7 +70,7 @@ public class AdminInnvalideringSedRuter extends AdminSedRuter implements SedRute
         boolean aktivBehandlingErInvalidert = erAktivBehandlingInvalidert(sedDokument, arkivsakID);
 
         if (sistAktiveBehandling.erNorgeUtpekt()) {
-            oppgaveService.opprettEllerGjenbrukBehandlingsoppgave(sistAktiveBehandling, melosysEessiMelding.getJournalpostId(), melosysEessiMelding.getAktoerId(), null);
+            oppdaterEllerOpprettOppgave(sistAktiveBehandling, prosessinstans, SedType.X008);
             return;
         }
 
