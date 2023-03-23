@@ -135,11 +135,11 @@ public final class OppgaveFactory {
     }
 
     private static Oppgavetyper oppgavetypeEøs(Behandlingstema tema, Behandlingstyper behandlingstype) {
+        if (tema == BESLUTNING_LOVVALG_NORGE &&  behandlingstype == Behandlingstyper.HENVENDELSE) {
+            return Oppgavetyper.VURD_HENV;
+        }
         if (erAnmodningOmUnntak(tema) || erRegistreringAvUnntak(tema) ||
             List.of(FORESPØRSEL_TRYGDEMYNDIGHET, TRYGDETID, BESLUTNING_LOVVALG_NORGE).contains(tema)) {
-            if (tema == BESLUTNING_LOVVALG_NORGE &&  behandlingstype == Behandlingstyper.HENVENDELSE) {
-                return Oppgavetyper.VURD_HENV;
-            }
             return Oppgavetyper.BEH_SED;
         }
         if (behandlingstype == Behandlingstyper.HENVENDELSE) {
