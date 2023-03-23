@@ -16,13 +16,11 @@ import no.nav.melosys.domain.oppgave.PrioritetType;
 import no.nav.melosys.exception.FunksjonellException;
 
 import static no.nav.melosys.domain.Behandling.*;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.TRYGDETID;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 
 public final class OppgaveFactory {
 
     private static final long FRIST_FERDIGSTILLELSE_JFR_OPPG = 7;
-    private static final String EU_EOS = "ab0424";
 
     private OppgaveFactory() {
     }
@@ -108,7 +106,7 @@ public final class OppgaveFactory {
 
     static OppgaveBehandlingstype utledOppgaveBehandlingstype(Sakstyper sakstype, Sakstemaer sakstema,
                                                               Behandlingstema behandlingstema) {
-        if (sakstype == Sakstyper.EU_EOS && sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG && behandlingstema == Behandlingstema.BESLUTNING_LOVVALG_NORGE) {
+        if (sakstype == Sakstyper.EU_EOS && sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG && behandlingstema == BESLUTNING_LOVVALG_NORGE) {
             return OppgaveBehandlingstype.EOS_LOVVALG_NORGE;
         }
         return null;
@@ -137,7 +135,11 @@ public final class OppgaveFactory {
     }
 
     private static Oppgavetyper oppgavetypeEøs(Behandlingstema tema, Behandlingstyper behandlingstype) {
-        if (erAnmodningOmUnntak(tema) || erRegistreringAvUnntak(tema) || List.of(FORESPØRSEL_TRYGDEMYNDIGHET, TRYGDETID).contains(tema)) {
+        if (erAnmodningOmUnntak(tema) || erRegistreringAvUnntak(tema) ||
+            List.of(FORESPØRSEL_TRYGDEMYNDIGHET, TRYGDETID, BESLUTNING_LOVVALG_NORGE).contains(tema)) {
+            if (tema == BESLUTNING_LOVVALG_NORGE &&  behandlingstype == Behandlingstyper.HENVENDELSE) {
+                return Oppgavetyper.VURD_HENV;
+            }
             return Oppgavetyper.BEH_SED;
         }
         if (behandlingstype == Behandlingstyper.HENVENDELSE) {
