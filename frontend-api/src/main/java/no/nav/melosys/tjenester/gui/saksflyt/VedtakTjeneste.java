@@ -91,6 +91,7 @@ public class VedtakTjeneste {
             .medVedtakstype(fattVedtakDto.getVedtakstype())
             .medBestillersId(bestillersId)
             .medBetalingsIntervall(fattVedtakDto.getBetalingsintervall())
+            .medKopiTilArbeidsgiver(fattVedtakDto.getKopiTilArbeidsgiver())
             .build();
     }
 }
