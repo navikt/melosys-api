@@ -27,6 +27,8 @@ public record Navn(String fornavn, String mellomnavn, String etternavn) {
 
     // C, A B -> A B C
     public static String navnEtternavnSist(String fulltNavnEtternavnFørst) {
+        if (!fulltNavnEtternavnFørst.contains(",")) return fulltNavnEtternavnFørst;
+
         String[] splittetNavn = fulltNavnEtternavnFørst.split(" ");
         var etternavn = splittetNavn[0].substring(0, splittetNavn[0].length() - 1);
         var forOgMellomnavn = String.join(" ", Arrays.copyOfRange(splittetNavn, 1, splittetNavn.length));
