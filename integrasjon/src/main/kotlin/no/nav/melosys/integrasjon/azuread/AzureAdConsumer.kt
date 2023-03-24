@@ -17,7 +17,7 @@ open class AzureAdConsumer(
             uriBuilder
                 .queryParam("\$filter", "onPremisesSamAccountName eq '$ident'")
                 .queryParam("\$count", true)
-                .queryParam("\$select", "displayName")
+                .queryParam("\$select", "givenName,surname")
                 .build()
         }
             .accept(MediaType.APPLICATION_JSON)
@@ -25,7 +25,8 @@ open class AzureAdConsumer(
             .bodyToMono<AzureAdGraphResponseDTO>()
             .mapNotNull {
                 if (!it.value.isEmpty()) {
-                    it.value[0].displayName
+                    val azureUser = it.value[0]
+                    "${azureUser.givenName} ${azureUser.surname}"
                 } else null
             }
             .block()
