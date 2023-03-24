@@ -9,10 +9,14 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.azuread.AzureAdService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SaksbehandlerService {
+
+    private static final Logger log = LoggerFactory.getLogger(SaksbehandlerService.class);
     private AzureAdService azureAdService;
 
     private Unleash unleash;
@@ -52,10 +56,10 @@ public class SaksbehandlerService {
         }
 
         if (saksbehandlerNavnFraToken.isPresent()) {
-            return saksbehandlerNavnFraToken;
-        } else {
-            return finnNavnForIdentFraAzure(ident);
+            log.warn("Saksbehandlers navn er tilgjengelig i token, men henter navn fra Graph API");
         }
+
+        return finnNavnForIdentFraAzure(ident);
     }
 
     public String hentNavnForIdent(String ident) {
