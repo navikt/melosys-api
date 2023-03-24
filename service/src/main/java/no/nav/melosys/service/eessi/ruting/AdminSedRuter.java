@@ -4,12 +4,8 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -66,25 +62,4 @@ public abstract class AdminSedRuter {
         }
         avvisMedPeriodeOpphørt(behandling);
     }
-
-    protected void oppdaterEllerOpprettBehandlingsOppgave(Behandling behandling, Prosessinstans prosessinstans, SedType sedType) {
-        oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(behandling.getFagsak().getSaksnummer())
-            .ifPresentOrElse(oppgave -> {
-                    OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder()
-                        .beskrivelse("Mottatt SED " + sedType)
-                        .build();
-                    oppgaveService.oppdaterOppgave(oppgave.getOppgaveId(), oppgaveOppdatering);
-                },
-                () -> opprettBehandlingsoppgave(behandling, prosessinstans.getData(ProsessDataKey.AKTØR_ID), sedType));
-    }
-
-    private String opprettBehandlingsoppgave(Behandling behandling, String aktørID, SedType sedType) {
-        var oppgave = oppgaveService.lagBehandlingsoppgave(behandling)
-            .setAktørId(aktørID)
-            .setSaksnummer(behandling.getFagsak().getSaksnummer())
-            .setBeskrivelse("Mottatt SED " + sedType)
-            .build();
-        return oppgaveService.opprettOppgave(oppgave);
-    }
-
 }

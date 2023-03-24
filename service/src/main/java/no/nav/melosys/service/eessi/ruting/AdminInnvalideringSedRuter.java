@@ -70,7 +70,7 @@ public class AdminInnvalideringSedRuter extends AdminSedRuter implements SedRute
         boolean aktivBehandlingErInvalidert = erAktivBehandlingInvalidert(sedDokument, arkivsakID);
 
         if (sistAktiveBehandling.erNorgeUtpekt()) {
-            oppdaterEllerOpprettBehandlingsOppgave(sistAktiveBehandling, prosessinstans, SedType.X008);
+            oppgaveService.opprettJournalføringsoppgave(melosysEessiMelding.getJournalpostId(), melosysEessiMelding.getAktoerId());
             return;
         }
 

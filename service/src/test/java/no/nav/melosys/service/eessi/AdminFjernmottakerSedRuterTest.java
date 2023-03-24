@@ -155,38 +155,14 @@ class AdminFjernmottakerSedRuterTest {
     }
 
     @Test
-    void rutSedTilBehandling_tilhørendeFagsakFinnesOgBehandlingErNorgeUtpekt_eksisterendeOppgaveOppdateres() {
+    void rutSedTilBehandling_tilhørendeFagsakFinnesOgBehandlingErNorgeUtpekt_journalføringsOppgaveLages() {
         when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING)));
-        Oppgave oppgave = new Oppgave.Builder()
-            .setOppgaveId("123")
-            .build();
-        when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(any())).thenReturn(Optional.of(oppgave));
 
 
         adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
 
 
-        ArgumentCaptor<OppgaveOppdatering> argumentCaptor = ArgumentCaptor.forClass(OppgaveOppdatering.class);
-        verify(oppgaveService).oppdaterOppgave(eq("123"), argumentCaptor.capture());
-        assertThat(argumentCaptor.getValue())
-            .extracting(OppgaveOppdatering::getBeskrivelse)
-            .isEqualTo("Mottatt SED X006");
-    }
-
-    @Test
-    void rutSedTilBehandling_tilhørendeFagsakFinnesOgBehandlingErNorgeUtpekt_oppgaveOpprettes() {
-        when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING)));
-        when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(any())).thenReturn(Optional.empty());
-        when(oppgaveService.lagBehandlingsoppgave(any(Behandling.class))).thenReturn(new Oppgave.Builder());
-
-        adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
-
-
-        ArgumentCaptor<Oppgave> argumentCaptor = ArgumentCaptor.forClass(Oppgave.class);
-        verify(oppgaveService).opprettOppgave(argumentCaptor.capture());
-        assertThat(argumentCaptor.getValue())
-            .extracting(Oppgave::getBeskrivelse)
-            .isEqualTo("Mottatt SED X006");
+        verify(oppgaveService).opprettJournalføringsoppgave(melosysEessiMelding.getJournalpostId(), melosysEessiMelding.getAktoerId());
     }
 
     private Behandling lagBehandling(Fagsak fagsak, Behandlingstema behandlingstema, Behandlingsstatus behandlingsstatus) {
