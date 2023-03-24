@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import no.finn.unleash.Unleash;
+import no.nav.melosys.domain.person.Navn;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.azuread.AzureAdService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -34,7 +35,7 @@ public class SaksbehandlerService {
         String saksbehandlerID = ThreadLocalAccessInfo.getSaksbehandler();
         if (ident.equals(saksbehandlerID)) {
             String saksbehandlerNavn = ThreadLocalAccessInfo.getSaksbehandlerNavn();
-            return Optional.of(saksbehandlerNavn);
+            return Optional.of(Navn.navnEtternavnSist(saksbehandlerNavn));
         }
         return Optional.empty();
     }
