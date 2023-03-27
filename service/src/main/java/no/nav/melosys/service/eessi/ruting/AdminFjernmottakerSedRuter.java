@@ -9,7 +9,9 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -24,6 +26,7 @@ public class AdminFjernmottakerSedRuter extends AdminSedRuter implements SedRute
     private static final Logger log = LoggerFactory.getLogger(AdminFjernmottakerSedRuter.class);
 
     private final OppgaveService oppgaveService;
+    private final BehandlingService behandlingService;
     private final Unleash unleash;
 
     public AdminFjernmottakerSedRuter(FagsakService fagsakService,
@@ -31,13 +34,14 @@ public class AdminFjernmottakerSedRuter extends AdminSedRuter implements SedRute
                                       OppgaveService oppgaveService,
                                       BehandlingsresultatService behandlingsresultatService,
                                       MedlPeriodeService medlPeriodeService,
-                                      Unleash unleash) {
+                                      BehandlingService behandlingService, Unleash unleash) {
         super(fagsakService,
             behandlingsresultatService,
             medlPeriodeService,
-            prosessinstansService, oppgaveService);
+            prosessinstansService);
 
         this.oppgaveService = oppgaveService;
+        this.behandlingService = behandlingService;
         this.unleash = unleash;
 
     }
@@ -65,8 +69,14 @@ public class AdminFjernmottakerSedRuter extends AdminSedRuter implements SedRute
         var sistAktiveBehandling = fagsak.get().hentSistAktivBehandling();
 
         if (sistAktiveBehandling.erNorgeUtpekt()) {
-            oppgaveService.opprettJournalføringsoppgave(melosysEessiMelding.getJournalpostId(), melosysEessiMelding.getAktoerId());
-            return;
+            if (sistAktiveBehandling.erAktiv()) {
+                behandlingService.endreStatus(sistAktiveBehandling.getId(), Behandlingsstatus.VURDER_DOKUMENT);
+                opprettJournalføringProsess(melosysEessiMelding, sistAktiveBehandling);
+                return;
+            } else {
+                oppgaveService.opprettJournalføringsoppgave(melosysEessiMelding.getJournalpostId(), melosysEessiMelding.getAktoerId());
+                return;
+            }
         }
 
         if (melosysEessiMelding.isX006NavErFjernet()) {

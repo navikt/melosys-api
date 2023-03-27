@@ -14,10 +14,9 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.eessi.ruting.AdminFjernmottakerSedRuter;
 import no.nav.melosys.service.medl.MedlPeriodeService;
@@ -27,11 +26,9 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
@@ -47,6 +44,8 @@ class AdminFjernmottakerSedRuterTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private MedlPeriodeService medlPeriodeService;
+    @Mock
+    private BehandlingService behandlingService;
 
     private final FakeUnleash fakeUnleash = new FakeUnleash();
     private AdminFjernmottakerSedRuter adminFjernmottakerSedRuter;
@@ -59,7 +58,7 @@ class AdminFjernmottakerSedRuterTest {
     @BeforeEach
     void setup() {
         adminFjernmottakerSedRuter = new AdminFjernmottakerSedRuter(fagsakService, prosessinstansService, oppgaveService,
-            behandlingsresultatService, medlPeriodeService, fakeUnleash);
+            behandlingsresultatService, medlPeriodeService, behandlingService, fakeUnleash);
 
         melosysEessiMelding.setAktoerId("12312412");
         melosysEessiMelding.setRinaSaksnummer("143141");
@@ -155,8 +154,22 @@ class AdminFjernmottakerSedRuterTest {
     }
 
     @Test
-    void rutSedTilBehandling_tilhørendeFagsakFinnesOgBehandlingErNorgeUtpekt_journalføringsOppgaveLages() {
-        when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING)));
+    void rutSedTilBehandling_tilhørendeFagsakFinnesOgBehandlingErNorgeUtpektAktiv_journalføringsOppgaveLages() {
+        var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING);
+        when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
+        Behandling sistAktiveBehandling = fagsak.hentSistAktivBehandling();
+
+
+        adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
+
+
+        verify(behandlingService).endreStatus(behandlingID, Behandlingsstatus.VURDER_DOKUMENT);
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(sistAktiveBehandling, melosysEessiMelding);
+    }
+
+    @Test
+    void rutSedTilBehandling_tilhørendeFagsakFinnesOgBehandlingErNorgeUtpektIkkeAktiv_journalføringsOppgaveLages() {
+        when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.AVSLUTTET)));
 
 
         adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);

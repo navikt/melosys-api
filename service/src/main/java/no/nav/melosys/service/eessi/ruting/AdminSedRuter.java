@@ -8,7 +8,6 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
-import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
@@ -21,17 +20,15 @@ public abstract class AdminSedRuter {
     protected final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
     private final ProsessinstansService prosessinstansService;
-    protected final OppgaveService oppgaveService;
 
     public AdminSedRuter(FagsakService fagsakService,
                          BehandlingsresultatService behandlingsresultatService,
                          MedlPeriodeService medlPeriodeService,
-                         ProsessinstansService prosessinstansService, OppgaveService oppgaveService) {
+                         ProsessinstansService prosessinstansService) {
         this.fagsakService = fagsakService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
         this.prosessinstansService = prosessinstansService;
-        this.oppgaveService = oppgaveService;
     }
 
     protected void avvisMedPeriodeOpphørt(Behandling behandling) {

@@ -16,10 +16,9 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.eessi.ruting.AdminInnvalideringSedRuter;
@@ -30,7 +29,6 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -54,6 +52,8 @@ class AdminInnvalideringSedRuterTest {
     private MedlPeriodeService medlPeriodeService;
     @Mock
     private EessiService eessiService;
+    @Mock
+    private BehandlingService behandlingService;
 
     private final FakeUnleash fakeUnleash = new FakeUnleash();
 
@@ -69,7 +69,7 @@ class AdminInnvalideringSedRuterTest {
     @BeforeEach
     void setup() {
         adminInnvalideringSedRuter = new AdminInnvalideringSedRuter(fagsakService, prosessinstansService, oppgaveService,
-            behandlingsresultatService, medlPeriodeService, eessiService, fakeUnleash);
+            behandlingsresultatService, medlPeriodeService, eessiService, behandlingService, fakeUnleash);
 
         melosysEessiMelding.setAktoerId("12312412");
         melosysEessiMelding.setRinaSaksnummer("143141");
@@ -102,8 +102,22 @@ class AdminInnvalideringSedRuterTest {
     }
 
     @Test
-    void rutSedTilBehandling_tilhørendeFagsakFinnesOgBehandlingErNorgeUtpekt_journalføringsOppgaveLages() {
-        when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING)));
+    void rutSedTilBehandling_tilhørendeFagsakFinnesOgBehandlingErNorgeUtpektAktiv_journalføringsOppgaveLages() {
+        var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING);
+        when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
+        Behandling sistAktiveBehandling = fagsak.hentSistAktivBehandling();
+
+
+        adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
+
+
+        verify(behandlingService).endreStatus(behandlingID, Behandlingsstatus.VURDER_DOKUMENT);
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(sistAktiveBehandling, melosysEessiMelding);
+    }
+
+    @Test
+    void rutSedTilBehandling_tilhørendeFagsakFinnesOgBehandlingErNorgeUtpektIkkeAktiv_journalføringsOppgaveLages() {
+        when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.AVSLUTTET)));
 
 
         adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
