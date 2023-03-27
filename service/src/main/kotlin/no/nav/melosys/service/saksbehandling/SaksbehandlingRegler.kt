@@ -177,7 +177,7 @@ class SaksbehandlingRegler(
             behandlingstema: Behandlingstema,
             ikkeYrkesaktivFlytToggleEnabled: Boolean
         ): Boolean {
-            if (ikkeYrkesaktivFlytToggleEnabled && sakstype == Sakstyper.EU_EOS && behandlingstema == IKKE_YRKESAKTIV) {
+            if (ikkeYrkesaktivFlytToggleEnabled && (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE) && behandlingstema == IKKE_YRKESAKTIV) {
                 return true
             }
             return false
