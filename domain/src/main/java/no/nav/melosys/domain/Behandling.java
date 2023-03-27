@@ -296,7 +296,7 @@ public class Behandling extends RegistreringsInfo {
     public boolean harLand() {
         if (mottatteOpplysninger != null && mottatteOpplysninger.getMottatteOpplysningerData() != null) {
             if (mottatteOpplysninger.getMottatteOpplysningerData() instanceof AnmodningEllerAttest anmodningEllerAttest) {
-                return anmodningEllerAttest.getLovvalgsland() != null || mottatteOpplysninger.getMottatteOpplysningerData().soeknadsland.erGyldig();
+                return anmodningEllerAttest.getLovvalgsland() != null;
             }
             return mottatteOpplysninger.getMottatteOpplysningerData().soeknadsland.erGyldig();
         }
