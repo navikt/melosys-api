@@ -20,6 +20,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -294,6 +295,9 @@ public class Behandling extends RegistreringsInfo {
 
     public boolean harLand() {
         if (mottatteOpplysninger != null && mottatteOpplysninger.getMottatteOpplysningerData() != null) {
+            if (mottatteOpplysninger.getMottatteOpplysningerData() instanceof AnmodningEllerAttest anmodningEllerAttest) {
+                return anmodningEllerAttest.getLovvalgsland() != null;
+            }
             return mottatteOpplysninger.getMottatteOpplysningerData().soeknadsland.erGyldig();
         }
         return false;
