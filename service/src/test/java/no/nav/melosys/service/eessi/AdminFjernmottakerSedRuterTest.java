@@ -16,6 +16,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.eessi.ruting.AdminFjernmottakerSedRuter;
 import no.nav.melosys.service.medl.MedlPeriodeService;
@@ -43,6 +44,8 @@ class AdminFjernmottakerSedRuterTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private MedlPeriodeService medlPeriodeService;
+    @Mock
+    private BehandlingService behandlingService;
 
     private final FakeUnleash fakeUnleash = new FakeUnleash();
     private AdminFjernmottakerSedRuter adminFjernmottakerSedRuter;
@@ -51,13 +54,11 @@ class AdminFjernmottakerSedRuterTest {
     private final long arkivsakID = 123321;
     private final Prosessinstans prosessinstans = new Prosessinstans();
     private final MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
-    private final String rinaSaksnummer = "1233333";
-    private final String sedID = "2414";
 
     @BeforeEach
     void setup() {
         adminFjernmottakerSedRuter = new AdminFjernmottakerSedRuter(fagsakService, prosessinstansService, oppgaveService,
-            behandlingsresultatService, medlPeriodeService, fakeUnleash);
+            behandlingsresultatService, medlPeriodeService, behandlingService, fakeUnleash);
 
         melosysEessiMelding.setAktoerId("12312412");
         melosysEessiMelding.setRinaSaksnummer("143141");
@@ -150,6 +151,31 @@ class AdminFjernmottakerSedRuterTest {
         verify(fagsakService).oppdaterStatus(fagsak, Saksstatuser.ANNULLERT);
         verify(medlPeriodeService).avvisPeriodeOpphørt(anmodningsperiode.getMedlPeriodeID());
         verify(prosessinstansService).opprettProsessinstansSedJournalføring(sistAktiveBehandling, melosysEessiMelding);
+    }
+
+    @Test
+    void rutSedTilBehandling_tilhørendeFagsakFinnesOgBehandlingErNorgeUtpektAktiv_behandlingsstausVURDER_DOKUMENT() {
+        var fagsak = lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.UNDER_BEHANDLING);
+        when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(fagsak));
+        Behandling sistAktiveBehandling = fagsak.hentSistAktivBehandling();
+
+
+        adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
+
+
+        verify(behandlingService).endreStatus(behandlingID, Behandlingsstatus.VURDER_DOKUMENT);
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(sistAktiveBehandling, melosysEessiMelding);
+    }
+
+    @Test
+    void rutSedTilBehandling_tilhørendeFagsakFinnesOgBehandlingErNorgeUtpektIkkeAktiv_journalføringsOppgaveLages() {
+        when(fagsakService.finnFagsakFraArkivsakID(arkivsakID)).thenReturn(Optional.of(lagFagsak(Behandlingstema.BESLUTNING_LOVVALG_NORGE, Behandlingsstatus.AVSLUTTET)));
+
+
+        adminFjernmottakerSedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
+
+
+        verify(oppgaveService).opprettJournalføringsoppgave(melosysEessiMelding.getJournalpostId(), melosysEessiMelding.getAktoerId());
     }
 
     private Behandling lagBehandling(Fagsak fagsak, Behandlingstema behandlingstema, Behandlingsstatus behandlingsstatus) {
