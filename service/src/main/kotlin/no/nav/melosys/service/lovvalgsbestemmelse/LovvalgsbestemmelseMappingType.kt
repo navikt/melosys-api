@@ -11,10 +11,13 @@ enum class LovvalgsbestemmelseMappingType {
         fun utledType(sakstema: Sakstemaer, behandlingstema: Behandlingstema): LovvalgsbestemmelseMappingType {
             if (sakstema === Sakstemaer.MEDLEMSKAP_LOVVALG && Behandlingstema.YRKESAKTIV === behandlingstema)
                 return YRKESAKTIV
+
             if (sakstema === Sakstemaer.MEDLEMSKAP_LOVVALG && Behandlingstema.IKKE_YRKESAKTIV === behandlingstema)
                 return IKKE_YRKESAKTIV
+
             if (sakstema === Sakstemaer.UNNTAK && (Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL === behandlingstema || Behandlingstema.REGISTRERING_UNNTAK === behandlingstema))
                 return UNNTAK
+
             throw FunksjonellException("Kan ikke mappe lovvalgsbestemmelser for sakstema=${sakstema} og behandlingstema=${behandlingstema}")
         }
     }
