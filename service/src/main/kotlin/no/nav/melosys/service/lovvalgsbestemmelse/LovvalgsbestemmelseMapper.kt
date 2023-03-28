@@ -27,6 +27,8 @@ import no.nav.melosys.exception.FunksjonellException
 
 class LovvalgsbestemmelseMapper {
     companion object {
+
+        // Oversikt over regler: https://confluence.adeo.no/display/TEESSI/Spesifikke+kodeverk+Trygdeavtaler#SpesifikkekodeverkTrygdeavtaler-Lovvalgsbestemmelser
         fun mapToLovvalgsbestemmelse(
             land: Land_iso2, mappingType: LovvalgsbestemmelseMappingType
         ): Set<LovvalgBestemmelse> {
