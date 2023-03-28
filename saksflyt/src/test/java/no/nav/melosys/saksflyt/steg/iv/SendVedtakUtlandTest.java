@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
+import no.finn.unleash.FakeUnleash;
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
@@ -58,6 +60,7 @@ class SendVedtakUtlandTest {
     private final Behandling behandling = new Behandling();
     private final Fagsak fagsak = new Fagsak();
 
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
     @Captor
     private ArgumentCaptor<DoksysBrevbestilling> brevbestillingArgumentCaptor;
 
@@ -77,7 +80,7 @@ class SendVedtakUtlandTest {
         behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
-        sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingsresultatService, sedSomBrevService, utpekingService, prosessinstansService, unleash);
+        sendVedtakUtland = new SendVedtakUtland(eessiService, behandlingsresultatService, sedSomBrevService, utpekingService, prosessinstansService, fakeUnleash);
     }
 
     private Behandlingsresultat lagBehandlingsresultat() {
