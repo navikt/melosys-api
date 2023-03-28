@@ -16,7 +16,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.UtledBehandlingsaarsak;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
@@ -30,8 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
 import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
-import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt;
-import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
+import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP;
+import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.*;
 
 @Service
 public class OpprettSak {
@@ -118,10 +117,12 @@ public class OpprettSak {
         lovligeKombinasjonerService.validerOpprettelseOgEndring(
             hovedpart, sakstype, sakstema, behandlingstema, behandlingstype);
 
-        var registreringUnntakFraMedlemskapToggleEnabled = unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP);
+        var registreringUnntakFraMedlemskapToggleEnabled = unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP);
+        var ikkeYrkesaktivFlytToggleEnabled = unleash.isEnabled(IKKEYRKESAKTIV_FLYT);
 
         if (erSakstypeEøs(sakstype)
-            && !harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), registreringUnntakFraMedlemskapToggleEnabled)
+            && !harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"), ikkeYrkesaktivFlytToggleEnabled, registreringUnntakFraMedlemskapToggleEnabled)
+            && !harIkkeYrkesaktivFlyt(sakstype, behandlingstema, ikkeYrkesaktivFlytToggleEnabled)
             && !harRegistreringUnntakFraMedlemskapFlyt(sakstype, sakstema, behandlingstema, registreringUnntakFraMedlemskapToggleEnabled)) {
             validerSøknadData(opprettSakDto.getSoknadDto());
         }

@@ -81,11 +81,12 @@ class AzureAdConsumerTest(
         val graphUsersResponse = """
         {
             "value" : [ {
-                "displayName" : "$saksbehandlerNavn"
+                "givenName" : "Lokal",
+                "surname" : "Testbruker"
             } ]
         }"""
         serviceUnderTestMockServer.stubFor(
-            get("/graph/v1.0/users?\$filter=onPremisesSamAccountName%20eq%20'Z123456'&\$count=true&\$select=displayName")
+            get("/graph/v1.0/users?\$filter=onPremisesSamAccountName%20eq%20'Z123456'&\$count=true&\$select=givenName,surname")
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(200)
@@ -107,7 +108,7 @@ class AzureAdConsumerTest(
             "value" : []
         }"""
         serviceUnderTestMockServer.stubFor(
-            get("/graph/v1.0/users?\$filter=onPremisesSamAccountName%20eq%20'Z123456'&\$count=true&\$select=displayName")
+            get("/graph/v1.0/users?\$filter=onPremisesSamAccountName%20eq%20'Z123456'&\$count=true&\$select=givenName,surname")
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(200)

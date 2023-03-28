@@ -18,4 +18,9 @@ public class NavnTest {
     void navnEtternavnSist() {
         assertThat(Navn.navnEtternavnSist(NAVN_ETTERNAVN_FØRST)).isEqualTo(NAVN_ETTERNAVN_SIST);
     }
+
+    @Test
+    void riktigFormatNavnKommerUtRiktig() {
+        assertThat(Navn.navnEtternavnSist(NAVN_ETTERNAVN_SIST)).isEqualTo(NAVN_ETTERNAVN_SIST);
+    }
 }

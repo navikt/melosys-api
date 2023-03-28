@@ -217,15 +217,16 @@ class SedMottakTestIT(
             .sortedBy { it.endretDato }
 
         extracting(prosessinstanserSortert) { låsReferanse }
-            .shouldHaveSize(3)
+            .shouldHaveSize(4)
             .shouldContainInOrder(
                 eessiMeldingA003.lagUnikIdentifikator(),
                 eessiMeldingA003.lagUnikIdentifikator(),
                 eessiMeldingX006.lagUnikIdentifikator(),
+                eessiMeldingX006.lagUnikIdentifikator(),
             )
 
         prosessinstanserSortert.filter { it.behandling != null }[0].behandling.apply {
-            status.shouldBe(Behandlingsstatus.OPPRETTET)
+            status.shouldBe(Behandlingsstatus.VURDER_DOKUMENT)
             fagsak.status.shouldBe(Saksstatuser.OPPRETTET)
             behandlingsresultatRepository.findWithLovvalgsperioderById(id).get().type.shouldBe(
                 Behandlingsresultattyper.IKKE_FASTSATT
@@ -265,15 +266,16 @@ class SedMottakTestIT(
             .sortedBy { it.endretDato }
 
         extracting(prosessinstanserSortert) { låsReferanse }
-            .shouldHaveSize(3)
+            .shouldHaveSize(4)
             .shouldContainInOrder(
                 eessiMeldingA003.lagUnikIdentifikator(),
                 eessiMeldingA003.lagUnikIdentifikator(),
                 eessiMeldingX008.lagUnikIdentifikator(),
+                eessiMeldingX008.lagUnikIdentifikator(),
             )
 
         prosessinstanserSortert.filter { it.behandling != null }[0].behandling.apply {
-            status.shouldBe(Behandlingsstatus.OPPRETTET)
+            status.shouldBe(Behandlingsstatus.VURDER_DOKUMENT)
             fagsak.status.shouldBe(Saksstatuser.OPPRETTET)
             behandlingsresultatRepository.findWithLovvalgsperioderById(id).get().type.shouldBe(
                 Behandlingsresultattyper.IKKE_FASTSATT

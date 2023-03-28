@@ -9,7 +9,7 @@ class AzureAdApi {
     @GetMapping("/users")
     fun hentSaksbehandlerNavn(): GraphAzureResponseDTO =
         GraphAzureResponseDTO(listOf()).apply {
-            value = listOf(GraphAzureUser("Lokal Testbruker"))
+            value = listOf(GraphAzureUser(givenName = "Lokal", surname = "Testbruker"))
         }
 }
 
@@ -17,5 +17,6 @@ class AzureAdApi {
 data class GraphAzureResponseDTO(var value: List<GraphAzureUser>)
 
 data class GraphAzureUser(
-    val displayName: String
+    val givenName: String,
+    val surname: String
 )

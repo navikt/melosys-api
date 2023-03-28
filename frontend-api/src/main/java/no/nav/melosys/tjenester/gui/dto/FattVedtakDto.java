@@ -1,12 +1,12 @@
 package no.nav.melosys.tjenester.gui.dto;
 
+import java.util.List;
+import java.util.Set;
+
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall;
 import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
-
-import java.util.List;
-import java.util.Set;
 
 public class FattVedtakDto {
     private Behandlingsresultattyper behandlingsresultatTypeKode;
@@ -21,6 +21,7 @@ public class FattVedtakDto {
     private String barnFritekst;
     private List<KopiMottakerDto> kopiMottakere;
     private FaktureringsIntervall betalingsintervall;
+    private Boolean kopiTilArbeidsgiver;
 
     public FaktureringsIntervall getBetalingsintervall() {
         return betalingsintervall;
@@ -38,6 +39,14 @@ public class FattVedtakDto {
         this.behandlingsresultatTypeKode = behandlingsresultatTypeKode;
     }
 
+    public Boolean getKopiTilArbeidsgiver() {
+        return kopiTilArbeidsgiver;
+    }
+
+    public void setKopiTilArbeidsgiver(final Boolean kopiTilArbeidsgiver) {
+        this.kopiTilArbeidsgiver = kopiTilArbeidsgiver;
+    }
+    
     public String getFritekst() {
         return fritekst;
     }

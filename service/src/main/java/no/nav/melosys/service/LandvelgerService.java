@@ -1,15 +1,13 @@
 package no.nav.melosys.service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
@@ -143,9 +141,10 @@ public class LandvelgerService {
 
         if (behandlingsresultat.erInnvilgetArbeidPåSkipOmfattetAvArbeidsland() || erVideresendt(behandlingsresultat)) {
             return Lists.newArrayList(Land_iso2.valueOf(hentBostedsland(behandlingID, grunnlagdata).landkode()));
-        } else {
-            return new ArrayList<>(hentAlleArbeidslandUtenMarginaltArbeid(behandlingID));
+        } if (grunnlagdata instanceof AnmodningEllerAttest anmodningEllerAttest) {
+            return Collections.singleton(anmodningEllerAttest.getLovvalgsland());
         }
+        return new ArrayList<>(hentAlleArbeidslandUtenMarginaltArbeid(behandlingID));
     }
 
     public Bostedsland hentBostedsland(Behandling behandling) {

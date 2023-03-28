@@ -1,4 +1,4 @@
 package no.nav.melosys.integrasjon.azuread.dto
 
-data class AzureAdGraphResponseDTO(val value: List<DisplayNameDTO>) {
+data class AzureAdGraphResponseDTO(val value: List<AzureAdUserDTO>) {
 }

@@ -121,6 +121,7 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
         oppgaveDto.setAktørId(oppgave.getAktørId());
         oppgaveDto.setOrgnr(oppgave.getOrgnr());
         oppgaveDto.setBehandlingstema(oppgave.getBehandlingstema());
+        oppgaveDto.setBehandlingstype(oppgave.getBehandlingstype());
         oppgaveDto.setBeskrivelse(
             hentNyBeskrivelseHendelseslogg(oppgave.getBeskrivelse(), oppgave.getSaksnummer())
         );

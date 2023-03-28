@@ -22,7 +22,9 @@ internal class OppgaveFactoryTest {
     fun eueos_medlemskapLovvalg_standardEndretPeriode_flere_1() {
         val sakstyper = listOf(Sakstyper.EU_EOS)
         val sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
-        val behandlingstyper = BEHANDLINGSTYPE_STANDARD_MED_ENDRET_PERIODE
+        val behandlingstyper = listOf(
+            Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.ENDRET_PERIODE,
+        )
         val behandlingstemaer = listOf(
             Behandlingstema.UTSENDT_ARBEIDSTAKER,
             Behandlingstema.UTSENDT_SELVSTENDIG,
@@ -52,13 +54,15 @@ internal class OppgaveFactoryTest {
     fun eueos_medlemskapLovvalg_standardEndretPeriode_beslutningLovvalgNorge_2() {
         val sakstyper = listOf(Sakstyper.EU_EOS)
         val sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
-        val behandlingstyper = BEHANDLINGSTYPE_STANDARD_MED_ENDRET_PERIODE
+        val behandlingstyper = listOf(
+            Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.ENDRET_PERIODE, Behandlingstyper.KLAGE,
+        )
         val behandlingstemaer = listOf(Behandlingstema.BESLUTNING_LOVVALG_NORGE)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.EU_EOS_LAND
         val expectedBehandlingstype = OppgaveBehandlingstype.EOS_LOVVALG_NORGE;
         val expectedTema = Tema.MED
-        val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
+        val expectedOppgavetype = Oppgavetyper.BEH_SED
 
         test(
             sakstyper,
@@ -899,11 +903,5 @@ internal class OppgaveFactoryTest {
         private val BEHANDLINGSTEMA_ALLE: Collection<Behandlingstema> = listOf(*Behandlingstema.values())
         private val BEHANDLINGSTYPE_STANDARD: Collection<Behandlingstyper> =
             listOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE)
-        private val BEHANDLINGSTYPE_STANDARD_MED_ENDRET_PERIODE: Collection<Behandlingstyper> = listOf(
-            Behandlingstyper.FØRSTEGANG,
-            Behandlingstyper.NY_VURDERING,
-            Behandlingstyper.ENDRET_PERIODE,
-            Behandlingstyper.ENDRET_PERIODE
-        )
     }
 }
