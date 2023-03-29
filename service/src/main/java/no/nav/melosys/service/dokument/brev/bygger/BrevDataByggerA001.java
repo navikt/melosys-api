@@ -151,7 +151,7 @@ public class BrevDataByggerA001 implements BrevDataBygger {
 
     private Optional<Periode> hentAnsettelsesperiode() {
         ArbeidsforholdDokument arbeidsforholdDok = behandling.finnArbeidsforholdDokument()
-            .orElseThrow(() -> new TekniskException("Finner ikke arbeidsforholddokument"));
+            .orElseThrow(() -> new TekniskException("Finner ikke arbeidsforhold"));
 
         Set<String> avklarteOrgnumre = dataGrunnlag.getAvklarteVirksomheterGrunnlag().hentNorskeArbeidsgivendeOrgnumre();
         Stream<Periode> avklarteAnsettelsesPerioder =

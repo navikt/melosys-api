@@ -71,7 +71,7 @@ public class AvklarteVirksomheterService {
     }
 
     public Set<String> hentNorskeArbeidsgivendeOrgnumre(Behandling behandling) {
-        Set<String> arbeidsgivendeOrgnumre = finnOrgNumreFraArbeidsforhold(behandling);
+        Set<String> arbeidsgivendeOrgnumre = finnOrgNummerFraArbeidsforhold(behandling);
         MottatteOpplysningerData grunnlagData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         arbeidsgivendeOrgnumre.addAll(grunnlagData.juridiskArbeidsgiverNorge.ekstraArbeidsgivere);
 
@@ -80,7 +80,7 @@ public class AvklarteVirksomheterService {
         return arbeidsgivendeOrgnumre;
     }
 
-    private Set<String> finnOrgNumreFraArbeidsforhold(Behandling behandling) {
+    private Set<String> finnOrgNummerFraArbeidsforhold(Behandling behandling) {
         return behandling.finnArbeidsforholdDokument().map(ArbeidsforholdDokument::hentOrgnumre).orElse(Collections.emptySet());
     }
 

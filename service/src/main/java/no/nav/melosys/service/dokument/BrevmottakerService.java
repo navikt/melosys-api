@@ -227,12 +227,12 @@ public class BrevmottakerService {
 
     private List<Mottaker> avklarArbeidsgiverFraAlleVirksomheter(Behandling behandling) {
         Set<String> arbeidsgiverOrgnumre = new HashSet<>();
-        arbeidsgiverOrgnumre.addAll(finnOrgNumreFraArbeidsforhold(behandling));
+        arbeidsgiverOrgnumre.addAll(finnOrgNummerFraArbeidsforhold(behandling));
         arbeidsgiverOrgnumre.addAll(behandling.getMottatteOpplysninger().getMottatteOpplysningerData().hentAlleOrganisasjonsnumre());
         return avklarArbeidsgiver(arbeidsgiverOrgnumre);
     }
 
-    private Set<String> finnOrgNumreFraArbeidsforhold(Behandling behandling) {
+    private Set<String> finnOrgNummerFraArbeidsforhold(Behandling behandling) {
         return behandling.finnArbeidsforholdDokument().map(ArbeidsforholdDokument::hentOrgnumre).orElse(Collections.emptySet());
     }
 
