@@ -8,6 +8,7 @@ import no.nav.melosys.domain.brev.BrevkopiRegel;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
 import no.nav.melosys.domain.brev.NorskMyndighet;
+import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -226,9 +227,13 @@ public class BrevmottakerService {
 
     private List<Mottaker> avklarArbeidsgiverFraAlleVirksomheter(Behandling behandling) {
         Set<String> arbeidsgiverOrgnumre = new HashSet<>();
-        arbeidsgiverOrgnumre.addAll(behandling.hentArbeidsforholdDokument().hentOrgnumre());
+        arbeidsgiverOrgnumre.addAll(finnOrgNumreFraArbeidsforhold(behandling));
         arbeidsgiverOrgnumre.addAll(behandling.getMottatteOpplysninger().getMottatteOpplysningerData().hentAlleOrganisasjonsnumre());
         return avklarArbeidsgiver(arbeidsgiverOrgnumre);
+    }
+
+    private Set<String> finnOrgNumreFraArbeidsforhold(Behandling behandling) {
+        return behandling.finnArbeidsforholdDokument().map(ArbeidsforholdDokument::hentOrgnumre).orElse(Collections.emptySet());
     }
 
     private List<Mottaker> avklarArbeidsgiver(Set<String> arbeidsgiverOrgnumre) {

@@ -238,11 +238,6 @@ public class Behandling extends RegistreringsInfo {
         return finnDokument(SaksopplysningType.ARBFORH).map(ArbeidsforholdDokument.class::cast);
     }
 
-    public ArbeidsforholdDokument hentArbeidsforholdDokument() {
-        return finnArbeidsforholdDokument()
-            .orElseThrow(() -> new TekniskException("Finner ikke arbeidsforholddokument"));
-    }
-
     public List<OrganisasjonDokument> hentOrganisasjonDokumenter() {
         return getSaksopplysninger().stream()
             .filter(saksopplysning -> saksopplysning.getType().equals(SaksopplysningType.ORG))
