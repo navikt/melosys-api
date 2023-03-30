@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.*;
 import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
 import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP;
 import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
@@ -76,10 +77,11 @@ class Kontroll {
     Collection<Kontrollfeil> utførKontroller(long behandlingID, Sakstyper sakstype, Behandlingsresultattyper behandlingsresultattype) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
 
-        return switch (behandlingsresultattype) {
-            case AVSLAG_MANGLENDE_OPPL, HENLEGGELSE -> utførKontrollerForAvslagOgHenleggelse(behandling);
-            default -> utførKontroller(behandling, sakstype);
-        };
+        if (behandlingsresultattype == AVSLAG_MANGLENDE_OPPL || behandlingsresultattype == HENLEGGELSE) {
+            return utførKontrollerForAvslagOgHenleggelse(behandling);
+        } else {
+            return utførKontroller(behandling, sakstype);
+        }
     }
 
     private Collection<Kontrollfeil> utførKontrollerForAvslagOgHenleggelse(Behandling behandling) {
@@ -92,7 +94,7 @@ class Kontroll {
     }
 
     private Collection<Kontrollfeil> utførKontroller(Behandling behandling, Sakstyper sakstype) {
-        var regelsettForVedtak = FerdigbehandlingKontrollsett.hentRegelsettForVedtak(sakstype);
+        var regelsettForVedtak = FerdigbehandlingKontrollsett.hentRegelsettForVedtak(sakstype, behandling.getTema());
 
         FerdigbehandlingKontrollData ferdigbehandlingKontrollData;
         if (sakstype.equals(Sakstyper.FTRL) && unleash.isEnabled("melosys.folketrygden.mvp")) {
