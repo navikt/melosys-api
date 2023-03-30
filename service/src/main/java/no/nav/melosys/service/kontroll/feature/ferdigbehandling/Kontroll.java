@@ -26,9 +26,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.*;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.HENLEGGELSE;
 import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
 import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP;
+import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt;
 import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
 
 @Component
@@ -94,7 +96,10 @@ class Kontroll {
     }
 
     private Collection<Kontrollfeil> utførKontroller(Behandling behandling, Sakstyper sakstype) {
-        var regelsettForVedtak = FerdigbehandlingKontrollsett.hentRegelsettForVedtak(sakstype, behandling.getTema());
+        boolean harRegistreringUnntakFraMedlemskapFlyt =
+            harRegistreringUnntakFraMedlemskapFlyt(behandling, unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP));
+
+        var regelsettForVedtak = FerdigbehandlingKontrollsett.hentRegelsettForVedtak(sakstype, harRegistreringUnntakFraMedlemskapFlyt);
 
         FerdigbehandlingKontrollData ferdigbehandlingKontrollData;
         if (sakstype.equals(Sakstyper.FTRL) && unleash.isEnabled("melosys.folketrygden.mvp")) {

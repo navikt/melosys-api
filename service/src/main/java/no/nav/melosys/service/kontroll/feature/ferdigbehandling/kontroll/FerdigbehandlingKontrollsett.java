@@ -5,25 +5,23 @@ import java.util.Set;
 import java.util.function.Function;
 
 import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData;
 import no.nav.melosys.service.validering.Kontrollfeil;
 
 public class FerdigbehandlingKontrollsett {
 
     public static Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> hentRegelsettForVedtak(Sakstyper sakstype,
-                                                                                                   Behandlingstema behandlingstema) {
+                                                                                                   boolean harRegistreringUnntakFraMedlemskapFlyt) {
+        if (harRegistreringUnntakFraMedlemskapFlyt) {
+            return REGELSETT_UNNTAKSREGISTRERING;
+        }
         return switch (sakstype) {
             case EU_EOS -> REGELSETT_EU_EOS;
             case FTRL -> Collections.emptySet();
-            case TRYGDEAVTALE -> {
-                if (behandlingstema.equals(Behandlingstema.REGISTRERING_UNNTAK)) {
-                    yield REGELSETT_TRYGDEAVTALE_UNNTAK;
-                }
-                yield REGELSETT_TRYGDEAVTALER;
-            }
+            case TRYGDEAVTALE -> REGELSETT_TRYGDEAVTALER;
         };
     }
+
     public static Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> hentRegelsettForAvslagOgHenleggelse() {
         return REGELSETT_AVSLAG_HENLEGGELSE;
     }
@@ -49,7 +47,7 @@ public class FerdigbehandlingKontrollsett {
         FerdigbehandlingKontroll::representantIUtlandetMangler
     );
 
-    private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_TRYGDEAVTALE_UNNTAK = Set.of(
+    private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_UNNTAKSREGISTRERING = Set.of(
         FerdigbehandlingKontroll::overlappendeMedlemsperiode,
         FerdigbehandlingKontroll::periodeManglerSluttdato
     );
