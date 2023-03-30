@@ -10,13 +10,18 @@ import no.nav.melosys.service.validering.Kontrollfeil;
 
 public class FerdigbehandlingKontrollsett {
 
-    public static Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> hentRegelsettForVedtak(Sakstyper sakstype) {
+    public static Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> hentRegelsettForVedtak(Sakstyper sakstype,
+                                                                                                   boolean harRegistreringUnntakFraMedlemskapFlyt) {
+        if (harRegistreringUnntakFraMedlemskapFlyt) {
+            return REGELSETT_UNNTAKSREGISTRERING;
+        }
         return switch (sakstype) {
             case EU_EOS -> REGELSETT_EU_EOS;
             case FTRL -> Collections.emptySet();
             case TRYGDEAVTALE -> REGELSETT_TRYGDEAVTALER;
         };
     }
+
     public static Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> hentRegelsettForAvslagOgHenleggelse() {
         return REGELSETT_AVSLAG_HENLEGGELSE;
     }
@@ -40,6 +45,11 @@ public class FerdigbehandlingKontrollsett {
         FerdigbehandlingKontroll::periodeManglerSluttdato,
         FerdigbehandlingKontroll::arbeidsstedManglerFelter,
         FerdigbehandlingKontroll::representantIUtlandetMangler
+    );
+
+    private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_UNNTAKSREGISTRERING = Set.of(
+        FerdigbehandlingKontroll::overlappendeMedlemsperiode,
+        FerdigbehandlingKontroll::periodeManglerSluttdato
     );
 
     private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_AVSLAG_HENLEGGELSE = Set.of(
