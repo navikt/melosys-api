@@ -1,5 +1,6 @@
 package no.nav.melosys.service.avklartefakta;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -15,6 +16,7 @@ import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -51,18 +53,28 @@ public class AvklarteVirksomheterService {
     }
 
     public List<AvklartVirksomhet> hentUtenlandskeVirksomheter(Behandling behandling) {
-        MottatteOpplysningerData grunnlagData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
+        MottatteOpplysninger mottatteOpplysninger = behandling.getMottatteOpplysninger();
+        if (mottatteOpplysninger == null) {
+            return Collections.emptyList();
+        }
+
+        MottatteOpplysningerData mottatteOpplysningerData = mottatteOpplysninger.getMottatteOpplysningerData();
         Set<String> avklarteOrgnumreOgUuider = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId());
 
-        return grunnlagData.foretakUtland.stream()
+        return mottatteOpplysningerData.foretakUtland.stream()
             .filter(uf -> avklarteOrgnumreOgUuider.contains(uf.uuid))
             .map(AvklartVirksomhet::new)
             .toList();
     }
 
     Set<String> hentNorskeSelvstendigeForetakOrgnumre(Behandling behandling) {
-        MottatteOpplysningerData grunnlagData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
-        Set<String> organisasjonsnumre = grunnlagData.selvstendigArbeid.hentAlleOrganisasjonsnumre()
+        MottatteOpplysninger mottatteOpplysninger = behandling.getMottatteOpplysninger();
+        if (mottatteOpplysninger == null) {
+            return Collections.emptySet();
+        }
+
+        MottatteOpplysningerData mottatteOpplysningerData = mottatteOpplysninger.getMottatteOpplysningerData();
+        Set<String> organisasjonsnumre = mottatteOpplysningerData.selvstendigArbeid.hentAlleOrganisasjonsnumre()
             .collect(Collectors.toSet());
 
         Set<String> avklarteOrgnumreOgUuider = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId());
@@ -71,9 +83,14 @@ public class AvklarteVirksomheterService {
     }
 
     public Set<String> hentNorskeArbeidsgivendeOrgnumre(Behandling behandling) {
+        MottatteOpplysninger mottatteOpplysninger = behandling.getMottatteOpplysninger();
+        if (mottatteOpplysninger == null) {
+            return Collections.emptySet();
+        }
+
         Set<String> arbeidsgivendeOrgnumre = finnOrgNummerFraArbeidsforhold(behandling);
-        MottatteOpplysningerData grunnlagData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
-        arbeidsgivendeOrgnumre.addAll(grunnlagData.juridiskArbeidsgiverNorge.ekstraArbeidsgivere);
+        MottatteOpplysningerData mottatteOpplysningerData = mottatteOpplysninger.getMottatteOpplysningerData();
+        arbeidsgivendeOrgnumre.addAll(mottatteOpplysningerData.juridiskArbeidsgiverNorge.ekstraArbeidsgivere);
 
         Set<String> avklarteOrgnumreOgUuider = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId());
         arbeidsgivendeOrgnumre.retainAll(avklarteOrgnumreOgUuider);
@@ -92,7 +109,7 @@ public class AvklarteVirksomheterService {
         Set<String> selvstendigeForetakOrgnumre = hentNorskeSelvstendigeForetakOrgnumre(behandling);
         return organisasjonOppslagService.hentOrganisasjoner(selvstendigeForetakOrgnumre).stream()
             .map(org -> new AvklartVirksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), adressekonverterer.apply(org), Yrkesaktivitetstyper.SELVSTENDIG))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     public List<AvklartVirksomhet> hentNorskeArbeidsgivere(Behandling behandling) {
@@ -103,7 +120,7 @@ public class AvklarteVirksomheterService {
         Set<String> arbeidsgivendeOrgnumre = hentNorskeArbeidsgivendeOrgnumre(behandling);
         return organisasjonOppslagService.hentOrganisasjoner(arbeidsgivendeOrgnumre).stream()
             .map(org -> new AvklartVirksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), adressekonverterer.apply(org), Yrkesaktivitetstyper.LOENNET_ARBEID, org.getOrganisasjonDetaljer().getOpphoersdato()))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     public List<AvklartVirksomhet> hentAlleNorskeVirksomheter(Behandling behandling) {
@@ -111,7 +128,7 @@ public class AvklarteVirksomheterService {
     }
 
     public List<AvklartVirksomhet> hentAlleNorskeVirksomheter(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer) {
-        List<AvklartVirksomhet> norskeVirksomheter = hentNorskeArbeidsgivere(behandling, adressekonverterer);
+        List<AvklartVirksomhet> norskeVirksomheter = new ArrayList<>(hentNorskeArbeidsgivere(behandling, adressekonverterer));
         Set<String> norskeVirksomheterOrgnr = norskeVirksomheter.stream()
             .map(AvklartVirksomhet::getOrgnr).collect(Collectors.toSet());
 
@@ -163,7 +180,12 @@ public class AvklarteVirksomheterService {
     }
 
     private boolean erVirksomhetIDGyldig(String virksomhetID, Behandling behandling) {
-        MottatteOpplysningerData mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
+        MottatteOpplysninger mottatteOpplysninger = behandling.getMottatteOpplysninger();
+        if (mottatteOpplysninger == null) {
+            return false;
+        }
+
+        MottatteOpplysningerData mottatteOpplysningerData = mottatteOpplysninger.getMottatteOpplysningerData();
         return erVirksomhetForetakUtland(virksomhetID, mottatteOpplysningerData)
             || erVirksomhetSelvstendigForetakEllerLagtInnManuelt(virksomhetID, mottatteOpplysningerData)
             || erVirksomhetArbeidNorge(virksomhetID, behandling);
