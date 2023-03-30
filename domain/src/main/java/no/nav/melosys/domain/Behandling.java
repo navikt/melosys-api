@@ -14,7 +14,6 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument;
 import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -235,10 +234,8 @@ public class Behandling extends RegistreringsInfo {
             .orElseThrow(() -> new TekniskException("Finner ikke medlemskapdokument"));
     }
 
-    public ArbeidsforholdDokument hentArbeidsforholdDokument() {
-        Optional<SaksopplysningDokument> saksopplysning = finnDokument(SaksopplysningType.ARBFORH);
-        return (ArbeidsforholdDokument) saksopplysning
-            .orElseThrow(() -> new TekniskException("Finner ikke arbeidsforholddokument"));
+    public Optional<ArbeidsforholdDokument> finnArbeidsforholdDokument() {
+        return finnDokument(SaksopplysningType.ARBFORH).map(ArbeidsforholdDokument.class::cast);
     }
 
     public List<OrganisasjonDokument> hentOrganisasjonDokumenter() {
@@ -289,8 +286,7 @@ public class Behandling extends RegistreringsInfo {
 
     public boolean harPeriode() {
         var optionalPeriode = finnPeriode();
-        var harPeriode = optionalPeriode.isPresent() && optionalPeriode.get().getFom() != null;
-        return harPeriode;
+        return optionalPeriode.isPresent() && optionalPeriode.get().getFom() != null;
     }
 
     public boolean harLand() {
@@ -386,24 +382,12 @@ public class Behandling extends RegistreringsInfo {
         return type == Behandlingstyper.NY_VURDERING;
     }
 
-    public boolean erEndretPeriode() {
-        return type == Behandlingstyper.ENDRET_PERIODE;
-    }
-
-    public boolean erKlage() {
-        return type == Behandlingstyper.KLAGE;
-    }
-
     public boolean erNorgeUtpekt() {
         return tema == BESLUTNING_LOVVALG_NORGE;
     }
 
     public boolean erBeslutningLovvalgAnnetLand() {
         return tema == BESLUTNING_LOVVALG_ANNET_LAND;
-    }
-
-    public boolean erBeslutningLovvalgNorge() {
-        return tema == BESLUTNING_LOVVALG_NORGE;
     }
 
     public boolean erUtsending() {
@@ -416,13 +400,6 @@ public class Behandling extends RegistreringsInfo {
 
     public boolean erAnmodningOmUnntak() {
         return erAnmodningOmUnntak(tema.getKode());
-    }
-
-    public boolean erElektroniskSøknad() {
-        if (mottatteOpplysninger != null) {
-            return mottatteOpplysninger.getType() == Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS;
-        }
-        return false;
     }
 
     public boolean erBehandlingAvSed() {

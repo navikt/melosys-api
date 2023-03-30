@@ -1,5 +1,6 @@
 package no.nav.melosys.service.avklartefakta;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -16,6 +17,7 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
@@ -69,14 +71,17 @@ public class AvklarteVirksomheterService {
     }
 
     public Set<String> hentNorskeArbeidsgivendeOrgnumre(Behandling behandling) {
-        ArbeidsforholdDokument arbDok = behandling.hentArbeidsforholdDokument();
-        Set<String> arbeidsgivendeOrgnumre = arbDok.hentOrgnumre();
+        Set<String> arbeidsgivendeOrgnumre = finnOrgNummerFraArbeidsforhold(behandling);
         MottatteOpplysningerData grunnlagData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         arbeidsgivendeOrgnumre.addAll(grunnlagData.juridiskArbeidsgiverNorge.ekstraArbeidsgivere);
 
         Set<String> avklarteOrgnumreOgUuider = avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId());
         arbeidsgivendeOrgnumre.retainAll(avklarteOrgnumreOgUuider);
         return arbeidsgivendeOrgnumre;
+    }
+
+    private Set<String> finnOrgNummerFraArbeidsforhold(Behandling behandling) {
+        return behandling.finnArbeidsforholdDokument().map(ArbeidsforholdDokument::hentOrgnumre).orElse(Collections.emptySet());
     }
 
     public List<AvklartVirksomhet> hentNorskeSelvstendigeForetak(Behandling behandling) {
@@ -173,7 +178,8 @@ public class AvklarteVirksomheterService {
     }
 
     private boolean erVirksomhetArbeidNorge(String orgnr, Behandling behandling) {
-        return behandling.hentArbeidsforholdDokument().hentOrgnumre().contains(orgnr);
+        return behandling.finnArbeidsforholdDokument()
+            .orElseThrow(() -> new TekniskException("Finner ikke arbeidsforholddokument")).hentOrgnumre().contains(orgnr);
     }
 
     StrukturertAdresse utfyllManglendeAdressefelter(OrganisasjonDokument org) {
