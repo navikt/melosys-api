@@ -3,12 +3,12 @@ package no.nav.melosys.service.medlemskapsperiode;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
-import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -114,7 +114,7 @@ class UtledMedlemskapsperioderTest {
     //Scenario 4
 
     @Test
-    void lagMedlemskapsperiode_søknadsperiodenStarter15MndFørMottaksdatoMedHelseOgPensjonsdelSlutter4MndEtterMottaksdato_enInnvilgetOgEnDelvisInnvilgetPeriode() {
+    void lagMedlemskapsperiode_søknadsperiodenStarter15MndFørMottaksdatoMedHelseOgPensjonsdelSlutter4MndEtterMottaksdato_enAvslåttOgInnvilgetMedSammePeriodeOgEnInnvilgetPeriode() {
         final Periode søknadsPeriode = new Periode(mottaksdato.minusMonths(15), mottaksdato.plusMonths(4));
         final Trygdedekninger trygdedekning = Trygdedekninger.HELSE_OG_PENSJONSDEL;
         final Folketrygdloven_kap2_bestemmelser bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD;
@@ -123,13 +123,30 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            new Medlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, bestemmelse, InnvilgelsesResultat.DELVIS_INNVILGET, Medlemskapstyper.PLIKTIG, Trygdedekninger.PENSJONSDEL),
+            new Medlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, bestemmelse, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.PLIKTIG, Trygdedekninger.HELSEDEL),
+            new Medlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, bestemmelse, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, Trygdedekninger.PENSJONSDEL),
             new Medlemskapsperiode(mottaksdato, søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, trygdedekning)
         );
     }
 
     @Test
-    void lagMedlemskapsperiode_søknadsperiodenStarter1MndOg1DagFørMottaksdatoMedHelseOgPensjonsdelSlutter4MndEtterMottaksdato_enInnvilgetOgEnDelvisInnvilgetPeriode() {
+    void lagMedlemskapsperiode_søknadsperiodenStarter15MndFørMottaksdatoMedHelseOgPensjonsdelMedSykeOgForeldrepengerSlutter4MndEtterMottaksdato_enAvslåttOgInnvilgetMedSammePeriodeOgEnInnvilgetPeriode() {
+        final Periode søknadsPeriode = new Periode(mottaksdato.minusMonths(15), mottaksdato.plusMonths(4));
+        final Trygdedekninger trygdedekning = Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER;
+        final Folketrygdloven_kap2_bestemmelser bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD;
+        var request = new UtledMedlemskapsperioderRequest(søknadsPeriode, trygdedekning, bestemmelse, mottaksdato, arbeidsland);
+
+        assertThat(
+            UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
+        ).containsOnly(
+            new Medlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, bestemmelse, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.PLIKTIG, Trygdedekninger.HELSEDEL_MED_SYKE_OG_FORELDREPENGER),
+            new Medlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, bestemmelse, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, Trygdedekninger.PENSJONSDEL),
+            new Medlemskapsperiode(mottaksdato, søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, trygdedekning)
+        );
+    }
+
+    @Test
+    void lagMedlemskapsperiode_søknadsperiodenStarter1MndOg1DagFørMottaksdatoMedHelseOgPensjonsdelSlutter4MndEtterMottaksdato_enAvslåttOgInnvilgetMedSammePeriodeOgEnInnvilgetPeriode() {
         final Periode søknadsPeriode = new Periode(mottaksdato.minusMonths(1).minusDays(1), mottaksdato.plusMonths(4));
         final Trygdedekninger trygdedekning = Trygdedekninger.HELSE_OG_PENSJONSDEL;
         final Folketrygdloven_kap2_bestemmelser bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD;
@@ -138,13 +155,14 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            new Medlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, bestemmelse, InnvilgelsesResultat.DELVIS_INNVILGET, Medlemskapstyper.PLIKTIG, Trygdedekninger.PENSJONSDEL),
+            new Medlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, bestemmelse, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.PLIKTIG, Trygdedekninger.HELSEDEL),
+            new Medlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, bestemmelse, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, Trygdedekninger.PENSJONSDEL),
             new Medlemskapsperiode(mottaksdato, søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, trygdedekning)
         );
     }
 
     @Test
-    void lagMedlemskapsperiode_søknadsperiodenStarter15MndFørMottaksdatoUtenSluttdatoMedHelseOgPensjonsdel_enInnvilgetOgEnDelvisInnvilgetPeriode() {
+    void lagMedlemskapsperiode_søknadsperiodenStarter15MndFørMottaksdatoUtenSluttdatoMedHelseOgPensjonsdel_enAvslåttOgInnvilgetMedSammePeriodeOgEnInnvilgetPeriode() {
         final Periode søknadsPeriode = new Periode(mottaksdato.minusMonths(15), null);
         final Trygdedekninger trygdedekning = Trygdedekninger.HELSE_OG_PENSJONSDEL;
         final Folketrygdloven_kap2_bestemmelser bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD;
@@ -153,13 +171,14 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            new Medlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, bestemmelse, InnvilgelsesResultat.DELVIS_INNVILGET, Medlemskapstyper.PLIKTIG, Trygdedekninger.PENSJONSDEL),
+            new Medlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, bestemmelse, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.PLIKTIG, Trygdedekninger.HELSEDEL),
+            new Medlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, bestemmelse, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, Trygdedekninger.PENSJONSDEL),
             new Medlemskapsperiode(mottaksdato, søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, trygdedekning)
         );
     }
 
     @Test
-    void lagMedlemskapsperiode_søknadsperiodenStarter15MndFørMottaksdatoSluttdato3MndFørMottaksdatoMedHelseOgPensjonsdel_delvisInnvilgetForsøknadsperiodenMedKunPensjonsdel() {
+    void lagMedlemskapsperiode_søknadsperiodenStarter15MndFørMottaksdatoSluttdato3MndFørMottaksdatoMedHelseOgPensjonsdel_avslåttOriginalDekningMenInnvilgetMedKunPensjonsdelForSøknadsperioden() {
         final Periode søknadsPeriode = new Periode(mottaksdato.minusMonths(15), mottaksdato.minusMonths(3));
         final Trygdedekninger trygdedekning = Trygdedekninger.HELSE_OG_PENSJONSDEL;
         final Folketrygdloven_kap2_bestemmelser bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD;
@@ -168,7 +187,24 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            new Medlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.DELVIS_INNVILGET, Medlemskapstyper.PLIKTIG, Trygdedekninger.PENSJONSDEL)
+            new Medlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.PLIKTIG, Trygdedekninger.HELSEDEL),
+            new Medlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, Trygdedekninger.PENSJONSDEL)
+        );
+    }
+
+
+    @Test
+    void lagMedlemskapsperiode_søknadsperiodenStarter15MndFørMottaksdatoSluttdato3MndFørMottaksdatoMedHelseOgPensjonsdelMedSykeOgForeldrePenger_avslåttOriginalDekningMenInnvilgetMedKunPensjonsdelMedSykeForeldrepengerForSøknadsperioden() {
+        final Periode søknadsPeriode = new Periode(mottaksdato.minusMonths(15), mottaksdato.minusMonths(3));
+        final Trygdedekninger trygdedekning = Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER;
+        final Folketrygdloven_kap2_bestemmelser bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD;
+        var request = new UtledMedlemskapsperioderRequest(søknadsPeriode, trygdedekning, bestemmelse, mottaksdato, arbeidsland);
+
+        assertThat(
+            UtledMedlemskapsperioder.lagMedlemskapsperioder(request)
+        ).containsOnly(
+            new Medlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.PLIKTIG, Trygdedekninger.HELSEDEL_MED_SYKE_OG_FORELDREPENGER),
+            new Medlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, bestemmelse, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, Trygdedekninger.PENSJONSDEL)
         );
     }
 
