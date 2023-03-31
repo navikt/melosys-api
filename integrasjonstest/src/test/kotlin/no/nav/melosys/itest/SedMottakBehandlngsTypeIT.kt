@@ -15,7 +15,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.saksflyt.ProsessType
 import no.nav.melosys.melosysmock.journalpost.JournalpostRepo
 import no.nav.melosys.melosysmock.oppgave.OppgaveRepo
-import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
@@ -56,7 +55,7 @@ class SedMottakBehandlngsTypeIT(
 
     @BeforeEach
     fun setup() {
-        SakRepo.clear()
+        oppgaveRepo.repo.clear()
     }
 
     @Test
