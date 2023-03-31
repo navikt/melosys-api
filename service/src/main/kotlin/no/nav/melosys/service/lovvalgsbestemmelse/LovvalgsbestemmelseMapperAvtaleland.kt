@@ -25,7 +25,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgs
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us.*
 import no.nav.melosys.exception.FunksjonellException
 
-class LovvalgsbestemmelseMapper {
+class LovvalgsbestemmelseMapperAvtaleland {
     companion object {
 
         // Oversikt over regler: https://confluence.adeo.no/display/TEESSI/Spesifikke+kodeverk+Trygdeavtaler#SpesifikkekodeverkTrygdeavtaler-Lovvalgsbestemmelser
