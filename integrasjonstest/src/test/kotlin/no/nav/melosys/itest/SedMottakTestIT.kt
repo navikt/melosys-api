@@ -13,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.saksflyt.ProsessStatus
-import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.melosysmock.melosyseessi.MelosysEessiRepo
 import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.repository.BehandlingsresultatRepository
@@ -28,7 +27,6 @@ import org.springframework.kafka.core.KafkaTemplate
 import java.time.Duration
 import java.time.LocalDate
 import java.util.*
-import java.util.stream.Collectors
 
 @Import(KodeverkStub::class)
 class SedMottakTestIT(
@@ -77,9 +75,7 @@ class SedMottakTestIT(
             }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
-            .stream()
-            .sorted(Comparator.comparing { obj: Prosessinstans -> obj.endretDato })
-            .collect(Collectors.toList())
+            .sortedBy { it.endretDato }
 
         extracting(prosessinstanserSortert) { låsReferanse }
             .shouldHaveSize(5)
@@ -137,9 +133,7 @@ class SedMottakTestIT(
             }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
-            .stream()
-            .sorted(Comparator.comparing { obj: Prosessinstans -> obj.endretDato })
-            .collect(Collectors.toList())
+            .sortedBy { it.endretDato }
 
         extracting(prosessinstanserSortert) { låsReferanse }
             .shouldHaveSize(5)
@@ -289,9 +283,7 @@ class SedMottakTestIT(
 
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer)
-            .stream()
-            .sorted(Comparator.comparing { obj: Prosessinstans -> obj.endretDato })
-            .collect(Collectors.toList())
+            .sortedBy { it.endretDato }
 
 //        Hver SED blir til en mottaksprosess + en behandlingsprosess
         extracting(prosessinstanserSortert) { låsReferanse }
