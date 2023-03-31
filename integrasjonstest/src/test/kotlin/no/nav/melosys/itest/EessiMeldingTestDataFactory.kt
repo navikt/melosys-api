@@ -22,28 +22,6 @@ class EessiMeldingTestDataFactory(
         artikkel: String?,
         lovvalgsland: String = "SE",
         isX006NavErFjernet: Boolean = false,
-    ): MelosysEessiMelding {
-        return melosysEessiMelding(
-            bucType = bucType,
-            rinaSaksnummer = rinaSaksnummer,
-            sedType = sedType,
-            periode = periode,
-            artikkel = artikkel,
-            journalpostID = opprettEessiJournalpost(sedType),
-            lovvalgsland = lovvalgsland,
-            isX006NavErFjernet = isX006NavErFjernet
-        )
-    }
-
-    fun melosysEessiMelding(
-        bucType: BucType,
-        rinaSaksnummer: String?,
-        sedType: SedType,
-        periode: Periode?,
-        artikkel: String?,
-        journalpostID: String,
-        lovvalgsland: String = "SE",
-        isX006NavErFjernet: Boolean = false,
     ): MelosysEessiMelding = MelosysEessiMelding().apply {
         this.aktoerId = "1111111111111"
         this.anmodningUnntak = null
@@ -53,7 +31,7 @@ class EessiMeldingTestDataFactory(
         this.artikkel = artikkel
         this.avsender = Avsender("SE:123", "SE")
         this.dokumentId = null
-        this.journalpostId = journalpostID
+        this.journalpostId = opprettEessiJournalpost(sedType)
         this.lovvalgsland = lovvalgsland
         this.periode = periode
         this.sedType = sedType.name
