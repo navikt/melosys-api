@@ -1,9 +1,6 @@
 package no.nav.melosys.service.oppgave;
 
 
-import java.util.*;
-import javax.annotation.Nullable;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RegistreringsInfo;
@@ -33,6 +30,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nullable;
+import java.util.*;
+
 import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentPeriode;
 import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentSøknadsland;
 
@@ -48,6 +48,7 @@ public class OppgaveService {
     private final PersondataFasade persondataFasade;
     private final EregFasade eregFasade;
     private final UtledMottaksdato utledMottaksdato;
+    private final OppgaveFactory oppgaveFactory;
 
     private static final String UKJENT = "UKJENT";
 
@@ -58,7 +59,8 @@ public class OppgaveService {
                           MottatteOpplysningerService mottatteOpplysningerService,
                           PersondataFasade persondataFasade,
                           EregFasade eregFasade,
-                          UtledMottaksdato utledMottaksdato) {
+                          UtledMottaksdato utledMottaksdato,
+                          OppgaveFactory oppgaveFactory) {
         this.behandlingService = behandlingService;
         this.fagsakService = fagsakService;
         this.oppgaveFasade = oppgaveFasade;
@@ -67,6 +69,7 @@ public class OppgaveService {
         this.persondataFasade = persondataFasade;
         this.eregFasade = eregFasade;
         this.utledMottaksdato = utledMottaksdato;
+        this.oppgaveFactory = oppgaveFactory;
     }
 
     public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) {
@@ -171,7 +174,7 @@ public class OppgaveService {
     }
 
     public Oppgave.Builder lagBehandlingsoppgave(Behandling behandling) {
-        return OppgaveFactory.lagBehandlingsoppgave(behandling, utledMottaksdato.getMottaksdato(behandling));
+        return oppgaveFactory.lagBehandlingsoppgave(behandling, utledMottaksdato.getMottaksdato(behandling));
     }
 
     public void opprettJournalføringsoppgave(String journalpostID, String aktørID) {

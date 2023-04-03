@@ -1,9 +1,5 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Stream;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.domain.brev.*;
@@ -23,15 +19,19 @@ import no.nav.melosys.service.brev.DokumentNavnService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
+import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
+
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_OG_JOURNALFØR_BREV;
-import static no.nav.melosys.service.oppgave.OppgaveFactory.utledTema;
 import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Component
@@ -46,6 +46,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
     private final EregFasade eregFasade;
     private final DokumentNavnService dokumentNavnService;
     private final DokumentHentingService dokumentHentingService;
+    private final OppgaveFactory oppgaveFactory;
 
     public OpprettOgJournalforBrev(BehandlingService behandlingService,
                                    DokgenService dokgenService,
@@ -54,7 +55,8 @@ public class OpprettOgJournalforBrev implements StegBehandler {
                                    PersondataFasade persondataFasade,
                                    EregFasade eregFasade,
                                    DokumentNavnService dokumentNavnService,
-                                   DokumentHentingService dokumentHentingService) {
+                                   DokumentHentingService dokumentHentingService,
+                                   OppgaveFactory oppgaveFactory) {
         this.behandlingService = behandlingService;
         this.dokgenService = dokgenService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
@@ -63,6 +65,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
         this.eregFasade = eregFasade;
         this.dokumentNavnService = dokumentNavnService;
         this.dokumentHentingService = dokumentHentingService;
+        this.oppgaveFactory = oppgaveFactory;
     }
 
     @Override
@@ -91,19 +94,19 @@ public class OpprettOgJournalforBrev implements StegBehandler {
         DokumentproduksjonsInfo dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(produserbartDokument);
 
         JournalpostBestilling.Builder bestilling = new JournalpostBestilling.Builder()
-            .medTittel(utledJournalføringsTittel(behandling, dokumentproduksjonsInfo, brevbestilling, mottaker))
-            .medBrevkode(dokumentproduksjonsInfo.dokgenMalnavn())
-            .medDokumentKategori(dokumentproduksjonsInfo.dokumentKategoriKode())
-            .medMottakerNavn(utledNavn(mottakerID, mottakerType))
-            .medMottakerId(mottakerType == MottakerType.PERSON_MED_AKTØR_ID ? persondataFasade.hentFolkeregisterident(mottakerID) : mottakerID)
-            .medMottakerIdType(utledMottakerIdType(mottakerType))
-            .medSaksnummer(behandling.getFagsak().getSaksnummer())
-            .medPdf(pdf)
-            .medVedlegg(vedlegg);
+                .medTittel(utledJournalføringsTittel(behandling, dokumentproduksjonsInfo, brevbestilling, mottaker))
+                .medBrevkode(dokumentproduksjonsInfo.dokgenMalnavn())
+                .medDokumentKategori(dokumentproduksjonsInfo.dokumentKategoriKode())
+                .medMottakerNavn(utledNavn(mottakerID, mottakerType))
+                .medMottakerId(mottakerType == MottakerType.PERSON_MED_AKTØR_ID ? persondataFasade.hentFolkeregisterident(mottakerID) : mottakerID)
+                .medMottakerIdType(utledMottakerIdType(mottakerType))
+                .medSaksnummer(behandling.getFagsak().getSaksnummer())
+                .medPdf(pdf)
+                .medVedlegg(vedlegg);
 
         settHovedpart(behandling, bestilling);
 
-        String journalpostId = joarkFasade.opprettJournalpost(OpprettJournalpost.lagJournalpostForBrev(bestilling.build(), utledTema(behandling.getFagsak().getTema())), true);
+        String journalpostId = joarkFasade.opprettJournalpost(OpprettJournalpost.lagJournalpostForBrev(bestilling.build(), oppgaveFactory.utledTema(behandling.getFagsak().getTema())), true);
 
         log.info("Brev for behandling {} er journalført, journalpostId {}", behandling.getId(), journalpostId);
         prosessinstans.setData(DISTRIBUERBAR_JOURNALPOST_ID, journalpostId);
@@ -154,12 +157,12 @@ public class OpprettOgJournalforBrev implements StegBehandler {
         var fagsak = behandling.getFagsak();
         if (fagsak.harAktørMedRolleType(Aktoersroller.VIRKSOMHET)) {
             bestilling
-                .medHovedpartId(fagsak.hentVirksomhet().getOrgnr())
-                .medHovedpartIdType(BrukerIdType.ORGNR);
+                    .medHovedpartId(fagsak.hentVirksomhet().getOrgnr())
+                    .medHovedpartIdType(BrukerIdType.ORGNR);
         } else {
             bestilling
-                .medHovedpartId(persondataFasade.hentFolkeregisterident(fagsak.hentBrukersAktørID()))
-                .medHovedpartIdType(BrukerIdType.FOLKEREGISTERIDENT);
+                    .medHovedpartId(persondataFasade.hentFolkeregisterident(fagsak.hentBrukersAktørID()))
+                    .medHovedpartIdType(BrukerIdType.FOLKEREGISTERIDENT);
         }
     }
 
@@ -188,11 +191,11 @@ public class OpprettOgJournalforBrev implements StegBehandler {
 
         return fritekstvedleggBestilling.stream().map(vedlegg -> {
             var vedleggBestilling = new FritekstvedleggBrevbestilling.Builder()
-                .medBehandlingId(fritekstbrevBrevbestilling.getBehandlingId())
-                .medProduserbartdokument(GENERELT_FRITEKSTVEDLEGG)
-                .medFritekstvedleggTittel(vedlegg.tittel())
-                .medFritekstvedleggTekst(vedlegg.fritekst())
-                .build();
+                    .medBehandlingId(fritekstbrevBrevbestilling.getBehandlingId())
+                    .medProduserbartdokument(GENERELT_FRITEKSTVEDLEGG)
+                    .medFritekstvedleggTittel(vedlegg.tittel())
+                    .medFritekstvedleggTekst(vedlegg.fritekst())
+                    .build();
             return new Vedlegg(dokgenService.produserBrev(mottaker, vedleggBestilling), vedlegg.tittel());
         }).toList();
     }
@@ -205,11 +208,11 @@ public class OpprettOgJournalforBrev implements StegBehandler {
         List<SaksvedleggBestilling> saksvedleggbestillingListe = brevbestilling.getSaksvedleggBestilling();
 
         return saksvedleggbestillingListe.stream()
-            .map(saksvedlegg -> {
-                var arkivDokument = hentArkivDokumentFraJournalpost(saksvedlegg, journalposterForSaken);
-                byte[] vedleggInnhold = joarkFasade.hentDokument(saksvedlegg.journalpostID(), saksvedlegg.dokumentID());
-                return new Vedlegg(vedleggInnhold, arkivDokument.getTittel());
-            }).toList();
+                .map(saksvedlegg -> {
+                    var arkivDokument = hentArkivDokumentFraJournalpost(saksvedlegg, journalposterForSaken);
+                    byte[] vedleggInnhold = joarkFasade.hentDokument(saksvedlegg.journalpostID(), saksvedlegg.dokumentID());
+                    return new Vedlegg(vedleggInnhold, arkivDokument.getTittel());
+                }).toList();
     }
 
     private String utledJournalføringsTittel(Behandling behandling, DokumentproduksjonsInfo dokumentproduksjonsInfo, DokgenBrevbestilling brevbestilling, Mottaker mottaker) {
@@ -231,10 +234,10 @@ public class OpprettOgJournalforBrev implements StegBehandler {
 
     private ArkivDokument hentArkivDokumentFraJournalpost(SaksvedleggBestilling saksvedlegg, List<Journalpost> journalposter) {
         return journalposter.stream()
-            .filter(journalpost -> saksvedlegg.journalpostID().equals(journalpost.getJournalpostId()))
-            .findFirst()
-            .orElseThrow(() -> new IkkeFunnetException(String.format("Finner ikke journalpost %s for saken %s", saksvedlegg.journalpostID(), "saksnummer")))
-            .hentArkivDokument(saksvedlegg.dokumentID());
+                .filter(journalpost -> saksvedlegg.journalpostID().equals(journalpost.getJournalpostId()))
+                .findFirst()
+                .orElseThrow(() -> new IkkeFunnetException(String.format("Finner ikke journalpost %s for saken %s", saksvedlegg.journalpostID(), "saksnummer")))
+                .hentArkivDokument(saksvedlegg.dokumentID());
     }
 
 }

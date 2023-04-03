@@ -2,6 +2,7 @@ package no.nav.melosys.service.oppgave
 
 import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
+import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Tema
@@ -617,7 +618,7 @@ class OppgaveFactoryTest {
             tema = melosysBehandlingstema
         }
 
-        val oppgave = OppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now()).build()
+        val oppgave = OppgaveFactory(FakeUnleash()).lagBehandlingsoppgave(behandling, LocalDate.now()).build()
 
         withClue(
             "\nsakstype:               $sakstype " +

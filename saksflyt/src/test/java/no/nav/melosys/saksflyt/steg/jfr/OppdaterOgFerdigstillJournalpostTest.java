@@ -1,9 +1,6 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
@@ -14,6 +11,7 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
+import no.nav.melosys.service.oppgave.OppgaveFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +19,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.any;
@@ -36,9 +38,11 @@ class OppdaterOgFerdigstillJournalpostTest {
     @Captor
     private ArgumentCaptor<JournalpostOppdatering> oppdateringArgumentCaptor;
 
+    private final OppgaveFactory oppgaveFactory = new OppgaveFactory(new FakeUnleash());
+
     @BeforeEach
     public void setUp() {
-        oppdaterOgFerdigstillJournalpost = new OppdaterOgFerdigstillJournalpost(joarkFasade);
+        oppdaterOgFerdigstillJournalpost = new OppdaterOgFerdigstillJournalpost(joarkFasade, oppgaveFactory);
     }
 
     @Test

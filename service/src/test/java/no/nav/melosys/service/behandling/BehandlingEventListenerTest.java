@@ -1,9 +1,6 @@
 package no.nav.melosys.service.behandling;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.Optional;
-
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingEndretAvSaksbehandlerEvent;
 import no.nav.melosys.domain.Fagsak;
@@ -26,6 +23,10 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -41,6 +42,8 @@ class BehandlingEventListenerTest {
     private ArgumentCaptor<OppgaveOppdatering> oppgaveOppdateringCaptor;
 
     private BehandlingEventListener behandlingEventListener;
+
+    private final OppgaveFactory oppgaveFactory = new OppgaveFactory(new FakeUnleash());
 
     private final long BEHANDLING_ID = 123321L;
     private final String FAGSAKSNUMMER = "222";
@@ -110,7 +113,7 @@ class BehandlingEventListenerTest {
         );
         Oppgave oppgave = new Oppgave.Builder().setOppgaveId(OPPGAVE_ID).build();
         when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(FAGSAKSNUMMER)).thenReturn(Optional.of(oppgave));
-        when(oppgaveService.lagBehandlingsoppgave(behandling)).thenReturn(OppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now()));
+        when(oppgaveService.lagBehandlingsoppgave(behandling)).thenReturn(oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now()));
 
         behandlingEventListener.behandlingEndret(behandlingEndretAvSaksbehandlerEvent);
 
