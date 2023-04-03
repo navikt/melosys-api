@@ -39,14 +39,14 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype
         )
     }
 
@@ -68,14 +68,14 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.BEH_SED
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype
         )
     }
 
@@ -92,14 +92,14 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.BEH_SED
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype
         )
     }
 
@@ -117,14 +117,14 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype
         )
     }
 
@@ -142,14 +142,14 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype
         )
     }
 
@@ -167,14 +167,14 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype
         )
     }
 
@@ -192,15 +192,15 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype,
-            Sakstyper.EU_EOS.beskrivelse
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype,
+            forventetBegrunnelse = Sakstyper.EU_EOS.beskrivelse
         )
     }
 
@@ -218,15 +218,15 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype,
-            Sakstyper.TRYGDEAVTALE.beskrivelse
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype,
+            forventetBegrunnelse = Sakstyper.TRYGDEAVTALE.beskrivelse
         )
     }
 
@@ -244,15 +244,15 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype,
-            Sakstyper.FTRL.beskrivelse
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype,
+            forventetBegrunnelse = Sakstyper.FTRL.beskrivelse
         )
     }
 
@@ -270,15 +270,15 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype,
-            ""
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype,
+            forventetBegrunnelse = ""
         )
     }
 
@@ -296,15 +296,15 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype,
-            ""
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype,
+            forventetBegrunnelse = ""
         )
     }
 
@@ -321,15 +321,15 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.BEH_SED
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype,
-            "SEDA001"
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype,
+            forventetBegrunnelse = "SEDA001"
         )
     }
 
@@ -346,15 +346,15 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.BEH_SED
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype,
-            "SEDA009"
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype,
+            forventetBegrunnelse = "SEDA009"
         )
     }
 
@@ -371,15 +371,15 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.BEH_SED
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype,
-            "SEDA010"
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype,
+            forventetBegrunnelse = "SEDA010"
         )
     }
 
@@ -396,15 +396,15 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.BEH_SED
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype,
-            "SEDA003"
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype,
+            forventetBegrunnelse = "SEDA003"
         )
     }
 
@@ -421,15 +421,15 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.BEH_SED
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype,
-            "SEDA005"
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype,
+            forventetBegrunnelse = "SEDA005"
         )
     }
 
@@ -446,14 +446,14 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype
         )
     }
 
@@ -470,15 +470,15 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.BEH_SED
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype,
-            "SEDA005"
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype,
+            forventetBegrunnelse = "SEDA005"
         )
     }
 
@@ -495,14 +495,14 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype
         )
     }
 
@@ -519,15 +519,15 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype,
-            ""
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype,
+            forventetBegrunnelse = ""
         )
     }
 
@@ -545,15 +545,15 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype,
-            ""
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype,
+            forventetBegrunnelse = ""
         )
     }
 
@@ -570,14 +570,14 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.VURD_HENV
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype
         )
     }
 
@@ -594,14 +594,14 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.VURD_HENV
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype
         )
     }
 
@@ -618,14 +618,14 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.VURD_HENV
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype
         )
     }
 
@@ -642,14 +642,14 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.VURD_HENV
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype
         )
     }
 
@@ -666,14 +666,14 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.VURD_HENV
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype
         )
     }
 
@@ -693,14 +693,14 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.VURD_HENV
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype
         )
     }
 
@@ -717,14 +717,14 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.VURD_HENV
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype
         )
     }
 
@@ -741,15 +741,15 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.VURD_HENV
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype,
-            ""
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype,
+            forventetBegrunnelse = ""
         )
     }
 
@@ -766,30 +766,30 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.VURD_HENV
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            expectedBehandlingstype,
-            expectedTema,
-            expectedOppgavetype,
-            ""
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = expectedBehandlingstype,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype,
+            forventetBegrunnelse = ""
         )
     }
 
     @Test
     fun eueos_medlemskapLovvalg_soeknad_foresporselTrygdemyndighet_xx() {
         test(
-            Sakstyper.EU_EOS,
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Behandlingstyper.FØRSTEGANG,
-            Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET,
-            OppgaveBehandlingstema.EU_EOS_LAND,
-            null,
-            Tema.MED,
-            Oppgavetyper.BEH_SED,
-            Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET.beskrivelse
+            sakstype = Sakstyper.EU_EOS,
+            sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG,
+            behandlingstype = Behandlingstyper.FØRSTEGANG,
+            melosysBehandlingstema = Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET,
+            expectedBehandlingstema = OppgaveBehandlingstema.EU_EOS_LAND,
+            expectedBehandlingstype = null,
+            expectedTema = Tema.MED,
+            expectedOppgavetype = Oppgavetyper.BEH_SED,
+            forventetBegrunnelse = Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET.beskrivelse
         )
     }
 
@@ -806,15 +806,15 @@ class OppgaveFactoryTest {
         val expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
 
         test(
-            sakstyper,
-            sakstemaer,
-            behandlingstyper,
-            behandlingstemaer,
-            expectedBehandlingstema,
-            null,
-            expectedTema,
-            expectedOppgavetype,
-            Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR.beskrivelse
+            sakstyper = sakstyper,
+            sakstemaer = sakstemaer,
+            behandlingstyper = behandlingstyper,
+            melosysBehandlingstemaer = behandlingstemaer,
+            expectedBehandlingstema = expectedBehandlingstema,
+            expectedBehandlingstype = null,
+            expectedTema = expectedTema,
+            expectedOppgavetype = expectedOppgavetype,
+            forventetBegrunnelse = Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR.beskrivelse
         )
     }
 
