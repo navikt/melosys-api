@@ -876,13 +876,15 @@ class OppgaveFactoryTest {
         expectedOppgavetype: Oppgavetyper,
         forventetBegrunnelse: String
     ) {
-        val fagsak = Fagsak()
-        fagsak.type = sakstype
-        fagsak.tema = sakstema
-        val behandling = Behandling()
-        behandling.fagsak = fagsak
-        behandling.type = behandlingstype
-        behandling.tema = melosysBehandlingstema
+        val behandling = Behandling().apply {
+            fagsak = Fagsak().apply {
+                type = sakstype
+                tema = sakstema
+
+            }
+            type = behandlingstype
+            tema = melosysBehandlingstema
+        }
 
         val oppgave = OppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now()).build()
 
