@@ -575,10 +575,10 @@ class OppgaveFactoryTest {
         expectedOppgavetype: Oppgavetyper,
         forventetBegrunnelse: String? = null
     ) {
-        for (sakstype in sakstyper) {
-            for (sakstema in sakstemaer) {
-                for (behandlignstype in behandlingstyper) {
-                    for (melosysBehandlingstema in melosysBehandlingstemaer) {
+        sakstyper.forEach { sakstype ->
+            sakstemaer.forEach { sakstema ->
+                behandlingstyper.forEach { behandlignstype ->
+                    melosysBehandlingstemaer.forEach { melosysBehandlingstema ->
                         test(
                             sakstype,
                             sakstema,
