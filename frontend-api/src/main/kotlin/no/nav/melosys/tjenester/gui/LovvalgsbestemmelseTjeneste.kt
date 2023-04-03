@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiOperation
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
 import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.service.lovvalgsbestemmelse.LovvalgsbestemmelseService
 import no.nav.security.token.support.core.api.Protected
@@ -23,10 +24,11 @@ class LovvalgsbestemmelseTjeneste(
     @GetMapping
     @ApiOperation(value = "Henter lovvalgsbestemmelser", response = LovvalgBestemmelse::class)
     fun hentLovvalgsbestemmelser(
-        @RequestParam(value = "sakstema") sakstema: Sakstemaer,
+        @RequestParam(value = "sakstype") sakstype: Sakstyper,
+        @RequestParam(value = "sakstema", required = false) sakstema: Sakstemaer?,
         @RequestParam(value = "behandlingstema") behandlingstema: Behandlingstema,
-        @RequestParam(value = "land") land: Land_iso2
+        @RequestParam(value = "land", required = false) land: Land_iso2?
     ): Set<LovvalgBestemmelse> {
-        return lovvalgsbestemmelseSerivce.hentLovvalgsbestemmelser(sakstema, behandlingstema, land)
+        return lovvalgsbestemmelseSerivce.hentLovvalgsbestemmelser(sakstype, sakstema, behandlingstema, land)
     }
 }
