@@ -12,7 +12,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.util.*
 
 class OppgaveFactoryTest {
 
@@ -108,7 +107,8 @@ class OppgaveFactoryTest {
     fun ftrl_medlemskapLovvalg_standard_beggeYrkesaktiv_4() {
         val sakstyper = listOf(Sakstyper.FTRL)
         val sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
-        val behandlingstyper = BEHANDLINGSTYPE_STANDARD
+        val behandlingstyper =
+            listOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE)
         val behandlingstemaer = listOf(Behandlingstema.YRKESAKTIV, Behandlingstema.IKKE_YRKESAKTIV)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.UTENFOR_AVTALELAND
@@ -132,7 +132,8 @@ class OppgaveFactoryTest {
     fun trygdeavtale_medlemskapLovvalg_standard_beggeYrkesaktiv_5() {
         val sakstyper = listOf(Sakstyper.TRYGDEAVTALE)
         val sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
-        val behandlingstyper = BEHANDLINGSTYPE_STANDARD
+        val behandlingstyper =
+            listOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE)
         val behandlingstemaer = listOf(Behandlingstema.YRKESAKTIV, Behandlingstema.IKKE_YRKESAKTIV)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.AVTALELAND
@@ -156,7 +157,8 @@ class OppgaveFactoryTest {
     fun ftrl_medlemskapLovvalg_standard_unntakMedlemskap_6() {
         val sakstyper = listOf(Sakstyper.FTRL)
         val sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
-        val behandlingstyper = BEHANDLINGSTYPE_STANDARD
+        val behandlingstyper =
+            listOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE)
         val behandlingstemaer = listOf(Behandlingstema.UNNTAK_MEDLEMSKAP)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.UTENFOR_AVTALELAND
@@ -180,7 +182,8 @@ class OppgaveFactoryTest {
     fun eueos_medlemskapLovvalg_standard_pensjonist_7() {
         val sakstyper = listOf(Sakstyper.EU_EOS)
         val sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
-        val behandlingstyper = BEHANDLINGSTYPE_STANDARD
+        val behandlingstyper =
+            listOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE)
         val behandlingstemaer = listOf(Behandlingstema.PENSJONIST)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.PENSJONIST_ELLER_UFORETRYGDET
@@ -205,7 +208,8 @@ class OppgaveFactoryTest {
     fun trygdeavtale_medlemskapLovvalg_standard_pensjonist_7() {
         val sakstyper = listOf(Sakstyper.TRYGDEAVTALE)
         val sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
-        val behandlingstyper = BEHANDLINGSTYPE_STANDARD
+        val behandlingstyper =
+            listOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE)
         val behandlingstemaer = listOf(Behandlingstema.PENSJONIST)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.PENSJONIST_ELLER_UFORETRYGDET
@@ -230,7 +234,8 @@ class OppgaveFactoryTest {
     fun ftrl_medlemskapLovvalg_standard_pensjonist_7() {
         val sakstyper = listOf(Sakstyper.FTRL)
         val sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
-        val behandlingstyper = BEHANDLINGSTYPE_STANDARD
+        val behandlingstyper =
+            listOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE)
         val behandlingstemaer = listOf(Behandlingstema.PENSJONIST)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.PENSJONIST_ELLER_UFORETRYGDET
@@ -253,9 +258,10 @@ class OppgaveFactoryTest {
 
     @Test
     fun alle_trygdeavgift_standard_pensjonist_8() {
-        val sakstyper = SAKSTYPE_ALLE
+        val sakstyper = Sakstyper.values().toList()
         val sakstemaer = listOf(Sakstemaer.TRYGDEAVGIFT)
-        val behandlingstyper = BEHANDLINGSTYPE_STANDARD
+        val behandlingstyper =
+            listOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE)
         val behandlingstemaer = listOf(Behandlingstema.PENSJONIST)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.PENSJONIST_ELLER_UFORETRYGDET
@@ -278,9 +284,10 @@ class OppgaveFactoryTest {
 
     @Test
     fun alle_trygdeavgift_standard_yrkesaktiv_9() {
-        val sakstyper = SAKSTYPE_ALLE
+        val sakstyper = Sakstyper.values().toList()
         val sakstemaer = listOf(Sakstemaer.TRYGDEAVGIFT)
-        val behandlingstyper = BEHANDLINGSTYPE_STANDARD
+        val behandlingstyper =
+            listOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE)
         val behandlingstemaer = listOf(Behandlingstema.YRKESAKTIV)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.YRKESAKTIV
@@ -528,7 +535,8 @@ class OppgaveFactoryTest {
     fun trygdeavtale_unntak_standard_registreringUnntak_15() {
         val sakstyper = listOf(Sakstyper.TRYGDEAVTALE)
         val sakstemaer = listOf(Sakstemaer.UNNTAK)
-        val behandlingstyper = BEHANDLINGSTYPE_STANDARD
+        val behandlingstyper =
+            listOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE)
         val behandlingstemaer = listOf(Behandlingstema.REGISTRERING_UNNTAK)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.REGISTRERING_UNNTAK
@@ -602,7 +610,7 @@ class OppgaveFactoryTest {
         val sakstyper = listOf(Sakstyper.TRYGDEAVTALE)
         val sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
         val behandlingstyper = listOf(Behandlingstyper.HENVENDELSE)
-        val behandlingstemaer = getAlleBehandlingstemaUnntatt(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
+        val behandlingstemaer = finnAlleBehandlingstemaUnntatt(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
 
         val expectedBehandlingstema = OppgaveBehandlingstema.AVTALELAND
         val expectedBehandlingstype = null
@@ -626,7 +634,7 @@ class OppgaveFactoryTest {
         val sakstyper = listOf(Sakstyper.FTRL)
         val sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
         val behandlingstyper = listOf(Behandlingstyper.HENVENDELSE)
-        val behandlingstemaer = BEHANDLINGSTEMA_ALLE
+        val behandlingstemaer = Behandlingstema.values().toList()
 
         val expectedBehandlingstema = OppgaveBehandlingstema.UTENFOR_AVTALELAND
         val expectedBehandlingstype = null
@@ -674,7 +682,7 @@ class OppgaveFactoryTest {
         val sakstyper = listOf(Sakstyper.TRYGDEAVTALE)
         val sakstemaer = listOf(Sakstemaer.UNNTAK)
         val behandlingstyper = listOf(Behandlingstyper.HENVENDELSE)
-        val behandlingstemaer = getAlleBehandlingstemaUnntatt(
+        val behandlingstemaer = finnAlleBehandlingstemaUnntatt(
             Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET,
             Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL
         )
@@ -701,7 +709,7 @@ class OppgaveFactoryTest {
         val sakstyper = listOf(Sakstyper.FTRL)
         val sakstemaer = listOf(Sakstemaer.UNNTAK)
         val behandlingstyper = listOf(Behandlingstyper.HENVENDELSE)
-        val behandlingstemaer = BEHANDLINGSTEMA_ALLE
+        val behandlingstemaer = Behandlingstema.values().toList()
 
         val expectedBehandlingstema = OppgaveBehandlingstema.UTENFOR_AVTALELAND
         val expectedBehandlingstype = null
@@ -722,7 +730,7 @@ class OppgaveFactoryTest {
 
     @Test
     fun alle_trygdeavgift_henvendelse_pensjonist_18() {
-        val sakstyper = SAKSTYPE_ALLE
+        val sakstyper = Sakstyper.values().toList()
         val sakstemaer = listOf(Sakstemaer.TRYGDEAVGIFT)
         val behandlingstyper = listOf(Behandlingstyper.HENVENDELSE)
         val behandlingstemaer = listOf(Behandlingstema.PENSJONIST)
@@ -747,7 +755,7 @@ class OppgaveFactoryTest {
 
     @Test
     fun alle_trygdeavgift_henvendelse_yrkesaktiv_18() {
-        val sakstyper = SAKSTYPE_ALLE
+        val sakstyper = Sakstyper.values().toList()
         val sakstemaer = listOf(Sakstemaer.TRYGDEAVGIFT)
         val behandlingstyper = listOf(Behandlingstyper.HENVENDELSE)
         val behandlingstemaer = listOf(Behandlingstema.YRKESAKTIV)
@@ -902,17 +910,6 @@ class OppgaveFactoryTest {
         }
     }
 
-    private fun getAlleBehandlingstemaUnntatt(vararg ekskluderteBehandlingstema: Behandlingstema): Collection<Behandlingstema> {
-        val ekskluderteBehandlingstemaList = Arrays.stream(ekskluderteBehandlingstema).toList()
-        return BEHANDLINGSTEMA_ALLE.stream()
-            .filter { tema: Behandlingstema -> !ekskluderteBehandlingstemaList.contains(tema) }
-            .toList()
-    }
-
-    companion object {
-        private val SAKSTYPE_ALLE: Collection<Sakstyper> = listOf(*Sakstyper.values())
-        private val BEHANDLINGSTEMA_ALLE: Collection<Behandlingstema> = listOf(*Behandlingstema.values())
-        private val BEHANDLINGSTYPE_STANDARD: Collection<Behandlingstyper> =
-            listOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE)
-    }
+    private fun finnAlleBehandlingstemaUnntatt(vararg ekskluderteBehandlingstema: Behandlingstema) =
+        Behandlingstema.values().filter { !ekskluderteBehandlingstema.contains(it) }
 }
