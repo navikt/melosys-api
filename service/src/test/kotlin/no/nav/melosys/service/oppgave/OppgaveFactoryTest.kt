@@ -1,5 +1,7 @@
 package no.nav.melosys.service.oppgave
 
+import io.kotest.assertions.withClue
+import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Tema
@@ -8,12 +10,11 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.*
 
-internal class OppgaveFactoryTest {
+class OppgaveFactoryTest {
 
     // Testene er på format hva som er input i lagBehandlingsoppgave:
     // sakstype_sakstema_behandlignstype_behandlingstema_radIConfluenceTabell
@@ -55,7 +56,10 @@ internal class OppgaveFactoryTest {
         val sakstyper = listOf(Sakstyper.EU_EOS)
         val sakstemaer = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG)
         val behandlingstyper = listOf(
-            Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.ENDRET_PERIODE, Behandlingstyper.KLAGE,
+            Behandlingstyper.FØRSTEGANG,
+            Behandlingstyper.NY_VURDERING,
+            Behandlingstyper.ENDRET_PERIODE,
+            Behandlingstyper.KLAGE,
         )
         val behandlingstemaer = listOf(Behandlingstema.BESLUTNING_LOVVALG_NORGE)
 
@@ -874,21 +878,28 @@ internal class OppgaveFactoryTest {
 
         val oppgave = OppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now()).build()
 
-        Assertions.assertThat(oppgave.behandlingstema)
-            .`as`("Behandlingstema (${sakstype}, ${sakstema}, ${behandlingstype}, ${melosysBehandlingstema})")
-            .isEqualTo(expectedBehandlingstema.kode)
-        Assertions.assertThat(oppgave.behandlingstype)
-            .`as`("Behandlingstype (${sakstype}, ${sakstema}, ${behandlingstype}, ${melosysBehandlingstema})")
-            .isEqualTo(expectedBehandlingstype?.kode)
-        Assertions.assertThat(oppgave.tema)
-            .`as`("Tema (${sakstype}, ${sakstema}, ${behandlingstype}, ${melosysBehandlingstema})")
-            .isEqualTo(expectedTema)
-        Assertions.assertThat(oppgave.oppgavetype)
-            .`as`("Oppgavetype (${sakstype}, ${sakstema}, ${behandlingstype}, ${melosysBehandlingstema})")
-            .isEqualTo(expectedOppgavetype)
-        Assertions.assertThat(oppgave.beskrivelse)
-            .`as`("Beskrivelse (${sakstype}, ${sakstema}, ${behandlingstype}, ${melosysBehandlingstema})")
-            .isEqualTo(forventetBegrunnelse)
+        withClue(
+            "\nsakstype:               $sakstype " +
+                "\nsakstema:               $sakstema " +
+                "\nbehandlingstype:        $behandlingstype " +
+                "\nmelosysBehandlingstema: $melosysBehandlingstema"
+        ) {
+            withClue("oppgave.behandlingstema") {
+                oppgave.behandlingstema.shouldBe(expectedBehandlingstema.kode)
+            }
+            withClue("oppgave.behandlingstype") {
+                oppgave.behandlingstype.shouldBe(expectedBehandlingstype?.kode)
+            }
+            withClue("oppgave.tema") {
+                oppgave.tema.shouldBe(expectedTema)
+            }
+            withClue("oppgave.oppgavetype") {
+                oppgave.oppgavetype.shouldBe(expectedOppgavetype)
+            }
+            withClue("oppgave.beskrivelse") {
+                oppgave.beskrivelse.shouldBe(forventetBegrunnelse)
+            }
+        }
     }
 
     private fun getAlleBehandlingstemaUnntatt(vararg ekskluderteBehandlingstema: Behandlingstema): Collection<Behandlingstema> {
