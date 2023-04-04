@@ -1,5 +1,10 @@
 package no.nav.melosys.service.medlemskapsperiode;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Medlemskapsperiode;
@@ -16,11 +21,6 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandling.UtledMottaksdato;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
 
 import static com.google.common.collect.MoreCollectors.onlyElement;
 import static java.lang.String.format;
@@ -54,7 +54,7 @@ public class OpprettMedlemskapsperiodeService {
         var behandling = behandlingsresultat.getBehandling();
         SoeknadFtrl søknad = (SoeknadFtrl) behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
 
-        var medlemskapsperioder = UtledMedlemskapsperioder.lagMedlemskapsperioder(
+        var medlemskapsperioder = new UtledMedlemskapsperioder().lagMedlemskapsperioder(
             new UtledMedlemskapsperioderRequest(
                 søknad.periode,
                 søknad.getTrygdedekning(),
