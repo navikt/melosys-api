@@ -1,196 +1,198 @@
-package no.nav.melosys.service.oppgave;
+package no.nav.melosys.service.oppgave
 
-import no.finn.unleash.Unleash;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Fagsystem;
-import no.nav.melosys.domain.Tema;
-import no.nav.melosys.domain.kodeverk.Oppgavetyper;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.oppgave.Oppgave;
-import no.nav.melosys.domain.oppgave.PrioritetType;
-import no.nav.melosys.exception.FunksjonellException;
-import org.springframework.stereotype.Component;
-
-import java.time.LocalDate;
-import java.util.List;
-
-import static no.nav.melosys.domain.Behandling.*;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
+import no.finn.unleash.Unleash
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Fagsystem
+import no.nav.melosys.domain.Tema
+import no.nav.melosys.domain.kodeverk.Oppgavetyper
+import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.oppgave.Oppgave
+import no.nav.melosys.domain.oppgave.PrioritetType
+import org.springframework.stereotype.Component
+import java.time.LocalDate
 
 @Component
-public class OppgaveFactory {
+class OppgaveFactory(private val unleash: Unleash) {
+    private val oppgaveBehandlingstemaFactory: OppgaveBehandlingstemaFactory =
+        OppgaveBehandlingstemaGammelMappingFactory()
 
-    private final Unleash unleash;
-
-    public OppgaveFactory(Unleash unleash) {
-        this.unleash = unleash;
+    fun utledOppgaveBehandlingstema(
+        sakstype: Sakstyper?,
+        sakstema: Sakstemaer?,
+        behandlingstema: Behandlingstema?,
+        behandlingstype: Behandlingstyper?
+    ): OppgaveBehandlingstema {
+        return oppgaveBehandlingstemaFactory.utledOppgaveBehandlingstema(
+            sakstype!!,
+            sakstema!!,
+            behandlingstema!!,
+            behandlingstype
+        )
     }
 
-    private static final long FRIST_FERDIGSTILLELSE_JFR_OPPG = 7;
+    fun lagBehandlingsoppgave(behandling: Behandling, mottaksdato: LocalDate?): Oppgave.Builder {
+        // Dokumentasjon for regler: https://confluence.adeo.no/display/TEESSI/Oppgaver+i+Gosys
+        val sakstype = behandling.fagsak.type
+        val sakstema = behandling.fagsak.tema
+        val behandlingstema = behandling.tema
+        val behandlingstype = behandling.type
+        val oppgaveBehandlingstema = utledOppgaveBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype)
+        val oppgaveBehandlingstype = utledOppgaveBehandlingstype(sakstype, sakstema, behandlingstema)
+        return Oppgave.Builder()
+            .setBehandlesAvApplikasjon(Fagsystem.MELOSYS)
+            .setPrioritet(PrioritetType.NORM)
+            .setBehandlingstema(oppgaveBehandlingstema.kode)
+            .setBehandlingstype(oppgaveBehandlingstype?.kode)
+            .setTema(utledTema(sakstema))
+            .setOppgavetype(utledOppgavetype(sakstype, behandlingstema, behandlingstype))
+            .setBeskrivelse(
+                utledBeskrivelse(
+                    oppgaveBehandlingstema,
+                    sakstype,
+                    sakstema,
+                    behandlingstema,
+                    behandlingstype
+                )
+            )
+            .setFristFerdigstillelse(Behandling.utledBehandlingsfrist(behandling, mottaksdato))
+    }
 
-    static Oppgave.Builder lagJournalføringsoppgave(String journalpostID) {
-        return new Oppgave.Builder()
+    fun utledOppgaveBehandlingstype(
+        sakstype: Sakstyper, sakstema: Sakstemaer,
+        behandlingstema: Behandlingstema
+    ): OppgaveBehandlingstype? {
+        return if (sakstype == Sakstyper.EU_EOS && sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG && behandlingstema == Behandlingstema.BESLUTNING_LOVVALG_NORGE) {
+            OppgaveBehandlingstype.EOS_LOVVALG_NORGE
+        } else null
+    }
+
+    fun utledTema(sakstema: Sakstemaer?): Tema {
+        return when (sakstema) {
+            Sakstemaer.MEDLEMSKAP_LOVVALG -> Tema.MED
+            Sakstemaer.TRYGDEAVGIFT -> Tema.TRY
+            Sakstemaer.UNNTAK -> Tema.UFM
+            else -> {
+                throw IllegalStateException("ingen mapping for sakstema:$sakstema")
+            }
+        }
+    }
+
+    private fun utledOppgavetype(
+        sakstype: Sakstyper,
+        behandlingstema: Behandlingstema,
+        behandlingstype: Behandlingstyper
+    ): Oppgavetyper {
+        if (sakstype == Sakstyper.EU_EOS) {
+            return oppgavetypeEøs(behandlingstema, behandlingstype)
+        }
+        if (sakstype == Sakstyper.TRYGDEAVTALE) {
+            return oppgavetypeTrygdeavtale(behandlingstema, behandlingstype)
+        }
+        return if (behandlingstype == Behandlingstyper.HENVENDELSE) {
+            Oppgavetyper.VURD_HENV
+        } else Oppgavetyper.BEH_SAK_MK
+    }
+
+    private fun oppgavetypeEøs(tema: Behandlingstema, behandlingstype: Behandlingstyper): Oppgavetyper {
+        if (tema == Behandlingstema.BESLUTNING_LOVVALG_NORGE && behandlingstype == Behandlingstyper.HENVENDELSE) {
+            return Oppgavetyper.VURD_HENV
+        }
+        if (Behandling.erAnmodningOmUnntak(tema) || Behandling.erRegistreringAvUnntak(tema) ||
+            listOf(
+                Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET,
+                Behandlingstema.TRYGDETID,
+                Behandlingstema.BESLUTNING_LOVVALG_NORGE
+            ).contains(tema)
+        ) {
+            return Oppgavetyper.BEH_SED
+        }
+        return if (behandlingstype == Behandlingstyper.HENVENDELSE) {
+            Oppgavetyper.VURD_HENV
+        } else Oppgavetyper.BEH_SAK_MK
+    }
+
+    private fun oppgavetypeTrygdeavtale(
+        behandlingstema: Behandlingstema,
+        behandlingstype: Behandlingstyper
+    ): Oppgavetyper {
+        if (behandlingstema == Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET) {
+            return Oppgavetyper.BEH_SAK_MK
+        }
+        return if (behandlingstype == Behandlingstyper.HENVENDELSE) {
+            Oppgavetyper.VURD_HENV
+        } else Oppgavetyper.BEH_SAK_MK
+    }
+
+    private fun utledBeskrivelse(
+        oppgaveBehandlingstema: OppgaveBehandlingstema,
+        sakstype: Sakstyper,
+        sakstema: Sakstemaer,
+        behandlingstema: Behandlingstema,
+        behandlingstype: Behandlingstyper
+    ): String {
+        return when (oppgaveBehandlingstema) {
+            OppgaveBehandlingstema.PENSJONIST_ELLER_UFORETRYGDET -> when (sakstema) {
+                Sakstemaer.MEDLEMSKAP_LOVVALG -> sakstype.beskrivelse
+                Sakstemaer.TRYGDEAVGIFT -> ""
+                Sakstemaer.UNNTAK -> behandlingstema.beskrivelse
+            }
+
+            OppgaveBehandlingstema.YRKESAKTIV -> ""
+            OppgaveBehandlingstema.ANMODNING_UNNTAK -> when (sakstype) {
+                Sakstyper.EU_EOS -> "SEDA001"
+                Sakstyper.TRYGDEAVTALE -> ""
+                Sakstyper.FTRL -> behandlingstema.beskrivelse
+            }
+
+            OppgaveBehandlingstema.REGISTRERING_UNNTAK -> when (behandlingstema) {
+                Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND -> "SEDA003"
+                Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING -> "SEDA009"
+                Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE -> "SEDA010"
+                Behandlingstema.REGISTRERING_UNNTAK -> ""
+                else -> behandlingstema.beskrivelse
+            }
+
+            OppgaveBehandlingstema.EU_EOS_LAND -> sedEllerDefaultBeskrivelse(
+                sakstype,
+                behandlingstema,
+                behandlingstype,
+                "SEDA005"
+            )
+
+            OppgaveBehandlingstema.AVTALELAND -> sedEllerDefaultBeskrivelse(
+                sakstype,
+                behandlingstema,
+                behandlingstype,
+                "SEDA008"
+            )
+
+            else -> behandlingstema.beskrivelse
+        }
+    }
+
+    private fun sedEllerDefaultBeskrivelse(
+        sakstype: Sakstyper,
+        behandlingstema: Behandlingstema,
+        behandlingstype: Behandlingstyper,
+        sed: String
+    ): String {
+        return if (sakstype == Sakstyper.EU_EOS && behandlingstype == Behandlingstyper.HENVENDELSE && behandlingstema == Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET) sed else behandlingstema.beskrivelse
+    }
+
+    companion object {
+        private const val FRIST_FERDIGSTILLELSE_JFR_OPPG: Long = 7
+
+        @JvmStatic
+        fun lagJournalføringsoppgave(journalpostID: String?): Oppgave.Builder {
+            return Oppgave.Builder()
                 .setOppgavetype(Oppgavetyper.JFR)
                 .setTema(Tema.MED)
                 .setPrioritet(PrioritetType.NORM)
                 .setJournalpostId(journalpostID)
-                .setFristFerdigstillelse(LocalDate.now().plusDays(FRIST_FERDIGSTILLELSE_JFR_OPPG));
-    }
-
-    public Oppgave.Builder lagBehandlingsoppgave(Behandling behandling, LocalDate mottaksdato) {
-        // Dokumentasjon for regler: https://confluence.adeo.no/display/TEESSI/Oppgaver+i+Gosys
-        Sakstyper sakstype = behandling.getFagsak().getType();
-        Sakstemaer sakstema = behandling.getFagsak().getTema();
-        Behandlingstema behandlingstema = behandling.getTema();
-        Behandlingstyper behandlingstype = behandling.getType();
-
-        var oppgaveBehandlingstema = utledOppgaveBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype);
-        var oppgaveBehandlingstype = utledOppgaveBehandlingstype(sakstype, sakstema, behandlingstema);
-        return new Oppgave.Builder()
-                .setBehandlesAvApplikasjon(Fagsystem.MELOSYS)
-                .setPrioritet(PrioritetType.NORM)
-                .setBehandlingstema(oppgaveBehandlingstema.getKode())
-                .setBehandlingstype(oppgaveBehandlingstype == null ? null : oppgaveBehandlingstype.getKode())
-                .setTema(utledTema(sakstema))
-                .setOppgavetype(utledOppgavetype(sakstype, behandlingstema, behandlingstype))
-                .setBeskrivelse(utledBeskrivelse(oppgaveBehandlingstema, sakstype, sakstema, behandlingstema, behandlingstype))
-                .setFristFerdigstillelse(utledBehandlingsfrist(behandling, mottaksdato));
-    }
-
-    OppgaveBehandlingstema utledOppgaveBehandlingstema(Sakstyper sakstype, Sakstemaer sakstema,
-                                                       Behandlingstema behandlingstema,
-                                                       Behandlingstyper behandlingstype) {
-        if (skalBrukeMelosysBehandlingstemaForOppgaveBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype)) {
-            return switch (behandlingstema) {
-                case PENSJONIST -> OppgaveBehandlingstema.PENSJONIST_ELLER_UFORETRYGDET;
-                case YRKESAKTIV -> OppgaveBehandlingstema.YRKESAKTIV;
-                case REGISTRERING_UNNTAK, REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, BESLUTNING_LOVVALG_ANNET_LAND ->
-                        OppgaveBehandlingstema.REGISTRERING_UNNTAK;
-                case ANMODNING_OM_UNNTAK_HOVEDREGEL -> OppgaveBehandlingstema.ANMODNING_UNNTAK;
-                default ->
-                        throw new FunksjonellException("Mangler mapping av behandlingstema %s".formatted(behandlingstema));
-            };
+                .setFristFerdigstillelse(LocalDate.now().plusDays(FRIST_FERDIGSTILLELSE_JFR_OPPG))
         }
-
-        return switch (sakstype) {
-            case EU_EOS -> OppgaveBehandlingstema.EU_EOS_LAND;
-            case TRYGDEAVTALE -> OppgaveBehandlingstema.AVTALELAND;
-            case FTRL -> OppgaveBehandlingstema.UTENFOR_AVTALELAND;
-        };
-    }
-
-    private boolean skalBrukeMelosysBehandlingstemaForOppgaveBehandlingstema(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
-        if (behandlingstype == null) return false;
-
-        return switch (behandlingstema) {
-            case PENSJONIST -> switch (sakstema) {
-                case MEDLEMSKAP_LOVVALG ->
-                        List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE).contains(behandlingstype);
-                case TRYGDEAVGIFT ->
-                        List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE, Behandlingstyper.HENVENDELSE).contains(behandlingstype);
-                case UNNTAK -> false;
-            };
-            case YRKESAKTIV ->
-                    sakstema == Sakstemaer.TRYGDEAVGIFT && List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE, Behandlingstyper.HENVENDELSE).contains(behandlingstype);
-            case ANMODNING_OM_UNNTAK_HOVEDREGEL -> switch (sakstype) {
-                case EU_EOS ->
-                        sakstema == Sakstemaer.UNNTAK && List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING).contains(behandlingstype);
-                case TRYGDEAVTALE ->
-                        sakstema == Sakstemaer.UNNTAK && List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.HENVENDELSE).contains(behandlingstype);
-                default -> false;
-            };
-            case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE, BESLUTNING_LOVVALG_ANNET_LAND ->
-                    sakstype == Sakstyper.EU_EOS && sakstema == Sakstemaer.UNNTAK && List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING).contains(behandlingstype);
-            case REGISTRERING_UNNTAK ->
-                    sakstype == Sakstyper.TRYGDEAVTALE && sakstema == Sakstemaer.UNNTAK && List.of(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE).contains(behandlingstype);
-            default -> false;
-        };
-    }
-
-    OppgaveBehandlingstype utledOppgaveBehandlingstype(Sakstyper sakstype, Sakstemaer sakstema,
-                                                       Behandlingstema behandlingstema) {
-        if (sakstype == Sakstyper.EU_EOS && sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG && behandlingstema == BESLUTNING_LOVVALG_NORGE) {
-            return OppgaveBehandlingstype.EOS_LOVVALG_NORGE;
-        }
-        return null;
-    }
-
-    public Tema utledTema(Sakstemaer sakstema) {
-        return switch (sakstema) {
-            case MEDLEMSKAP_LOVVALG -> Tema.MED;
-            case TRYGDEAVGIFT -> Tema.TRY;
-            case UNNTAK -> Tema.UFM;
-        };
-    }
-
-    private Oppgavetyper utledOppgavetype(Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
-        if (sakstype == Sakstyper.EU_EOS) {
-            return oppgavetypeEøs(behandlingstema, behandlingstype);
-        }
-        if (sakstype == Sakstyper.TRYGDEAVTALE) {
-            return oppgavetypeTrygdeavtale(behandlingstema, behandlingstype);
-        }
-
-        if (behandlingstype == Behandlingstyper.HENVENDELSE) {
-            return Oppgavetyper.VURD_HENV;
-        }
-        return Oppgavetyper.BEH_SAK_MK;
-    }
-
-    private Oppgavetyper oppgavetypeEøs(Behandlingstema tema, Behandlingstyper behandlingstype) {
-        if (tema == BESLUTNING_LOVVALG_NORGE && behandlingstype == Behandlingstyper.HENVENDELSE) {
-            return Oppgavetyper.VURD_HENV;
-        }
-        if (erAnmodningOmUnntak(tema) || erRegistreringAvUnntak(tema) ||
-                List.of(FORESPØRSEL_TRYGDEMYNDIGHET, TRYGDETID, BESLUTNING_LOVVALG_NORGE).contains(tema)) {
-            return Oppgavetyper.BEH_SED;
-        }
-        if (behandlingstype == Behandlingstyper.HENVENDELSE) {
-            return Oppgavetyper.VURD_HENV;
-        }
-        return Oppgavetyper.BEH_SAK_MK;
-    }
-
-    private Oppgavetyper oppgavetypeTrygdeavtale(Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
-        if (behandlingstema == FORESPØRSEL_TRYGDEMYNDIGHET) {
-            return Oppgavetyper.BEH_SAK_MK;
-        }
-        if (behandlingstype == Behandlingstyper.HENVENDELSE) {
-            return Oppgavetyper.VURD_HENV;
-        }
-        return Oppgavetyper.BEH_SAK_MK;
-    }
-
-    private String utledBeskrivelse(OppgaveBehandlingstema oppgaveBehandlingstema, Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
-        return switch (oppgaveBehandlingstema) {
-            case PENSJONIST_ELLER_UFORETRYGDET -> switch (sakstema) {
-                case MEDLEMSKAP_LOVVALG -> sakstype.getBeskrivelse();
-                case TRYGDEAVGIFT -> "";
-                case UNNTAK -> behandlingstema.getBeskrivelse();
-            };
-            case YRKESAKTIV -> "";
-            case ANMODNING_UNNTAK -> switch (sakstype) {
-                case EU_EOS -> "SEDA001";
-                case TRYGDEAVTALE -> "";
-                case FTRL -> behandlingstema.getBeskrivelse();
-            };
-            case REGISTRERING_UNNTAK -> switch (behandlingstema) {
-                case BESLUTNING_LOVVALG_ANNET_LAND -> "SEDA003";
-                case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING -> "SEDA009";
-                case REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE -> "SEDA010";
-                case REGISTRERING_UNNTAK -> "";
-                default -> behandlingstema.getBeskrivelse();
-            };
-            case EU_EOS_LAND -> sedEllerDefaultBeskrivelse(sakstype, behandlingstema, behandlingstype, "SEDA005");
-            case AVTALELAND -> sedEllerDefaultBeskrivelse(sakstype, behandlingstema, behandlingstype, "SEDA008");
-            default -> behandlingstema.getBeskrivelse();
-        };
-    }
-
-    private String sedEllerDefaultBeskrivelse(Sakstyper sakstype, Behandlingstema behandlingstema, Behandlingstyper behandlingstype, String sed) {
-        return sakstype == Sakstyper.EU_EOS && behandlingstype == Behandlingstyper.HENVENDELSE && behandlingstema == Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET ? sed : behandlingstema.getBeskrivelse();
     }
 }
