@@ -618,13 +618,16 @@ class OppgaveFactoryTest {
             tema = melosysBehandlingstema
         }
 
-        val oppgave = OppgaveFactory(FakeUnleash()).lagBehandlingsoppgave(behandling, LocalDate.now()).build()
+        val fakeUnleash = FakeUnleash().apply {
+//            disableAll()
+        }
+        val oppgave = OppgaveFactory(fakeUnleash).lagBehandlingsoppgave(behandling, LocalDate.now()).build()
 
         withClue(
             "\nsakstype:               $sakstype " +
-                "\nsakstema:               $sakstema " +
-                "\nbehandlingstype:        $behandlingstype " +
-                "\nmelosysBehandlingstema: $melosysBehandlingstema"
+                    "\nsakstema:               $sakstema " +
+                    "\nbehandlingstype:        $behandlingstype " +
+                    "\nmelosysBehandlingstema: $melosysBehandlingstema"
         ) {
             withClue("oppgave.behandlingstema") {
                 oppgave.behandlingstema.shouldBe(expectedBehandlingstema.kode)

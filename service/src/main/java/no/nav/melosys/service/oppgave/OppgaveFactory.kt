@@ -11,26 +11,17 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.domain.oppgave.PrioritetType
+import no.nav.melosys.featuretoggle.ToggleName.NY_GOSYS_MAPPING
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
 @Component
 class OppgaveFactory(private val unleash: Unleash) {
-    private val oppgaveBehandlingstemaFactory: OppgaveBehandlingstemaFactory =
+    private val oppgaveBehandlingstemaFactoryGammelMapping: OppgaveBehandlingstemaFactory by lazy {
         OppgaveBehandlingstemaGammelMappingFactory()
-
-    fun utledOppgaveBehandlingstema(
-        sakstype: Sakstyper?,
-        sakstema: Sakstemaer?,
-        behandlingstema: Behandlingstema?,
-        behandlingstype: Behandlingstyper?
-    ): OppgaveBehandlingstema {
-        return oppgaveBehandlingstemaFactory.utledOppgaveBehandlingstema(
-            sakstype!!,
-            sakstema!!,
-            behandlingstema!!,
-            behandlingstype
-        )
+    }
+    private val oppgaveBehandlingstemaFactoryNyMapping: OppgaveBehandlingstemaFactory by lazy {
+        OppgaveBehandlingstemaNyMappingFactory()
     }
 
     fun lagBehandlingsoppgave(behandling: Behandling, mottaksdato: LocalDate?): Oppgave.Builder {
@@ -59,6 +50,26 @@ class OppgaveFactory(private val unleash: Unleash) {
             )
             .setFristFerdigstillelse(Behandling.utledBehandlingsfrist(behandling, mottaksdato))
     }
+
+    fun utledOppgaveBehandlingstema(
+        sakstype: Sakstyper,
+        sakstema: Sakstemaer,
+        behandlingstema: Behandlingstema,
+        behandlingstype: Behandlingstyper?
+    ): OppgaveBehandlingstema {
+        return oppgaveBehandlingstemaFactory.utledOppgaveBehandlingstema(
+            sakstype,
+            sakstema,
+            behandlingstema,
+            behandlingstype
+        )
+    }
+
+    private val oppgaveBehandlingstemaFactory: OppgaveBehandlingstemaFactory
+        get() = if (unleash.isEnabled(NY_GOSYS_MAPPING))
+            oppgaveBehandlingstemaFactoryNyMapping
+        else
+        oppgaveBehandlingstemaFactoryGammelMapping
 
     fun utledOppgaveBehandlingstype(
         sakstype: Sakstyper, sakstema: Sakstemaer,
@@ -179,14 +190,17 @@ class OppgaveFactory(private val unleash: Unleash) {
         behandlingstype: Behandlingstyper,
         sed: String
     ): String {
-        return if (sakstype == Sakstyper.EU_EOS && behandlingstype == Behandlingstyper.HENVENDELSE && behandlingstema == Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET) sed else behandlingstema.beskrivelse
+        if (sakstype == Sakstyper.EU_EOS && behandlingstype == Behandlingstyper.HENVENDELSE && behandlingstema == Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET)
+            return sed
+
+        return behandlingstema.beskrivelse
     }
 
     companion object {
         private const val FRIST_FERDIGSTILLELSE_JFR_OPPG: Long = 7
 
         @JvmStatic
-        fun lagJournalføringsoppgave(journalpostID: String?): Oppgave.Builder {
+        fun lagJournalføringsoppgave(journalpostID: String): Oppgave.Builder {
             return Oppgave.Builder()
                 .setOppgavetype(Oppgavetyper.JFR)
                 .setTema(Tema.MED)
