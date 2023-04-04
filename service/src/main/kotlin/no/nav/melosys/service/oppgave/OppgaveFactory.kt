@@ -11,7 +11,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.domain.oppgave.PrioritetType
-import no.nav.melosys.featuretoggle.ToggleName.NY_GOSYS_MAPPING
+import no.nav.melosys.featuretoggle.ToggleName
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
@@ -66,7 +66,7 @@ class OppgaveFactory(private val unleash: Unleash) {
     }
 
     private val oppgaveBehandlingstemaFactory: OppgaveBehandlingstemaFactory
-        get() = if (unleash.isEnabled(NY_GOSYS_MAPPING))
+        get() = if (unleash.isEnabled(ToggleName.NY_GOSYS_MAPPING))
             oppgaveBehandlingstemaFactoryNyMapping
         else
         oppgaveBehandlingstemaFactoryGammelMapping
