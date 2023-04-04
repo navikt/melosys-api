@@ -618,9 +618,7 @@ class OppgaveFactoryTest {
             tema = melosysBehandlingstema
         }
 
-        val fakeUnleash = FakeUnleash().apply {
-//            disableAll()
-        }
+        val fakeUnleash = FakeUnleash().apply { disableAll() }
         val oppgave = OppgaveFactory(fakeUnleash).lagBehandlingsoppgave(behandling, LocalDate.now()).build()
 
         withClue(
