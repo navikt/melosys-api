@@ -1,12 +1,5 @@
 package no.nav.melosys.service.medlemskapsperiode;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.dokument.felles.Periode;
@@ -15,6 +8,13 @@ import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.exception.FunksjonellException;
 import org.springframework.data.util.Pair;
+
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static no.nav.melosys.domain.kodeverk.InnvilgelsesResultat.AVSLAATT;
 import static no.nav.melosys.domain.kodeverk.InnvilgelsesResultat.INNVILGET;
@@ -63,7 +63,7 @@ final class UtledMedlemskapsperioder {
     private static Collection<Medlemskapsperiode> lagMedlemskapsperioderForPeriodeFørMottaksdato(ErPeriode periode, UtledMedlemskapsperioderRequest request) {
         if (harPensjonsdel(request.getTrygdedekning())) {
             return Set.of(
-                lagPeriode(periode, trygdedekningUtenPensjondel(request.getTrygdedekning()), request.getBestemmelse(), request.getArbeidsland(), AVSLAATT),
+                lagPeriode(periode, fjernPensjonsdel(request.getTrygdedekning()), request.getBestemmelse(), request.getArbeidsland(), AVSLAATT),
                 lagPeriode(periode, PENSJONSDEL, request.getBestemmelse(), request.getArbeidsland(), INNVILGET)
             );
         }
@@ -88,14 +88,12 @@ final class UtledMedlemskapsperioder {
         );
     }
 
-    private static Trygdedekninger trygdedekningUtenPensjondel(final Trygdedekninger trygdedekning) {
-        if (trygdedekning == HELSE_OG_PENSJONSDEL) {
-            return HELSEDEL;
-        }
-        if (trygdedekning == HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER) {
-            return HELSEDEL_MED_SYKE_OG_FORELDREPENGER;
-        }
-        throw new FunksjonellException("Trygdedekning " + trygdedekning + " har ikke pensjonsdel");
+    private static Trygdedekninger fjernPensjonsdel(final Trygdedekninger trygdedekning) {
+        return switch (trygdedekning) {
+            case HELSE_OG_PENSJONSDEL -> HELSEDEL;
+            case HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER -> HELSEDEL_MED_SYKE_OG_FORELDREPENGER;
+            default -> throw new FunksjonellException("Trygdedekning " + trygdedekning + " har ikke pensjonsdel");
+        };
     }
 
     private static boolean harPensjonsdel(final Trygdedekninger trygdedekninger) {
