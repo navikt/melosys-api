@@ -9,12 +9,11 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import static no.nav.melosys.service.oppgave.OppgaveFactory.utledTema;
 
 @Component
 public class FerdigstillJournalpostSed implements StegBehandler {
@@ -23,11 +22,13 @@ public class FerdigstillJournalpostSed implements StegBehandler {
 
     private final JoarkFasade joarkFasade;
     private final PersondataFasade persondataFasade;
+    private final OppgaveFactory oppgaveFactory;
 
     public FerdigstillJournalpostSed(JoarkFasade joarkFasade,
-                                     PersondataFasade persondataFasade) {
+                                     PersondataFasade persondataFasade, OppgaveFactory oppgaveFactory) {
         this.joarkFasade = joarkFasade;
         this.persondataFasade = persondataFasade;
+        this.oppgaveFactory = oppgaveFactory;
     }
 
     @Override
@@ -57,7 +58,7 @@ public class FerdigstillJournalpostSed implements StegBehandler {
                 .medBrukerID(brukerID)
                 .medSaksnummer(saksnummer)
                 .medTittel(tittel)
-                .medTema(utledTema(behandling.getFagsak().getTema()).getKode())
+                .medTema(oppgaveFactory.utledTema(behandling.getFagsak().getTema()).getKode())
                 .build();
 
             joarkFasade.oppdaterOgFerdigstillJournalpost(eessiMelding.getJournalpostId(), journalpostOppdatering);

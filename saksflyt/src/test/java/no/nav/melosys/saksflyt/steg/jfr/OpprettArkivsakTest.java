@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -8,6 +9,7 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.sak.ArkivsakService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +19,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.TemaFactory.fraBehandlingstema;
-import static no.nav.melosys.service.oppgave.OppgaveFactory.utledTema;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.when;
@@ -32,9 +33,10 @@ class OpprettArkivsakTest {
 
     private OpprettArkivsak opprettArkivsak;
 
+    private final OppgaveFactory oppgaveFactory = new OppgaveFactory(new FakeUnleash());
     @BeforeEach
     public void setUp() {
-        opprettArkivsak = new OpprettArkivsak(fagsakService, arkivsakService);
+        opprettArkivsak = new OpprettArkivsak(fagsakService, arkivsakService, oppgaveFactory);
     }
 
     @Test
@@ -85,7 +87,7 @@ class OpprettArkivsakTest {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
-        when(arkivsakService.opprettSakForBruker(fagsak.getSaksnummer(), utledTema(fagsak.getTema()),
+        when(arkivsakService.opprettSakForBruker(fagsak.getSaksnummer(), oppgaveFactory.utledTema(fagsak.getTema()),
             aktørID)).thenReturn(forventetArkivsakID);
         opprettArkivsak.utfør(prosessinstans);
 
@@ -113,7 +115,7 @@ class OpprettArkivsakTest {
         prosessinstans.setBehandling(behandling);
 
         when(arkivsakService
-            .opprettSakForVirksomhet(fagsak.getSaksnummer(), utledTema(fagsak.getTema()), orgnr))
+            .opprettSakForVirksomhet(fagsak.getSaksnummer(), oppgaveFactory.utledTema(fagsak.getTema()), orgnr))
             .thenReturn(forventetArkivsakID);
 
 

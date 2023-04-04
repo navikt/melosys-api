@@ -1,8 +1,5 @@
 package no.nav.melosys.service.dokument.brev;
 
-import java.util.Collections;
-import java.util.List;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.FysiskDokument;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
@@ -11,10 +8,12 @@ import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.dokument.sed.EessiService;
+import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.service.oppgave.OppgaveFactory.utledTema;
+import java.util.Collections;
+import java.util.List;
 
 @Service
 public class SedSomBrevService {
@@ -22,15 +21,18 @@ public class SedSomBrevService {
     private final JoarkFasade joarkFasade;
     private final PersondataFasade persondataFasade;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
+    private final OppgaveFactory oppgaveFactory;
 
     public SedSomBrevService(EessiService eessiService,
                              JoarkFasade joarkFasade,
                              PersondataFasade persondataFasade,
-                             UtenlandskMyndighetService utenlandskMyndighetService) {
+                             UtenlandskMyndighetService utenlandskMyndighetService,
+                             OppgaveFactory oppgaveFactory) {
         this.eessiService = eessiService;
         this.joarkFasade = joarkFasade;
         this.persondataFasade = persondataFasade;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
+        this.oppgaveFactory = oppgaveFactory;
     }
 
     public String lagJournalpostForSendingAvSedSomBrev(SedType sedType,
@@ -49,7 +51,7 @@ public class SedSomBrevService {
         String institusjonID = utenlandskMyndighet.hentInstitusjonID();
         String brukerFnr = persondataFasade.hentFolkeregisterident(fagsak.hentBrukersAktørID());
         byte[] sedPdf = eessiService.genererSedPdf(behandling.getId(), sedType);
-        var tema = utledTema(behandling.getFagsak().getTema());
+        var tema = oppgaveFactory.utledTema(behandling.getFagsak().getTema());
 
         OpprettJournalpost opprettJournalpost = OpprettJournalpost.lagJournalpostForSendingAvSedSomBrev(
             fagsak.getSaksnummer(), brukerFnr, sedType, sedPdf, institusjonID,

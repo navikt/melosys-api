@@ -1,11 +1,5 @@
 package no.nav.melosys.service.oppgave;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
@@ -26,6 +20,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 @Service
 public class Oppgaveplukker {
     private static final Logger log = LoggerFactory.getLogger(Oppgaveplukker.class);
@@ -35,14 +35,17 @@ public class Oppgaveplukker {
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
     private final OppgaveService oppgaveService;
+    private final OppgaveFactory oppgaveFactory;
 
     public Oppgaveplukker(OppgaveFasade oppgaveFasade, OppgaveTilbakeleggingRepository oppgaveTilbakeleggingRepo,
-                          FagsakService fagsakService, BehandlingService behandlingService, OppgaveService oppgaveService) {
+                          FagsakService fagsakService, BehandlingService behandlingService, OppgaveService oppgaveService,
+                          OppgaveFactory oppgaveFactory) {
         this.oppgaveFasade = oppgaveFasade;
         this.oppgaveTilbakkeleggingRepo = oppgaveTilbakeleggingRepo;
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.oppgaveService = oppgaveService;
+        this.oppgaveFactory = oppgaveFactory;
     }
 
     @Transactional
@@ -64,7 +67,7 @@ public class Oppgaveplukker {
         return valg;
     }
 
-    public List<Oppgave> hentUtildelteOppgaver(PlukkOppgaveInnDto plukkDto){
+    public List<Oppgave> hentUtildelteOppgaver(PlukkOppgaveInnDto plukkDto) {
         List<Oppgave> utildelteOppgaver = new ArrayList<>();
         Set<String> oppgaveBehandlingstemaSet = hentAlleOppgaveBehandlingstemaTilSøk(plukkDto.sakstype(), plukkDto.sakstema(), plukkDto.behandlingstema());
         for (var oppgaveBehandlingstema : oppgaveBehandlingstemaSet) {
@@ -76,7 +79,7 @@ public class Oppgaveplukker {
     private List<Oppgave> filtrerOppgaver(PlukkOppgaveInnDto plukkDto, List<Oppgave> utildelteOppgaver) {
         Set<String> saksnumre = utildelteOppgaver.stream().map(Oppgave::getSaksnummer).collect(Collectors.toSet());
         Map<String, Fagsak> sasksnummerFagsakMap = fagsakService.hentFagsaker(saksnumre).stream()
-            .collect(Collectors.toMap(Fagsak::getSaksnummer, Function.identity()));
+                .collect(Collectors.toMap(Fagsak::getSaksnummer, Function.identity()));
 
         int antallSakSomIkkeMatcherSøk = 0;
         int antallSakSomVenter = 0;
@@ -111,8 +114,8 @@ public class Oppgaveplukker {
 
     private boolean fagsakMatcherSøk(Fagsak fagsak, PlukkOppgaveInnDto plukkDto) {
         return fagsak != null && fagsak.getType() == plukkDto.sakstype()
-            && fagsak.getTema() == plukkDto.sakstema()
-            && fagsak.getBehandlinger().stream().anyMatch(behandling -> behandling.getTema() == plukkDto.behandlingstema());
+                && fagsak.getTema() == plukkDto.sakstema()
+                && fagsak.getBehandlinger().stream().anyMatch(behandling -> behandling.getTema() == plukkDto.behandlingstema());
     }
 
     private boolean venterPåDokumentasjonEllerFagligAvklaring(Fagsak fagsak) {
@@ -123,7 +126,7 @@ public class Oppgaveplukker {
         if (behandling.erVenterForDokumentasjon()) {
             if (behandling.getDokumentasjonSvarfristDato() == null) {
                 log.warn("Behandling {} tilhørende {} avventer dokumentasjon, men har ingen svarfristdato.",
-                    behandling.getId(), fagsak.getSaksnummer());
+                        behandling.getId(), fagsak.getSaksnummer());
                 return true;
             }
             return Instant.now().isBefore(behandling.getDokumentasjonSvarfristDato());
@@ -142,8 +145,8 @@ public class Oppgaveplukker {
 
     private Set<String> hentAlleOppgaveBehandlingstemaTilSøk(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema) {
         return Arrays.stream(Behandlingstyper.values())
-            .map(behandlingstype -> OppgaveFactory.utledOppgaveBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype).getKode())
-            .collect(Collectors.toSet());
+                .map(behandlingstype -> oppgaveFactory.utledOppgaveBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype).getKode())
+                .collect(Collectors.toSet());
     }
 
     @Transactional
