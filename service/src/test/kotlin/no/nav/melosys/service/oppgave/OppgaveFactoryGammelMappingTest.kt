@@ -14,7 +14,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-class OppgaveFactoryTest {
+class OppgaveFactoryGammelMappingTest {
 
     // Testene er på format hva som er input i lagBehandlingsoppgave:
     // sakstype_sakstema_behandlignstype_behandlingstema_radIConfluenceTabell
