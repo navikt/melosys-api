@@ -37,7 +37,7 @@ class OppgaveFactory(private val unleash: Unleash) {
             .setPrioritet(PrioritetType.NORM)
             .setBehandlingstema(oppgaveBehandlingstema.kode)
             .setBehandlingstype(oppgaveBehandlingstype?.kode)
-            .setTema(utledTema(sakstema))
+            .setTema(utledTema(sakstype, sakstema, behandlingstema))
             .setOppgavetype(utledOppgavetype(sakstype, behandlingstema, behandlingstype))
             .setBeskrivelse(
                 utledBeskrivelse(
@@ -52,24 +52,18 @@ class OppgaveFactory(private val unleash: Unleash) {
     }
 
     fun utledOppgaveBehandlingstema(
-        sakstype: Sakstyper,
-        sakstema: Sakstemaer,
-        behandlingstema: Behandlingstema,
-        behandlingstype: Behandlingstyper?
+        sakstype: Sakstyper, sakstema: Sakstemaer, behandlingstema: Behandlingstema, behandlingstype: Behandlingstyper?
     ): OppgaveBehandlingstema {
         return oppgaveBehandlingstemaFactory.utledOppgaveBehandlingstema(
-            sakstype,
-            sakstema,
-            behandlingstema,
-            behandlingstype
+            sakstype, sakstema, behandlingstema, behandlingstype
         )
     }
 
     private val oppgaveBehandlingstemaFactory: OppgaveBehandlingstemaFactory
-        get() = if (unleash.isEnabled(ToggleName.NY_GOSYS_MAPPING))
+        get() = if (brukNyMapping())
             oppgaveBehandlingstemaFactoryNyMapping
         else
-        oppgaveBehandlingstemaFactoryGammelMapping
+            oppgaveBehandlingstemaFactoryGammelMapping
 
     fun utledOppgaveBehandlingstype(
         sakstype: Sakstyper, sakstema: Sakstemaer,
@@ -80,7 +74,10 @@ class OppgaveFactory(private val unleash: Unleash) {
         } else null
     }
 
-    fun utledTema(sakstema: Sakstemaer?): Tema {
+    fun utledTema(sakstype: Sakstyper, sakstema: Sakstemaer?, behandlingstema: Behandlingstema): Tema {
+        if (brukNyMapping() && sakstype == Sakstyper.FTRL && behandlingstema == Behandlingstema.UNNTAK_MEDLEMSKAP)
+            return Tema.UFM
+
         return when (sakstema) {
             Sakstemaer.MEDLEMSKAP_LOVVALG -> Tema.MED
             Sakstemaer.TRYGDEAVGIFT -> Tema.TRY
@@ -90,6 +87,8 @@ class OppgaveFactory(private val unleash: Unleash) {
             }
         }
     }
+
+    private fun brukNyMapping() = unleash.isEnabled(ToggleName.NY_GOSYS_MAPPING)
 
     private fun utledOppgavetype(
         sakstype: Sakstyper,

@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -50,7 +51,8 @@ public class FerdigstillJournalpostSed implements StegBehandler {
         } else {
             final var behandling = prosessinstans.getBehandling();
 
-            final String saksnummer = behandling.getFagsak().getSaksnummer();
+            Fagsak fagsak = behandling.getFagsak();
+            final String saksnummer = fagsak.getSaksnummer();
             final String brukerID = hentBrukerID(prosessinstans);
             final String tittel = prosessinstans.getData(ProsessDataKey.HOVEDDOKUMENT_TITTEL);
 
@@ -58,7 +60,7 @@ public class FerdigstillJournalpostSed implements StegBehandler {
                 .medBrukerID(brukerID)
                 .medSaksnummer(saksnummer)
                 .medTittel(tittel)
-                .medTema(oppgaveFactory.utledTema(behandling.getFagsak().getTema()).getKode())
+                .medTema(oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema()).getKode())
                 .build();
 
             joarkFasade.oppdaterOgFerdigstillJournalpost(eessiMelding.getJournalpostId(), journalpostOppdatering);
