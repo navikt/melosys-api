@@ -69,6 +69,8 @@ class OppgaveFactory(private val unleash: Unleash) {
         sakstype: Sakstyper, sakstema: Sakstemaer,
         behandlingstema: Behandlingstema
     ): OppgaveBehandlingstype? {
+        if (brukNyMapping()) return null
+
         return if (sakstype == Sakstyper.EU_EOS && sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG && behandlingstema == Behandlingstema.BESLUTNING_LOVVALG_NORGE) {
             OppgaveBehandlingstype.EOS_LOVVALG_NORGE
         } else null
