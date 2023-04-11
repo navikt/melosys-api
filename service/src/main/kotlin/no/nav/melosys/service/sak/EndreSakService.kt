@@ -166,7 +166,7 @@ class EndreSakService(
     ) {
         val mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id).orElse(null)
         mottatteOpplysningerService.slettOpplysninger(behandling.id)
-        mottatteOpplysningerService.opprettSøknad(
+        mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(
             behandling,
             mottatteOpplysninger?.mottatteOpplysningerData?.periode ?: Periode(),
             søknadslandTilGjenoppretting(nySakstype, mottatteOpplysninger?.mottatteOpplysningerData?.soeknadsland)
