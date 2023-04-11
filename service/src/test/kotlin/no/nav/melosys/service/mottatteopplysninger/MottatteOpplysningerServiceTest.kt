@@ -163,7 +163,7 @@ internal class MottatteOpplysningerServiceTest {
         val soeknadsland = Soeknadsland()
 
 
-        mottatteOpplysningerServiceSpy.opprettSøknad(behandling, periode, soeknadsland)
+        mottatteOpplysningerServiceSpy.opprettSøknadEllerAnmodningEllerAttest(behandling, periode, soeknadsland)
 
 
         val slot = slot<MottatteOpplysninger>()
@@ -299,7 +299,7 @@ internal class MottatteOpplysningerServiceTest {
         val soeknadsland = Soeknadsland(listOf("UK"), false)
 
 
-        mottatteOpplysningerServiceSpy.opprettSøknad(behandling, periode, soeknadsland)
+        mottatteOpplysningerServiceSpy.opprettSøknadEllerAnmodningEllerAttest(behandling, periode, soeknadsland)
 
 
         val slot = slot<MottatteOpplysninger>()
@@ -333,7 +333,7 @@ internal class MottatteOpplysningerServiceTest {
         setupMock(behandling)
 
 
-        mottatteOpplysningerServiceSpy.opprettSøknad(behandling, periode, soeknadsland)
+        mottatteOpplysningerServiceSpy.opprettSøknadEllerAnmodningEllerAttest(behandling, periode, soeknadsland)
 
 
         val slot = slot<MottatteOpplysninger>()
@@ -361,7 +361,7 @@ internal class MottatteOpplysningerServiceTest {
         )
 
 
-        mottatteOpplysningerServiceSpy.opprettSøknad(behandling, null, null)
+        mottatteOpplysningerServiceSpy.opprettSøknadEllerAnmodningEllerAttest(behandling, null, null)
 
 
         verify {
@@ -380,7 +380,7 @@ internal class MottatteOpplysningerServiceTest {
         )
 
 
-        mottatteOpplysningerServiceSpy.opprettSøknad(behandling, null, null)
+        mottatteOpplysningerServiceSpy.opprettSøknadEllerAnmodningEllerAttest(behandling, null, null)
 
 
         val slot = slot<MottatteOpplysninger>()
@@ -408,7 +408,7 @@ internal class MottatteOpplysningerServiceTest {
         }
 
 
-        mottatteOpplysningerServiceSpy.opprettSøknad(behandling, null, null)
+        mottatteOpplysningerServiceSpy.opprettSøknadEllerAnmodningEllerAttest(behandling, null, null)
 
 
         val slot = slot<MottatteOpplysninger>()
@@ -433,11 +433,11 @@ internal class MottatteOpplysningerServiceTest {
         )
 
 
-        mottatteOpplysningerServiceSpy.opprettSøknad(Prosessinstans(), behandling)
+        mottatteOpplysningerServiceSpy.opprettSøknadEllerAnmodningEllerAttest(Prosessinstans().apply { this.behandling = behandling })
 
 
         verify {
-            mottatteOpplysningerServiceSpy.opprettSøknad(any(), isNull(inverse = true), isNull(inverse = true))
+            mottatteOpplysningerServiceSpy.opprettSøknadEllerAnmodningEllerAttest(any(), isNull(inverse = true), isNull(inverse = true))
         }
     }
 

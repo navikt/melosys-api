@@ -112,7 +112,7 @@ internal class EndreSakServiceTest {
             )
         }
         verify { mottatteOpplysningerService.slettOpplysninger(aktivBehandling.id) }
-        verify { mottatteOpplysningerService.opprettSøknad(aktivBehandling, any(), any()) }
+        verify { mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(aktivBehandling, any(), any()) }
         verify { oppfriskSaksopplysningerService.oppfriskSaksopplysning(aktivBehandling.id, false) }
         verify { applicationEventPublisher.publishEvent(any()) }
     }
@@ -134,7 +134,7 @@ internal class EndreSakServiceTest {
 
 
         verify { mottatteOpplysningerService.slettOpplysninger(fagsak.hentAktivBehandling().id) }
-        verify(exactly = 0) { mottatteOpplysningerService.opprettSøknad(fagsak.hentAktivBehandling(), any(), any()) }
+        verify(exactly = 0) { mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(fagsak.hentAktivBehandling(), any(), any()) }
     }
 
     @Test
@@ -166,7 +166,7 @@ internal class EndreSakServiceTest {
         val soeknadslandSlot = slot<Soeknadsland>()
         verify { mottatteOpplysningerService.slettOpplysninger(fagsak.hentAktivBehandling().id) }
         verify {
-            mottatteOpplysningerService.opprettSøknad(
+            mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(
                 fagsak.hentAktivBehandling(),
                 any(),
                 capture(soeknadslandSlot)
@@ -204,7 +204,7 @@ internal class EndreSakServiceTest {
         val soeknadslandSlot = slot<Soeknadsland>()
         verify { mottatteOpplysningerService.slettOpplysninger(fagsak.hentAktivBehandling().id) }
         verify {
-            mottatteOpplysningerService.opprettSøknad(
+            mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(
                 fagsak.hentAktivBehandling(),
                 any(),
                 capture(soeknadslandSlot)
