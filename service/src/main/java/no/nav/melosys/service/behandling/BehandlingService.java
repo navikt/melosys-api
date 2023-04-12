@@ -1,10 +1,5 @@
 package no.nav.melosys.service.behandling;
 
-import java.lang.reflect.InvocationTargetException;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.*;
-
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
@@ -28,6 +23,11 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.*;
 
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.metrics.MetrikkerNavn.*;
@@ -123,7 +123,6 @@ public class BehandlingService {
     @Transactional
     public void endreBehandling(long behandlingID, Behandlingstyper nyType, Behandlingstema nyTema, Behandlingsstatus nyStatus, LocalDate nyMottaksdato) {
         var behandling = hentBehandling(behandlingID);
-        boolean behandlingErLåst = behandling.kanIkkeEndres();
 
         if (!behandling.erAktiv()) {
             throw new FunksjonellException("Behandlingen må være aktiv for å kunne endres");
@@ -132,10 +131,10 @@ public class BehandlingService {
             lovligeKombinasjonerService.validerNyStatusMulig(behandling, nyStatus);
             endreStatus(behandling, nyStatus);
         }
-        if (nyType != null && nyType != behandling.getType() && !behandlingErLåst) {
+        if (nyType != null && nyType != behandling.getType()) {
             endreType(behandling, nyType);
         }
-        if (nyTema != null && nyTema != behandling.getTema() && !behandlingErLåst) {
+        if (nyTema != null && nyTema != behandling.getTema()) {
             endreTema(behandling, nyTema);
         }
         var nåværendeMottaksdato = utledMottaksdato.getMottaksdato(behandling);
