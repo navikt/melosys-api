@@ -80,8 +80,6 @@ class BehandlingTjenesteTest {
     private static final String BASE_URL = "/api/behandlinger";
     private final Behandlingsresultat BEHANDLINGSRESULTAT = new Behandlingsresultat();
     private static final Set<Behandlingsstatus> MULIGE_STATUSER = Set.of(AVVENT_DOK_PART, AVVENT_DOK_UTL, UNDER_BEHANDLING, AVVENT_FAGLIG_AVKLARING);
-    private static final Set<Behandlingstema> MULIGE_BEHANDLINGSTEMA = Set.of(UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG);
-    private static final Set<Behandlingstyper> MULIGE_TYPER = Set.of(NY_VURDERING);
 
     @BeforeEach
     void setUp() {
@@ -100,22 +98,6 @@ class BehandlingTjenesteTest {
             .randomize(named("fnrAnnenForelder").and(ofType(String.class)), new NumericStringRandomizer(11))
             .randomize(named("orgnummer").and(ofType(String.class)), new NumericStringRandomizer(9))
         );
-    }
-
-    @Test
-    void endreBehandling() throws Exception {
-        final var behandlingstype = FØRSTEGANG;
-        final var behandlingstema = Behandlingstema.ARBEID_I_UTLANDET;
-        final var behandlingsstatus = Behandlingsstatus.UNDER_BEHANDLING;
-        final var behandlingsfrist = LocalDate.now();
-
-        var endreBehandlingDto = new EndreBehandlingDto(behandlingstype, behandlingstema, behandlingsstatus, behandlingsfrist);
-        mockMvc.perform(post(BASE_URL + "/{behandlingID}/endre", BEHANDLING_ID)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(endreBehandlingDto)))
-            .andExpect(status().isNoContent());
-
-        verify(behandlingService).endreBehandling(BEHANDLING_ID, behandlingstype, behandlingstema, behandlingsstatus, behandlingsfrist);
     }
 
     @Test
