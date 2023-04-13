@@ -76,7 +76,14 @@ class LovvalgsbestemmelseMapperAvtaleland {
             return when (mappingType) {
                 LovvalgsbestemmelseMappingType.YRKESAKTIV -> setOf(CAN_ART6_2, CAN_ART7, CAN_ART10, CAN_ART11)
                 LovvalgsbestemmelseMappingType.IKKE_YRKESAKTIV -> setOf(CAN_ART7_4, CAN_ART10_4, CAN_ART11)
-                LovvalgsbestemmelseMappingType.UNNTAK -> setOf(CAN, CAN_ART6_2, CAN_ART7, CAN_ART9, CAN_ART10, CAN_ART11)
+                LovvalgsbestemmelseMappingType.UNNTAK -> setOf(
+                    CAN,
+                    CAN_ART6_2,
+                    CAN_ART7,
+                    CAN_ART9,
+                    CAN_ART10,
+                    CAN_ART11
+                )
             }
         }
 
@@ -113,7 +120,12 @@ class LovvalgsbestemmelseMapperAvtaleland {
 
         private fun mapForIN(mappingType: LovvalgsbestemmelseMappingType): Set<Lovvalgsbestemmelser_trygdeavtale_in> {
             return when (mappingType) {
-                LovvalgsbestemmelseMappingType.YRKESAKTIV, LovvalgsbestemmelseMappingType.IKKE_YRKESAKTIV -> setOf(IND_ART8_1, IND_ART9_1, IND_ART10)
+                LovvalgsbestemmelseMappingType.YRKESAKTIV, LovvalgsbestemmelseMappingType.IKKE_YRKESAKTIV -> setOf(
+                    IND_ART8_1,
+                    IND_ART9_1,
+                    IND_ART10
+                )
+
                 LovvalgsbestemmelseMappingType.UNNTAK -> setOf(IND, IND_ART8, IND_ART9, IND_ART10)
             }
         }
@@ -121,7 +133,14 @@ class LovvalgsbestemmelseMapperAvtaleland {
         private fun mapForIL(mappingType: LovvalgsbestemmelseMappingType): Set<Lovvalgsbestemmelser_trygdeavtale_il> {
             return when (mappingType) {
                 LovvalgsbestemmelseMappingType.YRKESAKTIV -> setOf()
-                LovvalgsbestemmelseMappingType.IKKE_YRKESAKTIV -> setOf(ISR_ART6_5, ISR_ART8, ISR_ART9_1, ISR_ART9_2, ISR_ART9_3)
+                LovvalgsbestemmelseMappingType.IKKE_YRKESAKTIV -> setOf(
+                    ISR_ART6_5,
+                    ISR_ART8,
+                    ISR_ART9_1,
+                    ISR_ART9_2,
+                    ISR_ART9_3
+                )
+
                 LovvalgsbestemmelseMappingType.UNNTAK -> setOf(ISR, ISR_ART6_4, ISR_ART6_7, ISR_ART7, ISR_ART8)
             }
         }
@@ -179,7 +198,7 @@ class LovvalgsbestemmelseMapperAvtaleland {
                 LovvalgsbestemmelseMappingType.YRKESAKTIV -> setOf(UK_ART6_1, UK_ART6_5, UK_ART7_1, UK_ART8_2, UK_ART9)
                 LovvalgsbestemmelseMappingType.IKKE_YRKESAKTIV -> setOf(UK_ART5_4, UK_ART6_2, UK_ART8_5, UK_ART9)
                 LovvalgsbestemmelseMappingType.UNNTAK -> setOf(
-                    UK, UK_ART5_4, UK_ART6_1, UK_ART6_10, UK_ART7_1, UK_ART7_3, UK_ART8_2, UK_ART9
+                    UK, UK_ART6_1, UK_ART6_10, UK_ART7_1, UK_ART7_3, UK_ART8_2, UK_ART9
                 )
             }
         }
@@ -204,7 +223,15 @@ class LovvalgsbestemmelseMapperAvtaleland {
             return when (mappingType) {
                 LovvalgsbestemmelseMappingType.YRKESAKTIV -> setOf(USA_ART5_2, USA_ART5_4, USA_ART5_5, USA_ART5_9)
                 LovvalgsbestemmelseMappingType.IKKE_YRKESAKTIV -> setOf(USA_ART5_2, USA_ART5_9)
-                LovvalgsbestemmelseMappingType.UNNTAK -> setOf(USA, USA_ART5_2, USA_ART5_3, USA_ART5_4, USA_ART5_5, USA_ART5_6, USA_ART5_9)
+                LovvalgsbestemmelseMappingType.UNNTAK -> setOf(
+                    USA,
+                    USA_ART5_2,
+                    USA_ART5_3,
+                    USA_ART5_4,
+                    USA_ART5_5,
+                    USA_ART5_6,
+                    USA_ART5_9
+                )
             }
         }
     }
