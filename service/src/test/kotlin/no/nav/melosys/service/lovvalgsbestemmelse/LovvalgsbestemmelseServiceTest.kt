@@ -68,7 +68,6 @@ internal class LovvalgsbestemmelseServiceTest {
         ).shouldBe(
             setOf(
                 Lovvalgsbestemmelser_trygdeavtale_gb.UK,
-                Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART5_4,
                 Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1,
                 Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_10,
                 Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART7_1,
