@@ -7,12 +7,12 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.featuretoggle.ToggleName
 
-class OppgaveBehandlingstemUnleashAwareFactory(private val unleash: Unleash) : OppgaveBehandlingstemaFactory {
-    private val oppgaveBehandlingstemaFactoryGammelMapping: OppgaveBehandlingstemaFactory by lazy {
-        OppgaveBehandlingstemaGammelMappingFactory()
+class OppgaveBehandlingstemUnleashAwareUtleder(private val unleash: Unleash) : OppgaveBehandlingstemaUtleder {
+    private val oppgaveBehandlingstemaGammelUtleder: OppgaveBehandlingstemaUtleder by lazy {
+        OppgaveBehandlingstemaGammelUtleder()
     }
-    private val oppgaveBehandlingstemaFactoryNyMapping: OppgaveBehandlingstemaFactory by lazy {
-        OppgaveBehandlingstemaNyMappingFactory()
+    private val oppgaveBehandlingstemaNyUtleder: OppgaveBehandlingstemaUtleder by lazy {
+        OppgaveBehandlingstemaNyUtleder()
     }
 
     override fun utledOppgaveBehandlingstema(
@@ -21,15 +21,15 @@ class OppgaveBehandlingstemUnleashAwareFactory(private val unleash: Unleash) : O
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper?
     ): OppgaveBehandlingstema =
-        oppgaveBehandlingstemaFactory.utledOppgaveBehandlingstema(
+        oppgaveBehandlingstemaUtleder.utledOppgaveBehandlingstema(
             sakstype, sakstema, behandlingstema, behandlingstype
         )
 
-    private val oppgaveBehandlingstemaFactory: OppgaveBehandlingstemaFactory
+    private val oppgaveBehandlingstemaUtleder: OppgaveBehandlingstemaUtleder
         get() = if (brukNyMapping())
-            oppgaveBehandlingstemaFactoryNyMapping
+            oppgaveBehandlingstemaNyUtleder
         else
-            oppgaveBehandlingstemaFactoryGammelMapping
+            oppgaveBehandlingstemaGammelUtleder
 
     private fun brukNyMapping() = unleash.isEnabled(ToggleName.NY_GOSYS_MAPPING)
 }

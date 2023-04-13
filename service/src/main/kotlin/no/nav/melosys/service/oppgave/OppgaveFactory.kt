@@ -17,8 +17,8 @@ import java.time.LocalDate
 
 @Component
 class OppgaveFactory(private val unleash: Unleash) {
-    private val oppgaveBehandlingstemaFactory = OppgaveBehandlingstemUnleashAwareFactory(unleash)
-    private val oppgavetypeFactory = OppgavetypeUnleashAwareFactory(unleash)
+    private val oppgaveBehandlingstemaUtleder = OppgaveBehandlingstemUnleashAwareUtleder(unleash)
+    private val oppgavetypeUtleder = OppgavetypeUnleashAwareUtleder(unleash)
 
     fun lagBehandlingsoppgave(behandling: Behandling, mottaksdato: LocalDate?): Oppgave.Builder {
         // Dokumentasjon for regler: https://confluence.adeo.no/display/TEESSI/Oppgaver+i+Gosys
@@ -50,7 +50,7 @@ class OppgaveFactory(private val unleash: Unleash) {
     fun utledOppgaveBehandlingstema(
         sakstype: Sakstyper, sakstema: Sakstemaer, behandlingstema: Behandlingstema, behandlingstype: Behandlingstyper?
     ): OppgaveBehandlingstema =
-        oppgaveBehandlingstemaFactory.utledOppgaveBehandlingstema(
+        oppgaveBehandlingstemaUtleder.utledOppgaveBehandlingstema(
             sakstype, sakstema, behandlingstema, behandlingstype
         )
 
@@ -84,7 +84,7 @@ class OppgaveFactory(private val unleash: Unleash) {
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper
     ): Oppgavetyper {
-        return oppgavetypeFactory.utledOppgavetype(sakstype, behandlingstema, behandlingstype)
+        return oppgavetypeUtleder.utledOppgavetype(sakstype, behandlingstema, behandlingstype)
     }
     private fun brukNyMapping() = unleash.isEnabled(ToggleName.NY_GOSYS_MAPPING)
 

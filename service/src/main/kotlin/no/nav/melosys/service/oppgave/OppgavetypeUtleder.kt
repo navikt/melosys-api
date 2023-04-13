@@ -5,7 +5,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 
-interface OppgavetypeFactory {
+interface OppgavetypeUtleder {
     fun utledOppgavetype(
         sakstype: Sakstyper,
         behandlingstema: Behandlingstema,

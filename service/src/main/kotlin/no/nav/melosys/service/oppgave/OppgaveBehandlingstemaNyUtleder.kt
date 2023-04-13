@@ -5,7 +5,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 
-class OppgaveBehandlingstemaNyMappingFactory : OppgaveBehandlingstemaFactory {
+class OppgaveBehandlingstemaNyUtleder : OppgaveBehandlingstemaUtleder {
     override fun utledOppgaveBehandlingstema(
         sakstype: Sakstyper,
         sakstema: Sakstemaer,

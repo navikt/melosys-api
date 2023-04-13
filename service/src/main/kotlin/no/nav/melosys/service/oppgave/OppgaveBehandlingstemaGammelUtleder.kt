@@ -6,7 +6,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 
-class OppgaveBehandlingstemaGammelMappingFactory : OppgaveBehandlingstemaFactory {
+class OppgaveBehandlingstemaGammelUtleder : OppgaveBehandlingstemaUtleder {
 
     override fun utledOppgaveBehandlingstema(
         sakstype: Sakstyper, sakstema: Sakstemaer, behandlingstema: Behandlingstema, behandlingstype: Behandlingstyper?

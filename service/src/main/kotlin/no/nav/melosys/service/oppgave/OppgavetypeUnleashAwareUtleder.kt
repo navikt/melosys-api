@@ -7,25 +7,25 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.featuretoggle.ToggleName
 
-class OppgavetypeUnleashAwareFactory(private val unleash: Unleash) : OppgavetypeFactory {
-    private val oppgavetypeGammelMappingFactory: OppgavetypeFactory by lazy {
-        OppgavetypeGammelMappingFactory()
+class OppgavetypeUnleashAwareUtleder(private val unleash: Unleash) : OppgavetypeUtleder {
+    private val oppgavetypeGammelUtleder: OppgavetypeUtleder by lazy {
+        OppgavetypeGammelUtleder()
     }
-    private val oppgavetypeNyMappingFactory: OppgavetypeFactory by lazy {
-        OppgavetypeNyMappingFactory()
+    private val oppgavetypeNyUtleder: OppgavetypeUtleder by lazy {
+        OppgavetypeNyUtleder()
     }
 
     override fun utledOppgavetype(
         sakstype: Sakstyper,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper
-    ): Oppgavetyper = oppgavetypeFactory.utledOppgavetype(sakstype, behandlingstema, behandlingstype)
+    ): Oppgavetyper = oppgavetypeUtleder.utledOppgavetype(sakstype, behandlingstema, behandlingstype)
 
-    private val oppgavetypeFactory: OppgavetypeFactory
+    private val oppgavetypeUtleder: OppgavetypeUtleder
         get() = if (brukNyMapping())
-            oppgavetypeNyMappingFactory
+            oppgavetypeNyUtleder
         else
-            oppgavetypeGammelMappingFactory
+            oppgavetypeGammelUtleder
 
     private fun brukNyMapping() = unleash.isEnabled(ToggleName.NY_GOSYS_MAPPING)
 }
