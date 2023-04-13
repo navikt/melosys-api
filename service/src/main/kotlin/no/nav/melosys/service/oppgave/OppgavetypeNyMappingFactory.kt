@@ -11,6 +11,13 @@ class OppgavetypeNyMappingFactory : OppgavetypeFactory {
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper
     ): Oppgavetyper {
-        TODO("Not yet implemented")
+        if (behandlingstype == Behandlingstyper.HENVENDELSE) {
+            if (behandlingstema == Behandlingstema.TRYGDETID) {
+                return Oppgavetyper.BEH_SED
+            }
+            return Oppgavetyper.VURD_HENV
+        }
+        // TODO: flytt ut tableRows fra OppgaveBehandlingstemaNyMappingFactory og legg til dette og slå opp der
+        return Oppgavetyper.BEH_SAK_MK
     }
 }
