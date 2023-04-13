@@ -2,16 +2,18 @@ package no.nav.melosys.saksflyt.steg.medl;
 
 import java.util.NoSuchElementException;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
-import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.saksflyt.TestdataFactory;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
@@ -43,13 +45,18 @@ class LagreLovvalgsperiodeMedlTest {
     private final Prosessinstans prosessinstans = new Prosessinstans();
     private final Behandling behandling = new Behandling();
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+    private final FakeUnleash unleash = new FakeUnleash();
 
     @BeforeEach
     public void setup() {
-        lagreLovvalgsperiodeMedl = new LagreLovvalgsperiodeMedl(behandlingsresultatService, medlPeriodeService);
+        lagreLovvalgsperiodeMedl = new LagreLovvalgsperiodeMedl(behandlingsresultatService, medlPeriodeService, unleash);
+        Fagsak fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.TRYGDEAVTALE);
+        fagsak.setTema(Sakstemaer.UNNTAK);
 
         behandling.setId(behandlingID);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setFagsak(fagsak);
         prosessinstans.setBehandling(behandling);
     }
 
@@ -186,6 +193,29 @@ class LagreLovvalgsperiodeMedlTest {
     void utfør_avslagManglendeOpplysningerIngenLovvalgsperiode_oppretterIkkeLovvalgsperiode() {
         behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
+
+
+        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+
+
+        verifyNoInteractions(medlPeriodeService);
+    }
+
+    @Test
+    void utfør_ikkeGodkjentRegistreringUnntak_oppretterIkkeLovvalgsperiode() {
+        unleash.enable(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP);
+
+        Fagsak fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.TRYGDEAVTALE);
+        fagsak.setTema(Sakstemaer.UNNTAK);
+
+        Behandling behandling = TestdataFactory.lagBehandling();
+        behandling.setFagsak(fagsak);
+        behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK);
+        prosessinstans.setBehandling(behandling);
+
+        behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.IKKE_GODKJENT);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
 
 
         lagreLovvalgsperiodeMedl.utfør(prosessinstans);
