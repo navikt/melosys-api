@@ -2,8 +2,10 @@ package no.nav.melosys.saksflyt.steg.medl;
 
 import java.util.Optional;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
@@ -14,6 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP;
+import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt;
+
 @Component
 public class LagreLovvalgsperiodeMedl implements StegBehandler {
 
@@ -21,12 +26,14 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
 
     private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
+    private final Unleash unleash;
 
 
     public LagreLovvalgsperiodeMedl(BehandlingsresultatService behandlingsresultatService,
-                                    MedlPeriodeService medlPeriodeService) {
+                                    MedlPeriodeService medlPeriodeService, Unleash unleash) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
+        this.unleash = unleash;
     }
 
     @Override
@@ -38,7 +45,7 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
         final long behandlingID = prosessinstans.getBehandling().getId();
         final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        if (behandlingsresultat.erAvslagManglendeOpplysninger()) {
+        if (behandlingsresultat.erAvslagManglendeOpplysninger() || erIkkeGodkjentRegistreringUnntakFraMedlemskap(prosessinstans.getBehandling(), behandlingsresultat.getUtfallRegistreringUnntak())) {
             return;
         }
 
@@ -48,6 +55,10 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
             lovvalgsperiode.setMedlPeriodeID(finnOpprinneligMedlPeriodeID(behandling).orElse(null));
         }
         oppdaterLovvalgsperiode(behandling.getId(), lovvalgsperiode);
+    }
+
+    private boolean erIkkeGodkjentRegistreringUnntakFraMedlemskap(Behandling behandling, Utfallregistreringunntak utfallregistreringunntak) {
+        return harRegistreringUnntakFraMedlemskapFlyt(behandling, unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP)) && Utfallregistreringunntak.IKKE_GODKJENT == utfallregistreringunntak;
     }
 
     private Optional<Long> finnOpprinneligMedlPeriodeID(Behandling behandling) {
