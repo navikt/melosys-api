@@ -2,6 +2,7 @@ package no.nav.melosys.service.oppgave
 
 import no.finn.unleash.Unleash
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
+import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -17,9 +18,10 @@ class OppgavetypeUnleashAwareUtleder(private val unleash: Unleash) : Oppgavetype
 
     override fun utledOppgavetype(
         sakstype: Sakstyper,
+        sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper
-    ): Oppgavetyper = oppgavetypeUtleder.utledOppgavetype(sakstype, behandlingstema, behandlingstype)
+    ): Oppgavetyper = oppgavetypeUtleder.utledOppgavetype(sakstype, sakstema, behandlingstema, behandlingstype)
 
     private val oppgavetypeUtleder: OppgavetypeUtleder
         get() = if (brukNyMapping())

@@ -34,7 +34,7 @@ class OppgaveFactory(private val unleash: Unleash) {
             .setBehandlingstema(oppgaveBehandlingstema.kode)
             .setBehandlingstype(oppgaveBehandlingstype?.kode)
             .setTema(utledTema(sakstype, sakstema, behandlingstema))
-            .setOppgavetype(utledOppgavetype(sakstype, behandlingstema, behandlingstype))
+            .setOppgavetype(utledOppgavetype(sakstype, sakstema, behandlingstema, behandlingstype))
             .setBeskrivelse(
                 utledBeskrivelse(
                     oppgaveBehandlingstema,
@@ -81,11 +81,13 @@ class OppgaveFactory(private val unleash: Unleash) {
 
     private fun utledOppgavetype(
         sakstype: Sakstyper,
+        sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper
     ): Oppgavetyper {
-        return oppgavetypeUtleder.utledOppgavetype(sakstype, behandlingstema, behandlingstype)
+        return oppgavetypeUtleder.utledOppgavetype(sakstype, sakstema, behandlingstema, behandlingstype)
     }
+
     private fun brukNyMapping() = unleash.isEnabled(ToggleName.NY_GOSYS_MAPPING)
 
     private fun utledBeskrivelse(
