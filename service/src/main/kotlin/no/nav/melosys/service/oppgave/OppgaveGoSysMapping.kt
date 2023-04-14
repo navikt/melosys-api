@@ -9,7 +9,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 
 internal class OppgaveGoSysMapping {
 
-    internal  fun finnOppgave(
+    internal fun finnOppgave(
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
@@ -26,10 +26,10 @@ internal class OppgaveGoSysMapping {
         )
     }
 
-    internal enum class Beskrivelsefelt {
-        TOMT,
-        SED,
-        A1_ANMODNING_OM_UNNTAK_PAPIR
+    internal enum class Beskrivelsefelt(val beskrivelse: String) {
+        TOMT(""),
+        SED(""),
+        A1_ANMODNING_OM_UNNTAK_PAPIR(Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR.beskrivelse)
     }
 
     internal data class Oppgave(

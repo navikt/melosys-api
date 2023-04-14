@@ -1,9 +1,11 @@
 package no.nav.melosys.service.oppgave
 
+import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.exception.TekniskException
 
 class OppgaveBeskrivelseNyUtleder : OppgaveBeskrivelseUtleder {
     private val oppgaveGoSysMapping = OppgaveGoSysMapping()
@@ -13,9 +15,16 @@ class OppgaveBeskrivelseNyUtleder : OppgaveBeskrivelseUtleder {
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
-        behandlingstype: Behandlingstyper
+        behandlingstype: Behandlingstyper,
+        sedType: SedType?
     ): String {
-        // TODO: vi må få inn sed navn fra behehandling
-        return oppgaveGoSysMapping.finnOppgave(sakstype, sakstema, behandlingstema, behandlingstype).beskrivelsefelt.name
+        val beskrivelsefelt =
+            oppgaveGoSysMapping.finnOppgave(sakstype, sakstema, behandlingstema, behandlingstype).beskrivelsefelt
+
+        if (beskrivelsefelt == OppgaveGoSysMapping.Beskrivelsefelt.SED) {
+            if (sedType == null) throw TekniskException("SedType fra behandling er null når beskrivelsefelt er SED")
+            return sedType.name
+        }
+        return beskrivelsefelt.beskrivelse
     }
 }

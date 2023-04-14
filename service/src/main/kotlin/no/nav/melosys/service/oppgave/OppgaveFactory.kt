@@ -3,7 +3,10 @@ package no.nav.melosys.service.oppgave
 import no.finn.unleash.Unleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsystem
+import no.nav.melosys.domain.SaksopplysningType
 import no.nav.melosys.domain.Tema
+import no.nav.melosys.domain.dokument.sed.SedDokument
+import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -27,6 +30,7 @@ class OppgaveFactory(private val unleash: Unleash) {
         val sakstema = behandling.fagsak.tema
         val behandlingstema = behandling.tema
         val behandlingstype = behandling.type
+        val sedType: SedType? = finnSedType(behandling)
         val oppgaveBehandlingstema = utledOppgaveBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype)
         val oppgaveBehandlingstype = utledOppgaveBehandlingstype(sakstype, sakstema, behandlingstema)
         return Oppgave.Builder()
@@ -42,11 +46,17 @@ class OppgaveFactory(private val unleash: Unleash) {
                     sakstype,
                     sakstema,
                     behandlingstema,
-                    behandlingstype
+                    behandlingstype,
+                    sedType
                 )
             )
             .setFristFerdigstillelse(Behandling.utledBehandlingsfrist(behandling, mottaksdato))
     }
+
+    private fun finnSedType(behandling: Behandling): SedType? =
+        (behandling.saksopplysninger.find {
+            it.type == SaksopplysningType.SEDOPPL
+        }?.dokument as? SedDokument)?.sedType
 
     fun utledOppgaveBehandlingstema(
         sakstype: Sakstyper, sakstema: Sakstemaer, behandlingstema: Behandlingstema, behandlingstype: Behandlingstyper?
@@ -93,13 +103,15 @@ class OppgaveFactory(private val unleash: Unleash) {
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
-        behandlingstype: Behandlingstyper
+        behandlingstype: Behandlingstyper,
+        sedType: SedType?
     ): String = oppgaveBeskrivelseUtleder.utledBeskrivelse(
         oppgaveBehandlingstema,
         sakstype,
         sakstema,
         behandlingstema,
-        behandlingstype
+        behandlingstype,
+        sedType
     )
 
     private fun brukNyMapping() = unleash.isEnabled(ToggleName.NY_GOSYS_MAPPING)

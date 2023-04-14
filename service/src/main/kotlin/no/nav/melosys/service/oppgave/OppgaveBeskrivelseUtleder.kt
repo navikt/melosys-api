@@ -1,5 +1,6 @@
 package no.nav.melosys.service.oppgave
 
+import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -11,6 +12,7 @@ interface OppgaveBeskrivelseUtleder {
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
-        behandlingstype: Behandlingstyper
+        behandlingstype: Behandlingstyper,
+        sedType: SedType?
     ): String
 }
