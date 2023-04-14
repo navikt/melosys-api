@@ -34,7 +34,7 @@ class OppgaveFactoryNyMappingTest {
                 Behandlingstema.ARBEID_FLERE_LAND,
                 Behandlingstema.ARBEID_KUN_NORGE
             ),
-            expectedBehandlingstema = OppgaveBehandlingstema.AB0483,
+            expectedBehandlingstema = OppgaveBehandlingstema.EU_EOS_YRKESAKTIV,
             expectedBehandlingstype = null,
             expectedTema = Tema.MED,
             expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
@@ -119,5 +119,5 @@ class OppgaveFactoryNyMappingTest {
             }
         }
     }
-    
+
 }
