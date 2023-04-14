@@ -7,15 +7,15 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 
-class OppgaveGoSysMapping {
+internal class OppgaveGoSysMapping {
 
-    fun finnOppgave(
+    internal  fun finnOppgave(
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper?
     ): Oppgave {
-        return tableRows.find {
+        return rows.find {
             it.sakstype == sakstype &&
                 it.sakstema == sakstema &&
                 it.behandlingstype.contains(behandlingstype) &&
@@ -26,20 +26,20 @@ class OppgaveGoSysMapping {
         )
     }
 
-    enum class Beskrivelsefelt {
+    internal enum class Beskrivelsefelt {
         TOMT,
         SED,
         A1_ANMODNING_OM_UNNTAK_PAPIR
     }
 
-    data class Oppgave(
+    internal data class Oppgave(
         val oppgaveBehandlingstema: OppgaveBehandlingstema,
         val tema: Tema,
         val oppgaveType: Oppgavetyper,
         val beskrivelsefelt: Beskrivelsefelt
     )
 
-    private data class TableRow(
+    internal data class TableRow(
         val sakstype: Sakstyper,
         val sakstema: Sakstemaer,
         val behandlingstype: Set<Behandlingstyper>,
@@ -47,7 +47,8 @@ class OppgaveGoSysMapping {
         val oppgave: Oppgave
     )
 
-    private val tableRows by lazy {
+    // Skal være samme data som fylt inn tabellen: https://confluence.adeo.no/display/TEESSI/Oppgaver+i+Gosys
+    internal val rows by lazy {
         listOf(
             TableRow(
                 Sakstyper.EU_EOS,

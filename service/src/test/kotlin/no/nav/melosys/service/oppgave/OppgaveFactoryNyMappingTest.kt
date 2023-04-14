@@ -1,6 +1,7 @@
 package no.nav.melosys.service.oppgave
 
 import io.kotest.assertions.withClue
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Behandling
@@ -20,6 +21,34 @@ class OppgaveFactoryNyMappingTest {
     val oppgaveFactory = OppgaveFactory(FakeUnleash().apply { enable(ToggleName.NY_GOSYS_MAPPING) })
 
     @Test
+    fun `skal kun ha ett treff på alle mulige kombinasjoner av sakstype, sakstema, behandlingstype og behandlingstema`() {
+        val oppgaveGoSysMapping = OppgaveGoSysMapping()
+        oppgaveGoSysMapping.rows.forEach { row ->
+            row.behandlingstema.forEach { behandlingstema ->
+                row.behandlingstype.forEach { behandlingstyper ->
+                    oppgaveGoSysMapping.rows.filter {
+                        it.sakstype == row.sakstype &&
+                            it.sakstema == row.sakstema &&
+                            behandlingstyper in it.behandlingstype &&
+                            behandlingstema in it.behandlingstema
+                    }.shouldHaveSize(1)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `oppgave tema skal være av riktig type`() {
+        val oppgaveGoSysMapping = OppgaveGoSysMapping()
+        oppgaveGoSysMapping.rows.forEach { row ->
+            row.behandlingstema.forEach { behandlingstema ->
+                val tema: Tema = oppgaveFactory.utledTema(row.sakstype, row.sakstema, behandlingstema)
+                tema.shouldBe(row.oppgave.tema)
+            }
+        }
+    }
+
+    @Test
     fun eueos_medlemskapLovvalg_standardEndretPeriode_flere_1() {
         test(
             sakstyper = listOf(Sakstyper.EU_EOS),
@@ -37,7 +66,8 @@ class OppgaveFactoryNyMappingTest {
             expectedBehandlingstema = OppgaveBehandlingstema.EU_EOS_YRKESAKTIV,
             expectedBehandlingstype = null,
             expectedTema = Tema.MED,
-            expectedOppgavetype = Oppgavetyper.BEH_SAK_MK
+            expectedOppgavetype = Oppgavetyper.BEH_SAK_MK,
+            "TOMT" // bedre test her når vi henter fra SED fra behandling
         )
     }
 
@@ -98,9 +128,9 @@ class OppgaveFactoryNyMappingTest {
 
         withClue(
             "\nsakstype:               $sakstype " +
-                    "\nsakstema:               $sakstema " +
-                    "\nbehandlingstype:        $behandlingstype " +
-                    "\nmelosysBehandlingstema: $melosysBehandlingstema"
+                "\nsakstema:               $sakstema " +
+                "\nbehandlingstype:        $behandlingstype " +
+                "\nmelosysBehandlingstema: $melosysBehandlingstema"
         ) {
             withClue("oppgave.behandlingstema") {
                 oppgave.behandlingstema.shouldBe(expectedBehandlingstema.kode)
