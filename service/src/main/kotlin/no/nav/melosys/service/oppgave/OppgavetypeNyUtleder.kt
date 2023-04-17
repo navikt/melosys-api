@@ -7,11 +7,11 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 
 class OppgavetypeNyUtleder : OppgavetypeUtleder {
-    private val oppgaveGoSysMapping = OppgaveGoSysMapping()
+    private val oppgaveGosysMapping = OppgaveGosysMapping()
     override fun utledOppgavetype(
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper
-    ): Oppgavetyper = oppgaveGoSysMapping.finnOppgave(sakstype, sakstema, behandlingstema, behandlingstype).oppgaveType
+    ): Oppgavetyper = oppgaveGosysMapping.finnOppgave(sakstype, sakstema, behandlingstema, behandlingstype).oppgaveType
 }

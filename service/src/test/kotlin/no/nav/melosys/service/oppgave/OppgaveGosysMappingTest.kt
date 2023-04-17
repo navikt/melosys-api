@@ -9,7 +9,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import org.junit.jupiter.api.Test
 import java.io.File
 
-class OppgaveGoSysMappingTest {
+class oppgaveGosysMappingTest {
 
     @Test
     fun lagMappingFraConfluenseTabell() {
@@ -36,9 +36,9 @@ class OppgaveGoSysMappingTest {
             }
             val beskrivelsefelt = with(fields[8]) {
                 when {
-                    contains("tomt") -> OppgaveGoSysMapping.Beskrivelsefelt.TOMT
-                    contains("SED") -> OppgaveGoSysMapping.Beskrivelsefelt.SED
-                    equals("A1_ANMODNING_OM_UNNTAK_PAPIR") -> OppgaveGoSysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
+                    contains("tomt") -> OppgaveGosysMapping.Beskrivelsefelt.TOMT
+                    contains("SED") -> OppgaveGosysMapping.Beskrivelsefelt.SED
+                    equals("A1_ANMODNING_OM_UNNTAK_PAPIR") -> OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
                     else -> throw IllegalStateException("Fant ikke ${fields[8]}")
                 }
             }
@@ -48,7 +48,7 @@ class OppgaveGoSysMappingTest {
                 "        Sakstemaer.${sakstema},\n" +
                 "        setOf(${behandlingstyper.joinToString { "Behandlingstyper.$it" }}),\n" +
                 "        setOf(${behandlingstema.joinToString { "Behandlingstema.$it" }}),\n" +
-                "        OppgaveGoSysMapping.Oppgave(OppgaveBehandlingstema.$oppgaveBehandlingstema, Tema.$tema, Oppgavetyper.$oppgavetyper, Beskrivelsefelt.$beskrivelsefelt)\n" +
+                "        oppgaveGosysMapping.Oppgave(OppgaveBehandlingstema.$oppgaveBehandlingstema, Tema.$tema, Oppgavetyper.$oppgavetyper, Beskrivelsefelt.$beskrivelsefelt)\n" +
                 "    ),"
             println(row)
         }

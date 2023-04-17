@@ -7,7 +7,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 
-internal class OppgaveGoSysMapping {
+internal class OppgaveGosysMapping {
 
     internal fun finnOppgave(
         sakstype: Sakstyper,

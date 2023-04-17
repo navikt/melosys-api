@@ -21,15 +21,15 @@ import org.junit.jupiter.params.provider.MethodSource
 class OppgaveFactoryNyMappingTest {
 
     private val oppgaveFactory = OppgaveFactory(FakeUnleash().apply { enable(ToggleName.NY_GOSYS_MAPPING) })
-    private val oppgaveGoSysMapping = OppgaveGoSysMapping()
+    private val oppgaveGosysMapping = OppgaveGosysMapping()
 
     @Test
     fun `skal kun ha ett treff på alle mulige kombinasjoner av sakstype, sakstema, behandlingstype og behandlingstema`() {
 
-        oppgaveGoSysMapping.rows.forEach { row ->
+        oppgaveGosysMapping.rows.forEach { row ->
             row.behandlingstema.forEach { behandlingstema ->
                 row.behandlingstype.forEach { behandlingstyper ->
-                    oppgaveGoSysMapping.rows.filter {
+                    oppgaveGosysMapping.rows.filter {
                         it.sakstype == row.sakstype &&
                             it.sakstema == row.sakstema &&
                             behandlingstyper in it.behandlingstype &&
@@ -42,7 +42,7 @@ class OppgaveFactoryNyMappingTest {
 
     @Test
     fun `oppgave tema skal være av riktig type`() {
-        oppgaveGoSysMapping.rows.forEach { row ->
+        oppgaveGosysMapping.rows.forEach { row ->
             row.behandlingstema.forEach { behandlingstema ->
                 val tema: Tema = oppgaveFactory.utledTema(row.sakstype, row.sakstema, behandlingstema)
                 tema.shouldBe(row.oppgave.tema)
@@ -59,30 +59,30 @@ class OppgaveFactoryNyMappingTest {
         expected: String
     ) {
         val oppgave =
-            oppgaveGoSysMapping.finnOppgave(sakstype, sakstema, behandlingstema, Behandlingstyper.HENVENDELSE)
+            oppgaveGosysMapping.finnOppgave(sakstype, sakstema, behandlingstema, Behandlingstyper.HENVENDELSE)
 
 
         oppgave.apply {
             oppgaveBehandlingstema.kode.shouldBe(expected)
             oppgaveType.shouldBe(Oppgavetyper.VURD_HENV)
-            beskrivelsefelt.shouldBe(OppgaveGoSysMapping.Beskrivelsefelt.TOMT)
+            beskrivelsefelt.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.TOMT)
         }
     }
 
     private fun gyldigHenvendleseKombinasjonerBortsettFraVedUntakk() =
         sequence<Arguments> {
-            val oppgaveGoSysMapping = OppgaveGoSysMapping()
+            val oppgaveGosysMapping = OppgaveGosysMapping()
             Sakstyper.values().forEach { sakstyper: Sakstyper ->
                 Sakstemaer.values().forEach { sakstemaer: Sakstemaer ->
                     Behandlingstema.values().filter { behandlingstema ->
-                        oppgaveGoSysMapping.finnOppgaveFraTabell(
+                        oppgaveGosysMapping.finnOppgaveFraTabell(
                             sakstyper,
                             sakstemaer,
                             behandlingstema,
                             Behandlingstyper.HENVENDELSE
                         ) == null
                     }.forEach { behandlingstema ->
-                        val oppgave = oppgaveGoSysMapping.finnOppgaveVedBehandlingsTypeHenvendelse(
+                        val oppgave = oppgaveGosysMapping.finnOppgaveVedBehandlingsTypeHenvendelse(
                             sakstyper,
                             behandlingstema,
                         )

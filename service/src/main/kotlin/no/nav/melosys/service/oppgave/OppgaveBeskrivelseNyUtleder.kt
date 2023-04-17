@@ -8,7 +8,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.TekniskException
 
 class OppgaveBeskrivelseNyUtleder : OppgaveBeskrivelseUtleder {
-    private val oppgaveGoSysMapping = OppgaveGoSysMapping()
+    private val oppgaveGosysMapping = OppgaveGosysMapping()
 
     override fun utledBeskrivelse(
         oppgaveBehandlingstema: OppgaveBehandlingstema,
@@ -19,9 +19,9 @@ class OppgaveBeskrivelseNyUtleder : OppgaveBeskrivelseUtleder {
         sedType: SedType?
     ): String {
         val beskrivelsefelt =
-            oppgaveGoSysMapping.finnOppgave(sakstype, sakstema, behandlingstema, behandlingstype).beskrivelsefelt
+            oppgaveGosysMapping.finnOppgave(sakstype, sakstema, behandlingstema, behandlingstype).beskrivelsefelt
 
-        if (beskrivelsefelt == OppgaveGoSysMapping.Beskrivelsefelt.SED) {
+        if (beskrivelsefelt == OppgaveGosysMapping.Beskrivelsefelt.SED) {
             if (sedType == null) throw TekniskException("SedType fra behandling er null når beskrivelsefelt er SED")
             return sedType.name
         }
