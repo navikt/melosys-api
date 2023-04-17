@@ -14,17 +14,37 @@ internal class OppgaveGoSysMapping {
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper?
-    ): Oppgave {
-        return rows.find {
-            it.sakstype == sakstype &&
-                it.sakstema == sakstema &&
-                it.behandlingstype.contains(behandlingstype) &&
-                it.behandlingstema.contains(behandlingstema)
-        }?.oppgave ?: throw IllegalStateException(
+    ): Oppgave = finnOppgaveFraTabell(sakstype, sakstema, behandlingstema, behandlingstype)
+        ?: finnOppgaveVedBehandlingsTypeHenvendelse(sakstype, behandlingstema)
+        ?: throw IllegalStateException(
             "Fant ikke oppgave mapping for " +
                 "sakstype:$sakstype, sakstema:$sakstema, behandlingstema:$behandlingstema, behandlingstype:$behandlingstype"
         )
+
+    // https://confluence.adeo.no/display/TEESSI/Oppgaver+i+Gosys
+    private fun finnOppgaveFraTabell(
+        sakstype: Sakstyper,
+        sakstema: Sakstemaer,
+        behandlingstema: Behandlingstema,
+        behandlingstype: Behandlingstyper?
+    ): Oppgave? = rows.find {
+        it.sakstype == sakstype && it.sakstema == sakstema && behandlingstype in it.behandlingstype && behandlingstema in it.behandlingstema
+    }?.oppgave
+
+    fun finnOppgaveVedBehandlingsTypeHenvendelse(
+        sakstype: Sakstyper,
+        behandlingstema: Behandlingstema,
+    ): Oppgave? = rows.find {
+        it.sakstype == sakstype && behandlingstema in it.behandlingstema && Behandlingstyper.HENVENDELSE in it.behandlingstype
+    }?.oppgave?.let {
+        Oppgave(
+            oppgaveBehandlingstema = it.oppgaveBehandlingstema,
+            oppgaveType = Oppgavetyper.VURD_HENV,
+            tema = it.tema,
+            beskrivelsefelt = Beskrivelsefelt.TOMT
+        )
     }
+
 
     internal enum class Beskrivelsefelt(val beskrivelse: String) {
         TOMT(""),
