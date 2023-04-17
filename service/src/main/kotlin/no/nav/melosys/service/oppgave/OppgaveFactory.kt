@@ -3,9 +3,7 @@ package no.nav.melosys.service.oppgave
 import no.finn.unleash.Unleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsystem
-import no.nav.melosys.domain.SaksopplysningType
 import no.nav.melosys.domain.Tema
-import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -54,9 +52,7 @@ class OppgaveFactory(private val unleash: Unleash) {
     }
 
     private fun finnSedType(behandling: Behandling): SedType? =
-        (behandling.saksopplysninger.find {
-            it.type == SaksopplysningType.SEDOPPL
-        }?.dokument as? SedDokument)?.sedType
+        behandling.finnSedDokument().orElse(null)?.sedType
 
     fun utledOppgaveBehandlingstema(
         sakstype: Sakstyper, sakstema: Sakstemaer, behandlingstema: Behandlingstema, behandlingstype: Behandlingstyper?
