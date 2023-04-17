@@ -10,7 +10,6 @@ import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.arkiv.*
 import no.nav.melosys.domain.eessi.*
-import no.nav.melosys.domain.eessi.melding.Avsender
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis
 import no.nav.melosys.domain.kodeverk.*
@@ -19,7 +18,6 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.saksflyt.ProsessStatus
 import no.nav.melosys.domain.saksflyt.ProsessType
 import no.nav.melosys.domain.saksflyt.Prosessinstans
-import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.melosysmock.melosyseessi.MelosysEessiRepo
 import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.repository.BehandlingsresultatRepository
@@ -48,7 +46,7 @@ import java.util.stream.Collectors
 
 @Import(KodeverkStub::class)
 class SedMottakTestIT(
-    @Autowired private val joarkFasade: JoarkFasade,
+    @Autowired private val eessiMeldingTestDataFactory: EessiMeldingTestDataFactory,
     @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
     @Autowired private val prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val utpekingService: UtpekingService,
@@ -77,12 +75,12 @@ class SedMottakTestIT(
         val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
         MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
 
-        val eessiMeldingA009 = melosysEessiMelding(
+        val eessiMeldingA009 = eessiMeldingTestDataFactory.melosysEessiMelding(
             BucType.LA_BUC_04, ref, SedType.A009, Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
-            "12_1", opprettEessiJournalpost(SedType.A009)
+            "12_1"
         )
-        val eessiMeldingX008 = melosysEessiMelding(
-            BucType.LA_BUC_04, ref, SedType.X008, null, null, opprettEessiJournalpost(SedType.X008)
+        val eessiMeldingX008 = eessiMeldingTestDataFactory.melosysEessiMelding(
+            BucType.LA_BUC_04, ref, SedType.X008, null, null
         )
 
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA009)
@@ -97,9 +95,7 @@ class SedMottakTestIT(
             }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
-            .stream()
-            .sorted(Comparator.comparing { obj: Prosessinstans -> obj.endretDato })
-            .collect(Collectors.toList())
+            .sortedBy { it.endretDato }
 
         extracting(prosessinstanserSortert) { låsReferanse }
             .shouldHaveSize(5)
@@ -132,17 +128,16 @@ class SedMottakTestIT(
         val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
         MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
 
-        val eessiMeldingA009 = melosysEessiMelding(
+        val eessiMeldingA009 = eessiMeldingTestDataFactory.melosysEessiMelding(
             BucType.LA_BUC_04, ref, SedType.A009, Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
-            "12_1", opprettEessiJournalpost(SedType.A009)
+            "12_1"
         )
-        val eessiMeldingX006 = melosysEessiMelding(
+        val eessiMeldingX006 = eessiMeldingTestDataFactory.melosysEessiMelding(
             BucType.LA_BUC_04,
             ref,
             SedType.X006,
             null,
             null,
-            opprettEessiJournalpost(SedType.X008),
             isX006NavErFjernet = true
         )
 
@@ -158,9 +153,7 @@ class SedMottakTestIT(
             }
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
-            .stream()
-            .sorted(Comparator.comparing { obj: Prosessinstans -> obj.endretDato })
-            .collect(Collectors.toList())
+            .sortedBy { it.endretDato }
 
         extracting(prosessinstanserSortert) { låsReferanse }
             .shouldHaveSize(5)
@@ -187,17 +180,16 @@ class SedMottakTestIT(
         unleash.enable("melosys.sed.x006")
         val ref = Random().nextInt(100000).toString()
 
-        val eessiMeldingA003 = melosysEessiMelding(
+        val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding(
             BucType.LA_BUC_02, ref, SedType.A003, Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
-            "13_1_a", opprettEessiJournalpost(SedType.A003), "NO"
+            "13_1_a",  "NO"
         )
-        val eessiMeldingX006 = melosysEessiMelding(
+        val eessiMeldingX006 = eessiMeldingTestDataFactory.melosysEessiMelding(
             BucType.LA_BUC_02,
             ref,
             SedType.X006,
             null,
             null,
-            opprettEessiJournalpost(SedType.X006),
             isX006NavErFjernet = true
         )
 
@@ -242,12 +234,12 @@ class SedMottakTestIT(
         val bucInformasjon = BucInformasjon(ref, true, null, LocalDate.now(), null, listOf(sedInfo))
         MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
 
-        val eessiMeldingA003 = melosysEessiMelding(
+        val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding(
             BucType.LA_BUC_02, ref, SedType.A003, Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
-            "13_1_a", opprettEessiJournalpost(SedType.A003), "NO"
+            "13_1_a",  "NO"
         )
-        val eessiMeldingX008 = melosysEessiMelding(
-            BucType.LA_BUC_02, ref, SedType.X008, null, null, opprettEessiJournalpost(SedType.X008)
+        val eessiMeldingX008 = eessiMeldingTestDataFactory.melosysEessiMelding(
+            BucType.LA_BUC_02, ref, SedType.X008, null, null
         )
 
         melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
@@ -285,15 +277,15 @@ class SedMottakTestIT(
     @Test
     fun mottaSED_mottar3SED_blirBehandletEtterHverandre() {
         //Periode på 6 år - fører til et kontrolltreff
-        val eessiMeldingA009 = melosysEessiMelding(
+        val eessiMeldingA009 = eessiMeldingTestDataFactory.melosysEessiMelding(
             BucType.LA_BUC_04, rinaSaksnummer, SedType.A009, Periode(LocalDate.now(), LocalDate.now().plusYears(6)),
-            "12_1", opprettEessiJournalpost(SedType.A009)
+            "12_1"
         )
-        val eessiMeldingX001 = melosysEessiMelding(
-            BucType.LA_BUC_04, rinaSaksnummer, SedType.X001, null, null, opprettEessiJournalpost(SedType.X001)
+        val eessiMeldingX001 = eessiMeldingTestDataFactory.melosysEessiMelding(
+            BucType.LA_BUC_04, rinaSaksnummer, SedType.X001, null, null
         )
-        val eessiMeldingX007 = melosysEessiMelding(
-            BucType.LA_BUC_04, rinaSaksnummer, SedType.X007, null, null, opprettEessiJournalpost(SedType.X007)
+        val eessiMeldingX007 = eessiMeldingTestDataFactory.melosysEessiMelding(
+            BucType.LA_BUC_04, rinaSaksnummer, SedType.X007, null, null
         )
 
 
@@ -311,9 +303,7 @@ class SedMottakTestIT(
 
 
         val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer)
-            .stream()
-            .sorted(Comparator.comparing { obj: Prosessinstans -> obj.endretDato })
-            .collect(Collectors.toList())
+            .sortedBy { it.endretDato }
 
 //        Hver SED blir til en mottaksprosess + en behandlingsprosess
         extracting(prosessinstanserSortert) { låsReferanse }

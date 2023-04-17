@@ -197,7 +197,7 @@ class BrevmottakerServiceTest {
     void avklarMottakere_medArbeidsgiverRolleIkkeKunAvklarteVirksomheterOgIngenArbeidsgivere_girTomListe() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigOrg(null));
         when(behandling.getMottatteOpplysninger()).thenReturn(lagMottatteOpplysninger(null, null));
-        when(behandling.hentArbeidsforholdDokument()).thenReturn(lagArbeidsforholdDokument(null));
+        when(behandling.finnArbeidsforholdDokument()).thenReturn(Optional.of(lagArbeidsforholdDokument(null)));
 
         List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(ARBEIDSGIVER), behandling, false, false);
 
@@ -208,7 +208,7 @@ class BrevmottakerServiceTest {
     void avklarMottakere_medArbeidsgiverRolleIkkeKunAvklarteVirksomheter_girArbeidsgiverMottakere() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigOrg(null));
         when(behandling.getMottatteOpplysninger()).thenReturn(lagMottatteOpplysninger("987654321", null));
-        when(behandling.hentArbeidsforholdDokument()).thenReturn(lagArbeidsforholdDokument("123456789"));
+        when(behandling.finnArbeidsforholdDokument()).thenReturn(Optional.of(lagArbeidsforholdDokument("123456789")));
 
         List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(ARBEIDSGIVER), behandling, false, false);
 
@@ -221,7 +221,7 @@ class BrevmottakerServiceTest {
     void avklarMottakere_medBareUtenlandskeArbeidsgivereIkkeKunAvklarteVirksomheter_girIngenMottakere() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigOrg(null));
         when(behandling.getMottatteOpplysninger()).thenReturn(lagMottatteOpplysninger(null, "uuid"));
-        when(behandling.hentArbeidsforholdDokument()).thenReturn(lagArbeidsforholdDokument(null));
+        when(behandling.finnArbeidsforholdDokument()).thenReturn(Optional.of(lagArbeidsforholdDokument(null)));
 
         List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(ARBEIDSGIVER), behandling, false, false);
         assertThat(arbeidsgivere).isEmpty();

@@ -1,9 +1,5 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -11,13 +7,17 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.service.oppgave.OppgaveFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+
 import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPDATER_OG_FERDIGSTILL_JOURNALPOST;
-import static no.nav.melosys.service.oppgave.OppgaveFactory.utledTema;
 
 @Component
 public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
@@ -25,9 +25,11 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
     private static final Logger log = LoggerFactory.getLogger(OppdaterOgFerdigstillJournalpost.class);
 
     private final JoarkFasade joarkFasade;
+    private final OppgaveFactory oppgaveFactory;
 
-    public OppdaterOgFerdigstillJournalpost(JoarkFasade joarkFasade) {
+    public OppdaterOgFerdigstillJournalpost(JoarkFasade joarkFasade, OppgaveFactory oppgaveFactory) {
         this.joarkFasade = joarkFasade;
+        this.oppgaveFactory = oppgaveFactory;
     }
 
     @Override
@@ -72,7 +74,7 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
             .medMottattDato(mottattDato)
             .medFysiskeVedlegg(fysiskeVedleggMedTitler)
             .medLogiskeVedleggTitler(logiskeVedleggTitler)
-            .medTema(utledTema(behandling.getFagsak().getTema()).getKode())
+            .medTema(oppgaveFactory.utledTema(behandling.getFagsak().getTema()).getKode())
             .build();
         joarkFasade.oppdaterOgFerdigstillJournalpost(journalpostID, journalpostOppdatering);
         log.info("Oppdatert og ferdigstilt journalpost {} for fagsak: {}", journalpostID, behandling.getFagsak().getSaksnummer());

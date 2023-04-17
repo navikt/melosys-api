@@ -28,7 +28,6 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
 import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.IntegrasjonException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
@@ -317,7 +316,7 @@ class AvklarteVirksomheterServiceTest {
         assertThat(adresse.getPoststed()).isEqualTo("Poststed");
         assertThat(adresse.getLandkode()).isEqualTo("NO");
 
-        verify(mockKodeverkService).dekod(eq(FellesKodeverk.POSTNUMMER), eq("2345"));
+        verify(mockKodeverkService).dekod(FellesKodeverk.POSTNUMMER, "2345");
     }
 
     @Test
@@ -329,7 +328,7 @@ class AvklarteVirksomheterServiceTest {
         assertThat(adresse.getPoststed()).isEqualTo("Poststed");
         assertThat(adresse.getLandkode()).isEqualTo("NO");
 
-        verify(mockKodeverkService).dekod(eq(FellesKodeverk.POSTNUMMER), eq("2345"));
+        verify(mockKodeverkService).dekod(FellesKodeverk.POSTNUMMER, "2345");
     }
 
     @Test
@@ -356,7 +355,7 @@ class AvklarteVirksomheterServiceTest {
         assertThat(adresse.getPoststed()).isEqualTo("Poststed");
         assertThat(adresse.getLandkode()).isEqualTo("NO");
 
-        verify(mockKodeverkService).dekod(eq(FellesKodeverk.POSTNUMMER), eq("6789"));
+        verify(mockKodeverkService).dekod(FellesKodeverk.POSTNUMMER, "6789");
     }
 
     private void forberedValidering() {
@@ -385,7 +384,7 @@ class AvklarteVirksomheterServiceTest {
     }
 
     private void leggTilIRegisterOppslag(Collection<String> orgnumre) {
-        when(organisasjonOppslagService.hentOrganisasjoner(eq(new HashSet<>(orgnumre)))).thenReturn(lagOrganisasjonDokumenter(orgnumre));
+        when(organisasjonOppslagService.hentOrganisasjoner(new HashSet<>(orgnumre))).thenReturn(lagOrganisasjonDokumenter(orgnumre));
     }
 
     private OrganisasjonDokument lagOrganisasjonDokument(String forretningsPostnr, String forretningsGatenavn) {

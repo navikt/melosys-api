@@ -1,21 +1,21 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import java.util.Optional;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.sak.ArkivsakService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_ARKIVSAK;
-import static no.nav.melosys.service.oppgave.OppgaveFactory.utledTema;
 
 @Component
 public class OpprettArkivsak implements StegBehandler {
@@ -24,10 +24,12 @@ public class OpprettArkivsak implements StegBehandler {
 
     private final FagsakService fagsakService;
     private final ArkivsakService arkivsakService;
+    private final OppgaveFactory oppgaveFactory;
 
-    public OpprettArkivsak(FagsakService fagsakService, ArkivsakService arkivsakService) {
+    public OpprettArkivsak(FagsakService fagsakService, ArkivsakService arkivsakService, OppgaveFactory oppgaveFactory) {
         this.fagsakService = fagsakService;
         this.arkivsakService = arkivsakService;
+        this.oppgaveFactory = oppgaveFactory;
     }
 
     @Override
@@ -48,7 +50,7 @@ public class OpprettArkivsak implements StegBehandler {
         Optional<String> aktørId = fagsak.finnBrukersAktørID();
         Optional<String> virksomhetOrgnr = fagsak.finnVirksomhetsOrgnr();
 
-        var tema = utledTema(behandling.getFagsak().getTema());
+        var tema = oppgaveFactory.utledTema(behandling.getFagsak().getTema());
 
         Long arkivsakID;
         if (aktørId.isPresent()) {

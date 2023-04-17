@@ -40,7 +40,7 @@
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <!-- Melosys -->
-        <melosys.internt.kodeverk.version>5.15.185</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.15.186</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.124</melosys.brev.version>
 
         <!-- NAV -->
@@ -61,7 +61,7 @@
         <commons-text.version>1.10.0</commons-text.version>
         <findbugs.jsr305.version>3.0.2</findbugs.jsr305.version>
         <guava.version>31.1-jre</guava.version>
-        <graphql-java.version>17.4</graphql-java.version>
+        <graphql-java.version>17.5</graphql-java.version>
         <logback.version>1.2.11</logback.version>
         <logstash.version>7.3</logstash.version>
         <hikaricp.version>5.0.1</hikaricp.version>

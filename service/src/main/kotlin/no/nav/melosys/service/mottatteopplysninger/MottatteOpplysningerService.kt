@@ -51,30 +51,24 @@ class MottatteOpplysningerService(
         )
 
     fun opprettSøknadEllerAnmodningEllerAttest(prosessinstans: Prosessinstans) {
-        val behandling = prosessinstans.behandling
+        opprettSøknadEllerAnmodningEllerAttest(
+            prosessinstans.behandling,
+            prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode::class.java, Periode()),
+            prosessinstans.getData(ProsessDataKey.SØKNADSLAND, Soeknadsland::class.java, Soeknadsland())
+        )
+    }
+
+    fun opprettSøknadEllerAnmodningEllerAttest(behandling: Behandling, periode: Periode?, soeknadsland: Soeknadsland?) {
         val harRegistreringUnntakFraMedlemskapFlyt = SaksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(
             behandling,
             unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP)
         )
 
         if (harRegistreringUnntakFraMedlemskapFlyt) {
-            opprettMottatteOpplysninger(
-                behandlingID = behandling.id,
-                mottatteOpplysningerData = AnmodningEllerAttest(),
-                type = Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST,
-                versjon = VERSJON_ANMODNING_ATTEST_GRUNNLAG
-            )
+            opprettAnmodningEllerAttest(behandling, periode, soeknadsland)
         } else {
-            opprettSøknad(prosessinstans, behandling)
+            opprettSøknad(behandling, periode, soeknadsland)
         }
-    }
-
-    fun opprettSøknad(prosessinstans: Prosessinstans, behandling: Behandling) {
-        opprettSøknad(
-            behandling,
-            prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode::class.java, Periode()),
-            prosessinstans.getData(ProsessDataKey.SØKNADSLAND, Soeknadsland::class.java, Soeknadsland())
-        )
     }
 
     fun opprettSøknadUtsendteArbeidstakereEøs(
@@ -90,7 +84,23 @@ class MottatteOpplysningerService(
         )
     }
 
-    fun opprettSøknad(behandling: Behandling, periode: Periode?, soeknadsland: Soeknadsland?) {
+    private fun opprettAnmodningEllerAttest(behandling: Behandling, periode: Periode?, soeknadsland: Soeknadsland?) {
+        val mottatteOpplysningerData = AnmodningEllerAttest().apply {
+            this.periode = periode
+            this.soeknadsland = soeknadsland
+        }
+
+        opprettMottatteOpplysninger(
+            behandlingID = behandling.id,
+            mottatteOpplysningerData = mottatteOpplysningerData,
+            type = Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST,
+            versjon = VERSJON_ANMODNING_ATTEST_GRUNNLAG
+        )
+
+        log.info("Opprettet anmodning/attest for behandling {}.", behandling.id)
+    }
+
+    private fun opprettSøknad(behandling: Behandling, periode: Periode?, soeknadsland: Soeknadsland?) {
         val behandlingID = behandling.id
         val harTomFlyt = SaksbehandlingRegler.harTomFlyt(
             behandling,

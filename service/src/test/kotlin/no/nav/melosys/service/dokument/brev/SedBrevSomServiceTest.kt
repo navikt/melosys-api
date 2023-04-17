@@ -7,6 +7,7 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
+import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Tema
@@ -19,6 +20,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService
 import no.nav.melosys.service.dokument.sed.EessiService
+import no.nav.melosys.service.oppgave.OppgaveFactory
 import no.nav.melosys.service.persondata.PersondataFasade
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -41,13 +43,16 @@ class SedSomBrevServiceTest {
 
     lateinit var sedSomBrevService: SedSomBrevService
 
+    private val oppgaveFactory = OppgaveFactory(FakeUnleash())
+
     @BeforeEach
     internal fun setUp() {
         sedSomBrevService = SedSomBrevService(
             eessiServiceMock,
             joarkFasadeMock,
             persondataFasadeMock,
-            utenlandskMyndighetServiceMock
+            utenlandskMyndighetServiceMock,
+            oppgaveFactory
         )
     }
 

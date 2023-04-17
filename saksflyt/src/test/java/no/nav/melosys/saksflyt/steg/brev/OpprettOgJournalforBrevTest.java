@@ -24,6 +24,7 @@ import no.nav.melosys.service.brev.DokumentNavnService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.brev.mapper.DokumentproduksjonsInfoMapper;
+import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.BeforeEach;
@@ -70,11 +71,13 @@ class OpprettOgJournalforBrevTest {
 
     private OpprettOgJournalforBrev opprettJournalforBrev;
 
+    private final OppgaveFactory oppgaveFactory = new OppgaveFactory(new FakeUnleash());
+
     @BeforeEach
     void init() {
         opprettJournalforBrev = new OpprettOgJournalforBrev(mockBehandlingService, mockDokgenService,
             mockUtenlandskMyndighetService, mockJoarkFasade, mockPersondataFasade, mockEregFasade,
-            mockDokumentNavnService, mockDokumentHentingService);
+            mockDokumentNavnService, mockDokumentHentingService, oppgaveFactory);
     }
 
     @Test

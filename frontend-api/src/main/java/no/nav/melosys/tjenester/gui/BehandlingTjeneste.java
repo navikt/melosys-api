@@ -1,7 +1,5 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.util.Collection;
-
 import com.fasterxml.jackson.annotation.JsonView;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -9,8 +7,6 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.bruker.SaksbehandlerService;
@@ -18,7 +14,6 @@ import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.BehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.BehandlingOppsummeringDto;
-import no.nav.melosys.tjenester.gui.dto.EndreBehandlingDto;
 import no.nav.melosys.tjenester.gui.dto.TidligereMedlemsperioderDto;
 import no.nav.melosys.tjenester.gui.dto.saksopplysninger.SaksopplysningerTilDto;
 import no.nav.security.token.support.core.api.Protected;
@@ -28,6 +23,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
+
+import java.util.Collection;
 
 @Protected
 @RestController
@@ -53,23 +50,6 @@ public class BehandlingTjeneste {
         this.saksbehandlerService = saksbehandlerService;
         this.aksesskontroll = aksesskontroll;
         this.behandlingsresultatService = behandlingsresultatService;
-    }
-
-    @PostMapping("{behandlingID}/endre")
-    @ApiOperation("Endre behandling")
-    public ResponseEntity<Void> endreBehandling(@PathVariable long behandlingID,
-                                                @RequestBody EndreBehandlingDto endreBehandling) {
-        log.debug("Saksbehandler {} ber om å endre behandling {} med {}", SubjectHandler.getInstance().getUserID(), behandlingID, endreBehandling);
-        aksesskontroll.autoriser(behandlingID);
-        behandlingService.endreBehandling(
-            behandlingID,
-            endreBehandling.behandlingstype(),
-            endreBehandling.behandlingstema(),
-            endreBehandling.behandlingsstatus(),
-            endreBehandling.mottaksdato()
-        );
-
-        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("{behandlingID}/tidligere-medlemsperioder")

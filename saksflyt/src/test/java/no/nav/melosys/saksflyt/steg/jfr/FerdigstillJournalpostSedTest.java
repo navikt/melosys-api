@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -13,6 +14,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
+import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,9 +39,11 @@ class FerdigstillJournalpostSedTest {
     private static final String SAKSNUMMER = "MEL-1223";
     private static final String TITTEL = "tittel123";
 
+    private final OppgaveFactory oppgaveFactory = new OppgaveFactory(new FakeUnleash());
+
     @BeforeEach
     public void setUp() {
-        ferdigstillJournalpostSed = new FerdigstillJournalpostSed(joarkFasade, persondataFasade);
+        ferdigstillJournalpostSed = new FerdigstillJournalpostSed(joarkFasade, persondataFasade, oppgaveFactory);
     }
 
     @Test

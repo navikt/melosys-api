@@ -1,8 +1,5 @@
 package no.nav.melosys.service.eessi;
 
-import java.time.LocalDate;
-import java.util.Optional;
-
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -32,6 +29,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -50,6 +50,8 @@ class DefaultSedRuterTest {
     private OppgaveService oppgaveService;
 
     private DefaultSedRuter defaultSedRuter;
+
+    private final OppgaveFactory oppgaveFactory = new OppgaveFactory(new FakeUnleash());
 
     private static final String SAKSNUMMER = "MEL-!!!";
     private static final Long GSAK_SAKSNUMMER = 123L;
@@ -129,7 +131,7 @@ class DefaultSedRuterTest {
         Behandling behandling = fagsak.hentAktivBehandling();
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
         when(fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER)).thenReturn(Optional.of(fagsak));
-        when(oppgaveService.lagBehandlingsoppgave(any())).thenReturn(OppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now()));
+        when(oppgaveService.lagBehandlingsoppgave(any())).thenReturn(oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now()));
 
         defaultSedRuter.rutSedTilBehandling(prosessinstans, GSAK_SAKSNUMMER);
 
