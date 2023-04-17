@@ -22,7 +22,7 @@ internal class OppgaveGoSysMapping {
         )
 
     // https://confluence.adeo.no/display/TEESSI/Oppgaver+i+Gosys
-    private fun finnOppgaveFraTabell(
+    internal fun finnOppgaveFraTabell(
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
