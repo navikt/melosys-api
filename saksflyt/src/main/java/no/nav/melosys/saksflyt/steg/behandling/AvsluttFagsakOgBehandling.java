@@ -1,15 +1,18 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -25,10 +28,17 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
 
-    public AvsluttFagsakOgBehandling(FagsakService fagsakService, BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService) {
+    private final Unleash unleash;
+
+
+    public AvsluttFagsakOgBehandling(FagsakService fagsakService,
+                                     BehandlingService behandlingService,
+                                     BehandlingsresultatService behandlingsresultatService,
+                                     Unleash unleash) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
+        this.unleash = unleash;
     }
 
     @Override
@@ -41,7 +51,10 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
         final long behandlingID = prosessinstans.getBehandling().getId();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 
-        if (behandlingsresultat.erGodkjenningEllerInnvilgelseArt13()) {
+        var registreringUnntakToggleEnabled = unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP);
+
+        if (behandlingsresultat.erGodkjenningEllerInnvilgelseArt13()
+            && !SaksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandlingsresultat.getBehandling(), registreringUnntakToggleEnabled)) {
             behandlingService.endreStatus(behandlingID, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         } else {
             var saksstatus = prosessinstans.getData(ProsessDataKey.SAKSSTATUS, Saksstatuser.class, Saksstatuser.LOVVALG_AVKLART);
