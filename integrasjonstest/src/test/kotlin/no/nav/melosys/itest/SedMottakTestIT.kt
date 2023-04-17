@@ -29,6 +29,7 @@ import no.nav.melosys.service.utpeking.UtpekingService
 import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
+import no.nav.melosys.integrasjon.joark.JoarkFasade
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.untilNotNull
 import org.junit.jupiter.api.BeforeEach
