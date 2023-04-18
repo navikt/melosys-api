@@ -60,18 +60,18 @@ class SedMottakTestIT(
     @Autowired private val unleash: FakeUnleash
 ) : ComponentTestBase() {
 
-    lateinit var rinaSaksnummer: String
     private val kafkaTopic = "teammelosys.eessi.v1-local"
 
     @BeforeEach
     fun setup() {
         SakRepo.clear()
-        rinaSaksnummer = Random().nextInt(100000).toString()
+        MelosysEessiRepo.sedRepo.clear()
     }
 
     @Test
     fun `A009 med etterfølgende X008 skal gi fagsak annulert`() {
         unleash.enable("melosys.sed.x008")
+
         val ref = Random().nextInt(100000).toString()
 
         val sedInfo = SedInformasjon(ref, SedType.A009.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
@@ -279,6 +279,8 @@ class SedMottakTestIT(
 
     @Test
     fun mottaSED_mottar3SED_blirBehandletEtterHverandre() {
+        val rinaSaksnummer = Random().nextInt(100000).toString()
+
         //Periode på 6 år - fører til et kontrolltreff
         val eessiMeldingA009 = eessiMeldingTestDataFactory.melosysEessiMelding(
             BucType.LA_BUC_04, rinaSaksnummer, SedType.A009, Periode(LocalDate.now(), LocalDate.now().plusYears(6)),
@@ -319,6 +321,100 @@ class SedMottakTestIT(
                 eessiMeldingX007.lagUnikIdentifikator(),
                 eessiMeldingX007.lagUnikIdentifikator(),
             )
+    }
+
+    @Test
+    fun `Motta A003, godkjenne med A012, ugyldiggjøre godkjenning A012 med X008 for så å sende en A004`() {
+        unleash.enable("melosys.annuller.sed.ny.vurdering")
+
+        val randomUUID = UUID.randomUUID()
+        ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "steg")
+
+        val rinaSaksnummer = Random().nextInt(100000).toString()
+
+        val datoOmToÅr = LocalDate.now().plusYears(2)
+        val sedInfoA003 =
+            SedInformasjon(rinaSaksnummer, "A003id", datoOmToÅr, datoOmToÅr, SedType.A003.name, "MOTTATT", null)
+        val sedInfoA012 =
+            SedInformasjon(rinaSaksnummer, "A012id", datoOmToÅr, datoOmToÅr, SedType.A012.name, "SENDT", null)
+        val bucInformasjon =
+            BucInformasjon(rinaSaksnummer, true, "LA_BUC_02", LocalDate.now(), null, listOf(sedInfoA003, sedInfoA012))
+        MelosysEessiRepo.opprettBucinformasjon(bucInformasjon)
+        val eessiMeldingA003 = melosysEessiMelding(
+            BucType.LA_BUC_02, rinaSaksnummer, SedType.A003, Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
+            "13_1_a", opprettEessiJournalpost(SedType.A003)
+        )
+        eessiMeldingA003.apply { lovvalgsland = "NO" }
+
+        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
+
+        await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(3))
+            .until {
+                prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
+                    listOf(ProsessStatus.FERDIG),
+                    rinaSaksnummer
+                ).isEmpty()
+            }
+
+        val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(rinaSaksnummer)
+            .stream()
+            .sorted(Comparator.comparing { obj: Prosessinstans -> obj.endretDato })
+            .collect(Collectors.toList())
+
+        lovvalgsperiodeService.lagreLovvalgsperioder(
+            prosessinstanserSortert.get(1).behandling.id,
+            listOf(Lovvalgsperiode().apply {
+                fom = datoOmToÅr
+                tom = datoOmToÅr.plusDays(1)
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                dekning = Trygdedekninger.FULL_DEKNING_EOSFO
+                lovvalgsland = Land_iso2.NO
+                bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A
+            })
+        )
+
+        val vedtaksProsessInstans = executeAndWait(ProsessType.IVERKSETT_VEDTAK_EOS) {
+            vedtaksfattingFasade.fattVedtak(
+                prosessinstanserSortert.get(1).behandling.id, FattVedtakRequest.Builder()
+                    .medBehandlingsresultat(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND)
+                    .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
+                    .build()
+            )
+        }
+
+        val opprettNyVurderingProsessinstans = executeAndWait(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK) {
+            opprettBehandlingForSak.opprettBehandling(
+                prosessinstanserSortert.get(1).behandling.fagsak.saksnummer,
+                OpprettSakDto().apply {
+                    behandlingstema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
+                    behandlingstype = Behandlingstyper.NY_VURDERING
+                    mottaksdato = LocalDate.now()
+                    behandlingsaarsakType = Behandlingsaarsaktyper.HENVENDELSE
+                    virksomhetOrgnr = "123456788"
+                })
+        }
+
+        executeAndWait(ProsessType.UTPEKING_AVVIS) {
+            utpekingService.avvisUtpeking(opprettNyVurderingProsessinstans.behandling.id, UtpekingAvvis().apply {
+                begrunnelse = "lol"
+                isEtterspørInformasjon = false
+            })
+        }
+
+        MelosysEessiRepo.sedRepo.get(rinaSaksnummer)!!.shouldContainInOrder(
+            SedType.A012,
+            SedType.X008,
+            SedType.A004,
+        )
+        vedtaksProsessInstans.behandling.apply {
+            status.shouldBe(Behandlingsstatus.AVSLUTTET)
+            fagsak.status.shouldBe(Saksstatuser.LOVVALG_AVKLART)
+            behandlingsresultatRepository.findWithLovvalgsperioderById(id).get().type.shouldBe(
+                Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND
+            )
+        }
+
+        ThreadLocalAccessInfo.afterExecuteProcess(randomUUID)
     }
 
     @Test
