@@ -66,7 +66,7 @@ class EessiServiceTest {
     @Mock
     private SedDataGrunnlagFactory dokumentdataGrunnlagFactory;
 
-    private Unleash unleash = new FakeUnleash();
+    private FakeUnleash unleash = new FakeUnleash();
 
     private EessiService eessiService;
 
@@ -381,6 +381,7 @@ class EessiServiceTest {
         saksopplysning.setDokument(new SedDokument());
         behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(dokumentdataGrunnlagFactory.av(any(), any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
         when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
         mockBehandlingsresultat();
