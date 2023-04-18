@@ -3,6 +3,8 @@ package no.nav.melosys.saksflyt.steg.sed;
 import java.time.LocalDate;
 import java.util.Set;
 
+import no.finn.unleash.FakeUnleash;
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
@@ -43,6 +45,7 @@ class SendAvslagUtpekingTest {
     private BehandlingService behandlingService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
+    private Unleash unleash = new FakeUnleash();
 
     private SendAvslagUtpeking sendAvslagUtpeking;
     private EessiService eessiService;
@@ -51,7 +54,7 @@ class SendAvslagUtpekingTest {
     @BeforeEach
     public void settOpp() {
         eessiService = new EessiService(behandlingService, behandlingsresultatService, eessiConsumer, joarkFasade,
-                sedDataBygger, sedDataGrunnlagFactory);
+            sedDataBygger, sedDataGrunnlagFactory, unleash);
         sendAvslagUtpeking = new SendAvslagUtpeking(eessiService);
 
         SedDokument sedDokument = new SedDokument();
