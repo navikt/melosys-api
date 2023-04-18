@@ -6,7 +6,6 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.repository.BehandlingRepository;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class OpprettOppgaveTest {
@@ -23,12 +21,10 @@ class OpprettOppgaveTest {
     private OppgaveService oppgaveService;
 
     private OpprettOppgave opprettOppgave;
-    @Mock
-    private BehandlingRepository behandlingRepository;
 
     @BeforeEach
     public void setUp() {
-        opprettOppgave = new OpprettOppgave(oppgaveService, behandlingRepository);
+        opprettOppgave = new OpprettOppgave(oppgaveService);
     }
 
     @Test
@@ -48,16 +44,13 @@ class OpprettOppgaveTest {
         behandling.setId(243L);
         behandling.setInitierendeJournalpostId(journalpostID);
         behandling.setFagsak(fagsak);
-        when(behandlingRepository.findWithSaksopplysningerById(behandling.getId())).thenReturn(behandling);
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, true);
         prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
 
-
         opprettOppgave.utfør(prosessinstans);
-
 
         verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, aktørID, saksbehandler, null);
     }
@@ -80,16 +73,13 @@ class OpprettOppgaveTest {
         behandling.setId(243L);
         behandling.setInitierendeJournalpostId(journalpostID);
         behandling.setFagsak(fagsak);
-        when(behandlingRepository.findWithSaksopplysningerById(behandling.getId())).thenReturn(behandling);
 
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, true);
         prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, saksbehandler);
 
-
         opprettOppgave.utfør(prosessinstans);
-
 
         verify(oppgaveService).opprettEllerGjenbrukBehandlingsoppgave(behandling, journalpostID, null, saksbehandler, orgnr);
     }
