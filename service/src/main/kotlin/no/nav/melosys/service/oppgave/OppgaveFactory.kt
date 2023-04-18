@@ -24,16 +24,8 @@ class OppgaveFactory(private val unleash: Unleash) {
 
     fun lagBehandlingsoppgave(
         behandling: Behandling,
-        mottaksdato: LocalDate?
-    ): Oppgave.Builder {
-        val hentSedDokument: () -> SedDokument? = { null }
-        return lagBehandlingsoppgave(behandling, mottaksdato, hentSedDokument)
-    }
-
-    fun lagBehandlingsoppgave(
-        behandling: Behandling,
         mottaksdato: LocalDate?,
-        hentSedDokument: () -> SedDokument? // Kan ha default verdi her når vi konverter OppgaveService til Kotlin
+        hentSedDokument: () -> SedDokument?
     ): Oppgave.Builder {
         // Dokumentasjon for regler: https://confluence.adeo.no/display/TEESSI/Oppgaver+i+Gosys
         val sakstype = behandling.fagsak.type

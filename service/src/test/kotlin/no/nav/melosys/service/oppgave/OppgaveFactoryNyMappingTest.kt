@@ -54,7 +54,7 @@ internal class OppgaveFactoryNyMappingTest {
             }.forEach { row ->
                 val behandling = lagBehandlingBrukFørsteRad(row)
 
-                val oppgave = oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now()).build()
+                val oppgave = oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument).build()
 
                 oppgave.beskrivelse.shouldBe("")
             }
@@ -68,7 +68,7 @@ internal class OppgaveFactoryNyMappingTest {
             }.shouldHaveSize(1).forEach { row ->
                 val behandling = lagBehandlingBrukFørsteRad(row)
 
-                val oppgave = oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now()).build()
+                val oppgave = oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument).build()
 
                 oppgave.beskrivelse.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR.beskrivelse)
             }

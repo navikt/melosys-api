@@ -619,7 +619,7 @@ class OppgaveFactoryGammelMappingTest {
         }
 
         val fakeUnleash = FakeUnleash().apply { disableAll() }
-        val oppgave = OppgaveFactory(fakeUnleash).lagBehandlingsoppgave(behandling, LocalDate.now()).build()
+        val oppgave = OppgaveFactory(fakeUnleash).lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument).build()
 
         withClue(
             "\nsakstype:               $sakstype " +
