@@ -21,10 +21,12 @@ class OppgaveBeskrivelseNyUtleder : OppgaveBeskrivelseUtleder {
         val beskrivelsefelt =
             oppgaveGosysMapping.finnOppgave(sakstype, sakstema, behandlingstema, behandlingstype).beskrivelsefelt
 
-        if (beskrivelsefelt == OppgaveGosysMapping.Beskrivelsefelt.SED && sedType == null) {
-            throw TekniskException("SedType fra behandling er null når beskrivelsefelt er SED")
+        return when (beskrivelsefelt) {
+            OppgaveGosysMapping.Beskrivelsefelt.TOMT -> ""
+            OppgaveGosysMapping.Beskrivelsefelt.SED_ELLER_TOMT -> sedType?.name ?: ""
+            OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR -> beskrivelsefelt.beskrivelse
+            OppgaveGosysMapping.Beskrivelsefelt.SED -> sedType?.name
+                ?: throw TekniskException("SedType fra behandling er null når beskrivelsefelt er SED")
         }
-
-        return sedType?.name ?: beskrivelsefelt.beskrivelse
     }
 }
