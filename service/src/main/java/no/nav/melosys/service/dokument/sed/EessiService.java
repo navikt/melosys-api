@@ -1,10 +1,12 @@
 package no.nav.melosys.service.dokument.sed;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
@@ -12,20 +14,19 @@ import no.nav.melosys.domain.PeriodeType;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Vedlegg;
-import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
-import no.nav.melosys.domain.eessi.BucInformasjon;
-import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.eessi.Institusjon;
-import no.nav.melosys.domain.eessi.SedType;
+import no.nav.melosys.domain.eessi.*;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
+import no.nav.melosys.domain.eessi.sed.InvalideringSedDto;
 import no.nav.melosys.domain.eessi.sed.SedDataDto;
 import no.nav.melosys.domain.eessi.sed.UtpekingAvvisDto;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
@@ -57,16 +58,19 @@ public class EessiService {
     private final EessiConsumer eessiConsumer;
     private final SedDataBygger sedDataBygger;
     private final SedDataGrunnlagFactory dataGrunnlagFactory;
+    private final Unleash unleash;
 
     public EessiService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
                         EessiConsumer eessiConsumer, JoarkFasade joarkFasade,
-                        SedDataBygger sedDataBygger, SedDataGrunnlagFactory dataGrunnlagFactory) {
+                        SedDataBygger sedDataBygger, SedDataGrunnlagFactory dataGrunnlagFactory,
+                        Unleash unleash) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.joarkFasade = joarkFasade;
         this.eessiConsumer = eessiConsumer;
         this.sedDataBygger = sedDataBygger;
         this.dataGrunnlagFactory = dataGrunnlagFactory;
+        this.unleash = unleash;
     }
 
     public Collection<Vedlegg> lagEessiVedlegg(Fagsak fagsak, Collection<DokumentReferanse> vedleggReferanser) {
@@ -205,30 +209,12 @@ public class EessiService {
 
     public void sendGodkjenningArbeidFlereLand(long behandlingID, String ytterligereInformasjon) {
         log.info("Sender svar på A003 for behandling {}", behandlingID);
+        final var behandling = behandlingService.hentBehandling(behandlingID);
+
+        if (behandling.erNyVurdering() && unleash.isEnabled(ToggleName.ANNULER_SED_NY_VURDERING)) {
+            annullerSedForNyVurderingMedSendtVedtak(behandling);
+        }
         sendSedPåEksisterendeBehandling(behandlingID, PeriodeType.LOVVALGSPERIODE, br -> SedType.A012, ytterligereInformasjon);
-    }
-
-    private void sendSedPåEksisterendeBehandling(long behandlingID,
-                                                 PeriodeType periodeType,
-                                                 Function<Behandlingsresultat, SedType> sedTypeAvklarer) {
-        sendSedPåEksisterendeBehandling(behandlingID, periodeType, sedTypeAvklarer, null);
-    }
-
-    private void sendSedPåEksisterendeBehandling(long behandlingID,
-                                                 PeriodeType periodeType,
-                                                 Function<Behandlingsresultat, SedType> sedTypeAvklarer, String ytterligereInformasjon) {
-        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-
-        final var sedType = sedTypeAvklarer.apply(behandlingsresultat);
-        SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling, sedType);
-
-        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, periodeType);
-        sedDataDto.setYtterligereInformasjon(ytterligereInformasjon);
-        String rinaSaksnummer = behandling.hentSedDokument().getRinaSaksnummer();
-
-        log.info("Forsøker å sende sed {} for behandling {}", sedType, behandlingID);
-        eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, sedTypeAvklarer.apply(behandlingsresultat));
     }
 
     public void sendAvslagUtpekingSvar(long behandlingId, UtpekingAvvis utpekingAvvis) {
@@ -245,6 +231,11 @@ public class EessiService {
             utpekingAvvis.getBegrunnelse(),
             utpekingAvvis.isEtterspørInformasjon()
         ));
+
+        if (behandling.erNyVurdering() && unleash.isEnabled(ToggleName.ANNULER_SED_NY_VURDERING)) {
+            annullerSedForNyVurderingMedSendtVedtak(behandling);
+        }
+
         eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, SedType.A004);
     }
 
@@ -366,5 +357,55 @@ public class EessiService {
 
     public void lukkBuc(String rinaSaksnummer) {
         eessiConsumer.lukkBuc(rinaSaksnummer);
+    }
+
+    public void sendInvalideringSed(long behandlingID, String sedTypeSomSkalInvalideres, LocalDate opprettetDato) {
+        var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
+        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+        SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling, SedType.X008);
+        String rinaSaksnummer = behandling.hentSedDokument().getRinaSaksnummer();
+
+        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, PeriodeType.INGEN);
+
+        var invalideringSedDto = new InvalideringSedDto();
+        invalideringSedDto.setSedTypeSomSkalInvalideres(sedTypeSomSkalInvalideres);
+        invalideringSedDto.setUtstedelsedato(opprettetDato.toString());
+        sedDataDto.setInvalideringSedDto(invalideringSedDto);
+
+        log.info("Forsøker å sende sed {} for behandling {}", SedType.X008, behandlingID);
+        eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, SedType.X008);
+    }
+
+    private void annullerSedForNyVurderingMedSendtVedtak(Behandling behandling) {
+        finnSedSomSkalInvalideres(behandling.getFagsak().getGsakSaksnummer()).ifPresent(sedInformasjon ->
+            sendInvalideringSed(behandling.getId(), sedInformasjon.getSedType(), sedInformasjon.getOpprettetDato()));
+    }
+
+    private Optional<SedInformasjon> finnSedSomSkalInvalideres(long rinasaksnummer) {
+        var sedTypeList = List.of(SedType.A004, SedType.A012);
+        return hentTilknyttedeBucer(rinasaksnummer, Collections.emptyList())
+            .stream()
+            .filter(BucInformasjon::erÅpen)
+            .flatMap(b -> b.getSeder().stream())
+            .filter(s -> sedTypeList.contains(SedType.valueOf(s.getSedType())))
+            .sorted(Comparator.comparing(SedInformasjon::getOpprettetDato).reversed())
+            .findFirst();
+    }
+
+    private void sendSedPåEksisterendeBehandling(long behandlingID,
+                                                 PeriodeType periodeType,
+                                                 Function<Behandlingsresultat, SedType> sedTypeAvklarer, String ytterligereInformasjon) {
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+
+        final var sedType = sedTypeAvklarer.apply(behandlingsresultat);
+        SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling, sedType);
+
+        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, periodeType);
+        sedDataDto.setYtterligereInformasjon(ytterligereInformasjon);
+        String rinaSaksnummer = behandling.hentSedDokument().getRinaSaksnummer();
+
+        log.info("Forsøker å sende sed {} for behandling {}", sedType, behandlingID);
+        eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, sedTypeAvklarer.apply(behandlingsresultat));
     }
 }

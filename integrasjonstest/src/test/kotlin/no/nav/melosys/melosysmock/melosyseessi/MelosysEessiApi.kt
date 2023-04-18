@@ -2,8 +2,10 @@ package no.nav.melosys.melosysmock.melosyseessi
 
 import no.nav.melosys.domain.eessi.BucInformasjon
 import no.nav.melosys.domain.eessi.SedInformasjon
+import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.eessi.sed.Lovvalgsperiode
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto
+import no.nav.melosys.melosysmock.melosyseessi.MelosysEessiRepo.sedRepo
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.web.bind.annotation.*
 import java.time.ZoneOffset
@@ -15,7 +17,6 @@ class MelosysEessiApi {
 
     companion object SaksrelasjonLager {
         val saksrelasjoner = mutableSetOf<Saksrelasjon>()
-        val bucInformasjoner = mutableSetOf<BucInformasjon>()
     }
 
     @GetMapping("/buc/{bucType}/institusjoner")
@@ -53,8 +54,18 @@ class MelosysEessiApi {
             })
 
         }
-//        ReflectionTestUtils.setField(sedGrunnlagDto, "sedType", "A003")
         return sedGrunnlagDto
+    }
+
+    @PostMapping("/buc/{rinaSaksnummer}/sed/{sedType}")
+    fun opprettSed(
+        @RequestBody sedDataDto: SedGrunnlagDto,
+        @PathVariable rinaSaksnummer: String,
+        @PathVariable sedType: SedType
+    ) {
+        val currentList = sedRepo.getOrDefault(rinaSaksnummer, listOf())
+        val newList = currentList + sedType
+        sedRepo[rinaSaksnummer] = newList
     }
 }
 

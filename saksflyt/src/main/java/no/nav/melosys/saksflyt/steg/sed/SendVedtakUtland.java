@@ -1,8 +1,11 @@
 package no.nav.melosys.saksflyt.steg.sed;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -10,6 +13,7 @@ import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
+import no.nav.melosys.domain.eessi.SedInformasjon;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
@@ -36,15 +40,17 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     private final SedSomBrevService sedSomBrevService;
     private final UtpekingService utpekingService;
     private final ProsessinstansService prosessinstansService;
+    private final Unleash unleash;
 
     public SendVedtakUtland(EessiService eessiService,
                             BehandlingsresultatService behandlingsresultatService,
                             SedSomBrevService sedSomBrevService,
-                            UtpekingService utpekingService, ProsessinstansService prosessinstansService) {
+                            UtpekingService utpekingService, ProsessinstansService prosessinstansService, Unleash unleash) {
         super(eessiService, behandlingsresultatService);
         this.sedSomBrevService = sedSomBrevService;
         this.utpekingService = utpekingService;
         this.prosessinstansService = prosessinstansService;
+        this.unleash = unleash;
     }
 
     @Override

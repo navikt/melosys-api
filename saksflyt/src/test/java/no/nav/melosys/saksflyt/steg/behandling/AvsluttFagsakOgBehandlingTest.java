@@ -3,15 +3,15 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import java.util.Collections;
 import java.util.Set;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -50,7 +50,9 @@ class AvsluttFagsakOgBehandlingTest {
 
     @BeforeEach
     public void setUp() {
-        avsluttFagsakOgBehandling = new AvsluttFagsakOgBehandling(fagsakService, behandlingService, behandlingsresultatService);
+        FakeUnleash unleash = new FakeUnleash();
+        unleash.enableAll();
+        avsluttFagsakOgBehandling = new AvsluttFagsakOgBehandling(fagsakService, behandlingService, behandlingsresultatService, unleash);
 
         prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_EOS);
@@ -58,10 +60,13 @@ class AvsluttFagsakOgBehandlingTest {
         behandling = new Behandling();
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setId(123L);
+        behandling.setTema(Behandlingstema.ARBEID_I_UTLANDET);
 
         fagsak = new Fagsak();
         fagsak.setSaksnummer(saksnummer);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
+        fagsak.setType(Sakstyper.EU_EOS);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
 
         behandling.setFagsak(fagsak);
         prosessinstans.setBehandling(behandling);
@@ -73,6 +78,7 @@ class AvsluttFagsakOgBehandlingTest {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
+        behandlingsresultat.setBehandling(behandling);
 
         when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId()))
             .thenReturn(behandlingsresultat);
@@ -82,15 +88,31 @@ class AvsluttFagsakOgBehandlingTest {
     void utfør_erArtikkel12_behandlingOgFagsakAvsluttet() {
         when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+
         avsluttFagsakOgBehandling.utfør(prosessinstans);
+
         verify(fagsakService).avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART);
     }
 
     @Test
     void utfør_erArtikkel13_behandlingsstatusMidlertidigLovvalgsbeslutning() {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
+
         avsluttFagsakOgBehandling.utfør(prosessinstans);
+
         verify(behandlingService).endreStatus(behandling.getId(), Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
+    }
+
+    @Test
+    void utfør_erArtikkel13OgBehandlingstemaA1AnmodningOmUnntakPapir_behandlingOgFagsakAvsluttet() {
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
+        behandling.setTema(Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR);
+        fagsak.setTema(Sakstemaer.UNNTAK);
+        when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
+
+        avsluttFagsakOgBehandling.utfør(prosessinstans);
+
+        verify(fagsakService).avsluttFagsakOgBehandling(fagsak, Saksstatuser.LOVVALG_AVKLART);
     }
 
     @Test
