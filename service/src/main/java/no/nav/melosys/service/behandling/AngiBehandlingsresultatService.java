@@ -112,13 +112,13 @@ public class AngiBehandlingsresultatService {
     private boolean erGyldigEndringForFASTSATT_LOVVALGSLAND(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
         return Set.of(EU_EOS, TRYGDEAVTALE).contains(sakstype) &&
             sakstema == MEDLEMSKAP_LOVVALG &&
-            Set.of(ARBEID_KUN_NORGE, YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST).contains(behandlingstema) &&
+            Set.of(ARBEID_KUN_NORGE, YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST, UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG, ARBEID_TJENESTEPERSON_ELLER_FLY).contains(behandlingstema) &&
             Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype);
     }
 
     private boolean erGyldigEndringForAVSLAG_SØKNAD(Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
         return sakstema == MEDLEMSKAP_LOVVALG &&
-            Set.of(ARBEID_TJENESTEPERSON_ELLER_FLY, ARBEID_KUN_NORGE, YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST, UNNTAK_MEDLEMSKAP).contains(behandlingstema) &&
+            Set.of(ARBEID_TJENESTEPERSON_ELLER_FLY, ARBEID_KUN_NORGE, YRKESAKTIV, IKKE_YRKESAKTIV, PENSJONIST, UNNTAK_MEDLEMSKAP, UTSENDT_ARBEIDSTAKER, UTSENDT_SELVSTENDIG).contains(behandlingstema) &&
             Set.of(FØRSTEGANG, NY_VURDERING).contains(behandlingstype);
     }
 
