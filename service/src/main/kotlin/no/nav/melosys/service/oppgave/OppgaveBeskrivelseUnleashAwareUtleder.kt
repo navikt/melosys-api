@@ -1,7 +1,7 @@
 package no.nav.melosys.service.oppgave
 
 import no.finn.unleash.Unleash
-import no.nav.melosys.domain.eessi.SedType
+import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -22,7 +22,7 @@ class OppgaveBeskrivelseUnleashAwareUtleder(private val unleash: Unleash) : Oppg
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper,
-        sedType: SedType?
+        hentSedDokument: () -> SedDokument?
     ): String =
         oppgaveBeskrivelseUtleder.utledBeskrivelse(
             oppgaveBehandlingstema,
@@ -30,7 +30,7 @@ class OppgaveBeskrivelseUnleashAwareUtleder(private val unleash: Unleash) : Oppg
             sakstema,
             behandlingstema,
             behandlingstype,
-            sedType
+            hentSedDokument
         )
 
 

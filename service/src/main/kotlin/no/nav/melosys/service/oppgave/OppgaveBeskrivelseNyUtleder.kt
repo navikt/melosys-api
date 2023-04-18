@@ -1,6 +1,6 @@
 package no.nav.melosys.service.oppgave
 
-import no.nav.melosys.domain.eessi.SedType
+import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -16,16 +16,16 @@ class OppgaveBeskrivelseNyUtleder : OppgaveBeskrivelseUtleder {
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper,
-        sedType: SedType?
+        hentSedDokument: () -> SedDokument?
     ): String {
         val beskrivelsefelt =
             oppgaveGosysMapping.finnOppgave(sakstype, sakstema, behandlingstema, behandlingstype).beskrivelsefelt
 
         return when (beskrivelsefelt) {
             OppgaveGosysMapping.Beskrivelsefelt.TOMT -> ""
-            OppgaveGosysMapping.Beskrivelsefelt.SED_ELLER_TOMT -> sedType?.name ?: ""
+            OppgaveGosysMapping.Beskrivelsefelt.SED_ELLER_TOMT -> hentSedDokument()?.sedType?.name ?: ""
             OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR -> beskrivelsefelt.beskrivelse
-            OppgaveGosysMapping.Beskrivelsefelt.SED -> sedType?.name
+            OppgaveGosysMapping.Beskrivelsefelt.SED -> hentSedDokument()?.sedType?.name
                 ?: throw TekniskException("SedType fra behandling er null når beskrivelsefelt er SED")
         }
     }

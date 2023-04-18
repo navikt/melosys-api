@@ -36,7 +36,9 @@ internal class OppgaveFactoryNyMappingTest {
             }.forEach { row ->
                 val behandling = lagBehandlingBrukFørsteRad(row, SedType.A003)
 
-                val oppgave = oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now()).build()
+                val oppgave =
+                    oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument)
+                        .build()
 
                 oppgave.beskrivelse.shouldBe(SedType.A003.name)
             }

@@ -174,8 +174,8 @@ public class OppgaveService {
     }
 
     public Oppgave.Builder lagBehandlingsoppgave(Behandling behandling) {
-        Behandling behandlingMedSaksopplysninger = behandlingService.hentBehandlingMedSaksopplysninger(behandling.getId());
-        return oppgaveFactory.lagBehandlingsoppgave(behandlingMedSaksopplysninger, utledMottaksdato.getMottaksdato(behandling));
+        return oppgaveFactory.lagBehandlingsoppgave(behandling, utledMottaksdato.getMottaksdato(behandling),
+            () -> behandlingService.hentBehandlingMedSaksopplysninger(behandling.getId()).finnSedDokument().orElse(null));
     }
 
     public void opprettJournalføringsoppgave(String journalpostID, String aktørID) {

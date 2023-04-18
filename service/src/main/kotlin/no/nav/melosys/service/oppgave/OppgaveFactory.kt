@@ -4,7 +4,7 @@ import no.finn.unleash.Unleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsystem
 import no.nav.melosys.domain.Tema
-import no.nav.melosys.domain.eessi.SedType
+import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -22,13 +22,24 @@ class OppgaveFactory(private val unleash: Unleash) {
     private val oppgavetypeUtleder = OppgavetypeUnleashAwareUtleder(unleash)
     private val oppgaveBeskrivelseUtleder = OppgaveBeskrivelseUnleashAwareUtleder(unleash)
 
-    fun lagBehandlingsoppgave(behandling: Behandling, mottaksdato: LocalDate?): Oppgave.Builder {
+    fun lagBehandlingsoppgave(
+        behandling: Behandling,
+        mottaksdato: LocalDate?
+    ): Oppgave.Builder {
+        val hentSedDokument: () -> SedDokument? = { null }
+        return lagBehandlingsoppgave(behandling, mottaksdato, hentSedDokument)
+    }
+
+    fun lagBehandlingsoppgave(
+        behandling: Behandling,
+        mottaksdato: LocalDate?,
+        hentSedDokument: () -> SedDokument? // Kan ha default verdi her når vi konverter OppgaveService til Kotlin
+    ): Oppgave.Builder {
         // Dokumentasjon for regler: https://confluence.adeo.no/display/TEESSI/Oppgaver+i+Gosys
         val sakstype = behandling.fagsak.type
         val sakstema = behandling.fagsak.tema
         val behandlingstema = behandling.tema
         val behandlingstype = behandling.type
-        val sedType: SedType? = finnSedType(behandling)
         val oppgaveBehandlingstema = utledOppgaveBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype)
         val oppgaveBehandlingstype = utledOppgaveBehandlingstype(sakstype, sakstema, behandlingstema)
         return Oppgave.Builder()
@@ -45,14 +56,11 @@ class OppgaveFactory(private val unleash: Unleash) {
                     sakstema,
                     behandlingstema,
                     behandlingstype,
-                    sedType
+                    hentSedDokument
                 )
             )
             .setFristFerdigstillelse(Behandling.utledBehandlingsfrist(behandling, mottaksdato))
     }
-
-    private fun finnSedType(behandling: Behandling): SedType? =
-        behandling.finnSedDokument().orElse(null)?.sedType
 
     fun utledOppgaveBehandlingstema(
         sakstype: Sakstyper, sakstema: Sakstemaer, behandlingstema: Behandlingstema, behandlingstype: Behandlingstyper?
@@ -100,14 +108,14 @@ class OppgaveFactory(private val unleash: Unleash) {
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper,
-        sedType: SedType?
+        hentSedDokument: () -> SedDokument?
     ): String = oppgaveBeskrivelseUtleder.utledBeskrivelse(
         oppgaveBehandlingstema,
         sakstype,
         sakstema,
         behandlingstema,
         behandlingstype,
-        sedType
+        hentSedDokument
     )
 
     private fun brukNyMapping() = unleash.isEnabled(ToggleName.NY_GOSYS_MAPPING)
