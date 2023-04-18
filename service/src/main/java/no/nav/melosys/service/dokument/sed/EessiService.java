@@ -211,48 +211,10 @@ public class EessiService {
         log.info("Sender svar på A003 for behandling {}", behandlingID);
         final var behandling = behandlingService.hentBehandling(behandlingID);
 
-        if (behandling.erNyVurdering() && unleash.isEnabled("melosys.annuller.sed.ny.vurdering")) {
+        if (behandling.erNyVurdering() && unleash.isEnabled(ToggleName.ANNULER_SED_NY_VURDERING)) {
             annullerSedForNyVurderingMedSendtVedtak(behandling);
         }
         sendSedPåEksisterendeBehandling(behandlingID, PeriodeType.LOVVALGSPERIODE, br -> SedType.A012, ytterligereInformasjon);
-    }
-
-    public void annullerSedForNyVurderingMedSendtVedtak(Behandling behandling) {
-        finnSedSomSkalInvalideres(behandling.getFagsak().getGsakSaksnummer()).ifPresent(sedInformasjon ->
-            sendInvalideringSed(behandling.getId(), sedInformasjon.getSedType(), sedInformasjon.getOpprettetDato()));
-    }
-
-    private Optional<SedInformasjon> finnSedSomSkalInvalideres(long rinasaksnummer) {
-        var sedTypeList = List.of(SedType.A004, SedType.A012);
-        return hentTilknyttedeBucer(rinasaksnummer, Collections.emptyList())
-            .stream()
-            .filter(BucInformasjon::erÅpen)
-            .flatMap(b -> b.getSeder().stream())
-            .filter(s -> sedTypeList.contains(SedType.valueOf(s.getSedType())))
-            .sorted(Comparator.comparing(SedInformasjon::getOpprettetDato).reversed())
-            .findFirst();
-    }
-    private void sendSedPåEksisterendeBehandling(long behandlingID,
-                                                 PeriodeType periodeType,
-                                                 Function<Behandlingsresultat, SedType> sedTypeAvklarer) {
-        sendSedPåEksisterendeBehandling(behandlingID, periodeType, sedTypeAvklarer, null);
-    }
-
-    private void sendSedPåEksisterendeBehandling(long behandlingID,
-                                                 PeriodeType periodeType,
-                                                 Function<Behandlingsresultat, SedType> sedTypeAvklarer, String ytterligereInformasjon) {
-        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
-        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-
-        final var sedType = sedTypeAvklarer.apply(behandlingsresultat);
-        SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling, sedType);
-
-        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, periodeType);
-        sedDataDto.setYtterligereInformasjon(ytterligereInformasjon);
-        String rinaSaksnummer = behandling.hentSedDokument().getRinaSaksnummer();
-
-        log.info("Forsøker å sende sed {} for behandling {}", sedType, behandlingID);
-        eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, sedTypeAvklarer.apply(behandlingsresultat));
     }
 
     public void sendAvslagUtpekingSvar(long behandlingId, UtpekingAvvis utpekingAvvis) {
@@ -412,5 +374,38 @@ public class EessiService {
 
         log.info("Forsøker å sende sed {} for behandling {}", SedType.X008, behandlingID);
         eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, SedType.X008);
+    }
+
+    private void annullerSedForNyVurderingMedSendtVedtak(Behandling behandling) {
+        finnSedSomSkalInvalideres(behandling.getFagsak().getGsakSaksnummer()).ifPresent(sedInformasjon ->
+            sendInvalideringSed(behandling.getId(), sedInformasjon.getSedType(), sedInformasjon.getOpprettetDato()));
+    }
+
+    private Optional<SedInformasjon> finnSedSomSkalInvalideres(long rinasaksnummer) {
+        var sedTypeList = List.of(SedType.A004, SedType.A012);
+        return hentTilknyttedeBucer(rinasaksnummer, Collections.emptyList())
+            .stream()
+            .filter(BucInformasjon::erÅpen)
+            .flatMap(b -> b.getSeder().stream())
+            .filter(s -> sedTypeList.contains(SedType.valueOf(s.getSedType())))
+            .sorted(Comparator.comparing(SedInformasjon::getOpprettetDato).reversed())
+            .findFirst();
+    }
+
+    private void sendSedPåEksisterendeBehandling(long behandlingID,
+                                                 PeriodeType periodeType,
+                                                 Function<Behandlingsresultat, SedType> sedTypeAvklarer, String ytterligereInformasjon) {
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
+        Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+
+        final var sedType = sedTypeAvklarer.apply(behandlingsresultat);
+        SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling, sedType);
+
+        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, periodeType);
+        sedDataDto.setYtterligereInformasjon(ytterligereInformasjon);
+        String rinaSaksnummer = behandling.hentSedDokument().getRinaSaksnummer();
+
+        log.info("Forsøker å sende sed {} for behandling {}", sedType, behandlingID);
+        eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, sedTypeAvklarer.apply(behandlingsresultat));
     }
 }
