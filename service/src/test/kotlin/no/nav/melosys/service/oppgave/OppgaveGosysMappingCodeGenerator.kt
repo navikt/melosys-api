@@ -16,6 +16,9 @@ class OppgaveGosysMappingCodeGenerator {
     @Test
     fun lagMappingFraConfluenseTabell() {
         println("val tableRows = listOf(")
+        // oppgave-gosys-mapping.csv er laget ved å kopiere celler fra https://confluence.adeo.no/display/TEESSI/Oppgaver+i+Gosys
+        // til google sheet så til numbers på mac og så gjøre export->csv (Funket ikke å ta det rett inn i numbers)
+        // En - mulige bedre løsning er å lese dette rett inn fra html filen på confluence
         parseCsvFile("oppgave-gosys-mapping.csv").forEach { fields ->
             val sakstype = Sakstyper.valueOf(
                 fields[0]
