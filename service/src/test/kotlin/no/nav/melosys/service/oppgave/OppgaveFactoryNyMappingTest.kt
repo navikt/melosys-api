@@ -25,7 +25,6 @@ class OppgaveFactoryNyMappingTest {
 
     @Test
     fun `skal kun ha ett treff på alle mulige kombinasjoner av sakstype, sakstema, behandlingstype og behandlingstema`() {
-
         oppgaveGosysMapping.rows.forEach { row ->
             row.behandlingstema.forEach { behandlingstema ->
                 row.behandlingstype.forEach { behandlingstyper ->
@@ -50,8 +49,23 @@ class OppgaveFactoryNyMappingTest {
         }
     }
 
+    @ParameterizedTest(name = "{0}, {1}, {2}, {3} -> {4}")
+    @MethodSource("fraRegistretTabell")
+    fun `oppgave behandlingstema skal får riktig kode`(
+        sakstype: Sakstyper,
+        sakstema: Sakstemaer,
+        behandlingstema: Behandlingstema,
+        behandlingstyper: Behandlingstyper,
+        expectedKode: String
+    ) {
+        val oppgave =
+            oppgaveGosysMapping.finnOppgave(sakstype, sakstema, behandlingstema, behandlingstyper)
+
+        oppgave.oppgaveBehandlingstema.kode.shouldBe(expectedKode)
+    }
+
     @ParameterizedTest(name = "{0} - {1} - {2} - {3}")
-    @MethodSource("gyldigHenvendleseKombinasjonerBortsettFraRegistretTabell")
+    @MethodSource("gyldigHenvendleseKombinasjonerBortsettIkkeRegistretITabell")
     fun `gyldig henvendlese kombinasjoner bortsett fra data registert i tabell`(
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
@@ -69,7 +83,26 @@ class OppgaveFactoryNyMappingTest {
         }
     }
 
-    private fun gyldigHenvendleseKombinasjonerBortsettFraRegistretTabell() =
+    private fun fraRegistretTabell() =
+        sequence<Arguments> {
+            oppgaveGosysMapping.rows.forEach { row ->
+                row.behandlingstema.forEach { behandlingstema ->
+                    row.behandlingstype.forEach { behandlingstyper ->
+                        yield(
+                            arguments(
+                                row.sakstype,
+                                row.sakstema,
+                                behandlingstema,
+                                behandlingstyper,
+                                row.oppgave.oppgaveBehandlingstema.kode
+                            )
+                        )
+                    }
+                }
+            }
+        }.toList()
+
+    private fun gyldigHenvendleseKombinasjonerBortsettIkkeRegistretITabell() =
         sequence<Arguments> {
             val oppgaveGosysMapping = OppgaveGosysMapping()
             Sakstyper.values().forEach { sakstyper: Sakstyper ->
@@ -100,6 +133,4 @@ class OppgaveFactoryNyMappingTest {
                 }
             }
         }.toList()
-
-
 }
