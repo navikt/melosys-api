@@ -1,8 +1,11 @@
 package no.nav.melosys.saksflyt.steg.sed;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -10,6 +13,7 @@ import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
+import no.nav.melosys.domain.eessi.SedInformasjon;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
@@ -36,15 +40,17 @@ public class SendVedtakUtland extends AbstraktSendUtland {
     private final SedSomBrevService sedSomBrevService;
     private final UtpekingService utpekingService;
     private final ProsessinstansService prosessinstansService;
+    private final Unleash unleash;
 
     public SendVedtakUtland(EessiService eessiService,
                             BehandlingsresultatService behandlingsresultatService,
                             SedSomBrevService sedSomBrevService,
-                            UtpekingService utpekingService, ProsessinstansService prosessinstansService) {
+                            UtpekingService utpekingService, ProsessinstansService prosessinstansService, Unleash unleash) {
         super(eessiService, behandlingsresultatService);
         this.sedSomBrevService = sedSomBrevService;
         this.utpekingService = utpekingService;
         this.prosessinstansService = prosessinstansService;
+        this.unleash = unleash;
     }
 
     @Override
@@ -60,6 +66,9 @@ public class SendVedtakUtland extends AbstraktSendUtland {
         if (behandling.erNorgeUtpekt()) {
             var bucer = eessiService.hentTilknyttedeBucer(behandling.getFagsak().getGsakSaksnummer(), Collections.emptyList());
             if (bucer.stream().anyMatch(buc -> buc.getBucType().equals(BucType.LA_BUC_02.name()) && buc.erÅpen())) {
+                if (behandling.erNyVurdering() && unleash.isEnabled("melosys.annuller.sed.ny.vurdering")) {
+                    annullerSedForNyVurderingMedSendtVedtak(behandling);
+                }
                 eessiService.sendGodkjenningArbeidFlereLand(behandling.getId(), prosessinstans.getData(ProsessDataKey.YTTERLIGERE_INFO_SED));
             } else {
                 log.info("Sender ikke godkjenning av utpeking da behandling {} ikke er tilknyttet en åpen LA_BUC_02", behandling.getId());
@@ -111,6 +120,22 @@ public class SendVedtakUtland extends AbstraktSendUtland {
             .map(Lovvalgsperiode::getBestemmelse)
             .map(BucType::fraBestemmelse)
             .orElseThrow(() -> new TekniskException("Finner ikke lovvalgsbestemmelse for behandling " + behandling.getId()));
+    }
+
+    public void annullerSedForNyVurderingMedSendtVedtak(Behandling behandling) {
+        finnSedSomSkalInvalideres(behandling.getFagsak().getGsakSaksnummer()).ifPresent(sedInformasjon ->
+            eessiService.sendInvalideringSed(behandling.getId(), sedInformasjon.getSedType(), sedInformasjon.getOpprettetDato()));
+    }
+
+    private Optional<SedInformasjon> finnSedSomSkalInvalideres(long rinasaksnummer) {
+        var sedTypeList = List.of(SedType.A004, SedType.A012);
+        return eessiService.hentTilknyttedeBucer(rinasaksnummer, Collections.emptyList())
+            .stream()
+            .filter(BucInformasjon::erÅpen)
+            .flatMap(b -> b.getSeder().stream())
+            .filter(s -> sedTypeList.contains(SedType.valueOf(s.getSedType())))
+            .sorted(Comparator.comparing(SedInformasjon::getOpprettetDato).reversed())
+            .findFirst();
     }
 
     private void finnOgLukkTilhørendeBUC(Behandlingsresultat behandlingsresultat) {

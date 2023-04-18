@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.sed;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -12,6 +13,7 @@ import no.nav.melosys.domain.PeriodeType;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Vedlegg;
+import no.nav.melosys.domain.eessi.sed.InvalideringSedDto;
 import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
 import no.nav.melosys.domain.eessi.BucInformasjon;
 import no.nav.melosys.domain.eessi.BucType;
@@ -366,5 +368,22 @@ public class EessiService {
 
     public void lukkBuc(String rinaSaksnummer) {
         eessiConsumer.lukkBuc(rinaSaksnummer);
+    }
+
+    public void sendInvalideringSed(long behandlingID, String sedTypeSomSkalInvalideres, LocalDate opprettetDato) {
+        var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
+        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+        SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling, SedType.X008);
+        String rinaSaksnummer = behandling.hentSedDokument().getRinaSaksnummer();
+
+        SedDataDto sedDataDto = sedDataBygger.lagUtkast(dataGrunnlag, behandlingsresultat, PeriodeType.INGEN);
+
+        var invalideringSedDto = new InvalideringSedDto();
+        invalideringSedDto.setSedTypeSomSkalInvalideres(sedTypeSomSkalInvalideres);
+        invalideringSedDto.setUtstedelsedato(opprettetDato.toString());
+        sedDataDto.setInvalideringSedDto(invalideringSedDto);
+
+        log.info("Forsøker å sende sed {} for behandling {}", SedType.X008, behandlingID);
+        eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, SedType.X008);
     }
 }
