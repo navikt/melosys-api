@@ -15,7 +15,7 @@ internal class OppgaveGosysMapping {
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper?
     ): Oppgave = finnOppgaveFraTabell(sakstype, sakstema, behandlingstema, behandlingstype)
-        ?: finnOppgaveVedBehandlingsTypeHenvendelse(sakstype, behandlingstema)
+        ?: finnOppgaveVedBehandlingstypeHenvendelse(sakstype, behandlingstema)
         ?: throw IllegalStateException(
             "Fant ikke oppgave mapping for " +
                 "sakstype:$sakstype, sakstema:$sakstema, behandlingstema:$behandlingstema, behandlingstype:$behandlingstype"
@@ -31,7 +31,7 @@ internal class OppgaveGosysMapping {
         it.sakstype == sakstype && it.sakstema == sakstema && behandlingstype in it.behandlingstype && behandlingstema in it.behandlingstema
     }?.oppgave
 
-    fun finnOppgaveVedBehandlingsTypeHenvendelse(
+    fun finnOppgaveVedBehandlingstypeHenvendelse(
         sakstype: Sakstyper,
         behandlingstema: Behandlingstema,
     ): Oppgave? = rows.find {
@@ -41,7 +41,7 @@ internal class OppgaveGosysMapping {
             oppgaveBehandlingstema = it.oppgaveBehandlingstema,
             oppgaveType = Oppgavetyper.VURD_HENV,
             tema = it.tema,
-            beskrivelsefelt = Beskrivelsefelt.TOMT
+            beskrivelsefelt = Beskrivelsefelt.SED_ELLER_TOMT
         )
     }
 
@@ -49,6 +49,7 @@ internal class OppgaveGosysMapping {
     internal enum class Beskrivelsefelt(val beskrivelse: String) {
         TOMT(""),
         SED(""),
+        SED_ELLER_TOMT(""),
         A1_ANMODNING_OM_UNNTAK_PAPIR(Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR.beskrivelse)
     }
 

@@ -51,8 +51,8 @@ class OppgaveFactoryNyMappingTest {
     }
 
     @ParameterizedTest(name = "{0} - {1} - {2} - {3}")
-    @MethodSource("gyldigHenvendleseKombinasjonerBortsettFraVedUntakk")
-    fun `gyldig henvendlese kombinasjoner bortsett fra ved untakk`(
+    @MethodSource("gyldigHenvendleseKombinasjonerBortsettFraRegistretTabell")
+    fun `gyldig henvendlese kombinasjoner bortsett fra data registert i tabell`(
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
@@ -65,11 +65,11 @@ class OppgaveFactoryNyMappingTest {
         oppgave.apply {
             oppgaveBehandlingstema.kode.shouldBe(expected)
             oppgaveType.shouldBe(Oppgavetyper.VURD_HENV)
-            beskrivelsefelt.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.TOMT)
+            beskrivelsefelt.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.SED_ELLER_TOMT)
         }
     }
 
-    private fun gyldigHenvendleseKombinasjonerBortsettFraVedUntakk() =
+    private fun gyldigHenvendleseKombinasjonerBortsettFraRegistretTabell() =
         sequence<Arguments> {
             val oppgaveGosysMapping = OppgaveGosysMapping()
             Sakstyper.values().forEach { sakstyper: Sakstyper ->
@@ -82,7 +82,7 @@ class OppgaveFactoryNyMappingTest {
                             Behandlingstyper.HENVENDELSE
                         ) == null
                     }.forEach { behandlingstema ->
-                        val oppgave = oppgaveGosysMapping.finnOppgaveVedBehandlingsTypeHenvendelse(
+                        val oppgave = oppgaveGosysMapping.finnOppgaveVedBehandlingstypeHenvendelse(
                             sakstyper,
                             behandlingstema,
                         )
