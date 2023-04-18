@@ -6,10 +6,12 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.io.File
 
-class oppgaveGosysMappingTest {
+@Disabled("Brukes kun for å lage mapping tabell")
+class OppgaveGosysMappingCodeGenerator {
 
     @Test
     fun lagMappingFraConfluenseTabell() {
