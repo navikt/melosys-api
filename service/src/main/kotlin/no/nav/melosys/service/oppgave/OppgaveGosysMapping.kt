@@ -120,6 +120,23 @@ internal class OppgaveGosysMapping {
                     Behandlingstyper.ENDRET_PERIODE,
                     Behandlingstyper.KLAGE
                 ),
+                setOf(Behandlingstema.IKKE_YRKESAKTIV),
+                Oppgave(
+                    OppgaveBehandlingstema.EU_EOS_IKKE_YRKESAKTIV,
+                    Tema.MED,
+                    Oppgavetyper.BEH_SAK_MK,
+                    Beskrivelsefelt.TOMT
+                )
+            ),
+            TableRow(
+                Sakstyper.EU_EOS,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
+                setOf(
+                    Behandlingstyper.FØRSTEGANG,
+                    Behandlingstyper.NY_VURDERING,
+                    Behandlingstyper.ENDRET_PERIODE,
+                    Behandlingstyper.KLAGE
+                ),
                 setOf(Behandlingstema.BESLUTNING_LOVVALG_NORGE),
                 Oppgave(
                     OppgaveBehandlingstema.EU_EOS_NORGE_ER_UTPEKT_SOM_LOVVALGSLAND,
