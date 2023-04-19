@@ -17,6 +17,7 @@ public class Trygdeavgift {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // TODO: Flyttes til FastsattTrygdeavgift istedenfor Medlemskapsperiode?
     @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "medlemskapsperiode_id")
     private Medlemskapsperiode medlemskapsperiode;
@@ -27,6 +28,7 @@ public class Trygdeavgift {
     @Column(name = "trygdesats", nullable = false)
     private BigDecimal trygdesats;
 
+    @Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
     @Column(name = "avgiftskode", nullable = false)
     private String avgiftskode;
 
@@ -36,6 +38,7 @@ public class Trygdeavgift {
     @Column(name = "periode_til", nullable = false)
     private LocalDate periodeTil;
 
+    @Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
     @Column(name = "avgift_for_inntekt", nullable = false)
     @Enumerated(EnumType.STRING)
     private AvgiftForInntekt avgiftForInntekt;

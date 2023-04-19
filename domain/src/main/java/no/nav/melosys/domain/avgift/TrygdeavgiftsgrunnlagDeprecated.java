@@ -10,16 +10,17 @@ import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Loenn_forhold;
 import no.nav.melosys.domain.kodeverk.Saerligeavgiftsgrupper;
 
-public class Trygdeavgiftsgrunnlag extends AbstraktAvgiftsgrunnlag<AvgiftsgrunnlagInfoNorge, AvgiftsgrunnlagInfoUtland> {
+@Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
+public class TrygdeavgiftsgrunnlagDeprecated extends AbstraktAvgiftsgrunnlag<AvgiftsgrunnlagInfoNorge, AvgiftsgrunnlagInfoUtland> {
 
-    public Trygdeavgiftsgrunnlag(Loenn_forhold lønnsforhold, AvgiftsgrunnlagInfoNorge avgiftsGrunnlagNorge, AvgiftsgrunnlagInfoUtland avgiftsGrunnlagUtland) {
+    public TrygdeavgiftsgrunnlagDeprecated(Loenn_forhold lønnsforhold, AvgiftsgrunnlagInfoNorge avgiftsGrunnlagNorge, AvgiftsgrunnlagInfoUtland avgiftsGrunnlagUtland) {
         super(lønnsforhold, avgiftsGrunnlagNorge, avgiftsGrunnlagUtland);
     }
 
-    public static Trygdeavgiftsgrunnlag av(Behandlingsresultat behandlingsresultat) {
+    public static TrygdeavgiftsgrunnlagDeprecated av(Behandlingsresultat behandlingsresultat) {
         final var avklarteFakta = behandlingsresultat.getAvklartefakta();
         final var lønnsforhold = finnLønnsforholdFakta(avklarteFakta);
-        return new Trygdeavgiftsgrunnlag(
+        return new TrygdeavgiftsgrunnlagDeprecated(
             lønnsforhold,
             harLønnsforholdINorge(lønnsforhold) ? lagAvgiftsgrunnlagNorge(avklarteFakta, behandlingsresultat.getMedlemAvFolketrygden()) : null,
             harLønnsforholdIUtlandet(lønnsforhold) ? lagAvgiftsgrunnlagUtland(avklarteFakta, behandlingsresultat.getMedlemAvFolketrygden()) : null

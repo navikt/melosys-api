@@ -1,14 +1,8 @@
 package no.nav.melosys.service.avgift;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.avgift.OppdaterTrygdeavgiftsgrunnlagRequest;
-import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
+import no.nav.melosys.domain.avgift.TrygdeavgiftsgrunnlagDeprecated;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
@@ -19,6 +13,12 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.*;
 import static no.nav.melosys.domain.kodeverk.Loenn_forhold.*;
 import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_norsk_inntekt.NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV;
@@ -26,8 +26,9 @@ import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_norsk
 import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV;
 import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV;
 
+@Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
 @Service
-public class TrygdeavgiftsgrunnlagService {
+public class TrygdeavgiftsgrunnlagServiceDeprecated {
 
     private static final Set<Avklartefaktatyper> AVKLARTE_FAKTA_KODER = Set.of(LØNN_FORHOLD_VIRKSOMHET,
         LØNN_NORGE_SKATTEPLIKTIG_NORGE, LØNN_NORGE_ARBEIDSGIVERAVGIFT, LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE,
@@ -36,12 +37,13 @@ public class TrygdeavgiftsgrunnlagService {
 
     private final BehandlingsresultatService behandlingsresultatService;
 
-    public TrygdeavgiftsgrunnlagService(BehandlingsresultatService behandlingsresultatService) {
+    public TrygdeavgiftsgrunnlagServiceDeprecated(BehandlingsresultatService behandlingsresultatService) {
         this.behandlingsresultatService = behandlingsresultatService;
     }
 
+    @Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
     @Transactional
-    public Trygdeavgiftsgrunnlag oppdaterAvgiftsgrunnlag(long behandlingsresultatID, OppdaterTrygdeavgiftsgrunnlagRequest req) {
+    public TrygdeavgiftsgrunnlagDeprecated oppdaterAvgiftsgrunnlag(long behandlingsresultatID, OppdaterTrygdeavgiftsgrunnlagRequest req) {
         valider(req);
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID);
         oppdaterAvklartefakta(behandlingsresultat, req.tilAvklartefakta());
@@ -142,9 +144,10 @@ public class TrygdeavgiftsgrunnlagService {
         }
     }
 
+    @Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
     @Transactional(readOnly = true)
-    public Trygdeavgiftsgrunnlag hentAvgiftsgrunnlag(long behandlingresultatID) {
-        return Trygdeavgiftsgrunnlag.av(behandlingsresultatService.hentBehandlingsresultat(behandlingresultatID));
+    public TrygdeavgiftsgrunnlagDeprecated hentAvgiftsgrunnlag(long behandlingresultatID) {
+        return TrygdeavgiftsgrunnlagDeprecated.av(behandlingsresultatService.hentBehandlingsresultat(behandlingresultatID));
 
     }
 }

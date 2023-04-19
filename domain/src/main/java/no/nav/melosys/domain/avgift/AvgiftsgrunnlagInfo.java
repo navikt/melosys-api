@@ -5,6 +5,7 @@ import no.nav.melosys.exception.FunksjonellException;
 
 import static no.nav.melosys.domain.kodeverk.Saerligeavgiftsgrupper.*;
 
+@Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
 public class AvgiftsgrunnlagInfo {
     private final boolean erSkattepliktig;
     private final boolean betalerArbeidsgiverAvgift;

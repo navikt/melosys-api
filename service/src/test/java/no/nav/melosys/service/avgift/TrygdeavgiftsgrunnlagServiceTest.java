@@ -5,7 +5,7 @@ import java.util.Set;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfo;
 import no.nav.melosys.domain.avgift.OppdaterTrygdeavgiftsgrunnlagRequest;
-import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
+import no.nav.melosys.domain.avgift.TrygdeavgiftsgrunnlagDeprecated;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Loenn_forhold;
@@ -30,27 +30,28 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.when;
 
+@Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
 @ExtendWith(MockitoExtension.class)
 class TrygdeavgiftsgrunnlagServiceTest {
 
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
 
-    private TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService;
+    private TrygdeavgiftsgrunnlagServiceDeprecated trygdeavgiftsgrunnlagServiceDeprecated;
 
     private final long behandlingsresultatID = 223;
 
 
     @BeforeEach
     void setup() {
-        trygdeavgiftsgrunnlagService = new TrygdeavgiftsgrunnlagService(behandlingsresultatService);
+        trygdeavgiftsgrunnlagServiceDeprecated = new TrygdeavgiftsgrunnlagServiceDeprecated(behandlingsresultatService);
     }
 
     @Test
     void lagreAvgiftsinformasjon_lønnsforholdNull_kasterFeil() {
         final var request = new OppdaterTrygdeavgiftsgrunnlagRequest(null, null, null);
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request))
+            .isThrownBy(() -> trygdeavgiftsgrunnlagServiceDeprecated.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request))
             .withMessageContaining("Lønnsforhold");
     }
 
@@ -58,7 +59,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     void lagreAvgiftsinformasjon_lønnFraNorgeMenIkkeOppgitt_kasterFeil() {
         final var request = new OppdaterTrygdeavgiftsgrunnlagRequest(Loenn_forhold.LØNN_FRA_NORGE, null, null);
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request))
+            .isThrownBy(() -> trygdeavgiftsgrunnlagServiceDeprecated.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request))
             .withMessageContaining("Mangler informasjon om lønn fra Norge");
     }
 
@@ -66,7 +67,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     void lagreAvgiftsinformasjon_lønnFraUtlandMenIkkeOppgitt_kasterFeil() {
         final var request = new OppdaterTrygdeavgiftsgrunnlagRequest(Loenn_forhold.LØNN_FRA_UTLANDET, null, null);
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request))
+            .isThrownBy(() -> trygdeavgiftsgrunnlagServiceDeprecated.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request))
             .withMessageContaining("Mangler informasjon om lønn fra utland");
     }
 
@@ -78,7 +79,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
             Loenn_forhold.LØNN_FRA_NORGE,
             new AvgiftsgrunnlagInfo(true, true, null),
             null);
-        trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request);
+        trygdeavgiftsgrunnlagServiceDeprecated.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request);
 
         assertThat(behandlingsresultat.getAvklartefakta())
             .containsExactlyInAnyOrder(
@@ -109,7 +110,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
             Loenn_forhold.LØNN_FRA_UTLANDET,
             null,
             new AvgiftsgrunnlagInfo(false, false, null));
-        trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request);
+        trygdeavgiftsgrunnlagServiceDeprecated.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request);
 
         assertThat(behandlingsresultat.getAvklartefakta())
             .containsExactlyInAnyOrder(
@@ -140,7 +141,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
             Loenn_forhold.DELT_LØNN,
             new AvgiftsgrunnlagInfo(true, true, null),
             new AvgiftsgrunnlagInfo(false, false, null));
-        trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request);
+        trygdeavgiftsgrunnlagServiceDeprecated.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request);
 
         assertThat(behandlingsresultat.getAvklartefakta())
             .containsExactlyInAnyOrder(
@@ -174,7 +175,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
             Loenn_forhold.LØNN_FRA_NORGE,
             new AvgiftsgrunnlagInfo(true, false, Saerligeavgiftsgrupper.MISJONÆR),
             null);
-        trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request);
+        trygdeavgiftsgrunnlagServiceDeprecated.oppdaterAvgiftsgrunnlag(behandlingsresultatID, request);
 
         assertThat(behandlingsresultat.getAvklartefakta())
             .containsExactlyInAnyOrder(
@@ -214,9 +215,9 @@ class TrygdeavgiftsgrunnlagServiceTest {
         behandlingsresultat.getMedlemAvFolketrygden().setVurderingTrygdeavgiftUtenlandskInntekt(UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV);
         behandlingsresultat.getMedlemAvFolketrygden().setVurderingTrygdeavgiftNorskInntekt(NORSK_INNTEKT_TRYGDEAVGIFT_NAV);
 
-        assertThat(trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(behandlingsresultatID))
+        assertThat(trygdeavgiftsgrunnlagServiceDeprecated.hentAvgiftsgrunnlag(behandlingsresultatID))
             .extracting(
-                Trygdeavgiftsgrunnlag::getLønnsforhold,
+                TrygdeavgiftsgrunnlagDeprecated::getLønnsforhold,
                 a -> a.getAvgiftsGrunnlagNorge().betalerArbeidsgiverAvgift(),
                 a -> a.getAvgiftsGrunnlagNorge().erSkattepliktig(),
                 a -> a.getAvgiftsGrunnlagNorge().getSærligAvgiftsgruppe(),

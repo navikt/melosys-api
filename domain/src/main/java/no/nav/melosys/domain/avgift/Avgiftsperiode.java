@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
+@Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
 public class Avgiftsperiode {
     private final LocalDate fom;
     private final LocalDate tom;

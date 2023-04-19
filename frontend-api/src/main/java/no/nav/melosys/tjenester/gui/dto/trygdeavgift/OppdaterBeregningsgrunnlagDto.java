@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.avgift.OppdaterTrygdeavgiftsberegningRequest;
 
+@Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
 public class OppdaterBeregningsgrunnlagDto {
     private final Long avgiftspliktigLønnNorge;
     private final Long avgiftspliktigLønnUtland;

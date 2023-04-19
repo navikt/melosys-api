@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.avgift.OppdaterTrygdeavgiftsgrunnlagRequest;
 import no.nav.melosys.domain.kodeverk.Loenn_forhold;
 
+@Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
 public class OppdaterAvgiftsgrunnlagDto {
     private final Loenn_forhold lønnsforhold;
     private final AvgiftsgrunnlagInfoDto trygdeavgiftsgrunnlagNorge;

@@ -35,7 +35,7 @@ import static org.mockito.Mockito.*;
 class TrygdeavgiftsberegningServiceTest {
 
     @Mock
-    private TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService;
+    private TrygdeavgiftsgrunnlagServiceDeprecated trygdeavgiftsgrunnlagServiceDeprecated;
     @Mock
     private MedlemAvFolketrygdenService medlemAvFolketrygdenService;
     @Mock
@@ -50,7 +50,7 @@ class TrygdeavgiftsberegningServiceTest {
     @BeforeEach
     public void setup() {
         medlemAvFolketrygden.setFastsattTrygdeavgift(new FastsattTrygdeavgift());
-        trygdeavgiftsberegningService = new TrygdeavgiftsberegningService(trygdeavgiftsgrunnlagService, medlemAvFolketrygdenService, trygdeavgiftConsumer);
+        trygdeavgiftsberegningService = new TrygdeavgiftsberegningService(trygdeavgiftsgrunnlagServiceDeprecated, medlemAvFolketrygdenService, trygdeavgiftConsumer);
     }
 
     @Test
@@ -59,8 +59,8 @@ class TrygdeavgiftsberegningServiceTest {
         var request = new OppdaterTrygdeavgiftsberegningRequest(1L, 2L);
         medlemAvFolketrygden.setVurderingTrygdeavgiftNorskInntekt(NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV);
         medlemAvFolketrygden.setVurderingTrygdeavgiftUtenlandskInntekt(UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV);
-        when(trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(eq(behandlingsresultatID)))
-            .thenReturn(new Trygdeavgiftsgrunnlag(Loenn_forhold.LØNN_FRA_NORGE, new AvgiftsgrunnlagInfoNorge(true, false, null, NORSK_INNTEKT_TRYGDEAVGIFT_NAV), null));
+        when(trygdeavgiftsgrunnlagServiceDeprecated.hentAvgiftsgrunnlag(eq(behandlingsresultatID)))
+            .thenReturn(new TrygdeavgiftsgrunnlagDeprecated(Loenn_forhold.LØNN_FRA_NORGE, new AvgiftsgrunnlagInfoNorge(true, false, null, NORSK_INNTEKT_TRYGDEAVGIFT_NAV), null));
         trygdeavgiftsberegningService.oppdaterBeregningsgrunnlag(behandlingsresultatID, request);
         assertThat(medlemAvFolketrygden.getFastsattTrygdeavgift())
             .extracting(FastsattTrygdeavgift::getAvgiftspliktigUtenlandskInntektMnd, FastsattTrygdeavgift::getAvgiftspliktigNorskInntektMnd)
@@ -73,8 +73,8 @@ class TrygdeavgiftsberegningServiceTest {
         var request = new OppdaterTrygdeavgiftsberegningRequest(1L, 2L);
         medlemAvFolketrygden.setVurderingTrygdeavgiftNorskInntekt(NORSK_INNTEKT_TRYGDEAVGIFT_NAV);
         medlemAvFolketrygden.setVurderingTrygdeavgiftUtenlandskInntekt(UTENLANDSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV);
-        when(trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(eq(behandlingsresultatID)))
-            .thenReturn(new Trygdeavgiftsgrunnlag(Loenn_forhold.LØNN_FRA_NORGE, new AvgiftsgrunnlagInfoNorge(true, false, null, NORSK_INNTEKT_TRYGDEAVGIFT_NAV), null));
+        when(trygdeavgiftsgrunnlagServiceDeprecated.hentAvgiftsgrunnlag(eq(behandlingsresultatID)))
+            .thenReturn(new TrygdeavgiftsgrunnlagDeprecated(Loenn_forhold.LØNN_FRA_NORGE, new AvgiftsgrunnlagInfoNorge(true, false, null, NORSK_INNTEKT_TRYGDEAVGIFT_NAV), null));
         trygdeavgiftsberegningService.oppdaterBeregningsgrunnlag(behandlingsresultatID, request);
         assertThat(medlemAvFolketrygden.getFastsattTrygdeavgift())
             .extracting(FastsattTrygdeavgift::getAvgiftspliktigUtenlandskInntektMnd, FastsattTrygdeavgift::getAvgiftspliktigNorskInntektMnd)
@@ -89,8 +89,8 @@ class TrygdeavgiftsberegningServiceTest {
         medlemAvFolketrygden.setVurderingTrygdeavgiftNorskInntekt(NORSK_INNTEKT_TRYGDEAVGIFT_NAV);
         medlemAvFolketrygden.setFastsattTrygdeavgift(new FastsattTrygdeavgift());
 
-        when(trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(eq(behandlingsresultatID)))
-            .thenReturn(new Trygdeavgiftsgrunnlag(
+        when(trygdeavgiftsgrunnlagServiceDeprecated.hentAvgiftsgrunnlag(eq(behandlingsresultatID)))
+            .thenReturn(new TrygdeavgiftsgrunnlagDeprecated(
                 Loenn_forhold.LØNN_FRA_UTLANDET,
                 new AvgiftsgrunnlagInfoNorge(true, false, null, NORSK_INNTEKT_TRYGDEAVGIFT_NAV),
                 new AvgiftsgrunnlagInfoUtland(true, false, null, UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV)));
@@ -106,13 +106,13 @@ class TrygdeavgiftsberegningServiceTest {
         initMedlemAvFolketrygdenMock();
         medlemAvFolketrygden.setFastsattTrygdeavgift(null);
         trygdeavgiftsberegningService.beregnAvgift(behandlingsresultatID);
-        verify(trygdeavgiftsgrunnlagService, never()).hentAvgiftsgrunnlag(anyLong());
+        verify(trygdeavgiftsgrunnlagServiceDeprecated, never()).hentAvgiftsgrunnlag(anyLong());
     }
 
     @Test
     void beregnAvgift_tomtAvgiftsgrunnlag_beregnesIkke() {
         initMedlemAvFolketrygdenMock();
-        when(trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(eq(behandlingsresultatID))).thenReturn(new Trygdeavgiftsgrunnlag(null, null, null));
+        when(trygdeavgiftsgrunnlagServiceDeprecated.hentAvgiftsgrunnlag(eq(behandlingsresultatID))).thenReturn(new TrygdeavgiftsgrunnlagDeprecated(null, null, null));
         trygdeavgiftsberegningService.beregnAvgift(behandlingsresultatID);
         verify(trygdeavgiftConsumer, never()).beregnTrygdeavgift(any());
     }
@@ -127,8 +127,8 @@ class TrygdeavgiftsberegningServiceTest {
         medlemAvFolketrygden.getFastsattTrygdeavgift().setAvgiftspliktigUtenlandskInntektMnd(1000L);
         medlemAvFolketrygden.setVurderingTrygdeavgiftUtenlandskInntekt(UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV);
 
-        when(trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(eq(behandlingsresultatID))).thenReturn(
-            new Trygdeavgiftsgrunnlag(Loenn_forhold.LØNN_FRA_UTLANDET, null, new AvgiftsgrunnlagInfoUtland(true, false, null, UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV))
+        when(trygdeavgiftsgrunnlagServiceDeprecated.hentAvgiftsgrunnlag(eq(behandlingsresultatID))).thenReturn(
+            new TrygdeavgiftsgrunnlagDeprecated(Loenn_forhold.LØNN_FRA_UTLANDET, null, new AvgiftsgrunnlagInfoUtland(true, false, null, UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV))
         );
 
         final var forventetTrygdeavgiftsbeløp = new BigDecimal("10");
@@ -167,8 +167,8 @@ class TrygdeavgiftsberegningServiceTest {
         medlemAvFolketrygden.getFastsattTrygdeavgift().setAvgiftspliktigNorskInntektMnd(1000L);
         medlemAvFolketrygden.setVurderingTrygdeavgiftUtenlandskInntekt(UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV);
         medlemAvFolketrygden.setVurderingTrygdeavgiftNorskInntekt(NORSK_INNTEKT_TRYGDEAVGIFT_NAV);
-        when(trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(eq(behandlingsresultatID))).thenReturn(
-            new Trygdeavgiftsgrunnlag(
+        when(trygdeavgiftsgrunnlagServiceDeprecated.hentAvgiftsgrunnlag(eq(behandlingsresultatID))).thenReturn(
+            new TrygdeavgiftsgrunnlagDeprecated(
                 Loenn_forhold.LØNN_FRA_UTLANDET,
                 new AvgiftsgrunnlagInfoNorge(true, true, null, NORSK_INNTEKT_TRYGDEAVGIFT_NAV),
                 new AvgiftsgrunnlagInfoUtland(true, false, null, UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV))

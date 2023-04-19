@@ -33,9 +33,11 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
     @Column(name = "tom_dato")
     private LocalDate tom;
 
+    @Deprecated(since = "Dobbeltsjekk om denne kan fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
     @Column(name = "arbeidsland", nullable = false)
     private String arbeidsland;
 
+    @Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
     @Enumerated(EnumType.STRING)
     @Column(name = "bestemmelse", nullable = false)
     private Folketrygdloven_kap2_bestemmelser bestemmelse;

@@ -2,6 +2,7 @@ package no.nav.melosys.domain.avgift;
 
 import no.nav.melosys.domain.kodeverk.Loenn_forhold;
 
+@Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
 public abstract class AbstraktAvgiftsgrunnlag<N extends AvgiftsgrunnlagInfo, U extends AvgiftsgrunnlagInfo> {
     protected final Loenn_forhold lønnsforhold;
     protected final N avgiftsGrunnlagNorge;

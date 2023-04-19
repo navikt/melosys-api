@@ -11,8 +11,9 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Loenn_forhold;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
-import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
+import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagServiceDeprecated;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
+import no.nav.melosys.tjenester.gui.TrygdeavgiftTjeneste;
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,7 @@ public class TrygdeavgiftTjenesteTest {
     @MockBean
     private Aksesskontroll aksesskontroll;
     @MockBean
-    private TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService;
+    private TrygdeavgiftsgrunnlagServiceDeprecated trygdeavgiftsgrunnlagServiceDeprecated;
     @MockBean
     private TrygdeavgiftsberegningService trygdeavgiftsberegningService;
 
@@ -48,7 +49,7 @@ public class TrygdeavgiftTjenesteTest {
 
     private static final String BASE_URL = "/api/behandlinger/{behandlingID}/trygdeavgift";
     private static final long BEHANDLINGSRESULTAT_ID = 1;
-    private static final Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag = lagTrygdeavgiftsgrunnlag();
+    private static final TrygdeavgiftsgrunnlagDeprecated trygdeavgiftsgrunnlag = lagTrygdeavgiftsgrunnlag();
     private static final Trygdeavgiftsberegningsresultat trygdeavgiftsberegningsresultat = lagTrygdeavgiftsberegningresultat();
 
     @Test
@@ -58,7 +59,7 @@ public class TrygdeavgiftTjenesteTest {
             new AvgiftsgrunnlagInfoDto(true, true, null),
             new AvgiftsgrunnlagInfoDto(true, true, null)
         );
-        when(trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(eq(BEHANDLINGSRESULTAT_ID), any()))
+        when(trygdeavgiftsgrunnlagServiceDeprecated.oppdaterAvgiftsgrunnlag(eq(BEHANDLINGSRESULTAT_ID), any()))
             .thenReturn(trygdeavgiftsgrunnlag);
 
         mockMvc.perform(put(BASE_URL + "/grunnlag", 1L)
@@ -70,7 +71,7 @@ public class TrygdeavgiftTjenesteTest {
 
     @Test
     void hentAvgiftsgrunnlag() throws Exception {
-        when(trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(eq(BEHANDLINGSRESULTAT_ID)))
+        when(trygdeavgiftsgrunnlagServiceDeprecated.hentAvgiftsgrunnlag(eq(BEHANDLINGSRESULTAT_ID)))
             .thenReturn(trygdeavgiftsgrunnlag);
 
         mockMvc.perform(get(BASE_URL + "/grunnlag", 1L)
@@ -115,8 +116,8 @@ public class TrygdeavgiftTjenesteTest {
             ));
     }
 
-    private static Trygdeavgiftsgrunnlag lagTrygdeavgiftsgrunnlag() {
-        return new Trygdeavgiftsgrunnlag(
+    private static TrygdeavgiftsgrunnlagDeprecated lagTrygdeavgiftsgrunnlag() {
+        return new TrygdeavgiftsgrunnlagDeprecated(
             Loenn_forhold.DELT_LØNN,
             new AvgiftsgrunnlagInfoNorge(true, true, null, NORSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV),
             new AvgiftsgrunnlagInfoUtland(true, true, null, UTENLANDSK_INNTEKT_INGEN_TRYGDEAVGIFT_NAV)

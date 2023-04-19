@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.avgift;
 
+@Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
 public class OppdaterTrygdeavgiftsberegningRequest {
     private final Long avgiftspliktigLønnNorge;
     private final Long avgiftspliktigLønnUtland;

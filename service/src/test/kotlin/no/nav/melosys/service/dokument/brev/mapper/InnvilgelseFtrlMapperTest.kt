@@ -13,7 +13,7 @@ import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoNorge
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoUtland
-import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
+import no.nav.melosys.domain.avgift.TrygdeavgiftsgrunnlagDeprecated
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
@@ -22,7 +22,7 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
-import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
+import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagServiceDeprecated
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.dokument.DokgenTestData
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
@@ -37,7 +37,7 @@ import java.time.temporal.ChronoUnit
 @ExtendWith(MockKExtension::class)
 internal class InnvilgelseFtrlMapperTest {
     @MockK
-    private lateinit var mockTrygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService
+    private lateinit var mockTrygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagServiceDeprecated
 
     @MockK
     private lateinit var mockAvklarteVirksomheterService: AvklarteVirksomheterService
@@ -168,11 +168,19 @@ internal class InnvilgelseFtrlMapperTest {
             .build()
     }
 
-    private fun lagNorskTrygdeAvgiftsgrunnlag(): Trygdeavgiftsgrunnlag =
-        Trygdeavgiftsgrunnlag(Loenn_forhold.LØNN_FRA_NORGE, lagAvgiftsGrunnlagNorge(), null)
+    private fun lagNorskTrygdeAvgiftsgrunnlag(): TrygdeavgiftsgrunnlagDeprecated =
+        TrygdeavgiftsgrunnlagDeprecated(
+            Loenn_forhold.LØNN_FRA_NORGE,
+            lagAvgiftsGrunnlagNorge(),
+            null
+        )
 
-    private fun lagUtenlandskTrygdeAvgiftsgrunnlag(): Trygdeavgiftsgrunnlag =
-        Trygdeavgiftsgrunnlag(Loenn_forhold.LØNN_FRA_UTLANDET, null, lagAvgiftsGrunnlagUtland())
+    private fun lagUtenlandskTrygdeAvgiftsgrunnlag(): TrygdeavgiftsgrunnlagDeprecated =
+        TrygdeavgiftsgrunnlagDeprecated(
+            Loenn_forhold.LØNN_FRA_UTLANDET,
+            null,
+            lagAvgiftsGrunnlagUtland()
+        )
 
     private fun lagAvgiftsGrunnlagNorge(): AvgiftsgrunnlagInfoNorge = AvgiftsgrunnlagInfoNorge(
         true, true, null,

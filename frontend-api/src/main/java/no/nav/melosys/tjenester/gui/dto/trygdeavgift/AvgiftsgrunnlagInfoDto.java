@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfo;
 import no.nav.melosys.domain.kodeverk.Saerligeavgiftsgrupper;
 
+@Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
 public class AvgiftsgrunnlagInfoDto {
     private final boolean erSkattepliktig;
     private final boolean betalerArbeidsgiverAvgift;

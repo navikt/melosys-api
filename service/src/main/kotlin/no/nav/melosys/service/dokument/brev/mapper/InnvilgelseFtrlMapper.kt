@@ -5,7 +5,7 @@ import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfo
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoNorge
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoUtland
-import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
+import no.nav.melosys.domain.avgift.TrygdeavgiftsgrunnlagDeprecated
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
@@ -16,7 +16,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrl
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.Periode
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.TrygdeavgiftInfo
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.VurderingTrygdeavgift
-import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
+import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagServiceDeprecated
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -24,7 +24,7 @@ import javax.transaction.Transactional
 
 @Component
 class InnvilgelseFtrlMapper(
-    private val trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService,
+    private val trygdeavgiftsgrunnlagServiceDeprecated: TrygdeavgiftsgrunnlagServiceDeprecated,
     private val avklarteVirksomheterService: AvklarteVirksomheterService,
     private val dokgenMapperDatahenter: DokgenMapperDatahenter
 ) {
@@ -33,7 +33,7 @@ class InnvilgelseFtrlMapper(
         val behandlingId = brevbestilling.behandlingId
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(behandlingId)
         val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
-        val trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(behandlingId)
+        val trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlagServiceDeprecated.hentAvgiftsgrunnlag(behandlingId)
 
         //NOTE Henter i første versjon av FTRL kun en norsk arbeidsgiver og forventer ett registert arbeidsland
         val norskeArbeidsgivere = avklarteVirksomheterService.hentNorskeArbeidsgivere(brevbestilling.behandling)[0]
@@ -78,21 +78,21 @@ class InnvilgelseFtrlMapper(
 
 
     private fun mapVurderingTrygdeavgift(
-        trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag,
+        trygdeavgiftsgrunnlagDeprecated: TrygdeavgiftsgrunnlagDeprecated,
         fastsattTrygdeavgift: FastsattTrygdeavgift
     ) = VurderingTrygdeavgift(
-        norsk = trygdeavgiftsgrunnlag.tilAvgiftsGrunnlagNorge(fastsattTrygdeavgift),
-        utenlandsk = trygdeavgiftsgrunnlag.tilAvgiftsGrunnlagUtland(fastsattTrygdeavgift),
+        norsk = trygdeavgiftsgrunnlagDeprecated.tilAvgiftsGrunnlagNorge(fastsattTrygdeavgift),
+        utenlandsk = trygdeavgiftsgrunnlagDeprecated.tilAvgiftsGrunnlagUtland(fastsattTrygdeavgift),
 
         // MELOSYS-5732 - Skal disse fjernes, eller er dette koblet til fullmemektig?
         selvbetalende = fastsattTrygdeavgift.betalesAv?.rolle == null,
         representantNavn = fastsattTrygdeavgift.representantNr
     )
 
-    private fun Trygdeavgiftsgrunnlag.tilAvgiftsGrunnlagNorge(fastsattTrygdeavgift: FastsattTrygdeavgift): TrygdeavgiftInfo? =
+    private fun TrygdeavgiftsgrunnlagDeprecated.tilAvgiftsGrunnlagNorge(fastsattTrygdeavgift: FastsattTrygdeavgift): TrygdeavgiftInfo? =
         if (avgiftsGrunnlagNorge != null) trygdeavgiftInfo(avgiftsGrunnlagNorge, fastsattTrygdeavgift) else null
 
-    private fun Trygdeavgiftsgrunnlag.tilAvgiftsGrunnlagUtland(fastsattTrygdeavgift: FastsattTrygdeavgift): TrygdeavgiftInfo? =
+    private fun TrygdeavgiftsgrunnlagDeprecated.tilAvgiftsGrunnlagUtland(fastsattTrygdeavgift: FastsattTrygdeavgift): TrygdeavgiftInfo? =
         if (avgiftsGrunnlagUtland != null) trygdeavgiftInfo(avgiftsGrunnlagUtland, fastsattTrygdeavgift) else null
 
     private fun trygdeavgiftInfo(

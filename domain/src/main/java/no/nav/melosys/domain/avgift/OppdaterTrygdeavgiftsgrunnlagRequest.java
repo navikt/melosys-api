@@ -16,6 +16,7 @@ import static no.nav.melosys.domain.avklartefakta.Avklartefakta.IKKE_VALGT_FAKTA
 import static no.nav.melosys.domain.avklartefakta.Avklartefakta.VALGT_FAKTA;
 import static no.nav.melosys.domain.kodeverk.Loenn_forhold.*;
 
+@Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
 public class OppdaterTrygdeavgiftsgrunnlagRequest extends AbstraktAvgiftsgrunnlag<AvgiftsgrunnlagInfo, AvgiftsgrunnlagInfo> {
 
     public OppdaterTrygdeavgiftsgrunnlagRequest(Loenn_forhold lønnsforhold,

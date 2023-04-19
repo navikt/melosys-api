@@ -1,10 +1,11 @@
 package no.nav.melosys.tjenester.gui.dto.trygdeavgift;
 
-import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
+import no.nav.melosys.domain.avgift.TrygdeavgiftsgrunnlagDeprecated;
 import no.nav.melosys.domain.kodeverk.Loenn_forhold;
 import no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_norsk_inntekt;
 import no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_utenlandsk_inntekt;
 
+@Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
 public class AvgiftsgrunnlagDto extends OppdaterAvgiftsgrunnlagDto {
 
     private final Vurderingsutfall_trygdeavgift_norsk_inntekt vurderingTrygdeavgiftNorskInntekt;
@@ -28,13 +29,13 @@ public class AvgiftsgrunnlagDto extends OppdaterAvgiftsgrunnlagDto {
         return vurderingTrygdeavgiftUtenlandskInntekt;
     }
 
-    public static AvgiftsgrunnlagDto av(Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag) {
+    public static AvgiftsgrunnlagDto av(TrygdeavgiftsgrunnlagDeprecated trygdeavgiftsgrunnlagDeprecated) {
         return new AvgiftsgrunnlagDto(
-            trygdeavgiftsgrunnlag.getLønnsforhold(),
-            trygdeavgiftsgrunnlag.getAvgiftsGrunnlagNorge() != null ? AvgiftsgrunnlagInfoDto.av(trygdeavgiftsgrunnlag.getAvgiftsGrunnlagNorge()) : null,
-            trygdeavgiftsgrunnlag.getAvgiftsGrunnlagUtland() != null ? AvgiftsgrunnlagInfoDto.av(trygdeavgiftsgrunnlag.getAvgiftsGrunnlagUtland()) : null,
-            trygdeavgiftsgrunnlag.getAvgiftsGrunnlagNorge() != null ? trygdeavgiftsgrunnlag.getAvgiftsGrunnlagNorge().getVurderingTrygdeavgiftNorskInntekt() : null,
-            trygdeavgiftsgrunnlag.getAvgiftsGrunnlagUtland() != null ? trygdeavgiftsgrunnlag.getAvgiftsGrunnlagUtland().getVurderingTrygdeavgiftUtenlandskInntekt() : null
+            trygdeavgiftsgrunnlagDeprecated.getLønnsforhold(),
+            trygdeavgiftsgrunnlagDeprecated.getAvgiftsGrunnlagNorge() != null ? AvgiftsgrunnlagInfoDto.av(trygdeavgiftsgrunnlagDeprecated.getAvgiftsGrunnlagNorge()) : null,
+            trygdeavgiftsgrunnlagDeprecated.getAvgiftsGrunnlagUtland() != null ? AvgiftsgrunnlagInfoDto.av(trygdeavgiftsgrunnlagDeprecated.getAvgiftsGrunnlagUtland()) : null,
+            trygdeavgiftsgrunnlagDeprecated.getAvgiftsGrunnlagNorge() != null ? trygdeavgiftsgrunnlagDeprecated.getAvgiftsGrunnlagNorge().getVurderingTrygdeavgiftNorskInntekt() : null,
+            trygdeavgiftsgrunnlagDeprecated.getAvgiftsGrunnlagUtland() != null ? trygdeavgiftsgrunnlagDeprecated.getAvgiftsGrunnlagUtland().getVurderingTrygdeavgiftUtenlandskInntekt() : null
         );
     }
 }

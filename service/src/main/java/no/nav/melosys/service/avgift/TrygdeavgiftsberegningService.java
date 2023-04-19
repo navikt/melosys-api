@@ -20,13 +20,13 @@ import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_utenl
 @Service
 public class TrygdeavgiftsberegningService {
 
-    private final TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService;
+    private final TrygdeavgiftsgrunnlagServiceDeprecated trygdeavgiftsgrunnlagServiceDeprecated;
     private final MedlemAvFolketrygdenService medlemAvFolketrygdenService;
     private final TrygdeavgiftConsumer trygdeavgiftConsumer;
 
-    public TrygdeavgiftsberegningService(TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService,
+    public TrygdeavgiftsberegningService(TrygdeavgiftsgrunnlagServiceDeprecated trygdeavgiftsgrunnlagServiceDeprecated,
                                          MedlemAvFolketrygdenService medlemAvFolketrygdenService, TrygdeavgiftConsumer trygdeavgiftConsumer) {
-        this.trygdeavgiftsgrunnlagService = trygdeavgiftsgrunnlagService;
+        this.trygdeavgiftsgrunnlagServiceDeprecated = trygdeavgiftsgrunnlagServiceDeprecated;
         this.medlemAvFolketrygdenService = medlemAvFolketrygdenService;
         this.trygdeavgiftConsumer = trygdeavgiftConsumer;
     }
@@ -62,7 +62,7 @@ public class TrygdeavgiftsberegningService {
                 .map(Medlemskapsperiode::getTrygdeavgift)
                 .forEach(Collection::clear);
 
-            final var avgiftsgrunnlag = trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(behandlingsresultatID);
+            final var avgiftsgrunnlag = trygdeavgiftsgrunnlagServiceDeprecated.hentAvgiftsgrunnlag(behandlingsresultatID);
 
             if (avgiftsgrunnlag.getAvgiftsGrunnlagNorge() != null
                 && avgiftsgrunnlag.getAvgiftsGrunnlagNorge().getVurderingTrygdeavgiftNorskInntekt() == NORSK_INNTEKT_TRYGDEAVGIFT_NAV

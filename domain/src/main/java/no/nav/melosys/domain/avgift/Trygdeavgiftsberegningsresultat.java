@@ -9,6 +9,7 @@ import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 
+@Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
 public class Trygdeavgiftsberegningsresultat {
     private final Long avgiftspliktigLønnNorge;
     private final Long avgiftspliktigLønnUtland;

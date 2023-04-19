@@ -6,6 +6,7 @@ import javax.persistence.*;
 
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_norsk_inntekt;
 import no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_utenlandsk_inntekt;
 
@@ -20,16 +21,22 @@ public class MedlemAvFolketrygden {
     @JoinColumn(name = "beh_resultat_id", nullable = false, updatable = false)
     private Behandlingsresultat behandlingsresultat;
 
+    @Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
     @Column(name = "trygdeavgift_nav_norsk_inntekt")
     @Enumerated(EnumType.STRING)
     private Vurderingsutfall_trygdeavgift_norsk_inntekt vurderingTrygdeavgiftNorskInntekt;
 
+    @Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
     @Column(name = "trygdeavgift_nav_utenlandsk_inntekt")
     @Enumerated(EnumType.STRING)
     private Vurderingsutfall_trygdeavgift_utenlandsk_inntekt vurderingTrygdeavgiftUtenlandskInntekt;
 
+    @Column(name = "bestemmelse", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Folketrygdloven_kap2_bestemmelser bestemmelse;
+
     @OneToMany(mappedBy = "medlemAvFolketrygden", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private Collection<Medlemskapsperiode> medlemskapsperioder = new HashSet<>();
+    private Collection<Medlemskapsperiode> medlemskapsperioder = new HashSet<>(1);
 
     @OneToOne(mappedBy = "medlemAvFolketrygden", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private FastsattTrygdeavgift fastsattTrygdeavgift;
@@ -48,6 +55,14 @@ public class MedlemAvFolketrygden {
 
     public void setBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
         this.behandlingsresultat = behandlingsresultat;
+    }
+
+    public Folketrygdloven_kap2_bestemmelser getBestemmelse() {
+        return bestemmelse;
+    }
+
+    public void setBestemmelse(Folketrygdloven_kap2_bestemmelser bestemmelse) {
+        this.bestemmelse = bestemmelse;
     }
 
     public Vurderingsutfall_trygdeavgift_norsk_inntekt getVurderingTrygdeavgiftNorskInntekt() {

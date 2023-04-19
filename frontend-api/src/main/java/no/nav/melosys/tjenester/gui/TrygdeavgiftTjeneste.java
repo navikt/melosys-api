@@ -1,14 +1,13 @@
-package no.nav.melosys.tjenester.gui.avklartefakta;
+package no.nav.melosys.tjenester.gui;
 
 import io.swagger.annotations.Api;
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Ressurs;
-import no.nav.melosys.tjenester.gui.dto.trygdeavgift.AvgiftsgrunnlagDto;
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.BeregningsresultatDto;
-import no.nav.melosys.tjenester.gui.dto.trygdeavgift.OppdaterAvgiftsgrunnlagDto;
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.OppdaterBeregningsgrunnlagDto;
+import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftsgrunnlagDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,27 +30,24 @@ public class TrygdeavgiftTjeneste {
     }
 
     @PutMapping("/grunnlag")
-    public ResponseEntity<AvgiftsgrunnlagDto> oppdaterAvgiftsgrunnlag(@PathVariable("behandlingID") long behandlingID,
-                                                                      @RequestBody OppdaterAvgiftsgrunnlagDto oppdaterAvgiftsgrunnlagDto
+    public ResponseEntity<TrygdeavgiftsgrunnlagDto> oppdaterTrygdeavgiftsgrunnlaget(@PathVariable("behandlingID") long behandlingID,
+                                                                                    @RequestBody TrygdeavgiftsgrunnlagDto trygdeavgiftsgrunnlagDto
     ) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
+
         return ResponseEntity.ok(
-            AvgiftsgrunnlagDto.av(
-                trygdeavgiftsgrunnlagService.oppdaterAvgiftsgrunnlag(
-                    behandlingID, oppdaterAvgiftsgrunnlagDto.til()
-                )
+            TrygdeavgiftsgrunnlagDto.av(
+                trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlaget(behandlingID, trygdeavgiftsgrunnlagDto.tilRequest())
             )
         );
     }
 
     @GetMapping("/grunnlag")
-    public ResponseEntity<AvgiftsgrunnlagDto> hentAvgiftsgrunnlag(@PathVariable("behandlingID") long behandlingID) {
+    public ResponseEntity<TrygdeavgiftsgrunnlagDto> hentAvgiftsgrunnlag(@PathVariable("behandlingID") long behandlingID) {
         aksesskontroll.autoriser(behandlingID);
-        return ResponseEntity.ok(
-            AvgiftsgrunnlagDto.av(
-                trygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(behandlingID)
-            )
-        );
+        var grunnlag = trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlaget(behandlingID);
+
+        return grunnlag == null ? ResponseEntity.noContent().build() : ResponseEntity.ok(TrygdeavgiftsgrunnlagDto.av(grunnlag));
     }
 
     @PutMapping("/beregning")
