@@ -1,21 +1,25 @@
 package no.nav.melosys.tjenester.gui.dto.trygdeavgift
 
-import no.nav.melosys.domain.avgift.Inntektskilde
+import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
 import java.math.BigInteger
 
 data class InntekskildeDto(
     val type: Inntektskildetype,
-    val avgiftspliktigInntektMnd: BigInteger,
-    val arbeidsgiversavgiftBetales: Boolean
+    val arbeidsgiversavgiftBetales: Boolean,
+    val avgiftspliktigInntektMnd: BigInteger
 ) {
 
     fun tilRequest(): InntektskildeRequest =
-        InntektskildeRequest(type, avgiftspliktigInntektMnd, arbeidsgiversavgiftBetales)
+        InntektskildeRequest(type, arbeidsgiversavgiftBetales, avgiftspliktigInntektMnd)
 
     companion object {
-        fun av(inntektskilde: Inntektskilde): InntekskildeDto =
-            InntekskildeDto(inntektskilde.inntektskildetype, inntektskilde.avgiftspliktigInntektMnd, inntektskilde.isArbeidsgiversavgiftBetalesTilSkatt)
+        fun av(inntektsperiode: Inntektsperiode): InntekskildeDto =
+            InntekskildeDto(
+                inntektsperiode.type,
+                inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
+                inntektsperiode.avgiftspliktigInntektMnd
+            )
     }
 }

@@ -3,7 +3,7 @@ package no.nav.melosys.domain.folketrygden;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlaget;
+import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer;
 
 @Entity
@@ -30,7 +30,7 @@ public class FastsattTrygdeavgift {
     private String representantNr;
 
     @OneToOne(mappedBy = "fastsattTrygdeavgift", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    private Trygdeavgiftsgrunnlaget trygdeavgiftsgrunnlaget;
+    private Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag;
 
     @Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
     @Column(name = "avgiftspliktig_norsk_inntekt_md")
@@ -80,12 +80,13 @@ public class FastsattTrygdeavgift {
         this.representantNr = representantNr;
     }
 
-    public Trygdeavgiftsgrunnlaget getTrygdeavgiftsgrunnlaget() {
-        return trygdeavgiftsgrunnlaget;
+    public Trygdeavgiftsgrunnlag getTrygdeavgiftsgrunnlag() {
+        return trygdeavgiftsgrunnlag;
     }
 
-    public void setTrygdeavgiftsgrunnlaget(Trygdeavgiftsgrunnlaget trygdeavgiftsgrunnlaget) {
-        this.trygdeavgiftsgrunnlaget = trygdeavgiftsgrunnlaget;
+    public void setTrygdeavgiftsgrunnlag(Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag) {
+        trygdeavgiftsgrunnlag.setFastsattTrygdeavgift(this);
+        this.trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlag;
     }
 
     public Long getAvgiftspliktigNorskInntektMnd() {

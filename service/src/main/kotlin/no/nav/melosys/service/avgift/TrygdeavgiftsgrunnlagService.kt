@@ -1,8 +1,8 @@
 package no.nav.melosys.service.avgift
 
-import no.nav.melosys.domain.avgift.Inntektskilde
+import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
-import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlaget
+import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
@@ -21,7 +21,7 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
     @Transactional
     fun oppdaterTrygdeavgiftsgrunnlaget(
         behandlingsresultatID: Long, request: OppdaterTrygdeavgiftsgrunnlagRequest
-    ): Trygdeavgiftsgrunnlaget {
+    ): Trygdeavgiftsgrunnlag {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
         val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
         val medlemskapsperioder = medlemAvFolketrygden.medlemskapsperioder
@@ -32,23 +32,19 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
 
         val fastsattTrygdeavgift = medlemAvFolketrygden.fastsattTrygdeavgift ?: FastsattTrygdeavgift().apply {
             this.trygdeavgiftstype = Trygdeavgift_typer.FORELØPIG
-            this.medlemAvFolketrygden = medlemAvFolketrygden
         }
-
-        val trygdeavgiftsgrunnlaget = fastsattTrygdeavgift.trygdeavgiftsgrunnlaget ?: Trygdeavgiftsgrunnlaget().apply {
-            this.fastsattTrygdeavgift = fastsattTrygdeavgift
-        }
+        val trygdeavgiftsgrunnlag = fastsattTrygdeavgift.trygdeavgiftsgrunnlag ?: Trygdeavgiftsgrunnlag()
 
         val fomDato = medlemskapsperioder.minByOrNull { it.fom }?.fom
             ?: throw FunksjonellException("Klarte ikke finne startdatoen på medlemskapet")
         val tomDato = medlemskapsperioder.maxByOrNull { it.tom }?.tom
             ?: throw FunksjonellException("Klarte ikke finne sluttdatoen på medlemskapet")
 
-        fastsattTrygdeavgift.trygdeavgiftsgrunnlaget = trygdeavgiftsgrunnlaget.apply {
+        fastsattTrygdeavgift.trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlag.apply {
             this.skatteforholdTilNorge.clear()
-            this.skatteforholdTilNorge.add(lagSkatteforholdTilNorge(request, fomDato, tomDato, trygdeavgiftsgrunnlaget))
-            this.inntektskilder.clear()
-            this.inntektskilder.addAll(lagInntektskilder(request, fomDato, tomDato, trygdeavgiftsgrunnlaget))
+            this.skatteforholdTilNorge.add(lagSkatteforholdTilNorge(request, fomDato, tomDato, trygdeavgiftsgrunnlag))
+            this.inntektsperioder.clear()
+            this.inntektsperioder.addAll(lagInntektsperioder(request, fomDato, tomDato, trygdeavgiftsgrunnlag))
         }
         medlemAvFolketrygden.fastsattTrygdeavgift = fastsattTrygdeavgift
         behandlingsresultatService.lagre(behandlingsresultat)
@@ -61,41 +57,44 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
         request: OppdaterTrygdeavgiftsgrunnlagRequest,
         fomDato: LocalDate,
         tomDato: LocalDate,
-        trygdeavgiftsgrunnlaget: Trygdeavgiftsgrunnlaget
+        trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag
     ): SkatteforholdTilNorge = SkatteforholdTilNorge().apply {
         this.fomDato = fomDato
         this.tomDato = tomDato
         this.skatteplikttype = request.skatteplikttype
-        this.trygdeavgiftsgrunnlaget = trygdeavgiftsgrunnlaget
+        this.trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlag
     }
 
-    private fun lagInntektskilder(
+    private fun lagInntektsperioder(
         request: OppdaterTrygdeavgiftsgrunnlagRequest,
         fomDato: LocalDate,
         tomDato: LocalDate,
-        trygdeavgiftsgrunnlaget: Trygdeavgiftsgrunnlaget,
-    ): Set<Inntektskilde> =
+        trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag,
+    ): Set<Inntektsperiode> =
         (request.inntektskilder.map { inntektskildeRequest: InntektskildeRequest ->
-            Inntektskilde().apply {
+            Inntektsperiode().apply {
                 this.fomDato = fomDato
                 this.tomDato = tomDato
-                this.inntektskildetype = inntektskildeRequest.type
+                this.type = inntektskildeRequest.type
                 this.avgiftspliktigInntektMnd = inntektskildeRequest.avgiftspliktigInntektMnd
                 this.isArbeidsgiversavgiftBetalesTilSkatt = inntektskildeRequest.arbeidsgiversavgiftBetales
                 this.isTrygdeavgiftBetalesTilSkatt = trygdeavgiftBetalesTilSkatt(request.skatteplikttype, this)
-                this.trygdeavgiftsgrunnlaget = trygdeavgiftsgrunnlaget
+                this.trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlag
             }
         }).toSet()
 
-    private fun trygdeavgiftBetalesTilSkatt(skatteplikttype: Skatteplikttype, inntektskilde: Inntektskilde): Boolean {
+    private fun trygdeavgiftBetalesTilSkatt(
+        skatteplikttype: Skatteplikttype,
+        inntektsperiode: Inntektsperiode
+    ): Boolean {
         return skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG || listOf(
             Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE, Inntektskildetype.FN_SKATTEFRITAK
-        ).contains(inntektskilde.inntektskildetype) || inntektskilde.inntektskildetype == Inntektskildetype.INNTEKT_FRA_UTLANDET && inntektskilde.isArbeidsgiversavgiftBetalesTilSkatt
+        ).contains(inntektsperiode.type) || inntektsperiode.type == Inntektskildetype.INNTEKT_FRA_UTLANDET && inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt
     }
 
     @Transactional(readOnly = true)
-    fun hentTrygdeavgiftsgrunnlaget(behandlingsresultatID: Long): Trygdeavgiftsgrunnlaget? {
+    fun hentTrygdeavgiftsgrunnlaget(behandlingsresultatID: Long): Trygdeavgiftsgrunnlag? {
         return behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID).getMedlemAvFolketrygden()
-            ?.getFastsattTrygdeavgift()?.getTrygdeavgiftsgrunnlaget()
+            ?.getFastsattTrygdeavgift()?.getTrygdeavgiftsgrunnlag()
     }
 }

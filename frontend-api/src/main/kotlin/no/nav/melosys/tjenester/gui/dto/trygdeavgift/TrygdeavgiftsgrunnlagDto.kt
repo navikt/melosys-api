@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui.dto.trygdeavgift
 
-import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlaget
+import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
 
@@ -13,9 +13,10 @@ data class TrygdeavgiftsgrunnlagDto(
 
     companion object {
         @JvmStatic
-        fun av(trygdeavgiftsgrunnlaget: Trygdeavgiftsgrunnlaget): TrygdeavgiftsgrunnlagDto =
+        fun av(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag): TrygdeavgiftsgrunnlagDto =
             TrygdeavgiftsgrunnlagDto(
-                trygdeavgiftsgrunnlaget.skatteforholdTilNorge.first().skatteplikttype,
-                (trygdeavgiftsgrunnlaget.inntektskilder.map { InntekskildeDto.av(it) }).toSet())
+                trygdeavgiftsgrunnlag.skatteforholdTilNorge.first().skatteplikttype,
+                (trygdeavgiftsgrunnlag.inntektsperioder.map { InntekskildeDto.av(it) }).toSet()
+            )
     }
 }

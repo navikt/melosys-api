@@ -13,8 +13,8 @@ public class SkatteforholdTilNorge {
     private Long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "trygdeavgiftsgrunnlaget_id", nullable = false, updatable = false)
-    private Trygdeavgiftsgrunnlaget trygdeavgiftsgrunnlaget;
+    @JoinColumn(name = "trygdeavgiftsgrunnlag_id", nullable = false, updatable = false)
+    private Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag;
 
     @Column(name = "fom_dato", nullable = false)
     private LocalDate fomDato;
@@ -34,12 +34,12 @@ public class SkatteforholdTilNorge {
         this.id = id;
     }
 
-    public Trygdeavgiftsgrunnlaget getTrygdeavgiftsgrunnlaget() {
-        return trygdeavgiftsgrunnlaget;
+    public Trygdeavgiftsgrunnlag getTrygdeavgiftsgrunnlag() {
+        return trygdeavgiftsgrunnlag;
     }
 
-    public void setTrygdeavgiftsgrunnlaget(Trygdeavgiftsgrunnlaget trygdeavgiftsgrunnlaget) {
-        this.trygdeavgiftsgrunnlaget = trygdeavgiftsgrunnlaget;
+    public void setTrygdeavgiftsgrunnlag(Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag) {
+        this.trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlag;
     }
 
     public LocalDate getFomDato() {

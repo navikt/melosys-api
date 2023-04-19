@@ -23,7 +23,8 @@ public class TrygdeavgiftTjeneste {
     private final Aksesskontroll aksesskontroll;
 
     public TrygdeavgiftTjeneste(TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService,
-                                TrygdeavgiftsberegningService trygdeavgiftsberegningService, Aksesskontroll aksesskontroll) {
+                                TrygdeavgiftsberegningService trygdeavgiftsberegningService,
+                                Aksesskontroll aksesskontroll) {
         this.trygdeavgiftsgrunnlagService = trygdeavgiftsgrunnlagService;
         this.trygdeavgiftsberegningService = trygdeavgiftsberegningService;
         this.aksesskontroll = aksesskontroll;
@@ -43,7 +44,7 @@ public class TrygdeavgiftTjeneste {
     }
 
     @GetMapping("/grunnlag")
-    public ResponseEntity<TrygdeavgiftsgrunnlagDto> hentAvgiftsgrunnlag(@PathVariable("behandlingID") long behandlingID) {
+    public ResponseEntity<TrygdeavgiftsgrunnlagDto> hentTrygdeavgiftsgrunnlag(@PathVariable("behandlingID") long behandlingID) {
         aksesskontroll.autoriser(behandlingID);
         var grunnlag = trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlaget(behandlingID);
 

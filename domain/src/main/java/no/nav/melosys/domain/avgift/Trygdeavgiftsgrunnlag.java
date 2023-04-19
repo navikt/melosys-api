@@ -7,8 +7,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "trygdeavgiftsgrunnlaget")
-public class Trygdeavgiftsgrunnlaget {
+@Table(name = "trygdeavgiftsgrunnlag")
+public class Trygdeavgiftsgrunnlag {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -17,11 +17,11 @@ public class Trygdeavgiftsgrunnlaget {
     @JoinColumn(name = "fastsatt_trygdeavgift_id", nullable = false, updatable = false)
     private FastsattTrygdeavgift fastsattTrygdeavgift;
 
-    @OneToMany(mappedBy = "trygdeavgiftsgrunnlaget", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "trygdeavgiftsgrunnlag", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<SkatteforholdTilNorge> skatteforholdTilNorge = new HashSet<>(1);
 
-    @OneToMany(mappedBy = "trygdeavgiftsgrunnlaget", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    private Set<Inntektskilde> inntektskilder = new HashSet<>(1);
+    @OneToMany(mappedBy = "trygdeavgiftsgrunnlag", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private Set<Inntektsperiode> inntektsperioder = new HashSet<>(1);
 
     public Long getId() {
         return id;
@@ -47,11 +47,11 @@ public class Trygdeavgiftsgrunnlaget {
         this.skatteforholdTilNorge = skattefoholdTilNorge;
     }
 
-    public Set<Inntektskilde> getInntektskilder() {
-        return inntektskilder;
+    public Set<Inntektsperiode> getInntektsperioder() {
+        return inntektsperioder;
     }
 
-    public void setInntektskilder(Set<Inntektskilde> inntektskilder) {
-        this.inntektskilder = inntektskilder;
+    public void setInntektsperioder(Set<Inntektsperiode> inntektsperioder) {
+        this.inntektsperioder = inntektsperioder;
     }
 }

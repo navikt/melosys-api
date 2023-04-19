@@ -5,6 +5,6 @@ import java.math.BigInteger
 
 class InntektskildeRequest(
     val type: Inntektskildetype,
-    val avgiftspliktigInntektMnd: BigInteger,
-    val arbeidsgiversavgiftBetales: Boolean
+    val arbeidsgiversavgiftBetales: Boolean,
+    val avgiftspliktigInntektMnd: BigInteger
 )

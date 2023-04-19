@@ -7,15 +7,15 @@ import java.math.BigInteger;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "inntektskilde")
-public class Inntektskilde {
+@Table(name = "inntektsperiode")
+public class Inntektsperiode {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "trygdeavgiftsgrunnlaget_id", nullable = false, updatable = false)
-    private Trygdeavgiftsgrunnlaget trygdeavgiftsgrunnlaget;
+    @JoinColumn(name = "trygdeavgiftsgrunnlag_id", nullable = false, updatable = false)
+    private Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag;
 
     @Column(name = "fom_dato", nullable = false)
     private LocalDate fomDato;
@@ -23,14 +23,14 @@ public class Inntektskilde {
     @Column(name = "tom_dato", nullable = false)
     private LocalDate tomDato;
 
-    @Column(name = "inntektskilde_type", nullable = false)
+    @Column(name = "inntektsperiode_type", nullable = false)
     @Enumerated(EnumType.STRING)
-    private Inntektskildetype inntektskildetype;
+    private Inntektskildetype type;
 
     @Column(name = "avgiftspliktig_inntekt_mnd")
     private BigInteger avgiftspliktigInntektMnd;
 
-    @Column(name = "arbeidsgiversavgift_betales_til_skatt")
+    @Column(name = "aba_betales_til_skatt")
     private boolean arbeidsgiversavgiftBetalesTilSkatt;
 
     @Column(name = "trygdeavgift_betales_til_skatt")
@@ -44,12 +44,12 @@ public class Inntektskilde {
         this.id = id;
     }
 
-    public Trygdeavgiftsgrunnlaget getTrygdeavgiftsgrunnlaget() {
-        return trygdeavgiftsgrunnlaget;
+    public Trygdeavgiftsgrunnlag getTrygdeavgiftsgrunnlag() {
+        return trygdeavgiftsgrunnlag;
     }
 
-    public void setTrygdeavgiftsgrunnlaget(Trygdeavgiftsgrunnlaget trygdeavgiftsgrunnlaget) {
-        this.trygdeavgiftsgrunnlaget = trygdeavgiftsgrunnlaget;
+    public void setTrygdeavgiftsgrunnlag(Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag) {
+        this.trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlag;
     }
 
     public LocalDate getFomDato() {
@@ -68,12 +68,12 @@ public class Inntektskilde {
         this.tomDato = tomDato;
     }
 
-    public Inntektskildetype getInntektskildetype() {
-        return inntektskildetype;
+    public Inntektskildetype getType() {
+        return type;
     }
 
-    public void setInntektskildetype(Inntektskildetype inntektskildetype) {
-        this.inntektskildetype = inntektskildetype;
+    public void setType(Inntektskildetype inntektskildetype) {
+        this.type = inntektskildetype;
     }
 
     public BigInteger getAvgiftspliktigInntektMnd() {
