@@ -1,5 +1,6 @@
 package no.nav.melosys.service.oppgave
 
+import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.mockk.called
@@ -37,14 +38,17 @@ internal class OppgaveFactoryNyMappingTest {
             }.filter {
                 it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
             }.forEach { row ->
-                val behandling = spyk(lagBehandlingBrukFørsteRad(row, SedType.A003))
+                lagBehandlingBrukAlleKombinasjoner(row, SedType.A003) { flat, behandling ->
 
-                val oppgave =
-                    oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument)
-                        .build()
+                    val oppgave =
+                        oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument)
+                            .build()
 
-                oppgave.beskrivelse.shouldBe(SedType.A003.name)
-                verify { behandling.saksopplysninger }
+                    withClue("sakstype${row.sakstype}, sakstema=${flat.sakstema}, behandlingstema:${flat.behandlingstema}, ${flat.behandlingstype}") {
+                        oppgave.beskrivelse.shouldBe(SedType.A003.name)
+                        verify { behandling.saksopplysninger }
+                    }
+                }
             }
     }
 
@@ -56,12 +60,17 @@ internal class OppgaveFactoryNyMappingTest {
             }.filter {
                 it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
             }.forEach { row ->
-                val behandling = spyk(lagBehandlingBrukFørsteRad(row))
+                lagBehandlingBrukAlleKombinasjoner(row) { flat, behandling ->
 
-                val oppgave = oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument).build()
+                    val oppgave =
+                        oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument)
+                            .build()
 
-                oppgave.beskrivelse.shouldBe("")
-                verify { behandling.hentSedDokument() wasNot called }
+                    withClue("sakstype${row.sakstype}, sakstema=${flat.sakstema}, behandlingstema:${flat.behandlingstema}, ${flat.behandlingstype}") {
+                        oppgave.beskrivelse.shouldBe("")
+                        verify { behandling.hentSedDokument() wasNot called }
+                    }
+                }
             }
     }
 
@@ -71,12 +80,17 @@ internal class OppgaveFactoryNyMappingTest {
             .filter {
                 it.oppgave.beskrivelsefelt == OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
             }.shouldHaveSize(1).forEach { row ->
-                val behandling = spyk(lagBehandlingBrukFørsteRad(row))
+                lagBehandlingBrukAlleKombinasjoner(row) { flat, behandling ->
 
-                val oppgave = oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument).build()
+                    val oppgave =
+                        oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument)
+                            .build()
 
-                oppgave.beskrivelse.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR.beskrivelse)
-                verify { behandling.hentSedDokument() wasNot called }
+                    withClue("sakstype${row.sakstype}, sakstema=${flat.sakstema}, behandlingstema:${flat.behandlingstema}, ${flat.behandlingstype}") {
+                        oppgave.beskrivelse.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR.beskrivelse)
+                        verify { behandling.hentSedDokument() wasNot called }
+                    }
+                }
             }
     }
 
@@ -85,7 +99,9 @@ internal class OppgaveFactoryNyMappingTest {
         oppgaveGosysMapping.rows.forEach { row ->
             row.behandlingstema.forEach { behandlingstema ->
                 val tema: Tema = oppgaveFactory.utledTema(row.sakstype, row.sakstema, behandlingstema)
-                tema.shouldBe(row.oppgave.tema)
+                withClue("sakstype${row.sakstype}, sakstema=${row.sakstema}, behandlingstema:${behandlingstema}") {
+                    tema.shouldBe(row.oppgave.tema)
+                }
             }
         }
     }
@@ -135,17 +151,43 @@ internal class OppgaveFactoryNyMappingTest {
         }
     }
 
-    private fun lagBehandlingBrukFørsteRad(
+    private data class TableRowFlat(
+        val sakstype: Sakstyper,
+        val sakstema: Sakstemaer,
+        val behandlingstype: Behandlingstyper,
+        val behandlingstema: Behandlingstema,
+        val oppgave: OppgaveGosysMapping.Oppgave
+    )
+
+    private fun lagBehandlingBrukAlleKombinasjoner(
         tableRow: OppgaveGosysMapping.TableRow,
-        sedType: SedType? = null
-    ): Behandling =
-        lagBehandling(
-            tableRow.sakstype,
-            tableRow.sakstema,
-            tableRow.behandlingstema.first(),
-            tableRow.behandlingstype.first(),
-            sedType
-        )
+        sedType: SedType? = null,
+        action: (TableRowFlat, Behandling) -> Unit
+
+    ) {
+        tableRow.behandlingstema.forEach { behandlingstema ->
+            tableRow.behandlingstype.forEach { behandlingstype ->
+                action(
+                    TableRowFlat(
+                        tableRow.sakstype,
+                        tableRow.sakstema,
+                        behandlingstype,
+                        behandlingstema,
+                        tableRow.oppgave
+                    ),
+                    spyk(
+                        lagBehandling(
+                            tableRow.sakstype,
+                            tableRow.sakstema,
+                            behandlingstema,
+                            behandlingstype,
+                            sedType
+                        )
+                    )
+                )
+            }
+        }
+    }
 
     private fun lagBehandling(
         sakstype: Sakstyper,
