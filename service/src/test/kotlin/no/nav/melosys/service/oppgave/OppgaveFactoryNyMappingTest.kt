@@ -39,7 +39,6 @@ internal class OppgaveFactoryNyMappingTest {
                 it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
             }.forEach { row ->
                 lagBehandlingBrukAlleKombinasjoner(row, SedType.A003) { flat, behandling ->
-
                     val oppgave =
                         oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument)
                             .build()
@@ -61,7 +60,6 @@ internal class OppgaveFactoryNyMappingTest {
                 it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
             }.forEach { row ->
                 lagBehandlingBrukAlleKombinasjoner(row) { flat, behandling ->
-
                     val oppgave =
                         oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument)
                             .build()
@@ -81,7 +79,6 @@ internal class OppgaveFactoryNyMappingTest {
                 it.oppgave.beskrivelsefelt == OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
             }.shouldHaveSize(1).forEach { row ->
                 lagBehandlingBrukAlleKombinasjoner(row) { flat, behandling ->
-
                     val oppgave =
                         oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument)
                             .build()
@@ -99,6 +96,7 @@ internal class OppgaveFactoryNyMappingTest {
         oppgaveGosysMapping.rows.forEach { row ->
             row.behandlingstema.forEach { behandlingstema ->
                 val tema: Tema = oppgaveFactory.utledTema(row.sakstype, row.sakstema, behandlingstema)
+
                 withClue("sakstype${row.sakstype}, sakstema=${row.sakstema}, behandlingstema:${behandlingstema}") {
                     tema.shouldBe(row.oppgave.tema)
                 }
