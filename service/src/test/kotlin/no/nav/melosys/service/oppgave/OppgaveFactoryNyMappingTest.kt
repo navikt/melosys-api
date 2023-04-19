@@ -2,6 +2,9 @@ package no.nav.melosys.service.oppgave
 
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
+import io.mockk.called
+import io.mockk.spyk
+import io.mockk.verify
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.sed.SedDokument
@@ -34,13 +37,14 @@ internal class OppgaveFactoryNyMappingTest {
             }.filter {
                 it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
             }.forEach { row ->
-                val behandling = lagBehandlingBrukFørsteRad(row, SedType.A003)
+                val behandling = spyk(lagBehandlingBrukFørsteRad(row, SedType.A003))
 
                 val oppgave =
                     oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument)
                         .build()
 
                 oppgave.beskrivelse.shouldBe(SedType.A003.name)
+                verify { behandling.saksopplysninger }
             }
     }
 
@@ -52,11 +56,12 @@ internal class OppgaveFactoryNyMappingTest {
             }.filter {
                 it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
             }.forEach { row ->
-                val behandling = lagBehandlingBrukFørsteRad(row)
+                val behandling = spyk(lagBehandlingBrukFørsteRad(row))
 
                 val oppgave = oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument).build()
 
                 oppgave.beskrivelse.shouldBe("")
+                verify { behandling.hentSedDokument() wasNot called }
             }
     }
 
@@ -66,11 +71,12 @@ internal class OppgaveFactoryNyMappingTest {
             .filter {
                 it.oppgave.beskrivelsefelt == OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
             }.shouldHaveSize(1).forEach { row ->
-                val behandling = lagBehandlingBrukFørsteRad(row)
+                val behandling = spyk(lagBehandlingBrukFørsteRad(row))
 
                 val oppgave = oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument).build()
 
                 oppgave.beskrivelse.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR.beskrivelse)
+                verify { behandling.hentSedDokument() wasNot called }
             }
     }
 
