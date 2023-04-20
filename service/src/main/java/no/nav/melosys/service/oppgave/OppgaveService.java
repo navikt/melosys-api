@@ -369,11 +369,12 @@ public class OppgaveService {
     }
 
     private boolean harBeskyttelsesbehov(long behandlingID) {
-        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
-        final String brukersAktørID = behandling.getFagsak().hentBrukersAktørID();
+        final String brukersAktørID = getBrukersAktørID(behandlingID);
         if (persondataFasade.harStrengtFortroligAdresse(brukersAktørID)) {
             return true;
-        } else if (behandling.getMottatteOpplysninger() == null) {
+        }
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
+        if (behandling.getMottatteOpplysninger() == null) {
             return false;
         }
         for (String fnr : behandling.getMottatteOpplysninger().getMottatteOpplysningerData().hentFnrMedfølgendeBarn()) {
@@ -382,5 +383,13 @@ public class OppgaveService {
             }
         }
         return false;
+    }
+
+    private String getBrukersAktørID(long behandlingID) {
+        // Om behandlingService.hentBehandlingMedSaksopplysninger benyttes behandling ikke har saksopplysninger
+        // feiler getFagsak().hentBrukersAktørID() med LazyInitializationException: could not initialize proxy
+        // https://jira.adeo.no/browse/MELOSYS-5871
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        return behandling.getFagsak().hentBrukersAktørID();
     }
 }
