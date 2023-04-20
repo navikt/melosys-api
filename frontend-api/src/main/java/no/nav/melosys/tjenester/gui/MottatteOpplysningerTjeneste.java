@@ -29,11 +29,11 @@ public class MottatteOpplysningerTjeneste {
     }
 
     @GetMapping("/{behandlingID}")
-    public ResponseEntity<MottatteOpplysningerGetDto> hentMottatteOpplysninger(
+    public ResponseEntity<MottatteOpplysningerGetDto> hentEllerOpprettMottatteOpplysninger(
         @PathVariable(value = "behandlingID") long behandlingID
     ) {
         aksesskontroll.autoriser(behandlingID);
-        MottatteOpplysninger mottatteOpplysninger = mottatteOpplysningerService.hentMottatteOpplysninger(behandlingID);
+        MottatteOpplysninger mottatteOpplysninger = mottatteOpplysningerService.hentEllerOpprettMottatteOpplysninger(behandlingID);
         return ResponseEntity.ok(new MottatteOpplysningerGetDto(mottatteOpplysninger));
     }
 
