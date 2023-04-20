@@ -206,6 +206,7 @@ public final class MedlPeriodeKonverter {
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA, GrunnlagMedl.USA);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_1, GrunnlagMedl.USA_5_1);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_2, GrunnlagMedl.USA_5_2);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_3, GrunnlagMedl.USA_5_3);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_4, GrunnlagMedl.USA_5_4);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_5, GrunnlagMedl.USA_5_5);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_6, GrunnlagMedl.USA_5_6);
