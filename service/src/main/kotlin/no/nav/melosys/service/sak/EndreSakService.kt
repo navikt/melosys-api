@@ -1,7 +1,6 @@
 package no.nav.melosys.service.sak
 
 import mu.KotlinLogging
-import no.finn.unleash.Unleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.BehandlingEndretAvSaksbehandlerEvent
 import no.nav.melosys.domain.Fagsak
@@ -17,12 +16,10 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.featuretoggle.ToggleName
-import no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.Companion.harTomFlyt
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Service
@@ -39,7 +36,7 @@ class EndreSakService(
     private val mottatteOpplysningerService: MottatteOpplysningerService,
     private val oppfriskSaksopplysningerService: OppfriskSaksopplysningerService,
     private val applicationEventPublisher: ApplicationEventPublisher,
-    private val unleash: Unleash
+    private val saksbehandlingRegler: SaksbehandlingRegler
 ) {
     @Transactional
     fun endre(
@@ -80,14 +77,11 @@ class EndreSakService(
         )
 
         if (sakEndres || behandlingTemaEllerTypeEndres) {
-            if (harTomFlyt(
+            if (saksbehandlingRegler.harTomFlyt(
                     nySakstype,
                     nySakstema,
                     nyBehandlingstype,
-                    nyBehandlingstema,
-                    unleash.isEnabled("melosys.folketrygden.mvp"),
-                    unleash.isEnabled(IKKEYRKESAKTIV_FLYT),
-                    unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP)
+                    nyBehandlingstema
                 )
             ) {
                 mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id)

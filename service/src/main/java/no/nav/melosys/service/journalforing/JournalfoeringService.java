@@ -18,7 +18,6 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -42,7 +41,6 @@ import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
 import static no.nav.melosys.service.journalforing.UtledBehandlingsaarsak.utledÅrsaktype;
-import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.*;
 
 @Service
 public class JournalfoeringService {
@@ -54,7 +52,6 @@ public class JournalfoeringService {
     private final FagsakService fagsakService;
     private final PersondataFasade persondataFasade;
     private final LovligeKombinasjonerService lovligeKombinasjonerService;
-    private final Unleash unleash;
     private final SaksbehandlingRegler saksbehandlingRegler;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
@@ -75,7 +72,6 @@ public class JournalfoeringService {
         this.fagsakService = fagsakService;
         this.persondataFasade = persondataFasade;
         this.lovligeKombinasjonerService = lovligeKombinasjonerService;
-        this.unleash = unleash;
         this.saksbehandlingRegler = saksbehandlingRegler;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -319,15 +315,10 @@ public class JournalfoeringService {
     }
 
     private boolean skalSetteSøknadslandOgPeriode(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
-        var registreringUnntakFraMedlemskapToggleEnabled = unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP);
-        var ikkeYrkesaktivFlytToggleEnabled = unleash.isEnabled(ToggleName.IKKEYRKESAKTIV_FLYT);
-        var erAnmodningOmUnntakEllerRegistreringUnntak = harRegistreringUnntakFraMedlemskapFlyt(sakstype, sakstema, behandlingstema, registreringUnntakFraMedlemskapToggleEnabled);
-        var erIkkeYrkesaktiv = harIkkeYrkesaktivFlyt(sakstype, behandlingstema, ikkeYrkesaktivFlytToggleEnabled);
-
         return erSakstypeEøs(sakstype)
-            && !harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"), ikkeYrkesaktivFlytToggleEnabled, registreringUnntakFraMedlemskapToggleEnabled)
-            && !erAnmodningOmUnntakEllerRegistreringUnntak
-            && !erIkkeYrkesaktiv;
+            && !saksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema)
+            && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(sakstype, sakstema, behandlingstema)
+            && !saksbehandlingRegler.harIkkeYrkesaktivFlyt(sakstype, behandlingstema);
     }
 
     private ProsessType finnProsessTypeForAndregangsbehandling(Behandlingstyper behandlingstype, Behandlingstema behandlingstema, Fagsak fagsak) {

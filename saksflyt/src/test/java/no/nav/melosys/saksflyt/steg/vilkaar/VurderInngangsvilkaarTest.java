@@ -17,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,23 +34,22 @@ class VurderInngangsvilkaarTest {
     private InngangsvilkaarService inngangsvilkaarService;
     @Mock
     private BehandlingService behandlingService;
+    @Mock
+    private SaksbehandlingRegler saksbehandlingRegler;
 
     private VurderInngangsvilkaar vurderInngangsvilkaar;
 
     private final long behandlingID = 143;
     private final Behandling behandling = new Behandling();
-    private final FakeUnleash unleash = new FakeUnleash();
 
     @BeforeEach
     public void setUp() {
-        vurderInngangsvilkaar = new VurderInngangsvilkaar(inngangsvilkaarService, behandlingService, unleash);
+        vurderInngangsvilkaar = new VurderInngangsvilkaar(inngangsvilkaarService, behandlingService, saksbehandlingRegler);
 
         behandling.setId(behandlingID);
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
-
-        unleash.enableAll();
     }
 
     @Test
@@ -109,7 +109,7 @@ class VurderInngangsvilkaarTest {
 
     @Test
     void utfør_behandlingstemaBeslutningLovvalgAnnetLandToggleAv_vurdererIkkeInngangsvilkår() {
-        unleash.disableAll();
+        when(saksbehandlingRegler.harTomFlyt(any())).thenReturn(false);
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         behandling.setType(Behandlingstyper.NY_VURDERING);

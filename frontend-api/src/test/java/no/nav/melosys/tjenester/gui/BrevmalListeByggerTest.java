@@ -25,6 +25,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.BrevmalListeService;
 import no.nav.melosys.service.brev.bestilling.HentBrevAdresseTilMottakereService;
 import no.nav.melosys.service.brev.bestilling.HentMuligeProduserbaredokumenterService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.tjenester.gui.dto.brev.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,8 @@ class BrevmalListeByggerTest {
     private HentBrevAdresseTilMottakereService hentBrevAdresseTilMottakereService;
     @Mock
     private BehandlingService behandlingService;
+    @Mock
+    private SaksbehandlingRegler saksbehandlingRegler;
 
     private BrevmalListeBygger brevmalListeBygger;
 
@@ -58,7 +61,7 @@ class BrevmalListeByggerTest {
             hentMuligeProduserbaredokumenterService,
             hentBrevAdresseTilMottakereService);
 
-        brevmalListeBygger = new BrevmalListeBygger(brevmalListeService, behandlingService, new FakeUnleash());
+        brevmalListeBygger = new BrevmalListeBygger(brevmalListeService, behandlingService, saksbehandlingRegler);
     }
 
     @Test
@@ -151,6 +154,7 @@ class BrevmalListeByggerTest {
     void byggBrevmalDtoListe_behandlingHarTomFlyt_returnererIkkeArbeidsgiverArbeidsgiversFullmektig() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.HENVENDELSE));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.HENVENDELSE));
+        when(saksbehandlingRegler.harTomFlyt(any())).thenReturn(true);
 
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);

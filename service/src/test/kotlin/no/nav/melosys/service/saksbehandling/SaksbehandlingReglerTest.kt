@@ -16,6 +16,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.repository.BehandlingsresultatRepository
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
@@ -33,6 +34,13 @@ class SaksbehandlingReglerTest {
     lateinit var behandlingsresultatRepository: BehandlingsresultatRepository
 
     private val unleash = FakeUnleash()
+
+    private lateinit var saksbehandlingRegler: SaksbehandlingRegler
+
+    @BeforeEach
+    fun setUp() {
+        saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository, unleash)
+    }
 
     @ParameterizedTest(name = "{0} - {1} - {2} - {3}")
     @MethodSource("tidligereBehandlingSkalIkkeReplikeresData")
@@ -369,8 +377,13 @@ class SaksbehandlingReglerTest {
         toggle: Boolean,
         forventetResultat: Boolean
     ) {
-        SaksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(
-            sakstype, sakstema, behandlingstema, toggle
+        if (toggle) {
+            unleash.enableAll()
+        } else {
+            unleash.disableAll()
+        }
+        saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(
+            sakstype, sakstema, behandlingstema
         ).shouldBe(forventetResultat)
     }
 
