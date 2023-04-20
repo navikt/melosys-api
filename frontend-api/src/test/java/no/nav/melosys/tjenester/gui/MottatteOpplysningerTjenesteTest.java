@@ -68,18 +68,18 @@ public class MottatteOpplysningerTjenesteTest {
     }
 
     @Test
-    void hentMottatteOpplysninger() throws Exception {
+    void hentEllerOpprettMottatteOpplysninger() throws Exception {
         Soeknad soeknad = random.nextObject(Soeknad.class);
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setType(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS);
         mottatteOpplysninger.setMottatteOpplysningerdata(soeknad);
-        when(mottatteOpplysningerService.hentMottatteOpplysninger(anyLong())).thenReturn(mottatteOpplysninger);
+        when(mottatteOpplysningerService.hentEllerOpprettMottatteOpplysninger(anyLong())).thenReturn(mottatteOpplysninger);
 
         mockMvc.perform(get(BASE_URL + "/{behandlingID}", 1L)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(mottatteOpplysningerService).hentMottatteOpplysninger(anyLong());
+        verify(mottatteOpplysningerService).hentEllerOpprettMottatteOpplysninger(anyLong());
     }
 
     @Test

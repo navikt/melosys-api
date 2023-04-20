@@ -20,6 +20,7 @@ import no.nav.melosys.domain.arkiv.Journalpost
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.*
@@ -31,14 +32,18 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.repository.MottatteOpplysningerRepository
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.UtledMottaksdato
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.Mockito
+import org.mockito.junit.jupiter.MockitoExtension
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.util.*
 
 @ExtendWith(MockKExtension::class)
+@ExtendWith(MockitoExtension::class)
 internal class MottatteOpplysningerServiceTest {
     @MockK
     private lateinit var mottatteOpplysningerRepositoryMock: MottatteOpplysningerRepository
@@ -82,6 +87,47 @@ internal class MottatteOpplysningerServiceTest {
         shouldThrow<IkkeFunnetException> {
             mottatteOpplysningerServiceSpy.hentMottatteOpplysninger(1)
         }.shouldHaveMessage("Finner ikke mottatteOpplysninger for behandling 1")
+    }
+
+    @Test
+    fun hentEllerOpprettMottatteOpplysninger_finnesIkkeAktivBehandling_opprettMottatteOpplysninger() {
+        every { mottatteOpplysningerRepositoryMock.findByBehandling_Id(1) } returns Optional.empty()
+    }
+
+    @Test
+    fun hentEllerOpprettMottatteOpplysninger_finnesIkkeTomFlyt_kastException() {
+        mockkStatic(SaksbehandlingRegler::class)
+        every { SaksbehandlingRegler.harTomFlyt(any(), any(), any(), any()) } returns true
+        every { mottatteOpplysningerRepositoryMock.findByBehandling_Id(behandlingID) } returns Optional.empty()
+        every { behandlingServiceMock.hentBehandling(behandlingID) } returns lagBehandling(
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.YRKESAKTIV
+        ).apply {
+            status = Behandlingsstatus.OPPRETTET
+        }
+
+        shouldThrow<IkkeFunnetException> {
+            mottatteOpplysningerServiceSpy.hentEllerOpprettMottatteOpplysninger(behandlingID)
+        }.shouldHaveMessage("Finner ikke mottatteOpplysninger for behandling ${behandlingID}")
+    }
+
+    @Test
+    fun hentEllerOpprettMottatteOpplysninger_finnesIkkeInaktivBehandling_kastException() {
+        mockkStatic(SaksbehandlingRegler::class)
+        every { SaksbehandlingRegler.harTomFlyt(any(), any(), any(), any()) } returns false
+        every { mottatteOpplysningerRepositoryMock.findByBehandling_Id(behandlingID) } returns Optional.empty()
+        every { behandlingServiceMock.hentBehandling(behandlingID) } returns lagBehandling(
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.YRKESAKTIV
+        ).apply {
+            status = Behandlingsstatus.AVSLUTTET
+        }
+
+        shouldThrow<IkkeFunnetException> {
+            mottatteOpplysningerServiceSpy.hentEllerOpprettMottatteOpplysninger(behandlingID)
+        }.shouldHaveMessage("Finner ikke mottatteOpplysninger for behandling ${behandlingID}")
     }
 
     @Test
@@ -177,7 +223,7 @@ internal class MottatteOpplysningerServiceTest {
                 periode.shouldBe(periode)
                 soeknadsland.shouldBe(soeknadsland)
             }
-            mottaksdato.shouldBe(mottatDato)
+            mottaksdato.shouldBe(mottattDato)
         }
     }
 
@@ -280,7 +326,7 @@ internal class MottatteOpplysningerServiceTest {
         slot.captured.apply {
             type.shouldBe(Mottatteopplysningertyper.SED)
             behandling.shouldBe(behandling)
-            mottaksdato.shouldBe(mottatDato)
+            mottaksdato.shouldBe(mottattDato)
             mottatteOpplysningerData.shouldBeInstanceOf<SedGrunnlag>()
         }
     }
@@ -310,7 +356,7 @@ internal class MottatteOpplysningerServiceTest {
             mottatteOpplysningerData.shouldBeInstanceOf<SoeknadFtrl>()
             this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN)
             this.behandling.shouldBe(behandling)
-            mottaksdato.shouldBe(mottatDato)
+            mottaksdato.shouldBe(mottattDato)
             mottatteOpplysningerData.apply {
                 this.periode.shouldBe(periode)
                 this.soeknadsland.shouldBe(soeknadsland)
@@ -344,7 +390,7 @@ internal class MottatteOpplysningerServiceTest {
             mottatteOpplysningerData.shouldBeInstanceOf<SoeknadTrygdeavtale>()
             this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE)
             this.behandling.shouldBe(behandling)
-            mottaksdato.shouldBe(mottatDato)
+            mottaksdato.shouldBe(mottattDato)
             mottatteOpplysningerData.apply {
                 this.periode.shouldBe(periode)
                 this.soeknadsland.shouldBe(soeknadsland)
@@ -433,11 +479,17 @@ internal class MottatteOpplysningerServiceTest {
         )
 
 
-        mottatteOpplysningerServiceSpy.opprettSøknadEllerAnmodningEllerAttest(Prosessinstans().apply { this.behandling = behandling })
+        mottatteOpplysningerServiceSpy.opprettSøknadEllerAnmodningEllerAttest(Prosessinstans().apply {
+            this.behandling = behandling
+        })
 
 
         verify {
-            mottatteOpplysningerServiceSpy.opprettSøknadEllerAnmodningEllerAttest(any(), isNull(inverse = true), isNull(inverse = true))
+            mottatteOpplysningerServiceSpy.opprettSøknadEllerAnmodningEllerAttest(
+                any(),
+                isNull(inverse = true),
+                isNull(inverse = true)
+            )
         }
     }
 
@@ -455,7 +507,7 @@ internal class MottatteOpplysningerServiceTest {
 
     private fun lagJournalpost(behandling: Behandling) =
         Journalpost(behandling.initierendeJournalpostId).apply {
-            forsendelseMottatt = mottatDato.atStartOfDay().toInstant(ZoneOffset.UTC)
+            forsendelseMottatt = mottattDato.atStartOfDay().toInstant(ZoneOffset.UTC)
         }
 
     private fun lagBehandling(sakstype: Sakstyper, sakstemaer: Sakstemaer, tema: Behandlingstema) =
@@ -482,6 +534,6 @@ internal class MottatteOpplysningerServiceTest {
 
     companion object {
         private const val behandlingID: Long = 123332211
-        private val mottatDato = LocalDate.of(2003, 3, 3)
+        private val mottattDato = LocalDate.of(2003, 3, 3)
     }
 }
