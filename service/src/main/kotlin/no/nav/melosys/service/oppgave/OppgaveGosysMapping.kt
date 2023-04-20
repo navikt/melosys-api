@@ -35,7 +35,7 @@ internal class OppgaveGosysMapping {
         sakstype: Sakstyper,
         behandlingstema: Behandlingstema,
     ): Oppgave? = rows.find {
-        it.sakstype == sakstype && behandlingstema in it.behandlingstema && Behandlingstyper.HENVENDELSE in it.behandlingstype
+        it.sakstype == sakstype && behandlingstema in it.behandlingstema
     }?.oppgave?.let {
         Oppgave(
             oppgaveBehandlingstema = it.oppgaveBehandlingstema,
