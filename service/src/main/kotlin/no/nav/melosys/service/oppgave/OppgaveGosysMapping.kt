@@ -69,6 +69,7 @@ internal class OppgaveGosysMapping {
     )
 
     // Skal være samme data som fylt inn tabellen: https://confluence.adeo.no/display/TEESSI/Oppgaver+i+Gosys
+    // Laget av OppgaveGosysMappingCodeGenerator
     internal val rows by lazy {
         listOf(
             TableRow(

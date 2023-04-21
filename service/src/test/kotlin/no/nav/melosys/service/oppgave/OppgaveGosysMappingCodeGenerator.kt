@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.io.File
 
-@Disabled("Brukes kun for å lage mapping tabell")
+@Disabled("Brukes kun for å lage mapping tabell -> se OppgaveGosysMapping.kt")
 class OppgaveGosysMappingCodeGenerator {
 
     @Test
@@ -59,7 +59,7 @@ class OppgaveGosysMappingCodeGenerator {
         }
     }
 
-    // Lag at av chat GPT-4
+    // Laget av chat GPT-4
     fun parseCsvFile(filePath: String): List<List<String>> {
         val rows = mutableListOf<List<String>>()
         File(filePath).bufferedReader().use { reader ->
