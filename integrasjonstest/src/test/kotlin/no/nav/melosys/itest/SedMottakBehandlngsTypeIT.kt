@@ -7,12 +7,14 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.arkiv.*
 import no.nav.melosys.domain.eessi.*
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.saksflyt.ProsessType
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.melosysmock.journalpost.JournalpostRepo
 import no.nav.melosys.melosysmock.oppgave.OppgaveRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
@@ -44,6 +46,7 @@ class SedMottakBehandlngsTypeIT(
     @Autowired private val journalpostRepo: JournalpostRepo,
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
+    @Autowired private val unleash: FakeUnleash,
 
     @Autowired testDataGenerator: TestDataGenerator,
     @Autowired journalføringService: JournalfoeringService,
@@ -56,10 +59,11 @@ class SedMottakBehandlngsTypeIT(
     @BeforeEach
     fun setup() {
         oppgaveRepo.repo.clear()
+        unleash.resetAll()
     }
 
     @Test
-    fun `A003 skal føre til riktig oppgave i gosys`() {
+    fun `A003 skal føre til riktig oppgave i gosys - uten ny gosys mapping`() {
         val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding(
             bucType = BucType.LA_BUC_02,
             rinaSaksnummer = Random().nextInt(100000).toString(),
@@ -86,6 +90,38 @@ class SedMottakBehandlngsTypeIT(
             }
 
     }
+
+    @Test
+    fun `A003 skal føre til riktig oppgave i gosys - med ny gosys mapping`() {
+        unleash.enable(ToggleName.NY_GOSYS_MAPPING)
+
+        val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding(
+            bucType = BucType.LA_BUC_02,
+            rinaSaksnummer = Random().nextInt(100000).toString(),
+            sedType = SedType.A003,
+            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
+            artikkel = "13_1_a",
+            lovvalgsland = "NO"
+        )
+
+
+        executeAndWait(ProsessType.MOTTAK_SED, listOf(ProsessType.ARBEID_FLERE_LAND_NY_SAK)) {
+            melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
+        }
+
+        oppgaveRepo.repo.values
+            .shouldHaveSize(1)
+            .first()
+            .apply {
+                behandlingstema.shouldBe(OppgaveBehandlingstema.EU_EOS_NORGE_ER_UTPEKT_SOM_LOVVALGSLAND.kode)
+                behandlingstype.shouldBe(null)
+                // eksempel: --- 18.04.2023 08:22 (srvmelosys, Melosys) ---\n A003 - MEL-41\n
+                beskrivelse.shouldContain("A003")
+                oppgavetype.shouldBe(Oppgavetyper.BEH_SED.kode)
+            }
+
+    }
+
 
     @Test
     fun `A003 andre gangsbehandling`() {
@@ -128,7 +164,7 @@ class SedMottakBehandlngsTypeIT(
     @Test
     @Disabled
     fun `A003 lag data og skriv ut så det kan brukes i mock`() {
-        `A003 skal føre til riktig oppgave i gosys`()
+        `A003 skal føre til riktig oppgave i gosys - uten ny gosys mapping`()
 
         oppgaveRepo.repo.forEach {
             println(it.toJsonNode.toPrettyString())

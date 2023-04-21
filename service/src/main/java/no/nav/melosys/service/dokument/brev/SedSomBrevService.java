@@ -37,8 +37,7 @@ public class SedSomBrevService {
 
     public String lagJournalpostForSendingAvSedSomBrev(SedType sedType,
                                                        Land_iso2 mottakerland,
-                                                       Behandling behandling)
-        {
+                                                       Behandling behandling) {
         return lagJournalpostForSendingAvSedSomBrev(sedType, mottakerland, behandling, Collections.emptyList());
     }
 
@@ -51,11 +50,11 @@ public class SedSomBrevService {
         String institusjonID = utenlandskMyndighet.hentInstitusjonID();
         String brukerFnr = persondataFasade.hentFolkeregisterident(fagsak.hentBrukersAktørID());
         byte[] sedPdf = eessiService.genererSedPdf(behandling.getId(), sedType);
-        var tema = oppgaveFactory.utledTema(behandling.getFagsak().getTema());
+        var tema = oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema());
 
         OpprettJournalpost opprettJournalpost = OpprettJournalpost.lagJournalpostForSendingAvSedSomBrev(
-            fagsak.getSaksnummer(), brukerFnr, sedType, sedPdf, institusjonID,
-            utenlandskMyndighet.navn, mottakerland.getKode(), vedlegg, tema
+                fagsak.getSaksnummer(), brukerFnr, sedType, sedPdf, institusjonID,
+                utenlandskMyndighet.navn, mottakerland.getKode(), vedlegg, tema
         );
         return joarkFasade.opprettJournalpost(opprettJournalpost, true);
     }

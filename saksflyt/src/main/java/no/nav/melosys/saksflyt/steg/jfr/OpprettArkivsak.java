@@ -50,7 +50,7 @@ public class OpprettArkivsak implements StegBehandler {
         Optional<String> aktørId = fagsak.finnBrukersAktørID();
         Optional<String> virksomhetOrgnr = fagsak.finnVirksomhetsOrgnr();
 
-        var tema = oppgaveFactory.utledTema(behandling.getFagsak().getTema());
+        var tema = oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema());
 
         Long arkivsakID;
         if (aktørId.isPresent()) {

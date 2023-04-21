@@ -1,6 +1,7 @@
 package no.nav.melosys.itest
 
 import io.kotest.assertions.extracting
+import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainInOrder
@@ -19,6 +20,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.saksflyt.ProsessStatus
 import no.nav.melosys.domain.saksflyt.ProsessType
 import no.nav.melosys.domain.saksflyt.Prosessinstans
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.melosysmock.melosyseessi.MelosysEessiRepo
 import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.repository.BehandlingsresultatRepository
@@ -65,7 +67,41 @@ class SedMottakTestIT(
     @BeforeEach
     fun setup() {
         SakRepo.clear()
+        unleash.resetAll()
         MelosysEessiRepo.sedRepo.clear()
+    }
+
+    @Test
+    fun `alt skal fungere med NY_GOSYS_MAPPING toggle på`() {
+        val setupOgLeggNyGosysMappingToggle = {
+            setup()
+            unleash.enable(ToggleName.NY_GOSYS_MAPPING)
+        }
+        withClue("A009 med etterfølgende X006 skal gi fagsak annulert") {
+            setupOgLeggNyGosysMappingToggle()
+            `A009 med etterfølgende X006 skal gi fagsak annulert`()
+        }
+        withClue("A003 med etterfølgende X006 og lovvalgsland er NO skal gi manuelt behandling") {
+            setupOgLeggNyGosysMappingToggle()
+            `A003 med etterfølgende X006 og lovvalgsland er NO skal gi manuelt behandling`()
+        }
+        withClue("A003 med etterfølgende X008 og lovvalgsland er NO skal gi manuelt behandling") {
+            setupOgLeggNyGosysMappingToggle()
+            `A003 med etterfølgende X008 og lovvalgsland er NO skal gi manuelt behandling`()
+        }
+        withClue("mottaSED_mottar3SED_blirBehandletEtterHverandre") {
+            setupOgLeggNyGosysMappingToggle()
+            mottaSED_mottar3SED_blirBehandletEtterHverandre()
+        }
+        // TODO: finn ut hvorfor disse 2 ikke kan kjøres 2 ganger. Fungere heller ikke uten ny toggle
+        withClue("Motta A003, godkjenne med A012, ugyldiggjøre godkjenning A012 med X008 for så å sende en A004") {
+            setupOgLeggNyGosysMappingToggle()
+//            `Motta A003, godkjenne med A012, ugyldiggjøre godkjenning A012 med X008 for så å sende en A004`()
+        }
+        withClue("Motta A003, avvise med A004, ugyldiggjøre avvisning A004 med X008 for så å sende en A012") {
+            setupOgLeggNyGosysMappingToggle()
+//            `Motta A003, avvise med A004, ugyldiggjøre avvisning A004 med X008 for så å sende en A012`()
+        }
     }
 
     @Test
@@ -185,7 +221,7 @@ class SedMottakTestIT(
 
         val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding(
             BucType.LA_BUC_02, ref, SedType.A003, Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
-            "13_1_a",  "NO"
+            "13_1_a", "NO"
         )
         val eessiMeldingX006 = eessiMeldingTestDataFactory.melosysEessiMelding(
             BucType.LA_BUC_02,
@@ -239,7 +275,7 @@ class SedMottakTestIT(
 
         val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding(
             BucType.LA_BUC_02, ref, SedType.A003, Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
-            "13_1_a",  "NO"
+            "13_1_a", "NO"
         )
         val eessiMeldingX008 = eessiMeldingTestDataFactory.melosysEessiMelding(
             BucType.LA_BUC_02, ref, SedType.X008, null, null

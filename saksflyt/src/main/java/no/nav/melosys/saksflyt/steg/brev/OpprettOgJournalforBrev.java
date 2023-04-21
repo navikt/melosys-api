@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.*;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -88,7 +89,8 @@ public class OpprettOgJournalforBrev implements StegBehandler {
         Produserbaredokumenter produserbartDokument = brevbestilling.getProduserbartdokument();
 
         byte[] pdf = dokgenService.produserBrev(mottaker, brevbestilling);
-        List<Vedlegg> vedlegg = hentVedlegg(brevbestilling, behandling.getFagsak().getSaksnummer(), mottaker);
+        Fagsak fagsak = behandling.getFagsak();
+        List<Vedlegg> vedlegg = hentVedlegg(brevbestilling, fagsak.getSaksnummer(), mottaker);
         log.info("Produserbartdokument {} for behandling {} produsert", produserbartDokument, behandling.getId());
 
         DokumentproduksjonsInfo dokumentproduksjonsInfo = dokgenService.hentDokumentInfo(produserbartDokument);
@@ -100,13 +102,13 @@ public class OpprettOgJournalforBrev implements StegBehandler {
                 .medMottakerNavn(utledNavn(mottakerID, mottakerType))
                 .medMottakerId(mottakerType == MottakerType.PERSON_MED_AKTØR_ID ? persondataFasade.hentFolkeregisterident(mottakerID) : mottakerID)
                 .medMottakerIdType(utledMottakerIdType(mottakerType))
-                .medSaksnummer(behandling.getFagsak().getSaksnummer())
+                .medSaksnummer(fagsak.getSaksnummer())
                 .medPdf(pdf)
                 .medVedlegg(vedlegg);
 
         settHovedpart(behandling, bestilling);
 
-        String journalpostId = joarkFasade.opprettJournalpost(OpprettJournalpost.lagJournalpostForBrev(bestilling.build(), oppgaveFactory.utledTema(behandling.getFagsak().getTema())), true);
+        String journalpostId = joarkFasade.opprettJournalpost(OpprettJournalpost.lagJournalpostForBrev(bestilling.build(), oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema())), true);
 
         log.info("Brev for behandling {} er journalført, journalpostId {}", behandling.getId(), journalpostId);
         prosessinstans.setData(DISTRIBUERBAR_JOURNALPOST_ID, journalpostId);
