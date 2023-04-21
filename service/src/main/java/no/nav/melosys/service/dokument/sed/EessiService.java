@@ -359,7 +359,7 @@ public class EessiService {
         eessiConsumer.lukkBuc(rinaSaksnummer);
     }
 
-    public void sendInvalideringSed(long behandlingID, String sedTypeSomSkalInvalideres, LocalDate opprettetDato) {
+    private void sendInvalideringSed(long behandlingID, String sedTypeSomSkalInvalideres, LocalDate opprettetDato) {
         var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling, SedType.X008);
@@ -377,8 +377,12 @@ public class EessiService {
     }
 
     private void annullerSedForNyVurderingMedSendtVedtak(Behandling behandling) {
-        finnSedSomSkalInvalideres(behandling.getFagsak().getGsakSaksnummer()).ifPresent(sedInformasjon ->
-            sendInvalideringSed(behandling.getId(), sedInformasjon.getSedType(), sedInformasjon.getOpprettetDato()));
+        try {
+            finnSedSomSkalInvalideres(behandling.getFagsak().getGsakSaksnummer()).ifPresent(sedInformasjon ->
+                sendInvalideringSed(behandling.getId(), sedInformasjon.getSedType(), sedInformasjon.getOpprettetDato()));
+        } catch (Exception e) {
+            log.warn(String.format("Forsøkte å sende SED %s for behandling %s, men feilet i melosys-eessi.", SedType.X008, behandling.getId()), e);
+        }
     }
 
     private Optional<SedInformasjon> finnSedSomSkalInvalideres(long rinasaksnummer) {

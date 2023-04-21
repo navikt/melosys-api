@@ -4,7 +4,6 @@ import java.util.*;
 
 import com.google.common.collect.Sets;
 import no.finn.unleash.FakeUnleash;
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
@@ -16,14 +15,17 @@ import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Institusjon;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.eessi.sed.SedDataDto;
 import no.nav.melosys.domain.eessi.sed.UtpekingAvvisDto;
 import no.nav.melosys.domain.kodeverk.Anmodningsperiodesvartyper;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IntegrasjonException;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
@@ -392,6 +394,54 @@ class EessiServiceTest {
         verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.LOVVALGSPERIODE));
         verify(dokumentdataGrunnlagFactory).av(any(), any());
         verify(eessiConsumer).sendSedPåEksisterendeBuc(any(SedDataDto.class), any(), eq(SedType.A012));
+    }
+
+    @Test
+    void sendGodkjenningArbeidFlereLand__feiler_ikke_når_x008_utsending_feiler() {
+        unleash.enable(ToggleName.ANNULER_SED_NY_VURDERING);
+        Behandling behandling = new Behandling();
+        behandling.setId(BEHANDLING_ID);
+        behandling.setType(Behandlingstyper.NY_VURDERING);
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setType(SaksopplysningType.SEDOPPL);
+        saksopplysning.setDokument(new SedDokument());
+        behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(dokumentdataGrunnlagFactory.av(any(), any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
+        when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
+        mockBehandlingsresultat();
+
+        eessiService.sendGodkjenningArbeidFlereLand(BEHANDLING_ID, null);
+
+        verify(behandlingService).hentBehandlingMedSaksopplysninger(BEHANDLING_ID);
+        verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.LOVVALGSPERIODE));
+        verify(dokumentdataGrunnlagFactory).av(any(), any());
+        verify(eessiConsumer).sendSedPåEksisterendeBuc(any(SedDataDto.class), any(), eq(SedType.A012));
+    }
+
+    @Test
+    void sendAvslagUtpekingSvar__feiler_ikke_når_x008_utsending_feiler() {
+        unleash.enable(ToggleName.ANNULER_SED_NY_VURDERING);
+        Behandling behandling = new Behandling();
+        behandling.setId(BEHANDLING_ID);
+        behandling.setType(Behandlingstyper.NY_VURDERING);
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setType(SaksopplysningType.SEDOPPL);
+        saksopplysning.setDokument(new SedDokument());
+        behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
+        when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
+        mockBehandlingsresultat();
+        UtpekingAvvis utpekingAvvis = new UtpekingAvvis();
+        utpekingAvvis.setEtterspørInformasjon(false);
+
+        eessiService.sendAvslagUtpekingSvar(BEHANDLING_ID, utpekingAvvis);
+
+        verify(behandlingService).hentBehandlingMedSaksopplysninger(BEHANDLING_ID);
+        verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.LOVVALGSPERIODE));
+        verify(eessiConsumer).sendSedPåEksisterendeBuc(any(SedDataDto.class), any(), eq(SedType.A004));
     }
 
     @Test
