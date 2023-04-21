@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.sed;
 
+import java.time.LocalDate;
 import java.util.*;
 
 import com.google.common.collect.Sets;
@@ -10,10 +11,7 @@ import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Vedlegg;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
-import no.nav.melosys.domain.eessi.BucInformasjon;
-import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.eessi.Institusjon;
-import no.nav.melosys.domain.eessi.SedType;
+import no.nav.melosys.domain.eessi.*;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.eessi.sed.SedDataDto;
@@ -41,17 +39,13 @@ import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class EessiServiceTest {
@@ -410,25 +404,34 @@ class EessiServiceTest {
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
         behandling.setType(Behandlingstyper.NY_VURDERING);
+        Fagsak fagsak = new Fagsak();
+        fagsak.setGsakSaksnummer(1337L);
+        behandling.setFagsak(fagsak);
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.SEDOPPL);
         saksopplysning.setDokument(new SedDokument());
         behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
 
+        SedInformasjon sedInformasjon = new SedInformasjon("1", "2", LocalDate.now(), LocalDate.now(), "A012", "whatever", null);
+        BucInformasjon bucInformasjon = new BucInformasjon("1", true, "LA_BUC_02", LocalDate.now(), null, List.of(sedInformasjon));
+        List<BucInformasjon> bucInformasjonListe = List.of(bucInformasjon);
+
+        when(eessiConsumer.hentTilknyttedeBucer(eq(1337L), any())).thenReturn(bucInformasjonListe);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(dokumentdataGrunnlagFactory.av(any(), any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
         when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
         mockBehandlingsresultat();
+        doThrow(RuntimeException.class).when(eessiConsumer).sendSedPåEksisterendeBuc(any(), any(), eq(SedType.X008));
 
 
         eessiService.sendGodkjenningArbeidFlereLand(BEHANDLING_ID, null);
 
 
-        verify(behandlingService).hentBehandlingMedSaksopplysninger(BEHANDLING_ID);
+        verify(behandlingService, times(2)).hentBehandlingMedSaksopplysninger(BEHANDLING_ID);
         verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.LOVVALGSPERIODE));
-        verify(dokumentdataGrunnlagFactory).av(any(), any());
+        verify(dokumentdataGrunnlagFactory, times(2)).av(any(), any());
         verify(eessiConsumer).sendSedPåEksisterendeBuc(any(SedDataDto.class), any(), eq(SedType.A012));
     }
 
@@ -438,26 +441,37 @@ class EessiServiceTest {
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
         behandling.setType(Behandlingstyper.NY_VURDERING);
+        behandling.setType(Behandlingstyper.NY_VURDERING);
+        Fagsak fagsak = new Fagsak();
+        fagsak.setGsakSaksnummer(1337L);
+        behandling.setFagsak(fagsak);
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.SEDOPPL);
         saksopplysning.setDokument(new SedDokument());
         behandling.setSaksopplysninger(Collections.singleton(saksopplysning));
 
+        SedInformasjon sedInformasjon = new SedInformasjon("1", "2", LocalDate.now(), LocalDate.now(), "A012", "whatever", null);
+        BucInformasjon bucInformasjon = new BucInformasjon("1", true, "LA_BUC_02", LocalDate.now(), null, List.of(sedInformasjon));
+        List<BucInformasjon> bucInformasjonListe = List.of(bucInformasjon);
+
+        when(eessiConsumer.hentTilknyttedeBucer(eq(1337L), any())).thenReturn(bucInformasjonListe);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(dokumentdataGrunnlagFactory.av(any())).thenReturn(Mockito.mock(SedDataGrunnlagMedSoknad.class));
-        when(sedDataBygger.lagUtkast(any(SedDataGrunnlag.class), any(Behandlingsresultat.class), any(PeriodeType.class))).thenReturn(new SedDataDto());
+        when(sedDataBygger.lagUtkast(any(), any(), any())).thenReturn(new SedDataDto());
         mockBehandlingsresultat();
+        doThrow(RuntimeException.class).when(eessiConsumer).sendSedPåEksisterendeBuc(any(), any(), eq(SedType.X008));
+
 
         UtpekingAvvis utpekingAvvis = new UtpekingAvvis();
         utpekingAvvis.setEtterspørInformasjon(false);
 
-
         eessiService.sendAvslagUtpekingSvar(BEHANDLING_ID, utpekingAvvis);
 
 
-        verify(behandlingService).hentBehandlingMedSaksopplysninger(BEHANDLING_ID);
+        verify(behandlingService, times(2)).hentBehandlingMedSaksopplysninger(BEHANDLING_ID);
         verify(sedDataBygger).lagUtkast(any(SedDataGrunnlag.class), any(), eq(PeriodeType.LOVVALGSPERIODE));
+        verify(dokumentdataGrunnlagFactory, times(1)).av(any(), any());
         verify(eessiConsumer).sendSedPåEksisterendeBuc(any(SedDataDto.class), any(), eq(SedType.A004));
     }
 
