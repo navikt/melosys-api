@@ -1,5 +1,5 @@
 {
-  "URL": "melosys-api.dev.intern.nav.no",
+  "URL": "melosys-api.intern.dev.nav.no",
   "KAFKA_POOL": "nav-dev",
   "VAULT_CLUSTER": "dev",
   "APP_NAME": "melosys",
