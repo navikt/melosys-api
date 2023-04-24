@@ -47,7 +47,6 @@ class AdminFjernmottakerSedRuterTest {
     @Mock
     private BehandlingService behandlingService;
 
-    private final FakeUnleash fakeUnleash = new FakeUnleash();
     private AdminFjernmottakerSedRuter adminFjernmottakerSedRuter;
 
     private final long behandlingID = 111;
@@ -58,7 +57,7 @@ class AdminFjernmottakerSedRuterTest {
     @BeforeEach
     void setup() {
         adminFjernmottakerSedRuter = new AdminFjernmottakerSedRuter(fagsakService, prosessinstansService, oppgaveService,
-            behandlingsresultatService, medlPeriodeService, behandlingService, fakeUnleash);
+            behandlingsresultatService, medlPeriodeService, behandlingService);
 
         melosysEessiMelding.setAktoerId("12312412");
         melosysEessiMelding.setRinaSaksnummer("143141");
