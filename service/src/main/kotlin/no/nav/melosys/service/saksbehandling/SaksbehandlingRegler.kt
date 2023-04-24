@@ -92,6 +92,16 @@ class SaksbehandlingRegler(
     }
 
     fun harRegistreringUnntakFraMedlemskapFlyt(
+        behandling: Behandling
+    ): Boolean {
+        return harRegistreringUnntakFraMedlemskapFlyt(
+            behandling.fagsak.type,
+            behandling.fagsak.tema,
+            behandling.tema
+        )
+    }
+
+    fun harRegistreringUnntakFraMedlemskapFlyt(
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema
@@ -122,16 +132,6 @@ class SaksbehandlingRegler(
             return true
         }
         return false
-    }
-
-    fun harRegistreringUnntakFraMedlemskapFlyt(
-        behandling: Behandling
-    ): Boolean {
-        return harRegistreringUnntakFraMedlemskapFlyt(
-            behandling.fagsak.type,
-            behandling.fagsak.tema,
-            behandling.tema
-        )
     }
 
     companion object {

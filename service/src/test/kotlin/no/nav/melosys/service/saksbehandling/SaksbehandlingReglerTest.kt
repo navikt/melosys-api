@@ -16,6 +16,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.repository.BehandlingsresultatRepository
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.extension.ExtendWith
@@ -40,6 +41,11 @@ class SaksbehandlingReglerTest {
     @BeforeEach
     fun setUp() {
         saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository, unleash)
+    }
+
+    @AfterEach
+    fun afterEach() {
+        unleash.resetAll()
     }
 
     @ParameterizedTest(name = "{0} - {1} - {2} - {3}")

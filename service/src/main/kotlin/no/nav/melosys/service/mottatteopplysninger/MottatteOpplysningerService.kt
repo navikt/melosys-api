@@ -96,8 +96,7 @@ class MottatteOpplysningerService(
 
     private fun opprettSøknad(behandling: Behandling, periode: Periode?, soeknadsland: Soeknadsland?) {
         val behandlingID = behandling.id
-        val harTomFlyt = saksbehandlingRegler.harTomFlyt(behandling)
-        if (harTomFlyt) {
+        if (saksbehandlingRegler.harTomFlyt(behandling)) {
             log.info { "Søknad trengs ikke og opprettes ikke for behandling $behandlingID med tema ${behandling.tema}" }
             return
         }
