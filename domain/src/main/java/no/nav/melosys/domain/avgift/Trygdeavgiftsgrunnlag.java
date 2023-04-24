@@ -43,8 +43,10 @@ public class Trygdeavgiftsgrunnlag {
         return skatteforholdTilNorge;
     }
 
-    public void setSkatteforholdTilNorge(Set<SkatteforholdTilNorge> skattefoholdTilNorge) {
-        this.skatteforholdTilNorge = skattefoholdTilNorge;
+    public void setSkatteforholdTilNorge(Set<SkatteforholdTilNorge> skatteforholdTilNorge) {
+        this.skatteforholdTilNorge.clear();
+        skatteforholdTilNorge.forEach(forhold -> forhold.setTrygdeavgiftsgrunnlag(this));
+        this.skatteforholdTilNorge.addAll(skatteforholdTilNorge);
     }
 
     public Set<Inntektsperiode> getInntektsperioder() {
@@ -52,6 +54,8 @@ public class Trygdeavgiftsgrunnlag {
     }
 
     public void setInntektsperioder(Set<Inntektsperiode> inntektsperioder) {
-        this.inntektsperioder = inntektsperioder;
+        this.inntektsperioder.clear();
+        inntektsperioder.forEach(periode -> periode.setTrygdeavgiftsgrunnlag(this));
+        this.inntektsperioder.addAll(inntektsperioder);
     }
 }

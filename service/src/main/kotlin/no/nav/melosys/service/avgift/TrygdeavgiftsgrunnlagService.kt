@@ -1,9 +1,11 @@
 package no.nav.melosys.service.avgift
 
+import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
@@ -19,7 +21,7 @@ import java.time.LocalDate
 class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: BehandlingsresultatService) {
 
     @Transactional
-    fun oppdaterTrygdeavgiftsgrunnlaget(
+    fun oppdaterTrygdeavgiftsgrunnlag(
         behandlingsresultatID: Long, request: OppdaterTrygdeavgiftsgrunnlagRequest
     ): Trygdeavgiftsgrunnlag {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
@@ -30,46 +32,52 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
             throw FunksjonellException("Kan ikke oppdatere trygdeavgiftsgrunnlaget før medlemskapsperioder finnes")
         }
 
-        val fastsattTrygdeavgift = medlemAvFolketrygden.fastsattTrygdeavgift ?: FastsattTrygdeavgift().apply {
-            this.trygdeavgiftstype = Trygdeavgift_typer.FORELØPIG
-        }
-        val trygdeavgiftsgrunnlag = fastsattTrygdeavgift.trygdeavgiftsgrunnlag ?: Trygdeavgiftsgrunnlag()
+        val fomDato = utledFomDato(medlemskapsperioder)
+        val tomDato = utledTomDato(medlemskapsperioder)
 
-        val fomDato = medlemskapsperioder.minByOrNull { it.fom }?.fom
-            ?: throw FunksjonellException("Klarte ikke finne startdatoen på medlemskapet")
-        val tomDato = medlemskapsperioder.maxByOrNull { it.tom }?.tom
-            ?: throw FunksjonellException("Klarte ikke finne sluttdatoen på medlemskapet")
-
-        fastsattTrygdeavgift.trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlag.apply {
-            this.skatteforholdTilNorge.clear()
-            this.skatteforholdTilNorge.add(lagSkatteforholdTilNorge(request, fomDato, tomDato, trygdeavgiftsgrunnlag))
-            this.inntektsperioder.clear()
-            this.inntektsperioder.addAll(lagInntektsperioder(request, fomDato, tomDato, trygdeavgiftsgrunnlag))
-        }
-        medlemAvFolketrygden.fastsattTrygdeavgift = fastsattTrygdeavgift
+        medlemAvFolketrygden.fastsattTrygdeavgift = eksisterendeEllerNyFastsattTrygdeavgift(medlemAvFolketrygden)
+        medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag =
+            eksisterendeEllerNyttTrygdeavgiftsgrunnlag(medlemAvFolketrygden).apply {
+                this.skatteforholdTilNorge = lagSkatteforholdTilNorge(request, fomDato, tomDato)
+                this.inntektsperioder = lagInntektsperioder(request, fomDato, tomDato)
+            }
         behandlingsresultatService.lagre(behandlingsresultat)
 
-        return hentTrygdeavgiftsgrunnlaget(behandlingsresultatID)
+        return hentTrygdeavgiftsgrunnlag(behandlingsresultatID)
             ?: throw FunksjonellException("Noe skjedde ved lagring av trygdeavgiftsgrunnlaget")
     }
+
+    private fun utledFomDato(medlemskapsperioder: Collection<Medlemskapsperiode>): LocalDate =
+        medlemskapsperioder.minByOrNull { it.fom }?.fom
+            ?: throw FunksjonellException("Klarte ikke finne startdatoen på medlemskapet")
+
+    private fun utledTomDato(medlemskapsperioder: Collection<Medlemskapsperiode>): LocalDate =
+        medlemskapsperioder.maxByOrNull { it.tom }?.tom
+            ?: throw FunksjonellException("Klarte ikke finne sluttdatoen på medlemskapet")
+
+    private fun eksisterendeEllerNyFastsattTrygdeavgift(medlemAvFolketrygden: MedlemAvFolketrygden): FastsattTrygdeavgift =
+        medlemAvFolketrygden.fastsattTrygdeavgift ?: FastsattTrygdeavgift().apply {
+            this.trygdeavgiftstype = Trygdeavgift_typer.FORELØPIG
+        }
+
+    private fun eksisterendeEllerNyttTrygdeavgiftsgrunnlag(medlemAvFolketrygden: MedlemAvFolketrygden): Trygdeavgiftsgrunnlag =
+        medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag ?: Trygdeavgiftsgrunnlag()
+
 
     private fun lagSkatteforholdTilNorge(
         request: OppdaterTrygdeavgiftsgrunnlagRequest,
         fomDato: LocalDate,
         tomDato: LocalDate,
-        trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag
-    ): SkatteforholdTilNorge = SkatteforholdTilNorge().apply {
+    ): Set<SkatteforholdTilNorge> = setOf(SkatteforholdTilNorge().apply {
         this.fomDato = fomDato
         this.tomDato = tomDato
         this.skatteplikttype = request.skatteplikttype
-        this.trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlag
-    }
+    })
 
     private fun lagInntektsperioder(
         request: OppdaterTrygdeavgiftsgrunnlagRequest,
         fomDato: LocalDate,
         tomDato: LocalDate,
-        trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag,
     ): Set<Inntektsperiode> =
         (request.inntektskilder.map { inntektskildeRequest: InntektskildeRequest ->
             Inntektsperiode().apply {
@@ -79,7 +87,6 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
                 this.avgiftspliktigInntektMnd = inntektskildeRequest.avgiftspliktigInntektMnd
                 this.isArbeidsgiversavgiftBetalesTilSkatt = inntektskildeRequest.arbeidsgiversavgiftBetales
                 this.isTrygdeavgiftBetalesTilSkatt = trygdeavgiftBetalesTilSkatt(request.skatteplikttype, this)
-                this.trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlag
             }
         }).toSet()
 
@@ -93,7 +100,7 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
     }
 
     @Transactional(readOnly = true)
-    fun hentTrygdeavgiftsgrunnlaget(behandlingsresultatID: Long): Trygdeavgiftsgrunnlag? {
+    fun hentTrygdeavgiftsgrunnlag(behandlingsresultatID: Long): Trygdeavgiftsgrunnlag? {
         return behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID).getMedlemAvFolketrygden()
             ?.getFastsattTrygdeavgift()?.getTrygdeavgiftsgrunnlag()
     }

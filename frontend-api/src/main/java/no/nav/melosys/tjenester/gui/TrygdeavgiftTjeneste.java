@@ -31,14 +31,14 @@ public class TrygdeavgiftTjeneste {
     }
 
     @PutMapping("/grunnlag")
-    public ResponseEntity<TrygdeavgiftsgrunnlagDto> oppdaterTrygdeavgiftsgrunnlaget(@PathVariable("behandlingID") long behandlingID,
-                                                                                    @RequestBody TrygdeavgiftsgrunnlagDto trygdeavgiftsgrunnlagDto
+    public ResponseEntity<TrygdeavgiftsgrunnlagDto> oppdaterTrygdeavgiftsgrunnlag(@PathVariable("behandlingID") long behandlingID,
+                                                                                  @RequestBody TrygdeavgiftsgrunnlagDto trygdeavgiftsgrunnlagDto
     ) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
         return ResponseEntity.ok(
             TrygdeavgiftsgrunnlagDto.av(
-                trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlaget(behandlingID, trygdeavgiftsgrunnlagDto.tilRequest())
+                trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(behandlingID, trygdeavgiftsgrunnlagDto.tilRequest())
             )
         );
     }
@@ -46,8 +46,8 @@ public class TrygdeavgiftTjeneste {
     @GetMapping("/grunnlag")
     public ResponseEntity<TrygdeavgiftsgrunnlagDto> hentTrygdeavgiftsgrunnlag(@PathVariable("behandlingID") long behandlingID) {
         aksesskontroll.autoriser(behandlingID);
-        var grunnlag = trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlaget(behandlingID);
 
+        var grunnlag = trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlag(behandlingID);
         return grunnlag == null ? ResponseEntity.noContent().build() : ResponseEntity.ok(TrygdeavgiftsgrunnlagDto.av(grunnlag));
     }
 
