@@ -26,9 +26,7 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
         val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
         val medlemskapsperioder = medlemAvFolketrygden.medlemskapsperioder
 
-        if (medlemskapsperioder.isEmpty()) {
-            throw FunksjonellException("Kan ikke oppdatere trygdeavgiftsgrunnlaget før medlemskapsperioder finnes")
-        }
+        valider(medlemskapsperioder, request)
 
         val fomDato = utledFomDato(medlemskapsperioder)
         val tomDato = utledTomDato(medlemskapsperioder)
@@ -43,6 +41,15 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
 
         return hentTrygdeavgiftsgrunnlag(behandlingsresultatID)
             ?: throw FunksjonellException("Noe skjedde ved lagring av trygdeavgiftsgrunnlaget")
+    }
+
+    private fun valider(medlemskapsperioder: Collection<Medlemskapsperiode>, request: OppdaterTrygdeavgiftsgrunnlagRequest) {
+        if (medlemskapsperioder.isEmpty()) {
+            throw FunksjonellException("Kan ikke oppdatere trygdeavgiftsgrunnlaget før medlemskapsperioder finnes")
+        }
+        if (request.inntektskilder.isEmpty()) {
+            throw FunksjonellException("Krever minimum én inntektskilde. Fant ingen.")
+        }
     }
 
     private fun utledFomDato(medlemskapsperioder: Collection<Medlemskapsperiode>): LocalDate =
