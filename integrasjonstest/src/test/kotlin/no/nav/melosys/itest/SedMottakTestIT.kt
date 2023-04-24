@@ -33,6 +33,7 @@ import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.melosys.integrasjon.joark.JoarkFasade
+import no.nav.melosys.melosysmock.medl.MedlRepo
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.untilNotNull
 import org.junit.jupiter.api.BeforeEach
@@ -67,40 +68,37 @@ class SedMottakTestIT(
     @BeforeEach
     fun setup() {
         SakRepo.clear()
-        unleash.resetAll()
+        MedlRepo.repo.clear()
         MelosysEessiRepo.sedRepo.clear()
+        unleash.resetAll()
     }
 
     @Test
     fun `alt skal fungere med NY_GOSYS_MAPPING toggle på`() {
-        val setupOgLeggNyGosysMappingToggle = {
+        fun withClueAndSetupCleanup(clue: String, action: () -> Unit) {
             setup()
             unleash.enable(ToggleName.NY_GOSYS_MAPPING)
+            withClue(clue) {
+                action()
+            }
         }
-        withClue("A009 med etterfølgende X006 skal gi fagsak annulert") {
-            setupOgLeggNyGosysMappingToggle()
+        withClueAndSetupCleanup("A009 med etterfølgende X006 skal gi fagsak annulert") {
             `A009 med etterfølgende X006 skal gi fagsak annulert`()
         }
-        withClue("A003 med etterfølgende X006 og lovvalgsland er NO skal gi manuelt behandling") {
-            setupOgLeggNyGosysMappingToggle()
+        withClueAndSetupCleanup("A003 med etterfølgende X006 og lovvalgsland er NO skal gi manuelt behandling") {
             `A003 med etterfølgende X006 og lovvalgsland er NO skal gi manuelt behandling`()
         }
-        withClue("A003 med etterfølgende X008 og lovvalgsland er NO skal gi manuelt behandling") {
-            setupOgLeggNyGosysMappingToggle()
+        withClueAndSetupCleanup("A003 med etterfølgende X008 og lovvalgsland er NO skal gi manuelt behandling") {
             `A003 med etterfølgende X008 og lovvalgsland er NO skal gi manuelt behandling`()
         }
-        withClue("mottaSED_mottar3SED_blirBehandletEtterHverandre") {
-            setupOgLeggNyGosysMappingToggle()
+        withClueAndSetupCleanup("mottaSED_mottar3SED_blirBehandletEtterHverandre") {
             mottaSED_mottar3SED_blirBehandletEtterHverandre()
         }
-        // TODO: finn ut hvorfor disse 2 ikke kan kjøres 2 ganger. Fungere heller ikke uten ny toggle
-        withClue("Motta A003, godkjenne med A012, ugyldiggjøre godkjenning A012 med X008 for så å sende en A004") {
-            setupOgLeggNyGosysMappingToggle()
-//            `Motta A003, godkjenne med A012, ugyldiggjøre godkjenning A012 med X008 for så å sende en A004`()
+        withClueAndSetupCleanup("Motta A003, godkjenne med A012, ugyldiggjøre godkjenning A012 med X008 for så å sende en A004") {
+            `Motta A003, godkjenne med A012, ugyldiggjøre godkjenning A012 med X008 for så å sende en A004`()
         }
-        withClue("Motta A003, avvise med A004, ugyldiggjøre avvisning A004 med X008 for så å sende en A012") {
-            setupOgLeggNyGosysMappingToggle()
-//            `Motta A003, avvise med A004, ugyldiggjøre avvisning A004 med X008 for så å sende en A012`()
+        withClueAndSetupCleanup("Motta A003, avvise med A004, ugyldiggjøre avvisning A004 med X008 for så å sende en A012") {
+            `Motta A003, avvise med A004, ugyldiggjøre avvisning A004 med X008 for så å sende en A012`()
         }
     }
 
