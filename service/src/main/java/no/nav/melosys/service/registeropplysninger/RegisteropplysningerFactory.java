@@ -1,30 +1,36 @@
 package no.nav.melosys.service.registeropplysninger;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.TekniskException;
-
-import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt;
-import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
+import no.nav.melosys.featuretoggle.ToggleName;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
+import org.springframework.stereotype.Component;
 
 
 // Setter saksopplysningtyper per behandlingstema,
 // iht. https://confluence.adeo.no/display/TEESSI/Saksopplysninger+per+behandlingstema
-public final class RegisteropplysningerFactory {
+@Component
+public class RegisteropplysningerFactory {
 
-    private RegisteropplysningerFactory() {
+    private final SaksbehandlingRegler saksbehandlingRegler;
+    private final Unleash unleash;
+
+    public RegisteropplysningerFactory(SaksbehandlingRegler saksbehandlingRegler, Unleash unleash) {
+        this.saksbehandlingRegler = saksbehandlingRegler;
+        this.unleash = unleash;
     }
 
-    public static RegisteropplysningerRequest.SaksopplysningTyper utledSaksopplysningTyper(
-        Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype,
-        boolean folketrygdenToggleEnabled, boolean ikkeYrkesaktivToggleEnabled, boolean registreringUnntakFraMedlemskapToggleEnabled) {
+    public RegisteropplysningerRequest.SaksopplysningTyper utledSaksopplysningTyper(
+        Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
 
-        if (harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, folketrygdenToggleEnabled, ikkeYrkesaktivToggleEnabled, registreringUnntakFraMedlemskapToggleEnabled)) {
+        if (saksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema)) {
             return ingenSaksopplysningTyper();
         }
-        if (harRegistreringUnntakFraMedlemskapFlyt(sakstype, sakstema, behandlingstema, registreringUnntakFraMedlemskapToggleEnabled)) {
+        if (saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(sakstype, sakstema, behandlingstema)) {
             return hentSaksopplysningTyperForRegistreringUnntakFraMedlemskap();
         }
 
@@ -42,7 +48,7 @@ public final class RegisteropplysningerFactory {
             case BESLUTNING_LOVVALG_NORGE, BESLUTNING_LOVVALG_ANNET_LAND ->
                 hentSaksopplysningTyperForBeslutningOmLovvalg();
             case IKKE_YRKESAKTIV -> {
-                if (ikkeYrkesaktivToggleEnabled) yield hentSaksopplysningTyperForBehandlingAvSøknad();
+                if (unleash.isEnabled(ToggleName.IKKEYRKESAKTIV_FLYT)) yield hentSaksopplysningTyperForBehandlingAvSøknad();
                 throw new TekniskException("Kan ikke utlede relevante saksopplysninger fra behandlingstema " + behandlingstema);
             }
             default -> throw new TekniskException(
@@ -50,7 +56,7 @@ public final class RegisteropplysningerFactory {
         };
     }
 
-    private static RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForBehandlingAvSøknad() {
+    private RegisteropplysningerRequest.SaksopplysningTyper hentSaksopplysningTyperForBehandlingAvSøknad() {
         return RegisteropplysningerRequest.SaksopplysningTyper.builder()
             .arbeidsforholdopplysninger()
             .inntektsopplysninger()

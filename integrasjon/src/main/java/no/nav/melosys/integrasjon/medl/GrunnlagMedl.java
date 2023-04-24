@@ -163,6 +163,7 @@ public enum GrunnlagMedl {
     USA("USA"),
     USA_5_1("USA_5_1"),
     USA_5_2("USA_5_2"),
+    USA_5_3("USA_5_3"),
     USA_5_4("USA_5_4"),
     USA_5_5("USA_5_5"),
     USA_5_6("USA_5_6"),

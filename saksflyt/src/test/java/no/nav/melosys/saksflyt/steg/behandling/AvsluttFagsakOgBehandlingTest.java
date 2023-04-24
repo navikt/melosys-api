@@ -20,12 +20,14 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -40,6 +42,8 @@ class AvsluttFagsakOgBehandlingTest {
     private BehandlingService behandlingService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
+    @Mock
+    private SaksbehandlingRegler saksbehandlingRegler;
 
     private Behandling behandling;
     private Fagsak fagsak;
@@ -50,9 +54,7 @@ class AvsluttFagsakOgBehandlingTest {
 
     @BeforeEach
     public void setUp() {
-        FakeUnleash unleash = new FakeUnleash();
-        unleash.enableAll();
-        avsluttFagsakOgBehandling = new AvsluttFagsakOgBehandling(fagsakService, behandlingService, behandlingsresultatService, unleash);
+        avsluttFagsakOgBehandling = new AvsluttFagsakOgBehandling(fagsakService, behandlingService, behandlingsresultatService, saksbehandlingRegler);
 
         prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.IVERKSETT_VEDTAK_EOS);
@@ -109,6 +111,7 @@ class AvsluttFagsakOgBehandlingTest {
         behandling.setTema(Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR);
         fagsak.setTema(Sakstemaer.UNNTAK);
         when(fagsakService.hentFagsak(saksnummer)).thenReturn(fagsak);
+        when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any())).thenReturn(true);
 
         avsluttFagsakOgBehandling.utfør(prosessinstans);
 

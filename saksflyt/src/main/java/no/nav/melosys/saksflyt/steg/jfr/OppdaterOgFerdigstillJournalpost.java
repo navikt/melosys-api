@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -62,8 +63,9 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
         List<String> logiskeVedleggTitler = prosessinstans.getData(LOGISKE_VEDLEGG_TITLER, List.class);
         Map<String, String> fysiskeVedleggMedTitler = prosessinstans.getData(FYSISKE_VEDLEGG, Map.class);
 
+        Fagsak fagsak = behandling.getFagsak();
         JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder()
-            .medSaksnummer(behandling.getFagsak().getSaksnummer())
+            .medSaksnummer(fagsak.getSaksnummer())
             .medBrukerID(brukerID)
             .medVirksomhetOrgnr(virksomhetOrgnr)
             .medHovedDokumentID(hovedDokumentID)
@@ -74,9 +76,9 @@ public class OppdaterOgFerdigstillJournalpost implements StegBehandler {
             .medMottattDato(mottattDato)
             .medFysiskeVedlegg(fysiskeVedleggMedTitler)
             .medLogiskeVedleggTitler(logiskeVedleggTitler)
-            .medTema(oppgaveFactory.utledTema(behandling.getFagsak().getTema()).getKode())
+            .medTema(oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema()).getKode())
             .build();
         joarkFasade.oppdaterOgFerdigstillJournalpost(journalpostID, journalpostOppdatering);
-        log.info("Oppdatert og ferdigstilt journalpost {} for fagsak: {}", journalpostID, behandling.getFagsak().getSaksnummer());
+        log.info("Oppdatert og ferdigstilt journalpost {} for fagsak: {}", journalpostID, fagsak.getSaksnummer());
     }
 }

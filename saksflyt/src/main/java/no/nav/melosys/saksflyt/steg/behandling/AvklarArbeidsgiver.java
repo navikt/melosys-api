@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
@@ -19,14 +18,12 @@ import no.nav.melosys.service.aktoer.AktoerService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.AVKLAR_ARBEIDSGIVER;
-import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
-import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP;
-import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
 
 @Component
 public class AvklarArbeidsgiver implements StegBehandler {
@@ -37,18 +34,18 @@ public class AvklarArbeidsgiver implements StegBehandler {
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final Unleash unleash;
+    private final SaksbehandlingRegler saksbehandlingRegler;
 
     public AvklarArbeidsgiver(AktoerService aktoerService,
                               AvklarteVirksomheterService avklarteVirksomheterService,
                               BehandlingService behandlingService,
                               BehandlingsresultatService behandlingsresultatService,
-                              Unleash unleash) {
+                              SaksbehandlingRegler saksbehandlingRegler) {
         this.aktoerService = aktoerService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
-        this.unleash = unleash;
+        this.saksbehandlingRegler = saksbehandlingRegler;
     }
 
     public ProsessSteg inngangsSteg() {
@@ -83,7 +80,7 @@ public class AvklarArbeidsgiver implements StegBehandler {
     }
 
     private boolean arbeidsgiverIkkeAvklares(Behandling behandling, Behandlingsresultat resultat) {
-        return harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP))
+        return saksbehandlingRegler.harTomFlyt(behandling)
             || resultat.erAvslagManglendeOpplysninger()
             || erEøsMedArtikkel13(behandling, resultat);
     }

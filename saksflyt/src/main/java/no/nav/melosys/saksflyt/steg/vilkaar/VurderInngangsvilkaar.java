@@ -1,19 +1,15 @@
 package no.nav.melosys.saksflyt.steg.vilkaar;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
-import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP;
-import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
 
 @Component
 public class VurderInngangsvilkaar implements StegBehandler {
@@ -21,12 +17,12 @@ public class VurderInngangsvilkaar implements StegBehandler {
 
     private final InngangsvilkaarService inngangsvilkaarService;
     private final BehandlingService behandlingService;
-    private final Unleash unleash;
+    private final SaksbehandlingRegler saksbehandlingRegler;
 
-    public VurderInngangsvilkaar(InngangsvilkaarService inngangsvilkaarService, BehandlingService behandlingService, Unleash unleash) {
+    public VurderInngangsvilkaar(InngangsvilkaarService inngangsvilkaarService, BehandlingService behandlingService, SaksbehandlingRegler saksbehandlingRegler) {
         this.inngangsvilkaarService = inngangsvilkaarService;
         this.behandlingService = behandlingService;
-        this.unleash = unleash;
+        this.saksbehandlingRegler = saksbehandlingRegler;
     }
 
     @Override
@@ -53,7 +49,7 @@ public class VurderInngangsvilkaar implements StegBehandler {
 
     private boolean skalVurdereInngangsvilkår(Behandling behandling) {
         return behandling.getFagsak().erSakstypeEøs()
-            && !harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP))
+            && !saksbehandlingRegler.harTomFlyt(behandling)
             && behandling.kanResultereIVedtak()
             && behandling.harPeriodeOgLand();
     }

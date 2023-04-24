@@ -2,7 +2,6 @@ package no.nav.melosys.service.mottatteopplysninger
 
 import com.fasterxml.jackson.databind.JsonNode
 import mu.KotlinLogging
-import no.finn.unleash.Unleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -13,12 +12,10 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey
 import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.MottatteOpplysningerRepository
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.UtledMottaksdato
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.Companion.harTomFlyt
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -31,7 +28,7 @@ class MottatteOpplysningerService(
     private val mottatteOpplysningerRepository: MottatteOpplysningerRepository,
     private val behandlingService: BehandlingService,
     private val utledMottaksdato: UtledMottaksdato,
-    private val unleash: Unleash
+    private val saksbehandlingRegler: SaksbehandlingRegler
 ) {
     @Transactional(readOnly = true)
     fun hentMottatteOpplysninger(behandlingID: Long): MottatteOpplysninger =
@@ -41,13 +38,7 @@ class MottatteOpplysningerService(
     fun hentEllerOpprettMottatteOpplysninger(behandlingID: Long): MottatteOpplysninger? =
         finnMottatteOpplysninger(behandlingID).orElseGet {
             val behandling = behandlingService.hentBehandling(behandlingID)
-            if (behandling.erInaktiv() || harTomFlyt(
-                    behandling,
-                    unleash.isEnabled(ToggleName.FOLKETRYGDEN_MVP),
-                    unleash.isEnabled(ToggleName.IKKEYRKESAKTIV_FLYT),
-                    unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP)
-                )
-            ) {
+            if (behandling.erInaktiv() || saksbehandlingRegler.harTomFlyt(behandling)) {
                 throw IkkeFunnetException("Finner ikke mottatteOpplysninger for behandling $behandlingID")
             } else {
                 opprettSøknadEllerAnmodningEllerAttest(behandling, null, null)
@@ -76,14 +67,8 @@ class MottatteOpplysningerService(
         )
     }
 
-    fun opprettSøknadEllerAnmodningEllerAttest(
-        behandling: Behandling, periode: Periode?, soeknadsland: Soeknadsland?
-    ): MottatteOpplysninger? {
-        val harRegistreringUnntakFraMedlemskapFlyt = SaksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(
-            behandling, unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP)
-        )
-
-        if (harRegistreringUnntakFraMedlemskapFlyt) {
+    fun opprettSøknadEllerAnmodningEllerAttest(behandling: Behandling, periode: Periode?, soeknadsland: Soeknadsland?): MottatteOpplysninger? {
+        if (saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)) {
             return opprettAnmodningEllerAttest(behandling, periode, soeknadsland)
         } else {
             return opprettSøknad(behandling, periode, soeknadsland)
@@ -124,13 +109,7 @@ class MottatteOpplysningerService(
         behandling: Behandling, periode: Periode?, soeknadsland: Soeknadsland?
     ): MottatteOpplysninger? {
         val behandlingID = behandling.id
-        val harTomFlyt = SaksbehandlingRegler.harTomFlyt(
-            behandling,
-            unleash.isEnabled("melosys.folketrygden.mvp"),
-            unleash.isEnabled(ToggleName.IKKEYRKESAKTIV_FLYT),
-            unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP)
-        )
-        if (harTomFlyt) {
+        if (saksbehandlingRegler.harTomFlyt(behandling)) {
             log.info { "Søknad trengs ikke og opprettes ikke for behandling $behandlingID med tema ${behandling.tema}" }
             return null
         }

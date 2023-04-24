@@ -343,6 +343,7 @@ class OppgaveServiceTest {
     void opprettEllerGjenbrukBehandlingsoppgave_ingenEksisterendeOppgave_oppgaveBlirOpprettet() {
         Behandling behandling = lagBehandling();
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(utledMottaksdato.getMottaksdato(behandling)).thenReturn(LocalDate.now());
 
 
@@ -361,6 +362,7 @@ class OppgaveServiceTest {
         behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new MottatteOpplysningerData());
         behandling.getMottatteOpplysninger().setType(Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(utledMottaksdato.getMottaksdato(behandling)).thenReturn(LocalDate.now());
 
 
@@ -376,6 +378,7 @@ class OppgaveServiceTest {
         Behandling behandling = lagBehandling();
         behandling.setType(Behandlingstyper.NY_VURDERING);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(utledMottaksdato.getMottaksdato(behandling)).thenReturn(LocalDate.now());
 
 
@@ -419,7 +422,7 @@ class OppgaveServiceTest {
     @Test
     void opprettEllerGjenbrukBehandlingsoppgave_personHarBeskyttelsesbehov_sensitivOppgaveBlirOpprettet() {
         Behandling behandling = lagBehandling();
-        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(persondataFasade.harStrengtFortroligAdresse("aktørID")).thenReturn(true);
         when(utledMottaksdato.getMottaksdato(behandling)).thenReturn(LocalDate.now());
 
@@ -441,6 +444,7 @@ class OppgaveServiceTest {
         when(persondataFasade.harStrengtFortroligAdresse("aktørID")).thenReturn(false);
         when(persondataFasade.harStrengtFortroligAdresse("fnrBarn")).thenReturn(true);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(utledMottaksdato.getMottaksdato(behandling)).thenReturn(LocalDate.now());
 
 
@@ -463,6 +467,7 @@ class OppgaveServiceTest {
 
         when(persondataFasade.harStrengtFortroligAdresse("aktørID")).thenReturn(false);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(oppgaveFasade.finnAvsluttetBehandlingsoppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(oppgave1, oppgave2));
         when(fagsakService.hentFagsak(SAKSNUMMER)).thenReturn(fagsak);
         when(utledMottaksdato.getMottaksdato(behandling)).thenReturn(LocalDate.now());

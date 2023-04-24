@@ -54,9 +54,10 @@ internal class MottatteOpplysningerServiceTest {
     @MockK
     private lateinit var joarkFasadeMock: JoarkFasade
 
-    private lateinit var mottatteOpplysningerServiceSpy: MottatteOpplysningerService
+    @MockK
+    private lateinit var saksbehandlingRegler: SaksbehandlingRegler
 
-    private val unleash = FakeUnleash()
+    private lateinit var mottatteOpplysningerServiceSpy: MottatteOpplysningerService
 
     @BeforeEach
     fun setup() {
@@ -65,10 +66,11 @@ internal class MottatteOpplysningerServiceTest {
                 mottatteOpplysningerRepositoryMock,
                 behandlingServiceMock,
                 UtledMottaksdato(joarkFasadeMock),
-                unleash
+                saksbehandlingRegler
             )
         )
-        unleash.enableAll()
+        every { saksbehandlingRegler.harTomFlyt(any()) } returns false
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false
     }
 
     @Test
@@ -96,8 +98,7 @@ internal class MottatteOpplysningerServiceTest {
 
     @Test
     fun hentEllerOpprettMottatteOpplysninger_finnesIkkeTomFlyt_kastException() {
-        mockkStatic(SaksbehandlingRegler::class)
-        every { SaksbehandlingRegler.harTomFlyt(any(), any(), any(), any()) } returns true
+        every { saksbehandlingRegler.harTomFlyt(any()) } returns true
         every { mottatteOpplysningerRepositoryMock.findByBehandling_Id(behandlingID) } returns Optional.empty()
         every { behandlingServiceMock.hentBehandling(behandlingID) } returns lagBehandling(
             Sakstyper.EU_EOS,
@@ -114,8 +115,7 @@ internal class MottatteOpplysningerServiceTest {
 
     @Test
     fun hentEllerOpprettMottatteOpplysninger_finnesIkkeInaktivBehandling_kastException() {
-        mockkStatic(SaksbehandlingRegler::class)
-        every { SaksbehandlingRegler.harTomFlyt(any(), any(), any(), any()) } returns false
+        every { saksbehandlingRegler.harTomFlyt(any()) } returns false
         every { mottatteOpplysningerRepositoryMock.findByBehandling_Id(behandlingID) } returns Optional.empty()
         every { behandlingServiceMock.hentBehandling(behandlingID) } returns lagBehandling(
             Sakstyper.EU_EOS,
@@ -130,9 +130,8 @@ internal class MottatteOpplysningerServiceTest {
         }.shouldHaveMessage("Finner ikke mottatteOpplysninger for behandling ${behandlingID}")
     }
 
-    @Test
-    fun opprettSøknadEllerAnmodningEllerAttest_toggleErAv_lagerIkkeAnmodningEllerAttest() {
-        unleash.disableAll()
+    fun opprettSøknadEllerAnmodningEllerAttest_tomFlyt_lagerIkkeAnmodningEllerAttest() {
+        every { saksbehandlingRegler.harTomFlyt(any()) } returns true
         val prosessinstans = Prosessinstans().apply {
             behandling = lagBehandling(
                 Sakstyper.EU_EOS,
@@ -152,6 +151,7 @@ internal class MottatteOpplysningerServiceTest {
 
     @Test
     fun opprettSøknadEllerAnmodningEllerAttest_erAnmodningOmUnntakEllerRegistreringUnntak_lagerAnmodningEllerAttest() {
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns true
         val prosessinstans = Prosessinstans().apply {
             behandling = setupMock(
                 Sakstyper.EU_EOS,
@@ -400,6 +400,7 @@ internal class MottatteOpplysningerServiceTest {
 
     @Test
     fun opprettSøknad_tomFlyt_mottatteOpplysningerBlirIkkeOpprettet() {
+        every { saksbehandlingRegler.harTomFlyt(any()) } returns true
         val behandling = lagBehandling(
             Sakstyper.TRYGDEAVTALE,
             Sakstemaer.MEDLEMSKAP_LOVVALG,

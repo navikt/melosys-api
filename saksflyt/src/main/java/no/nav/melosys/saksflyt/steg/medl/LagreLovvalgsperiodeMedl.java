@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.medl;
 
 import java.util.Optional;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
@@ -12,12 +11,10 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP;
-import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt;
 
 @Component
 public class LagreLovvalgsperiodeMedl implements StegBehandler {
@@ -26,14 +23,15 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
 
     private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
-    private final Unleash unleash;
+    private final SaksbehandlingRegler saksbehandlingRegler;
 
 
     public LagreLovvalgsperiodeMedl(BehandlingsresultatService behandlingsresultatService,
-                                    MedlPeriodeService medlPeriodeService, Unleash unleash) {
+                                    MedlPeriodeService medlPeriodeService,
+                                    SaksbehandlingRegler saksbehandlingRegler) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
-        this.unleash = unleash;
+        this.saksbehandlingRegler = saksbehandlingRegler;
     }
 
     @Override
@@ -58,7 +56,7 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
     }
 
     private boolean erIkkeGodkjentRegistreringUnntakFraMedlemskap(Behandling behandling, Utfallregistreringunntak utfallregistreringunntak) {
-        return harRegistreringUnntakFraMedlemskapFlyt(behandling, unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP)) && Utfallregistreringunntak.IKKE_GODKJENT == utfallregistreringunntak;
+        return saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) && Utfallregistreringunntak.IKKE_GODKJENT == utfallregistreringunntak;
     }
 
     private Optional<Long> finnOpprinneligMedlPeriodeID(Behandling behandling) {
