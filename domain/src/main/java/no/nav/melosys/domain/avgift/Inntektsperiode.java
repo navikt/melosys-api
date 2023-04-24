@@ -1,10 +1,12 @@
 package no.nav.melosys.domain.avgift;
 
 import no.nav.melosys.domain.kodeverk.Inntektskildetype;
+import no.nav.melosys.domain.kodeverk.Skatteplikttype;
 
 import javax.persistence.*;
 import java.math.BigInteger;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "inntektsperiode")
@@ -98,5 +100,11 @@ public class Inntektsperiode {
 
     public void setTrygdeavgiftBetalesTilSkatt(boolean trygdeavgiftBetalesTilSkatt) {
         this.trygdeavgiftBetalesTilSkatt = trygdeavgiftBetalesTilSkatt;
+    }
+
+    public boolean utledTrygdeavgiftBetalesTilSkatt(Skatteplikttype skatteplikttype) {
+        return (skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG) ||
+            List.of(Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE, Inntektskildetype.FN_SKATTEFRITAK).contains(type) ||
+            (type == Inntektskildetype.INNTEKT_FRA_UTLANDET && arbeidsgiversavgiftBetalesTilSkatt);
     }
 }

@@ -6,8 +6,6 @@ import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
-import no.nav.melosys.domain.kodeverk.Inntektskildetype
-import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
@@ -86,18 +84,9 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
                 this.type = inntektskildeRequest.type
                 this.avgiftspliktigInntektMnd = inntektskildeRequest.avgiftspliktigInntektMnd
                 this.isArbeidsgiversavgiftBetalesTilSkatt = inntektskildeRequest.arbeidsgiversavgiftBetales
-                this.isTrygdeavgiftBetalesTilSkatt = trygdeavgiftBetalesTilSkatt(request.skatteplikttype, this)
+                this.isTrygdeavgiftBetalesTilSkatt = this.utledTrygdeavgiftBetalesTilSkatt(request.skatteplikttype)
             }
         }).toSet()
-
-    private fun trygdeavgiftBetalesTilSkatt(
-        skatteplikttype: Skatteplikttype,
-        inntektsperiode: Inntektsperiode
-    ): Boolean {
-        return skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG || listOf(
-            Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE, Inntektskildetype.FN_SKATTEFRITAK
-        ).contains(inntektsperiode.type) || inntektsperiode.type == Inntektskildetype.INNTEKT_FRA_UTLANDET && inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt
-    }
 
     @Transactional(readOnly = true)
     fun hentTrygdeavgiftsgrunnlag(behandlingsresultatID: Long): Trygdeavgiftsgrunnlag? {

@@ -1,10 +1,12 @@
 package no.nav.melosys.domain.folketrygden;
 
-import javax.persistence.*;
-
 import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.avgift.Inntektsperiode;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer;
+import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker;
+
+import javax.persistence.*;
 
 @Entity
 @Table(name = "fastsatt_trygdeavgift")
@@ -103,5 +105,16 @@ public class FastsattTrygdeavgift {
 
     public void setAvgiftspliktigUtenlandskInntektMnd(Long avgiftspliktigUtenlandskInntektMnd) {
         this.avgiftspliktigUtenlandskInntektMnd = avgiftspliktigUtenlandskInntektMnd;
+    }
+
+    public Trygdeavgiftmottaker getTrygdeavgiftMottaker() {
+        var inntektsperioder = trygdeavgiftsgrunnlag.getInntektsperioder();
+
+        if (inntektsperioder.stream().map(Inntektsperiode::isTrygdeavgiftBetalesTilSkatt).distinct().count() != 1) {
+            return Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT;
+        }
+        return inntektsperioder.iterator().next().isTrygdeavgiftBetalesTilSkatt()
+            ? Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
+            : Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV;
     }
 }
