@@ -10,10 +10,7 @@ import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Oppgavetyper;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
@@ -24,6 +21,7 @@ import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
@@ -50,8 +48,8 @@ class OpprettSakTest {
     private ProsessinstansService prosessinstansService;
     @Mock
     private LovligeKombinasjonerService lovligeKombinasjonerService;
-
-    private final FakeUnleash unleash = new FakeUnleash();
+    @Mock
+    private SaksbehandlingRegler saksbehandlingRegler;
 
     private static final EasyRandom random = new EasyRandom(getRandomConfig());
 
@@ -66,8 +64,7 @@ class OpprettSakTest {
 
     @BeforeEach
     public void setUp() {
-        opprettSak = new OpprettSak(journalfoeringService, oppgaveService, prosessinstansService, unleash, lovligeKombinasjonerService);
-        unleash.enableAll();
+        opprettSak = new OpprettSak(journalfoeringService, oppgaveService, prosessinstansService, saksbehandlingRegler, lovligeKombinasjonerService);
     }
 
     @Test
@@ -94,6 +91,7 @@ class OpprettSakTest {
         opprettSakDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         opprettSakDto.setBehandlingstype(Behandlingstyper.HENVENDELSE);
+        opprettSakDto.setSoknadDto(opprettSoknadDto());
 
 
         opprettSak.opprettNySakOgBehandling(opprettSakDto);
@@ -184,7 +182,6 @@ class OpprettSakTest {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.TRYGDEAVTALE);
         opprettSakDto.setBehandlingstema(Behandlingstema.YRKESAKTIV);
-        unleash.enableAll();
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         when(journalfoeringService.hentJournalpost("1234")).thenReturn(lagJournalpost(Journalposttype.INN, "skanning"));
@@ -257,12 +254,12 @@ class OpprettSakTest {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET);
+        opprettSakDto.setSoknadDto(opprettSoknadDto());
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId(JP_ID).build();
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
         final Journalpost journalpost = lagJournalpost(Journalposttype.INN, "EESSI");
         when(journalfoeringService.hentJournalpost(JP_ID)).thenReturn(journalpost);
         when(journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost)).thenReturn(Optional.empty());
-
 
         opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
 
@@ -284,6 +281,7 @@ class OpprettSakTest {
         final Journalpost journalpost = lagJournalpost(Journalposttype.INN, "EESSI");
         when(journalfoeringService.hentJournalpost(JP_ID)).thenReturn(journalpost);
         when(journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost)).thenReturn(Optional.empty());
+        when(saksbehandlingRegler.harTomFlyt(any(), any(), any(), any())).thenReturn(true);
 
 
         opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);
@@ -423,5 +421,12 @@ class OpprettSakTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto))
             .withMessageContaining("land");
+    }
+
+    private SøknadDto opprettSoknadDto() {
+        var søknadDto = new SøknadDto();
+        søknadDto.setPeriode(new PeriodeDto(LocalDate.now().minusMonths(4), LocalDate.now().minusMonths(3)));
+        søknadDto.setLand(SoeknadslandDto.av(Landkoder.DE));
+        return søknadDto;
     }
 }

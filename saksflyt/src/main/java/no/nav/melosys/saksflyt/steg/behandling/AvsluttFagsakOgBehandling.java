@@ -1,13 +1,11 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -27,18 +25,17 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
-
-    private final Unleash unleash;
+    private final SaksbehandlingRegler saksbehandlingRegler;
 
 
     public AvsluttFagsakOgBehandling(FagsakService fagsakService,
                                      BehandlingService behandlingService,
                                      BehandlingsresultatService behandlingsresultatService,
-                                     Unleash unleash) {
+                                     SaksbehandlingRegler saksbehandlingRegler) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
-        this.unleash = unleash;
+        this.saksbehandlingRegler = saksbehandlingRegler;
     }
 
     @Override
@@ -51,10 +48,8 @@ public class AvsluttFagsakOgBehandling implements StegBehandler {
         final long behandlingID = prosessinstans.getBehandling().getId();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
 
-        var registreringUnntakToggleEnabled = unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP);
-
         if (behandlingsresultat.erGodkjenningEllerInnvilgelseArt13()
-            && !SaksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandlingsresultat.getBehandling(), registreringUnntakToggleEnabled)) {
+            && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandlingsresultat.getBehandling())) {
             behandlingService.endreStatus(behandlingID, Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         } else {
             var saksstatus = prosessinstans.getData(ProsessDataKey.SAKSSTATUS, Saksstatuser.class, Saksstatuser.LOVVALG_AVKLART);

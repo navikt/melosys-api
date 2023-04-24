@@ -30,6 +30,7 @@ import no.nav.melosys.service.SaksbehandlingDataFactory
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -58,13 +59,13 @@ internal class EndreSakServiceTest {
     @RelaxedMockK
     lateinit var applicationEventPublisher: ApplicationEventPublisher
 
-    private val unleash: FakeUnleash = FakeUnleash()
+    @RelaxedMockK
+    lateinit var saksbehandlingRegler: SaksbehandlingRegler
 
     private lateinit var endreSakService: EndreSakService
 
     @BeforeEach
     fun setUp() {
-        unleash.resetAll()
         endreSakService = EndreSakService(
             lovligeKombinasjonerService,
             fagsakService,
@@ -72,7 +73,7 @@ internal class EndreSakServiceTest {
             mottatteOpplysningerService,
             oppfriskSaksopplysningerService,
             applicationEventPublisher,
-            unleash,
+            saksbehandlingRegler,
         )
     }
 
@@ -128,6 +129,7 @@ internal class EndreSakServiceTest {
         fagsak.behandlinger.add(SaksbehandlingDataFactory.lagBehandling(fagsak, mottatteOpplysningerData))
         every { fagsakService.hentFagsak(saksnummer) } returns fagsak
         every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(MottatteOpplysninger())
+        every { saksbehandlingRegler.harTomFlyt(any(), any(), any(), any()) } returns true
 
 
         endreSakService.endre(saksnummer, FTRL, TRYGDEAVGIFT, YRKESAKTIV, FØRSTEGANG, AVVENT_FAGLIG_AVKLARING, null)

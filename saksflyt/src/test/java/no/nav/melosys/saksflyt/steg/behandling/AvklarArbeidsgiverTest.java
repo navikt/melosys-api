@@ -23,6 +23,7 @@ import no.nav.melosys.service.aktoer.AktoerService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,6 +40,8 @@ class AvklarArbeidsgiverTest {
     BehandlingService behandlingService;
     @Mock
     BehandlingsresultatService behandlingsresultatService;
+    @Mock
+    SaksbehandlingRegler saksbehandlingRegler;
 
     Behandling behandling = new Behandling();
     @Mock
@@ -50,12 +53,11 @@ class AvklarArbeidsgiverTest {
     private Fagsak fagsak;
     private Behandlingsresultat behandlingsresultat;
     private Lovvalgsperiode lovvalgsperiode;
-    private final FakeUnleash unleash = new FakeUnleash();
 
     @BeforeEach
     public void setUp() {
         aktoerService = mock(AktoerService.class);
-        avklarArbeidsgiver = new AvklarArbeidsgiver(aktoerService, avklarteVirksomheterService, behandlingService, behandlingsresultatService, unleash);
+        avklarArbeidsgiver = new AvklarArbeidsgiver(aktoerService, avklarteVirksomheterService, behandlingService, behandlingsresultatService, saksbehandlingRegler);
 
         prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
@@ -82,15 +84,13 @@ class AvklarArbeidsgiverTest {
 
         avklartVirksomhet =
             new AvklartVirksomhet("Test", "123456789", null, Yrkesaktivitetstyper.LOENNET_ARBEID);
-
-        unleash.enableAll();
     }
 
     @Test
     void utfør_medAvklartNorskVirksomhet_arbeidsgiveraktørOpprettes() {
         AktoerRepository aktoerRepository = mock(AktoerRepository.class);
         AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository), avklarteVirksomheterService,
-            behandlingService, behandlingsresultatService, unleash);
+            behandlingService, behandlingsresultatService, saksbehandlingRegler);
 
         List<AvklartVirksomhet> avklarteVirksomheter = Collections.singletonList(avklartVirksomhet);
         when(avklarteVirksomheterService.hentNorskeArbeidsgivere(any(), any())).thenReturn(avklarteVirksomheter);
@@ -110,8 +110,8 @@ class AvklarArbeidsgiverTest {
 
     @Test
     void utfør_medTomFlyt_arbeidsgiverAvklaresIkke() {
+        when(saksbehandlingRegler.harTomFlyt(any())).thenReturn(true);
         behandling.setType(Behandlingstyper.HENVENDELSE);
-
 
         avklarArbeidsgiver.utfør(prosessinstans);
 
@@ -123,7 +123,7 @@ class AvklarArbeidsgiverTest {
     void utfør_utenAvklartNorskVirksomhet_arbeidsgiveraktorerSlettes() {
         AktoerRepository aktoerRepository = mock(AktoerRepository.class);
         AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository), avklarteVirksomheterService,
-            behandlingService, behandlingsresultatService, unleash);
+            behandlingService, behandlingsresultatService, saksbehandlingRegler);
 
 
         steg.utfør(prosessinstans);

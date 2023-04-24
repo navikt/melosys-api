@@ -31,6 +31,7 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.repository.MottatteOpplysningerRepository
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.UtledMottaksdato
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -49,9 +50,10 @@ internal class MottatteOpplysningerServiceTest {
     @MockK
     private lateinit var joarkFasadeMock: JoarkFasade
 
-    private lateinit var mottatteOpplysningerServiceSpy: MottatteOpplysningerService
+    @MockK
+    private lateinit var saksbehandlingRegler: SaksbehandlingRegler
 
-    private val unleash = FakeUnleash()
+    private lateinit var mottatteOpplysningerServiceSpy: MottatteOpplysningerService
 
     @BeforeEach
     fun setup() {
@@ -60,10 +62,11 @@ internal class MottatteOpplysningerServiceTest {
                 mottatteOpplysningerRepositoryMock,
                 behandlingServiceMock,
                 UtledMottaksdato(joarkFasadeMock),
-                unleash
+                saksbehandlingRegler
             )
         )
-        unleash.enableAll()
+        every { saksbehandlingRegler.harTomFlyt(any()) } returns false
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false
     }
 
     @Test
@@ -85,8 +88,8 @@ internal class MottatteOpplysningerServiceTest {
     }
 
     @Test
-    fun opprettSøknadEllerAnmodningEllerAttest_toggleErAv_lagerIkkeAnmodningEllerAttest() {
-        unleash.disableAll()
+    fun opprettSøknadEllerAnmodningEllerAttest_tomFlyt_lagerIkkeAnmodningEllerAttest() {
+        every { saksbehandlingRegler.harTomFlyt(any()) } returns true
         val prosessinstans = Prosessinstans().apply {
             behandling = lagBehandling(
                 Sakstyper.EU_EOS,
@@ -106,6 +109,7 @@ internal class MottatteOpplysningerServiceTest {
 
     @Test
     fun opprettSøknadEllerAnmodningEllerAttest_erAnmodningOmUnntakEllerRegistreringUnntak_lagerAnmodningEllerAttest() {
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns true
         val prosessinstans = Prosessinstans().apply {
             behandling = setupMock(
                 Sakstyper.EU_EOS,
@@ -354,6 +358,7 @@ internal class MottatteOpplysningerServiceTest {
 
     @Test
     fun opprettSøknad_tomFlyt_mottatteOpplysningerBlirIkkeOpprettet() {
+        every { saksbehandlingRegler.harTomFlyt(any()) } returns true
         val behandling = lagBehandling(
             Sakstyper.TRYGDEAVTALE,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
@@ -433,11 +438,17 @@ internal class MottatteOpplysningerServiceTest {
         )
 
 
-        mottatteOpplysningerServiceSpy.opprettSøknadEllerAnmodningEllerAttest(Prosessinstans().apply { this.behandling = behandling })
+        mottatteOpplysningerServiceSpy.opprettSøknadEllerAnmodningEllerAttest(Prosessinstans().apply {
+            this.behandling = behandling
+        })
 
 
         verify {
-            mottatteOpplysningerServiceSpy.opprettSøknadEllerAnmodningEllerAttest(any(), isNull(inverse = true), isNull(inverse = true))
+            mottatteOpplysningerServiceSpy.opprettSøknadEllerAnmodningEllerAttest(
+                any(),
+                isNull(inverse = true),
+                isNull(inverse = true)
+            )
         }
     }
 
