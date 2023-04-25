@@ -21,7 +21,7 @@ public interface BehandlingRepository extends CrudRepository<Behandling, Long> {
     Collection<Behandling> findAllByStatus(Behandlingsstatus behandlingsstatus);
 
     @Query("SELECT new no.nav.melosys.domain.SakOgBehandlingDTO(" +
-            "e.fagsak.saksnummer, e.fagsak.type, e.fagsak.tema, e.type, e.tema, e.status) " +
+            "e.fagsak.saksnummer, e.id, e.fagsak.type, e.fagsak.tema, e.type, e.tema, e.status) " +
             "FROM Behandling e WHERE e.status NOT IN (:excludedStatuses)")
     Collection<SakOgBehandlingDTO> findSaksOgBehandlingTyperOgTeam(@Param("excludedStatuses") List<Behandlingsstatus> excludedStatuses);
 }

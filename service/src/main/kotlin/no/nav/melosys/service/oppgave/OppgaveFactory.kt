@@ -85,7 +85,7 @@ class OppgaveFactory(private val unleash: Unleash) {
         }
     }
 
-    private fun utledOppgavetype(
+    internal fun utledOppgavetype(
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
@@ -94,7 +94,7 @@ class OppgaveFactory(private val unleash: Unleash) {
         return oppgavetypeUtleder.utledOppgavetype(sakstype, sakstema, behandlingstema, behandlingstype)
     }
 
-    private fun utledBeskrivelse(
+    internal fun utledBeskrivelse(
         oppgaveBehandlingstema: OppgaveBehandlingstema,
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
