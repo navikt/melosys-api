@@ -14,4 +14,5 @@ public interface Aksesskontroll {
     void autoriserSkrivTilRessurs(long behandlingID, Ressurs ressurs);
     void autoriserFolkeregisterIdent(String brukerID);
     boolean behandlingKanRedigeresAvSaksbehandler(Behandling behandling, String saksbehandler);
+    boolean behandlingKanRedigeresAvSaksbehandler(long behandlingID);
 }
