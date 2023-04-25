@@ -33,6 +33,7 @@ import no.nav.melosys.repository.MottatteOpplysningerRepository
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.UtledMottaksdato
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
+import no.nav.melosys.service.tilgang.Aksesskontroll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -52,6 +53,9 @@ internal class MottatteOpplysningerServiceTest {
     private lateinit var behandlingServiceMock: BehandlingService
 
     @MockK
+    private lateinit var aksesskontrollMock: Aksesskontroll
+
+    @MockK
     private lateinit var joarkFasadeMock: JoarkFasade
 
     @MockK
@@ -65,6 +69,7 @@ internal class MottatteOpplysningerServiceTest {
             MottatteOpplysningerService(
                 mottatteOpplysningerRepositoryMock,
                 behandlingServiceMock,
+                aksesskontrollMock,
                 UtledMottaksdato(joarkFasadeMock),
                 saksbehandlingRegler
             )
@@ -109,13 +114,14 @@ internal class MottatteOpplysningerServiceTest {
         }
 
         shouldThrow<IkkeFunnetException> {
-            mottatteOpplysningerServiceSpy.hentEllerOpprettMottatteOpplysninger(behandlingID)
+            mottatteOpplysningerServiceSpy.hentEllerOpprettMottatteOpplysninger(behandlingID, "")
         }.shouldHaveMessage("Finner ikke mottatteOpplysninger for behandling ${behandlingID}")
     }
 
     @Test
-    fun hentEllerOpprettMottatteOpplysninger_finnesIkkeInaktivBehandling_kastException() {
+    fun hentEllerOpprettMottatteOpplysninger_saksbehandlerKanIkkeRedigereBehandling_kastException() {
         every { saksbehandlingRegler.harTomFlyt(any()) } returns false
+        every { aksesskontrollMock.behandlingKanRedigeresAvSaksbehandler(any(), any())} returns false
         every { mottatteOpplysningerRepositoryMock.findByBehandling_Id(behandlingID) } returns Optional.empty()
         every { behandlingServiceMock.hentBehandling(behandlingID) } returns lagBehandling(
             Sakstyper.EU_EOS,
@@ -126,7 +132,7 @@ internal class MottatteOpplysningerServiceTest {
         }
 
         shouldThrow<IkkeFunnetException> {
-            mottatteOpplysningerServiceSpy.hentEllerOpprettMottatteOpplysninger(behandlingID)
+            mottatteOpplysningerServiceSpy.hentEllerOpprettMottatteOpplysninger(behandlingID, "")
         }.shouldHaveMessage("Finner ikke mottatteOpplysninger for behandling ${behandlingID}")
     }
 
