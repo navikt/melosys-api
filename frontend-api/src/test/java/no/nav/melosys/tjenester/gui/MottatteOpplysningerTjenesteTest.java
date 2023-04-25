@@ -14,6 +14,8 @@ import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper;
 import no.nav.melosys.domain.kodeverk.Flyvningstyper;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.mottatteopplysninger.PeriodeOgLandPostDto;
 import no.nav.melosys.tjenester.gui.util.NumericStringRandomizer;
 import org.jeasy.random.EasyRandom;
@@ -29,8 +31,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.jeasy.random.FieldPredicates.named;
 import static org.jeasy.random.FieldPredicates.ofType;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -69,17 +70,18 @@ public class MottatteOpplysningerTjenesteTest {
 
     @Test
     void hentEllerOpprettMottatteOpplysninger() throws Exception {
+        SubjectHandler.set(new TestSubjectHandler());
         Soeknad soeknad = random.nextObject(Soeknad.class);
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setType(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS);
         mottatteOpplysninger.setMottatteOpplysningerdata(soeknad);
-        when(mottatteOpplysningerService.hentEllerOpprettMottatteOpplysninger(anyLong())).thenReturn(mottatteOpplysninger);
+        when(mottatteOpplysningerService.hentEllerOpprettMottatteOpplysninger(anyLong(), anyString())).thenReturn(mottatteOpplysninger);
 
         mockMvc.perform(get(BASE_URL + "/{behandlingID}", 1L)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(mottatteOpplysningerService).hentEllerOpprettMottatteOpplysninger(anyLong());
+        verify(mottatteOpplysningerService).hentEllerOpprettMottatteOpplysninger(anyLong(), anyString());
     }
 
     @Test
