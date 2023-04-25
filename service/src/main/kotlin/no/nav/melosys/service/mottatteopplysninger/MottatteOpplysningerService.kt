@@ -16,8 +16,6 @@ import no.nav.melosys.repository.MottatteOpplysningerRepository
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.UtledMottaksdato
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
-import no.nav.melosys.service.tilgang.Aksesskontroll
-import no.nav.melosys.service.tilgang.AksesskontrollImpl
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -29,7 +27,6 @@ private val log = KotlinLogging.logger { }
 class MottatteOpplysningerService(
     private val mottatteOpplysningerRepository: MottatteOpplysningerRepository,
     private val behandlingService: BehandlingService,
-    private val aksesskontroll: Aksesskontroll,
     private val utledMottaksdato: UtledMottaksdato,
     private val saksbehandlingRegler: SaksbehandlingRegler
 ) {
@@ -38,10 +35,13 @@ class MottatteOpplysningerService(
         finnMottatteOpplysninger(behandlingID).orElseThrow { IkkeFunnetException("Finner ikke mottatteOpplysninger for behandling $behandlingID") }
 
     @Transactional(readOnly = true)
-    fun hentEllerOpprettMottatteOpplysninger(behandlingID: Long, saksbehandlerID: String): MottatteOpplysninger? =
+    fun hentEllerOpprettMottatteOpplysninger(
+        behandlingID: Long,
+        behandlingKanRedigeresAvSaksbehandler: Boolean
+    ): MottatteOpplysninger? =
         finnMottatteOpplysninger(behandlingID).orElseGet {
             val behandling = behandlingService.hentBehandling(behandlingID)
-            if (saksbehandlingRegler.harTomFlyt(behandling) || !aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandlerID)) {
+            if (saksbehandlingRegler.harTomFlyt(behandling) || !behandlingKanRedigeresAvSaksbehandler) {
                 throw IkkeFunnetException("Finner ikke mottatteOpplysninger for behandling $behandlingID")
             } else {
                 opprettSøknadEllerAnmodningEllerAttest(behandling, null, null)

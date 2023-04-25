@@ -35,8 +35,8 @@ public class MottatteOpplysningerTjeneste {
     ) {
         aksesskontroll.autoriser(behandlingID);
 
-        String saksbehandlerID = SubjectHandler.getInstance().getUserID();
-        MottatteOpplysninger mottatteOpplysninger = mottatteOpplysningerService.hentEllerOpprettMottatteOpplysninger(behandlingID, saksbehandlerID);
+        boolean behandlingKanRedigeresAvSaksbehandler = aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandlingID);
+        MottatteOpplysninger mottatteOpplysninger = mottatteOpplysningerService.hentEllerOpprettMottatteOpplysninger(behandlingID, behandlingKanRedigeresAvSaksbehandler);
         return ResponseEntity.ok(new MottatteOpplysningerGetDto(mottatteOpplysninger));
     }
 

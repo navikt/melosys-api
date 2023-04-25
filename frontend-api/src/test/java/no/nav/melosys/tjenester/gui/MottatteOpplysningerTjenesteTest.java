@@ -70,18 +70,17 @@ public class MottatteOpplysningerTjenesteTest {
 
     @Test
     void hentEllerOpprettMottatteOpplysninger() throws Exception {
-        SubjectHandler.set(new TestSubjectHandler());
         Soeknad soeknad = random.nextObject(Soeknad.class);
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setType(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS);
         mottatteOpplysninger.setMottatteOpplysningerdata(soeknad);
-        when(mottatteOpplysningerService.hentEllerOpprettMottatteOpplysninger(anyLong(), anyString())).thenReturn(mottatteOpplysninger);
+        when(mottatteOpplysningerService.hentEllerOpprettMottatteOpplysninger(anyLong(), anyBoolean())).thenReturn(mottatteOpplysninger);
 
         mockMvc.perform(get(BASE_URL + "/{behandlingID}", 1L)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
 
-        verify(mottatteOpplysningerService).hentEllerOpprettMottatteOpplysninger(anyLong(), anyString());
+        verify(mottatteOpplysningerService).hentEllerOpprettMottatteOpplysninger(anyLong(), anyBoolean());
     }
 
     @Test
