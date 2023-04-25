@@ -104,6 +104,32 @@ class LagreLovvalgsperiodeMedlTest {
     }
 
     @Test
+    void utfør_erInnvilgelseArt13IngenMedlIDUnntaksflyt_oppretterEndeligPeriode() {
+        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(null, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, InnvilgelsesResultat.INNVILGET);
+        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
+        when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)).thenReturn(true);
+
+        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+
+
+        verify(medlPeriodeService).opprettPeriodeEndelig(lovvalgsperiode, behandlingID);
+    }
+
+    @Test
+    void utfør_erInnvilgelseArt13MedMedlIDUnntaksflyt_oppdatererTilEndeligPeriode() {
+        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(11L, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, InnvilgelsesResultat.INNVILGET);
+        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
+        when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)).thenReturn(true);
+
+        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+
+
+        verify(medlPeriodeService).oppdaterPeriodeEndelig(lovvalgsperiode);
+    }
+
+    @Test
     void utfør_erInnvilgelseArt12IngenMedlID_oppretterEndeligPeriode() {
         Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(null, Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, InnvilgelsesResultat.INNVILGET);
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
