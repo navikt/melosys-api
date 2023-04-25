@@ -16,6 +16,8 @@ import no.nav.melosys.repository.MottatteOpplysningerRepository
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.UtledMottaksdato
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
+import no.nav.melosys.service.tilgang.Aksesskontroll
+import no.nav.melosys.service.tilgang.AksesskontrollImpl
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -27,6 +29,7 @@ private val log = KotlinLogging.logger { }
 class MottatteOpplysningerService(
     private val mottatteOpplysningerRepository: MottatteOpplysningerRepository,
     private val behandlingService: BehandlingService,
+    private val aksesskontroll: Aksesskontroll,
     private val utledMottaksdato: UtledMottaksdato,
     private val saksbehandlingRegler: SaksbehandlingRegler
 ) {
@@ -35,10 +38,10 @@ class MottatteOpplysningerService(
         finnMottatteOpplysninger(behandlingID).orElseThrow { IkkeFunnetException("Finner ikke mottatteOpplysninger for behandling $behandlingID") }
 
     @Transactional(readOnly = true)
-    fun hentEllerOpprettMottatteOpplysninger(behandlingID: Long): MottatteOpplysninger? =
+    fun hentEllerOpprettMottatteOpplysninger(behandlingID: Long, saksbehandlerID: String): MottatteOpplysninger? =
         finnMottatteOpplysninger(behandlingID).orElseGet {
             val behandling = behandlingService.hentBehandling(behandlingID)
-            if (behandling.erInaktiv() || saksbehandlingRegler.harTomFlyt(behandling)) {
+            if (saksbehandlingRegler.harTomFlyt(behandling) || !aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandlerID)) {
                 throw IkkeFunnetException("Finner ikke mottatteOpplysninger for behandling $behandlingID")
             } else {
                 opprettSøknadEllerAnmodningEllerAttest(behandling, null, null)
@@ -59,21 +62,23 @@ class MottatteOpplysningerService(
             versjon = VERSJON_SED_GRUNNLAG
         )
 
-    fun opprettSøknadEllerAnmodningEllerAttest(prosessinstans: Prosessinstans): MottatteOpplysninger? {
-        return opprettSøknadEllerAnmodningEllerAttest(
+    fun opprettSøknadEllerAnmodningEllerAttest(prosessinstans: Prosessinstans): MottatteOpplysninger? =
+        opprettSøknadEllerAnmodningEllerAttest(
             prosessinstans.behandling,
             prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode::class.java, Periode()),
             prosessinstans.getData(ProsessDataKey.SØKNADSLAND, Soeknadsland::class.java, Soeknadsland())
         )
-    }
 
-    fun opprettSøknadEllerAnmodningEllerAttest(behandling: Behandling, periode: Periode?, soeknadsland: Soeknadsland?): MottatteOpplysninger? {
-        if (saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)) {
-            return opprettAnmodningEllerAttest(behandling, periode, soeknadsland)
-        } else {
-            return opprettSøknad(behandling, periode, soeknadsland)
-        }
-    }
+
+    fun opprettSøknadEllerAnmodningEllerAttest(
+        behandling: Behandling,
+        periode: Periode?,
+        soeknadsland: Soeknadsland?
+    ): MottatteOpplysninger? =
+        if (saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling))
+            opprettAnmodningEllerAttest(behandling, periode, soeknadsland)
+        else opprettSøknad(behandling, periode, soeknadsland)
+
 
     fun opprettSøknadUtsendteArbeidstakereEøs(
         behandlingID: Long, orginalData: String?, soeknad: Soeknad, eksternReferanseID: String?
