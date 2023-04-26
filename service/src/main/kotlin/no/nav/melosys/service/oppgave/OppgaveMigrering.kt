@@ -1,5 +1,6 @@
 package no.nav.melosys.service.oppgave
 
+import GyldigeKombinasjoner
 import mu.KotlinLogging
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Behandling
@@ -12,7 +13,7 @@ import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
-import no.nav.melosys.repository.BehandlingRepository
+import no.nav.melosys.repository.BehandlingRepositoryForOppgaveMigrering
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.core.env.Environment
 import org.springframework.scheduling.annotation.Async
@@ -25,7 +26,7 @@ private val log = KotlinLogging.logger { }
 
 @Component
 class OppgaveMigrering(
-    private val behandlingRepository: BehandlingRepository,
+    private val behandlingRepository: BehandlingRepositoryForOppgaveMigrering,
     private val oppgaveFasade: OppgaveFasade,
     private val environment: Environment
 ) {
@@ -67,6 +68,7 @@ class OppgaveMigrering(
     }
 
     @Async
+    @Synchronized
     fun go() {
         ThreadLocalAccessInfo.executeProcess("Prossess oppgaver") {
             migrering()
@@ -87,8 +89,6 @@ class OppgaveMigrering(
         }.filter { it.erRedigerbar() }.sortedBy { it.saksnummer }
         antallSakerErRedigerbar = sakOgBehandlinger.size
 
-        println("sakOgBehandlinger filtrert: $antallSakerErRedigerbar")
-
         sakOgBehandlinger.forEach {
             antallSakerProssessert++
             oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(it.saksnummer).apply {
@@ -105,7 +105,6 @@ class OppgaveMigrering(
 
     private fun lagRapport() {
         val status = statusEtterKjøring()
-        println(status)
         saveStatusFiles(status)
     }
 
@@ -173,7 +172,13 @@ class OppgaveMigrering(
             oppgaveMappingKjørelog.appendLine("beskrivelse=       $beskrivelse")
             oppgaveMappingKjørelog.appendLine("------------------------------------")
         } catch (e: Exception) {
-            sakHvorMappingFeiler.add("${sakOgBehandling.saksnummer}: ${e.message}")
+            val gyldige = GyldigeKombinasjoner.finnGyldige(
+                sakOgBehandling.sakstype,
+                sakOgBehandling.sakstema,
+                sakOgBehandling.behandlingstype,
+                sakOgBehandling.behandlingstema
+            )
+            sakHvorMappingFeiler.add("${sakOgBehandling.saksnummer}: gyldige:${gyldige.size}  ${e.message}")
         }
     }
 
@@ -224,4 +229,3 @@ class OppgaveMigrering(
     private fun hentBehandlingMedSaksoplysninger(behandlingID: Long): Behandling = behandlingRepository
         .findWithSaksopplysningerById(behandlingID) ?: throw TekniskException("Fant ikke behandling for $behandlingID")
 }
-
