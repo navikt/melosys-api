@@ -154,7 +154,7 @@ public class FattetVedtakService {
                 null,
                 new Periode(m.getFom(), m.getTom()),
                 m.getInnvilgelsesresultat(),
-                m.getDekning(),
+                m.getTrygdedekning(),
                 m.getMedlemskapstype(),
                 new FastsattTrygdeavgift(
                     new BetalesAv(betalesAv.getOrgnr(), betalesAv.getRolle()),

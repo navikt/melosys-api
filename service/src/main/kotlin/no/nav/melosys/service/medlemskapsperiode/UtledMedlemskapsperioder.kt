@@ -115,15 +115,15 @@ class UtledMedlemskapsperioder {
         arbeidsland: String,
         innvilgelsesResultat: InnvilgelsesResultat
     ): Medlemskapsperiode =
-        Medlemskapsperiode(
-            søknadsperiode.fom,
-            søknadsperiode.tom,
-            arbeidsland,
-            bestemmelse,
-            innvilgelsesResultat,
-            Medlemskapstyper.PLIKTIG,
-            trygdedekning
-        )
+        Medlemskapsperiode().apply {
+            this.fom = søknadsperiode.fom
+            this.tom = søknadsperiode.tom
+            this.arbeidsland = arbeidsland
+            this.bestemmelse = bestemmelse
+            this.innvilgelsesresultat = innvilgelsesResultat
+            this.medlemskapstype = Medlemskapstyper.PLIKTIG
+            this.trygdedekning = trygdedekning
+        }
 
 
     private fun splitPeriode(periode: ErPeriode, splitFra: LocalDate): Pair<ErPeriode, ErPeriode> =

@@ -92,7 +92,7 @@ public class TrygdeavgiftsberegningServiceDeprecated {
             new MelosysTrygdeavgfitBeregningV1Dto(
                 avgiftsgrunnlag.betalerArbeidsgiverAvgift(),
                 avgiftsgrunnlag.erSkattepliktig(),
-                medlemskapsperiode.getDekning(),
+                medlemskapsperiode.getTrygdedekning(),
                 medlemskapsperiode.getBestemmelse(),
                 inntektPerMd,
                 avgiftsgrunnlag.getSærligAvgiftsgruppe(),

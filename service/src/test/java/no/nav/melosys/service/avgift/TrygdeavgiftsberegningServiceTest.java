@@ -134,7 +134,7 @@ class TrygdeavgiftsberegningServiceTest {
         final var forventetTrygdeavgiftsbeløp = new BigDecimal("10");
         final var forventetTrygdesats = new BigDecimal("12.2");
         when(trygdeavgiftConsumer.beregnTrygdeavgift(eq(new MelosysTrygdeavgfitBeregningV1Dto(
-            false, true, medlemskapsperiode.getDekning(), medlemskapsperiode.getBestemmelse(),
+            false, true, medlemskapsperiode.getTrygdedekning(), medlemskapsperiode.getBestemmelse(),
             medlemAvFolketrygden.getFastsattTrygdeavgift().getAvgiftspliktigUtenlandskInntektMnd(), null,
             medlemskapsperiode.getFom(), medlemskapsperiode.getTom())))).thenReturn(Collections.singletonList(new TrygdeavgiftDto(LocalDate.of(2022, 1, 1), LocalDate.of(2023, 1, 1), "kode", forventetTrygdesats, forventetTrygdeavgiftsbeløp)));
 
@@ -216,7 +216,7 @@ class TrygdeavgiftsberegningServiceTest {
         assertThat(trygdeavgiftsberegningsresultat.getAvgiftspliktigLønnNorge()).isNotNull();
         assertThat(trygdeavgiftsberegningsresultat.getAvgiftsperioder()).hasSize(1)
             .flatExtracting(Avgiftsperiode::getFom, Avgiftsperiode::getTom, Avgiftsperiode::getTrygdedekning, Avgiftsperiode::isForNorskInntekt)
-            .containsExactly(medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getDekning(), true);
+            .containsExactly(medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getTrygdedekning(), true);
     }
 
     @Test
@@ -234,7 +234,7 @@ class TrygdeavgiftsberegningServiceTest {
         assertThat(trygdeavgiftsberegningsresultat.getAvgiftspliktigLønnUtland()).isNotNull();
         assertThat(trygdeavgiftsberegningsresultat.getAvgiftsperioder()).hasSize(1)
             .flatExtracting(Avgiftsperiode::getFom, Avgiftsperiode::getTom, Avgiftsperiode::getTrygdedekning, Avgiftsperiode::isForNorskInntekt)
-            .containsExactly(medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getDekning(), false);
+            .containsExactly(medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getTrygdedekning(), false);
     }
 
     @Test
@@ -256,8 +256,8 @@ class TrygdeavgiftsberegningServiceTest {
         assertThat(trygdeavgiftsberegningsresultat.getAvgiftsperioder()).hasSize(2)
             .flatExtracting(Avgiftsperiode::getFom, Avgiftsperiode::getTom, Avgiftsperiode::getTrygdedekning, Avgiftsperiode::isForNorskInntekt)
             .containsExactlyInAnyOrder(
-                medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getDekning(), false,
-                medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getDekning(), true
+                medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getTrygdedekning(), false,
+                medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getTrygdedekning(), true
             );
     }
 
@@ -280,8 +280,8 @@ class TrygdeavgiftsberegningServiceTest {
         assertThat(trygdeavgiftsberegningsresultat.getAvgiftsperioder()).hasSize(2)
             .flatExtracting(Avgiftsperiode::getFom, Avgiftsperiode::getTom, Avgiftsperiode::getTrygdedekning, Avgiftsperiode::isForNorskInntekt)
             .containsExactlyInAnyOrder(
-                medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getDekning(), false,
-                medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getDekning(), true
+                medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getTrygdedekning(), false,
+                medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getTrygdedekning(), true
             );
 
     }

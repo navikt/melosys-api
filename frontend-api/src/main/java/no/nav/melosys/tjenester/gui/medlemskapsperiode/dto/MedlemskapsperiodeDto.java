@@ -25,7 +25,7 @@ public record MedlemskapsperiodeDto (long id,
             medlemskapsperiode.getTom(),
             medlemskapsperiode.getBestemmelse(),
             medlemskapsperiode.getInnvilgelsesresultat(),
-            medlemskapsperiode.getDekning(),
+            medlemskapsperiode.getTrygdedekning(),
             medlemskapsperiode.getMedlemskapstype()
         );
     }

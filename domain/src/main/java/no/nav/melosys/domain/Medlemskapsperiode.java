@@ -60,25 +60,6 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
     @OneToMany(mappedBy = "medlemskapsperiode", orphanRemoval = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Collection<TrygdeavgiftDeprecated> trygdeavgiftDeprecated = new ArrayList<>(1);
 
-    public Medlemskapsperiode() {
-    }
-
-    public Medlemskapsperiode(LocalDate fom,
-                              LocalDate tom,
-                              String arbeidsland,
-                              Folketrygdloven_kap2_bestemmelser bestemmelse,
-                              InnvilgelsesResultat innvilgelsesresultat,
-                              Medlemskapstyper medlemskapstype,
-                              Trygdedekninger trygdedekning) {
-        this.fom = fom;
-        this.tom = tom;
-        this.arbeidsland = arbeidsland;
-        this.bestemmelse = bestemmelse;
-        this.innvilgelsesresultat = innvilgelsesresultat;
-        this.medlemskapstype = medlemskapstype;
-        this.trygdedekning = trygdedekning;
-    }
-
     public Long getId() {
         return id;
     }
@@ -143,7 +124,7 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
         this.medlemskapstype = medlemskapstype;
     }
 
-    public Trygdedekninger getDekning() {
+    public Trygdedekninger getTrygdedekning() {
         return trygdedekning;
     }
 

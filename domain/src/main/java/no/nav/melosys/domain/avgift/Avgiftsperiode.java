@@ -67,7 +67,7 @@ public class Avgiftsperiode {
         return new Avgiftsperiode(
             trygdeavgiftDeprecated.getPeriodeFra(),
             trygdeavgiftDeprecated.getPeriodeTil(),
-            medlemskapsperiode.getDekning(),
+            medlemskapsperiode.getTrygdedekning(),
             trygdeavgiftDeprecated.getTrygdesats(),
             trygdeavgiftDeprecated.getTrygdeavgiftsbeløpMd(),
             trygdeavgiftDeprecated.erAvgiftForNorskInntekt()

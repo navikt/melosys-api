@@ -32,7 +32,7 @@ data class MelosysTrygdeavgfitBeregningV2Dto(
             medlemskapsperioder.map {
                 Medlemskapsperiode(
                     DatoPeriode(it.fom, it.tom),
-                    avgiftsdekningerFraTrygdedekning(it.dekning)
+                    avgiftsdekningerFraTrygdedekning(it.trygdedekning)
                 )
             }
 

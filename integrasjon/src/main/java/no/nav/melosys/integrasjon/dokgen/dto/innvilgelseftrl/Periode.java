@@ -28,8 +28,8 @@ public class Periode {
         this.bestemmelse = m.getBestemmelse().getKode();
         this.innvilgelsesResultat = m.getInnvilgelsesresultat().getKode();
         this.medlemskapstype = m.getMedlemskapstype().getKode();
-        this.dekning = m.getDekning().getKode();
-        this.dekningBeskrivelse = m.getDekning().getBeskrivelse();
+        this.dekning = m.getTrygdedekning().getKode();
+        this.dekningBeskrivelse = m.getTrygdedekning().getBeskrivelse();
         this.trygdeavgift = m.getTrygdeavgift().stream().map(t -> new Trygdeavgift(
             t.getTrygdeavgiftsbeløpMd(),
             t.getTrygdesats(),

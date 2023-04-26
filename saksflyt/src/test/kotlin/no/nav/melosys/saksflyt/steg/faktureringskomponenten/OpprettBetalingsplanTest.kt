@@ -236,7 +236,7 @@ class OpprettBetalingsplanTest {
 
     private fun lagMedlemskapsperioder(): List<Medlemskapsperiode> {
         return listOf(Medlemskapsperiode().apply {
-            this.setTrygdedekning(Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER)
+            trygdedekning = Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             medlemskapstype = Medlemskapstyper.FRIVILLIG
             fom = LocalDate.of(2022, 1, 1)

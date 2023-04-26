@@ -96,7 +96,7 @@ public class Trygdeavgift {
     }
 
     public Trygdedekninger hentGjeldendeTrygdedekning() {
-        return hentGjeldendeMedlemskapsperiode().getDekning();
+        return hentGjeldendeMedlemskapsperiode().getTrygdedekning();
     }
 
     public Inntektsperiode hentGjeldendeInntektsperiode() {
