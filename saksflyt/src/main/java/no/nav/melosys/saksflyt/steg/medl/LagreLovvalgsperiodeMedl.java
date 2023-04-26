@@ -52,7 +52,7 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
         if (behandling.erNyVurdering()) {
             lovvalgsperiode.setMedlPeriodeID(finnOpprinneligMedlPeriodeID(behandling).orElse(null));
         }
-        oppdaterLovvalgsperiode(behandling.getId(), lovvalgsperiode);
+        oppdaterLovvalgsperiode(behandling, lovvalgsperiode);
     }
 
     private boolean erIkkeGodkjentRegistreringUnntakFraMedlemskap(Behandling behandling, Utfallregistreringunntak utfallregistreringunntak) {
@@ -70,37 +70,37 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
         return opprinnelingResultat.finnLovvalgsperiode().map(Lovvalgsperiode::getMedlPeriodeID);
     }
 
-    private void oppdaterLovvalgsperiode(Long behandlingID, Lovvalgsperiode lovvalgsperiode) {
+    private void oppdaterLovvalgsperiode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
         if (lovvalgsperiode.erAvslått()) {
             if (lovvalgsperiode.getMedlPeriodeID() != null) {
                 medlPeriodeService.avvisPeriode(lovvalgsperiode.getMedlPeriodeID());
             }
         } else if (lovvalgsperiode.erInnvilget()) {
-            opprettEllerOppdaterMedlPeriode(behandlingID, lovvalgsperiode);
+            opprettEllerOppdaterMedlPeriode(behandling, lovvalgsperiode);
         } else {
             throw new FunksjonellException(
                 "Ukjent eller ikke-eksisterende innvilgelsesresultat for en lovvalgsperiode: " + lovvalgsperiode.getInnvilgelsesresultat());
         }
     }
 
-    private void opprettEllerOppdaterMedlPeriode(Long behandlingID, Lovvalgsperiode lovvalgsperiode) {
+    private void opprettEllerOppdaterMedlPeriode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
         if (lovvalgsperiode.getMedlPeriodeID() == null) {
-            opprettMedlPeriode(behandlingID, lovvalgsperiode);
+            opprettMedlPeriode(behandling, lovvalgsperiode);
         } else {
-            oppdaterMedlPeriode(lovvalgsperiode);
+            oppdaterMedlPeriode(behandling, lovvalgsperiode);
         }
     }
 
-    private void opprettMedlPeriode(Long behandlingID, Lovvalgsperiode lovvalgsperiode) {
-        if (lovvalgsperiode.erArtikkel13()) {
-            medlPeriodeService.opprettPeriodeForeløpig(lovvalgsperiode, behandlingID);
+    private void opprettMedlPeriode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
+        if (lovvalgsperiode.erArtikkel13() && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)) {
+            medlPeriodeService.opprettPeriodeForeløpig(lovvalgsperiode, behandling.getId());
         } else {
-            medlPeriodeService.opprettPeriodeEndelig(lovvalgsperiode, behandlingID);
+            medlPeriodeService.opprettPeriodeEndelig(lovvalgsperiode, behandling.getId());
         }
     }
 
-    private void oppdaterMedlPeriode(Lovvalgsperiode lovvalgsperiode) {
-        if (lovvalgsperiode.erArtikkel13()) {
+    private void oppdaterMedlPeriode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
+        if (lovvalgsperiode.erArtikkel13() && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)) {
             medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode);
         } else {
             medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode);

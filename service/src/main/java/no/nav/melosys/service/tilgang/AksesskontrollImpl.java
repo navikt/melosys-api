@@ -80,6 +80,13 @@ public class AksesskontrollImpl implements Aksesskontroll {
             && sakErTilordnetSaksbehandler(behandling.getFagsak().getSaksnummer(), saksbehandler);
     }
 
+    @Override
+    public boolean behandlingKanRedigeresAvSaksbehandler(long behandlingID) {
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        return redigerbarKontroll.behandlingErRedigerbar(behandling)
+            && sakErTilordnetSaksbehandler(behandling.getFagsak().getSaksnummer(), SubjectHandler.getInstance().getUserID());
+    }
+
     private void autoriser(Behandling behandling, Aksesstype aksesstype, Ressurs ressurs, boolean validerTilordnet) {
         behandling.getFagsak().finnBrukersAktørID().ifPresent(brukertilgangKontroll::validerTilgangTilAktørID);
 

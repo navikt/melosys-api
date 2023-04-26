@@ -104,8 +104,6 @@ class SedMottakTestIT(
 
     @Test
     fun `A009 med etterfølgende X008 skal gi fagsak annulert`() {
-        unleash.enable("melosys.sed.x008")
-
         val ref = Random().nextInt(100000).toString()
 
         val sedInfo = SedInformasjon(ref, SedType.A009.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
@@ -158,7 +156,6 @@ class SedMottakTestIT(
 
     @Test
     fun `A009 med etterfølgende X006 skal gi fagsak annulert`() {
-        unleash.enable("melosys.sed.x006")
         val ref = Random().nextInt(100000).toString()
 
         val sedInfo = SedInformasjon(ref, SedType.A009.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
@@ -214,7 +211,6 @@ class SedMottakTestIT(
 
     @Test
     fun `A003 med etterfølgende X006 og lovvalgsland er NO skal gi manuelt behandling`() {
-        unleash.enable("melosys.sed.x006")
         val ref = Random().nextInt(100000).toString()
 
         val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding(
@@ -264,7 +260,6 @@ class SedMottakTestIT(
 
     @Test
     fun `A003 med etterfølgende X008 og lovvalgsland er NO skal gi manuelt behandling`() {
-        unleash.enable("melosys.sed.x008")
         val ref = Random().nextInt(100000).toString()
 
         val sedInfo = SedInformasjon(ref, SedType.A003.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
