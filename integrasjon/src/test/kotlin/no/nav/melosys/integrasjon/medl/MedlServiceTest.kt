@@ -18,6 +18,7 @@ import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
 import no.nav.melosys.exception.TekniskException
@@ -318,10 +319,11 @@ internal class MedlServiceTest {
     private fun lagMedlemskapsPeriode() = Medlemskapsperiode().apply {
         medlemskapstype = Medlemskapstyper.FRIVILLIG
         arbeidsland = Landkoder.BE.kode
-        bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
-        setTrygdedekning(Trygdedekninger.HELSEDEL)
+        trygdedekning = Trygdedekninger.HELSEDEL
         fom = LocalDate.now()
         tom = LocalDate.now().plusYears(1)
+        medlemAvFolketrygden =
+            MedlemAvFolketrygden().apply { bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8 }
     }
 
     private fun hentMedlemskapsunntakListe() = objectMapper.readValue(

@@ -63,7 +63,6 @@ public class MedlemskapsperiodeService {
         oppdaterMedlemskapsperiode(nyMedlemskapsperiode, fom, tom, innvilgelsesResultat, trygdedekning);
         nyMedlemskapsperiode.setMedlemAvFolketrygden(medlemAvFolketrygden);
         nyMedlemskapsperiode.setArbeidsland(eksisterendeMedlemsperiode.getArbeidsland());
-        nyMedlemskapsperiode.setBestemmelse(eksisterendeMedlemsperiode.getBestemmelse());
         nyMedlemskapsperiode.setMedlemskapstype(eksisterendeMedlemsperiode.getMedlemskapstype());
 
         return medlemskapsperiodeRepository.save(nyMedlemskapsperiode);

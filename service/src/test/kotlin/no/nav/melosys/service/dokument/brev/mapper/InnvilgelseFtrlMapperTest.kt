@@ -138,15 +138,15 @@ internal class InnvilgelseFtrlMapperTest {
     @Test
     fun map_delvisInnvilget_populererFelter() {
         mockHappyCase()
-
-        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat().apply {
+        val behandlingsresultat = lagBehandlingsResultat()
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat.apply {
             medlemAvFolketrygden.medlemskapsperioder = listOf(
                 medlemAvFolketrygden.medlemskapsperioder.iterator().next(),
                 Medlemskapsperiode().apply {
-                    bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
                     innvilgelsesresultat = InnvilgelsesResultat.DELVIS_INNVILGET
                     medlemskapstype = Medlemskapstyper.FRIVILLIG
-                    setTrygdedekning(Trygdedekninger.HELSEDEL)
+                    trygdedekning = Trygdedekninger.HELSEDEL
+                    medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
                 }
             )
         }
@@ -215,16 +215,18 @@ internal class InnvilgelseFtrlMapperTest {
     )
 
     private fun lagMedlemAvFolketrygden(): MedlemAvFolketrygden = MedlemAvFolketrygden().apply {
-        medlemskapsperioder = lagMedlemskapsperioder()
+        medlemskapsperioder = lagMedlemskapsperioder(this)
         fastsattTrygdeavgift = lagFastsattTrygdeavgift()
+        bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
     }
 
-    private fun lagMedlemskapsperioder(): List<Medlemskapsperiode> = listOf(Medlemskapsperiode().apply {
-        bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
-        innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-        medlemskapstype = Medlemskapstyper.FRIVILLIG
-        setTrygdedekning(Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER)
-    })
+    private fun lagMedlemskapsperioder(medlemAvFolketrygden: MedlemAvFolketrygden): List<Medlemskapsperiode> =
+        listOf(Medlemskapsperiode().apply {
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            medlemskapstype = Medlemskapstyper.FRIVILLIG
+            trygdedekning = Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER
+            this.medlemAvFolketrygden = medlemAvFolketrygden
+        })
 
     private fun lagFastsattTrygdeavgift(): FastsattTrygdeavgift = FastsattTrygdeavgift().apply {
         avgiftspliktigNorskInntektMnd = 50000L

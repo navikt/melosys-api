@@ -74,13 +74,13 @@ public class FattetVedtakTestData {
         MedlemAvFolketrygden medlemAvFolketrygden = new MedlemAvFolketrygden();
         medlemAvFolketrygden.setFastsattTrygdeavgift(lagFastsattTrygdeavgift());
         medlemAvFolketrygden.setMedlemskapsperioder(lagMedlemskapsperioder());
+        medlemAvFolketrygden.setBestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8);
 
         return medlemAvFolketrygden;
     }
 
     private static Collection<Medlemskapsperiode> lagMedlemskapsperioder() {
         Medlemskapsperiode m = new Medlemskapsperiode();
-        m.setBestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8);
         m.setFom(NOW);
         m.setTom(NOW.plusYears(1));
         m.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);

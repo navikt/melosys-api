@@ -60,7 +60,7 @@ class MedlemskapsperiodeTjenesteTest {
                 MedlemskapsperiodeDto::innvilgelsesResultat, MedlemskapsperiodeDto::medlemskapstype)
             .containsExactly(
                 medlemskapsperiode.getId(), medlemskapsperiode.getArbeidsland(), medlemskapsperiode.getBestemmelse(),
-                medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getDekning(),
+                medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getTrygdedekning(),
                 medlemskapsperiode.getInnvilgelsesresultat(), medlemskapsperiode.getMedlemskapstype()
             );
     }
@@ -84,7 +84,6 @@ class MedlemskapsperiodeTjenesteTest {
         medlemskapsperiode.setFom(LocalDate.now());
         medlemskapsperiode.setTom(LocalDate.now().plusYears(1));
         medlemskapsperiode.setArbeidsland("BR");
-        medlemskapsperiode.setBestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD);
         medlemskapsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.DELVIS_INNVILGET);
         medlemskapsperiode.setMedlemskapstype(Medlemskapstyper.FRIVILLIG);
         medlemskapsperiode.setTrygdedekning(Trygdedekninger.HELSE_OG_PENSJONSDEL);

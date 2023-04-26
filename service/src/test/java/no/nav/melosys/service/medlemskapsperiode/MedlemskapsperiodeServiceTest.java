@@ -5,10 +5,10 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Optional;
 
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.exception.FunksjonellException;
@@ -62,7 +62,7 @@ class MedlemskapsperiodeServiceTest {
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> medlemskapsperiodeService.opprettMedlemskapsperiode(
                 behandlingsresultatID, LocalDate.now(), LocalDate.now().plusYears(1),
-                    InnvilgelsesResultat.DELVIS_INNVILGET, Trygdedekninger.FULL_DEKNING_FTRL))
+                InnvilgelsesResultat.DELVIS_INNVILGET, Trygdedekninger.FULL_DEKNING_FTRL))
             .withMessageContaining("ingen medlemskapsperiode");
     }
 
@@ -77,10 +77,16 @@ class MedlemskapsperiodeServiceTest {
 
         verify(medlemskapsperiodeRepository).save(medlemskapsperiodeCaptor.capture());
         assertThat(medlemskapsperiodeCaptor.getValue()).isNotNull()
-            .extracting(Medlemskapsperiode::getArbeidsland, Medlemskapsperiode::getBestemmelse,
-                Medlemskapsperiode::getInnvilgelsesresultat, Medlemskapsperiode::getTrygdedekning, Medlemskapsperiode::getMedlemskapstype)
-            .containsExactly(eksisterende.getArbeidsland(), eksisterende.getBestemmelse(),
-                InnvilgelsesResultat.AVSLAATT, Trygdedekninger.HELSEDEL, eksisterende.getMedlemskapstype());
+            .extracting(
+                Medlemskapsperiode::getArbeidsland,
+                Medlemskapsperiode::getInnvilgelsesresultat,
+                Medlemskapsperiode::getTrygdedekning,
+                Medlemskapsperiode::getMedlemskapstype)
+            .containsExactly(
+                eksisterende.getArbeidsland(),
+                InnvilgelsesResultat.AVSLAATT,
+                Trygdedekninger.HELSEDEL,
+                eksisterende.getMedlemskapstype());
     }
 
     @Test
@@ -181,6 +187,7 @@ class MedlemskapsperiodeServiceTest {
     private MedlemAvFolketrygden lagMedlemAvFolketrygden(Medlemskapsperiode... medlemskapsperioder) {
         MedlemAvFolketrygden medlemAvFolketrygden = new MedlemAvFolketrygden();
         medlemAvFolketrygden.setMedlemskapsperioder(new LinkedList<>(Arrays.asList(medlemskapsperioder)));
+        medlemAvFolketrygden.setBestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD);
         return medlemAvFolketrygden;
     }
 
@@ -189,7 +196,6 @@ class MedlemskapsperiodeServiceTest {
         medlemskapsperiode.setId(medlemskapsperiodeID);
         medlemskapsperiode.setFom(LocalDate.now());
         medlemskapsperiode.setTom(LocalDate.now().plusYears(1));
-        medlemskapsperiode.setBestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD);
         medlemskapsperiode.setTrygdedekning(Trygdedekninger.FULL_DEKNING_FTRL);
         medlemskapsperiode.setMedlemskapstype(Medlemskapstyper.PLIKTIG);
         medlemskapsperiode.setArbeidsland("BR");

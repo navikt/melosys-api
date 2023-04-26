@@ -101,11 +101,7 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
     }
 
     public Folketrygdloven_kap2_bestemmelser getBestemmelse() {
-        return bestemmelse;
-    }
-
-    public void setBestemmelse(Folketrygdloven_kap2_bestemmelser bestemmelse) {
-        this.bestemmelse = bestemmelse;
+        return medlemAvFolketrygden.getBestemmelse();
     }
 
     public InnvilgelsesResultat getInnvilgelsesresultat() {

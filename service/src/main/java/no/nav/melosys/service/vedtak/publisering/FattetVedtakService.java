@@ -32,6 +32,7 @@ import static no.nav.melosys.service.vedtak.publisering.dto.IdentifikatorType.OR
 import static org.springframework.util.ObjectUtils.isEmpty;
 import static org.springframework.util.StringUtils.hasText;
 
+// TODO skal denne klassen beholdes?
 @Service
 public class FattetVedtakService {
 
