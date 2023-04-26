@@ -30,15 +30,13 @@ public class AdminInnvalideringSedRuter extends AdminSedRuter implements SedRute
     private final EessiService eessiService;
     private final OppgaveService oppgaveService;
     private final BehandlingService behandlingService;
-    private final Unleash unleash;
-
     public AdminInnvalideringSedRuter(FagsakService fagsakService,
                                       ProsessinstansService prosessinstansService,
                                       OppgaveService oppgaveService,
                                       BehandlingsresultatService behandlingsresultatService,
                                       MedlPeriodeService medlPeriodeService,
                                       EessiService eessiService,
-                                      BehandlingService behandlingService, Unleash unleash) {
+                                      BehandlingService behandlingService) {
         super(fagsakService,
             behandlingsresultatService,
             medlPeriodeService,
@@ -47,16 +45,11 @@ public class AdminInnvalideringSedRuter extends AdminSedRuter implements SedRute
         this.eessiService = eessiService;
         this.oppgaveService = oppgaveService;
         this.behandlingService = behandlingService;
-        this.unleash = unleash;
     }
 
     @Override
     public Collection<SedType> gjelderSedTyper() {
-        if (unleash.isEnabled("melosys.sed.x008")) {
-            return Set.of(SedType.X008);
-        } else {
-            return Collections.emptySet();
-        }
+        return Set.of(SedType.X008);
     }
 
     @Override

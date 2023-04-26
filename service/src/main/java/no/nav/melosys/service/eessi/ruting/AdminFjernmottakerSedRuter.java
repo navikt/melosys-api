@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
@@ -27,14 +26,13 @@ public class AdminFjernmottakerSedRuter extends AdminSedRuter implements SedRute
 
     private final OppgaveService oppgaveService;
     private final BehandlingService behandlingService;
-    private final Unleash unleash;
 
     public AdminFjernmottakerSedRuter(FagsakService fagsakService,
                                       ProsessinstansService prosessinstansService,
                                       OppgaveService oppgaveService,
                                       BehandlingsresultatService behandlingsresultatService,
                                       MedlPeriodeService medlPeriodeService,
-                                      BehandlingService behandlingService, Unleash unleash) {
+                                      BehandlingService behandlingService) {
         super(fagsakService,
             behandlingsresultatService,
             medlPeriodeService,
@@ -42,17 +40,12 @@ public class AdminFjernmottakerSedRuter extends AdminSedRuter implements SedRute
 
         this.oppgaveService = oppgaveService;
         this.behandlingService = behandlingService;
-        this.unleash = unleash;
 
     }
 
     @Override
     public Collection<SedType> gjelderSedTyper() {
-        if (unleash.isEnabled("melosys.sed.x006")) {
-            return Collections.singleton(SedType.X006);
-        } else {
-            return Collections.emptySet();
-        }
+        return Collections.singleton(SedType.X006);
     }
 
     @Override

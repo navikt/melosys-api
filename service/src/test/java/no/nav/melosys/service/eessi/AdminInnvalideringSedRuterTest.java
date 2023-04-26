@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.BucInformasjon;
@@ -55,8 +54,6 @@ class AdminInnvalideringSedRuterTest {
     @Mock
     private BehandlingService behandlingService;
 
-    private final FakeUnleash fakeUnleash = new FakeUnleash();
-
     private AdminInnvalideringSedRuter adminInnvalideringSedRuter;
 
     private final long behandlingID = 111;
@@ -69,7 +66,7 @@ class AdminInnvalideringSedRuterTest {
     @BeforeEach
     void setup() {
         adminInnvalideringSedRuter = new AdminInnvalideringSedRuter(fagsakService, prosessinstansService, oppgaveService,
-            behandlingsresultatService, medlPeriodeService, eessiService, behandlingService, fakeUnleash);
+            behandlingsresultatService, medlPeriodeService, eessiService, behandlingService);
 
         melosysEessiMelding.setAktoerId("12312412");
         melosysEessiMelding.setRinaSaksnummer("143141");
@@ -78,21 +75,13 @@ class AdminInnvalideringSedRuterTest {
 
     @Test
     void gjelderSedTyper_featureTogglePå_collectionMedX008() {
-        fakeUnleash.enableAll();
         assertThat(adminInnvalideringSedRuter.gjelderSedTyper()).containsExactly(SedType.X008);
-    }
-
-    @Test
-    void gjelderSedTyper_featureToggleAv_tomCollection() {
-        fakeUnleash.disableAll();
-        assertThat(adminInnvalideringSedRuter.gjelderSedTyper()).isEmpty();
     }
 
     @Test
     void rutSedTilBehandling_arkivsaksIdErNull_opprettJournalFøringsOppgave() {
         adminInnvalideringSedRuter.rutSedTilBehandling(prosessinstans, null);
         verify(oppgaveService).opprettJournalføringsoppgave(melosysEessiMelding.getJournalpostId(), melosysEessiMelding.getAktoerId());
-
     }
 
     @Test
