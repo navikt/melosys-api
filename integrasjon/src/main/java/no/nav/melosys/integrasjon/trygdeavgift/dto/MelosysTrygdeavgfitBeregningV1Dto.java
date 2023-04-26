@@ -7,7 +7,7 @@ import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Saerligeavgiftsgrupper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
-public class MelosysTrygdeavgfitBeregningDto {
+public class MelosysTrygdeavgfitBeregningV1Dto {
     private final Boolean arbeidsgiverBetalerAvgift;
     private final Boolean sokerErSkattepliktig;
     private final Trygdedekninger trygdedekning;
@@ -17,14 +17,14 @@ public class MelosysTrygdeavgfitBeregningDto {
     private final LocalDate beregningsperiodeFom;
     private final LocalDate beregningsperiodeTom;
 
-    public MelosysTrygdeavgfitBeregningDto(Boolean arbeidsgiverBetalerAvgift,
-                                           Boolean sokerErSkattepliktig,
-                                           Trygdedekninger trygdedekning,
-                                           Folketrygdloven_kap2_bestemmelser bestemmelse,
-                                           long maanedsbelop,
-                                           Saerligeavgiftsgrupper saerligAvgiftsGruppe,
-                                           LocalDate beregningsperiodeFom,
-                                           LocalDate beregningsperiodeTom) {
+    public MelosysTrygdeavgfitBeregningV1Dto(Boolean arbeidsgiverBetalerAvgift,
+                                             Boolean sokerErSkattepliktig,
+                                             Trygdedekninger trygdedekning,
+                                             Folketrygdloven_kap2_bestemmelser bestemmelse,
+                                             long maanedsbelop,
+                                             Saerligeavgiftsgrupper saerligAvgiftsGruppe,
+                                             LocalDate beregningsperiodeFom,
+                                             LocalDate beregningsperiodeTom) {
         this.arbeidsgiverBetalerAvgift = arbeidsgiverBetalerAvgift;
         this.sokerErSkattepliktig = sokerErSkattepliktig;
         this.trygdedekning = trygdedekning;
@@ -71,7 +71,7 @@ public class MelosysTrygdeavgfitBeregningDto {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        MelosysTrygdeavgfitBeregningDto that = (MelosysTrygdeavgfitBeregningDto) o;
+        MelosysTrygdeavgfitBeregningV1Dto that = (MelosysTrygdeavgfitBeregningV1Dto) o;
         return maanedsbelop == that.maanedsbelop &&
             Objects.equals(arbeidsgiverBetalerAvgift, that.arbeidsgiverBetalerAvgift) &&
             Objects.equals(sokerErSkattepliktig, that.sokerErSkattepliktig) &&

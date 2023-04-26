@@ -1,11 +1,13 @@
 package no.nav.melosys.domain.avgift;
 
+import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.exception.FunksjonellException;
+
+import javax.persistence.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
-import javax.persistence.*;
-
-import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 
 @Entity
 @Table(name = "trygdeavgiftt")
@@ -78,4 +80,18 @@ public class Trygdeavgift {
     public void setTrygdesats(BigDecimal trygdesats) {
         this.trygdesats = trygdesats;
     }
+
+    public Trygdedekninger hentGjeldendeTrygdedekning() {
+        var gjeldendeMedlemskapsperioder = fastsattTrygdeavgift.getMedlemAvFolketrygden().getMedlemskapsperioder()
+            .stream()
+            .filter(medlemskapsperiode ->
+                (medlemskapsperiode.getFom().equals(periodeFra) || medlemskapsperiode.getFom().isBefore(periodeFra))
+                    && (medlemskapsperiode.getTom().isEqual(periodeTil) || medlemskapsperiode.getTom().isAfter(periodeTil)))
+            .toList();
+        if (gjeldendeMedlemskapsperioder.size() != 1) {
+            throw new FunksjonellException("Finner " + gjeldendeMedlemskapsperioder.size() + " gjeldende medlemskapsperioder. Forventet én.");
+        }
+        return gjeldendeMedlemskapsperioder.get(0).getDekning();
+    }
+
 }

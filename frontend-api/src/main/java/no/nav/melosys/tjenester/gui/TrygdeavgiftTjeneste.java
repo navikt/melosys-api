@@ -5,8 +5,7 @@ import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Ressurs;
-import no.nav.melosys.tjenester.gui.dto.trygdeavgift.BeregningsresultatDto;
-import no.nav.melosys.tjenester.gui.dto.trygdeavgift.OppdaterBeregningsgrunnlagDto;
+import no.nav.melosys.tjenester.gui.dto.trygdeavgift.BeregnetTrygdeavgiftDto;
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftsgrunnlagDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.http.ResponseEntity;
@@ -52,24 +51,23 @@ public class TrygdeavgiftTjeneste {
     }
 
     @PutMapping("/beregning")
-    public ResponseEntity<BeregningsresultatDto> oppdaterBeregningsgrunnlag(@PathVariable("behandlingID") long behandlingID,
-                                                                            @RequestBody OppdaterBeregningsgrunnlagDto oppdaterBeregningsgrunnlagDto) {
+    public ResponseEntity<BeregnetTrygdeavgiftDto> beregnTrygdeavgift(@PathVariable("behandlingID") long behandlingID) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
-        trygdeavgiftsberegningService.oppdaterBeregningsgrunnlag(behandlingID, oppdaterBeregningsgrunnlagDto.til());
 
         return ResponseEntity.ok(
-            BeregningsresultatDto.av(
-                trygdeavgiftsberegningService.hentBeregningsresultat(behandlingID)
+            BeregnetTrygdeavgiftDto.av(
+                trygdeavgiftsberegningService.beregnTrygdeavgift(behandlingID)
             )
         );
     }
 
     @GetMapping("/beregning")
-    public ResponseEntity<BeregningsresultatDto> hentBeregningsresultat(@PathVariable("behandlingID") long behandlingID) {
+    public ResponseEntity<BeregnetTrygdeavgiftDto> hentTrygdeavgift(@PathVariable("behandlingID") long behandlingID) {
         aksesskontroll.autoriser(behandlingID);
+
         return ResponseEntity.ok(
-            BeregningsresultatDto.av(
-                trygdeavgiftsberegningService.hentBeregningsresultat(behandlingID)
+            BeregnetTrygdeavgiftDto.av(
+                trygdeavgiftsberegningService.hentTrygdeavgiftsberegning(behandlingID)
             )
         );
     }

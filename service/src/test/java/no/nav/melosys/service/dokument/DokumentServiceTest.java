@@ -46,7 +46,7 @@ import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
+import no.nav.melosys.service.avgift.TrygdeavgiftsberegningServiceDeprecated;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDtoKonverterer;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -236,7 +236,7 @@ final class DokumentServiceTest {
             avklarteVirksomheterService,
             mock(UtenlandskMyndighetService.class),
             behandlingsresultatService,
-            mock(TrygdeavgiftsberegningService.class),
+            mock(TrygdeavgiftsberegningServiceDeprecated.class),
             mock(LovvalgsperiodeService.class),
             behandlingService);
         return new DokumentService(

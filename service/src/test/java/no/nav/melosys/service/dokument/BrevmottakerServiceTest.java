@@ -25,7 +25,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
+import no.nav.melosys.service.avgift.TrygdeavgiftsberegningServiceDeprecated;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -52,7 +52,7 @@ class BrevmottakerServiceTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
-    private TrygdeavgiftsberegningService trygdeavgiftsberegningService;
+    private TrygdeavgiftsberegningServiceDeprecated trygdeavgiftsberegningServiceDeprecated;
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
@@ -67,7 +67,7 @@ class BrevmottakerServiceTest {
     void setup() {
         brevmottakerService = new BrevmottakerService(
             avklarteVirksomheterService, utenlandskMyndighetService, behandlingsresultatService,
-            trygdeavgiftsberegningService, lovvalgsperiodeService, behandlingService);
+                trygdeavgiftsberegningServiceDeprecated, lovvalgsperiodeService, behandlingService);
 
         behandlingsresultat = new Behandlingsresultat();
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
@@ -311,7 +311,7 @@ class BrevmottakerServiceTest {
                 emptyList()
             );
 
-        verifyNoInteractions(trygdeavgiftsberegningService);
+        verifyNoInteractions(trygdeavgiftsberegningServiceDeprecated);
     }
 
     @Test
@@ -328,7 +328,7 @@ class BrevmottakerServiceTest {
                 emptyList()
             );
 
-        verifyNoInteractions(trygdeavgiftsberegningService);
+        verifyNoInteractions(trygdeavgiftsberegningServiceDeprecated);
     }
 
     @Test
@@ -348,7 +348,7 @@ class BrevmottakerServiceTest {
                 emptyList()
             );
 
-        verify(trygdeavgiftsberegningService).finnBeregningsresultat(anyLong());
+        verify(trygdeavgiftsberegningServiceDeprecated).finnBeregningsresultat(anyLong());
     }
 
     @Test
@@ -367,7 +367,7 @@ class BrevmottakerServiceTest {
                 List.of(SKATTEETATEN)
             );
 
-        verify(trygdeavgiftsberegningService).finnBeregningsresultat(anyLong());
+        verify(trygdeavgiftsberegningServiceDeprecated).finnBeregningsresultat(anyLong());
     }
 
     @Test
@@ -387,7 +387,7 @@ class BrevmottakerServiceTest {
                 List.of(SKATTEETATEN)
             );
 
-        verify(trygdeavgiftsberegningService).finnBeregningsresultat(anyLong());
+        verify(trygdeavgiftsberegningServiceDeprecated).finnBeregningsresultat(anyLong());
     }
 
     @Test
@@ -407,7 +407,7 @@ class BrevmottakerServiceTest {
                 List.of(SKATTEETATEN)
             );
 
-        verify(trygdeavgiftsberegningService).finnBeregningsresultat(anyLong());
+        verify(trygdeavgiftsberegningServiceDeprecated).finnBeregningsresultat(anyLong());
     }
 
     @Test
@@ -428,7 +428,7 @@ class BrevmottakerServiceTest {
                 List.of(SKATTEETATEN)
             );
 
-        verify(trygdeavgiftsberegningService).finnBeregningsresultat(anyLong());
+        verify(trygdeavgiftsberegningServiceDeprecated).finnBeregningsresultat(anyLong());
     }
 
     @Test
@@ -448,7 +448,7 @@ class BrevmottakerServiceTest {
                 emptyList()
             );
 
-        verify(trygdeavgiftsberegningService).finnBeregningsresultat(anyLong());
+        verify(trygdeavgiftsberegningServiceDeprecated).finnBeregningsresultat(anyLong());
     }
 
     @Test
@@ -527,7 +527,7 @@ class BrevmottakerServiceTest {
             new Trygdeavgiftsberegningsresultat(norskinntekt, null, lagAktoer(selvbetalende ? Aktoersroller.BRUKER : Aktoersroller.REPRESENTANT_TRYGDEAVGIFT), emptyList())
         );
 
-        when(trygdeavgiftsberegningService.finnBeregningsresultat(anyLong())).thenReturn(trygdeavgiftsberegningsresultat);
+        when(trygdeavgiftsberegningServiceDeprecated.finnBeregningsresultat(anyLong())).thenReturn(trygdeavgiftsberegningsresultat);
 
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         Fagsak fagsak = lagFagsakMedFullmektigOrg(representerer);

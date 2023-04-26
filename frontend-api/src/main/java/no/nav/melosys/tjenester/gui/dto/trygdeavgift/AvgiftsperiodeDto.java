@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import no.nav.melosys.domain.avgift.Avgiftsperiode;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
+@Deprecated
 public class AvgiftsperiodeDto {
     private final LocalDate fom;
     private final LocalDate tom;

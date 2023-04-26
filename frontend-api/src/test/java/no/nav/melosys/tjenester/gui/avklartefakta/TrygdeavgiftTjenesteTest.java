@@ -10,7 +10,7 @@ import no.nav.melosys.domain.avgift.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Loenn_forhold;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
+import no.nav.melosys.service.avgift.TrygdeavgiftsberegningServiceDeprecated;
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagServiceDeprecated;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.TrygdeavgiftTjeneste;
@@ -40,7 +40,7 @@ public class TrygdeavgiftTjenesteTest {
     @MockBean
     private TrygdeavgiftsgrunnlagServiceDeprecated trygdeavgiftsgrunnlagServiceDeprecated;
     @MockBean
-    private TrygdeavgiftsberegningService trygdeavgiftsberegningService;
+    private TrygdeavgiftsberegningServiceDeprecated trygdeavgiftsberegningServiceDeprecated;
 
     @Autowired
     private MockMvc mockMvc;
@@ -83,7 +83,7 @@ public class TrygdeavgiftTjenesteTest {
     @Test
     void oppdaterBeregningsgrunnlag() throws Exception {
         var dto = new OppdaterBeregningsgrunnlagDto(100L, null);
-        when(trygdeavgiftsberegningService.hentBeregningsresultat(eq(BEHANDLINGSRESULTAT_ID)))
+        when(trygdeavgiftsberegningServiceDeprecated.hentBeregningsresultat(eq(BEHANDLINGSRESULTAT_ID)))
             .thenReturn(lagTrygdeavgiftsberegningresultat());
 
         mockMvc.perform(put(BASE_URL + "/beregning", 1L)
@@ -95,7 +95,7 @@ public class TrygdeavgiftTjenesteTest {
 
     @Test
     void hentBeregningsresultat() throws Exception {
-        when(trygdeavgiftsberegningService.hentBeregningsresultat(eq(BEHANDLINGSRESULTAT_ID)))
+        when(trygdeavgiftsberegningServiceDeprecated.hentBeregningsresultat(eq(BEHANDLINGSRESULTAT_ID)))
             .thenReturn(lagTrygdeavgiftsberegningresultat());
 
         mockMvc.perform(get(BASE_URL + "/beregning", 1L)

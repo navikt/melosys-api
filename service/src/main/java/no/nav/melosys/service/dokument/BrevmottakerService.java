@@ -19,7 +19,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
+import no.nav.melosys.service.avgift.TrygdeavgiftsberegningServiceDeprecated;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -41,19 +41,19 @@ public class BrevmottakerService {
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final TrygdeavgiftsberegningService trygdeavgiftsberegningService;
+    private final TrygdeavgiftsberegningServiceDeprecated trygdeavgiftsberegningServiceDeprecated;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final BehandlingService behandlingService;
 
     public BrevmottakerService(AvklarteVirksomheterService avklarteVirksomheterService,
                                UtenlandskMyndighetService utenlandskMyndighetService,
                                BehandlingsresultatService behandlingsresultatService,
-                               TrygdeavgiftsberegningService trygdeavgiftsberegningService,
+                               TrygdeavgiftsberegningServiceDeprecated trygdeavgiftsberegningServiceDeprecated,
                                LovvalgsperiodeService lovvalgsperiodeService, BehandlingService behandlingService) {
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.behandlingsresultatService = behandlingsresultatService;
-        this.trygdeavgiftsberegningService = trygdeavgiftsberegningService;
+        this.trygdeavgiftsberegningServiceDeprecated = trygdeavgiftsberegningServiceDeprecated;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.behandlingService = behandlingService;
     }
@@ -112,7 +112,7 @@ public class BrevmottakerService {
             );
         }
 
-        Optional<Trygdeavgiftsberegningsresultat> trygdeavgiftsberegningsresultat = trygdeavgiftsberegningService.finnBeregningsresultat(behandling.getId());
+        Optional<Trygdeavgiftsberegningsresultat> trygdeavgiftsberegningsresultat = trygdeavgiftsberegningServiceDeprecated.finnBeregningsresultat(behandling.getId());
 
         trygdeavgiftsberegningsresultat.ifPresent(resultat -> {
             if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI_HVIS_IKKE_SELVBETALENDE_BRUKER) && resultat.erIkkeSelvbetalendeBruker()) {

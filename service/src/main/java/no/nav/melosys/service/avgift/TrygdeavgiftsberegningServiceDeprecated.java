@@ -9,7 +9,7 @@ import no.nav.melosys.domain.avgift.OppdaterTrygdeavgiftsberegningRequest;
 import no.nav.melosys.domain.avgift.TrygdeavgiftDeprecated;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsberegningsresultat;
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer;
-import no.nav.melosys.integrasjon.trygdeavgift.dto.MelosysTrygdeavgfitBeregningDto;
+import no.nav.melosys.integrasjon.trygdeavgift.dto.MelosysTrygdeavgfitBeregningV1Dto;
 import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,15 +17,16 @@ import org.springframework.transaction.annotation.Transactional;
 import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_norsk_inntekt.NORSK_INNTEKT_TRYGDEAVGIFT_NAV;
 import static no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV;
 
+@Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
 @Service
-public class TrygdeavgiftsberegningService {
+public class TrygdeavgiftsberegningServiceDeprecated {
 
     private final TrygdeavgiftsgrunnlagServiceDeprecated trygdeavgiftsgrunnlagServiceDeprecated;
     private final MedlemAvFolketrygdenService medlemAvFolketrygdenService;
     private final TrygdeavgiftConsumer trygdeavgiftConsumer;
 
-    public TrygdeavgiftsberegningService(TrygdeavgiftsgrunnlagServiceDeprecated trygdeavgiftsgrunnlagServiceDeprecated,
-                                         MedlemAvFolketrygdenService medlemAvFolketrygdenService, TrygdeavgiftConsumer trygdeavgiftConsumer) {
+    public TrygdeavgiftsberegningServiceDeprecated(TrygdeavgiftsgrunnlagServiceDeprecated trygdeavgiftsgrunnlagServiceDeprecated,
+                                                   MedlemAvFolketrygdenService medlemAvFolketrygdenService, TrygdeavgiftConsumer trygdeavgiftConsumer) {
         this.trygdeavgiftsgrunnlagServiceDeprecated = trygdeavgiftsgrunnlagServiceDeprecated;
         this.medlemAvFolketrygdenService = medlemAvFolketrygdenService;
         this.trygdeavgiftConsumer = trygdeavgiftConsumer;
@@ -88,7 +89,7 @@ public class TrygdeavgiftsberegningService {
                                     boolean erAvgiftForNorskInntekt) {
 
         var beregningsresultater = trygdeavgiftConsumer.beregnTrygdeavgift(
-            new MelosysTrygdeavgfitBeregningDto(
+            new MelosysTrygdeavgfitBeregningV1Dto(
                 avgiftsgrunnlag.betalerArbeidsgiverAvgift(),
                 avgiftsgrunnlag.erSkattepliktig(),
                 medlemskapsperiode.getDekning(),

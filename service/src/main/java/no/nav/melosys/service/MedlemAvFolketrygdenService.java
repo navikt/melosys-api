@@ -24,4 +24,8 @@ public class MedlemAvFolketrygdenService {
     public Optional<MedlemAvFolketrygden> finnMedlemAvFolketrygden(long behandlingsresultatID) {
         return medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingsresultatID);
     }
+
+    public MedlemAvFolketrygden lagre(MedlemAvFolketrygden medlemAvFolketrygden) {
+        return medlemAvFolketrygdenRepository.save(medlemAvFolketrygden);
+    }
 }
