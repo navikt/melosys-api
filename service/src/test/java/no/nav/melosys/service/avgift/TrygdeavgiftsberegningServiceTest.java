@@ -143,10 +143,10 @@ class TrygdeavgiftsberegningServiceTest {
         assertThat(medlemskapsperiode.getTrygdeavgift())
             .hasSize(1)
             .flatExtracting(
-                Trygdeavgift::erAvgiftForNorskInntekt,
-                Trygdeavgift::getAvgiftskode,
-                Trygdeavgift::getTrygdeavgiftsbeløpMd,
-                Trygdeavgift::getTrygdesats
+                TrygdeavgiftDeprecated::erAvgiftForNorskInntekt,
+                TrygdeavgiftDeprecated::getAvgiftskode,
+                TrygdeavgiftDeprecated::getTrygdeavgiftsbeløpMd,
+                TrygdeavgiftDeprecated::getTrygdesats
             ).containsExactly(
                 false,
                 "kode",
@@ -185,10 +185,10 @@ class TrygdeavgiftsberegningServiceTest {
         assertThat(medlemskapsperiode.getTrygdeavgift())
             .hasSize(2)
             .flatExtracting(
-                Trygdeavgift::erAvgiftForNorskInntekt,
-                Trygdeavgift::getAvgiftskode,
-                Trygdeavgift::getTrygdeavgiftsbeløpMd,
-                Trygdeavgift::getTrygdesats
+                TrygdeavgiftDeprecated::erAvgiftForNorskInntekt,
+                TrygdeavgiftDeprecated::getAvgiftskode,
+                TrygdeavgiftDeprecated::getTrygdeavgiftsbeløpMd,
+                TrygdeavgiftDeprecated::getTrygdesats
             ).containsExactlyInAnyOrder(
                 false,
                 "kode",
@@ -308,14 +308,14 @@ class TrygdeavgiftsberegningServiceTest {
         return medlemskapsperiode;
     }
 
-    private Trygdeavgift lagTrygdeavgift(boolean forNorskInntekt) {
-        Trygdeavgift trygdeavgift = new Trygdeavgift();
-        trygdeavgift.setAvgiftForInntekt(forNorskInntekt ? Trygdeavgift.AvgiftForInntekt.NORSK_INNTEKT : Trygdeavgift.AvgiftForInntekt.UTENLANDSK_INNTEKT);
-        trygdeavgift.setTrygdeavgiftsbeløpMd(new BigDecimal(10));
-        trygdeavgift.setAvgiftskode("ABC");
-        trygdeavgift.setTrygdesats(new BigDecimal("1.1"));
-        trygdeavgift.setPeriodeFra(LocalDate.now());
-        trygdeavgift.setPeriodeTil(LocalDate.now().plusYears(1));
-        return trygdeavgift;
+    private TrygdeavgiftDeprecated lagTrygdeavgift(boolean forNorskInntekt) {
+        TrygdeavgiftDeprecated trygdeavgiftDeprecated = new TrygdeavgiftDeprecated();
+        trygdeavgiftDeprecated.setAvgiftForInntekt(forNorskInntekt ? TrygdeavgiftDeprecated.AvgiftForInntekt.NORSK_INNTEKT : TrygdeavgiftDeprecated.AvgiftForInntekt.UTENLANDSK_INNTEKT);
+        trygdeavgiftDeprecated.setTrygdeavgiftsbeløpMd(new BigDecimal(10));
+        trygdeavgiftDeprecated.setAvgiftskode("ABC");
+        trygdeavgiftDeprecated.setTrygdesats(new BigDecimal("1.1"));
+        trygdeavgiftDeprecated.setPeriodeFra(LocalDate.now());
+        trygdeavgiftDeprecated.setPeriodeTil(LocalDate.now().plusYears(1));
+        return trygdeavgiftDeprecated;
     }
 }

@@ -63,14 +63,14 @@ public class Avgiftsperiode {
     }
 
     private static Avgiftsperiode lagAvgiftsperiode(Medlemskapsperiode medlemskapsperiode,
-                                                    Trygdeavgift trygdeavgift) {
+                                                    TrygdeavgiftDeprecated trygdeavgiftDeprecated) {
         return new Avgiftsperiode(
-            trygdeavgift.getPeriodeFra(),
-            trygdeavgift.getPeriodeTil(),
+            trygdeavgiftDeprecated.getPeriodeFra(),
+            trygdeavgiftDeprecated.getPeriodeTil(),
             medlemskapsperiode.getDekning(),
-            trygdeavgift.getTrygdesats(),
-            trygdeavgift.getTrygdeavgiftsbeløpMd(),
-            trygdeavgift.erAvgiftForNorskInntekt()
+            trygdeavgiftDeprecated.getTrygdesats(),
+            trygdeavgiftDeprecated.getTrygdeavgiftsbeløpMd(),
+            trygdeavgiftDeprecated.erAvgiftForNorskInntekt()
         );
     }
 }

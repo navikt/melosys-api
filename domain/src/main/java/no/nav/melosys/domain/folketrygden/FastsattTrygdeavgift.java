@@ -1,12 +1,15 @@
 package no.nav.melosys.domain.folketrygden;
 
+import java.util.HashSet;
+import java.util.Set;
+import javax.persistence.*;
+
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.avgift.Inntektsperiode;
+import no.nav.melosys.domain.avgift.Trygdeavgift;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer;
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker;
-
-import javax.persistence.*;
 
 @Entity
 @Table(name = "fastsatt_trygdeavgift")
@@ -33,6 +36,9 @@ public class FastsattTrygdeavgift {
 
     @OneToOne(mappedBy = "fastsattTrygdeavgift", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag;
+
+    @OneToMany(mappedBy = "fastsattTrygdeavgift", orphanRemoval = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Set<Trygdeavgift> trygdeavgift = new HashSet<>(1);
 
     @Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
     @Column(name = "avgiftspliktig_norsk_inntekt_md")
@@ -105,6 +111,14 @@ public class FastsattTrygdeavgift {
 
     public void setAvgiftspliktigUtenlandskInntektMnd(Long avgiftspliktigUtenlandskInntektMnd) {
         this.avgiftspliktigUtenlandskInntektMnd = avgiftspliktigUtenlandskInntektMnd;
+    }
+
+    public Set<Trygdeavgift> getTrygdeavgift() {
+        return trygdeavgift;
+    }
+
+    public void setTrygdeavgift(Set<Trygdeavgift> trygdeavgift) {
+        this.trygdeavgift = trygdeavgift;
     }
 
     public Trygdeavgiftmottaker getTrygdeavgiftMottaker() {

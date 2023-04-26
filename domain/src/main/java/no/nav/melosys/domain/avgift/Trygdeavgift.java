@@ -4,33 +4,19 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import javax.persistence.*;
 
-import no.nav.melosys.domain.Medlemskapsperiode;
-
-import static no.nav.melosys.domain.avgift.Trygdeavgift.AvgiftForInntekt.NORSK_INNTEKT;
-import static no.nav.melosys.domain.avgift.Trygdeavgift.AvgiftForInntekt.UTENLANDSK_INNTEKT;
+import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 
 @Entity
-@Table(name = "trygdeavgift")
+@Table(name = "trygdeavgiftt")
 public class Trygdeavgift {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // TODO: Flyttes til FastsattTrygdeavgift istedenfor Medlemskapsperiode?
     @ManyToOne(optional = false, fetch = FetchType.EAGER)
-    @JoinColumn(name = "medlemskapsperiode_id")
-    private Medlemskapsperiode medlemskapsperiode;
-
-    @Column(name = "trygdeavgift_belop_md", nullable = false)
-    private BigDecimal trygdeavgiftsbeløpMd;
-
-    @Column(name = "trygdesats", nullable = false)
-    private BigDecimal trygdesats;
-
-    @Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
-    @Column(name = "avgiftskode", nullable = false)
-    private String avgiftskode;
+    @JoinColumn(name = "fastsatt_trygdeavgift_id")
+    private FastsattTrygdeavgift fastsattTrygdeavgift;
 
     @Column(name = "periode_fra", nullable = false)
     private LocalDate periodeFra;
@@ -38,29 +24,11 @@ public class Trygdeavgift {
     @Column(name = "periode_til", nullable = false)
     private LocalDate periodeTil;
 
-    @Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
-    @Column(name = "avgift_for_inntekt", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private AvgiftForInntekt avgiftForInntekt;
+    @Column(name = "trygdeavgift_belop_md", nullable = false)
+    private BigDecimal trygdeavgiftsbeløpMd;
 
-    public Trygdeavgift() {
-    }
-
-    public Trygdeavgift(Medlemskapsperiode medlemskapsperiode,
-                        BigDecimal trygdeavgiftsbeløpMd,
-                        BigDecimal trygdesats,
-                        String avgiftskode,
-                        boolean erAvgiftForNorskInntekt,
-                        LocalDate periodeFra,
-                        LocalDate periodeTil) {
-        this.medlemskapsperiode = medlemskapsperiode;
-        this.trygdeavgiftsbeløpMd = trygdeavgiftsbeløpMd;
-        this.trygdesats = trygdesats;
-        this.avgiftskode = avgiftskode;
-        this.avgiftForInntekt = erAvgiftForNorskInntekt ? NORSK_INNTEKT : UTENLANDSK_INNTEKT;
-        this.periodeFra = periodeFra;
-        this.periodeTil = periodeTil;
-    }
+    @Column(name = "trygdesats", nullable = false)
+    private BigDecimal trygdesats;
 
     public Long getId() {
         return id;
@@ -70,48 +38,12 @@ public class Trygdeavgift {
         this.id = id;
     }
 
-    public Medlemskapsperiode getMedlemskapsperiode() {
-        return medlemskapsperiode;
+    public FastsattTrygdeavgift getFastsattTrygdeavgift() {
+        return fastsattTrygdeavgift;
     }
 
-    public void setMedlemskapsperiode(Medlemskapsperiode medlemskapsperiode) {
-        this.medlemskapsperiode = medlemskapsperiode;
-    }
-
-    public BigDecimal getTrygdeavgiftsbeløpMd() {
-        return trygdeavgiftsbeløpMd;
-    }
-
-    public void setTrygdeavgiftsbeløpMd(BigDecimal trygdeavgiftsBeløp) {
-        this.trygdeavgiftsbeløpMd = trygdeavgiftsBeløp;
-    }
-
-    public BigDecimal getTrygdesats() {
-        return trygdesats;
-    }
-
-    public void setTrygdesats(BigDecimal trygdesats) {
-        this.trygdesats = trygdesats;
-    }
-
-    public String getAvgiftskode() {
-        return avgiftskode;
-    }
-
-    public void setAvgiftskode(String avgiftskode) {
-        this.avgiftskode = avgiftskode;
-    }
-
-    public AvgiftForInntekt getAvgiftForInntekt() {
-        return avgiftForInntekt;
-    }
-
-    public void setAvgiftForInntekt(AvgiftForInntekt avgiftForInntekt) {
-        this.avgiftForInntekt = avgiftForInntekt;
-    }
-
-    public boolean erAvgiftForNorskInntekt() {
-        return avgiftForInntekt == NORSK_INNTEKT;
+    public void setFastsattTrygdeavgift(FastsattTrygdeavgift fastsattTrygdeavgift) {
+        this.fastsattTrygdeavgift = fastsattTrygdeavgift;
     }
 
     public LocalDate getPeriodeFra() {
@@ -130,7 +62,19 @@ public class Trygdeavgift {
         this.periodeTil = periodeTil;
     }
 
-    public enum AvgiftForInntekt {
-        NORSK_INNTEKT, UTENLANDSK_INNTEKT
+    public BigDecimal getTrygdeavgiftsbeløpMd() {
+        return trygdeavgiftsbeløpMd;
+    }
+
+    public void setTrygdeavgiftsbeløpMd(BigDecimal trygdeavgiftsbeløpMd) {
+        this.trygdeavgiftsbeløpMd = trygdeavgiftsbeløpMd;
+    }
+
+    public BigDecimal getTrygdesats() {
+        return trygdesats;
+    }
+
+    public void setTrygdesats(BigDecimal trygdesats) {
+        this.trygdesats = trygdesats;
     }
 }

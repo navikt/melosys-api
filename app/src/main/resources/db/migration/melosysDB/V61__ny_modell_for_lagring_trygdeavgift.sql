@@ -43,3 +43,22 @@ CREATE INDEX idx_skatteforhold_til_norge_trygdeavgiftsgrunnlag ON skatteforhold_
 ALTER TABLE medlem_av_folketrygden ADD bestemmelse VARCHAR2(99);
 UPDATE medlem_av_folketrygden SET bestemmelse = 'FTRL_KAP2_2_8_FØRSTE_LEDD_A';
 ALTER TABLE medlem_av_folketrygden MODIFY bestemmelse VARCHAR2(99) NOT NULL;
+
+
+ALTER TABLE trygdeavgift RENAME TO trygdeavgift_deprecated;
+ALTER TABLE trygdeavgift_deprecated RENAME CONSTRAINT pk_trygdeavgift to pk_trygdeavgift_deprecated;
+
+CREATE TABLE trygdeavgiftt
+(
+    id                          NUMBER(19)      GENERATED ALWAYS AS IDENTITY,
+    fastsatt_trygdeavgift_id    NUMBER(19)      NOT NULL,
+    periode_fra                 DATE            NOT NULL,
+    periode_til                 DATE            NOT NULL,
+    trygdeavgift_belop_md       DECIMAL(12,2)   NOT NULL,
+    trygdesats                  DECIMAL(4,2)    NOT NULL,
+    CONSTRAINT pk_trygdeavgiftt  PRIMARY KEY (id)
+);
+
+ALTER TABLE trygdeavgiftt
+    ADD CONSTRAINT fk_trygdeavgift_fastsatt_trygdeavgift FOREIGN KEY (fastsatt_trygdeavgift_id) REFERENCES fastsatt_trygdeavgift;
+CREATE INDEX idx_trygdeavgift_fastsatt_trygdeavgift ON trygdeavgiftt (fastsatt_trygdeavgift_id);

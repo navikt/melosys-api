@@ -8,7 +8,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.avgift.Trygdeavgift
+import no.nav.melosys.domain.avgift.TrygdeavgiftDeprecated
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
@@ -244,8 +244,8 @@ class OpprettBetalingsplanTest {
         return java.util.List.of(periode1)
     }
 
-    private fun lagTrygdeAvgift(medlemskapsperiode: Medlemskapsperiode): Trygdeavgift {
-        val trygdeavgift = Trygdeavgift(
+    private fun lagTrygdeAvgift(medlemskapsperiode: Medlemskapsperiode): TrygdeavgiftDeprecated {
+        val trygdeavgiftDeprecated = TrygdeavgiftDeprecated(
             medlemskapsperiode,
             BigDecimal(5000),
             BigDecimal(3.5),
@@ -254,7 +254,7 @@ class OpprettBetalingsplanTest {
             LocalDate.of(2023, 1, 1),
             LocalDate.of(2023, 5, 1)
         )
-        return trygdeavgift
+        return trygdeavgiftDeprecated
     }
 
     private fun lagFastsattTrygdeavgift(): FastsattTrygdeavgift {

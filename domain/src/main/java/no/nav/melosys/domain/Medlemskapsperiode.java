@@ -6,7 +6,7 @@ import java.util.Collection;
 import java.util.Objects;
 import javax.persistence.*;
 
-import no.nav.melosys.domain.avgift.Trygdeavgift;
+import no.nav.melosys.domain.avgift.TrygdeavgiftDeprecated;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
@@ -58,8 +58,7 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
     private Long medlPeriodeID;
 
     @OneToMany(mappedBy = "medlemskapsperiode", orphanRemoval = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private Collection<Trygdeavgift> trygdeavgift = new ArrayList<>(1);
-
+    private Collection<TrygdeavgiftDeprecated> trygdeavgiftDeprecated = new ArrayList<>(1);
 
     public Medlemskapsperiode() {
     }
@@ -160,12 +159,12 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
         this.medlPeriodeID = medlPeriodeID;
     }
 
-    public Collection<Trygdeavgift> getTrygdeavgift() {
-        return trygdeavgift;
+    public Collection<TrygdeavgiftDeprecated> getTrygdeavgift() {
+        return trygdeavgiftDeprecated;
     }
 
-    public void setTrygdeavgift(Collection<Trygdeavgift> trygdeavgift) {
-        this.trygdeavgift = trygdeavgift;
+    public void setTrygdeavgift(Collection<TrygdeavgiftDeprecated> trygdeavgiftDeprecated) {
+        this.trygdeavgiftDeprecated = trygdeavgiftDeprecated;
     }
 
     public boolean erInnvilget() {

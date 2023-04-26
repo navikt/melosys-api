@@ -9,7 +9,7 @@ import java.util.Set;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.avgift.Trygdeavgift;
+import no.nav.melosys.domain.avgift.TrygdeavgiftDeprecated;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.SoeknadFtrl;
@@ -91,14 +91,14 @@ public class FattetVedtakTestData {
         return List.of(m);
     }
 
-    private static Collection<Trygdeavgift> lagTrygdeavgift() {
-        Trygdeavgift norsk = new Trygdeavgift();
-        norsk.setAvgiftForInntekt(Trygdeavgift.AvgiftForInntekt.NORSK_INNTEKT);
+    private static Collection<TrygdeavgiftDeprecated> lagTrygdeavgift() {
+        TrygdeavgiftDeprecated norsk = new TrygdeavgiftDeprecated();
+        norsk.setAvgiftForInntekt(TrygdeavgiftDeprecated.AvgiftForInntekt.NORSK_INNTEKT);
         norsk.setTrygdesats(BigDecimal.valueOf(2.3));
         norsk.setTrygdeavgiftsbeløpMd(BigDecimal.valueOf(1150));
         norsk.setAvgiftskode("M2E");
-        Trygdeavgift utenlandsk = new Trygdeavgift();
-        utenlandsk.setAvgiftForInntekt(Trygdeavgift.AvgiftForInntekt.UTENLANDSK_INNTEKT);
+        TrygdeavgiftDeprecated utenlandsk = new TrygdeavgiftDeprecated();
+        utenlandsk.setAvgiftForInntekt(TrygdeavgiftDeprecated.AvgiftForInntekt.UTENLANDSK_INNTEKT);
         utenlandsk.setTrygdesats(BigDecimal.valueOf(4.3));
         utenlandsk.setTrygdeavgiftsbeløpMd(BigDecimal.valueOf(430));
         utenlandsk.setAvgiftskode("M2D");

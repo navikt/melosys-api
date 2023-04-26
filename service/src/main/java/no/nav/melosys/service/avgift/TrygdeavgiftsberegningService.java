@@ -6,7 +6,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfo;
 import no.nav.melosys.domain.avgift.OppdaterTrygdeavgiftsberegningRequest;
-import no.nav.melosys.domain.avgift.Trygdeavgift;
+import no.nav.melosys.domain.avgift.TrygdeavgiftDeprecated;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsberegningsresultat;
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer;
 import no.nav.melosys.integrasjon.trygdeavgift.dto.MelosysTrygdeavgfitBeregningDto;
@@ -102,7 +102,7 @@ public class TrygdeavgiftsberegningService {
 
         beregningsresultater.stream().forEach(beregningsresultat ->
             medlemskapsperiode.getTrygdeavgift().add(
-                new Trygdeavgift(
+                new TrygdeavgiftDeprecated(
                     medlemskapsperiode,
                     beregningsresultat.getMaanedsavgift(),
                     beregningsresultat.getAvgiftssats(),

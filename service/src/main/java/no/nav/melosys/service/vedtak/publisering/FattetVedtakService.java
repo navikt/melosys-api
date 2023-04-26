@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.avgift.TrygdeavgiftDeprecated;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -140,7 +141,7 @@ public class FattetVedtakService {
         return medlemAvFolketrygden.getMedlemskapsperioder().stream().map(m -> {
 
             var avgiftForNorsk = m.getTrygdeavgift().stream()
-                .filter(no.nav.melosys.domain.avgift.Trygdeavgift::erAvgiftForNorskInntekt).findFirst();
+                .filter(TrygdeavgiftDeprecated::erAvgiftForNorskInntekt).findFirst();
 
             var avgiftForUtenlandsk = m.getTrygdeavgift().stream()
                 .filter(t -> !t.erAvgiftForNorskInntekt()).findFirst();
