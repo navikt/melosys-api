@@ -15,6 +15,7 @@ import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.core.env.Environment
+import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import java.io.File
 import java.time.LocalDateTime
@@ -40,7 +41,32 @@ class OppgaveMigrering(
     private val sakHvorMappingFeiler = mutableListOf<String>()
     private val oppgaveMappingKjørelog = StringBuilder()
 
+    @Volatile
+    private var antallSakerFunnet: Int = 0
 
+    @Volatile
+    private var antallSakerErRedigerbar: Int = 0
+
+    @Volatile
+    private var antallSakerProssessert: Int = 0
+
+    @Volatile
+    private var antallSakerMigrert: Int = 0
+
+    @Volatile
+    private var harIkkeÅpenOppgave: Int = 0
+
+    fun status(): Map<String, Any> {
+        return mapOf(
+            "antallSakerFunnet" to antallSakerFunnet,
+            "antallSakerErRedigerbar" to antallSakerErRedigerbar,
+            "antallSakerProssessert" to antallSakerProssessert,
+            "antallSakerMigrert" to antallSakerMigrert,
+            "harIkkeÅpenOppgave" to harIkkeÅpenOppgave,
+        )
+    }
+
+    @Async
     fun go() {
         ThreadLocalAccessInfo.executeProcess("Prossess oppgaver") {
             migrering()
@@ -57,23 +83,27 @@ class OppgaveMigrering(
             )
         ).apply {
             log.info("size før erRedigerbar: $size")
+            antallSakerFunnet = size
         }.filter { it.erRedigerbar() }.sortedBy { it.saksnummer }
+        antallSakerErRedigerbar = sakOgBehandlinger.size
 
-        println("sakOgBehandlinger filtrert: ${sakOgBehandlinger.size}")
+        println("sakOgBehandlinger filtrert: $antallSakerErRedigerbar")
 
         sakOgBehandlinger.forEach {
+            antallSakerProssessert++
             oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(it.saksnummer).apply {
                 if (size > 1) sakMedFlereOppgaver(it)
                 if (size == 0) sakManglerOppgave(it)
             }.firstOrNull()?.apply {
                 gammelOppgaveMapping(it)
                 nyOppgaveMapping(it)
+                antallSakerMigrert++
             }
         }
-        lagKjøreRapport()
+        lagRapport()
     }
 
-    private fun lagKjøreRapport() {
+    private fun lagRapport() {
         val status = statusEtterKjøring()
         println(status)
         saveStatusFiles(status)
@@ -92,7 +122,8 @@ class OppgaveMigrering(
     private fun saveStatusFiles(status: String) {
         val envName = environment.getActiveProfiles().first()
         if (envName == "test") return
-        val timeForRun = "oppgave-migrering/$envName-${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))}"
+        val timeForRun =
+            "oppgave-migrering/$envName-${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))}"
         File(timeForRun).mkdirs()
 
         File("$timeForRun/status.txt").writeText(status)
@@ -114,7 +145,7 @@ class OppgaveMigrering(
 
     private fun Oppgave.gammelOppgaveMapping(sakOgBehandling: SakOgBehandlingDTO) {
         log.info(sakOgBehandling.toString())
-        log.info("oppgave:$oppgaveId - beskrivelse:${beskrivelse ?: ""}")
+        log.info("oppgave:$oppgaveId - beskrivelse:$beskrivelse")
         sakerMedOppgave.add(sakOgBehandling.saksnummer)
         oppgaveMappingKjørelog.appendLine()
         oppgaveMappingKjørelog.appendLine("$sakOgBehandling")
@@ -126,7 +157,6 @@ class OppgaveMigrering(
         oppgaveMappingKjørelog.appendLine("behandlingstype=   $behandlingstype")
         oppgaveMappingKjørelog.appendLine("oppgavetype=       $oppgavetype")
         oppgaveMappingKjørelog.appendLine("beskrivelse=       $beskrivelse")
-        oppgaveMappingKjørelog.appendLine("=========== nye ===========")
     }
 
     private fun nyOppgaveMapping(sakOgBehandling: SakOgBehandlingDTO) {
@@ -135,6 +165,7 @@ class OppgaveMigrering(
             val oppgavetype: Oppgavetyper = sakOgBehandling.utledOppgaveType()
             val beskrivelse: String = sakOgBehandling.utledBeskrivelse(oppgaveBehandlingstema)
             val tema: Tema = sakOgBehandling.utledTema()
+            oppgaveMappingKjørelog.appendLine("=========== ny ===========")
             oppgaveMappingKjørelog.appendLine("oppgavetype=       $oppgavetype")
             oppgaveMappingKjørelog.appendLine("tema=              $tema")
             oppgaveMappingKjørelog.appendLine("behandlingstema=   ${oppgaveBehandlingstema.kode}")
@@ -148,6 +179,7 @@ class OppgaveMigrering(
 
     private fun sakManglerOppgave(sakOgBehandlingDTO: SakOgBehandlingDTO) {
         log.warn("${sakOgBehandlingDTO.saksnummer} har ikke åpen oppgagave")
+        harIkkeÅpenOppgave++
         sakerManglerOppgave.add(sakOgBehandlingDTO.saksnummer)
     }
 
