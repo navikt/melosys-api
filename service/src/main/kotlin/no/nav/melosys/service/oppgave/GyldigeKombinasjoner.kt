@@ -23,7 +23,7 @@ class GyldigeKombinasjoner {
             }
         }
 
-        private val rows: List<TableRow> by lazy {
+        val rows: List<TableRow> by lazy {
             sequence {
                 tableRowMedGrupperings.forEach { row ->
                     row.behandlingstyper.forEach { behandlingstype ->
