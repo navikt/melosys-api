@@ -7,12 +7,16 @@ import java.util.Set;
 
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.avgift.Trygdeavgiftsberegningsresultat;
+import no.nav.melosys.domain.avgift.Inntektsperiode;
+import no.nav.melosys.domain.avgift.Trygdeavgift;
+import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -25,7 +29,6 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.avgift.TrygdeavgiftsberegningServiceDeprecated;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -52,8 +55,6 @@ class BrevmottakerServiceTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
-    private TrygdeavgiftsberegningServiceDeprecated trygdeavgiftsberegningServiceDeprecated;
-    @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
     private BehandlingService behandlingService;
@@ -66,13 +67,14 @@ class BrevmottakerServiceTest {
     @BeforeEach
     void setup() {
         brevmottakerService = new BrevmottakerService(
-            avklarteVirksomheterService, utenlandskMyndighetService, behandlingsresultatService,
-                trygdeavgiftsberegningServiceDeprecated, lovvalgsperiodeService, behandlingService);
+            avklarteVirksomheterService, utenlandskMyndighetService, behandlingsresultatService, lovvalgsperiodeService, behandlingService);
 
         behandlingsresultat = new Behandlingsresultat();
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
+        behandlingsresultat.setMedlemAvFolketrygden(new MedlemAvFolketrygden());
+        behandlingsresultat.getMedlemAvFolketrygden().setFastsattTrygdeavgift(new FastsattTrygdeavgift());
     }
 
     @Test
@@ -311,7 +313,7 @@ class BrevmottakerServiceTest {
                 emptyList()
             );
 
-        verifyNoInteractions(trygdeavgiftsberegningServiceDeprecated);
+        verifyNoInteractions(behandlingsresultatService);
     }
 
     @Test
@@ -328,13 +330,14 @@ class BrevmottakerServiceTest {
                 emptyList()
             );
 
-        verifyNoInteractions(trygdeavgiftsberegningServiceDeprecated);
+        verifyNoInteractions(behandlingsresultatService);
     }
 
     @Test
     void gittMangelbrevArbeidsgiver_skalHovedmottakerVæreArbeidsgiverMedKopi() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigOrg(null));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         assertThat(brevmottakerService.hentMottakerliste(MANGELBREV_ARBEIDSGIVER, 123))
             .extracting(
@@ -348,14 +351,14 @@ class BrevmottakerServiceTest {
                 emptyList()
             );
 
-        verify(trygdeavgiftsberegningServiceDeprecated).finnBeregningsresultat(anyLong());
+        verify(behandlingsresultatService).hentBehandlingsresultat(123L);
     }
 
     @Test
     void gittVedtakFtrl2_8UtenFullmektigIkkeSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() {
         initMocksForFtrlVedtaksbrev(null, 10000, false);
 
-        assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, 123))
+        assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, 123L))
             .extracting(
                 Mottakerliste::getHovedMottaker,
                 Mottakerliste::getKopiMottakere,
@@ -367,14 +370,14 @@ class BrevmottakerServiceTest {
                 List.of(SKATTEETATEN)
             );
 
-        verify(trygdeavgiftsberegningServiceDeprecated).finnBeregningsresultat(anyLong());
+        verify(behandlingsresultatService).hentBehandlingsresultat(123L);
     }
 
     @Test
     void gittVedtakFtrl2_8UtenFullmektigSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() {
         initMocksForFtrlVedtaksbrev(null, 10000, true);
 
-        assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, 123))
+        assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN_2_8, 123L))
             .isNotNull()
             .extracting(
                 Mottakerliste::getHovedMottaker,
@@ -387,7 +390,7 @@ class BrevmottakerServiceTest {
                 List.of(SKATTEETATEN)
             );
 
-        verify(trygdeavgiftsberegningServiceDeprecated).finnBeregningsresultat(anyLong());
+        verify(behandlingsresultatService).hentBehandlingsresultat(123L);
     }
 
     @Test
@@ -407,7 +410,7 @@ class BrevmottakerServiceTest {
                 List.of(SKATTEETATEN)
             );
 
-        verify(trygdeavgiftsberegningServiceDeprecated).finnBeregningsresultat(anyLong());
+        verify(behandlingsresultatService).hentBehandlingsresultat(123L);
     }
 
     @Test
@@ -428,7 +431,7 @@ class BrevmottakerServiceTest {
                 List.of(SKATTEETATEN)
             );
 
-        verify(trygdeavgiftsberegningServiceDeprecated).finnBeregningsresultat(anyLong());
+        verify(behandlingsresultatService).hentBehandlingsresultat(123L);
     }
 
     @Test
@@ -448,7 +451,7 @@ class BrevmottakerServiceTest {
                 emptyList()
             );
 
-        verify(trygdeavgiftsberegningServiceDeprecated).finnBeregningsresultat(anyLong());
+        verify(behandlingsresultatService).hentBehandlingsresultat(123L);
     }
 
     @Test
@@ -457,6 +460,7 @@ class BrevmottakerServiceTest {
         lovvalgsperiode.setBestemmelse(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1);
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigOrg(null));
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
         when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
 
         assertThat(brevmottakerService.hentMottakerliste(TRYGDEAVTALE_GB, 123))
@@ -479,6 +483,7 @@ class BrevmottakerServiceTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigOrg(null));
         when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         assertThat(brevmottakerService.hentMottakerliste(TRYGDEAVTALE_GB, 123))
             .extracting(
@@ -523,16 +528,23 @@ class BrevmottakerServiceTest {
     }
 
     private void initMocksForFtrlVedtaksbrev(Representerer representerer, long norskinntekt, boolean selvbetalende) {
-        Optional<Trygdeavgiftsberegningsresultat> trygdeavgiftsberegningsresultat = Optional.of(
-            new Trygdeavgiftsberegningsresultat(norskinntekt, null, lagAktoer(selvbetalende ? Aktoersroller.BRUKER : Aktoersroller.REPRESENTANT_TRYGDEAVGIFT), emptyList())
-        );
-
-        when(trygdeavgiftsberegningServiceDeprecated.finnBeregningsresultat(anyLong())).thenReturn(trygdeavgiftsberegningsresultat);
-
-        when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         Fagsak fagsak = lagFagsakMedFullmektigOrg(representerer);
         fagsak.setType(Sakstyper.FTRL);
+        mockFastsattTrygdeavgift(fagsak, norskinntekt, selvbetalende);
+
+        when(behandlingsresultatService.hentBehandlingsresultat(123L)).thenReturn(behandlingsresultat);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
         when(behandling.getFagsak()).thenReturn(fagsak);
+    }
+
+    private void mockFastsattTrygdeavgift(Fagsak fagsak, long norskinntekt, boolean selvbetalende) {
+        var inntektsperiode = new Inntektsperiode();
+        inntektsperiode.setTrygdeavgiftBetalesTilSkatt(norskinntekt == 0);
+        var fastsattTrygdeavgift = behandlingsresultat.getMedlemAvFolketrygden().getFastsattTrygdeavgift();
+        fastsattTrygdeavgift.setTrygdeavgift(Set.of(new Trygdeavgift()));
+        fastsattTrygdeavgift.setBetalesAv(selvbetalende ? fagsak.hentBruker() : lagAktoer(Aktoersroller.REPRESENTANT));
+        fastsattTrygdeavgift.setTrygdeavgiftsgrunnlag(new Trygdeavgiftsgrunnlag());
+        fastsattTrygdeavgift.getTrygdeavgiftsgrunnlag().setInntektsperioder(Set.of(inntektsperiode));
     }
 
     private Aktoer lagAktoer(Aktoersroller rolle) {

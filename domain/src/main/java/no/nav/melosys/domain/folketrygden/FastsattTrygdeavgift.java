@@ -131,4 +131,8 @@ public class FastsattTrygdeavgift {
             ? Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
             : Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV;
     }
+
+    public boolean skalBetaleTrygdeavgiftTilNav() {
+        return getTrygdeavgiftMottaker() != Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT;
+    }
 }

@@ -30,7 +30,7 @@ class TrygdeavgiftsberegningService
 
         fastsattTrygdeavgift.trygdeavgift.clear()
 
-        if (fastsattTrygdeavgift.getTrygdeavgiftMottaker() == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT) {
+        if (!fastsattTrygdeavgift.skalBetaleTrygdeavgiftTilNav()) {
             return emptySet()
         }
 
