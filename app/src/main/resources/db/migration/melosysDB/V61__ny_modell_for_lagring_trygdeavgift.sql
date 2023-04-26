@@ -54,7 +54,7 @@ CREATE TABLE trygdeavgiftt
     fastsatt_trygdeavgift_id    NUMBER(19)      NOT NULL,
     periode_fra                 DATE            NOT NULL,
     periode_til                 DATE            NOT NULL,
-    trygdeavgift_belop_md       DECIMAL(12,2)   NOT NULL,
+    trygdeavgift_belop_md       DECIMAL(12,0)   NOT NULL,
     trygdesats                  DECIMAL(4,2)    NOT NULL,
     CONSTRAINT pk_trygdeavgiftt  PRIMARY KEY (id)
 );

@@ -1,6 +1,7 @@
 package no.nav.melosys.domain.avgift;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDate;
 import javax.persistence.*;
 
@@ -25,7 +26,7 @@ public class Trygdeavgift {
     private LocalDate periodeTil;
 
     @Column(name = "trygdeavgift_belop_md", nullable = false)
-    private BigDecimal trygdeavgiftsbeløpMd;
+    private BigInteger trygdeavgiftsbeløpMd;
 
     @Column(name = "trygdesats", nullable = false)
     private BigDecimal trygdesats;
@@ -62,11 +63,11 @@ public class Trygdeavgift {
         this.periodeTil = periodeTil;
     }
 
-    public BigDecimal getTrygdeavgiftsbeløpMd() {
+    public BigInteger getTrygdeavgiftsbeløpMd() {
         return trygdeavgiftsbeløpMd;
     }
 
-    public void setTrygdeavgiftsbeløpMd(BigDecimal trygdeavgiftsbeløpMd) {
+    public void setTrygdeavgiftsbeløpMd(BigInteger trygdeavgiftsbeløpMd) {
         this.trygdeavgiftsbeløpMd = trygdeavgiftsbeløpMd;
     }
 
