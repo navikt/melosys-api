@@ -5,7 +5,6 @@ import no.finn.unleash.Unleash
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Kontaktopplysning
-import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.saksflyt.ProsessDataKey
 import no.nav.melosys.domain.saksflyt.ProsessSteg
 import no.nav.melosys.domain.saksflyt.Prosessinstans
@@ -18,6 +17,7 @@ import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Component
+import java.math.BigDecimal
 import java.util.*
 
 private val log = KotlinLogging.logger { }
@@ -42,43 +42,29 @@ class OpprettBetalingsplan(
         }
 
         val behandlingsId = prosessinstans.behandling.id
-        val behandling = behandlingService.hentBehandling(behandlingsId)
-        val fagsak = behandling.fagsak
-        val aktoerer = fagsak.aktører.filter { it.rolle == Aktoersroller.BRUKER }
-
-        if (aktoerer.size > 1) {
-            throw FunksjonellException("Kunne ikke opprette betalingsplan, det finnes ${aktoerer.size} aktører med rolle BRUKER")
-        } else if (aktoerer.isEmpty()) {
-            throw FunksjonellException("Kunne ikke opprette betalingsplan, det finnes ${aktoerer.size} aktører")
-        }
+        val fagsak = behandlingService.hentBehandling(behandlingsId).fagsak
 
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsId)
         val vedtaksdato = behandlingsresultat.vedtakMetadata.vedtaksdato.toString()
-        val medlemskapsperioder = behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder
         val fastsattTrygdeavgift = behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift
-        val avgiftspliktigUtenlandskInntektMnd = fastsattTrygdeavgift.avgiftspliktigUtenlandskInntektMnd ?: 0
-        val avgiftspliktigNorskInntektMnd = fastsattTrygdeavgift.avgiftspliktigNorskInntektMnd ?: 0
-        val inntektBelopMnd = avgiftspliktigUtenlandskInntektMnd + avgiftspliktigNorskInntektMnd
         val kontaktopplysning = hentKontaktopplysning(fagsak, fastsattTrygdeavgift.betalesAv)
 
-        val alleTrygdeavgiftIMedlemskap = medlemskapsperioder.flatMap {
-            it.trygdeavgift.map { trygdeavgift -> trygdeavgift }
-        }
-        val fakturaseriePeriodeDtoListe = alleTrygdeavgiftIMedlemskap.map {
+        val fakturaseriePeriodeDtoListe = fastsattTrygdeavgift.trygdeavgift.map {
             FakturaseriePeriodeDto(
-                it.trygdeavgiftsbeløpMd,
+                BigDecimal(it.trygdeavgiftsbeløpMd),
                 it.periodeFra,
                 it.periodeTil,
-                "Inntekt: ${inntektBelopMnd}, Dekning: ${it.medlemskapsperiode.dekning}, Sats: ${it.trygdesats} %"
+                "Inntekt: ${it.hentGjeldendeAvgiftspliktigInntekt()}, Dekning: ${it.hentGjeldendeTrygdedekning()}, Sats: ${it.trygdesats} %"
             )
         }
 
-        val foedselsNr = pdlService.finnFolkeregisterident(aktoerer.first().aktørId)
+        val foedselsNr = pdlService.finnFolkeregisterident(fagsak.hentBrukersAktørID())
             .orElseThrow { FunksjonellException("Kunne ikke finne fødselsnummer fra PDL") }
 
         val intervall = prosessinstans.getData(
             ProsessDataKey.BETALINGSINTERVALL,
-            FaktureringsIntervall::class.java
+            FaktureringsIntervall::class.java,
+            FaktureringsIntervall.MANEDLIG
         )
 
         val fakturaserieDto =
@@ -88,7 +74,7 @@ class OpprettBetalingsplan(
                 referanseNAV = "Medlemskap og avgift",
                 fullmektig = fullmektigDto(fastsattTrygdeavgift.betalesAv, kontaktopplysning),
                 fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
-                intervall = intervall ?: FaktureringsIntervall.MANEDLIG,
+                intervall = intervall,
                 referanseBruker = vedtaksdato,
                 perioder = fakturaseriePeriodeDtoListe
             )

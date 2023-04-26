@@ -8,7 +8,9 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.avgift.TrygdeavgiftDeprecated
+import no.nav.melosys.domain.avgift.Inntektsperiode
+import no.nav.melosys.domain.avgift.Trygdeavgift
+import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
@@ -19,6 +21,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.saksflyt.ProsessDataKey
 import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall
 import no.nav.melosys.saksflyt.faktureringskomponenten.OpprettBetalingsplan
@@ -30,6 +33,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
+import java.math.BigInteger
 import java.time.Instant
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -93,7 +97,7 @@ class OpprettBetalingsplanTest {
         lagTestData(lagFagsak().apply {
             aktører = setOf(
                 lagAktoerOrg(Aktoersroller.REPRESENTANT, "123456789"),
-                lagAktoerPerson(Aktoersroller.BRUKER, "11111111111")
+                lagAktoerPerson("11111111111")
             )
         })
 
@@ -128,7 +132,7 @@ class OpprettBetalingsplanTest {
         lagTestData(lagFagsak().apply {
             aktører = setOf(
                 lagAktoerOrg(Aktoersroller.REPRESENTANT, "123456789"),
-                lagAktoerPerson(Aktoersroller.BRUKER, "11111111111")
+                lagAktoerPerson("11111111111")
             )
         })
 
@@ -171,7 +175,7 @@ class OpprettBetalingsplanTest {
 
         shouldThrow<FunksjonellException> {
             opprettBetalingsplan.utfør(prosessinstans)
-        }.message.shouldContain("Kunne ikke opprette betalingsplan, det finnes 0 aktører")
+        }.message.shouldContain("Finner ikke bruker på fagsak MEL-100")
     }
 
     @Test
@@ -188,9 +192,9 @@ class OpprettBetalingsplanTest {
         } returns behandling
 
 
-        shouldThrow<FunksjonellException> {
+        shouldThrow<TekniskException> {
             opprettBetalingsplan.utfør(prosessinstans)
-        }.message.shouldContain("Kunne ikke opprette betalingsplan, det finnes 2 aktører med rolle BRUKER")
+        }.message.shouldContain("Det finnes mer enn en aktør med rollen Bruker for sak MEL-100")
     }
 
     private fun lagBehandling(fagsak: Fagsak = lagFagsak()): Behandling {
@@ -223,47 +227,52 @@ class OpprettBetalingsplanTest {
     }
 
     private fun lagMedlemAvFolketrygden(): MedlemAvFolketrygden {
-        val medlemAvFolketrygden = MedlemAvFolketrygden()
-        medlemAvFolketrygden.medlemskapsperioder = lagMedlemskapsperioder()
-        medlemAvFolketrygden.fastsattTrygdeavgift = lagFastsattTrygdeavgift()
-        return medlemAvFolketrygden
+        return MedlemAvFolketrygden().apply {
+            medlemskapsperioder = lagMedlemskapsperioder()
+            fastsattTrygdeavgift = lagFastsattTrygdeavgift()
+            bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+        }
     }
 
-
-    private fun lagMedlemskapsperioder(): List<Medlemskapsperiode>? {
-        val periode1 = Medlemskapsperiode()
-
-        periode1.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
-        periode1.innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-        periode1.medlemskapstype = Medlemskapstyper.FRIVILLIG
-        periode1.fom = LocalDate.of(2022, 1, 1)
-        periode1.tom = LocalDate.of(2023, 5, 31)
-        val trygdeAvgift = lagTrygdeAvgift(periode1)
-        periode1.trygdeavgift = listOf(trygdeAvgift)
-        periode1.setTrygdedekning(Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER)
-        return java.util.List.of(periode1)
-    }
-
-    private fun lagTrygdeAvgift(medlemskapsperiode: Medlemskapsperiode): TrygdeavgiftDeprecated {
-        val trygdeavgiftDeprecated = TrygdeavgiftDeprecated(
-            medlemskapsperiode,
-            BigDecimal(5000),
-            BigDecimal(3.5),
-            "Trygda",
-            true,
-            LocalDate.of(2023, 1, 1),
-            LocalDate.of(2023, 5, 1)
-        )
-        return trygdeavgiftDeprecated
+    private fun lagMedlemskapsperioder(): List<Medlemskapsperiode> {
+        return listOf(Medlemskapsperiode().apply {
+            this.setTrygdedekning(Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER)
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            medlemskapstype = Medlemskapstyper.FRIVILLIG
+            fom = LocalDate.of(2022, 1, 1)
+            tom = LocalDate.of(2023, 5, 31)
+        })
     }
 
     private fun lagFastsattTrygdeavgift(): FastsattTrygdeavgift {
-        val fastsattTrygdeavgift = FastsattTrygdeavgift()
-        fastsattTrygdeavgift.avgiftspliktigNorskInntektMnd = 50000L
-        fastsattTrygdeavgift.avgiftspliktigUtenlandskInntektMnd = 50000L
-        fastsattTrygdeavgift.betalesAv = lagBetalesAv()
-        fastsattTrygdeavgift.representantNr = "1234"
-        return fastsattTrygdeavgift
+        return FastsattTrygdeavgift().apply {
+            avgiftspliktigNorskInntektMnd = 50000L
+            avgiftspliktigUtenlandskInntektMnd = 50000L
+            betalesAv = lagBetalesAv()
+            representantNr = "1234"
+            trygdeavgift = setOf(lagTrygdeavgift(this))
+            trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
+                inntektsperioder = setOf(lagInntektsperiode())
+            }
+        }
+    }
+
+    private fun lagTrygdeavgift(fastsattTrygdeavgift: FastsattTrygdeavgift): Trygdeavgift {
+        return Trygdeavgift().apply {
+            periodeFra = LocalDate.of(2023, 1, 1)
+            periodeTil = LocalDate.of(2023, 5, 1)
+            trygdeavgiftsbeløpMd = BigInteger.valueOf(5000)
+            trygdesats = BigDecimal(3.5)
+            this.fastsattTrygdeavgift = fastsattTrygdeavgift
+        }
+    }
+
+    private fun lagInntektsperiode(): Inntektsperiode {
+        return Inntektsperiode().apply {
+            fomDato = LocalDate.of(2023, 1, 1)
+            tomDato = LocalDate.of(2023, 5, 1)
+            avgiftspliktigInntektMnd = BigInteger.valueOf(5000)
+        }
     }
 
     fun lagKontaktOpplysning(): Kontaktopplysning {
@@ -275,10 +284,9 @@ class OpprettBetalingsplanTest {
 
     private fun lagBetalesAv(): Aktoer {
         val aktoer = Aktoer()
-        aktoer.rolle = Aktoersroller.REPRESENTANT_TRYGDEAVGIFT
+        aktoer.rolle = Aktoersroller.BRUKER
         return aktoer
     }
-
 
     private fun lagAktoerOrg(aktoersroller: Aktoersroller, orgNummer: String): Aktoer {
         val aktoer = Aktoer()
@@ -287,9 +295,9 @@ class OpprettBetalingsplanTest {
         return aktoer
     }
 
-    private fun lagAktoerPerson(aktoersroller: Aktoersroller, aktørId: String): Aktoer {
+    private fun lagAktoerPerson(aktørId: String): Aktoer {
         val aktoer = Aktoer()
-        aktoer.rolle = aktoersroller
+        aktoer.rolle = Aktoersroller.BRUKER
         aktoer.aktørId = aktørId
         return aktoer
     }

@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.avgift;
 
+import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.exception.FunksjonellException;
@@ -81,7 +82,7 @@ public class Trygdeavgift {
         this.trygdesats = trygdesats;
     }
 
-    public Trygdedekninger hentGjeldendeTrygdedekning() {
+    public Medlemskapsperiode hentGjeldendeMedlemskapsperiode() {
         var gjeldendeMedlemskapsperioder = fastsattTrygdeavgift.getMedlemAvFolketrygden().getMedlemskapsperioder()
             .stream()
             .filter(medlemskapsperiode ->
@@ -91,7 +92,28 @@ public class Trygdeavgift {
         if (gjeldendeMedlemskapsperioder.size() != 1) {
             throw new FunksjonellException("Finner " + gjeldendeMedlemskapsperioder.size() + " gjeldende medlemskapsperioder. Forventet én.");
         }
-        return gjeldendeMedlemskapsperioder.get(0).getDekning();
+        return gjeldendeMedlemskapsperioder.get(0);
     }
 
+    public Trygdedekninger hentGjeldendeTrygdedekning() {
+        return hentGjeldendeMedlemskapsperiode().getDekning();
+    }
+
+    public Inntektsperiode hentGjeldendeInntektsperiode() {
+        var getGjeldendeInntektsperiode = fastsattTrygdeavgift.getTrygdeavgiftsgrunnlag().getInntektsperioder()
+            .stream()
+            .filter(inntektsperiode ->
+                (inntektsperiode.getFomDato().equals(periodeFra) || inntektsperiode.getFomDato().isBefore(periodeFra))
+                    && (inntektsperiode.getTomDato().isEqual(periodeTil) || inntektsperiode.getTomDato().isAfter(periodeTil)))
+            .filter(inntektsperiode -> !inntektsperiode.isTrygdeavgiftBetalesTilSkatt())
+            .toList();
+        if (getGjeldendeInntektsperiode.size() != 1) {
+            throw new FunksjonellException("Finner " + getGjeldendeInntektsperiode.size() + " gjeldende medlemskapsperioder. Forventet én.");
+        }
+        return getGjeldendeInntektsperiode.get(0);
+    }
+
+    public BigInteger hentGjeldendeAvgiftspliktigInntekt() {
+        return hentGjeldendeInntektsperiode().getAvgiftspliktigInntektMnd();
+    }
 }
