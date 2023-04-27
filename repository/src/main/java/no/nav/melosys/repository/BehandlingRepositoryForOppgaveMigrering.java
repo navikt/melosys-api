@@ -21,4 +21,22 @@ public interface BehandlingRepositoryForOppgaveMigrering extends CrudRepository<
             "e.fagsak.saksnummer, e.id, e.fagsak.type, e.fagsak.tema, e.type, e.tema, e.status) " +
             "FROM Behandling e WHERE e.status NOT IN (:excludedStatuses)")
     Collection<SakOgBehandlingDTO> finnSaksOgBehandlingTyperOgTema(@Param("excludedStatuses") List<Behandlingsstatus> excludedStatuses);
+
+    @Query("SELECT new no.nav.melosys.domain.SakOgBehandlingDTO(" +
+            "e.fagsak.saksnummer, e.id, e.fagsak.type, e.fagsak.tema, e.type, e.tema, e.status) " +
+            "FROM Behandling e WHERE e.status NOT IN (:excludedStatuses) " +
+             "and (e.fagsak.registrertAv = :bruker or e.fagsak.endretAv = :bruker)")
+    Collection<SakOgBehandlingDTO> finnSakerRegistrertAv(
+            @Param("bruker") String bruker,
+            @Param("excludedStatuses") List<Behandlingsstatus> excludedStatuses
+            );
+
+    @Query("SELECT new no.nav.melosys.domain.SakOgBehandlingDTO(" +
+            "e.fagsak.saksnummer, e.id, e.fagsak.type, e.fagsak.tema, e.type, e.tema, e.status) " +
+            "FROM Behandling e WHERE e.status NOT IN (:excludedStatuses) " +
+             "and e.fagsak.saksnummer = :saksnummer")
+    Collection<SakOgBehandlingDTO> finnSak(
+            @Param("saksnummer") String saksnummer,
+            @Param("excludedStatuses") List<Behandlingsstatus> excludedStatuses
+            );
 }

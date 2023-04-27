@@ -72,6 +72,11 @@ class OppgaveMigrering(
     fun sakHvorMappingFeiler(): String = sakHvorMappingFeiler.joinToString("\n")
     fun sakHvorViSkalHaSedMenSomIkkeFinnes(): String = sakHvorViSkalHaSedMenSomIkkeFinnes.joinToString("\n")
 
+    private val behandlingsstatuser = listOf(
+        Behandlingsstatus.AVSLUTTET,
+        Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING,
+        Behandlingsstatus.IVERKSETTER_VEDTAK,
+    )
     @Async
     @Synchronized
     fun go(bruker: String?, saksnummer: String?, dryrun: Boolean) {
@@ -80,15 +85,19 @@ class OppgaveMigrering(
         }
     }
 
+    private fun finnSaker(bruker: String?, saksnummer: String?, dryrun: Boolean): MutableCollection<SakOgBehandlingDTO> {
+        if(saksnummer != null) {
+            return behandlingRepository.finnSak(saksnummer, behandlingsstatuser)
+        }
+        if(bruker != null) {
+            return behandlingRepository.finnSakerRegistrertAv(bruker, behandlingsstatuser)
+        }
+        return behandlingRepository.finnSaksOgBehandlingTyperOgTema(behandlingsstatuser)
+    }
+
     private fun migrering(bruker: String?, saksnummer: String?, dryrun: Boolean) {
         log.info("Utfører OppgaveMigrering")
-        behandlingRepository.finnSaksOgBehandlingTyperOgTema(
-            listOf(
-                Behandlingsstatus.AVSLUTTET,
-                Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING,
-                Behandlingsstatus.IVERKSETTER_VEDTAK,
-            )
-        ).apply {
+        finnSaker(bruker, saksnummer, dryrun).apply {
             log.info("size før erRedigerbar: $size")
             antallSakerFunnet = size
         }.filter { it.erRedigerbar() }.sortedBy { it.saksnummer }.apply {
