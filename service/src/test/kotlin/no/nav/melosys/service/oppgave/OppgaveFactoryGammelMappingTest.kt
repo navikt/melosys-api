@@ -14,7 +14,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
-class OppgaveFactoryTest {
+class OppgaveFactoryGammelMappingTest {
 
     // Testene er på format hva som er input i lagBehandlingsoppgave:
     // sakstype_sakstema_behandlignstype_behandlingstema_radIConfluenceTabell
@@ -618,13 +618,14 @@ class OppgaveFactoryTest {
             tema = melosysBehandlingstema
         }
 
-        val oppgave = OppgaveFactory(FakeUnleash()).lagBehandlingsoppgave(behandling, LocalDate.now()).build()
+        val fakeUnleash = FakeUnleash().apply { disableAll() }
+        val oppgave = OppgaveFactory(fakeUnleash).lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument).build()
 
         withClue(
             "\nsakstype:               $sakstype " +
-                "\nsakstema:               $sakstema " +
-                "\nbehandlingstype:        $behandlingstype " +
-                "\nmelosysBehandlingstema: $melosysBehandlingstema"
+                    "\nsakstema:               $sakstema " +
+                    "\nbehandlingstype:        $behandlingstype " +
+                    "\nmelosysBehandlingstema: $melosysBehandlingstema"
         ) {
             withClue("oppgave.behandlingstema") {
                 oppgave.behandlingstema.shouldBe(expectedBehandlingstema.kode)

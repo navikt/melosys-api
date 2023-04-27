@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.register;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -9,6 +8,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import org.slf4j.Logger;
@@ -16,9 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import static no.nav.melosys.domain.saksflyt.ProsessSteg.HENT_REGISTEROPPLYSNINGER;
-import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
-import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP;
-import static no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory.utledSaksopplysningTyper;
 
 @Component
 public class HentRegisteropplysninger implements StegBehandler {
@@ -28,16 +25,16 @@ public class HentRegisteropplysninger implements StegBehandler {
     private final RegisteropplysningerService registeropplysningerService;
     private final BehandlingService behandlingService;
     private final PersondataFasade persondataFasade;
-    private final Unleash unleash;
+    private final RegisteropplysningerFactory registeropplysningerFactory;
 
     public HentRegisteropplysninger(RegisteropplysningerService registeropplysningerService,
                                     BehandlingService behandlingService,
                                     PersondataFasade persondataFasade,
-                                    Unleash unleash) {
+                                    RegisteropplysningerFactory registeropplysningerFactory) {
         this.registeropplysningerService = registeropplysningerService;
         this.behandlingService = behandlingService;
         this.persondataFasade = persondataFasade;
-        this.unleash = unleash;
+        this.registeropplysningerFactory = registeropplysningerFactory;
     }
 
     @Override
@@ -55,25 +52,19 @@ public class HentRegisteropplysninger implements StegBehandler {
             return;
         }
 
-        var folketrygdenToggleEnabled = unleash.isEnabled("melosys.folketrygden.mvp");
-        var ikkeYrkesaktivToggleEnabled =  unleash.isEnabled(IKKEYRKESAKTIV_FLYT);
-        var registreringUnntakFraMedlemskapToggleEnabled =  unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP);
-
         var aktørId = behandling.getFagsak().finnBrukersAktørID().orElseThrow(
             () -> new FunksjonellException("Kan ikke hente registreopplysninger når bruker ikke har aktørID")
         );
 
-            var registeropplysningerRequestBuilder = RegisteropplysningerRequest.builder()
-                .behandlingID(prosessinstans.getBehandling().getId())
-                .fnr(persondataFasade.hentFolkeregisterident(aktørId))
-                .saksopplysningTyper(utledSaksopplysningTyper(
-                    behandling.getFagsak().getType(),
-                    behandling.getFagsak().getTema(),
-                    behandling.getTema(),
-                    behandling.getType(),
-                    folketrygdenToggleEnabled,
-                    ikkeYrkesaktivToggleEnabled,
-                    registreringUnntakFraMedlemskapToggleEnabled));
+        var registeropplysningerRequestBuilder = RegisteropplysningerRequest.builder()
+            .behandlingID(prosessinstans.getBehandling().getId())
+            .fnr(persondataFasade.hentFolkeregisterident(aktørId))
+            .saksopplysningTyper(registeropplysningerFactory.utledSaksopplysningTyper(
+                behandling.getFagsak().getType(),
+                behandling.getFagsak().getTema(),
+                behandling.getTema(),
+                behandling.getType()
+            ));
 
         behandling.finnPeriode().ifPresent(periode -> {
             registeropplysningerRequestBuilder.fom(periode.getFom());

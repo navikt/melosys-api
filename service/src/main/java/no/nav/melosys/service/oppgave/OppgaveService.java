@@ -1,6 +1,9 @@
 package no.nav.melosys.service.oppgave;
 
 
+import java.util.*;
+import javax.annotation.Nullable;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RegistreringsInfo;
@@ -29,9 +32,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import javax.annotation.Nullable;
-import java.util.*;
 
 import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentPeriode;
 import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentSøknadsland;
@@ -174,7 +174,8 @@ public class OppgaveService {
     }
 
     public Oppgave.Builder lagBehandlingsoppgave(Behandling behandling) {
-        return oppgaveFactory.lagBehandlingsoppgave(behandling, utledMottaksdato.getMottaksdato(behandling));
+        return oppgaveFactory.lagBehandlingsoppgave(behandling, utledMottaksdato.getMottaksdato(behandling),
+            () -> behandlingService.hentBehandlingMedSaksopplysninger(behandling.getId()).finnSedDokument().orElse(null));
     }
 
     public void opprettJournalføringsoppgave(String journalpostID, String aktørID) {
@@ -369,11 +370,12 @@ public class OppgaveService {
     }
 
     private boolean harBeskyttelsesbehov(long behandlingID) {
-        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
-        final String brukersAktørID = behandling.getFagsak().hentBrukersAktørID();
+        final String brukersAktørID = getBrukersAktørID(behandlingID);
         if (persondataFasade.harStrengtFortroligAdresse(brukersAktørID)) {
             return true;
-        } else if (behandling.getMottatteOpplysninger() == null) {
+        }
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
+        if (behandling.getMottatteOpplysninger() == null) {
             return false;
         }
         for (String fnr : behandling.getMottatteOpplysninger().getMottatteOpplysningerData().hentFnrMedfølgendeBarn()) {
@@ -382,5 +384,13 @@ public class OppgaveService {
             }
         }
         return false;
+    }
+
+    private String getBrukersAktørID(long behandlingID) {
+        // Om behandlingService.hentBehandlingMedSaksopplysninger benyttes behandling ikke har saksopplysninger
+        // feiler getFagsak().hentBrukersAktørID() med LazyInitializationException: could not initialize proxy
+        // https://jira.adeo.no/browse/MELOSYS-5871
+        Behandling behandling = behandlingService.hentBehandling(behandlingID);
+        return behandling.getFagsak().hentBrukersAktørID();
     }
 }

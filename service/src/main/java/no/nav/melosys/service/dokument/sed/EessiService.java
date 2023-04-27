@@ -204,7 +204,6 @@ public class EessiService {
     public void sendAnmodningUnntakSvar(long behandlingId, String ytterligereInformasjon) {
         log.info("Sender svar på anmodning om unntak for behandling {}", behandlingId);
         sendSedPåEksisterendeBehandling(behandlingId, PeriodeType.ANMODNINGSPERIODE, this::hentSedTypeForAnmodningUnntakSvar, ytterligereInformasjon);
-
     }
 
     public void sendGodkjenningArbeidFlereLand(long behandlingID, String ytterligereInformasjon) {
@@ -359,7 +358,7 @@ public class EessiService {
         eessiConsumer.lukkBuc(rinaSaksnummer);
     }
 
-    public void sendInvalideringSed(long behandlingID, String sedTypeSomSkalInvalideres, LocalDate opprettetDato) {
+    private void sendInvalideringSed(long behandlingID, String sedTypeSomSkalInvalideres, LocalDate opprettetDato) {
         var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
         SedDataGrunnlag dataGrunnlag = dataGrunnlagFactory.av(behandling, SedType.X008);
@@ -373,7 +372,11 @@ public class EessiService {
         sedDataDto.setInvalideringSedDto(invalideringSedDto);
 
         log.info("Forsøker å sende sed {} for behandling {}", SedType.X008, behandlingID);
-        eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, SedType.X008);
+        try {
+            eessiConsumer.sendSedPåEksisterendeBuc(sedDataDto, rinaSaksnummer, SedType.X008);
+        } catch (Exception e) {
+            log.warn(String.format("Forsøkte å sende SED %s for behandling %s, men det feilet i melosys-eessi.", SedType.X008, behandling.getId()), e);
+        }
     }
 
     private void annullerSedForNyVurderingMedSendtVedtak(Behandling behandling) {

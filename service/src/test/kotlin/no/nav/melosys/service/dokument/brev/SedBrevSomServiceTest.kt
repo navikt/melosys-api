@@ -15,6 +15,7 @@ import no.nav.melosys.domain.UtenlandskMyndighet
 import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.integrasjon.joark.JoarkFasade
@@ -73,6 +74,7 @@ class SedSomBrevServiceTest {
         every { persondataFasadeMock.hentFolkeregisterident(any()) } returns BRUKER_FNR
         every { fagsak.saksnummer } returns SAKSNUMMER
         every { fagsak.tema } returns Sakstemaer.MEDLEMSKAP_LOVVALG
+        every { fagsak.type } returns Sakstyper.EU_EOS
 
 
         sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(SedType.A002, Land_iso2.SE, behandling, null)

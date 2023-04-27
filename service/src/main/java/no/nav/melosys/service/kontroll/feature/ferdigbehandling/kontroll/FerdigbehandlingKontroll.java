@@ -120,6 +120,7 @@ final class FerdigbehandlingKontroll {
 
     private static boolean erBestemmelseDerTrygdeavtaleAttestSendesUSA(LovvalgBestemmelse bestemmelse) {
         return bestemmelse == USA_ART5_2
+            || bestemmelse == USA_ART5_3
             || bestemmelse == USA_ART5_4
             || bestemmelse == USA_ART5_5
             || bestemmelse == USA_ART5_6

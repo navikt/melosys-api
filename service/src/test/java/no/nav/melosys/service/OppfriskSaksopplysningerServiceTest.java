@@ -26,8 +26,10 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.feature.ufm.UfmKontrollService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.saksopplysninger.OppfriskSaksopplysningerService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
@@ -59,8 +61,12 @@ class OppfriskSaksopplysningerServiceTest {
     private RegisteropplysningerService registeropplysningerService;
     @Mock
     private PersondataFasade persondataFasade;
+    @Mock
+    private SaksbehandlingRegler saksbehandlingRegler;
 
     private final FakeUnleash unleash = new FakeUnleash();
+
+    private RegisteropplysningerFactory registeropplysningerFactory;
 
     private OppfriskSaksopplysningerService oppfriskSaksopplysningerService;
 
@@ -68,6 +74,7 @@ class OppfriskSaksopplysningerServiceTest {
 
     @BeforeEach
     public void setUp() {
+        registeropplysningerFactory = new RegisteropplysningerFactory(saksbehandlingRegler, unleash);
         oppfriskSaksopplysningerService = new OppfriskSaksopplysningerService(
             anmodningsperiodeService,
             behandlingService,
@@ -76,8 +83,8 @@ class OppfriskSaksopplysningerServiceTest {
             inngangsvilkaarService,
             registeropplysningerService,
             persondataFasade,
-            unleash);
-        unleash.enableAll();
+            registeropplysningerFactory,
+            saksbehandlingRegler);
     }
 
     @Test
@@ -95,13 +102,15 @@ class OppfriskSaksopplysningerServiceTest {
     }
 
     @Test
-    void oppfriskSaksopplysning_virksomhet() {
+    void oppfriskSaksopplysning_virksomhetTomFlyt() {
         Behandling behandling = lagBehandling();
         Aktoer virksomhet = new Aktoer();
         virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
         behandling.getFagsak().setAktører(Set.of(virksomhet));
         behandling.setType(Behandlingstyper.HENVENDELSE);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(saksbehandlingRegler.harTomFlyt(any(), any(), any(), any())).thenReturn(true);
+        when(saksbehandlingRegler.harTomFlyt(any())).thenReturn(true);
 
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
@@ -181,7 +190,8 @@ class OppfriskSaksopplysningerServiceTest {
 
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
-
+        when(saksbehandlingRegler.harTomFlyt(any())).thenReturn(true);
+        when(saksbehandlingRegler.harTomFlyt(any(), any(), any(), any())).thenReturn(true);
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
 

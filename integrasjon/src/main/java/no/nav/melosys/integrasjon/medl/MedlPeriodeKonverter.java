@@ -44,6 +44,7 @@ public final class MedlPeriodeKonverter {
         tbl.put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1, GrunnlagMedl.FO_11_4_1);
         tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_4_2, GrunnlagMedl.FO_11_4_2);
         tbl.put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5, GrunnlagMedl.FO_11_5);
+        tbl.put(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_2, GrunnlagMedl.FO_11_2);
         tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1, GrunnlagMedl.FO_12_1);
         tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2, GrunnlagMedl.FO_12_2);
         tbl.put(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, GrunnlagMedl.FO_13_1_A);
@@ -206,6 +207,7 @@ public final class MedlPeriodeKonverter {
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA, GrunnlagMedl.USA);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_1, GrunnlagMedl.USA_5_1);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_2, GrunnlagMedl.USA_5_2);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_3, GrunnlagMedl.USA_5_3);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_4, GrunnlagMedl.USA_5_4);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_5, GrunnlagMedl.USA_5_5);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_6, GrunnlagMedl.USA_5_6);

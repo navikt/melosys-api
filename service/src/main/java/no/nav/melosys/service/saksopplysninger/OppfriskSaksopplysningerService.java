@@ -2,7 +2,6 @@ package no.nav.melosys.service.saksopplysninger;
 
 import java.util.Optional;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.dokument.felles.Periode;
@@ -12,19 +11,16 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kontroll.feature.ufm.UfmKontrollService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
-import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP;
-import static no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory.utledSaksopplysningTyper;
-import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
 
 @Service
 public class OppfriskSaksopplysningerService {
@@ -37,7 +33,8 @@ public class OppfriskSaksopplysningerService {
     private final InngangsvilkaarService inngangsvilkaarService;
     private final RegisteropplysningerService registeropplysningerService;
     private final PersondataFasade persondataFasade;
-    private final Unleash unleash;
+    private final RegisteropplysningerFactory registeropplysningerFactory;
+    private final SaksbehandlingRegler saksbehandlingRegler;
 
     public OppfriskSaksopplysningerService(AnmodningsperiodeService anmodningsperiodeService,
                                            BehandlingService behandlingService,
@@ -46,7 +43,8 @@ public class OppfriskSaksopplysningerService {
                                            InngangsvilkaarService inngangsvilkaarService,
                                            RegisteropplysningerService registeropplysningerService,
                                            PersondataFasade persondataFasade,
-                                           Unleash unleash) {
+                                           RegisteropplysningerFactory registeropplysningerFactory,
+                                           SaksbehandlingRegler saksbehandlingRegler) {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -54,14 +52,12 @@ public class OppfriskSaksopplysningerService {
         this.inngangsvilkaarService = inngangsvilkaarService;
         this.registeropplysningerService = registeropplysningerService;
         this.persondataFasade = persondataFasade;
-        this.unleash = unleash;
+        this.registeropplysningerFactory = registeropplysningerFactory;
+        this.saksbehandlingRegler = saksbehandlingRegler;
     }
 
     @Transactional
     public void oppfriskSaksopplysning(long behandlingID, boolean medFamilierelasjoner) {
-        var folketrygdenToggleEnabled = unleash.isEnabled("melosys.folketrygden.mvp");
-        var ikkeYrkesaktivToggleEnabled = unleash.isEnabled(IKKEYRKESAKTIV_FLYT);
-        var registreringUnntakFraMedlemskapToggleEnabled = unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP);
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
         if (behandling.erUtsending() && anmodningsperiodeService.harSendtAnmodningsperiode(behandlingID)) {
@@ -77,14 +73,12 @@ public class OppfriskSaksopplysningerService {
 
         RegisteropplysningerRequest registeropplysningerRequest = RegisteropplysningerRequest.builder()
             .behandlingID(behandlingID)
-            .saksopplysningTyper(utledSaksopplysningTyper(
+            .saksopplysningTyper(registeropplysningerFactory.utledSaksopplysningTyper(
                 behandling.getFagsak().getType(),
                 behandling.getFagsak().getTema(),
                 behandling.getTema(),
-                behandling.getType(),
-                folketrygdenToggleEnabled,
-                ikkeYrkesaktivToggleEnabled,
-                registreringUnntakFraMedlemskapToggleEnabled))
+                behandling.getType()
+            ))
             .fnr(brukerID)
             .fom(periode.getFom())
             .tom(periode.getTom())
@@ -104,7 +98,7 @@ public class OppfriskSaksopplysningerService {
 
         if (behandling.getFagsak().erSakstypeEøs()
             && behandling.harPeriodeOgLand()
-            && !harTomFlyt(behandling, folketrygdenToggleEnabled, ikkeYrkesaktivToggleEnabled, registreringUnntakFraMedlemskapToggleEnabled)
+            && !saksbehandlingRegler.harTomFlyt(behandling)
             && behandling.kanResultereIVedtak()
             && !inngangsvilkaarService.oppfyllervurderingEF_883_2004(behandlingID)) {
             inngangsvilkaarService.vurderOgLagreInngangsvilkår(

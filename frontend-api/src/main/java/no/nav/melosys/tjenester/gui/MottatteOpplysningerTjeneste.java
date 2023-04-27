@@ -6,6 +6,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.tjenester.gui.dto.mottatteopplysninger.MottatteOpplysningerGetDto;
 import no.nav.melosys.tjenester.gui.dto.mottatteopplysninger.MottatteOpplysningerPostDto;
 import no.nav.melosys.tjenester.gui.dto.mottatteopplysninger.PeriodeOgLandPostDto;
@@ -29,11 +30,13 @@ public class MottatteOpplysningerTjeneste {
     }
 
     @GetMapping("/{behandlingID}")
-    public ResponseEntity<MottatteOpplysningerGetDto> hentMottatteOpplysninger(
+    public ResponseEntity<MottatteOpplysningerGetDto> hentEllerOpprettMottatteOpplysninger(
         @PathVariable(value = "behandlingID") long behandlingID
     ) {
         aksesskontroll.autoriser(behandlingID);
-        MottatteOpplysninger mottatteOpplysninger = mottatteOpplysningerService.hentMottatteOpplysninger(behandlingID);
+
+        boolean behandlingKanRedigeresAvSaksbehandler = aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandlingID);
+        MottatteOpplysninger mottatteOpplysninger = mottatteOpplysningerService.hentEllerOpprettMottatteOpplysninger(behandlingID, behandlingKanRedigeresAvSaksbehandler);
         return ResponseEntity.ok(new MottatteOpplysningerGetDto(mottatteOpplysninger));
     }
 

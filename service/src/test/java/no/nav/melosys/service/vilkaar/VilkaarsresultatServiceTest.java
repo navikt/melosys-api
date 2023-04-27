@@ -13,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,15 +32,14 @@ class VilkaarsresultatServiceTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private VilkaarsresultatRepository vilkaarsresultatRepo;
-
-    private final FakeUnleash unleash = new FakeUnleash();
+    @Mock
+    private SaksbehandlingRegler saksbehandlingRegler;
 
     private VilkaarsresultatService vilkaarsresultatService;
 
     @BeforeEach
     public void setUp() {
-        vilkaarsresultatService = new VilkaarsresultatService(behandlingsresultatService, vilkaarsresultatRepo, unleash);
-        unleash.disableAll();
+        vilkaarsresultatService = new VilkaarsresultatService(behandlingsresultatService, vilkaarsresultatRepo, saksbehandlingRegler);
     }
 
     @Test
@@ -87,7 +87,6 @@ class VilkaarsresultatServiceTest {
 
     @Test
     void tømVilkårForBehandlingsresultat_sakstypeIkkeEøs_sletterAlleVilkår() {
-        unleash.enableAll();
         long behandlingID = 1L;
         var fagsak = new Fagsak();
         fagsak.setType(Sakstyper.FTRL);
@@ -105,7 +104,6 @@ class VilkaarsresultatServiceTest {
 
     @Test
     void tømVilkårForBehandlingsresultat_sakstypeEøsMenTomFlyt_sletterAlleVilkår() {
-        unleash.enableAll();
         long behandlingID = 1L;
         var fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
@@ -117,6 +115,7 @@ class VilkaarsresultatServiceTest {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(behandlingID);
         behandlingsresultat.setBehandling(behandling);
+        when(saksbehandlingRegler.harTomFlyt(any())).thenReturn(true);
 
 
         vilkaarsresultatService.tømVilkårForBehandlingsresultat(behandlingsresultat);
@@ -127,7 +126,6 @@ class VilkaarsresultatServiceTest {
 
     @Test
     void tømVilkårForBehandlingsresultat_sakstypeEøs_sletterIkkeInngangsvilkår() {
-        unleash.enableAll();
         long behandlingID = 1L;
         var fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);

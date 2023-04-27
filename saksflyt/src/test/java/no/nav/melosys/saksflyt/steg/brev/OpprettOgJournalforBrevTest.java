@@ -10,6 +10,8 @@ import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -127,8 +129,10 @@ class OpprettOgJournalforBrevTest {
         var fagsak = new Fagsak();
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         fagsak.setAktører(Set.of(virksomhet));
+        fagsak.setType(Sakstyper.EU_EOS);
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
+        behandling.setTema(Behandlingstema.YRKESAKTIV);
         behandling.setId(1L);
 
         when(mockBehandlingService.hentBehandling(behandling.getId())).thenReturn(behandling);

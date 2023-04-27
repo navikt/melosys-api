@@ -25,14 +25,14 @@ public class Inntektsperiode {
     @Column(name = "tom_dato", nullable = false)
     private LocalDate tomDato;
 
-    @Column(name = "inntektsperiode_type", nullable = false)
+    @Column(name = "inntektskilde_type", nullable = false)
     @Enumerated(EnumType.STRING)
     private Inntektskildetype type;
 
     @Column(name = "avgiftspliktig_inntekt_mnd")
     private BigInteger avgiftspliktigInntektMnd;
 
-    @Column(name = "aba_betales_til_skatt")
+    @Column(name = "aga_betales_til_skatt")
     private boolean arbeidsgiversavgiftBetalesTilSkatt;
 
     @Column(name = "trygdeavgift_betales_til_skatt")

@@ -9,8 +9,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT
-import no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP
+import no.nav.melosys.featuretoggle.ToggleName.*
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import org.springframework.stereotype.Component
 
@@ -25,17 +24,11 @@ class SaksbehandlingRegler(
         behandlingstype: Behandlingstyper,
         behandlingstema: Behandlingstema
     ): Boolean {
-        val ftrlToggleEnabled = unleash.isEnabled("melosys.folketrygden.mvp")
-        val ikkeYrkesaktivToggleEnabled = unleash.isEnabled(IKKEYRKESAKTIV_FLYT)
-        val registreringUnntakFraMedlemskapToggleEnabled = unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP)
         if (harTomFlyt(
                 fagsak.type,
                 fagsak.tema,
                 behandlingstype,
-                behandlingstema,
-                ftrlToggleEnabled,
-                ikkeYrkesaktivToggleEnabled,
-                registreringUnntakFraMedlemskapToggleEnabled
+                behandlingstema
             )
         ) return false
 
@@ -48,20 +41,98 @@ class SaksbehandlingRegler(
     internal fun finnBehandlingSomKanReplikeres(behandlinger: List<Behandling>) =
         behandlinger
             .filter { it.erInaktiv() }
-            .filter {
-                !harTomFlyt(
-                    it,
-                    unleash.isEnabled("melosys.folketrygden.mvp"),
-                    unleash.isEnabled(IKKEYRKESAKTIV_FLYT),
-                    unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP)
-                )
-            }
+            .filter { !harTomFlyt(it) }
             .firstOrNull {
                 val behandlingsresultat = behandlingsresultatRepository.findById(it.id)
                 behandlingstyperSomKanReplikeres.contains(it.type)
                     && behandlingsresultat.isPresent
                     && !behandlingsresultattyperSomIkkeKanReplikeres.contains(behandlingsresultat.get().type)
             }
+
+    fun harTomFlyt(behandling: Behandling): Boolean =
+        harTomFlyt(
+            behandling.fagsak.type,
+            behandling.fagsak.tema,
+            behandling.type,
+            behandling.tema
+        )
+
+    fun harTomFlyt(
+        sakstype: Sakstyper,
+        sakstema: Sakstemaer,
+        behandlingstype: Behandlingstyper,
+        behandlingstema: Behandlingstema
+    ): Boolean {
+        if (harRegistreringUnntakFraMedlemskapFlyt(
+                sakstype,
+                sakstema,
+                behandlingstema,
+            )
+        ) return false
+
+        if (sakstema == Sakstemaer.TRYGDEAVGIFT) return true
+        if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE) return true
+
+        return when (behandlingstema) {
+            ARBEID_KUN_NORGE,
+            PENSJONIST,
+            REGISTRERING_UNNTAK,
+            UNNTAK_MEDLEMSKAP,
+            FORESPØRSEL_TRYGDEMYNDIGHET,
+            TRYGDETID,
+            A1_ANMODNING_OM_UNNTAK_PAPIR
+            -> true
+
+            ANMODNING_OM_UNNTAK_HOVEDREGEL -> sakstype == Sakstyper.TRYGDEAVTALE
+            YRKESAKTIV -> (sakstype == Sakstyper.FTRL && !unleash.isEnabled(FOLKETRYGDEN_MVP))
+            IKKE_YRKESAKTIV -> (!unleash.isEnabled(IKKEYRKESAKTIV_FLYT))
+
+            else -> return false
+        }
+    }
+
+    fun harRegistreringUnntakFraMedlemskapFlyt(
+        behandling: Behandling
+    ): Boolean {
+        return harRegistreringUnntakFraMedlemskapFlyt(
+            behandling.fagsak.type,
+            behandling.fagsak.tema,
+            behandling.tema
+        )
+    }
+
+    fun harRegistreringUnntakFraMedlemskapFlyt(
+        sakstype: Sakstyper,
+        sakstema: Sakstemaer,
+        behandlingstema: Behandlingstema
+    ): Boolean {
+        if (!unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP) || sakstema != Sakstemaer.UNNTAK) {
+            return false
+        }
+
+        if (sakstype == Sakstyper.EU_EOS && behandlingstema == A1_ANMODNING_OM_UNNTAK_PAPIR) {
+            return true
+        }
+
+        if (sakstype == Sakstyper.TRYGDEAVTALE && listOf(
+                REGISTRERING_UNNTAK,
+                ANMODNING_OM_UNNTAK_HOVEDREGEL
+            ).contains(behandlingstema)
+        ) {
+            return true
+        }
+        return false
+    }
+
+    fun harIkkeYrkesaktivFlyt(
+        sakstype: Sakstyper,
+        behandlingstema: Behandlingstema
+    ): Boolean {
+        if (unleash.isEnabled(IKKEYRKESAKTIV_FLYT) && (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE) && behandlingstema == IKKE_YRKESAKTIV) {
+            return true
+        }
+        return false
+    }
 
     companion object {
         val behandlingstyperSomKanReplikeres = listOf(
@@ -76,111 +147,5 @@ class SaksbehandlingRegler(
             Behandlingsresultattyper.FERDIGBEHANDLET,
             Behandlingsresultattyper.HENLEGGELSE_BORTFALT
         )
-
-        @JvmStatic
-        fun harTomFlyt(
-            behandling: Behandling,
-            ftrlToggleEnabled: Boolean,
-            ikkeYrkesaktivToggleEnabled: Boolean,
-            registreringUnntakFraMedlemskapToggleEnabled: Boolean
-        ): Boolean =
-            harTomFlyt(
-                behandling.fagsak.type,
-                behandling.fagsak.tema,
-                behandling.type,
-                behandling.tema,
-                ftrlToggleEnabled,
-                ikkeYrkesaktivToggleEnabled,
-                registreringUnntakFraMedlemskapToggleEnabled
-            )
-
-        @JvmStatic
-        fun harTomFlyt(
-            sakstype: Sakstyper,
-            sakstema: Sakstemaer,
-            behandlingstype: Behandlingstyper,
-            behandlingstema: Behandlingstema,
-            ftrlToggleEnabled: Boolean,
-            ikkeYrkesaktivToggleEnabled: Boolean,
-            registreringUnntakFraMedlemskapToggleEnabled: Boolean
-        ): Boolean {
-            if (harRegistreringUnntakFraMedlemskapFlyt(
-                    sakstype,
-                    sakstema,
-                    behandlingstema,
-                    registreringUnntakFraMedlemskapToggleEnabled
-                )
-            ) return false
-
-            if (sakstema == Sakstemaer.TRYGDEAVGIFT) return true
-            if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE) return true
-
-            return when (behandlingstema) {
-                ARBEID_KUN_NORGE,
-                PENSJONIST,
-                REGISTRERING_UNNTAK,
-                UNNTAK_MEDLEMSKAP,
-                FORESPØRSEL_TRYGDEMYNDIGHET,
-                TRYGDETID,
-                A1_ANMODNING_OM_UNNTAK_PAPIR
-                -> true
-
-                ANMODNING_OM_UNNTAK_HOVEDREGEL -> sakstype == Sakstyper.TRYGDEAVTALE
-                YRKESAKTIV -> (sakstype == Sakstyper.FTRL && !ftrlToggleEnabled)
-                IKKE_YRKESAKTIV -> (!ikkeYrkesaktivToggleEnabled)
-
-                else -> return false
-            }
-        }
-
-        @JvmStatic
-        fun harRegistreringUnntakFraMedlemskapFlyt(
-            behandling: Behandling,
-            registreringUnntakFraMedlemskapToggleEnabled: Boolean
-        ): Boolean {
-            return harRegistreringUnntakFraMedlemskapFlyt(
-                behandling.fagsak.type,
-                behandling.fagsak.tema,
-                behandling.tema,
-                registreringUnntakFraMedlemskapToggleEnabled
-            )
-        }
-
-        @JvmStatic
-        fun harRegistreringUnntakFraMedlemskapFlyt(
-            sakstype: Sakstyper,
-            sakstema: Sakstemaer,
-            behandlingstema: Behandlingstema,
-            registreringUnntakFraMedlemskapToggleEnabled: Boolean
-        ): Boolean {
-            if (!registreringUnntakFraMedlemskapToggleEnabled || sakstema != Sakstemaer.UNNTAK) {
-                return false
-            }
-
-            if (sakstype == Sakstyper.EU_EOS && behandlingstema == A1_ANMODNING_OM_UNNTAK_PAPIR) {
-                return true
-            }
-
-            if (sakstype == Sakstyper.TRYGDEAVTALE && listOf(
-                    REGISTRERING_UNNTAK,
-                    ANMODNING_OM_UNNTAK_HOVEDREGEL
-                ).contains(behandlingstema)
-            ) {
-                return true
-            }
-            return false
-        }
-
-        @JvmStatic
-        fun harIkkeYrkesaktivFlyt(
-            sakstype: Sakstyper,
-            behandlingstema: Behandlingstema,
-            ikkeYrkesaktivFlytToggleEnabled: Boolean
-        ): Boolean {
-            if (ikkeYrkesaktivFlytToggleEnabled && (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE) && behandlingstema == IKKE_YRKESAKTIV) {
-                return true
-            }
-            return false
-        }
     }
 }

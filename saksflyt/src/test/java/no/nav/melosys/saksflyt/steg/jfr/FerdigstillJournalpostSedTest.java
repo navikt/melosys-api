@@ -9,6 +9,7 @@ import no.nav.melosys.domain.arkiv.Journalposttype;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
@@ -117,6 +118,7 @@ class FerdigstillJournalpostSedTest {
         bruker.setAktørId(AKTØR_ID);
 
         Fagsak fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
         fagsak.setGsakSaksnummer(123L);
         fagsak.setSaksnummer(SAKSNUMMER);
         fagsak.getAktører().add(bruker);

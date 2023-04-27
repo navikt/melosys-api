@@ -8,6 +8,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.*;
 
@@ -46,7 +47,8 @@ public final class LovvalgBestemmelseUtils {
             Lovvalgsbestemmelser_trygdeavtale_us.values(),
 
             Tilleggsbestemmelser_trygdeavtale_cl.values(),
-            Tilleggsbestemmelser_trygdeavtale_ca.values()
+            Tilleggsbestemmelser_trygdeavtale_ca.values(),
+            Overgangsregelbestemmelser.values()
         )) {
             for (var lovBestemmelse : lovBestemelser) {
                 kodeTilLovvalgBestemmelse.put(lovBestemmelse.getKode(), lovBestemmelse);

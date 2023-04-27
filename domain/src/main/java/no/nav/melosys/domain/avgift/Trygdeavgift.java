@@ -28,7 +28,7 @@ public class Trygdeavgift {
     @Column(name = "periode_til", nullable = false)
     private LocalDate periodeTil;
 
-    @Column(name = "trygdeavgift_belop_md", nullable = false)
+    @Column(name = "trygdeavgift_beloep_md", nullable = false)
     private BigInteger trygdeavgiftsbeløpMd;
 
     @Column(name = "trygdesats", nullable = false)
