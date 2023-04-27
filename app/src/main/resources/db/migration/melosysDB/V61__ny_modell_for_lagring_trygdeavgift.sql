@@ -15,9 +15,9 @@ CREATE TABLE inntektsperiode
     trygdeavgiftsgrunnlag_id        NUMBER(19)       NOT NULL,
     fom_dato                        DATE             NOT NULL,
     tom_dato                        DATE             NOT NULL,
-    inntektsperiode_type            VARCHAR2(99)     NOT NULL,
+    inntektskilde_type              VARCHAR2(99)     NOT NULL,
     avgiftspliktig_inntekt_mnd      DECIMAL(12,2),
-    aba_betales_til_skatt           NUMBER(1),
+    aga_betales_til_skatt           NUMBER(1),
     trygdeavgift_betales_til_skatt  NUMBER(1),
     CONSTRAINT pk_inntektsperiode   PRIMARY KEY (id)
 );
@@ -54,9 +54,9 @@ CREATE TABLE trygdeavgiftt
     fastsatt_trygdeavgift_id    NUMBER(19)      NOT NULL,
     periode_fra                 DATE            NOT NULL,
     periode_til                 DATE            NOT NULL,
-    trygdeavgift_belop_md       DECIMAL(12,0)   NOT NULL,
+    trygdeavgift_beloep_md      DECIMAL(12,2)   NOT NULL,
     trygdesats                  DECIMAL(4,2)    NOT NULL,
-    CONSTRAINT pk_trygdeavgiftt  PRIMARY KEY (id)
+    CONSTRAINT pk_trygdeavgiftt PRIMARY KEY (id)
 );
 
 ALTER TABLE trygdeavgiftt
