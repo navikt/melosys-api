@@ -17,6 +17,7 @@ import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.saksflyt.TestdataFactory;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,6 +37,8 @@ class LagreLovvalgsperiodeMedlTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private MedlPeriodeService medlPeriodeService;
+    @Mock
+    private SaksbehandlingRegler saksbehandlingRegler;
     @Captor
     private ArgumentCaptor<Lovvalgsperiode> lovvalgsperiodeArgumentCaptor;
 
@@ -45,11 +48,10 @@ class LagreLovvalgsperiodeMedlTest {
     private final Prosessinstans prosessinstans = new Prosessinstans();
     private final Behandling behandling = new Behandling();
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-    private final FakeUnleash unleash = new FakeUnleash();
 
     @BeforeEach
     public void setup() {
-        lagreLovvalgsperiodeMedl = new LagreLovvalgsperiodeMedl(behandlingsresultatService, medlPeriodeService, unleash);
+        lagreLovvalgsperiodeMedl = new LagreLovvalgsperiodeMedl(behandlingsresultatService, medlPeriodeService, saksbehandlingRegler);
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Sakstyper.TRYGDEAVTALE);
         fagsak.setTema(Sakstemaer.UNNTAK);
@@ -99,6 +101,32 @@ class LagreLovvalgsperiodeMedlTest {
 
 
         verify(medlPeriodeService).oppdaterPeriodeForeløpig(lovvalgsperiode);
+    }
+
+    @Test
+    void utfør_erInnvilgelseArt13IngenMedlIDUnntaksflyt_oppretterEndeligPeriode() {
+        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(null, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, InnvilgelsesResultat.INNVILGET);
+        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
+        when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)).thenReturn(true);
+
+        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+
+
+        verify(medlPeriodeService).opprettPeriodeEndelig(lovvalgsperiode, behandlingID);
+    }
+
+    @Test
+    void utfør_erInnvilgelseArt13MedMedlIDUnntaksflyt_oppdatererTilEndeligPeriode() {
+        Lovvalgsperiode lovvalgsperiode = lagLovvalgsperiode(11L, Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A, InnvilgelsesResultat.INNVILGET);
+        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
+        when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)).thenReturn(true);
+
+        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
+
+
+        verify(medlPeriodeService).oppdaterPeriodeEndelig(lovvalgsperiode);
     }
 
     @Test
@@ -203,8 +231,6 @@ class LagreLovvalgsperiodeMedlTest {
 
     @Test
     void utfør_ikkeGodkjentRegistreringUnntak_oppretterIkkeLovvalgsperiode() {
-        unleash.enable(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP);
-
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Sakstyper.TRYGDEAVTALE);
         fagsak.setTema(Sakstemaer.UNNTAK);
@@ -216,6 +242,7 @@ class LagreLovvalgsperiodeMedlTest {
 
         behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.IKKE_GODKJENT);
         when(behandlingsresultatService.hentBehandlingsresultat(behandling.getId())).thenReturn(behandlingsresultat);
+        when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any())).thenReturn(true);
 
 
         lagreLovvalgsperiodeMedl.utfør(prosessinstans);

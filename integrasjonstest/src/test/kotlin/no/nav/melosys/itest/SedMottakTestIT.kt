@@ -1,6 +1,7 @@
 package no.nav.melosys.itest
 
 import io.kotest.assertions.extracting
+import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainInOrder
@@ -19,6 +20,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.saksflyt.ProsessStatus
 import no.nav.melosys.domain.saksflyt.ProsessType
 import no.nav.melosys.domain.saksflyt.Prosessinstans
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.melosysmock.melosyseessi.MelosysEessiRepo
 import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.repository.BehandlingsresultatRepository
@@ -31,6 +33,7 @@ import no.nav.melosys.service.vedtak.FattVedtakRequest
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.melosys.integrasjon.joark.JoarkFasade
+import no.nav.melosys.melosysmock.medl.MedlRepo
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.untilNotNull
 import org.junit.jupiter.api.BeforeEach
@@ -65,13 +68,42 @@ class SedMottakTestIT(
     @BeforeEach
     fun setup() {
         SakRepo.clear()
+        MedlRepo.repo.clear()
         MelosysEessiRepo.sedRepo.clear()
+        unleash.resetAll()
+    }
+
+    @Test
+    fun `alt skal fungere med NY_GOSYS_MAPPING toggle på`() {
+        fun withClueAndSetupCleanup(clue: String, action: () -> Unit) {
+            setup()
+            unleash.enable(ToggleName.NY_GOSYS_MAPPING)
+            withClue(clue) {
+                action()
+            }
+        }
+        withClueAndSetupCleanup("A009 med etterfølgende X006 skal gi fagsak annulert") {
+            `A009 med etterfølgende X006 skal gi fagsak annulert`()
+        }
+        withClueAndSetupCleanup("A003 med etterfølgende X006 og lovvalgsland er NO skal gi manuelt behandling") {
+            `A003 med etterfølgende X006 og lovvalgsland er NO skal gi manuelt behandling`()
+        }
+        withClueAndSetupCleanup("A003 med etterfølgende X008 og lovvalgsland er NO skal gi manuelt behandling") {
+            `A003 med etterfølgende X008 og lovvalgsland er NO skal gi manuelt behandling`()
+        }
+        withClueAndSetupCleanup("mottaSED_mottar3SED_blirBehandletEtterHverandre") {
+            mottaSED_mottar3SED_blirBehandletEtterHverandre()
+        }
+        withClueAndSetupCleanup("Motta A003, godkjenne med A012, ugyldiggjøre godkjenning A012 med X008 for så å sende en A004") {
+            `Motta A003, godkjenne med A012, ugyldiggjøre godkjenning A012 med X008 for så å sende en A004`()
+        }
+        withClueAndSetupCleanup("Motta A003, avvise med A004, ugyldiggjøre avvisning A004 med X008 for så å sende en A012") {
+            `Motta A003, avvise med A004, ugyldiggjøre avvisning A004 med X008 for så å sende en A012`()
+        }
     }
 
     @Test
     fun `A009 med etterfølgende X008 skal gi fagsak annulert`() {
-        unleash.enable("melosys.sed.x008")
-
         val ref = Random().nextInt(100000).toString()
 
         val sedInfo = SedInformasjon(ref, SedType.A009.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
@@ -124,7 +156,6 @@ class SedMottakTestIT(
 
     @Test
     fun `A009 med etterfølgende X006 skal gi fagsak annulert`() {
-        unleash.enable("melosys.sed.x006")
         val ref = Random().nextInt(100000).toString()
 
         val sedInfo = SedInformasjon(ref, SedType.A009.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
@@ -180,12 +211,11 @@ class SedMottakTestIT(
 
     @Test
     fun `A003 med etterfølgende X006 og lovvalgsland er NO skal gi manuelt behandling`() {
-        unleash.enable("melosys.sed.x006")
         val ref = Random().nextInt(100000).toString()
 
         val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding(
             BucType.LA_BUC_02, ref, SedType.A003, Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
-            "13_1_a",  "NO"
+            "13_1_a", "NO"
         )
         val eessiMeldingX006 = eessiMeldingTestDataFactory.melosysEessiMelding(
             BucType.LA_BUC_02,
@@ -230,7 +260,6 @@ class SedMottakTestIT(
 
     @Test
     fun `A003 med etterfølgende X008 og lovvalgsland er NO skal gi manuelt behandling`() {
-        unleash.enable("melosys.sed.x008")
         val ref = Random().nextInt(100000).toString()
 
         val sedInfo = SedInformasjon(ref, SedType.A003.name, LocalDate.now(), LocalDate.now(), null, "AVBRUTT", null)
@@ -239,7 +268,7 @@ class SedMottakTestIT(
 
         val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding(
             BucType.LA_BUC_02, ref, SedType.A003, Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
-            "13_1_a",  "NO"
+            "13_1_a", "NO"
         )
         val eessiMeldingX008 = eessiMeldingTestDataFactory.melosysEessiMelding(
             BucType.LA_BUC_02, ref, SedType.X008, null, null

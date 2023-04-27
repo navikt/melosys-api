@@ -58,7 +58,7 @@ class GjenbrukOppgaveTest {
         Oppgave eksisterendeOppgave = new Oppgave.Builder().setBeskrivelse(oppgaveBeskrivelse).build();
         when(oppgaveService.hentOppgaveMedOppgaveID(oppgaveID)).thenReturn(eksisterendeOppgave);
         var prosessinstans = lagProsessinstans(oppgaveID, saksnummer, false);
-        when(oppgaveService.lagBehandlingsoppgave(any())).thenReturn(oppgaveFactory.lagBehandlingsoppgave(prosessinstans.getBehandling(), LocalDate.now()));
+        when(oppgaveService.lagBehandlingsoppgave(any())).thenReturn(oppgaveFactory.lagBehandlingsoppgave(prosessinstans.getBehandling(), LocalDate.now(), () -> null));
 
 
         gjenbrukOppgave.utfør(prosessinstans);
@@ -84,7 +84,7 @@ class GjenbrukOppgaveTest {
         Oppgave eksisterendeOppgave = new Oppgave.Builder().setBeskrivelse(oppgaveBeskrivelse).build();
         when(oppgaveService.hentOppgaveMedOppgaveID(oppgaveID)).thenReturn(eksisterendeOppgave);
         var prosessinstans = lagProsessinstans(oppgaveID, saksnummer, true);
-        when(oppgaveService.lagBehandlingsoppgave(any())).thenReturn(oppgaveFactory.lagBehandlingsoppgave(prosessinstans.getBehandling(), LocalDate.now()));
+        when(oppgaveService.lagBehandlingsoppgave(any())).thenReturn(oppgaveFactory.lagBehandlingsoppgave(prosessinstans.getBehandling(), LocalDate.now(),  () -> null));
 
 
         gjenbrukOppgave.utfør(prosessinstans);

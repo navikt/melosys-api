@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
@@ -38,6 +37,7 @@ import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagUtenSokna
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -67,8 +67,8 @@ class SedDataByggerTest {
     private LandvelgerService landvelgerService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
-
-    private final FakeUnleash unleash = new FakeUnleash();
+    @Mock
+    private SaksbehandlingRegler saksbehandlingRegler;
 
     private SedDataBygger dataBygger;
     private Behandling behandling;
@@ -109,7 +109,7 @@ class SedDataByggerTest {
 
         behandling = DataByggerStubs.hentBehandlingStub();
         behandlingsresultat.setBehandling(behandling);
-        dataBygger = new SedDataBygger(behandlingsresultatService, landvelgerService, lovvalgsperiodeService, unleash);
+        dataBygger = new SedDataBygger(behandlingsresultatService, landvelgerService, lovvalgsperiodeService, saksbehandlingRegler);
 
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setFom(LocalDate.now());
@@ -124,7 +124,7 @@ class SedDataByggerTest {
 
     private SedDataGrunnlagMedSoknad lagGrunnlagMedSøknad(Persondata persondata) {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,
-                                                                                                  organisasjonOppslagService, mock(BehandlingService.class), kodeverkService);
+            organisasjonOppslagService, mock(BehandlingService.class), kodeverkService);
         return new SedDataGrunnlagMedSoknad(behandling, kodeverkService, avklarteVirksomheterService,
             avklartefaktaService, persondata);
     }
@@ -137,7 +137,7 @@ class SedDataByggerTest {
                                                                           boolean arbeidsgivendeForetakUtlandManglerLandkode,
                                                                           boolean selvstendigForetakUtlandManglerLandkode) {
         AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,
-                                                                                                  organisasjonOppslagService, mock(BehandlingService.class), kodeverkService);
+            organisasjonOppslagService, mock(BehandlingService.class), kodeverkService);
         return new SedDataGrunnlagMedSoknad(DataByggerStubs.hentBehandlingMedManglendeAdressefelterStub(
             arbeidsstedManglerLandkode, arbeidsgivendeForetakUtlandManglerLandkode, selvstendigForetakUtlandManglerLandkode),
             kodeverkService, avklarteVirksomheterService, avklartefaktaService, behandling.hentPersonDokument());
@@ -599,6 +599,8 @@ class SedDataByggerTest {
         behandling.setType(Behandlingstyper.HENVENDELSE);
         behandling.setFagsak(fagsak);
         var søknad = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
+        when(saksbehandlingRegler.harTomFlyt(any())).thenReturn(true);
+
         var sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
 
         assertThat(sedData.getSøknadsperiode()).isNull();

@@ -21,8 +21,10 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,8 +45,11 @@ class HentRegisteropplysningerTest {
     private BehandlingService behandlingService;
     @Mock
     private PersondataFasade persondataFasade;
+    @Mock
+    private SaksbehandlingRegler saksbehandlingRegler;
 
-    private final FakeUnleash unleash = new FakeUnleash();
+    private RegisteropplysningerFactory registeropplysningerFactory;
+
     private HentRegisteropplysninger hentRegisteropplysninger;
 
     @Captor
@@ -55,9 +60,8 @@ class HentRegisteropplysningerTest {
 
     @BeforeEach
     public void setUp() {
-        hentRegisteropplysninger = new HentRegisteropplysninger(registeropplysningerService, behandlingService, persondataFasade, unleash);
-
-        unleash.enableAll();
+        registeropplysningerFactory = new RegisteropplysningerFactory(saksbehandlingRegler, new FakeUnleash());
+        hentRegisteropplysninger = new HentRegisteropplysninger(registeropplysningerService, behandlingService, persondataFasade, registeropplysningerFactory);
 
         behandling.setId(222L);
 
@@ -76,7 +80,6 @@ class HentRegisteropplysningerTest {
 
     @Test
     void utfør_hoppOverSteg() {
-        unleash.disableAll();
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         Fagsak fagsak = new Fagsak();
@@ -130,7 +133,9 @@ class HentRegisteropplysningerTest {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
+
         hentRegisteropplysninger.utfør(prosessinstans);
+
 
         verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
 
@@ -179,6 +184,7 @@ class HentRegisteropplysningerTest {
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
         var prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
+        when(saksbehandlingRegler.harTomFlyt(any(), any(), any(), any())).thenReturn(true);
 
         hentRegisteropplysninger.utfør(prosessinstans);
 

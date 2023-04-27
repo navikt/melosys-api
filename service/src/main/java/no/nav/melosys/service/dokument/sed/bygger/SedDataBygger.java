@@ -4,7 +4,6 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
@@ -30,29 +29,27 @@ import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlag;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagMedSoknad;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagUtenSoknad;
 import no.nav.melosys.service.dokument.sed.mapper.VilkaarsresultatTilBegrunnelseMapper;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import static java.util.function.Predicate.not;
 import static no.nav.melosys.domain.eessi.sed.Adresse.fraStrukturertAdresse;
 import static no.nav.melosys.domain.eessi.sed.Adresse.lagAdresse;
-import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
-import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP;
-import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harTomFlyt;
 
 @Service
 public class SedDataBygger {
     private final BehandlingsresultatService behandlingsresultatService;
     private final LandvelgerService landvelgerService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
-    private final Unleash unleash;
+    private final SaksbehandlingRegler saksbehandlingRegler;
 
     public SedDataBygger(BehandlingsresultatService behandlingsresultatService, LandvelgerService landvelgerService,
-                         LovvalgsperiodeService lovvalgsperiodeService, Unleash unleash) {
+                         LovvalgsperiodeService lovvalgsperiodeService, SaksbehandlingRegler saksbehandlingRegler) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.landvelgerService = landvelgerService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
-        this.unleash = unleash;
+        this.saksbehandlingRegler = saksbehandlingRegler;
     }
 
     public SedDataDto lag(SedDataGrunnlag dataGrunnlag,
@@ -123,7 +120,7 @@ public class SedDataBygger {
         var behandling = grunnlagMedSøknad.getBehandling();
         if (behandling.getFagsak().erSakstypeEøs() &&
             !behandling.erBehandlingAvSed() &&
-            !harTomFlyt(behandling, unleash.isEnabled("melosys.folketrygden.mvp"), unleash.isEnabled(IKKEYRKESAKTIV_FLYT), unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP))
+            !saksbehandlingRegler.harTomFlyt(behandling)
         ) {
             sedDataDto.setSøknadsperiode(new Periode(
                 grunnlagMedSøknad.getMottatteOpplysningerData().periode.getFom(),

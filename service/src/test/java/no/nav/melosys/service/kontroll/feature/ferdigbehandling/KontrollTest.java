@@ -28,6 +28,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -52,6 +54,8 @@ class KontrollTest {
     private AvklarteVirksomheterService avklarteVirksomheterService;
     @Mock
     private PersondataFasade persondataFasade;
+    @Mock
+    private SaksbehandlingRegler saksbehandlingRegler;
 
     private final long behandlingID = 1L;
     private final Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
@@ -73,7 +77,7 @@ class KontrollTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
 
         unleash.enableAll();
-        kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, avklarteVirksomheterService, persondataFasade, unleash);
+        kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, avklarteVirksomheterService, persondataFasade, saksbehandlingRegler, unleash);
     }
 
     @Test
@@ -94,6 +98,8 @@ class KontrollTest {
     void utførKontroller_avslagTomFlyt__returnererTomCollection() {
         behandling.setType(Behandlingstyper.HENVENDELSE);
         behandling.setMottatteOpplysninger(null);
+        when(saksbehandlingRegler.harTomFlyt(any())).thenReturn(true);
+
         Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
 
         assertThat(resultat).isEmpty();

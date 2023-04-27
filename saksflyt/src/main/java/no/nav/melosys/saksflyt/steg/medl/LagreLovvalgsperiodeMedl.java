@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.medl;
 
 import java.util.Optional;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
@@ -12,12 +11,10 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP;
-import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt;
 
 @Component
 public class LagreLovvalgsperiodeMedl implements StegBehandler {
@@ -26,14 +23,15 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
 
     private final BehandlingsresultatService behandlingsresultatService;
     private final MedlPeriodeService medlPeriodeService;
-    private final Unleash unleash;
+    private final SaksbehandlingRegler saksbehandlingRegler;
 
 
     public LagreLovvalgsperiodeMedl(BehandlingsresultatService behandlingsresultatService,
-                                    MedlPeriodeService medlPeriodeService, Unleash unleash) {
+                                    MedlPeriodeService medlPeriodeService,
+                                    SaksbehandlingRegler saksbehandlingRegler) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.medlPeriodeService = medlPeriodeService;
-        this.unleash = unleash;
+        this.saksbehandlingRegler = saksbehandlingRegler;
     }
 
     @Override
@@ -54,11 +52,11 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
         if (behandling.erNyVurdering()) {
             lovvalgsperiode.setMedlPeriodeID(finnOpprinneligMedlPeriodeID(behandling).orElse(null));
         }
-        oppdaterLovvalgsperiode(behandling.getId(), lovvalgsperiode);
+        oppdaterLovvalgsperiode(behandling, lovvalgsperiode);
     }
 
     private boolean erIkkeGodkjentRegistreringUnntakFraMedlemskap(Behandling behandling, Utfallregistreringunntak utfallregistreringunntak) {
-        return harRegistreringUnntakFraMedlemskapFlyt(behandling, unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP)) && Utfallregistreringunntak.IKKE_GODKJENT == utfallregistreringunntak;
+        return saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) && Utfallregistreringunntak.IKKE_GODKJENT == utfallregistreringunntak;
     }
 
     private Optional<Long> finnOpprinneligMedlPeriodeID(Behandling behandling) {
@@ -72,37 +70,37 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
         return opprinnelingResultat.finnLovvalgsperiode().map(Lovvalgsperiode::getMedlPeriodeID);
     }
 
-    private void oppdaterLovvalgsperiode(Long behandlingID, Lovvalgsperiode lovvalgsperiode) {
+    private void oppdaterLovvalgsperiode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
         if (lovvalgsperiode.erAvslått()) {
             if (lovvalgsperiode.getMedlPeriodeID() != null) {
                 medlPeriodeService.avvisPeriode(lovvalgsperiode.getMedlPeriodeID());
             }
         } else if (lovvalgsperiode.erInnvilget()) {
-            opprettEllerOppdaterMedlPeriode(behandlingID, lovvalgsperiode);
+            opprettEllerOppdaterMedlPeriode(behandling, lovvalgsperiode);
         } else {
             throw new FunksjonellException(
                 "Ukjent eller ikke-eksisterende innvilgelsesresultat for en lovvalgsperiode: " + lovvalgsperiode.getInnvilgelsesresultat());
         }
     }
 
-    private void opprettEllerOppdaterMedlPeriode(Long behandlingID, Lovvalgsperiode lovvalgsperiode) {
+    private void opprettEllerOppdaterMedlPeriode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
         if (lovvalgsperiode.getMedlPeriodeID() == null) {
-            opprettMedlPeriode(behandlingID, lovvalgsperiode);
+            opprettMedlPeriode(behandling, lovvalgsperiode);
         } else {
-            oppdaterMedlPeriode(lovvalgsperiode);
+            oppdaterMedlPeriode(behandling, lovvalgsperiode);
         }
     }
 
-    private void opprettMedlPeriode(Long behandlingID, Lovvalgsperiode lovvalgsperiode) {
-        if (lovvalgsperiode.erArtikkel13()) {
-            medlPeriodeService.opprettPeriodeForeløpig(lovvalgsperiode, behandlingID);
+    private void opprettMedlPeriode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
+        if (lovvalgsperiode.erArtikkel13() && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)) {
+            medlPeriodeService.opprettPeriodeForeløpig(lovvalgsperiode, behandling.getId());
         } else {
-            medlPeriodeService.opprettPeriodeEndelig(lovvalgsperiode, behandlingID);
+            medlPeriodeService.opprettPeriodeEndelig(lovvalgsperiode, behandling.getId());
         }
     }
 
-    private void oppdaterMedlPeriode(Lovvalgsperiode lovvalgsperiode) {
-        if (lovvalgsperiode.erArtikkel13()) {
+    private void oppdaterMedlPeriode(Behandling behandling, Lovvalgsperiode lovvalgsperiode) {
+        if (lovvalgsperiode.erArtikkel13() && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)) {
             medlPeriodeService.oppdaterPeriodeForeløpig(lovvalgsperiode);
         } else {
             medlPeriodeService.oppdaterPeriodeEndelig(lovvalgsperiode);

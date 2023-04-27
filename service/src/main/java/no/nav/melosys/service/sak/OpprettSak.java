@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Optional;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
@@ -21,6 +20,7 @@ import no.nav.melosys.service.journalforing.UtledBehandlingsaarsak;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
@@ -28,27 +28,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
-import static no.nav.melosys.featuretoggle.ToggleName.IKKEYRKESAKTIV_FLYT;
-import static no.nav.melosys.featuretoggle.ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP;
-import static no.nav.melosys.service.saksbehandling.SaksbehandlingRegler.*;
 
 @Service
 public class OpprettSak {
     private final JournalfoeringService journalfoeringService;
     private final OppgaveService oppgaveService;
     private final ProsessinstansService prosessinstansService;
-    private final Unleash unleash;
+    private final SaksbehandlingRegler saksbehandlingRegler;
 
     private final LovligeKombinasjonerService lovligeKombinasjonerService;
 
     public OpprettSak(JournalfoeringService journalfoeringService, OppgaveService oppgaveService,
                       @Lazy ProsessinstansService prosessinstansService,
-                      Unleash unleash,
+                      SaksbehandlingRegler saksbehandlingRegler,
                       LovligeKombinasjonerService lovligeKombinasjonerService) {
         this.journalfoeringService = journalfoeringService;
         this.oppgaveService = oppgaveService;
         this.prosessinstansService = prosessinstansService;
-        this.unleash = unleash;
+        this.saksbehandlingRegler = saksbehandlingRegler;
         this.lovligeKombinasjonerService = lovligeKombinasjonerService;
     }
 
@@ -117,13 +114,10 @@ public class OpprettSak {
         lovligeKombinasjonerService.validerOpprettelseOgEndring(
             hovedpart, sakstype, sakstema, behandlingstema, behandlingstype);
 
-        var registreringUnntakFraMedlemskapToggleEnabled = unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP);
-        var ikkeYrkesaktivFlytToggleEnabled = unleash.isEnabled(IKKEYRKESAKTIV_FLYT);
-
         if (erSakstypeEøs(sakstype)
-            && !harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, unleash.isEnabled("melosys.folketrygden.mvp"), ikkeYrkesaktivFlytToggleEnabled, registreringUnntakFraMedlemskapToggleEnabled)
-            && !harIkkeYrkesaktivFlyt(sakstype, behandlingstema, ikkeYrkesaktivFlytToggleEnabled)
-            && !harRegistreringUnntakFraMedlemskapFlyt(sakstype, sakstema, behandlingstema, registreringUnntakFraMedlemskapToggleEnabled)) {
+            && !saksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema)
+            && !saksbehandlingRegler.harIkkeYrkesaktivFlyt(sakstype, behandlingstema)
+            && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(sakstype, sakstema, behandlingstema)) {
             validerSøknadData(opprettSakDto.getSoknadDto());
         }
     }

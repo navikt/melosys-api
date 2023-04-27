@@ -24,6 +24,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
@@ -64,8 +65,10 @@ class EosVedtakServiceTest {
     private ApplicationEventMulticaster melosysEventMulticaster;
     @Mock
     private FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
+    @Mock
+    private SaksbehandlingRegler saksbehandlingRegler;
+
     private EosVedtakService vedtakService;
-    private final FakeUnleash unleash = new FakeUnleash();
     private final long behandlingID = 1L;
     private final Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
     private final Behandling behandling = new Behandling();
@@ -74,7 +77,7 @@ class EosVedtakServiceTest {
     @BeforeEach
     void setUp() {
         vedtakService = new EosVedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService,
-            eessiService, landvelgerService, avklartefaktaService, melosysEventMulticaster, ferdigbehandlingKontrollFacade, unleash);
+            eessiService, landvelgerService, avklartefaktaService, melosysEventMulticaster, ferdigbehandlingKontrollFacade, saksbehandlingRegler);
 
         SpringSubjectHandler.set(new TestSubjectHandler());
 
@@ -87,8 +90,6 @@ class EosVedtakServiceTest {
         behandlingsresultat.setBehandling(behandling);
 
         behandling.setFagsak(lagFagsak());
-
-        unleash.enableAll();
     }
 
     @Test

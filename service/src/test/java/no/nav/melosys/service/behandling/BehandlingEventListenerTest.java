@@ -113,7 +113,7 @@ class BehandlingEventListenerTest {
         );
         Oppgave oppgave = new Oppgave.Builder().setOppgaveId(OPPGAVE_ID).build();
         when(oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(FAGSAKSNUMMER)).thenReturn(Optional.of(oppgave));
-        when(oppgaveService.lagBehandlingsoppgave(behandling)).thenReturn(oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now()));
+        when(oppgaveService.lagBehandlingsoppgave(behandling)).thenReturn(oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument));
 
         behandlingEventListener.behandlingEndret(behandlingEndretAvSaksbehandlerEvent);
 
