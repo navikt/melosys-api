@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
@@ -281,7 +280,7 @@ class OpprettSakTest {
         final Journalpost journalpost = lagJournalpost(Journalposttype.INN, "EESSI");
         when(journalfoeringService.hentJournalpost(JP_ID)).thenReturn(journalpost);
         when(journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost)).thenReturn(Optional.empty());
-        when(saksbehandlingRegler.harTomFlyt(any(), any(), any(), any())).thenReturn(true);
+        when(saksbehandlingRegler.harTomFlytIgnorerInaktivOgMottatteOpplysninger(any(), any(), any(), any())).thenReturn(true);
 
 
         opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);

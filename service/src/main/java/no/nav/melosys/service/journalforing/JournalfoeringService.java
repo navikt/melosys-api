@@ -316,7 +316,7 @@ public class JournalfoeringService {
 
     private boolean skalSetteSøknadslandOgPeriode(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
         return erSakstypeEøs(sakstype)
-            && !saksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema)
+            && !saksbehandlingRegler.harTomFlytIgnorerInaktivOgMottatteOpplysninger(sakstype, sakstema, behandlingstype, behandlingstema)
             && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(sakstype, sakstema, behandlingstema)
             && !saksbehandlingRegler.harIkkeYrkesaktivFlyt(sakstype, behandlingstema);
     }

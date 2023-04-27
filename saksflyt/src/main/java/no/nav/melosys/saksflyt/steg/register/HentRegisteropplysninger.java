@@ -59,12 +59,7 @@ public class HentRegisteropplysninger implements StegBehandler {
         var registeropplysningerRequestBuilder = RegisteropplysningerRequest.builder()
             .behandlingID(prosessinstans.getBehandling().getId())
             .fnr(persondataFasade.hentFolkeregisterident(aktørId))
-            .saksopplysningTyper(registeropplysningerFactory.utledSaksopplysningTyper(
-                behandling.getFagsak().getType(),
-                behandling.getFagsak().getTema(),
-                behandling.getTema(),
-                behandling.getType()
-            ));
+            .saksopplysningTyper(registeropplysningerFactory.utledSaksopplysningTyper(behandling));
 
         behandling.finnPeriode().ifPresent(periode -> {
             registeropplysningerRequestBuilder.fom(periode.getFom());

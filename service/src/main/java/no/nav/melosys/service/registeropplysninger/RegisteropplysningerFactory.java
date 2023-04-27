@@ -1,10 +1,7 @@
 package no.nav.melosys.service.registeropplysninger;
 
 import no.finn.unleash.Unleash;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
@@ -24,17 +21,15 @@ public class RegisteropplysningerFactory {
         this.unleash = unleash;
     }
 
-    public RegisteropplysningerRequest.SaksopplysningTyper utledSaksopplysningTyper(
-        Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
-
-        if (saksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema)) {
+    public RegisteropplysningerRequest.SaksopplysningTyper utledSaksopplysningTyper(Behandling behandling) {
+        if (saksbehandlingRegler.harTomFlyt(behandling)) {
             return ingenSaksopplysningTyper();
         }
-        if (saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(sakstype, sakstema, behandlingstema)) {
+        if (saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)) {
             return hentSaksopplysningTyperForRegistreringUnntakFraMedlemskap();
         }
 
-        return switch (behandlingstema) {
+        return switch (behandling.getTema()) {
             case UTSENDT_ARBEIDSTAKER,
                 UTSENDT_SELVSTENDIG,
                 ARBEID_FLERE_LAND,
@@ -48,11 +43,12 @@ public class RegisteropplysningerFactory {
             case BESLUTNING_LOVVALG_NORGE, BESLUTNING_LOVVALG_ANNET_LAND ->
                 hentSaksopplysningTyperForBeslutningOmLovvalg();
             case IKKE_YRKESAKTIV -> {
-                if (unleash.isEnabled(ToggleName.IKKEYRKESAKTIV_FLYT)) yield hentSaksopplysningTyperForBehandlingAvSøknad();
-                throw new TekniskException("Kan ikke utlede relevante saksopplysninger fra behandlingstema " + behandlingstema);
+                if (unleash.isEnabled(ToggleName.IKKEYRKESAKTIV_FLYT))
+                    yield hentSaksopplysningTyperForBehandlingAvSøknad();
+                throw new TekniskException("Kan ikke utlede relevante saksopplysninger fra behandlingstema %s".formatted(behandling.getTema()));
             }
             default -> throw new TekniskException(
-                "Kan ikke utlede relevante saksopplysninger fra behandlingstema " + behandlingstema);
+                "Kan ikke utlede relevante saksopplysninger fra behandlingstema %s".formatted(behandling.getTema()));
         };
     }
 

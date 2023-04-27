@@ -81,7 +81,9 @@ class EndreSakService(
                     nySakstype,
                     nySakstema,
                     nyBehandlingstype,
-                    nyBehandlingstema
+                    nyBehandlingstema,
+                    behandling.mottatteOpplysninger,
+                    behandling.erInaktiv()
                 )
             ) {
                 mottatteOpplysningerService.finnMottatteOpplysninger(behandling.id)

@@ -109,8 +109,7 @@ class OppfriskSaksopplysningerServiceTest {
         behandling.getFagsak().setAktører(Set.of(virksomhet));
         behandling.setType(Behandlingstyper.HENVENDELSE);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(saksbehandlingRegler.harTomFlyt(any(), any(), any(), any())).thenReturn(true);
-        when(saksbehandlingRegler.harTomFlyt(any())).thenReturn(true);
+        when(saksbehandlingRegler.harTomFlyt(any(Behandling.class))).thenReturn(true);
 
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
@@ -190,8 +189,7 @@ class OppfriskSaksopplysningerServiceTest {
 
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
-        when(saksbehandlingRegler.harTomFlyt(any())).thenReturn(true);
-        when(saksbehandlingRegler.harTomFlyt(any(), any(), any(), any())).thenReturn(true);
+        when(saksbehandlingRegler.harTomFlyt(any(Behandling.class))).thenReturn(true);
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
 

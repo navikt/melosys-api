@@ -129,7 +129,7 @@ internal class EndreSakServiceTest {
         fagsak.behandlinger.add(SaksbehandlingDataFactory.lagBehandling(fagsak, mottatteOpplysningerData))
         every { fagsakService.hentFagsak(saksnummer) } returns fagsak
         every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(MottatteOpplysninger())
-        every { saksbehandlingRegler.harTomFlyt(any(), any(), any(), any()) } returns true
+        every { saksbehandlingRegler.harTomFlyt(any(), any(), any(), any(), any(), any()) } returns true
 
 
         endreSakService.endre(saksnummer, FTRL, TRYGDEAVGIFT, YRKESAKTIV, FØRSTEGANG, AVVENT_FAGLIG_AVKLARING, null)

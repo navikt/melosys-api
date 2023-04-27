@@ -184,7 +184,7 @@ class HentRegisteropplysningerTest {
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
         var prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
-        when(saksbehandlingRegler.harTomFlyt(any(), any(), any(), any())).thenReturn(true);
+        when(saksbehandlingRegler.harTomFlyt(any())).thenReturn(true);
 
         hentRegisteropplysninger.utfør(prosessinstans);
 

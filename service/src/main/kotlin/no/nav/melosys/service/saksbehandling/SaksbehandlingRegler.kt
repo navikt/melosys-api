@@ -9,6 +9,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.featuretoggle.ToggleName.*
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import org.springframework.stereotype.Component
@@ -24,7 +25,7 @@ class SaksbehandlingRegler(
         behandlingstype: Behandlingstyper,
         behandlingstema: Behandlingstema
     ): Boolean {
-        if (harTomFlyt(
+        if (harTomFlytIgnorerInaktivOgMottatteOpplysninger(
                 fagsak.type,
                 fagsak.tema,
                 behandlingstype,
@@ -41,7 +42,7 @@ class SaksbehandlingRegler(
     internal fun finnBehandlingSomKanReplikeres(behandlinger: List<Behandling>) =
         behandlinger
             .filter { it.erInaktiv() }
-            .filter { !harTomFlyt(it) }
+            .filter { !harTomFlytIgnorerInaktivOgMottatteOpplysninger(it.fagsak.type, it.fagsak.tema, it.type, it.tema) }
             .firstOrNull {
                 val behandlingsresultat = behandlingsresultatRepository.findById(it.id)
                 behandlingstyperSomKanReplikeres.contains(it.type)
@@ -54,15 +55,30 @@ class SaksbehandlingRegler(
             behandling.fagsak.type,
             behandling.fagsak.tema,
             behandling.type,
-            behandling.tema
+            behandling.tema,
+            behandling.mottatteOpplysninger,
+            behandling.erInaktiv()
         )
+
+    fun harTomFlytIgnorerInaktivOgMottatteOpplysninger(
+        sakstype: Sakstyper,
+        sakstema: Sakstemaer,
+        behandlingstype: Behandlingstyper,
+        behandlingstema: Behandlingstema
+    ): Boolean =
+        harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema, null, false)
 
     fun harTomFlyt(
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstype: Behandlingstyper,
-        behandlingstema: Behandlingstema
+        behandlingstema: Behandlingstema,
+        mottatteOpplysninger: MottatteOpplysninger?,
+        erBehandlingInaktiv: Boolean
     ): Boolean {
+        if (erBehandlingInaktiv && mottatteOpplysninger === null)
+            return true
+
         if (harRegistreringUnntakFraMedlemskapFlyt(
                 sakstype,
                 sakstema,
@@ -87,19 +103,16 @@ class SaksbehandlingRegler(
             YRKESAKTIV -> (sakstype == Sakstyper.FTRL && !unleash.isEnabled(FOLKETRYGDEN_MVP))
             IKKE_YRKESAKTIV -> (!unleash.isEnabled(IKKEYRKESAKTIV_FLYT))
 
-            else -> return false
+            else -> false
         }
     }
 
-    fun harRegistreringUnntakFraMedlemskapFlyt(
-        behandling: Behandling
-    ): Boolean {
-        return harRegistreringUnntakFraMedlemskapFlyt(
+    fun harRegistreringUnntakFraMedlemskapFlyt(behandling: Behandling): Boolean =
+        harRegistreringUnntakFraMedlemskapFlyt(
             behandling.fagsak.type,
             behandling.fagsak.tema,
             behandling.tema
         )
-    }
 
     fun harRegistreringUnntakFraMedlemskapFlyt(
         sakstype: Sakstyper,
@@ -124,15 +137,10 @@ class SaksbehandlingRegler(
         return false
     }
 
-    fun harIkkeYrkesaktivFlyt(
-        sakstype: Sakstyper,
-        behandlingstema: Behandlingstema
-    ): Boolean {
-        if (unleash.isEnabled(IKKEYRKESAKTIV_FLYT) && (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE) && behandlingstema == IKKE_YRKESAKTIV) {
-            return true
-        }
-        return false
-    }
+    fun harIkkeYrkesaktivFlyt(sakstype: Sakstyper, behandlingstema: Behandlingstema): Boolean =
+        unleash.isEnabled(IKKEYRKESAKTIV_FLYT)
+            && (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE)
+            && behandlingstema == IKKE_YRKESAKTIV
 
     companion object {
         val behandlingstyperSomKanReplikeres = listOf(

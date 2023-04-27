@@ -73,12 +73,7 @@ public class OppfriskSaksopplysningerService {
 
         RegisteropplysningerRequest registeropplysningerRequest = RegisteropplysningerRequest.builder()
             .behandlingID(behandlingID)
-            .saksopplysningTyper(registeropplysningerFactory.utledSaksopplysningTyper(
-                behandling.getFagsak().getType(),
-                behandling.getFagsak().getTema(),
-                behandling.getTema(),
-                behandling.getType()
-            ))
+            .saksopplysningTyper(registeropplysningerFactory.utledSaksopplysningTyper(behandling))
             .fnr(brukerID)
             .fom(periode.getFom())
             .tom(periode.getTom())
