@@ -9,7 +9,7 @@ import io.mockk.verify
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.Trygdeavgift
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
@@ -257,8 +257,8 @@ class OpprettBetalingsplanTest {
         }
     }
 
-    private fun lagTrygdeavgift(fastsattTrygdeavgift: FastsattTrygdeavgift): Trygdeavgift {
-        return Trygdeavgift().apply {
+    private fun lagTrygdeavgift(fastsattTrygdeavgift: FastsattTrygdeavgift): Trygdeavgiftsperiode {
+        return Trygdeavgiftsperiode().apply {
             periodeFra = LocalDate.of(2023, 1, 1)
             periodeTil = LocalDate.of(2023, 5, 1)
             trygdeavgiftsbeløpMd = BigInteger.valueOf(5000)

@@ -1,12 +1,12 @@
 package no.nav.melosys.tjenester.gui.dto.trygdeavgift
 
-import no.nav.melosys.domain.avgift.Trygdeavgift
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 
 data class BeregnetTrygdeavgiftDto(val trygdeavgiftsperioder: Set<TrygdeavgiftsperioderDto>) {
     companion object {
         @JvmStatic
-        fun av(trygdeavgiftSet: Set<Trygdeavgift>): BeregnetTrygdeavgiftDto =
-            BeregnetTrygdeavgiftDto(trygdeavgiftSet.map { TrygdeavgiftsperioderDto(it) }.toSet())
+        fun av(trygdeavgiftsperiodeSet: Set<Trygdeavgiftsperiode>): BeregnetTrygdeavgiftDto =
+            BeregnetTrygdeavgiftDto(trygdeavgiftsperiodeSet.map { TrygdeavgiftsperioderDto(it) }.toSet())
     }
 
 }

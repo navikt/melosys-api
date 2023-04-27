@@ -1,6 +1,6 @@
 package no.nav.melosys.tjenester.gui.dto.trygdeavgift
 
-import no.nav.melosys.domain.avgift.Trygdeavgift
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -13,6 +13,6 @@ data class TrygdeavgiftsperioderDto(
     val avgiftssats: BigDecimal,
     val avgiftPerMd: BigInteger
 ) {
-    constructor(trygdeavgift: Trygdeavgift) :
-        this(trygdeavgift.periodeFra, trygdeavgift.periodeTil, trygdeavgift.hentGjeldendeTrygdedekning(), trygdeavgift.trygdesats, trygdeavgift.trygdeavgiftsbeløpMd)
+    constructor(trygdeavgiftsperiode: Trygdeavgiftsperiode) :
+        this(trygdeavgiftsperiode.periodeFra, trygdeavgiftsperiode.periodeTil, trygdeavgiftsperiode.hentGjeldendeTrygdedekning(), trygdeavgiftsperiode.trygdesats, trygdeavgiftsperiode.trygdeavgiftsbeløpMd)
 }

@@ -8,7 +8,7 @@ import java.util.Set;
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avgift.Inntektsperiode;
-import no.nav.melosys.domain.avgift.Trygdeavgift;
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.brev.Mottaker;
@@ -541,7 +541,7 @@ class BrevmottakerServiceTest {
         var inntektsperiode = new Inntektsperiode();
         inntektsperiode.setTrygdeavgiftBetalesTilSkatt(norskinntekt == 0);
         var fastsattTrygdeavgift = behandlingsresultat.getMedlemAvFolketrygden().getFastsattTrygdeavgift();
-        fastsattTrygdeavgift.setTrygdeavgift(Set.of(new Trygdeavgift()));
+        fastsattTrygdeavgift.setTrygdeavgift(Set.of(new Trygdeavgiftsperiode()));
         fastsattTrygdeavgift.setBetalesAv(selvbetalende ? fagsak.hentBruker() : lagAktoer(Aktoersroller.REPRESENTANT));
         fastsattTrygdeavgift.setTrygdeavgiftsgrunnlag(new Trygdeavgiftsgrunnlag());
         fastsattTrygdeavgift.getTrygdeavgiftsgrunnlag().setInntektsperioder(Set.of(inntektsperiode));

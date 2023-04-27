@@ -11,8 +11,8 @@ import java.math.BigInteger;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "trygdeavgiftt")
-public class Trygdeavgift {
+@Table(name = "trygdeavgiftsperiode")
+public class Trygdeavgiftsperiode {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

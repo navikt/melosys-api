@@ -1,11 +1,9 @@
 package no.nav.melosys.service.avgift
 
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.avgift.Trygdeavgift
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
-import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.dto.MelosysTrygdeavgfitBeregningV2Dto
@@ -22,7 +20,7 @@ class TrygdeavgiftsberegningService
 ) {
 
     @Transactional
-    fun beregnTrygdeavgift(behandlingsresultatID: Long): Set<Trygdeavgift> {
+    fun beregnTrygdeavgift(behandlingsresultatID: Long): Set<no.nav.melosys.domain.avgift.Trygdeavgiftsperiode> {
         val medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)
         val fastsattTrygdeavgift = medlemAvFolketrygden.fastsattTrygdeavgift
 
@@ -64,7 +62,7 @@ class TrygdeavgiftsberegningService
         fastsattTrygdeavgift: FastsattTrygdeavgift,
         trygdeavgiftsperiode: Trygdeavgiftsperiode
     ) =
-        Trygdeavgift().apply {
+        no.nav.melosys.domain.avgift.Trygdeavgiftsperiode().apply {
             this.periodeFra = trygdeavgiftsperiode.periode.fom
             this.periodeTil = trygdeavgiftsperiode.periode.tom
             this.trygdesats = trygdeavgiftsperiode.sats
@@ -91,7 +89,7 @@ class TrygdeavgiftsberegningService
     }
 
     @Transactional(readOnly = true)
-    fun hentTrygdeavgiftsberegning(behandlingsresultatID: Long): Set<Trygdeavgift> {
+    fun hentTrygdeavgiftsberegning(behandlingsresultatID: Long): Set<no.nav.melosys.domain.avgift.Trygdeavgiftsperiode> {
         return medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)?.fastsattTrygdeavgift?.trygdeavgift
             ?: emptySet()
     }
