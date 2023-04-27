@@ -67,6 +67,11 @@ class OppgaveMigrering(
         )
     }
 
+    fun sakerMedOppgave(): String = oppgaveMappingKjørelog.toString()
+    fun sakerMedFlereOppgaver(): String = sakerMedFlereOppgaver.joinToString("\n")
+    fun sakHvorMappingFeiler(): String = sakHvorMappingFeiler.joinToString("\n")
+    fun sakHvorViSkalHaSedMenSomIkkeFinnes(): String = sakHvorViSkalHaSedMenSomIkkeFinnes.joinToString("\n")
+
     @Async
     @Synchronized
     fun go() {
@@ -77,7 +82,7 @@ class OppgaveMigrering(
 
     private fun migrering() {
         log.info("Utfører OppgaveMigrering")
-        val sakOgBehandlinger = behandlingRepository.findSaksOgBehandlingTyperOgTeam(
+        behandlingRepository.findSaksOgBehandlingTyperOgTeam(
             listOf(
                 Behandlingsstatus.AVSLUTTET,
                 Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING,
@@ -86,91 +91,42 @@ class OppgaveMigrering(
         ).apply {
             log.info("size før erRedigerbar: $size")
             antallSakerFunnet = size
-        }.filter { it.erRedigerbar() }.sortedBy { it.saksnummer }
-        antallSakerErRedigerbar = sakOgBehandlinger.size
-
-        sakOgBehandlinger.forEach {
+        }.filter { it.erRedigerbar() }.sortedBy { it.saksnummer }.apply {
+            antallSakerErRedigerbar = size
+        }.forEach { sak ->
             antallSakerProssessert++
-            oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(it.saksnummer).apply {
-                if (size > 1) sakMedFlereOppgaver(it)
-                if (size == 0) sakManglerOppgave(it)
-            }.firstOrNull()?.apply {
-                gammelOppgaveMapping(it)
-                nyOppgaveMapping(it)
+            oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(sak.saksnummer).apply {
+                if (size == 0) {
+                    log.warn("${sak.saksnummer} har ikke åpen oppgagave")
+                    harIkkeÅpenOppgave++
+                    sakerManglerOppgave.add(sak.saksnummer)
+                }
+                if (size > 1) {
+                    log.error("fant $size for: ${sak.saksnummer}")
+                    sakerMedFlereOppgaver.add("fant $size oppgaver for: ${sak.saksnummer}")
+                }
+            }.firstOrNull()?.let { gammel ->
+                log.info(sak.toString())
+                log.info("oppgave:${gammel.oppgaveId} - beskrivelse:${gammel.beskrivelse}")
+                sakerMedOppgave.add(sak.saksnummer)
+
+                oppgaveMappingKjørelog.appendLine("$sak")
+                val report = Diff(OppgavePart(gammel), nyOppgaveMapping(sak)).report()
+                oppgaveMappingKjørelog.append(report)
                 antallSakerMigrert++
             }
         }
+        log.info("OppgaveMigrering utført!")
         lagRapport()
     }
 
-    private fun lagRapport() {
-        val status = statusEtterKjøring()
-        saveStatusFiles(status)
-    }
-
-    private fun statusEtterKjøring(): String {
-        val sb = StringBuilder()
-        sb.appendLine("sakerMedOppgave:                       ${sakerMedOppgave.size}")
-        sb.appendLine("sakerManglerOppgave:                   ${sakerManglerOppgave.size}")
-        sb.appendLine("sakerMedFlereOppgaver:                 ${sakerMedFlereOppgaver.size}")
-        sb.appendLine("sakHvorMappingFeiler:                  ${sakHvorMappingFeiler.size}")
-        sb.appendLine("sakHvorViSkalHaSedMenSomIkkeFinnes:    ${sakHvorViSkalHaSedMenSomIkkeFinnes.size}")
-        return sb.toString()
-    }
-
-    private fun saveStatusFiles(status: String) {
-        val envName = environment.getActiveProfiles().first()
-        if (envName == "test") return
-        val timeForRun =
-            "oppgave-migrering/$envName-${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))}"
-        File(timeForRun).mkdirs()
-
-        File("$timeForRun/status.txt").writeText(status)
-        File("$timeForRun/oppgaver.txt").writeText(oppgaveMappingKjørelog.toString())
-        File("$timeForRun/saker-med-oppgave.txt").writeText(sakerMedOppgave.joinToString(","))
-        File("$timeForRun/saker-mangler-oppgave.txt").writeText(sakerManglerOppgave.joinToString(","))
-        File("$timeForRun/saker-med-flere-oppgave.txt").writeText(sakerMedFlereOppgaver.joinToString("\n"))
-        File("$timeForRun/sak-hvor-mapping-feiler.txt").writeText(sakHvorMappingFeiler.joinToString("\n"))
-        File("$timeForRun/sak-hvor-vi-skal-ha-sed-men-som-ikke-finnes.txt").writeText(
-            sakHvorViSkalHaSedMenSomIkkeFinnes.joinToString("\n")
-        )
-
-    }
-
-    private fun MutableList<Oppgave>.sakMedFlereOppgaver(sakOgBehandling: SakOgBehandlingDTO) {
-        log.error("fant $size for: ${sakOgBehandling.saksnummer}")
-        sakerMedFlereOppgaver.add("fant $size oppgaver for: ${sakOgBehandling.saksnummer}")
-    }
-
-    private fun Oppgave.gammelOppgaveMapping(sakOgBehandling: SakOgBehandlingDTO) {
-        log.info(sakOgBehandling.toString())
-        log.info("oppgave:$oppgaveId - beskrivelse:$beskrivelse")
-        sakerMedOppgave.add(sakOgBehandling.saksnummer)
-        oppgaveMappingKjørelog.appendLine()
-        oppgaveMappingKjørelog.appendLine("$sakOgBehandling")
-        oppgaveMappingKjørelog.appendLine("oppgaveId=         $oppgaveId")
-        oppgaveMappingKjørelog.appendLine("=========== gammel ===========")
-        oppgaveMappingKjørelog.appendLine("oppgavetype=       $oppgavetype")
-        oppgaveMappingKjørelog.appendLine("tema=              $tema")
-        oppgaveMappingKjørelog.appendLine("behandlingstema=   $behandlingstema")
-        oppgaveMappingKjørelog.appendLine("behandlingstype=   $behandlingstype")
-        oppgaveMappingKjørelog.appendLine("oppgavetype=       $oppgavetype")
-        oppgaveMappingKjørelog.appendLine("beskrivelse=       $beskrivelse")
-    }
-
-    private fun nyOppgaveMapping(sakOgBehandling: SakOgBehandlingDTO) {
+    private fun nyOppgaveMapping(sakOgBehandling: SakOgBehandlingDTO): OppgavePart? {
         try {
             val oppgaveBehandlingstema: OppgaveBehandlingstema = sakOgBehandling.utledOppgaveBehandlingstema()
             val oppgavetype: Oppgavetyper = sakOgBehandling.utledOppgaveType()
             val beskrivelse: String = sakOgBehandling.utledBeskrivelse(oppgaveBehandlingstema)
             val tema: Tema = sakOgBehandling.utledTema()
-            oppgaveMappingKjørelog.appendLine("=========== ny ===========")
-            oppgaveMappingKjørelog.appendLine("oppgavetype=       $oppgavetype")
-            oppgaveMappingKjørelog.appendLine("tema=              $tema")
-            oppgaveMappingKjørelog.appendLine("behandlingstema=   ${oppgaveBehandlingstema.kode}")
-            oppgaveMappingKjørelog.appendLine("oppgavetype=       $oppgavetype")
-            oppgaveMappingKjørelog.appendLine("beskrivelse=       $beskrivelse")
-            oppgaveMappingKjørelog.appendLine("------------------------------------")
+            return OppgavePart(oppgaveBehandlingstema, null, tema, oppgavetype, beskrivelse)
         } catch (e: Exception) {
             val gyldige = GyldigeKombinasjoner.finnGyldige(
                 sakOgBehandling.sakstype,
@@ -179,16 +135,11 @@ class OppgaveMigrering(
                 sakOgBehandling.behandlingstema
             )
             sakHvorMappingFeiler.add("${sakOgBehandling.saksnummer}: gyldige:${gyldige.size}  ${e.message}")
+            return null
         }
     }
 
-    private fun sakManglerOppgave(sakOgBehandlingDTO: SakOgBehandlingDTO) {
-        log.warn("${sakOgBehandlingDTO.saksnummer} har ikke åpen oppgagave")
-        harIkkeÅpenOppgave++
-        sakerManglerOppgave.add(sakOgBehandlingDTO.saksnummer)
-    }
-
-    fun SakOgBehandlingDTO.utledOppgaveBehandlingstema(): OppgaveBehandlingstema =
+    private fun SakOgBehandlingDTO.utledOppgaveBehandlingstema(): OppgaveBehandlingstema =
         nyOppgaveFactory.utledOppgaveBehandlingstema(
             sakstype, sakstema, behandlingstema, behandlingstype
         )
@@ -196,12 +147,12 @@ class OppgaveMigrering(
     private fun SakOgBehandlingDTO.utledOppgaveType(): Oppgavetyper =
         nyOppgaveFactory.utledOppgavetype(sakstype, sakstema, behandlingstema, behandlingstype)
 
-    fun SakOgBehandlingDTO.utledTema(): Tema =
+    private fun SakOgBehandlingDTO.utledTema(): Tema =
         nyOppgaveFactory.utledTema(
             sakstype, sakstema, behandlingstema
         )
 
-    fun SakOgBehandlingDTO.utledBeskrivelse(oppgaveBehandlingstema: OppgaveBehandlingstema): String {
+    private fun SakOgBehandlingDTO.utledBeskrivelse(oppgaveBehandlingstema: OppgaveBehandlingstema): String {
         val hentSedDokument = {
             log.info("Henter sed dokuemnt for: $behandlingID")
             sedDokument(behandlingID)
@@ -228,4 +179,80 @@ class OppgaveMigrering(
 
     private fun hentBehandlingMedSaksoplysninger(behandlingID: Long): Behandling = behandlingRepository
         .findWithSaksopplysningerById(behandlingID) ?: throw TekniskException("Fant ikke behandling for $behandlingID")
+
+    private fun lagRapport() {
+        val status = statusEtterKjøring()
+        log.info(status)
+        saveStatusFiles(status)
+    }
+
+    private fun statusEtterKjøring(): String {
+        val sb = StringBuilder()
+        sb.appendLine()
+        sb.appendLine("sakerMedOppgave: ${sakerMedOppgave.size}")
+        sb.appendLine("sakerManglerOppgave: ${sakerManglerOppgave.size}")
+        sb.appendLine("sakerMedFlereOppgaver: ${sakerMedFlereOppgaver.size}")
+        sb.appendLine("sakHvorMappingFeiler: ${sakHvorMappingFeiler.size}")
+        sb.appendLine("sakHvorViSkalHaSedMenSomIkkeFinnes: ${sakHvorViSkalHaSedMenSomIkkeFinnes.size}")
+        return sb.toString()
+    }
+
+    private fun saveStatusFiles(status: String) {
+        val profil = environment.getActiveProfiles().first()
+        log.info("Profile:$profil")
+        if (profil !in listOf("local-mock", "local-q1", "local-q2")) return // kun lag profiler ved lokal kjøring
+        val timeForRun =
+            "oppgave-migrering/$profil-${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))}"
+        File(timeForRun).mkdirs()
+
+        File("$timeForRun/status.txt").writeText(status)
+        File("$timeForRun/oppgaver.txt").writeText(oppgaveMappingKjørelog.toString())
+        File("$timeForRun/saker-med-oppgave.txt").writeText(sakerMedOppgave.joinToString(","))
+        File("$timeForRun/saker-mangler-oppgave.txt").writeText(sakerManglerOppgave.joinToString(","))
+        File("$timeForRun/saker-med-flere-oppgave.txt").writeText(sakerMedFlereOppgaver.joinToString("\n"))
+        File("$timeForRun/sak-hvor-mapping-feiler.txt").writeText(sakHvorMappingFeiler.joinToString("\n"))
+        File("$timeForRun/sak-hvor-vi-skal-ha-sed-men-som-ikke-finnes.txt").writeText(
+            sakHvorViSkalHaSedMenSomIkkeFinnes.joinToString("\n")
+        )
+    }
+
+    class Diff(private val gammel: OppgavePart, private val ny: OppgavePart?) {
+        fun report(): String {
+            val sb = StringBuilder()
+            sb.appendLine("=========== gammel ===========")
+            sb.appendLine("type=              ${gammel.oppgaveType}")
+            sb.appendLine("tema=              ${gammel.tema}")
+            sb.appendLine("behandlingstema=   ${gammel.oppgaveBehandlingstema.kode}")
+            sb.appendLine("behandlingstype=   ${gammel.oppgaveBehandlingstype?.kode}")
+            sb.appendLine("beskrivelse=       ${gammel.beskrivelse}")
+
+            if (ny != null) {
+                sb.appendLine("=========== ny ===========")
+                sb.appendLine("type=              ${ny.oppgaveType}")
+                sb.appendLine("tema=              ${ny.tema}")
+                sb.appendLine("behandlingstema=   ${ny.oppgaveBehandlingstema.kode}")
+                sb.appendLine("beskrivelse=       ${ny.beskrivelse}")
+            }
+            sb.appendLine("------------------------------")
+            sb.appendLine()
+            return sb.toString()
+        }
+    }
+
+    data class OppgavePart(
+        val oppgaveBehandlingstema: OppgaveBehandlingstema,
+        val oppgaveBehandlingstype: OppgaveBehandlingstype?,
+        val tema: Tema,
+        val oppgaveType: Oppgavetyper,
+        val beskrivelse: String
+    ) {
+        constructor(oppgave: Oppgave) : this(
+            OppgaveBehandlingstema.values().find { it.kode == oppgave.behandlingstema }!!,
+            OppgaveBehandlingstype.values().find { it.kode == oppgave.behandlingstype },
+            oppgave.tema,
+            oppgave.oppgavetype,
+            oppgave.beskrivelse
+        )
+    }
+
 }
