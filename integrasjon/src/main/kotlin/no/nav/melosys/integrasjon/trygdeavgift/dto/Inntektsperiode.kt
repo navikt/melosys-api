@@ -13,7 +13,9 @@ data class Inntektsperiode(
     val månedsbeløp: Penger?
 )
 
-data class Penger(val verdi: BigInteger, var valuta: Valuta = NOK)
+data class Penger(val verdi: BigInteger, var valuta: Valuta = NOK) {
+    constructor(verdi: BigInteger) : this(verdi, NOK)
+}
 
 data class Valuta(val kode: String, val desimaler: Int = 2)
 

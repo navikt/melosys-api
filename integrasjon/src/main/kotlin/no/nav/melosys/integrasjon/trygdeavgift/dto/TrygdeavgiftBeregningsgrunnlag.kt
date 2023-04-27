@@ -9,7 +9,7 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger.*
 import no.nav.melosys.exception.FunksjonellException
 
 
-data class MelosysTrygdeavgfitBeregningV2Dto(
+data class TrygdeavgiftBeregningsgrunnlag(
     val medlemskapsperioder: Set<Medlemskapsperiode>,
     val skatteforholdsperioder: Set<Skatteforholdsperiode>,
     val inntektsperioder: List<Inntektsperiode>
@@ -20,8 +20,8 @@ data class MelosysTrygdeavgfitBeregningV2Dto(
             medlemskapsperioder: Collection<no.nav.melosys.domain.Medlemskapsperiode>,
             skatteforholdTilNorge: Collection<SkatteforholdTilNorge>,
             inntektsperioder: Collection<no.nav.melosys.domain.avgift.Inntektsperiode>
-        ): MelosysTrygdeavgfitBeregningV2Dto =
-            MelosysTrygdeavgfitBeregningV2Dto(
+        ): TrygdeavgiftBeregningsgrunnlag =
+            TrygdeavgiftBeregningsgrunnlag(
                 mapMedlemskapsperioder(medlemskapsperioder).toSet(),
                 mapSkatteforholdsperioder(skatteforholdTilNorge).toSet(),
                 mapInntektsperioder(inntektsperioder)

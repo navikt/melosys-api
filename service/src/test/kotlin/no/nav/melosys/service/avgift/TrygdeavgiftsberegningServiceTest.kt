@@ -90,7 +90,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             }
         }
         every { mockMedlemAvFolketrygdenService.lagre(any()) }.returns(medlemAvFolketrygden)
-        every { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(MelosysTrygdeavgfitBeregningV2Dto::class)) }
+        every { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftBeregningsgrunnlag::class)) }
             .returns(
                 listOf(
                     Trygdeavgiftsperiode(
@@ -111,7 +111,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                     trygdeavgiftsbeløpMd = BigInteger.valueOf(790)
                 }
             }
-        verify { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(MelosysTrygdeavgfitBeregningV2Dto::class)) }
+        verify { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftBeregningsgrunnlag::class)) }
         verify { mockMedlemAvFolketrygdenService.lagre(medlemAvFolketrygden) }
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgift.shouldNotBeEmpty()
     }

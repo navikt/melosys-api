@@ -6,7 +6,7 @@ import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
-import no.nav.melosys.integrasjon.trygdeavgift.dto.MelosysTrygdeavgfitBeregningV2Dto
+import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftBeregningsgrunnlag
 import no.nav.melosys.integrasjon.trygdeavgift.dto.Trygdeavgiftsperiode
 import no.nav.melosys.service.MedlemAvFolketrygdenService
 import org.springframework.stereotype.Service
@@ -46,7 +46,7 @@ class TrygdeavgiftsberegningService
         fastsattTrygdeavgift: FastsattTrygdeavgift
     ) {
         val trygdeavgiftsperioder = trygdeavgiftConsumer.beregnTrygdeavgift(
-            MelosysTrygdeavgfitBeregningV2Dto.av(
+            TrygdeavgiftBeregningsgrunnlag.av(
                 medlemskapsperioder,
                 trygdeavgiftsgrunnlag.skatteforholdTilNorge,
                 trygdeavgiftsgrunnlag.inntektsperioder
