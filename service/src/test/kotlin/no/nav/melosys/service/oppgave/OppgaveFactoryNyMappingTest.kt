@@ -104,6 +104,16 @@ internal class OppgaveFactoryNyMappingTest {
         }
     }
 
+    @Test
+    fun `AVTALAND_FORESPORSEL_FRA_TRYGDEMYNDIGHET skal ikke brukes`() {
+        val oppgave = oppgaveGosysMapping.finnOppgave(
+            Sakstyper.TRYGDEAVTALE, Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET, Behandlingstyper.HENVENDELSE
+        )
+
+        oppgave.oppgaveBehandlingstema.kode.shouldBe(null)
+    }
+
     @ParameterizedTest(name = "{0}, {1}, {2}, {3} -> {4}")
     @MethodSource("fraRegistretTabell")
     fun `oppgave oppslag skal fungere på med type sed`(

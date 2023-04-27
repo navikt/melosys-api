@@ -372,7 +372,7 @@ internal class OppgaveGosysMapping {
                 setOf(Behandlingstyper.HENVENDELSE),
                 setOf(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET),
                 Oppgave(
-                    OppgaveBehandlingstema.AVTALAND_FORESPORSEL_FRA_TRYGDEMYNDIGHET,
+                    OppgaveBehandlingstema.NULL,
                     Tema.MED,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.TOMT
