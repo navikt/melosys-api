@@ -27,7 +27,7 @@ class OppgaveMigreringAdminTjeneste(
         log.info("Migrer oppgave for bruker $bruker for sak $saksnummer dryrun $dryrun")
         validerApikey(apiKey)
 
-        oppgaveMigrering.go()
+        oppgaveMigrering.go(bruker, saksnummer, dryrun)
 
         return ResponseEntity.noContent().build()
     }
@@ -35,6 +35,10 @@ class OppgaveMigreringAdminTjeneste(
     @GetMapping("/status")
     fun status(): ResponseEntity<Map<String, Any>> {
         return ResponseEntity<Map<String, Any>>(oppgaveMigrering.status(), HttpStatus.OK)
+    }
+    @GetMapping("/sakerMedOppgave")
+    fun oppgaver(): ResponseEntity<String> {
+        return ResponseEntity<String>(oppgaveMigrering.sakerMedOppgave(), HttpStatus.OK)
     }
 
     override fun getApiKey(): String {

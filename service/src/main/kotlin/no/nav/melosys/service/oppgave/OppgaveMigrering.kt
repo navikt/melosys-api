@@ -74,15 +74,15 @@ class OppgaveMigrering(
 
     @Async
     @Synchronized
-    fun go() {
+    fun go(bruker: String?, saksnummer: String?, dryrun: Boolean) {
         ThreadLocalAccessInfo.executeProcess("Prossess oppgaver") {
-            migrering()
+            migrering(bruker, saksnummer, dryrun)
         }
     }
 
-    private fun migrering() {
+    private fun migrering(bruker: String?, saksnummer: String?, dryrun: Boolean) {
         log.info("Utfører OppgaveMigrering")
-        behandlingRepository.findSaksOgBehandlingTyperOgTeam(
+        behandlingRepository.finnSaksOgBehandlingTyperOgTema(
             listOf(
                 Behandlingsstatus.AVSLUTTET,
                 Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING,
@@ -218,6 +218,7 @@ class OppgaveMigrering(
 
     class Diff(private val oppgave: Oppgave, private val ny: OppgavePart?) {
         fun report(): String {
+            val behandlingstema = OppgaveBehandlingstema.values().find { it.kode == oppgave.behandlingstema }
             val sb = StringBuilder()
             sb.appendLine("oppgaveId= ${oppgave.oppgaveId}")
             sb.appendLine("behandlingstype= ${oppgave.behandlingstype}")
@@ -227,14 +228,14 @@ class OppgaveMigrering(
             sb.appendLine("=========== gammel ===========")
             sb.appendLine("type= ${oppgave.oppgavetype}")
             sb.appendLine("tema= ${oppgave.tema}")
-            sb.appendLine("behandlingstema= ${oppgave.behandlingstema}")
+            sb.appendLine("behandlingstema= ${oppgave.behandlingstema} (${behandlingstema?.name})")
             sb.appendLine("beskrivelse= ${oppgave.beskrivelse}")
 
             if (ny != null) {
                 sb.appendLine("=========== ny ===========")
                 sb.appendLine("type= ${ny.oppgaveType}")
                 sb.appendLine("tema= ${ny.tema}")
-                sb.appendLine("behandlingstema= ${ny.oppgaveBehandlingstema.kode}")
+                sb.appendLine("behandlingstema= ${ny.oppgaveBehandlingstema.kode} (${ny.oppgaveBehandlingstema.name})" )
                 sb.appendLine("beskrivelse= ${ny.beskrivelse}")
             }
             sb.appendLine("------------------------------")

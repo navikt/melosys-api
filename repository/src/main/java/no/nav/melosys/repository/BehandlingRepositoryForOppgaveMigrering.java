@@ -20,5 +20,5 @@ public interface BehandlingRepositoryForOppgaveMigrering extends CrudRepository<
     @Query("SELECT new no.nav.melosys.domain.SakOgBehandlingDTO(" +
             "e.fagsak.saksnummer, e.id, e.fagsak.type, e.fagsak.tema, e.type, e.tema, e.status) " +
             "FROM Behandling e WHERE e.status NOT IN (:excludedStatuses)")
-    Collection<SakOgBehandlingDTO> findSaksOgBehandlingTyperOgTeam(@Param("excludedStatuses") List<Behandlingsstatus> excludedStatuses);
+    Collection<SakOgBehandlingDTO> finnSaksOgBehandlingTyperOgTema(@Param("excludedStatuses") List<Behandlingsstatus> excludedStatuses);
 }
