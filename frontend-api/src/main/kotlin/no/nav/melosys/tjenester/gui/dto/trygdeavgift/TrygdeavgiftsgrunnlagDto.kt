@@ -8,15 +8,11 @@ data class TrygdeavgiftsgrunnlagDto(
     val skatteplikttype: Skatteplikttype,
     val inntektskilder: Set<InntekskildeDto>
 ) {
+    constructor(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag) : this(
+        trygdeavgiftsgrunnlag.skatteforholdTilNorge.first().skatteplikttype,
+        (trygdeavgiftsgrunnlag.inntektsperioder.map { InntekskildeDto(it) }).toSet()
+    )
+
     fun tilRequest(): OppdaterTrygdeavgiftsgrunnlagRequest =
         OppdaterTrygdeavgiftsgrunnlagRequest(skatteplikttype, (inntektskilder.map { it.tilRequest() }).toSet())
-
-    companion object {
-        @JvmStatic
-        fun av(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag): TrygdeavgiftsgrunnlagDto =
-            TrygdeavgiftsgrunnlagDto(
-                trygdeavgiftsgrunnlag.skatteforholdTilNorge.first().skatteplikttype,
-                (trygdeavgiftsgrunnlag.inntektsperioder.map { InntekskildeDto.av(it) }).toSet()
-            )
-    }
 }

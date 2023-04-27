@@ -36,7 +36,7 @@ public class TrygdeavgiftTjeneste {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
         return ResponseEntity.ok(
-            TrygdeavgiftsgrunnlagDto.av(
+            new TrygdeavgiftsgrunnlagDto(
                 trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(behandlingID, trygdeavgiftsgrunnlagDto.tilRequest())
             )
         );
@@ -47,7 +47,7 @@ public class TrygdeavgiftTjeneste {
         aksesskontroll.autoriser(behandlingID);
 
         var grunnlag = trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlag(behandlingID);
-        return grunnlag == null ? ResponseEntity.noContent().build() : ResponseEntity.ok(TrygdeavgiftsgrunnlagDto.av(grunnlag));
+        return grunnlag == null ? ResponseEntity.noContent().build() : ResponseEntity.ok(new TrygdeavgiftsgrunnlagDto(grunnlag));
     }
 
     @PutMapping("/beregning")

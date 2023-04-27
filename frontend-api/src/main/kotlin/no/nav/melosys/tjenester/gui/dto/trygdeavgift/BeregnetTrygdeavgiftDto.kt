@@ -8,5 +8,4 @@ data class BeregnetTrygdeavgiftDto(val trygdeavgiftsperioder: Set<Trygdeavgiftsp
         fun av(trygdeavgiftsperiodeSet: Set<Trygdeavgiftsperiode>): BeregnetTrygdeavgiftDto =
             BeregnetTrygdeavgiftDto(trygdeavgiftsperiodeSet.map { TrygdeavgiftsperioderDto(it) }.toSet())
     }
-
 }

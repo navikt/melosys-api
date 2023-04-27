@@ -9,16 +9,12 @@ data class InntekskildeDto(
     val arbeidsgiversavgiftBetales: Boolean,
     val avgiftspliktigInntektMnd: Int
 ) {
+    constructor(inntektsperiode: Inntektsperiode) : this(
+        inntektsperiode.type,
+        inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
+        inntektsperiode.avgiftspliktigInntektMnd.toInt()
+    )
 
     fun tilRequest(): InntektskildeRequest =
         InntektskildeRequest(type, arbeidsgiversavgiftBetales, avgiftspliktigInntektMnd.toBigInteger())
-
-    companion object {
-        fun av(inntektsperiode: Inntektsperiode): InntekskildeDto =
-            InntekskildeDto(
-                inntektsperiode.type,
-                inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
-                inntektsperiode.avgiftspliktigInntektMnd.toInt()
-            )
-    }
 }
