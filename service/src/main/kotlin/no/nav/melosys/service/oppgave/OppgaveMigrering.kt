@@ -105,13 +105,13 @@ class OppgaveMigrering(
                     log.error("fant $size for: ${sak.saksnummer}")
                     sakerMedFlereOppgaver.add("fant $size oppgaver for: ${sak.saksnummer}")
                 }
-            }.firstOrNull()?.let { gammel ->
+            }.firstOrNull()?.let { gammel: Oppgave ->
                 log.info(sak.toString())
                 log.info("oppgave:${gammel.oppgaveId} - beskrivelse:${gammel.beskrivelse}")
                 sakerMedOppgave.add(sak.saksnummer)
 
                 oppgaveMappingKjørelog.appendLine("$sak")
-                val report = Diff(OppgavePart(gammel), nyOppgaveMapping(sak)).report()
+                val report = Diff(gammel, nyOppgaveMapping(sak)).report()
                 oppgaveMappingKjørelog.append(report)
                 antallSakerMigrert++
             }
@@ -216,22 +216,26 @@ class OppgaveMigrering(
         )
     }
 
-    class Diff(private val gammel: OppgavePart, private val ny: OppgavePart?) {
+    class Diff(private val oppgave: Oppgave, private val ny: OppgavePart?) {
         fun report(): String {
             val sb = StringBuilder()
+            sb.appendLine("oppgaveId= ${oppgave.oppgaveId}")
+            sb.appendLine("behandlingstype= ${oppgave.behandlingstype}")
+            sb.appendLine("opprettetTidspunkt= ${oppgave.opprettetTidspunkt}")
+            sb.appendLine("fristFerdigstillelse= ${oppgave.fristFerdigstillelse}")
+            sb.appendLine("aktørId= ${oppgave.aktørId}")
             sb.appendLine("=========== gammel ===========")
-            sb.appendLine("type=              ${gammel.oppgaveType}")
-            sb.appendLine("tema=              ${gammel.tema}")
-            sb.appendLine("behandlingstema=   ${gammel.oppgaveBehandlingstema.kode}")
-            sb.appendLine("behandlingstype=   ${gammel.oppgaveBehandlingstype?.kode}")
-            sb.appendLine("beskrivelse=       ${gammel.beskrivelse}")
+            sb.appendLine("type= ${oppgave.oppgavetype}")
+            sb.appendLine("tema= ${oppgave.tema}")
+            sb.appendLine("behandlingstema= ${oppgave.behandlingstema}")
+            sb.appendLine("beskrivelse= ${oppgave.beskrivelse}")
 
             if (ny != null) {
                 sb.appendLine("=========== ny ===========")
-                sb.appendLine("type=              ${ny.oppgaveType}")
-                sb.appendLine("tema=              ${ny.tema}")
-                sb.appendLine("behandlingstema=   ${ny.oppgaveBehandlingstema.kode}")
-                sb.appendLine("beskrivelse=       ${ny.beskrivelse}")
+                sb.appendLine("type= ${ny.oppgaveType}")
+                sb.appendLine("tema= ${ny.tema}")
+                sb.appendLine("behandlingstema= ${ny.oppgaveBehandlingstema.kode}")
+                sb.appendLine("beskrivelse= ${ny.beskrivelse}")
             }
             sb.appendLine("------------------------------")
             sb.appendLine()
@@ -245,14 +249,5 @@ class OppgaveMigrering(
         val tema: Tema,
         val oppgaveType: Oppgavetyper,
         val beskrivelse: String
-    ) {
-        constructor(oppgave: Oppgave) : this(
-            OppgaveBehandlingstema.values().find { it.kode == oppgave.behandlingstema }!!,
-            OppgaveBehandlingstype.values().find { it.kode == oppgave.behandlingstype },
-            oppgave.tema,
-            oppgave.oppgavetype,
-            oppgave.beskrivelse
-        )
-    }
-
+    )
 }
