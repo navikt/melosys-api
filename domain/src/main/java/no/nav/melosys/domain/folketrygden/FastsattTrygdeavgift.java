@@ -6,8 +6,8 @@ import javax.persistence.*;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.avgift.Inntektsperiode;
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer;
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker;
 
@@ -133,6 +133,8 @@ public class FastsattTrygdeavgift {
     }
 
     public boolean skalBetaleTrygdeavgiftTilNav() {
-        return getTrygdeavgiftMottaker() != Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT;
+        var trygdeavgiftMottaker = getTrygdeavgiftMottaker();
+        return trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
+            || trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT;
     }
 }
