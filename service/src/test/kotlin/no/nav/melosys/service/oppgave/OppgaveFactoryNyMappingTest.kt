@@ -256,6 +256,7 @@ internal class OppgaveFactoryNyMappingTest {
                         val oppgave = oppgaveGosysMapping.finnOppgaveVedBehandlingstypeHenvendelse(
                             sakstyper,
                             behandlingstema,
+                            Behandlingstyper.HENVENDELSE
                         )
                         if (oppgave != null) {
                             yield(

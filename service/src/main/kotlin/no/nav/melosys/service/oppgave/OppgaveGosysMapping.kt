@@ -15,7 +15,7 @@ internal class OppgaveGosysMapping {
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper?
     ): Oppgave = finnOppgaveFraTabell(sakstype, sakstema, behandlingstema, behandlingstype)
-        ?: finnOppgaveVedBehandlingstypeHenvendelse(sakstype, behandlingstema)
+        ?: finnOppgaveVedBehandlingstypeHenvendelse(sakstype, behandlingstema, behandlingstype)
         ?: throw IllegalStateException(
             "Fant ikke oppgave mapping for " +
                 "sakstype:$sakstype, sakstema:$sakstema, behandlingstema:$behandlingstema, behandlingstype:$behandlingstype"
@@ -34,15 +34,19 @@ internal class OppgaveGosysMapping {
     fun finnOppgaveVedBehandlingstypeHenvendelse(
         sakstype: Sakstyper,
         behandlingstema: Behandlingstema,
-    ): Oppgave? = rows.find {
-        it.sakstype == sakstype && behandlingstema in it.behandlingstema
-    }?.oppgave?.let {
-        Oppgave(
-            oppgaveBehandlingstema = it.oppgaveBehandlingstema,
-            oppgaveType = Oppgavetyper.VURD_HENV,
-            tema = it.tema,
-            beskrivelsefelt = Beskrivelsefelt.SED_ELLER_TOMT
-        )
+        behandlingstype: Behandlingstyper?
+    ): Oppgave? {
+        if(behandlingstype != Behandlingstyper.HENVENDELSE) return null
+        return rows.find {
+            it.sakstype == sakstype && behandlingstema in it.behandlingstema
+        }?.oppgave?.let {
+            Oppgave(
+                oppgaveBehandlingstema = it.oppgaveBehandlingstema,
+                oppgaveType = Oppgavetyper.VURD_HENV,
+                tema = it.tema,
+                beskrivelsefelt = Beskrivelsefelt.SED_ELLER_TOMT
+            )
+        }
     }
 
 
