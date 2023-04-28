@@ -104,6 +104,16 @@ internal class OppgaveFactoryNyMappingTest {
         }
     }
 
+    @Test
+    fun `AVTALAND_FORESPORSEL_FRA_TRYGDEMYNDIGHET skal ikke brukes`() {
+        val oppgave = oppgaveGosysMapping.finnOppgave(
+            Sakstyper.TRYGDEAVTALE, Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET, Behandlingstyper.HENVENDELSE
+        )
+
+        oppgave.oppgaveBehandlingstema.kode.shouldBe(null)
+    }
+
     @ParameterizedTest(name = "{0}, {1}, {2}, {3} -> {4}")
     @MethodSource("fraRegistretTabell")
     fun `oppgave oppslag skal fungere på med type sed`(
@@ -138,7 +148,7 @@ internal class OppgaveFactoryNyMappingTest {
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
-        expectedOppgaveBehandlingstema: String
+        expectedOppgaveBehandlingstema: String?
     ) {
         val oppgave = oppgaveGosysMapping.finnOppgave(sakstype, sakstema, behandlingstema, Behandlingstyper.HENVENDELSE)
 
@@ -146,6 +156,24 @@ internal class OppgaveFactoryNyMappingTest {
             oppgaveBehandlingstema.kode.shouldBe(expectedOppgaveBehandlingstema)
             oppgaveType.shouldBe(Oppgavetyper.VURD_HENV)
             beskrivelsefelt.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.SED_ELLER_TOMT)
+        }
+    }
+
+    @ParameterizedTest(name = "{0} - {1} - {2} - {3}")
+    @MethodSource("henvendelseVirksomhetPermutasjoner")
+    fun `hånter henvendelse og virksomhet med egne regler`(
+        sakstype: Sakstyper,
+        sakstema: Sakstemaer,
+        behandlingstema: Behandlingstema,
+        behandlingstype: Behandlingstyper
+    ) {
+        val oppgave = oppgaveGosysMapping.finnOppgave(sakstype, sakstema, behandlingstema, behandlingstype)
+
+        oppgave.apply {
+            tema.shouldBe(OppgaveTemaUtleder().utledTema(sakstype, sakstema, behandlingstema))
+            oppgaveBehandlingstema.kode.shouldBe(null)
+            oppgaveType.shouldBe(Oppgavetyper.VURD_HENV)
+            beskrivelsefelt.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.TOMT)
         }
     }
 
@@ -246,6 +274,7 @@ internal class OppgaveFactoryNyMappingTest {
                         val oppgave = oppgaveGosysMapping.finnOppgaveVedBehandlingstypeHenvendelse(
                             sakstyper,
                             behandlingstema,
+                            Behandlingstyper.HENVENDELSE
                         )
                         if (oppgave != null) {
                             yield(
@@ -261,4 +290,21 @@ internal class OppgaveFactoryNyMappingTest {
                 }
             }
         }.toList()
+
+    private fun henvendelseVirksomhetPermutasjoner() =
+        sequence<Arguments> {
+            Sakstyper.values().forEach { sakstyper: Sakstyper ->
+                Sakstemaer.values().forEach { sakstemaer: Sakstemaer ->
+                    yield(
+                        arguments(
+                            sakstyper,
+                            sakstemaer,
+                            Behandlingstema.VIRKSOMHET,
+                            Behandlingstyper.HENVENDELSE,
+                        )
+                    )
+                }
+            }
+        }.toList()
+
 }
