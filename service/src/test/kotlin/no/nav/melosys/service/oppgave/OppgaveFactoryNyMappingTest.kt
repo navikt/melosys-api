@@ -148,7 +148,7 @@ internal class OppgaveFactoryNyMappingTest {
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
-        expectedOppgaveBehandlingstema: String
+        expectedOppgaveBehandlingstema: String?
     ) {
         val oppgave = oppgaveGosysMapping.finnOppgave(sakstype, sakstema, behandlingstema, Behandlingstyper.HENVENDELSE)
 
