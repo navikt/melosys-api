@@ -9,12 +9,15 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 
 internal class OppgaveGosysMapping {
 
+    private val teamaUtleder = OppgaveTemaUtleder()
+
     internal fun finnOppgave(
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper?
     ): Oppgave = finnOppgaveFraTabell(sakstype, sakstema, behandlingstema, behandlingstype)
+        ?: finnOppgaveVedBehandlingstypeHenvendelseOgVirksomhet(sakstype, sakstema, behandlingstema, behandlingstype)
         ?: finnOppgaveVedBehandlingstypeHenvendelse(sakstype, behandlingstema, behandlingstype)
         ?: throw IllegalStateException(
             "Fant ikke oppgave mapping for " +
@@ -31,12 +34,28 @@ internal class OppgaveGosysMapping {
         it.sakstype == sakstype && it.sakstema == sakstema && behandlingstype in it.behandlingstype && behandlingstema in it.behandlingstema
     }?.oppgave
 
+    fun finnOppgaveVedBehandlingstypeHenvendelseOgVirksomhet(
+        sakstype: Sakstyper,
+        sakstema: Sakstemaer,
+        behandlingstema: Behandlingstema,
+        behandlingstype: Behandlingstyper?,
+    ): Oppgave? {
+        if (behandlingstema != Behandlingstema.VIRKSOMHET) return null
+        if (behandlingstype != Behandlingstyper.HENVENDELSE) return null
+        return Oppgave(
+            oppgaveBehandlingstema = OppgaveBehandlingstema.NULL,
+            oppgaveType = Oppgavetyper.VURD_HENV,
+            tema = teamaUtleder.utledTema(sakstype, sakstema, behandlingstema),
+            beskrivelsefelt = Beskrivelsefelt.TOMT
+        )
+    }
+
     fun finnOppgaveVedBehandlingstypeHenvendelse(
         sakstype: Sakstyper,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper?
     ): Oppgave? {
-        if(behandlingstype != Behandlingstyper.HENVENDELSE) return null
+        if (behandlingstype != Behandlingstyper.HENVENDELSE) return null
         return rows.find {
             it.sakstype == sakstype && behandlingstema in it.behandlingstema
         }?.oppgave?.let {

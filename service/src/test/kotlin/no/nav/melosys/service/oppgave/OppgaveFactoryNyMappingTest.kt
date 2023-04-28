@@ -159,6 +159,24 @@ internal class OppgaveFactoryNyMappingTest {
         }
     }
 
+    @ParameterizedTest(name = "{0} - {1} - {2} - {3}")
+    @MethodSource("henvendelseVirksomhetPermutasjoner")
+    fun `hånter henvendelse og virksomhet med egne regler`(
+        sakstype: Sakstyper,
+        sakstema: Sakstemaer,
+        behandlingstema: Behandlingstema,
+        behandlingstype: Behandlingstyper
+    ) {
+        val oppgave = oppgaveGosysMapping.finnOppgave(sakstype, sakstema, behandlingstema, behandlingstype)
+
+        oppgave.apply {
+            tema.shouldBe(OppgaveTemaUtleder().utledTema(sakstype, sakstema, behandlingstema))
+            oppgaveBehandlingstema.kode.shouldBe(null)
+            oppgaveType.shouldBe(Oppgavetyper.VURD_HENV)
+            beskrivelsefelt.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.TOMT)
+        }
+    }
+
     private data class TableRowFlat(
         val sakstype: Sakstyper,
         val sakstema: Sakstemaer,
@@ -272,4 +290,21 @@ internal class OppgaveFactoryNyMappingTest {
                 }
             }
         }.toList()
+
+    private fun henvendelseVirksomhetPermutasjoner() =
+        sequence<Arguments> {
+            Sakstyper.values().forEach { sakstyper: Sakstyper ->
+                Sakstemaer.values().forEach { sakstemaer: Sakstemaer ->
+                    yield(
+                        arguments(
+                            sakstyper,
+                            sakstemaer,
+                            Behandlingstema.VIRKSOMHET,
+                            Behandlingstyper.HENVENDELSE,
+                        )
+                    )
+                }
+            }
+        }.toList()
+
 }

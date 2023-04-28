@@ -21,6 +21,7 @@ class OppgaveFactory(private val unleash: Unleash) {
     private val oppgaveBehandlingstemaUtleder = OppgaveBehandlingstemUnleashAwareUtleder(unleash)
     private val oppgavetypeUtleder = OppgavetypeUnleashAwareUtleder(unleash)
     private val oppgaveBeskrivelseUtleder = OppgaveBeskrivelseUnleashAwareUtleder(unleash)
+    private val temaUtleder = OppgaveTemaUtleder()
 
     fun lagBehandlingsoppgave(
         behandling: Behandling,
@@ -72,8 +73,7 @@ class OppgaveFactory(private val unleash: Unleash) {
     }
 
     fun utledTema(sakstype: Sakstyper, sakstema: Sakstemaer?, behandlingstema: Behandlingstema): Tema {
-        if (brukNyMapping() && sakstype == Sakstyper.FTRL && behandlingstema == Behandlingstema.UNNTAK_MEDLEMSKAP)
-            return Tema.UFM
+        if (brukNyMapping()) return temaUtleder.utledTema(sakstype, sakstema, behandlingstema)
 
         return when (sakstema) {
             Sakstemaer.MEDLEMSKAP_LOVVALG -> Tema.MED
