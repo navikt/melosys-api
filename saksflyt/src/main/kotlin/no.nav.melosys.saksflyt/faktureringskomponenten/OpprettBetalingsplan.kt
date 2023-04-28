@@ -51,7 +51,7 @@ class OpprettBetalingsplan(
 
         val fakturaseriePeriodeDtoListe = fastsattTrygdeavgift.trygdeavgift.map {
             FakturaseriePeriodeDto(
-                BigDecimal(it.trygdeavgiftsbeløpMd),
+                it.trygdeavgiftsbeløpMd.verdi,
                 it.periodeFra,
                 it.periodeTil,
                 "Inntekt: ${it.hentGjeldendeAvgiftspliktigInntekt()}, Dekning: ${it.hentGjeldendeTrygdedekning()}, Sats: ${it.trygdesats} %"

@@ -1,14 +1,16 @@
 package no.nav.melosys.domain.avgift;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import javax.persistence.*;
+
 import no.nav.melosys.domain.Medlemskapsperiode;
+import no.nav.melosys.domain.avgift.penger.Penger;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.exception.FunksjonellException;
-
-import javax.persistence.*;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.time.LocalDate;
+import org.hibernate.annotations.Columns;
+import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "trygdeavgiftsperiode")
@@ -28,8 +30,11 @@ public class Trygdeavgiftsperiode {
     @Column(name = "periode_til", nullable = false)
     private LocalDate periodeTil;
 
-    @Column(name = "trygdeavgift_beloep_md", nullable = false)
-    private BigInteger trygdeavgiftsbeløpMd;
+    @Columns(columns = {
+        @Column(name = "trygdeavgift_beloep_mnd_verdi", nullable = false),
+        @Column(name = "trygdeavgift_beloep_mnd_valuta", nullable = false)})
+    @Type(type = "no.nav.melosys.domain.avgift.penger.TrygdeavgiftsbeloepMndType")
+    private Penger trygdeavgiftsbeløpMd;
 
     @Column(name = "trygdesats", nullable = false)
     private BigDecimal trygdesats;
@@ -66,11 +71,11 @@ public class Trygdeavgiftsperiode {
         this.periodeTil = periodeTil;
     }
 
-    public BigInteger getTrygdeavgiftsbeløpMd() {
+    public Penger getTrygdeavgiftsbeløpMd() {
         return trygdeavgiftsbeløpMd;
     }
 
-    public void setTrygdeavgiftsbeløpMd(BigInteger trygdeavgiftsbeløpMd) {
+    public void setTrygdeavgiftsbeløpMd(Penger trygdeavgiftsbeløpMd) {
         this.trygdeavgiftsbeløpMd = trygdeavgiftsbeløpMd;
     }
 
@@ -113,7 +118,7 @@ public class Trygdeavgiftsperiode {
         return getGjeldendeInntektsperiode.get(0);
     }
 
-    public BigInteger hentGjeldendeAvgiftspliktigInntekt() {
-        return hentGjeldendeInntektsperiode().getAvgiftspliktigInntektMnd();
+    public BigDecimal hentGjeldendeAvgiftspliktigInntekt() {
+        return hentGjeldendeInntektsperiode().getAvgiftspliktigInntektMnd().getVerdi();
     }
 }

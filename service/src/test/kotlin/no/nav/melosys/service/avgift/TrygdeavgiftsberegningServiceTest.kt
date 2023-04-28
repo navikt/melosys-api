@@ -14,6 +14,7 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
+import no.nav.melosys.domain.avgift.penger.Penger
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
@@ -85,7 +86,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                     type = Inntektskildetype.INNTEKT_FRA_UTLANDET
                     isArbeidsgiversavgiftBetalesTilSkatt = false
                     isTrygdeavgiftBetalesTilSkatt = false
-                    avgiftspliktigInntektMnd = BigInteger.valueOf(10000L)
+                    avgiftspliktigInntektMnd = Penger(10000.0)
                 })
             }
         }
@@ -96,7 +97,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                     Trygdeavgiftsperiode(
                         DatoPeriode(FOM, TOM),
                         BigDecimal.valueOf(7.9),
-                        Penger(BigInteger.valueOf(790), NOK)
+                        PengerDto(BigDecimal.valueOf(790), NOK)
                     )
                 )
             )
@@ -108,7 +109,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             .forEach {
                 it.apply {
                     trygdesats = BigDecimal.valueOf(7.9)
-                    trygdeavgiftsbeløpMd = BigInteger.valueOf(790)
+                    trygdeavgiftsbeløpMd = Penger(790.0)
                 }
             }
         verify { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftBeregningsgrunnlag::class)) }

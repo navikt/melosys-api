@@ -1,8 +1,9 @@
 package no.nav.melosys.integrasjon.trygdeavgift.dto
 
+import no.nav.melosys.domain.avgift.penger.Penger
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
-import java.math.BigInteger
+import java.math.BigDecimal
 
 data class Inntektsperiode(
     val periode: DatoPeriode,
@@ -10,11 +11,15 @@ data class Inntektsperiode(
     val skatteplikt: Skatteplikttype,
     val arbeidsgiverBetalerAvgift: Boolean,
     val trygdeavgiftBetalesTilSkatt: Boolean,
-    val månedsbeløp: Penger?
+    val månedsbeløp: PengerDto?
 )
 
-data class Penger(val verdi: BigInteger, var valuta: Valuta = NOK) {
-    constructor(verdi: BigInteger) : this(verdi, NOK)
+data class PengerDto(val verdi: BigDecimal, var valuta: Valuta = NOK) {
+    constructor(verdi: BigDecimal) : this(verdi, NOK)
+    constructor(verdi: BigDecimal, valuta: String) : this(verdi, Valuta(valuta))
+    constructor(penger: Penger) : this(penger.verdi, penger.valuta)
+
+    fun tilPenger() = Penger(verdi, valuta.kode)
 }
 
 data class Valuta(val kode: String, val desimaler: Int = 2)

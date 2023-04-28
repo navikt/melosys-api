@@ -11,15 +11,16 @@ CREATE UNIQUE INDEX idx_trygdeavgiftsgrunnlag_fastsatt_trygdeavgift_unik ON tryg
 
 CREATE TABLE inntektsperiode
 (
-    id                              NUMBER(19)       GENERATED ALWAYS AS IDENTITY,
-    trygdeavgiftsgrunnlag_id        NUMBER(19)       NOT NULL,
-    fom_dato                        DATE             NOT NULL,
-    tom_dato                        DATE             NOT NULL,
-    inntektskilde_type              VARCHAR2(99)     NOT NULL,
-    avgiftspliktig_inntekt_mnd      DECIMAL(12,2),
-    aga_betales_til_skatt           NUMBER(1),
-    trygdeavgift_betales_til_skatt  NUMBER(1),
-    CONSTRAINT pk_inntektsperiode   PRIMARY KEY (id)
+    id                                  NUMBER(19)       GENERATED ALWAYS AS IDENTITY,
+    trygdeavgiftsgrunnlag_id            NUMBER(19)       NOT NULL,
+    fom_dato                            DATE             NOT NULL,
+    tom_dato                            DATE             NOT NULL,
+    inntektskilde_type                  VARCHAR2(99)     NOT NULL,
+    avgiftspliktig_inntekt_mnd_verdi    DECIMAL(12,2),
+    avgiftspliktig_inntekt_mnd_valuta   VARCHAR2(3),
+    aga_betales_til_skatt               NUMBER(1),
+    trygdeavgift_betales_til_skatt      NUMBER(1),
+    CONSTRAINT pk_inntektsperiode       PRIMARY KEY (id)
 );
 
 ALTER TABLE inntektsperiode ADD CONSTRAINT fk_inntektsperiode_trygdeavgiftsgrunnlag FOREIGN KEY (trygdeavgiftsgrunnlag_id) REFERENCES trygdeavgiftsgrunnlag;
@@ -50,13 +51,14 @@ ALTER TABLE trygdeavgift_deprecated RENAME CONSTRAINT pk_trygdeavgift to pk_tryg
 
 CREATE TABLE trygdeavgiftsperiode
 (
-    id                          NUMBER(19)      GENERATED ALWAYS AS IDENTITY,
-    fastsatt_trygdeavgift_id    NUMBER(19)      NOT NULL,
-    periode_fra                 DATE            NOT NULL,
-    periode_til                 DATE            NOT NULL,
-    trygdeavgift_beloep_md      DECIMAL(12,2)   NOT NULL,
-    trygdesats                  DECIMAL(4,2)    NOT NULL,
-    CONSTRAINT pk_trygdeavgiftsperiode PRIMARY KEY (id)
+    id                                  NUMBER(19)      GENERATED ALWAYS AS IDENTITY,
+    fastsatt_trygdeavgift_id            NUMBER(19)      NOT NULL,
+    periode_fra                         DATE            NOT NULL,
+    periode_til                         DATE            NOT NULL,
+    trygdeavgift_beloep_mnd_verdi       DECIMAL(12,2)   NOT NULL,
+    trygdeavgift_beloep_mnd_valuta      VARCHAR2(3)     NOT NULL,
+    trygdesats                          DECIMAL(4,2)    NOT NULL,
+    CONSTRAINT pk_trygdeavgiftsperiode  PRIMARY KEY (id)
 );
 
 ALTER TABLE trygdeavgiftsperiode

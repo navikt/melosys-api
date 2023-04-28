@@ -2,14 +2,13 @@ package no.nav.melosys.integrasjon.trygdeavgift;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 
-import no.nav.melosys.integrasjon.trygdeavgift.dto.Penger;
+import no.nav.melosys.integrasjon.trygdeavgift.dto.PengerDto;
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftBeregningsgrunnlag;
 import no.nav.melosys.integrasjon.trygdeavgift.dto.Trygdeavgiftsperiode;
 import okhttp3.mockwebserver.MockResponse;
@@ -54,7 +53,7 @@ class TrygdeavgiftConsumerTest {
         List<Trygdeavgiftsperiode> response = trygdeavgiftConsumer.beregnTrygdeavgift(a);
         assertThat(response.get(0))
             .extracting(Trygdeavgiftsperiode::getSats, Trygdeavgiftsperiode::getAvgift)
-            .containsExactly(new BigDecimal("21.8"), new Penger(BigInteger.valueOf(21800)));
+            .containsExactly(new BigDecimal("21.8"), new PengerDto(BigDecimal.valueOf(21800)));
     }
 
     private TrygdeavgiftBeregningsgrunnlag lagTrygdeavgiftBeregningsgrunnlag() {

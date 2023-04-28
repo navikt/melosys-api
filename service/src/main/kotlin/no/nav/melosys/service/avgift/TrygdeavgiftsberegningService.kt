@@ -66,7 +66,7 @@ class TrygdeavgiftsberegningService
             this.periodeFra = trygdeavgiftsperiode.periode.fom
             this.periodeTil = trygdeavgiftsperiode.periode.tom
             this.trygdesats = trygdeavgiftsperiode.sats
-            this.trygdeavgiftsbeløpMd = trygdeavgiftsperiode.avgift.verdi
+            this.trygdeavgiftsbeløpMd = trygdeavgiftsperiode.avgift.tilPenger()
             this.fastsattTrygdeavgift = fastsattTrygdeavgift
         }
 

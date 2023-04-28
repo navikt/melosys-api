@@ -4,6 +4,7 @@ import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
+import no.nav.melosys.domain.avgift.penger.Penger
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
@@ -43,7 +44,10 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
             ?: throw FunksjonellException("Noe skjedde ved lagring av trygdeavgiftsgrunnlaget")
     }
 
-    private fun valider(medlemskapsperioder: Collection<Medlemskapsperiode>, request: OppdaterTrygdeavgiftsgrunnlagRequest) {
+    private fun valider(
+        medlemskapsperioder: Collection<Medlemskapsperiode>,
+        request: OppdaterTrygdeavgiftsgrunnlagRequest
+    ) {
         if (medlemskapsperioder.isEmpty()) {
             throw FunksjonellException("Kan ikke oppdatere trygdeavgiftsgrunnlaget før medlemskapsperioder finnes")
         }
@@ -89,7 +93,8 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
                 this.fomDato = fomDato
                 this.tomDato = tomDato
                 this.type = inntektskildeRequest.type
-                this.avgiftspliktigInntektMnd = inntektskildeRequest.avgiftspliktigInntektMnd
+                this.avgiftspliktigInntektMnd =
+                    Penger(inntektskildeRequest.avgiftspliktigInntektMnd.toBigDecimal())
                 this.isArbeidsgiversavgiftBetalesTilSkatt = inntektskildeRequest.arbeidsgiversavgiftBetales
                 this.isTrygdeavgiftBetalesTilSkatt = this.utledTrygdeavgiftBetalesTilSkatt(request.skatteplikttype)
             }

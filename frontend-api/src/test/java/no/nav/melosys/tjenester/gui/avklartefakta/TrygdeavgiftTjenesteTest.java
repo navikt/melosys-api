@@ -9,8 +9,9 @@ import java.util.Set;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge;
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
+import no.nav.melosys.domain.avgift.penger.Penger;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Skatteplikttype;
@@ -55,7 +56,7 @@ class TrygdeavgiftTjenesteTest {
     private static final String BASE_URL = "/api/behandlinger/{behandlingID}/trygdeavgift";
     private static final long BEHANDLINGSRESULTAT_ID = 1;
     private static final Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag = lagTrygdeavgiftsgrunnlag();
-    private static final Set<Trygdeavgift> trygdeavgiftsperioder = lagTrygdeavgiftsperioder();
+    private static final Set<Trygdeavgiftsperiode> trygdeavgiftsperioder = lagTrygdeavgiftsperioder();
 
     @Test
     void hentTrygdeavgiftsgrunnlag() throws Exception {
@@ -64,7 +65,7 @@ class TrygdeavgiftTjenesteTest {
         mockMvc.perform(get(BASE_URL + "/grunnlag", 1L)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(responseBody(objectMapper).containsObjectAsJson(TrygdeavgiftsgrunnlagDto.av(trygdeavgiftsgrunnlag), TrygdeavgiftsgrunnlagDto.class));
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(new TrygdeavgiftsgrunnlagDto(trygdeavgiftsgrunnlag), TrygdeavgiftsgrunnlagDto.class));
     }
 
     @Test
@@ -77,7 +78,7 @@ class TrygdeavgiftTjenesteTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
             .andExpect(status().isOk())
-            .andExpect(responseBody(objectMapper).containsObjectAsJson(TrygdeavgiftsgrunnlagDto.av(trygdeavgiftsgrunnlag), TrygdeavgiftsgrunnlagDto.class));
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(new TrygdeavgiftsgrunnlagDto(trygdeavgiftsgrunnlag), TrygdeavgiftsgrunnlagDto.class));
     }
 
     @Test
@@ -115,7 +116,7 @@ class TrygdeavgiftTjenesteTest {
         trygdeavgift.setPeriodeFra(LocalDate.now());
         trygdeavgift.setPeriodeTil(LocalDate.now().plusDays(10));
         trygdeavgift.setTrygdesats(BigDecimal.valueOf(7.9));
-        trygdeavgift.setTrygdeavgiftsbeløpMd(BigInteger.valueOf(10000));
+        trygdeavgift.setTrygdeavgiftsbeløpMd(new Penger(BigDecimal.valueOf(10000)));
 
         var medlemskapsperiode = new Medlemskapsperiode();
         medlemskapsperiode.setFom(LocalDate.now());

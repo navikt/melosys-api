@@ -12,7 +12,7 @@ data class InntekskildeDto(
     constructor(inntektsperiode: Inntektsperiode) : this(
         inntektsperiode.type,
         inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
-        inntektsperiode.avgiftspliktigInntektMnd.toInt()
+        inntektsperiode.avgiftspliktigInntektMnd.verdi.toInt()
     )
 
     fun tilRequest(): InntektskildeRequest =

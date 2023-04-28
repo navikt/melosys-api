@@ -1,12 +1,14 @@
 package no.nav.melosys.domain.avgift;
 
-import no.nav.melosys.domain.kodeverk.Inntektskildetype;
-import no.nav.melosys.domain.kodeverk.Skatteplikttype;
-
-import javax.persistence.*;
-import java.math.BigInteger;
 import java.time.LocalDate;
 import java.util.List;
+import javax.persistence.*;
+
+import no.nav.melosys.domain.avgift.penger.Penger;
+import no.nav.melosys.domain.kodeverk.Inntektskildetype;
+import no.nav.melosys.domain.kodeverk.Skatteplikttype;
+import org.hibernate.annotations.Columns;
+import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "inntektsperiode")
@@ -29,8 +31,11 @@ public class Inntektsperiode {
     @Enumerated(EnumType.STRING)
     private Inntektskildetype type;
 
-    @Column(name = "avgiftspliktig_inntekt_mnd")
-    private BigInteger avgiftspliktigInntektMnd;
+    @Columns(columns = {
+        @Column(name = "avgiftspliktig_inntekt_mnd_verdi"),
+        @Column(name = "avgiftspliktig_inntekt_mnd_valuta")})
+    @Type(type = "no.nav.melosys.domain.avgift.penger.AvgiftspliktigInntektMndType")
+    private Penger avgiftspliktigInntektMnd;
 
     @Column(name = "aga_betales_til_skatt")
     private boolean arbeidsgiversavgiftBetalesTilSkatt;
@@ -78,11 +83,11 @@ public class Inntektsperiode {
         this.type = inntektskildetype;
     }
 
-    public BigInteger getAvgiftspliktigInntektMnd() {
+    public Penger getAvgiftspliktigInntektMnd() {
         return avgiftspliktigInntektMnd;
     }
 
-    public void setAvgiftspliktigInntektMnd(BigInteger avgiftspliktigInntektMnd) {
+    public void setAvgiftspliktigInntektMnd(Penger avgiftspliktigInntektMnd) {
         this.avgiftspliktigInntektMnd = avgiftspliktigInntektMnd;
     }
 

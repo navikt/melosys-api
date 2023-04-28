@@ -52,7 +52,7 @@ data class TrygdeavgiftBeregningsgrunnlag(
                     Skatteplikttype.SKATTEPLIKTIG, // TODO: Fiks etter avklaring.
                     it.isArbeidsgiversavgiftBetalesTilSkatt,
                     it.isTrygdeavgiftBetalesTilSkatt,
-                    Penger(it.avgiftspliktigInntektMnd),
+                    PengerDto(it.avgiftspliktigInntektMnd),
                 )
             }
 

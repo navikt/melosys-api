@@ -9,8 +9,9 @@ import io.mockk.verify
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.penger.Penger
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
@@ -33,7 +34,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
-import java.math.BigInteger
 import java.time.Instant
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -261,7 +261,7 @@ class OpprettBetalingsplanTest {
         return Trygdeavgiftsperiode().apply {
             periodeFra = LocalDate.of(2023, 1, 1)
             periodeTil = LocalDate.of(2023, 5, 1)
-            trygdeavgiftsbeløpMd = BigInteger.valueOf(5000)
+            trygdeavgiftsbeløpMd = Penger(5000.0)
             trygdesats = BigDecimal(3.5)
             this.fastsattTrygdeavgift = fastsattTrygdeavgift
         }
@@ -271,7 +271,7 @@ class OpprettBetalingsplanTest {
         return Inntektsperiode().apply {
             fomDato = LocalDate.of(2023, 1, 1)
             tomDato = LocalDate.of(2023, 5, 1)
-            avgiftspliktigInntektMnd = BigInteger.valueOf(5000)
+            avgiftspliktigInntektMnd = Penger(5000.0)
         }
     }
 
