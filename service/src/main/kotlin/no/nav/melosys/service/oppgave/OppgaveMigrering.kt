@@ -1,6 +1,5 @@
 package no.nav.melosys.service.oppgave
 
-import GyldigeKombinasjoner
 import mu.KotlinLogging
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Behandling
@@ -14,6 +13,7 @@ import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
 import no.nav.melosys.repository.BehandlingRepositoryForOppgaveMigrering
+import no.nav.melosys.service.lovligekombinasjoner.GyldigeKombinasjoner
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.core.env.Environment
 import org.springframework.scheduling.annotation.Async
