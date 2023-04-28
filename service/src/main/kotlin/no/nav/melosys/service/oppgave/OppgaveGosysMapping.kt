@@ -43,7 +43,7 @@ internal class OppgaveGosysMapping {
         if (behandlingstema != Behandlingstema.VIRKSOMHET) return null
         if (behandlingstype != Behandlingstyper.HENVENDELSE) return null
         return Oppgave(
-            oppgaveBehandlingstema = OppgaveBehandlingstema.NULL,
+            oppgaveBehandlingstema = null,
             oppgaveType = Oppgavetyper.VURD_HENV,
             tema = teamaUtleder.utledTema(sakstype, sakstema, behandlingstema),
             beskrivelsefelt = Beskrivelsefelt.TOMT
@@ -77,7 +77,7 @@ internal class OppgaveGosysMapping {
     }
 
     internal data class Oppgave(
-        val oppgaveBehandlingstema: OppgaveBehandlingstema,
+        val oppgaveBehandlingstema: OppgaveBehandlingstema?,
         val tema: Tema,
         val oppgaveType: Oppgavetyper,
         val beskrivelsefelt: Beskrivelsefelt
@@ -395,7 +395,7 @@ internal class OppgaveGosysMapping {
                 setOf(Behandlingstyper.HENVENDELSE),
                 setOf(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET),
                 Oppgave(
-                    OppgaveBehandlingstema.NULL,
+                    null,
                     Tema.MED,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.TOMT

@@ -111,7 +111,7 @@ internal class OppgaveFactoryNyMappingTest {
             Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET, Behandlingstyper.HENVENDELSE
         )
 
-        oppgave.oppgaveBehandlingstema.kode.shouldBe(null)
+        oppgave.oppgaveBehandlingstema?.kode.shouldBe(null)
     }
 
     @ParameterizedTest(name = "{0}, {1}, {2}, {3} -> {4}")
@@ -153,7 +153,7 @@ internal class OppgaveFactoryNyMappingTest {
         val oppgave = oppgaveGosysMapping.finnOppgave(sakstype, sakstema, behandlingstema, Behandlingstyper.HENVENDELSE)
 
         oppgave.apply {
-            oppgaveBehandlingstema.kode.shouldBe(expectedOppgaveBehandlingstema)
+            oppgaveBehandlingstema?.kode.shouldBe(expectedOppgaveBehandlingstema)
             oppgaveType.shouldBe(Oppgavetyper.VURD_HENV)
             beskrivelsefelt.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.SED_ELLER_TOMT)
         }
@@ -171,7 +171,7 @@ internal class OppgaveFactoryNyMappingTest {
 
         oppgave.apply {
             tema.shouldBe(OppgaveTemaUtleder().utledTema(sakstype, sakstema, behandlingstema))
-            oppgaveBehandlingstema.kode.shouldBe(null)
+            oppgaveBehandlingstema?.kode.shouldBe(null)
             oppgaveType.shouldBe(Oppgavetyper.VURD_HENV)
             beskrivelsefelt.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.TOMT)
         }
@@ -282,7 +282,7 @@ internal class OppgaveFactoryNyMappingTest {
                                     sakstyper,
                                     sakstemaer,
                                     behandlingstema,
-                                    oppgave.oppgaveBehandlingstema.kode
+                                    oppgave.oppgaveBehandlingstema?.kode
                                 )
                             )
                         }

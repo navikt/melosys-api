@@ -24,8 +24,7 @@ public enum OppgaveBehandlingstema {
     EU_EOS_SOKNAD_OM_UNNTAK("ab0491"),
     EU_EOS_FORESPORSEL_FRA_TRYGDEMYNDIGHET("ab0492"),
     AVTALAND_MELDING_OM_UNNTAK("ab0488"),
-    AVTALAND_SOKNAD_OM_UNNTAK("ab0489"),
-    NULL(null);
+    AVTALAND_SOKNAD_OM_UNNTAK("ab0489");
 
     private final String kode;
 

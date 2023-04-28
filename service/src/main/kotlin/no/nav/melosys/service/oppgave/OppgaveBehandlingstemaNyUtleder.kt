@@ -14,7 +14,7 @@ class OppgaveBehandlingstemaNyUtleder : OppgaveBehandlingstemaUtleder {
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper?
-    ): OppgaveBehandlingstema =
+    ): OppgaveBehandlingstema? =
         oppgaveGosysMapping.finnOppgave(sakstype, sakstema, behandlingstema, behandlingstype).oppgaveBehandlingstema
 
 }

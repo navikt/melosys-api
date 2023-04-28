@@ -38,7 +38,7 @@ class OppgaveFactory(private val unleash: Unleash) {
         return Oppgave.Builder()
             .setBehandlesAvApplikasjon(Fagsystem.MELOSYS)
             .setPrioritet(PrioritetType.NORM)
-            .setBehandlingstema(oppgaveBehandlingstema.kode)
+            .setBehandlingstema(oppgaveBehandlingstema?.kode)
             .setBehandlingstype(oppgaveBehandlingstype?.kode)
             .setTema(utledTema(sakstype, sakstema, behandlingstema))
             .setOppgavetype(utledOppgavetype(sakstype, sakstema, behandlingstema, behandlingstype))
@@ -57,7 +57,7 @@ class OppgaveFactory(private val unleash: Unleash) {
 
     fun utledOppgaveBehandlingstema(
         sakstype: Sakstyper, sakstema: Sakstemaer, behandlingstema: Behandlingstema, behandlingstype: Behandlingstyper?
-    ): OppgaveBehandlingstema =
+    ): OppgaveBehandlingstema? =
         oppgaveBehandlingstemaUtleder.utledOppgaveBehandlingstema(
             sakstype, sakstema, behandlingstema, behandlingstype
         )
@@ -95,7 +95,7 @@ class OppgaveFactory(private val unleash: Unleash) {
     }
 
     private fun utledBeskrivelse(
-        oppgaveBehandlingstema: OppgaveBehandlingstema,
+        oppgaveBehandlingstema: OppgaveBehandlingstema?,
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
