@@ -131,7 +131,7 @@ class OppgaveMigrering(
 
     private fun nyOppgaveMapping(sakOgBehandling: SakOgBehandlingDTO): OppgavePart? {
         try {
-            val oppgaveBehandlingstema: OppgaveBehandlingstema = sakOgBehandling.utledOppgaveBehandlingstema()
+            val oppgaveBehandlingstema: OppgaveBehandlingstema? = sakOgBehandling.utledOppgaveBehandlingstema()
             val oppgavetype: Oppgavetyper = sakOgBehandling.utledOppgaveType()
             val beskrivelse: String = sakOgBehandling.utledBeskrivelse(oppgaveBehandlingstema)
             val tema: Tema = sakOgBehandling.utledTema()
@@ -148,7 +148,7 @@ class OppgaveMigrering(
         }
     }
 
-    private fun SakOgBehandlingDTO.utledOppgaveBehandlingstema(): OppgaveBehandlingstema =
+    private fun SakOgBehandlingDTO.utledOppgaveBehandlingstema(): OppgaveBehandlingstema? =
         nyOppgaveFactory.utledOppgaveBehandlingstema(
             sakstype, sakstema, behandlingstema, behandlingstype
         )
@@ -161,7 +161,7 @@ class OppgaveMigrering(
             sakstype, sakstema, behandlingstema
         )
 
-    private fun SakOgBehandlingDTO.utledBeskrivelse(oppgaveBehandlingstema: OppgaveBehandlingstema): String {
+    private fun SakOgBehandlingDTO.utledBeskrivelse(oppgaveBehandlingstema: OppgaveBehandlingstema?): String {
         val hentSedDokument = {
             log.info("Henter sed dokuemnt for: $behandlingID")
             sedDokument(behandlingID)
@@ -244,7 +244,7 @@ class OppgaveMigrering(
                 sb.appendLine("=========== ny ===========")
                 sb.appendLine("type= ${ny.oppgaveType}")
                 sb.appendLine("tema= ${ny.tema}")
-                sb.appendLine("behandlingstema= ${ny.oppgaveBehandlingstema.kode} (${ny.oppgaveBehandlingstema.name})" )
+                sb.appendLine("behandlingstema= ${ny.oppgaveBehandlingstema?.kode} (${ny.oppgaveBehandlingstema?.name})" )
                 sb.appendLine("beskrivelse= ${ny.beskrivelse}")
             }
             sb.appendLine("------------------------------")
@@ -254,7 +254,7 @@ class OppgaveMigrering(
     }
 
     data class OppgavePart(
-        val oppgaveBehandlingstema: OppgaveBehandlingstema,
+        val oppgaveBehandlingstema: OppgaveBehandlingstema?,
         val oppgaveBehandlingstype: OppgaveBehandlingstype?,
         val tema: Tema,
         val oppgaveType: Oppgavetyper,

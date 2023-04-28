@@ -95,7 +95,7 @@ class OppgaveFactory(private val unleash: Unleash) {
     }
 
     internal fun utledBeskrivelse(
-        oppgaveBehandlingstema: OppgaveBehandlingstema,
+        oppgaveBehandlingstema: OppgaveBehandlingstema?,
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
