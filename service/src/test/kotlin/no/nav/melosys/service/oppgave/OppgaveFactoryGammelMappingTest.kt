@@ -570,7 +570,7 @@ class OppgaveFactoryGammelMappingTest {
         sakstemaer: Collection<Sakstemaer>,
         behandlingstyper: Collection<Behandlingstyper>,
         melosysBehandlingstemaer: Collection<Behandlingstema>,
-        expectedBehandlingstema: OppgaveBehandlingstema,
+        expectedBehandlingstema: OppgaveBehandlingstema?,
         expectedBehandlingstype: OppgaveBehandlingstype?,
         expectedTema: Tema,
         expectedOppgavetype: Oppgavetyper,
@@ -602,7 +602,7 @@ class OppgaveFactoryGammelMappingTest {
         sakstema: Sakstemaer,
         behandlingstype: Behandlingstyper,
         melosysBehandlingstema: Behandlingstema,
-        expectedBehandlingstema: OppgaveBehandlingstema,
+        expectedBehandlingstema: OppgaveBehandlingstema?,
         expectedBehandlingstype: OppgaveBehandlingstype?,
         expectedTema: Tema,
         expectedOppgavetype: Oppgavetyper,
@@ -628,7 +628,7 @@ class OppgaveFactoryGammelMappingTest {
                     "\nmelosysBehandlingstema: $melosysBehandlingstema"
         ) {
             withClue("oppgave.behandlingstema") {
-                oppgave.behandlingstema.shouldBe(expectedBehandlingstema.kode)
+                oppgave.behandlingstema.shouldBe(expectedBehandlingstema?.kode)
             }
             withClue("oppgave.behandlingstype") {
                 oppgave.behandlingstype.shouldBe(expectedBehandlingstype?.kode)

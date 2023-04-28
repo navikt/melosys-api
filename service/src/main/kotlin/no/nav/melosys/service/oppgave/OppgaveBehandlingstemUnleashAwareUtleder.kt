@@ -20,7 +20,7 @@ class OppgaveBehandlingstemUnleashAwareUtleder(private val unleash: Unleash) : O
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper?
-    ): OppgaveBehandlingstema =
+    ): OppgaveBehandlingstema? =
         oppgaveBehandlingstemaUtleder.utledOppgaveBehandlingstema(
             sakstype, sakstema, behandlingstema, behandlingstype
         )

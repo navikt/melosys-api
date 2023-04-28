@@ -9,13 +9,16 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 
 internal class OppgaveGosysMapping {
 
+    private val teamaUtleder = OppgaveTemaUtleder()
+
     internal fun finnOppgave(
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper?
     ): Oppgave = finnOppgaveFraTabell(sakstype, sakstema, behandlingstema, behandlingstype)
-        ?: finnOppgaveVedBehandlingstypeHenvendelse(sakstype, behandlingstema)
+        ?: finnOppgaveVedBehandlingstypeHenvendelseOgVirksomhet(sakstype, sakstema, behandlingstema, behandlingstype)
+        ?: finnOppgaveVedBehandlingstypeHenvendelse(sakstype, behandlingstema, behandlingstype)
         ?: throw IllegalStateException(
             "Fant ikke oppgave mapping for " +
                 "sakstype:$sakstype, sakstema:$sakstema, behandlingstema:$behandlingstema, behandlingstype:$behandlingstype"
@@ -31,18 +34,38 @@ internal class OppgaveGosysMapping {
         it.sakstype == sakstype && it.sakstema == sakstema && behandlingstype in it.behandlingstype && behandlingstema in it.behandlingstema
     }?.oppgave
 
+    fun finnOppgaveVedBehandlingstypeHenvendelseOgVirksomhet(
+        sakstype: Sakstyper,
+        sakstema: Sakstemaer,
+        behandlingstema: Behandlingstema,
+        behandlingstype: Behandlingstyper?,
+    ): Oppgave? {
+        if (behandlingstema != Behandlingstema.VIRKSOMHET) return null
+        if (behandlingstype != Behandlingstyper.HENVENDELSE) return null
+        return Oppgave(
+            oppgaveBehandlingstema = null,
+            oppgaveType = Oppgavetyper.VURD_HENV,
+            tema = teamaUtleder.utledTema(sakstype, sakstema, behandlingstema),
+            beskrivelsefelt = Beskrivelsefelt.TOMT
+        )
+    }
+
     fun finnOppgaveVedBehandlingstypeHenvendelse(
         sakstype: Sakstyper,
         behandlingstema: Behandlingstema,
-    ): Oppgave? = rows.find {
-        it.sakstype == sakstype && behandlingstema in it.behandlingstema
-    }?.oppgave?.let {
-        Oppgave(
-            oppgaveBehandlingstema = it.oppgaveBehandlingstema,
-            oppgaveType = Oppgavetyper.VURD_HENV,
-            tema = it.tema,
-            beskrivelsefelt = Beskrivelsefelt.SED_ELLER_TOMT
-        )
+        behandlingstype: Behandlingstyper?
+    ): Oppgave? {
+        if (behandlingstype != Behandlingstyper.HENVENDELSE) return null
+        return rows.find {
+            it.sakstype == sakstype && behandlingstema in it.behandlingstema
+        }?.oppgave?.let {
+            Oppgave(
+                oppgaveBehandlingstema = it.oppgaveBehandlingstema,
+                oppgaveType = Oppgavetyper.VURD_HENV,
+                tema = it.tema,
+                beskrivelsefelt = Beskrivelsefelt.SED_ELLER_TOMT
+            )
+        }
     }
 
 
@@ -54,7 +77,7 @@ internal class OppgaveGosysMapping {
     }
 
     internal data class Oppgave(
-        val oppgaveBehandlingstema: OppgaveBehandlingstema,
+        val oppgaveBehandlingstema: OppgaveBehandlingstema?,
         val tema: Tema,
         val oppgaveType: Oppgavetyper,
         val beskrivelsefelt: Beskrivelsefelt
@@ -372,7 +395,7 @@ internal class OppgaveGosysMapping {
                 setOf(Behandlingstyper.HENVENDELSE),
                 setOf(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET),
                 Oppgave(
-                    OppgaveBehandlingstema.AVTALAND_FORESPORSEL_FRA_TRYGDEMYNDIGHET,
+                    null,
                     Tema.MED,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.TOMT

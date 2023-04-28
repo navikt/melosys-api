@@ -9,7 +9,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 class OppgaveBeskrivelseGammelUtleder : OppgaveBeskrivelseUtleder {
 
     override fun utledBeskrivelse(
-        oppgaveBehandlingstema: OppgaveBehandlingstema,
+        oppgaveBehandlingstema: OppgaveBehandlingstema?,
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
