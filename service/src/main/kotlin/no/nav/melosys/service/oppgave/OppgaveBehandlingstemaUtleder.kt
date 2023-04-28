@@ -9,5 +9,5 @@ interface OppgaveBehandlingstemaUtleder {
 
     fun utledOppgaveBehandlingstema(
         sakstype: Sakstyper, sakstema: Sakstemaer, behandlingstema: Behandlingstema, behandlingstype: Behandlingstyper?
-    ): OppgaveBehandlingstema
+    ): OppgaveBehandlingstema?
 }

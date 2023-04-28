@@ -8,7 +8,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 
 interface OppgaveBeskrivelseUtleder {
     fun utledBeskrivelse(
-        oppgaveBehandlingstema: OppgaveBehandlingstema,
+        oppgaveBehandlingstema: OppgaveBehandlingstema?,
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
