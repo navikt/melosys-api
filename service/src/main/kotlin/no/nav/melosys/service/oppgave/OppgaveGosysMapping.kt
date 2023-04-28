@@ -368,7 +368,7 @@ internal class OppgaveGosysMapping {
             TableRow(
                 Sakstyper.EU_EOS,
                 Sakstemaer.UNNTAK,
-                setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING),
+                setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR),
                 Oppgave(
                     OppgaveBehandlingstema.EU_EOS_SOKNAD_OM_UNNTAK,
@@ -416,7 +416,7 @@ internal class OppgaveGosysMapping {
             TableRow(
                 Sakstyper.TRYGDEAVTALE,
                 Sakstemaer.UNNTAK,
-                setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING),
+                setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL),
                 Oppgave(
                     OppgaveBehandlingstema.AVTALAND_SOKNAD_OM_UNNTAK,
