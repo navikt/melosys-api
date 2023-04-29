@@ -127,18 +127,22 @@ class OppgaveMigrering(
                 if (size > 1) {
                     log.error("fant $size for: ${sak.saksnummer}")
                     sakerMedFlereOppgaver.add("fant $size oppgaver for: ${sak.saksnummer}")
+                    val diff = Diff(sak, first(), nyOppgaveMapping(sak), drop(1))
+                    diffListe.add(diff)
                 }
-            }.firstOrNull()?.let { gammel: Oppgave ->
-                log.info(sak.toString())
-                log.info("oppgave:${gammel.oppgaveId} - beskrivelse:${gammel.beskrivelse}")
-                sakerMedOppgave.add(sak.saksnummer)
+                if (size == 1) {
+                    val oppgave = first()
+                    log.info(sak.toString())
+                    log.info("oppgave:${oppgave.oppgaveId} - beskrivelse:${oppgave.beskrivelse}")
+                    val diff = Diff(sak, oppgave, nyOppgaveMapping(sak))
+                    diffListe.add(diff)
 
-                oppgaveMappingKjørelog.appendLine("$sak")
-                val diff = Diff(sak, gammel, nyOppgaveMapping(sak))
-                diffListe.add(diff)
-                val report = diff.report()
-                oppgaveMappingKjørelog.append(report)
-                antallSakerMigrert++
+                    sakerMedOppgave.add(sak.saksnummer)
+                    oppgaveMappingKjørelog.appendLine("$sak")
+                    oppgaveMappingKjørelog.append(diff.report())
+                    antallSakerMigrert++
+                    // TODO: legg til oppgaveFasade.oppdaterOppgave()
+                }
             }
         }
         log.info("OppgaveMigrering utført!")
@@ -245,14 +249,42 @@ class OppgaveMigrering(
         )
     }
 
-    data class Diff(val sak: SakOgBehandlingDTO, val oppgave: MigreringsOppgave, val ny: OppgavePart) {
-        constructor(sak: SakOgBehandlingDTO, oppgave: Oppgave, ny: OppgavePart) :
-            this(sak, MigreringsOppgave(oppgave), ny)
+    private val Any.toJsonNode: JsonNode
+        get() {
+            return jacksonObjectMapper()
+                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                .registerModule(JavaTimeModule())
+                .valueToTree(this)
+        }
 
+    data class Diff(
+        val sak: SakOgBehandlingDTO,
+        val oppgave: MigreringsOppgave,
+        val ny: OppgavePart,
+        val ekstraMigreringsOppgaver: List<MigreringsOppgave> = listOf()
+    ) {
+        constructor(
+            sak: SakOgBehandlingDTO,
+            oppgave: Oppgave,
+            ny: OppgavePart,
+            ekstraMigreringsOppgaver: List<Oppgave> = listOf()
+        ) :
+            this(sak, MigreringsOppgave(oppgave), ny, ekstraMigreringsOppgaver.map { MigreringsOppgave(it) })
+
+        fun harFeil(): Boolean = ny.harFeil() || ekstraMigreringsOppgaver.isNotEmpty()
+
+
+        fun oppgaver(): List<MigreringsOppgave> = listOf(oppgave) + ekstraMigreringsOppgaver
+
+        //${oppgaver().forEach { it.htmlTableData() }}
         fun htmlTableRow(): String {
+            val forMangeOppgaverStyle =
+                if (ekstraMigreringsOppgaver.isNotEmpty()) {
+                    "style=\"background-color:YELLOW\""
+                } else ""
             return """
-                <tr>
-                    ${sak.htmlTableData()}
+                <tr ${forMangeOppgaverStyle}>
+                    ${sak.htmlTableData(1)}
                     ${oppgave.htmlTableData()}
                     ${ny.htmlTableData()}
                 </tr>
@@ -282,17 +314,7 @@ class OppgaveMigrering(
             sb.appendLine()
             return sb.toString()
         }
-
     }
-
-    private val Any.toJsonNode: JsonNode
-        get() {
-            return jacksonObjectMapper()
-                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                .registerModule(JavaTimeModule())
-                .valueToTree(this)
-        }
-
 
     data class OppgavePart(
         val oppgaveBehandlingstema: OppgaveBehandlingstema?,
@@ -311,6 +333,12 @@ class OppgaveMigrering(
             mappingError = mappingError
         )
 
+        fun harFeil(): Boolean {
+            if (mappingError != null) return true
+            if (styleBeskrivelse() != "") return true
+            return false
+        }
+
         fun htmlTableData(): String {
             if (mappingError != null) {
                 return """
@@ -326,7 +354,7 @@ class OppgaveMigrering(
         }
 
         private fun styleBeskrivelse(): String {
-            if(beskrivelse?.contains("feilet for") == true) {
+            if (beskrivelse?.contains("feilet for") == true) {
                 return """style="background-color:RED""""
             }
             return ""

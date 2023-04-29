@@ -15,14 +15,14 @@ data class SakOgBehandlingDTO(
     val behandlingstema: Behandlingstema,
     val behandlingstatus: Behandlingsstatus
 ) {
-    fun htmlTableData(): String {
+    fun htmlTableData(size: Int): String {
         return """
-            <td>$sakstype</td>
-            <td>$sakstema</td>
-            <td>$behandlingstype</td>
-            <td>$behandlingstema</td>
-            <td>$behandlingstatus</td>
-            <td>$saksnummer ($behandlingID)</td>
+            <td rowspan=$size >$sakstype</td>
+            <td rowspan=$size>$sakstema</td>
+            <td rowspan=$size>$behandlingstype</td>
+            <td rowspan=$size>$behandlingstema</td>
+            <td rowspan=$size>$behandlingstatus</td>
+            <td rowspan=$size>$saksnummer ($behandlingID)</td>
         """.trimIndent()
     }
 

@@ -23,8 +23,7 @@ class OppgaveMigreringTest {
                     { it.sak.behandlingstema },
                     { it.sak.behandlingstatus },
                 )
-            )
-//            .sortedBy { it.sak.sakstype }
+            ).filter { it.harFeil() }
             .joinToString("") { it.htmlTableRow() }
 
         val html = """
@@ -33,7 +32,11 @@ class OppgaveMigreringTest {
                 <body>
                    <table border="1">
                    <tr border="1">
-                    <td colspan=3>hei</td>
+                    <td colspan=4 rowspan=1>hei</td>
+                    <td colspan=4 rowspan=2>hei-2</td>
+                   </tr>
+                   <tr border="1">
+                    <td colspan=4 rowspan=1>hei</td>
                    </tr>
                     $joinToString
                    </table>
