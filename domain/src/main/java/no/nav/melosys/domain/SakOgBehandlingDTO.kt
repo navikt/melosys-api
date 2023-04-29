@@ -15,9 +15,20 @@ data class SakOgBehandlingDTO(
     val behandlingstema: Behandlingstema,
     val behandlingstatus: Behandlingsstatus
 ) {
+    fun htmlTableData(): String {
+        return """
+            <td>$sakstype</td>
+            <td>$sakstema</td>
+            <td>$behandlingstype</td>
+            <td>$behandlingstema</td>
+            <td>$behandlingstatus</td>
+            <td>$saksnummer ($behandlingID)</td>
+        """.trimIndent()
+    }
+
     fun erRedigerbar(): Boolean {
         return erAktiv() && behandlingstatus != Behandlingsstatus.IVERKSETTER_VEDTAK &&
-                !(behandlingstatus == Behandlingsstatus.ANMODNING_UNNTAK_SENDT && behandlingstema != Behandlingstema.IKKE_YRKESAKTIV)
+            !(behandlingstatus == Behandlingsstatus.ANMODNING_UNNTAK_SENDT && behandlingstema != Behandlingstema.IKKE_YRKESAKTIV)
     }
 
     private fun erAktiv(): Boolean {

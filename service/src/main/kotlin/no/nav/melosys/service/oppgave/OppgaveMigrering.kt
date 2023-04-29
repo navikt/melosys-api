@@ -1,14 +1,20 @@
 package no.nav.melosys.service.oppgave
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import mu.KotlinLogging
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Fagsystem
 import no.nav.melosys.domain.SakOgBehandlingDTO
 import no.nav.melosys.domain.Tema
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.oppgave.Oppgave
+import no.nav.melosys.domain.oppgave.PrioritetType
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
@@ -19,7 +25,9 @@ import org.springframework.core.env.Environment
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import java.io.File
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 private val log = KotlinLogging.logger { }
@@ -41,6 +49,7 @@ class OppgaveMigrering(
     private val sakHvorViSkalHaSedMenSomIkkeFinnes = mutableListOf<String>()
     private val sakHvorMappingFeiler = mutableListOf<String>()
     private val oppgaveMappingKjørelog = StringBuilder()
+    private val diffListe = mutableListOf<Diff>()
 
     @Volatile
     private var antallSakerFunnet: Int = 0
@@ -77,6 +86,7 @@ class OppgaveMigrering(
         Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING,
         Behandlingsstatus.IVERKSETTER_VEDTAK,
     )
+
     @Async
     @Synchronized
     fun go(bruker: String?, saksnummer: String?, dryrun: Boolean) {
@@ -85,11 +95,15 @@ class OppgaveMigrering(
         }
     }
 
-    private fun finnSaker(bruker: String?, saksnummer: String?, dryrun: Boolean): MutableCollection<SakOgBehandlingDTO> {
-        if(saksnummer != null) {
+    private fun finnSaker(
+        bruker: String?,
+        saksnummer: String?,
+        dryrun: Boolean
+    ): MutableCollection<SakOgBehandlingDTO> {
+        if (saksnummer != null) {
             return behandlingRepository.finnSak(saksnummer, behandlingsstatuser)
         }
-        if(bruker != null) {
+        if (bruker != null) {
             return behandlingRepository.finnSakerRegistrertAv(bruker, behandlingsstatuser)
         }
         return behandlingRepository.finnSaksOgBehandlingTyperOgTema(behandlingsstatuser)
@@ -120,7 +134,9 @@ class OppgaveMigrering(
                 sakerMedOppgave.add(sak.saksnummer)
 
                 oppgaveMappingKjørelog.appendLine("$sak")
-                val report = Diff(gammel, nyOppgaveMapping(sak)).report()
+                val diff = Diff(sak, gammel, nyOppgaveMapping(sak))
+                diffListe.add(diff)
+                val report = diff.report()
                 oppgaveMappingKjørelog.append(report)
                 antallSakerMigrert++
             }
@@ -214,6 +230,9 @@ class OppgaveMigrering(
             "oppgave-migrering/$profil-${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))}"
         File(timeForRun).mkdirs()
 
+
+        File("$timeForRun/diff.json").writeText(diffListe.toJsonNode.toPrettyString())
+
         File("$timeForRun/status.txt").writeText(status)
         File("$timeForRun/oppgaver.txt").writeText(oppgaveMappingKjørelog.toString())
         File("$timeForRun/saker-med-oppgave.txt").writeText(sakerMedOppgave.joinToString(","))
@@ -225,7 +244,19 @@ class OppgaveMigrering(
         )
     }
 
-    class Diff(private val oppgave: Oppgave, private val ny: OppgavePart?) {
+    data class Diff(val sak: SakOgBehandlingDTO, val oppgave: MigreringsOppgave, val ny: OppgavePart?) {
+        constructor(sak: SakOgBehandlingDTO, oppgave: Oppgave, ny: OppgavePart?) :
+            this(sak, MigreringsOppgave(oppgave), ny)
+
+        fun htmlTableRow(): String {
+            return """
+                <tr>
+                    ${sak.htmlTableData()}
+                    ${oppgave.htmlTableData()}
+                </tr>
+                """.trimIndent()
+        }
+
         fun report(): String {
             val behandlingstema = OppgaveBehandlingstema.values().find { it.kode == oppgave.behandlingstema }
             val sb = StringBuilder()
@@ -244,14 +275,24 @@ class OppgaveMigrering(
                 sb.appendLine("=========== ny ===========")
                 sb.appendLine("type= ${ny.oppgaveType}")
                 sb.appendLine("tema= ${ny.tema}")
-                sb.appendLine("behandlingstema= ${ny.oppgaveBehandlingstema?.kode} (${ny.oppgaveBehandlingstema?.name})" )
+                sb.appendLine("behandlingstema= ${ny.oppgaveBehandlingstema?.kode} (${ny.oppgaveBehandlingstema?.name})")
                 sb.appendLine("beskrivelse= ${ny.beskrivelse}")
             }
             sb.appendLine("------------------------------")
             sb.appendLine()
             return sb.toString()
         }
+
     }
+
+    private val Any.toJsonNode: JsonNode
+        get() {
+            return jacksonObjectMapper()
+                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                .registerModule(JavaTimeModule())
+                .valueToTree(this)
+        }
+
 
     data class OppgavePart(
         val oppgaveBehandlingstema: OppgaveBehandlingstema?,
@@ -260,4 +301,68 @@ class OppgaveMigrering(
         val oppgaveType: Oppgavetyper,
         val beskrivelse: String
     )
+
+    data class MigreringsOppgave(
+        val aktørId: String? = null,
+        val orgnr: String? = null,
+        val behandlingstema: String? = null,
+        val behandlingstype: String? = null,
+        val beskrivelse: String? = null,
+        val behandlesAvApplikasjon: Fagsystem? = null,
+        val opprettetTidspunkt: ZonedDateTime? = null,
+        val fristFerdigstillelse: LocalDate? = null,
+        val journalpostId: String? = null,
+        val oppgaveId: String? = null,
+        val oppgavetype: Oppgavetyper? = null,
+        val prioritet: PrioritetType? = null,
+        val saksnummer: String? = null,
+        val tema: Tema? = null,
+        val temagruppe: String? = null,
+        val tilordnetRessurs: String? = null,
+        val tildeltEnhetsnr: String? = null,
+        val versjon: Int? = null,
+        val aktivDato: LocalDate? = null,
+        val status: String? = null
+    ) {
+        constructor(oppgave: Oppgave) :
+            this(
+                oppgave.aktørId,
+                oppgave.orgnr,
+                oppgave.behandlingstema,
+                oppgave.behandlingstype,
+                oppgave.beskrivelse,
+                oppgave.behandlesAvApplikasjon,
+                oppgave.opprettetTidspunkt,
+                oppgave.fristFerdigstillelse,
+                oppgave.journalpostId,
+                oppgave.oppgaveId,
+                oppgave.oppgavetype,
+                oppgave.prioritet,
+                oppgave.saksnummer,
+                oppgave.tema,
+                oppgave.temagruppe,
+                oppgave.tilordnetRessurs,
+                oppgave.tildeltEnhetsnr,
+                oppgave.versjon,
+                oppgave.aktivDato,
+                oppgave.status
+            )
+//        <td>${oppgave.oppgaveId}</td>
+//        <td>${oppgave.behandlingstype}</td>
+//        <td>${oppgave.opprettetTidspunkt}</td>
+//        <td>${oppgave.fristFerdigstillelse}</td>
+//        <td>${oppgave.aktørId}</td>
+
+        fun htmlTableData(): String {
+            return """
+            <td>$oppgavetype</td>
+            <td>$behandlingstype</td>
+            <td>$behandlingstema</td>
+            <td>$tilordnetRessurs</td>
+            <td>$opprettetTidspunkt</td>
+            <td>$fristFerdigstillelse</td>
+        """.trimIndent()
+        }
+
+    }
 }
