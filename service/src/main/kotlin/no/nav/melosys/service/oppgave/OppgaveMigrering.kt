@@ -245,8 +245,8 @@ class OppgaveMigrering(
         )
     }
 
-    data class Diff(val sak: SakOgBehandlingDTO, val oppgave: MigreringsOppgave, val ny: OppgavePart?) {
-        constructor(sak: SakOgBehandlingDTO, oppgave: Oppgave, ny: OppgavePart?) :
+    data class Diff(val sak: SakOgBehandlingDTO, val oppgave: MigreringsOppgave, val ny: OppgavePart) {
+        constructor(sak: SakOgBehandlingDTO, oppgave: Oppgave, ny: OppgavePart) :
             this(sak, MigreringsOppgave(oppgave), ny)
 
         fun htmlTableRow(): String {
@@ -254,7 +254,7 @@ class OppgaveMigrering(
                 <tr>
                     ${sak.htmlTableData()}
                     ${oppgave.htmlTableData()}
-                    ${ny?.htmlTableData() ?: "<td colspan=4>tom</td>"}
+                    ${ny.htmlTableData()}
                 </tr>
                 """.trimIndent()
         }
@@ -273,13 +273,11 @@ class OppgaveMigrering(
             sb.appendLine("behandlingstema= ${oppgave.behandlingstema} (${behandlingstema?.name})")
             sb.appendLine("beskrivelse= ${oppgave.beskrivelse}")
 
-            if (ny != null) {
-                sb.appendLine("=========== ny ===========")
-                sb.appendLine("type= ${ny.oppgaveType}")
-                sb.appendLine("tema= ${ny.tema}")
-                sb.appendLine("behandlingstema= ${ny.oppgaveBehandlingstema?.kode} (${ny.oppgaveBehandlingstema?.name})")
-                sb.appendLine("beskrivelse= ${ny.beskrivelse}")
-            }
+            sb.appendLine("=========== ny ===========")
+            sb.appendLine("type= ${ny.oppgaveType}")
+            sb.appendLine("tema= ${ny.tema}")
+            sb.appendLine("behandlingstema= ${ny.oppgaveBehandlingstema?.kode} (${ny.oppgaveBehandlingstema?.name})")
+            sb.appendLine("beskrivelse= ${ny.beskrivelse}")
             sb.appendLine("------------------------------")
             sb.appendLine()
             return sb.toString()
@@ -314,12 +312,24 @@ class OppgaveMigrering(
         )
 
         fun htmlTableData(): String {
+            if (mappingError != null) {
+                return """
+                    <td colspan=4 style="background-color:RED" >${mappingError}</td>
+                """.trimIndent()
+            }
             return """
-            <td  style="background-color:LIGHTBLUE" title=${oppgaveBehandlingstema?.name}>${oppgaveBehandlingstema?.kode}</td>
+            <td style="background-color:LIGHTBLUE" title=${oppgaveBehandlingstema?.name}>${oppgaveBehandlingstema?.kode}</td>
             <td>$tema</td>
             <td>$oppgaveType</td>
-            <td>$beskrivelse</td>
+            <td ${styleBeskrivelse()}>$beskrivelse</td>
         """.trimIndent()
+        }
+
+        private fun styleBeskrivelse(): String {
+            if(beskrivelse?.contains("feilet for") == true) {
+                return """style="background-color:RED""""
+            }
+            return ""
         }
     }
 
