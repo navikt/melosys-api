@@ -283,17 +283,12 @@ class OppgaveMigrering(
             return """
                 <tr ${forMangeOppgaverStyle}>
                     ${sak.htmlTableData(oppgaver.size)}
+                    ${ny.htmlTableData(oppgaver.size)}
                 </tr>
-                """.trimIndent() + oppgaver.joinToString("\n") {
-                """
-                    <tr>${it.htmlTableData()}</tr>
-                """
-            }
-//            + """
-//                <tr>${ny.htmlTableData(oppgaver.size)}</tr>
-//            """.trimIndent()
-//            ${oppgave.htmlTableData()}
-//            ${ny.htmlTableData()}
+                """.trimIndent() +
+                oppgaver.joinToString("\n") {
+                    """<tr>${it.htmlTableData()}</tr>""".trimIndent()
+                }
         }
 
         fun report(): String {
@@ -345,14 +340,14 @@ class OppgaveMigrering(
         }
 
         fun htmlTableData(count: Int): String {
-            val rowspan = if (count > 0) "rowspan=${count+1}" else ""
+            val rowspan = if (count > 0) "rowspan=${count + 1}" else ""
             if (mappingError != null) {
                 return """
                     <td colspan=4 $rowspan style="background-color:RED" >${mappingError}</td>
                 """.trimIndent()
             }
             return """
-            <td  style="background-color:LIGHTBLUE" title=${oppgaveBehandlingstema?.name}>${oppgaveBehandlingstema?.kode}</td>
+            <td $rowspan style="background-color:LIGHTBLUE" title=${oppgaveBehandlingstema?.name}>${oppgaveBehandlingstema?.kode}</td>
             <td $rowspan>$tema</td>
             <td $rowspan>$oppgaveType</td>
             <td $rowspan ${styleBeskrivelse()}>$beskrivelse</td>
