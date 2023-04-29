@@ -145,7 +145,7 @@ class OppgaveMigrering(
         lagRapport()
     }
 
-    private fun nyOppgaveMapping(sakOgBehandling: SakOgBehandlingDTO): OppgavePart? {
+    private fun nyOppgaveMapping(sakOgBehandling: SakOgBehandlingDTO): OppgavePart {
         try {
             val oppgaveBehandlingstema: OppgaveBehandlingstema? = sakOgBehandling.utledOppgaveBehandlingstema()
             val oppgavetype: Oppgavetyper = sakOgBehandling.utledOppgaveType()
@@ -159,8 +159,9 @@ class OppgaveMigrering(
                 sakOgBehandling.behandlingstype,
                 sakOgBehandling.behandlingstema
             )
-            sakHvorMappingFeiler.add("${sakOgBehandling.saksnummer}: gyldige:${gyldige.size}  ${e.message}")
-            return null
+            val mappingError = "${sakOgBehandling.saksnummer}: gyldige:${gyldige.size}  ${e.message}"
+            sakHvorMappingFeiler.add(mappingError)
+            return OppgavePart(mappingError)
         }
     }
 
@@ -253,6 +254,7 @@ class OppgaveMigrering(
                 <tr>
                     ${sak.htmlTableData()}
                     ${oppgave.htmlTableData()}
+                    ${ny?.htmlTableData() ?: "<td colspan=4>tom</td>"}
                 </tr>
                 """.trimIndent()
         }
@@ -297,10 +299,29 @@ class OppgaveMigrering(
     data class OppgavePart(
         val oppgaveBehandlingstema: OppgaveBehandlingstema?,
         val oppgaveBehandlingstype: OppgaveBehandlingstype?,
-        val tema: Tema,
-        val oppgaveType: Oppgavetyper,
-        val beskrivelse: String
-    )
+        val tema: Tema?,
+        val oppgaveType: Oppgavetyper?,
+        val beskrivelse: String?,
+        val mappingError: String? = null
+    ) {
+        constructor(mappingError: String?) : this(
+            null,
+            null,
+            null,
+            null,
+            null,
+            mappingError = mappingError
+        )
+
+        fun htmlTableData(): String {
+            return """
+            <td  style="background-color:LIGHTBLUE" title=${oppgaveBehandlingstema?.name}>${oppgaveBehandlingstema?.kode}</td>
+            <td>$tema</td>
+            <td>$oppgaveType</td>
+            <td>$beskrivelse</td>
+        """.trimIndent()
+        }
+    }
 
     data class MigreringsOppgave(
         val aktørId: String? = null,
@@ -347,15 +368,10 @@ class OppgaveMigrering(
                 oppgave.aktivDato,
                 oppgave.status
             )
-//        <td>${oppgave.oppgaveId}</td>
-//        <td>${oppgave.behandlingstype}</td>
-//        <td>${oppgave.opprettetTidspunkt}</td>
-//        <td>${oppgave.fristFerdigstillelse}</td>
-//        <td>${oppgave.aktørId}</td>
 
         fun htmlTableData(): String {
             return """
-            <td>$oppgavetype</td>
+            <td  style="background-color:LIGHTGREEN">$oppgavetype</td>
             <td>$behandlingstype</td>
             <td>$behandlingstema</td>
             <td>$tilordnetRessurs</td>

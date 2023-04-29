@@ -32,7 +32,7 @@ class OppgaveMigreringTest {
             <html>
                 <body>
                    <table border="1">
-                   <tr>
+                   <tr border="1">
                     <td colspan=3>hei</td>
                    </tr>
                     $joinToString
