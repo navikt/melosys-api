@@ -15,14 +15,15 @@ data class SakOgBehandlingDTO(
     val behandlingstema: Behandlingstema,
     val behandlingstatus: Behandlingsstatus
 ) {
-    fun htmlTableData(size: Int): String {
+    fun htmlTableData(count: Int): String {
+        val rowspan = if (count > 0) "rowspan=${count+1}" else ""
         return """
-            <td rowspan=$size >$sakstype</td>
-            <td rowspan=$size>$sakstema</td>
-            <td rowspan=$size>$behandlingstype</td>
-            <td rowspan=$size>$behandlingstema</td>
-            <td rowspan=$size>$behandlingstatus</td>
-            <td rowspan=$size>$saksnummer ($behandlingID)</td>
+            <td $rowspan>$sakstype</td>
+            <td $rowspan>$sakstema</td>
+            <td $rowspan>$behandlingstype</td>
+            <td $rowspan>$behandlingstema</td>
+            <td $rowspan>$behandlingstatus</td>
+            <td $rowspan>$saksnummer ($behandlingID)</td>
         """.trimIndent()
     }
 
