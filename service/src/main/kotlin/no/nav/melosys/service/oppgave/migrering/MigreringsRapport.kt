@@ -92,7 +92,7 @@ class MigreringsRapport(private val environment: Environment) {
             "oppgave-migrering/$profil-${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))}"
         File(timeForRun).mkdirs()
 
-        File("$timeForRun/diff.json").writeText(migreringsSakListe.toJsonNode.toPrettyString())
+        File("$timeForRun/diff.json").writeText(migreringsSakListeSomJsonString())
 
         File("$timeForRun/status.txt").writeText(status)
         File("$timeForRun/saker-mangler-oppgave.txt").writeText(sakerManglerOppgave.joinToString(","))
@@ -102,6 +102,8 @@ class MigreringsRapport(private val environment: Environment) {
             sakHvorViSkalHaSedMenSomIkkeFinnes.joinToString("\n")
         )
     }
+
+    fun migreringsSakListeSomJsonString() : String = migreringsSakListe.toJsonNode.toPrettyString()
 
     private val Any.toJsonNode: JsonNode
         get() {

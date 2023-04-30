@@ -43,8 +43,8 @@ class OppgaveMigreringAdminTjeneste(
     }
 
     @GetMapping("/jsonrapport", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun jsonrapport(): ResponseEntity<List<MigreringsSak>> {
-        return ResponseEntity(migreringsRapport.migreringsSakListe, HttpStatus.OK)
+    fun jsonrapport(): ResponseEntity<String> {
+        return ResponseEntity(migreringsRapport.migreringsSakListeSomJsonString(), HttpStatus.OK)
     }
 
     @GetMapping("rapport", produces = [MediaType.TEXT_HTML_VALUE])
