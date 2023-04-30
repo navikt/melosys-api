@@ -45,7 +45,7 @@ class OppgaveMigrering(
     private val sakerMedFlereOppgaver = mutableListOf<String>()
     private val sakHvorViSkalHaSedMenSomIkkeFinnes = mutableListOf<String>()
     private val sakHvorMappingFeiler = mutableListOf<String>()
-    val migreringsInfoListe = mutableListOf<MigreringsInfo>()
+    val migreringsSakListe = mutableListOf<MigreringsSak>()
 
     @Volatile
     private var antallSakerFunnet: Int = 0
@@ -111,8 +111,8 @@ class OppgaveMigrering(
             antallSakerProssessert++
             oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(sak.saksnummer).apply {
                 // TODO: legg til oppgaveFasade.oppdaterOppgave()
-                val migreringsInfo = MigreringsInfo(sak, this, nyOppgaveMapping(sak))
-                migreringsInfoListe.add(migreringsInfo)
+                val migreringsSak = MigreringsSak(sak, this, nyOppgaveMapping(sak))
+                migreringsSakListe.add(migreringsSak)
                 if (size == 0) {
                     harIkkeÅpenOppgave++
                     sakerManglerOppgave.add(sak.saksnummer)
@@ -218,7 +218,7 @@ class OppgaveMigrering(
         File(timeForRun).mkdirs()
 
 
-        File("$timeForRun/diff.json").writeText(migreringsInfoListe.toJsonNode.toPrettyString())
+        File("$timeForRun/diff.json").writeText(migreringsSakListe.toJsonNode.toPrettyString())
 
         File("$timeForRun/status.txt").writeText(status)
         File("$timeForRun/saker-med-oppgave.txt").writeText(sakerMedOppgave.joinToString(","))

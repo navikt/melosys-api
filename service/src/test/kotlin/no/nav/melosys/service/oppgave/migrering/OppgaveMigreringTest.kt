@@ -18,7 +18,7 @@ class OppgaveMigreringTest {
 
     @Test
     fun test() {
-        val migreringsSaker: List<MigreringsInfo> = hentMigreringsSaker("/Users/rune/div/diff-q2.json")
+        val migreringsSaker: List<MigreringsSak> = hentMigreringsSaker("/Users/rune/div/diff-q2.json")
 
         val migreringsSakerHtml = migreringsSaker
             .sortedWith(
@@ -47,19 +47,19 @@ class OppgaveMigreringTest {
         File("/Users/rune/div/diff.html").writeText(html)
     }
 
-    private fun hentMigreringsSaker(fileName: String): List<MigreringsInfo> {
+    private fun hentMigreringsSaker(fileName: String): List<MigreringsSak> {
         val json = File(fileName).readText()
         val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
-        val migreringsInfos: List<MigreringsInfo> =
+        val migreringsSaks: List<MigreringsSak> =
             mapper.readValue(json, object : TypeReference<List<MigreringsInfoForLesing>>() {})
                 .map { it.tilMigreringsInfo() }
-        return migreringsInfos
+        return migreringsSaks
     }
 
     data class MigreringsInfoForLesing(
         val sak: SakOgBehandlingDTO, val oppgaver: List<MigreringsOppgave>, val ny: OppgaveOppdatering,
     ) {
-        fun tilMigreringsInfo(): MigreringsInfo = MigreringsInfo(sak, oppgaver.map { it.tilOppgave() }, ny)
+        fun tilMigreringsInfo(): MigreringsSak = MigreringsSak(sak, oppgaver.map { it.tilOppgave() }, ny)
 
         data class MigreringsOppgave(
             val aktørId: String? = null,

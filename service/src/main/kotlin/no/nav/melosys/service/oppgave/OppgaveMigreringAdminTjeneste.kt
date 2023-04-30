@@ -2,7 +2,7 @@ package no.nav.melosys.service.oppgave
 
 import mu.KotlinLogging
 import no.nav.melosys.service.AdminTjeneste
-import no.nav.melosys.service.oppgave.migrering.MigreringsInfo
+import no.nav.melosys.service.oppgave.migrering.MigreringsSak
 import no.nav.melosys.service.oppgave.migrering.OppgaveMigrering
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.beans.factory.annotation.Value
@@ -39,8 +39,8 @@ class OppgaveMigreringAdminTjeneste(
         return ResponseEntity<Map<String, Any>>(oppgaveMigrering.status(), HttpStatus.OK)
     }
     @GetMapping("/migreringsinfo")
-    fun migreringsinfo(): ResponseEntity<List<MigreringsInfo>> {
-        return ResponseEntity<List<MigreringsInfo>>(oppgaveMigrering.migreringsInfoListe, HttpStatus.OK)
+    fun migreringsinfo(): ResponseEntity<List<MigreringsSak>> {
+        return ResponseEntity<List<MigreringsSak>>(oppgaveMigrering.migreringsSakListe, HttpStatus.OK)
     }
 
     override fun getApiKey(): String {

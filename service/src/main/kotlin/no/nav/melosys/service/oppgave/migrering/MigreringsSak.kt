@@ -3,7 +3,7 @@ package no.nav.melosys.service.oppgave.migrering
 import no.nav.melosys.domain.SakOgBehandlingDTO
 import no.nav.melosys.domain.oppgave.Oppgave
 
-data class MigreringsInfo(
+data class MigreringsSak(
     val sak: SakOgBehandlingDTO,
     val oppgaver: List<Oppgave>,
     val ny: OppgaveOppdatering,
