@@ -25,14 +25,19 @@ data class MigreringsSak(
                 """<tr>${it.htmlTableData()}</tr>""".trimIndent()
             }
     }
+
     private fun Oppgave.htmlTableData(): String {
-        return """
-            <td  style="background-color:LIGHTBLUE">$oppgavetype</td>
-            <td>$behandlingstype</td>
-            <td>$behandlingstema</td>
-            <td>$tilordnetRessurs</td>
-            <td>$opprettetTidspunkt</td>
-            <td>$fristFerdigstillelse</td>
-        """.trimIndent()
+        return listOf<String?>(
+            behandlingstema,
+            tema.kode,
+            oppgavetype.kode,
+            behandlingstype,
+            beskrivelse,
+            tilordnetRessurs,
+            opprettetTidspunkt.toString(),
+            fristFerdigstillelse.toString()
+        ).joinToString("\n") {
+            """<td  style="background-color:LIGHTBLUE">$it</td>"""
+        }
     }
 }
