@@ -27,26 +27,11 @@ data class OppgaveOppdatering(
         return beskrivelseInneholderErrorMessage()
     }
 
-    fun htmlTableData(count: Int): String {
-        val rowspan = if (count > 0) "rowspan=${count + 1}" else ""
-        if (mappingError != null) {
-            return """
-                    <td colspan=4 $rowspan style="background-color:RED" >${mappingError}</td>
-                """.trimIndent()
-        }
-        return """
-            <td $rowspan style="background-color:LIGHTGREEN" title=${oppgaveBehandlingstema?.name}>${oppgaveBehandlingstema?.kode}</td>
-            <td $rowspan style="background-color:LIGHTGREEN">$tema</td>
-            <td $rowspan style="background-color:LIGHTGREEN">$oppgaveType</td>
-            <td $rowspan ${styleBeskrivelse()}>$beskrivelse</td>
-        """.trimIndent()
-    }
-
-    private fun styleBeskrivelse(): String {
+    internal fun styleBeskrivelse(): String {
         if (beskrivelseInneholderErrorMessage()) {
             return """style="background-color:RED""""
         }
         return """style="background-color:LIGHTGREEN""""
     }
-    private fun beskrivelseInneholderErrorMessage() = beskrivelse?.contains("feilet for") == true
+    internal fun beskrivelseInneholderErrorMessage() = beskrivelse?.contains("feilet for") == true
 }

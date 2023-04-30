@@ -29,7 +29,8 @@ class OppgaveMigreringTest {
                     { it.sak.behandlingstema },
                     { it.sak.behandlingstatus },
                 )
-            ).filter { it.harFeil() }
+            )
+            .filter { it.harFeil() || it.teamErForsjellig() || it.oppgavetypeErForsjellig() }
             .filter { it.oppgaver.isNotEmpty() }
             .joinToString("") { it.htmlTableRow() }
 
@@ -48,15 +49,13 @@ class OppgaveMigreringTest {
     }
 
     private fun hentMigreringsSaker(fileName: String): List<MigreringsSak> {
-        val json = File(fileName).readText()
-        val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
-        val migreringsSaks: List<MigreringsSak> =
-            mapper.readValue(json, object : TypeReference<List<MigreringsInfoForLesing>>() {})
-                .map { it.tilMigreringsInfo() }
-        return migreringsSaks
+        return jacksonObjectMapper()
+            .registerModule(JavaTimeModule())
+            .readValue(File(fileName), object : TypeReference<List<MigreringsInfoForLesing>>() {})
+            .map { it.tilMigreringsInfo() }
     }
 
-    data class MigreringsInfoForLesing(
+    private data class MigreringsInfoForLesing(
         val sak: SakOgBehandlingDTO, val oppgaver: List<MigreringsOppgave>, val ny: OppgaveOppdatering,
     ) {
         fun tilMigreringsInfo(): MigreringsSak = MigreringsSak(sak, oppgaver.map { it.tilOppgave() }, ny)
