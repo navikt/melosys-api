@@ -45,8 +45,7 @@ class OppgaveMigrering(
     private val sakerMedFlereOppgaver = mutableListOf<String>()
     private val sakHvorViSkalHaSedMenSomIkkeFinnes = mutableListOf<String>()
     private val sakHvorMappingFeiler = mutableListOf<String>()
-    private val oppgaveMappingKjørelog = StringBuilder()
-    private val migreringsInfoListe = mutableListOf<MigreringsInfo>()
+    val migreringsInfoListe = mutableListOf<MigreringsInfo>()
 
     @Volatile
     private var antallSakerFunnet: Int = 0
@@ -72,11 +71,6 @@ class OppgaveMigrering(
             "harIkkeÅpenOppgave" to harIkkeÅpenOppgave,
         )
     }
-
-    fun sakerMedOppgave(): String = oppgaveMappingKjørelog.toString()
-    fun sakerMedFlereOppgaver(): String = sakerMedFlereOppgaver.joinToString("\n")
-    fun sakHvorMappingFeiler(): String = sakHvorMappingFeiler.joinToString("\n")
-    fun sakHvorViSkalHaSedMenSomIkkeFinnes(): String = sakHvorViSkalHaSedMenSomIkkeFinnes.joinToString("\n")
 
     private val behandlingsstatuser = listOf(
         Behandlingsstatus.AVSLUTTET,
@@ -116,29 +110,20 @@ class OppgaveMigrering(
         }.forEach { sak ->
             antallSakerProssessert++
             oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(sak.saksnummer).apply {
+                // TODO: legg til oppgaveFasade.oppdaterOppgave()
+                val migreringsInfo = MigreringsInfo(sak, this, nyOppgaveMapping(sak))
+                migreringsInfoListe.add(migreringsInfo)
                 if (size == 0) {
-                    log.warn("${sak.saksnummer} har ikke åpen oppgagave")
                     harIkkeÅpenOppgave++
                     sakerManglerOppgave.add(sak.saksnummer)
                 }
                 if (size > 1) {
-                    log.error("fant $size for: ${sak.saksnummer}")
+                    log.warn("fant $size for: ${sak.saksnummer}")
                     sakerMedFlereOppgaver.add("fant $size oppgaver for: ${sak.saksnummer}")
-                    val migreringsInfo = MigreringsInfo(sak, first(), nyOppgaveMapping(sak), drop(1))
-                    migreringsInfoListe.add(migreringsInfo)
                 }
                 if (size == 1) {
-                    val oppgave = first()
-                    log.info(sak.toString())
-                    log.info("oppgave:${oppgave.oppgaveId} - beskrivelse:${oppgave.beskrivelse}")
-                    val migreringsInfo = MigreringsInfo(sak, oppgave, nyOppgaveMapping(sak))
-                    migreringsInfoListe.add(migreringsInfo)
-
                     sakerMedOppgave.add(sak.saksnummer)
-                    oppgaveMappingKjørelog.appendLine("$sak")
-                    oppgaveMappingKjørelog.append(migreringsInfo.report())
                     antallSakerMigrert++
-                    // TODO: legg til oppgaveFasade.oppdaterOppgave()
                 }
             }
         }
@@ -225,7 +210,7 @@ class OppgaveMigrering(
     }
 
     private fun saveStatusFiles(status: String) {
-        val profil = environment.getActiveProfiles().first()
+        val profil = environment.activeProfiles.first()
         log.info("Profile:$profil")
         if (profil !in listOf("local-mock", "local-q1", "local-q2")) return // kun lag profiler ved lokal kjøring
         val timeForRun =
@@ -236,7 +221,6 @@ class OppgaveMigrering(
         File("$timeForRun/diff.json").writeText(migreringsInfoListe.toJsonNode.toPrettyString())
 
         File("$timeForRun/status.txt").writeText(status)
-        File("$timeForRun/oppgaver.txt").writeText(oppgaveMappingKjørelog.toString())
         File("$timeForRun/saker-med-oppgave.txt").writeText(sakerMedOppgave.joinToString(","))
         File("$timeForRun/saker-mangler-oppgave.txt").writeText(sakerManglerOppgave.joinToString(","))
         File("$timeForRun/saker-med-flere-oppgave.txt").writeText(sakerMedFlereOppgaver.joinToString("\n"))

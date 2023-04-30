@@ -54,6 +54,29 @@ data class MigreringsOppgave(
             oppgave.status
         )
 
+    fun tilOppgave(): Oppgave = Oppgave.Builder()
+        .setOppgaveId(oppgaveId)
+        .setBehandlesAvApplikasjon(behandlesAvApplikasjon)
+        .setSaksnummer(saksnummer)
+        .setBeskrivelse(beskrivelse)
+        .setOpprettetTidspunkt(opprettetTidspunkt)
+        .setFristFerdigstillelse(fristFerdigstillelse)
+        .setTema(tema)
+        .setOppgavetype(oppgavetype)
+        .setPrioritet(prioritet)
+        .setJournalpostId(journalpostId)
+        .setTilordnetRessurs(tilordnetRessurs)
+        .setVersjon(versjon!!)
+        .setAktørId(aktørId)
+        .setOrgnr(orgnr)
+        .setBehandlingstema(behandlingstema)
+        .setBehandlingstype(behandlingstype)
+        .setTemagruppe(temagruppe)
+        .setTildeltEnhetsnr(tildeltEnhetsnr)
+        .setAktivDato(aktivDato)
+        .setStatus(status)
+        .build()
+
     fun htmlTableData(): String {
         return """
             <td  style="background-color:LIGHTGREEN">$oppgavetype</td>

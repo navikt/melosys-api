@@ -2,29 +2,17 @@ package no.nav.melosys.service.oppgave.migrering
 
 import no.nav.melosys.domain.SakOgBehandlingDTO
 import no.nav.melosys.domain.oppgave.Oppgave
-import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
 
 data class MigreringsInfo(
     val sak: SakOgBehandlingDTO,
-    val oppgave: MigreringsOppgave,
+    val oppgaver: List<Oppgave>,
     val ny: OppgaveOppdatering,
-    val ekstraMigreringsOppgaver: List<MigreringsOppgave> = listOf()
 ) {
-    constructor(
-        sak: SakOgBehandlingDTO,
-        oppgave: Oppgave,
-        ny: OppgaveOppdatering,
-        ekstraMigreringsOppgaver: List<Oppgave> = listOf()
-    ) :
-        this(sak, MigreringsOppgave(oppgave), ny, ekstraMigreringsOppgaver.map { MigreringsOppgave(it) })
 
-    fun harFeil(): Boolean = ny.harFeil() || ekstraMigreringsOppgaver.isNotEmpty()
-
-    val oppgaver
-        get() = listOf(oppgave) + ekstraMigreringsOppgaver
+    fun harFeil(): Boolean = ny.harFeil() || oppgaver.size != 1
 
     fun htmlTableRow(): String {
-        val forMangeOppgaverStyle = if (ekstraMigreringsOppgaver.isNotEmpty()) {
+        val forMangeOppgaverStyle = if (oppgaver.size > 1) {
             "style=\"background-color:YELLOW\""
         } else ""
         return """
@@ -37,28 +25,14 @@ data class MigreringsInfo(
                 """<tr>${it.htmlTableData()}</tr>""".trimIndent()
             }
     }
-
-    fun report(): String {
-        val behandlingstema = OppgaveBehandlingstema.values().find { it.kode == oppgave.behandlingstema }
-        val sb = StringBuilder()
-        sb.appendLine("oppgaveId= ${oppgave.oppgaveId}")
-        sb.appendLine("behandlingstype= ${oppgave.behandlingstype}")
-        sb.appendLine("opprettetTidspunkt= ${oppgave.opprettetTidspunkt}")
-        sb.appendLine("fristFerdigstillelse= ${oppgave.fristFerdigstillelse}")
-        sb.appendLine("aktørId= ${oppgave.aktørId}")
-        sb.appendLine("=========== gammel ===========")
-        sb.appendLine("type= ${oppgave.oppgavetype}")
-        sb.appendLine("tema= ${oppgave.tema}")
-        sb.appendLine("behandlingstema= ${oppgave.behandlingstema} (${behandlingstema?.name})")
-        sb.appendLine("beskrivelse= ${oppgave.beskrivelse}")
-
-        sb.appendLine("=========== ny ===========")
-        sb.appendLine("type= ${ny.oppgaveType}")
-        sb.appendLine("tema= ${ny.tema}")
-        sb.appendLine("behandlingstema= ${ny.oppgaveBehandlingstema?.kode} (${ny.oppgaveBehandlingstema?.name})")
-        sb.appendLine("beskrivelse= ${ny.beskrivelse}")
-        sb.appendLine("------------------------------")
-        sb.appendLine()
-        return sb.toString()
+    private fun Oppgave.htmlTableData(): String {
+        return """
+            <td  style="background-color:LIGHTGREEN">$oppgavetype</td>
+            <td>$behandlingstype</td>
+            <td>$behandlingstema</td>
+            <td>$tilordnetRessurs</td>
+            <td>$opprettetTidspunkt</td>
+            <td>$fristFerdigstillelse</td>
+        """.trimIndent()
     }
 }

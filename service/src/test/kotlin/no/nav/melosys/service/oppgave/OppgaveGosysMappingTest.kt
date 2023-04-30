@@ -31,14 +31,4 @@ class OppgaveGosysMappingTest {
         }
     }
 
-    @Test
-    fun test() {
-        GyldigeKombinasjoner.rows.forEach { row ->
-            val oppgave =
-                oppgaveGosysMapping.finnOppgave(row.sakstype, row.sakstema, row.behandlingstema, row.behandlingstype)
-
-            println("${row.sakstype}, ${row.sakstema}, ${row.behandlingstype}, ${row.behandlingstema} -> $oppgave")
-        }
-    }
-
 }
