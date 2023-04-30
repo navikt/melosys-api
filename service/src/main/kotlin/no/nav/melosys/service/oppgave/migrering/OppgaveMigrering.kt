@@ -7,30 +7,24 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import mu.KotlinLogging
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Fagsystem
 import no.nav.melosys.domain.SakOgBehandlingDTO
 import no.nav.melosys.domain.Tema
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
-import no.nav.melosys.domain.oppgave.Oppgave
-import no.nav.melosys.domain.oppgave.PrioritetType
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
 import no.nav.melosys.repository.BehandlingRepositoryForOppgaveMigrering
 import no.nav.melosys.service.lovligekombinasjoner.GyldigeKombinasjoner
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
-import no.nav.melosys.service.oppgave.OppgaveBehandlingstype
 import no.nav.melosys.service.oppgave.OppgaveFactory
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.core.env.Environment
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
 import java.io.File
-import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 private val log = KotlinLogging.logger { }
@@ -52,7 +46,7 @@ class OppgaveMigrering(
     private val sakHvorViSkalHaSedMenSomIkkeFinnes = mutableListOf<String>()
     private val sakHvorMappingFeiler = mutableListOf<String>()
     private val oppgaveMappingKjørelog = StringBuilder()
-    private val diffListe = mutableListOf<Diff>()
+    private val migreringsInfoListe = mutableListOf<MigreringsInfo>()
 
     @Volatile
     private var antallSakerFunnet: Int = 0
@@ -130,19 +124,19 @@ class OppgaveMigrering(
                 if (size > 1) {
                     log.error("fant $size for: ${sak.saksnummer}")
                     sakerMedFlereOppgaver.add("fant $size oppgaver for: ${sak.saksnummer}")
-                    val diff = Diff(sak, first(), nyOppgaveMapping(sak), drop(1))
-                    diffListe.add(diff)
+                    val migreringsInfo = MigreringsInfo(sak, first(), nyOppgaveMapping(sak), drop(1))
+                    migreringsInfoListe.add(migreringsInfo)
                 }
                 if (size == 1) {
                     val oppgave = first()
                     log.info(sak.toString())
                     log.info("oppgave:${oppgave.oppgaveId} - beskrivelse:${oppgave.beskrivelse}")
-                    val diff = Diff(sak, oppgave, nyOppgaveMapping(sak))
-                    diffListe.add(diff)
+                    val migreringsInfo = MigreringsInfo(sak, oppgave, nyOppgaveMapping(sak))
+                    migreringsInfoListe.add(migreringsInfo)
 
                     sakerMedOppgave.add(sak.saksnummer)
                     oppgaveMappingKjørelog.appendLine("$sak")
-                    oppgaveMappingKjørelog.append(diff.report())
+                    oppgaveMappingKjørelog.append(migreringsInfo.report())
                     antallSakerMigrert++
                     // TODO: legg til oppgaveFasade.oppdaterOppgave()
                 }
@@ -152,13 +146,13 @@ class OppgaveMigrering(
         lagRapport()
     }
 
-    private fun nyOppgaveMapping(sakOgBehandling: SakOgBehandlingDTO): OppgavePart {
+    private fun nyOppgaveMapping(sakOgBehandling: SakOgBehandlingDTO): OppgaveOppdatering {
         try {
             val oppgaveBehandlingstema: OppgaveBehandlingstema? = sakOgBehandling.utledOppgaveBehandlingstema()
             val oppgavetype: Oppgavetyper = sakOgBehandling.utledOppgaveType()
             val beskrivelse: String = sakOgBehandling.utledBeskrivelse(oppgaveBehandlingstema)
             val tema: Tema = sakOgBehandling.utledTema()
-            return OppgavePart(oppgaveBehandlingstema, null, tema, oppgavetype, beskrivelse)
+            return OppgaveOppdatering(oppgaveBehandlingstema, null, tema, oppgavetype, beskrivelse)
         } catch (e: Exception) {
             val gyldige = GyldigeKombinasjoner.finnGyldige(
                 sakOgBehandling.sakstype,
@@ -168,7 +162,7 @@ class OppgaveMigrering(
             )
             val mappingError = "${sakOgBehandling.saksnummer}: gyldige:${gyldige.size}  ${e.message}"
             sakHvorMappingFeiler.add(mappingError)
-            return OppgavePart(mappingError)
+            return OppgaveOppdatering(mappingError)
         }
     }
 
@@ -239,7 +233,7 @@ class OppgaveMigrering(
         File(timeForRun).mkdirs()
 
 
-        File("$timeForRun/diff.json").writeText(diffListe.toJsonNode.toPrettyString())
+        File("$timeForRun/diff.json").writeText(migreringsInfoListe.toJsonNode.toPrettyString())
 
         File("$timeForRun/status.txt").writeText(status)
         File("$timeForRun/oppgaver.txt").writeText(oppgaveMappingKjørelog.toString())
@@ -259,168 +253,4 @@ class OppgaveMigrering(
                 .registerModule(JavaTimeModule())
                 .valueToTree(this)
         }
-
-    data class Diff(
-        val sak: SakOgBehandlingDTO,
-        val oppgave: MigreringsOppgave,
-        val ny: OppgavePart,
-        val ekstraMigreringsOppgaver: List<MigreringsOppgave> = listOf()
-    ) {
-        constructor(
-            sak: SakOgBehandlingDTO,
-            oppgave: Oppgave,
-            ny: OppgavePart,
-            ekstraMigreringsOppgaver: List<Oppgave> = listOf()
-        ) :
-            this(sak, MigreringsOppgave(oppgave), ny, ekstraMigreringsOppgaver.map { MigreringsOppgave(it) })
-
-        fun harFeil(): Boolean = ny.harFeil() || ekstraMigreringsOppgaver.isNotEmpty()
-
-        val oppgaver
-            get() = listOf(oppgave) + ekstraMigreringsOppgaver
-
-        fun htmlTableRow(): String {
-            val forMangeOppgaverStyle = if (ekstraMigreringsOppgaver.isNotEmpty()) {
-                "style=\"background-color:YELLOW\""
-            } else ""
-            return """
-                <tr ${forMangeOppgaverStyle}>
-                    ${sak.htmlTableData(oppgaver.size)}
-                    ${ny.htmlTableData(oppgaver.size)}
-                </tr>
-                """.trimIndent() +
-                oppgaver.joinToString("\n") {
-                    """<tr>${it.htmlTableData()}</tr>""".trimIndent()
-                }
-        }
-
-        fun report(): String {
-            val behandlingstema = OppgaveBehandlingstema.values().find { it.kode == oppgave.behandlingstema }
-            val sb = StringBuilder()
-            sb.appendLine("oppgaveId= ${oppgave.oppgaveId}")
-            sb.appendLine("behandlingstype= ${oppgave.behandlingstype}")
-            sb.appendLine("opprettetTidspunkt= ${oppgave.opprettetTidspunkt}")
-            sb.appendLine("fristFerdigstillelse= ${oppgave.fristFerdigstillelse}")
-            sb.appendLine("aktørId= ${oppgave.aktørId}")
-            sb.appendLine("=========== gammel ===========")
-            sb.appendLine("type= ${oppgave.oppgavetype}")
-            sb.appendLine("tema= ${oppgave.tema}")
-            sb.appendLine("behandlingstema= ${oppgave.behandlingstema} (${behandlingstema?.name})")
-            sb.appendLine("beskrivelse= ${oppgave.beskrivelse}")
-
-            sb.appendLine("=========== ny ===========")
-            sb.appendLine("type= ${ny.oppgaveType}")
-            sb.appendLine("tema= ${ny.tema}")
-            sb.appendLine("behandlingstema= ${ny.oppgaveBehandlingstema?.kode} (${ny.oppgaveBehandlingstema?.name})")
-            sb.appendLine("beskrivelse= ${ny.beskrivelse}")
-            sb.appendLine("------------------------------")
-            sb.appendLine()
-            return sb.toString()
-        }
-    }
-
-    data class OppgavePart(
-        val oppgaveBehandlingstema: OppgaveBehandlingstema?,
-        val oppgaveBehandlingstype: OppgaveBehandlingstype?,
-        val tema: Tema?,
-        val oppgaveType: Oppgavetyper?,
-        val beskrivelse: String?,
-        val mappingError: String? = null
-    ) {
-        constructor(mappingError: String?) : this(
-            null,
-            null,
-            null,
-            null,
-            null,
-            mappingError = mappingError
-        )
-
-        fun harFeil(): Boolean {
-            if (mappingError != null) return true
-            if (styleBeskrivelse() != "") return true
-            return false
-        }
-
-        fun htmlTableData(count: Int): String {
-            val rowspan = if (count > 0) "rowspan=${count + 1}" else ""
-            if (mappingError != null) {
-                return """
-                    <td colspan=4 $rowspan style="background-color:RED" >${mappingError}</td>
-                """.trimIndent()
-            }
-            return """
-            <td $rowspan style="background-color:LIGHTBLUE" title=${oppgaveBehandlingstema?.name}>${oppgaveBehandlingstema?.kode}</td>
-            <td $rowspan>$tema</td>
-            <td $rowspan>$oppgaveType</td>
-            <td $rowspan ${styleBeskrivelse()}>$beskrivelse</td>
-        """.trimIndent()
-        }
-
-        private fun styleBeskrivelse(): String {
-            if (beskrivelse?.contains("feilet for") == true) {
-                return """style="background-color:RED""""
-            }
-            return ""
-        }
-    }
-
-    data class MigreringsOppgave(
-        val aktørId: String? = null,
-        val orgnr: String? = null,
-        val behandlingstema: String? = null,
-        val behandlingstype: String? = null,
-        val beskrivelse: String? = null,
-        val behandlesAvApplikasjon: Fagsystem? = null,
-        val opprettetTidspunkt: ZonedDateTime? = null,
-        val fristFerdigstillelse: LocalDate? = null,
-        val journalpostId: String? = null,
-        val oppgaveId: String? = null,
-        val oppgavetype: Oppgavetyper? = null,
-        val prioritet: PrioritetType? = null,
-        val saksnummer: String? = null,
-        val tema: Tema? = null,
-        val temagruppe: String? = null,
-        val tilordnetRessurs: String? = null,
-        val tildeltEnhetsnr: String? = null,
-        val versjon: Int? = null,
-        val aktivDato: LocalDate? = null,
-        val status: String? = null
-    ) {
-        constructor(oppgave: Oppgave) :
-            this(
-                oppgave.aktørId,
-                oppgave.orgnr,
-                oppgave.behandlingstema,
-                oppgave.behandlingstype,
-                oppgave.beskrivelse,
-                oppgave.behandlesAvApplikasjon,
-                oppgave.opprettetTidspunkt,
-                oppgave.fristFerdigstillelse,
-                oppgave.journalpostId,
-                oppgave.oppgaveId,
-                oppgave.oppgavetype,
-                oppgave.prioritet,
-                oppgave.saksnummer,
-                oppgave.tema,
-                oppgave.temagruppe,
-                oppgave.tilordnetRessurs,
-                oppgave.tildeltEnhetsnr,
-                oppgave.versjon,
-                oppgave.aktivDato,
-                oppgave.status
-            )
-
-        fun htmlTableData(): String {
-            return """
-            <td  style="background-color:LIGHTGREEN">$oppgavetype</td>
-            <td>$behandlingstype</td>
-            <td>$behandlingstema</td>
-            <td>$tilordnetRessurs</td>
-            <td>$opprettetTidspunkt</td>
-            <td>$fristFerdigstillelse</td>
-        """.trimIndent()
-        }
-
-    }
 }

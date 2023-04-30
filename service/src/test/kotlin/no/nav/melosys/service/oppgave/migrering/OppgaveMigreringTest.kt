@@ -11,10 +11,10 @@ class OppgaveMigreringTest {
     fun test() {
         val json = File("/Users/rune/div/diff-q2.json").readText()
         val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
-        val diffs: List<OppgaveMigrering.Diff> =
-            mapper.readValue(json, object : TypeReference<List<OppgaveMigrering.Diff>>() {})
+        val migreringsInfos: List<MigreringsInfo> =
+            mapper.readValue(json, object : TypeReference<List<MigreringsInfo>>() {})
 
-        val joinToString = diffs
+        val joinToString = migreringsInfos
             .sortedWith(
                 compareBy(
                     { it.sak.sakstype },
