@@ -16,15 +16,21 @@ data class SakOgBehandlingDTO(
     val behandlingstatus: Behandlingsstatus
 ) {
     fun htmlTableData(count: Int): String {
-        val rowspan = if (count > 0) "rowspan=${count+1}" else ""
+        val rowspan = if (count > 0) "rowspan=${count + 1}" else ""
         return """
             <td $rowspan>$sakstype</td>
-            <td $rowspan>$sakstema</td>
-            <td $rowspan>$behandlingstype</td>
-            <td $rowspan>$behandlingstema</td>
-            <td $rowspan>$behandlingstatus</td>
-            <td $rowspan>$saksnummer ($behandlingID)</td>
+            <td $rowspan>${splitLong(sakstema.name)}</td>
+            <td $rowspan>${splitLong(behandlingstype.name)}</td>
+            <td $rowspan>${splitLong(behandlingstema.name)}</td>
+            <td $rowspan>${splitLong(behandlingstatus.name)}</td>
+            <td $rowspan title=$behandlingID>$saksnummer</td>
         """.trimIndent()
+    }
+
+    fun splitLong(name: String, max: Int = 10): String {
+        if (name.length > max)
+            return name.split("_").joinToString("</br>")
+        return name
     }
 
     fun erRedigerbar(): Boolean {
