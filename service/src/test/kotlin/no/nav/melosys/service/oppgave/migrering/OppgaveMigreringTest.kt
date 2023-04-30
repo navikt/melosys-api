@@ -1,4 +1,4 @@
-package no.nav.melosys.service.oppgave
+package no.nav.melosys.service.oppgave.migrering
 
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule

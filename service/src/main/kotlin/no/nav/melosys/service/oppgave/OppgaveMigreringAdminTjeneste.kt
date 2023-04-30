@@ -2,6 +2,7 @@ package no.nav.melosys.service.oppgave
 
 import mu.KotlinLogging
 import no.nav.melosys.service.AdminTjeneste
+import no.nav.melosys.service.oppgave.migrering.OppgaveMigrering
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus

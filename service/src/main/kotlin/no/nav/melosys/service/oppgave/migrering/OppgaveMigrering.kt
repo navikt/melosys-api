@@ -1,4 +1,4 @@
-package no.nav.melosys.service.oppgave
+package no.nav.melosys.service.oppgave.migrering
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -20,6 +20,9 @@ import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
 import no.nav.melosys.repository.BehandlingRepositoryForOppgaveMigrering
 import no.nav.melosys.service.lovligekombinasjoner.GyldigeKombinasjoner
+import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
+import no.nav.melosys.service.oppgave.OppgaveBehandlingstype
+import no.nav.melosys.service.oppgave.OppgaveFactory
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.core.env.Environment
 import org.springframework.scheduling.annotation.Async
