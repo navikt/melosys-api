@@ -27,7 +27,7 @@ data class MigreringsSak(
     }
     private fun Oppgave.htmlTableData(): String {
         return """
-            <td  style="background-color:LIGHTGREEN">$oppgavetype</td>
+            <td  style="background-color:LIGHTBLUE">$oppgavetype</td>
             <td>$behandlingstype</td>
             <td>$behandlingstema</td>
             <td>$tilordnetRessurs</td>

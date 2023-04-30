@@ -24,8 +24,7 @@ data class OppgaveOppdatering(
 
     fun harFeil(): Boolean {
         if (mappingError != null) return true
-        if (styleBeskrivelse() != "") return true
-        return false
+        return beskrivelseInneholderErrorMessage()
     }
 
     fun htmlTableData(count: Int): String {
@@ -36,17 +35,18 @@ data class OppgaveOppdatering(
                 """.trimIndent()
         }
         return """
-            <td $rowspan style="background-color:LIGHTBLUE" title=${oppgaveBehandlingstema?.name}>${oppgaveBehandlingstema?.kode}</td>
-            <td $rowspan>$tema</td>
-            <td $rowspan>$oppgaveType</td>
+            <td $rowspan style="background-color:LIGHTGREEN" title=${oppgaveBehandlingstema?.name}>${oppgaveBehandlingstema?.kode}</td>
+            <td $rowspan style="background-color:LIGHTGREEN">$tema</td>
+            <td $rowspan style="background-color:LIGHTGREEN">$oppgaveType</td>
             <td $rowspan ${styleBeskrivelse()}>$beskrivelse</td>
         """.trimIndent()
     }
 
     private fun styleBeskrivelse(): String {
-        if (beskrivelse?.contains("feilet for") == true) {
+        if (beskrivelseInneholderErrorMessage()) {
             return """style="background-color:RED""""
         }
-        return ""
+        return """style="background-color:LIGHTGREEN""""
     }
+    private fun beskrivelseInneholderErrorMessage() = beskrivelse?.contains("feilet for") == true
 }
