@@ -109,19 +109,19 @@ class OppgaveMigrering(
             antallSakerErRedigerbar = size
         }.forEach { sak ->
             antallSakerProssessert++
-            oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(sak.saksnummer).apply {
+            oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(sak.saksnummer).let { oppgaver ->
                 // TODO: legg til oppgaveFasade.oppdaterOppgave()
-                val migreringsSak = MigreringsSak(sak, this, nyOppgaveMapping(sak))
+                val migreringsSak = MigreringsSak(sak, oppgaver, nyOppgaveMapping(sak))
                 migreringsSakListe.add(migreringsSak)
-                if (size == 0) {
+                if (oppgaver.size == 0) {
                     harIkkeÅpenOppgave++
                     sakerManglerOppgave.add(sak.saksnummer)
                 }
-                if (size > 1) {
-                    log.warn("fant $size for: ${sak.saksnummer}")
-                    sakerMedFlereOppgaver.add("fant $size oppgaver for: ${sak.saksnummer}")
+                if (oppgaver.size > 1) {
+                    log.warn("fant ${oppgaver.size} for: ${sak.saksnummer}")
+                    sakerMedFlereOppgaver.add("fant ${oppgaver.size} oppgaver for: ${sak.saksnummer}")
                 }
-                if (size == 1) {
+                if (oppgaver.size == 1) {
                     sakerMedOppgave.add(sak.saksnummer)
                     antallSakerMigrert++
                 }
