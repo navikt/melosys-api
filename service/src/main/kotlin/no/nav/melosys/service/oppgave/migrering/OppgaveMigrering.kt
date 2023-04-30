@@ -1,9 +1,5 @@
 package no.nav.melosys.service.oppgave.migrering
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import mu.KotlinLogging
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Behandling
@@ -20,12 +16,8 @@ import no.nav.melosys.service.lovligekombinasjoner.GyldigeKombinasjoner
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
 import no.nav.melosys.service.oppgave.OppgaveFactory
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
-import org.springframework.core.env.Environment
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
-import java.io.File
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 private val log = KotlinLogging.logger { }
 
@@ -33,43 +25,15 @@ private val log = KotlinLogging.logger { }
 class OppgaveMigrering(
     private val behandlingRepository: BehandlingRepositoryForOppgaveMigrering,
     private val oppgaveFasade: OppgaveFasade,
-    private val environment: Environment
+    private val migreringsRapport: MigreringsRapport,
 ) {
 
     private val nyOppgaveFactory = OppgaveFactory(FakeUnleash().apply {
         enable(ToggleName.NY_GOSYS_MAPPING)
     })
 
-    private val sakerManglerOppgave = mutableListOf<String>()
-    private val sakerMedOppgave = mutableListOf<String>()
-    private val sakerMedFlereOppgaver = mutableListOf<String>()
-    private val sakHvorViSkalHaSedMenSomIkkeFinnes = mutableListOf<String>()
-    private val sakHvorMappingFeiler = mutableListOf<String>()
-    val migreringsSakListe = mutableListOf<MigreringsSak>()
-
-    @Volatile
-    private var antallSakerFunnet: Int = 0
-
-    @Volatile
-    private var antallSakerErRedigerbar: Int = 0
-
-    @Volatile
-    private var antallSakerProssessert: Int = 0
-
-    @Volatile
-    private var antallSakerMigrert: Int = 0
-
-    @Volatile
-    private var harIkkeÅpenOppgave: Int = 0
-
     fun status(): Map<String, Any> {
-        return mapOf(
-            "antallSakerFunnet" to antallSakerFunnet,
-            "antallSakerErRedigerbar" to antallSakerErRedigerbar,
-            "antallSakerProssessert" to antallSakerProssessert,
-            "antallSakerMigrert" to antallSakerMigrert,
-            "harIkkeÅpenOppgave" to harIkkeÅpenOppgave,
-        )
+        return migreringsRapport.status()
     }
 
     private val behandlingsstatuser = listOf(
@@ -104,26 +68,23 @@ class OppgaveMigrering(
         log.info("Utfører OppgaveMigrering")
         finnSaker(bruker, saksnummer, dryrun).apply {
             log.info("size før erRedigerbar: $size")
-            antallSakerFunnet = size
+            migreringsRapport.antallSakerFunnet = size
         }.filter { it.erRedigerbar() }.sortedBy { it.saksnummer }.apply {
-            antallSakerErRedigerbar = size
+            migreringsRapport.antallSakerErRedigerbar = size
         }.forEach { sak ->
-            antallSakerProssessert++
+            migreringsRapport.antallSakerProssessert++
             oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(sak.saksnummer).let { oppgaver ->
                 // TODO: legg til oppgaveFasade.oppdaterOppgave()
                 val migreringsSak = MigreringsSak(sak, oppgaver, nyOppgaveMapping(sak))
-                migreringsSakListe.add(migreringsSak)
+                migreringsRapport.migrertSak(migreringsSak)
                 if (oppgaver.size == 0) {
-                    harIkkeÅpenOppgave++
-                    sakerManglerOppgave.add(sak.saksnummer)
+                    migreringsRapport.sakManglerOppgave(sak.saksnummer)
                 }
                 if (oppgaver.size > 1) {
-                    log.warn("fant ${oppgaver.size} for: ${sak.saksnummer}")
-                    sakerMedFlereOppgaver.add("fant ${oppgaver.size} oppgaver for: ${sak.saksnummer}")
+                    migreringsRapport.sakerMedFlereOppgaver("fant ${oppgaver.size} oppgaver for: ${sak.saksnummer}")
                 }
                 if (oppgaver.size == 1) {
-                    sakerMedOppgave.add(sak.saksnummer)
-                    antallSakerMigrert++
+                    migreringsRapport.sakMedOppgave(migreringsSak)
                 }
             }
         }
@@ -146,7 +107,7 @@ class OppgaveMigrering(
                 sakOgBehandling.behandlingstema
             )
             val mappingError = "${sakOgBehandling.saksnummer}: gyldige:${gyldige.size}  ${e.message}"
-            sakHvorMappingFeiler.add(mappingError)
+            migreringsRapport.mappingFeiler(mappingError)
             return OppgaveOppdatering(mappingError)
         }
     }
@@ -180,7 +141,7 @@ class OppgaveMigrering(
         } catch (e: Exception) {
             val message = e.message ?: "utledBeskrivelse feilet "
             val msg = "$message feilet for $saksnummer, behandlingID:$behandlingID"
-            sakHvorViSkalHaSedMenSomIkkeFinnes.add(msg)
+            migreringsRapport.finnesIkkeSedForSak(msg)
             return msg
         }
     }
@@ -193,48 +154,8 @@ class OppgaveMigrering(
         .findWithSaksopplysningerById(behandlingID) ?: throw TekniskException("Fant ikke behandling for $behandlingID")
 
     private fun lagRapport() {
-        val status = statusEtterKjøring()
+        val status = migreringsRapport.statusEtterKjøring()
         log.info(status)
-        saveStatusFiles(status)
+        migreringsRapport.saveStatusFiles(status)
     }
-
-    private fun statusEtterKjøring(): String {
-        val sb = StringBuilder()
-        sb.appendLine()
-        sb.appendLine("sakerMedOppgave: ${sakerMedOppgave.size}")
-        sb.appendLine("sakerManglerOppgave: ${sakerManglerOppgave.size}")
-        sb.appendLine("sakerMedFlereOppgaver: ${sakerMedFlereOppgaver.size}")
-        sb.appendLine("sakHvorMappingFeiler: ${sakHvorMappingFeiler.size}")
-        sb.appendLine("sakHvorViSkalHaSedMenSomIkkeFinnes: ${sakHvorViSkalHaSedMenSomIkkeFinnes.size}")
-        return sb.toString()
-    }
-
-    private fun saveStatusFiles(status: String) {
-        val profil = environment.activeProfiles.first()
-        log.info("Profile:$profil")
-        if (profil !in listOf("local-mock", "local-q1", "local-q2")) return // kun lag profiler ved lokal kjøring
-        val timeForRun =
-            "oppgave-migrering/$profil-${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))}"
-        File(timeForRun).mkdirs()
-
-
-        File("$timeForRun/diff.json").writeText(migreringsSakListe.toJsonNode.toPrettyString())
-
-        File("$timeForRun/status.txt").writeText(status)
-        File("$timeForRun/saker-med-oppgave.txt").writeText(sakerMedOppgave.joinToString(","))
-        File("$timeForRun/saker-mangler-oppgave.txt").writeText(sakerManglerOppgave.joinToString(","))
-        File("$timeForRun/saker-med-flere-oppgave.txt").writeText(sakerMedFlereOppgaver.joinToString("\n"))
-        File("$timeForRun/sak-hvor-mapping-feiler.txt").writeText(sakHvorMappingFeiler.joinToString("\n"))
-        File("$timeForRun/sak-hvor-vi-skal-ha-sed-men-som-ikke-finnes.txt").writeText(
-            sakHvorViSkalHaSedMenSomIkkeFinnes.joinToString("\n")
-        )
-    }
-
-    private val Any.toJsonNode: JsonNode
-        get() {
-            return jacksonObjectMapper()
-                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                .registerModule(JavaTimeModule())
-                .valueToTree(this)
-        }
 }

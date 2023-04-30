@@ -2,11 +2,13 @@ package no.nav.melosys.service.oppgave
 
 import mu.KotlinLogging
 import no.nav.melosys.service.AdminTjeneste
+import no.nav.melosys.service.oppgave.migrering.MigreringsRapport
 import no.nav.melosys.service.oppgave.migrering.MigreringsSak
 import no.nav.melosys.service.oppgave.migrering.OppgaveMigrering
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -17,6 +19,7 @@ private val log = KotlinLogging.logger { }
 @RequestMapping("/admin/oppgaver/migrering")
 class OppgaveMigreringAdminTjeneste(
     private val oppgaveMigrering: OppgaveMigrering,
+    private val migreringsRapport: MigreringsRapport,
     @Value("\${Melosys-admin.apikey}") private val apiKey: String
 ) : AdminTjeneste {
     @PostMapping("")
@@ -36,12 +39,43 @@ class OppgaveMigreringAdminTjeneste(
 
     @GetMapping("/status")
     fun status(): ResponseEntity<Map<String, Any>> {
-        return ResponseEntity<Map<String, Any>>(oppgaveMigrering.status(), HttpStatus.OK)
+        return ResponseEntity<Map<String, Any>>(migreringsRapport.status(), HttpStatus.OK)
     }
-    @GetMapping("/migreringsinfo")
-    fun migreringsinfo(): ResponseEntity<List<MigreringsSak>> {
-        return ResponseEntity<List<MigreringsSak>>(oppgaveMigrering.migreringsSakListe, HttpStatus.OK)
+
+    @GetMapping("/jsonrapport", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun jsonrapport(): ResponseEntity<List<MigreringsSak>> {
+        return ResponseEntity(migreringsRapport.migreringsSakListe, HttpStatus.OK)
     }
+
+    @GetMapping("rapport", produces = [MediaType.TEXT_HTML_VALUE])
+    fun rapport(@RequestParam(required = false, defaultValue = "false") alle: Boolean): ResponseEntity<String> {
+        val migreringsSakerHtml = migreringsRapport.migreringsSakListe
+            .sortedWith(
+                compareBy(
+                    { it.sak.sakstype },
+                    { it.sak.sakstema },
+                    { it.sak.behandlingstype },
+                    { it.sak.behandlingstema },
+                    { it.sak.behandlingstatus },
+                )
+            ).filter { alle || it.harFeil() }
+            .filter { it.oppgaver.isNotEmpty()  }
+            .joinToString("") { it.htmlTableRow() }
+
+        val html = """
+            <!DOCTYPE html>
+            <html>
+                <body>
+                   <table border="1">
+                    $migreringsSakerHtml
+                   </table>
+                </body>
+            </html>
+            """
+
+        return ResponseEntity(html, HttpStatus.OK)
+    }
+
 
     override fun getApiKey(): String {
         return apiKey
