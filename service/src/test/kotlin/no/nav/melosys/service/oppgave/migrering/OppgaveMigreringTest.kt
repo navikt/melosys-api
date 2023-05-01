@@ -37,8 +37,57 @@ class OppgaveMigreringTest {
         val html = """
             <!DOCTYPE html>
             <html>
+            <style>
+                table, th, td {
+                    border: 1px solid black;
+                    border-collapse: collapse;
+                }
+                .sak {
+                    background-color:#fff0b3
+                }
+                .ny {
+                    background-color:#abf5d1
+                }
+                .oppgave {
+                    background-color:#ffebe6
+                }
+                .feil {
+                    background-color: #ff5656
+                }
+                .sakfeil {
+                    background-color: #ffceb3
+                }
+                .forskjell {
+                    background-color: rgba(255, 33, 0, 0.61)
+                }
+            </style>
                 <body>
-                   <table border="1">
+                   <table>
+                        <tr>
+                            <th class="sak" colspan=6>melosys sak</th>
+                            <th class="ny" colspan=4>migrert oppgave</th>
+                            <th class="oppgave" colspan=8>orginal oppgave</th>
+                        </tr>
+                        <tr>
+                            <th class="sak">sakstype</th>
+                            <th class="sak">sakstema</th>
+                            <th class="sak">behandlingstype</th>
+                            <th class="sak">behandlingstema</th>
+                            <th class="sak">behandlingstatus</th>
+                            <th class="sak">saksnummer</th>
+                            <th class="ny">behandlings<br>tema</th>
+                            <th class="ny">tema</th>
+                            <th class="ny">oppgavetype</th>
+                            <th class="ny">beskrivelse</th>
+                            <th class="oppgave">behandlings<br>tema</th>
+                            <th class="oppgave">tema</th>
+                            <th class="oppgave">oppgavetype</th>
+                            <th class="oppgave">behandlings<br>type</th>
+                            <th class="oppgave">beskrivelse</th>
+                            <th class="oppgave">bruker</th>
+                            <th class="oppgave">opprettet tidspunkt</th>
+                            <th class="oppgave">frist</th>
+                        </tr>
                     $migreringsSakerHtml
                    </table>
                 </body>

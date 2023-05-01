@@ -15,24 +15,6 @@ data class SakOgBehandlingDTO(
     val behandlingstema: Behandlingstema,
     val behandlingstatus: Behandlingsstatus
 ) {
-    fun htmlTableData(count: Int): String {
-        val rowspan = if (count > 0) "rowspan=${count + 1}" else ""
-        return """
-            <td $rowspan>$sakstype</td>
-            <td $rowspan>${splitLong(sakstema.name)}</td>
-            <td $rowspan>${splitLong(behandlingstype.name)}</td>
-            <td $rowspan>${splitLong(behandlingstema.name)}</td>
-            <td $rowspan>${splitLong(behandlingstatus.name)}</td>
-            <td $rowspan title=$behandlingID>$saksnummer</td>
-        """.trimIndent()
-    }
-
-    fun splitLong(name: String, max: Int = 10): String {
-        if (name.length > max)
-            return name.split("_").joinToString("</br>")
-        return name
-    }
-
     fun erRedigerbar(): Boolean {
         return erAktiv() && behandlingstatus != Behandlingsstatus.IVERKSETTER_VEDTAK &&
             !(behandlingstatus == Behandlingsstatus.ANMODNING_UNNTAK_SENDT && behandlingstema != Behandlingstema.IKKE_YRKESAKTIV)

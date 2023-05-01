@@ -27,11 +27,5 @@ data class OppgaveOppdatering(
         return beskrivelseInneholderErrorMessage()
     }
 
-    internal fun styleBeskrivelse(): String {
-        if (beskrivelseInneholderErrorMessage()) {
-            return """style="background-color:RED""""
-        }
-        return """style="background-color:LIGHTGREEN""""
-    }
     internal fun beskrivelseInneholderErrorMessage() = beskrivelse?.contains("feilet for") == true
 }
