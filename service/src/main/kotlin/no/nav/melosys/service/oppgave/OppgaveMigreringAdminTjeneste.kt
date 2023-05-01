@@ -48,31 +48,11 @@ class OppgaveMigreringAdminTjeneste(
 
     @GetMapping("rapport", produces = [MediaType.TEXT_HTML_VALUE])
     fun rapport(@RequestParam(required = false, defaultValue = "false") alle: Boolean): ResponseEntity<String> {
-        val migreringsSakerHtml = migreringsRapport.migreringsSakListe
-            .sortedWith(
-                compareBy(
-                    { it.sak.sakstype },
-                    { it.sak.sakstema },
-                    { it.sak.behandlingstype },
-                    { it.sak.behandlingstema },
-                    { it.sak.behandlingstatus },
-                )
-            ).filter { alle || it.harFeil() }
-            .filter { it.oppgaver.isNotEmpty()  }
-            .joinToString("") { it.htmlTableRow() }
-
-        val html = """
-            <!DOCTYPE html>
-            <html>
-                <body>
-                   <table border="1">
-                    $migreringsSakerHtml
-                   </table>
-                </body>
-            </html>
-            """
-
-        return ResponseEntity(html, HttpStatus.OK)
+        return ResponseEntity(migreringsRapport.html { migreringsSaker ->
+            migreringsSaker
+                .filter { it.harFeil() || it.teamErForsjellig() || it.oppgavetypeErForsjellig() }
+                .filter { it.oppgaver.isNotEmpty() }
+        }, HttpStatus.OK)
     }
 
 
