@@ -25,9 +25,9 @@ class OppgaveMigreringTest {
         hentMigreringsSaker("/Users/rune/div/diff-q2.json").forEach {
             migreringsRapport.migrertSak(it)
         }
-        File("/Users/rune/div/diff.html").writeText(migreringsRapport.html { migreringsSaker ->
+        File("/Users/rune/div/migrerings-rapport.html").writeText(migreringsRapport.html { migreringsSaker ->
             migreringsSaker
-                .filter { it.harFeil() || it.teamErForsjellig() || it.oppgavetypeErForsjellig() }
+                .filter { it.harFeil() || it.temaErForskjellig() || it.oppgavetypeErForskjellig() }
                 .filter { it.oppgaver.isNotEmpty() }
         })
     }

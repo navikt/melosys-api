@@ -10,8 +10,8 @@ data class MigreringsSak(
 ) {
 
     fun harFeil(): Boolean = ny.harFeil() || oppgaver.size != 1
-    fun teamErForsjellig(): Boolean = oppgaver.any { it.tema != ny.tema }
-    fun oppgavetypeErForsjellig(): Boolean = oppgaver.any { it.oppgavetype.kode != ny.oppgaveType?.kode }
+    fun temaErForskjellig(): Boolean = oppgaver.any { it.tema != ny.tema }
+    fun oppgavetypeErForskjellig(): Boolean = oppgaver.any { it.oppgavetype.kode != ny.oppgaveType?.kode }
 
     private val sakStyle = if (oppgaver.size > 1) "class=\"sakfeil\"" else "class=\"sak\""
     fun htmlTableRow(): String {
@@ -43,8 +43,8 @@ data class MigreringsSak(
         if (mappingError != null) {
             return """<td colspan=4 $rowspan class="feil" >$mappingError</td>"""
         }
-        val teamBackClass = if (teamErForsjellig()) "forskjell" else "ny"
-        val oppgavetypeClass = if (oppgavetypeErForsjellig()) "forskjell" else "ny"
+        val teamBackClass = if (temaErForskjellig()) "forskjell" else "ny"
+        val oppgavetypeClass = if (oppgavetypeErForskjellig()) "forskjell" else "ny"
         val beskrivelseClass = if (beskrivelseInneholderErrorMessage()) "feil" else "ny"
 
         return """
@@ -56,8 +56,8 @@ data class MigreringsSak(
     }
 
     private fun Oppgave.htmlTableData(): String {
-        val teamClass = if (teamErForsjellig()) "forskjell" else "oppgave"
-        val oppgavetypeClass = if (oppgavetypeErForsjellig()) "forskjell" else "oppgave"
+        val teamClass = if (temaErForskjellig()) "forskjell" else "oppgave"
+        val oppgavetypeClass = if (oppgavetypeErForskjellig()) "forskjell" else "oppgave"
         return """
             <td class="oppgave">$behandlingstema</td>
             <td class="$teamClass">${tema.kode}</td>
