@@ -50,7 +50,7 @@ class OppgaveMigreringAdminTjeneste(
     fun rapport(@RequestParam(required = false, defaultValue = "false") alle: Boolean): ResponseEntity<String> {
         return ResponseEntity(migreringsRapport.html { migreringsSaker ->
             migreringsSaker
-                .filter { it.harFeil() || it.temaErForskjellig() || it.oppgavetypeErForskjellig() }
+                .filter { alle || it.harFeil()  }
                 .filter { it.oppgaver.isNotEmpty() }
         }, HttpStatus.OK)
     }
