@@ -30,13 +30,31 @@ final class FerdigbehandlingKontroll {
     private FerdigbehandlingKontroll() {
     }
 
+    static Kontrollfeil overlappendePeriode(FerdigbehandlingKontrollData kontrollData) {
+        MedlemskapDokument medlemskapDokument = kontrollData.medlemskapDokument();
+        PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();
+        Lovvalgsperiode opprinneligLovvalgsperiode = kontrollData.opprinneligLovvalgsperiode();
+
+        return OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument,
+            lovvalgsperiode, opprinneligLovvalgsperiode) ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER) : null;
+    }
+
+    static Kontrollfeil overlappendeUnntaksperiode(FerdigbehandlingKontrollData kontrollData) {
+        MedlemskapDokument medlemskapDokument = kontrollData.medlemskapDokument();
+        PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();
+        Lovvalgsperiode opprinneligLovvalgsperiode = kontrollData.opprinneligLovvalgsperiode();
+
+        return OverlappendeMedlemskapsperioderRegler.harOverlappendeUnntaksperiode(medlemskapDokument,
+            lovvalgsperiode, opprinneligLovvalgsperiode) ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_UNNTAK_PERIODER) : null;
+    }
+
     static Kontrollfeil overlappendeMedlemsperiode(FerdigbehandlingKontrollData kontrollData) {
         MedlemskapDokument medlemskapDokument = kontrollData.medlemskapDokument();
         PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();
         Lovvalgsperiode opprinneligLovvalgsperiode = kontrollData.opprinneligLovvalgsperiode();
 
         return OverlappendeMedlemskapsperioderRegler.harOverlappendeMedlemsperiode(medlemskapDokument,
-            lovvalgsperiode, opprinneligLovvalgsperiode) ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER) : null;
+            lovvalgsperiode, opprinneligLovvalgsperiode) ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDLEMSKAPSPERIODER) : null;
     }
 
     static Kontrollfeil periodeOver24Mnd(FerdigbehandlingKontrollData kontrollData) {

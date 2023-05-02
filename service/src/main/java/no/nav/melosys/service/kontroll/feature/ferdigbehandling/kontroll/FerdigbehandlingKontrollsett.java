@@ -28,7 +28,7 @@ public class FerdigbehandlingKontrollsett {
 
     private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_EU_EOS = Set.of(
         FerdigbehandlingKontroll::adresseRegistrert,
-        FerdigbehandlingKontroll::overlappendeMedlemsperiode,
+        FerdigbehandlingKontroll::overlappendePeriode,
         FerdigbehandlingKontroll::periodeOver24Mnd,
         FerdigbehandlingKontroll::periodeManglerSluttdato,
         FerdigbehandlingKontroll::arbeidsstedManglerFelter,
@@ -38,7 +38,7 @@ public class FerdigbehandlingKontrollsett {
 
     private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_TRYGDEAVTALER = Set.of(
         FerdigbehandlingKontroll::adresseRegistrert,
-        FerdigbehandlingKontroll::overlappendeMedlemsperiode,
+        FerdigbehandlingKontroll::overlappendePeriode,
         FerdigbehandlingKontroll::periodeOver12Måneder,
         FerdigbehandlingKontroll::periodeOverTreÅr,
         FerdigbehandlingKontroll::periodeOverFemÅr,
@@ -49,7 +49,8 @@ public class FerdigbehandlingKontrollsett {
 
     private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_UNNTAKSREGISTRERING = Set.of(
         FerdigbehandlingKontroll::overlappendeMedlemsperiode,
-        FerdigbehandlingKontroll::periodeManglerSluttdato
+        FerdigbehandlingKontroll::periodeManglerSluttdato,
+        FerdigbehandlingKontroll::overlappendeUnntaksperiode
     );
 
     private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_AVSLAG_HENLEGGELSE = Set.of(
