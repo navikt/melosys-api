@@ -36,6 +36,28 @@ class MigreringsRapport(private val environment: Environment) {
     private val sakHvorMappingFeiler = mutableListOf<String>()
     private val migreringsSakListe = mutableListOf<MigreringsSak>()
 
+    fun statsHtmlTable(): String {
+        val html = mapOf(
+            "Totalt antal" to migreringsSakListe.size,
+            "Kan migreres" to migreringsSakListe.count { !it.harFeil() },
+            "har feil" to migreringsSakListe.count { it.harFeil() },
+            "tema forskjellig" to migreringsSakListe.count { it.temaErForskjellig() },
+            "oppgavetype forskjellig" to migreringsSakListe.count { it.oppgavetypeErForskjellig() },
+            "mangler oppgave" to migreringsSakListe.count { it.oppgaver.isEmpty() },
+            "flere oppgaver funnet på sak" to migreringsSakListe.count { it.oppgaver.size > 1 },
+            "SedType fra behandling er null" to migreringsSakListe.count { it.ny.sedTypeFraBehandlingErNull() },
+            "Har ikke oppgave mapping" to migreringsSakListe.count { it.ny.fantIkkeOppgaveMapping() },
+        ).toList().joinToString("\n") {
+            """
+                <tr>
+                   <th style="text-align: left">${it.first}</th>
+                   <td style="text-align: right">${it.second}</td>
+                </tr>
+        """.trimIndent()
+        }
+        return """<table>$html</table>"""
+    }
+
     fun html(action: (List<MigreringsSak>) -> List<MigreringsSak>): String {
         val migreringsSakerHtml = action(
             migreringsSakListe.sortedWith(
@@ -77,6 +99,7 @@ class MigreringsRapport(private val environment: Environment) {
                 }
             </style>
                 <body>
+                   ${statsHtmlTable()}
                    <table>
                         <tr>
                             <th class="sak" colspan=6>melosys sak</th>

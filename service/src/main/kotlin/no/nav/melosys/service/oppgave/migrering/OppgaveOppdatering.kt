@@ -28,4 +28,6 @@ data class OppgaveOppdatering(
     }
 
     internal fun beskrivelseInneholderErrorMessage() = beskrivelse?.contains("feilet for") == true
+    internal fun sedTypeFraBehandlingErNull() = beskrivelse?.contains("SedType fra behandling er null når beskrivelsefelt er SED") == true
+    internal fun fantIkkeOppgaveMapping() = mappingError?.contains("Fant ikke oppgave mapping for") == true
 }
