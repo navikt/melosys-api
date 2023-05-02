@@ -104,7 +104,7 @@ public class Trygdeavgiftsperiode {
         return hentGjeldendeMedlemskapsperiode().getTrygdedekning();
     }
 
-    public Inntektsperiode hentGjeldendeInntektsperiode() {
+    public Inntektsperiode hentGjeldendeInntektsperiode() { // TODO: Erstatt med data fra beregningsmodulen
         var getGjeldendeInntektsperiode = fastsattTrygdeavgift.getTrygdeavgiftsgrunnlag().getInntektsperioder()
             .stream()
             .filter(inntektsperiode ->
