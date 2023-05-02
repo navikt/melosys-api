@@ -9,7 +9,7 @@ public class Penger {
     private static final String NOK = "NOK";
 
     public Penger(Double verdi) {
-        new Penger(BigDecimal.valueOf(verdi));
+        this(BigDecimal.valueOf(verdi));
     }
 
     public Penger(BigDecimal verdi) {
