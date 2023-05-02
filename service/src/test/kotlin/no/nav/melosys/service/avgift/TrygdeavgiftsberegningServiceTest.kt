@@ -14,7 +14,7 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
-import no.nav.melosys.domain.avgift.penger.Penger
+import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
@@ -28,7 +28,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
-import java.math.BigInteger
 import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)

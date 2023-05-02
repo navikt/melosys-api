@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.avgift.penger;
+package no.nav.melosys.domain.avgift;
 
 import java.math.BigDecimal;
 

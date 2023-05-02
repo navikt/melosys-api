@@ -1,6 +1,6 @@
 package no.nav.melosys.integrasjon.trygdeavgift.dto
 
-import no.nav.melosys.domain.avgift.penger.Penger
+import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import java.math.BigDecimal

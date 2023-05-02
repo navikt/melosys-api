@@ -1,12 +1,4 @@
-package no.nav.melosys.domain.avgift.penger;
-
-import no.nav.melosys.exception.TekniskException;
-import org.hibernate.HibernateException;
-import org.hibernate.engine.spi.SharedSessionContractImplementor;
-import org.hibernate.type.BigDecimalType;
-import org.hibernate.type.StringType;
-import org.hibernate.type.Type;
-import org.hibernate.usertype.CompositeUserType;
+package no.nav.melosys.domain.avgift;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -15,11 +7,32 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Objects;
+import java.util.Properties;
 
-public class PengerType implements CompositeUserType {
+import no.nav.melosys.exception.TekniskException;
+import org.hibernate.HibernateException;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import org.hibernate.type.BigDecimalType;
+import org.hibernate.type.StringType;
+import org.hibernate.type.Type;
+import org.hibernate.usertype.CompositeUserType;
+import org.hibernate.usertype.DynamicParameterizedType;
+
+public class PengerType implements CompositeUserType, DynamicParameterizedType {
+
+    private String[] propertyNames;
+
+    @Override
+    public void setParameterValues(Properties parameters) {
+        this.propertyNames = new String[]{
+            parameters.getProperty("verdiPropertyName", "verdi"),
+            parameters.getProperty("valutaPropertyName", "valuta")
+        };
+    }
+
     @Override
     public String[] getPropertyNames() {
-        return new String[]{"verdi", "valuta"};
+        return propertyNames;
     }
 
     @Override

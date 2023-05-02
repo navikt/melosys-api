@@ -1,7 +1,6 @@
 package no.nav.melosys.tjenester.gui.avklartefakta;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Set;
@@ -11,7 +10,7 @@ import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
-import no.nav.melosys.domain.avgift.penger.Penger;
+import no.nav.melosys.domain.avgift.Penger;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Skatteplikttype;

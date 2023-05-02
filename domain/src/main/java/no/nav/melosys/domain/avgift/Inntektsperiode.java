@@ -4,10 +4,10 @@ import java.time.LocalDate;
 import java.util.List;
 import javax.persistence.*;
 
-import no.nav.melosys.domain.avgift.penger.Penger;
 import no.nav.melosys.domain.kodeverk.Inntektskildetype;
 import no.nav.melosys.domain.kodeverk.Skatteplikttype;
 import org.hibernate.annotations.Columns;
+import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
 
 @Entity
@@ -34,7 +34,9 @@ public class Inntektsperiode {
     @Columns(columns = {
         @Column(name = "avgiftspliktig_inntekt_mnd_verdi"),
         @Column(name = "avgiftspliktig_inntekt_mnd_valuta")})
-    @Type(type = "no.nav.melosys.domain.avgift.penger.AvgiftspliktigInntektMndType")
+    @Type(type = "no.nav.melosys.domain.avgift.PengerType", parameters = {
+        @Parameter(name = "verdiPropertyName", value = "avgiftspliktig_inntekt_mnd_verdi"),
+        @Parameter(name = "valutaPropertyName", value = "avgiftspliktig_inntekt_mnd_valuta")})
     private Penger avgiftspliktigInntektMnd;
 
     @Column(name = "aga_betales_til_skatt")
