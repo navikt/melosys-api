@@ -105,7 +105,7 @@ class TrygdeavgiftTjenesteTest {
     }
 
     private BeregnetTrygdeavgiftDto forventetBeregnetTrygdeavgiftDto() {
-        return new BeregnetTrygdeavgiftDto(trygdeavgiftsperioder.stream().map(TrygdeavgiftsperiodeDto::new).collect(Collectors.toSet()));
+        return new BeregnetTrygdeavgiftDto(trygdeavgiftsperioder.stream().map(TrygdeavgiftsperiodeDto::new).toList());
     }
 
     private static Trygdeavgiftsgrunnlag lagTrygdeavgiftsgrunnlag() {
