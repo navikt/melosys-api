@@ -58,7 +58,7 @@ class TrygdeavgiftTjeneste(
     fun beregnTrygdeavgift(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<BeregnetTrygdeavgiftDto> {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA)
         return ResponseEntity.ok(
-            BeregnetTrygdeavgiftDto.av(trygdeavgiftsberegningService.beregnTrygdeavgift(behandlingID))
+            BeregnetTrygdeavgiftDto.av(trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingID))
         )
     }
 }

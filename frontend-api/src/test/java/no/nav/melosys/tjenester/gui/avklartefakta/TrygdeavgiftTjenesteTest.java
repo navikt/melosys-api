@@ -95,7 +95,7 @@ class TrygdeavgiftTjenesteTest {
 
     @Test
     void beregnTrygdeavgift() throws Exception {
-        when(trygdeavgiftsberegningService.beregnTrygdeavgift(BEHANDLINGSRESULTAT_ID)).thenReturn(trygdeavgiftsperioder);
+        when(trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLINGSRESULTAT_ID)).thenReturn(trygdeavgiftsperioder);
 
         mockMvc.perform(put(BASE_URL + "/beregning", 1L)
                 .contentType(MediaType.APPLICATION_JSON))

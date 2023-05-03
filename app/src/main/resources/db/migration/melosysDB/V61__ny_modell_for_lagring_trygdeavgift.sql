@@ -62,13 +62,13 @@ ALTER TABLE medlemskapsperiode
 CREATE TABLE trygdeavgiftsperiode
 (
     id                             NUMBER(19) GENERATED ALWAYS AS IDENTITY,
-    fastsatt_trygdeavgift_id       NUMBER(19)     NOT NULL,
-    periode_fra                    DATE           NOT NULL,
-    periode_til                    DATE           NOT NULL,
-    trygdeavgift_beloep_mnd_verdi  DECIMAL(12, 2) NOT NULL,
-    trygdeavgift_beloep_mnd_valuta VARCHAR2(3)    NOT NULL,
-    trygdesats                     DECIMAL(4, 2)  NOT NULL,
-    CONSTRAINT pk_trygdeavgiftsperiode PRIMARY KEY (id)
+    fastsatt_trygdeavgift_id       NUMBER(19)       NOT NULL,
+    periode_fra                    DATE             NOT NULL,
+    periode_til                    DATE             NOT NULL,
+    trygdeavgift_beloep_mnd_verdi  DECIMAL(12, 2)   NOT NULL,
+    trygdeavgift_beloep_mnd_valuta VARCHAR2(3)      NOT NULL,
+    trygdesats                     DOUBLE PRECISION NOT NULL,
+    CONSTRAINT pk_trygdeavgiftsperiode              PRIMARY KEY (id)
 );
 
 ALTER TABLE trygdeavgiftsperiode
