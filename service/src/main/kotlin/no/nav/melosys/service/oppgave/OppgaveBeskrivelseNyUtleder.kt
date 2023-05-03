@@ -11,7 +11,7 @@ class OppgaveBeskrivelseNyUtleder : OppgaveBeskrivelseUtleder {
     private val oppgaveGosysMapping = OppgaveGosysMapping()
 
     override fun utledBeskrivelse(
-        oppgaveBehandlingstema: OppgaveBehandlingstema,
+        oppgaveBehandlingstema: OppgaveBehandlingstema?,
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,

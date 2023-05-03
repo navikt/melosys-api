@@ -29,7 +29,7 @@ class OppgaveGosysMappingCodeGenerator {
             val sakstema = Sakstemaer.valueOf(fields[1])
             val behandlingstyper = fields[2].split("\n").map { Behandlingstyper.valueOf(it) }.toList()
             val behandlingstema = fields[3].split("\n").map { Behandlingstema.valueOf(it) }.toList()
-            val oppgaveBehandlingstema: OppgaveBehandlingstema =
+            val oppgaveBehandlingstema: OppgaveBehandlingstema? =
                 OppgaveBehandlingstema.values().find { it.kode == fields[4] }!!
             val tema = Tema.valueOf(fields[6])
             val oppgavetyper = with(fields[7]) {

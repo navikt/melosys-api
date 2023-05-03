@@ -75,4 +75,12 @@ public class Medlemsperiode implements HarPeriode {
     public String hentLandSomIso2() {
         return land != null ? IsoLandkodeKonverterer.tilIso2(land) : null;
     }
+
+    public boolean erUnntaksperiode() {
+        return !"NOR".equals(land);
+    }
+
+    public boolean erMedlemskapsperiode() {
+        return "NOR".equals(land);
+    }
 }
