@@ -28,6 +28,10 @@ jobs:
       actions: read
       contents: read
       security-events: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PASSWORD: ${{ secrets.READER_TOKEN }}
+      REGISTRY: ghcr.io
 
     strategy:
       fail-fast: false
