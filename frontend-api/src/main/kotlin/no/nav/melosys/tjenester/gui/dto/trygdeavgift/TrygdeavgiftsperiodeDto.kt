@@ -4,7 +4,7 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import java.time.LocalDate
 
-data class TrygdeavgiftsperioderDto(
+data class TrygdeavgiftsperiodeDto(
     val fom: LocalDate,
     val tom: LocalDate,
     val trygdedekning: Trygdedekninger,

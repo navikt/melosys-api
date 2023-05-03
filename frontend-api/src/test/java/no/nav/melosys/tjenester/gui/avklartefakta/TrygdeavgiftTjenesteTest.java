@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Medlemskapsperiode;
@@ -22,6 +23,7 @@ import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.TrygdeavgiftTjeneste;
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.BeregnetTrygdeavgiftDto;
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftsgrunnlagDto;
+import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftsperiodeDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -87,7 +89,8 @@ class TrygdeavgiftTjenesteTest {
         mockMvc.perform(get(BASE_URL + "/beregning", 1L)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(responseBody(objectMapper).containsObjectAsJson(BeregnetTrygdeavgiftDto.av(trygdeavgiftsperioder), BeregnetTrygdeavgiftDto.class));
+            .andExpect(responseBody(objectMapper)
+                .containsObjectAsJson(forventetBeregnetTrygdeavgiftDto(), BeregnetTrygdeavgiftDto.class));
     }
 
     @Test
@@ -97,7 +100,12 @@ class TrygdeavgiftTjenesteTest {
         mockMvc.perform(put(BASE_URL + "/beregning", 1L)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(responseBody(objectMapper).containsObjectAsJson(BeregnetTrygdeavgiftDto.av(trygdeavgiftsperioder), BeregnetTrygdeavgiftDto.class));
+            .andExpect(responseBody(objectMapper)
+                .containsObjectAsJson(forventetBeregnetTrygdeavgiftDto(), BeregnetTrygdeavgiftDto.class));
+    }
+
+    private BeregnetTrygdeavgiftDto forventetBeregnetTrygdeavgiftDto() {
+        return new BeregnetTrygdeavgiftDto(trygdeavgiftsperioder.stream().map(TrygdeavgiftsperiodeDto::new).collect(Collectors.toSet()));
     }
 
     private static Trygdeavgiftsgrunnlag lagTrygdeavgiftsgrunnlag() {
