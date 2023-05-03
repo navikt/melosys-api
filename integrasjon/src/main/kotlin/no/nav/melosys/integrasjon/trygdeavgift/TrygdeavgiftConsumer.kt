@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.trygdeavgift
 
-import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftBeregningsgrunnlag
-import no.nav.melosys.integrasjon.trygdeavgift.dto.Trygdeavgiftsperiode
+import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftBeregningsgrunnlagDto
+import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsperiodeDto
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -28,12 +28,12 @@ class TrygdeavgiftConsumer(@Value("\${melosystrygdeavgift.url}") url: String?) {
         httpHeaders.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
     }
 
-    fun beregnTrygdeavgift(trygdeavgiftBeregningsgrunnlag: TrygdeavgiftBeregningsgrunnlag?): List<Trygdeavgiftsperiode> {
+    fun beregnTrygdeavgift(trygdeavgiftBeregningsgrunnlagDto: TrygdeavgiftBeregningsgrunnlagDto?): List<TrygdeavgiftsperiodeDto> {
         return webClient.post()
             .uri("/v2/beregn")
-            .bodyValue(trygdeavgiftBeregningsgrunnlag!!)
+            .bodyValue(trygdeavgiftBeregningsgrunnlagDto!!)
             .retrieve()
-            .bodyToMono<List<Trygdeavgiftsperiode>>()
+            .bodyToMono<List<TrygdeavgiftsperiodeDto>>()
             .block() ?: throw IllegalStateException("Ingen body fra /v2/beregn")
     }
 }

@@ -90,11 +90,11 @@ internal class TrygdeavgiftsberegningServiceTest {
             }
         }
         every { mockMedlemAvFolketrygdenService.lagre(any()) }.returns(medlemAvFolketrygden)
-        every { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftBeregningsgrunnlag::class)) }
+        every { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftBeregningsgrunnlagDto::class)) }
             .returns(
                 listOf(
-                    Trygdeavgiftsperiode(
-                        DatoPeriode(FOM, TOM),
+                    TrygdeavgiftsperiodeDto(
+                        DatoPeriodeDto(FOM, TOM),
                         7.9,
                         PengerDto(BigDecimal.valueOf(790), NOK)
                     )
@@ -102,7 +102,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             )
 
 
-        trygdeavgiftsberegningService.beregnTrygdeavgift(BEHANDLING_ID)
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID)
             .shouldNotBeNull()
             .shouldNotBeEmpty()
             .forEach {
@@ -111,7 +111,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                     trygdeavgiftsbeløpMd = Penger(790.0)
                 }
             }
-        verify { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftBeregningsgrunnlag::class)) }
+        verify { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftBeregningsgrunnlagDto::class)) }
         verify { mockMedlemAvFolketrygdenService.lagre(medlemAvFolketrygden) }
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgift.shouldNotBeEmpty()
     }
@@ -131,7 +131,7 @@ internal class TrygdeavgiftsberegningServiceTest {
 
 
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgift.shouldNotBeEmpty()
-        trygdeavgiftsberegningService.beregnTrygdeavgift(BEHANDLING_ID)
+        trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID)
             .shouldNotBeNull()
             .shouldBeEmpty()
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgift.shouldBeEmpty()
@@ -140,7 +140,7 @@ internal class TrygdeavgiftsberegningServiceTest {
     @Test
     fun beregnTrygdeavgift_manglerMedlemskapsperioder_kasterFeil() {
         shouldThrow<FunksjonellException> {
-            trygdeavgiftsberegningService.beregnTrygdeavgift(BEHANDLING_ID)
+            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID)
         }.message.shouldContain("Kan ikke beregne trygdeavgift uten medlemskapsperioder")
     }
 
@@ -149,7 +149,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         medlemAvFolketrygden.medlemskapsperioder.add(Medlemskapsperiode())
 
         shouldThrow<FunksjonellException> {
-            trygdeavgiftsberegningService.beregnTrygdeavgift(BEHANDLING_ID)
+            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID)
         }.message.shouldContain("Kan ikke beregne trygdeavgift uten fastsattTrygdeavgift")
     }
 
@@ -159,7 +159,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         medlemAvFolketrygden.fastsattTrygdeavgift = FastsattTrygdeavgift()
 
         shouldThrow<FunksjonellException> {
-            trygdeavgiftsberegningService.beregnTrygdeavgift(BEHANDLING_ID)
+            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID)
         }.message.shouldContain("Kan ikke beregne trygdeavgift uten trygdeavgiftsgrunnlag")
     }
 
@@ -171,7 +171,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         }
 
         shouldThrow<FunksjonellException> {
-            trygdeavgiftsberegningService.beregnTrygdeavgift(BEHANDLING_ID)
+            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID)
         }.message.shouldContain("Kan ikke beregne trygdeavgift uten skatteforholdTilNorge")
     }
 
@@ -185,7 +185,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         }
 
         shouldThrow<FunksjonellException> {
-            trygdeavgiftsberegningService.beregnTrygdeavgift(BEHANDLING_ID)
+            trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID)
         }.message.shouldContain("Kan ikke beregne trygdeavgift uten inntektsperioder")
     }
 }

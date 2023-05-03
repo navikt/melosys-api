@@ -9,8 +9,8 @@ import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.integrasjon.trygdeavgift.dto.PengerDto;
-import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftBeregningsgrunnlag;
-import no.nav.melosys.integrasjon.trygdeavgift.dto.Trygdeavgiftsperiode;
+import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftBeregningsgrunnlagDto;
+import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsperiodeDto;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -49,15 +49,14 @@ class TrygdeavgiftConsumerTest {
             .addHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
         );
 
-        var a = lagTrygdeavgiftBeregningsgrunnlag();
-        List<Trygdeavgiftsperiode> response = trygdeavgiftConsumer.beregnTrygdeavgift(a);
+        List<TrygdeavgiftsperiodeDto> response = trygdeavgiftConsumer.beregnTrygdeavgift(lagTrygdeavgiftBeregningsgrunnlagDto());
         assertThat(response.get(0))
-            .extracting(Trygdeavgiftsperiode::getSats, Trygdeavgiftsperiode::getAvgift)
+            .extracting(TrygdeavgiftsperiodeDto::getSats, TrygdeavgiftsperiodeDto::getAvgift)
             .containsExactly(new BigDecimal("21.8"), new PengerDto(BigDecimal.valueOf(21800)));
     }
 
-    private TrygdeavgiftBeregningsgrunnlag lagTrygdeavgiftBeregningsgrunnlag() {
-        return new TrygdeavgiftBeregningsgrunnlag(Collections.emptySet(), Collections.emptySet(), Collections.emptyList());
+    private TrygdeavgiftBeregningsgrunnlagDto lagTrygdeavgiftBeregningsgrunnlagDto() {
+        return new TrygdeavgiftBeregningsgrunnlagDto(Collections.emptySet(), Collections.emptySet(), Collections.emptyList());
     }
 
     private String hentMockRespons() throws URISyntaxException, IOException {

@@ -2,12 +2,13 @@ package no.nav.melosys.service.avgift
 
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
-import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftBeregningsgrunnlag
-import no.nav.melosys.integrasjon.trygdeavgift.dto.Trygdeavgiftsperiode
+import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftBeregningsgrunnlagDto
+import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsperiodeDto
 import no.nav.melosys.service.MedlemAvFolketrygdenService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -20,7 +21,7 @@ class TrygdeavgiftsberegningService
 ) {
 
     @Transactional
-    fun beregnTrygdeavgift(behandlingsresultatID: Long): Set<no.nav.melosys.domain.avgift.Trygdeavgiftsperiode> {
+    fun beregnOgLagreTrygdeavgift(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
         val medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)
         val fastsattTrygdeavgift = medlemAvFolketrygden.fastsattTrygdeavgift
 
@@ -32,41 +33,41 @@ class TrygdeavgiftsberegningService
             return emptySet()
         }
 
-        beregnOgOppdaterTrygdeavgift(
-            medlemAvFolketrygden.medlemskapsperioder,
-            fastsattTrygdeavgift.trygdeavgiftsgrunnlag,
-            fastsattTrygdeavgift
-        )
+        val beregnetTrygdeavgift =
+            beregnTrygdeavgift(medlemAvFolketrygden.medlemskapsperioder, fastsattTrygdeavgift.trygdeavgiftsgrunnlag)
+        oppdaterTrygdeavgift(beregnetTrygdeavgift, fastsattTrygdeavgift)
         return medlemAvFolketrygdenService.lagre(medlemAvFolketrygden).fastsattTrygdeavgift.trygdeavgift
     }
 
-    private fun beregnOgOppdaterTrygdeavgift(
+    private fun beregnTrygdeavgift(
         medlemskapsperioder: Collection<Medlemskapsperiode>,
         trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag,
-        fastsattTrygdeavgift: FastsattTrygdeavgift
-    ) {
-        val trygdeavgiftsperioder = trygdeavgiftConsumer.beregnTrygdeavgift(
-            TrygdeavgiftBeregningsgrunnlag.av(
+    ): List<TrygdeavgiftsperiodeDto> =
+        trygdeavgiftConsumer.beregnTrygdeavgift(
+            TrygdeavgiftBeregningsgrunnlagDto.av(
                 medlemskapsperioder,
                 trygdeavgiftsgrunnlag.skatteforholdTilNorge,
                 trygdeavgiftsgrunnlag.inntektsperioder
             )
         )
 
-        trygdeavgiftsperioder.forEach {
-            fastsattTrygdeavgift.trygdeavgift.add(lagTrygdeavgift(fastsattTrygdeavgift, it))
-        }
-    }
-
-    private fun lagTrygdeavgift(
-        fastsattTrygdeavgift: FastsattTrygdeavgift,
-        trygdeavgiftsperiode: Trygdeavgiftsperiode
+    private fun oppdaterTrygdeavgift(
+        beregnetTrygdeavgift: List<TrygdeavgiftsperiodeDto>,
+        fastsattTrygdeavgift: FastsattTrygdeavgift
     ) =
-        no.nav.melosys.domain.avgift.Trygdeavgiftsperiode().apply {
-            this.periodeFra = trygdeavgiftsperiode.periode.fom
-            this.periodeTil = trygdeavgiftsperiode.periode.tom
-            this.trygdesats = trygdeavgiftsperiode.sats
-            this.trygdeavgiftsbeløpMd = trygdeavgiftsperiode.avgift.tilPenger()
+        beregnetTrygdeavgift.forEach {
+            fastsattTrygdeavgift.trygdeavgift.add(lagTrygdeavgiftsperiode(fastsattTrygdeavgift, it))
+        }
+
+    private fun lagTrygdeavgiftsperiode(
+        fastsattTrygdeavgift: FastsattTrygdeavgift,
+        trygdeavgiftsperiodeDto: TrygdeavgiftsperiodeDto
+    ) =
+        Trygdeavgiftsperiode().apply {
+            this.periodeFra = trygdeavgiftsperiodeDto.periode.fom
+            this.periodeTil = trygdeavgiftsperiodeDto.periode.tom
+            this.trygdesats = trygdeavgiftsperiodeDto.sats
+            this.trygdeavgiftsbeløpMd = trygdeavgiftsperiodeDto.avgift.tilPenger()
             this.fastsattTrygdeavgift = fastsattTrygdeavgift
         }
 

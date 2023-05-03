@@ -3,7 +3,7 @@ package no.nav.melosys.integrasjon.trygdeavgift.dto
 import no.nav.melosys.domain.kodeverk.Avgiftsdekning
 
 
-data class Medlemskapsperiode(
-    val periode: DatoPeriode,
+data class MedlemskapsperiodeDto(
+    val periode: DatoPeriodeDto,
     val avgiftsdekninger: Set<Avgiftsdekning>
 )

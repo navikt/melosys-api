@@ -1,5 +1,7 @@
 package no.nav.melosys.integrasjon.trygdeavgift.dto
 
+import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.kodeverk.Avgiftsdekning
 import no.nav.melosys.domain.kodeverk.Avgiftsdekning.*
@@ -8,45 +10,45 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger.*
 import no.nav.melosys.exception.FunksjonellException
 
 
-data class TrygdeavgiftBeregningsgrunnlag(
-    val medlemskapsperioder: Set<Medlemskapsperiode>,
-    val skatteforholdsperioder: Set<Skatteforholdsperiode>,
-    val inntektsperioder: List<Inntektsperiode>
+data class TrygdeavgiftBeregningsgrunnlagDto(
+    val medlemskapsperioder: Set<MedlemskapsperiodeDto>,
+    val skatteforholdsperioder: Set<SkatteforholdsperiodeDto>,
+    val inntektsperioder: List<InntektsperiodeDto>
 ) {
 
     companion object {
         fun av(
-            medlemskapsperioder: Collection<no.nav.melosys.domain.Medlemskapsperiode>,
+            medlemskapsperioder: Collection<Medlemskapsperiode>,
             skatteforholdTilNorge: Collection<SkatteforholdTilNorge>,
-            inntektsperioder: Collection<no.nav.melosys.domain.avgift.Inntektsperiode>
-        ): TrygdeavgiftBeregningsgrunnlag =
-            TrygdeavgiftBeregningsgrunnlag(
+            inntektsperioder: Collection<Inntektsperiode>
+        ): TrygdeavgiftBeregningsgrunnlagDto =
+            TrygdeavgiftBeregningsgrunnlagDto(
                 mapMedlemskapsperioder(medlemskapsperioder).toSet(),
                 mapSkatteforholdsperioder(skatteforholdTilNorge).toSet(),
                 mapInntektsperioder(inntektsperioder)
             )
 
 
-        private fun mapMedlemskapsperioder(medlemskapsperioder: Collection<no.nav.melosys.domain.Medlemskapsperiode>): List<Medlemskapsperiode> =
+        private fun mapMedlemskapsperioder(medlemskapsperioder: Collection<Medlemskapsperiode>): List<MedlemskapsperiodeDto> =
             medlemskapsperioder.map {
-                Medlemskapsperiode(
-                    DatoPeriode(it.fom, it.tom),
+                MedlemskapsperiodeDto(
+                    DatoPeriodeDto(it.fom, it.tom),
                     avgiftsdekningerFraTrygdedekning(it.trygdedekning)
                 )
             }
 
-        private fun mapSkatteforholdsperioder(skatteforholdTilNorge: Collection<SkatteforholdTilNorge>): List<Skatteforholdsperiode> =
+        private fun mapSkatteforholdsperioder(skatteforholdTilNorge: Collection<SkatteforholdTilNorge>): List<SkatteforholdsperiodeDto> =
             skatteforholdTilNorge.map {
-                Skatteforholdsperiode(
-                    DatoPeriode(it.fomDato, it.tomDato),
+                SkatteforholdsperiodeDto(
+                    DatoPeriodeDto(it.fomDato, it.tomDato),
                     it.skatteplikttype
                 )
             }
 
-        private fun mapInntektsperioder(inntektsperioder: Collection<no.nav.melosys.domain.avgift.Inntektsperiode>): List<Inntektsperiode> =
+        private fun mapInntektsperioder(inntektsperioder: Collection<Inntektsperiode>): List<InntektsperiodeDto> =
             inntektsperioder.map {
-                Inntektsperiode(
-                    DatoPeriode(it.fomDato, it.tomDato),
+                InntektsperiodeDto(
+                    DatoPeriodeDto(it.fomDato, it.tomDato),
                     it.type,
                     it.isArbeidsgiversavgiftBetalesTilSkatt,
                     it.isTrygdeavgiftBetalesTilSkatt,
