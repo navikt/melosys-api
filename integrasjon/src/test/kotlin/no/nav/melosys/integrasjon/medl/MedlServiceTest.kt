@@ -13,13 +13,19 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.melosys.domain.Lovvalgsperiode
-import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForGet
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPost
@@ -118,6 +124,39 @@ internal class MedlServiceTest {
                     lovvalgsland = "BEL",
                     lovvalg = LovvalgMedl.UAVK.kode,
                     grunnlag = GrunnlagMedl.FO_11_4_1.kode,
+                    sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
+                        kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
+                    )
+                )
+            )
+            hentMedlemskapsunntak()
+        }
+        medlService.opprettPeriodeUnderAvklaring(FNR, lovvalgsperiode, KildedokumenttypeMedl.HENV_SOKNAD)
+            .shouldBe(123456)
+    }
+
+    @Test
+    fun skalOpprettPeriodeMedOvergangsregelSomGrunnlag() {
+        val lovvalgsperiode =
+            lagLovvalgsPeriode().apply {
+                bestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A
+                tilleggsbestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A
+                behandlingsresultat = lagBehandlingsresultatMedOvergangsregelbestemmelser()
+            }
+        val medlemskapsunntakForPostCapturingSlot = slot<MedlemskapsunntakForPost>()
+        every {
+            mockRestConsumer.opprettPeriode(capture(medlemskapsunntakForPostCapturingSlot))
+        } answers {
+            medlemskapsunntakForPostCapturingSlot.captured.shouldBeEqualToComparingFields(
+                MedlemskapsunntakForPost(
+                    ident = FNR,
+                    fraOgMed = lovvalgsperiode.fom,
+                    tilOgMed = lovvalgsperiode.tom,
+                    status = LovvalgMedl.UAVK.kode,
+                    dekning = DekningMedl.FULL.kode,
+                    lovvalgsland = "BEL",
+                    lovvalg = LovvalgMedl.UAVK.kode,
+                    grunnlag = GrunnlagMedl.FO_1408_14_2_A.kode,
                     sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
                         kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
                     )
@@ -323,6 +362,30 @@ internal class MedlServiceTest {
         fom = LocalDate.now()
         tom = LocalDate.now().plusYears(1)
     }
+
+    fun lagBehandlingsresultatMedOvergangsregelbestemmelser(): Behandlingsresultat {
+        val behandlingsresultat = Behandlingsresultat()
+
+        behandlingsresultat.apply {
+            id = 1L
+            type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            behandling = Behandling().apply {
+                id = 1233
+                tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
+                type = Behandlingstyper.FØRSTEGANG
+                status = Behandlingsstatus.VURDER_DOKUMENT
+                mottatteOpplysninger = MottatteOpplysninger().apply {
+                    setMottatteOpplysningerdata(SedGrunnlag().apply {
+                        overgangsregelbestemmelser = listOf(Overgangsregelbestemmelser.FO_1408_1971_ART14_2_A)
+                    })
+                }
+            }
+        }
+
+
+        return behandlingsresultat
+    }
+
 
     private fun hentMedlemskapsunntakListe() = objectMapper.readValue(
         javaClass.classLoader.getResource("mock/medlemskap/gyldigPeriodelisteResponse.json"),
