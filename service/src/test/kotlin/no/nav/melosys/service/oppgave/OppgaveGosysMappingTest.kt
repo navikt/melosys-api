@@ -1,6 +1,7 @@
 package no.nav.melosys.service.oppgave
 
 import io.kotest.matchers.collections.shouldHaveSize
+import no.nav.melosys.service.lovligekombinasjoner.GyldigeKombinasjoner
 import org.junit.jupiter.api.Test
 
 class OppgaveGosysMappingTest {
@@ -22,4 +23,12 @@ class OppgaveGosysMappingTest {
             }
         }
     }
+
+    @Test
+    fun `sjekk at gyldige melosys kombinasjoner funger når vi lager gosys oppgave`() {
+        GyldigeKombinasjoner.rows.forEach {
+            oppgaveGosysMapping.finnOppgave(it.sakstype, it.sakstema, it.behandlingstema, it.behandlingstype)
+        }
+    }
+
 }
