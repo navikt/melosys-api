@@ -1,6 +1,5 @@
 package no.nav.melosys.service.oppgave
 
-import no.finn.unleash.FakeUnleash
 import no.finn.unleash.Unleash
 import no.nav.melosys.domain.Tema
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
@@ -9,10 +8,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 
-internal class OppgaveGosysMapping(
-    // brukes for å slå på spesial regler under migrering
-    private val unleash: Unleash = FakeUnleash()
-) {
+internal class OppgaveGosysMapping(private val unleash: Unleash) {
 
     private val teamaUtleder = OppgaveTemaUtleder()
 

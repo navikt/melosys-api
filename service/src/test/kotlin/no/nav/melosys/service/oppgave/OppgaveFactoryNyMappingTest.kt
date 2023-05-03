@@ -28,7 +28,7 @@ import java.time.LocalDate
 internal class OppgaveFactoryNyMappingTest {
 
     private val oppgaveFactory = OppgaveFactory(FakeUnleash().apply { enable(ToggleName.NY_GOSYS_MAPPING) })
-    private val oppgaveGosysMapping = OppgaveGosysMapping()
+    private val oppgaveGosysMapping = OppgaveGosysMapping(FakeUnleash())
 
     @Test
     fun `Sed skal brukes som beskrivelse ved oppgavetype BEH_SED - untatt ved A1_ANMODNING_OM_UNNTAK_PAPIR`() {

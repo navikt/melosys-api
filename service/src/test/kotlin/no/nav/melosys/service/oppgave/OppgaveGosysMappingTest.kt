@@ -14,7 +14,7 @@ import no.nav.melosys.service.oppgave.OppgaveGosysMapping.Companion.NY_GOSYS_MAP
 
 class OppgaveGosysMappingTest {
 
-    private val oppgaveGosysMapping = OppgaveGosysMapping()
+    private val oppgaveGosysMapping = OppgaveGosysMapping(FakeUnleash())
 
     @Test
     fun `skal kun ha ett treff på alle mulige kombinasjoner av sakstype, sakstema, behandlingstype og behandlingstema`() {
@@ -49,7 +49,7 @@ class OppgaveGosysMappingTest {
                 behandlingstype
             )
         }
-        OppgaveGosysMapping().apply {
+        OppgaveGosysMapping(FakeUnleash()).apply {
             shouldThrow<IllegalStateException> {
                 ulovligKobo(this, Behandlingstyper.FØRSTEGANG)
             }.message.shouldBe("Fant ikke oppgave mapping for sakstype:EU_EOS, sakstema:MEDLEMSKAP_LOVVALG, behandlingstema:TRYGDETID, behandlingstype:FØRSTEGANG")
