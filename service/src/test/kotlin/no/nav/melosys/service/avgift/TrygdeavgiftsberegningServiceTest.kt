@@ -11,10 +11,10 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
-import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
 import no.nav.melosys.domain.avgift.Penger
+import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
+import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
@@ -95,7 +95,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 listOf(
                     Trygdeavgiftsperiode(
                         DatoPeriode(FOM, TOM),
-                        BigDecimal.valueOf(7.9),
+                        7.9,
                         PengerDto(BigDecimal.valueOf(790), NOK)
                     )
                 )
@@ -107,7 +107,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             .shouldNotBeEmpty()
             .forEach {
                 it.apply {
-                    trygdesats = BigDecimal.valueOf(7.9)
+                    trygdesats = 7.9
                     trygdeavgiftsbeløpMd = Penger(790.0)
                 }
             }

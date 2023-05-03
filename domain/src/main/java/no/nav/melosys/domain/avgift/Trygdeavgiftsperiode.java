@@ -39,7 +39,7 @@ public class Trygdeavgiftsperiode {
     private Penger trygdeavgiftsbeløpMd;
 
     @Column(name = "trygdesats", nullable = false)
-    private BigDecimal trygdesats;
+    private Double trygdesats;
 
     public Long getId() {
         return id;
@@ -81,11 +81,11 @@ public class Trygdeavgiftsperiode {
         this.trygdeavgiftsbeløpMd = trygdeavgiftsbeløpMd;
     }
 
-    public BigDecimal getTrygdesats() {
+    public Double getTrygdesats() {
         return trygdesats;
     }
 
-    public void setTrygdesats(BigDecimal trygdesats) {
+    public void setTrygdesats(Double trygdesats) {
         this.trygdesats = trygdesats;
     }
 

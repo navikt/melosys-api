@@ -7,10 +7,10 @@ import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Medlemskapsperiode;
+import no.nav.melosys.domain.avgift.Penger;
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
-import no.nav.melosys.domain.avgift.Penger;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Skatteplikttype;
@@ -114,7 +114,7 @@ class TrygdeavgiftTjenesteTest {
         var trygdeavgift = new Trygdeavgiftsperiode();
         trygdeavgift.setPeriodeFra(LocalDate.now());
         trygdeavgift.setPeriodeTil(LocalDate.now().plusDays(10));
-        trygdeavgift.setTrygdesats(BigDecimal.valueOf(7.9));
+        trygdeavgift.setTrygdesats(7.9);
         trygdeavgift.setTrygdeavgiftsbeløpMd(new Penger(BigDecimal.valueOf(10000)));
 
         var medlemskapsperiode = new Medlemskapsperiode();
