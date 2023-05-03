@@ -92,6 +92,27 @@ internal class OppgaveFactoryNyMappingTest {
     }
 
     @Test
+    fun `OppgaveFactory skal funger med NY_GOSYS_MAPPING_UNTAKK_FOR_MIGRERING toggle under migreing`() {
+        val behandling = lagBehandling(
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.TRYGDETID,
+            Behandlingstyper.FØRSTEGANG,
+            SedType.A003
+        )
+        OppgaveFactory(FakeUnleash().apply {
+            enable(
+                ToggleName.NY_GOSYS_MAPPING,
+                OppgaveGosysMapping.NY_GOSYS_MAPPING_UNTAKK_FOR_MIGRERING
+            )
+        }).apply {
+            val oppgave = lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument).build()
+            oppgave.behandlingstema.shouldBe(OppgaveBehandlingstema.EU_EOS_FORESPORSEL_OM_TRYGDETID.kode)
+        }
+    }
+
+
+    @Test
     fun `oppgave tema skal være av riktig type`() {
         oppgaveGosysMapping.rows.forEach { row ->
             row.behandlingstema.forEach { behandlingstema ->
