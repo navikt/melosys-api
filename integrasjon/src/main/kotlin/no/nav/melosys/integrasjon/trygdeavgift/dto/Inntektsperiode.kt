@@ -2,14 +2,12 @@ package no.nav.melosys.integrasjon.trygdeavgift.dto
 
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
-import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import java.math.BigDecimal
 
 data class Inntektsperiode(
     val periode: DatoPeriode,
     val inntektskilde: Inntektskildetype,
-    val skatteplikt: Skatteplikttype,
-    val arbeidsgiverBetalerAvgift: Boolean,
+    val arbeidsgiverBetalerAvgift: Boolean?,
     val trygdeavgiftBetalesTilSkatt: Boolean,
     val månedsbeløp: PengerDto?
 )

@@ -3,7 +3,6 @@ package no.nav.melosys.integrasjon.trygdeavgift.dto
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.kodeverk.Avgiftsdekning
 import no.nav.melosys.domain.kodeverk.Avgiftsdekning.*
-import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.Trygdedekninger.*
 import no.nav.melosys.exception.FunksjonellException
@@ -49,7 +48,6 @@ data class TrygdeavgiftBeregningsgrunnlag(
                 Inntektsperiode(
                     DatoPeriode(it.fomDato, it.tomDato),
                     it.type,
-                    Skatteplikttype.SKATTEPLIKTIG, // TODO: Fiks etter avklaring.
                     it.isArbeidsgiversavgiftBetalesTilSkatt,
                     it.isTrygdeavgiftBetalesTilSkatt,
                     PengerDto(it.avgiftspliktigInntektMnd),
