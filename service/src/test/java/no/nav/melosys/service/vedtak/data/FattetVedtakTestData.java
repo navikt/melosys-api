@@ -1,22 +1,7 @@
 package no.nav.melosys.service.vedtak.data;
 
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.avgift.TrygdeavgiftDeprecated;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.domain.mottatteopplysninger.SoeknadFtrl;
-import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
-import no.nav.melosys.domain.mottatteopplysninger.data.JuridiskArbeidsgiverNorge;
-import no.nav.melosys.domain.mottatteopplysninger.data.LoennOgGodtgjoerelse;
-import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -24,11 +9,25 @@ import no.nav.melosys.domain.eessi.sed.Adressetype;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.SoeknadFtrl;
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
+import no.nav.melosys.domain.mottatteopplysninger.data.JuridiskArbeidsgiverNorge;
+import no.nav.melosys.domain.mottatteopplysninger.data.LoennOgGodtgjoerelse;
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.integrasjon.pdl.dto.person.Navn;
 import no.nav.melosys.integrasjon.pdl.dto.person.Statsborgerskap;
 import no.nav.melosys.service.SaksbehandlingDataFactory;
 import no.nav.melosys.service.vedtak.publisering.dto.Fullmektig;
 import no.nav.melosys.service.vedtak.publisering.dto.*;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagBostedsadresse;
 
@@ -86,24 +85,8 @@ public class FattetVedtakTestData {
         m.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
         m.setTrygdedekning(Trygdedekninger.HELSE_OG_PENSJONSDEL);
         m.setMedlemskapstype(Medlemskapstyper.FRIVILLIG);
-        m.setTrygdeavgift(lagTrygdeavgift());
 
         return List.of(m);
-    }
-
-    private static Collection<TrygdeavgiftDeprecated> lagTrygdeavgift() {
-        TrygdeavgiftDeprecated norsk = new TrygdeavgiftDeprecated();
-        norsk.setAvgiftForInntekt(TrygdeavgiftDeprecated.AvgiftForInntekt.NORSK_INNTEKT);
-        norsk.setTrygdesats(BigDecimal.valueOf(2.3));
-        norsk.setTrygdeavgiftsbeløpMd(BigDecimal.valueOf(1150));
-        norsk.setAvgiftskode("M2E");
-        TrygdeavgiftDeprecated utenlandsk = new TrygdeavgiftDeprecated();
-        utenlandsk.setAvgiftForInntekt(TrygdeavgiftDeprecated.AvgiftForInntekt.UTENLANDSK_INNTEKT);
-        utenlandsk.setTrygdesats(BigDecimal.valueOf(4.3));
-        utenlandsk.setTrygdeavgiftsbeløpMd(BigDecimal.valueOf(430));
-        utenlandsk.setAvgiftskode("M2D");
-
-        return List.of(norsk, utenlandsk);
     }
 
     private static FastsattTrygdeavgift lagFastsattTrygdeavgift() {

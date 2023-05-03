@@ -47,7 +47,7 @@ class MedlemskapsperiodeTjenesteTest {
     @Test
     void hentMedlemskapsperioder_validerSchema() {
         final var medlemskapsperiode = lagMedlemskapsperiode();
-        when(medlemskapsperiodeService.hentMedlemskapsperioder(eq(behandlingID)))
+        when(medlemskapsperiodeService.hentMedlemskapsperioder(behandlingID))
             .thenReturn(Collections.singleton(medlemskapsperiode));
 
         var res = medlemskapsperiodeTjeneste.hentMedlemskapsperioder(behandlingID);
@@ -55,11 +55,11 @@ class MedlemskapsperiodeTjenesteTest {
 
         assertThat(res.getBody()).hasSize(1)
             .flatExtracting(
-                MedlemskapsperiodeDto::id, MedlemskapsperiodeDto::arbeidsland, MedlemskapsperiodeDto::bestemmelse,
+                MedlemskapsperiodeDto::id, MedlemskapsperiodeDto::arbeidsland,
                 MedlemskapsperiodeDto::fomDato, MedlemskapsperiodeDto::tomDato, MedlemskapsperiodeDto::trygdedekning,
                 MedlemskapsperiodeDto::innvilgelsesResultat, MedlemskapsperiodeDto::medlemskapstype)
             .containsExactly(
-                medlemskapsperiode.getId(), medlemskapsperiode.getArbeidsland(), medlemskapsperiode.getBestemmelse(),
+                medlemskapsperiode.getId(), medlemskapsperiode.getArbeidsland(),
                 medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getTrygdedekning(),
                 medlemskapsperiode.getInnvilgelsesresultat(), medlemskapsperiode.getMedlemskapstype()
             );

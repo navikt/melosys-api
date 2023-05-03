@@ -11,9 +11,6 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoNorge
-import no.nav.melosys.domain.avgift.AvgiftsgrunnlagInfoUtland
-import no.nav.melosys.domain.avgift.TrygdeavgiftsgrunnlagDeprecated
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
@@ -22,7 +19,6 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
-import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagServiceDeprecated
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.dokument.DokgenTestData
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
@@ -36,8 +32,6 @@ import java.time.temporal.ChronoUnit
 
 @ExtendWith(MockKExtension::class)
 internal class InnvilgelseFtrlMapperTest {
-    @MockK
-    private lateinit var mockTrygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagServiceDeprecated
 
     @MockK
     private lateinit var mockAvklarteVirksomheterService: AvklarteVirksomheterService
@@ -50,7 +44,6 @@ internal class InnvilgelseFtrlMapperTest {
     @BeforeEach
     fun setup() {
         innvilgelseFtrlMapper = InnvilgelseFtrlMapper(
-            mockTrygdeavgiftsgrunnlagService,
             mockAvklarteVirksomheterService,
             mockDokgenMapperDatahenter
         )
@@ -76,24 +69,9 @@ internal class InnvilgelseFtrlMapperTest {
                 arbeidsgiverNavn.shouldBe(ARBEIDSGIVER_NAVN)
                 arbeidsland.shouldBe(Landkoder.AT.beskrivelse)
                 isTrygdeavtaleMedArbeidsland.shouldBeFalse()
-                vurderingTrygdeavgift.shouldNotBeNull().apply {
-                    selvbetalende.shouldBeFalse()
-                    representantNavn.equals("1234")
-                    utenlandsk.shouldBeNull()
-                    norsk.shouldNotBeNull().apply {
-                        avgiftspliktigInntektMd() shouldBe 50000
-                        trygdeavgiftNav().shouldBeFalse()
-                        erSkattepliktig().shouldBeTrue()
-                        arbeidsgiverBetalerAvgift().shouldBeTrue()
-                        saerligeavgiftsgruppe().shouldBeNull()
-                    }
-                }
-                loennsforhold.shouldBe(Loenn_forhold.LØNN_FRA_NORGE.kode)
                 arbeidsgiverFullmektigNavn.shouldBeNull()
                 isBrukerHarFullmektig.shouldBeFalse()
                 avgiftssatsAar.shouldBe(DateTime.now().year.toString())
-                isLoennNorgeSkattepliktig.shouldBeTrue()
-                isLoennUtlandSkattepliktig.shouldBeFalse()
                 saksinfo.apply {
                     fnr().shouldBe(DokgenTestData.FNR_BRUKER)
                     saksnummer().shouldBe(SAKSNUMMER)
@@ -113,7 +91,6 @@ internal class InnvilgelseFtrlMapperTest {
     fun map_InnvilgetMedUtenlandskInntekt_harTrygdeavtaleMedLand_populererFelter() {
         mockHappyCase()
         every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.GB.kode) } returns Landkoder.GB.beskrivelse
-        every { mockTrygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(ofType()) } returns lagUtenlandskTrygdeAvgiftsgrunnlag()
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat().apply {
             behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland =
                 Soeknadsland(listOf("GB"), false)
@@ -122,16 +99,6 @@ internal class InnvilgelseFtrlMapperTest {
         innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling()).apply {
             arbeidsland.shouldBe(Landkoder.GB.beskrivelse)
             isTrygdeavtaleMedArbeidsland.shouldBeTrue()
-            vurderingTrygdeavgift.shouldNotBeNull().apply {
-                norsk.shouldBeNull()
-                utenlandsk.shouldNotBeNull().apply {
-                    avgiftspliktigInntektMd.shouldBe(50000)
-                    trygdeavgiftNav.shouldBeTrue()
-                    erSkattepliktig.shouldBeTrue()
-                    arbeidsgiverBetalerAvgift.shouldBeFalse()
-                    saerligeavgiftsgruppe.shouldBe(Saerligeavgiftsgrupper.ARBEIDSTAKER_MALAYSIA.kode)
-                }
-            }
         }
     }
 
@@ -168,29 +135,6 @@ internal class InnvilgelseFtrlMapperTest {
             .build()
     }
 
-    private fun lagNorskTrygdeAvgiftsgrunnlag(): TrygdeavgiftsgrunnlagDeprecated =
-        TrygdeavgiftsgrunnlagDeprecated(
-            Loenn_forhold.LØNN_FRA_NORGE,
-            lagAvgiftsGrunnlagNorge(),
-            null
-        )
-
-    private fun lagUtenlandskTrygdeAvgiftsgrunnlag(): TrygdeavgiftsgrunnlagDeprecated =
-        TrygdeavgiftsgrunnlagDeprecated(
-            Loenn_forhold.LØNN_FRA_UTLANDET,
-            null,
-            lagAvgiftsGrunnlagUtland()
-        )
-
-    private fun lagAvgiftsGrunnlagNorge(): AvgiftsgrunnlagInfoNorge = AvgiftsgrunnlagInfoNorge(
-        true, true, null,
-        Vurderingsutfall_trygdeavgift_norsk_inntekt.NORSK_INNTEKT_TRYGDEAVGIFT_NAV
-    )
-
-    private fun lagAvgiftsGrunnlagUtland(): AvgiftsgrunnlagInfoUtland = AvgiftsgrunnlagInfoUtland(
-        true, false, Saerligeavgiftsgrupper.ARBEIDSTAKER_MALAYSIA,
-        Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.UTENLANDSK_INNTEKT_TRYGDEAVGIFT_NAV
-    )
 
     private fun lagBehandlingsResultat(): Behandlingsresultat {
         return Behandlingsresultat().apply {
@@ -238,7 +182,6 @@ internal class InnvilgelseFtrlMapperTest {
     }
 
     private fun mockHappyCase() {
-        every { mockTrygdeavgiftsgrunnlagService.hentAvgiftsgrunnlag(ofType()) } returns lagNorskTrygdeAvgiftsgrunnlag()
         every { mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(ofType()) } returns lagAvklarteVirksomheter()
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat()
         every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.AT.kode) } returns Landkoder.AT.beskrivelse
