@@ -405,6 +405,18 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
             TableRow(
                 Sakstyper.TRYGDEAVTALE,
                 Sakstemaer.UNNTAK,
+                setOf(Behandlingstyper.HENVENDELSE),
+                setOf(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET),
+                Oppgave(
+                    null,
+                    Tema.UFM,
+                    Oppgavetyper.BEH_SAK_MK,
+                    Beskrivelsefelt.TOMT
+                )
+            ),
+            TableRow(
+                Sakstyper.TRYGDEAVTALE,
+                Sakstemaer.UNNTAK,
                 setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.REGISTRERING_UNNTAK),
                 Oppgave(
