@@ -6,11 +6,11 @@ import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.io.File
 
+@Disabled("brukes bare for å lage oppgave migrering html rapporter, fjerns fra git etter at migreing er utført")
 class LagRapportTest {
     private val oppgaveGosysMapping = OppgaveGosysMapping(FakeUnleash())
 
     @Test
-    @Disabled("brukes bare for å lage oppgave migrering html rapporter, fjerns fra git etter at migreing er utført")
     fun `lag rapport hvor kombinasjoner er gruppert etter antall pr kombinasjon`() {
         val oppgaveGosysMapping = OppgaveGosysMapping(FakeUnleash().apply { enable(OppgaveGosysMapping.NY_GOSYS_MAPPING_UNTAKK_FOR_MIGRERING) })
         val migreringsRapport = Migrering.migreringsRapportFraJson("/Users/rune/div/jsonrapport-prod.json")
@@ -37,7 +37,31 @@ class LagRapportTest {
         val html = tilHtml(tableRows)
 
         File("/Users/rune/div/filtert-mot-migrering.html").writeText(html)
+    }
 
+    @Test
+    fun `mapping regler gruppert`() {
+        oppgaveGosysMapping.allGrouped { name, list : List<Migrering.TableRowSingle> ->
+            println("${name} - ${list.size}")
+            val tableRows = list.sortedWith(
+                compareBy(
+                    { it.sakstype },
+                    { it.sakstema },
+                    { it.behandlingstype },
+                    { it.behandlingstema }
+                )
+            ).joinToString("\n") {
+                val oppgave: OppgaveGosysMapping.Oppgave =
+                    oppgaveGosysMapping.finnOppgave(it.sakstype, it.sakstema, it.behandlingstema, it.behandlingstype)
+                """<tr>
+                    ${it.tilTableRow()}
+                    ${oppgave.tilTableRow()}
+                </tr>
+            """.trimMargin()
+            }
+
+            File("/Users/rune/div/regler-fra-$name.html").writeText(tilHtml(tableRows))
+        }
     }
 
     @Test

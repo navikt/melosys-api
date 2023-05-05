@@ -17,12 +17,7 @@ internal fun OppgaveGosysMapping.all(
         behandlingstype: Behandlingstyper,
         behandlingstema: Behandlingstema,
     ) -> OppgaveGosysMapping.Oppgave? = { sakstype, sakstema, btype, btema ->
-        finnOppgave(
-            sakstype,
-            sakstema,
-            btema,
-            btype
-        )
+        finnOppgave(sakstype, sakstema, btema, btype)
     }
 ): List<Migrering.TableRowSingle> {
     var i = 0
@@ -52,3 +47,22 @@ internal fun OppgaveGosysMapping.all(
     }.toList().apply { println("don't match:$i") }
 }
 
+internal fun OppgaveGosysMapping.allGrouped(action: (name: String, list: List<Migrering.TableRowSingle>) -> Unit) =
+    mapOf(
+        "finnOppgaveFraTabell" to all { sakstype, sakstema, btype, btema ->
+            finnOppgaveFraTabell(sakstype, sakstema, btema, btype)
+        },
+        "finnOppgaveVedBehandlingstypeHenvendelseOgVirksomhet" to all { sakstype, sakstema, btype, btema ->
+            when {
+                finnOppgaveFraTabell(sakstype, sakstema, btema, btype) != null -> null
+                else -> finnOppgaveVedBehandlingstypeHenvendelseOgVirksomhet(sakstype, sakstema, btema, btype)
+            }
+        },
+        "finnOppgaveVedBehandlingstypeHenvendelse" to all { sakstype, sakstema, btype, btema ->
+            when {
+                finnOppgaveFraTabell(sakstype, sakstema, btema, btype) != null -> null
+                finnOppgaveVedBehandlingstypeHenvendelseOgVirksomhet(sakstype, sakstema, btema, btype) != null -> null
+                else -> finnOppgaveVedBehandlingstypeHenvendelse(sakstype, btema, btype)
+            }
+        }
+    ).forEach { action(it.key, it.value) }
