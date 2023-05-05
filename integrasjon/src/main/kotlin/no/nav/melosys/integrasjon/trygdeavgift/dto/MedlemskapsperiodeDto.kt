@@ -5,5 +5,6 @@ import no.nav.melosys.domain.kodeverk.Avgiftsdekning
 
 data class MedlemskapsperiodeDto(
     val periode: DatoPeriodeDto,
-    val avgiftsdekninger: Set<Avgiftsdekning>
+    val avgiftsdekninger: Set<Avgiftsdekning>,
+    var id: String
 )

@@ -69,6 +69,15 @@ class TrygdeavgiftsberegningService
             this.trygdesats = trygdeavgiftsperiodeDto.sats
             this.trygdeavgiftsbeløpMd = trygdeavgiftsperiodeDto.avgift.tilPenger()
             this.fastsattTrygdeavgift = fastsattTrygdeavgift
+            this.grunnlagInntekstperiode =
+                fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder
+                    .find { it.id.toString() == trygdeavgiftsperiodeDto.grunnlagInntektsperiode }
+            this.grunnlagMedlemskapsperiode =
+                fastsattTrygdeavgift.medlemAvFolketrygden.medlemskapsperioder
+                    .find { it.id.toString() == trygdeavgiftsperiodeDto.grunnlagMedlemskapsperiode }
+            this.grunnlagSkatteforholdTilNorge =
+                fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge
+                    .find { it.id.toString() == trygdeavgiftsperiodeDto.grunnlagSkatteforholdsperiode }
         }
 
     private fun valider(medlemAvFolketrygden: MedlemAvFolketrygden) {
@@ -90,7 +99,7 @@ class TrygdeavgiftsberegningService
     }
 
     @Transactional(readOnly = true)
-    fun hentTrygdeavgiftsberegning(behandlingsresultatID: Long): Set<no.nav.melosys.domain.avgift.Trygdeavgiftsperiode> {
+    fun hentTrygdeavgiftsberegning(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
         return medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)?.fastsattTrygdeavgift?.trygdeavgift
             ?: emptySet()
     }

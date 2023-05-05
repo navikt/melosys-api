@@ -33,7 +33,8 @@ data class TrygdeavgiftBeregningsgrunnlagDto(
             medlemskapsperioder.map {
                 MedlemskapsperiodeDto(
                     DatoPeriodeDto(it.fom, it.tom),
-                    avgiftsdekningerFraTrygdedekning(it.trygdedekning)
+                    avgiftsdekningerFraTrygdedekning(it.trygdedekning),
+                    it.id.toString()
                 )
             }
 
@@ -41,7 +42,8 @@ data class TrygdeavgiftBeregningsgrunnlagDto(
             skatteforholdTilNorge.map {
                 SkatteforholdsperiodeDto(
                     DatoPeriodeDto(it.fomDato, it.tomDato),
-                    it.skatteplikttype
+                    it.skatteplikttype,
+                    it.id.toString()
                 )
             }
 
@@ -53,6 +55,7 @@ data class TrygdeavgiftBeregningsgrunnlagDto(
                     it.isArbeidsgiversavgiftBetalesTilSkatt,
                     it.isTrygdeavgiftBetalesTilSkatt,
                     PengerDto(it.avgiftspliktigInntektMnd),
+                    it.id.toString()
                 )
             }
 

@@ -9,7 +9,8 @@ data class InntektsperiodeDto(
     val inntektskilde: Inntektskildetype,
     val arbeidsgiverBetalerAvgift: Boolean?,
     val trygdeavgiftBetalesTilSkatt: Boolean,
-    val månedsbeløp: PengerDto?
+    val månedsbeløp: PengerDto?,
+    var id: String
 )
 
 data class PengerDto(val verdi: BigDecimal, var valuta: Valuta = NOK) {

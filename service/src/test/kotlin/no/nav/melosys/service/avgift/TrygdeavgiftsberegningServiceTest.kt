@@ -96,7 +96,10 @@ internal class TrygdeavgiftsberegningServiceTest {
                     TrygdeavgiftsperiodeDto(
                         DatoPeriodeDto(FOM, TOM),
                         7.9,
-                        PengerDto(BigDecimal.valueOf(790), NOK)
+                        PengerDto(BigDecimal.valueOf(790), NOK),
+                        "1",
+                        "1",
+                        "1"
                     )
                 )
             )
