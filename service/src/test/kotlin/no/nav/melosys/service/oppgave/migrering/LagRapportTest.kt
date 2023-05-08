@@ -41,7 +41,7 @@ class LagRapportTest {
 
     @Test
     fun `mapping regler gruppert`() {
-        oppgaveGosysMapping.allGrouped { name, list : List<Migrering.TableRowSingle> ->
+        oppgaveGosysMapping.allGrouped { name, list: List<Migrering.TableRowSingle> ->
             println("${name} - ${list.size}")
             val tableRows = list.sortedWith(
                 compareBy(
@@ -95,26 +95,61 @@ class LagRapportTest {
 
     @Test
     fun `gyldige melosys kombinasjoner som tabell`() {
-        val tableRows = oppgaveGosysMapping.all().apply { println("all size:$size") }.sortedWith(
-            compareBy(
-                { it.sakstype },
-                { it.sakstema },
-                { it.behandlingstype },
-                { it.behandlingstema }
-            )
-        ).apply { println("fitered size:$size") }.joinToString("\n") {
-            val oppgave: OppgaveGosysMapping.Oppgave =
-                oppgaveGosysMapping.finnOppgave(it.sakstype, it.sakstema, it.behandlingstema, it.behandlingstype)
-            """<tr>
-                    ${it.tilTableRow()}
-                    ${oppgave.tilTableRow()}
-                </tr>
-            """.trimMargin()
+        document {
+            table {
+                th {
+                    item(bc = "BurlyWood") { "Sakstype" }
+                    item(bc = "BurlyWood") { "Sakstema" }
+                    item(bc = "BurlyWood") { "Behandlingstype" }
+                    item(bc = "BurlyWood") { "Behandlingstema" }
+                    item(bc = "Chocolate") { "Mapping regel" }
+                    item(bc = "DarkSalmon") { "Behandlingstema" }
+                    item(bc = "DarkSalmon") { "Behandlingstema beskrivelse" }
+                    item(bc = "DarkSalmon") { "Tema" }
+                    item(bc = "DarkSalmon") { "Oppgavetype" }
+                    item(bc = "DarkSalmon") { "Beskrivelsesfelt" }
+                }
+                oppgaveGosysMapping.all().sortedWith(
+                    compareBy(
+                        { it.sakstype },
+                        { it.sakstema },
+                        { it.behandlingstype },
+                        { it.behandlingstema }
+                    )
+                ).forEach {
+                    val oppgave = oppgaveGosysMapping.finnOppgave(it.sakstype, it.sakstema, it.behandlingstema, it.behandlingstype)
+                    val fargeFraRegelTuffet = when(oppgave.regelTruffet) {
+                        OppgaveGosysMapping.Regel.FRA_TABELL -> "MintCream"
+                        OppgaveGosysMapping.Regel.HENVENDELSE -> "MistyRose"
+                        OppgaveGosysMapping.Regel.HENVENDELSE_OG_VIRKSOMHET -> "Orchid"
+                    }
+                    val fontType = when(oppgave.regelTruffet) {
+                        OppgaveGosysMapping.Regel.FRA_TABELL -> Font.NORMAL
+                        OppgaveGosysMapping.Regel.HENVENDELSE -> Font.ITALIC
+                        OppgaveGosysMapping.Regel.HENVENDELSE_OG_VIRKSOMHET -> Font.STRONG
+                    }
+                    tr {
+                        item(bc = "OldLace") { it.sakstype }
+                        item(bc = "OldLace") { it.sakstema }
+                        item(bc = "OldLace") { it.behandlingstype }
+                        item(bc = "OldLace") { it.behandlingstema }
+                        item(bc = fargeFraRegelTuffet, font = fontType) { oppgave.regelTruffet.beskrivelse }
+                        item(bc = "PeachPuff") { oppgave.oppgaveBehandlingstema?.kode }
+                        item(bc = "PeachPuff") { oppgave.oppgaveBehandlingstema?.name }
+                        item(bc = "PeachPuff") { oppgave.tema }
+                        item(bc = "PeachPuff") { oppgave.oppgaveType }
+                        item(bc = "PeachPuff") { oppgave.beskrivelsefelt }
+                    }
+                }
+            }
+        }.apply {
+            this.export(HtmlExporter()).let {
+                File("/Users/rune/div/oppgave-mapping-kombinasjoner.html").writeText(it)
+            }
+            this.export(ConfluenceWikiExporter()).let {
+                File("/Users/rune/div/oppgave-mapping-kombinasjoner.txt").writeText(it)
+            }
         }
-
-        val html = tilHtml(tableRows)
-
-        File("/Users/rune/div/gyldige-kobos3.html").writeText(html)
     }
 
     private fun tilHtml(tableRows: String): String {
@@ -161,7 +196,7 @@ class LagRapportTest {
     private fun OppgaveGosysMapping.Oppgave.tilTableRow(): String {
         val sakStyle = "class=\"oppgave\""
         return """
-            <td $sakStyle> ${regelTruffet?.beskrivelse}</td>
+            <td $sakStyle> ${regelTruffet.beskrivelse}</td>
             <td $sakStyle> ${oppgaveBehandlingstema?.kode}</td>
             <td $sakStyle> ${oppgaveBehandlingstema?.name}</td>
             <td $sakStyle> ${tema.name}</td>
@@ -172,16 +207,6 @@ class LagRapportTest {
     }
 
     private fun Migrering.Sak.tilTableRow(): String {
-        val sakStyle = "class=\"sak\""
-        return """
-            <td $sakStyle> $sakstype</td>
-            <td $sakStyle> ${splitLong(sakstema.name)}</td>
-            <td $sakStyle> ${splitLong(behandlingstype.kode)}</td>
-            <td $sakStyle> ${splitLong(behandlingstema.kode)}</td>
-        """.trimIndent()
-    }
-
-    private fun Migrering.TableRowSingle.tilTableRow(): String {
         val sakStyle = "class=\"sak\""
         return """
             <td $sakStyle> $sakstype</td>
