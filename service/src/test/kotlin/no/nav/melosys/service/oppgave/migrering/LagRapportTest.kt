@@ -50,18 +50,47 @@ class LagRapportTest {
                     { it.behandlingstype },
                     { it.behandlingstema }
                 )
-            ).joinToString("\n") {
+            ).toTableRows { row ->
                 val oppgave: OppgaveGosysMapping.Oppgave =
-                    oppgaveGosysMapping.finnOppgave(it.sakstype, it.sakstema, it.behandlingstema, it.behandlingstype)
-                """<tr>
-                    ${it.tilTableRow()}
-                    ${oppgave.tilTableRow()}
-                </tr>
-            """.trimMargin()
+                    oppgaveGosysMapping.finnOppgave(row.sakstype, row.sakstema, row.behandlingstema, row.behandlingstype)
+                listOf(
+                    Row(row.sakstype.name, "#fff0b3"),
+                    Row(row.sakstema.name),
+                    Row(row.behandlingstype.kode),
+                    Row(row.behandlingstema.kode),
+
+                    Row(oppgave.oppgaveBehandlingstema?.kode),
+                    Row(oppgave.oppgaveBehandlingstema?.name),
+                    Row(oppgave.tema.name),
+                    Row(oppgave.oppgaveType.kode),
+                    Row(oppgave.beskrivelsefelt.name),
+                ).joinToString("\n") { it.toHtml() }
             }
 
-            File("/Users/rune/div/regler-fra-$name.html").writeText(tilHtml(tableRows))
+            val html = tilHtml(tableRows)
+            File("/Users/rune/div/regler-fra-$name.html").writeText(html)
         }
+    }
+
+    class Row(
+        val text: String?,
+        val color: String? = null
+    ) {
+        fun toHtml(): String {
+            val style = if (color != null) "style=\"background-color:$color\"" else ""
+            return """
+                <td $style>$text</td>
+            """.trimIndent()
+        }
+    }
+
+    private fun <T> Iterable<T>.toTableRows(a: (b: T) -> String): String {
+        return this.map {
+            """<tr>
+                    ${a(it)}
+                </tr>
+            """.trimIndent()
+        }.joinToString("")
     }
 
     @Test
@@ -132,6 +161,7 @@ class LagRapportTest {
     private fun OppgaveGosysMapping.Oppgave.tilTableRow(): String {
         val sakStyle = "class=\"oppgave\""
         return """
+            <td $sakStyle> ${regelTruffet?.beskrivelse}</td>
             <td $sakStyle> ${oppgaveBehandlingstema?.kode}</td>
             <td $sakStyle> ${oppgaveBehandlingstema?.name}</td>
             <td $sakStyle> ${tema.name}</td>
