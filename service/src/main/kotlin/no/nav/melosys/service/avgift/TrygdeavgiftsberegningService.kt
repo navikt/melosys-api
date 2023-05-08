@@ -1,5 +1,7 @@
 package no.nav.melosys.service.avgift
 
+import com.google.common.collect.BiMap
+import com.google.common.collect.HashBiMap
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
@@ -12,6 +14,7 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsperiodeDto
 import no.nav.melosys.service.MedlemAvFolketrygdenService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.*
 
 @Service
 class TrygdeavgiftsberegningService
@@ -33,35 +36,44 @@ class TrygdeavgiftsberegningService
             return emptySet()
         }
 
-        val beregnetTrygdeavgift =
+        val (beregnetTrygdeavgift, DBID_UUID_MAP) =
             beregnTrygdeavgift(medlemAvFolketrygden.medlemskapsperioder, fastsattTrygdeavgift.trygdeavgiftsgrunnlag)
-        oppdaterTrygdeavgift(beregnetTrygdeavgift, fastsattTrygdeavgift)
+        oppdaterTrygdeavgift(beregnetTrygdeavgift, fastsattTrygdeavgift, DBID_UUID_MAP)
         return medlemAvFolketrygdenService.lagre(medlemAvFolketrygden).fastsattTrygdeavgift.trygdeavgift
     }
 
     private fun beregnTrygdeavgift(
         medlemskapsperioder: Collection<Medlemskapsperiode>,
         trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag,
-    ): List<TrygdeavgiftsperiodeDto> =
-        trygdeavgiftConsumer.beregnTrygdeavgift(
-            TrygdeavgiftBeregningsgrunnlagDto.av(
-                medlemskapsperioder,
-                trygdeavgiftsgrunnlag.skatteforholdTilNorge,
-                trygdeavgiftsgrunnlag.inntektsperioder
-            )
+    ): Pair<List<TrygdeavgiftsperiodeDto>, MutableList<BiMap<Long, UUID>>> {
+        val DBID_UUID_MAP =
+            mutableListOf<BiMap<Long, UUID>>(HashBiMap.create(), HashBiMap.create(), HashBiMap.create())
+
+        return Pair(
+            trygdeavgiftConsumer.beregnTrygdeavgift(
+                TrygdeavgiftBeregningsgrunnlagDto.av(
+                    medlemskapsperioder,
+                    trygdeavgiftsgrunnlag.skatteforholdTilNorge,
+                    trygdeavgiftsgrunnlag.inntektsperioder,
+                    DBID_UUID_MAP
+                )
+            ), DBID_UUID_MAP
         )
+    }
 
     private fun oppdaterTrygdeavgift(
         beregnetTrygdeavgift: List<TrygdeavgiftsperiodeDto>,
-        fastsattTrygdeavgift: FastsattTrygdeavgift
+        fastsattTrygdeavgift: FastsattTrygdeavgift,
+        DBID_UUID_MAP: MutableList<BiMap<Long, UUID>>
     ) =
         beregnetTrygdeavgift.forEach {
-            fastsattTrygdeavgift.trygdeavgift.add(lagTrygdeavgiftsperiode(fastsattTrygdeavgift, it))
+            fastsattTrygdeavgift.trygdeavgift.add(lagTrygdeavgiftsperiode(fastsattTrygdeavgift, it, DBID_UUID_MAP))
         }
 
     private fun lagTrygdeavgiftsperiode(
         fastsattTrygdeavgift: FastsattTrygdeavgift,
-        trygdeavgiftsperiodeDto: TrygdeavgiftsperiodeDto
+        trygdeavgiftsperiodeDto: TrygdeavgiftsperiodeDto,
+        DBID_UUID_MAP: MutableList<BiMap<Long, UUID>>
     ) =
         Trygdeavgiftsperiode().apply {
             this.periodeFra = trygdeavgiftsperiodeDto.periode.fom
@@ -71,13 +83,20 @@ class TrygdeavgiftsberegningService
             this.fastsattTrygdeavgift = fastsattTrygdeavgift
             this.grunnlagInntekstperiode =
                 fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder
-                    .find { it.id.toString() == trygdeavgiftsperiodeDto.grunnlagInntektsperiode }
+                    .find {
+                        it.id == DBID_UUID_MAP.get(0).inverse().get(trygdeavgiftsperiodeDto.grunnlagInntektsperiode)
+                    }
             this.grunnlagMedlemskapsperiode =
                 fastsattTrygdeavgift.medlemAvFolketrygden.medlemskapsperioder
-                    .find { it.id.toString() == trygdeavgiftsperiodeDto.grunnlagMedlemskapsperiode }
+                    .find {
+                        it.id == DBID_UUID_MAP.get(1).inverse().get(trygdeavgiftsperiodeDto.grunnlagMedlemskapsperiode)
+                    }
             this.grunnlagSkatteforholdTilNorge =
                 fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge
-                    .find { it.id.toString() == trygdeavgiftsperiodeDto.grunnlagSkatteforholdsperiode }
+                    .find {
+                        it.id == DBID_UUID_MAP.get(2).inverse()
+                            .get(trygdeavgiftsperiodeDto.grunnlagSkatteforholdsperiode)
+                    }
         }
 
     private fun valider(medlemAvFolketrygden: MedlemAvFolketrygden) {

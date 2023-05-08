@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.trygdeavgift.dto
 
+import com.google.common.collect.BiMap
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
@@ -8,6 +9,7 @@ import no.nav.melosys.domain.kodeverk.Avgiftsdekning.*
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.Trygdedekninger.*
 import no.nav.melosys.exception.FunksjonellException
+import java.util.*
 
 
 data class TrygdeavgiftBeregningsgrunnlagDto(
@@ -20,34 +22,44 @@ data class TrygdeavgiftBeregningsgrunnlagDto(
         fun av(
             medlemskapsperioder: Collection<Medlemskapsperiode>,
             skatteforholdTilNorge: Collection<SkatteforholdTilNorge>,
-            inntektsperioder: Collection<Inntektsperiode>
+            inntektsperioder: Collection<Inntektsperiode>,
+            DBID_UUID_MAP: MutableList<BiMap<Long, UUID>>
         ): TrygdeavgiftBeregningsgrunnlagDto =
             TrygdeavgiftBeregningsgrunnlagDto(
-                mapMedlemskapsperioder(medlemskapsperioder).toSet(),
-                mapSkatteforholdsperioder(skatteforholdTilNorge).toSet(),
-                mapInntektsperioder(inntektsperioder)
+                mapMedlemskapsperioder(medlemskapsperioder, DBID_UUID_MAP).toSet(),
+                mapSkatteforholdsperioder(skatteforholdTilNorge, DBID_UUID_MAP).toSet(),
+                mapInntektsperioder(inntektsperioder, DBID_UUID_MAP)
             )
 
 
-        private fun mapMedlemskapsperioder(medlemskapsperioder: Collection<Medlemskapsperiode>): List<MedlemskapsperiodeDto> =
+        private fun mapMedlemskapsperioder(
+            medlemskapsperioder: Collection<Medlemskapsperiode>,
+            DBID_UUID_MAP: MutableList<BiMap<Long, UUID>>
+        ): List<MedlemskapsperiodeDto> =
             medlemskapsperioder.map {
                 MedlemskapsperiodeDto(
                     DatoPeriodeDto(it.fom, it.tom),
                     avgiftsdekningerFraTrygdedekning(it.trygdedekning),
-                    it.id.toString()
+                    DBID_UUID_MAP.get(0).put(it.id, UUID.randomUUID())!!
                 )
             }
 
-        private fun mapSkatteforholdsperioder(skatteforholdTilNorge: Collection<SkatteforholdTilNorge>): List<SkatteforholdsperiodeDto> =
+        private fun mapSkatteforholdsperioder(
+            skatteforholdTilNorge: Collection<SkatteforholdTilNorge>,
+            DBID_UUID_MAP: MutableList<BiMap<Long, UUID>>
+        ): List<SkatteforholdsperiodeDto> =
             skatteforholdTilNorge.map {
                 SkatteforholdsperiodeDto(
                     DatoPeriodeDto(it.fomDato, it.tomDato),
                     it.skatteplikttype,
-                    it.id.toString()
+                    DBID_UUID_MAP.get(1).put(it.id, UUID.randomUUID())!!
                 )
             }
 
-        private fun mapInntektsperioder(inntektsperioder: Collection<Inntektsperiode>): List<InntektsperiodeDto> =
+        private fun mapInntektsperioder(
+            inntektsperioder: Collection<Inntektsperiode>,
+            DBID_UUID_MAP: MutableList<BiMap<Long, UUID>>
+        ): List<InntektsperiodeDto> =
             inntektsperioder.map {
                 InntektsperiodeDto(
                     DatoPeriodeDto(it.fomDato, it.tomDato),
@@ -55,7 +67,7 @@ data class TrygdeavgiftBeregningsgrunnlagDto(
                     it.isArbeidsgiversavgiftBetalesTilSkatt,
                     it.isTrygdeavgiftBetalesTilSkatt,
                     PengerDto(it.avgiftspliktigInntektMnd),
-                    it.id.toString()
+                    DBID_UUID_MAP.get(2).put(it.id, UUID.randomUUID())!!
                 )
             }
 
