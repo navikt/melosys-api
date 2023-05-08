@@ -12,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemm
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
 import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag
 import no.nav.melosys.domain.util.IsoLandkodeKonverterer
+import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForGet
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPost
@@ -22,7 +23,7 @@ import java.time.LocalDate
 @Service
 class MedlService(
     private val medlemskapRestConsumer: MedlemskapRestConsumer,
-    private val objectMapper: ObjectMapper,
+    private val objectMapper: ObjectMapper
 ) {
 
     init {
@@ -141,17 +142,17 @@ class MedlService(
     }
 
     private fun lovvalgRequest(periodeOmLovvalg: PeriodeOmLovvalg): MedlemskapsunntakForPost {
-        var overgangsregelbestemmelser = listOf<Overgangsregelbestemmelser>()
-
-        if (periodeOmLovvalg.behandlingsresultat?.behandling?.mottatteOpplysninger?.mottatteOpplysningerData != null) {
-            overgangsregelbestemmelser =
-                (periodeOmLovvalg.behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SedGrunnlag).overgangsregelbestemmelser
-        }
-
+        val overgangsregelbestemmelser =
+            (periodeOmLovvalg.behandlingsresultat?.behandling?.mottatteOpplysninger?.mottatteOpplysningerData
+                as? SedGrunnlag)?.overgangsregelbestemmelser ?: listOf<Overgangsregelbestemmelser>()
 
         val lovvalgBestemmelse = MedlPeriodeKonverter.hentLovvalgBestemmelse(
             periodeOmLovvalg
         )
+
+        if (harOvergangsregler(lovvalgBestemmelse) && overgangsregelbestemmelser.isEmpty()) {
+            throw FunksjonellException("Grunnlaget ${lovvalgBestemmelse.kode} og overgangsregler skal benyttes, men er tom.")
+        }
 
         val grunnlag =
             if (harOvergangsregler(lovvalgBestemmelse)) MedlPeriodeKonverter.tilGrunnlagMedltypeFraOvergangsregler(
