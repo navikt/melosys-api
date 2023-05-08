@@ -90,7 +90,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
         val tema: Tema,
         val oppgaveType: Oppgavetyper,
         val beskrivelsefelt: Beskrivelsefelt,
-        val regelTruffet: Regel? = Regel.FRA_TABELL
+        val regelTruffet: Regel = Regel.FRA_TABELL
     )
 
     internal data class TableRow(
