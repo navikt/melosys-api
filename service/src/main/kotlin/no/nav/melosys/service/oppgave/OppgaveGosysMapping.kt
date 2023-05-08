@@ -47,7 +47,9 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
             oppgaveBehandlingstema = null,
             oppgaveType = Oppgavetyper.VURD_HENV,
             tema = teamaUtleder.utledTema(sakstype, sakstema, behandlingstema),
-            beskrivelsefelt = Beskrivelsefelt.TOMT
+            beskrivelsefelt = Beskrivelsefelt.TOMT,
+            regelTruffet = Regel.HENVENDELSE_OG_VIRKSOMHET
+
         )
     }
 
@@ -64,7 +66,8 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 oppgaveBehandlingstema = it.oppgaveBehandlingstema,
                 oppgaveType = Oppgavetyper.VURD_HENV,
                 tema = it.tema,
-                beskrivelsefelt = Beskrivelsefelt.SED_ELLER_TOMT
+                beskrivelsefelt = Beskrivelsefelt.SED_ELLER_TOMT,
+                regelTruffet = Regel.HENVENDELSE
             )
         }
     }
@@ -77,11 +80,17 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
         A1_ANMODNING_OM_UNNTAK_PAPIR(Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR.beskrivelse)
     }
 
+    enum class Regel(val beskrivelse: String) {
+        FRA_TABELL("tabell"),
+        HENVENDELSE("henvendelse"),
+        HENVENDELSE_OG_VIRKSOMHET("henv-virksomhet")
+    }
     internal data class Oppgave(
         val oppgaveBehandlingstema: OppgaveBehandlingstema?,
         val tema: Tema,
         val oppgaveType: Oppgavetyper,
-        val beskrivelsefelt: Beskrivelsefelt
+        val beskrivelsefelt: Beskrivelsefelt,
+        val regelTruffet: Regel? = Regel.FRA_TABELL
     )
 
     internal data class TableRow(
