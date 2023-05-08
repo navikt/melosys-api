@@ -400,7 +400,6 @@ class EessiServiceTest {
 
     @Test
     void sendGodkjenningArbeidFlereLand__feiler_ikke_når_x008_utsending_feiler() {
-        unleash.enable(ToggleName.ANNULER_SED_NY_VURDERING);
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
         behandling.setType(Behandlingstyper.NY_VURDERING);
@@ -437,7 +436,6 @@ class EessiServiceTest {
 
     @Test
     void sendAvslagUtpekingSvar__feiler_ikke_når_x008_utsending_feiler() {
-        unleash.enable(ToggleName.ANNULER_SED_NY_VURDERING);
         Behandling behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
         behandling.setType(Behandlingstyper.NY_VURDERING);

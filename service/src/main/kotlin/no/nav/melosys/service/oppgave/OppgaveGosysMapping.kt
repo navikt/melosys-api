@@ -1,5 +1,6 @@
 package no.nav.melosys.service.oppgave
 
+import no.finn.unleash.Unleash
 import no.nav.melosys.domain.Tema
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -7,7 +8,9 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 
-internal class OppgaveGosysMapping {
+internal class OppgaveGosysMapping(private val unleash: Unleash) {
+
+    private val teamaUtleder = OppgaveTemaUtleder()
 
     internal fun finnOppgave(
         sakstype: Sakstyper,
@@ -15,7 +18,8 @@ internal class OppgaveGosysMapping {
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper?
     ): Oppgave = finnOppgaveFraTabell(sakstype, sakstema, behandlingstema, behandlingstype)
-        ?: finnOppgaveVedBehandlingstypeHenvendelse(sakstype, behandlingstema)
+        ?: finnOppgaveVedBehandlingstypeHenvendelseOgVirksomhet(sakstype, sakstema, behandlingstema, behandlingstype)
+        ?: finnOppgaveVedBehandlingstypeHenvendelse(sakstype, behandlingstema, behandlingstype)
         ?: throw IllegalStateException(
             "Fant ikke oppgave mapping for " +
                 "sakstype:$sakstype, sakstema:$sakstema, behandlingstema:$behandlingstema, behandlingstype:$behandlingstype"
@@ -31,18 +35,38 @@ internal class OppgaveGosysMapping {
         it.sakstype == sakstype && it.sakstema == sakstema && behandlingstype in it.behandlingstype && behandlingstema in it.behandlingstema
     }?.oppgave
 
+    fun finnOppgaveVedBehandlingstypeHenvendelseOgVirksomhet(
+        sakstype: Sakstyper,
+        sakstema: Sakstemaer,
+        behandlingstema: Behandlingstema,
+        behandlingstype: Behandlingstyper?,
+    ): Oppgave? {
+        if (behandlingstema != Behandlingstema.VIRKSOMHET) return null
+        if (behandlingstype != Behandlingstyper.HENVENDELSE) return null
+        return Oppgave(
+            oppgaveBehandlingstema = null,
+            oppgaveType = Oppgavetyper.VURD_HENV,
+            tema = teamaUtleder.utledTema(sakstype, sakstema, behandlingstema),
+            beskrivelsefelt = Beskrivelsefelt.TOMT
+        )
+    }
+
     fun finnOppgaveVedBehandlingstypeHenvendelse(
         sakstype: Sakstyper,
         behandlingstema: Behandlingstema,
-    ): Oppgave? = rows.find {
-        it.sakstype == sakstype && behandlingstema in it.behandlingstema
-    }?.oppgave?.let {
-        Oppgave(
-            oppgaveBehandlingstema = it.oppgaveBehandlingstema,
-            oppgaveType = Oppgavetyper.VURD_HENV,
-            tema = it.tema,
-            beskrivelsefelt = Beskrivelsefelt.SED_ELLER_TOMT
-        )
+        behandlingstype: Behandlingstyper?
+    ): Oppgave? {
+        if (behandlingstype != Behandlingstyper.HENVENDELSE) return null
+        return rows.find {
+            it.sakstype == sakstype && behandlingstema in it.behandlingstema
+        }?.oppgave?.let {
+            Oppgave(
+                oppgaveBehandlingstema = it.oppgaveBehandlingstema,
+                oppgaveType = Oppgavetyper.VURD_HENV,
+                tema = it.tema,
+                beskrivelsefelt = Beskrivelsefelt.SED_ELLER_TOMT
+            )
+        }
     }
 
 
@@ -54,7 +78,7 @@ internal class OppgaveGosysMapping {
     }
 
     internal data class Oppgave(
-        val oppgaveBehandlingstema: OppgaveBehandlingstema,
+        val oppgaveBehandlingstema: OppgaveBehandlingstema?,
         val tema: Tema,
         val oppgaveType: Oppgavetyper,
         val beskrivelsefelt: Beskrivelsefelt
@@ -345,7 +369,7 @@ internal class OppgaveGosysMapping {
             TableRow(
                 Sakstyper.EU_EOS,
                 Sakstemaer.UNNTAK,
-                setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING),
+                setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR),
                 Oppgave(
                     OppgaveBehandlingstema.EU_EOS_SOKNAD_OM_UNNTAK,
@@ -372,8 +396,20 @@ internal class OppgaveGosysMapping {
                 setOf(Behandlingstyper.HENVENDELSE),
                 setOf(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET),
                 Oppgave(
-                    OppgaveBehandlingstema.AVTALAND_FORESPORSEL_FRA_TRYGDEMYNDIGHET,
+                    null,
                     Tema.MED,
+                    Oppgavetyper.BEH_SAK_MK,
+                    Beskrivelsefelt.TOMT
+                )
+            ),
+            TableRow(
+                Sakstyper.TRYGDEAVTALE,
+                Sakstemaer.UNNTAK,
+                setOf(Behandlingstyper.HENVENDELSE),
+                setOf(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET),
+                Oppgave(
+                    null,
+                    Tema.UFM,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.TOMT
                 )
@@ -393,7 +429,7 @@ internal class OppgaveGosysMapping {
             TableRow(
                 Sakstyper.TRYGDEAVTALE,
                 Sakstemaer.UNNTAK,
-                setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING),
+                setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL),
                 Oppgave(
                     OppgaveBehandlingstema.AVTALAND_SOKNAD_OM_UNNTAK,
@@ -402,6 +438,31 @@ internal class OppgaveGosysMapping {
                     Beskrivelsefelt.TOMT
                 )
             )
-        )
+        ) + spesialReglerForMigringVedIkkeStøttetKombinasjon()
+    }
+
+    fun spesialReglerForMigringVedIkkeStøttetKombinasjon(): List<TableRow> =
+        if (unleash.isEnabled(NY_GOSYS_MAPPING_UNTAKK_FOR_MIGRERING))
+            listOf(
+                TableRow(
+                    Sakstyper.EU_EOS,
+                    Sakstemaer.MEDLEMSKAP_LOVVALG,
+                    setOf(
+                        Behandlingstyper.FØRSTEGANG,
+                        Behandlingstyper.NY_VURDERING
+                    ),
+                    setOf(Behandlingstema.TRYGDETID),
+                    Oppgave(
+                        OppgaveBehandlingstema.EU_EOS_FORESPORSEL_OM_TRYGDETID,
+                        Tema.MED,
+                        Oppgavetyper.BEH_SED,
+                        Beskrivelsefelt.SED
+                    )
+                )
+            ) else listOf()
+
+    companion object {
+        // Den skal kun settes av Oppgave migrering
+        const val NY_GOSYS_MAPPING_UNTAKK_FOR_MIGRERING = "melosys.ny_gosys_mapping_untakk_for_migrering"
     }
 }

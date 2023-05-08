@@ -1,0 +1,22 @@
+package no.nav.melosys.service.oppgave
+
+import no.nav.melosys.domain.Tema
+import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+
+class OppgaveTemaUtleder {
+    fun utledTema(sakstype: Sakstyper, sakstema: Sakstemaer?, behandlingstema: Behandlingstema): Tema {
+        if (sakstype == Sakstyper.FTRL && behandlingstema == Behandlingstema.UNNTAK_MEDLEMSKAP)
+            return Tema.UFM
+
+        return when (sakstema) {
+            Sakstemaer.MEDLEMSKAP_LOVVALG -> Tema.MED
+            Sakstemaer.TRYGDEAVGIFT -> Tema.TRY
+            Sakstemaer.UNNTAK -> Tema.UFM
+            else -> {
+                throw IllegalStateException("ingen mapping for sakstema:$sakstema")
+            }
+        }
+    }
+}

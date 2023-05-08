@@ -21,6 +21,7 @@ class OppgaveFactory(private val unleash: Unleash) {
     private val oppgaveBehandlingstemaUtleder = OppgaveBehandlingstemUnleashAwareUtleder(unleash)
     private val oppgavetypeUtleder = OppgavetypeUnleashAwareUtleder(unleash)
     private val oppgaveBeskrivelseUtleder = OppgaveBeskrivelseUnleashAwareUtleder(unleash)
+    private val temaUtleder = OppgaveTemaUtleder()
 
     fun lagBehandlingsoppgave(
         behandling: Behandling,
@@ -37,7 +38,7 @@ class OppgaveFactory(private val unleash: Unleash) {
         return Oppgave.Builder()
             .setBehandlesAvApplikasjon(Fagsystem.MELOSYS)
             .setPrioritet(PrioritetType.NORM)
-            .setBehandlingstema(oppgaveBehandlingstema.kode)
+            .setBehandlingstema(oppgaveBehandlingstema?.kode)
             .setBehandlingstype(oppgaveBehandlingstype?.kode)
             .setTema(utledTema(sakstype, sakstema, behandlingstema))
             .setOppgavetype(utledOppgavetype(sakstype, sakstema, behandlingstema, behandlingstype))
@@ -56,7 +57,7 @@ class OppgaveFactory(private val unleash: Unleash) {
 
     fun utledOppgaveBehandlingstema(
         sakstype: Sakstyper, sakstema: Sakstemaer, behandlingstema: Behandlingstema, behandlingstype: Behandlingstyper?
-    ): OppgaveBehandlingstema =
+    ): OppgaveBehandlingstema? =
         oppgaveBehandlingstemaUtleder.utledOppgaveBehandlingstema(
             sakstype, sakstema, behandlingstema, behandlingstype
         )
@@ -72,8 +73,7 @@ class OppgaveFactory(private val unleash: Unleash) {
     }
 
     fun utledTema(sakstype: Sakstyper, sakstema: Sakstemaer?, behandlingstema: Behandlingstema): Tema {
-        if (brukNyMapping() && sakstype == Sakstyper.FTRL && behandlingstema == Behandlingstema.UNNTAK_MEDLEMSKAP)
-            return Tema.UFM
+        if (brukNyMapping()) return temaUtleder.utledTema(sakstype, sakstema, behandlingstema)
 
         return when (sakstema) {
             Sakstemaer.MEDLEMSKAP_LOVVALG -> Tema.MED
@@ -85,7 +85,7 @@ class OppgaveFactory(private val unleash: Unleash) {
         }
     }
 
-    private fun utledOppgavetype(
+    internal fun utledOppgavetype(
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
@@ -94,8 +94,8 @@ class OppgaveFactory(private val unleash: Unleash) {
         return oppgavetypeUtleder.utledOppgavetype(sakstype, sakstema, behandlingstema, behandlingstype)
     }
 
-    private fun utledBeskrivelse(
-        oppgaveBehandlingstema: OppgaveBehandlingstema,
+    internal fun utledBeskrivelse(
+        oppgaveBehandlingstema: OppgaveBehandlingstema?,
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,

@@ -13,7 +13,7 @@ class OppgavetypeUnleashAwareUtleder(private val unleash: Unleash) : Oppgavetype
         OppgavetypeGammelUtleder()
     }
     private val oppgavetypeNyUtleder: OppgavetypeUtleder by lazy {
-        OppgavetypeNyUtleder()
+        OppgavetypeNyUtleder(unleash)
     }
 
     override fun utledOppgavetype(

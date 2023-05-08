@@ -4,11 +4,12 @@ import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.PeriodeOmLovvalg;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
+import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 
 public final class OverlappendeMedlemskapsperioderRegler {
-    
+
     public static boolean harOverlappendeMedlemsperiodeFraSed(MedlemskapDokument medlemskapDokument,
                                                               ErPeriode kontrollperiode) {
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
@@ -23,12 +24,36 @@ public final class OverlappendeMedlemskapsperioderRegler {
                 && PeriodeRegler.perioderOverlapperMerEnn1Dag(kontrollperiode, medlemsperiode.getPeriode()));
     }
 
-    public static boolean harOverlappendeMedlemsperiode(MedlemskapDokument medlemskapDokument,
-                                                        PeriodeOmLovvalg kontrollperiode,
-                                                        Lovvalgsperiode opprinneligPeriodeTilKontrollperiode) {
+    public static boolean harOverlappendePeriode(MedlemskapDokument medlemskapDokument,
+                                                 PeriodeOmLovvalg kontrollperiode,
+                                                 Lovvalgsperiode opprinneligPeriodeTilKontrollperiode) {
         return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
             medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status)
                 && PeriodeRegler.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode())
+                && (kontrollperiode.erNyPeriodeForMedl() || kontrollperiode.harForskjelligMedlID(medlemsperiode.id))
+                && (opprinneligPeriodeTilKontrollperiode == null || opprinneligPeriodeTilKontrollperiode.harForskjelligMedlID(medlemsperiode.id)
+            ));
+    }
+
+    public static boolean harOverlappendeUnntaksperiode(MedlemskapDokument medlemskapDokument,
+                                                        PeriodeOmLovvalg kontrollperiode,
+                                                        Lovvalgsperiode opprinneligPeriodeTilKontrollperiode) {
+        return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream()
+            .filter(Medlemsperiode::erUnntaksperiode)
+            .filter(medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status))
+            .anyMatch(medlemsperiode -> PeriodeRegler.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode())
+                && (kontrollperiode.erNyPeriodeForMedl() || kontrollperiode.harForskjelligMedlID(medlemsperiode.id))
+                && (opprinneligPeriodeTilKontrollperiode == null || opprinneligPeriodeTilKontrollperiode.harForskjelligMedlID(medlemsperiode.id)
+            ));
+    }
+
+    public static boolean harOverlappendeMedlemsperiode(MedlemskapDokument medlemskapDokument,
+                                                        PeriodeOmLovvalg kontrollperiode,
+                                                        Lovvalgsperiode opprinneligPeriodeTilKontrollperiode) {
+        return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream()
+            .filter(Medlemsperiode::erMedlemskapsperiode)
+            .filter(medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status))
+            .anyMatch(medlemsperiode -> PeriodeRegler.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode())
                 && (kontrollperiode.erNyPeriodeForMedl() || kontrollperiode.harForskjelligMedlID(medlemsperiode.id))
                 && (opprinneligPeriodeTilKontrollperiode == null || opprinneligPeriodeTilKontrollperiode.harForskjelligMedlID(medlemsperiode.id)
             ));

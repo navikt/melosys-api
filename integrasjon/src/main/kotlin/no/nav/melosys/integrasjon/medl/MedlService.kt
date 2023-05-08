@@ -7,7 +7,12 @@ import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
+import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag
 import no.nav.melosys.domain.util.IsoLandkodeKonverterer
+import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForGet
 import no.nav.melosys.integrasjon.medl.api.v1.MedlemskapsunntakForPost
@@ -136,20 +141,37 @@ class MedlService(
         return medlemskapRestConsumer.opprettPeriode(medlemskapsunntakForPost).unntakId
     }
 
-    private fun lovvalgRequest(periodeOmLovvalg: PeriodeOmLovvalg) =
-        MedlemskapsunntakForPost(
+    private fun lovvalgRequest(periodeOmLovvalg: PeriodeOmLovvalg): MedlemskapsunntakForPost {
+        val overgangsregelbestemmelser =
+            (periodeOmLovvalg.behandlingsresultat?.behandling?.mottatteOpplysninger?.mottatteOpplysningerData
+                as? SedGrunnlag)?.overgangsregelbestemmelser ?: listOf<Overgangsregelbestemmelser>()
+
+        val lovvalgBestemmelse = MedlPeriodeKonverter.hentLovvalgBestemmelse(
+            periodeOmLovvalg
+        )
+
+        if (harOvergangsregler(lovvalgBestemmelse) && overgangsregelbestemmelser.isEmpty()) {
+            throw FunksjonellException("Grunnlaget ${lovvalgBestemmelse.kode} og overgangsregler skal benyttes, men er tom.")
+        }
+
+        val grunnlag =
+            if (harOvergangsregler(lovvalgBestemmelse)) MedlPeriodeKonverter.tilGrunnlagMedltypeFraOvergangsregler(
+                overgangsregelbestemmelser[0]
+            ).kode else MedlPeriodeKonverter.tilGrunnlagMedltype(
+                lovvalgBestemmelse
+            ).kode
+
+        return MedlemskapsunntakForPost(
             fraOgMed = periodeOmLovvalg.fom,
             tilOgMed = periodeOmLovvalg.tom,
             dekning = MedlPeriodeKonverter.tilMedlTrygdeDekning(periodeOmLovvalg.dekning).kode,
             lovvalgsland = IsoLandkodeKonverterer.tilIso3(periodeOmLovvalg.lovvalgsland.kode),
-            grunnlag = MedlPeriodeKonverter.tilGrunnlagMedltype(
-                MedlPeriodeKonverter.hentLovvalgBestemmelse(
-                    periodeOmLovvalg
-                )
-            ).kode
+            grunnlag = grunnlag
         )
+    }
 
-    private fun medlemskapsperiodeRequest(medlemskapsperiode: Medlemskapsperiode) =
+
+    private fun medlemskapsperiodeRequest(medlemskapsperiode: Medlemskapsperiode): MedlemskapsunntakForPost =
         MedlemskapsunntakForPost(
             fraOgMed = medlemskapsperiode.fom,
             tilOgMed = medlemskapsperiode.tom,
@@ -158,7 +180,9 @@ class MedlService(
                 medlemskapsperiode.bestemmelse
             ).kode,
             lovvalgsland = IsoLandkodeKonverterer.tilIso3(medlemskapsperiode.arbeidsland),
-            grunnlag = MedlPeriodeKonverter.tilGrunnlagMedltype(medlemskapsperiode.bestemmelse).kode
+            grunnlag = MedlPeriodeKonverter.tilGrunnlagMedltype(
+                medlemskapsperiode.bestemmelse,
+            ).kode
         )
 
     private fun oppdaterPeriode(
@@ -170,6 +194,7 @@ class MedlService(
         val medlPeriodeID = periodeOmLovvalg.medlPeriodeID
             ?: throw TekniskException("Det er ikke lagret noen medlPeriodeID på lovvalgsperiode som skal oppdateres i MEDL")
         val eksisterendePeriode = hentEksisterendePeriode(medlPeriodeID)
+
 
         val request = MedlemskapsunntakForPut(
             unntakId = medlPeriodeID,
@@ -190,6 +215,11 @@ class MedlService(
             )
         )
         medlemskapRestConsumer.oppdaterPeriode(request)
+    }
+
+
+    private fun harOvergangsregler(bestemmelse: LovvalgBestemmelse?): Boolean {
+        return bestemmelse == Tilleggsbestemmelser_883_2004.FO_883_2004_ART87_8 || bestemmelse == Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A
     }
 
     private fun hentEksisterendePeriode(medlPeriodeID: Long): MedlemskapsunntakForGet {

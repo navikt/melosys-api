@@ -13,11 +13,11 @@ class OppgaveBeskrivelseUnleashAwareUtleder(private val unleash: Unleash) : Oppg
         OppgaveBeskrivelseGammelUtleder()
     }
     private val oppgaveBeskrivelseNyUtleder: OppgaveBeskrivelseNyUtleder by lazy {
-        OppgaveBeskrivelseNyUtleder()
+        OppgaveBeskrivelseNyUtleder(unleash)
     }
 
     override fun utledBeskrivelse(
-        oppgaveBehandlingstema: OppgaveBehandlingstema,
+        oppgaveBehandlingstema: OppgaveBehandlingstema?,
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
