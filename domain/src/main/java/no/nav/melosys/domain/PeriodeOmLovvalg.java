@@ -11,6 +11,8 @@ import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestem
 public interface PeriodeOmLovvalg extends ErPeriode, HarBestemmelse<LovvalgBestemmelse> {
     LovvalgBestemmelse getBestemmelse();
 
+    Behandlingsresultat getBehandlingsresultat();
+
     Land_iso2 getLovvalgsland();
 
     LovvalgBestemmelse getTilleggsbestemmelse();

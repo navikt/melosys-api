@@ -59,6 +59,11 @@ class PeriodeOmLovvalgTest {
         }
 
         @Override
+        public Behandlingsresultat getBehandlingsresultat() {
+            return null;
+        }
+
+        @Override
         public Trygdedekninger getDekning() {
             return null;
         }
