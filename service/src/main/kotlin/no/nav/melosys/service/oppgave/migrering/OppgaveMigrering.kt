@@ -15,6 +15,7 @@ import no.nav.melosys.repository.BehandlingRepositoryForOppgaveMigrering
 import no.nav.melosys.service.lovligekombinasjoner.GyldigeKombinasjoner
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
 import no.nav.melosys.service.oppgave.OppgaveFactory
+import no.nav.melosys.service.oppgave.OppgaveGosysMapping.Companion.NY_GOSYS_MAPPING_UNTAKK_FOR_MIGRERING
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
@@ -29,7 +30,9 @@ class OppgaveMigrering(
 ) {
 
     private val nyOppgaveFactory = OppgaveFactory(FakeUnleash().apply {
-        enable(ToggleName.NY_GOSYS_MAPPING)
+        //  litt spesiel måte å bruke unleash på, men siden unleash skal vekk fra
+        //  OppgaveFactory etter at vi er over på ny mapping så blir dette den enkleste løsningen
+        enable(ToggleName.NY_GOSYS_MAPPING, NY_GOSYS_MAPPING_UNTAKK_FOR_MIGRERING)
     })
 
     fun status(): Map<String, Any> {

@@ -12,7 +12,7 @@ class OppgaveBehandlingstemUnleashAwareUtleder(private val unleash: Unleash) : O
         OppgaveBehandlingstemaGammelUtleder()
     }
     private val oppgaveBehandlingstemaNyUtleder: OppgaveBehandlingstemaUtleder by lazy {
-        OppgaveBehandlingstemaNyUtleder()
+        OppgaveBehandlingstemaNyUtleder(unleash)
     }
 
     override fun utledOppgaveBehandlingstema(

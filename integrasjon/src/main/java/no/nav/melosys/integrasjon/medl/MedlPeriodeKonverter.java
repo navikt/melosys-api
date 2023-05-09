@@ -273,11 +273,16 @@ public final class MedlPeriodeKonverter {
         if (bestemmelse.equals(Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2)) {
             return GrunnlagMedl.FO_16;
         }
+
         GrunnlagMedl grunnlagMedltype = lovvalgsbestemmelseTilGrunnlagMedlTabell.get(bestemmelse);
         if (grunnlagMedltype == null) {
             throw new TekniskException("Lovvalgsbestemmelse støttes ikke i MEDL. Kode: " + bestemmelse.getKode() + " Beskrivelse: " + bestemmelse.getBeskrivelse());
         }
         return grunnlagMedltype;
+    }
+
+    public static GrunnlagMedl tilGrunnlagMedltypeFraOvergangsregler(Overgangsregelbestemmelser overgangsregelbestemmelser) {
+        return lovvalgsbestemmelseTilGrunnlagMedlTabell.get(overgangsregelbestemmelser);
     }
 
     public static GrunnlagMedl tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser bestemmelse) {
@@ -305,5 +310,11 @@ public final class MedlPeriodeKonverter {
             bestemmelse = lovvalgsperiode.getBestemmelse();
         }
         return bestemmelse;
+    }
+
+    private static boolean harOvergangsregler(LovvalgBestemmelse bestemmelse) {
+        return bestemmelse != null
+            && (bestemmelse.equals(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87_8)
+            || bestemmelse.equals(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A));
     }
 }

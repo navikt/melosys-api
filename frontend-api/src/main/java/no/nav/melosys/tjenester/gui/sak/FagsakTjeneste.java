@@ -31,8 +31,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
-import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentPeriode;
-import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentSøknadsland;
+import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.*;
 
 @Protected
 @RestController
@@ -228,7 +227,7 @@ public class FagsakTjeneste {
                 if (mottatteOpplysninger.isPresent()) {
                     var mottatteOpplysningerData = mottatteOpplysninger.get().getMottatteOpplysningerData();
 
-                    var land = SoeknadslandDto.av(hentSøknadsland((mottatteOpplysningerData)));
+                    var land = SoeknadslandDto.av(hentLand((mottatteOpplysningerData)));
                     behandlingOversiktDto.setLand(land);
 
                     var periode = hentPeriode(mottatteOpplysningerData);

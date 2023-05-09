@@ -1,5 +1,6 @@
 package no.nav.melosys.service.oppgave
 
+import no.finn.unleash.Unleash
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -7,8 +8,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.TekniskException
 
-class OppgaveBeskrivelseNyUtleder : OppgaveBeskrivelseUtleder {
-    private val oppgaveGosysMapping = OppgaveGosysMapping()
+class OppgaveBeskrivelseNyUtleder(unleash: Unleash) : OppgaveBeskrivelseUtleder {
+    private val oppgaveGosysMapping = OppgaveGosysMapping(unleash)
 
     override fun utledBeskrivelse(
         oppgaveBehandlingstema: OppgaveBehandlingstema?,
