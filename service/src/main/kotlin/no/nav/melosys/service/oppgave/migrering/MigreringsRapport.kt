@@ -39,7 +39,7 @@ class MigreringsRapport(private val environment: Environment) {
     fun statsHtmlTable(): String {
         val html = mapOf(
             "Totalt antal" to migreringsSakListe.size,
-            "Kan migreres" to migreringsSakListe.count { !it.harFeil() },
+            "Kan migreres" to migreringsSakListe.count { it.oppgaver.size == 1 && !it.ny.fantIkkeOppgaveMapping()  },
             "har feil" to migreringsSakListe.count { it.harFeil() },
             "tema forskjellig" to migreringsSakListe.count { it.temaErForskjellig() },
             "oppgavetype forskjellig" to migreringsSakListe.count { it.oppgavetypeErForskjellig() },
@@ -59,17 +59,8 @@ class MigreringsRapport(private val environment: Environment) {
     }
 
     fun html(action: (List<MigreringsSak>) -> List<MigreringsSak>): String {
-        val migreringsSakerHtml = action(
-            migreringsSakListe.sortedWith(
-                compareBy(
-                    { it.sak.sakstype },
-                    { it.sak.sakstema },
-                    { it.sak.behandlingstype },
-                    { it.sak.behandlingstema },
-                    { it.sak.behandlingstatus },
-                )
-            )
-        ).joinToString("") { it.htmlTableRow() }
+        val migreringsSakerHtml = action(sortedMigreringsListe())
+            .joinToString("") { it.htmlTableRow() }
 
         return """
             <!DOCTYPE html>
@@ -133,6 +124,16 @@ class MigreringsRapport(private val environment: Environment) {
             """
 
     }
+
+    internal fun sortedMigreringsListe() = migreringsSakListe.sortedWith(
+        compareBy(
+            { it.sak.sakstype },
+            { it.sak.sakstema },
+            { it.sak.behandlingstype },
+            { it.sak.behandlingstema },
+            { it.sak.behandlingstatus },
+        )
+    )
 
     fun status(): Map<String, Any> {
         return mapOf(
