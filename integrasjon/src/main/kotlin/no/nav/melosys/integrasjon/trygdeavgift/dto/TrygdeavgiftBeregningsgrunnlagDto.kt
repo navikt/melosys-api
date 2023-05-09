@@ -23,7 +23,7 @@ data class TrygdeavgiftBeregningsgrunnlagDto(
             medlemskapsperioder: Collection<Medlemskapsperiode>,
             skatteforholdTilNorge: Collection<SkatteforholdTilNorge>,
             inntektsperioder: Collection<Inntektsperiode>,
-            DBID_UUID_MAP: MutableList<BiMap<Long, UUID>>
+            DBID_UUID_MAP: List<BiMap<Long, UUID>>
         ): TrygdeavgiftBeregningsgrunnlagDto =
             TrygdeavgiftBeregningsgrunnlagDto(
                 mapMedlemskapsperioder(medlemskapsperioder, DBID_UUID_MAP).toSet(),
@@ -33,11 +33,11 @@ data class TrygdeavgiftBeregningsgrunnlagDto(
 
         private fun mapMedlemskapsperioder(
             medlemskapsperioder: Collection<Medlemskapsperiode>,
-            DBID_UUID_MAP: MutableList<BiMap<Long, UUID>>
+            DBID_UUID_MAP: List<BiMap<Long, UUID>>
         ): List<MedlemskapsperiodeDto> =
             medlemskapsperioder.map {
                 MedlemskapsperiodeDto(
-                    DBID_UUID_MAP.get(0).put(it.id, UUID.randomUUID())!!,
+                    DBID_UUID_MAP.get(0).get(it.id)!!,
                     DatoPeriodeDto(it.fom, it.tom),
                     avgiftsdekningerFraTrygdedekning(it.trygdedekning)
                 )
@@ -45,11 +45,11 @@ data class TrygdeavgiftBeregningsgrunnlagDto(
 
         private fun mapSkatteforholdsperioder(
             skatteforholdTilNorge: Collection<SkatteforholdTilNorge>,
-            DBID_UUID_MAP: MutableList<BiMap<Long, UUID>>
+            DBID_UUID_MAP: List<BiMap<Long, UUID>>
         ): List<SkatteforholdsperiodeDto> =
             skatteforholdTilNorge.map {
                 SkatteforholdsperiodeDto(
-                    DBID_UUID_MAP.get(1).put(it.id, UUID.randomUUID())!!,
+                    DBID_UUID_MAP.get(1).get(it.id)!!,
                     DatoPeriodeDto(it.fomDato, it.tomDato),
                     it.skatteplikttype
                 )
@@ -57,11 +57,11 @@ data class TrygdeavgiftBeregningsgrunnlagDto(
 
         private fun mapInntektsperioder(
             inntektsperioder: Collection<Inntektsperiode>,
-            DBID_UUID_MAP: MutableList<BiMap<Long, UUID>>
+            DBID_UUID_MAP: List<BiMap<Long, UUID>>
         ): List<InntektsperiodeDto> =
             inntektsperioder.map {
                 InntektsperiodeDto(
-                    DBID_UUID_MAP.get(2).put(it.id, UUID.randomUUID())!!,
+                    DBID_UUID_MAP.get(2).get(it.id)!!,
                     DatoPeriodeDto(it.fomDato, it.tomDato),
                     it.type,
                     it.isArbeidsgiversavgiftBetalesTilSkatt,

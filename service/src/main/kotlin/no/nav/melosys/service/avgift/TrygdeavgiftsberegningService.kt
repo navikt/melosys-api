@@ -36,35 +36,50 @@ class TrygdeavgiftsberegningService
             return emptySet()
         }
 
-        val (beregnetTrygdeavgift, DBID_UUID_MAP) =
-            beregnTrygdeavgift(medlemAvFolketrygden.medlemskapsperioder, fastsattTrygdeavgift.trygdeavgiftsgrunnlag)
+        val DBID_UUID_MAP =
+            lagDBIDUUIDMAP(medlemAvFolketrygden.medlemskapsperioder, fastsattTrygdeavgift.trygdeavgiftsgrunnlag)
+        val beregnetTrygdeavgift =
+            beregnTrygdeavgift(
+                medlemAvFolketrygden.medlemskapsperioder,
+                fastsattTrygdeavgift.trygdeavgiftsgrunnlag,
+                DBID_UUID_MAP
+            )
         oppdaterTrygdeavgift(beregnetTrygdeavgift, fastsattTrygdeavgift, DBID_UUID_MAP)
         return medlemAvFolketrygdenService.lagre(medlemAvFolketrygden).fastsattTrygdeavgift.trygdeavgift
+    }
+
+    private fun lagDBIDUUIDMAP(
+        medlemskapsperioder: Collection<Medlemskapsperiode>,
+        trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag
+    ): List<BiMap<Long, UUID>> {
+        val medlemskapsperiodeMap =
+            HashBiMap.create(medlemskapsperioder.map { Pair(it.id, UUID.randomUUID()) }.toMap())
+        val skatteforholdsperiodeMap =
+            HashBiMap.create(trygdeavgiftsgrunnlag.skatteforholdTilNorge.map { Pair(it.id, UUID.randomUUID()) }.toMap())
+        val inntektsperiodeMap =
+            HashBiMap.create(trygdeavgiftsgrunnlag.inntektsperioder.map { Pair(it.id, UUID.randomUUID()) }.toMap())
+        return listOf(medlemskapsperiodeMap, skatteforholdsperiodeMap, inntektsperiodeMap)
     }
 
     private fun beregnTrygdeavgift(
         medlemskapsperioder: Collection<Medlemskapsperiode>,
         trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag,
-    ): Pair<List<TrygdeavgiftsperiodeDto>, MutableList<BiMap<Long, UUID>>> {
-        val DBID_UUID_MAP =
-            mutableListOf<BiMap<Long, UUID>>(HashBiMap.create(), HashBiMap.create(), HashBiMap.create())
-
-        return Pair(
-            trygdeavgiftConsumer.beregnTrygdeavgift(
-                TrygdeavgiftBeregningsgrunnlagDto.av(
-                    medlemskapsperioder,
-                    trygdeavgiftsgrunnlag.skatteforholdTilNorge,
-                    trygdeavgiftsgrunnlag.inntektsperioder,
-                    DBID_UUID_MAP
-                )
-            ), DBID_UUID_MAP
+        DBID_UUID_MAP: List<BiMap<Long, UUID>>,
+    ): List<TrygdeavgiftsperiodeDto> =
+        trygdeavgiftConsumer.beregnTrygdeavgift(
+            TrygdeavgiftBeregningsgrunnlagDto.av(
+                medlemskapsperioder,
+                trygdeavgiftsgrunnlag.skatteforholdTilNorge,
+                trygdeavgiftsgrunnlag.inntektsperioder,
+                DBID_UUID_MAP
+            )
         )
-    }
+
 
     private fun oppdaterTrygdeavgift(
         beregnetTrygdeavgift: List<TrygdeavgiftsperiodeDto>,
         fastsattTrygdeavgift: FastsattTrygdeavgift,
-        DBID_UUID_MAP: MutableList<BiMap<Long, UUID>>
+        DBID_UUID_MAP: List<BiMap<Long, UUID>>
     ) =
         beregnetTrygdeavgift.forEach {
             fastsattTrygdeavgift.trygdeavgift.add(lagTrygdeavgiftsperiode(fastsattTrygdeavgift, it, DBID_UUID_MAP))
@@ -73,7 +88,7 @@ class TrygdeavgiftsberegningService
     private fun lagTrygdeavgiftsperiode(
         fastsattTrygdeavgift: FastsattTrygdeavgift,
         trygdeavgiftsperiodeDto: TrygdeavgiftsperiodeDto,
-        DBID_UUID_MAP: MutableList<BiMap<Long, UUID>>
+        DBID_UUID_MAP: List<BiMap<Long, UUID>>
     ) =
         Trygdeavgiftsperiode().apply {
             this.periodeFra = trygdeavgiftsperiodeDto.periode.fom
