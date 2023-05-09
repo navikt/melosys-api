@@ -31,16 +31,15 @@ data class TrygdeavgiftBeregningsgrunnlagDto(
                 mapInntektsperioder(inntektsperioder, DBID_UUID_MAP)
             )
 
-
         private fun mapMedlemskapsperioder(
             medlemskapsperioder: Collection<Medlemskapsperiode>,
             DBID_UUID_MAP: MutableList<BiMap<Long, UUID>>
         ): List<MedlemskapsperiodeDto> =
             medlemskapsperioder.map {
                 MedlemskapsperiodeDto(
+                    DBID_UUID_MAP.get(0).put(it.id, UUID.randomUUID())!!,
                     DatoPeriodeDto(it.fom, it.tom),
-                    avgiftsdekningerFraTrygdedekning(it.trygdedekning),
-                    DBID_UUID_MAP.get(0).put(it.id, UUID.randomUUID())!!
+                    avgiftsdekningerFraTrygdedekning(it.trygdedekning)
                 )
             }
 
@@ -50,9 +49,9 @@ data class TrygdeavgiftBeregningsgrunnlagDto(
         ): List<SkatteforholdsperiodeDto> =
             skatteforholdTilNorge.map {
                 SkatteforholdsperiodeDto(
+                    DBID_UUID_MAP.get(1).put(it.id, UUID.randomUUID())!!,
                     DatoPeriodeDto(it.fomDato, it.tomDato),
-                    it.skatteplikttype,
-                    DBID_UUID_MAP.get(1).put(it.id, UUID.randomUUID())!!
+                    it.skatteplikttype
                 )
             }
 
@@ -62,12 +61,12 @@ data class TrygdeavgiftBeregningsgrunnlagDto(
         ): List<InntektsperiodeDto> =
             inntektsperioder.map {
                 InntektsperiodeDto(
+                    DBID_UUID_MAP.get(2).put(it.id, UUID.randomUUID())!!,
                     DatoPeriodeDto(it.fomDato, it.tomDato),
                     it.type,
                     it.isArbeidsgiversavgiftBetalesTilSkatt,
                     it.isTrygdeavgiftBetalesTilSkatt,
-                    PengerDto(it.avgiftspliktigInntektMnd),
-                    DBID_UUID_MAP.get(2).put(it.id, UUID.randomUUID())!!
+                    PengerDto(it.avgiftspliktigInntektMnd)
                 )
             }
 
@@ -87,5 +86,4 @@ data class TrygdeavgiftBeregningsgrunnlagDto(
             }
         }
     }
-
 }

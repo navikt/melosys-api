@@ -5,7 +5,7 @@ import java.util.*
 
 
 data class MedlemskapsperiodeDto(
+    val id: UUID,
     val periode: DatoPeriodeDto,
-    val avgiftsdekninger: Set<Avgiftsdekning>,
-    var id: UUID
+    val avgiftsdekninger: Set<Avgiftsdekning>
 )

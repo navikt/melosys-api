@@ -6,12 +6,12 @@ import java.math.BigDecimal
 import java.util.*
 
 data class InntektsperiodeDto(
+    val id: UUID,
     val periode: DatoPeriodeDto,
     val inntektskilde: Inntektskildetype,
     val arbeidsgiverBetalerAvgift: Boolean?,
     val trygdeavgiftBetalesTilSkatt: Boolean,
-    val månedsbeløp: PengerDto?,
-    var id: UUID
+    val månedsbeløp: PengerDto?
 )
 
 data class PengerDto(val verdi: BigDecimal, var valuta: Valuta = NOK) {

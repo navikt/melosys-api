@@ -47,7 +47,7 @@ public class Trygdeavgiftsperiode {
     private Medlemskapsperiode grunnlagMedlemskapsperiode;
 
     @OneToOne
-    @JoinColumn(name = "skatteforhold_til_norge_id")
+    @JoinColumn(name = "skatteforhold_id")
     private SkatteforholdTilNorge grunnlagSkatteforholdTilNorge;
 
     public Long getId() {
