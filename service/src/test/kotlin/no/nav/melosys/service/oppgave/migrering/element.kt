@@ -1,10 +1,10 @@
 package no.nav.melosys.service.oppgave.migrering
 
-interface CHElement {
+interface Element {
     fun export(exporter: Exporter): String
 }
 
-class Table : CHElement {
+class Table : Element {
     internal var headers: TableRow = TableRow()
     internal val rows = mutableListOf<TableRow>()
 
@@ -16,11 +16,11 @@ class TabelCell(
     internal val fc: String? = null,
     internal val bc: String? = null,
     internal val font: Font = Font.NORMAL
-) : CHElement {
+) : Element {
     override fun export(exporter: Exporter): String = exporter.renderTableCell(this)
 }
 
-class TableRow : CHElement {
+class TableRow : Element {
     internal val cols = mutableListOf<TabelCell>()
 
     override fun export(exporter: Exporter): String = exporter.renderTableRow(this)

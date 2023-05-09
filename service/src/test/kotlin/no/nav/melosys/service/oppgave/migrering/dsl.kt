@@ -5,10 +5,10 @@ package no.nav.melosys.service.oppgave.migrering
 annotation class TabelDsl
 
 @TabelDsl
-fun document(builder: CHDocument.() -> Unit) = CHDocument().apply(builder)
+fun document(builder: Document.() -> Unit) = Document().apply(builder)
 
 @TabelDsl
-fun CHDocument.table(builder: Table.() -> Unit) = elements.add(Table().apply(builder))
+fun Document.table(builder: Table.() -> Unit) = elements.add(Table().apply(builder))
 
 @TabelDsl
 fun Table.th(builder: TableRow.() -> Unit) {

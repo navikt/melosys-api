@@ -1,14 +1,14 @@
 package no.nav.melosys.service.oppgave.migrering
 interface Exporter {
-    fun renderDocument(elements: List<CHElement>): String
+    fun renderDocument(elements: List<Element>): String
     fun renderTable(table: Table): String
     fun renderTableRow(tableRow: TableRow): String
     fun renderTableCell(tabelCell: TabelCell): String = tabelCell.text.toString()
 }
 
 class ConfluenceWikiExporter : Exporter {
-    override fun renderDocument(elements: List<CHElement>): String {
-        return elements.joinToString { it: CHElement -> it.export(this) }
+    override fun renderDocument(elements: List<Element>): String {
+        return elements.joinToString { it: Element -> it.export(this) }
     }
 
     override fun renderTable(table: Table): String {
@@ -37,7 +37,7 @@ class ConfluenceWikiExporter : Exporter {
 }
 
 class HtmlExporter(private val ignoreForegroundColor: Boolean = false) : Exporter {
-    override fun renderDocument(elements: List<CHElement>): String {
+    override fun renderDocument(elements: List<Element>): String {
         return """
         <!DOCTYPE html>
         <html>
@@ -52,7 +52,7 @@ class HtmlExporter(private val ignoreForegroundColor: Boolean = false) : Exporte
         </style>
             <body>
                 <table>
-                    ${elements.joinToString { it: CHElement -> it.export(this) }}
+                    ${elements.joinToString { it: Element -> it.export(this) }}
                 </table>
             </body>
         </html>
