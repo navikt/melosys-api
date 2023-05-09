@@ -34,8 +34,8 @@ class LagRapportTest {
                 migreringsRapport.sortedMigreringsListe().asSequence().filter {
                     !it.ny.fantIkkeOppgaveMapping() && it.oppgaver.size == 1
                 }
-                    .map { it.sak.tilSak() }.groupBy { it }.toList()
-                    .map { it.first to it.second.size }
+                    .map { it.sak.tilSak() }.groupBy { it }
+                    .map { it.key to it.value.size }
                     .sortedBy { it.second }.toList().reversed().forEach {
                         val sak = it.first
                         val oppgave: OppgaveGosysMapping.Oppgave =
