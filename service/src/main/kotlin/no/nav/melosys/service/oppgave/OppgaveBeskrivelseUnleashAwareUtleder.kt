@@ -13,7 +13,7 @@ class OppgaveBeskrivelseUnleashAwareUtleder(private val unleash: Unleash) : Oppg
         OppgaveBeskrivelseGammelUtleder()
     }
     private val oppgaveBeskrivelseNyUtleder: OppgaveBeskrivelseNyUtleder by lazy {
-        OppgaveBeskrivelseNyUtleder()
+        OppgaveBeskrivelseNyUtleder(unleash)
     }
 
     override fun utledBeskrivelse(
