@@ -115,14 +115,14 @@ class LagRapportTest {
                         OppgaveGosysMapping.Regel.HENVENDELSE_OG_VIRKSOMHET -> Font.STRONG
                         else -> Font.NORMAL
                     }
-                    val maglerOppgaveFarge = if (oppgave == null) "RED" else null
+                    val maglerOppgaveFarge = if (oppgave == null) "Red" else null
                     val maglerOppgaveFont = if (oppgave == null) Font.STRONG else Font.NORMAL
                     tr {
                         item(fc = maglerOppgaveFarge, font = maglerOppgaveFont) { it.sakstype }
                         item(fc = maglerOppgaveFarge, font = maglerOppgaveFont) { it.sakstema }
                         item(fc = maglerOppgaveFarge, font = maglerOppgaveFont) { it.behandlingstype }
                         item(fc = maglerOppgaveFarge, font = maglerOppgaveFont) { it.behandlingstema }
-                        item(bc = fargeFraRegelTuffet, font = fontType) { oppgave?.regelTruffet?.beskrivelse }
+                        item(fc = maglerOppgaveFarge, bc = fargeFraRegelTuffet, font = fontType) { oppgave?.regelTruffet?.beskrivelse }
                         item(fc = maglerOppgaveFarge, font = maglerOppgaveFont) { it.regel.beskrivelse }
                         item(fc = maglerOppgaveFarge, font = maglerOppgaveFont) { oppgave?.oppgaveBehandlingstema?.kode }
                         item(fc = maglerOppgaveFarge, font = maglerOppgaveFont) { oppgave?.oppgaveBehandlingstema?.name }
@@ -133,7 +133,7 @@ class LagRapportTest {
                 }
             }
         }.run {
-            export(HtmlExporter()).let {
+            export(HtmlExporter(ignoreForegroundColor = false, ignoreBackgroundColor = false)).let {
                 File("/Users/rune/div/oppgave-mapping-kombinasjoner.html").writeText(it)
             }
             export(ConfluenceWikiExporter()).let {
