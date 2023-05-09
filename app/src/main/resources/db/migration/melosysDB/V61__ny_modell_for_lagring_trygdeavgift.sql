@@ -68,12 +68,25 @@ CREATE TABLE trygdeavgiftsperiode
     trygdeavgift_beloep_mnd_verdi  DECIMAL(12, 2)   NOT NULL,
     trygdeavgift_beloep_mnd_valuta VARCHAR2(3)      NOT NULL,
     trygdesats                     DOUBLE PRECISION NOT NULL,
-    CONSTRAINT pk_trygdeavgiftsperiode              PRIMARY KEY (id)
+    inntektsperiode_id             NUMBER(19),
+    medlemskapsperiode_id          NUMBER(19),
+    skatteforhold_id               NUMBER(19),
+    CONSTRAINT pk_trygdeavgiftsperiode PRIMARY KEY (id)
 );
 
 ALTER TABLE trygdeavgiftsperiode
     ADD CONSTRAINT fk_trygdeavgiftsperiode_fastsatt_trygdeavgift FOREIGN KEY (fastsatt_trygdeavgift_id) REFERENCES fastsatt_trygdeavgift;
 CREATE INDEX idx_trygdeavgiftsperiode_fastsatt_trygdeavgift ON trygdeavgiftsperiode (fastsatt_trygdeavgift_id);
+ALTER TABLE trygdeavgiftsperiode
+    ADD CONSTRAINT fk_trygdeavgiftsperiode_inntektsperiode FOREIGN KEY (inntektsperiode_id) REFERENCES inntektsperiode;
+CREATE INDEX idx_trygdeavgiftsperiode_inntektsperiode ON trygdeavgiftsperiode (inntektsperiode_id);
+ALTER TABLE trygdeavgiftsperiode
+    ADD CONSTRAINT fk_trygdeavgiftsperiode_medlemskapsperiode FOREIGN KEY (medlemskapsperiode_id) REFERENCES medlemskapsperiode;
+CREATE INDEX idx_trygdeavgiftsperiode_medlemskapsperiode ON trygdeavgiftsperiode (medlemskapsperiode_id);
+ALTER TABLE trygdeavgiftsperiode
+    ADD CONSTRAINT fk_trygdeavgiftsperiode_skatteforhold_til_norge FOREIGN KEY (skatteforhold_id) REFERENCES skatteforhold_til_norge;
+CREATE INDEX idx_trygdeavgiftsperiode_skatteforhold_til_norge ON trygdeavgiftsperiode (skatteforhold_id);
+
 
 INSERT INTO trygdeavgiftsperiode(fastsatt_trygdeavgift_id, periode_fra, periode_til, trygdeavgift_beloep_mnd_verdi,
                                  trygdeavgift_beloep_mnd_valuta, trygdesats)
