@@ -30,62 +30,44 @@ class GyldigeKombinasjoner {
             Sak(sakstype, sakstema, behandlingstype, behandlingstema)
 
         val rowsMelosysOgDatavarehus: List<TableRow> by lazy {
-            (rowsMelosys + rowsDatavarehus).groupBy { it.tilSak() }.map { item ->
-                if (item.value.size > 2) {
+            (rowsMelosys + rowsDatavarehus).groupBy { it.tilSak() }.map { (sak, rows) ->
+                if (rows.size > 2) {
                     throw IllegalStateException(
-                        "Skal aldri ha mer en to treff! fant:${item.value.size} for:" +
-                            item.value.joinToString("\n")
+                        "Skal aldri ha mer en to treff! fant:${rows.size} for:" +
+                            rows.joinToString("\n")
                     )
                 }
-                if (item.value.size == 1) item.value.first() else TableRow(
-                    item.key.sakstype,
-                    item.key.sakstema,
-                    item.key.behandlingstype,
-                    item.key.behandlingstema,
+                if (rows.size == 1) rows.first() else TableRow(
+                    sak.sakstype,
+                    sak.sakstema,
+                    sak.behandlingstype,
+                    sak.behandlingstema,
                     Regel.Begge
                 )
             }
         }
 
-        val rowsMelosys: List<TableRow> by lazy {
-            sequence {
-                tableRowsMelosys.forEach { row ->
-                    row.behandlingstyper.forEach { behandlingstype ->
-                        row.behandlingstemaer.forEach { behandlingstema ->
-                            yield(
-                                TableRow(
-                                    row.sakstype,
-                                    row.sakstema,
-                                    behandlingstype,
-                                    behandlingstema,
-                                    Regel.MELOSYS
-                                )
-                            )
-                        }
-                    }
-                }
-            }.toList()
-        }
+        val rowsMelosys: List<TableRow> by lazy { tableRows(tableRowsMelosys, Regel.MELOSYS) }
 
-        val rowsDatavarehus: List<TableRow> by lazy {
-            sequence {
-                tableRowsDatavarehus.forEach { row ->
-                    row.behandlingstyper.forEach { behandlingstype ->
-                        row.behandlingstemaer.forEach { behandlingstema ->
-                            yield(
-                                TableRow(
-                                    row.sakstype,
-                                    row.sakstema,
-                                    behandlingstype,
-                                    behandlingstema,
-                                    Regel.DVH
-                                )
+        private val rowsDatavarehus: List<TableRow> by lazy { tableRows(tableRowsDatavarehus, Regel.DVH) }
+
+        private fun tableRows(rows: List<TableRowMedGruppering>, regel: Regel) = sequence {
+            rows.forEach { row ->
+                row.behandlingstyper.forEach { behandlingstype ->
+                    row.behandlingstemaer.forEach { behandlingstema ->
+                        yield(
+                            TableRow(
+                                row.sakstype,
+                                row.sakstema,
+                                behandlingstype,
+                                behandlingstema,
+                                regel
                             )
-                        }
+                        )
                     }
                 }
-            }.toList()
-        }
+            }
+        }.toList()
 
         // https://confluence.adeo.no/display/TEESSI/Lovlige+kombinasjoner+av+sakstype%2C+sakstema%2C+behandlingstype+og+behandlingstema
         private val tableRowsMelosys = listOf(
