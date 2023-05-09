@@ -1,13 +1,14 @@
 package no.nav.melosys.service.oppgave
 
+import no.finn.unleash.Unleash
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 
-class OppgaveBehandlingstemaNyUtleder : OppgaveBehandlingstemaUtleder {
+class OppgaveBehandlingstemaNyUtleder(unleash: Unleash) : OppgaveBehandlingstemaUtleder {
 
-    private val oppgaveGosysMapping = OppgaveGosysMapping()
+    private val oppgaveGosysMapping = OppgaveGosysMapping(unleash)
 
     override fun utledOppgaveBehandlingstema(
         sakstype: Sakstyper,

@@ -354,8 +354,6 @@ class SedMottakTestIT(
 
     @Test
     fun `Motta A003, godkjenne med A012, ugyldiggjøre godkjenning A012 med X008 for så å sende en A004`() {
-        unleash.enable("melosys.annuller.sed.ny.vurdering")
-
         val randomUUID = UUID.randomUUID()
         ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "steg")
 
@@ -448,8 +446,6 @@ class SedMottakTestIT(
 
     @Test
     fun `Motta A003, avvise med A004, ugyldiggjøre avvisning A004 med X008 for så å sende en A012`() {
-        unleash.enable("melosys.annuller.sed.ny.vurdering")
-
         val randomUUID = UUID.randomUUID()
         ThreadLocalAccessInfo.beforeExecuteProcess(randomUUID, "steg")
 

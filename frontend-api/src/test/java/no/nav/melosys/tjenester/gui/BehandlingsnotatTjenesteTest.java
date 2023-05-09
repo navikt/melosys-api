@@ -2,7 +2,6 @@ package no.nav.melosys.tjenester.gui;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Optional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Behandling;
@@ -14,7 +13,6 @@ import no.nav.melosys.service.BehandlingsnotatService;
 import no.nav.melosys.service.bruker.SaksbehandlerService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.BehandlingsnotatPostDto;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -46,13 +44,7 @@ public class BehandlingsnotatTjenesteTest {
     private ObjectMapper objectMapper;
 
     private static final String saksbehandler = "Z224234";
-    private static final String saksbehandlerNavn = "Morteni Mortenseni";
     private static final String BASE_URL = "/api/fagsaker";
-
-    @BeforeEach
-    public void setup() {
-        when(saksbehandlerService.finnNavnForIdent(eq(saksbehandler))).thenReturn(Optional.of(saksbehandlerNavn));
-    }
 
     @Test
     void hentBehandlingsnotaterForFagsak() throws Exception {
@@ -67,7 +59,7 @@ public class BehandlingsnotatTjenesteTest {
             .andExpect(jsonPath("$.length()", equalTo(1)))
             .andExpect(jsonPath("$[0].endretDato", equalTo(behandlingsnotat.getEndretDato().toString())))
             .andExpect(jsonPath("$[0].notatId", equalTo(behandlingsnotat.getId().intValue())))
-            .andExpect(jsonPath("$[0].registrertAvNavn", equalTo(saksbehandlerNavn)))
+            .andExpect(jsonPath("$[0].registrertAvNavn", equalTo(behandlingsnotat.getRegistrertAv())))
             .andExpect(jsonPath("$[0].tekst", equalTo(behandlingsnotat.getTekst())));
     }
 

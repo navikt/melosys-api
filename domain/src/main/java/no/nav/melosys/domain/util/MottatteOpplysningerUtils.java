@@ -6,6 +6,7 @@ import java.util.Optional;
 import no.nav.melosys.domain.Bostedsland;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
@@ -41,6 +42,13 @@ public final class MottatteOpplysningerUtils {
 
     public static Soeknadsland hentSøknadsland(MottatteOpplysningerData mottatteOpplysningerData) {
         return mottatteOpplysningerData.soeknadsland;
+    }
+
+    public static Soeknadsland hentLand(MottatteOpplysningerData mottatteOpplysningerData) {
+        if (mottatteOpplysningerData instanceof AnmodningEllerAttest anmodningEllerAttest) {
+            return Soeknadsland.av(anmodningEllerAttest.getLovvalgsland());
+        }
+        return hentSøknadsland(mottatteOpplysningerData);
     }
 
     public static StrukturertAdresse hentBostedsadresse(MottatteOpplysningerData mottatteOpplysningerData) {
