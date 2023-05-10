@@ -10,17 +10,14 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.Penger
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
-import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftBeregningsgrunnlagDtoMapper
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.service.MedlemAvFolketrygdenService
@@ -29,6 +26,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.util.*
 
 @ExtendWith(MockKExtension::class)
 internal class TrygdeavgiftsberegningServiceTest {
@@ -37,6 +35,8 @@ internal class TrygdeavgiftsberegningServiceTest {
 
     @MockK
     private lateinit var mockTrygdeavgiftConsumer: TrygdeavgiftConsumer
+
+    private var mockTrygdeavgiftBeregningsgrunnlagDtoMapper = TrygdeavgiftBeregningsgrunnlagDtoMapper()
 
     private lateinit var trygdeavgiftsberegningService: TrygdeavgiftsberegningService
 
@@ -49,7 +49,11 @@ internal class TrygdeavgiftsberegningServiceTest {
     @BeforeEach
     fun setup() {
         trygdeavgiftsberegningService =
-            TrygdeavgiftsberegningService(mockMedlemAvFolketrygdenService, mockTrygdeavgiftConsumer)
+            TrygdeavgiftsberegningService(
+                mockMedlemAvFolketrygdenService,
+                mockTrygdeavgiftConsumer,
+                mockTrygdeavgiftBeregningsgrunnlagDtoMapper
+            )
         medlemAvFolketrygden = MedlemAvFolketrygden()
         every { mockMedlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID) }.returns(medlemAvFolketrygden)
     }
@@ -97,9 +101,9 @@ internal class TrygdeavgiftsberegningServiceTest {
                         DatoPeriodeDto(FOM, TOM),
                         7.9,
                         PengerDto(BigDecimal.valueOf(790), NOK),
-                        "1",
-                        "1",
-                        "1"
+                        UUID.randomUUID(),
+                        UUID.randomUUID(),
+                        UUID.randomUUID()
                     )
                 )
             )
