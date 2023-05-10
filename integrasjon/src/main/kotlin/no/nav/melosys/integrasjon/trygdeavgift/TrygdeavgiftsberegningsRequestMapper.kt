@@ -7,10 +7,8 @@ import no.nav.melosys.domain.kodeverk.Avgiftsdekning
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
-import org.springframework.stereotype.Component
 import java.util.*
 
-@Component
 class TrygdeavgiftsberegningsRequestMapper {
 
     fun map(
