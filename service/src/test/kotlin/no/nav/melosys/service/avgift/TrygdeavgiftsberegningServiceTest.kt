@@ -18,7 +18,6 @@ import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
-import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftsberegningsRequestMapper
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.service.MedlemAvFolketrygdenService
 import org.junit.jupiter.api.BeforeEach
@@ -36,8 +35,6 @@ internal class TrygdeavgiftsberegningServiceTest {
     @MockK
     private lateinit var mockTrygdeavgiftConsumer: TrygdeavgiftConsumer
 
-    private var mockTrygdeavgiftsberegningsRequestMapper = TrygdeavgiftsberegningsRequestMapper()
-
     private lateinit var trygdeavgiftsberegningService: TrygdeavgiftsberegningService
 
     private lateinit var medlemAvFolketrygden: MedlemAvFolketrygden
@@ -51,8 +48,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         trygdeavgiftsberegningService =
             TrygdeavgiftsberegningService(
                 mockMedlemAvFolketrygdenService,
-                mockTrygdeavgiftConsumer,
-                mockTrygdeavgiftsberegningsRequestMapper
+                mockTrygdeavgiftConsumer
             )
         medlemAvFolketrygden = MedlemAvFolketrygden()
         every { mockMedlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID) }.returns(medlemAvFolketrygden)

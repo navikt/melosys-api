@@ -16,8 +16,7 @@ import java.util.*
 class TrygdeavgiftsberegningService
     (
     private val medlemAvFolketrygdenService: MedlemAvFolketrygdenService,
-    private val trygdeavgiftConsumer: TrygdeavgiftConsumer,
-    private val trygdeavgiftsberegningsRequestMapper: TrygdeavgiftsberegningsRequestMapper
+    private val trygdeavgiftConsumer: TrygdeavgiftConsumer
 ) {
 
     @Transactional
@@ -34,7 +33,7 @@ class TrygdeavgiftsberegningService
         }
 
         val (trygdeavgiftsberegningRequest, UUID_DBID_MAPS) =
-            trygdeavgiftsberegningsRequestMapper.map(
+            TrygdeavgiftsberegningsRequestMapper().map(
                 medlemAvFolketrygden.medlemskapsperioder,
                 fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge,
                 fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder
