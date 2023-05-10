@@ -105,7 +105,7 @@ internal class OppgaveFactoryNyMappingTest {
                 ToggleName.NY_GOSYS_MAPPING,
                 OppgaveGosysMapping.NY_GOSYS_MAPPING_UNTAKK_FOR_MIGRERING
             )
-        }).apply {
+        }).run {
             val oppgave = lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument).build()
             oppgave.behandlingstema.shouldBe(OppgaveBehandlingstema.EU_EOS_FORESPORSEL_OM_TRYGDETID.kode)
         }
@@ -144,6 +144,21 @@ internal class OppgaveFactoryNyMappingTest {
 
         oppgave.tema.shouldBe(Tema.UFM)
     }
+
+    @Test
+    fun `Beskrivelsesfelt fylles ut basert på behandlingstema i Melosys for EU_EØS, MEDLEMSKAP_LOVVALG som mapper til ab0483`() {
+        val behandling = lagBehandling(
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.UTSENDT_ARBEIDSTAKER,
+            Behandlingstyper.FØRSTEGANG
+        )
+        val oppgave =
+            oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument).build()
+
+        oppgave.beskrivelse.shouldBe(Behandlingstema.UTSENDT_ARBEIDSTAKER.beskrivelse)
+    }
+
 
     @ParameterizedTest(name = "{0}, {1}, {2}, {3} -> {4}")
     @MethodSource("fraRegistretTabell")
