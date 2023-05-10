@@ -28,6 +28,7 @@ class OppgaveBeskrivelseNyUtleder(unleash: Unleash) : OppgaveBeskrivelseUtleder 
             OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR -> beskrivelsefelt.beskrivelse
             OppgaveGosysMapping.Beskrivelsefelt.SED -> hentSedDokument()?.sedType?.name
                 ?: throw TekniskException("SedType fra behandling er null når beskrivelsefelt er SED")
+            OppgaveGosysMapping.Beskrivelsefelt.BEHANDLINGSTEMA -> behandlingstema.beskrivelse
         }
     }
 }

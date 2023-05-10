@@ -78,6 +78,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
         TOMT(""),
         SED(""),
         SED_ELLER_TOMT(""),
+        BEHANDLINGSTEMA("Hent behandlingstemaet på behandlingen i Melosys"),
         A1_ANMODNING_OM_UNNTAK_PAPIR(Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR.beskrivelse)
     }
 
@@ -126,7 +127,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                     OppgaveBehandlingstema.EU_EOS_YRKESAKTIV,
                     Tema.MED,
                     Oppgavetyper.BEH_SAK_MK,
-                    Beskrivelsefelt.TOMT
+                    Beskrivelsefelt.BEHANDLINGSTEMA
                 )
             ),
             TableRow(
