@@ -292,27 +292,27 @@ internal class OppgaveFactoryNyMappingTest {
 
     private fun gyldigHenvendleseKombinasjonerBortsettIkkeRegistretITabell() =
         sequence<Arguments> {
-            Sakstyper.values().forEach { sakstyper: Sakstyper ->
-                Sakstemaer.values().forEach { sakstemaer: Sakstemaer ->
+            Sakstyper.values().forEach { sakstype: Sakstyper ->
+                Sakstemaer.values().forEach { sakstemae: Sakstemaer ->
                     Behandlingstema.values().filter { behandlingstema ->
                         oppgaveGosysMapping.finnOppgaveFraTabell(
-                            sakstyper,
-                            sakstemaer,
+                            sakstype,
+                            sakstemae,
                             behandlingstema,
                             Behandlingstyper.HENVENDELSE
                         ) == null
                     }.forEach { behandlingstema ->
                         val oppgave = oppgaveGosysMapping.finnOppgaveVedBehandlingstypeHenvendelse(
-                            sakstyper,
-                            sakstemaer,
+                            sakstype,
+                            sakstemae,
                             behandlingstema,
                             Behandlingstyper.HENVENDELSE
                         )
                         if (oppgave != null) {
                             yield(
                                 arguments(
-                                    sakstyper,
-                                    sakstemaer,
+                                    sakstype,
+                                    sakstemae,
                                     behandlingstema,
                                     oppgave.oppgaveBehandlingstema?.kode
                                 )
@@ -325,12 +325,12 @@ internal class OppgaveFactoryNyMappingTest {
 
     private fun henvendelseVirksomhetPermutasjoner() =
         sequence<Arguments> {
-            Sakstyper.values().forEach { sakstyper: Sakstyper ->
-                Sakstemaer.values().forEach { sakstemaer: Sakstemaer ->
+            Sakstyper.values().forEach { sakstype: Sakstyper ->
+                Sakstemaer.values().forEach { sakstemae: Sakstemaer ->
                     yield(
                         arguments(
-                            sakstyper,
-                            sakstemaer,
+                            sakstype,
+                            sakstemae,
                             Behandlingstema.VIRKSOMHET,
                             Behandlingstyper.HENVENDELSE,
                         )
