@@ -17,8 +17,8 @@ import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftBeregningsgrunnlagDtoMapper
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
+import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftsberegningsRequestMapper
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.service.MedlemAvFolketrygdenService
 import org.junit.jupiter.api.BeforeEach
@@ -36,7 +36,7 @@ internal class TrygdeavgiftsberegningServiceTest {
     @MockK
     private lateinit var mockTrygdeavgiftConsumer: TrygdeavgiftConsumer
 
-    private var mockTrygdeavgiftBeregningsgrunnlagDtoMapper = TrygdeavgiftBeregningsgrunnlagDtoMapper()
+    private var mockTrygdeavgiftsberegningsRequestMapper = TrygdeavgiftsberegningsRequestMapper()
 
     private lateinit var trygdeavgiftsberegningService: TrygdeavgiftsberegningService
 
@@ -52,7 +52,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             TrygdeavgiftsberegningService(
                 mockMedlemAvFolketrygdenService,
                 mockTrygdeavgiftConsumer,
-                mockTrygdeavgiftBeregningsgrunnlagDtoMapper
+                mockTrygdeavgiftsberegningsRequestMapper
             )
         medlemAvFolketrygden = MedlemAvFolketrygden()
         every { mockMedlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID) }.returns(medlemAvFolketrygden)
@@ -94,16 +94,20 @@ internal class TrygdeavgiftsberegningServiceTest {
             }
         }
         every { mockMedlemAvFolketrygdenService.lagre(any()) }.returns(medlemAvFolketrygden)
-        every { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftBeregningsgrunnlagDto::class)) }
+        every { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
             .returns(
                 listOf(
-                    TrygdeavgiftsperiodeDto(
-                        DatoPeriodeDto(FOM, TOM),
-                        7.9,
-                        PengerDto(BigDecimal.valueOf(790), NOK),
-                        UUID.randomUUID(),
-                        UUID.randomUUID(),
-                        UUID.randomUUID()
+                    TrygdeavgiftsberegningResponse(
+                        TrygdeavgiftsperiodeDto(
+                            DatoPeriodeDto(FOM, TOM),
+                            7.9,
+                            PengerDto(BigDecimal.valueOf(790), NOK)
+                        ),
+                        TrygdeavgiftsgrunnlagDto(
+                            UUID.randomUUID(),
+                            UUID.randomUUID(),
+                            UUID.randomUUID()
+                        )
                     )
                 )
             )
@@ -118,7 +122,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                     trygdeavgiftsbeløpMd = Penger(790.0)
                 }
             }
-        verify { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftBeregningsgrunnlagDto::class)) }
+        verify { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
         verify { mockMedlemAvFolketrygdenService.lagre(medlemAvFolketrygden) }
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgift.shouldNotBeEmpty()
     }

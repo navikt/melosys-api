@@ -11,18 +11,18 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-class TrygdeavgiftBeregningsgrunnlagDtoMapper {
+class TrygdeavgiftsberegningsRequestMapper {
 
     fun map(
         medlemskapsperioder: Collection<Medlemskapsperiode>,
         skatteforholdTilNorge: Collection<SkatteforholdTilNorge>,
         inntektsperioder: Collection<Inntektsperiode>,
-    ): Pair<TrygdeavgiftBeregningsgrunnlagDto, List<Map<UUID, Long>>> {
+    ): Pair<TrygdeavgiftsberegningRequest, List<Map<UUID, Long>>> {
         val (medlemskapsperioderDto, medlemskapsperiodeMap) = mapMedlemskapsperioder(medlemskapsperioder)
         val (skatteforholdsperioderDto, skatteforholdsperiodeMap) = mapSkatteforholdsperioder(skatteforholdTilNorge)
         val (inntektsperioderDto, inntektsperiodeMap) = mapInntektsperioder(inntektsperioder)
         return Pair(
-            TrygdeavgiftBeregningsgrunnlagDto(
+            TrygdeavgiftsberegningRequest(
                 medlemskapsperioderDto,
                 skatteforholdsperioderDto,
                 inntektsperioderDto
