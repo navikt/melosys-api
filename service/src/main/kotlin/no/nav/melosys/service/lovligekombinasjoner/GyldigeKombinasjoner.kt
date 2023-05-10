@@ -33,7 +33,7 @@ class GyldigeKombinasjoner {
             (rowsMelosys + rowsDatavarehus).groupBy { it.tilSak() }.map { (sak, rows) ->
                 if (rows.size > 2) {
                     throw IllegalStateException(
-                        "Skal aldri ha mer en to treff! fant:${rows.size} for:" +
+                        "Skal aldri ha mer enn to treff! fant:${rows.size} for:" +
                             rows.joinToString("\n")
                     )
                 }
