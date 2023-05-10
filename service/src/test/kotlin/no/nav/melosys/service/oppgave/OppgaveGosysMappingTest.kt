@@ -37,7 +37,9 @@ class OppgaveGosysMappingTest {
 
     @Test
     fun `sjekk at gyldige melosys kombinasjoner funger når vi lager gosys oppgave`() {
-        GyldigeKombinasjoner.rows.forEach {
+        GyldigeKombinasjoner.rowsMelosys.forEach {
+            // TODO: bruk rowsMelosysOgDatavarehus når mapping av oppgave er fikset for de 4 som mangler
+            // https://confluence.adeo.no/display/TEESSI/Alle+kombinasjoner+fra+melosys+og+dvh+med+mapping+til+gosys+oppgave
             oppgaveGosysMapping.finnOppgave(it.sakstype, it.sakstema, it.behandlingstema, it.behandlingstype)
         }
     }

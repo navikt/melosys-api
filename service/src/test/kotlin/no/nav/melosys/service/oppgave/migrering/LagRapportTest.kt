@@ -1,6 +1,7 @@
 package no.nav.melosys.service.oppgave.migrering
 
 import no.finn.unleash.FakeUnleash
+import no.nav.melosys.service.lovligekombinasjoner.GyldigeKombinasjoner
 import no.nav.melosys.service.oppgave.OppgaveGosysMapping
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -60,8 +61,8 @@ class LagRapportTest {
 
                         }
                     }
-                }
-        }.apply {
+            }
+        }.run {
             export(HtmlExporter()).let {
                 File("/Users/rune/div/filtert-mot-migrering.html").writeText(it)
             }
@@ -72,7 +73,7 @@ class LagRapportTest {
     }
 
     @Test
-    fun `gyldige melosys kombinasjoner som tabell`() {
+    fun `lag gyldige melosys kombinasjoner mappet til oppgave tabell`() {
         document {
             table {
                 th {
@@ -81,13 +82,14 @@ class LagRapportTest {
                     item(bc = "BurlyWood") { "Behandlingstype" }
                     item(bc = "BurlyWood") { "Behandlingstema" }
                     item(bc = "Chocolate") { "Mapping regel" }
+                    item(bc = "Chocolate") { "melosys/dvh" }
                     item(bc = "DarkSalmon") { "Behandlingstema" }
                     item(bc = "DarkSalmon") { "Behandlingstema beskrivelse" }
                     item(bc = "DarkSalmon") { "Tema" }
                     item(bc = "DarkSalmon") { "Oppgavetype" }
                     item(bc = "DarkSalmon") { "Beskrivelsesfelt" }
                 }
-                oppgaveGosysMapping.all().sortedWith(
+                GyldigeKombinasjoner.rowsMelosysOgDatavarehus.sortedWith(
                     compareBy(
                         { it.sakstype },
                         { it.sakstema },
@@ -95,33 +97,43 @@ class LagRapportTest {
                         { it.behandlingstema }
                     )
                 ).forEach {
-                    val oppgave = oppgaveGosysMapping.finnOppgave(it.sakstype, it.sakstema, it.behandlingstema, it.behandlingstype)
-                    val fargeFraRegelTuffet = when(oppgave.regelTruffet) {
+                    val oppgave: OppgaveGosysMapping.Oppgave? = try {
+                        oppgaveGosysMapping.finnOppgave(it.sakstype, it.sakstema, it.behandlingstema, it.behandlingstype)
+                    } catch (e: Exception) {
+                        println(e.message)
+                        null
+                    }
+                    val fargeFraRegelTuffet = when (oppgave?.regelTruffet) {
                         OppgaveGosysMapping.Regel.FRA_TABELL -> "MintCream"
                         OppgaveGosysMapping.Regel.HENVENDELSE -> "MistyRose"
                         OppgaveGosysMapping.Regel.HENVENDELSE_OG_VIRKSOMHET -> "Orchid"
+                        else -> null
                     }
-                    val fontType = when(oppgave.regelTruffet) {
+                    val fontType = when (oppgave?.regelTruffet) {
                         OppgaveGosysMapping.Regel.FRA_TABELL -> Font.NORMAL
                         OppgaveGosysMapping.Regel.HENVENDELSE -> Font.ITALIC
                         OppgaveGosysMapping.Regel.HENVENDELSE_OG_VIRKSOMHET -> Font.STRONG
+                        else -> Font.NORMAL
                     }
+                    val maglerOppgaveFarge = if (oppgave == null) "Red" else null
+                    val maglerOppgaveFont = if (oppgave == null) Font.STRONG else Font.NORMAL
                     tr {
-                        item(bc = "OldLace") { it.sakstype }
-                        item(bc = "OldLace") { it.sakstema }
-                        item(bc = "OldLace") { it.behandlingstype }
-                        item(bc = "OldLace") { it.behandlingstema }
-                        item(bc = fargeFraRegelTuffet, font = fontType) { oppgave.regelTruffet.beskrivelse }
-                        item(bc = "PeachPuff") { oppgave.oppgaveBehandlingstema?.kode }
-                        item(bc = "PeachPuff") { oppgave.oppgaveBehandlingstema?.name }
-                        item(bc = "PeachPuff") { oppgave.tema }
-                        item(bc = "PeachPuff") { oppgave.oppgaveType }
-                        item(bc = "PeachPuff") { oppgave.beskrivelsefelt }
+                        item(fc = maglerOppgaveFarge, font = maglerOppgaveFont) { it.sakstype }
+                        item(fc = maglerOppgaveFarge, font = maglerOppgaveFont) { it.sakstema }
+                        item(fc = maglerOppgaveFarge, font = maglerOppgaveFont) { it.behandlingstype }
+                        item(fc = maglerOppgaveFarge, font = maglerOppgaveFont) { it.behandlingstema }
+                        item(fc = maglerOppgaveFarge, bc = fargeFraRegelTuffet, font = fontType) { oppgave?.regelTruffet?.beskrivelse }
+                        item(fc = maglerOppgaveFarge, font = maglerOppgaveFont) { it.regel.beskrivelse }
+                        item(fc = maglerOppgaveFarge, font = maglerOppgaveFont) { oppgave?.oppgaveBehandlingstema?.kode }
+                        item(fc = maglerOppgaveFarge, font = maglerOppgaveFont) { oppgave?.oppgaveBehandlingstema?.name }
+                        item(fc = maglerOppgaveFarge, font = maglerOppgaveFont) { oppgave?.tema }
+                        item(fc = maglerOppgaveFarge, font = maglerOppgaveFont) { oppgave?.oppgaveType }
+                        item(fc = maglerOppgaveFarge, font = maglerOppgaveFont) { oppgave?.beskrivelsefelt }
                     }
                 }
             }
-        }.apply {
-            export(HtmlExporter()).let {
+        }.run {
+            export(HtmlExporter(ignoreForegroundColor = false, ignoreBackgroundColor = false)).let {
                 File("/Users/rune/div/oppgave-mapping-kombinasjoner.html").writeText(it)
             }
             export(ConfluenceWikiExporter()).let {

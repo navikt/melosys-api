@@ -36,7 +36,10 @@ class ConfluenceWikiExporter : Exporter {
     }
 }
 
-class HtmlExporter(private val ignoreForegroundColor: Boolean = false) : Exporter {
+class HtmlExporter(
+    private val ignoreForegroundColor: Boolean = false,
+    private val ignoreBackgroundColor: Boolean = false
+) : Exporter {
     override fun renderDocument(elements: List<Element>): String {
         return """
         <!DOCTYPE html>
@@ -59,7 +62,13 @@ class HtmlExporter(private val ignoreForegroundColor: Boolean = false) : Exporte
     """.trimIndent()
     }
 
-    private fun style(tabelCell: TabelCell): String = if (tabelCell.bc != null) "style=\"background-color:${tabelCell.bc}\"" else ""
+    private fun style(tabelCell: TabelCell): String = mutableListOf<String>().apply {
+            if (!ignoreForegroundColor && tabelCell.fc != null) add("color:${tabelCell.fc}")
+            if (!ignoreBackgroundColor && tabelCell.bc != null) add("background-color:${tabelCell.bc}")
+        }.run {
+            return if (isNotEmpty()) "style=\"${joinToString("; ")}\"" else ""
+    }
+
 
     override fun renderTable(table: Table): String {
         return """
@@ -75,5 +84,14 @@ class HtmlExporter(private val ignoreForegroundColor: Boolean = false) : Exporte
         <tr>
             ${tableRow.cols.joinToString(" ") { it: TabelCell -> "<td ${style(it)}>" + it.export(this) + "</td>" }}
         </tr>""".trimIndent()
+    }
+    override fun renderTableCell(tabelCell: TabelCell): String {
+        val text = when (tabelCell.font) {
+            Font.NORMAL -> tabelCell.text
+            Font.STRONG -> "<b>${tabelCell.text}</b>"
+            Font.ITALIC -> "<i>${tabelCell.text}</i>"
+        }
+
+        return text.toString()
     }
 }
