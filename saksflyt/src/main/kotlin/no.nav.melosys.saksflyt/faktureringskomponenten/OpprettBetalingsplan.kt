@@ -53,7 +53,7 @@ class OpprettBetalingsplan(
                 it.trygdeavgiftsbeløpMd.verdi,
                 it.periodeFra,
                 it.periodeTil,
-                "Inntekt: ${it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi}, Dekning: ${it.grunnlagMedlemskapsperiode.trygdedekning}, Sats: ${it.trygdesats} %"
+                "Inntekt: ${it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi}, Dekning: ${it.grunnlagMedlemskapsperiode.trygdedekning.beskrivelse}, Sats: ${it.trygdesats} %"
             )
         }
 

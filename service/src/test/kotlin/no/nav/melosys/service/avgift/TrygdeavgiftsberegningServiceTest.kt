@@ -72,6 +72,7 @@ internal class TrygdeavgiftsberegningServiceTest {
     @Test
     fun beregnTrygdeavgift_skalBetaleTrygeavgift_beregnerOgLagrerTrygdeavgift() {
         medlemAvFolketrygden.medlemskapsperioder.add(Medlemskapsperiode().apply {
+            id = 1L
             fom = FOM
             tom = TOM
             trygdedekning = Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER
@@ -79,11 +80,13 @@ internal class TrygdeavgiftsberegningServiceTest {
         medlemAvFolketrygden.fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
             trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
                 skatteforholdTilNorge = setOf(SkatteforholdTilNorge().apply {
+                    id = 1L
                     fomDato = FOM
                     tomDato = TOM
                     skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
                 })
                 inntektsperioder = setOf(Inntektsperiode().apply {
+                    id = 1L
                     fomDato = FOM
                     tomDato = TOM
                     type = Inntektskildetype.INNTEKT_FRA_UTLANDET

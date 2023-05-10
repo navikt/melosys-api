@@ -53,6 +53,7 @@ class TrygdeavgiftConsumerTest {
         assertThat(response.get(0))
             .extracting(førsteresponse -> førsteresponse.getBeregnetPeriode().getSats(), førsteresponse -> førsteresponse.getBeregnetPeriode().getAvgift())
             .containsExactly(21.8, new PengerDto(BigDecimal.valueOf(21800)));
+        assertThat(response.get(0).component2()).isNotNull();
     }
 
     private TrygdeavgiftsberegningRequest lagTrygdeavgiftsberegningRequest() {

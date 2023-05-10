@@ -129,6 +129,7 @@ class TrygdeavgiftTjenesteTest {
         medlemskapsperiode.setFom(LocalDate.now());
         medlemskapsperiode.setTom(LocalDate.now().plusDays(10));
         medlemskapsperiode.setTrygdedekning(Trygdedekninger.HELSEDEL);
+        trygdeavgift.setGrunnlagMedlemskapsperiode(medlemskapsperiode);
         trygdeavgift.setFastsattTrygdeavgift(new FastsattTrygdeavgift());
         trygdeavgift.getFastsattTrygdeavgift().setMedlemAvFolketrygden(new MedlemAvFolketrygden());
         trygdeavgift.getFastsattTrygdeavgift().getMedlemAvFolketrygden().setMedlemskapsperioder(Set.of(medlemskapsperiode));

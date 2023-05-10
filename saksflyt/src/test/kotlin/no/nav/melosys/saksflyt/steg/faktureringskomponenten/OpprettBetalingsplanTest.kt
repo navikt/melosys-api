@@ -230,6 +230,10 @@ class OpprettBetalingsplanTest {
             medlemskapsperioder = lagMedlemskapsperioder()
             fastsattTrygdeavgift = lagFastsattTrygdeavgift()
             bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
+            fastsattTrygdeavgift.trygdeavgift.first().grunnlagMedlemskapsperiode =
+                medlemskapsperioder.first()
+            fastsattTrygdeavgift.trygdeavgift.first().grunnlagInntekstperiode =
+                fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.first()
         }
     }
 
