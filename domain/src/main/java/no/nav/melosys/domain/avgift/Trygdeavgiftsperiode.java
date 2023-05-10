@@ -1,16 +1,13 @@
 package no.nav.melosys.domain.avgift;
 
+import java.time.LocalDate;
+import javax.persistence.*;
+
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
-import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.exception.FunksjonellException;
 import org.hibernate.annotations.Columns;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
-
-import javax.persistence.*;
-import java.math.BigDecimal;
-import java.time.LocalDate;
 
 @Entity
 @Table(name = "trygdeavgiftsperiode")
@@ -40,6 +37,18 @@ public class Trygdeavgiftsperiode {
 
     @Column(name = "trygdesats", nullable = false)
     private Double trygdesats;
+
+    @OneToOne
+    @JoinColumn(name = "inntektsperiode_id")
+    private Inntektsperiode grunnlagInntekstperiode;
+
+    @OneToOne
+    @JoinColumn(name = "medlemskapsperiode_id")
+    private Medlemskapsperiode grunnlagMedlemskapsperiode;
+
+    @OneToOne
+    @JoinColumn(name = "skatteforhold_id")
+    private SkatteforholdTilNorge grunnlagSkatteforholdTilNorge;
 
     public Long getId() {
         return id;
@@ -89,38 +98,27 @@ public class Trygdeavgiftsperiode {
         this.trygdesats = trygdesats;
     }
 
-    public Medlemskapsperiode hentGjeldendeMedlemskapsperiode() {
-        var gjeldendeMedlemskapsperioder = fastsattTrygdeavgift.getMedlemAvFolketrygden().getMedlemskapsperioder()
-            .stream()
-            .filter(medlemskapsperiode ->
-                (medlemskapsperiode.getFom().equals(periodeFra) || medlemskapsperiode.getFom().isBefore(periodeFra))
-                    && (medlemskapsperiode.getTom().isEqual(periodeTil) || medlemskapsperiode.getTom().isAfter(periodeTil)))
-            .toList();
-        if (gjeldendeMedlemskapsperioder.size() != 1) {
-            throw new FunksjonellException("Finner " + gjeldendeMedlemskapsperioder.size() + " gjeldende medlemskapsperioder. Forventet én.");
-        }
-        return gjeldendeMedlemskapsperioder.get(0);
+    public Inntektsperiode getGrunnlagInntekstperiode() {
+        return grunnlagInntekstperiode;
     }
 
-    public Trygdedekninger hentGjeldendeTrygdedekning() {
-        return hentGjeldendeMedlemskapsperiode().getTrygdedekning();
+    public void setGrunnlagInntekstperiode(Inntektsperiode grunnlagInntekstperiode) {
+        this.grunnlagInntekstperiode = grunnlagInntekstperiode;
     }
 
-    public Inntektsperiode hentGjeldendeInntektsperiode() { // TODO: Erstatt med data fra beregningsmodulen
-        var getGjeldendeInntektsperiode = fastsattTrygdeavgift.getTrygdeavgiftsgrunnlag().getInntektsperioder()
-            .stream()
-            .filter(inntektsperiode ->
-                (inntektsperiode.getFomDato().equals(periodeFra) || inntektsperiode.getFomDato().isBefore(periodeFra))
-                    && (inntektsperiode.getTomDato().isEqual(periodeTil) || inntektsperiode.getTomDato().isAfter(periodeTil)))
-            .filter(inntektsperiode -> !inntektsperiode.isTrygdeavgiftBetalesTilSkatt())
-            .toList();
-        if (getGjeldendeInntektsperiode.size() != 1) {
-            throw new FunksjonellException("Finner " + getGjeldendeInntektsperiode.size() + " gjeldende medlemskapsperioder. Forventet én.");
-        }
-        return getGjeldendeInntektsperiode.get(0);
+    public Medlemskapsperiode getGrunnlagMedlemskapsperiode() {
+        return grunnlagMedlemskapsperiode;
     }
 
-    public BigDecimal hentGjeldendeAvgiftspliktigInntekt() {
-        return hentGjeldendeInntektsperiode().getAvgiftspliktigInntektMnd().getVerdi();
+    public void setGrunnlagMedlemskapsperiode(Medlemskapsperiode grunnlagMedlemskapsperiode) {
+        this.grunnlagMedlemskapsperiode = grunnlagMedlemskapsperiode;
+    }
+
+    public SkatteforholdTilNorge getGrunnlagSkatteforholdTilNorge() {
+        return grunnlagSkatteforholdTilNorge;
+    }
+
+    public void setGrunnlagSkatteforholdTilNorge(SkatteforholdTilNorge grunnlagSkatteforholdTilNorge) {
+        this.grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge;
     }
 }

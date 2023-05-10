@@ -17,7 +17,6 @@ import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Component
-import java.math.BigDecimal
 import java.util.*
 
 private val log = KotlinLogging.logger { }
@@ -54,7 +53,7 @@ class OpprettBetalingsplan(
                 it.trygdeavgiftsbeløpMd.verdi,
                 it.periodeFra,
                 it.periodeTil,
-                "Inntekt: ${it.hentGjeldendeAvgiftspliktigInntekt()}, Dekning: ${it.hentGjeldendeTrygdedekning()}, Sats: ${it.trygdesats} %"
+                "Inntekt: ${it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi}, Dekning: ${it.grunnlagMedlemskapsperiode.trygdedekning.beskrivelse}, Sats: ${it.trygdesats} %"
             )
         }
 

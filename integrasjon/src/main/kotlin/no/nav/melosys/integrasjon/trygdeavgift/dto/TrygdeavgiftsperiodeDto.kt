@@ -3,5 +3,5 @@ package no.nav.melosys.integrasjon.trygdeavgift.dto
 data class TrygdeavgiftsperiodeDto(
     val periode: DatoPeriodeDto,
     val sats: Double,
-    val avgift: PengerDto
+    val avgift: PengerDto,
 )

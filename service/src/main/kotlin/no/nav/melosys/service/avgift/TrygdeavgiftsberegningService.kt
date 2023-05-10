@@ -1,23 +1,23 @@
 package no.nav.melosys.service.avgift
 
-import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
-import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftBeregningsgrunnlagDto
-import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsperiodeDto
+import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftsberegningsRequestMapper
+import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningResponse
 import no.nav.melosys.service.MedlemAvFolketrygdenService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.*
 
 @Service
 class TrygdeavgiftsberegningService
     (
     private val medlemAvFolketrygdenService: MedlemAvFolketrygdenService,
-    private val trygdeavgiftConsumer: TrygdeavgiftConsumer
+    private val trygdeavgiftConsumer: TrygdeavgiftConsumer,
+    private val trygdeavgiftsberegningsRequestMapper: TrygdeavgiftsberegningsRequestMapper
 ) {
 
     @Transactional
@@ -33,43 +33,55 @@ class TrygdeavgiftsberegningService
             return emptySet()
         }
 
-        val beregnetTrygdeavgift =
-            beregnTrygdeavgift(medlemAvFolketrygden.medlemskapsperioder, fastsattTrygdeavgift.trygdeavgiftsgrunnlag)
-        oppdaterTrygdeavgift(beregnetTrygdeavgift, fastsattTrygdeavgift)
+        val (trygdeavgiftsberegningRequest, UUID_DBID_MAPS) =
+            trygdeavgiftsberegningsRequestMapper.map(
+                medlemAvFolketrygden.medlemskapsperioder,
+                fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge,
+                fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder
+            )
+        val beregnetTrygdeavgift = trygdeavgiftConsumer.beregnTrygdeavgift(trygdeavgiftsberegningRequest)
+        oppdaterTrygdeavgift(beregnetTrygdeavgift, fastsattTrygdeavgift, UUID_DBID_MAPS)
+
         return medlemAvFolketrygdenService.lagre(medlemAvFolketrygden).fastsattTrygdeavgift.trygdeavgift
     }
 
-    private fun beregnTrygdeavgift(
-        medlemskapsperioder: Collection<Medlemskapsperiode>,
-        trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag,
-    ): List<TrygdeavgiftsperiodeDto> =
-        trygdeavgiftConsumer.beregnTrygdeavgift(
-            TrygdeavgiftBeregningsgrunnlagDto.av(
-                medlemskapsperioder,
-                trygdeavgiftsgrunnlag.skatteforholdTilNorge,
-                trygdeavgiftsgrunnlag.inntektsperioder
-            )
-        )
-
     private fun oppdaterTrygdeavgift(
-        beregnetTrygdeavgift: List<TrygdeavgiftsperiodeDto>,
-        fastsattTrygdeavgift: FastsattTrygdeavgift
+        beregnetTrygdeavgift: List<TrygdeavgiftsberegningResponse>,
+        fastsattTrygdeavgift: FastsattTrygdeavgift,
+        UUID_DBID_MAPS: List<Map<UUID, Long>>
     ) =
         beregnetTrygdeavgift.forEach {
-            fastsattTrygdeavgift.trygdeavgift.add(lagTrygdeavgiftsperiode(fastsattTrygdeavgift, it))
+            fastsattTrygdeavgift.trygdeavgift.add(lagTrygdeavgiftsperiode(fastsattTrygdeavgift, it, UUID_DBID_MAPS))
         }
 
     private fun lagTrygdeavgiftsperiode(
         fastsattTrygdeavgift: FastsattTrygdeavgift,
-        trygdeavgiftsperiodeDto: TrygdeavgiftsperiodeDto
-    ) =
-        Trygdeavgiftsperiode().apply {
-            this.periodeFra = trygdeavgiftsperiodeDto.periode.fom
-            this.periodeTil = trygdeavgiftsperiodeDto.periode.tom
-            this.trygdesats = trygdeavgiftsperiodeDto.sats
-            this.trygdeavgiftsbeløpMd = trygdeavgiftsperiodeDto.avgift.tilPenger()
+        trygdeavgiftsberegningResponse: TrygdeavgiftsberegningResponse,
+        UUID_DBID_MAPS: List<Map<UUID, Long>>
+    ): Trygdeavgiftsperiode {
+        val beregnetPeriode = trygdeavgiftsberegningResponse.beregnetPeriode
+        val beregningsgrunnlag = trygdeavgiftsberegningResponse.grunnlag
+
+        return Trygdeavgiftsperiode().apply {
+            this.periodeFra = beregnetPeriode.periode.fom
+            this.periodeTil = beregnetPeriode.periode.tom
+            this.trygdesats = beregnetPeriode.sats
+            this.trygdeavgiftsbeløpMd = beregnetPeriode.avgift.tilPenger()
             this.fastsattTrygdeavgift = fastsattTrygdeavgift
+            this.grunnlagMedlemskapsperiode = fastsattTrygdeavgift.medlemAvFolketrygden.medlemskapsperioder
+                .find {
+                    it.id == UUID_DBID_MAPS.get(0).get(beregningsgrunnlag.medlemskapsperiodeId)
+                }
+            this.grunnlagSkatteforholdTilNorge = fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge
+                .find {
+                    it.id == UUID_DBID_MAPS.get(1).get(beregningsgrunnlag.skatteforholdsperiodeId)
+                }
+            this.grunnlagInntekstperiode = fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder
+                .find {
+                    it.id == UUID_DBID_MAPS.get(2).get(beregningsgrunnlag.inntektsperiodeId)
+                }
         }
+    }
 
     private fun valider(medlemAvFolketrygden: MedlemAvFolketrygden) {
         if (medlemAvFolketrygden.medlemskapsperioder.isEmpty()) {
@@ -90,7 +102,7 @@ class TrygdeavgiftsberegningService
     }
 
     @Transactional(readOnly = true)
-    fun hentTrygdeavgiftsberegning(behandlingsresultatID: Long): Set<no.nav.melosys.domain.avgift.Trygdeavgiftsperiode> {
+    fun hentTrygdeavgiftsberegning(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
         return medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)?.fastsattTrygdeavgift?.trygdeavgift
             ?: emptySet()
     }

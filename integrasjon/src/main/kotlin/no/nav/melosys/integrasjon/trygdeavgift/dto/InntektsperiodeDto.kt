@@ -3,8 +3,10 @@ package no.nav.melosys.integrasjon.trygdeavgift.dto
 import no.nav.melosys.domain.avgift.Penger
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import java.math.BigDecimal
+import java.util.*
 
 data class InntektsperiodeDto(
+    val id: UUID,
     val periode: DatoPeriodeDto,
     val inntektskilde: Inntektskildetype,
     val arbeidsgiverBetalerAvgift: Boolean?,
