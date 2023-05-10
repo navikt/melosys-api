@@ -52,12 +52,14 @@ internal class OppgaveFactoryNyMappingTest {
     }
 
     @Test
-    fun `tom beskrivelse når oppgavetype ikke er BEH_SED - untatt ved A1_ANMODNING_OM_UNNTAK_PAPIR`() {
+    fun `tom beskrivelse når oppgavetype ikke er BEH_SED - untatt ved A1_ANMODNING_OM_UNNTAK_PAPIR og BEHANDLINGSTEMA`() {
         oppgaveGosysMapping.rows
             .filter {
                 it.oppgave.oppgaveType != Oppgavetyper.BEH_SED
             }.filter {
                 it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
+            }.filter {
+                it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.BEHANDLINGSTEMA
             }.forEach { row ->
                 lagBehandlingBrukAlleKombinasjoner(row) { flat, behandling ->
                     val oppgave =
