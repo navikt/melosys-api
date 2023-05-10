@@ -13,6 +13,6 @@ interface OppgaveBeskrivelseUtleder {
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper,
-        hentSedDokument: () -> SedDokument?
+        hentSedDokument: (logOmMangler: Boolean) -> SedDokument?
     ): String
 }

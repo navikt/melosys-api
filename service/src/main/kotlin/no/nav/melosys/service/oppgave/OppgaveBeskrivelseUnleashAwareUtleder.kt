@@ -22,7 +22,7 @@ class OppgaveBeskrivelseUnleashAwareUtleder(private val unleash: Unleash) : Oppg
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper,
-        hentSedDokument: () -> SedDokument?
+        hentSedDokument: (logOmMangler: Boolean) -> SedDokument?
     ): String =
         oppgaveBeskrivelseUtleder.utledBeskrivelse(
             oppgaveBehandlingstema,
