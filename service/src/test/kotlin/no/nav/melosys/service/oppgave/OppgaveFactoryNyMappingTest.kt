@@ -135,6 +135,16 @@ internal class OppgaveFactoryNyMappingTest {
         oppgave.oppgaveBehandlingstema?.kode.shouldBe(null)
     }
 
+    @Test
+    fun `Tema må hentes ved bruk av teamaUtleder`() {
+        val oppgave = oppgaveGosysMapping.finnOppgave(
+            Sakstyper.EU_EOS, Sakstemaer.UNNTAK,
+            Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET, Behandlingstyper.HENVENDELSE
+        )
+
+        oppgave.tema.shouldBe(Tema.UFM)
+    }
+
     @ParameterizedTest(name = "{0}, {1}, {2}, {3} -> {4}")
     @MethodSource("fraRegistretTabell")
     fun `oppgave oppslag skal fungere på med type sed`(
@@ -294,6 +304,7 @@ internal class OppgaveFactoryNyMappingTest {
                     }.forEach { behandlingstema ->
                         val oppgave = oppgaveGosysMapping.finnOppgaveVedBehandlingstypeHenvendelse(
                             sakstyper,
+                            sakstemaer,
                             behandlingstema,
                             Behandlingstyper.HENVENDELSE
                         )
