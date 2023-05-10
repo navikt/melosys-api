@@ -135,6 +135,16 @@ internal class OppgaveFactoryNyMappingTest {
         oppgave.oppgaveBehandlingstema?.kode.shouldBe(null)
     }
 
+    @Test
+    fun `Tema må hentes ved bruk av teamaUtleder`() {
+        val oppgave = oppgaveGosysMapping.finnOppgave(
+            Sakstyper.EU_EOS, Sakstemaer.UNNTAK,
+            Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET, Behandlingstyper.HENVENDELSE
+        )
+
+        oppgave.tema.shouldBe(Tema.UFM)
+    }
+
     @ParameterizedTest(name = "{0}, {1}, {2}, {3} -> {4}")
     @MethodSource("fraRegistretTabell")
     fun `oppgave oppslag skal fungere på med type sed`(
@@ -282,26 +292,27 @@ internal class OppgaveFactoryNyMappingTest {
 
     private fun gyldigHenvendleseKombinasjonerBortsettIkkeRegistretITabell() =
         sequence<Arguments> {
-            Sakstyper.values().forEach { sakstyper: Sakstyper ->
-                Sakstemaer.values().forEach { sakstemaer: Sakstemaer ->
+            Sakstyper.values().forEach { sakstype: Sakstyper ->
+                Sakstemaer.values().forEach { sakstemae: Sakstemaer ->
                     Behandlingstema.values().filter { behandlingstema ->
                         oppgaveGosysMapping.finnOppgaveFraTabell(
-                            sakstyper,
-                            sakstemaer,
+                            sakstype,
+                            sakstemae,
                             behandlingstema,
                             Behandlingstyper.HENVENDELSE
                         ) == null
                     }.forEach { behandlingstema ->
                         val oppgave = oppgaveGosysMapping.finnOppgaveVedBehandlingstypeHenvendelse(
-                            sakstyper,
+                            sakstype,
+                            sakstemae,
                             behandlingstema,
                             Behandlingstyper.HENVENDELSE
                         )
                         if (oppgave != null) {
                             yield(
                                 arguments(
-                                    sakstyper,
-                                    sakstemaer,
+                                    sakstype,
+                                    sakstemae,
                                     behandlingstema,
                                     oppgave.oppgaveBehandlingstema?.kode
                                 )
@@ -314,12 +325,12 @@ internal class OppgaveFactoryNyMappingTest {
 
     private fun henvendelseVirksomhetPermutasjoner() =
         sequence<Arguments> {
-            Sakstyper.values().forEach { sakstyper: Sakstyper ->
-                Sakstemaer.values().forEach { sakstemaer: Sakstemaer ->
+            Sakstyper.values().forEach { sakstype: Sakstyper ->
+                Sakstemaer.values().forEach { sakstemae: Sakstemaer ->
                     yield(
                         arguments(
-                            sakstyper,
-                            sakstemaer,
+                            sakstype,
+                            sakstemae,
                             Behandlingstema.VIRKSOMHET,
                             Behandlingstyper.HENVENDELSE,
                         )

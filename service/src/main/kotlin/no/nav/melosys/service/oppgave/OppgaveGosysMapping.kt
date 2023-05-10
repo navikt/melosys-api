@@ -19,7 +19,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
         behandlingstype: Behandlingstyper?
     ): Oppgave = finnOppgaveFraTabell(sakstype, sakstema, behandlingstema, behandlingstype)
         ?: finnOppgaveVedBehandlingstypeHenvendelseOgVirksomhet(sakstype, sakstema, behandlingstema, behandlingstype)
-        ?: finnOppgaveVedBehandlingstypeHenvendelse(sakstype, behandlingstema, behandlingstype)
+        ?: finnOppgaveVedBehandlingstypeHenvendelse(sakstype, sakstema, behandlingstema, behandlingstype)
         ?: throw IllegalStateException(
             "Fant ikke oppgave mapping for " +
                 "sakstype:$sakstype, sakstema:$sakstema, behandlingstema:$behandlingstema, behandlingstype:$behandlingstype"
@@ -55,6 +55,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
 
     fun finnOppgaveVedBehandlingstypeHenvendelse(
         sakstype: Sakstyper,
+        sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper?
     ): Oppgave? {
@@ -65,7 +66,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
             Oppgave(
                 oppgaveBehandlingstema = it.oppgaveBehandlingstema,
                 oppgaveType = Oppgavetyper.VURD_HENV,
-                tema = it.tema,
+                tema = teamaUtleder.utledTema(sakstype, sakstema, behandlingstema),
                 beskrivelsefelt = Beskrivelsefelt.SED_ELLER_TOMT,
                 regelTruffet = Regel.HENVENDELSE
             )

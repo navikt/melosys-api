@@ -62,7 +62,7 @@ internal fun OppgaveGosysMapping.allGrouped(action: (name: String, list: List<Mi
             when {
                 finnOppgaveFraTabell(sakstype, sakstema, btema, btype) != null -> null
                 finnOppgaveVedBehandlingstypeHenvendelseOgVirksomhet(sakstype, sakstema, btema, btype) != null -> null
-                else -> finnOppgaveVedBehandlingstypeHenvendelse(sakstype, btema, btype)
+                else -> finnOppgaveVedBehandlingstypeHenvendelse(sakstype, sakstema, btema, btype)
             }
         }
     ).forEach { action(it.key, it.value) }
