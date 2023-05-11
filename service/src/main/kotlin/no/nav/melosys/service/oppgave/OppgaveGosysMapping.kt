@@ -190,7 +190,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                     OppgaveBehandlingstema.EU_EOS_FORESPORSEL_OM_TRYGDETID,
                     Tema.MED,
                     Oppgavetyper.BEH_SED,
-                    Beskrivelsefelt.SED
+                    Beskrivelsefelt.SED_ELLER_TOMT
                 )
             ),
             TableRow(
@@ -398,7 +398,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                     OppgaveBehandlingstema.EU_EOS_FORESPORSEL_FRA_TRYGDEMYNDIGHET,
                     Tema.MED,
                     Oppgavetyper.BEH_SED,
-                    Beskrivelsefelt.SED
+                    Beskrivelsefelt.SED_ELLER_TOMT
                 )
             ),
             TableRow(
