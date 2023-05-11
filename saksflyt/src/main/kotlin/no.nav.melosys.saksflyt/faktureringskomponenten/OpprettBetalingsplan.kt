@@ -6,6 +6,7 @@ import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Kontaktopplysning
 import no.nav.melosys.domain.kodeverk.Aktoersroller
+import no.nav.melosys.domain.kodeverk.Representerer
 import no.nav.melosys.domain.saksflyt.ProsessDataKey
 import no.nav.melosys.domain.saksflyt.ProsessSteg
 import no.nav.melosys.domain.saksflyt.Prosessinstans
@@ -19,6 +20,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Component
 import java.util.*
+import kotlin.jvm.optionals.getOrNull
 
 private val log = KotlinLogging.logger { }
 
@@ -59,7 +61,8 @@ class OpprettBetalingsplan(
         val avgiftspliktigUtenlandskInntektMnd = fastsattTrygdeavgift.avgiftspliktigUtenlandskInntektMnd ?: 0
         val avgiftspliktigNorskInntektMnd = fastsattTrygdeavgift.avgiftspliktigNorskInntektMnd ?: 0
         val inntektBelopMnd = avgiftspliktigUtenlandskInntektMnd + avgiftspliktigNorskInntektMnd
-        val kontaktopplysning = hentKontaktopplysning(fagsak, fastsattTrygdeavgift.betalesAv)
+        val fullmektig = fagsak.finnRepresentant(Representerer.BRUKER)
+        val kontaktopplysning = hentKontaktopplysning(fagsak, fullmektig)
 
         val alleTrygdeavgiftIMedlemskap = medlemskapsperioder.flatMap {
             it.trygdeavgift.map { trygdeavgift -> trygdeavgift }
@@ -86,7 +89,7 @@ class OpprettBetalingsplan(
                 vedtaksId = "${fagsak.saksnummer}-$behandlingsId",
                 fodselsnummer = foedselsNr,
                 referanseNAV = "Medlemskap og avgift",
-                fullmektig = fullmektigDto(fastsattTrygdeavgift.betalesAv, kontaktopplysning),
+                fullmektig = fullmektigDto(fagsak, kontaktopplysning),
                 fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
                 intervall = intervall ?: FaktureringsIntervall.MANEDLIG,
                 referanseBruker = vedtaksdato,
@@ -98,20 +101,26 @@ class OpprettBetalingsplan(
         faktureringskomponentenConsumer.lagFakturaSerie(fakturaserieDto)
     }
 
+    @OptIn(ExperimentalStdlibApi::class)
     private fun hentKontaktopplysning(
         fagsak: Fagsak,
-        betalesAv: Aktoer?
+        betalesAv: Optional<Aktoer>
     ): Optional<Kontaktopplysning> {
-        if (betalesAv == null) return Optional.empty()
-        return kontaktopplysningService.hentKontaktopplysning(fagsak.saksnummer, betalesAv.orgnr)
+        val fullmektig = betalesAv.getOrNull()
+        if (fullmektig == null) return Optional.empty()
+        return kontaktopplysningService.hentKontaktopplysning(fagsak.saksnummer, fullmektig.orgnr)
     }
 
+    @OptIn(ExperimentalStdlibApi::class)
     private fun fullmektigDto(
-        betalesAv: Aktoer?,
+        fagsak: Fagsak,
         kontaktopplysning: Optional<Kontaktopplysning>
-    ) = FullmektigDto(
-        fodselsnummer = betalesAv?.personIdent,
-        organisasjonsnummer = betalesAv?.orgnr,
-        kontaktperson = kontaktopplysning.orElse(null)?.kontaktNavn
-    )
+    ): FullmektigDto {
+        val fullmektig = fagsak.finnRepresentant(Representerer.BRUKER).getOrNull()
+        return FullmektigDto(
+            fodselsnummer = fullmektig?.personIdent,
+            organisasjonsnummer = fullmektig?.orgnr,
+            kontaktperson = kontaktopplysning.orElse(null)?.kontaktNavn
+        )
+    }
 }
