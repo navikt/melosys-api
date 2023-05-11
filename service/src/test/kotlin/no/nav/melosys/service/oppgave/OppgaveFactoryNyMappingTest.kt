@@ -38,12 +38,19 @@ internal class OppgaveFactoryNyMappingTest {
             }.filter {
                 it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
             }.forEach { row ->
-                lagBehandlingBrukAlleKombinasjoner(row, SedType.A003) { flat, behandling ->
+                lagBehandlingBrukAlleKombinasjoner(row, SedType.A003) { sak, behandling ->
+                    if (sak.behandlingstype in listOf(
+                            Behandlingstyper.NY_VURDERING,
+                            Behandlingstyper.KLAGE,
+                            Behandlingstyper.ENDRET_PERIODE
+                        )
+                    ) return@lagBehandlingBrukAlleKombinasjoner
+                    
                     val oppgave =
                         oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument)
                             .build()
 
-                    withClue("sakstype${row.sakstype}, sakstema=${flat.sakstema}, behandlingstema:${flat.behandlingstema}, ${flat.behandlingstype}") {
+                    withClue("sakstype${row.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
                         oppgave.beskrivelse.shouldBe(SedType.A003.name)
                         verify { behandling.saksopplysninger }
                     }
@@ -161,6 +168,23 @@ internal class OppgaveFactoryNyMappingTest {
         oppgave.beskrivelse.shouldBe(Behandlingstema.UTSENDT_ARBEIDSTAKER.beskrivelse)
     }
 
+    @Test
+    fun `Behandlingstyper NY_VURDERING eller KLAGE skal føre til tomt beskrivelse felt`() {
+        val behandling = lagBehandling(
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.BESLUTNING_LOVVALG_NORGE,
+            Behandlingstyper.NY_VURDERING,
+            SedType.A003
+
+        )
+        val oppgave =
+            oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now()) { finnSedDokument(behandling) }.build()
+
+        oppgave.beskrivelse.shouldBe("")
+    }
+
+    fun finnSedDokument(behandling: Behandling): SedDokument? = behandling.finnSedDokument().orElse(null)
 
     @ParameterizedTest(name = "{0}, {1}, {2}, {3} -> {4}")
     @MethodSource("fraRegistretTabell")

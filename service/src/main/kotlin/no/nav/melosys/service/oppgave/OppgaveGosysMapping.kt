@@ -168,7 +168,20 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 Sakstyper.EU_EOS,
                 Sakstemaer.MEDLEMSKAP_LOVVALG,
                 setOf(
-                    Behandlingstyper.FØRSTEGANG,
+                    Behandlingstyper.FØRSTEGANG
+                ),
+                setOf(Behandlingstema.BESLUTNING_LOVVALG_NORGE),
+                Oppgave(
+                    OppgaveBehandlingstema.EU_EOS_NORGE_ER_UTPEKT_SOM_LOVVALGSLAND, // ab0482
+                    Tema.MED,
+                    Oppgavetyper.BEH_SED,
+                    Beskrivelsefelt.SED
+                )
+            ),
+            TableRow(
+                Sakstyper.EU_EOS,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
+                setOf(
                     Behandlingstyper.NY_VURDERING,
                     Behandlingstyper.ENDRET_PERIODE,
                     Behandlingstyper.KLAGE
@@ -178,7 +191,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                     OppgaveBehandlingstema.EU_EOS_NORGE_ER_UTPEKT_SOM_LOVVALGSLAND, // ab0482
                     Tema.MED,
                     Oppgavetyper.BEH_SED,
-                    Beskrivelsefelt.SED
+                    Beskrivelsefelt.TOMT
                 )
             ),
             TableRow(
