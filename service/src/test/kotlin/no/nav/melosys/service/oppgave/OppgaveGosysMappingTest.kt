@@ -1,7 +1,7 @@
 package no.nav.melosys.service.oppgave
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -50,9 +50,8 @@ class OppgaveGosysMappingTest {
             .filter { it.oppgave.beskrivelsefelt == OppgaveGosysMapping.Beskrivelsefelt.SED }
             .filter { Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR !in it.behandlingstema }
             .shouldHaveSize(3)
-            .run {
-                all { it.oppgave.oppgaveBehandlingstema?.kode in listOf("ab0482", "ab0490", "ab0491") }.shouldBeTrue()
-            }
+            .map { it.oppgave.oppgaveBehandlingstema?.kode }
+            .shouldContainAll("ab0482", "ab0490", "ab0491")
     }
 
     @Test
@@ -76,10 +75,17 @@ class OppgaveGosysMappingTest {
         }
 
         OppgaveGosysMapping(FakeUnleash().apply { enable(NY_GOSYS_MAPPING_UNTAKK_FOR_MIGRERING) }).apply {
-            ulovligKobo(this, Behandlingstyper.FØRSTEGANG).oppgaveBehandlingstema.shouldBe(OppgaveBehandlingstema.EU_EOS_FORESPORSEL_OM_TRYGDETID)
-            ulovligKobo(this, Behandlingstyper.NY_VURDERING).oppgaveBehandlingstema.shouldBe(OppgaveBehandlingstema.EU_EOS_FORESPORSEL_OM_TRYGDETID)
+            ulovligKobo(
+                this,
+                Behandlingstyper.FØRSTEGANG
+            ).oppgaveBehandlingstema.shouldBe(OppgaveBehandlingstema.EU_EOS_FORESPORSEL_OM_TRYGDETID)
+            ulovligKobo(
+                this,
+                Behandlingstyper.NY_VURDERING
+            ).oppgaveBehandlingstema.shouldBe(OppgaveBehandlingstema.EU_EOS_FORESPORSEL_OM_TRYGDETID)
         }
     }
+
     @Test
     fun `kombo TRYGDEAVTALE,  UNNTAK, HENVENDELSE, FORESPØRSEL_TRYGDEMYNDIGHET skal gi tema Unntak fra medlemskap`() {
         val oppgave = oppgaveGosysMapping.finnOppgave(
