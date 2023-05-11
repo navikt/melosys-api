@@ -8,6 +8,7 @@ import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
 import no.nav.melosys.service.medlemskapsperiode.OpprettMedlemskapsperiodeService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -34,6 +35,8 @@ class MedlemskapsperiodeTjenesteTest {
     private Aksesskontroll aksesskontroll;
     @Mock
     private OpprettMedlemskapsperiodeService opprettMedlemskapsperiodeService;
+    @Mock
+    private MedlemAvFolketrygdenService medlemAvFolketrygdenService;
 
     private MedlemskapsperiodeTjeneste medlemskapsperiodeTjeneste;
 
@@ -41,7 +44,10 @@ class MedlemskapsperiodeTjenesteTest {
 
     @BeforeEach
     void setup() {
-        medlemskapsperiodeTjeneste = new MedlemskapsperiodeTjeneste(medlemskapsperiodeService, opprettMedlemskapsperiodeService, aksesskontroll);
+        medlemskapsperiodeTjeneste = new MedlemskapsperiodeTjeneste(medlemskapsperiodeService,
+            medlemAvFolketrygdenService,
+            opprettMedlemskapsperiodeService,
+            aksesskontroll);
     }
 
     @Test

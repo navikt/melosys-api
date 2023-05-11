@@ -55,8 +55,11 @@ SET bestemmelse = (
 );
 ALTER TABLE medlem_av_folketrygden
     MODIFY bestemmelse VARCHAR2(99) NOT NULL;
-ALTER TABLE medlemskapsperiode
-    DROP COLUMN bestemmelse;
+ALTER TABLE medlemskapsperiode DROP COLUMN bestemmelse;
+
+
+ALTER TABLE medlem_av_folketrygden DROP COLUMN trygdeavgift_nav_norsk_inntekt;
+ALTER TABLE medlem_av_folketrygden DROP COLUMN trygdeavgift_nav_utenlandsk_inntekt;
 
 
 CREATE TABLE trygdeavgiftsperiode

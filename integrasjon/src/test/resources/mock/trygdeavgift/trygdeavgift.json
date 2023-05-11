@@ -2,7 +2,7 @@
   {
     "beregnetPeriode": {
       "sats": 21.8,
-      "avgift": {
+      "månedsavgift": {
         "verdi": 21800,
         "valuta": {
           "kode": "NOK",

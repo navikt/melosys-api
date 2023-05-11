@@ -7,8 +7,6 @@ import javax.persistence.*;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
-import no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_norsk_inntekt;
-import no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_utenlandsk_inntekt;
 
 @Entity
 @Table(name = "medlem_av_folketrygden")
@@ -20,16 +18,6 @@ public class MedlemAvFolketrygden {
     @OneToOne(optional = false)
     @JoinColumn(name = "beh_resultat_id", nullable = false, updatable = false)
     private Behandlingsresultat behandlingsresultat;
-
-    @Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
-    @Column(name = "trygdeavgift_nav_norsk_inntekt")
-    @Enumerated(EnumType.STRING)
-    private Vurderingsutfall_trygdeavgift_norsk_inntekt vurderingTrygdeavgiftNorskInntekt;
-
-    @Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
-    @Column(name = "trygdeavgift_nav_utenlandsk_inntekt")
-    @Enumerated(EnumType.STRING)
-    private Vurderingsutfall_trygdeavgift_utenlandsk_inntekt vurderingTrygdeavgiftUtenlandskInntekt;
 
     @Column(name = "bestemmelse", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -63,22 +51,6 @@ public class MedlemAvFolketrygden {
 
     public void setBestemmelse(Folketrygdloven_kap2_bestemmelser bestemmelse) {
         this.bestemmelse = bestemmelse;
-    }
-
-    public Vurderingsutfall_trygdeavgift_norsk_inntekt getVurderingTrygdeavgiftNorskInntekt() {
-        return vurderingTrygdeavgiftNorskInntekt;
-    }
-
-    public void setVurderingTrygdeavgiftNorskInntekt(Vurderingsutfall_trygdeavgift_norsk_inntekt vurderingTrygdeavgiftNorskInntekt) {
-        this.vurderingTrygdeavgiftNorskInntekt = vurderingTrygdeavgiftNorskInntekt;
-    }
-
-    public Vurderingsutfall_trygdeavgift_utenlandsk_inntekt getVurderingTrygdeavgiftUtenlandskInntekt() {
-        return vurderingTrygdeavgiftUtenlandskInntekt;
-    }
-
-    public void setVurderingTrygdeavgiftUtenlandskInntekt(Vurderingsutfall_trygdeavgift_utenlandsk_inntekt vurderingTrygdeavgiftUtenlandskInntekt) {
-        this.vurderingTrygdeavgiftUtenlandskInntekt = vurderingTrygdeavgiftUtenlandskInntekt;
     }
 
     public Collection<Medlemskapsperiode> getMedlemskapsperioder() {

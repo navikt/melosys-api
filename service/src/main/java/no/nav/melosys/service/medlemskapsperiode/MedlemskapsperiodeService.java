@@ -1,20 +1,20 @@
 package no.nav.melosys.service.medlemskapsperiode;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
-
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
 import no.nav.melosys.repository.MedlemskapsperiodeRepository;
+import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
 
 import static no.nav.melosys.domain.kodeverk.Trygdedekninger.*;
 import static no.nav.melosys.service.kontroll.regler.PeriodeRegler.feilIPeriode;
@@ -26,24 +26,19 @@ public class MedlemskapsperiodeService {
         PENSJONSDEL, HELSE_OG_PENSJONSDEL, HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER);
 
     private final MedlemskapsperiodeRepository medlemskapsperiodeRepository;
-    private final MedlemAvFolketrygdenRepository medlemAvFolketrygdenRepository;
+    private final MedlemAvFolketrygdenService medlemAvFolketrygdenService;
 
     public MedlemskapsperiodeService(MedlemskapsperiodeRepository medlemskapsperiodeRepository,
-                                     MedlemAvFolketrygdenRepository medlemAvFolketrygdenRepository) {
+                                     MedlemAvFolketrygdenService medlemAvFolketrygdenService) {
         this.medlemskapsperiodeRepository = medlemskapsperiodeRepository;
-        this.medlemAvFolketrygdenRepository = medlemAvFolketrygdenRepository;
+        this.medlemAvFolketrygdenService = medlemAvFolketrygdenService;
     }
 
     @Transactional(readOnly = true)
     public Collection<Medlemskapsperiode> hentMedlemskapsperioder(long behandlingsresultatID) {
-        return medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingsresultatID)
+        return medlemAvFolketrygdenService.finnMedlemAvFolketrygden(behandlingsresultatID)
             .map(medlemAvFolketrygden -> medlemAvFolketrygden.getMedlemskapsperioder().stream().toList())
             .orElse(Collections.emptyList());
-    }
-
-    public MedlemAvFolketrygden hentMedlemAvFolketrygden(long behandlingsresultatID) {
-        return medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingsresultatID)
-            .orElseThrow(() -> new FunksjonellException("Bestemmelse er ikke opprettet for behandling " + behandlingsresultatID));
     }
 
     @Transactional
@@ -52,7 +47,7 @@ public class MedlemskapsperiodeService {
                                                         LocalDate tom,
                                                         InnvilgelsesResultat innvilgelsesResultat,
                                                         Trygdedekninger trygdedekning) {
-        final var medlemAvFolketrygden = hentMedlemAvFolketrygden(behandlingsresultatID);
+        final var medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID);
         final var eksisterendeMedlemsperiode = medlemAvFolketrygden
             .getMedlemskapsperioder()
             .stream()
@@ -75,7 +70,7 @@ public class MedlemskapsperiodeService {
                                                          LocalDate tom,
                                                          InnvilgelsesResultat innvilgelsesResultat,
                                                          Trygdedekninger trygdedekning) {
-        var medlemskapsperiode = hentMedlemAvFolketrygden(behandlingsresultatID)
+        var medlemskapsperiode = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)
             .getMedlemskapsperioder()
             .stream()
             .filter(m -> m.getId() == medlemskapsperiodeID)
@@ -107,7 +102,7 @@ public class MedlemskapsperiodeService {
 
     @Transactional
     public void slettMedlemskapsperiode(long behandlingsresultatID, long medlemskapsperiodeID) {
-        MedlemAvFolketrygden medlemAvFolketrygden = hentMedlemAvFolketrygden(behandlingsresultatID);
+        MedlemAvFolketrygden medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID);
         Collection<Medlemskapsperiode> medlemskapsperioder = medlemAvFolketrygden.getMedlemskapsperioder();
 
         if (medlemskapsperioder.size() == 1) {
