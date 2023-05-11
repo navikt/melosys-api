@@ -87,7 +87,7 @@ class OpprettBetalingsplan(
                 vedtaksId = "${fagsak.saksnummer}-$behandlingsId",
                 fodselsnummer = foedselsNr,
                 referanseNAV = "Medlemskap og avgift",
-                fullmektig = fullmektigDto(fagsak, kontaktopplysning),
+                fullmektig = fullmektigDto(fullmektig, kontaktopplysning),
                 fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
                 intervall = intervall ?: FaktureringsIntervall.MANEDLIG,
                 referanseBruker = vedtaksdato,
@@ -108,14 +108,11 @@ class OpprettBetalingsplan(
     }
 
     private fun fullmektigDto(
-        fagsak: Fagsak,
+        fullmektig: Aktoer?,
         kontaktopplysning: Kontaktopplysning?
-    ): FullmektigDto {
-        val fullmektig = fagsak.finnRepresentant(Representerer.BRUKER).orElse(null)
-        return FullmektigDto(
-            fodselsnummer = fullmektig?.personIdent,
-            organisasjonsnummer = fullmektig?.orgnr,
-            kontaktperson = kontaktopplysning?.kontaktNavn
-        )
-    }
+    ) = FullmektigDto(
+        fodselsnummer = fullmektig?.personIdent,
+        organisasjonsnummer = fullmektig?.orgnr,
+        kontaktperson = kontaktopplysning?.kontaktNavn
+    )
 }
