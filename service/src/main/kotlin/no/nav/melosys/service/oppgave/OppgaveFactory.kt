@@ -52,8 +52,8 @@ class OppgaveFactory(private val unleash: Unleash) {
                     sakstema,
                     behandlingstema,
                     behandlingstype
-                ) { logOmMangler ->
-                    if (logOmMangler) log.warn("Sed dokument mangler for:${behandling.fagsak.saksnummer} behandlingID:${behandling.id}")
+                ) { logHvisMangler ->
+                    if (logHvisMangler) log.warn("Sed dokument mangler for:${behandling.fagsak.saksnummer} behandlingID:${behandling.id}")
                     hentSedDokument()
                 }
             )
@@ -105,7 +105,7 @@ class OppgaveFactory(private val unleash: Unleash) {
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper,
-        hentSedDokument: (logOmMangler: Boolean) -> SedDokument?
+        hentSedDokument: (logHvisMangler: Boolean) -> SedDokument?
     ): String = oppgaveBeskrivelseUtleder.utledBeskrivelse(
         oppgaveBehandlingstema,
         sakstype,

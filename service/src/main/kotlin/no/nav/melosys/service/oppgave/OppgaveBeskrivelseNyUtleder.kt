@@ -16,7 +16,7 @@ class OppgaveBeskrivelseNyUtleder(unleash: Unleash) : OppgaveBeskrivelseUtleder 
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper,
-        hentSedDokument: (logVisFeiler: Boolean) -> SedDokument?
+        hentSedDokument: (logHvisManger: Boolean) -> SedDokument?
     ): String {
         val beskrivelsefelt =
             oppgaveGosysMapping.finnOppgave(sakstype, sakstema, behandlingstema, behandlingstype).beskrivelsefelt

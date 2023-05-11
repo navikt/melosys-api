@@ -129,9 +129,9 @@ class OppgaveMigrering(
         )
 
     private fun SakOgBehandlingDTO.utledBeskrivelse(oppgaveBehandlingstema: OppgaveBehandlingstema?): String {
-        val hentSedDokument = { logOmMangler: Boolean ->
+        val hentSedDokument = { logHvisMangler: Boolean ->
             log.info("Henter sed dokuemnt for: $behandlingID")
-            if (logOmMangler) log.warn("Sed dokument mangler for:${saksnummer} behandlingID:${behandlingID}")
+            if (logHvisMangler) log.warn("Sed dokument mangler for:${saksnummer} behandlingID:${behandlingID}")
             sedDokument(behandlingID)
         }
         return try {

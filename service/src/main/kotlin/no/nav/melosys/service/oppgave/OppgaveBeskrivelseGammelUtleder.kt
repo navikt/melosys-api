@@ -14,7 +14,7 @@ class OppgaveBeskrivelseGammelUtleder : OppgaveBeskrivelseUtleder {
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper,
-        hentSedDokument: (logOmMangler: Boolean) -> SedDokument?
+        hentSedDokument: (logHvisMangler: Boolean) -> SedDokument?
     ): String {
         return when (oppgaveBehandlingstema) {
             OppgaveBehandlingstema.PENSJONIST_ELLER_UFORETRYGDET -> when (sakstema) {
