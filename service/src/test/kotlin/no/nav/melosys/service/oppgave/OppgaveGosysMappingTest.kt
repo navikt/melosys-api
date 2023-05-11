@@ -1,6 +1,7 @@
 package no.nav.melosys.service.oppgave
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -37,11 +38,21 @@ class OppgaveGosysMappingTest {
 
     @Test
     fun `sjekk at gyldige melosys kombinasjoner funger når vi lager gosys oppgave`() {
-        GyldigeKombinasjoner.rowsMelosys.forEach {
-            // TODO: bruk rowsMelosysOgDatavarehus når mapping av oppgave er fikset for de 4 som mangler
+        GyldigeKombinasjoner.rowsMelosysOgDatavarehus.forEach {
             // https://confluence.adeo.no/display/TEESSI/Alle+kombinasjoner+fra+melosys+og+dvh+med+mapping+til+gosys+oppgave
             oppgaveGosysMapping.finnOppgave(it.sakstype, it.sakstema, it.behandlingstema, it.behandlingstype)
         }
+    }
+
+    @Test
+    fun `Skal ha 3 stk med Beskrivelsefelt SED`() {
+        oppgaveGosysMapping.rows
+            .filter { it.oppgave.beskrivelsefelt == OppgaveGosysMapping.Beskrivelsefelt.SED }
+            .filter { Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR !in it.behandlingstema }
+            .shouldHaveSize(3)
+            .run {
+                all { it.oppgave.oppgaveBehandlingstema?.kode in listOf("ab0482", "ab0490", "ab0491") }.shouldBeTrue()
+            }
     }
 
     @Test

@@ -352,7 +352,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
             TableRow(
                 Sakstyper.EU_EOS,
                 Sakstemaer.UNNTAK,
-                setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING),
+                setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(
                     Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
                     Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
@@ -368,7 +368,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
             TableRow(
                 Sakstyper.EU_EOS,
                 Sakstemaer.UNNTAK,
-                setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING),
+                setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL),
                 Oppgave(
                     OppgaveBehandlingstema.EU_EOS_SOKNAD_OM_UNNTAK,
@@ -385,7 +385,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 Oppgave(
                     OppgaveBehandlingstema.EU_EOS_SOKNAD_OM_UNNTAK,
                     Tema.UFM,
-                    Oppgavetyper.BEH_SED,
+                    Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
                 )
             ),
@@ -397,6 +397,18 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 Oppgave(
                     OppgaveBehandlingstema.EU_EOS_FORESPORSEL_FRA_TRYGDEMYNDIGHET,
                     Tema.MED,
+                    Oppgavetyper.BEH_SED,
+                    Beskrivelsefelt.SED_ELLER_TOMT
+                )
+            ),
+            TableRow(
+                Sakstyper.EU_EOS,
+                Sakstemaer.UNNTAK,
+                setOf(Behandlingstyper.HENVENDELSE),
+                setOf(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET),
+                Oppgave(
+                    OppgaveBehandlingstema.EU_EOS_FORESPORSEL_FRA_TRYGDEMYNDIGHET,
+                    Tema.UFM,
                     Oppgavetyper.BEH_SED,
                     Beskrivelsefelt.SED_ELLER_TOMT
                 )
