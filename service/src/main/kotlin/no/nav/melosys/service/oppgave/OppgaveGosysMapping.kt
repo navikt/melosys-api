@@ -124,7 +124,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                     Behandlingstema.ARBEID_KUN_NORGE
                 ),
                 Oppgave(
-                    OppgaveBehandlingstema.EU_EOS_YRKESAKTIV,
+                    OppgaveBehandlingstema.EU_EOS_YRKESAKTIV, // ab0483
                     Tema.MED,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.BEHANDLINGSTEMA
@@ -141,7 +141,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 ),
                 setOf(Behandlingstema.PENSJONIST),
                 Oppgave(
-                    OppgaveBehandlingstema.EU_EOS_PENSJONIST_ELLER_UFORETRYGDET,
+                    OppgaveBehandlingstema.EU_EOS_PENSJONIST_ELLER_UFORETRYGDET, // ab0480
                     Tema.MED,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.TOMT
@@ -158,7 +158,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 ),
                 setOf(Behandlingstema.IKKE_YRKESAKTIV),
                 Oppgave(
-                    OppgaveBehandlingstema.EU_EOS_IKKE_YRKESAKTIV,
+                    OppgaveBehandlingstema.EU_EOS_IKKE_YRKESAKTIV, // ab0481
                     Tema.MED,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.TOMT
@@ -175,7 +175,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 ),
                 setOf(Behandlingstema.BESLUTNING_LOVVALG_NORGE),
                 Oppgave(
-                    OppgaveBehandlingstema.EU_EOS_NORGE_ER_UTPEKT_SOM_LOVVALGSLAND,
+                    OppgaveBehandlingstema.EU_EOS_NORGE_ER_UTPEKT_SOM_LOVVALGSLAND, // ab0482
                     Tema.MED,
                     Oppgavetyper.BEH_SED,
                     Beskrivelsefelt.SED
@@ -187,7 +187,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 setOf(Behandlingstyper.HENVENDELSE),
                 setOf(Behandlingstema.TRYGDETID),
                 Oppgave(
-                    OppgaveBehandlingstema.EU_EOS_FORESPORSEL_OM_TRYGDETID,
+                    OppgaveBehandlingstema.EU_EOS_FORESPORSEL_OM_TRYGDETID, // ab0479
                     Tema.MED,
                     Oppgavetyper.BEH_SED,
                     Beskrivelsefelt.SED_ELLER_TOMT
@@ -199,7 +199,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.YRKESAKTIV),
                 Oppgave(
-                    OppgaveBehandlingstema.UTENFOR_AVTALAND_YRKESAKTIV,
+                    OppgaveBehandlingstema.UTENFOR_AVTALAND_YRKESAKTIV, // ab0484
                     Tema.MED,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.TOMT
@@ -211,7 +211,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.PENSJONIST),
                 Oppgave(
-                    OppgaveBehandlingstema.UTENFOR_AVTALAND_PENSJONIST_ELLER_UFORETRYGDET,
+                    OppgaveBehandlingstema.UTENFOR_AVTALAND_PENSJONIST_ELLER_UFORETRYGDET, // ab0485
                     Tema.MED,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.TOMT
@@ -223,7 +223,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.IKKE_YRKESAKTIV),
                 Oppgave(
-                    OppgaveBehandlingstema.UTENFOR_AVTALAND_IKKE_YRKESAKTIV,
+                    OppgaveBehandlingstema.UTENFOR_AVTALAND_IKKE_YRKESAKTIV, // ab0486
                     Tema.MED,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.TOMT
@@ -235,7 +235,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.IKKE_YRKESAKTIV),
                 Oppgave(
-                    OppgaveBehandlingstema.AVTALAND_IKKE_YRKESAKTIV,
+                    OppgaveBehandlingstema.AVTALAND_IKKE_YRKESAKTIV, // ab0475
                     Tema.MED,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.TOMT
@@ -247,7 +247,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.PENSJONIST),
                 Oppgave(
-                    OppgaveBehandlingstema.AVTALAND_PENSJONIST_ELLER_UFORETRYGDET,
+                    OppgaveBehandlingstema.AVTALAND_PENSJONIST_ELLER_UFORETRYGDET, // ab0476
                     Tema.MED,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.TOMT
@@ -259,7 +259,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.YRKESAKTIV),
                 Oppgave(
-                    OppgaveBehandlingstema.AVTALAND_YRKESAKTIV,
+                    OppgaveBehandlingstema.AVTALAND_YRKESAKTIV, // ab0477
                     Tema.MED,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.TOMT
@@ -271,7 +271,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.UNNTAK_MEDLEMSKAP),
                 Oppgave(
-                    OppgaveBehandlingstema.UTENFOR_AVTALAND_SOKNAD_OM_UNNTAK,
+                    OppgaveBehandlingstema.UTENFOR_AVTALAND_SOKNAD_OM_UNNTAK, // ab0493
                     Tema.UFM,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.TOMT
@@ -283,7 +283,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.PENSJONIST),
                 Oppgave(
-                    OppgaveBehandlingstema.EU_EOS_PENSJONIST_ELLER_UFORETRYGDET,
+                    OppgaveBehandlingstema.EU_EOS_PENSJONIST_ELLER_UFORETRYGDET, // ab0480
                     Tema.TRY,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.TOMT
@@ -295,7 +295,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.PENSJONIST),
                 Oppgave(
-                    OppgaveBehandlingstema.UTENFOR_AVTALAND_PENSJONIST_ELLER_UFORETRYGDET,
+                    OppgaveBehandlingstema.UTENFOR_AVTALAND_PENSJONIST_ELLER_UFORETRYGDET, // ab0485
                     Tema.TRY,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.TOMT
@@ -307,7 +307,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.PENSJONIST),
                 Oppgave(
-                    OppgaveBehandlingstema.AVTALAND_PENSJONIST_ELLER_UFORETRYGDET,
+                    OppgaveBehandlingstema.AVTALAND_PENSJONIST_ELLER_UFORETRYGDET, // ab0476
                     Tema.TRY,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.TOMT
@@ -319,7 +319,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.YRKESAKTIV),
                 Oppgave(
-                    OppgaveBehandlingstema.EU_EOS_YRKESAKTIV,
+                    OppgaveBehandlingstema.EU_EOS_YRKESAKTIV, // ab0483
                     Tema.TRY,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.TOMT
@@ -331,7 +331,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.YRKESAKTIV),
                 Oppgave(
-                    OppgaveBehandlingstema.UTENFOR_AVTALAND_YRKESAKTIV,
+                    OppgaveBehandlingstema.UTENFOR_AVTALAND_YRKESAKTIV, // ab0484
                     Tema.TRY,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.TOMT
@@ -343,7 +343,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.YRKESAKTIV),
                 Oppgave(
-                    OppgaveBehandlingstema.AVTALAND_YRKESAKTIV,
+                    OppgaveBehandlingstema.AVTALAND_YRKESAKTIV, // ab0477
                     Tema.TRY,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.TOMT
@@ -359,7 +359,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                     Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
                 ),
                 Oppgave(
-                    OppgaveBehandlingstema.EU_EOS_MELDING_OM_UNNTAK_UNNTAK,
+                    OppgaveBehandlingstema.EU_EOS_MELDING_OM_UNNTAK_UNNTAK, // ab0490
                     Tema.UFM,
                     Oppgavetyper.BEH_SED,
                     Beskrivelsefelt.SED
@@ -371,7 +371,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL),
                 Oppgave(
-                    OppgaveBehandlingstema.EU_EOS_SOKNAD_OM_UNNTAK,
+                    OppgaveBehandlingstema.EU_EOS_SOKNAD_OM_UNNTAK, // ab0491
                     Tema.UFM,
                     Oppgavetyper.BEH_SED,
                     Beskrivelsefelt.SED
@@ -383,7 +383,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR),
                 Oppgave(
-                    OppgaveBehandlingstema.EU_EOS_SOKNAD_OM_UNNTAK,
+                    OppgaveBehandlingstema.EU_EOS_SOKNAD_OM_UNNTAK, // ab0491
                     Tema.UFM,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
@@ -395,7 +395,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 setOf(Behandlingstyper.HENVENDELSE),
                 setOf(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET),
                 Oppgave(
-                    OppgaveBehandlingstema.EU_EOS_FORESPORSEL_FRA_TRYGDEMYNDIGHET,
+                    OppgaveBehandlingstema.EU_EOS_FORESPORSEL_FRA_TRYGDEMYNDIGHET, // ab0492
                     Tema.MED,
                     Oppgavetyper.BEH_SED,
                     Beskrivelsefelt.SED_ELLER_TOMT
@@ -407,7 +407,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 setOf(Behandlingstyper.HENVENDELSE),
                 setOf(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET),
                 Oppgave(
-                    OppgaveBehandlingstema.EU_EOS_FORESPORSEL_FRA_TRYGDEMYNDIGHET,
+                    OppgaveBehandlingstema.EU_EOS_FORESPORSEL_FRA_TRYGDEMYNDIGHET, // ab0492
                     Tema.UFM,
                     Oppgavetyper.BEH_SED,
                     Beskrivelsefelt.SED_ELLER_TOMT
@@ -443,7 +443,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.REGISTRERING_UNNTAK),
                 Oppgave(
-                    OppgaveBehandlingstema.AVTALAND_MELDING_OM_UNNTAK,
+                    OppgaveBehandlingstema.AVTALAND_MELDING_OM_UNNTAK, // ab0488
                     Tema.UFM,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.TOMT
@@ -455,7 +455,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL),
                 Oppgave(
-                    OppgaveBehandlingstema.AVTALAND_SOKNAD_OM_UNNTAK,
+                    OppgaveBehandlingstema.AVTALAND_SOKNAD_OM_UNNTAK, // ab0489
                     Tema.UFM,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.TOMT
