@@ -48,7 +48,6 @@ class OppgaveGosysMappingTest {
     fun `Skal ha 3 stk med Beskrivelsefelt SED`() {
         oppgaveGosysMapping.rows
             .filter { it.oppgave.beskrivelsefelt == OppgaveGosysMapping.Beskrivelsefelt.SED }
-            .filter { Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR !in it.behandlingstema }
             .shouldHaveSize(3)
             .map { it.oppgave.oppgaveBehandlingstema?.kode }
             .shouldContainAll("ab0482", "ab0490", "ab0491")
