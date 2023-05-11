@@ -1,6 +1,7 @@
 package no.nav.melosys.service.oppgave
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -37,9 +38,19 @@ class OppgaveGosysMappingTest {
 
     @Test
     fun `sjekk at gyldige melosys kombinasjoner funger når vi lager gosys oppgave`() {
-        GyldigeKombinasjoner.rows.forEach {
+        GyldigeKombinasjoner.rowsMelosysOgDatavarehus.forEach {
+            // https://confluence.adeo.no/display/TEESSI/Alle+kombinasjoner+fra+melosys+og+dvh+med+mapping+til+gosys+oppgave
             oppgaveGosysMapping.finnOppgave(it.sakstype, it.sakstema, it.behandlingstema, it.behandlingstype)
         }
+    }
+
+    @Test
+    fun `Skal ha 3 stk med Beskrivelsefelt SED`() {
+        oppgaveGosysMapping.rows
+            .filter { it.oppgave.beskrivelsefelt == OppgaveGosysMapping.Beskrivelsefelt.SED }
+            .shouldHaveSize(3)
+            .map { it.oppgave.oppgaveBehandlingstema?.kode }
+            .shouldContainAll("ab0482", "ab0490", "ab0491")
     }
 
     @Test
@@ -63,10 +74,17 @@ class OppgaveGosysMappingTest {
         }
 
         OppgaveGosysMapping(FakeUnleash().apply { enable(NY_GOSYS_MAPPING_UNTAKK_FOR_MIGRERING) }).apply {
-            ulovligKobo(this, Behandlingstyper.FØRSTEGANG).oppgaveBehandlingstema.shouldBe(OppgaveBehandlingstema.EU_EOS_FORESPORSEL_OM_TRYGDETID)
-            ulovligKobo(this, Behandlingstyper.NY_VURDERING).oppgaveBehandlingstema.shouldBe(OppgaveBehandlingstema.EU_EOS_FORESPORSEL_OM_TRYGDETID)
+            ulovligKobo(
+                this,
+                Behandlingstyper.FØRSTEGANG
+            ).oppgaveBehandlingstema.shouldBe(OppgaveBehandlingstema.EU_EOS_FORESPORSEL_OM_TRYGDETID)
+            ulovligKobo(
+                this,
+                Behandlingstyper.NY_VURDERING
+            ).oppgaveBehandlingstema.shouldBe(OppgaveBehandlingstema.EU_EOS_FORESPORSEL_OM_TRYGDETID)
         }
     }
+
     @Test
     fun `kombo TRYGDEAVTALE,  UNNTAK, HENVENDELSE, FORESPØRSEL_TRYGDEMYNDIGHET skal gi tema Unntak fra medlemskap`() {
         val oppgave = oppgaveGosysMapping.finnOppgave(

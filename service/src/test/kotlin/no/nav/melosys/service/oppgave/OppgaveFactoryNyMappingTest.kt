@@ -52,12 +52,14 @@ internal class OppgaveFactoryNyMappingTest {
     }
 
     @Test
-    fun `tom beskrivelse når oppgavetype ikke er BEH_SED - untatt ved A1_ANMODNING_OM_UNNTAK_PAPIR`() {
+    fun `tom beskrivelse når oppgavetype ikke er BEH_SED - untatt ved A1_ANMODNING_OM_UNNTAK_PAPIR og BEHANDLINGSTEMA`() {
         oppgaveGosysMapping.rows
             .filter {
                 it.oppgave.oppgaveType != Oppgavetyper.BEH_SED
             }.filter {
                 it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
+            }.filter {
+                it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.BEHANDLINGSTEMA
             }.forEach { row ->
                 lagBehandlingBrukAlleKombinasjoner(row) { flat, behandling ->
                     val oppgave =
@@ -105,7 +107,7 @@ internal class OppgaveFactoryNyMappingTest {
                 ToggleName.NY_GOSYS_MAPPING,
                 OppgaveGosysMapping.NY_GOSYS_MAPPING_UNTAKK_FOR_MIGRERING
             )
-        }).apply {
+        }).run {
             val oppgave = lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument).build()
             oppgave.behandlingstema.shouldBe(OppgaveBehandlingstema.EU_EOS_FORESPORSEL_OM_TRYGDETID.kode)
         }
@@ -134,6 +136,31 @@ internal class OppgaveFactoryNyMappingTest {
 
         oppgave.oppgaveBehandlingstema?.kode.shouldBe(null)
     }
+
+    @Test
+    fun `Tema må hentes ved bruk av teamaUtleder`() {
+        val oppgave = oppgaveGosysMapping.finnOppgave(
+            Sakstyper.EU_EOS, Sakstemaer.UNNTAK,
+            Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET, Behandlingstyper.HENVENDELSE
+        )
+
+        oppgave.tema.shouldBe(Tema.UFM)
+    }
+
+    @Test
+    fun `Beskrivelsesfelt fylles ut basert på behandlingstema i Melosys for EU_EØS, MEDLEMSKAP_LOVVALG som mapper til ab0483`() {
+        val behandling = lagBehandling(
+            Sakstyper.EU_EOS,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstema.UTSENDT_ARBEIDSTAKER,
+            Behandlingstyper.FØRSTEGANG
+        )
+        val oppgave =
+            oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument).build()
+
+        oppgave.beskrivelse.shouldBe(Behandlingstema.UTSENDT_ARBEIDSTAKER.beskrivelse)
+    }
+
 
     @ParameterizedTest(name = "{0}, {1}, {2}, {3} -> {4}")
     @MethodSource("fraRegistretTabell")
@@ -282,26 +309,27 @@ internal class OppgaveFactoryNyMappingTest {
 
     private fun gyldigHenvendleseKombinasjonerBortsettIkkeRegistretITabell() =
         sequence<Arguments> {
-            Sakstyper.values().forEach { sakstyper: Sakstyper ->
-                Sakstemaer.values().forEach { sakstemaer: Sakstemaer ->
+            Sakstyper.values().forEach { sakstype: Sakstyper ->
+                Sakstemaer.values().forEach { sakstemae: Sakstemaer ->
                     Behandlingstema.values().filter { behandlingstema ->
                         oppgaveGosysMapping.finnOppgaveFraTabell(
-                            sakstyper,
-                            sakstemaer,
+                            sakstype,
+                            sakstemae,
                             behandlingstema,
                             Behandlingstyper.HENVENDELSE
                         ) == null
                     }.forEach { behandlingstema ->
                         val oppgave = oppgaveGosysMapping.finnOppgaveVedBehandlingstypeHenvendelse(
-                            sakstyper,
+                            sakstype,
+                            sakstemae,
                             behandlingstema,
                             Behandlingstyper.HENVENDELSE
                         )
                         if (oppgave != null) {
                             yield(
                                 arguments(
-                                    sakstyper,
-                                    sakstemaer,
+                                    sakstype,
+                                    sakstemae,
                                     behandlingstema,
                                     oppgave.oppgaveBehandlingstema?.kode
                                 )
@@ -314,12 +342,12 @@ internal class OppgaveFactoryNyMappingTest {
 
     private fun henvendelseVirksomhetPermutasjoner() =
         sequence<Arguments> {
-            Sakstyper.values().forEach { sakstyper: Sakstyper ->
-                Sakstemaer.values().forEach { sakstemaer: Sakstemaer ->
+            Sakstyper.values().forEach { sakstype: Sakstyper ->
+                Sakstemaer.values().forEach { sakstemae: Sakstemaer ->
                     yield(
                         arguments(
-                            sakstyper,
-                            sakstemaer,
+                            sakstype,
+                            sakstemae,
                             Behandlingstema.VIRKSOMHET,
                             Behandlingstyper.HENVENDELSE,
                         )

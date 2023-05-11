@@ -19,7 +19,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
         behandlingstype: Behandlingstyper?
     ): Oppgave = finnOppgaveFraTabell(sakstype, sakstema, behandlingstema, behandlingstype)
         ?: finnOppgaveVedBehandlingstypeHenvendelseOgVirksomhet(sakstype, sakstema, behandlingstema, behandlingstype)
-        ?: finnOppgaveVedBehandlingstypeHenvendelse(sakstype, behandlingstema, behandlingstype)
+        ?: finnOppgaveVedBehandlingstypeHenvendelse(sakstype, sakstema, behandlingstema, behandlingstype)
         ?: throw IllegalStateException(
             "Fant ikke oppgave mapping for " +
                 "sakstype:$sakstype, sakstema:$sakstema, behandlingstema:$behandlingstema, behandlingstype:$behandlingstype"
@@ -47,12 +47,15 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
             oppgaveBehandlingstema = null,
             oppgaveType = Oppgavetyper.VURD_HENV,
             tema = teamaUtleder.utledTema(sakstype, sakstema, behandlingstema),
-            beskrivelsefelt = Beskrivelsefelt.TOMT
+            beskrivelsefelt = Beskrivelsefelt.TOMT,
+            regelTruffet = Regel.HENVENDELSE_OG_VIRKSOMHET
+
         )
     }
 
     fun finnOppgaveVedBehandlingstypeHenvendelse(
         sakstype: Sakstyper,
+        sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper?
     ): Oppgave? {
@@ -63,8 +66,9 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
             Oppgave(
                 oppgaveBehandlingstema = it.oppgaveBehandlingstema,
                 oppgaveType = Oppgavetyper.VURD_HENV,
-                tema = it.tema,
-                beskrivelsefelt = Beskrivelsefelt.SED_ELLER_TOMT
+                tema = teamaUtleder.utledTema(sakstype, sakstema, behandlingstema),
+                beskrivelsefelt = Beskrivelsefelt.SED_ELLER_TOMT,
+                regelTruffet = Regel.HENVENDELSE
             )
         }
     }
@@ -74,14 +78,21 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
         TOMT(""),
         SED(""),
         SED_ELLER_TOMT(""),
+        BEHANDLINGSTEMA("Hent behandlingstemaet på behandlingen i Melosys"),
         A1_ANMODNING_OM_UNNTAK_PAPIR(Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR.beskrivelse)
     }
 
+    enum class Regel(val beskrivelse: String) {
+        FRA_TABELL("tabell"),
+        HENVENDELSE("henvendelse"),
+        HENVENDELSE_OG_VIRKSOMHET("henv-virksomhet")
+    }
     internal data class Oppgave(
         val oppgaveBehandlingstema: OppgaveBehandlingstema?,
         val tema: Tema,
         val oppgaveType: Oppgavetyper,
-        val beskrivelsefelt: Beskrivelsefelt
+        val beskrivelsefelt: Beskrivelsefelt,
+        val regelTruffet: Regel = Regel.FRA_TABELL
     )
 
     internal data class TableRow(
@@ -116,7 +127,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                     OppgaveBehandlingstema.EU_EOS_YRKESAKTIV,
                     Tema.MED,
                     Oppgavetyper.BEH_SAK_MK,
-                    Beskrivelsefelt.TOMT
+                    Beskrivelsefelt.BEHANDLINGSTEMA
                 )
             ),
             TableRow(
@@ -179,7 +190,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                     OppgaveBehandlingstema.EU_EOS_FORESPORSEL_OM_TRYGDETID,
                     Tema.MED,
                     Oppgavetyper.BEH_SED,
-                    Beskrivelsefelt.SED
+                    Beskrivelsefelt.SED_ELLER_TOMT
                 )
             ),
             TableRow(
@@ -341,7 +352,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
             TableRow(
                 Sakstyper.EU_EOS,
                 Sakstemaer.UNNTAK,
-                setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING),
+                setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(
                     Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
                     Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
@@ -357,7 +368,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
             TableRow(
                 Sakstyper.EU_EOS,
                 Sakstemaer.UNNTAK,
-                setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING),
+                setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL),
                 Oppgave(
                     OppgaveBehandlingstema.EU_EOS_SOKNAD_OM_UNNTAK,
@@ -374,7 +385,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 Oppgave(
                     OppgaveBehandlingstema.EU_EOS_SOKNAD_OM_UNNTAK,
                     Tema.UFM,
-                    Oppgavetyper.BEH_SED,
+                    Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
                 )
             ),
@@ -387,7 +398,19 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                     OppgaveBehandlingstema.EU_EOS_FORESPORSEL_FRA_TRYGDEMYNDIGHET,
                     Tema.MED,
                     Oppgavetyper.BEH_SED,
-                    Beskrivelsefelt.SED
+                    Beskrivelsefelt.SED_ELLER_TOMT
+                )
+            ),
+            TableRow(
+                Sakstyper.EU_EOS,
+                Sakstemaer.UNNTAK,
+                setOf(Behandlingstyper.HENVENDELSE),
+                setOf(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET),
+                Oppgave(
+                    OppgaveBehandlingstema.EU_EOS_FORESPORSEL_FRA_TRYGDEMYNDIGHET,
+                    Tema.UFM,
+                    Oppgavetyper.BEH_SED,
+                    Beskrivelsefelt.SED_ELLER_TOMT
                 )
             ),
             TableRow(
