@@ -19,8 +19,6 @@ import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Component
-import java.util.*
-import kotlin.jvm.optionals.getOrNull
 
 private val log = KotlinLogging.logger { }
 
@@ -61,7 +59,7 @@ class OpprettBetalingsplan(
         val avgiftspliktigUtenlandskInntektMnd = fastsattTrygdeavgift.avgiftspliktigUtenlandskInntektMnd ?: 0
         val avgiftspliktigNorskInntektMnd = fastsattTrygdeavgift.avgiftspliktigNorskInntektMnd ?: 0
         val inntektBelopMnd = avgiftspliktigUtenlandskInntektMnd + avgiftspliktigNorskInntektMnd
-        val fullmektig = fagsak.finnRepresentant(Representerer.BRUKER)
+        val fullmektig = fagsak.finnRepresentant(Representerer.BRUKER).orElse(null)
         val kontaktopplysning = hentKontaktopplysning(fagsak, fullmektig)
 
         val alleTrygdeavgiftIMedlemskap = medlemskapsperioder.flatMap {
@@ -101,26 +99,23 @@ class OpprettBetalingsplan(
         faktureringskomponentenConsumer.lagFakturaSerie(fakturaserieDto)
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
     private fun hentKontaktopplysning(
         fagsak: Fagsak,
-        betalesAv: Optional<Aktoer>
-    ): Optional<Kontaktopplysning> {
-        val fullmektig = betalesAv.getOrNull()
-        if (fullmektig == null) return Optional.empty()
-        return kontaktopplysningService.hentKontaktopplysning(fagsak.saksnummer, fullmektig.orgnr)
+        betalesAv: Aktoer?
+    ): Kontaktopplysning? {
+        if (betalesAv == null) return null
+        return kontaktopplysningService.hentKontaktopplysning(fagsak.saksnummer, betalesAv.orgnr).orElse(null)
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
     private fun fullmektigDto(
         fagsak: Fagsak,
-        kontaktopplysning: Optional<Kontaktopplysning>
+        kontaktopplysning: Kontaktopplysning?
     ): FullmektigDto {
-        val fullmektig = fagsak.finnRepresentant(Representerer.BRUKER).getOrNull()
+        val fullmektig = fagsak.finnRepresentant(Representerer.BRUKER).orElse(null)
         return FullmektigDto(
             fodselsnummer = fullmektig?.personIdent,
             organisasjonsnummer = fullmektig?.orgnr,
-            kontaktperson = kontaktopplysning.orElse(null)?.kontaktNavn
+            kontaktperson = kontaktopplysning?.kontaktNavn
         )
     }
 }
