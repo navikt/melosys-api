@@ -58,7 +58,6 @@ public class OpprettMedlemskapsperiodeService {
             new UtledMedlemskapsperioderRequest(
                 søknad.periode,
                 søknad.getTrygdedekning(),
-                bestemmelse,
                 utledMottaksdato.getMottaksdato(behandling),
                 søknad.soeknadsland.landkoder.stream().collect(onlyElement())
             )

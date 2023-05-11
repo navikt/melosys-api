@@ -1,17 +1,10 @@
 package no.nav.melosys.service.vedtak.publisering;
 
-import java.time.ZoneId;
-import java.util.Collection;
-import java.util.Optional;
-
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.avgift.TrygdeavgiftDeprecated;
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.mottatteopplysninger.SoeknadFtrl;
-import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.pdl.dto.person.Navn;
@@ -25,6 +18,8 @@ import no.nav.melosys.service.vedtak.publisering.dto.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.ZoneId;
+
 import static java.time.LocalDate.ofInstant;
 import static java.util.Collections.emptyList;
 import static no.nav.melosys.service.vedtak.publisering.dto.IdentifikatorType.BRUKER;
@@ -32,6 +27,7 @@ import static no.nav.melosys.service.vedtak.publisering.dto.IdentifikatorType.OR
 import static org.springframework.util.ObjectUtils.isEmpty;
 import static org.springframework.util.StringUtils.hasText;
 
+// TODO Slett klassen
 @Service
 public class FattetVedtakService {
 
@@ -66,7 +62,7 @@ public class FattetVedtakService {
             lagSoeknad(behandling),
             lagSaksopplysninger(persondata),
             null,
-            lagPerioder(behandlingsresultat),
+            emptyList(),
             lagFullmektig(behandling.getFagsak()),
             lagRepresentantAvgift(behandlingsresultat)
         );
@@ -128,52 +124,6 @@ public class FattetVedtakService {
         );
     }
 
-    private Collection<LovvalgOgMedlemskapsperiode> lagPerioder(Behandlingsresultat behandlingsresultat) {
-        Optional<MedlemAvFolketrygden> medlemAvFolketrygden = behandlingsresultat.finnMedlemAvFolketrygden();
-
-        //NOTE Ikke støtte for EØS foreløpig
-        return medlemAvFolketrygden.map(this::lagMedlemskapsperioder).orElse(emptyList());
-    }
-
-    private Collection<LovvalgOgMedlemskapsperiode> lagMedlemskapsperioder(MedlemAvFolketrygden medlemAvFolketrygden) {
-        var fastsattTrygdeavgift = medlemAvFolketrygden.getFastsattTrygdeavgift();
-
-        return medlemAvFolketrygden.getMedlemskapsperioder().stream().map(m -> {
-
-            var avgiftForNorsk = m.getTrygdeavgift().stream()
-                .filter(TrygdeavgiftDeprecated::erAvgiftForNorskInntekt).findFirst();
-
-            var avgiftForUtenlandsk = m.getTrygdeavgift().stream()
-                .filter(t -> !t.erAvgiftForNorskInntekt()).findFirst();
-
-            Aktoer betalesAv = fastsattTrygdeavgift.getBetalesAv();
-
-            return new LovvalgOgMedlemskapsperiode(
-                m.getBestemmelse(),
-                null,
-                null,
-                new Periode(m.getFom(), m.getTom()),
-                m.getInnvilgelsesresultat(),
-                m.getDekning(),
-                m.getMedlemskapstype(),
-                new FastsattTrygdeavgift(
-                    new BetalesAv(betalesAv.getOrgnr(), betalesAv.getRolle()),
-                    avgiftForNorsk.map(n -> new Trygdeavgift(
-                        fastsattTrygdeavgift.getAvgiftspliktigNorskInntektMnd(),
-                        n.getTrygdeavgiftsbeløpMd(),
-                        n.getTrygdesats(),
-                        n.getAvgiftskode()
-                    )).orElse(null),
-                    avgiftForUtenlandsk.map(u -> new Trygdeavgift(
-                        fastsattTrygdeavgift.getAvgiftspliktigNorskInntektMnd(),
-                        u.getTrygdeavgiftsbeløpMd(),
-                        u.getTrygdesats(),
-                        u.getAvgiftskode()
-                    )).orElse(null)
-                )
-            );
-        }).toList();
-    }
 
     private Fullmektig lagFullmektig(Fagsak fagsak) {
         return fagsak.finnRepresentant(Representerer.BRUKER)

@@ -47,7 +47,7 @@ class MedlemskapsperiodeTjenesteTest {
     @Test
     void hentMedlemskapsperioder_validerSchema() {
         final var medlemskapsperiode = lagMedlemskapsperiode();
-        when(medlemskapsperiodeService.hentMedlemskapsperioder(eq(behandlingID)))
+        when(medlemskapsperiodeService.hentMedlemskapsperioder(behandlingID))
             .thenReturn(Collections.singleton(medlemskapsperiode));
 
         var res = medlemskapsperiodeTjeneste.hentMedlemskapsperioder(behandlingID);
@@ -55,12 +55,12 @@ class MedlemskapsperiodeTjenesteTest {
 
         assertThat(res.getBody()).hasSize(1)
             .flatExtracting(
-                MedlemskapsperiodeDto::id, MedlemskapsperiodeDto::arbeidsland, MedlemskapsperiodeDto::bestemmelse,
+                MedlemskapsperiodeDto::id, MedlemskapsperiodeDto::arbeidsland,
                 MedlemskapsperiodeDto::fomDato, MedlemskapsperiodeDto::tomDato, MedlemskapsperiodeDto::trygdedekning,
                 MedlemskapsperiodeDto::innvilgelsesResultat, MedlemskapsperiodeDto::medlemskapstype)
             .containsExactly(
-                medlemskapsperiode.getId(), medlemskapsperiode.getArbeidsland(), medlemskapsperiode.getBestemmelse(),
-                medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getDekning(),
+                medlemskapsperiode.getId(), medlemskapsperiode.getArbeidsland(),
+                medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getTrygdedekning(),
                 medlemskapsperiode.getInnvilgelsesresultat(), medlemskapsperiode.getMedlemskapstype()
             );
     }
@@ -84,7 +84,6 @@ class MedlemskapsperiodeTjenesteTest {
         medlemskapsperiode.setFom(LocalDate.now());
         medlemskapsperiode.setTom(LocalDate.now().plusYears(1));
         medlemskapsperiode.setArbeidsland("BR");
-        medlemskapsperiode.setBestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD);
         medlemskapsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.DELVIS_INNVILGET);
         medlemskapsperiode.setMedlemskapstype(Medlemskapstyper.FRIVILLIG);
         medlemskapsperiode.setTrygdedekning(Trygdedekninger.HELSE_OG_PENSJONSDEL);

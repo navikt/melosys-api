@@ -176,7 +176,7 @@ class MedlService(
             fraOgMed = medlemskapsperiode.fom,
             tilOgMed = medlemskapsperiode.tom,
             dekning = MedlPeriodeKonverter.tilMedlTrygdeDekningFtrl(
-                medlemskapsperiode.dekning,
+                medlemskapsperiode.trygdedekning,
                 medlemskapsperiode.bestemmelse
             ).kode,
             lovvalgsland = IsoLandkodeKonverterer.tilIso3(medlemskapsperiode.arbeidsland),

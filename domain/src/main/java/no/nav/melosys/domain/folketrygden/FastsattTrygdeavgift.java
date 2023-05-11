@@ -6,8 +6,8 @@ import javax.persistence.*;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.avgift.Inntektsperiode;
-import no.nav.melosys.domain.avgift.Trygdeavgift;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer;
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker;
 
@@ -38,7 +38,7 @@ public class FastsattTrygdeavgift {
     private Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag;
 
     @OneToMany(mappedBy = "fastsattTrygdeavgift", orphanRemoval = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private Set<Trygdeavgift> trygdeavgift = new HashSet<>(1);
+    private Set<Trygdeavgiftsperiode> trygdeavgiftsperiode = new HashSet<>(1);
 
     @Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
     @Column(name = "avgiftspliktig_norsk_inntekt_md")
@@ -113,12 +113,12 @@ public class FastsattTrygdeavgift {
         this.avgiftspliktigUtenlandskInntektMnd = avgiftspliktigUtenlandskInntektMnd;
     }
 
-    public Set<Trygdeavgift> getTrygdeavgift() {
-        return trygdeavgift;
+    public Set<Trygdeavgiftsperiode> getTrygdeavgift() {
+        return trygdeavgiftsperiode;
     }
 
-    public void setTrygdeavgift(Set<Trygdeavgift> trygdeavgift) {
-        this.trygdeavgift = trygdeavgift;
+    public void setTrygdeavgift(Set<Trygdeavgiftsperiode> trygdeavgiftsperiode) {
+        this.trygdeavgiftsperiode = trygdeavgiftsperiode;
     }
 
     public Trygdeavgiftmottaker getTrygdeavgiftMottaker() {
@@ -130,5 +130,11 @@ public class FastsattTrygdeavgift {
         return inntektsperioder.iterator().next().isTrygdeavgiftBetalesTilSkatt()
             ? Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
             : Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV;
+    }
+
+    public boolean skalBetaleTrygdeavgiftTilNav() {
+        var trygdeavgiftMottaker = getTrygdeavgiftMottaker();
+        return trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
+            || trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT;
     }
 }

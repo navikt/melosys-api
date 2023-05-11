@@ -1,20 +1,14 @@
 package no.nav.melosys.domain;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Objects;
-import javax.persistence.*;
-
-import no.nav.melosys.domain.avgift.TrygdeavgiftDeprecated;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
-import static no.nav.melosys.domain.kodeverk.InnvilgelsesResultat.DELVIS_INNVILGET;
-import static no.nav.melosys.domain.kodeverk.InnvilgelsesResultat.INNVILGET;
+import javax.persistence.*;
+import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity
 @Table(name = "medlemskapsperiode")
@@ -33,14 +27,8 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
     @Column(name = "tom_dato")
     private LocalDate tom;
 
-    @Deprecated(since = "Dobbeltsjekk om denne kan fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
     @Column(name = "arbeidsland", nullable = false)
     private String arbeidsland;
-
-    @Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
-    @Enumerated(EnumType.STRING)
-    @Column(name = "bestemmelse", nullable = false)
-    private Folketrygdloven_kap2_bestemmelser bestemmelse;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "innvilgelse_resultat", nullable = false)
@@ -56,28 +44,6 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
 
     @Column(name = "medlperiode_id")
     private Long medlPeriodeID;
-
-    @OneToMany(mappedBy = "medlemskapsperiode", orphanRemoval = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private Collection<TrygdeavgiftDeprecated> trygdeavgiftDeprecated = new ArrayList<>(1);
-
-    public Medlemskapsperiode() {
-    }
-
-    public Medlemskapsperiode(LocalDate fom,
-                              LocalDate tom,
-                              String arbeidsland,
-                              Folketrygdloven_kap2_bestemmelser bestemmelse,
-                              InnvilgelsesResultat innvilgelsesresultat,
-                              Medlemskapstyper medlemskapstype,
-                              Trygdedekninger trygdedekning) {
-        this.fom = fom;
-        this.tom = tom;
-        this.arbeidsland = arbeidsland;
-        this.bestemmelse = bestemmelse;
-        this.innvilgelsesresultat = innvilgelsesresultat;
-        this.medlemskapstype = medlemskapstype;
-        this.trygdedekning = trygdedekning;
-    }
 
     public Long getId() {
         return id;
@@ -120,11 +86,7 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
     }
 
     public Folketrygdloven_kap2_bestemmelser getBestemmelse() {
-        return bestemmelse;
-    }
-
-    public void setBestemmelse(Folketrygdloven_kap2_bestemmelser bestemmelse) {
-        this.bestemmelse = bestemmelse;
+        return medlemAvFolketrygden.getBestemmelse();
     }
 
     public InnvilgelsesResultat getInnvilgelsesresultat() {
@@ -143,7 +105,7 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
         this.medlemskapstype = medlemskapstype;
     }
 
-    public Trygdedekninger getDekning() {
+    public Trygdedekninger getTrygdedekning() {
         return trygdedekning;
     }
 
@@ -159,18 +121,6 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
         this.medlPeriodeID = medlPeriodeID;
     }
 
-    public Collection<TrygdeavgiftDeprecated> getTrygdeavgift() {
-        return trygdeavgiftDeprecated;
-    }
-
-    public void setTrygdeavgift(Collection<TrygdeavgiftDeprecated> trygdeavgiftDeprecated) {
-        this.trygdeavgiftDeprecated = trygdeavgiftDeprecated;
-    }
-
-    public boolean erInnvilget() {
-        return innvilgelsesresultat == INNVILGET || innvilgelsesresultat == DELVIS_INNVILGET;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -181,7 +131,6 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
             Objects.equals(fom, that.fom) &&
             Objects.equals(tom, that.tom) &&
             Objects.equals(arbeidsland, that.arbeidsland) &&
-            bestemmelse == that.bestemmelse &&
             innvilgelsesresultat == that.innvilgelsesresultat &&
             medlemskapstype == that.medlemskapstype &&
             trygdedekning == that.trygdedekning &&
@@ -190,7 +139,7 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, medlemAvFolketrygden, fom, tom, arbeidsland, bestemmelse, innvilgelsesresultat, medlemskapstype, trygdedekning, medlPeriodeID);
+        return Objects.hash(id, medlemAvFolketrygden, fom, tom, arbeidsland, innvilgelsesresultat, medlemskapstype, trygdedekning, medlPeriodeID);
     }
 
     @Override
@@ -201,7 +150,6 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
             ", fom=" + fom +
             ", tom=" + tom +
             ", arbeidsland='" + arbeidsland + '\'' +
-            ", bestemmelse=" + bestemmelse +
             ", innvilgelsesresultat=" + innvilgelsesresultat +
             ", medlemskapstype=" + medlemskapstype +
             ", trygdedekning=" + trygdedekning +

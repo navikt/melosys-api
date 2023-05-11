@@ -1,0 +1,23 @@
+[
+  {
+    "beregnetPeriode": {
+      "sats": 21.8,
+      "avgift": {
+        "verdi": 21800,
+        "valuta": {
+          "kode": "NOK",
+          "desimaler": 2
+        }
+      },
+      "periode": {
+        "fom": "2023-01-01",
+        "tom": "2023-12-31"
+      }
+    },
+    "grunnlag": {
+      "medlemskapsperiodeId": "da5ee48c-9d31-4f27-9254-46b1d3959330",
+      "skatteforholdsperiodeId": "da5ee48c-9d31-4f27-9254-46b1d3959330",
+      "inntektsperiodeId": "da5ee48c-9d31-4f27-9254-46b1d3959330"
+    }
+  }
+]
