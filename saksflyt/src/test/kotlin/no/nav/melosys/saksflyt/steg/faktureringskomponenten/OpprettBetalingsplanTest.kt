@@ -1,10 +1,13 @@
 package no.nav.melosys.saksflyt.steg.faktureringskomponenten
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.slot
 import io.mockk.verify
 import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.*
@@ -24,6 +27,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
+import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall
 import no.nav.melosys.saksflyt.faktureringskomponenten.OpprettBetalingsplan
 import no.nav.melosys.service.aktoer.KontaktopplysningService
@@ -159,6 +163,46 @@ class OpprettBetalingsplanTest {
         verify(exactly = 1) {
             faktureringskomponentenConsumer.lagFakturaSerie(any())
         }
+    }
+
+    @Test
+    fun `Opprett betalingsplan med fullmektig sender fullmektig`() {
+        lagTestData(lagFagsak().apply {
+            aktører = setOf(
+                lagAktoerOrg(Aktoersroller.REPRESENTANT, "123456789").apply { representerer = Representerer.BEGGE },
+                lagAktoerPerson(Aktoersroller.BRUKER, "11111111111")
+            )
+        })
+
+        every {
+            behandlingsresultatService.hentBehandlingsresultat(prosessinstans.behandling.id)
+        } returns behandlingsresultat
+
+        every {
+            behandlingService.hentBehandling(behandlingsId)
+        } returns behandling
+
+        every {
+            kontaktopplysningService.hentKontaktopplysning(
+                fagsak.saksnummer,
+                "123456789"
+            )
+        } returns Optional.empty()
+
+        every {
+            pdlService.finnFolkeregisterident("11111111111")
+        } returns Optional.of("12345678911")
+
+
+        opprettBetalingsplan.utfør(prosessinstans)
+
+
+        val slot = slot<FakturaserieDto>()
+        verify(exactly = 1) {
+            faktureringskomponentenConsumer.lagFakturaSerie(capture(slot))
+        }
+        slot.captured.shouldNotBeNull()
+        slot.captured.fullmektig?.organisasjonsnummer.shouldBe("123456789")
     }
 
     @Test

@@ -1,5 +1,6 @@
 package no.nav.melosys.service.oppgave
 
+import mu.KotlinLogging
 import no.finn.unleash.Unleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsystem
@@ -15,6 +16,8 @@ import no.nav.melosys.domain.oppgave.PrioritetType
 import no.nav.melosys.featuretoggle.ToggleName
 import org.springframework.stereotype.Component
 import java.time.LocalDate
+
+private val log = KotlinLogging.logger { }
 
 @Component
 class OppgaveFactory(private val unleash: Unleash) {
@@ -48,9 +51,11 @@ class OppgaveFactory(private val unleash: Unleash) {
                     sakstype,
                     sakstema,
                     behandlingstema,
-                    behandlingstype,
-                    hentSedDokument
-                )
+                    behandlingstype
+                ) { logHvisMangler ->
+                    if (logHvisMangler) log.warn("Sed dokument mangler for:${behandling.fagsak.saksnummer} behandlingID:${behandling.id}")
+                    hentSedDokument()
+                }
             )
             .setFristFerdigstillelse(Behandling.utledBehandlingsfrist(behandling, mottaksdato))
     }
@@ -100,7 +105,7 @@ class OppgaveFactory(private val unleash: Unleash) {
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper,
-        hentSedDokument: () -> SedDokument?
+        hentSedDokument: (logHvisMangler: Boolean) -> SedDokument?
     ): String = oppgaveBeskrivelseUtleder.utledBeskrivelse(
         oppgaveBehandlingstema,
         sakstype,
