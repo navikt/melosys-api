@@ -113,13 +113,6 @@ class OpprettBetalingsplanTest {
         } returns behandling
 
         every {
-            kontaktopplysningService.hentKontaktopplysning(
-                fagsak.saksnummer,
-                fastsattTrygdeavgift.betalesAv.orgnr
-            )
-        } returns Optional.of(lagKontaktOpplysning())
-
-        every {
             pdlService.finnFolkeregisterident("11111111111")
         } returns Optional.of("12345678911")
 
@@ -146,13 +139,6 @@ class OpprettBetalingsplanTest {
         every {
             behandlingService.hentBehandling(behandlingsId)
         } returns behandling
-
-        every {
-            kontaktopplysningService.hentKontaktopplysning(
-                fagsak.saksnummer,
-                fastsattTrygdeavgift.betalesAv.orgnr
-            )
-        } returns Optional.empty()
 
         every {
             pdlService.finnFolkeregisterident("11111111111")
@@ -293,10 +279,6 @@ class OpprettBetalingsplanTest {
 
     private fun lagFastsattTrygdeavgift(): FastsattTrygdeavgift {
         return FastsattTrygdeavgift().apply {
-            avgiftspliktigNorskInntektMnd = 50000L
-            avgiftspliktigUtenlandskInntektMnd = 50000L
-            betalesAv = lagBetalesAv()
-            representantNr = "1234"
             trygdeavgiftsperioder = setOf(lagTrygdeavgift(this))
             trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
                 inntektsperioder = setOf(lagInntektsperiode())
@@ -320,19 +302,6 @@ class OpprettBetalingsplanTest {
             tomDato = LocalDate.of(2023, 5, 1)
             avgiftspliktigInntektMnd = Penger(5000.0)
         }
-    }
-
-    fun lagKontaktOpplysning(): Kontaktopplysning {
-        val kontaktopplysning = Kontaktopplysning()
-        kontaktopplysning.kontaktNavn = "Donald Duck"
-        return kontaktopplysning
-    }
-
-
-    private fun lagBetalesAv(): Aktoer {
-        val aktoer = Aktoer()
-        aktoer.rolle = Aktoersroller.BRUKER
-        return aktoer
     }
 
     private fun lagAktoerOrg(aktoersroller: Aktoersroller, orgNummer: String): Aktoer {

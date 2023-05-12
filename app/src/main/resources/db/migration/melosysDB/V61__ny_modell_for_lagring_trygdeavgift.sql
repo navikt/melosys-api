@@ -101,3 +101,10 @@ from trygdeavgift t
 
 DROP TABLE trygdeavgift CASCADE CONSTRAINTS;
 
+
+ALTER TABLE fastsatt_trygdeavgift DROP COLUMN betales_av CASCADE CONSTRAINTS;
+ALTER TABLE fastsatt_trygdeavgift DROP COLUMN representant_nr;
+ALTER TABLE fastsatt_trygdeavgift DROP COLUMN avgiftspliktig_norsk_inntekt_md;
+ALTER TABLE fastsatt_trygdeavgift DROP COLUMN avgiftspliktig_utenlandsk_inntekt_md;
+
+

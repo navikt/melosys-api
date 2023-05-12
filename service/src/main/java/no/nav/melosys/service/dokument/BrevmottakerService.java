@@ -110,7 +110,7 @@ public class BrevmottakerService {
         var fastsattTrygdeavgift = behandlingsresultatService.hentBehandlingsresultat(behandlingId).getMedlemAvFolketrygden().getFastsattTrygdeavgift();
 
         if (!fastsattTrygdeavgift.getTrygdeavgiftsperioder().isEmpty()) {
-            if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI_HVIS_IKKE_SELVBETALENDE_BRUKER) && !fastsattTrygdeavgift.getBetalesAv().erBruker()) {
+            if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI_HVIS_IKKE_SELVBETALENDE_BRUKER) && brukerHarFullmektig) { // TODO Bytt ut brukerHarFullmektig med bruker har fullmektig med den nye rollen (MELOSYS-5902)
                 mottakerliste.getKopiMottakere().add(Mottakerroller.ARBEIDSGIVER);
             }
 

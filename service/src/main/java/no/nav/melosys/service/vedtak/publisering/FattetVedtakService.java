@@ -1,8 +1,11 @@
 package no.nav.melosys.service.vedtak.publisering;
 
-import no.nav.melosys.domain.*;
+import java.time.ZoneId;
+
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.VedtakMetadata;
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.mottatteopplysninger.SoeknadFtrl;
 import no.nav.melosys.domain.person.Persondata;
@@ -13,12 +16,9 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandling.UtledMottaksdato;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.service.vedtak.publisering.dto.Fullmektig;
 import no.nav.melosys.service.vedtak.publisering.dto.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.ZoneId;
 
 import static java.time.LocalDate.ofInstant;
 import static java.util.Collections.emptyList;
@@ -63,8 +63,7 @@ public class FattetVedtakService {
             lagSaksopplysninger(persondata),
             null,
             emptyList(),
-            lagFullmektig(behandling.getFagsak()),
-            lagRepresentantAvgift(behandlingsresultat)
+            lagFullmektig(behandling.getFagsak())
         );
     }
 
@@ -134,26 +133,5 @@ public class FattetVedtakService {
                 }
                 return new Fullmektig(new Identifikator(hasText(fnr) ? fnr : f.getOrgnr(), hasText(fnr) ? BRUKER : ORGANISASJON));
             }).orElse(null);
-    }
-
-    private RepresentantAvgift lagRepresentantAvgift(Behandlingsresultat behandlingsresultat) {
-        return behandlingsresultat.finnMedlemAvFolketrygden().map(m -> {
-            var fastsattTrygdeavgift = m.getFastsattTrygdeavgift();
-            Aktoer betalesAv = fastsattTrygdeavgift.getBetalesAv();
-
-            String fnr = null;
-
-            if (betalesAv.getRolle() == Aktoersroller.BRUKER) {
-                fnr = persondataFasade.hentFolkeregisterident(betalesAv.getAktørId());
-            }
-
-            return new RepresentantAvgift(
-                new Identifikator(
-                    hasText(fnr) ? fnr : betalesAv.getOrgnr(),
-                    hasText(fnr) ? BRUKER : ORGANISASJON
-                ),
-                fastsattTrygdeavgift.getRepresentantNr()
-            );
-        }).orElse(null);
     }
 }
