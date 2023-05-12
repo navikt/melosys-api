@@ -46,7 +46,10 @@ public final class MottatteOpplysningerUtils {
 
     public static Soeknadsland hentLand(MottatteOpplysningerData mottatteOpplysningerData) {
         if (mottatteOpplysningerData instanceof AnmodningEllerAttest anmodningEllerAttest) {
-            return Soeknadsland.av(anmodningEllerAttest.getLovvalgsland());
+            if (anmodningEllerAttest.getLovvalgsland() != null)
+                return Soeknadsland.av(anmodningEllerAttest.getLovvalgsland());
+            if (anmodningEllerAttest.getAvsenderland() != null)
+                return Soeknadsland.av(anmodningEllerAttest.getAvsenderland());
         }
         return hentSøknadsland(mottatteOpplysningerData);
     }
