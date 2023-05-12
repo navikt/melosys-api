@@ -143,7 +143,6 @@ internal class OppgaveFactoryNyMappingTest {
                                 .build()
 
                         withClue("sakstype${row.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
-                            println("sakstype${row.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}")
                             oppgave.beskrivelse.shouldBe("")
                             oppgaveFactoryListAppender.list
                                 .shouldHaveSize(1)
@@ -155,6 +154,37 @@ internal class OppgaveFactoryNyMappingTest {
                     }
                 }
             }
+    }
+
+    @Test
+    fun `skal ikke logge advarsel når oppgave opprettes fra eksisterende og SED er tilgjengelig`() {
+        oppgaveGosysMapping.rows.filter {
+            it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
+        }.filter {
+            it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.BEHANDLINGSTEMA
+        }.forEach { row ->
+            lagBehandlingBrukAlleKombinasjoner(row) { sak, behandling ->
+                if (sak.behandlingstype !in listOf(
+                        Behandlingstyper.NY_VURDERING,
+                        Behandlingstyper.KLAGE
+                    )
+                ) return@lagBehandlingBrukAlleKombinasjoner
+                LoggingTestUtils.withLogAppender<OppgaveBeskrivelseNyUtleder> { oppgaveBeskrivelseListAppender ->
+                    val oppgave =
+                        oppgaveFactory.lagBehandlingsoppgave(
+                            behandling,
+                            LocalDate.now(),
+                        ) { finnSedDokument(behandling) }
+                            .build()
+
+                    withClue("sakstype${row.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
+                        oppgave.beskrivelse.shouldBe("")
+                        oppgaveBeskrivelseListAppender.list
+                            .shouldHaveSize(0)
+                    }
+                }
+            }
+        }
     }
 
 
