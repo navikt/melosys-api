@@ -1,5 +1,6 @@
 package no.nav.melosys.service.oppgave
 
+import ch.qos.logback.classic.Level
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -23,12 +24,35 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.classic.Logger
+import ch.qos.logback.core.read.ListAppender
+import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.BeforeAll
+import org.slf4j.LoggerFactory
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class OppgaveFactoryNyMappingTest {
 
     private val oppgaveFactory = OppgaveFactory(FakeUnleash().apply { enable(ToggleName.NY_GOSYS_MAPPING) })
     private val oppgaveGosysMapping = OppgaveGosysMapping(FakeUnleash())
+    private lateinit var oppgaveFactoryListAppender: ListAppender<ILoggingEvent>
+    private lateinit var oppgaveFactorylogger: Logger
+
+    @BeforeAll
+    fun beforeAll() {
+        oppgaveFactorylogger = LoggerFactory.getLogger(OppgaveFactory::class.java) as Logger
+        oppgaveFactoryListAppender = ListAppender()
+        oppgaveFactoryListAppender.context = oppgaveFactorylogger.loggerContext
+
+        oppgaveFactoryListAppender.start()
+        oppgaveFactorylogger.addAppender(oppgaveFactoryListAppender)
+    }
+
+    @AfterAll
+    fun afterAll() {
+        oppgaveFactorylogger.detachAppender(oppgaveFactoryListAppender)
+    }
 
     @Test
     fun `Sed skal brukes som beskrivelse ved oppgavetype BEH_SED - untatt ved A1_ANMODNING_OM_UNNTAK_PAPIR`() {
@@ -45,7 +69,7 @@ internal class OppgaveFactoryNyMappingTest {
                             Behandlingstyper.ENDRET_PERIODE
                         )
                     ) return@lagBehandlingBrukAlleKombinasjoner
-                    
+
                     val oppgave =
                         oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument)
                             .build()
@@ -99,6 +123,30 @@ internal class OppgaveFactoryNyMappingTest {
                 }
             }
     }
+
+    @Test
+    fun `Bruker sed om det finnes for de 3 som har SED_ELLER_TOMT, ellers ikke log warning og retuner en tom streng`() {
+        oppgaveGosysMapping.rows
+            .filter {
+                it.oppgave.beskrivelsefelt == OppgaveGosysMapping.Beskrivelsefelt.SED_ELLER_TOMT
+            }.shouldHaveSize(3).forEach { row ->
+                lagBehandlingBrukAlleKombinasjoner(row) { flat, behandling ->
+                    val oppgave =
+                        oppgaveFactory.lagBehandlingsoppgave(
+                            behandling,
+                            LocalDate.now()
+                        ) { finnSedDokument(behandling) }
+                            .build()
+
+                    withClue("sakstype${row.sakstype}, sakstema=${flat.sakstema}, behandlingstema:${flat.behandlingstema}, ${flat.behandlingstype}") {
+                        oppgave.beskrivelse.shouldBe("")
+                        oppgaveFactoryListAppender.list.shouldHaveSize(0)
+                        verify { behandling.finnSedDokument() }
+                    }
+                }
+            }
+    }
+
 
     @Test
     fun `OppgaveFactory skal funger med NY_GOSYS_MAPPING_UNTAKK_FOR_MIGRERING toggle under migreing`() {
@@ -181,6 +229,26 @@ internal class OppgaveFactoryNyMappingTest {
         val oppgave =
             oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now()) { finnSedDokument(behandling) }.build()
 
+        oppgave.beskrivelse.shouldBe("")
+    }
+
+    @Test
+    fun `Skal ha SED - om ikke skal det logges en warning - og retunere en tom streng`() {
+        val behandling = lagBehandling(
+            Sakstyper.EU_EOS,
+            Sakstemaer.UNNTAK,
+            Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND,
+            Behandlingstyper.FØRSTEGANG
+        )
+        val oppgave =
+            oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now()) { finnSedDokument(behandling) }.build()
+
+        oppgaveFactoryListAppender.list
+            .shouldHaveSize(1)
+            .first().let {
+                it.level.shouldBe(Level.WARN)
+                it.message.shouldBe("Sed dokument mangler for:MEL-1 behandlingID:1")
+            }
         oppgave.beskrivelse.shouldBe("")
     }
 
@@ -295,7 +363,9 @@ internal class OppgaveFactoryNyMappingTest {
         sedType: SedType? = null
     ): Behandling {
         return Behandling().apply {
+            id = 1
             fagsak = Fagsak().apply {
+                saksnummer = "MEL-1"
                 type = sakstype
                 tema = sakstema
             }

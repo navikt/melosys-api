@@ -53,8 +53,9 @@ class OppgaveFactory(private val unleash: Unleash) {
                     behandlingstema,
                     behandlingstype
                 ) { logHvisMangler ->
-                    if (logHvisMangler) log.warn("Sed dokument mangler for:${behandling.fagsak.saksnummer} behandlingID:${behandling.id}")
-                    hentSedDokument()
+                    hentSedDokument().apply {
+                        if (logHvisMangler && this == null) log.warn("Sed dokument mangler for:${behandling.fagsak.saksnummer} behandlingID:${behandling.id}")
+                    }
                 }
             )
             .setFristFerdigstillelse(Behandling.utledBehandlingsfrist(behandling, mottaksdato))
