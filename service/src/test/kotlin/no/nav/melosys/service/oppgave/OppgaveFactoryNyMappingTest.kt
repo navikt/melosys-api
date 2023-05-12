@@ -359,7 +359,7 @@ internal class OppgaveFactoryNyMappingTest {
         }
     }
 
-    private data class TableRowsak(
+    private data class TableRowSak(
         val sakstype: Sakstyper,
         val sakstema: Sakstemaer,
         val behandlingstype: Behandlingstyper,
@@ -370,13 +370,13 @@ internal class OppgaveFactoryNyMappingTest {
     private fun lagBehandlingBrukAlleKombinasjoner(
         tableRow: OppgaveGosysMapping.TableRow,
         sedType: SedType? = null,
-        action: (TableRowsak, Behandling) -> Unit
+        action: (TableRowSak, Behandling) -> Unit
 
     ) {
         tableRow.behandlingstema.forEach { behandlingstema ->
             tableRow.behandlingstype.forEach { behandlingstype ->
                 action(
-                    TableRowsak(
+                    TableRowSak(
                         tableRow.sakstype,
                         tableRow.sakstema,
                         behandlingstype,
