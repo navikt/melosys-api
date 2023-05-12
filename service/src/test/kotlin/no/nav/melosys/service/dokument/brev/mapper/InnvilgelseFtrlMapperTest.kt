@@ -160,7 +160,7 @@ internal class InnvilgelseFtrlMapperTest {
 
     private fun lagMedlemAvFolketrygden(): MedlemAvFolketrygden = MedlemAvFolketrygden().apply {
         medlemskapsperioder = lagMedlemskapsperioder(this)
-        fastsattTrygdeavgift = lagFastsattTrygdeavgift()
+        fastsattTrygdeavgift = FastsattTrygdeavgift()
         bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
     }
 
@@ -171,15 +171,6 @@ internal class InnvilgelseFtrlMapperTest {
             trygdedekning = Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER
             this.medlemAvFolketrygden = medlemAvFolketrygden
         })
-
-    private fun lagFastsattTrygdeavgift(): FastsattTrygdeavgift = FastsattTrygdeavgift().apply {
-        avgiftspliktigNorskInntektMnd = 50000L
-        avgiftspliktigUtenlandskInntektMnd = 50000L
-        betalesAv = Aktoer().apply {
-            rolle = Aktoersroller.REPRESENTANT_TRYGDEAVGIFT
-        }
-        representantNr = "1234"
-    }
 
     private fun mockHappyCase() {
         every { mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(ofType()) } returns lagAvklarteVirksomheter()

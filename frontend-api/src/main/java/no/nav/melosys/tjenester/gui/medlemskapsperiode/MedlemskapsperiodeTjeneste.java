@@ -1,9 +1,15 @@
 package no.nav.melosys.tjenester.gui.medlemskapsperiode;
 
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
 import no.nav.melosys.service.medlemskapsperiode.OpprettMedlemskapsperiodeService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -14,11 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 @Protected
 @RestController
 @Api(tags = {"medlemskapsperioder"})
@@ -26,11 +27,16 @@ import java.util.stream.Collectors;
 public class MedlemskapsperiodeTjeneste {
 
     private final MedlemskapsperiodeService medlemskapsperiodeService;
+    private final MedlemAvFolketrygdenService medlemAvFolketrygdenService;
     private final OpprettMedlemskapsperiodeService opprettMedlemskapsperiodeService;
     private final Aksesskontroll aksesskontroll;
 
-    public MedlemskapsperiodeTjeneste(MedlemskapsperiodeService medlemskapsperiodeService, OpprettMedlemskapsperiodeService opprettMedlemskapsperiodeService, Aksesskontroll aksesskontroll) {
+    public MedlemskapsperiodeTjeneste(MedlemskapsperiodeService medlemskapsperiodeService,
+                                      MedlemAvFolketrygdenService medlemAvFolketrygdenService,
+                                      OpprettMedlemskapsperiodeService opprettMedlemskapsperiodeService,
+                                      Aksesskontroll aksesskontroll) {
         this.medlemskapsperiodeService = medlemskapsperiodeService;
+        this.medlemAvFolketrygdenService = medlemAvFolketrygdenService;
         this.opprettMedlemskapsperiodeService = opprettMedlemskapsperiodeService;
         this.aksesskontroll = aksesskontroll;
     }
@@ -107,6 +113,15 @@ public class MedlemskapsperiodeTjeneste {
                 .map(vilkår -> new VilkårOgBegrunnelserDto(vilkår, opprettMedlemskapsperiodeService.hentMuligeBegrunnelser(vilkår)))
                 .collect(Collectors.toCollection(LinkedHashSet::new))
         );
+    }
+
+    @GetMapping("/behandlinger/{behandlingID}/medlemskapsperioder/bestemmelser")
+    public ResponseEntity<BestemmelseDto> hentBestemmelse(@PathVariable("behandlingID") long behandlingID) {
+        aksesskontroll.autoriser(behandlingID);
+
+        return medlemAvFolketrygdenService.finnMedlemAvFolketrygden(behandlingID)
+            .map(avFolketrygden -> ResponseEntity.ok(new BestemmelseDto(avFolketrygden.getBestemmelse())))
+            .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     @PostMapping("/behandlinger/{behandlingID}/medlemskapsperioder/bestemmelser")

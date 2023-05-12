@@ -55,8 +55,11 @@ SET bestemmelse = (
 );
 ALTER TABLE medlem_av_folketrygden
     MODIFY bestemmelse VARCHAR2(99) NOT NULL;
-ALTER TABLE medlemskapsperiode
-    DROP COLUMN bestemmelse;
+ALTER TABLE medlemskapsperiode DROP COLUMN bestemmelse;
+
+
+ALTER TABLE medlem_av_folketrygden DROP COLUMN trygdeavgift_nav_norsk_inntekt;
+ALTER TABLE medlem_av_folketrygden DROP COLUMN trygdeavgift_nav_utenlandsk_inntekt;
 
 
 CREATE TABLE trygdeavgiftsperiode
@@ -97,4 +100,11 @@ from trygdeavgift t
          JOIN fastsatt_trygdeavgift ft on maf.id = ft.medlem_av_folketrygden_id;
 
 DROP TABLE trygdeavgift CASCADE CONSTRAINTS;
+
+
+ALTER TABLE fastsatt_trygdeavgift DROP COLUMN betales_av CASCADE CONSTRAINTS;
+ALTER TABLE fastsatt_trygdeavgift DROP COLUMN representant_nr;
+ALTER TABLE fastsatt_trygdeavgift DROP COLUMN avgiftspliktig_norsk_inntekt_md;
+ALTER TABLE fastsatt_trygdeavgift DROP COLUMN avgiftspliktig_utenlandsk_inntekt_md;
+
 

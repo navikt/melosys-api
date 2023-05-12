@@ -49,7 +49,7 @@ class OpprettBetalingsplan(
         val fullmektig = fagsak.finnRepresentant(Representerer.BRUKER).orElse(null)
         val kontaktopplysning = hentKontaktopplysning(fagsak, fullmektig)
 
-        val fakturaseriePeriodeDtoListe = fastsattTrygdeavgift.trygdeavgift.map {
+        val fakturaseriePeriodeDtoListe = fastsattTrygdeavgift.trygdeavgiftsperioder.map {
             FakturaseriePeriodeDto(
                 it.trygdeavgiftsbeløpMd.verdi,
                 it.periodeFra,

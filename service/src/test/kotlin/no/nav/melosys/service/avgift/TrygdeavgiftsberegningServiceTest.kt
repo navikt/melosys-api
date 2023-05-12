@@ -57,7 +57,7 @@ internal class TrygdeavgiftsberegningServiceTest {
     @Test
     fun hentTrygdeavgiftsberegning_ingenTrygdeavgift_returnerTomListe() {
         medlemAvFolketrygden.fastsattTrygdeavgift = FastsattTrygdeavgift()
-        medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgift = null
+        medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder = null
 
 
         trygdeavgiftsberegningService.hentTrygdeavgiftsberegning(BEHANDLING_ID)
@@ -123,7 +123,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             }
         verify { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
         verify { mockMedlemAvFolketrygdenService.lagre(medlemAvFolketrygden) }
-        medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgift.shouldNotBeEmpty()
+        medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.shouldNotBeEmpty()
     }
 
     @Test
@@ -136,15 +136,15 @@ internal class TrygdeavgiftsberegningServiceTest {
                     isTrygdeavgiftBetalesTilSkatt = true
                 })
             }
-            trygdeavgift.add(Trygdeavgiftsperiode())
+            trygdeavgiftsperioder.add(Trygdeavgiftsperiode())
         }
 
 
-        medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgift.shouldNotBeEmpty()
+        medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.shouldNotBeEmpty()
         trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID)
             .shouldNotBeNull()
             .shouldBeEmpty()
-        medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgift.shouldBeEmpty()
+        medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.shouldBeEmpty()
     }
 
     @Test

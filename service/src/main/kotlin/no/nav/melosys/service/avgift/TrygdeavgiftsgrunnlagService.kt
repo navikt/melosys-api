@@ -1,10 +1,7 @@
 package no.nav.melosys.service.avgift
 
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
-import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
-import no.nav.melosys.domain.avgift.Penger
+import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
@@ -28,6 +25,7 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
         val medlemskapsperioder = medlemAvFolketrygden.medlemskapsperioder
 
         valider(medlemskapsperioder, request)
+        fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden.fastsattTrygdeavgift)
 
         val fomDato = utledFomDato(medlemskapsperioder)
         val tomDato = utledTomDato(medlemskapsperioder)
@@ -42,6 +40,10 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
 
         return hentTrygdeavgiftsgrunnlag(behandlingsresultatID)
             ?: throw FunksjonellException("Noe skjedde ved lagring av trygdeavgiftsgrunnlaget")
+    }
+
+    private fun fjernTrygdeavgiftsperioderOmDeFinnes(fastsattTrygdeavgift: FastsattTrygdeavgift?) {
+        fastsattTrygdeavgift?.trygdeavgiftsperioder?.clear()
     }
 
     private fun valider(

@@ -33,6 +33,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -355,6 +356,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
+    @Disabled("Vi har ikke mulighet å skille på har fullmektig og selvbetalende før den nye fullmektig-rollen kommer (MELOSYS-5902)")
     void gittVedtakFtrl2_8UtenFullmektigIkkeSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() {
         initMocksForFtrlVedtaksbrev(null, 10000, false);
 
@@ -414,6 +416,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
+    @Disabled("Vi har ikke mulighet å skille på har fullmektig og selvbetalende før den nye fullmektig-rollen kommer (MELOSYS-5902)")
     void gittVedtakFtrl2_8FullmektigSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() {
         initMocksForFtrlVedtaksbrev(Representerer.BRUKER, 10000, true);
 
@@ -541,8 +544,7 @@ class BrevmottakerServiceTest {
         var inntektsperiode = new Inntektsperiode();
         inntektsperiode.setTrygdeavgiftBetalesTilSkatt(norskinntekt == 0);
         var fastsattTrygdeavgift = behandlingsresultat.getMedlemAvFolketrygden().getFastsattTrygdeavgift();
-        fastsattTrygdeavgift.setTrygdeavgift(Set.of(new Trygdeavgiftsperiode()));
-        fastsattTrygdeavgift.setBetalesAv(selvbetalende ? fagsak.hentBruker() : lagAktoer(Aktoersroller.REPRESENTANT));
+        fastsattTrygdeavgift.setTrygdeavgiftsperioder(Set.of(new Trygdeavgiftsperiode()));
         fastsattTrygdeavgift.setTrygdeavgiftsgrunnlag(new Trygdeavgiftsgrunnlag());
         fastsattTrygdeavgift.getTrygdeavgiftsgrunnlag().setInntektsperioder(Set.of(inntektsperiode));
     }

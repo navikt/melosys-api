@@ -113,13 +113,6 @@ class OpprettBetalingsplanTest {
         } returns behandling
 
         every {
-            kontaktopplysningService.hentKontaktopplysning(
-                fagsak.saksnummer,
-                fastsattTrygdeavgift.betalesAv.orgnr
-            )
-        } returns Optional.of(lagKontaktOpplysning())
-
-        every {
             pdlService.finnFolkeregisterident("11111111111")
         } returns Optional.of("12345678911")
 
@@ -148,13 +141,6 @@ class OpprettBetalingsplanTest {
         } returns behandling
 
         every {
-            kontaktopplysningService.hentKontaktopplysning(
-                fagsak.saksnummer,
-                fastsattTrygdeavgift.betalesAv.orgnr
-            )
-        } returns Optional.empty()
-
-        every {
             pdlService.finnFolkeregisterident("11111111111")
         } returns Optional.of("12345678911")
 
@@ -170,7 +156,7 @@ class OpprettBetalingsplanTest {
         lagTestData(lagFagsak().apply {
             aktører = setOf(
                 lagAktoerOrg(Aktoersroller.REPRESENTANT, "123456789").apply { representerer = Representerer.BEGGE },
-                lagAktoerPerson(Aktoersroller.BRUKER, "11111111111")
+                lagAktoerPerson("11111111111")
             )
         })
 
@@ -274,9 +260,9 @@ class OpprettBetalingsplanTest {
             medlemskapsperioder = lagMedlemskapsperioder()
             fastsattTrygdeavgift = lagFastsattTrygdeavgift()
             bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
-            fastsattTrygdeavgift.trygdeavgift.first().grunnlagMedlemskapsperiode =
+            fastsattTrygdeavgift.trygdeavgiftsperioder.first().grunnlagMedlemskapsperiode =
                 medlemskapsperioder.first()
-            fastsattTrygdeavgift.trygdeavgift.first().grunnlagInntekstperiode =
+            fastsattTrygdeavgift.trygdeavgiftsperioder.first().grunnlagInntekstperiode =
                 fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.first()
         }
     }
@@ -293,11 +279,7 @@ class OpprettBetalingsplanTest {
 
     private fun lagFastsattTrygdeavgift(): FastsattTrygdeavgift {
         return FastsattTrygdeavgift().apply {
-            avgiftspliktigNorskInntektMnd = 50000L
-            avgiftspliktigUtenlandskInntektMnd = 50000L
-            betalesAv = lagBetalesAv()
-            representantNr = "1234"
-            trygdeavgift = setOf(lagTrygdeavgift(this))
+            trygdeavgiftsperioder = setOf(lagTrygdeavgift(this))
             trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
                 inntektsperioder = setOf(lagInntektsperiode())
             }
@@ -320,19 +302,6 @@ class OpprettBetalingsplanTest {
             tomDato = LocalDate.of(2023, 5, 1)
             avgiftspliktigInntektMnd = Penger(5000.0)
         }
-    }
-
-    fun lagKontaktOpplysning(): Kontaktopplysning {
-        val kontaktopplysning = Kontaktopplysning()
-        kontaktopplysning.kontaktNavn = "Donald Duck"
-        return kontaktopplysning
-    }
-
-
-    private fun lagBetalesAv(): Aktoer {
-        val aktoer = Aktoer()
-        aktoer.rolle = Aktoersroller.BRUKER
-        return aktoer
     }
 
     private fun lagAktoerOrg(aktoersroller: Aktoersroller, orgNummer: String): Aktoer {

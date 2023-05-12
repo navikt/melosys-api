@@ -64,14 +64,13 @@ public class FattetVedtakTestData {
             lagSaksopplysninger(),
             lagAvklarteFakta(),
             lagLovvalgOgMedlemskapsperioder(),
-            lagFullmektig(),
-            lagRepresentantAvgift()
+            lagFullmektig()
         );
     }
 
     private static MedlemAvFolketrygden lagMedlemAvFolketrygden() {
         MedlemAvFolketrygden medlemAvFolketrygden = new MedlemAvFolketrygden();
-        medlemAvFolketrygden.setFastsattTrygdeavgift(lagFastsattTrygdeavgift());
+        medlemAvFolketrygden.setFastsattTrygdeavgift(new FastsattTrygdeavgift());
         medlemAvFolketrygden.setMedlemskapsperioder(lagMedlemskapsperioder());
         medlemAvFolketrygden.setBestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8);
 
@@ -87,21 +86,6 @@ public class FattetVedtakTestData {
         m.setMedlemskapstype(Medlemskapstyper.FRIVILLIG);
 
         return List.of(m);
-    }
-
-    private static FastsattTrygdeavgift lagFastsattTrygdeavgift() {
-        FastsattTrygdeavgift trygdeavgift = new FastsattTrygdeavgift();
-        Aktoer betalesAv = new Aktoer();
-        betalesAv.setOrgnr(ORGNR);
-        betalesAv.setRolle(Aktoersroller.ARBEIDSGIVER);
-
-        trygdeavgift.setBetalesAv(betalesAv);
-        trygdeavgift.setTrygdeavgiftstype(Trygdeavgift_typer.ENDELIG);
-        trygdeavgift.setAvgiftspliktigNorskInntektMnd(50000L);
-        trygdeavgift.setAvgiftspliktigUtenlandskInntektMnd(10000L);
-        trygdeavgift.setRepresentantNr("000123");
-
-        return trygdeavgift;
     }
 
     private static VedtakMetadata lagVedtakMetadata() {
@@ -272,9 +256,5 @@ public class FattetVedtakTestData {
 
     private static Fullmektig lagFullmektig() {
         return new Fullmektig(lagIdentifikator());
-    }
-
-    private static RepresentantAvgift lagRepresentantAvgift() {
-        return new RepresentantAvgift(lagIdentifikator(), "3001");
     }
 }
