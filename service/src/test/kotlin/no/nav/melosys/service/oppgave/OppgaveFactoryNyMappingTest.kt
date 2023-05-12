@@ -27,8 +27,8 @@ import java.time.LocalDate
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.core.read.ListAppender
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.slf4j.LoggerFactory
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -39,17 +39,18 @@ internal class OppgaveFactoryNyMappingTest {
     private lateinit var oppgaveFactoryListAppender: ListAppender<ILoggingEvent>
     private lateinit var oppgaveFactorylogger: Logger
 
-    @BeforeAll
+    @BeforeEach
     fun beforeAll() {
         oppgaveFactorylogger = LoggerFactory.getLogger(OppgaveFactory::class.java) as Logger
-        oppgaveFactoryListAppender = ListAppender()
-        oppgaveFactoryListAppender.context = oppgaveFactorylogger.loggerContext
+        oppgaveFactoryListAppender = ListAppender<ILoggingEvent>().apply {
+            context = oppgaveFactorylogger.loggerContext
+            start()
+        }
 
-        oppgaveFactoryListAppender.start()
         oppgaveFactorylogger.addAppender(oppgaveFactoryListAppender)
     }
 
-    @AfterAll
+    @AfterEach
     fun afterAll() {
         oppgaveFactorylogger.detachAppender(oppgaveFactoryListAppender)
     }
