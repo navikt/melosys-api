@@ -50,8 +50,8 @@ jobs:
       uses: github/codeql-action/init@v2
       with:
         languages: ${{ matrix.language }}
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v2
+    - name: Build
+      run: mvn clean package -B -e -U --settings .github/settings.xml
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
       with:

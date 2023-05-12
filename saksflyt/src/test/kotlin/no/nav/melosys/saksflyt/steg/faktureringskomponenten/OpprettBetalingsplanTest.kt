@@ -116,11 +116,16 @@ class OpprettBetalingsplanTest {
             pdlService.finnFolkeregisterident("11111111111")
         } returns Optional.of("12345678911")
 
+
         opprettBetalingsplan.utfør(prosessinstans)
 
+
+        val slot = slot<FakturaserieDto>()
         verify(exactly = 1) {
-            faktureringskomponentenConsumer.lagFakturaSerie(any())
+            faktureringskomponentenConsumer.lagFakturaSerie(capture(slot))
         }
+        slot.captured.shouldNotBeNull()
+        slot.captured.referanseBruker.shouldContain("Vedtak om medlemskap datert ")
     }
 
     @Test
