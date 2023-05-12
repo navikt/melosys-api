@@ -92,12 +92,12 @@ internal class OppgaveFactoryNyMappingTest {
             }.filter {
                 it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.BEHANDLINGSTEMA
             }.forEach { row ->
-                lagBehandlingBrukAlleKombinasjoner(row) { flat, behandling ->
+                lagBehandlingBrukAlleKombinasjoner(row) { sak, behandling ->
                     val oppgave =
                         oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument)
                             .build()
 
-                    withClue("sakstype${row.sakstype}, sakstema=${flat.sakstema}, behandlingstema:${flat.behandlingstema}, ${flat.behandlingstype}") {
+                    withClue("sakstype${row.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
                         oppgave.beskrivelse.shouldBe("")
                         verify { behandling.hentSedDokument() wasNot called }
                     }
@@ -111,12 +111,12 @@ internal class OppgaveFactoryNyMappingTest {
             .filter {
                 it.oppgave.beskrivelsefelt == OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
             }.shouldHaveSize(1).forEach { row ->
-                lagBehandlingBrukAlleKombinasjoner(row) { flat, behandling ->
+                lagBehandlingBrukAlleKombinasjoner(row) { sak, behandling ->
                     val oppgave =
                         oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument)
                             .build()
 
-                    withClue("sakstype${row.sakstype}, sakstema=${flat.sakstema}, behandlingstema:${flat.behandlingstema}, ${flat.behandlingstype}") {
+                    withClue("sakstype${row.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
                         oppgave.beskrivelse.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR.beskrivelse)
                         verify { behandling.hentSedDokument() wasNot called }
                     }
@@ -130,7 +130,7 @@ internal class OppgaveFactoryNyMappingTest {
             .filter {
                 it.oppgave.beskrivelsefelt == OppgaveGosysMapping.Beskrivelsefelt.SED_ELLER_TOMT
             }.shouldHaveSize(3).forEach { row ->
-                lagBehandlingBrukAlleKombinasjoner(row) { flat, behandling ->
+                lagBehandlingBrukAlleKombinasjoner(row) { sak, behandling ->
                     val oppgave =
                         oppgaveFactory.lagBehandlingsoppgave(
                             behandling,
@@ -138,7 +138,7 @@ internal class OppgaveFactoryNyMappingTest {
                         ) { finnSedDokument(behandling) }
                             .build()
 
-                    withClue("sakstype${row.sakstype}, sakstema=${flat.sakstema}, behandlingstema:${flat.behandlingstema}, ${flat.behandlingstype}") {
+                    withClue("sakstype${row.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
                         oppgave.beskrivelse.shouldBe("")
                         oppgaveFactoryListAppender.list.shouldHaveSize(0)
                         verify { behandling.finnSedDokument() }
@@ -317,7 +317,7 @@ internal class OppgaveFactoryNyMappingTest {
         }
     }
 
-    private data class TableRowFlat(
+    private data class TableRowsak(
         val sakstype: Sakstyper,
         val sakstema: Sakstemaer,
         val behandlingstype: Behandlingstyper,
@@ -328,13 +328,13 @@ internal class OppgaveFactoryNyMappingTest {
     private fun lagBehandlingBrukAlleKombinasjoner(
         tableRow: OppgaveGosysMapping.TableRow,
         sedType: SedType? = null,
-        action: (TableRowFlat, Behandling) -> Unit
+        action: (TableRowsak, Behandling) -> Unit
 
     ) {
         tableRow.behandlingstema.forEach { behandlingstema ->
             tableRow.behandlingstype.forEach { behandlingstype ->
                 action(
-                    TableRowFlat(
+                    TableRowsak(
                         tableRow.sakstype,
                         tableRow.sakstema,
                         behandlingstype,
