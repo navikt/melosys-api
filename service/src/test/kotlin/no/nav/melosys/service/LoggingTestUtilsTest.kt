@@ -14,13 +14,13 @@ class LoggingTestUtilsTest {
     fun `skal finne loggoppføringer og nullstille listAppender etter bruk`() {
         (0..10).forEach {
             LoggingTestUtils.withLogAppender<LoggingTestUtilsTest> { listAppender ->
-                log.warn("entry-1")
+                log.warn("entry-$it")
 
                 listAppender.list.shouldHaveSize(1)
                     .first()
                     .run {
                         level.shouldBe(Level.WARN)
-                        message.shouldBe("entry-1")
+                        message.shouldBe("entry-$it")
                     }
             }
         }
