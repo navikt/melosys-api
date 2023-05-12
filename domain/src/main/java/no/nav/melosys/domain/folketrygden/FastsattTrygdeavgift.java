@@ -38,7 +38,7 @@ public class FastsattTrygdeavgift {
     private Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag;
 
     @OneToMany(mappedBy = "fastsattTrygdeavgift", orphanRemoval = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private Set<Trygdeavgiftsperiode> trygdeavgiftsperiode = new HashSet<>(1);
+    private Set<Trygdeavgiftsperiode> trygdeavgiftsperioder = new HashSet<>(1);
 
     @Deprecated(since = "Skal fjernes med ny lagring av trygdeavgift: MELOSYS-5827")
     @Column(name = "avgiftspliktig_norsk_inntekt_md")
@@ -113,12 +113,12 @@ public class FastsattTrygdeavgift {
         this.avgiftspliktigUtenlandskInntektMnd = avgiftspliktigUtenlandskInntektMnd;
     }
 
-    public Set<Trygdeavgiftsperiode> getTrygdeavgift() {
-        return trygdeavgiftsperiode;
+    public Set<Trygdeavgiftsperiode> getTrygdeavgiftsperioder() {
+        return trygdeavgiftsperioder;
     }
 
-    public void setTrygdeavgift(Set<Trygdeavgiftsperiode> trygdeavgiftsperiode) {
-        this.trygdeavgiftsperiode = trygdeavgiftsperiode;
+    public void setTrygdeavgiftsperioder(Set<Trygdeavgiftsperiode> trygdeavgiftsperioder) {
+        this.trygdeavgiftsperioder = trygdeavgiftsperioder;
     }
 
     public Trygdeavgiftmottaker getTrygdeavgiftMottaker() {

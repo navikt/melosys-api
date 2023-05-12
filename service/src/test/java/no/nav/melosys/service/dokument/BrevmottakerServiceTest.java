@@ -541,7 +541,7 @@ class BrevmottakerServiceTest {
         var inntektsperiode = new Inntektsperiode();
         inntektsperiode.setTrygdeavgiftBetalesTilSkatt(norskinntekt == 0);
         var fastsattTrygdeavgift = behandlingsresultat.getMedlemAvFolketrygden().getFastsattTrygdeavgift();
-        fastsattTrygdeavgift.setTrygdeavgift(Set.of(new Trygdeavgiftsperiode()));
+        fastsattTrygdeavgift.setTrygdeavgiftsperioder(Set.of(new Trygdeavgiftsperiode()));
         fastsattTrygdeavgift.setBetalesAv(selvbetalende ? fagsak.hentBruker() : lagAktoer(Aktoersroller.REPRESENTANT));
         fastsattTrygdeavgift.setTrygdeavgiftsgrunnlag(new Trygdeavgiftsgrunnlag());
         fastsattTrygdeavgift.getTrygdeavgiftsgrunnlag().setInntektsperioder(Set.of(inntektsperiode));

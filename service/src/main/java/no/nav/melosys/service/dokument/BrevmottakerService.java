@@ -109,7 +109,7 @@ public class BrevmottakerService {
         }
         var fastsattTrygdeavgift = behandlingsresultatService.hentBehandlingsresultat(behandlingId).getMedlemAvFolketrygden().getFastsattTrygdeavgift();
 
-        if (!fastsattTrygdeavgift.getTrygdeavgift().isEmpty()) {
+        if (!fastsattTrygdeavgift.getTrygdeavgiftsperioder().isEmpty()) {
             if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI_HVIS_IKKE_SELVBETALENDE_BRUKER) && !fastsattTrygdeavgift.getBetalesAv().erBruker()) {
                 mottakerliste.getKopiMottakere().add(Mottakerroller.ARBEIDSGIVER);
             }

@@ -27,7 +27,7 @@ class TrygdeavgiftsberegningService
 
         valider(medlemAvFolketrygden)
 
-        fastsattTrygdeavgift.trygdeavgift.clear()
+        fastsattTrygdeavgift.trygdeavgiftsperioder.clear()
 
         if (!fastsattTrygdeavgift.skalBetaleTrygdeavgiftTilNav()) {
             return emptySet()
@@ -45,7 +45,7 @@ class TrygdeavgiftsberegningService
         val beregnetTrygdeavgift = trygdeavgiftConsumer.beregnTrygdeavgift(trygdeavgiftsberegningRequest)
         oppdaterTrygdeavgift(beregnetTrygdeavgift, fastsattTrygdeavgift, UUID_DBID_MAPS)
 
-        return medlemAvFolketrygdenService.lagre(medlemAvFolketrygden).fastsattTrygdeavgift.trygdeavgift
+        return medlemAvFolketrygdenService.lagre(medlemAvFolketrygden).fastsattTrygdeavgift.trygdeavgiftsperioder
     }
 
     private fun oppdaterTrygdeavgift(
@@ -54,7 +54,7 @@ class TrygdeavgiftsberegningService
         UUID_DBID_MAPS: List<Map<UUID, Long>>
     ) =
         beregnetTrygdeavgift.forEach {
-            fastsattTrygdeavgift.trygdeavgift.add(lagTrygdeavgiftsperiode(fastsattTrygdeavgift, it, UUID_DBID_MAPS))
+            fastsattTrygdeavgift.trygdeavgiftsperioder.add(lagTrygdeavgiftsperiode(fastsattTrygdeavgift, it, UUID_DBID_MAPS))
         }
 
     private fun lagTrygdeavgiftsperiode(
@@ -106,7 +106,7 @@ class TrygdeavgiftsberegningService
 
     @Transactional(readOnly = true)
     fun hentTrygdeavgiftsberegning(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
-        return medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)?.fastsattTrygdeavgift?.trygdeavgift
+        return medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)?.fastsattTrygdeavgift?.trygdeavgiftsperioder
             ?: emptySet()
     }
 }
