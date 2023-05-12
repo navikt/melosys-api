@@ -18,9 +18,9 @@ class LoggingTestUtilsTest {
 
                 listAppender.list.shouldHaveSize(1)
                     .first()
-                    .let {
-                        it.level.shouldBe(Level.WARN)
-                        it.message.shouldBe("entry-1")
+                    .run {
+                        level.shouldBe(Level.WARN)
+                        message.shouldBe("entry-1")
                     }
             }
         }

@@ -146,9 +146,9 @@ internal class OppgaveFactoryNyMappingTest {
                             oppgave.beskrivelse.shouldBe("")
                             oppgaveFactoryListAppender.list
                                 .shouldHaveSize(1)
-                                .first().let {
-                                    it.level.shouldBe(Level.WARN)
-                                    it.message.shouldBe("Sed dokument mangler for:MEL-1 behandlingID:1")
+                                .first().run {
+                                    level.shouldBe(Level.WARN)
+                                    message.shouldBe("Sed dokument mangler for:MEL-1 behandlingID:1")
                                 }
                         }
                     }
@@ -287,9 +287,9 @@ internal class OppgaveFactoryNyMappingTest {
 
             oppgaveFactoryListAppender.list
                 .shouldHaveSize(1)
-                .first().let {
-                    it.level.shouldBe(Level.WARN)
-                    it.message.shouldBe("Sed dokument mangler for:MEL-1 behandlingID:1")
+                .first().run {
+                    level.shouldBe(Level.WARN)
+                    message.shouldBe("Sed dokument mangler for:MEL-1 behandlingID:1")
                 }
             oppgave.beskrivelse.shouldBe("")
         }
