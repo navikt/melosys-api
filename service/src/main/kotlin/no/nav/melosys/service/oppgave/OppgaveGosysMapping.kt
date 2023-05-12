@@ -365,7 +365,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
             TableRow(
                 Sakstyper.EU_EOS,
                 Sakstemaer.UNNTAK,
-                setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
+                setOf(Behandlingstyper.FØRSTEGANG),
                 setOf(
                     Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
                     Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
@@ -381,13 +381,41 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
             TableRow(
                 Sakstyper.EU_EOS,
                 Sakstemaer.UNNTAK,
-                setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
+                setOf(Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
+                setOf(
+                    Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
+                    Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE,
+                    Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND
+                ),
+                Oppgave(
+                    OppgaveBehandlingstema.EU_EOS_MELDING_OM_UNNTAK_UNNTAK, // ab0490
+                    Tema.UFM,
+                    Oppgavetyper.BEH_SED,
+                    Beskrivelsefelt.SED_ELLER_TOMT
+                )
+            ),
+            TableRow(
+                Sakstyper.EU_EOS,
+                Sakstemaer.UNNTAK,
+                setOf(Behandlingstyper.FØRSTEGANG),
                 setOf(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL),
                 Oppgave(
                     OppgaveBehandlingstema.EU_EOS_SOKNAD_OM_UNNTAK, // ab0491
                     Tema.UFM,
                     Oppgavetyper.BEH_SED,
                     Beskrivelsefelt.SED
+                )
+            ),
+            TableRow(
+                Sakstyper.EU_EOS,
+                Sakstemaer.UNNTAK,
+                setOf(Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
+                setOf(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL),
+                Oppgave(
+                    OppgaveBehandlingstema.EU_EOS_SOKNAD_OM_UNNTAK, // ab0491
+                    Tema.UFM,
+                    Oppgavetyper.BEH_SED,
+                    Beskrivelsefelt.SED_ELLER_TOMT
                 )
             ),
             TableRow(

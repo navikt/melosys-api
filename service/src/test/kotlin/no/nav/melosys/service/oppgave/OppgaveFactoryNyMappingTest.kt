@@ -41,6 +41,19 @@ internal class OppgaveFactoryNyMappingTest {
 
     @BeforeEach
     fun beforeAll() {
+        setupLogAppender()
+    }
+
+    @AfterEach
+    fun afterAll() {
+        detachLogAppender()
+    }
+
+    private fun resetLogAppender() {
+        detachLogAppender()
+        setupLogAppender()
+    }
+    private fun setupLogAppender() {
         oppgaveFactorylogger = LoggerFactory.getLogger(OppgaveFactory::class.java) as Logger
         oppgaveFactoryListAppender = ListAppender<ILoggingEvent>().apply {
             context = oppgaveFactorylogger.loggerContext
@@ -50,8 +63,7 @@ internal class OppgaveFactoryNyMappingTest {
         oppgaveFactorylogger.addAppender(oppgaveFactoryListAppender)
     }
 
-    @AfterEach
-    fun afterAll() {
+    private fun detachLogAppender() {
         oppgaveFactorylogger.detachAppender(oppgaveFactoryListAppender)
     }
 
@@ -130,7 +142,7 @@ internal class OppgaveFactoryNyMappingTest {
         oppgaveGosysMapping.rows
             .filter {
                 it.oppgave.beskrivelsefelt == OppgaveGosysMapping.Beskrivelsefelt.SED_ELLER_TOMT
-            }.shouldHaveSize(3).forEach { row ->
+            }.shouldHaveSize(5).forEach { row ->
                 lagBehandlingBrukAlleKombinasjoner(row) { sak, behandling ->
                     val oppgave =
                         oppgaveFactory.lagBehandlingsoppgave(
@@ -143,6 +155,35 @@ internal class OppgaveFactoryNyMappingTest {
                         oppgave.beskrivelse.shouldBe("")
                         oppgaveFactoryListAppender.list.shouldHaveSize(0)
                         verify { behandling.finnSedDokument() }
+                    }
+                }
+            }
+    }
+
+    @Test
+    fun `Bruker sed om det finnes for de 3 som har SED, ellers log warning og retuner en tom streng`() {
+        oppgaveGosysMapping.rows
+            .filter {
+                it.oppgave.beskrivelsefelt == OppgaveGosysMapping.Beskrivelsefelt.SED
+            }.shouldHaveSize(3).forEach { row ->
+                lagBehandlingBrukAlleKombinasjoner(row) { sak, behandling ->
+                    val oppgave =
+                        oppgaveFactory.lagBehandlingsoppgave(
+                            behandling,
+                            LocalDate.now(),
+                        ) { finnSedDokument(behandling) }
+                            .build()
+
+                    withClue("sakstype${row.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
+                        println("sakstype${row.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}")
+                        oppgave.beskrivelse.shouldBe("")
+                        oppgaveFactoryListAppender.list
+                            .shouldHaveSize(1)
+                            .first().let {
+                                it.level.shouldBe(Level.WARN)
+                                it.message.shouldBe("Sed dokument mangler for:MEL-1 behandlingID:1")
+                            }
+                        resetLogAppender()
                     }
                 }
             }
