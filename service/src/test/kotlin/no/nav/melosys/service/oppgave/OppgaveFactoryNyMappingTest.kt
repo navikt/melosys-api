@@ -45,8 +45,7 @@ internal class OppgaveFactoryNyMappingTest {
                     Behandlingstyper.KLAGE,
                     Behandlingstyper.ENDRET_PERIODE
                 )
-            }.shouldHaveSize(8)
-            .forEach { sak ->
+            }.shouldHaveSize(8).forEach { sak ->
                 val behandling = sak.lagBehandlingMedSpy(SedType.A003)
                 val oppgave =
                     oppgaveFactory.lagBehandlingsoppgave(
@@ -69,7 +68,7 @@ internal class OppgaveFactoryNyMappingTest {
                 it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
             }.filter {
                 it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.BEHANDLINGSTEMA
-            }.forEach { sak ->
+            }.shouldHaveSize(55).forEach { sak ->
                 val behandling = sak.lagBehandlingMedSpy()
                 val oppgave =
                     oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument)
@@ -160,7 +159,7 @@ internal class OppgaveFactoryNyMappingTest {
             it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.BEHANDLINGSTEMA
         }.filter {
             it.behandlingstype in listOf(Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE)
-        }.forEach { sak ->
+        }.shouldHaveSize(44).forEach { sak ->
             LoggingTestUtils.withLogAppender<OppgaveBeskrivelseNyUtleder> { oppgaveBeskrivelseListAppender ->
                 val behandling = sak.lagBehandlingMedSpy()
                 val oppgave =
@@ -203,11 +202,11 @@ internal class OppgaveFactoryNyMappingTest {
     @Test
     fun `oppgave tema skal være av riktig type`() {
         rowsMedAlleKombinasjoner.forEach { sak ->
-                val tema: Tema = oppgaveFactory.utledTema(sak.sakstype, sak.sakstema, sak.behandlingstema)
+            val tema: Tema = oppgaveFactory.utledTema(sak.sakstype, sak.sakstema, sak.behandlingstema)
 
-                withClue("sakstype${sak.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}") {
-                    tema.shouldBe(sak.oppgave.tema)
-                }
+            withClue("sakstype${sak.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}") {
+                tema.shouldBe(sak.oppgave.tema)
+            }
         }
     }
 
