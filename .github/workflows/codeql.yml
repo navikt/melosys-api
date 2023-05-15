@@ -51,7 +51,7 @@ jobs:
       with:
         languages: ${{ matrix.language }}
     - name: Build
-      run: mvn clean build -B -e -U --settings .github/settings.xml
+      run: mvn clean package -B -e -U --settings .github/settings.xml
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
       with:

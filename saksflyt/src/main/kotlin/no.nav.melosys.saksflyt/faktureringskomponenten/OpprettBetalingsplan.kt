@@ -19,6 +19,8 @@ import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Component
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 private val log = KotlinLogging.logger { }
 
@@ -53,7 +55,7 @@ class OpprettBetalingsplan(
         }
 
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsId)
-        val vedtaksdato = behandlingsresultat.vedtakMetadata.vedtaksdato.toString()
+        val vedtaksdato = behandlingsresultat.vedtakMetadata.vedtaksdato
         val medlemskapsperioder = behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder
         val fastsattTrygdeavgift = behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift
         val avgiftspliktigUtenlandskInntektMnd = fastsattTrygdeavgift.avgiftspliktigUtenlandskInntektMnd ?: 0
@@ -90,7 +92,8 @@ class OpprettBetalingsplan(
                 fullmektig = fullmektigDto(fullmektig, kontaktopplysning),
                 fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
                 intervall = intervall ?: FaktureringsIntervall.MANEDLIG,
-                referanseBruker = vedtaksdato,
+                referanseBruker = "Vedtak om medlemskap datert " +
+                    DateTimeFormatter.ofPattern("dd.MM.yyyy").withZone(ZoneId.systemDefault()).format(vedtaksdato),
                 perioder = fakturaseriePeriodeDtoListe
             )
 
