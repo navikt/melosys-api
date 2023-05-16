@@ -1,6 +1,8 @@
 package no.nav.melosys.domain.avgift;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Objects;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.Medlemskapsperiode;
@@ -120,5 +122,9 @@ public class Trygdeavgiftsperiode {
 
     public void setGrunnlagSkatteforholdTilNorge(SkatteforholdTilNorge grunnlagSkatteforholdTilNorge) {
         this.grunnlagSkatteforholdTilNorge = grunnlagSkatteforholdTilNorge;
+    }
+
+    public boolean harAvgift() {
+        return this.trygdesats != 0.0 && !Objects.equals(this.trygdeavgiftsbeløpMd.getVerdi(), BigDecimal.valueOf(0.0));
     }
 }

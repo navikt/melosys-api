@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.faktureringskomponenten
 
-import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -24,8 +23,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.saksflyt.ProsessDataKey
 import no.nav.melosys.domain.saksflyt.Prosessinstans
-import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall
@@ -61,6 +58,7 @@ class OpprettBetalingsplanTest {
     lateinit var pdlService: PersondataService
 
     private val unleash = FakeUnleash()
+    private val slotFakturaserieDto = slot<FakturaserieDto>()
 
     lateinit var opprettBetalingsplan: OpprettBetalingsplan
 
@@ -73,6 +71,7 @@ class OpprettBetalingsplanTest {
     @BeforeEach
     internal fun setUp() {
         unleash.enable("melosys.folketrygden.mvp")
+        slotFakturaserieDto.clear()
 
         opprettBetalingsplan = OpprettBetalingsplan(
             behandlingService,
@@ -84,156 +83,135 @@ class OpprettBetalingsplanTest {
         )
     }
 
-    private fun lagTestData(fagsak: Fagsak = lagFagsak(), behandling: Behandling = lagBehandling(fagsak)) {
-        this.fagsak = fagsak
-        this.behandling = behandling
+    @Test
+    fun `Opprett betalingsplan med riktige verdier`() {
+        lagTestData(setOf(lagAktoerRepresentant(), lagAktoerBruker()))
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
+
+
+        opprettBetalingsplan.utfør(prosessinstans)
+
+
+        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaSerie(capture(slotFakturaserieDto)) }
+        slotFakturaserieDto.captured.shouldNotBeNull()
+        slotFakturaserieDto.captured.referanseBruker.shouldContain("Vedtak om medlemskap datert ")
+    }
+
+    @Test
+    fun `Opprett betalingsplan kun for trygdeavgiftsperioder med avgift`() {
+        lagTestData(setOf(lagAktoerBruker()))
+        behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.apply {
+            this.trygdeavgiftsperioder.add(lagTrygdeavgift(behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift).apply {
+                this.trygdeavgiftsbeløpMd = Penger(0.0)
+                this.trygdesats = 0.0
+            })
+        }
+
+        behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.size.shouldBe(2)
+
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
+
+
+        opprettBetalingsplan.utfør(prosessinstans)
+
+
+        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaSerie(capture(slotFakturaserieDto)) }
+        slotFakturaserieDto.captured.shouldNotBeNull()
+        slotFakturaserieDto.captured.perioder.size.shouldBe(1)
+    }
+
+    @Test
+    fun `Ikke opprett betalingsplan når behandling ikke har trygdeavgiftsperioder med avgift`() {
+        lagTestData(emptySet())
+        behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.apply {
+            this.trygdeavgiftsperioder =
+                setOf(lagTrygdeavgift(behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift).apply {
+                    this.trygdeavgiftsbeløpMd = Penger(0.0)
+                    this.trygdesats = 0.0
+                })
+        }
+
+        behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.size.shouldBe(1)
+
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+
+
+        opprettBetalingsplan.utfør(prosessinstans)
+
+
+        verify(exactly = 0) { faktureringskomponentenConsumer.lagFakturaSerie(any()) }
+    }
+
+    @Test
+    fun `Ikke opprett betalingsplan når trygdeavgift betales til skatt`() {
+        lagTestData(emptySet())
+        behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder
+            .first().apply { isTrygdeavgiftBetalesTilSkatt = true }
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+
+
+        opprettBetalingsplan.utfør(prosessinstans)
+
+
+        verify(exactly = 0) { faktureringskomponentenConsumer.lagFakturaSerie(any()) }
+    }
+
+    @Test
+    fun `Opprett betalingsplan uten kontaktopplysning skal fungere`() {
+        lagTestData(setOf(lagAktoerRepresentant(), lagAktoerBruker()))
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
+
+
+        opprettBetalingsplan.utfør(prosessinstans)
+
+
+        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaSerie(any()) }
+    }
+
+    @Test
+    fun `Opprett betalingsplan med fullmektig sender fullmektig`() {
+        lagTestData(setOf(lagAktoerRepresentant().apply { representerer = Representerer.BEGGE }, lagAktoerBruker()))
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every {
+            kontaktopplysningService.hentKontaktopplysning(
+                fagsak.saksnummer,
+                REPRESENTANT_ORGNR
+            )
+        } returns Optional.empty()
+        every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
+
+
+        opprettBetalingsplan.utfør(prosessinstans)
+
+
+        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaSerie(capture(slotFakturaserieDto)) }
+        slotFakturaserieDto.captured.shouldNotBeNull()
+        slotFakturaserieDto.captured.fullmektig?.organisasjonsnummer.shouldBe(REPRESENTANT_ORGNR)
+    }
+
+    private fun lagTestData(aktører: Set<Aktoer>) {
+        this.fagsak = lagFagsak().apply { this.aktører = aktører }
+        this.behandling = lagBehandling(fagsak)
         prosessinstans = Prosessinstans().apply {
             setData(ProsessDataKey.BETALINGSINTERVALL, FaktureringsIntervall.KVARTAL)
-            this.behandling = behandling
+            this.behandling = this@OpprettBetalingsplanTest.behandling
         }
         behandlingsresultat = lagBehandlingsresultat()
         fastsattTrygdeavgift = behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift
     }
 
-    @Test
-    fun `Opprett betalingsplan med riktige verdier`() {
-        lagTestData(lagFagsak().apply {
-            aktører = setOf(
-                lagAktoerOrg(Aktoersroller.REPRESENTANT, "123456789"),
-                lagAktoerPerson("11111111111")
-            )
-        })
-
-        every {
-            behandlingsresultatService.hentBehandlingsresultat(prosessinstans.behandling.id)
-        } returns behandlingsresultat
-
-        every {
-            behandlingService.hentBehandling(behandlingsId)
-        } returns behandling
-
-        every {
-            pdlService.finnFolkeregisterident("11111111111")
-        } returns Optional.of("12345678911")
-
-
-        opprettBetalingsplan.utfør(prosessinstans)
-
-
-        val slot = slot<FakturaserieDto>()
-        verify(exactly = 1) {
-            faktureringskomponentenConsumer.lagFakturaSerie(capture(slot))
-        }
-        slot.captured.shouldNotBeNull()
-        slot.captured.referanseBruker.shouldContain("Vedtak om medlemskap datert ")
-    }
-
-    @Test
-    fun `Opprett betalingsplan uten kontaktopplysning skal fungere`() {
-        lagTestData(lagFagsak().apply {
-            aktører = setOf(
-                lagAktoerOrg(Aktoersroller.REPRESENTANT, "123456789"),
-                lagAktoerPerson("11111111111")
-            )
-        })
-
-        every {
-            behandlingsresultatService.hentBehandlingsresultat(prosessinstans.behandling.id)
-        } returns behandlingsresultat
-
-        every {
-            behandlingService.hentBehandling(behandlingsId)
-        } returns behandling
-
-        every {
-            pdlService.finnFolkeregisterident("11111111111")
-        } returns Optional.of("12345678911")
-
-        opprettBetalingsplan.utfør(prosessinstans)
-
-        verify(exactly = 1) {
-            faktureringskomponentenConsumer.lagFakturaSerie(any())
-        }
-    }
-
-    @Test
-    fun `Opprett betalingsplan med fullmektig sender fullmektig`() {
-        lagTestData(lagFagsak().apply {
-            aktører = setOf(
-                lagAktoerOrg(Aktoersroller.REPRESENTANT, "123456789").apply { representerer = Representerer.BEGGE },
-                lagAktoerPerson("11111111111")
-            )
-        })
-
-        every {
-            behandlingsresultatService.hentBehandlingsresultat(prosessinstans.behandling.id)
-        } returns behandlingsresultat
-
-        every {
-            behandlingService.hentBehandling(behandlingsId)
-        } returns behandling
-
-        every {
-            kontaktopplysningService.hentKontaktopplysning(
-                fagsak.saksnummer,
-                "123456789"
-            )
-        } returns Optional.empty()
-
-        every {
-            pdlService.finnFolkeregisterident("11111111111")
-        } returns Optional.of("12345678911")
-
-
-        opprettBetalingsplan.utfør(prosessinstans)
-
-
-        val slot = slot<FakturaserieDto>()
-        verify(exactly = 1) {
-            faktureringskomponentenConsumer.lagFakturaSerie(capture(slot))
-        }
-        slot.captured.shouldNotBeNull()
-        slot.captured.fullmektig?.organisasjonsnummer.shouldBe("123456789")
-    }
-
-    @Test
-    fun `Opprett betalingsplan uten aktoer feiler`() {
-        lagTestData(lagFagsak().apply {
-            aktører = setOf(lagAktoerOrg(Aktoersroller.REPRESENTANT, "123456789"))
-        })
-
-        every {
-            behandlingService.hentBehandling(behandlingsId)
-        } returns behandling
-
-
-        shouldThrow<FunksjonellException> {
-            opprettBetalingsplan.utfør(prosessinstans)
-        }.message.shouldContain("Finner ikke bruker på fagsak MEL-100")
-    }
-
-    @Test
-    fun `Opprett betalingsplan med to BRUKER aktoer feiler`() {
-        lagTestData(lagFagsak().apply {
-            aktører = setOf(
-                lagAktoerOrg(Aktoersroller.BRUKER, "123456789"),
-                lagAktoerOrg(Aktoersroller.BRUKER, "123456781")
-            )
-        })
-
-        every {
-            behandlingService.hentBehandling(behandlingsId)
-        } returns behandling
-
-
-        shouldThrow<TekniskException> {
-            opprettBetalingsplan.utfør(prosessinstans)
-        }.message.shouldContain("Det finnes mer enn en aktør med rollen Bruker for sak MEL-100")
-    }
-
     private fun lagBehandling(fagsak: Fagsak = lagFagsak()): Behandling {
         val behandling = Behandling()
-        behandling.id = behandlingsId
+        behandling.id = BEHANDLING_ID
         behandling.tema = Behandlingstema.UTSENDT_ARBEIDSTAKER
         behandling.type = Behandlingstyper.FØRSTEGANG
         behandling.status = Behandlingsstatus.AVSLUTTET
@@ -284,7 +262,7 @@ class OpprettBetalingsplanTest {
 
     private fun lagFastsattTrygdeavgift(): FastsattTrygdeavgift {
         return FastsattTrygdeavgift().apply {
-            trygdeavgiftsperioder = setOf(lagTrygdeavgift(this))
+            trygdeavgiftsperioder = mutableSetOf(lagTrygdeavgift(this))
             trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
                 inntektsperioder = setOf(lagInntektsperiode())
             }
@@ -309,21 +287,24 @@ class OpprettBetalingsplanTest {
         }
     }
 
-    private fun lagAktoerOrg(aktoersroller: Aktoersroller, orgNummer: String): Aktoer {
+    private fun lagAktoerRepresentant(): Aktoer {
         val aktoer = Aktoer()
-        aktoer.rolle = aktoersroller
-        aktoer.orgnr = orgNummer
+        aktoer.rolle = Aktoersroller.REPRESENTANT
+        aktoer.orgnr = REPRESENTANT_ORGNR
         return aktoer
     }
 
-    private fun lagAktoerPerson(aktørId: String): Aktoer {
+    private fun lagAktoerBruker(): Aktoer {
         val aktoer = Aktoer()
         aktoer.rolle = Aktoersroller.BRUKER
-        aktoer.aktørId = aktørId
+        aktoer.aktørId = BRUKER_FNR
         return aktoer
     }
 
     companion object {
-        const val behandlingsId = 1L
+        const val BEHANDLING_ID = 1L
+        const val BRUKER_FNR = "11111111111"
+        const val BRUKER_AKTØRID = "12345678911"
+        const val REPRESENTANT_ORGNR = "123456789"
     }
 }

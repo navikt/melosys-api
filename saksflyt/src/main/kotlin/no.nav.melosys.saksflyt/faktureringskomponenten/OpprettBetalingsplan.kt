@@ -44,14 +44,24 @@ class OpprettBetalingsplan(
 
         val behandlingsId = prosessinstans.behandling.id
         val fagsak = behandlingService.hentBehandling(behandlingsId).fagsak
-
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsId)
-        val vedtaksdato = behandlingsresultat.vedtakMetadata.vedtaksdato
         val fastsattTrygdeavgift = behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift
+
+        if (!fastsattTrygdeavgift.skalBetaleTrygdeavgiftTilNav()) {
+            return
+        }
+
+        val trygdeavgiftsperioderMedAvgift = fastsattTrygdeavgift.trygdeavgiftsperioder.filter { it.harAvgift() }
+
+        if (trygdeavgiftsperioderMedAvgift.isEmpty()) {
+            return
+        }
+
+        val vedtaksdato = behandlingsresultat.vedtakMetadata.vedtaksdato
         val fullmektig = fagsak.finnRepresentant(Representerer.BRUKER).orElse(null)
         val kontaktopplysning = hentKontaktopplysning(fagsak, fullmektig)
 
-        val fakturaseriePeriodeDtoListe = fastsattTrygdeavgift.trygdeavgiftsperioder.map {
+        val fakturaseriePeriodeDtoListe = trygdeavgiftsperioderMedAvgift.map {
             FakturaseriePeriodeDto(
                 it.trygdeavgiftsbeløpMd.verdi,
                 it.periodeFra,
