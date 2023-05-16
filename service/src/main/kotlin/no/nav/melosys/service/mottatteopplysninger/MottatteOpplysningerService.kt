@@ -179,7 +179,7 @@ class MottatteOpplysningerService(
         }
 
         behandling.mottatteOpplysninger = mottatteOpplysninger
-        return mottatteOpplysningerRepository.save(mottatteOpplysninger)
+        return mottatteOpplysningerRepository.saveAndFlush(mottatteOpplysninger)
     }
 
     @Transactional
