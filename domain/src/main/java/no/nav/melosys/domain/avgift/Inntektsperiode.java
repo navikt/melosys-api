@@ -110,8 +110,9 @@ public class Inntektsperiode {
     }
 
     public boolean utledTrygdeavgiftBetalesTilSkatt(Skatteplikttype skatteplikttype) {
-        return !((skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG) ||
-            List.of(Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE, Inntektskildetype.FN_SKATTEFRITAK).contains(type) ||
-            (type == Inntektskildetype.INNTEKT_FRA_UTLANDET && arbeidsgiversavgiftBetalesTilSkatt));
+        var trygdeavgiftBetalesTilNAV = (skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG)
+            || List.of(Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE, Inntektskildetype.FN_SKATTEFRITAK).contains(type)
+            || (type == Inntektskildetype.INNTEKT_FRA_UTLANDET && !arbeidsgiversavgiftBetalesTilSkatt);
+        return !trygdeavgiftBetalesTilNAV;
     }
 }
