@@ -1,19 +1,11 @@
 package no.nav.melosys.tjenester.gui.avklartefakta;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Medlemskapsperiode;
-import no.nav.melosys.domain.avgift.Penger;
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge;
-import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
+import no.nav.melosys.domain.avgift.*;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
+import no.nav.melosys.domain.kodeverk.Inntektskildetype;
 import no.nav.melosys.domain.kodeverk.Skatteplikttype;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
@@ -30,6 +22,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.Set;
 
 import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
 import static org.mockito.ArgumentMatchers.any;
@@ -126,10 +123,13 @@ class TrygdeavgiftTjenesteTest {
         trygdeavgift.setTrygdeavgiftsbeløpMd(new Penger(BigDecimal.valueOf(10000)));
 
         var medlemskapsperiode = new Medlemskapsperiode();
-        medlemskapsperiode.setFom(LocalDate.now());
-        medlemskapsperiode.setTom(LocalDate.now().plusDays(10));
         medlemskapsperiode.setTrygdedekning(Trygdedekninger.HELSEDEL);
         trygdeavgift.setGrunnlagMedlemskapsperiode(medlemskapsperiode);
+
+        var inntektsperiode = new Inntektsperiode();
+        inntektsperiode.setType(Inntektskildetype.INNTEKT_FRA_UTLANDET);
+        trygdeavgift.setGrunnlagInntekstperiode(inntektsperiode);
+
         trygdeavgift.setFastsattTrygdeavgift(new FastsattTrygdeavgift());
         trygdeavgift.getFastsattTrygdeavgift().setMedlemAvFolketrygden(new MedlemAvFolketrygden());
         trygdeavgift.getFastsattTrygdeavgift().getMedlemAvFolketrygden().setMedlemskapsperioder(Set.of(medlemskapsperiode));

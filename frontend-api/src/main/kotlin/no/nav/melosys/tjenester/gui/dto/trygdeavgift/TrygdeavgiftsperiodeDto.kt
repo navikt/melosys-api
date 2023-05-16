@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.dto.trygdeavgift
 
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import java.time.LocalDate
 
@@ -8,6 +9,7 @@ data class TrygdeavgiftsperiodeDto(
     val fom: LocalDate,
     val tom: LocalDate,
     val trygdedekning: Trygdedekninger,
+    val inntektskildetype: Inntektskildetype,
     val avgiftssats: Double,
     val avgiftPerMd: Int
 ) {
@@ -16,6 +18,7 @@ data class TrygdeavgiftsperiodeDto(
             trygdeavgiftsperiode.periodeFra,
             trygdeavgiftsperiode.periodeTil,
             trygdeavgiftsperiode.grunnlagMedlemskapsperiode.trygdedekning,
+            trygdeavgiftsperiode.grunnlagInntekstperiode.type,
             trygdeavgiftsperiode.trygdesats,
             trygdeavgiftsperiode.trygdeavgiftsbeløpMd.verdi.toInt()
         )
