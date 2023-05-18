@@ -30,146 +30,107 @@ import java.time.LocalDate
 internal class OppgaveFactoryNyMappingTest {
 
     private val oppgaveFactory = OppgaveFactory(FakeUnleash().apply { enable(ToggleName.NY_GOSYS_MAPPING) })
-    private val oppgaveGosysMapping = OppgaveGosysMapping(FakeUnleash())
 
     @Test
-    fun `Sed skal brukes som beskrivelse ved oppgavetype BEH_SED - untatt ved A1_ANMODNING_OM_UNNTAK_PAPIR`() {
-        oppgaveGosysMapping.rows
+    fun `Sed skal brukes som beskrivelse ved oppgavetype BEH_SED - untatt ved A1_ANMODNING_OM_UNNTAK_PAPIR eller oppgave opprettes fra eksisterende`() {
+        rowsMedAlleKombinasjoner
             .filter {
                 it.oppgave.oppgaveType == Oppgavetyper.BEH_SED
             }.filter {
                 it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
-            }.forEach { row ->
-                lagBehandlingBrukAlleKombinasjoner(row, SedType.A003) { sak, behandling ->
-                    if (sak.behandlingstype in listOf(
-                            Behandlingstyper.NY_VURDERING,
-                            Behandlingstyper.KLAGE,
-                            Behandlingstyper.ENDRET_PERIODE
-                        )
-                    ) return@lagBehandlingBrukAlleKombinasjoner
+            }.shouldHaveSize(19)
+            .filter { sak ->
+                sak.behandlingstype !in listOf(
+                    Behandlingstyper.NY_VURDERING,
+                    Behandlingstyper.KLAGE,
+                    Behandlingstyper.ENDRET_PERIODE
+                )
+            }.shouldHaveSize(8).forEach { sak ->
+                val behandling = sak.lagBehandlingMedSpy(SedType.A003)
+                val oppgave =
+                    oppgaveFactory.lagBehandlingsoppgave(
+                        behandling, LocalDate.now(), behandling::hentSedDokument
+                    ).build()
 
-                    val oppgave =
-                        oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument)
-                            .build()
-
-                    withClue("sakstype${row.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
-                        oppgave.beskrivelse.shouldBe(SedType.A003.name)
-                        verify { behandling.saksopplysninger }
-                    }
+                withClue("sakstype${sak.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
+                    oppgave.beskrivelse.shouldBe(SedType.A003.name)
+                    verify { behandling.saksopplysninger }
                 }
             }
     }
 
     @Test
     fun `tom beskrivelse når oppgavetype ikke er BEH_SED - untatt ved A1_ANMODNING_OM_UNNTAK_PAPIR og BEHANDLINGSTEMA`() {
-        oppgaveGosysMapping.rows
+        rowsMedAlleKombinasjoner
             .filter {
                 it.oppgave.oppgaveType != Oppgavetyper.BEH_SED
             }.filter {
                 it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
             }.filter {
                 it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.BEHANDLINGSTEMA
-            }.forEach { row ->
-                lagBehandlingBrukAlleKombinasjoner(row) { sak, behandling ->
-                    val oppgave =
-                        oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument)
-                            .build()
+            }.shouldHaveSize(55).forEach { sak ->
+                val behandling = sak.lagBehandlingMedSpy()
+                val oppgave =
+                    oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument)
+                        .build()
 
-                    withClue("sakstype${row.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
-                        oppgave.beskrivelse.shouldBe("")
-                        verify { behandling.hentSedDokument() wasNot called }
-                    }
+                withClue("sakstype${sak.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
+                    oppgave.beskrivelse.shouldBe("")
+                    verify { behandling.hentSedDokument() wasNot called }
                 }
             }
     }
 
     @Test
     fun `A1_ANMODNING_OM_UNNTAK_PAPIR skal brukes som beskrivelse ved A1_ANMODNING_OM_UNNTAK_PAPIR`() {
-        oppgaveGosysMapping.rows
+        rowsMedAlleKombinasjoner
             .filter {
                 it.oppgave.beskrivelsefelt == OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
-            }.shouldHaveSize(1).forEach { row ->
-                lagBehandlingBrukAlleKombinasjoner(row) { sak, behandling ->
-                    val oppgave =
-                        oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument)
-                            .build()
+            }.shouldHaveSize(3).forEach { sak ->
+                val behandling = sak.lagBehandlingMedSpy()
+                val oppgave =
+                    oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument)
+                        .build()
 
-                    withClue("sakstype${row.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
-                        oppgave.beskrivelse.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR.beskrivelse)
-                        verify { behandling.hentSedDokument() wasNot called }
-                    }
+                withClue("sakstype${sak.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
+                    oppgave.beskrivelse.shouldBe(OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR.beskrivelse)
+                    verify { behandling.hentSedDokument() wasNot called }
                 }
             }
     }
 
     @Test
-    fun `Bruker sed om det finnes for de 3 som har SED_ELLER_TOMT, ellers ikke log warning og retuner en tom streng`() {
-        oppgaveGosysMapping.rows
+    fun `Bruker sed om det finnes for de 11 som har SED_ELLER_TOMT, ellers ikke log warning og retuner en tom streng`() {
+        rowsMedAlleKombinasjoner
             .filter {
                 it.oppgave.beskrivelsefelt == OppgaveGosysMapping.Beskrivelsefelt.SED_ELLER_TOMT
-            }.shouldHaveSize(5).forEach { row ->
-                lagBehandlingBrukAlleKombinasjoner(row) { sak, behandling ->
-                    LoggingTestUtils.withLogAppender<OppgaveFactory> { oppgaveFactoryListAppender ->
-                        val oppgave =
-                            oppgaveFactory.lagBehandlingsoppgave(
-                                behandling,
-                                LocalDate.now()
-                            ) { finnSedDokument(behandling) }
-                                .build()
+            }.shouldHaveSize(11).forEach { sak ->
+                val behandling = sak.lagBehandlingMedSpy()
+                LoggingTestUtils.withLogAppender<OppgaveFactory> { oppgaveFactoryListAppender ->
+                    val oppgave =
+                        oppgaveFactory.lagBehandlingsoppgave(
+                            behandling,
+                            LocalDate.now()
+                        ) { finnSedDokument(behandling) }
+                            .build()
 
-                        withClue("sakstype${row.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
-                            oppgave.beskrivelse.shouldBe("")
-                            oppgaveFactoryListAppender.list.shouldHaveSize(0)
-                            verify { behandling.finnSedDokument() }
-                        }
+                    withClue("sakstype${sak.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
+                        oppgave.beskrivelse.shouldBe("")
+                        oppgaveFactoryListAppender.list.shouldHaveSize(0)
+                        verify { behandling.finnSedDokument() }
                     }
                 }
             }
     }
 
     @Test
-    fun `Bruker sed om det finnes for de 3 som har SED, ellers log warning og retuner en tom streng`() {
-        oppgaveGosysMapping.rows
+    fun `Bruker sed om det finnes for de 5 som har SED, ellers log warning og retuner en tom streng`() {
+        rowsMedAlleKombinasjoner
             .filter {
                 it.oppgave.beskrivelsefelt == OppgaveGosysMapping.Beskrivelsefelt.SED
-            }.shouldHaveSize(3).forEach { row ->
-                lagBehandlingBrukAlleKombinasjoner(row) { sak, behandling ->
-                    LoggingTestUtils.withLogAppender<OppgaveFactory> { oppgaveFactoryListAppender ->
-                        val oppgave =
-                            oppgaveFactory.lagBehandlingsoppgave(
-                                behandling,
-                                LocalDate.now(),
-                            ) { finnSedDokument(behandling) }
-                                .build()
-
-                        withClue("sakstype${row.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
-                            oppgave.beskrivelse.shouldBe("")
-                            oppgaveFactoryListAppender.list
-                                .shouldHaveSize(1)
-                                .first().run {
-                                    level.shouldBe(Level.WARN)
-                                    message.shouldBe("Sed dokument mangler for:MEL-1 behandlingID:1")
-                                }
-                        }
-                    }
-                }
-            }
-    }
-
-    @Test
-    fun `skal ikke logge advarsel når oppgave opprettes fra eksisterende og SED er tilgjengelig`() {
-        oppgaveGosysMapping.rows.filter {
-            it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
-        }.filter {
-            it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.BEHANDLINGSTEMA
-        }.forEach { row ->
-            lagBehandlingBrukAlleKombinasjoner(row) { sak, behandling ->
-                if (sak.behandlingstype !in listOf(
-                        Behandlingstyper.NY_VURDERING,
-                        Behandlingstyper.KLAGE
-                    )
-                ) return@lagBehandlingBrukAlleKombinasjoner
-                LoggingTestUtils.withLogAppender<OppgaveBeskrivelseNyUtleder> { oppgaveBeskrivelseListAppender ->
+            }.shouldHaveSize(5).forEach { sak ->
+                val behandling = sak.lagBehandlingMedSpy()
+                LoggingTestUtils.withLogAppender<OppgaveFactory> { oppgaveFactoryListAppender ->
                     val oppgave =
                         oppgaveFactory.lagBehandlingsoppgave(
                             behandling,
@@ -177,11 +138,41 @@ internal class OppgaveFactoryNyMappingTest {
                         ) { finnSedDokument(behandling) }
                             .build()
 
-                    withClue("sakstype${row.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
+                    withClue("sakstype${sak.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
                         oppgave.beskrivelse.shouldBe("")
-                        oppgaveBeskrivelseListAppender.list
-                            .shouldHaveSize(0)
+                        oppgaveFactoryListAppender.list
+                            .shouldHaveSize(1)
+                            .first().run {
+                                level.shouldBe(Level.WARN)
+                                message.shouldBe("Sed dokument mangler for:MEL-1 behandlingID:1")
+                            }
                     }
+                }
+            }
+    }
+
+    @Test
+    fun `skal ikke logge advarsel når oppgave opprettes fra eksisterende og SED er tilgjengelig`() {
+        rowsMedAlleKombinasjoner.filter {
+            it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
+        }.filter {
+            it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.BEHANDLINGSTEMA
+        }.filter {
+            it.behandlingstype in listOf(Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE)
+        }.shouldHaveSize(44).forEach { sak ->
+            LoggingTestUtils.withLogAppender<OppgaveBeskrivelseNyUtleder> { oppgaveBeskrivelseListAppender ->
+                val behandling = sak.lagBehandlingMedSpy()
+                val oppgave =
+                    oppgaveFactory.lagBehandlingsoppgave(
+                        behandling,
+                        LocalDate.now(),
+                    ) { finnSedDokument(behandling) }
+                        .build()
+
+                withClue("sakstype${sak.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
+                    oppgave.beskrivelse.shouldBe("")
+                    oppgaveBeskrivelseListAppender.list
+                        .shouldHaveSize(0)
                 }
             }
         }
@@ -208,16 +199,13 @@ internal class OppgaveFactoryNyMappingTest {
         }
     }
 
-
     @Test
     fun `oppgave tema skal være av riktig type`() {
-        oppgaveGosysMapping.rows.forEach { row ->
-            row.behandlingstema.forEach { behandlingstema ->
-                val tema: Tema = oppgaveFactory.utledTema(row.sakstype, row.sakstema, behandlingstema)
+        rowsMedAlleKombinasjoner.forEach { sak ->
+            val tema: Tema = oppgaveFactory.utledTema(sak.sakstype, sak.sakstema, sak.behandlingstema)
 
-                withClue("sakstype${row.sakstype}, sakstema=${row.sakstema}, behandlingstema:${behandlingstema}") {
-                    tema.shouldBe(row.oppgave.tema)
-                }
+            withClue("sakstype${sak.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}") {
+                tema.shouldBe(sak.oppgave.tema)
             }
         }
     }
@@ -366,64 +354,20 @@ internal class OppgaveFactoryNyMappingTest {
         val behandlingstype: Behandlingstyper,
         val behandlingstema: Behandlingstema,
         val oppgave: OppgaveGosysMapping.Oppgave
-    )
-
-    private fun lagBehandlingBrukAlleKombinasjoner(
-        tableRow: OppgaveGosysMapping.TableRow,
-        sedType: SedType? = null,
-        action: (TableRowSak, Behandling) -> Unit
-
     ) {
-        tableRow.behandlingstema.forEach { behandlingstema ->
-            tableRow.behandlingstype.forEach { behandlingstype ->
-                action(
-                    TableRowSak(
-                        tableRow.sakstype,
-                        tableRow.sakstema,
-                        behandlingstype,
-                        behandlingstema,
-                        tableRow.oppgave
-                    ),
-                    spyk(
-                        lagBehandling(
-                            tableRow.sakstype,
-                            tableRow.sakstema,
-                            behandlingstema,
-                            behandlingstype,
-                            sedType
-                        )
-                    )
+        fun lagBehandlingMedSpy(sedType: SedType? = null): Behandling {
+            return spyk(
+                lagBehandling(
+                    sakstype,
+                    sakstema,
+                    behandlingstema,
+                    behandlingstype,
+                    sedType
                 )
-            }
+            )
         }
     }
 
-    private fun lagBehandling(
-        sakstype: Sakstyper,
-        sakstema: Sakstemaer,
-        behandlingstema: Behandlingstema,
-        behandlingstype: Behandlingstyper,
-        sedType: SedType? = null
-    ): Behandling {
-        return Behandling().apply {
-            id = 1
-            fagsak = Fagsak().apply {
-                saksnummer = "MEL-1"
-                type = sakstype
-                tema = sakstema
-            }
-            type = behandlingstype
-            tema = behandlingstema
-            if (sedType != null) {
-                saksopplysninger.add(Saksopplysning().apply {
-                    type = SaksopplysningType.SEDOPPL
-                    dokument = SedDokument().apply {
-                        setSedType(sedType)
-                    }
-                })
-            }
-        }
-    }
 
     private fun fraRegistretTabell() =
         sequence<Arguments> {
@@ -493,4 +437,54 @@ internal class OppgaveFactoryNyMappingTest {
             }
         }.toList()
 
+    companion object {
+        private val oppgaveGosysMapping = OppgaveGosysMapping(FakeUnleash())
+
+        private val rowsMedAlleKombinasjoner by lazy {
+            sequence {
+                oppgaveGosysMapping.rows.forEach { tableRow ->
+                    tableRow.behandlingstema.forEach { behandlingstema ->
+                        tableRow.behandlingstype.forEach { behandlingstype ->
+                            yield(
+                                TableRowSak(
+                                    tableRow.sakstype,
+                                    tableRow.sakstema,
+                                    behandlingstype,
+                                    behandlingstema,
+                                    tableRow.oppgave
+                                )
+                            )
+                        }
+                    }
+                }
+            }.toList()
+        }
+
+        private fun lagBehandling(
+            sakstype: Sakstyper,
+            sakstema: Sakstemaer,
+            behandlingstema: Behandlingstema,
+            behandlingstype: Behandlingstyper,
+            sedType: SedType? = null
+        ): Behandling {
+            return Behandling().apply {
+                id = 1
+                fagsak = Fagsak().apply {
+                    saksnummer = "MEL-1"
+                    type = sakstype
+                    tema = sakstema
+                }
+                type = behandlingstype
+                tema = behandlingstema
+                if (sedType != null) {
+                    saksopplysninger.add(Saksopplysning().apply {
+                        type = SaksopplysningType.SEDOPPL
+                        dokument = SedDokument().apply {
+                            setSedType(sedType)
+                        }
+                    })
+                }
+            }
+        }
+    }
 }
