@@ -17,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.featuretoggle.ToggleName
+import no.nav.melosys.service.LoggingTestUtils
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
@@ -24,48 +25,12 @@ import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.time.LocalDate
-import ch.qos.logback.classic.spi.ILoggingEvent
-import ch.qos.logback.classic.Logger
-import ch.qos.logback.core.read.ListAppender
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.slf4j.LoggerFactory
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class OppgaveFactoryNyMappingTest {
 
     private val oppgaveFactory = OppgaveFactory(FakeUnleash().apply { enable(ToggleName.NY_GOSYS_MAPPING) })
     private val oppgaveGosysMapping = OppgaveGosysMapping(FakeUnleash())
-    private lateinit var oppgaveFactoryListAppender: ListAppender<ILoggingEvent>
-    private lateinit var oppgaveFactorylogger: Logger
-
-    @BeforeEach
-    fun beforeAll() {
-        setupLogAppender()
-    }
-
-    @AfterEach
-    fun afterAll() {
-        detachLogAppender()
-    }
-
-    private fun resetLogAppender() {
-        detachLogAppender()
-        setupLogAppender()
-    }
-    private fun setupLogAppender() {
-        oppgaveFactorylogger = LoggerFactory.getLogger(OppgaveFactory::class.java) as Logger
-        oppgaveFactoryListAppender = ListAppender<ILoggingEvent>().apply {
-            context = oppgaveFactorylogger.loggerContext
-            start()
-        }
-
-        oppgaveFactorylogger.addAppender(oppgaveFactoryListAppender)
-    }
-
-    private fun detachLogAppender() {
-        oppgaveFactorylogger.detachAppender(oppgaveFactoryListAppender)
-    }
 
     @Test
     fun `Sed skal brukes som beskrivelse ved oppgavetype BEH_SED - untatt ved A1_ANMODNING_OM_UNNTAK_PAPIR`() {
@@ -144,17 +109,19 @@ internal class OppgaveFactoryNyMappingTest {
                 it.oppgave.beskrivelsefelt == OppgaveGosysMapping.Beskrivelsefelt.SED_ELLER_TOMT
             }.shouldHaveSize(5).forEach { row ->
                 lagBehandlingBrukAlleKombinasjoner(row) { sak, behandling ->
-                    val oppgave =
-                        oppgaveFactory.lagBehandlingsoppgave(
-                            behandling,
-                            LocalDate.now()
-                        ) { finnSedDokument(behandling) }
-                            .build()
+                    LoggingTestUtils.withLogAppender<OppgaveFactory> { oppgaveFactoryListAppender ->
+                        val oppgave =
+                            oppgaveFactory.lagBehandlingsoppgave(
+                                behandling,
+                                LocalDate.now()
+                            ) { finnSedDokument(behandling) }
+                                .build()
 
-                    withClue("sakstype${row.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
-                        oppgave.beskrivelse.shouldBe("")
-                        oppgaveFactoryListAppender.list.shouldHaveSize(0)
-                        verify { behandling.finnSedDokument() }
+                        withClue("sakstype${row.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
+                            oppgave.beskrivelse.shouldBe("")
+                            oppgaveFactoryListAppender.list.shouldHaveSize(0)
+                            verify { behandling.finnSedDokument() }
+                        }
                     }
                 }
             }
@@ -167,6 +134,42 @@ internal class OppgaveFactoryNyMappingTest {
                 it.oppgave.beskrivelsefelt == OppgaveGosysMapping.Beskrivelsefelt.SED
             }.shouldHaveSize(3).forEach { row ->
                 lagBehandlingBrukAlleKombinasjoner(row) { sak, behandling ->
+                    LoggingTestUtils.withLogAppender<OppgaveFactory> { oppgaveFactoryListAppender ->
+                        val oppgave =
+                            oppgaveFactory.lagBehandlingsoppgave(
+                                behandling,
+                                LocalDate.now(),
+                            ) { finnSedDokument(behandling) }
+                                .build()
+
+                        withClue("sakstype${row.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
+                            oppgave.beskrivelse.shouldBe("")
+                            oppgaveFactoryListAppender.list
+                                .shouldHaveSize(1)
+                                .first().run {
+                                    level.shouldBe(Level.WARN)
+                                    message.shouldBe("Sed dokument mangler for:MEL-1 behandlingID:1")
+                                }
+                        }
+                    }
+                }
+            }
+    }
+
+    @Test
+    fun `skal ikke logge advarsel når oppgave opprettes fra eksisterende og SED er tilgjengelig`() {
+        oppgaveGosysMapping.rows.filter {
+            it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
+        }.filter {
+            it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.BEHANDLINGSTEMA
+        }.forEach { row ->
+            lagBehandlingBrukAlleKombinasjoner(row) { sak, behandling ->
+                if (sak.behandlingstype !in listOf(
+                        Behandlingstyper.NY_VURDERING,
+                        Behandlingstyper.KLAGE
+                    )
+                ) return@lagBehandlingBrukAlleKombinasjoner
+                LoggingTestUtils.withLogAppender<OppgaveBeskrivelseNyUtleder> { oppgaveBeskrivelseListAppender ->
                     val oppgave =
                         oppgaveFactory.lagBehandlingsoppgave(
                             behandling,
@@ -175,18 +178,13 @@ internal class OppgaveFactoryNyMappingTest {
                             .build()
 
                     withClue("sakstype${row.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
-                        println("sakstype${row.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}")
                         oppgave.beskrivelse.shouldBe("")
-                        oppgaveFactoryListAppender.list
-                            .shouldHaveSize(1)
-                            .first().let {
-                                it.level.shouldBe(Level.WARN)
-                                it.message.shouldBe("Sed dokument mangler for:MEL-1 behandlingID:1")
-                            }
-                        resetLogAppender()
+                        oppgaveBeskrivelseListAppender.list
+                            .shouldHaveSize(0)
                     }
                 }
             }
+        }
     }
 
 
@@ -276,22 +274,25 @@ internal class OppgaveFactoryNyMappingTest {
 
     @Test
     fun `Skal ha SED - om ikke skal det logges en warning - og retunere en tom streng`() {
-        val behandling = lagBehandling(
-            Sakstyper.EU_EOS,
-            Sakstemaer.UNNTAK,
-            Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND,
-            Behandlingstyper.FØRSTEGANG
-        )
-        val oppgave =
-            oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now()) { finnSedDokument(behandling) }.build()
+        LoggingTestUtils.withLogAppender<OppgaveFactory> { oppgaveFactoryListAppender ->
+            val behandling = lagBehandling(
+                Sakstyper.EU_EOS,
+                Sakstemaer.UNNTAK,
+                Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND,
+                Behandlingstyper.FØRSTEGANG
+            )
+            val oppgave =
+                oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now()) { finnSedDokument(behandling) }
+                    .build()
 
-        oppgaveFactoryListAppender.list
-            .shouldHaveSize(1)
-            .first().let {
-                it.level.shouldBe(Level.WARN)
-                it.message.shouldBe("Sed dokument mangler for:MEL-1 behandlingID:1")
-            }
-        oppgave.beskrivelse.shouldBe("")
+            oppgaveFactoryListAppender.list
+                .shouldHaveSize(1)
+                .first().run {
+                    level.shouldBe(Level.WARN)
+                    message.shouldBe("Sed dokument mangler for:MEL-1 behandlingID:1")
+                }
+            oppgave.beskrivelse.shouldBe("")
+        }
     }
 
     fun finnSedDokument(behandling: Behandling): SedDokument? = behandling.finnSedDokument().orElse(null)
