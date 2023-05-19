@@ -78,20 +78,35 @@ class OppgaveMigrering(
             oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(sak.saksnummer).let { oppgaver ->
                 val migreringsSak = MigreringsSak(sak, oppgaver, nyOppgaveMapping(sak))
                 migreringsRapport.migrertSak(migreringsSak)
-                if (oppgaver.size == 0) {
-                    migreringsRapport.sakManglerOppgave(sak.saksnummer)
+                if (!dryrun && oppgaver.size == 1) {
+                    oppdaterOppgave(migreringsSak)
                 }
-                if (oppgaver.size > 1) {
-                    migreringsRapport.sakerMedFlereOppgaver("fant ${oppgaver.size} oppgaver for: ${sak.saksnummer}")
-                }
-                if (oppgaver.size == 1) {
-                    migreringsRapport.sakMedOppgave(migreringsSak)
-                    // TODO: legg til oppgaveFasade.oppdaterOppgave()
-                }
+                leggTilRapport(migreringsSak)
             }
         }
         log.info("OppgaveMigrering utført!")
         lagRapport()
+    }
+
+    private fun leggTilRapport(
+        migreringsSak: MigreringsSak
+    ) {
+        val oppgaver = migreringsSak.oppgaver
+        val sak = migreringsSak.sak
+        if (oppgaver.isEmpty()) {
+            migreringsRapport.sakManglerOppgave(sak.saksnummer)
+        }
+        if (oppgaver.size > 1) {
+            migreringsRapport.sakerMedFlereOppgaver("fant ${oppgaver.size} oppgaver for: ${sak.saksnummer}")
+        }
+        if (oppgaver.size == 1) {
+            migreringsRapport.sakMedOppgave(migreringsSak)
+        }
+    }
+
+    private fun oppdaterOppgave(migreringsSak: MigreringsSak) {
+        val sak = migreringsSak.sak
+        log.info("oppdatere oppgave for: ${sak.saksnummer} (${sak.behandlingID})")
     }
 
     private fun nyOppgaveMapping(sakOgBehandling: SakOgBehandlingDTO): OppgaveOppdatering {
