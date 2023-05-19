@@ -24,15 +24,16 @@ class ConfluenceWikiExporter : Exporter {
     }
 
     override fun renderTableCell(tabelCell: TabelCell): String {
+        val cellText = tabelCell.text.toString().ifBlank { " " }
         val text = when (tabelCell.font) {
-            Font.NORMAL -> tabelCell.text
-            Font.STRONG -> "*${tabelCell.text}*"
-            Font.ITALIC -> "_${tabelCell.text}_"
+            Font.NORMAL -> cellText
+            Font.STRONG -> "*$cellText*"
+            Font.ITALIC -> "_${cellText}_"
         }
 
         return if (tabelCell.fc != null) {
             "{color:${tabelCell.fc}}$text{color}"
-        } else text.toString()
+        } else text
     }
 }
 
