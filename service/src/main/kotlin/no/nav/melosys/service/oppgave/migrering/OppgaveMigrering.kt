@@ -107,9 +107,22 @@ class OppgaveMigrering(
 
     private fun oppdaterOppgave(migreringsSak: MigreringsSak) {
         val sak = migreringsSak.sak
-        val oppgave = migreringsSak.oppgaver.first()
-        log.info("oppdatere oppgave for: ${sak.saksnummer} (${sak.behandlingID})")
-//        oppgaveFasade.oppdaterOppgave(oppgave.oppgaveId, OppgaveOppdatering.builder().build())
+        val oppgaveId = migreringsSak.oppgaver.first().oppgaveId
+        val oppdatering = migreringsSak.ny
+
+        log.info("oppdatere oppgave:$oppgaveId for: ${sak.saksnummer} (${sak.behandlingID})")
+        val oppgaveOppdatering = OppgaveOppdatering
+            .builder()
+            .oppgavetype(oppdatering.oppgaveType)
+            .behandlingstema(oppdatering.oppgaveBehandlingstema?.kode)
+            .tema(oppdatering.tema)
+            .beskrivelse(oppdatering.beskrivelse)
+            .build()
+        try {
+            oppgaveFasade.oppdaterOppgave(oppgaveId, oppgaveOppdatering)
+        } catch (e: Exception) {
+            log.error("oppdaterOppgave feilet for ${sak.saksnummer}(${sak.behandlingID}) oppgaveID:$oppgaveId", e)
+        }
     }
 
     private fun nyOppgaveMapping(sakOgBehandling: SakOgBehandlingDTO): OppgaveMigreringsOppdatering {
