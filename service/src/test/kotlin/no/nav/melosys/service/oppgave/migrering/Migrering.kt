@@ -49,7 +49,7 @@ object Migrering {
     }
 
     private data class MigreringsInfoForLesing(
-        val sak: SakOgBehandlingDTO, val oppgaver: List<MigreringsOppgave>, val ny: OppgaveOppdatering,
+        val sak: SakOgBehandlingDTO, val oppgaver: List<MigreringsOppgave>, val ny: OppgaveMigreringsOppdatering,
     ) {
         fun tilMigreringsInfo(): MigreringsSak = MigreringsSak(sak, oppgaver.map { it.tilOppgave() }, ny)
 

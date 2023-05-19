@@ -5,7 +5,7 @@ import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstype
 
-data class OppgaveOppdatering(
+data class OppgaveMigreringsOppdatering(
     val oppgaveBehandlingstema: OppgaveBehandlingstema?,
     val oppgaveBehandlingstype: OppgaveBehandlingstype?,
     val tema: Tema?,

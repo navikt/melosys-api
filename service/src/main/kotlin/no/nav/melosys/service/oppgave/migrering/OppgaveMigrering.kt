@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
+import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
 import no.nav.melosys.repository.BehandlingRepositoryForOppgaveMigrering
 import no.nav.melosys.service.lovligekombinasjoner.GyldigeKombinasjoner
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
@@ -106,16 +107,18 @@ class OppgaveMigrering(
 
     private fun oppdaterOppgave(migreringsSak: MigreringsSak) {
         val sak = migreringsSak.sak
+        val oppgave = migreringsSak.oppgaver.first()
         log.info("oppdatere oppgave for: ${sak.saksnummer} (${sak.behandlingID})")
+//        oppgaveFasade.oppdaterOppgave(oppgave.oppgaveId, OppgaveOppdatering.builder().build())
     }
 
-    private fun nyOppgaveMapping(sakOgBehandling: SakOgBehandlingDTO): OppgaveOppdatering {
+    private fun nyOppgaveMapping(sakOgBehandling: SakOgBehandlingDTO): OppgaveMigreringsOppdatering {
         try {
             val oppgaveBehandlingstema: OppgaveBehandlingstema? = sakOgBehandling.utledOppgaveBehandlingstema()
             val oppgavetype: Oppgavetyper = sakOgBehandling.utledOppgaveType()
             val beskrivelse: String = sakOgBehandling.utledBeskrivelse(oppgaveBehandlingstema)
             val tema: Tema = sakOgBehandling.utledTema()
-            return OppgaveOppdatering(oppgaveBehandlingstema, null, tema, oppgavetype, beskrivelse)
+            return OppgaveMigreringsOppdatering(oppgaveBehandlingstema, null, tema, oppgavetype, beskrivelse)
         } catch (e: Exception) {
             val gyldige = GyldigeKombinasjoner.finnGyldige(
                 sakOgBehandling.sakstype,
@@ -125,7 +128,7 @@ class OppgaveMigrering(
             )
             val mappingError = "${sakOgBehandling.saksnummer}: gyldige:${gyldige.size}  ${e.message}"
             migreringsRapport.mappingFeiler(mappingError)
-            return OppgaveOppdatering(mappingError)
+            return OppgaveMigreringsOppdatering(mappingError)
         }
     }
 

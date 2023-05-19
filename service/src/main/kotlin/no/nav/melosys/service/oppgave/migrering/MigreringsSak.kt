@@ -9,7 +9,7 @@ import no.nav.melosys.service.oppgave.OppgaveGosysMapping
 data class MigreringsSak(
     val sak: SakOgBehandlingDTO,
     val oppgaver: List<Oppgave>,
-    val ny: OppgaveOppdatering,
+    val ny: OppgaveMigreringsOppdatering,
 ) {
 
     fun harFeil(): Boolean = ny.harFeil() || oppgaver.size != 1
@@ -51,7 +51,7 @@ data class MigreringsSak(
         """.trimIndent()
     }
 
-    private fun OppgaveOppdatering.htmlTableData(count: Int): String {
+    private fun OppgaveMigreringsOppdatering.htmlTableData(count: Int): String {
         val rowspan = if (count > 0) "rowspan=${count + 1}" else ""
         if (mappingError != null) {
             return """<td colspan=4 $rowspan class="feil" >$mappingError</td>"""
