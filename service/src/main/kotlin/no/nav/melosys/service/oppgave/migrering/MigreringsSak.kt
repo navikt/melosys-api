@@ -13,15 +13,14 @@ data class MigreringsSak(
 ) {
 
     fun harFeil(): Boolean = ny.harFeil() || oppgaver.size != 1
-    fun mangerSedDokument(): Boolean {
-        return try {
+    fun mangerSedDokument(): Boolean =
+        try {
             val oppgave =
                 oppgaveGosysMapping.finnOppgave(sak.sakstype, sak.sakstema, sak.behandlingstema, sak.behandlingstype)
             oppgave.beskrivelsefelt == OppgaveGosysMapping.Beskrivelsefelt.SED && ny.beskrivelse.isNullOrEmpty()
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             false
         }
-    }
 
     fun temaErForskjellig(): Boolean = oppgaver.any { it.tema != ny.tema }
     fun oppgavetypeErForskjellig(): Boolean = oppgaver.any { it.oppgavetype.kode != ny.oppgaveType?.kode }
