@@ -26,9 +26,8 @@ class OppgaveMigreringTest {
 
         File("/Users/rune/div/migrerings-rapport.html").writeText(migreringsRapport.html { migreringsSaker ->
             migreringsSaker
-                .filter { !it.ny.fantIkkeOppgaveMapping() }
+                .filter { it.mangerSedDokument() }
                 .filter { it.oppgaver.size == 1 }
-                .filter { sedTyper.contains(it.ny.beskrivelse) }
         })
 
     }
