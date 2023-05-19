@@ -79,8 +79,8 @@ class OppgaveMigrering(
             oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(sak.saksnummer).let { oppgaver ->
                 val migreringsSak = MigreringsSak(sak, oppgaver, nyOppgaveMapping(sak))
                 migreringsRapport.migrertSak(migreringsSak)
-                if (!dryrun && oppgaver.size == 1 && !migreringsSak.ny.fantIkkeOppgaveMapping()) {
-                    oppdaterOppgave(migreringsSak)
+                if (oppgaver.size == 1 && !migreringsSak.ny.fantIkkeOppgaveMapping()) {
+                    oppdaterOppgave(dryrun, migreringsSak)
                 }
                 leggTilRapport(migreringsSak)
             }
@@ -100,12 +100,14 @@ class OppgaveMigrering(
         if (oppgaver.size > 1) {
             migreringsRapport.sakerMedFlereOppgaver("fant ${oppgaver.size} oppgaver for: ${sak.saksnummer}")
         }
-        if (oppgaver.size == 1) {
-            migreringsRapport.sakMedOppgave(migreringsSak)
-        }
     }
 
-    private fun oppdaterOppgave(migreringsSak: MigreringsSak) {
+    private fun oppdaterOppgave(dryrun: Boolean, migreringsSak: MigreringsSak) {
+        if (dryrun) {
+            migreringsRapport.antallSakerMigrert++ // Så vi ser hvor mange vi kommer til å migrere
+            return
+        }
+
         val sak = migreringsSak.sak
         val oppgaveId = migreringsSak.oppgaver.first().oppgaveId
         val oppdatering = migreringsSak.ny
@@ -120,9 +122,11 @@ class OppgaveMigrering(
             .build()
         try {
             oppgaveFasade.oppdaterOppgave(oppgaveId, oppgaveOppdatering)
+            migreringsRapport.antallSakerMigrert++
         } catch (e: Exception) {
             // Mulig vi bør samle disse opp så vi kan laste de ned som en json dokument
             log.error("oppdaterOppgave feilet for ${sak.saksnummer}(${sak.behandlingID}) oppgaveID:$oppgaveId", e)
+            migreringsRapport.migreingFeilet++
         }
     }
 
