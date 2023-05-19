@@ -70,7 +70,7 @@ CREATE TABLE trygdeavgiftsperiode
     periode_til                    DATE             NOT NULL,
     trygdeavgift_beloep_mnd_verdi  DECIMAL(12, 2)   NOT NULL,
     trygdeavgift_beloep_mnd_valuta VARCHAR2(3)      NOT NULL,
-    trygdesats                     DOUBLE PRECISION NOT NULL,
+    trygdesats                     DECIMAL(4, 2)    NOT NULL,
     inntektsperiode_id             NUMBER(19),
     medlemskapsperiode_id          NUMBER(19),
     skatteforhold_id               NUMBER(19),

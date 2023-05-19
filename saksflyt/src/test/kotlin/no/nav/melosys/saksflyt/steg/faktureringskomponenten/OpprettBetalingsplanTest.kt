@@ -34,6 +34,7 @@ import no.nav.melosys.service.persondata.PersondataService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -105,7 +106,7 @@ class OpprettBetalingsplanTest {
         behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.apply {
             this.trygdeavgiftsperioder.add(lagTrygdeavgift(behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift).apply {
                 this.trygdeavgiftsbeløpMd = Penger(0.0)
-                this.trygdesats = 0.0
+                this.trygdesats = BigDecimal(0)
             })
         }
 
@@ -131,7 +132,7 @@ class OpprettBetalingsplanTest {
             this.trygdeavgiftsperioder =
                 setOf(lagTrygdeavgift(behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift).apply {
                     this.trygdeavgiftsbeløpMd = Penger(0.0)
-                    this.trygdesats = 0.0
+                    this.trygdesats = BigDecimal(0)
                 })
         }
 
@@ -274,7 +275,7 @@ class OpprettBetalingsplanTest {
             periodeFra = LocalDate.of(2023, 1, 1)
             periodeTil = LocalDate.of(2023, 5, 1)
             trygdeavgiftsbeløpMd = Penger(5000.0)
-            trygdesats = 3.5
+            trygdesats = BigDecimal(3.5)
             this.fastsattTrygdeavgift = fastsattTrygdeavgift
         }
     }

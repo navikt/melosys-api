@@ -2,7 +2,6 @@ package no.nav.melosys.domain.avgift;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Objects;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.Medlemskapsperiode;
@@ -38,7 +37,7 @@ public class Trygdeavgiftsperiode {
     private Penger trygdeavgiftsbeløpMd;
 
     @Column(name = "trygdesats", nullable = false)
-    private Double trygdesats;
+    private BigDecimal trygdesats;
 
     @OneToOne
     @JoinColumn(name = "inntektsperiode_id")
@@ -92,11 +91,11 @@ public class Trygdeavgiftsperiode {
         this.trygdeavgiftsbeløpMd = trygdeavgiftsbeløpMd;
     }
 
-    public Double getTrygdesats() {
+    public BigDecimal getTrygdesats() {
         return trygdesats;
     }
 
-    public void setTrygdesats(Double trygdesats) {
+    public void setTrygdesats(BigDecimal trygdesats) {
         this.trygdesats = trygdesats;
     }
 
@@ -125,6 +124,6 @@ public class Trygdeavgiftsperiode {
     }
 
     public boolean harAvgift() {
-        return this.trygdesats != 0.0 && !Objects.equals(this.trygdeavgiftsbeløpMd.getVerdi(), BigDecimal.valueOf(0.0));
+        return BigDecimal.ZERO.compareTo(this.trygdesats) != 0 && BigDecimal.ZERO.compareTo(this.trygdeavgiftsbeløpMd.getVerdi()) != 0;
     }
 }

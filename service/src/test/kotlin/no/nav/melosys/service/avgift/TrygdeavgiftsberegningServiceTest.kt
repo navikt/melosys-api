@@ -99,7 +99,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                     TrygdeavgiftsberegningResponse(
                         TrygdeavgiftsperiodeDto(
                             DatoPeriodeDto(FOM, TOM),
-                            7.9,
+                            BigDecimal.valueOf(7.9),
                             PengerDto(BigDecimal.valueOf(790), NOK)
                         ),
                         TrygdeavgiftsgrunnlagDto(
@@ -117,7 +117,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             .shouldNotBeEmpty()
             .forEach {
                 it.apply {
-                    trygdesats = 7.9
+                    trygdesats = BigDecimal.valueOf(7.9)
                     trygdeavgiftsbeløpMd = Penger(790.0)
                 }
             }

@@ -73,15 +73,15 @@ class TrygdeavgiftsberegningService
             this.fastsattTrygdeavgift = fastsattTrygdeavgift
             this.grunnlagMedlemskapsperiode = fastsattTrygdeavgift.medlemAvFolketrygden.medlemskapsperioder
                 .find {
-                    it.id == UUID_DBID_MAPS.get(0).get(beregningsgrunnlag.medlemskapsperiodeId)
+                    it.id == UUID_DBID_MAPS[0][beregningsgrunnlag.medlemskapsperiodeId]
                 }
             this.grunnlagSkatteforholdTilNorge = fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge
                 .find {
-                    it.id == UUID_DBID_MAPS.get(1).get(beregningsgrunnlag.skatteforholdsperiodeId)
+                    it.id == UUID_DBID_MAPS[1][beregningsgrunnlag.skatteforholdsperiodeId]
                 }
             this.grunnlagInntekstperiode = fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder
                 .find {
-                    it.id == UUID_DBID_MAPS.get(2).get(beregningsgrunnlag.inntektsperiodeId)
+                    it.id == UUID_DBID_MAPS[2][beregningsgrunnlag.inntektsperiodeId]
                 }
         }
     }

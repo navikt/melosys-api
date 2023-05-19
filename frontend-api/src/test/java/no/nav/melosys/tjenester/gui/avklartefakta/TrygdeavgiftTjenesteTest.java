@@ -119,7 +119,7 @@ class TrygdeavgiftTjenesteTest {
         var trygdeavgift = new Trygdeavgiftsperiode();
         trygdeavgift.setPeriodeFra(LocalDate.now());
         trygdeavgift.setPeriodeTil(LocalDate.now().plusDays(10));
-        trygdeavgift.setTrygdesats(7.9);
+        trygdeavgift.setTrygdesats(BigDecimal.valueOf(7.9));
         trygdeavgift.setTrygdeavgiftsbeløpMd(new Penger(BigDecimal.valueOf(10000)));
 
         var medlemskapsperiode = new Medlemskapsperiode();
