@@ -121,6 +121,7 @@ class OppgaveMigrering(
         try {
             oppgaveFasade.oppdaterOppgave(oppgaveId, oppgaveOppdatering)
         } catch (e: Exception) {
+            // Mulig vi bør samle disse opp så vi kan laste de ned som en json dokument
             log.error("oppdaterOppgave feilet for ${sak.saksnummer}(${sak.behandlingID}) oppgaveID:$oppgaveId", e)
         }
     }
