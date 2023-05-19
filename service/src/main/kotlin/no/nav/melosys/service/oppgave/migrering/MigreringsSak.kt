@@ -1,15 +1,28 @@
 package no.nav.melosys.service.oppgave.migrering
 
+import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.SakOgBehandlingDTO
 import no.nav.melosys.domain.oppgave.Oppgave
+import no.nav.melosys.featuretoggle.ToggleName
+import no.nav.melosys.service.oppgave.OppgaveGosysMapping
 
 data class MigreringsSak(
     val sak: SakOgBehandlingDTO,
     val oppgaver: List<Oppgave>,
     val ny: OppgaveOppdatering,
 ) {
+
     fun harFeil(): Boolean = ny.harFeil() || oppgaver.size != 1
-    fun mangerSed() : Boolean = ny.manglerSedDokument ?: false
+    fun mangerSedDokument(): Boolean {
+        return try {
+            val oppgave =
+                oppgaveGosysMapping.finnOppgave(sak.sakstype, sak.sakstema, sak.behandlingstema, sak.behandlingstype)
+            oppgave.beskrivelsefelt == OppgaveGosysMapping.Beskrivelsefelt.SED && ny.beskrivelse.isNullOrEmpty()
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     fun temaErForskjellig(): Boolean = oppgaver.any { it.tema != ny.tema }
     fun oppgavetypeErForskjellig(): Boolean = oppgaver.any { it.oppgavetype.kode != ny.oppgaveType?.kode }
 
@@ -69,10 +82,20 @@ data class MigreringsSak(
             <td class="oppgave">$fristFerdigstillelse</td>
             """
     }
+
     private fun splitLong(name: String, max: Int = 10): String {
         if (name.length > max)
             return name.split("_").joinToString("</br>")
         return name
     }
 
+    companion object {
+        private val oppgaveGosysMapping =
+            OppgaveGosysMapping(FakeUnleash().apply {
+                enable(
+                    ToggleName.NY_GOSYS_MAPPING,
+                    OppgaveGosysMapping.NY_GOSYS_MAPPING_UNTAKK_FOR_MIGRERING
+                )
+            })
+    }
 }

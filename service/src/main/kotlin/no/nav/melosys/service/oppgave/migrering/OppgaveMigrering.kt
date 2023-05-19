@@ -98,18 +98,9 @@ class OppgaveMigrering(
         try {
             val oppgaveBehandlingstema: OppgaveBehandlingstema? = sakOgBehandling.utledOppgaveBehandlingstema()
             val oppgavetype: Oppgavetyper = sakOgBehandling.utledOppgaveType()
-            val utledetBeskrivelse = sakOgBehandling.utledBeskrivelse(oppgaveBehandlingstema)
-            val beskrivelse: String = utledetBeskrivelse.first
+            val beskrivelse: String = sakOgBehandling.utledBeskrivelse(oppgaveBehandlingstema)
             val tema: Tema = sakOgBehandling.utledTema()
-            return OppgaveOppdatering(
-                oppgaveBehandlingstema,
-                null,
-                tema,
-                oppgavetype,
-                beskrivelse,
-                null,
-                utledetBeskrivelse.second
-            )
+            return OppgaveOppdatering(oppgaveBehandlingstema, null, tema, oppgavetype, beskrivelse)
         } catch (e: Exception) {
             val gyldige = GyldigeKombinasjoner.finnGyldige(
                 sakOgBehandling.sakstype,
@@ -136,33 +127,27 @@ class OppgaveMigrering(
             sakstype, sakstema, behandlingstema
         )
 
-    private fun SakOgBehandlingDTO.utledBeskrivelse(oppgaveBehandlingstema: OppgaveBehandlingstema?): Pair<String, Boolean?> {
-        var sedDokumentMangler: Boolean = false
+    private fun SakOgBehandlingDTO.utledBeskrivelse(oppgaveBehandlingstema: OppgaveBehandlingstema?): String {
         val hentSedDokument = { logHvisMangler: Boolean ->
             log.info("Henter sed dokuemnt for: $behandlingID")
             sedDokument(behandlingID).apply {
-                if (logHvisMangler && this == null) {
-                    log.warn("Sed dokument mangler for:${saksnummer} behandlingID:${behandlingID}")
-                    sedDokumentMangler = true
-                }
+                if (logHvisMangler && this == null) log.warn("Sed dokument mangler for:${saksnummer} behandlingID:${behandlingID}")
             }
         }
         return try {
-            Pair(
-                nyOppgaveFactory.utledBeskrivelse(
-                    oppgaveBehandlingstema,
-                    sakstype,
-                    sakstema,
-                    behandlingstema,
-                    behandlingstype, hentSedDokument
-                ), sedDokumentMangler
+            nyOppgaveFactory.utledBeskrivelse(
+                oppgaveBehandlingstema,
+                sakstype,
+                sakstema,
+                behandlingstema,
+                behandlingstype, hentSedDokument
             )
         } catch (e: Exception) {
             val message = e.message ?: "utledBeskrivelse feilet "
             val msg = "$message feilet for $saksnummer, behandlingID:$behandlingID"
             log.warn(msg)
             migreringsRapport.finnesIkkeSedForSak(msg)
-            return Pair(msg, sedDokumentMangler)
+            return msg
         }
     }
 
