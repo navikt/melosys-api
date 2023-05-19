@@ -39,7 +39,7 @@ class MigreringsRapport(private val environment: Environment) {
     fun statsHtmlTable(): String {
         val html = mapOf(
             "Totalt antal" to migreringsSakListe.size,
-            "Kan migreres" to migreringsSakListe.count { it.oppgaver.size == 1 && !it.ny.fantIkkeOppgaveMapping()  },
+            "Kan migreres" to migreringsSakListe.count { it.oppgaver.size == 1 && !it.ny.fantIkkeOppgaveMapping() },
             "har feil" to migreringsSakListe.count { it.harFeil() },
             "tema forskjellig" to migreringsSakListe.count { it.temaErForskjellig() },
             "oppgavetype forskjellig" to migreringsSakListe.count { it.oppgavetypeErForskjellig() },
@@ -183,14 +183,30 @@ class MigreringsRapport(private val environment: Environment) {
     }
 
     internal fun saveStatusFiles(status: String) {
-        val profil = environment.activeProfiles.first()
+        val profil = environment.activeProfiles.firstOrNull() ?: "local-test"
         log.info("Profile:$profil")
-        if (profil !in listOf("local-mock", "local-q1", "local-q2")) return // kun lag profiler ved lokal kjøring
+        if (profil !in listOf(
+                "local-test",
+                "local-mock",
+                "local-q1",
+                "local-q2"
+            )
+        ) return // kun lag profiler ved lokal kjøring
+
+        val localOutputFolder = System.getenv("lokal-output-folder") ?: "oppgave-migrering"
         val timeForRun =
-            "oppgave-migrering/$profil-${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))}"
+            "$localOutputFolder/$profil-${
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))
+            }"
         File(timeForRun).mkdirs()
 
         File("$timeForRun/diff.json").writeText(migreringsSakListeSomJsonString())
+        File("$timeForRun/result.html").writeText(html { migreringsSaker ->
+            migreringsSaker
+                .filter { !it.ny.fantIkkeOppgaveMapping() }
+                .filter { it.oppgaver.size == 1 }
+                .filter { it.temaErForskjellig() || it.oppgavetypeErForskjellig() }
+        })
 
         File("$timeForRun/status.txt").writeText(status)
         File("$timeForRun/saker-mangler-oppgave.txt").writeText(sakerManglerOppgave.joinToString(","))
