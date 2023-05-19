@@ -4,7 +4,6 @@ import io.swagger.annotations.Api
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
 import no.nav.melosys.service.tilgang.Aksesskontroll
-import no.nav.melosys.service.tilgang.Ressurs
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.BeregnetTrygdeavgiftDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftsgrunnlagDto
 import no.nav.security.token.support.core.api.Protected
@@ -34,7 +33,7 @@ class TrygdeavgiftTjeneste(
         @PathVariable("behandlingID") behandlingID: Long,
         @RequestBody trygdeavgiftsgrunnlagDto: TrygdeavgiftsgrunnlagDto
     ): ResponseEntity<TrygdeavgiftsgrunnlagDto> {
-        aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA)
+        aksesskontroll.autoriserSkrivOgTilordnet(behandlingID)
 
         return ResponseEntity.ok(
             TrygdeavgiftsgrunnlagDto(
@@ -56,7 +55,7 @@ class TrygdeavgiftTjeneste(
 
     @PutMapping("/beregning")
     fun beregnTrygdeavgift(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<BeregnetTrygdeavgiftDto> {
-        aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA)
+        aksesskontroll.autoriserSkrivOgTilordnet(behandlingID)
         return ResponseEntity.ok(
             BeregnetTrygdeavgiftDto.av(trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingID))
         )
