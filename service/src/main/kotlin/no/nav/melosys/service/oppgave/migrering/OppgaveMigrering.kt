@@ -79,7 +79,7 @@ class OppgaveMigrering(
             oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(sak.saksnummer).let { oppgaver ->
                 val migreringsSak = MigreringsSak(sak, oppgaver, nyOppgaveMapping(sak))
                 migreringsRapport.migrertSak(migreringsSak)
-                if (!dryrun && oppgaver.size == 1) {
+                if (!dryrun && oppgaver.size == 1 && !migreringsSak.ny.fantIkkeOppgaveMapping()) {
                     oppdaterOppgave(migreringsSak)
                 }
                 leggTilRapport(migreringsSak)
