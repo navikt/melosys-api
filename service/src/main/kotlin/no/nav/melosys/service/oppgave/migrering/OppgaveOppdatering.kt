@@ -11,7 +11,8 @@ data class OppgaveOppdatering(
     val tema: Tema?,
     val oppgaveType: Oppgavetyper?,
     val beskrivelse: String?,
-    val mappingError: String? = null
+    val mappingError: String? = null,
+    val manglerSedDokument: Boolean? = null
 ) {
     constructor(mappingError: String?) : this(
         null,

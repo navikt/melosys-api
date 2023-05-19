@@ -8,8 +8,8 @@ data class MigreringsSak(
     val oppgaver: List<Oppgave>,
     val ny: OppgaveOppdatering,
 ) {
-
     fun harFeil(): Boolean = ny.harFeil() || oppgaver.size != 1
+    fun mangerSed() : Boolean = ny.manglerSedDokument ?: false
     fun temaErForskjellig(): Boolean = oppgaver.any { it.tema != ny.tema }
     fun oppgavetypeErForskjellig(): Boolean = oppgaver.any { it.oppgavetype.kode != ny.oppgaveType?.kode }
 

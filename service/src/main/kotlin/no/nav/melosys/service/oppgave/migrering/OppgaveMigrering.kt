@@ -55,8 +55,7 @@ class OppgaveMigrering(
 
     private fun finnSaker(
         bruker: String?,
-        saksnummer: String?,
-        dryrun: Boolean
+        saksnummer: String?
     ): MutableCollection<SakOgBehandlingDTO> {
         if (saksnummer != null) {
             return behandlingRepository.finnSak(saksnummer, behandlingsstatuser)
@@ -69,7 +68,7 @@ class OppgaveMigrering(
 
     internal fun migrering(bruker: String?, saksnummer: String?, dryrun: Boolean) {
         log.info("Utfører OppgaveMigrering")
-        finnSaker(bruker, saksnummer, dryrun).apply {
+        finnSaker(bruker, saksnummer).apply {
             log.info("size før erRedigerbar: $size")
             migreringsRapport.antallSakerFunnet = size
         }.filter { it.erRedigerbar() }.sortedBy { it.saksnummer }.apply {
@@ -77,7 +76,6 @@ class OppgaveMigrering(
         }.forEach { sak ->
             migreringsRapport.antallSakerProssessert++
             oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(sak.saksnummer).let { oppgaver ->
-                // TODO: legg til oppgaveFasade.oppdaterOppgave()
                 val migreringsSak = MigreringsSak(sak, oppgaver, nyOppgaveMapping(sak))
                 migreringsRapport.migrertSak(migreringsSak)
                 if (oppgaver.size == 0) {
@@ -88,6 +86,7 @@ class OppgaveMigrering(
                 }
                 if (oppgaver.size == 1) {
                     migreringsRapport.sakMedOppgave(migreringsSak)
+                    // TODO: legg til oppgaveFasade.oppdaterOppgave()
                 }
             }
         }
@@ -99,9 +98,18 @@ class OppgaveMigrering(
         try {
             val oppgaveBehandlingstema: OppgaveBehandlingstema? = sakOgBehandling.utledOppgaveBehandlingstema()
             val oppgavetype: Oppgavetyper = sakOgBehandling.utledOppgaveType()
-            val beskrivelse: String = sakOgBehandling.utledBeskrivelse(oppgaveBehandlingstema)
+            val utledetBeskrivelse = sakOgBehandling.utledBeskrivelse(oppgaveBehandlingstema)
+            val beskrivelse: String = utledetBeskrivelse.first
             val tema: Tema = sakOgBehandling.utledTema()
-            return OppgaveOppdatering(oppgaveBehandlingstema, null, tema, oppgavetype, beskrivelse)
+            return OppgaveOppdatering(
+                oppgaveBehandlingstema,
+                null,
+                tema,
+                oppgavetype,
+                beskrivelse,
+                null,
+                utledetBeskrivelse.second
+            )
         } catch (e: Exception) {
             val gyldige = GyldigeKombinasjoner.finnGyldige(
                 sakOgBehandling.sakstype,
@@ -128,27 +136,33 @@ class OppgaveMigrering(
             sakstype, sakstema, behandlingstema
         )
 
-    private fun SakOgBehandlingDTO.utledBeskrivelse(oppgaveBehandlingstema: OppgaveBehandlingstema?): String {
+    private fun SakOgBehandlingDTO.utledBeskrivelse(oppgaveBehandlingstema: OppgaveBehandlingstema?): Pair<String, Boolean?> {
+        var sedDokumentMangler: Boolean = false
         val hentSedDokument = { logHvisMangler: Boolean ->
             log.info("Henter sed dokuemnt for: $behandlingID")
             sedDokument(behandlingID).apply {
-                if (logHvisMangler && this == null) log.warn("Sed dokument mangler for:${saksnummer} behandlingID:${behandlingID}")
+                if (logHvisMangler && this == null) {
+                    log.warn("Sed dokument mangler for:${saksnummer} behandlingID:${behandlingID}")
+                    sedDokumentMangler = true
+                }
             }
         }
         return try {
-            nyOppgaveFactory.utledBeskrivelse(
-                oppgaveBehandlingstema,
-                sakstype,
-                sakstema,
-                behandlingstema,
-                behandlingstype, hentSedDokument
+            Pair(
+                nyOppgaveFactory.utledBeskrivelse(
+                    oppgaveBehandlingstema,
+                    sakstype,
+                    sakstema,
+                    behandlingstema,
+                    behandlingstype, hentSedDokument
+                ), sedDokumentMangler
             )
         } catch (e: Exception) {
             val message = e.message ?: "utledBeskrivelse feilet "
             val msg = "$message feilet for $saksnummer, behandlingID:$behandlingID"
             log.warn(msg)
             migreringsRapport.finnesIkkeSedForSak(msg)
-            return msg
+            return Pair(msg, sedDokumentMangler)
         }
     }
 
