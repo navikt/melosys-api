@@ -85,7 +85,8 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
     enum class Regel(val beskrivelse: String) {
         FRA_TABELL("tabell"),
         HENVENDELSE("henvendelse"),
-        HENVENDELSE_OG_VIRKSOMHET("henv-virksomhet")
+        HENVENDELSE_OG_VIRKSOMHET("henv-virksomhet"),
+        KUN_VED_MIGRERING("migrering")
     }
     internal data class Oppgave(
         val oppgaveBehandlingstema: OppgaveBehandlingstema?,
@@ -520,7 +521,8 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                         OppgaveBehandlingstema.EU_EOS_FORESPORSEL_OM_TRYGDETID,
                         Tema.MED,
                         Oppgavetyper.BEH_SED,
-                        Beskrivelsefelt.SED
+                        Beskrivelsefelt.SED,
+                        Regel.KUN_VED_MIGRERING
                     )
                 )
             ) else listOf()

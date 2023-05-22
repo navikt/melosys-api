@@ -1,14 +1,13 @@
 package no.nav.melosys.service.oppgave.migrering
 
-import no.nav.melosys.domain.SakOgBehandlingDTO
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.service.oppgave.OppgaveGosysMapping
 
-internal fun SakOgBehandlingDTO.tilSak(): Migrering.Sak =
-    Migrering.Sak(sakstype, sakstema, behandlingstype, behandlingstema)
+internal fun MigreringsSak.tilSak(): Migrering.Sak =
+    Migrering.Sak(sak.sakstype, sak.sakstema, sak.behandlingstype, sak.behandlingstema, ny.beskrivelse)
 
 internal fun OppgaveGosysMapping.all(
     check: (
