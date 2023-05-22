@@ -2,8 +2,10 @@ package no.nav.melosys.tjenester.gui.medlemskapsperiode;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.Optional;
 
 import no.nav.melosys.domain.Medlemskapsperiode;
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
@@ -69,6 +71,29 @@ class MedlemskapsperiodeTjenesteTest {
                 medlemskapsperiode.getFom(), medlemskapsperiode.getTom(), medlemskapsperiode.getTrygdedekning(),
                 medlemskapsperiode.getInnvilgelsesresultat(), medlemskapsperiode.getMedlemskapstype()
             );
+    }
+
+    @Test
+    void hentBestemmelse_validerSchema() {
+        var medlemAvFolketrygden = new MedlemAvFolketrygden();
+        medlemAvFolketrygden.setBestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_E);
+        when(medlemAvFolketrygdenService.finnMedlemAvFolketrygden(behandlingID))
+            .thenReturn(Optional.of(medlemAvFolketrygden));
+
+        var res = medlemskapsperiodeTjeneste.hentBestemmelse(behandlingID);
+        assertThat(res.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        assertThat(res.getBody()).isNotNull();
+        assertThat(res.getBody().bestemmelse()).isEqualTo(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5_FØRSTE_LEDD_E);
+    }
+
+    @Test
+    void hentBestemmelse_ingen_medlemAvFolketrygden_returnererNoContent() {
+        when(medlemAvFolketrygdenService.finnMedlemAvFolketrygden(behandlingID))
+            .thenReturn(Optional.empty());
+
+        var res = medlemskapsperiodeTjeneste.hentBestemmelse(behandlingID);
+        assertThat(res.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     }
 
     @Test
