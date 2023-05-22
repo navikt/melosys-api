@@ -192,7 +192,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                     OppgaveBehandlingstema.EU_EOS_NORGE_ER_UTPEKT_SOM_LOVVALGSLAND, // ab0482
                     Tema.MED,
                     Oppgavetyper.BEH_SED,
-                    Beskrivelsefelt.TOMT
+                    Beskrivelsefelt.SED_ELLER_TOMT
                 )
             ),
             TableRow(
