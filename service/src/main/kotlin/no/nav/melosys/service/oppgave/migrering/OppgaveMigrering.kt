@@ -67,7 +67,7 @@ class OppgaveMigrering(
         return behandlingRepository.finnSaksOgBehandlingTyperOgTema(behandlingsstatuser)
     }
 
-    private fun migrering(bruker: String?, saksnummer: String?, dryrun: Boolean) {
+    internal fun migrering(bruker: String?, saksnummer: String?, dryrun: Boolean) {
         log.info("Utfører OppgaveMigrering")
         finnSaker(bruker, saksnummer, dryrun).apply {
             log.info("size før erRedigerbar: $size")
@@ -146,6 +146,7 @@ class OppgaveMigrering(
         } catch (e: Exception) {
             val message = e.message ?: "utledBeskrivelse feilet "
             val msg = "$message feilet for $saksnummer, behandlingID:$behandlingID"
+            log.warn(msg)
             migreringsRapport.finnesIkkeSedForSak(msg)
             return msg
         }
