@@ -25,9 +25,11 @@ import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.repository.ProsessinstansRepository
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.Awaitility
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,6 +37,7 @@ import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.context.annotation.Import
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.context.ActiveProfiles
@@ -42,6 +45,7 @@ import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.*
 
 @ActiveProfiles("test")
 @SpringBootTest(
@@ -54,21 +58,34 @@ import java.time.LocalDateTime
     brokerProperties = ["offsets.topic.replication.factor=1", "transaction.state.log.replication.factor=1", "transaction.state.log.min.isr=1"]
 )
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@EnableMockOAuth2Server
 @DirtiesContext
+@EnableMockOAuth2Server
+@Import(OAuthMockServer::class)
 internal class SaksflytOppstartIT(
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val applicationEventPublisher: ApplicationEventPublisher,
+    @Autowired private val oAuthMockServer: OAuthMockServer
 ) : OracleTestContainerBase() {
+
+    private val processUUID = UUID.randomUUID()
 
     @MockkBean
     lateinit var safConsumer: SafConsumer
 
     @BeforeEach
     fun before() {
+        ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "test")
+
         SakRepo.clear()
+        oAuthMockServer.start()
+    }
+
+    @AfterEach
+    fun after() {
+        ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
+        oAuthMockServer.stop()
     }
 
     @Test

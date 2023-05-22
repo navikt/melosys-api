@@ -27,6 +27,7 @@ import no.nav.melosys.service.oppgave.OppgaveBehandlingstype
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.sak.OpprettBehandlingForSak
 import no.nav.melosys.service.sak.OpprettSakDto
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -37,7 +38,7 @@ import org.springframework.kafka.core.KafkaTemplate
 import java.time.LocalDate
 import java.util.*
 
-@Import(KodeverkStub::class)
+@Import(KodeverkStub::class, OAuthMockServer::class)
 class SedMottakBehandlngsTypeIT(
     @Autowired @Qualifier("melosysEessiMelding") private val melosysEessiMeldingKafkaTemplate: KafkaTemplate<String, MelosysEessiMelding>,
     @Autowired private val eessiMeldingTestDataFactory: EessiMeldingTestDataFactory,
@@ -52,16 +53,22 @@ class SedMottakBehandlngsTypeIT(
     @Autowired journalføringService: JournalfoeringService,
     @Autowired oppgaveService: OppgaveService,
     @Autowired prosessinstansRepository: ProsessinstansRepository,
+    @Autowired private val oAuthMockServer: OAuthMockServer
 ) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService, prosessinstansRepository) {
 
     private val kafkaTopic = "teammelosys.eessi.v1-local"
 
     @BeforeEach
     fun setup() {
+        oAuthMockServer.start()
         oppgaveRepo.repo.clear()
         unleash.resetAll()
     }
 
+    @AfterEach
+    fun afterEach() {
+        oAuthMockServer.stop()
+    }
     @Test
     fun `A003 skal føre til riktig oppgave i gosys - uten ny gosys mapping`() {
         val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding(

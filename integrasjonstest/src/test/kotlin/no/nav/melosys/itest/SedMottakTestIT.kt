@@ -36,6 +36,7 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.untilNotNull
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -49,7 +50,7 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 import java.util.stream.Collectors
 
-@Import(KodeverkStub::class)
+@Import(KodeverkStub::class, OAuthMockServer::class)
 class SedMottakTestIT(
     @Autowired private val joarkFasade: JoarkFasade,
     @Autowired private val eessiMeldingTestDataFactory: EessiMeldingTestDataFactory,
@@ -60,18 +61,26 @@ class SedMottakTestIT(
     @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak,
     @Autowired private val lovvalgsperiodeService: LovvalgsperiodeService,
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
-    @Autowired private val unleash: FakeUnleash
+    @Autowired private val unleash: FakeUnleash,
+    @Autowired private val oAuthMockServer: OAuthMockServer
 ) : ComponentTestBase() {
 
     private val kafkaTopic = "teammelosys.eessi.v1-local"
 
     @BeforeEach
     fun setup() {
+        oAuthMockServer.start()
         SakRepo.clear()
         MedlRepo.repo.clear()
         MelosysEessiRepo.sedRepo.clear()
         unleash.resetAll()
     }
+
+    @AfterEach
+    fun after() {
+        oAuthMockServer.stop()
+    }
+
 
     @Test
     fun `alt skal fungere med NY_GOSYS_MAPPING toggle på`() {
