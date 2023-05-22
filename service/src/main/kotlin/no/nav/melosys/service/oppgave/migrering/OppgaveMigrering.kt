@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
+import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
 import no.nav.melosys.repository.BehandlingRepositoryForOppgaveMigrering
 import no.nav.melosys.service.lovligekombinasjoner.GyldigeKombinasjoner
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
@@ -55,8 +56,7 @@ class OppgaveMigrering(
 
     private fun finnSaker(
         bruker: String?,
-        saksnummer: String?,
-        dryrun: Boolean
+        saksnummer: String?
     ): MutableCollection<SakOgBehandlingDTO> {
         if (saksnummer != null) {
             return behandlingRepository.finnSak(saksnummer, behandlingsstatuser)
@@ -69,7 +69,7 @@ class OppgaveMigrering(
 
     internal fun migrering(bruker: String?, saksnummer: String?, dryrun: Boolean) {
         log.info("Utfører OppgaveMigrering")
-        finnSaker(bruker, saksnummer, dryrun).apply {
+        finnSaker(bruker, saksnummer).apply {
             log.info("size før erRedigerbar: $size")
             migreringsRapport.antallSakerFunnet = size
         }.filter { it.erRedigerbar() }.sortedBy { it.saksnummer }.apply {
@@ -77,31 +77,66 @@ class OppgaveMigrering(
         }.forEach { sak ->
             migreringsRapport.antallSakerProssessert++
             oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(sak.saksnummer).let { oppgaver ->
-                // TODO: legg til oppgaveFasade.oppdaterOppgave()
                 val migreringsSak = MigreringsSak(sak, oppgaver, nyOppgaveMapping(sak))
                 migreringsRapport.migrertSak(migreringsSak)
-                if (oppgaver.size == 0) {
-                    migreringsRapport.sakManglerOppgave(sak.saksnummer)
+                if (oppgaver.size == 1 && !migreringsSak.ny.fantIkkeOppgaveMapping()) {
+                    oppdaterOppgave(dryrun, migreringsSak)
                 }
-                if (oppgaver.size > 1) {
-                    migreringsRapport.sakerMedFlereOppgaver("fant ${oppgaver.size} oppgaver for: ${sak.saksnummer}")
-                }
-                if (oppgaver.size == 1) {
-                    migreringsRapport.sakMedOppgave(migreringsSak)
-                }
+                leggTilRapport(migreringsSak)
             }
         }
         log.info("OppgaveMigrering utført!")
         lagRapport()
     }
 
-    private fun nyOppgaveMapping(sakOgBehandling: SakOgBehandlingDTO): OppgaveOppdatering {
+    private fun leggTilRapport(
+        migreringsSak: MigreringsSak
+    ) {
+        val oppgaver = migreringsSak.oppgaver
+        val sak = migreringsSak.sak
+        if (oppgaver.isEmpty()) {
+            migreringsRapport.sakManglerOppgave(sak.saksnummer)
+        }
+        if (oppgaver.size > 1) {
+            migreringsRapport.sakerMedFlereOppgaver("fant ${oppgaver.size} oppgaver for: ${sak.saksnummer}")
+        }
+    }
+
+    private fun oppdaterOppgave(dryrun: Boolean, migreringsSak: MigreringsSak) {
+        if (dryrun) {
+            migreringsRapport.antallSakerMigrert++ // Så vi ser hvor mange vi kommer til å migrere
+            return
+        }
+
+        val sak = migreringsSak.sak
+        val oppgaveId = migreringsSak.oppgaver.first().oppgaveId
+        val oppdatering = migreringsSak.ny
+
+        log.info("oppdatere oppgave:$oppgaveId for: ${sak.saksnummer} (${sak.behandlingID})")
+        val oppgaveOppdatering = OppgaveOppdatering
+            .builder()
+            .oppgavetype(oppdatering.oppgaveType)
+            .behandlingstema(oppdatering.oppgaveBehandlingstema?.kode)
+            .tema(oppdatering.tema)
+            .beskrivelse(oppdatering.beskrivelse)
+            .build()
+        try {
+            oppgaveFasade.oppdaterOppgave(oppgaveId, oppgaveOppdatering)
+            migreringsRapport.antallSakerMigrert++
+        } catch (e: Exception) {
+            // Mulig vi bør samle disse opp så vi kan laste de ned som en json dokument
+            log.error("oppdaterOppgave feilet for ${sak.saksnummer}(${sak.behandlingID}) oppgaveID:$oppgaveId", e)
+            migreringsRapport.migreingFeilet++
+        }
+    }
+
+    private fun nyOppgaveMapping(sakOgBehandling: SakOgBehandlingDTO): OppgaveMigreringsOppdatering {
         try {
             val oppgaveBehandlingstema: OppgaveBehandlingstema? = sakOgBehandling.utledOppgaveBehandlingstema()
             val oppgavetype: Oppgavetyper = sakOgBehandling.utledOppgaveType()
             val beskrivelse: String = sakOgBehandling.utledBeskrivelse(oppgaveBehandlingstema)
             val tema: Tema = sakOgBehandling.utledTema()
-            return OppgaveOppdatering(oppgaveBehandlingstema, null, tema, oppgavetype, beskrivelse)
+            return OppgaveMigreringsOppdatering(oppgaveBehandlingstema, null, tema, oppgavetype, beskrivelse)
         } catch (e: Exception) {
             val gyldige = GyldigeKombinasjoner.finnGyldige(
                 sakOgBehandling.sakstype,
@@ -111,7 +146,7 @@ class OppgaveMigrering(
             )
             val mappingError = "${sakOgBehandling.saksnummer}: gyldige:${gyldige.size}  ${e.message}"
             migreringsRapport.mappingFeiler(mappingError)
-            return OppgaveOppdatering(mappingError)
+            return OppgaveMigreringsOppdatering(mappingError)
         }
     }
 

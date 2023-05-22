@@ -15,6 +15,7 @@ private val log = KotlinLogging.logger { }
 
 @Component
 class MigreringsRapport(private val environment: Environment) {
+
     @Volatile
     internal var antallSakerFunnet: Int = 0
 
@@ -25,7 +26,10 @@ class MigreringsRapport(private val environment: Environment) {
     internal var antallSakerProssessert: Int = 0
 
     @Volatile
-    private var antallSakerMigrert: Int = 0
+    internal var antallSakerMigrert: Int = 0
+
+    @Volatile
+    internal var migreingFeilet: Int = 0
 
     @Volatile
     private var sakSomMangerOppgaveAntall: Int = 0
@@ -165,10 +169,6 @@ class MigreringsRapport(private val environment: Environment) {
 
     internal fun finnesIkkeSedForSak(msg: String) {
         sakHvorViSkalHaSedMenSomIkkeFinnes.add(msg)
-    }
-
-    internal fun sakMedOppgave(migreringsSak: MigreringsSak) {
-        antallSakerMigrert++
     }
 
     internal fun statusEtterKjøring(): String {
