@@ -57,9 +57,9 @@ class LagRapportTest {
                     item(bc = "DarkSalmon") { "Behandlingstema beskrivelse" }
                 }
 
-                var sumTemaDiffer: Int = 0
-                var sumOppgveDiffer: Int = 0
-                var sum: Int = 0
+                var sumTemaDiffer = 0
+                var sumOppgveDiffer = 0
+                var sum = 0
                 migreringsRapport.sortedMigreringsListe().asSequence()
                     .filter { !it.ny.fantIkkeOppgaveMapping() && it.oppgaver.size == 1 }
                     .filter { it.temaErForskjellig() || it.oppgavetypeErForskjellig() }
@@ -159,15 +159,14 @@ class LagRapportTest {
                     item(bc = "DarkSalmon") { "Beskrivelsesfelt" }
                 }
 
-                var sum: Int = 0
+                var sum = 0
                 migreringsRapport.sortedMigreringsListe().asSequence()
                     .filter { !it.ny.fantIkkeOppgaveMapping() && it.oppgaver.size == 1 }
                     .filter { it.mangerSedDokument() }
                     .map { it.tilSak() }.groupBy { it }
                     .map { it.key to it.value.size }
-                    .sortedBy { it.second }.toList().reversed().forEach {
-                        sum += it.second
-                        val sak = it.first
+                    .sortedBy { it.second }.toList().reversed().forEach { (sak, count) ->
+                        sum += count
                         val oppgave: OppgaveGosysMapping.Oppgave =
                             oppgaveGosysMapping.finnOppgave(
                                 sak.sakstype,
@@ -193,7 +192,7 @@ class LagRapportTest {
                             item(bc = "OldLace") { sak.behandlingstype }
                             item(bc = "OldLace") { sak.behandlingstema }
                             item(bc = fargeFraRegelTuffet, font = fontType) { oppgave.regelTruffet.beskrivelse }
-                            item(bc = "PaleGoldenRod", font = Font.STRONG) { it.second }
+                            item(bc = "PaleGoldenRod", font = Font.STRONG) { count }
                             item(bc = "PaleGoldenRod") { sak.beskrivelse }
                             item(bc = "PeachPuff") { oppgave.oppgaveBehandlingstema?.kode }
                             item(bc = "PeachPuff") { oppgave.oppgaveBehandlingstema?.name }
