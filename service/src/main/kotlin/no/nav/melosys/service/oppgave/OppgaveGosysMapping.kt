@@ -424,7 +424,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR),
                 Oppgave(
-                    OppgaveBehandlingstema.EU_EOS_SOKNAD_OM_UNNTAK, // ab0491
+                    OppgaveBehandlingstema.EU_EOS_MELDING_OM_UNNTAK_UNNTAK, // ab0490
                     Tema.UFM,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
