@@ -5,9 +5,9 @@ import javax.annotation.Nullable;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import no.nav.melosys.service.vedtak.data.FattetVedtakTestData;
 import no.nav.melosys.service.vedtak.publisering.FattetVedtakProducer;
 import no.nav.melosys.service.vedtak.publisering.dto.FattetVedtak;
+import no.nav.melosys.service.vedtak.publisering.dto.Sak;
 import org.apache.kafka.clients.producer.MockProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.common.serialization.StringSerializer;
@@ -16,6 +16,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.support.serializer.JsonSerializer;
+
+import java.time.LocalDate;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -36,7 +38,7 @@ class FattetVedtakProducerTest {
 
     @Test
     void produserMelding_validererRiktig() {
-        FattetVedtak produsertMelding = fattetVedtakProducer.produserMelding(FattetVedtakTestData.lagFattetVedtak());
+        FattetVedtak produsertMelding = fattetVedtakProducer.produserMelding(new FattetVedtak(new Sak("", 1L, "", "FTRL", LocalDate.now())));
         assertThat(produsertMelding).isNotNull();
     }
 
