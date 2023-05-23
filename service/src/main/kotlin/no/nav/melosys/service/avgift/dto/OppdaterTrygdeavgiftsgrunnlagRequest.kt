@@ -4,5 +4,5 @@ import no.nav.melosys.domain.kodeverk.Skatteplikttype
 
 class OppdaterTrygdeavgiftsgrunnlagRequest(
     val skatteplikttype: Skatteplikttype,
-    val inntektskilder: Set<InntektskildeRequest>
+    val inntektskilder: List<InntektskildeRequest>
 )

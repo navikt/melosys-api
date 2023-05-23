@@ -68,7 +68,7 @@ class TrygdeavgiftTjenesteTest {
 
     @Test
     void oppdaterTrygdeavgiftsgrunnlag() throws Exception {
-        var dto = new TrygdeavgiftsgrunnlagDto(Skatteplikttype.SKATTEPLIKTIG, Collections.emptySet());
+        var dto = new TrygdeavgiftsgrunnlagDto(Skatteplikttype.SKATTEPLIKTIG, Collections.emptyList());
         when(trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(eq(BEHANDLINGSRESULTAT_ID), any(OppdaterTrygdeavgiftsgrunnlagRequest.class)))
             .thenReturn(trygdeavgiftsgrunnlag);
 
