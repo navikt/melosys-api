@@ -6,13 +6,13 @@ import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
 
 data class TrygdeavgiftsgrunnlagDto(
     val skatteplikttype: Skatteplikttype,
-    val inntektskilder: Set<InntekskildeDto>
+    val inntektskilder: List<InntekskildeDto>
 ) {
     constructor(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag) : this(
         trygdeavgiftsgrunnlag.skatteforholdTilNorge.first().skatteplikttype,
-        (trygdeavgiftsgrunnlag.inntektsperioder.map { InntekskildeDto(it) }).toSet()
+        (trygdeavgiftsgrunnlag.inntektsperioder.map { InntekskildeDto(it) })
     )
 
     fun tilRequest(): OppdaterTrygdeavgiftsgrunnlagRequest =
-        OppdaterTrygdeavgiftsgrunnlagRequest(skatteplikttype, (inntektskilder.map { it.tilRequest() }).toSet())
+        OppdaterTrygdeavgiftsgrunnlagRequest(skatteplikttype, (inntektskilder.map { it.tilRequest() }))
 }
