@@ -39,13 +39,13 @@ class UtstedtA1AdminTjenesteTest {
     }
 
     @Test
-    void publiser() throws Exception {
+    void publiser() {
         utstedtA1AdminTjeneste.publiserMelding(apiKey, 1L);
         verify(utstedtA1Service).sendMeldingOmUtstedtA1(eq(1L));
     }
 
     @Test
-    void publiserEksisterendeBehandlinger_forventListe() throws Exception {
+    void publiserEksisterendeBehandlinger_forventListe() {
         when(vedtakMetadataRepository.findBehandlingsresultatIdByRegistrertDatoIsGreaterThanEqual(anyInstant()))
             .thenReturn(List.of(1L, 2L, 3L));
 
@@ -57,7 +57,7 @@ class UtstedtA1AdminTjenesteTest {
     }
 
     @Test
-    void publiserEksisterendeBehandlinger_medOppgitteBehandlingerOgBehandlingFeiler_forventListe() throws Exception {
+    void publiserEksisterendeBehandlinger_medOppgitteBehandlingerOgBehandlingFeiler_forventListe() {
         when(vedtakMetadataRepository.findBehandlingsresultatIdByRegistrertDatoIsGreaterThanEqual(anyInstant()))
             .thenReturn(List.of(1L, 2L, 3L));
         doNothing().when(utstedtA1Service).sendMeldingOmUtstedtA1(or(eq(1L), eq(2L)));
