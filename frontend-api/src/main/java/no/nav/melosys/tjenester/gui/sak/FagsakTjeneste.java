@@ -231,7 +231,9 @@ public class FagsakTjeneste {
                     behandlingOversiktDto.setLand(land);
 
                     var periode = hentPeriode(mottatteOpplysningerData);
-                    behandlingOversiktDto.setSoknadsperiode(new PeriodeDto(periode.getFom(), periode.getTom()));
+                    if (periode != null) {
+                        behandlingOversiktDto.setSoknadsperiode(new PeriodeDto(periode.getFom(), periode.getTom()));
+                    }
                 }
             });
 
