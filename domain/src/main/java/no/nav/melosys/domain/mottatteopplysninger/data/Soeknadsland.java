@@ -7,6 +7,7 @@ import no.nav.melosys.exception.TekniskException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class Soeknadsland {
     public List<String> landkoder = new ArrayList<>();
@@ -22,7 +23,7 @@ public class Soeknadsland {
     }
 
     public static Soeknadsland av(Land_iso2... lovvalgsland) {
-        return new Soeknadsland(Arrays.stream(lovvalgsland).map(Land_iso2::getKode).toList(), false);
+        return new Soeknadsland(Arrays.stream(lovvalgsland).filter(Objects::nonNull).map(Land_iso2::getKode).toList(), false);
     }
 
     public boolean erGyldig() {
