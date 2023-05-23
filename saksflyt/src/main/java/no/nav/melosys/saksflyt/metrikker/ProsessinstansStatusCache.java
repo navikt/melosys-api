@@ -86,7 +86,7 @@ public class ProsessinstansStatusCache {
     }
 
     private void oppfriskCache() {
-        log.info("Oppfrisker caching til metrikker for prosessinstanser");
+        log.info("Oppfrisker caching av metrikker for prosessinstanser");
         long tidStart = System.currentTimeMillis();
 
         Collection<ProsessinstansAntall> prosessinstansMetrikker = prosessinstansRepository.
@@ -116,6 +116,6 @@ public class ProsessinstansStatusCache {
         }
         long tidSlutt = System.currentTimeMillis();
         long tidBrukt = tidSlutt - tidStart;
-        log.info("Oppfriskning av cache til metrikker for prosessinstanser tok " + tidBrukt + " millisekunder.");
+        log.info("Oppfriskning av cache av metrikker for prosessinstanser tok " + tidBrukt + " millisekunder.");
     }
 }
