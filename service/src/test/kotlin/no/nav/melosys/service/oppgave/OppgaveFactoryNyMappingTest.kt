@@ -100,11 +100,11 @@ internal class OppgaveFactoryNyMappingTest {
     }
 
     @Test
-    fun `Bruker sed om det finnes for de 11 som har SED_ELLER_TOMT, ellers ikke log warning og retuner en tom streng`() {
+    fun `Bruker sed om det finnes for de 14 som har SED_ELLER_TOMT, ellers ikke log warning og retuner en tom streng`() {
         rowsMedAlleKombinasjoner
             .filter {
                 it.oppgave.beskrivelsefelt == OppgaveGosysMapping.Beskrivelsefelt.SED_ELLER_TOMT
-            }.shouldHaveSize(11).forEach { sak ->
+            }.shouldHaveSize(14).forEach { sak ->
                 val behandling = sak.lagBehandlingMedSpy()
                 LoggingTestUtils.withLogAppender<OppgaveFactory> { oppgaveFactoryListAppender ->
                     val oppgave =
@@ -119,6 +119,21 @@ internal class OppgaveFactoryNyMappingTest {
                         oppgaveFactoryListAppender.list.shouldHaveSize(0)
                         verify { behandling.finnSedDokument() }
                     }
+                }
+            }
+    }
+
+    @Test
+    fun `Oppgavetyper BEH_SED skal føre til Beskrivelsefelt SED eller SED_ELLER_TOMT`() {
+        rowsMedAlleKombinasjoner
+            .filter {
+                it.oppgave.oppgaveType == Oppgavetyper.BEH_SED
+            }.forEach { sak ->
+                withClue("sakstype${sak.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype}") {
+                    sak.oppgave.beskrivelsefelt in listOf(
+                        OppgaveGosysMapping.Beskrivelsefelt.SED_ELLER_TOMT,
+                        OppgaveGosysMapping.Beskrivelsefelt.SED
+                    )
                 }
             }
     }
@@ -244,21 +259,6 @@ internal class OppgaveFactoryNyMappingTest {
         oppgave.beskrivelse.shouldBe(Behandlingstema.UTSENDT_ARBEIDSTAKER.beskrivelse)
     }
 
-    @Test
-    fun `Behandlingstyper NY_VURDERING eller KLAGE skal føre til tomt beskrivelse felt`() {
-        val behandling = lagBehandling(
-            Sakstyper.EU_EOS,
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Behandlingstema.BESLUTNING_LOVVALG_NORGE,
-            Behandlingstyper.NY_VURDERING,
-            SedType.A003
-
-        )
-        val oppgave =
-            oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now()) { finnSedDokument(behandling) }.build()
-
-        oppgave.beskrivelse.shouldBe("")
-    }
 
     @Test
     fun `Skal ha SED - om ikke skal det logges en warning - og retunere en tom streng`() {
