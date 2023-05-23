@@ -13,11 +13,16 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessflytDefinisjon;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ProsessinstansStatusCache {
+
+    private static final Logger log = LoggerFactory.getLogger(ProsessinstansStatusCache.class);
+
     private final ProsessinstansRepository prosessinstansRepository;
     private final long maksDataLevetidMs;
 
@@ -30,7 +35,7 @@ public class ProsessinstansStatusCache {
     private static final EnumSet<ProsessStatus> STATUS_FEILET = EnumSet.of(ProsessStatus.FEILET);
 
     public ProsessinstansStatusCache(ProsessinstansRepository prosessinstansRepository,
-                                     @Value("${melosys.prosesser.status.cache.levetid:1000}") long millisLevetidICache) {
+                                     @Value("${melosys.prosesser.status.cache.levetid:5000}") long millisLevetidICache) {
         this.prosessinstansRepository = prosessinstansRepository;
         this.maksDataLevetidMs = millisLevetidICache;
     }
@@ -81,6 +86,9 @@ public class ProsessinstansStatusCache {
     }
 
     private void oppfriskCache() {
+        log.info("Oppfrisker caching til metrikker for prosessinstanser");
+        long tidStart = System.currentTimeMillis();
+
         Collection<ProsessinstansAntall> prosessinstansMetrikker = prosessinstansRepository.
             antallAktiveOgFeiletPerTypeOgStatus(PROSESS_TYPER);
 
@@ -106,5 +114,8 @@ public class ProsessinstansStatusCache {
                         : eksisterendeAntall + prosessinstansStegAntall.getAntall());
             }
         }
+        long tidSlutt = System.currentTimeMillis();
+        long tidBrukt = tidSlutt - tidStart;
+        log.info("Oppfriskning av cache til metrikker for prosessinstanser tok " + tidBrukt + " millisekunder.");
     }
 }

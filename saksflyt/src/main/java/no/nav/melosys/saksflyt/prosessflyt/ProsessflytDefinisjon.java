@@ -369,6 +369,12 @@ public final class ProsessflytDefinisjon {
 
     public static Optional<ProsessSteg> hentNesteSteg(ProsessType prosessType, ProsessSteg sistFullfortSteg) {
         return ProsessflytDefinisjon.finnFlytForProsessType(prosessType)
-            .map(it -> it.nesteSteg(sistFullfortSteg));
+            .map(it -> {
+                try {
+                    return it.nesteSteg(sistFullfortSteg);
+                } catch (Exception ignored) {
+                    return null;
+                }
+            });
     }
 }
