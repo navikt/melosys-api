@@ -16,6 +16,9 @@ public class SoeknadslandDto {
     }
 
     public static SoeknadslandDto av(Soeknadsland søknadsland) {
+        if (søknadsland == null) {
+            return new SoeknadslandDto(Collections.emptyList(), false);
+        }
         return new SoeknadslandDto(søknadsland.landkoder, søknadsland.erUkjenteEllerAlleEosLand);
     }
 
