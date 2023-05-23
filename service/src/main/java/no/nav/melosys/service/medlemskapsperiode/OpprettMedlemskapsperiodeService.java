@@ -48,7 +48,7 @@ public class OpprettMedlemskapsperiodeService {
         validerBestemmelse(bestemmelse, behandlingsresultat.getBehandling().getTema());
         validerVilkår(behandlingsresultat, bestemmelse);
 
-        var medlemAvFolketrygden = hentEllerOpprettMedlemAvFolketrygden(behandlingsresultat);
+        var medlemAvFolketrygden = hentEllerOpprettMedlemAvFolketrygden(behandlingsresultat, bestemmelse);
         medlemAvFolketrygden.getMedlemskapsperioder().clear();
 
         var behandling = behandlingsresultat.getBehandling();
@@ -58,7 +58,6 @@ public class OpprettMedlemskapsperiodeService {
             new UtledMedlemskapsperioderRequest(
                 søknad.periode,
                 søknad.getTrygdedekning(),
-                bestemmelse,
                 utledMottaksdato.getMottaksdato(behandling),
                 søknad.soeknadsland.landkoder.stream().collect(onlyElement())
             )
@@ -69,13 +68,14 @@ public class OpprettMedlemskapsperiodeService {
         return medlemAvFolketrygdenRepository.save(medlemAvFolketrygden).getMedlemskapsperioder();
     }
 
-    private MedlemAvFolketrygden hentEllerOpprettMedlemAvFolketrygden(Behandlingsresultat behandlingsresultat) {
+    private MedlemAvFolketrygden hentEllerOpprettMedlemAvFolketrygden(Behandlingsresultat behandlingsresultat, Folketrygdloven_kap2_bestemmelser bestemmelse) {
         if (behandlingsresultat.getMedlemAvFolketrygden() != null) {
             return behandlingsresultat.getMedlemAvFolketrygden();
         }
 
         var medlemAvFolketrygden = new MedlemAvFolketrygden();
         medlemAvFolketrygden.setBehandlingsresultat(behandlingsresultat);
+        medlemAvFolketrygden.setBestemmelse(bestemmelse);
         return medlemAvFolketrygdenRepository.save(medlemAvFolketrygden);
     }
 

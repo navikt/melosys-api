@@ -1,16 +1,13 @@
 package no.nav.melosys.service.vedtak.publisering;
 
 import java.time.ZoneId;
-import java.util.Collection;
-import java.util.Optional;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.VedtakMetadata;
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.mottatteopplysninger.SoeknadFtrl;
-import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.pdl.dto.person.Navn;
@@ -19,7 +16,6 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandling.UtledMottaksdato;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import no.nav.melosys.service.vedtak.publisering.dto.Fullmektig;
 import no.nav.melosys.service.vedtak.publisering.dto.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +27,7 @@ import static no.nav.melosys.service.vedtak.publisering.dto.IdentifikatorType.OR
 import static org.springframework.util.ObjectUtils.isEmpty;
 import static org.springframework.util.StringUtils.hasText;
 
+// TODO Slett klassen
 @Service
 public class FattetVedtakService {
 
@@ -65,9 +62,8 @@ public class FattetVedtakService {
             lagSoeknad(behandling),
             lagSaksopplysninger(persondata),
             null,
-            lagPerioder(behandlingsresultat),
-            lagFullmektig(behandling.getFagsak()),
-            lagRepresentantAvgift(behandlingsresultat)
+            emptyList(),
+            lagFullmektig(behandling.getFagsak())
         );
     }
 
@@ -127,52 +123,6 @@ public class FattetVedtakService {
         );
     }
 
-    private Collection<LovvalgOgMedlemskapsperiode> lagPerioder(Behandlingsresultat behandlingsresultat) {
-        Optional<MedlemAvFolketrygden> medlemAvFolketrygden = behandlingsresultat.finnMedlemAvFolketrygden();
-
-        //NOTE Ikke støtte for EØS foreløpig
-        return medlemAvFolketrygden.map(this::lagMedlemskapsperioder).orElse(emptyList());
-    }
-
-    private Collection<LovvalgOgMedlemskapsperiode> lagMedlemskapsperioder(MedlemAvFolketrygden medlemAvFolketrygden) {
-        var fastsattTrygdeavgift = medlemAvFolketrygden.getFastsattTrygdeavgift();
-
-        return medlemAvFolketrygden.getMedlemskapsperioder().stream().map(m -> {
-
-            var avgiftForNorsk = m.getTrygdeavgift().stream()
-                .filter(no.nav.melosys.domain.avgift.Trygdeavgift::erAvgiftForNorskInntekt).findFirst();
-
-            var avgiftForUtenlandsk = m.getTrygdeavgift().stream()
-                .filter(t -> !t.erAvgiftForNorskInntekt()).findFirst();
-
-            Aktoer betalesAv = fastsattTrygdeavgift.getBetalesAv();
-
-            return new LovvalgOgMedlemskapsperiode(
-                m.getBestemmelse(),
-                null,
-                null,
-                new Periode(m.getFom(), m.getTom()),
-                m.getInnvilgelsesresultat(),
-                m.getDekning(),
-                m.getMedlemskapstype(),
-                new FastsattTrygdeavgift(
-                    new BetalesAv(betalesAv.getOrgnr(), betalesAv.getRolle()),
-                    avgiftForNorsk.map(n -> new Trygdeavgift(
-                        fastsattTrygdeavgift.getAvgiftspliktigNorskInntektMnd(),
-                        n.getTrygdeavgiftsbeløpMd(),
-                        n.getTrygdesats(),
-                        n.getAvgiftskode()
-                    )).orElse(null),
-                    avgiftForUtenlandsk.map(u -> new Trygdeavgift(
-                        fastsattTrygdeavgift.getAvgiftspliktigNorskInntektMnd(),
-                        u.getTrygdeavgiftsbeløpMd(),
-                        u.getTrygdesats(),
-                        u.getAvgiftskode()
-                    )).orElse(null)
-                )
-            );
-        }).toList();
-    }
 
     private Fullmektig lagFullmektig(Fagsak fagsak) {
         return fagsak.finnRepresentant(Representerer.BRUKER)
@@ -183,26 +133,5 @@ public class FattetVedtakService {
                 }
                 return new Fullmektig(new Identifikator(hasText(fnr) ? fnr : f.getOrgnr(), hasText(fnr) ? BRUKER : ORGANISASJON));
             }).orElse(null);
-    }
-
-    private RepresentantAvgift lagRepresentantAvgift(Behandlingsresultat behandlingsresultat) {
-        return behandlingsresultat.finnMedlemAvFolketrygden().map(m -> {
-            var fastsattTrygdeavgift = m.getFastsattTrygdeavgift();
-            Aktoer betalesAv = fastsattTrygdeavgift.getBetalesAv();
-
-            String fnr = null;
-
-            if (betalesAv.getRolle() == Aktoersroller.BRUKER) {
-                fnr = persondataFasade.hentFolkeregisterident(betalesAv.getAktørId());
-            }
-
-            return new RepresentantAvgift(
-                new Identifikator(
-                    hasText(fnr) ? fnr : betalesAv.getOrgnr(),
-                    hasText(fnr) ? BRUKER : ORGANISASJON
-                ),
-                fastsattTrygdeavgift.getRepresentantNr()
-            );
-        }).orElse(null);
     }
 }

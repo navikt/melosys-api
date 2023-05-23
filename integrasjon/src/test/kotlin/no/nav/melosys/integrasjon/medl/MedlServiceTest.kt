@@ -17,6 +17,7 @@ import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -357,10 +358,11 @@ internal class MedlServiceTest {
     private fun lagMedlemskapsPeriode() = Medlemskapsperiode().apply {
         medlemskapstype = Medlemskapstyper.FRIVILLIG
         arbeidsland = Landkoder.BE.kode
-        bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
-        setTrygdedekning(Trygdedekninger.HELSEDEL)
+        trygdedekning = Trygdedekninger.HELSEDEL
         fom = LocalDate.now()
         tom = LocalDate.now().plusYears(1)
+        medlemAvFolketrygden =
+            MedlemAvFolketrygden().apply { bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8 }
     }
 
     fun lagBehandlingsresultatMedOvergangsregelbestemmelser(): Behandlingsresultat {

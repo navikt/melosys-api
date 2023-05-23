@@ -1,9 +1,14 @@
 package no.nav.melosys.domain.folketrygden;
 
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.*;
 
-import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.avgift.Inntektsperiode;
+import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer;
+import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker;
 
 @Entity
 @Table(name = "fastsatt_trygdeavgift")
@@ -20,18 +25,11 @@ public class FastsattTrygdeavgift {
     @Enumerated(EnumType.STRING)
     private Trygdeavgift_typer trygdeavgiftstype;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "betales_av")
-    private Aktoer betalesAv;
+    @OneToOne(mappedBy = "fastsattTrygdeavgift", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag;
 
-    @Column(name = "representant_nr")
-    private String representantNr;
-
-    @Column(name = "avgiftspliktig_norsk_inntekt_md")
-    private Long avgiftspliktigNorskInntektMnd;
-
-    @Column(name = "avgiftspliktig_utenlandsk_inntekt_md")
-    private Long avgiftspliktigUtenlandskInntektMnd;
+    @OneToMany(mappedBy = "fastsattTrygdeavgift", orphanRemoval = true, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Set<Trygdeavgiftsperiode> trygdeavgiftsperioder = new HashSet<>(1);
 
     public Long getId() {
         return id;
@@ -57,35 +55,37 @@ public class FastsattTrygdeavgift {
         this.trygdeavgiftstype = trygdeavgiftstype;
     }
 
-    public Aktoer getBetalesAv() {
-        return betalesAv;
+    public Trygdeavgiftsgrunnlag getTrygdeavgiftsgrunnlag() {
+        return trygdeavgiftsgrunnlag;
     }
 
-    public void setBetalesAv(Aktoer betalesAv) {
-        this.betalesAv = betalesAv;
+    public void setTrygdeavgiftsgrunnlag(Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag) {
+        trygdeavgiftsgrunnlag.setFastsattTrygdeavgift(this);
+        this.trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlag;
     }
 
-    public String getRepresentantNr() {
-        return representantNr;
+    public Set<Trygdeavgiftsperiode> getTrygdeavgiftsperioder() {
+        return trygdeavgiftsperioder;
     }
 
-    public void setRepresentantNr(String representantNr) {
-        this.representantNr = representantNr;
+    public void setTrygdeavgiftsperioder(Set<Trygdeavgiftsperiode> trygdeavgiftsperioder) {
+        this.trygdeavgiftsperioder = trygdeavgiftsperioder;
     }
 
-    public Long getAvgiftspliktigNorskInntektMnd() {
-        return avgiftspliktigNorskInntektMnd;
+    public Trygdeavgiftmottaker getTrygdeavgiftMottaker() {
+        var inntektsperioder = trygdeavgiftsgrunnlag.getInntektsperioder();
+
+        if (inntektsperioder.stream().map(Inntektsperiode::isTrygdeavgiftBetalesTilSkatt).distinct().count() != 1) {
+            return Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT;
+        }
+        return inntektsperioder.iterator().next().isTrygdeavgiftBetalesTilSkatt()
+            ? Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
+            : Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV;
     }
 
-    public void setAvgiftspliktigNorskInntektMnd(Long avgiftspliktigNorskInntektMnd) {
-        this.avgiftspliktigNorskInntektMnd = avgiftspliktigNorskInntektMnd;
-    }
-
-    public Long getAvgiftspliktigUtenlandskInntektMnd() {
-        return avgiftspliktigUtenlandskInntektMnd;
-    }
-
-    public void setAvgiftspliktigUtenlandskInntektMnd(Long avgiftspliktigUtenlandskInntektMnd) {
-        this.avgiftspliktigUtenlandskInntektMnd = avgiftspliktigUtenlandskInntektMnd;
+    public boolean skalBetaleTrygdeavgiftTilNav() {
+        var trygdeavgiftMottaker = getTrygdeavgiftMottaker();
+        return trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
+            || trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT;
     }
 }

@@ -1,59 +1,61 @@
 package no.nav.melosys.domain.avgift;
 
-import java.util.Collection;
-import java.util.Optional;
+import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
-import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
-import no.nav.melosys.domain.kodeverk.Loenn_forhold;
-import no.nav.melosys.domain.kodeverk.Saerligeavgiftsgrupper;
+import javax.persistence.*;
+import java.util.HashSet;
+import java.util.Set;
 
-public class Trygdeavgiftsgrunnlag extends AbstraktAvgiftsgrunnlag<AvgiftsgrunnlagInfoNorge, AvgiftsgrunnlagInfoUtland> {
+@Entity
+@Table(name = "trygdeavgiftsgrunnlag")
+public class Trygdeavgiftsgrunnlag {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    public Trygdeavgiftsgrunnlag(Loenn_forhold lønnsforhold, AvgiftsgrunnlagInfoNorge avgiftsGrunnlagNorge, AvgiftsgrunnlagInfoUtland avgiftsGrunnlagUtland) {
-        super(lønnsforhold, avgiftsGrunnlagNorge, avgiftsGrunnlagUtland);
+    @OneToOne(optional = false)
+    @JoinColumn(name = "fastsatt_trygdeavgift_id", nullable = false, updatable = false)
+    private FastsattTrygdeavgift fastsattTrygdeavgift;
+
+    @OneToMany(mappedBy = "trygdeavgiftsgrunnlag", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private Set<SkatteforholdTilNorge> skatteforholdTilNorge = new HashSet<>(1);
+
+    @OneToMany(mappedBy = "trygdeavgiftsgrunnlag", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private Set<Inntektsperiode> inntektsperioder = new HashSet<>(1);
+
+    public Long getId() {
+        return id;
     }
 
-    public static Trygdeavgiftsgrunnlag av(Behandlingsresultat behandlingsresultat) {
-        final var avklarteFakta = behandlingsresultat.getAvklartefakta();
-        final var lønnsforhold = finnLønnsforholdFakta(avklarteFakta);
-        return new Trygdeavgiftsgrunnlag(
-            lønnsforhold,
-            harLønnsforholdINorge(lønnsforhold) ? lagAvgiftsgrunnlagNorge(avklarteFakta, behandlingsresultat.getMedlemAvFolketrygden()) : null,
-            harLønnsforholdIUtlandet(lønnsforhold) ? lagAvgiftsgrunnlagUtland(avklarteFakta, behandlingsresultat.getMedlemAvFolketrygden()) : null
-        );
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    private static AvgiftsgrunnlagInfoNorge lagAvgiftsgrunnlagNorge(Collection<Avklartefakta> avklartefakta, MedlemAvFolketrygden medlemAvFolketrygden) {
-        return new AvgiftsgrunnlagInfoNorge(
-            finnAvklartefakta(avklartefakta, Avklartefaktatyper.LØNN_NORGE_SKATTEPLIKTIG_NORGE).filter(Avklartefakta::erValgtFakta).isPresent(),
-            finnAvklartefakta(avklartefakta, Avklartefaktatyper.LØNN_NORGE_ARBEIDSGIVERAVGIFT).filter(Avklartefakta::erValgtFakta).isPresent(),
-            finnAvklartefakta(avklartefakta, Avklartefaktatyper.LØNN_NORGE_SÆRLIG_AVGIFTS_GRUPPE).filter(Avklartefakta::erValgtFakta)
-                .map(Avklartefakta::getSubjekt).map(Saerligeavgiftsgrupper::valueOf).orElse(null),
-            Optional.ofNullable(medlemAvFolketrygden).map(MedlemAvFolketrygden::getVurderingTrygdeavgiftNorskInntekt).orElse(null)
-        );
+    public FastsattTrygdeavgift getFastsattTrygdeavgift() {
+        return fastsattTrygdeavgift;
     }
 
-    private static AvgiftsgrunnlagInfoUtland lagAvgiftsgrunnlagUtland(Collection<Avklartefakta> avklartefakta, MedlemAvFolketrygden medlemAvFolketrygden) {
-        return new AvgiftsgrunnlagInfoUtland(
-            finnAvklartefakta(avklartefakta, Avklartefaktatyper.LØNN_UTL_SKATTEPLIKTIG_NORGE).filter(Avklartefakta::erValgtFakta).isPresent(),
-            finnAvklartefakta(avklartefakta, Avklartefaktatyper.LØNN_UTL_ARBEIDSGIVERAVGIFT).filter(Avklartefakta::erValgtFakta).isPresent(),
-            finnAvklartefakta(avklartefakta, Avklartefaktatyper.LØNN_UTL_SÆRLIG_AVGIFTS_GRUPPE).filter(Avklartefakta::erValgtFakta)
-                .map(Avklartefakta::getSubjekt).map(Saerligeavgiftsgrupper::valueOf).orElse(null),
-            Optional.ofNullable(medlemAvFolketrygden).map(MedlemAvFolketrygden::getVurderingTrygdeavgiftUtenlandskInntekt).orElse(null)
-        );
+    public void setFastsattTrygdeavgift(FastsattTrygdeavgift fastsattTrygdeavgift) {
+        this.fastsattTrygdeavgift = fastsattTrygdeavgift;
     }
 
-    private static Loenn_forhold finnLønnsforholdFakta(Collection<Avklartefakta> avklartefakta) {
-        return finnAvklartefakta(avklartefakta, Avklartefaktatyper.LØNN_FORHOLD_VIRKSOMHET)
-            .map(Avklartefakta::getFakta)
-            .map(Loenn_forhold::valueOf)
-            .orElse(null);
+    public Set<SkatteforholdTilNorge> getSkatteforholdTilNorge() {
+        return skatteforholdTilNorge;
     }
 
-    private static Optional<Avklartefakta> finnAvklartefakta(Collection<Avklartefakta> avklartefakta, Avklartefaktatyper avklartefaktatype) {
-        return avklartefakta.stream().filter(a -> a.getType() == avklartefaktatype).findFirst();
+    public void setSkatteforholdTilNorge(Set<SkatteforholdTilNorge> skatteforholdTilNorge) {
+        this.skatteforholdTilNorge.clear();
+        skatteforholdTilNorge.forEach(forhold -> forhold.setTrygdeavgiftsgrunnlag(this));
+        this.skatteforholdTilNorge.addAll(skatteforholdTilNorge);
+    }
+
+    public Set<Inntektsperiode> getInntektsperioder() {
+        return inntektsperioder;
+    }
+
+    public void setInntektsperioder(Set<Inntektsperiode> inntektsperioder) {
+        this.inntektsperioder.clear();
+        inntektsperioder.forEach(periode -> periode.setTrygdeavgiftsgrunnlag(this));
+        this.inntektsperioder.addAll(inntektsperioder);
     }
 }

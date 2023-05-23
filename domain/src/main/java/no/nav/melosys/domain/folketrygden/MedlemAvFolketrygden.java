@@ -6,8 +6,7 @@ import javax.persistence.*;
 
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
-import no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_norsk_inntekt;
-import no.nav.melosys.domain.kodeverk.Vurderingsutfall_trygdeavgift_utenlandsk_inntekt;
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 
 @Entity
 @Table(name = "medlem_av_folketrygden")
@@ -20,16 +19,12 @@ public class MedlemAvFolketrygden {
     @JoinColumn(name = "beh_resultat_id", nullable = false, updatable = false)
     private Behandlingsresultat behandlingsresultat;
 
-    @Column(name = "trygdeavgift_nav_norsk_inntekt")
+    @Column(name = "bestemmelse", nullable = false)
     @Enumerated(EnumType.STRING)
-    private Vurderingsutfall_trygdeavgift_norsk_inntekt vurderingTrygdeavgiftNorskInntekt;
-
-    @Column(name = "trygdeavgift_nav_utenlandsk_inntekt")
-    @Enumerated(EnumType.STRING)
-    private Vurderingsutfall_trygdeavgift_utenlandsk_inntekt vurderingTrygdeavgiftUtenlandskInntekt;
+    private Folketrygdloven_kap2_bestemmelser bestemmelse;
 
     @OneToMany(mappedBy = "medlemAvFolketrygden", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private Collection<Medlemskapsperiode> medlemskapsperioder = new HashSet<>();
+    private Collection<Medlemskapsperiode> medlemskapsperioder = new HashSet<>(1);
 
     @OneToOne(mappedBy = "medlemAvFolketrygden", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private FastsattTrygdeavgift fastsattTrygdeavgift;
@@ -50,20 +45,12 @@ public class MedlemAvFolketrygden {
         this.behandlingsresultat = behandlingsresultat;
     }
 
-    public Vurderingsutfall_trygdeavgift_norsk_inntekt getVurderingTrygdeavgiftNorskInntekt() {
-        return vurderingTrygdeavgiftNorskInntekt;
+    public Folketrygdloven_kap2_bestemmelser getBestemmelse() {
+        return bestemmelse;
     }
 
-    public void setVurderingTrygdeavgiftNorskInntekt(Vurderingsutfall_trygdeavgift_norsk_inntekt vurderingTrygdeavgiftNorskInntekt) {
-        this.vurderingTrygdeavgiftNorskInntekt = vurderingTrygdeavgiftNorskInntekt;
-    }
-
-    public Vurderingsutfall_trygdeavgift_utenlandsk_inntekt getVurderingTrygdeavgiftUtenlandskInntekt() {
-        return vurderingTrygdeavgiftUtenlandskInntekt;
-    }
-
-    public void setVurderingTrygdeavgiftUtenlandskInntekt(Vurderingsutfall_trygdeavgift_utenlandsk_inntekt vurderingTrygdeavgiftUtenlandskInntekt) {
-        this.vurderingTrygdeavgiftUtenlandskInntekt = vurderingTrygdeavgiftUtenlandskInntekt;
+    public void setBestemmelse(Folketrygdloven_kap2_bestemmelser bestemmelse) {
+        this.bestemmelse = bestemmelse;
     }
 
     public Collection<Medlemskapsperiode> getMedlemskapsperioder() {
@@ -79,6 +66,7 @@ public class MedlemAvFolketrygden {
     }
 
     public void setFastsattTrygdeavgift(FastsattTrygdeavgift fastsattTrygdeavgift) {
+        fastsattTrygdeavgift.setMedlemAvFolketrygden(this);
         this.fastsattTrygdeavgift = fastsattTrygdeavgift;
     }
 }

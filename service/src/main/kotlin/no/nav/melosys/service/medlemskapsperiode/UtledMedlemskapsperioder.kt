@@ -3,7 +3,6 @@ package no.nav.melosys.service.medlemskapsperiode
 import no.nav.melosys.domain.ErPeriode
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.dokument.felles.Periode
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
@@ -22,7 +21,6 @@ class UtledMedlemskapsperioder {
                 lagPeriode(
                     søknadsperiode,
                     request.trygdedekning,
-                    request.bestemmelse,
                     request.arbeidsland,
                     InnvilgelsesResultat.INNVILGET
                 )
@@ -34,7 +32,6 @@ class UtledMedlemskapsperioder {
                 lagPeriode(
                     søknadsperiode,
                     request.trygdedekning,
-                    request.bestemmelse,
                     request.arbeidsland,
                     InnvilgelsesResultat.AVSLAATT
                 )
@@ -52,7 +49,6 @@ class UtledMedlemskapsperioder {
                 lagPeriode(
                     søknadsperiode,
                     request.trygdedekning,
-                    request.bestemmelse,
                     request.arbeidsland,
                     InnvilgelsesResultat.INNVILGET
                 )
@@ -68,7 +64,6 @@ class UtledMedlemskapsperioder {
             lagPeriode(
                 splittetPeriode.second,
                 request.trygdedekning,
-                request.bestemmelse,
                 request.arbeidsland,
                 InnvilgelsesResultat.INNVILGET
             )
@@ -85,14 +80,12 @@ class UtledMedlemskapsperioder {
                 lagPeriode(
                     periode,
                     fjernPensjonsdel(request.trygdedekning),
-                    request.bestemmelse,
                     request.arbeidsland,
                     InnvilgelsesResultat.AVSLAATT
                 ),
                 lagPeriode(
                     periode,
                     Trygdedekninger.PENSJONSDEL,
-                    request.bestemmelse,
                     request.arbeidsland,
                     InnvilgelsesResultat.INNVILGET
                 )
@@ -101,7 +94,6 @@ class UtledMedlemskapsperioder {
             lagPeriode(
                 periode,
                 request.trygdedekning,
-                request.bestemmelse,
                 request.arbeidsland,
                 InnvilgelsesResultat.AVSLAATT
             )
@@ -111,19 +103,17 @@ class UtledMedlemskapsperioder {
     private fun lagPeriode(
         søknadsperiode: ErPeriode,
         trygdedekning: Trygdedekninger,
-        bestemmelse: Folketrygdloven_kap2_bestemmelser,
         arbeidsland: String,
         innvilgelsesResultat: InnvilgelsesResultat
     ): Medlemskapsperiode =
-        Medlemskapsperiode(
-            søknadsperiode.fom,
-            søknadsperiode.tom,
-            arbeidsland,
-            bestemmelse,
-            innvilgelsesResultat,
-            Medlemskapstyper.PLIKTIG,
-            trygdedekning
-        )
+        Medlemskapsperiode().apply {
+            this.fom = søknadsperiode.fom
+            this.tom = søknadsperiode.tom
+            this.arbeidsland = arbeidsland
+            this.innvilgelsesresultat = innvilgelsesResultat
+            this.medlemskapstype = Medlemskapstyper.PLIKTIG
+            this.trygdedekning = trygdedekning
+        }
 
 
     private fun splitPeriode(periode: ErPeriode, splitFra: LocalDate): Pair<ErPeriode, ErPeriode> =

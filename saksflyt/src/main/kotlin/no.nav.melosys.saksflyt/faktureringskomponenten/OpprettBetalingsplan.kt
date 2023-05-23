@@ -5,7 +5,6 @@ import no.finn.unleash.Unleash
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Kontaktopplysning
-import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Representerer
 import no.nav.melosys.domain.saksflyt.ProsessDataKey
 import no.nav.melosys.domain.saksflyt.ProsessSteg
@@ -44,44 +43,40 @@ class OpprettBetalingsplan(
         }
 
         val behandlingsId = prosessinstans.behandling.id
-        val behandling = behandlingService.hentBehandling(behandlingsId)
-        val fagsak = behandling.fagsak
-        val aktoerer = fagsak.aktører.filter { it.rolle == Aktoersroller.BRUKER }
+        val fagsak = behandlingService.hentBehandling(behandlingsId).fagsak
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsId)
+        val fastsattTrygdeavgift = behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift
 
-        if (aktoerer.size > 1) {
-            throw FunksjonellException("Kunne ikke opprette betalingsplan, det finnes ${aktoerer.size} aktører med rolle BRUKER")
-        } else if (aktoerer.isEmpty()) {
-            throw FunksjonellException("Kunne ikke opprette betalingsplan, det finnes ${aktoerer.size} aktører")
+        if (!fastsattTrygdeavgift.skalBetaleTrygdeavgiftTilNav()) {
+            return
         }
 
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsId)
+        val trygdeavgiftsperioderMedAvgift = fastsattTrygdeavgift.trygdeavgiftsperioder.filter { it.harAvgift() }
+
+        if (trygdeavgiftsperioderMedAvgift.isEmpty()) {
+            return
+        }
+
         val vedtaksdato = behandlingsresultat.vedtakMetadata.vedtaksdato
-        val medlemskapsperioder = behandlingsresultat.medlemAvFolketrygden.medlemskapsperioder
-        val fastsattTrygdeavgift = behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift
-        val avgiftspliktigUtenlandskInntektMnd = fastsattTrygdeavgift.avgiftspliktigUtenlandskInntektMnd ?: 0
-        val avgiftspliktigNorskInntektMnd = fastsattTrygdeavgift.avgiftspliktigNorskInntektMnd ?: 0
-        val inntektBelopMnd = avgiftspliktigUtenlandskInntektMnd + avgiftspliktigNorskInntektMnd
         val fullmektig = fagsak.finnRepresentant(Representerer.BRUKER).orElse(null)
         val kontaktopplysning = hentKontaktopplysning(fagsak, fullmektig)
 
-        val alleTrygdeavgiftIMedlemskap = medlemskapsperioder.flatMap {
-            it.trygdeavgift.map { trygdeavgift -> trygdeavgift }
-        }
-        val fakturaseriePeriodeDtoListe = alleTrygdeavgiftIMedlemskap.map {
+        val fakturaseriePeriodeDtoListe = trygdeavgiftsperioderMedAvgift.map {
             FakturaseriePeriodeDto(
-                it.trygdeavgiftsbeløpMd,
+                it.trygdeavgiftsbeløpMd.verdi,
                 it.periodeFra,
                 it.periodeTil,
-                "Inntekt: ${inntektBelopMnd}, Dekning: ${it.medlemskapsperiode.dekning}, Sats: ${it.trygdesats} %"
+                "Inntekt: ${it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi}, Dekning: ${it.grunnlagMedlemskapsperiode.trygdedekning.beskrivelse}, Sats: ${it.trygdesats} %"
             )
         }
 
-        val foedselsNr = pdlService.finnFolkeregisterident(aktoerer.first().aktørId)
+        val foedselsNr = pdlService.finnFolkeregisterident(fagsak.hentBrukersAktørID())
             .orElseThrow { FunksjonellException("Kunne ikke finne fødselsnummer fra PDL") }
 
         val intervall = prosessinstans.getData(
             ProsessDataKey.BETALINGSINTERVALL,
-            FaktureringsIntervall::class.java
+            FaktureringsIntervall::class.java,
+            FaktureringsIntervall.MANEDLIG
         )
 
         val fakturaserieDto =
@@ -91,7 +86,7 @@ class OpprettBetalingsplan(
                 referanseNAV = "Medlemskap og avgift",
                 fullmektig = fullmektigDto(fullmektig, kontaktopplysning),
                 fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
-                intervall = intervall ?: FaktureringsIntervall.MANEDLIG,
+                intervall = intervall,
                 referanseBruker = "Vedtak om medlemskap datert " +
                     DateTimeFormatter.ofPattern("dd.MM.yyyy").withZone(ZoneId.systemDefault()).format(vedtaksdato),
                 perioder = fakturaseriePeriodeDtoListe

@@ -3,7 +3,6 @@ package no.nav.melosys.service.dokument;
 import java.util.*;
 
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.avgift.Trygdeavgiftsberegningsresultat;
 import no.nav.melosys.domain.brev.BrevkopiRegel;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
@@ -19,7 +18,6 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -41,19 +39,17 @@ public class BrevmottakerService {
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final TrygdeavgiftsberegningService trygdeavgiftsberegningService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final BehandlingService behandlingService;
 
     public BrevmottakerService(AvklarteVirksomheterService avklarteVirksomheterService,
                                UtenlandskMyndighetService utenlandskMyndighetService,
                                BehandlingsresultatService behandlingsresultatService,
-                               TrygdeavgiftsberegningService trygdeavgiftsberegningService,
-                               LovvalgsperiodeService lovvalgsperiodeService, BehandlingService behandlingService) {
+                               LovvalgsperiodeService lovvalgsperiodeService,
+                               BehandlingService behandlingService) {
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.behandlingsresultatService = behandlingsresultatService;
-        this.trygdeavgiftsberegningService = trygdeavgiftsberegningService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.behandlingService = behandlingService;
     }
@@ -111,18 +107,17 @@ public class BrevmottakerService {
                 }
             );
         }
+        var fastsattTrygdeavgift = behandlingsresultatService.hentBehandlingsresultat(behandlingId).getMedlemAvFolketrygden().getFastsattTrygdeavgift();
 
-        Optional<Trygdeavgiftsberegningsresultat> trygdeavgiftsberegningsresultat = trygdeavgiftsberegningService.finnBeregningsresultat(behandling.getId());
-
-        trygdeavgiftsberegningsresultat.ifPresent(resultat -> {
-            if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI_HVIS_IKKE_SELVBETALENDE_BRUKER) && resultat.erIkkeSelvbetalendeBruker()) {
+        if (!fastsattTrygdeavgift.getTrygdeavgiftsperioder().isEmpty()) {
+            if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI_HVIS_IKKE_SELVBETALENDE_BRUKER) && brukerHarFullmektig) { // TODO Bytt ut brukerHarFullmektig med bruker har fullmektig med den nye rollen (MELOSYS-5902)
                 mottakerliste.getKopiMottakere().add(Mottakerroller.ARBEIDSGIVER);
             }
 
-            if (brevkopiRegler.contains(SKATT_FÅR_KOPI_HVIS_AVGIFTSPLIKTIG_INNTEKT) && resultat.harAvgiftspliktigInntekt()) {
+            if (brevkopiRegler.contains(SKATT_FÅR_KOPI_HVIS_AVGIFTSPLIKTIG_INNTEKT) && fastsattTrygdeavgift.skalBetaleTrygdeavgiftTilNav()) {
                 mottakerliste.getFasteMottakere().add(NorskMyndighet.SKATTEETATEN);
             }
-        });
+        }
     }
 
     public Mottaker avklarMottaker(Produserbaredokumenter produserbartDokument, Mottaker mottaker, Behandling behandling) {
