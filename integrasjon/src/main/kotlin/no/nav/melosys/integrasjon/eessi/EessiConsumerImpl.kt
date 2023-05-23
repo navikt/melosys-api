@@ -63,6 +63,13 @@ open class EessiConsumerImpl(private val webClient: WebClient) : EessiConsumer, 
             .block()
     }
 
+    override fun hentSakForGsakSaksnummer(gsakSaksnummer: Long) =
+        webClient.get()
+            .uri("/sak?gsakSaksnummer={gsakSaksnummer}", gsakSaksnummer)
+            .retrieve()
+            .bodyToMono<List<SaksrelasjonDto>>()
+            .block()!!
+
     override fun hentSakForRinasaksnummer(rinaSaksnummer: String) =
         webClient.get()
             .uri("/sak?rinaSaksnummer={rinaSaksnummer}", rinaSaksnummer)

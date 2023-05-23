@@ -22,13 +22,15 @@ class OppgaveMigreringTest {
 
     @Test
     fun test() {
-        val migreringsRapport = Migrering.migreringsRapportFraJson("/Users/rune/div/jsonrapport-prod.json")
+        val migreringsRapport = Migrering.migreringsRapportFraJson("/Users/rune/div/dryrun-0520/jsonrapport-prod-0520.json")
 
         File("/Users/rune/div/migrerings-rapport.html").writeText(migreringsRapport.html { migreringsSaker ->
             migreringsSaker
-                .filter { !it.ny.fantIkkeOppgaveMapping() }
+                .filter { it.sak.sakstype == Sakstyper.EU_EOS }
+                .filter { it.sak.sakstema == Sakstemaer.UNNTAK }
+                .filter { it.sak.behandlingstype == Behandlingstyper.HENVENDELSE }
+                .filter { it.sak.behandlingstema == Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND }
                 .filter { it.oppgaver.size == 1 }
-                .filter { sedTyper.contains(it.ny.beskrivelse) }
         })
 
     }

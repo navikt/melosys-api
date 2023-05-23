@@ -35,6 +35,8 @@ public interface EessiConsumer {
 
     void lagreSaksrelasjon(SaksrelasjonDto saksrelasjonDto);
 
+    List<SaksrelasjonDto> hentSakForGsakSaksnummer(Long gsakSaksnummer);
+
     List<SaksrelasjonDto> hentSakForRinasaksnummer(String rinaSaksnummer);
 
     byte[] genererSedPdf(SedDataDto sedDataDto, SedType sedType);

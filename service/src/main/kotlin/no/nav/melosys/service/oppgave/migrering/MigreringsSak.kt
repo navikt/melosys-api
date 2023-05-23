@@ -6,10 +6,11 @@ import no.nav.melosys.domain.oppgave.Oppgave
 data class MigreringsSak(
     val sak: SakOgBehandlingDTO,
     val oppgaver: List<Oppgave>,
-    val ny: OppgaveOppdatering,
+    val ny: OppgaveMigreringsOppdatering,
 ) {
 
     fun harFeil(): Boolean = ny.harFeil() || oppgaver.size != 1
+
     fun temaErForskjellig(): Boolean = oppgaver.any { it.tema != ny.tema }
     fun oppgavetypeErForskjellig(): Boolean = oppgaver.any { it.oppgavetype.kode != ny.oppgaveType?.kode }
 
@@ -38,7 +39,7 @@ data class MigreringsSak(
         """.trimIndent()
     }
 
-    private fun OppgaveOppdatering.htmlTableData(count: Int): String {
+    private fun OppgaveMigreringsOppdatering.htmlTableData(count: Int): String {
         val rowspan = if (count > 0) "rowspan=${count + 1}" else ""
         if (mappingError != null) {
             return """<td colspan=4 $rowspan class="feil" >$mappingError</td>"""
@@ -69,10 +70,10 @@ data class MigreringsSak(
             <td class="oppgave">$fristFerdigstillelse</td>
             """
     }
+
     private fun splitLong(name: String, max: Int = 10): String {
         if (name.length > max)
             return name.split("_").joinToString("</br>")
         return name
     }
-
 }

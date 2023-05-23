@@ -26,6 +26,7 @@ object Migrering {
         val sakstema: Sakstemaer,
         val behandlingstype: Behandlingstyper,
         val behandlingstema: Behandlingstema,
+        val beskrivelse: String? = null
     )
 
     internal data class TableRowSingle(
@@ -49,7 +50,7 @@ object Migrering {
     }
 
     private data class MigreringsInfoForLesing(
-        val sak: SakOgBehandlingDTO, val oppgaver: List<MigreringsOppgave>, val ny: OppgaveOppdatering,
+        val sak: SakOgBehandlingDTO, val oppgaver: List<MigreringsOppgave>, val ny: OppgaveMigreringsOppdatering,
     ) {
         fun tilMigreringsInfo(): MigreringsSak = MigreringsSak(sak, oppgaver.map { it.tilOppgave() }, ny)
 

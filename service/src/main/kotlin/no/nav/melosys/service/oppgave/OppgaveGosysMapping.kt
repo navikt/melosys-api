@@ -85,7 +85,8 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
     enum class Regel(val beskrivelse: String) {
         FRA_TABELL("tabell"),
         HENVENDELSE("henvendelse"),
-        HENVENDELSE_OG_VIRKSOMHET("henv-virksomhet")
+        HENVENDELSE_OG_VIRKSOMHET("henv-virksomhet"),
+        KUN_VED_MIGRERING("migrering")
     }
     internal data class Oppgave(
         val oppgaveBehandlingstema: OppgaveBehandlingstema?,
@@ -424,7 +425,7 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                 setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR),
                 Oppgave(
-                    OppgaveBehandlingstema.EU_EOS_SOKNAD_OM_UNNTAK, // ab0491
+                    OppgaveBehandlingstema.EU_EOS_MELDING_OM_UNNTAK_UNNTAK, // ab0490
                     Tema.UFM,
                     Oppgavetyper.BEH_SAK_MK,
                     Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
@@ -520,7 +521,8 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                         OppgaveBehandlingstema.EU_EOS_FORESPORSEL_OM_TRYGDETID,
                         Tema.MED,
                         Oppgavetyper.BEH_SED,
-                        Beskrivelsefelt.SED
+                        Beskrivelsefelt.SED,
+                        Regel.KUN_VED_MIGRERING
                     )
                 )
             ) else listOf()

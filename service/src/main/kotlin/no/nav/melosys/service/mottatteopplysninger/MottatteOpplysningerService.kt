@@ -34,7 +34,7 @@ class MottatteOpplysningerService(
     fun hentMottatteOpplysninger(behandlingID: Long): MottatteOpplysninger =
         finnMottatteOpplysninger(behandlingID).orElseThrow { IkkeFunnetException("Finner ikke mottatteOpplysninger for behandling $behandlingID") }
 
-    @Transactional(readOnly = true)
+    @Transactional
     fun hentEllerOpprettMottatteOpplysninger(
         behandlingID: Long,
         behandlingKanRedigeresAvSaksbehandler: Boolean
