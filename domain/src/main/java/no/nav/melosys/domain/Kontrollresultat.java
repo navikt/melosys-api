@@ -50,7 +50,7 @@ public class Kontrollresultat {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Kontrollresultat that = (Kontrollresultat) o;
-        return id.equals(that.id) &&
+        return Objects.equals(id, that.id) &&
             begrunnelse == that.begrunnelse &&
             behandlingsresultat.equals(that.behandlingsresultat);
     }
