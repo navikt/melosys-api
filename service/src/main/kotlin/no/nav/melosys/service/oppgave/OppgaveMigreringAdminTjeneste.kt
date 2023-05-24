@@ -36,7 +36,7 @@ class OppgaveMigreringAdminTjeneste(
         return ResponseEntity.noContent().build()
     }
 
-    @PostMapping("")
+    @PostMapping("/stop")
     fun stopMigreing(
         @RequestHeader(AdminTjeneste.API_KEY_HEADER) apiKey: String?,
     ): ResponseEntity<Unit> {
