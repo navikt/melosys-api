@@ -131,7 +131,7 @@ class OppgaveMigrering(
             oppgaveFasade.oppdaterOppgave(oppgaveId, oppgaveOppdatering)
             migreringsRapport.antallSakerMigrert++
         } catch (e: Exception) {
-            // Mulig vi bør samle disse opp så vi kan laste de ned som en json dokument
+            migreringsSak.ny.oppgaveOppdateringError = e.message
             log.error("oppdaterOppgave feilet for ${sak.saksnummer}(${sak.behandlingID}) oppgaveID:$oppgaveId", e)
             migreringsRapport.migreingFeilet++
             var sleepTime = 100L * migreringsRapport.migreingFeilet
