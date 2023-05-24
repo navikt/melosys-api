@@ -92,7 +92,7 @@ class OppgaveMigrering(
                 leggTilRapport(migreringsSak)
             }
         }
-        log.info("OppgaveMigrering utført! ${if(stopMigrering) "Stoppet manuelt!" else ""}")
+        log.info("OppgaveMigrering utført! ${if (stopMigrering) "Stoppet manuelt!" else ""}")
         lagRapport()
     }
 
@@ -134,6 +134,9 @@ class OppgaveMigrering(
             // Mulig vi bør samle disse opp så vi kan laste de ned som en json dokument
             log.error("oppdaterOppgave feilet for ${sak.saksnummer}(${sak.behandlingID}) oppgaveID:$oppgaveId", e)
             migreringsRapport.migreingFeilet++
+            var sleepTime = 100L * migreringsRapport.migreingFeilet
+            if (sleepTime > 1000) sleepTime = 1000
+            Thread.sleep(sleepTime)
         }
     }
 
