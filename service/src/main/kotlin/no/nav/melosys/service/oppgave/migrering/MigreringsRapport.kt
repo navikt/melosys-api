@@ -29,7 +29,7 @@ class MigreringsRapport(private val environment: Environment) {
     internal var antallSakerMigrert: Int = 0
 
     @Volatile
-    internal var migreingFeilet: Int = 0
+    internal var migreringFeilet: Int = 0
 
     @Volatile
     private var sakSomMangerOppgaveAntall: Int = 0
@@ -145,6 +145,7 @@ class MigreringsRapport(private val environment: Environment) {
             "antallSakerErRedigerbar" to antallSakerErRedigerbar,
             "antallSakerProssessert" to antallSakerProssessert,
             "antallSakerMigrert" to antallSakerMigrert,
+            "migreringFeilet" to migreringFeilet,
             "harIkkeÅpenOppgave" to sakSomMangerOppgaveAntall,
         )
     }

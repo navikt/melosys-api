@@ -29,6 +29,8 @@ class OppgaveMigrering(
     private val oppgaveFasade: OppgaveFasade,
     private val migreringsRapport: MigreringsRapport,
 ) {
+    @Volatile
+    var stopMigrering: Boolean = false
 
     private val nyOppgaveFactory = OppgaveFactory(FakeUnleash().apply {
         //  litt spesiel måte å bruke unleash på, men siden unleash skal vekk fra
@@ -54,6 +56,11 @@ class OppgaveMigrering(
         }
     }
 
+    fun stop() {
+        stopMigrering = true
+        log.info("Migrering stoppet!")
+    }
+
     private fun finnSaker(
         bruker: String?,
         saksnummer: String?
@@ -74,7 +81,7 @@ class OppgaveMigrering(
             migreringsRapport.antallSakerFunnet = size
         }.filter { it.erRedigerbar() }.sortedBy { it.saksnummer }.apply {
             migreringsRapport.antallSakerErRedigerbar = size
-        }.forEach { sak ->
+        }.asSequence().filter { !stopMigrering }.forEach { sak ->
             migreringsRapport.antallSakerProssessert++
             oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(sak.saksnummer).let { oppgaver ->
                 val migreringsSak = MigreringsSak(sak, oppgaver, nyOppgaveMapping(sak))
@@ -85,7 +92,7 @@ class OppgaveMigrering(
                 leggTilRapport(migreringsSak)
             }
         }
-        log.info("OppgaveMigrering utført!")
+        log.info("OppgaveMigrering utført! ${if (stopMigrering) "Stoppet manuelt!" else ""}")
         lagRapport()
     }
 
@@ -124,9 +131,12 @@ class OppgaveMigrering(
             oppgaveFasade.oppdaterOppgave(oppgaveId, oppgaveOppdatering)
             migreringsRapport.antallSakerMigrert++
         } catch (e: Exception) {
-            // Mulig vi bør samle disse opp så vi kan laste de ned som en json dokument
+            migreringsSak.ny.oppgaveOppdateringError = e.message
             log.error("oppdaterOppgave feilet for ${sak.saksnummer}(${sak.behandlingID}) oppgaveID:$oppgaveId", e)
-            migreringsRapport.migreingFeilet++
+            migreringsRapport.migreringFeilet++
+            var sleepTime = 100L * migreringsRapport.migreringFeilet
+            if (sleepTime > 1000) sleepTime = 1000
+            Thread.sleep(sleepTime)
         }
     }
 

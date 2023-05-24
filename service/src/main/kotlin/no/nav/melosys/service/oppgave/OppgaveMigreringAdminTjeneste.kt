@@ -27,11 +27,23 @@ class OppgaveMigreringAdminTjeneste(
         @RequestParam(required = false) bruker: String?,
         @RequestParam(required = false) saksnummer: String?,
         @RequestParam(required = false, defaultValue = "true") dryrun: Boolean
-    ): ResponseEntity<Void> {
+    ): ResponseEntity<Unit> {
         log.info("Migrer oppgave for bruker $bruker for sak $saksnummer dryrun $dryrun")
         validerApikey(apiKey)
 
         oppgaveMigrering.go(bruker, saksnummer, dryrun)
+
+        return ResponseEntity.noContent().build()
+    }
+
+    @PostMapping("/stop")
+    fun stopMigreing(
+        @RequestHeader(AdminTjeneste.API_KEY_HEADER) apiKey: String?,
+    ): ResponseEntity<Unit> {
+        log.info("Stopper migreing!")
+        validerApikey(apiKey)
+
+        oppgaveMigrering.stop()
 
         return ResponseEntity.noContent().build()
     }
