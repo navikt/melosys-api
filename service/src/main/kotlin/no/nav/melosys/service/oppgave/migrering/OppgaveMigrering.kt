@@ -133,8 +133,8 @@ class OppgaveMigrering(
         } catch (e: Exception) {
             migreringsSak.ny.oppgaveOppdateringError = e.message
             log.error("oppdaterOppgave feilet for ${sak.saksnummer}(${sak.behandlingID}) oppgaveID:$oppgaveId", e)
-            migreringsRapport.migreingFeilet++
-            var sleepTime = 100L * migreringsRapport.migreingFeilet
+            migreringsRapport.migreringFeilet++
+            var sleepTime = 100L * migreringsRapport.migreringFeilet
             if (sleepTime > 1000) sleepTime = 1000
             Thread.sleep(sleepTime)
         }
