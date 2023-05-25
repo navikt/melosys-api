@@ -125,7 +125,7 @@ class OppgaveMigrering(
             .oppgavetype(oppdatering.oppgaveType)
             .behandlingstema(oppdatering.oppgaveBehandlingstema?.kode)
             .tema(oppdatering.tema)
-            .beskrivelse("") // Vi vil ikke oppdatere beskrivelsen i oppggave i migreringen
+            .beskrivelse("") // Vi vil ikke oppdatere beskrivelsen for oppggave i migreringen
             .build()
         try {
             oppgaveFasade.oppdaterOppgave(oppgaveId, oppgaveOppdatering)
