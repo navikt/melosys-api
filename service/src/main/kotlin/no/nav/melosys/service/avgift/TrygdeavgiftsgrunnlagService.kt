@@ -1,7 +1,10 @@
 package no.nav.melosys.service.avgift
 
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.avgift.*
+import no.nav.melosys.domain.avgift.Inntektsperiode
+import no.nav.melosys.domain.avgift.Penger
+import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
+import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
@@ -24,7 +27,7 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
         val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
         val medlemskapsperioder = medlemAvFolketrygden.medlemskapsperioder
 
-        valider(medlemskapsperioder, request)
+        validerAtMedlemskapsperioderFinnes(medlemskapsperioder)
         fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden.fastsattTrygdeavgift)
 
         val fomDato = utledFomDato(medlemskapsperioder)
@@ -46,15 +49,9 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
         fastsattTrygdeavgift?.trygdeavgiftsperioder?.clear()
     }
 
-    private fun valider(
-        medlemskapsperioder: Collection<Medlemskapsperiode>,
-        request: OppdaterTrygdeavgiftsgrunnlagRequest
-    ) {
+    private fun validerAtMedlemskapsperioderFinnes(medlemskapsperioder: Collection<Medlemskapsperiode>) {
         if (medlemskapsperioder.isEmpty()) {
             throw FunksjonellException("Kan ikke oppdatere trygdeavgiftsgrunnlaget før medlemskapsperioder finnes")
-        }
-        if (request.inntektskilder.isEmpty()) {
-            throw FunksjonellException("Krever minimum én inntektskilde. Fant ingen.")
         }
     }
 
