@@ -1,13 +1,12 @@
 package no.nav.melosys.service.dokument;
 
-import java.util.*;
-
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.BrevkopiRegel;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
 import no.nav.melosys.domain.brev.NorskMyndighet;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -26,6 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
 
 import static java.util.Optional.ofNullable;
 import static no.nav.melosys.domain.Preferanse.PreferanseEnum.RESERVERT_FRA_A1;
@@ -107,14 +108,15 @@ public class BrevmottakerService {
                 }
             );
         }
-        var fastsattTrygdeavgift = behandlingsresultatService.hentBehandlingsresultat(behandlingId).getMedlemAvFolketrygden().getFastsattTrygdeavgift();
+        var fastsattTrygdeavgift = Optional.ofNullable(
+            behandlingsresultatService.hentBehandlingsresultat(behandlingId).getMedlemAvFolketrygden()).map(MedlemAvFolketrygden::getFastsattTrygdeavgift);
 
-        if (!fastsattTrygdeavgift.getTrygdeavgiftsperioder().isEmpty()) {
+        if (fastsattTrygdeavgift.isPresent() && !fastsattTrygdeavgift.get().getTrygdeavgiftsperioder().isEmpty()) {
             if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI_HVIS_IKKE_SELVBETALENDE_BRUKER) && brukerHarFullmektig) { // TODO Bytt ut brukerHarFullmektig med bruker har fullmektig med den nye rollen (MELOSYS-5902)
                 mottakerliste.getKopiMottakere().add(Mottakerroller.ARBEIDSGIVER);
             }
 
-            if (brevkopiRegler.contains(SKATT_FÅR_KOPI_HVIS_AVGIFTSPLIKTIG_INNTEKT) && fastsattTrygdeavgift.skalBetaleTrygdeavgiftTilNav()) {
+            if (brevkopiRegler.contains(SKATT_FÅR_KOPI_HVIS_AVGIFTSPLIKTIG_INNTEKT) && fastsattTrygdeavgift.get().skalBetaleTrygdeavgiftTilNav()) {
                 mottakerliste.getFasteMottakere().add(NorskMyndighet.SKATTEETATEN);
             }
         }
