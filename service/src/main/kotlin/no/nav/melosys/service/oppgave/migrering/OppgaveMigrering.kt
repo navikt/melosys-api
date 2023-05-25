@@ -110,12 +110,12 @@ class OppgaveMigrering(
     }
 
     private fun oppdaterOppgave(dryrun: Boolean, migreringsSak: MigreringsSak) {
-        if (dryrun) {
-            migreringsRapport.antallSakerMigrert++ // Så vi ser hvor mange vi kommer til å migrere
-            return
-        }
         if (migreringsSak.erOppgaveMigrert()) {
             migreringsRapport.alleredeMigrert++
+            return
+        }
+        if (dryrun) {
+            migreringsRapport.antallSakerMigrert++ // Så vi ser hvor mange vi kommer til å migrere
             return
         }
 
