@@ -199,7 +199,7 @@ class MigreringsRapport(private val environment: Environment) {
             )
         ) return // kun lag profiler ved lokal kjøring
 
-        val localOutputFolder = System.getenv("lokal-output-folder") ?: "oppgave-migrering"
+        val localOutputFolder = System.getenv("lokal-output-folder") ?: return
         val timeForRun =
             "$localOutputFolder/$profil-${
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))
