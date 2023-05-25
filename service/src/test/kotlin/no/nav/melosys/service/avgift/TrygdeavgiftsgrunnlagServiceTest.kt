@@ -123,7 +123,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     }
 
     @Test
-    fun oppdaterTrygdeavgiftsgrunnlag_normaltScenario_lagrerAltKorrekt() {
+    fun oppdaterTrygdeavgiftsgrunnlag_requestMedSkattepliktOgInntektskilder_lagrerAltKorrekt() {
         val fom = LocalDate.now().minusMonths(1)
         val tom = LocalDate.now().plusMonths(3)
         every { mockBehandlingsresultatService.lagre(any()) }.returns(Unit)
