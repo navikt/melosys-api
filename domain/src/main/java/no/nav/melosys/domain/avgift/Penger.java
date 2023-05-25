@@ -1,6 +1,7 @@
 package no.nav.melosys.domain.avgift;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 public class Penger {
     private BigDecimal verdi;
@@ -36,5 +37,24 @@ public class Penger {
 
     public void setValuta(String valuta) {
         this.valuta = valuta;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Penger that = (Penger) o;
+        return Objects.equals(verdi, that.verdi)
+            && Objects.equals(valuta, that.valuta);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(verdi, valuta);
+    }
+
+    @Override
+    public String toString() {
+        return "Penger{" + verdi + " " + valuta + '}';
     }
 }

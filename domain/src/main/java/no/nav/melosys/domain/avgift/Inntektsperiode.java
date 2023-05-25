@@ -1,14 +1,15 @@
 package no.nav.melosys.domain.avgift;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Objects;
+import javax.persistence.*;
+
 import no.nav.melosys.domain.kodeverk.Inntektskildetype;
 import no.nav.melosys.domain.kodeverk.Skatteplikttype;
 import org.hibernate.annotations.Columns;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
-
-import javax.persistence.*;
-import java.time.LocalDate;
-import java.util.List;
 
 @Entity
 @Table(name = "inntektsperiode")
@@ -114,5 +115,31 @@ public class Inntektsperiode {
             || List.of(Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE, Inntektskildetype.FN_SKATTEFRITAK).contains(type)
             || (type == Inntektskildetype.INNTEKT_FRA_UTLANDET && !arbeidsgiversavgiftBetalesTilSkatt);
         return !trygdeavgiftBetalesTilNAV;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Inntektsperiode that = (Inntektsperiode) o;
+        return Objects.equals(trygdeavgiftsgrunnlag, that.trygdeavgiftsgrunnlag)
+            && Objects.equals(fomDato, that.fomDato) && Objects.equals(tomDato, that.tomDato)
+            && Objects.equals(type, that.type)
+            && Objects.equals(avgiftspliktigInntektMnd, that.avgiftspliktigInntektMnd)
+            && arbeidsgiversavgiftBetalesTilSkatt == that.arbeidsgiversavgiftBetalesTilSkatt
+            && trygdeavgiftBetalesTilSkatt == that.trygdeavgiftBetalesTilSkatt;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(trygdeavgiftsgrunnlag, fomDato, tomDato, type, avgiftspliktigInntektMnd,
+            arbeidsgiversavgiftBetalesTilSkatt, trygdeavgiftBetalesTilSkatt);
+    }
+
+    @Override
+    public String toString() {
+        return "Inntektsperiode{" + "id=" + id + ", fomDato=" + fomDato + ", tomDato=" + tomDato + ", type=" + type
+            + ", avgiftspliktigInntektMnd=" + avgiftspliktigInntektMnd + ", arbeidsgiversavgiftBetalesTilSkatt="
+            + arbeidsgiversavgiftBetalesTilSkatt + ", trygdeavgiftBetalesTilSkatt=" + trygdeavgiftBetalesTilSkatt + '}';
     }
 }
