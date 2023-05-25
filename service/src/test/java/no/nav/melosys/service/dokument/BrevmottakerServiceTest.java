@@ -1,15 +1,10 @@
 package no.nav.melosys.service.dokument;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avgift.Inntektsperiode;
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
@@ -38,6 +33,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static java.util.Collections.emptyList;
 import static no.nav.melosys.domain.brev.NorskMyndighet.SKATTEETATEN;
@@ -74,8 +74,6 @@ class BrevmottakerServiceTest {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
-        behandlingsresultat.setMedlemAvFolketrygden(new MedlemAvFolketrygden());
-        behandlingsresultat.getMedlemAvFolketrygden().setFastsattTrygdeavgift(new FastsattTrygdeavgift());
     }
 
     @Test
@@ -531,6 +529,9 @@ class BrevmottakerServiceTest {
     }
 
     private void initMocksForFtrlVedtaksbrev(Representerer representerer, long norskinntekt, boolean selvbetalende) {
+        behandlingsresultat.setMedlemAvFolketrygden(new MedlemAvFolketrygden());
+        behandlingsresultat.getMedlemAvFolketrygden().setFastsattTrygdeavgift(new FastsattTrygdeavgift());
+
         Fagsak fagsak = lagFagsakMedFullmektigOrg(representerer);
         fagsak.setType(Sakstyper.FTRL);
         mockFastsattTrygdeavgift(fagsak, norskinntekt, selvbetalende);
