@@ -1,5 +1,7 @@
 package no.nav.melosys.service.oppgave.migrering
 
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.domain.*
@@ -10,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
+import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
 import no.nav.melosys.repository.BehandlingRepositoryForOppgaveMigrering
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -38,12 +41,24 @@ class OppgaveMigreringTest {
     @Test
     fun `kjør migreing fra tidligere jsonrapport fil`() {
         val migreringsListe =
-            Migrering.migreringsRapportFraJson("/Users/rune/div/jsonrapport-prod.json").sortedMigreringsListe()
+            Migrering.migreringsRapportFraJson("/Users/rune/div/dryrun-0520/jsonrapport-prod-0520.json")
+                .sortedMigreringsListe()
 
         val behandlingRepository = mockk<BehandlingRepositoryForOppgaveMigrering>()
         every { behandlingRepository.finnSaksOgBehandlingTyperOgTema(any()) } returns migreringsListe.map { it.sak }
 
         val oppgaveFasade = mockk<OppgaveFasade>()
+
+        every { oppgaveFasade.oppdaterOppgave(any(), any()) } answers {
+            val id = firstArg<String>()
+            val oppgaveOppdatering = secondArg<OppgaveOppdatering>()
+            if (id == "361544672") throw IllegalStateException("Feil ved oppdatering av oppgave 361544672")
+            if(oppgaveOppdatering.beskrivelse != "") {
+                throw IllegalStateException("Beskrivelse skal være tom")
+            }
+            else Unit
+        }
+
         migreringsListe.groupBy { it.sak.saksnummer }
             .map { it.key to it.value.map { o -> o.oppgaver }.firstOrNull() }
             .forEach { (sak, oppgaver) ->
@@ -55,11 +70,18 @@ class OppgaveMigreringTest {
             )
         }
 
+        val migreringsRapport = MigreringsRapport(StandardEnvironment())
         OppgaveMigrering(
             behandlingRepository,
             oppgaveFasade,
-            MigreringsRapport(StandardEnvironment())
-        ).migrering(null, null, true)
+            migreringsRapport
+        ).migrering(null, null, false)
+
+        migreringsRapport.status()["migreringFeilet"].shouldBe(1)
+        migreringsRapport.sortedMigreringsListe().filter {
+            it.ny.oppgaveOppdateringError != null
+        }.shouldHaveSize(1)
+            .first().ny.oppgaveOppdateringError.shouldBe("Feil ved oppdatering av oppgave 361544672")
     }
 
     private fun lagBehandling(
