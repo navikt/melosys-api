@@ -94,7 +94,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     }
 
     @Test
-    fun oppdaterTrygdeavgiftsgrunnlag_flereMedlemskapsperioder_finnerKorrektFomOgTomDato() {
+    fun oppdaterTrygdeavgiftsgrunnlag_flereMedlemskapsperioder_riktigSkatteforhold() {
         val nå = LocalDate.now()
         every { mockBehandlingsresultatService.lagre(any()) }.returns(Unit)
         behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
@@ -118,6 +118,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
         val skatteforholdTilNorge =
             slotBehandlingsresultat.captured.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge
         skatteforholdTilNorge.shouldHaveSize(1)
+        skatteforholdTilNorge.first().skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
         skatteforholdTilNorge.first().fomDato.shouldBe(nå.minusMonths(6))
         skatteforholdTilNorge.first().tomDato.shouldBe(nå.plusMonths(3))
     }
