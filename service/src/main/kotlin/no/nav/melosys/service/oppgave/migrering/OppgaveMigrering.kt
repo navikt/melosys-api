@@ -114,6 +114,10 @@ class OppgaveMigrering(
             migreringsRapport.antallSakerMigrert++ // Så vi ser hvor mange vi kommer til å migrere
             return
         }
+        if (migreringsSak.erOppgaveMigrert()) {
+            migreringsRapport.alleredeMigrert++
+            return
+        }
 
         val sak = migreringsSak.sak
         val oppgaveId = migreringsSak.oppgaver.first().oppgaveId

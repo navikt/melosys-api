@@ -29,6 +29,9 @@ class MigreringsRapport(private val environment: Environment) {
     internal var antallSakerMigrert: Int = 0
 
     @Volatile
+    internal var alleredeMigrert: Int = 0
+
+    @Volatile
     internal var migreringFeilet: Int = 0
 
     @Volatile
@@ -145,6 +148,7 @@ class MigreringsRapport(private val environment: Environment) {
             "antallSakerErRedigerbar" to antallSakerErRedigerbar,
             "antallSakerProssessert" to antallSakerProssessert,
             "antallSakerMigrert" to antallSakerMigrert,
+            "alleredeMigrert" to alleredeMigrert,
             "migreringFeilet" to migreringFeilet,
             "harIkkeÅpenOppgave" to sakSomMangerOppgaveAntall,
         )
@@ -175,7 +179,8 @@ class MigreringsRapport(private val environment: Environment) {
     internal fun statusEtterKjøring(): String {
         val sb = StringBuilder()
         sb.appendLine()
-        sb.appendLine("sakerMedOppgave: $antallSakerMigrert")
+        sb.appendLine("antallSakerMigrert: $antallSakerMigrert")
+        sb.appendLine("alleredeMigrert: $alleredeMigrert")
         sb.appendLine("sakerManglerOppgave: ${sakerManglerOppgave.size}")
         sb.appendLine("sakerMedFlereOppgaver: ${sakerMedFlereOppgaver.size}")
         sb.appendLine("sakHvorMappingFeiler: ${sakHvorMappingFeiler.size}")

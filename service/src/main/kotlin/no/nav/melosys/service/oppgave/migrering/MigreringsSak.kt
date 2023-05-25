@@ -14,6 +14,16 @@ data class MigreringsSak(
     fun temaErForskjellig(): Boolean = oppgaver.any { it.tema != ny.tema }
     fun oppgavetypeErForskjellig(): Boolean = oppgaver.any { it.oppgavetype.kode != ny.oppgaveType?.kode }
 
+    fun erOppgaveMigrert(): Boolean {
+        if (oppgaver.size != 1) return false
+        val oppgave = oppgaver.first()
+        val behandlingstema = oppgave.behandlingstema
+
+        return ny.oppgaveBehandlingstema?.kode == behandlingstema &&
+            ny.tema == oppgave.tema &&
+            ny.oppgaveType == oppgave.oppgavetype
+    }
+
     private val sakStyle = if (oppgaver.size > 1) "class=\"sakfeil\"" else "class=\"sak\""
     fun htmlTableRow(): String {
         return """
