@@ -167,6 +167,7 @@ final class OppgaveFasadeImplTest {
             .behandlesAvApplikasjon(Fagsystem.MELOSYS)
             .saksnummer("saksnr")
             .behandlingstema("behandlingstema")
+            .behandlingstype("behandlingstype")
             .prioritet("prioritet #1")
             .status("heeelt ferdig")
             .tilordnetRessurs("Z133337")
@@ -184,6 +185,7 @@ final class OppgaveFasadeImplTest {
             OppgaveDto::getBehandlesAvApplikasjon,
             OppgaveDto::getSaksreferanse,
             OppgaveDto::getBehandlingstema,
+            OppgaveDto::getBehandlingstype,
             OppgaveDto::getPrioritet,
             OppgaveDto::getStatus,
             OppgaveDto::getTilordnetRessurs,
@@ -194,6 +196,7 @@ final class OppgaveFasadeImplTest {
                 Fagsystem.MELOSYS.getKode(),
                 "saksnr",
                 "behandlingstema",
+                "behandlingstype",
                 "prioritet #1",
                 "heeelt ferdig",
                 "Z133337",
