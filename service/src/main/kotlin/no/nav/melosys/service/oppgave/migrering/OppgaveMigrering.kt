@@ -128,7 +128,7 @@ class OppgaveMigrering(
             .builder()
             .oppgavetype(oppdatering.oppgaveType)
             .behandlingstema(oppdatering.oppgaveBehandlingstema?.kode)
-            .behandlingstype("") // Må være tomstreng og ikke null slik at feltet slettes i oppgave
+            .behandlingstype("") // Må være tom streng og ikke null slik at feltet slettes i oppgave
             .tema(oppdatering.tema)
             .beskrivelse("") // Vi vil ikke oppdatere beskrivelsen for oppggave i migreringen
             .build()
