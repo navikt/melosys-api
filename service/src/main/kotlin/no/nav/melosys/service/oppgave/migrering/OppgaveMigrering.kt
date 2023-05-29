@@ -7,7 +7,11 @@ import no.nav.melosys.domain.SakOgBehandlingDTO
 import no.nav.melosys.domain.Tema
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
+import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
@@ -51,7 +55,7 @@ class OppgaveMigrering(
     @Async
     @Synchronized
     fun go(bruker: String?, saksnummer: String?, dryrun: Boolean) {
-        ThreadLocalAccessInfo.executeProcess("Prossess oppgaver") {
+        ThreadLocalAccessInfo.executeProcess("Migrer oppgaver") {
             migrering(bruker, saksnummer, dryrun)
         }
     }
@@ -77,30 +81,44 @@ class OppgaveMigrering(
     internal fun migrering(bruker: String?, saksnummer: String?, dryrun: Boolean) {
         log.info("Utfører OppgaveMigrering")
         finnSaker(bruker, saksnummer).apply {
-            log.info("size før erRedigerbar: $size")
             migreringsRapport.antallSakerFunnet = size
         }.filter { it.erRedigerbar() }.sortedBy { it.saksnummer }.apply {
             migreringsRapport.antallSakerErRedigerbar = size
-        }.asSequence().filter { !stopMigrering }.forEach { sak ->
+        }.asSequence().filter { !stopMigrering }.map {
+            MigreringsSak(
+                sak = it,
+                oppgaver = oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(it.saksnummer),
+                ny = nyOppgaveMapping(it)
+            )
+        }.onEach {
             migreringsRapport.antallSakerProssessert++
-            oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(sak.saksnummer).let { oppgaver ->
-                val migreringsSak = MigreringsSak(sak, oppgaver, nyOppgaveMapping(sak))
-                migreringsRapport.migrertSak(migreringsSak)
-                if (oppgaver.size == 1 && !migreringsSak.ny.fantIkkeOppgaveMapping()) {
-                    oppdaterOppgave(dryrun, migreringsSak)
-                }
-                leggTilRapport(migreringsSak)
-            }
+            leggTilRapport(it)
+        }.filter {
+            it.oppgaver.size == 1 && erGyldig(it.sak)
+        }.filterNot {
+            it.ny.fantIkkeOppgaveMapping()
+        }.forEach {
+            oppdaterOppgave(dryrun, it)
         }
         log.info("OppgaveMigrering utført! ${if (stopMigrering) "Stoppet manuelt!" else ""}")
         lagRapport()
     }
 
-    private fun leggTilRapport(
-        migreringsSak: MigreringsSak
-    ) {
+    private fun erGyldig(sak: SakOgBehandlingDTO): Boolean =
+        erGyldig(sak.sakstype, sak.sakstema, sak.behandlingstype, sak.behandlingstema).apply {
+            if (!this) {
+                migreringsRapport.harIkkeGyldigKombinasjon++
+                log.warn(
+                    "${sak.saksnummer} har ikke gyldig kombinasjon:" +
+                        " sakstype${sak.sakstype}, sakstema=${sak.sakstema}, behandlingstema:${sak.behandlingstema}, ${sak.behandlingstype} "
+                )
+            }
+        }
+
+    private fun leggTilRapport(migreringsSak: MigreringsSak) {
         val oppgaver = migreringsSak.oppgaver
         val sak = migreringsSak.sak
+        migreringsRapport.migrertSak(migreringsSak)
         if (oppgaver.isEmpty()) {
             migreringsRapport.sakManglerOppgave(sak.saksnummer)
         }
@@ -123,7 +141,6 @@ class OppgaveMigrering(
         val oppgaveId = migreringsSak.oppgaver.first().oppgaveId
         val oppdatering = migreringsSak.ny
 
-        log.info("oppdatere oppgave:$oppgaveId for: ${sak.saksnummer} (${sak.behandlingID})")
         val oppgaveOppdatering = OppgaveOppdatering
             .builder()
             .oppgavetype(oppdatering.oppgaveType)
@@ -180,7 +197,6 @@ class OppgaveMigrering(
 
     private fun SakOgBehandlingDTO.utledBeskrivelse(oppgaveBehandlingstema: OppgaveBehandlingstema?): String {
         val hentSedDokument = { logHvisMangler: Boolean ->
-            log.info("Henter sed dokuemnt for: $behandlingID")
             sedDokument(behandlingID).apply {
                 if (logHvisMangler && this == null) log.warn("Sed dokument mangler for:${saksnummer} behandlingID:${behandlingID}")
             }
@@ -213,5 +229,39 @@ class OppgaveMigrering(
         val status = migreringsRapport.statusEtterKjøring()
         log.info(status)
         migreringsRapport.saveStatusFiles(status)
+    }
+
+    companion object {
+        internal fun erGyldig(
+            sakstype: Sakstyper,
+            sakstema: Sakstemaer,
+            behandlingstype: Behandlingstyper,
+            behandlingstema: Behandlingstema,
+        ): Boolean = finnGyldige(sakstype, sakstema, behandlingstype, behandlingstema).isNotEmpty()
+
+        private fun finnGyldige(
+            sakstype: Sakstyper,
+            sakstema: Sakstemaer,
+            behandlingstype: Behandlingstyper,
+            behandlingstema: Behandlingstema,
+        ) = GyldigeKombinasjoner.finnGyldige(
+            sakstype, sakstema, behandlingstype, behandlingstema
+        ) + unntakForMigrering.filter {
+            it.match(sakstype, sakstema, behandlingstype, behandlingstema)
+        }
+
+        internal val unntakForMigrering = listOf(
+            GyldigeKombinasjoner.TableRow(
+                sakstype = Sakstyper.EU_EOS,
+                sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG,
+                behandlingstype = Behandlingstyper.FØRSTEGANG,
+                behandlingstema = Behandlingstema.TRYGDETID
+            ), GyldigeKombinasjoner.TableRow(
+                sakstype = Sakstyper.EU_EOS,
+                sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG,
+                behandlingstype = Behandlingstyper.NY_VURDERING,
+                behandlingstema = Behandlingstema.TRYGDETID,
+            )
+        )
     }
 }
