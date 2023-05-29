@@ -40,7 +40,7 @@ class OppgaveBeskrivelseNyUtleder(unleash: Unleash) : OppgaveBeskrivelseUtleder 
         if (behandlingstype in listOf(Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE)) {
             // Vi har valgt å løse dette ved å legge inn ekstra mapping i OppgaveGosysMapping
             // Se https://confluence.adeo.no/display/TEESSI/Oppgaver+i+Gosys
-            log.warn("Det skal ikke være treffe på NY_VURDERING eller KLAGE med Beskrivelsefelt.SED, sjekke OppgaveGosysMapping")
+            log.warn("Det skal ikke være mulig å ha NY_VURDERING eller KLAGE med Beskrivelsefelt.SED, sjekk OppgaveGosysMapping")
             return ""
         }
         return hentSedDokument(true)?.sedType?.name ?: ""
