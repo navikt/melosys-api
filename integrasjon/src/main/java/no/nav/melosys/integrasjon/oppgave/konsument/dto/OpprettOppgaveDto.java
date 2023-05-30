@@ -30,6 +30,15 @@ public class OpprettOppgaveDto {
     private String temagruppe;
     private String tildeltEnhetsnr;
     private String tilordnetRessurs;
+    private String mappeId;
+
+    public String getMappeId() {
+        return mappeId;
+    }
+
+    public void setMappeId(String mappeId) {
+        this.mappeId = mappeId;
+    }
 
     public LocalDate getAktivDato() {
         return aktivDato;
@@ -177,6 +186,7 @@ public class OpprettOppgaveDto {
             ", temagruppe='" + temagruppe + '\'' +
             ", tildeltEnhetsnr='" + tildeltEnhetsnr + '\'' +
             ", tilordnetRessurs='" + tilordnetRessurs + '\'' +
+            ", mappeId='" + mappeId + '\'' +
             '}';
     }
 }

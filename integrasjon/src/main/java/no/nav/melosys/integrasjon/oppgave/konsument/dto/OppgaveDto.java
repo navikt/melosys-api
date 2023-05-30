@@ -77,6 +77,7 @@ public class OppgaveDto extends OpprettOppgaveDto {
         oppgaveDto.setTemagruppe(oppgave.getTemagruppe());
         oppgaveDto.setTildeltEnhetsnr(oppgave.getTildeltEnhetsnr());
         oppgaveDto.setTilordnetRessurs(oppgave.getTilordnetRessurs());
+        oppgaveDto.setMappeId(oppgave.getMappeId());
         return oppgaveDto;
     }
 }

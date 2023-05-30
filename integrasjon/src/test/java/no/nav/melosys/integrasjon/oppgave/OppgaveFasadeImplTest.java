@@ -159,6 +159,7 @@ final class OppgaveFasadeImplTest {
     @Test
     void oppdaterOppgave_mapperOppgaveOppdateringTilOppgaveDtoRiktig() {
         OppgaveDto oppgaveDto = new OppgaveDto();
+        oppgaveDto.setMappeId("321");
         when(oppgaveConsumer.hentOppgave("123")).thenReturn(oppgaveDto);
 
         OppgaveOppdatering oppgaveOppdatering = OppgaveOppdatering.builder()
@@ -189,7 +190,8 @@ final class OppgaveFasadeImplTest {
             OppgaveDto::getPrioritet,
             OppgaveDto::getStatus,
             OppgaveDto::getTilordnetRessurs,
-            OppgaveDto::getFristFerdigstillelse
+            OppgaveDto::getFristFerdigstillelse,
+            OppgaveDto::getMappeId
             )
             .contains(Oppgavetyper.JFR.getKode(),
                 Tema.MED.getKode(),
@@ -200,6 +202,7 @@ final class OppgaveFasadeImplTest {
                 "prioritet #1",
                 "heeelt ferdig",
                 "Z133337",
+                "321",
                 LocalDate.now());
     }
 
@@ -267,6 +270,7 @@ final class OppgaveFasadeImplTest {
         oppgaveBuilder.setTemagruppe("temagruppe");
         oppgaveBuilder.setTildeltEnhetsnr("4530");
         oppgaveBuilder.setTilordnetRessurs("ressurs123");
+        oppgaveBuilder.setMappeId("321");
 
         return oppgaveBuilder.build();
     }
