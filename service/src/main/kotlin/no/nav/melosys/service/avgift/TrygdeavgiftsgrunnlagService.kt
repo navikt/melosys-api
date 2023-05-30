@@ -7,6 +7,8 @@ import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
+import no.nav.melosys.domain.kodeverk.Inntektskildetype
+import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
@@ -86,7 +88,7 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
         request: OppdaterTrygdeavgiftsgrunnlagRequest,
         fomDato: LocalDate,
         tomDato: LocalDate,
-    ): Set<Inntektsperiode> =
+    ): List<Inntektsperiode> =
         (request.inntektskilder.map { inntektskildeRequest: InntektskildeRequest ->
             Inntektsperiode().apply {
                 this.fomDato = fomDato
@@ -95,9 +97,17 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
                 this.avgiftspliktigInntektMnd =
                     Penger(inntektskildeRequest.avgiftspliktigInntektMnd.toBigDecimal())
                 this.isArbeidsgiversavgiftBetalesTilSkatt = inntektskildeRequest.arbeidsgiversavgiftBetales
-                this.isTrygdeavgiftBetalesTilSkatt = this.utledTrygdeavgiftBetalesTilSkatt(request.skatteplikttype)
+                this.isTrygdeavgiftBetalesTilSkatt = !trygdeavgiftBetalesTilNAV(request, inntektskildeRequest)
             }
-        }).toSet()
+        })
+
+    private fun trygdeavgiftBetalesTilNAV(
+        request: OppdaterTrygdeavgiftsgrunnlagRequest, inntektskildeRequest: InntektskildeRequest
+    ): Boolean {
+        return (request.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG || listOf(
+            Inntektskildetype.FN_SKATTEFRITAK
+        ).contains(inntektskildeRequest.type))
+    }
 
     @Transactional(readOnly = true)
     fun hentTrygdeavgiftsgrunnlag(behandlingsresultatID: Long): Trygdeavgiftsgrunnlag? {

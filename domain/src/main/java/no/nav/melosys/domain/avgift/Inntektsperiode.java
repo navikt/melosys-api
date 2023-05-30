@@ -1,12 +1,10 @@
 package no.nav.melosys.domain.avgift;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Objects;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.Inntektskildetype;
-import no.nav.melosys.domain.kodeverk.Skatteplikttype;
 import org.hibernate.annotations.Columns;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
@@ -108,13 +106,6 @@ public class Inntektsperiode {
 
     public void setTrygdeavgiftBetalesTilSkatt(boolean trygdeavgiftBetalesTilSkatt) {
         this.trygdeavgiftBetalesTilSkatt = trygdeavgiftBetalesTilSkatt;
-    }
-
-    public boolean utledTrygdeavgiftBetalesTilSkatt(Skatteplikttype skatteplikttype) {
-        var trygdeavgiftBetalesTilNAV = (skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG)
-            || List.of(Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE, Inntektskildetype.FN_SKATTEFRITAK).contains(type)
-            || (type == Inntektskildetype.INNTEKT_FRA_UTLANDET && !arbeidsgiversavgiftBetalesTilSkatt);
-        return !trygdeavgiftBetalesTilNAV;
     }
 
     @Override
