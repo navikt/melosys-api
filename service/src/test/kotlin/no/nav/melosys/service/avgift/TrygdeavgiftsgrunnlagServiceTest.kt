@@ -146,7 +146,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
                 Skatteplikttype.SKATTEPLIKTIG, listOf(
                     InntektskildeRequest(Inntektskildetype.INNTEKT_FRA_UTLANDET, false, BigDecimal.valueOf(30000)),
                     InntektskildeRequest(Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE, false, BigDecimal.valueOf(10000)),
-                    InntektskildeRequest(Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, BigDecimal.valueOf(0))
+                    InntektskildeRequest(Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, null)
                 )
             )
         )
@@ -186,7 +186,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
                     type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
                     isArbeidsgiversavgiftBetalesTilSkatt = true
                     isTrygdeavgiftBetalesTilSkatt = true
-                    avgiftspliktigInntektMnd = Penger(BigDecimal.valueOf(0))
+                    avgiftspliktigInntektMnd = null
                     trygdeavgiftsgrunnlag =
                         lagretBehandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag
                 }

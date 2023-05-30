@@ -67,7 +67,7 @@ class TrygdeavgiftsberegningsRequestMapper {
                 it.type,
                 it.isArbeidsgiversavgiftBetalesTilSkatt,
                 it.isTrygdeavgiftBetalesTilSkatt,
-                PengerDto(it.avgiftspliktigInntektMnd)
+                if (it.avgiftspliktigInntektMnd == null) null else PengerDto(it.avgiftspliktigInntektMnd)
             )
             map[dto.id] = it.id
             dto

@@ -97,7 +97,9 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
                 this.fomDato = fomDato
                 this.tomDato = tomDato
                 this.type = inntektskildeRequest.type
-                this.avgiftspliktigInntektMnd = Penger(inntektskildeRequest.avgiftspliktigInntektMnd)
+                this.avgiftspliktigInntektMnd =
+                    if (inntektskildeRequest.avgiftspliktigInntektMnd == null) null
+                    else Penger(inntektskildeRequest.avgiftspliktigInntektMnd)
                 this.isArbeidsgiversavgiftBetalesTilSkatt = inntektskildeRequest.arbeidsgiversavgiftBetales
                 this.isTrygdeavgiftBetalesTilSkatt = this.utledTrygdeavgiftBetalesTilSkatt(request.skatteplikttype)
             }
