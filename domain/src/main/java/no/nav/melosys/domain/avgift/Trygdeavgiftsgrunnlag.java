@@ -4,9 +4,12 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
+import no.nav.melosys.domain.kodeverk.Inntektskildetype;
+import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker;
 
 @Entity
 @Table(name = "trygdeavgiftsgrunnlag")
@@ -59,5 +62,22 @@ public class Trygdeavgiftsgrunnlag {
         this.inntektsperioder.clear();
         inntektsperioder.forEach(periode -> periode.setTrygdeavgiftsgrunnlag(this));
         this.inntektsperioder.addAll(inntektsperioder);
+    }
+
+    public Trygdeavgiftmottaker getTrygdeavgiftMottaker() {
+        if (inntektsperioder.stream().anyMatch(avgiftBetalesTilNavOgSkatt())) {
+            return Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT;
+        }
+        return inntektsperioder.stream().anyMatch(Inntektsperiode::isTrygdeavgiftBetalesTilSkatt)
+            ? Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
+            : Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV;
+    }
+
+    private static Predicate<Inntektsperiode> avgiftBetalesTilNavOgSkatt() {
+        return inntektsperiode -> inntektsperiode.isTrygdeavgiftBetalesTilSkatt() && !inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt() && !erSpesiellGruppe(inntektsperiode.getType());
+    }
+
+    private static boolean erSpesiellGruppe(Inntektskildetype inntektskildetype) {
+        return Set.of(Inntektskildetype.FN_SKATTEFRITAK, Inntektskildetype.MISJONÆR).contains(inntektskildetype);
     }
 }
