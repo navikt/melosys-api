@@ -19,6 +19,7 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
@@ -75,6 +76,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply {
                 fom = LocalDate.now().minusMonths(1)
                 tom = LocalDate.now().plusMonths(3)
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             })
             fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
                 trygdeavgiftsperioder = mutableSetOf(Trygdeavgiftsperiode())
@@ -101,9 +103,11 @@ class TrygdeavgiftsgrunnlagServiceTest {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply {
                 fom = nå.minusMonths(6)
                 tom = nå.minusMonths(1)
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             }, Medlemskapsperiode().apply {
                 fom = nå.minusMonths(1)
                 tom = nå.plusMonths(3)
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             })
         }
 
@@ -132,6 +136,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply {
                 this.fom = fom
                 this.tom = tom
+                this.innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             })
         }
 
