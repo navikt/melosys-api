@@ -139,9 +139,9 @@ class TrygdeavgiftsgrunnlagServiceTest {
         trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
             BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(
                 Skatteplikttype.SKATTEPLIKTIG, listOf(
-                    InntektskildeRequest(Inntektskildetype.INNTEKT_FRA_UTLANDET, false, BigInteger.valueOf(30000)),
-                    InntektskildeRequest(Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE, false, BigInteger.valueOf(10000)),
-                    InntektskildeRequest(Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, BigInteger.valueOf(0))
+                    InntektskildeRequest(Inntektskildetype.INNTEKT_FRA_UTLANDET, false, BigDecimal.valueOf(30000)),
+                    InntektskildeRequest(Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE, false, BigDecimal.valueOf(10000)),
+                    InntektskildeRequest(Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, BigDecimal.valueOf(0))
                 )
             )
         )
