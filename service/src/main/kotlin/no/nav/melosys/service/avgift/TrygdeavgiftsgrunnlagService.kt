@@ -97,11 +97,11 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
                 this.avgiftspliktigInntektMnd =
                     Penger(inntektskildeRequest.avgiftspliktigInntektMnd.toBigDecimal())
                 this.isArbeidsgiversavgiftBetalesTilSkatt = inntektskildeRequest.arbeidsgiversavgiftBetales
-                this.isTrygdeavgiftBetalesTilSkatt = !trygdeavgiftBetalesTilNAV(request, inntektskildeRequest)
+                this.isTrygdeavgiftBetalesTilSkatt = !ordinærTrygdeavgiftBetalesTilNav(request, inntektskildeRequest)
             }
         })
 
-    private fun trygdeavgiftBetalesTilNAV(
+    private fun ordinærTrygdeavgiftBetalesTilNav(
         request: OppdaterTrygdeavgiftsgrunnlagRequest, inntektskildeRequest: InntektskildeRequest
     ): Boolean {
         return (request.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG || listOf(
