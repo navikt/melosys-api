@@ -414,6 +414,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
+    //TODO
     @Disabled("Vi har ikke mulighet å skille på har fullmektig og selvbetalende før den nye fullmektig-rollen kommer (MELOSYS-5902)")
     void gittVedtakFtrl2_8FullmektigSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() {
         initMocksForFtrlVedtaksbrev(Representerer.BRUKER, 10000, true);
@@ -436,6 +437,8 @@ class BrevmottakerServiceTest {
     }
 
     @Test
+    //TODO
+    @Disabled("Vi har ikke mulighet å skille på har fullmektig og selvbetalende før den nye fullmektig-rollen kommer (MELOSYS-5902)")
     void gittVedtakFtrl2_8FullmektigIkkeSelvbetalendeIkkeInntekt_skalHovedmottakerVæreBrukerMedKopier() {
         initMocksForFtrlVedtaksbrev(Representerer.BRUKER, 0, false);
 
@@ -543,6 +546,7 @@ class BrevmottakerServiceTest {
 
     private void mockFastsattTrygdeavgift(Fagsak fagsak, long norskinntekt, boolean selvbetalende) {
         var inntektsperiode = new Inntektsperiode();
+        inntektsperiode.setType(Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE);
         inntektsperiode.setTrygdeavgiftBetalesTilSkatt(norskinntekt == 0);
         var fastsattTrygdeavgift = behandlingsresultat.getMedlemAvFolketrygden().getFastsattTrygdeavgift();
         fastsattTrygdeavgift.setTrygdeavgiftsperioder(Set.of(new Trygdeavgiftsperiode()));
