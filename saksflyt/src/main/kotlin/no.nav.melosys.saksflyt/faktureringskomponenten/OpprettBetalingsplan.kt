@@ -47,7 +47,7 @@ class OpprettBetalingsplan(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsId)
         val fastsattTrygdeavgift = behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift
 
-        if (!fastsattTrygdeavgift.skalBetaleTrygdeavgiftTilNav()) {
+        if (!fastsattTrygdeavgift.skalBetalesTilNav()) {
             return
         }
 

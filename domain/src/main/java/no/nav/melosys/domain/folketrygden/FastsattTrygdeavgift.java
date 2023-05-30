@@ -83,7 +83,7 @@ public class FastsattTrygdeavgift {
             : Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV;
     }
 
-    public boolean skalBetaleTrygdeavgiftTilNav() {
+    public boolean skalBetalesTilNav() {
         var trygdeavgiftMottaker = getTrygdeavgiftMottaker();
         return trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
             || trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT;

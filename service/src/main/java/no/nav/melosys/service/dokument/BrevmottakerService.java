@@ -1,5 +1,7 @@
 package no.nav.melosys.service.dokument;
 
+import java.util.*;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.BrevkopiRegel;
 import no.nav.melosys.domain.brev.Mottaker;
@@ -25,8 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
 
 import static java.util.Optional.ofNullable;
 import static no.nav.melosys.domain.Preferanse.PreferanseEnum.RESERVERT_FRA_A1;
@@ -116,7 +116,7 @@ public class BrevmottakerService {
                 mottakerliste.getKopiMottakere().add(Mottakerroller.ARBEIDSGIVER);
             }
 
-            if (brevkopiRegler.contains(SKATT_FÅR_KOPI_HVIS_AVGIFTSPLIKTIG_INNTEKT) && fastsattTrygdeavgift.get().skalBetaleTrygdeavgiftTilNav()) {
+            if (brevkopiRegler.contains(SKATT_FÅR_KOPI_HVIS_AVGIFTSPLIKTIG_INNTEKT) && fastsattTrygdeavgift.get().skalBetalesTilNav()) {
                 mottakerliste.getFasteMottakere().add(NorskMyndighet.SKATTEETATEN);
             }
         }
