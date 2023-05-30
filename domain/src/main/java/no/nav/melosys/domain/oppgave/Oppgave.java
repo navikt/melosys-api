@@ -31,6 +31,8 @@ public final class Oppgave {
     private final LocalDate aktivDato;
     private final String status;
 
+    private final String mappeId;
+
     public static class Builder {
         private String aktørId;
         private String orgnr;
@@ -52,6 +54,7 @@ public final class Oppgave {
         private int versjon;
         private LocalDate aktivDato;
         private String status;
+        private String mappeId;
 
         public Builder setOppgaveId(String oppgaveId) {
             this.oppgaveId = oppgaveId;
@@ -153,6 +156,11 @@ public final class Oppgave {
             return this;
         }
 
+        public Builder setMappeId(String mappeId) {
+            this.mappeId = mappeId;
+            return this;
+        }
+
         public Oppgave build() {
             return new Oppgave(this);
         }
@@ -179,6 +187,7 @@ public final class Oppgave {
         this.status = builder.status;
         this.aktivDato = builder.aktivDato;
         this.temagruppe = builder.temagruppe;
+        this.mappeId = builder.mappeId;
     }
 
     public String getAktørId() {
@@ -281,6 +290,10 @@ public final class Oppgave {
         return oppgavetype == Oppgavetyper.BEH_SED;
     }
 
+    public String getMappeId() {
+        return mappeId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -295,7 +308,7 @@ public final class Oppgave {
     }
 
     /**
-     *  Sorter oppgaver basert på prioritet (først), frist og aktiv dato
+     * Sorter oppgaver basert på prioritet (først), frist og aktiv dato
      */
     public static final Comparator<Oppgave> LAVEST_TIL_HØYEST_PRIORITET = (a, b) -> {
         int res;
