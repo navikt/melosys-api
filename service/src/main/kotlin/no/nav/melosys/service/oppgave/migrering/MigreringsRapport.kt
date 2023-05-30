@@ -35,6 +35,9 @@ class MigreringsRapport(private val environment: Environment) {
     internal var migreringFeilet: Int = 0
 
     @Volatile
+    internal var harIkkeGyldigKombinasjon: Int = 0
+
+    @Volatile
     private var sakSomMangerOppgaveAntall: Int = 0
 
     private val sakerManglerOppgave = mutableListOf<String>()
@@ -150,6 +153,7 @@ class MigreringsRapport(private val environment: Environment) {
             "antallSakerMigrert" to antallSakerMigrert,
             "alleredeMigrert" to alleredeMigrert,
             "migreringFeilet" to migreringFeilet,
+            "harIkkeGyldigKombinasjon" to harIkkeGyldigKombinasjon,
             "harIkkeÅpenOppgave" to sakSomMangerOppgaveAntall,
         )
     }
