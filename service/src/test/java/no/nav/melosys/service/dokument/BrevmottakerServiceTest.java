@@ -1,5 +1,10 @@
 package no.nav.melosys.service.dokument;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avgift.Inntektsperiode;
@@ -33,11 +38,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 import static java.util.Collections.emptyList;
 import static no.nav.melosys.domain.brev.NorskMyndighet.SKATTEETATEN;
@@ -547,7 +547,7 @@ class BrevmottakerServiceTest {
         var fastsattTrygdeavgift = behandlingsresultat.getMedlemAvFolketrygden().getFastsattTrygdeavgift();
         fastsattTrygdeavgift.setTrygdeavgiftsperioder(Set.of(new Trygdeavgiftsperiode()));
         fastsattTrygdeavgift.setTrygdeavgiftsgrunnlag(new Trygdeavgiftsgrunnlag());
-        fastsattTrygdeavgift.getTrygdeavgiftsgrunnlag().setInntektsperioder(Set.of(inntektsperiode));
+        fastsattTrygdeavgift.getTrygdeavgiftsgrunnlag().setInntektsperioder(List.of(inntektsperiode));
     }
 
     private Aktoer lagAktoer(Aktoersroller rolle) {

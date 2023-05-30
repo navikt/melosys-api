@@ -81,7 +81,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                     tomDato = TOM
                     skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
                 })
-                inntektsperioder = setOf(Inntektsperiode().apply {
+                inntektsperioder = listOf(Inntektsperiode().apply {
                     id = 1L
                     fomDato = FOM
                     tomDato = TOM
@@ -132,7 +132,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         medlemAvFolketrygden.fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
             trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
                 skatteforholdTilNorge = setOf(SkatteforholdTilNorge())
-                inntektsperioder = setOf(Inntektsperiode().apply {
+                inntektsperioder = listOf(Inntektsperiode().apply {
                     isTrygdeavgiftBetalesTilSkatt = true
                 })
             }

@@ -1,10 +1,12 @@
 package no.nav.melosys.domain.avgift;
 
-import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
-
-import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import javax.persistence.*;
+
+import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 
 @Entity
 @Table(name = "trygdeavgiftsgrunnlag")
@@ -21,7 +23,7 @@ public class Trygdeavgiftsgrunnlag {
     private Set<SkatteforholdTilNorge> skatteforholdTilNorge = new HashSet<>(1);
 
     @OneToMany(mappedBy = "trygdeavgiftsgrunnlag", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    private Set<Inntektsperiode> inntektsperioder = new HashSet<>(1);
+    private List<Inntektsperiode> inntektsperioder = new ArrayList<>(1);
 
     public Long getId() {
         return id;
@@ -49,11 +51,11 @@ public class Trygdeavgiftsgrunnlag {
         this.skatteforholdTilNorge.addAll(skatteforholdTilNorge);
     }
 
-    public Set<Inntektsperiode> getInntektsperioder() {
+    public List<Inntektsperiode> getInntektsperioder() {
         return inntektsperioder;
     }
 
-    public void setInntektsperioder(Set<Inntektsperiode> inntektsperioder) {
+    public void setInntektsperioder(List<Inntektsperiode> inntektsperioder) {
         this.inntektsperioder.clear();
         inntektsperioder.forEach(periode -> periode.setTrygdeavgiftsgrunnlag(this));
         this.inntektsperioder.addAll(inntektsperioder);
