@@ -135,7 +135,7 @@ public class Inntektsperiode {
             + arbeidsgiversavgiftBetalesTilSkatt + ", trygdeavgiftBetalesTilSkatt=" + trygdeavgiftBetalesTilSkatt + '}';
     }
 
-    public boolean avgiftBetalesTilNavOgSkatt() {
+    public boolean trygdeavgiftBetalesTilNavOgSkatt() {
         return isTrygdeavgiftBetalesTilSkatt() && !isArbeidsgiversavgiftBetalesTilSkatt() && !erSpesiellGruppe(getType());
     }
 

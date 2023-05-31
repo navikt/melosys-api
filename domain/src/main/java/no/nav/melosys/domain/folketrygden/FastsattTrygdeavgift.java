@@ -1,6 +1,7 @@
 package no.nav.melosys.domain.folketrygden;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.persistence.*;
 
@@ -80,11 +81,18 @@ public class FastsattTrygdeavgift {
 
     private Trygdeavgiftmottaker getTrygdeavgiftMottaker() {
         var inntektsperioder = trygdeavgiftsgrunnlag.getInntektsperioder();
-        if (inntektsperioder.stream().anyMatch(Inntektsperiode::avgiftBetalesTilNavOgSkatt)) {
+
+        if (trygdeavgiftBetalesTilNavOgSkatt(inntektsperioder)) {
             return Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT;
         }
-        return inntektsperioder.stream().anyMatch(Inntektsperiode::isTrygdeavgiftBetalesTilSkatt)
+        return inntektsperioder.stream().allMatch(Inntektsperiode::isTrygdeavgiftBetalesTilSkatt)
             ? Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
             : Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV;
+    }
+
+    private static boolean trygdeavgiftBetalesTilNavOgSkatt(List<Inntektsperiode> inntektsperioder) {
+        boolean anyMatchSkatt = inntektsperioder.stream().anyMatch(Inntektsperiode::isTrygdeavgiftBetalesTilSkatt);
+        boolean anyMatchNAV = inntektsperioder.stream().anyMatch(inntektsperiode -> !inntektsperiode.isTrygdeavgiftBetalesTilSkatt());
+        return (anyMatchSkatt && anyMatchNAV) || inntektsperioder.stream().anyMatch(Inntektsperiode::trygdeavgiftBetalesTilNavOgSkatt);
     }
 }
