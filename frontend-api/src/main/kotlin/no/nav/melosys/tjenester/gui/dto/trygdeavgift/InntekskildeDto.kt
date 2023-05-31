@@ -8,14 +8,14 @@ import java.math.BigDecimal
 data class InntekskildeDto(
     val type: Inntektskildetype,
     val arbeidsgiversavgiftBetales: Boolean,
-    val avgiftspliktigInntektMnd: BigDecimal
+    val avgiftspliktigInntektMnd: BigDecimal?
 ) {
     constructor(inntektsperiode: Inntektsperiode) : this(
         inntektsperiode.type,
         inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt,
-        inntektsperiode.avgiftspliktigInntektMnd.verdi
+        inntektsperiode.avgiftspliktigInntektMnd?.verdi
     )
 
     fun tilRequest(): InntektskildeRequest =
-        InntektskildeRequest(type, arbeidsgiversavgiftBetales, avgiftspliktigInntektMnd.toBigInteger())
+        InntektskildeRequest(type, arbeidsgiversavgiftBetales, avgiftspliktigInntektMnd)
 }

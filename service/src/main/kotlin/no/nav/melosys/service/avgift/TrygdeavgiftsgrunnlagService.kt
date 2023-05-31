@@ -7,6 +7,7 @@ import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
@@ -56,11 +57,15 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
     }
 
     private fun utledFomDato(medlemskapsperioder: Collection<Medlemskapsperiode>): LocalDate =
-        medlemskapsperioder.minByOrNull { it.fom }?.fom
+        medlemskapsperioder
+            .filter { it.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET }
+            .minByOrNull { it.fom }?.fom
             ?: throw FunksjonellException("Klarte ikke finne startdatoen på medlemskapet")
 
     private fun utledTomDato(medlemskapsperioder: Collection<Medlemskapsperiode>): LocalDate =
-        medlemskapsperioder.maxByOrNull { it.tom }?.tom
+        medlemskapsperioder
+            .filter { it.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET }
+            .maxByOrNull { it.tom }?.tom
             ?: throw FunksjonellException("Klarte ikke finne sluttdatoen på medlemskapet")
 
     private fun eksisterendeEllerNyFastsattTrygdeavgift(medlemAvFolketrygden: MedlemAvFolketrygden): FastsattTrygdeavgift =
@@ -93,7 +98,8 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
                 this.tomDato = tomDato
                 this.type = inntektskildeRequest.type
                 this.avgiftspliktigInntektMnd =
-                    Penger(inntektskildeRequest.avgiftspliktigInntektMnd.toBigDecimal())
+                    if (inntektskildeRequest.avgiftspliktigInntektMnd == null) null
+                    else Penger(inntektskildeRequest.avgiftspliktigInntektMnd)
                 this.isArbeidsgiversavgiftBetalesTilSkatt = inntektskildeRequest.arbeidsgiversavgiftBetales
                 this.isTrygdeavgiftBetalesTilSkatt = this.utledTrygdeavgiftBetalesTilSkatt(request.skatteplikttype)
             }
