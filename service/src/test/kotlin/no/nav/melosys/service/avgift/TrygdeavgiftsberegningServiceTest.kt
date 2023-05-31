@@ -131,9 +131,20 @@ internal class TrygdeavgiftsberegningServiceTest {
         medlemAvFolketrygden.medlemskapsperioder.add(Medlemskapsperiode())
         medlemAvFolketrygden.fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
             trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
-                skatteforholdTilNorge = setOf(SkatteforholdTilNorge())
+                skatteforholdTilNorge = setOf(SkatteforholdTilNorge().apply {
+                    id = 1L
+                    fomDato = FOM
+                    tomDato = TOM
+                    skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                })
                 inntektsperioder = listOf(Inntektsperiode().apply {
+                    id = 1L
+                    fomDato = FOM
+                    tomDato = TOM
+                    type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
                     isTrygdeavgiftBetalesTilSkatt = true
+                    isArbeidsgiversavgiftBetalesTilSkatt = true
+                    avgiftspliktigInntektMnd = Penger(0.0)
                 })
             }
             trygdeavgiftsperioder.add(Trygdeavgiftsperiode())
