@@ -164,6 +164,19 @@ public class EessiService {
         return true;
     }
 
+    public boolean erBucLukket(long arkivsakID) {
+        var tilknyttedeBucer = hentTilknyttedeBucer(arkivsakID, List.of());
+
+        // Loglinje for å bekrefte eller avkrefte om en arkivsak fortsatt kan ha flere BUCer tilknyttet seg
+        if (tilknyttedeBucer.size() > 1) {
+            log.warn("Fant mer enn 1 tilknyttet BUC for arkivsakID %d".formatted(arkivsakID));
+        }
+        return tilknyttedeBucer.stream()
+            .max(Comparator.comparing(BucInformasjon::getOpprettetDato))
+            .orElseThrow(() -> new FunksjonellException("Fant ingen tilknyttet BUC for arkivsakID %d".formatted(arkivsakID)))
+            .erÅpen();
+    }
+
     public List<BucInformasjon> hentTilknyttedeBucer(long arkivsakID, List<String> statuser) {
         return eessiConsumer.hentTilknyttedeBucer(arkivsakID, statuser);
     }
