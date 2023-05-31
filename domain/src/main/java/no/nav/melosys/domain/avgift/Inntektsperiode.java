@@ -2,6 +2,7 @@ package no.nav.melosys.domain.avgift;
 
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.Set;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.Inntektskildetype;
@@ -132,5 +133,13 @@ public class Inntektsperiode {
         return "Inntektsperiode{" + "id=" + id + ", fomDato=" + fomDato + ", tomDato=" + tomDato + ", type=" + type
             + ", avgiftspliktigInntektMnd=" + avgiftspliktigInntektMnd + ", arbeidsgiversavgiftBetalesTilSkatt="
             + arbeidsgiversavgiftBetalesTilSkatt + ", trygdeavgiftBetalesTilSkatt=" + trygdeavgiftBetalesTilSkatt + '}';
+    }
+
+    public boolean avgiftBetalesTilNavOgSkatt() {
+        return isTrygdeavgiftBetalesTilSkatt() && !isArbeidsgiversavgiftBetalesTilSkatt() && !erSpesiellGruppe(getType());
+    }
+
+    private static boolean erSpesiellGruppe(Inntektskildetype inntektskildetype) {
+        return Set.of(Inntektskildetype.FN_SKATTEFRITAK, Inntektskildetype.MISJONÆR).contains(inntektskildetype);
     }
 }

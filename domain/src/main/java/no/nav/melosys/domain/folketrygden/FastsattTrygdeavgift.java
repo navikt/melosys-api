@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.*;
 
+import no.nav.melosys.domain.avgift.Inntektsperiode;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer;
@@ -72,8 +73,18 @@ public class FastsattTrygdeavgift {
     }
 
     public boolean skalBetalesTilNav() {
-        var trygdeavgiftMottaker = trygdeavgiftsgrunnlag.getTrygdeavgiftMottaker();
+        var trygdeavgiftMottaker = getTrygdeavgiftMottaker();
         return trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
             || trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT;
+    }
+
+    private Trygdeavgiftmottaker getTrygdeavgiftMottaker() {
+        var inntektsperioder = trygdeavgiftsgrunnlag.getInntektsperioder();
+        if (inntektsperioder.stream().anyMatch(Inntektsperiode::avgiftBetalesTilNavOgSkatt)) {
+            return Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT;
+        }
+        return inntektsperioder.stream().anyMatch(Inntektsperiode::isTrygdeavgiftBetalesTilSkatt)
+            ? Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
+            : Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV;
     }
 }
