@@ -38,7 +38,7 @@ public class KontrollTjeneste {
 
     /**
      * @deprecated
-     * "Erstattes av erBucLukket endepunktet. Fjernes etter fiks på prodfeil er ute"
+     * "Erstattes av erBucAapen endepunktet. Fjernes etter fiks på prodfeil er ute"
      */
     @GetMapping("{behandlingId}/sed/{sedType}")
     public ResponseEntity<Boolean> kanOppretteSedTypePaaBuc(@PathVariable("behandlingId") Long behandlingId,
@@ -51,7 +51,7 @@ public class KontrollTjeneste {
         return ResponseEntity.ok(eessiService.kanOppretteSedTyperPåBuc(rinaSaksnummer.get(), sedType));
     }
 
-    @GetMapping("{behandlingId}/buc")
+    @GetMapping("{behandlingId}/erBucAapen")
     public ResponseEntity<Boolean> erBucAapen(@PathVariable("behandlingId") Long behandlingId) {
         var behandling = behandlingService.hentBehandling(behandlingId);
         return ResponseEntity.ok(eessiService.erBucAapen(behandling.getFagsak().getGsakSaksnummer()));
