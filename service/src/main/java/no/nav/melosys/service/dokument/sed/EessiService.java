@@ -26,7 +26,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
@@ -164,7 +163,7 @@ public class EessiService {
         return true;
     }
 
-    public boolean erBucLukket(long arkivsakID) {
+    public boolean erBucAapen(long arkivsakID) {
         var tilknyttedeBucer = hentTilknyttedeBucer(arkivsakID, List.of());
 
         // Loglinje for å bekrefte eller avkrefte om en arkivsak fortsatt kan ha flere BUCer tilknyttet seg

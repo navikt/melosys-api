@@ -52,9 +52,9 @@ public class KontrollTjeneste {
     }
 
     @GetMapping("{behandlingId}/buc")
-    public ResponseEntity<Boolean> erBucLukket(@PathVariable("behandlingId") Long behandlingId) {
+    public ResponseEntity<Boolean> erBucAapen(@PathVariable("behandlingId") Long behandlingId) {
         var behandling = behandlingService.hentBehandling(behandlingId);
-        return ResponseEntity.ok(eessiService.erBucLukket(behandling.getFagsak().getGsakSaksnummer()));
+        return ResponseEntity.ok(eessiService.erBucAapen(behandling.getFagsak().getGsakSaksnummer()));
     }
 
     @PostMapping("/ferdigbehandling")
