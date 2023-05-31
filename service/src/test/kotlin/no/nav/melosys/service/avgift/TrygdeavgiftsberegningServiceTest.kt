@@ -144,7 +144,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                     type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
                     isTrygdeavgiftBetalesTilSkatt = true
                     isArbeidsgiversavgiftBetalesTilSkatt = true
-                    avgiftspliktigInntektMnd = Penger(0.0)
+                    avgiftspliktigInntektMnd = null
                 })
             }
             trygdeavgiftsperioder.add(Trygdeavgiftsperiode())
