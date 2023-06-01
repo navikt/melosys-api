@@ -93,6 +93,6 @@ public class FastsattTrygdeavgift {
     private static boolean trygdeavgiftBetalesTilNavOgSkatt(List<Inntektsperiode> inntektsperioder) {
         boolean ordinærTrygdeavgiftTilSkatt = inntektsperioder.stream().anyMatch(Inntektsperiode::isTrygdeavgiftBetalesTilSkatt);
         boolean ordinærTrygdeavgiftTilNav = inntektsperioder.stream().anyMatch(inntektsperiode -> !inntektsperiode.isTrygdeavgiftBetalesTilSkatt());
-        return (ordinærTrygdeavgiftTilSkatt && ordinærTrygdeavgiftTilNav) || inntektsperioder.stream().anyMatch(Inntektsperiode::trygdeavgiftBetalesTilNavOgSkatt);
+        return (ordinærTrygdeavgiftTilSkatt && ordinærTrygdeavgiftTilNav) || inntektsperioder.stream().anyMatch(Inntektsperiode::trygdeavgiftBetalesBådeTilNavOgSkatt);
     }
 }
