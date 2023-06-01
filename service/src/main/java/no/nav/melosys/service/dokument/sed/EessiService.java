@@ -26,7 +26,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
-import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.integrasjon.eessi.EessiConsumer;
 import no.nav.melosys.integrasjon.eessi.dto.OpprettSedDto;
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto;
@@ -162,6 +161,19 @@ public class EessiService {
         }
 
         return true;
+    }
+
+    public boolean erBucAapen(long arkivsakID) {
+        var tilknyttedeBucer = hentTilknyttedeBucer(arkivsakID, List.of());
+
+        // Loglinje for å bekrefte eller avkrefte om en arkivsak fortsatt kan ha flere BUCer tilknyttet seg
+        if (tilknyttedeBucer.size() > 1) {
+            log.warn("Fant mer enn 1 tilknyttet BUC for arkivsakID %d".formatted(arkivsakID));
+        }
+        return tilknyttedeBucer.stream()
+            .max(Comparator.comparing(BucInformasjon::getOpprettetDato))
+            .orElseThrow(() -> new FunksjonellException("Fant ingen tilknyttet BUC for arkivsakID %d".formatted(arkivsakID)))
+            .erÅpen();
     }
 
     public List<BucInformasjon> hentTilknyttedeBucer(long arkivsakID, List<String> statuser) {

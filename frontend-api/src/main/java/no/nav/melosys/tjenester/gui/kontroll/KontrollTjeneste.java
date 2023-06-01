@@ -36,15 +36,25 @@ public class KontrollTjeneste {
         this.behandlingService = behandlingService;
     }
 
+    /**
+     * @deprecated
+     * "Erstattes av erBucAapen endepunktet. Fjernes etter fiks på prodfeil er ute"
+     */
     @GetMapping("{behandlingId}/sed/{sedType}")
     public ResponseEntity<Boolean> kanOppretteSedTypePaaBuc(@PathVariable("behandlingId") Long behandlingId,
                                                             @PathVariable("sedType") SedType sedType) {
         var behandling = behandlingService.hentBehandling(behandlingId);
         var rinaSaksnummer = eessiService.finnSakForGsakSaksnummer(behandling.getFagsak().getGsakSaksnummer());
-        if(rinaSaksnummer.isEmpty()) {
+        if (rinaSaksnummer.isEmpty()) {
             throw new FunksjonellException("Finner ikke rinaSaksnummer for behandling %d".formatted(behandlingId));
         }
         return ResponseEntity.ok(eessiService.kanOppretteSedTyperPåBuc(rinaSaksnummer.get(), sedType));
+    }
+
+    @GetMapping("{behandlingId}/erBucAapen")
+    public ResponseEntity<Boolean> erBucAapen(@PathVariable("behandlingId") Long behandlingId) {
+        var behandling = behandlingService.hentBehandling(behandlingId);
+        return ResponseEntity.ok(eessiService.erBucAapen(behandling.getFagsak().getGsakSaksnummer()));
     }
 
     @PostMapping("/ferdigbehandling")
