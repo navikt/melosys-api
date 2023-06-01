@@ -8,8 +8,8 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
-import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
@@ -110,9 +110,7 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
     private fun ordinærTrygdeavgiftBetalesTilNav(
         request: OppdaterTrygdeavgiftsgrunnlagRequest, inntektskildeRequest: InntektskildeRequest
     ): Boolean {
-        return (request.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG || listOf(
-            Inntektskildetype.FN_SKATTEFRITAK
-        ).contains(inntektskildeRequest.type))
+        return request.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG || inntektskildeRequest.type == Inntektskildetype.FN_SKATTEFRITAK
     }
 
     @Transactional(readOnly = true)
