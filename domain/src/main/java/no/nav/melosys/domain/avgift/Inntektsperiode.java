@@ -135,7 +135,7 @@ public class Inntektsperiode {
             + arbeidsgiversavgiftBetalesTilSkatt + ", trygdeavgiftBetalesTilSkatt=" + trygdeavgiftBetalesTilSkatt + '}';
     }
 
-    // FIXME Riktig logikk for Trygdeavgiftmottaker kommer i egen historie. Dette er for å fikse MELOSYS-5927
+    // FIXME Riktig logikk for Trygdeavgiftmottaker kommer i https://jira.adeo.no/browse/MELOSYS-5940. Dette er for å fikse MELOSYS-5927
     public boolean trygdeavgiftBetalesBådeTilNavOgSkatt() {
         return isTrygdeavgiftBetalesTilSkatt() && !isArbeidsgiversavgiftBetalesTilSkatt() && !erSpesiellGruppe(getType());
     }
