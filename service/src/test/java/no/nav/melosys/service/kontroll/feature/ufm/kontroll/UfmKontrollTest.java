@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class UfmKontrollTest {
 
-    private final LocalDate DATE = LocalDate.now();
+    private final LocalDate DATE = LocalDate.EPOCH;
 
     @Test
     void feilIPeriode_erFeil_verifiserBegrunnelse() {
@@ -77,12 +77,12 @@ class UfmKontrollTest {
 
     @Test
     void periodeOver1ÅrFremITid_erFeil_verifiserBegrunnelse() {
-        assertThat(UfmKontroll.periodeOver1ÅrFremITid(kontrollData())).isEqualTo(Kontroll_begrunnelser.PERIODE_LANGT_FREM_I_TID);
+        assertThat(UfmKontroll.periodeOver1ÅrFremITid(kontrollData(LocalDate.now()))).isEqualTo(Kontroll_begrunnelser.PERIODE_LANGT_FREM_I_TID);
     }
 
     @Test
     void utbetaltYtelserFraOffentligIPeriode_erFeil_verifiserBegrunnelse() {
-        assertThat(UfmKontroll.utbetaltYtelserFraOffentligIPeriode(kontrollData())).isEqualTo(Kontroll_begrunnelser.MOTTAR_YTELSER);
+        assertThat(UfmKontroll.utbetaltYtelserFraOffentligIPeriode(kontrollData(LocalDate.now()))).isEqualTo(Kontroll_begrunnelser.MOTTAR_YTELSER);
     }
 
     @Test
@@ -131,6 +131,10 @@ class UfmKontrollTest {
 
     private UfmKontrollData kontrollData() {
         return kontrollData(DATE.plusMonths(15), DATE.plusYears(10));
+    }
+
+    private UfmKontrollData kontrollData(LocalDate localDate) {
+        return kontrollData(localDate.plusMonths(15), localDate.plusYears(10));
     }
 
     private UfmKontrollData kontrollData(LocalDate fom, LocalDate tom) {
