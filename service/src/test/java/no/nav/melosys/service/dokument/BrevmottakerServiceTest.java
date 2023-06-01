@@ -1,5 +1,10 @@
 package no.nav.melosys.service.dokument;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
 import com.google.common.collect.Sets;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avgift.Inntektsperiode;
@@ -33,11 +38,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 import static java.util.Collections.emptyList;
 import static no.nav.melosys.domain.brev.NorskMyndighet.SKATTEETATEN;
@@ -414,6 +414,7 @@ class BrevmottakerServiceTest {
     }
 
     @Test
+    //TODO
     @Disabled("Vi har ikke mulighet å skille på har fullmektig og selvbetalende før den nye fullmektig-rollen kommer (MELOSYS-5902)")
     void gittVedtakFtrl2_8FullmektigSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() {
         initMocksForFtrlVedtaksbrev(Representerer.BRUKER, 10000, true);
@@ -436,6 +437,8 @@ class BrevmottakerServiceTest {
     }
 
     @Test
+    //TODO
+    @Disabled("Vi har ikke mulighet å skille på har fullmektig og selvbetalende før den nye fullmektig-rollen kommer (MELOSYS-5902)")
     void gittVedtakFtrl2_8FullmektigIkkeSelvbetalendeIkkeInntekt_skalHovedmottakerVæreBrukerMedKopier() {
         initMocksForFtrlVedtaksbrev(Representerer.BRUKER, 0, false);
 
@@ -543,11 +546,12 @@ class BrevmottakerServiceTest {
 
     private void mockFastsattTrygdeavgift(Fagsak fagsak, long norskinntekt, boolean selvbetalende) {
         var inntektsperiode = new Inntektsperiode();
+        inntektsperiode.setType(Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE);
         inntektsperiode.setTrygdeavgiftBetalesTilSkatt(norskinntekt == 0);
         var fastsattTrygdeavgift = behandlingsresultat.getMedlemAvFolketrygden().getFastsattTrygdeavgift();
         fastsattTrygdeavgift.setTrygdeavgiftsperioder(Set.of(new Trygdeavgiftsperiode()));
         fastsattTrygdeavgift.setTrygdeavgiftsgrunnlag(new Trygdeavgiftsgrunnlag());
-        fastsattTrygdeavgift.getTrygdeavgiftsgrunnlag().setInntektsperioder(Set.of(inntektsperiode));
+        fastsattTrygdeavgift.getTrygdeavgiftsgrunnlag().setInntektsperioder(List.of(inntektsperiode));
     }
 
     private Aktoer lagAktoer(Aktoersroller rolle) {

@@ -1,12 +1,11 @@
 package no.nav.melosys.domain.avgift;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.Inntektskildetype;
-import no.nav.melosys.domain.kodeverk.Skatteplikttype;
 import org.hibernate.annotations.Columns;
 import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Type;
@@ -110,13 +109,6 @@ public class Inntektsperiode {
         this.trygdeavgiftBetalesTilSkatt = trygdeavgiftBetalesTilSkatt;
     }
 
-    public boolean utledTrygdeavgiftBetalesTilSkatt(Skatteplikttype skatteplikttype) {
-        var trygdeavgiftBetalesTilNAV = (skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG)
-            || List.of(Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE, Inntektskildetype.FN_SKATTEFRITAK).contains(type)
-            || (type == Inntektskildetype.INNTEKT_FRA_UTLANDET && !arbeidsgiversavgiftBetalesTilSkatt);
-        return !trygdeavgiftBetalesTilNAV;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -141,5 +133,14 @@ public class Inntektsperiode {
         return "Inntektsperiode{" + "id=" + id + ", fomDato=" + fomDato + ", tomDato=" + tomDato + ", type=" + type
             + ", avgiftspliktigInntektMnd=" + avgiftspliktigInntektMnd + ", arbeidsgiversavgiftBetalesTilSkatt="
             + arbeidsgiversavgiftBetalesTilSkatt + ", trygdeavgiftBetalesTilSkatt=" + trygdeavgiftBetalesTilSkatt + '}';
+    }
+
+    // FIXME Riktig logikk for Trygdeavgiftmottaker kommer i https://jira.adeo.no/browse/MELOSYS-5940. Dette er for å fikse MELOSYS-5927
+    public boolean trygdeavgiftBetalesBådeTilNavOgSkatt() {
+        return isTrygdeavgiftBetalesTilSkatt() && !isArbeidsgiversavgiftBetalesTilSkatt() && !erSpesiellGruppe(getType());
+    }
+
+    private static boolean erSpesiellGruppe(Inntektskildetype inntektskildetype) {
+        return Set.of(Inntektskildetype.FN_SKATTEFRITAK, Inntektskildetype.MISJONÆR).contains(inntektskildetype);
     }
 }

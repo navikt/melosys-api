@@ -29,7 +29,7 @@ class TrygdeavgiftsberegningService
 
         fastsattTrygdeavgift.trygdeavgiftsperioder.clear()
 
-        if (!fastsattTrygdeavgift.skalBetaleTrygdeavgiftTilNav()) {
+        if (!fastsattTrygdeavgift.skalBetalesTilNav()) {
             return emptySet()
         }
 

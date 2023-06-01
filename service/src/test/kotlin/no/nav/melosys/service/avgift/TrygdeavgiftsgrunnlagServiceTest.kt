@@ -165,7 +165,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
                     tomDato = tom
                     type = Inntektskildetype.INNTEKT_FRA_UTLANDET
                     isArbeidsgiversavgiftBetalesTilSkatt = false
-                    isTrygdeavgiftBetalesTilSkatt = false
+                    isTrygdeavgiftBetalesTilSkatt = true
                     avgiftspliktigInntektMnd = Penger(BigDecimal.valueOf(30000))
                     trygdeavgiftsgrunnlag =
                         lagretBehandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag
@@ -175,7 +175,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
                     tomDato = tom
                     type = Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE
                     isArbeidsgiversavgiftBetalesTilSkatt = false
-                    isTrygdeavgiftBetalesTilSkatt = false
+                    isTrygdeavgiftBetalesTilSkatt = true
                     avgiftspliktigInntektMnd = Penger(BigDecimal.valueOf(10000))
                     trygdeavgiftsgrunnlag =
                         lagretBehandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag

@@ -151,8 +151,11 @@ class OpprettBetalingsplanTest {
     @Test
     fun `Ikke opprett betalingsplan når trygdeavgift betales til skatt`() {
         lagTestData(emptySet())
-        behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder
-            .first().apply { isTrygdeavgiftBetalesTilSkatt = true }
+        behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.first()
+            .apply {
+                isTrygdeavgiftBetalesTilSkatt = true
+                isArbeidsgiversavgiftBetalesTilSkatt = true
+            }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
 
@@ -265,7 +268,7 @@ class OpprettBetalingsplanTest {
         return FastsattTrygdeavgift().apply {
             trygdeavgiftsperioder = mutableSetOf(lagTrygdeavgift(this))
             trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
-                inntektsperioder = setOf(lagInntektsperiode())
+                inntektsperioder = listOf(lagInntektsperiode())
             }
         }
     }

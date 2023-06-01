@@ -1,5 +1,10 @@
 package no.nav.melosys.tjenester.gui.avklartefakta;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.avgift.*;
@@ -22,11 +27,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.Set;
 
 import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
 import static org.mockito.ArgumentMatchers.any;
@@ -110,7 +110,7 @@ class TrygdeavgiftTjenesteTest {
         skatteForholdINorge.setSkatteplikttype(Skatteplikttype.SKATTEPLIKTIG);
         var trygdeavgiftsgrunnlag = new Trygdeavgiftsgrunnlag();
         trygdeavgiftsgrunnlag.setSkatteforholdTilNorge(Set.of(skatteForholdINorge));
-        trygdeavgiftsgrunnlag.setInntektsperioder(Collections.emptySet());
+        trygdeavgiftsgrunnlag.setInntektsperioder(Collections.emptyList());
 
         return trygdeavgiftsgrunnlag;
     }

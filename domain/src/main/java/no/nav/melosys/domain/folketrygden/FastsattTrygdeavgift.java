@@ -1,6 +1,7 @@
 package no.nav.melosys.domain.folketrygden;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.persistence.*;
 
@@ -72,20 +73,26 @@ public class FastsattTrygdeavgift {
         this.trygdeavgiftsperioder = trygdeavgiftsperioder;
     }
 
-    public Trygdeavgiftmottaker getTrygdeavgiftMottaker() {
+    public boolean skalBetalesTilNav() {
+        var trygdeavgiftMottaker = getTrygdeavgiftMottaker();
+        return trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
+            || trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT;
+    }
+
+    private Trygdeavgiftmottaker getTrygdeavgiftMottaker() {
         var inntektsperioder = trygdeavgiftsgrunnlag.getInntektsperioder();
 
-        if (inntektsperioder.stream().map(Inntektsperiode::isTrygdeavgiftBetalesTilSkatt).distinct().count() != 1) {
+        if (trygdeavgiftBetalesTilNavOgSkatt(inntektsperioder)) {
             return Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT;
         }
-        return inntektsperioder.iterator().next().isTrygdeavgiftBetalesTilSkatt()
+        return inntektsperioder.stream().allMatch(Inntektsperiode::isTrygdeavgiftBetalesTilSkatt)
             ? Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
             : Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV;
     }
 
-    public boolean skalBetaleTrygdeavgiftTilNav() {
-        var trygdeavgiftMottaker = getTrygdeavgiftMottaker();
-        return trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
-            || trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT;
+    private static boolean trygdeavgiftBetalesTilNavOgSkatt(List<Inntektsperiode> inntektsperioder) {
+        boolean ordinærTrygdeavgiftTilSkatt = inntektsperioder.stream().anyMatch(Inntektsperiode::isTrygdeavgiftBetalesTilSkatt);
+        boolean ordinærTrygdeavgiftTilNav = inntektsperioder.stream().anyMatch(inntektsperiode -> !inntektsperiode.isTrygdeavgiftBetalesTilSkatt());
+        return (ordinærTrygdeavgiftTilSkatt && ordinærTrygdeavgiftTilNav) || inntektsperioder.stream().anyMatch(Inntektsperiode::trygdeavgiftBetalesBådeTilNavOgSkatt);
     }
 }
