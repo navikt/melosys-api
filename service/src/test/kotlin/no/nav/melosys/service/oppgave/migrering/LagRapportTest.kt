@@ -11,7 +11,6 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.service.LoggingTestUtils
 import no.nav.melosys.service.lovligekombinasjoner.GyldigeKombinasjoner
 import no.nav.melosys.service.oppgave.OppgaveFactory
@@ -23,16 +22,12 @@ import java.time.LocalDate
 
 @Disabled("brukes bare for å lage oppgave migrering html rapporter, fjerns fra git etter at migreing er utført")
 class LagRapportTest {
-    private val oppgaveGosysMapping = OppgaveGosysMapping(
-        FakeUnleash().apply { enable(OppgaveGosysMapping.NY_GOSYS_MAPPING_UNTAKK_FOR_MIGRERING) }
-    )
-    private val oppgaveFactory = OppgaveFactory(FakeUnleash().apply { enable(ToggleName.NY_GOSYS_MAPPING) })
+    private val oppgaveGosysMapping = OppgaveGosysMapping()
+    private val oppgaveFactory = OppgaveFactory(FakeUnleash())
 
     @Test
     fun `lag rapport hvor kombinasjoner er gruppert etter antall pr kombinasjon og med de som er forskjellig`() {
-        val oppgaveGosysMapping = OppgaveGosysMapping(
-            FakeUnleash().apply { enable(OppgaveGosysMapping.NY_GOSYS_MAPPING_UNTAKK_FOR_MIGRERING) }
-        )
+        val oppgaveGosysMapping = OppgaveGosysMapping()
         val migreringsRapport =
             Migrering.migreringsRapportFraJson("/Users/rune/div/dryrun-0520/jsonrapport-prod-0520.json")
 

@@ -1,6 +1,5 @@
 package no.nav.melosys.service.oppgave
 
-import no.finn.unleash.Unleash
 import no.nav.melosys.domain.Tema
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -8,7 +7,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 
-internal class OppgaveGosysMapping(private val unleash: Unleash) {
+internal class OppgaveGosysMapping {
 
     private val teamaUtleder = OppgaveTemaUtleder()
 
@@ -503,32 +502,6 @@ internal class OppgaveGosysMapping(private val unleash: Unleash) {
                     Beskrivelsefelt.TOMT
                 )
             )
-        ) + spesialReglerForMigringVedIkkeStøttetKombinasjon()
-    }
-
-    fun spesialReglerForMigringVedIkkeStøttetKombinasjon(): List<TableRow> =
-        if (unleash.isEnabled(NY_GOSYS_MAPPING_UNTAKK_FOR_MIGRERING))
-            listOf(
-                TableRow(
-                    Sakstyper.EU_EOS,
-                    Sakstemaer.MEDLEMSKAP_LOVVALG,
-                    setOf(
-                        Behandlingstyper.FØRSTEGANG,
-                        Behandlingstyper.NY_VURDERING
-                    ),
-                    setOf(Behandlingstema.TRYGDETID),
-                    Oppgave(
-                        OppgaveBehandlingstema.EU_EOS_FORESPORSEL_OM_TRYGDETID,
-                        Tema.MED,
-                        Oppgavetyper.BEH_SED,
-                        Beskrivelsefelt.SED,
-                        Regel.KUN_VED_MIGRERING
-                    )
-                )
-            ) else listOf()
-
-    companion object {
-        // Den skal kun settes av Oppgave migrering
-        const val NY_GOSYS_MAPPING_UNTAKK_FOR_MIGRERING = "melosys.ny_gosys_mapping_untakk_for_migrering"
+        )
     }
 }

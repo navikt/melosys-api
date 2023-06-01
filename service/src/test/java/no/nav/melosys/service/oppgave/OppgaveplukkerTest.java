@@ -1,5 +1,10 @@
 package no.nav.melosys.service.oppgave;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.*;
+
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -26,11 +31,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-
-import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -308,7 +308,7 @@ class OppgaveplukkerTest {
         Optional<Oppgave> oppgave = oppgaveplukker.plukkOppgave("Z01234", plukkOppgaveInnDto);
 
 
-        verify(oppgaveFasade, times(2)).finnUtildelteOppgaverEtterFrist(anyString());
+        verify(oppgaveFasade, times(1)).finnUtildelteOppgaverEtterFrist(anyString());
         assertThat(oppgave).isPresent();
     }
 

@@ -14,7 +14,6 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.saksflyt.ProsessType
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.melosysmock.journalpost.JournalpostRepo
 import no.nav.melosys.melosysmock.oppgave.OppgaveRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
@@ -99,9 +98,7 @@ class SedMottakBehandlngsTypeIT(
     }
 
     @Test
-    fun `A003 skal føre til riktig oppgave i gosys - med ny gosys mapping`() {
-        unleash.enable(ToggleName.NY_GOSYS_MAPPING)
-
+    fun `A003 skal føre til riktig oppgave i gosys`() {
         val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding(
             bucType = BucType.LA_BUC_02,
             rinaSaksnummer = Random().nextInt(100000).toString(),
@@ -115,6 +112,7 @@ class SedMottakBehandlngsTypeIT(
         executeAndWait(ProsessType.MOTTAK_SED, listOf(ProsessType.ARBEID_FLERE_LAND_NY_SAK)) {
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
         }
+
 
         oppgaveRepo.repo.values
             .shouldHaveSize(1)
