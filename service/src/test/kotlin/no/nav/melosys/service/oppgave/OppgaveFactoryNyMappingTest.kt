@@ -173,7 +173,7 @@ internal class OppgaveFactoryNyMappingTest {
         }.filter {
             it.behandlingstype in listOf(Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE)
         }.shouldHaveSize(44).forEach { sak ->
-            LoggingTestUtils.withLogAppender<OppgaveBeskrivelseNyUtleder> { oppgaveBeskrivelseListAppender ->
+            LoggingTestUtils.withLogAppender<OppgaveBeskrivelseUtleder> { oppgaveBeskrivelseListAppender ->
                 val behandling = sak.lagBehandlingMedSpy()
                 val oppgave =
                     oppgaveFactory.lagBehandlingsoppgave(

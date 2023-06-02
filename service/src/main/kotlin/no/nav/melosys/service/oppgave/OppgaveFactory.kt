@@ -21,7 +21,7 @@ private val log = KotlinLogging.logger { }
 class OppgaveFactory {
     private val oppgaveBehandlingstemaUtleder = OppgaveBehandlingstemaUtleder()
     private val oppgavetypeUtleder = OppgavetypeNyUtleder()
-    private val oppgaveBeskrivelseUtleder = OppgaveBeskrivelseNyUtleder()
+    private val oppgaveBeskrivelseUtleder = OppgaveBeskrivelseUtleder()
     private val temaUtleder = OppgaveTemaUtleder()
 
     fun lagBehandlingsoppgave(
