@@ -160,7 +160,7 @@ class OppgaveMigrering(
         try {
             val oppgaveBehandlingstema: OppgaveBehandlingstema? = sakOgBehandling.utledOppgaveBehandlingstema()
             val oppgavetype: Oppgavetyper = sakOgBehandling.utledOppgaveType()
-            val beskrivelse: String = sakOgBehandling.utledBeskrivelse(oppgaveBehandlingstema)
+            val beskrivelse: String = sakOgBehandling.utledBeskrivelse()
             val tema: Tema = sakOgBehandling.utledTema()
             return OppgaveMigreringsOppdatering(oppgaveBehandlingstema, null, tema, oppgavetype, beskrivelse)
         } catch (e: Exception) {
@@ -189,15 +189,15 @@ class OppgaveMigrering(
             sakstype, sakstema, behandlingstema
         )
 
-    private fun SakOgBehandlingDTO.utledBeskrivelse(oppgaveBehandlingstema: OppgaveBehandlingstema?): String {
+    private fun SakOgBehandlingDTO.utledBeskrivelse(): String {
         val hentSedDokument = { _: Boolean -> sedDokument(behandlingID) }
         return try {
             nyOppgaveFactory.utledBeskrivelse(
-                oppgaveBehandlingstema,
                 sakstype,
                 sakstema,
                 behandlingstema,
-                behandlingstype, hentSedDokument
+                behandlingstype,
+                hentSedDokument
             )
         } catch (e: Exception) {
             val message = e.message ?: "utledBeskrivelse feilet "

@@ -13,7 +13,6 @@ class OppgaveBeskrivelseUtleder {
     private val oppgaveGosysMapping = OppgaveGosysMapping()
 
     fun utledBeskrivelse(
-        oppgaveBehandlingstema: OppgaveBehandlingstema?,
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,

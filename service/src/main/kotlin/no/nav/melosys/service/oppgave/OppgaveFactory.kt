@@ -44,7 +44,6 @@ class OppgaveFactory {
             .setOppgavetype(utledOppgavetype(sakstype, sakstema, behandlingstema, behandlingstype))
             .setBeskrivelse(
                 utledBeskrivelse(
-                    oppgaveBehandlingstema,
                     sakstype,
                     sakstema,
                     behandlingstema,
@@ -78,14 +77,12 @@ class OppgaveFactory {
     }
 
     internal fun utledBeskrivelse(
-        oppgaveBehandlingstema: OppgaveBehandlingstema?,
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper,
         hentSedDokument: (logHvisMangler: Boolean) -> SedDokument?
     ): String = oppgaveBeskrivelseUtleder.utledBeskrivelse(
-        oppgaveBehandlingstema,
         sakstype,
         sakstema,
         behandlingstema,
