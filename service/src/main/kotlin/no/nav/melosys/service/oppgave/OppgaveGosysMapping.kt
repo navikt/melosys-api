@@ -16,13 +16,20 @@ internal class OppgaveGosysMapping {
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper?
-    ): Oppgave = finnOppgaveFraTabell(sakstype, sakstema, behandlingstema, behandlingstype)
-        ?: finnOppgaveVedBehandlingstypeHenvendelseOgVirksomhet(sakstype, sakstema, behandlingstema, behandlingstype)
-        ?: finnOppgaveVedBehandlingstypeHenvendelse(sakstype, sakstema, behandlingstema, behandlingstype)
+    ): Oppgave = finnOppgaveOrNull(sakstype, sakstema, behandlingstema, behandlingstype)
         ?: throw IllegalStateException(
             "Fant ikke oppgave mapping for " +
                 "sakstype:$sakstype, sakstema:$sakstema, behandlingstema:$behandlingstema, behandlingstype:$behandlingstype"
         )
+
+    internal fun finnOppgaveOrNull(
+        sakstype: Sakstyper,
+        sakstema: Sakstemaer,
+        behandlingstema: Behandlingstema,
+        behandlingstype: Behandlingstyper?
+    ): Oppgave? = finnOppgaveFraTabell(sakstype, sakstema, behandlingstema, behandlingstype)
+        ?: finnOppgaveVedBehandlingstypeHenvendelseOgVirksomhet(sakstype, sakstema, behandlingstema, behandlingstype)
+        ?: finnOppgaveVedBehandlingstypeHenvendelse(sakstype, sakstema, behandlingstema, behandlingstype)
 
     // https://confluence.adeo.no/display/TEESSI/Oppgaver+i+Gosys
     internal fun finnOppgaveFraTabell(

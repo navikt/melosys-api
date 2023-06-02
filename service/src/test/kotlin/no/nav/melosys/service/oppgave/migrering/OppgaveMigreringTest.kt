@@ -1,6 +1,5 @@
 package no.nav.melosys.service.oppgave.migrering
 
-import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
@@ -25,7 +24,6 @@ import org.springframework.core.env.StandardEnvironment
 import java.io.File
 
 class OppgaveMigreringTest {
-    private val sedTyper = SedType.values().map { it.name }.toSet()
 
     @Test
     fun `sjekk at vi ikke migrer allerede migrerte`() {
@@ -82,17 +80,43 @@ class OppgaveMigreringTest {
 
     @Test
     @Disabled("brukes bare for å lage oppgave migrering html rapporter, fjerns fra git etter at migreing er utført")
+    fun `finn de som er forandret på etter migreing`() {
+        val migreringsListe =
+            Migrering.migreringsRapportFraJson("/Users/rune/div/dryrun-prod-0602/jsonrapport-prod-dryrun-0602.json")
+                .sortedMigreringsListe()
+                .filter {
+                    OppgaveMigrering.erGyldig(
+                        it.sak.sakstype,
+                        it.sak.sakstema,
+                        it.sak.behandlingstype,
+                        it.sak.behandlingstema
+                    )
+                }
+                .filter { it.oppgaver.size == 1 }
+                .filterNot { it.erOppgaveMigrert() }
+
+        println(migreringsListe.size)
+        println(migreringsListe.joinToString(", ") { it.sak.saksnummer })
+    }
+
+    @Test
+    @Disabled("brukes bare for å lage oppgave migrering html rapporter, fjerns fra git etter at migreing er utført")
     fun `lag rapport`() {
         val migreringsRapport =
-            Migrering.migreringsRapportFraJson("/Users/rune/div/dryrun-0520/jsonrapport-prod-0520.json")
+            Migrering.migreringsRapportFraJson("/Users/rune/div/dryrun-prod-0601/jsonrapport-prod-dryrun-0601.json")
 
-        File("/Users/rune/div/migrerings-rapport.html").writeText(migreringsRapport.html { migreringsSaker ->
+        File("/Users/rune/div/migrerings-rapport-ikke-gyldig.html").writeText(migreringsRapport.html { migreringsSaker ->
             migreringsSaker
-                .filter { it.sak.sakstype == Sakstyper.EU_EOS }
-                .filter { it.sak.sakstema == Sakstemaer.UNNTAK }
-                .filter { it.sak.behandlingstype == Behandlingstyper.HENVENDELSE }
-                .filter { it.sak.behandlingstema == Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND }
                 .filter { it.oppgaver.size == 1 }
+                .filter {
+                    OppgaveMigrering.erGyldig(
+                        it.sak.sakstype,
+                        it.sak.sakstema,
+                        it.sak.behandlingstype,
+                        it.sak.behandlingstema
+                    )
+                }
+                .filterNot { it.erOppgaveMigrert() }
         })
     }
 
@@ -100,8 +124,9 @@ class OppgaveMigreringTest {
     @Disabled("brukes bare for å lage oppgave migrering html rapporter, fjerns fra git etter at migreing er utført")
     fun `kjør migreing fra tidligere jsonrapport fil`() {
         val migreringsListe =
-            Migrering.migreringsRapportFraJson("/Users/rune/div/dryrun-0520/jsonrapport-prod-0520.json")
+            Migrering.migreringsRapportFraJson("/Users/rune/div/dryrun-prod-0602/jsonrapport-prod-dryrun-0602.json")
                 .sortedMigreringsListe()
+//                .filterNot { unntakForMigrering.any { unntak ->  unntak.match(it.sak.sakstype, it.sak.sakstema, it.sak.behandlingstype, it.sak.behandlingstema) }  }
 
         val behandlingRepository = mockk<BehandlingRepositoryForOppgaveMigrering>()
         every { behandlingRepository.finnSaksOgBehandlingTyperOgTema(any()) } returns migreringsListe.map { it.sak }
@@ -135,11 +160,9 @@ class OppgaveMigreringTest {
             migreringsRapport
         ).migrering(null, null, false)
 
-        migreringsRapport.status()["migreringFeilet"].shouldBe(1)
-        migreringsRapport.sortedMigreringsListe().filter {
-            it.ny.oppgaveOppdateringError != null
-        }.shouldHaveSize(1)
-            .first().ny.oppgaveOppdateringError.shouldBe("Feil ved oppdatering av oppgave 361544672")
+        migreringsRapport.status().forEach {
+            println(it)
+        }
     }
 
     private fun lagBehandling(
@@ -150,7 +173,7 @@ class OppgaveMigreringTest {
         val sakstema: Sakstemaer = sak.sakstema
         val behandlingstema: Behandlingstema = sak.behandlingstema
         val behandlingstype: Behandlingstyper = sak.behandlingstype
-        val sedName = sedTyper.find { it == migreringsSak.ny.beskrivelse }
+        val sedName = SedType.values().find { it.name == migreringsSak.ny.beskrivelse }?.name
 
         return Behandling().apply {
             id = 1

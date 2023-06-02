@@ -19,6 +19,7 @@ import no.nav.melosys.repository.BehandlingRepositoryForOppgaveMigrering
 import no.nav.melosys.service.lovligekombinasjoner.GyldigeKombinasjoner
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
 import no.nav.melosys.service.oppgave.OppgaveFactory
+import no.nav.melosys.service.oppgave.OppgaveGosysMapping
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
@@ -222,6 +223,7 @@ class OppgaveMigrering(
     }
 
     companion object {
+        private val oppgaveGosysMapping by lazy { OppgaveGosysMapping() }
         internal fun erGyldig(
             sakstype: Sakstyper,
             sakstema: Sakstemaer,
@@ -253,7 +255,37 @@ class OppgaveMigrering(
                 behandlingstema = Behandlingstema.TRYGDETID,
             )
         )
+
+        internal fun finnOppgave(
+            sakstype: Sakstyper,
+            sakstema: Sakstemaer,
+            behandlingstema: Behandlingstema,
+            behandlingstype: Behandlingstyper?
+        ): OppgaveGosysMapping.Oppgave {
+            return oppgaveGosysMapping.finnOppgaveOrNull(sakstype, sakstema, behandlingstema, behandlingstype)
+                ?: listOf(
+                    OppgaveGosysMapping.TableRow(
+                        Sakstyper.EU_EOS,
+                        Sakstemaer.MEDLEMSKAP_LOVVALG,
+                        setOf(
+                            Behandlingstyper.FØRSTEGANG,
+                            Behandlingstyper.NY_VURDERING
+                        ),
+                        setOf(Behandlingstema.TRYGDETID),
+                        OppgaveGosysMapping.Oppgave(
+                            OppgaveBehandlingstema.EU_EOS_FORESPORSEL_OM_TRYGDETID,
+                            Tema.MED,
+                            Oppgavetyper.BEH_SED,
+                            OppgaveGosysMapping.Beskrivelsefelt.SED,
+                            OppgaveGosysMapping.Regel.KUN_VED_MIGRERING
+                        )
+                    )
+                ).find {
+                    it.sakstype == sakstype && it.sakstema == sakstema && behandlingstype in it.behandlingstype && behandlingstema in it.behandlingstema
+                }?.oppgave ?: throw IllegalStateException(
+                    "Fant ikke oppgave mapping for " +
+                        "sakstype:$sakstype, sakstema:$sakstema, behandlingstema:$behandlingstema, behandlingstype:$behandlingstype"
+                )
+        }
     }
-
-
 }
