@@ -1,7 +1,6 @@
 package no.nav.melosys.service.oppgave.migrering
 
 import mu.KotlinLogging
-import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.SakOgBehandlingDTO
 import no.nav.melosys.domain.Tema
@@ -35,7 +34,7 @@ class OppgaveMigrering(
     @Volatile
     var stopMigrering: Boolean = false
 
-    private val nyOppgaveFactory = OppgaveFactory(FakeUnleash())
+    private val nyOppgaveFactory = OppgaveFactory()
 
     fun status(): Map<String, Any> {
         return migreringsRapport.status()

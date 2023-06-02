@@ -1,7 +1,6 @@
 package no.nav.melosys.service.oppgave
 
 import mu.KotlinLogging
-import no.finn.unleash.Unleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsystem
 import no.nav.melosys.domain.Tema
@@ -19,7 +18,7 @@ import java.time.LocalDate
 private val log = KotlinLogging.logger { }
 
 @Component
-class OppgaveFactory(private val unleash: Unleash) {
+class OppgaveFactory {
     private val oppgaveBehandlingstemaUtleder = OppgaveBehandlingstemaNyUtleder()
     private val oppgavetypeUtleder = OppgavetypeNyUtleder()
     private val oppgaveBeskrivelseUtleder = OppgaveBeskrivelseNyUtleder()
@@ -65,10 +64,6 @@ class OppgaveFactory(private val unleash: Unleash) {
         oppgaveBehandlingstemaUtleder.utledOppgaveBehandlingstema(
             sakstype, sakstema, behandlingstema, behandlingstype
         )
-
-    fun utledOppgaveBehandlingstype(
-        sakstype: Sakstyper, sakstema: Sakstemaer, behandlingstema: Behandlingstema
-    ): OppgaveBehandlingstype? = null
 
     fun utledTema(sakstype: Sakstyper, sakstema: Sakstemaer?, behandlingstema: Behandlingstema): Tema =
         temaUtleder.utledTema(sakstype, sakstema, behandlingstema)

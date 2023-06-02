@@ -1,5 +1,8 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
+import java.util.List;
+import java.util.Set;
+
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
@@ -40,9 +43,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
-import java.util.Set;
-
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -73,7 +73,7 @@ class OpprettOgJournalforBrevTest {
 
     private OpprettOgJournalforBrev opprettJournalforBrev;
 
-    private final OppgaveFactory oppgaveFactory = new OppgaveFactory(new FakeUnleash());
+    private final OppgaveFactory oppgaveFactory = new OppgaveFactory();
 
     @BeforeEach
     void init() {

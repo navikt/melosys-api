@@ -5,7 +5,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Oppgavetyper;
@@ -52,7 +51,7 @@ class OppgaveplukkerTest {
 
     private Oppgaveplukker oppgaveplukker;
 
-    private final OppgaveFactory oppgaveFactory = new OppgaveFactory(new FakeUnleash());
+    private final OppgaveFactory oppgaveFactory = new OppgaveFactory();
 
     private final static long BEHANDLING_ID = 123L;
     private final static long GSAK_SAKSNUMMER = 42L;

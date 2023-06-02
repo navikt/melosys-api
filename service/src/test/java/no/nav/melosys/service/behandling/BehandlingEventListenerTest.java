@@ -1,6 +1,5 @@
 package no.nav.melosys.service.behandling;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingEndretAvSaksbehandlerEvent;
 import no.nav.melosys.domain.Fagsak;
@@ -43,7 +42,7 @@ class BehandlingEventListenerTest {
 
     private BehandlingEventListener behandlingEventListener;
 
-    private final OppgaveFactory oppgaveFactory = new OppgaveFactory(new FakeUnleash());
+    private final OppgaveFactory oppgaveFactory = new OppgaveFactory();
 
     private final long BEHANDLING_ID = 123321L;
     private final String FAGSAKSNUMMER = "222";

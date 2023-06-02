@@ -3,7 +3,6 @@ package no.nav.melosys.service.eessi;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Saksopplysning;
@@ -54,7 +53,7 @@ class DefaultSedRuterTest {
 
     private DefaultSedRuter defaultSedRuter;
 
-    private final OppgaveFactory oppgaveFactory = new OppgaveFactory(new FakeUnleash());
+    private final OppgaveFactory oppgaveFactory = new OppgaveFactory();
 
     private static final String SAKSNUMMER = "MEL-!!!";
     private static final Long GSAK_SAKSNUMMER = 123L;

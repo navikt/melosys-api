@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -40,7 +39,7 @@ class FerdigstillJournalpostSedTest {
     private static final String SAKSNUMMER = "MEL-1223";
     private static final String TITTEL = "tittel123";
 
-    private final OppgaveFactory oppgaveFactory = new OppgaveFactory(new FakeUnleash());
+    private final OppgaveFactory oppgaveFactory = new OppgaveFactory();
 
     @BeforeEach
     public void setUp() {

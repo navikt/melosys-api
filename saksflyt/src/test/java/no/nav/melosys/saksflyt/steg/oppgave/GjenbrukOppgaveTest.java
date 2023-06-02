@@ -2,7 +2,6 @@ package no.nav.melosys.saksflyt.steg.oppgave;
 
 import java.time.LocalDate;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -42,7 +41,7 @@ class GjenbrukOppgaveTest {
 
     private GjenbrukOppgave gjenbrukOppgave;
 
-    private final OppgaveFactory oppgaveFactory = new OppgaveFactory(new FakeUnleash());
+    private final OppgaveFactory oppgaveFactory = new OppgaveFactory();
 
     @BeforeEach
     public void setUp() {

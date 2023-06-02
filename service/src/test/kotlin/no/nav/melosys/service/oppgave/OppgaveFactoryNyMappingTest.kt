@@ -7,7 +7,6 @@ import io.kotest.matchers.shouldBe
 import io.mockk.called
 import io.mockk.spyk
 import io.mockk.verify
-import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.SedType
@@ -28,7 +27,7 @@ import java.time.LocalDate
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class OppgaveFactoryNyMappingTest {
 
-    private val oppgaveFactory = OppgaveFactory(FakeUnleash())
+    private val oppgaveFactory = OppgaveFactory()
 
     @Test
     fun `Sed skal brukes som beskrivelse ved oppgavetype BEH_SED - untatt ved A1_ANMODNING_OM_UNNTAK_PAPIR eller oppgave opprettes fra eksisterende`() {
