@@ -20,7 +20,7 @@ private val log = KotlinLogging.logger { }
 @Component
 class OppgaveFactory {
     private val oppgaveBehandlingstemaUtleder = OppgaveBehandlingstemaUtleder()
-    private val oppgavetypeUtleder = OppgavetypeNyUtleder()
+    private val oppgavetypeUtleder = OppgavetypeUtleder()
     private val oppgaveBeskrivelseUtleder = OppgaveBeskrivelseUtleder()
     private val temaUtleder = OppgaveTemaUtleder()
 
