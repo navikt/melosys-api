@@ -15,7 +15,7 @@ import no.nav.melosys.saksflyt.prosessflyt.ProsessflytDefinisjon;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -24,20 +24,14 @@ public class ProsessinstansStatusCache {
     private static final Logger log = LoggerFactory.getLogger(ProsessinstansStatusCache.class);
 
     private final ProsessinstansRepository prosessinstansRepository;
-    private final long maksDataLevetidMs;
-
     private Map<Pair<ProsessType, ProsessStatus>, Long> antallPerTypeOgStatus;
     private Map<Pair<ProsessSteg, ProsessStatus>, Long> antallPerStegOgStatus;
-    private long sistLestTidspunkt = 0;
-
     private static final EnumSet<ProsessType> PROSESS_TYPER = EnumSet.allOf(ProsessType.class);
     private static final EnumSet<ProsessSteg> PROSESS_STEG = EnumSet.allOf(ProsessSteg.class);
     private static final EnumSet<ProsessStatus> STATUS_FEILET = EnumSet.of(ProsessStatus.FEILET);
 
-    public ProsessinstansStatusCache(ProsessinstansRepository prosessinstansRepository,
-                                     @Value("${melosys.prosesser.status.cache.levetid:5000}") long millisLevetidICache) {
+    public ProsessinstansStatusCache(ProsessinstansRepository prosessinstansRepository) {
         this.prosessinstansRepository = prosessinstansRepository;
-        this.maksDataLevetidMs = millisLevetidICache;
     }
 
     double antallProsessinstanserFeiletPåType(ProsessType type) {
@@ -49,8 +43,6 @@ public class ProsessinstansStatusCache {
     }
 
     private long antallProsessinstanserMedStegOgStatus(ProsessSteg prosessSteg, EnumSet<ProsessStatus> statuser) {
-        oppfriskCacheHvisUtløpt();
-
         long sumAntall = 0;
         for (ProsessStatus prosessStatus : statuser) {
             Pair<ProsessSteg, ProsessStatus> prosessStegOgStatus = Pair.of(prosessSteg, prosessStatus);
@@ -63,8 +55,6 @@ public class ProsessinstansStatusCache {
     }
 
     private long antallProsessinstanserMedTypeOgStatus(ProsessType prosessType, EnumSet<ProsessStatus> statuser) {
-        oppfriskCacheHvisUtløpt();
-
         long sumAntall = 0;
         for (ProsessStatus prosessStatus : statuser) {
             Pair<ProsessType, ProsessStatus> prosessTypeOgStatus = Pair.of(prosessType, prosessStatus);
@@ -76,15 +66,7 @@ public class ProsessinstansStatusCache {
         return sumAntall;
     }
 
-    private void oppfriskCacheHvisUtløpt() {
-        long nå = System.currentTimeMillis();
-        long alderMs = nå - sistLestTidspunkt;
-        if (alderMs >= maksDataLevetidMs) {
-            oppfriskCache();
-            sistLestTidspunkt = System.currentTimeMillis();
-        }
-    }
-
+    @Scheduled(fixedRate = 15000)
     private void oppfriskCache() {
         log.info("Oppfrisker caching av metrikker for prosessinstanser");
         long tidStart = System.currentTimeMillis();

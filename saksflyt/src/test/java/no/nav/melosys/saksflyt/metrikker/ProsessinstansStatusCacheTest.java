@@ -28,7 +28,7 @@ class ProsessinstansStatusCacheTest {
 
     @BeforeEach
     void setup() {
-        cache = new ProsessinstansStatusCache(prosessinstansRepository, 100);
+        cache = new ProsessinstansStatusCache(prosessinstansRepository);
         ProsessinstansAntall prosessinstansAntall_1 = new ProsessinstansAntall(JFR_ANDREGANG_REPLIKER_BEHANDLING, FERDIG, 2);
         ProsessinstansAntall prosessinstansAntall_2 = new ProsessinstansAntall(JFR_KNYTT, FEILET, 1);
         ProsessinstansAntall prosessinstansAntall_3 = new ProsessinstansAntall(IVERKSETT_VEDTAK_EOS, FEILET, 2);
