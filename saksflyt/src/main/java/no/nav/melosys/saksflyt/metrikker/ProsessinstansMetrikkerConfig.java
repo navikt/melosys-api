@@ -24,7 +24,7 @@ public class ProsessinstansMetrikkerConfig {
     private void registrerAntallFeiledeProsessinstanserGruppertPåType(MeterRegistry meterRegistry,
                                                                       ProsessinstansStatusCache statusCache) {
         for (ProsessType prosessType : ProsessType.values()) {
-            String gaugeNavnProsessinstansType = MetrikkerNavn.PROSESSINSTANSER;
+            String gaugeNavnProsessinstansType = MetrikkerNavn.PROSESSINSTANSER_FEILET;
             Gauge.builder(
                 gaugeNavnProsessinstansType,
                 statusCache,
