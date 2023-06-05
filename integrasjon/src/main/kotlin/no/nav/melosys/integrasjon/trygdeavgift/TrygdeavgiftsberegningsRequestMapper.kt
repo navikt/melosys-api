@@ -79,14 +79,19 @@ class TrygdeavgiftsberegningsRequestMapper {
         return when (trygdedekning) {
             Trygdedekninger.HELSEDEL ->
                 setOf(Avgiftsdekning.HELSEDEL_UTEN_SYKEPENGER)
+
             Trygdedekninger.HELSEDEL_MED_SYKE_OG_FORELDREPENGER ->
                 setOf(Avgiftsdekning.HELSEDEL_MED_SYKEPENGER)
+
             Trygdedekninger.PENSJONSDEL ->
                 setOf(Avgiftsdekning.PENSJONSDEL_UTEN_YRKESSKADETRYGD)
+
             Trygdedekninger.HELSE_OG_PENSJONSDEL ->
                 setOf(Avgiftsdekning.HELSEDEL_UTEN_SYKEPENGER, Avgiftsdekning.PENSJONSDEL_UTEN_YRKESSKADETRYGD)
+
             Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER ->
                 setOf(Avgiftsdekning.HELSEDEL_MED_SYKEPENGER, Avgiftsdekning.PENSJONSDEL_UTEN_YRKESSKADETRYGD)
+
             else -> throw FunksjonellException("Kan ikke finne avgiftsdekninger fra trygdedekning " + trygdedekning)
         }
     }
