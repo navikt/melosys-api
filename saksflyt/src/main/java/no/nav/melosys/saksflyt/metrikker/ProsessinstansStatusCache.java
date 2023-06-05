@@ -24,8 +24,8 @@ public class ProsessinstansStatusCache {
     private static final Logger log = LoggerFactory.getLogger(ProsessinstansStatusCache.class);
 
     private final ProsessinstansRepository prosessinstansRepository;
-    private Map<Pair<ProsessType, ProsessStatus>, Long> antallPerTypeOgStatus;
-    private Map<Pair<ProsessSteg, ProsessStatus>, Long> antallPerStegOgStatus;
+    private final Map<Pair<ProsessType, ProsessStatus>, Long> antallPerTypeOgStatus = new HashMap<>();
+    private final Map<Pair<ProsessSteg, ProsessStatus>, Long> antallPerStegOgStatus = new HashMap<>();
     private static final EnumSet<ProsessType> PROSESS_TYPER = EnumSet.allOf(ProsessType.class);
     private static final EnumSet<ProsessSteg> PROSESS_STEG = EnumSet.allOf(ProsessSteg.class);
     private static final EnumSet<ProsessStatus> STATUS_FEILET = EnumSet.of(ProsessStatus.FEILET);
@@ -66,24 +66,39 @@ public class ProsessinstansStatusCache {
         return sumAntall;
     }
 
-    @Scheduled(fixedRate = 15000)
+    @Scheduled(fixedRateString = "${melosys.prosesser.status.oppfriskning.frekvens:1500}")
     private void oppfriskCache() {
         log.info("Oppfrisker caching av metrikker for prosessinstanser");
         long tidStart = System.currentTimeMillis();
 
+        oppfriskPerTypeOgStatus();
+
+        oppfriskPerStegOgStatus();
+
+        long tidSlutt = System.currentTimeMillis();
+        long tidBrukt = tidSlutt - tidStart;
+        log.info("Oppfriskning av cache av metrikker for prosessinstanser tok {} millisekunder.", tidBrukt);
+    }
+
+    private void oppfriskPerTypeOgStatus() {
         Collection<ProsessinstansAntall> prosessinstansMetrikker = prosessinstansRepository.
             antallAktiveOgFeiletPerTypeOgStatus(PROSESS_TYPER);
 
-        antallPerTypeOgStatus = new HashMap<>();
+        antallPerTypeOgStatus.clear();
         for (ProsessinstansAntall prosessinstansAntall : prosessinstansMetrikker) {
             Pair<ProsessType, ProsessStatus> typeOgStatus = Pair.of(prosessinstansAntall.getProsessType(), prosessinstansAntall.getProsessStatus());
             antallPerTypeOgStatus.put(typeOgStatus, prosessinstansAntall.getAntall());
         }
+        for (ProsessinstansAntall prosessinstansAntall : prosessinstansMetrikker) {
+            Pair<ProsessType, ProsessStatus> typeOgStatus = Pair.of(prosessinstansAntall.getProsessType(), prosessinstansAntall.getProsessStatus());
+        }
+    }
 
+    private void oppfriskPerStegOgStatus() {
         Collection<ProsessinstansStegAntall> prosessinstansMetrikkerForStegOgStatus = prosessinstansRepository.
             antallAktiveOgFeiletPerStegOgStatus(PROSESS_STEG, true);
 
-        antallPerStegOgStatus = new HashMap<>();
+        antallPerStegOgStatus.clear();
         for (ProsessinstansStegAntall prosessinstansStegAntall : prosessinstansMetrikkerForStegOgStatus) {
             ProsessSteg feiletSteg = ProsessflytDefinisjon.hentNesteSteg(prosessinstansStegAntall.getProsessType(), prosessinstansStegAntall.getSistFullfortSteg())
                 .orElse(null);
@@ -96,8 +111,5 @@ public class ProsessinstansStatusCache {
                         : eksisterendeAntall + prosessinstansStegAntall.getAntall());
             }
         }
-        long tidSlutt = System.currentTimeMillis();
-        long tidBrukt = tidSlutt - tidStart;
-        log.info("Oppfriskning av cache av metrikker for prosessinstanser tok " + tidBrukt + " millisekunder.");
     }
 }
