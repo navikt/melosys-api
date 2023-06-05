@@ -38,7 +38,7 @@ public class ProsessinstansMetrikkerConfig {
     private void registrerAntallFeiledeProsessinstanserGruppertPåSteg(MeterRegistry meterRegistry,
                                                                       ProsessinstansStatusCache statusCache) {
         for (ProsessSteg prosessSteg : ProsessSteg.values()) {
-            String gaugeNavnProsessinstansSteg = MetrikkerNavn.PROSESSINSTANSER_FEILET;
+            String gaugeNavnProsessinstansSteg = MetrikkerNavn.PROSESSINSTANSER_STEG_FEILET;
             Gauge.builder(
                     gaugeNavnProsessinstansSteg,
                     statusCache,
