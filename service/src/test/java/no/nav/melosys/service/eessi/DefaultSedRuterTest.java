@@ -1,8 +1,13 @@
 package no.nav.melosys.service.eessi;
 
-import no.finn.unleash.FakeUnleash;
+import java.time.LocalDate;
+import java.util.Optional;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
@@ -29,9 +34,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -51,7 +53,7 @@ class DefaultSedRuterTest {
 
     private DefaultSedRuter defaultSedRuter;
 
-    private final OppgaveFactory oppgaveFactory = new OppgaveFactory(new FakeUnleash());
+    private final OppgaveFactory oppgaveFactory = new OppgaveFactory();
 
     private static final String SAKSNUMMER = "MEL-!!!";
     private static final Long GSAK_SAKSNUMMER = 123L;
@@ -129,6 +131,7 @@ class DefaultSedRuterTest {
         fagsak.setType(Sakstyper.EU_EOS);
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         Behandling behandling = fagsak.hentAktivBehandling();
+        behandling.setType(Behandlingstyper.HENVENDELSE);
         behandling.setStatus(Behandlingsstatus.OPPRETTET);
         when(fagsakService.finnFagsakFraArkivsakID(GSAK_SAKSNUMMER)).thenReturn(Optional.of(fagsak));
         when(oppgaveService.lagBehandlingsoppgave(any())).thenReturn(oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument));
@@ -191,6 +194,12 @@ class DefaultSedRuterTest {
         fagsak.setSaksnummer(SAKSNUMMER);
         fagsak.getBehandlinger().add(behandling);
         behandling.setFagsak(fagsak);
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setType(SaksopplysningType.SEDOPPL);
+        SedDokument dokument = new SedDokument();
+        dokument.setSedType(SedType.A003);
+        saksopplysning.setDokument(dokument);
+        behandling.getSaksopplysninger().add(saksopplysning);
         return fagsak;
     }
 }

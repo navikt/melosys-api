@@ -74,7 +74,8 @@ object Migrering {
             val tildeltEnhetsnr: String? = null,
             val versjon: Int? = null,
             val aktivDato: LocalDate? = null,
-            val status: String? = null
+            val status: String? = null,
+            val mappeId: String? = null
         ) {
             fun tilOppgave(): Oppgave = Oppgave.Builder()
                 .setOppgaveId(oppgaveId)
@@ -97,6 +98,7 @@ object Migrering {
                 .setTildeltEnhetsnr(tildeltEnhetsnr)
                 .setAktivDato(aktivDato)
                 .setStatus(status)
+                .setMappeId(mappeId)
                 .build()
         }
     }

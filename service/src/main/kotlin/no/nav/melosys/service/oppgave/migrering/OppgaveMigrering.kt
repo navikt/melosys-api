@@ -1,7 +1,6 @@
 package no.nav.melosys.service.oppgave.migrering
 
 import mu.KotlinLogging
-import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.SakOgBehandlingDTO
 import no.nav.melosys.domain.Tema
@@ -13,14 +12,13 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.TekniskException
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
 import no.nav.melosys.repository.BehandlingRepositoryForOppgaveMigrering
 import no.nav.melosys.service.lovligekombinasjoner.GyldigeKombinasjoner
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
 import no.nav.melosys.service.oppgave.OppgaveFactory
-import no.nav.melosys.service.oppgave.OppgaveGosysMapping.Companion.NY_GOSYS_MAPPING_UNTAKK_FOR_MIGRERING
+import no.nav.melosys.service.oppgave.OppgaveGosysMapping
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
@@ -36,11 +34,7 @@ class OppgaveMigrering(
     @Volatile
     var stopMigrering: Boolean = false
 
-    private val nyOppgaveFactory = OppgaveFactory(FakeUnleash().apply {
-        //  litt spesiel måte å bruke unleash på, men siden unleash skal vekk fra
-        //  OppgaveFactory etter at vi er over på ny mapping så blir dette den enkleste løsningen
-        enable(ToggleName.NY_GOSYS_MAPPING, NY_GOSYS_MAPPING_UNTAKK_FOR_MIGRERING)
-    })
+    private val nyOppgaveFactory = OppgaveFactory()
 
     fun status(): Map<String, Any> {
         return migreringsRapport.status()
@@ -166,7 +160,7 @@ class OppgaveMigrering(
         try {
             val oppgaveBehandlingstema: OppgaveBehandlingstema? = sakOgBehandling.utledOppgaveBehandlingstema()
             val oppgavetype: Oppgavetyper = sakOgBehandling.utledOppgaveType()
-            val beskrivelse: String = sakOgBehandling.utledBeskrivelse(oppgaveBehandlingstema)
+            val beskrivelse: String = sakOgBehandling.utledBeskrivelse()
             val tema: Tema = sakOgBehandling.utledTema()
             return OppgaveMigreringsOppdatering(oppgaveBehandlingstema, null, tema, oppgavetype, beskrivelse)
         } catch (e: Exception) {
@@ -195,15 +189,15 @@ class OppgaveMigrering(
             sakstype, sakstema, behandlingstema
         )
 
-    private fun SakOgBehandlingDTO.utledBeskrivelse(oppgaveBehandlingstema: OppgaveBehandlingstema?): String {
+    private fun SakOgBehandlingDTO.utledBeskrivelse(): String {
         val hentSedDokument = { _: Boolean -> sedDokument(behandlingID) }
         return try {
             nyOppgaveFactory.utledBeskrivelse(
-                oppgaveBehandlingstema,
                 sakstype,
                 sakstema,
                 behandlingstema,
-                behandlingstype, hentSedDokument
+                behandlingstype,
+                hentSedDokument
             )
         } catch (e: Exception) {
             val message = e.message ?: "utledBeskrivelse feilet "
@@ -228,6 +222,7 @@ class OppgaveMigrering(
     }
 
     companion object {
+        private val oppgaveGosysMapping by lazy { OppgaveGosysMapping() }
         internal fun erGyldig(
             sakstype: Sakstyper,
             sakstema: Sakstemaer,
@@ -259,5 +254,37 @@ class OppgaveMigrering(
                 behandlingstema = Behandlingstema.TRYGDETID,
             )
         )
+
+        internal fun finnOppgave(
+            sakstype: Sakstyper,
+            sakstema: Sakstemaer,
+            behandlingstema: Behandlingstema,
+            behandlingstype: Behandlingstyper?
+        ): OppgaveGosysMapping.Oppgave {
+            return oppgaveGosysMapping.finnOppgaveOrNull(sakstype, sakstema, behandlingstema, behandlingstype)
+                ?: listOf(
+                    OppgaveGosysMapping.TableRow(
+                        Sakstyper.EU_EOS,
+                        Sakstemaer.MEDLEMSKAP_LOVVALG,
+                        setOf(
+                            Behandlingstyper.FØRSTEGANG,
+                            Behandlingstyper.NY_VURDERING
+                        ),
+                        setOf(Behandlingstema.TRYGDETID),
+                        OppgaveGosysMapping.Oppgave(
+                            OppgaveBehandlingstema.EU_EOS_FORESPORSEL_OM_TRYGDETID,
+                            Tema.MED,
+                            Oppgavetyper.BEH_SED,
+                            OppgaveGosysMapping.Beskrivelsefelt.SED,
+                            OppgaveGosysMapping.Regel.KUN_VED_MIGRERING
+                        )
+                    )
+                ).find {
+                    it.sakstype == sakstype && it.sakstema == sakstema && behandlingstype in it.behandlingstype && behandlingstema in it.behandlingstema
+                }?.oppgave ?: throw IllegalStateException(
+                    "Fant ikke oppgave mapping for " +
+                        "sakstype:$sakstype, sakstema:$sakstema, behandlingstema:$behandlingstema, behandlingstype:$behandlingstype"
+                )
+        }
     }
 }

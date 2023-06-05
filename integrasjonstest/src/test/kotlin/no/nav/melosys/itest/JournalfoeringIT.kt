@@ -1,6 +1,5 @@
 package no.nav.melosys.itest
 
-import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equality.FieldsEqualityCheckConfig
 import io.kotest.matchers.equality.shouldBeEqualToComparingFields
@@ -20,7 +19,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.saksflyt.ProsessType
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
@@ -56,33 +54,6 @@ class JournalfoeringIT(
     @AfterEach
     fun afterEach() {
         oAuthMockServer.stop()
-    }
-
-    @Test
-    fun `alt skal fungere med NY_GOSYS_MAPPING toggle på`() {
-        fun withClueAndSetupCleanup(clue: String, action: () -> Unit) {
-            setup()
-            unleash.enable(ToggleName.NY_GOSYS_MAPPING)
-            withClue(clue) {
-                action()
-            }
-            afterEach()
-        }
-
-        withClueAndSetupCleanup("journalførOgOpprettSak_EU_EOS_prosesserKjørerAlleSteg()") {
-            journalførOgOpprettSak_EU_EOS_prosesserKjørerAlleSteg()
-        }
-        withClueAndSetupCleanup("journalførOgOpprettAndregangsBehandling_replikerBehandling_replikerBehandlingProsessStegBlirKjørt()") {
-            journalførOgOpprettAndregangsBehandling_replikerBehandling_replikerBehandlingProsessStegBlirKjørt()
-        }
-        withClueAndSetupCleanup("journalførOgOpprettAndregangsBehandling_fraAvslåttFlyt_flytMedPeriodeOgLand()") {
-            journalførOgOpprettAndregangsBehandling_fraAvslåttFlyt_flytMedPeriodeOgLand()
-        }
-
-        withClueAndSetupCleanup("journalførOgOpprettAndregangsBehandling_fraTomflyt_flytMedPeriodeOgLand()") {
-            journalførOgOpprettAndregangsBehandling_fraTomflyt_flytMedPeriodeOgLand()
-        }
-
     }
 
     @Test

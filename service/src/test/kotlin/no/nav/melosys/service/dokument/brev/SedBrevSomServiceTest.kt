@@ -7,7 +7,6 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
-import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Tema
@@ -44,7 +43,7 @@ class SedSomBrevServiceTest {
 
     lateinit var sedSomBrevService: SedSomBrevService
 
-    private val oppgaveFactory = OppgaveFactory(FakeUnleash())
+    private val oppgaveFactory = OppgaveFactory()
 
     @BeforeEach
     internal fun setUp() {

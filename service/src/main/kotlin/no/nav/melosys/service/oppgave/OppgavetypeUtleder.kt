@@ -6,11 +6,12 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 
-interface OppgavetypeUtleder {
+class OppgavetypeUtleder  {
+    private val oppgaveGosysMapping = OppgaveGosysMapping()
     fun utledOppgavetype(
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
         behandlingstype: Behandlingstyper
-    ): Oppgavetyper
+    ): Oppgavetyper = oppgaveGosysMapping.finnOppgave(sakstype, sakstema, behandlingstema, behandlingstype).oppgaveType
 }

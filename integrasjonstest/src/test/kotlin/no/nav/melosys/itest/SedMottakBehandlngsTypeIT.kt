@@ -14,7 +14,6 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.domain.saksflyt.ProsessType
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.melosysmock.journalpost.JournalpostRepo
 import no.nav.melosys.melosysmock.oppgave.OppgaveRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
@@ -23,7 +22,6 @@ import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.repository.ProsessinstansRepository
 import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
-import no.nav.melosys.service.oppgave.OppgaveBehandlingstype
 import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.sak.OpprettBehandlingForSak
 import no.nav.melosys.service.sak.OpprettSakDto
@@ -69,8 +67,9 @@ class SedMottakBehandlngsTypeIT(
     fun afterEach() {
         oAuthMockServer.stop()
     }
+
     @Test
-    fun `A003 skal føre til riktig oppgave i gosys - uten ny gosys mapping`() {
+    fun `A003 skal føre til riktig oppgave i gosys`() {
         val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding(
             bucType = BucType.LA_BUC_02,
             rinaSaksnummer = Random().nextInt(100000).toString(),
@@ -85,36 +84,6 @@ class SedMottakBehandlngsTypeIT(
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
         }
 
-
-        oppgaveRepo.repo.values
-            .shouldHaveSize(1)
-            .first()
-            .apply {
-                behandlingstema.shouldBe(OppgaveBehandlingstema.EU_EOS_LAND.kode)
-                behandlingstype.shouldBe(OppgaveBehandlingstype.EOS_LOVVALG_NORGE.kode)
-                beskrivelse.shouldContain("Beslutning om norsk lovvalg – A003")
-                oppgavetype.shouldBe(Oppgavetyper.BEH_SED.kode)
-            }
-
-    }
-
-    @Test
-    fun `A003 skal føre til riktig oppgave i gosys - med ny gosys mapping`() {
-        unleash.enable(ToggleName.NY_GOSYS_MAPPING)
-
-        val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding(
-            bucType = BucType.LA_BUC_02,
-            rinaSaksnummer = Random().nextInt(100000).toString(),
-            sedType = SedType.A003,
-            periode = Periode(LocalDate.now(), LocalDate.now().plusYears(1)),
-            artikkel = "13_1_a",
-            lovvalgsland = "NO"
-        )
-
-
-        executeAndWait(ProsessType.MOTTAK_SED, listOf(ProsessType.ARBEID_FLERE_LAND_NY_SAK)) {
-            melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
-        }
 
         oppgaveRepo.repo.values
             .shouldHaveSize(1)
@@ -171,7 +140,7 @@ class SedMottakBehandlngsTypeIT(
     @Test
     @Disabled
     fun `A003 lag data og skriv ut så det kan brukes i mock`() {
-        `A003 skal føre til riktig oppgave i gosys - uten ny gosys mapping`()
+        `A003 skal føre til riktig oppgave i gosys`()
 
         oppgaveRepo.repo.forEach {
             println(it.toJsonNode.toPrettyString())

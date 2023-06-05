@@ -7,7 +7,6 @@ import io.kotest.matchers.shouldBe
 import io.mockk.called
 import io.mockk.spyk
 import io.mockk.verify
-import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.SedType
@@ -16,7 +15,6 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.service.LoggingTestUtils
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -29,7 +27,7 @@ import java.time.LocalDate
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class OppgaveFactoryNyMappingTest {
 
-    private val oppgaveFactory = OppgaveFactory(FakeUnleash().apply { enable(ToggleName.NY_GOSYS_MAPPING) })
+    private val oppgaveFactory = OppgaveFactory()
 
     @Test
     fun `Sed skal brukes som beskrivelse ved oppgavetype BEH_SED - untatt ved A1_ANMODNING_OM_UNNTAK_PAPIR eller oppgave opprettes fra eksisterende`() {
@@ -175,7 +173,7 @@ internal class OppgaveFactoryNyMappingTest {
         }.filter {
             it.behandlingstype in listOf(Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE)
         }.shouldHaveSize(44).forEach { sak ->
-            LoggingTestUtils.withLogAppender<OppgaveBeskrivelseNyUtleder> { oppgaveBeskrivelseListAppender ->
+            LoggingTestUtils.withLogAppender<OppgaveBeskrivelseUtleder> { oppgaveBeskrivelseListAppender ->
                 val behandling = sak.lagBehandlingMedSpy()
                 val oppgave =
                     oppgaveFactory.lagBehandlingsoppgave(
@@ -193,26 +191,6 @@ internal class OppgaveFactoryNyMappingTest {
         }
     }
 
-
-    @Test
-    fun `OppgaveFactory skal funger med NY_GOSYS_MAPPING_UNTAKK_FOR_MIGRERING toggle under migreing`() {
-        val behandling = lagBehandling(
-            Sakstyper.EU_EOS,
-            Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Behandlingstema.TRYGDETID,
-            Behandlingstyper.FØRSTEGANG,
-            SedType.A003
-        )
-        OppgaveFactory(FakeUnleash().apply {
-            enable(
-                ToggleName.NY_GOSYS_MAPPING,
-                OppgaveGosysMapping.NY_GOSYS_MAPPING_UNTAKK_FOR_MIGRERING
-            )
-        }).run {
-            val oppgave = lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument).build()
-            oppgave.behandlingstema.shouldBe(OppgaveBehandlingstema.EU_EOS_FORESPORSEL_OM_TRYGDETID.kode)
-        }
-    }
 
     @Test
     fun `oppgave tema skal være av riktig type`() {
@@ -438,7 +416,7 @@ internal class OppgaveFactoryNyMappingTest {
         }.toList()
 
     companion object {
-        private val oppgaveGosysMapping = OppgaveGosysMapping(FakeUnleash())
+        private val oppgaveGosysMapping = OppgaveGosysMapping()
 
         private val rowsMedAlleKombinasjoner by lazy {
             sequence {

@@ -1,6 +1,10 @@
 package no.nav.melosys.service;
 
-import no.finn.unleash.FakeUnleash;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.*;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Diskresjonskode;
@@ -38,11 +42,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.*;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -82,7 +81,7 @@ class OppgaveServiceTest {
 
     private Oppgave oppgave;
 
-    private final OppgaveFactory oppgaveFactory = new OppgaveFactory(new FakeUnleash());
+    private final OppgaveFactory oppgaveFactory = new OppgaveFactory();
 
     @BeforeEach
     public void setUp() {

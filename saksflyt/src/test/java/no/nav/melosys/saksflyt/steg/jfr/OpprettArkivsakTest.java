@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -34,7 +33,7 @@ class OpprettArkivsakTest {
 
     private OpprettArkivsak opprettArkivsak;
 
-    private final OppgaveFactory oppgaveFactory = new OppgaveFactory(new FakeUnleash());
+    private final OppgaveFactory oppgaveFactory = new OppgaveFactory();
     @BeforeEach
     public void setUp() {
         opprettArkivsak = new OpprettArkivsak(fagsakService, arkivsakService, oppgaveFactory);
