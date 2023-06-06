@@ -66,7 +66,7 @@ public class ProsessinstansStatusCache {
         return sumAntall;
     }
 
-    @Scheduled(fixedRateString = "${melosys.prosesser.status.oppfriskning.frekvens:1500}")
+    @Scheduled(fixedRateString = "${melosys.prosesser.status.oppfriskning.frekvens:30000}")
     private void oppfriskCache() {
         log.debug("Oppfrisker caching av metrikker for prosessinstanser");
         long tidStart = System.currentTimeMillis();
