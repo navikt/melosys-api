@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.mottatteopplysninger;
 
+import no.nav.melosys.domain.kodeverk.begrunnelser.Ikkeyrkesaktivsituasjontype;
 import no.nav.melosys.domain.mottatteopplysninger.data.ArbeidsgiversBekreftelse;
 import no.nav.melosys.domain.mottatteopplysninger.data.ArbeidssituasjonOgOevrig;
 import no.nav.melosys.domain.mottatteopplysninger.data.LoennOgGodtgjoerelse;
@@ -14,4 +15,6 @@ public class Soeknad extends MottatteOpplysningerData {
     public Utenlandsoppdraget utenlandsoppdraget = new Utenlandsoppdraget();
 
     public ArbeidssituasjonOgOevrig arbeidssituasjonOgOevrig = new ArbeidssituasjonOgOevrig();
+
+    public Ikkeyrkesaktivsituasjontype ikkeYrkesaktivSituasjontype = null;
 }
