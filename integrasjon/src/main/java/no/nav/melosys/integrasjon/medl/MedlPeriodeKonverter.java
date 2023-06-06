@@ -241,7 +241,7 @@ public final class MedlPeriodeKonverter {
         return switch (dekning) {
             case FULL_DEKNING_EOSFO, FULL_DEKNING_FTRL -> DekningMedl.FULL;
             case UTEN_DEKNING -> DekningMedl.UNNTATT;
-            case UNNTATT_CAN_7_5_B, UNNTATT_CAN_11, UNNTATT_USA_5_2_G, UNNTATT_USA_5_9 -> DekningMedl.IKKE_PENSJONSDEL;
+            case UNNTATT_CAN_7_5_B, UNNTATT_USA_5_2_G -> DekningMedl.IKKE_PENSJONSDEL;
             default -> throw new TekniskException("Dekningstype støttes ikke:" + dekning.getKode());
         };
     }
