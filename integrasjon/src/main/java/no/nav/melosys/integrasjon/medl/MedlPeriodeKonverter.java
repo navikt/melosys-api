@@ -124,13 +124,13 @@ public final class MedlPeriodeKonverter {
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_it.ITA, GrunnlagMedl.ITALIA);
 
         // Kroatia
-         tbl.put(Lovvalgsbestemmelser_trygdeavtale_hr.HRV, GrunnlagMedl.KORATIA);
-         tbl.put(Lovvalgsbestemmelser_trygdeavtale_hr.HRV_ART3, GrunnlagMedl.KORATIA_3);
-         tbl.put(Lovvalgsbestemmelser_trygdeavtale_hr.HRV_ART4, GrunnlagMedl.KORATIA_4);
-         tbl.put(Lovvalgsbestemmelser_trygdeavtale_hr.HRV_ART4_A, GrunnlagMedl.KORATIA_4_A);
-         tbl.put(Lovvalgsbestemmelser_trygdeavtale_hr.HRV_ART5, GrunnlagMedl.KORATIA_5);
-         tbl.put(Lovvalgsbestemmelser_trygdeavtale_hr.HRV_ART6, GrunnlagMedl.KORATIA_6);
-         tbl.put(Lovvalgsbestemmelser_trygdeavtale_hr.HRV_ART7, GrunnlagMedl.KORATIA_7);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_hr.HRV, GrunnlagMedl.KORATIA);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_hr.HRV_ART3, GrunnlagMedl.KORATIA_3);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_hr.HRV_ART4, GrunnlagMedl.KORATIA_4);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_hr.HRV_ART4_A, GrunnlagMedl.KORATIA_4_A);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_hr.HRV_ART5, GrunnlagMedl.KORATIA_5);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_hr.HRV_ART6, GrunnlagMedl.KORATIA_6);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_hr.HRV_ART7, GrunnlagMedl.KORATIA_7);
 
         // Montenegro
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_me.MNE, GrunnlagMedl.MONTENEGRO);
@@ -169,13 +169,13 @@ public final class MedlPeriodeKonverter {
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_rs.SRB_ART7, GrunnlagMedl.SERBIA_7);
 
         // Slovenia
-         tbl.put(Lovvalgsbestemmelser_trygdeavtale_si.SVN, GrunnlagMedl.SLOVENIA);
-         tbl.put(Lovvalgsbestemmelser_trygdeavtale_si.SVN_ART3, GrunnlagMedl.SLOVENIA_3);
-         tbl.put(Lovvalgsbestemmelser_trygdeavtale_si.SVN_ART4, GrunnlagMedl.SLOVENIA_4);
-         tbl.put(Lovvalgsbestemmelser_trygdeavtale_si.SVN_ART4_A, GrunnlagMedl.SLOVENIA_4_A);
-         tbl.put(Lovvalgsbestemmelser_trygdeavtale_si.SVN_ART5, GrunnlagMedl.SLOVENIA_5);
-         tbl.put(Lovvalgsbestemmelser_trygdeavtale_si.SVN_ART6, GrunnlagMedl.SLOVENIA_6);
-         tbl.put(Lovvalgsbestemmelser_trygdeavtale_si.SVN_ART7, GrunnlagMedl.SLOVENIA_7);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_si.SVN, GrunnlagMedl.SLOVENIA);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_si.SVN_ART3, GrunnlagMedl.SLOVENIA_3);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_si.SVN_ART4, GrunnlagMedl.SLOVENIA_4);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_si.SVN_ART4_A, GrunnlagMedl.SLOVENIA_4_A);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_si.SVN_ART5, GrunnlagMedl.SLOVENIA_5);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_si.SVN_ART6, GrunnlagMedl.SLOVENIA_6);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_si.SVN_ART7, GrunnlagMedl.SLOVENIA_7);
 
         // Storbritannia og Nord-Irland
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_gb.UK, GrunnlagMedl.STORBRIT_NIRLAND);

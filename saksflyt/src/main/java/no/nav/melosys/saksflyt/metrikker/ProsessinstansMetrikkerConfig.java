@@ -24,24 +24,27 @@ public class ProsessinstansMetrikkerConfig {
     private void registrerAntallFeiledeProsessinstanserGruppertPåType(MeterRegistry meterRegistry,
                                                                       ProsessinstansStatusCache statusCache) {
         for (ProsessType prosessType : ProsessType.values()) {
-            String gaugeNavnProsessinstansType = MetrikkerNavn.PROSESSINSTANSER + prosessType.getKode().toLowerCase() + ".feilet";
+            String gaugeNavnProsessinstansType = MetrikkerNavn.PROSESSINSTANSER_FEILET;
             Gauge.builder(
-                gaugeNavnProsessinstansType,
-                statusCache,
-                type -> statusCache.antallProsessinstanserFeiletPåType(prosessType)
-            ).register(meterRegistry);
+                    gaugeNavnProsessinstansType,
+                    statusCache,
+                    type -> statusCache.antallProsessinstanserFeiletPåType(prosessType)
+                )
+                .tag(MetrikkerNavn.TAG_PROSESSINSTANSTYPE, prosessType.getKode())
+                .register(meterRegistry);
         }
     }
 
     private void registrerAntallFeiledeProsessinstanserGruppertPåSteg(MeterRegistry meterRegistry,
                                                                       ProsessinstansStatusCache statusCache) {
         for (ProsessSteg prosessSteg : ProsessSteg.values()) {
-            String gaugeNavnProsessinstansSteg = MetrikkerNavn.PROSESSINSTANSER_STEG + prosessSteg.getKode().toLowerCase() + ".feilet";
+            String gaugeNavnProsessinstansSteg = MetrikkerNavn.PROSESSINSTANSER_STEG_FEILET;
             Gauge.builder(
-                gaugeNavnProsessinstansSteg,
-                statusCache,
-                type -> statusCache.antallProsessinstanserFeiletPåSteg(prosessSteg)
-            ).register(meterRegistry);
+                    gaugeNavnProsessinstansSteg,
+                    statusCache,
+                    type -> statusCache.antallProsessinstanserFeiletPåSteg(prosessSteg)
+                ).tag(MetrikkerNavn.TAG_PROSESSTEG, prosessSteg.getKode())
+                .register(meterRegistry);
         }
     }
 }
