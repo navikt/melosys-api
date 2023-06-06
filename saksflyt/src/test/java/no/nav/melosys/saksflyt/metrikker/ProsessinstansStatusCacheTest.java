@@ -1,46 +1,61 @@
 package no.nav.melosys.saksflyt.metrikker;
 
+import java.time.Duration;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
 
 import no.nav.melosys.domain.metrikker.ProsessinstansAntall;
+import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.repository.ProsessinstansRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
 
 import static no.nav.melosys.domain.saksflyt.ProsessStatus.FEILET;
 import static no.nav.melosys.domain.saksflyt.ProsessStatus.FERDIG;
-import static no.nav.melosys.domain.saksflyt.ProsessType.*;
+import static no.nav.melosys.domain.saksflyt.ProsessType.ANMODNING_OM_UNNTAK;
+import static no.nav.melosys.domain.saksflyt.ProsessType.IVERKSETT_VEDTAK_EOS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.awaitility.Awaitility.await;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+
+@SpringJUnitConfig(classes = ProsessinstansStatusCache.class)
+@EnableScheduling
+@TestPropertySource(properties = "melosys.prosesser.status.oppfriskning.frekvens=50")
 class ProsessinstansStatusCacheTest {
-    @Mock
+    @MockBean
     private ProsessinstansRepository prosessinstansRepository;
 
-    private ProsessinstansStatusCache cache;
-    private List<ProsessinstansAntall> prosessinstansMetrikkerList;
-
-    @BeforeEach
-    void setup() {
-        cache = new ProsessinstansStatusCache(prosessinstansRepository, 100);
-        ProsessinstansAntall prosessinstansAntall_1 = new ProsessinstansAntall(JFR_ANDREGANG_REPLIKER_BEHANDLING, FERDIG, 2);
-        ProsessinstansAntall prosessinstansAntall_2 = new ProsessinstansAntall(JFR_KNYTT, FEILET, 1);
-        ProsessinstansAntall prosessinstansAntall_3 = new ProsessinstansAntall(IVERKSETT_VEDTAK_EOS, FEILET, 2);
-        prosessinstansMetrikkerList = Arrays.asList(prosessinstansAntall_1, prosessinstansAntall_2, prosessinstansAntall_3);
-    }
+    @Autowired
+    ProsessinstansStatusCache cache;
 
     @Test
-    void antallProsessinstanserFeilet() {
-        when(prosessinstansRepository.antallAktiveOgFeiletPerTypeOgStatus(anyCollection()))
-            .thenReturn(prosessinstansMetrikkerList);
-        assertThat(cache.antallProsessinstanserFeiletPåType(JFR_ANDREGANG_REPLIKER_BEHANDLING)).isEqualTo(0.0);
-        assertThat(cache.antallProsessinstanserFeiletPåType(JFR_KNYTT)).isEqualTo(1.0);
-        assertThat(cache.antallProsessinstanserFeiletPåType(IVERKSETT_VEDTAK_EOS)).isEqualTo(2.0);
+    void antallProsessinstanserFeiletPåType() {
+        when(prosessinstansRepository.antallAktiveOgFeiletPerTypeOgStatus(any())).thenReturn(getProsessinstansAntallFeilet());
+        when(prosessinstansRepository.antallAktiveOgFeiletPerStegOgStatus(anyCollection(), anyBoolean())).thenReturn(Collections.emptyList());
+
+
+        assertThat(cache.antallProsessinstanserFeiletPåType(ProsessType.ANMODNING_OM_UNNTAK)).isZero();
+
+
+        await().atMost(Duration.ofSeconds(1))
+            .pollDelay(Duration.ofMillis(60))
+            .untilAsserted(() -> {
+                    assertThat(cache.antallProsessinstanserFeiletPåType(ProsessType.ANMODNING_OM_UNNTAK)).isPositive();
+                }
+            );
+    }
+
+    private static Collection<ProsessinstansAntall> getProsessinstansAntallFeilet() {
+        ProsessinstansAntall prosessinstansAntall_1 = new ProsessinstansAntall(ANMODNING_OM_UNNTAK, FERDIG, 0);
+        ProsessinstansAntall prosessinstansAntall_2 = new ProsessinstansAntall(ANMODNING_OM_UNNTAK, FEILET, 2);
+        ProsessinstansAntall prosessinstansAntall_3 = new ProsessinstansAntall(IVERKSETT_VEDTAK_EOS, FERDIG, 2);
+        return Arrays.asList(prosessinstansAntall_1, prosessinstansAntall_2, prosessinstansAntall_3);
     }
 }
