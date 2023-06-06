@@ -38,6 +38,8 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
+import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -96,6 +98,7 @@ class JournalfoeringServiceTest {
     @BeforeEach
     public void setup() {
         saksbehandlingRegler = new SaksbehandlingRegler(behandlingsresultatRepository, unleash);
+        SpringSubjectHandler.set(new TestSubjectHandler());
 
         unleash.enable("melosys.folketrygden.mvp");
         journalpost = new Journalpost("123");
