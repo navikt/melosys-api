@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 
 @SpringJUnitConfig(classes = ProsessinstansStatusCache.class)
 @EnableScheduling
-@TestPropertySource(properties = "melosys.prosesser.status.oppfriskning.frekvens=150")
+@TestPropertySource(properties = "melosys.prosesser.status.oppfriskning.frekvens=50")
 class ProsessinstansStatusCacheTest {
     @MockBean
     private ProsessinstansRepository prosessinstansRepository;
@@ -44,8 +44,8 @@ class ProsessinstansStatusCacheTest {
         assertThat(cache.antallProsessinstanserFeiletPåType(ProsessType.ANMODNING_OM_UNNTAK)).isZero();
 
 
-        await().atMost(Duration.ofMillis(1000))
-            .pollDelay(Duration.ofMillis(250))
+        await().atMost(Duration.ofSeconds(1))
+            .pollDelay(Duration.ofMillis(60))
             .untilAsserted(() -> {
                     assertThat(cache.antallProsessinstanserFeiletPåType(ProsessType.ANMODNING_OM_UNNTAK)).isPositive();
                 }
