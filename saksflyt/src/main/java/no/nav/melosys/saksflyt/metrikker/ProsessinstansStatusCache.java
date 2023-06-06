@@ -68,7 +68,7 @@ public class ProsessinstansStatusCache {
 
     @Scheduled(fixedRateString = "${melosys.prosesser.status.oppfriskning.frekvens:1500}")
     private void oppfriskCache() {
-        log.info("Oppfrisker caching av metrikker for prosessinstanser");
+        log.debug("Oppfrisker caching av metrikker for prosessinstanser");
         long tidStart = System.currentTimeMillis();
 
         oppfriskPerTypeOgStatus();
@@ -77,7 +77,7 @@ public class ProsessinstansStatusCache {
 
         long tidSlutt = System.currentTimeMillis();
         long tidBrukt = tidSlutt - tidStart;
-        log.info("Oppfriskning av cache av metrikker for prosessinstanser tok {} millisekunder.", tidBrukt);
+        log.debug("Oppfriskning av cache av metrikker for prosessinstanser tok {} millisekunder.", tidBrukt);
     }
 
     private void oppfriskPerTypeOgStatus() {
@@ -88,9 +88,6 @@ public class ProsessinstansStatusCache {
         for (ProsessinstansAntall prosessinstansAntall : prosessinstansMetrikker) {
             Pair<ProsessType, ProsessStatus> typeOgStatus = Pair.of(prosessinstansAntall.getProsessType(), prosessinstansAntall.getProsessStatus());
             antallPerTypeOgStatus.put(typeOgStatus, prosessinstansAntall.getAntall());
-        }
-        for (ProsessinstansAntall prosessinstansAntall : prosessinstansMetrikker) {
-            Pair<ProsessType, ProsessStatus> typeOgStatus = Pair.of(prosessinstansAntall.getProsessType(), prosessinstansAntall.getProsessStatus());
         }
     }
 
