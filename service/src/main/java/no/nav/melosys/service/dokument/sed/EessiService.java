@@ -203,11 +203,6 @@ public class EessiService {
         return eessiConsumer.hentMelosysEessiMeldingFraJournalpostID(journalpostID);
     }
 
-    public Optional<String> finnSakForGsakSaksnummer(Long gsakSaksnummer) {
-        return eessiConsumer.hentSakForGsakSaksnummer(gsakSaksnummer).stream()
-            .findFirst().map(SaksrelasjonDto::getRinaSaksnummer);
-    }
-
     public Optional<Long> finnSakForRinasaksnummer(String rinaSaksnummer) {
         return eessiConsumer.hentSakForRinasaksnummer(rinaSaksnummer).stream()
             .findFirst().map(SaksrelasjonDto::getGsakSaksnummer);
