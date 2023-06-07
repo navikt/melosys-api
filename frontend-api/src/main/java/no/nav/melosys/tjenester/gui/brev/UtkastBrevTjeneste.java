@@ -52,7 +52,7 @@ public class UtkastBrevTjeneste {
 
         utkastBrevService.lagreUtkast(behandlingID, saksbehandlerID, brevbestillingRequest.tilUtkast());
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping(value = "/{behandlingID}/{utkastBrevID}")
@@ -66,7 +66,7 @@ public class UtkastBrevTjeneste {
 
         utkastBrevService.oppdaterUtkast(new OppdaterUtkastService.RequestDto(utkastBrevID, behandlingID, saksbehandlerID, brevbestillingRequest.tilUtkast()));
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping(value = "/{behandlingID}/{utkastBrevID}")
