@@ -365,6 +365,9 @@ public class OppgaveService {
 
     private static PeriodeDto mapPeriode(MottatteOpplysningerData mottatteOpplysningerData) {
         Periode periode = hentPeriode(mottatteOpplysningerData);
+        if (periode == null) {
+            return new PeriodeDto(null, null);
+        }
         return new PeriodeDto(periode.getFom(), periode.getTom());
     }
 
