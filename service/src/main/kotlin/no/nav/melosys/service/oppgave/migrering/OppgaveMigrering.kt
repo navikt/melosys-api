@@ -33,9 +33,9 @@ class OppgaveMigrering(
     @Volatile
     var stopMigrering: Boolean = false
 
-    private val oppgaveBehandlingstemaUtleder = OppgaveBehandlingstemaUtleder()
-    private val oppgavetypeUtleder = OppgavetypeUtleder()
-    private val oppgaveBeskrivelseUtleder = OppgaveBeskrivelseUtleder()
+    private val oppgaveBehandlingstemaUtleder = OppgaveBehandlingstemaUtleder(OppgaveGosysMappingMedRegler())
+    private val oppgavetypeUtleder = OppgavetypeUtleder(OppgaveGosysMappingMedRegler())
+    private val oppgaveBeskrivelseUtleder = OppgaveBeskrivelseUtleder(OppgaveGosysMappingMedRegler())
     private val temaUtleder = OppgaveTemaUtleder()
 
     fun status(): Map<String, Any> {

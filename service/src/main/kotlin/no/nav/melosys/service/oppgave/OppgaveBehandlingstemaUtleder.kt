@@ -5,9 +5,9 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 
-class OppgaveBehandlingstemaUtleder {
-
-    private val oppgaveGosysMapping = OppgaveGosysMapping()
+class OppgaveBehandlingstemaUtleder internal constructor(
+    private val oppgaveGosysMapping:OppgaveGosysMapping  = OppgaveGosysMapping()
+) {
 
     fun utledOppgaveBehandlingstema(
         sakstype: Sakstyper,
