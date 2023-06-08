@@ -366,6 +366,7 @@ public class OppgaveService {
     private static PeriodeDto mapPeriode(MottatteOpplysningerData mottatteOpplysningerData) {
         Periode periode = hentPeriode(mottatteOpplysningerData);
         if (periode == null) {
+            log.error("Periode er null ved mapping. Dette skal ikke skje.");
             return new PeriodeDto(null, null);
         }
         return new PeriodeDto(periode.getFom(), periode.getTom());
