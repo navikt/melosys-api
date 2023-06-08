@@ -92,15 +92,7 @@ class MigreringsRapport(private val environment: Environment) {
     }
 
     internal fun statusEtterKjøring(): String {
-        val sb = StringBuilder()
-        sb.appendLine()
-        sb.appendLine("antallSakerMigrert: $antallSakerMigrert")
-        sb.appendLine("alleredeMigrert: $alleredeMigrert")
-        sb.appendLine("sakerManglerOppgave: ${sakerManglerOppgave.size}")
-        sb.appendLine("sakerMedFlereOppgaver: ${sakerMedFlereOppgaver.size}")
-        sb.appendLine("sakHvorMappingFeiler: ${sakHvorMappingFeiler.size}")
-        sb.appendLine("sakHvorViSkalHaSedMenSomIkkeFinnes: ${sakHvorViSkalHaSedMenSomIkkeFinnes.size}")
-        return sb.toString()
+        return status().toJsonNode.toPrettyString()
     }
 
     internal fun saveStatusFiles(status: String) {
@@ -121,15 +113,8 @@ class MigreringsRapport(private val environment: Environment) {
             }"
         File(timeForRun).mkdirs()
 
-        File("$timeForRun/diff.json").writeText(migreringsSakListeSomJsonString())
-
-        File("$timeForRun/status.txt").writeText(status)
-        File("$timeForRun/saker-mangler-oppgave.txt").writeText(sakerManglerOppgave.joinToString(","))
-        File("$timeForRun/saker-med-flere-oppgave.txt").writeText(sakerMedFlereOppgaver.joinToString("\n"))
-        File("$timeForRun/sak-hvor-mapping-feiler.txt").writeText(sakHvorMappingFeiler.joinToString("\n"))
-        File("$timeForRun/sak-hvor-vi-skal-ha-sed-men-som-ikke-finnes.txt").writeText(
-            sakHvorViSkalHaSedMenSomIkkeFinnes.joinToString("\n")
-        )
+        File("$timeForRun/rapport.json").writeText(migreringsSakListeSomJsonString())
+        File("$timeForRun/status.json").writeText(status)
     }
 
     fun migreringsSakListeSomJsonString(): String = migreringsSakListe.toJsonNode.toPrettyString()
