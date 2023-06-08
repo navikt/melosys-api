@@ -16,8 +16,7 @@ import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
 import no.nav.melosys.repository.BehandlingRepositoryForOppgaveMigrering
 import no.nav.melosys.service.lovligekombinasjoner.GyldigeKombinasjoner
-import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
-import no.nav.melosys.service.oppgave.OppgaveFactory
+import no.nav.melosys.service.oppgave.*
 import no.nav.melosys.service.oppgave.OppgaveGosysMapping
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.scheduling.annotation.Async
@@ -34,7 +33,10 @@ class OppgaveMigrering(
     @Volatile
     var stopMigrering: Boolean = false
 
-    private val nyOppgaveFactory = OppgaveFactory()
+    private val oppgaveBehandlingstemaUtleder = OppgaveBehandlingstemaUtleder()
+    private val oppgavetypeUtleder = OppgavetypeUtleder()
+    private val oppgaveBeskrivelseUtleder = OppgaveBeskrivelseUtleder()
+    private val temaUtleder = OppgaveTemaUtleder()
 
     fun status(): Map<String, Any> {
         return migreringsRapport.status()
@@ -177,22 +179,22 @@ class OppgaveMigrering(
     }
 
     private fun SakOgBehandlingDTO.utledOppgaveBehandlingstema(): OppgaveBehandlingstema? =
-        nyOppgaveFactory.utledOppgaveBehandlingstema(
+        oppgaveBehandlingstemaUtleder.utledOppgaveBehandlingstema(
             sakstype, sakstema, behandlingstema, behandlingstype
         )
 
     private fun SakOgBehandlingDTO.utledOppgaveType(): Oppgavetyper =
-        nyOppgaveFactory.utledOppgavetype(sakstype, sakstema, behandlingstema, behandlingstype)
+        oppgavetypeUtleder.utledOppgavetype(sakstype, sakstema, behandlingstema, behandlingstype)
 
     private fun SakOgBehandlingDTO.utledTema(): Tema =
-        nyOppgaveFactory.utledTema(
+        temaUtleder.utledTema(
             sakstype, sakstema, behandlingstema
         )
 
     private fun SakOgBehandlingDTO.utledBeskrivelse(): String {
         val hentSedDokument = { _: Boolean -> sedDokument(behandlingID) }
         return try {
-            nyOppgaveFactory.utledBeskrivelse(
+            oppgaveBeskrivelseUtleder.utledBeskrivelse(
                 sakstype,
                 sakstema,
                 behandlingstema,
