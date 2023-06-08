@@ -8,6 +8,4 @@ public class ToggleName {
     public static final String FOLKETRYGDEN_MVP = "melosys.folketrygden.mvp";
 
     public static final String REGISTRERING_UNNTAK_FRA_MEDLEMSKAP = "melosys.registrering_unntak_fra_medlemskap";
-
-    public static final String NY_GOSYS_MAPPING = "melosys.ny_gosys_mapping";
 }
