@@ -9,8 +9,9 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 
 private val log = KotlinLogging.logger { }
 
-class OppgaveBeskrivelseUtleder {
-    private val oppgaveGosysMapping = OppgaveGosysMapping()
+class OppgaveBeskrivelseUtleder internal constructor(
+    private val oppgaveGosysMapping: OppgaveGosysMapping = OppgaveGosysMapping()
+) {
 
     fun utledBeskrivelse(
         sakstype: Sakstyper,

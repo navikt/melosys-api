@@ -15,7 +15,7 @@ class OppgaveTemaUtleder {
             Sakstemaer.TRYGDEAVGIFT -> Tema.TRY
             Sakstemaer.UNNTAK -> Tema.UFM
             else -> {
-                throw IllegalStateException("ingen mapping for sakstema:$sakstema")
+                error("ingen mapping for sakstema:$sakstema")
             }
         }
     }

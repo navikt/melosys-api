@@ -16,8 +16,7 @@ import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
 import no.nav.melosys.repository.BehandlingRepositoryForOppgaveMigrering
 import no.nav.melosys.service.lovligekombinasjoner.GyldigeKombinasjoner
-import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
-import no.nav.melosys.service.oppgave.OppgaveFactory
+import no.nav.melosys.service.oppgave.*
 import no.nav.melosys.service.oppgave.OppgaveGosysMapping
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.scheduling.annotation.Async
@@ -34,7 +33,10 @@ class OppgaveMigrering(
     @Volatile
     var stopMigrering: Boolean = false
 
-    private val nyOppgaveFactory = OppgaveFactory()
+    private val oppgaveBehandlingstemaUtleder = OppgaveBehandlingstemaUtleder(OppgaveGosysMappingMedRegler())
+    private val oppgavetypeUtleder = OppgavetypeUtleder(OppgaveGosysMappingMedRegler())
+    private val oppgaveBeskrivelseUtleder = OppgaveBeskrivelseUtleder(OppgaveGosysMappingMedRegler())
+    private val temaUtleder = OppgaveTemaUtleder()
 
     fun status(): Map<String, Any> {
         return migreringsRapport.status()
@@ -177,22 +179,22 @@ class OppgaveMigrering(
     }
 
     private fun SakOgBehandlingDTO.utledOppgaveBehandlingstema(): OppgaveBehandlingstema? =
-        nyOppgaveFactory.utledOppgaveBehandlingstema(
+        oppgaveBehandlingstemaUtleder.utledOppgaveBehandlingstema(
             sakstype, sakstema, behandlingstema, behandlingstype
         )
 
     private fun SakOgBehandlingDTO.utledOppgaveType(): Oppgavetyper =
-        nyOppgaveFactory.utledOppgavetype(sakstype, sakstema, behandlingstema, behandlingstype)
+        oppgavetypeUtleder.utledOppgavetype(sakstype, sakstema, behandlingstema, behandlingstype)
 
     private fun SakOgBehandlingDTO.utledTema(): Tema =
-        nyOppgaveFactory.utledTema(
+        temaUtleder.utledTema(
             sakstype, sakstema, behandlingstema
         )
 
     private fun SakOgBehandlingDTO.utledBeskrivelse(): String {
         val hentSedDokument = { _: Boolean -> sedDokument(behandlingID) }
         return try {
-            nyOppgaveFactory.utledBeskrivelse(
+            oppgaveBeskrivelseUtleder.utledBeskrivelse(
                 sakstype,
                 sakstema,
                 behandlingstema,
@@ -222,7 +224,7 @@ class OppgaveMigrering(
     }
 
     companion object {
-        private val oppgaveGosysMapping by lazy { OppgaveGosysMapping() }
+        private val oppgaveGosysMapping by lazy { OppgaveGosysMappingMedRegler() }
         internal fun erGyldig(
             sakstype: Sakstyper,
             sakstema: Sakstemaer,
@@ -241,7 +243,7 @@ class OppgaveMigrering(
             it.match(sakstype, sakstema, behandlingstype, behandlingstema)
         }
 
-        internal val unntakForMigrering = listOf(
+        private val unntakForMigrering = listOf(
             GyldigeKombinasjoner.TableRow(
                 sakstype = Sakstyper.EU_EOS,
                 sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG,
@@ -261,9 +263,20 @@ class OppgaveMigrering(
             behandlingstema: Behandlingstema,
             behandlingstype: Behandlingstyper?
         ): OppgaveGosysMapping.Oppgave {
-            return oppgaveGosysMapping.finnOppgaveOrNull(sakstype, sakstema, behandlingstema, behandlingstype)
+            return oppgaveGosysMapping.finnOppgave(sakstype, sakstema, behandlingstema, behandlingstype)
+        }
+    }
+
+    internal class OppgaveGosysMappingMedRegler : OppgaveGosysMapping() {
+        override fun finnOppgave(
+            sakstype: Sakstyper,
+            sakstema: Sakstemaer,
+            behandlingstema: Behandlingstema,
+            behandlingstype: Behandlingstyper?
+        ): Oppgave {
+            return super.finnOppgaveOrNull(sakstype, sakstema, behandlingstema, behandlingstype)
                 ?: listOf(
-                    OppgaveGosysMapping.TableRow(
+                    TableRow(
                         Sakstyper.EU_EOS,
                         Sakstemaer.MEDLEMSKAP_LOVVALG,
                         setOf(
@@ -271,12 +284,12 @@ class OppgaveMigrering(
                             Behandlingstyper.NY_VURDERING
                         ),
                         setOf(Behandlingstema.TRYGDETID),
-                        OppgaveGosysMapping.Oppgave(
+                        Oppgave(
                             OppgaveBehandlingstema.EU_EOS_FORESPORSEL_OM_TRYGDETID,
                             Tema.MED,
                             Oppgavetyper.BEH_SED,
-                            OppgaveGosysMapping.Beskrivelsefelt.SED,
-                            OppgaveGosysMapping.Regel.KUN_VED_MIGRERING
+                            Beskrivelsefelt.SED,
+                            Regel.KUN_VED_MIGRERING
                         )
                     )
                 ).find {

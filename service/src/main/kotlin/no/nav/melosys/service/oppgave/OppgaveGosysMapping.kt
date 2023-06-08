@@ -7,11 +7,11 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 
-internal class OppgaveGosysMapping {
+internal open class OppgaveGosysMapping {
 
     private val teamaUtleder = OppgaveTemaUtleder()
 
-    internal fun finnOppgave(
+    internal open fun finnOppgave(
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
