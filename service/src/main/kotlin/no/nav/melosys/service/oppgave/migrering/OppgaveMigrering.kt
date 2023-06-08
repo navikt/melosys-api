@@ -224,7 +224,7 @@ class OppgaveMigrering(
     }
 
     companion object {
-        private val oppgaveGosysMapping by lazy { OppgaveGosysMapping() }
+        private val oppgaveGosysMapping by lazy { OppgaveGosysMappingMedRegler() }
         internal fun erGyldig(
             sakstype: Sakstyper,
             sakstema: Sakstemaer,
@@ -243,7 +243,7 @@ class OppgaveMigrering(
             it.match(sakstype, sakstema, behandlingstype, behandlingstema)
         }
 
-        internal val unntakForMigrering = listOf(
+        private val unntakForMigrering = listOf(
             GyldigeKombinasjoner.TableRow(
                 sakstype = Sakstyper.EU_EOS,
                 sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG,
@@ -263,9 +263,20 @@ class OppgaveMigrering(
             behandlingstema: Behandlingstema,
             behandlingstype: Behandlingstyper?
         ): OppgaveGosysMapping.Oppgave {
-            return oppgaveGosysMapping.finnOppgaveOrNull(sakstype, sakstema, behandlingstema, behandlingstype)
+            return oppgaveGosysMapping.finnOppgave(sakstype, sakstema, behandlingstema, behandlingstype)
+        }
+    }
+
+    internal class OppgaveGosysMappingMedRegler : OppgaveGosysMapping() {
+        override fun finnOppgave(
+            sakstype: Sakstyper,
+            sakstema: Sakstemaer,
+            behandlingstema: Behandlingstema,
+            behandlingstype: Behandlingstyper?
+        ): Oppgave {
+            return super.finnOppgaveOrNull(sakstype, sakstema, behandlingstema, behandlingstype)
                 ?: listOf(
-                    OppgaveGosysMapping.TableRow(
+                    TableRow(
                         Sakstyper.EU_EOS,
                         Sakstemaer.MEDLEMSKAP_LOVVALG,
                         setOf(
@@ -273,12 +284,12 @@ class OppgaveMigrering(
                             Behandlingstyper.NY_VURDERING
                         ),
                         setOf(Behandlingstema.TRYGDETID),
-                        OppgaveGosysMapping.Oppgave(
+                        Oppgave(
                             OppgaveBehandlingstema.EU_EOS_FORESPORSEL_OM_TRYGDETID,
                             Tema.MED,
                             Oppgavetyper.BEH_SED,
-                            OppgaveGosysMapping.Beskrivelsefelt.SED,
-                            OppgaveGosysMapping.Regel.KUN_VED_MIGRERING
+                            Beskrivelsefelt.SED,
+                            Regel.KUN_VED_MIGRERING
                         )
                     )
                 ).find {
