@@ -58,15 +58,6 @@ class OppgaveMigreringAdminTjeneste(
         return ResponseEntity(migreringsRapport.migreringsSakListeSomJsonString(), HttpStatus.OK)
     }
 
-    @GetMapping("rapport", produces = [MediaType.TEXT_HTML_VALUE])
-    fun rapport(@RequestParam(required = false, defaultValue = "false") alle: Boolean): ResponseEntity<String> {
-        return ResponseEntity(migreringsRapport.html { migreringsSaker ->
-            migreringsSaker
-                .filter { alle || it.harFeil() || it.temaErForskjellig() || it.oppgavetypeErForskjellig() }
-                .filter { it.oppgaver.isNotEmpty() }
-        }, HttpStatus.OK)
-    }
-
 
     override fun getApiKey(): String {
         return apiKey
