@@ -21,7 +21,6 @@ import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.core.env.StandardEnvironment
-import java.io.File
 
 class OppgaveMigreringTest {
 
@@ -101,32 +100,10 @@ class OppgaveMigreringTest {
 
     @Test
     @Disabled("brukes bare for å lage oppgave migrering html rapporter, fjerns fra git etter at migreing er utført")
-    fun `lag rapport`() {
-        val migreringsRapport =
-            Migrering.migreringsRapportFraJson("/Users/rune/div/dryrun-prod-0601/jsonrapport-prod-dryrun-0601.json")
-
-        File("/Users/rune/div/migrerings-rapport-ikke-gyldig.html").writeText(migreringsRapport.html { migreringsSaker ->
-            migreringsSaker
-                .filter { it.oppgaver.size == 1 }
-                .filter {
-                    OppgaveMigrering.erGyldig(
-                        it.sak.sakstype,
-                        it.sak.sakstema,
-                        it.sak.behandlingstype,
-                        it.sak.behandlingstema
-                    )
-                }
-                .filterNot { it.erOppgaveMigrert() }
-        })
-    }
-
-    @Test
-    @Disabled("brukes bare for å lage oppgave migrering html rapporter, fjerns fra git etter at migreing er utført")
     fun `kjør migreing fra tidligere jsonrapport fil`() {
         val migreringsListe =
-            Migrering.migreringsRapportFraJson("/Users/rune/div/dryrun-prod-0602/jsonrapport-prod-dryrun-0602.json")
+            Migrering.migreringsRapportFraJson("/Users/rune/div/dryrun-prod-0607/jsonrapport-prod-0607.json")
                 .sortedMigreringsListe()
-//                .filterNot { unntakForMigrering.any { unntak ->  unntak.match(it.sak.sakstype, it.sak.sakstema, it.sak.behandlingstype, it.sak.behandlingstema) }  }
 
         val behandlingRepository = mockk<BehandlingRepositoryForOppgaveMigrering>()
         every { behandlingRepository.finnSaksOgBehandlingTyperOgTema(any()) } returns migreringsListe.map { it.sak }
