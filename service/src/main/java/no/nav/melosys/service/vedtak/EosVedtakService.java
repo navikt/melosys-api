@@ -29,6 +29,7 @@ import no.nav.melosys.service.kontroll.feature.ferdigbehandling.Ferdigbehandling
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import no.nav.melosys.service.validering.Kontrollfeil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.ApplicationEventMulticaster;
@@ -90,13 +91,18 @@ public class EosVedtakService {
                 ? null
                 : Collections.singleton(Kontroll_begrunnelser.OPPHØRT_ARBEIDSGIVER);
 
-            ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
+            Collection<Kontrollfeil> kontrollfeil = ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
                 behandling,
                 behandlingsresultat,
                 Sakstyper.EU_EOS,
                 request.getBehandlingsresultatTypeKode(),
                 kontrollerSomSkalIgnoreres
             );
+
+            if (!kontrollfeil.isEmpty()) {
+                throw new ValideringException("Feil i validering. Kan ikke fatte vedtak.",
+                    kontrollfeil.stream().map(Kontrollfeil::tilDto).toList());
+            }
         }
 
         oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), request.getFritekst(), request.getNyVurderingBakgrunn());

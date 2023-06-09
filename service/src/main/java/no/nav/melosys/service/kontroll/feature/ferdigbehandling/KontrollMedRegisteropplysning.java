@@ -1,6 +1,7 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Set;
 
 import no.finn.unleash.Unleash;
@@ -17,6 +18,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
+import no.nav.melosys.service.validering.Kontrollfeil;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -42,20 +44,20 @@ class KontrollMedRegisteropplysning {
         this.unleash = unleash;
     }
 
-    public void kontroller(long behandlingId, Behandlingsresultattyper behandlingsresultattype, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) throws ValideringException {
+    public Collection<Kontrollfeil> kontroller(long behandlingId, Behandlingsresultattyper behandlingsresultattype, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) throws ValideringException {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         Sakstyper sakstype = behandling.getFagsak().getType();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
-        kontrollerVedtak(behandling, behandlingsresultat, sakstype, behandlingsresultattype, kontrollerSomSkalIgnoreres);
+        return kontrollerVedtak(behandling, behandlingsresultat, sakstype, behandlingsresultattype, kontrollerSomSkalIgnoreres);
     }
 
-    public void kontrollerVedtak(Behandling behandling,
-                                 Behandlingsresultat behandlingsresultat,
-                                 Sakstyper sakstype,
-                                 Behandlingsresultattyper behandlingsresultattype,
-                                 Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) throws ValideringException {
+    public Collection<Kontrollfeil> kontrollerVedtak(Behandling behandling,
+                                                     Behandlingsresultat behandlingsresultat,
+                                                     Sakstyper sakstype,
+                                                     Behandlingsresultattyper behandlingsresultattype,
+                                                     Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) throws ValideringException {
         hentNyeRegisteropplysninger(behandlingsresultat, behandling);
-        kontroll.kontrollerVedtak(behandling.getId(), sakstype, behandlingsresultattype, kontrollerSomSkalIgnoreres);
+        return kontroll.kontrollerVedtak(behandling.getId(), sakstype, behandlingsresultattype, kontrollerSomSkalIgnoreres);
     }
 
     private void hentNyeRegisteropplysninger(Behandlingsresultat behandlingsresultat, Behandling behandling) {

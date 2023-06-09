@@ -51,21 +51,16 @@ class Kontroll {
         this.unleash = unleash;
     }
 
-    public void kontroller(long behandlingId, Behandlingsresultattyper behandlingsresultattype, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) throws ValideringException {
+    public Collection<Kontrollfeil> kontroller(long behandlingId, Behandlingsresultattyper behandlingsresultattype, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) throws ValideringException {
         var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         var sakstype = behandling.getFagsak().getType();
-        kontrollerVedtak(behandlingId, sakstype, behandlingsresultattype, kontrollerSomSkalIgnoreres);
+        return kontrollerVedtak(behandlingId, sakstype, behandlingsresultattype, kontrollerSomSkalIgnoreres);
     }
 
-    public void kontrollerVedtak(long behandlingID, Sakstyper sakstype, Behandlingsresultattyper behandlingsresultattype, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) throws ValideringException {
-        Collection<Kontrollfeil> kontrollfeil = utførKontroller(behandlingID, sakstype, behandlingsresultattype).stream()
+    public Collection<Kontrollfeil> kontrollerVedtak(long behandlingID, Sakstyper sakstype, Behandlingsresultattyper behandlingsresultattype, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) throws ValideringException {
+        return utførKontroller(behandlingID, sakstype, behandlingsresultattype).stream()
             .filter(feil -> skalViseFeil(feil, kontrollerSomSkalIgnoreres, behandlingID))
             .toList();
-
-        if (!kontrollfeil.isEmpty()) {
-            throw new ValideringException("Feil i validering. Kan ikke fatte vedtak.",
-                kontrollfeil.stream().map(Kontrollfeil::tilDto).toList());
-        }
     }
 
     private boolean skalViseFeil(Kontrollfeil kontrollfeil, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres, long behandlingID) {

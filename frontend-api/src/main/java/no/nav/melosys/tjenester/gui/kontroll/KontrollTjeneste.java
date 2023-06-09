@@ -9,12 +9,15 @@ import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Aksesstype;
+import no.nav.melosys.service.validering.Kontrollfeil;
 import no.nav.melosys.tjenester.gui.dto.kontroller.FerdigbehandlingKontrollerDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
+
+import java.util.Collection;
 
 @Protected
 @RestController
@@ -53,12 +56,19 @@ public class KontrollTjeneste {
             ferdigbehandlingKontrollerDto.skalRegisteropplysningerOppdateres() ? Aksesstype.SKRIV : Aksesstype.LES
         );
 
-        ferdigbehandlingKontrollFacade.kontroller(
+        Collection<Kontrollfeil> kontrollfeil = ferdigbehandlingKontrollFacade.kontroller(
             ferdigbehandlingKontrollerDto.behandlingID(),
             ferdigbehandlingKontrollerDto.skalRegisteropplysningerOppdateres(),
             ferdigbehandlingKontrollerDto.behandlingsresultattype(),
             ferdigbehandlingKontrollerDto.kontrollerSomSkalIgnoreres()
         );
+
+        //TODO: Gjør om fra kasting av exception til å returnere dto
+        if (!kontrollfeil.isEmpty()) {
+            throw new ValideringException("Feil i validering. Kan ikke fatte vedtak.",
+                kontrollfeil.stream().map(Kontrollfeil::tilDto).toList());
+        }
+
 
         return ResponseEntity.noContent().build();
     }

@@ -1,6 +1,7 @@
 package no.nav.melosys.service.vedtak;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
@@ -23,6 +24,7 @@ import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import no.nav.melosys.service.validering.Kontrollfeil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -65,13 +67,18 @@ public class TrygdeavtaleVedtakService {
         behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
 
         if (behandlingsresultat.erInnvilgelse()) {
-            ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
+            Collection<Kontrollfeil> kontrollfeil = ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
                 behandling,
                 behandlingsresultat,
                 Sakstyper.TRYGDEAVTALE,
                 Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN,
                 null
             );
+
+            if (!kontrollfeil.isEmpty()) {
+                throw new ValideringException("Feil i validering. Kan ikke fatte vedtak.",
+                    kontrollfeil.stream().map(Kontrollfeil::tilDto).toList());
+            }
         }
 
         oppdaterBehandlingsresultat(behandlingsresultat, request);
