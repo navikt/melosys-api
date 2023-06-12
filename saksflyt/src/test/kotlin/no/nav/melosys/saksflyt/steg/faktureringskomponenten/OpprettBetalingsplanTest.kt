@@ -153,7 +153,7 @@ class OpprettBetalingsplanTest {
         lagTestData(emptySet())
         behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.first()
             .apply {
-                isTrygdeavgiftBetalesTilSkatt = true
+                isOrdinærTrygdeavgiftBetalesTilSkatt = true
                 isArbeidsgiversavgiftBetalesTilSkatt = true
             }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat

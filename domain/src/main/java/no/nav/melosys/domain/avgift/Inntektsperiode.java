@@ -2,7 +2,6 @@ package no.nav.melosys.domain.avgift;
 
 import java.time.LocalDate;
 import java.util.Objects;
-import java.util.Set;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.Inntektskildetype;
@@ -43,7 +42,7 @@ public class Inntektsperiode {
     private boolean arbeidsgiversavgiftBetalesTilSkatt;
 
     @Column(name = "trygdeavgift_betales_til_skatt")
-    private boolean trygdeavgiftBetalesTilSkatt;
+    private boolean ordinærTrygdeavgiftBetalesTilSkatt;
 
     public Long getId() {
         return id;
@@ -101,12 +100,12 @@ public class Inntektsperiode {
         this.arbeidsgiversavgiftBetalesTilSkatt = arbeidsgiversavgiftBetalesTilSkatt;
     }
 
-    public boolean isTrygdeavgiftBetalesTilSkatt() {
-        return trygdeavgiftBetalesTilSkatt;
+    public boolean isOrdinærTrygdeavgiftBetalesTilSkatt() {
+        return ordinærTrygdeavgiftBetalesTilSkatt;
     }
 
-    public void setTrygdeavgiftBetalesTilSkatt(boolean trygdeavgiftBetalesTilSkatt) {
-        this.trygdeavgiftBetalesTilSkatt = trygdeavgiftBetalesTilSkatt;
+    public void setOrdinærTrygdeavgiftBetalesTilSkatt(boolean ordinærTrygdeavgiftBetalesTilSkatt) {
+        this.ordinærTrygdeavgiftBetalesTilSkatt = ordinærTrygdeavgiftBetalesTilSkatt;
     }
 
     @Override
@@ -119,28 +118,32 @@ public class Inntektsperiode {
             && Objects.equals(type, that.type)
             && Objects.equals(avgiftspliktigInntektMnd, that.avgiftspliktigInntektMnd)
             && arbeidsgiversavgiftBetalesTilSkatt == that.arbeidsgiversavgiftBetalesTilSkatt
-            && trygdeavgiftBetalesTilSkatt == that.trygdeavgiftBetalesTilSkatt;
+            && ordinærTrygdeavgiftBetalesTilSkatt == that.ordinærTrygdeavgiftBetalesTilSkatt;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(trygdeavgiftsgrunnlag, fomDato, tomDato, type, avgiftspliktigInntektMnd,
-            arbeidsgiversavgiftBetalesTilSkatt, trygdeavgiftBetalesTilSkatt);
+            arbeidsgiversavgiftBetalesTilSkatt, ordinærTrygdeavgiftBetalesTilSkatt);
     }
 
     @Override
     public String toString() {
         return "Inntektsperiode{" + "id=" + id + ", fomDato=" + fomDato + ", tomDato=" + tomDato + ", type=" + type
             + ", avgiftspliktigInntektMnd=" + avgiftspliktigInntektMnd + ", arbeidsgiversavgiftBetalesTilSkatt="
-            + arbeidsgiversavgiftBetalesTilSkatt + ", trygdeavgiftBetalesTilSkatt=" + trygdeavgiftBetalesTilSkatt + '}';
+            + arbeidsgiversavgiftBetalesTilSkatt + ", ordinærTrygdeavgiftBetalesTilSkatt=" + ordinærTrygdeavgiftBetalesTilSkatt + '}';
     }
 
-    // FIXME Riktig logikk for Trygdeavgiftmottaker kommer i https://jira.adeo.no/browse/MELOSYS-5940. Dette er for å fikse MELOSYS-5927
-    public boolean trygdeavgiftBetalesBådeTilNavOgSkatt() {
-        return isTrygdeavgiftBetalesTilSkatt() && !isArbeidsgiversavgiftBetalesTilSkatt() && !erSpesiellGruppe(getType());
+    public boolean isTrygdeavgiftBetalesBådeTilNavOgSkatt() {
+        return !isTrygdeavgiftBetalesKunTilSkatt() && !isTrygdeavgiftBetalesKunTilNav();
     }
 
-    private static boolean erSpesiellGruppe(Inntektskildetype inntektskildetype) {
-        return Set.of(Inntektskildetype.FN_SKATTEFRITAK, Inntektskildetype.MISJONÆR).contains(inntektskildetype);
+    public boolean isTrygdeavgiftBetalesKunTilSkatt() {
+        return isOrdinærTrygdeavgiftBetalesTilSkatt() && (isArbeidsgiversavgiftBetalesTilSkatt() || Inntektskildetype.MISJONÆR.equals(type));
     }
+
+    public boolean isTrygdeavgiftBetalesKunTilNav() {
+        return !isOrdinærTrygdeavgiftBetalesTilSkatt() && (!isArbeidsgiversavgiftBetalesTilSkatt() || Inntektskildetype.MISJONÆR.equals(type));
+    }
+
 }

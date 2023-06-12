@@ -103,7 +103,8 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
                     if (inntektskildeRequest.avgiftspliktigInntektMnd == null) null
                     else Penger(inntektskildeRequest.avgiftspliktigInntektMnd)
                 this.isArbeidsgiversavgiftBetalesTilSkatt = inntektskildeRequest.arbeidsgiversavgiftBetales
-                this.isTrygdeavgiftBetalesTilSkatt = !ordinærTrygdeavgiftBetalesTilNav(request, inntektskildeRequest)
+                this.isOrdinærTrygdeavgiftBetalesTilSkatt =
+                    !ordinærTrygdeavgiftBetalesTilNav(request, inntektskildeRequest)
             }
         })
 
