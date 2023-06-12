@@ -104,8 +104,8 @@ public class Inntektsperiode {
         return ordinærTrygdeavgiftBetalesTilSkatt;
     }
 
-    public void setOrdinærTrygdeavgiftBetalesTilSkatt(boolean trygdeavgiftBetalesTilSkatt) {
-        this.ordinærTrygdeavgiftBetalesTilSkatt = trygdeavgiftBetalesTilSkatt;
+    public void setOrdinærTrygdeavgiftBetalesTilSkatt(boolean ordinærTrygdeavgiftBetalesTilSkatt) {
+        this.ordinærTrygdeavgiftBetalesTilSkatt = ordinærTrygdeavgiftBetalesTilSkatt;
     }
 
     @Override
@@ -131,18 +131,18 @@ public class Inntektsperiode {
     public String toString() {
         return "Inntektsperiode{" + "id=" + id + ", fomDato=" + fomDato + ", tomDato=" + tomDato + ", type=" + type
             + ", avgiftspliktigInntektMnd=" + avgiftspliktigInntektMnd + ", arbeidsgiversavgiftBetalesTilSkatt="
-            + arbeidsgiversavgiftBetalesTilSkatt + ", trygdeavgiftBetalesTilSkatt=" + ordinærTrygdeavgiftBetalesTilSkatt + '}';
+            + arbeidsgiversavgiftBetalesTilSkatt + ", ordinærTrygdeavgiftBetalesTilSkatt=" + ordinærTrygdeavgiftBetalesTilSkatt + '}';
     }
 
     public boolean isTrygdeavgiftBetalesBådeTilNavOgSkatt() {
-        return (isOrdinærTrygdeavgiftBetalesTilSkatt() ^ isArbeidsgiversavgiftBetalesTilSkatt()) && !Inntektskildetype.MISJONÆR.equals(type);
+        return !isTrygdeavgiftBetalesKunTilSkatt() && !isTrygdeavgiftBetalesKunTilNav();
     }
 
-    public boolean isTrygdeavgiftBetalesTilSkatt() {
+    public boolean isTrygdeavgiftBetalesKunTilSkatt() {
         return isOrdinærTrygdeavgiftBetalesTilSkatt() && (isArbeidsgiversavgiftBetalesTilSkatt() || Inntektskildetype.MISJONÆR.equals(type));
     }
 
-    public boolean isTrygdeavgiftBetalesTilNav() {
+    public boolean isTrygdeavgiftBetalesKunTilNav() {
         return !isOrdinærTrygdeavgiftBetalesTilSkatt() && (!isArbeidsgiversavgiftBetalesTilSkatt() || Inntektskildetype.MISJONÆR.equals(type));
     }
 

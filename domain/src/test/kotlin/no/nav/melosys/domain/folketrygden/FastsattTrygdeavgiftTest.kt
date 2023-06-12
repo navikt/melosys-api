@@ -66,6 +66,20 @@ internal class FastsattTrygdeavgiftTest {
     }
 
     @Test
+    fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis ordinær trygdeavgift og aga er en kombinasjon v3`() {
+        FastsattTrygdeavgift().apply {
+            trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
+                inntektsperioder = mutableListOf(
+                    lagInntektsperiode(false, true),
+                    lagInntektsperiode(true, true)
+                )
+            }
+        }.run {
+            trygdeavgiftMottaker.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
+        }
+    }
+
+    @Test
     fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis det er flere innteksperioder med forskjellige mottakere`() {
         FastsattTrygdeavgift().apply {
             trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
