@@ -1,11 +1,8 @@
 package no.nav.melosys.integrasjon.dokgen.dto;
 
-import java.time.Instant;
+import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
-import no.nav.melosys.domain.brev.FritekstbrevBrevbestilling;
 import no.nav.melosys.domain.brev.IkkeYrkesaktivBrevbestilling;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikkeyrkesaktivsituasjontype;
@@ -17,9 +14,8 @@ import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
 public class IkkeYrkesaktivVedtaksbrev extends DokgenDto {
 
-    @JsonSerialize(using = InstantSerializer.class)
     @JsonFormat(shape = STRING)
-    private final Instant datoMottatt;
+    private final LocalDate datoMottatt;
     private final String sakstype;
     private final String behandlingstype;
     private final String nyVurderingBakgrunn;
@@ -34,7 +30,7 @@ public class IkkeYrkesaktivVedtaksbrev extends DokgenDto {
         super(brevbestilling, Mottakerroller.BRUKER); // TODO i MELOSYS-5738
         var fagsak = brevbestilling.getBehandling().getFagsak();
 
-        this.datoMottatt = brevbestilling.getForsendelseMottatt();
+        this.datoMottatt = instantTilLocalDate(brevbestilling.getForsendelseMottatt());
         this.sakstype = fagsak.getType().getKode();
         this.behandlingstype = fagsak.hentSistOppdatertBehandling().getType().getKode();
         this.innvilgelse = new IkkeYrkesaktivInnvilgelse(brevbestilling.getInnledningFritekst(), brevbestilling.getBegrunnelseFritekst(), brevbestilling.getNyVurderingFritekst());
@@ -46,7 +42,16 @@ public class IkkeYrkesaktivVedtaksbrev extends DokgenDto {
         this.ikkeYrkesaktivSituasjontype = brevbestilling.getIkkeYrkesaktivSituasjontype();
     }
 
-    public Instant getDatoMottatt() {
+
+    public String getArtikkel() {
+        return artikkel;
+    }
+
+    public String getBestemmelse() {
+        return bestemmelse;
+    }
+
+    public LocalDate getDatoMottatt() {
         return datoMottatt;
     }
 

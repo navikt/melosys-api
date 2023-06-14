@@ -1,8 +1,8 @@
 package no.nav.melosys.domain.brev;
 
-import no.nav.melosys.domain.kodeverk.begrunnelser.Ikkeyrkesaktivsituasjontype;
-
 import java.time.LocalDate;
+
+import no.nav.melosys.domain.kodeverk.begrunnelser.Ikkeyrkesaktivsituasjontype;
 
 public class IkkeYrkesaktivBrevbestilling extends DokgenBrevbestilling {
     private String begrunnelseFritekst;
@@ -59,6 +59,7 @@ public class IkkeYrkesaktivBrevbestilling extends DokgenBrevbestilling {
         return brukerSkalHaKopi;
     }
 
+    @Override
     public Builder toBuilder() {
         return new Builder(this);
     }
@@ -120,6 +121,7 @@ public class IkkeYrkesaktivBrevbestilling extends DokgenBrevbestilling {
             this.bestemmelse = ikkeYrkesaktivBrevbestilling.bestemmelse;
             this.ikkeYrkesaktivSituasjontype = ikkeYrkesaktivBrevbestilling.ikkeYrkesaktivSituasjontype;
             this.nyVurderingFritekst = ikkeYrkesaktivBrevbestilling.nyVurderingFritekst;
+            this.nyVurderingBakgrunn = ikkeYrkesaktivBrevbestilling.nyVurderingBakgrunn;
             this.artikkel = ikkeYrkesaktivBrevbestilling.artikkel;
         }
 
@@ -183,6 +185,7 @@ public class IkkeYrkesaktivBrevbestilling extends DokgenBrevbestilling {
             return this;
         }
 
+        @Override
         public IkkeYrkesaktivBrevbestilling build() {
             return new IkkeYrkesaktivBrevbestilling(this);
         }
