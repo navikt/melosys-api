@@ -58,7 +58,8 @@ public class BrevmottakerService {
     Mottakerroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) {
         return switch (produserbartDokument) {
             case MELDING_FORVENTET_SAKSBEHANDLINGSTID, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
-                AVSLAG_YRKESAKTIV, ORIENTERING_ANMODNING_UNNTAK, MELDING_MANGLENDE_OPPLYSNINGER, MELDING_HENLAGT_SAK, INNVILGELSE_YRKESAKTIV -> Mottakerroller.BRUKER;
+                AVSLAG_YRKESAKTIV, ORIENTERING_ANMODNING_UNNTAK, MELDING_MANGLENDE_OPPLYSNINGER, MELDING_HENLAGT_SAK,
+                INNVILGELSE_YRKESAKTIV, IKKE_YRKESAKTIV_VEDTAKSBREV -> Mottakerroller.BRUKER;
             case INNVILGELSE_ARBEIDSGIVER, AVSLAG_ARBEIDSGIVER -> Mottakerroller.ARBEIDSGIVER;
             case ANMODNING_UNNTAK, ATTEST_A1 -> Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET;
             default -> throw new TekniskException("Valg av mottakerRolle støttes ikke for " + produserbartDokument);
@@ -146,7 +147,8 @@ public class BrevmottakerService {
             case BRUKER -> avklarMottakereForBruker(produserbartDokument, behandling, forhåndsvisning);
             case VIRKSOMHET -> avklarMottakereForVirksomhet(behandling);
             case ARBEIDSGIVER -> avklarMottakereForArbeidsgiver(behandling, kunAvklarteVirksomheter);
-            case UTENLANDSK_TRYGDEMYNDIGHET -> avklarMottakereForUtenlandskTrygdeyndighet(mottaker, behandling, produserbartDokument);
+            case UTENLANDSK_TRYGDEMYNDIGHET ->
+                avklarMottakereForUtenlandskTrygdeyndighet(mottaker, behandling, produserbartDokument);
             case NORSK_MYNDIGHET -> avklarMottakereForNorskMyndighet(mottaker);
             case FULLMEKTIG -> avklarMottakereForFullmektig(behandling.getFagsak());
             default -> throw new FunksjonellException("%s støttes ikke.".formatted(mottaker.getRolle()));
