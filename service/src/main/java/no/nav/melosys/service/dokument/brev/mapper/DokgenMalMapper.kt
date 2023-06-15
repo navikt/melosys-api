@@ -7,6 +7,7 @@ import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.Representerer
+import no.nav.melosys.domain.kodeverk.begrunnelser.Ikkeyrkesaktivsituasjontype
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.exception.FunksjonellException
@@ -172,7 +173,7 @@ class DokgenMalMapper(
                 Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET
             )
 
-            Produserbaredokumenter.IKKE_YRKESAKTIV_VEDTAKSBREV -> lagIkkeYrkesaktivVedtaksbrev(brevbestilling)
+            Produserbaredokumenter.IKKE_YRKESAKTIV_VEDTAKSBREV -> lagIkkeYrkesaktivVedtaksbrev(brevbestilling as IkkeYrkesaktivBrevbestilling)
             else -> throw FunksjonellException(
                 String.format(
                     "ProduserbartDokument %s er ikke støttet av melosys-dokgen",
@@ -182,7 +183,7 @@ class DokgenMalMapper(
         }
     }
 
-    private fun lagIkkeYrkesaktivVedtaksbrev(brevbestilling: DokgenBrevbestilling): IkkeYrkesaktivVedtaksbrev {
+    private fun lagIkkeYrkesaktivVedtaksbrev(brevbestilling: IkkeYrkesaktivBrevbestilling): IkkeYrkesaktivVedtaksbrev {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandling.id)
         val lovvalgsperioder = behandlingsresultat.lovvalgsperioder
         val lovvalgsperiode: Lovvalgsperiode =
@@ -190,15 +191,21 @@ class DokgenMalMapper(
         val bestemmelse = lovvalgsperiode.bestemmelse
         val mottatteOpplysningerData =
             behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as Soeknad
-        val ikkeYrkesaktivSituasjontype =
-            mottatteOpplysningerData.ikkeYrkesaktivSituasjontype ?: error("IkkeYrkesaktivSituasjontype mangler")
-        return IkkeYrkesaktivVedtaksbrev.av(
-            (brevbestilling as IkkeYrkesaktivBrevbestilling).toBuilder()
-                .medIkkeyrkesaktivSituasjontype(ikkeYrkesaktivSituasjontype)
-                .medBestemmelse(bestemmelse.name())
-                .medPeriodeFom(lovvalgsperiode.fom)
-                .medPeriodeTom(lovvalgsperiode.tom)
-                .build()
+        val ikkeYrkesaktivSituasjontype = mottatteOpplysningerData.ikkeYrkesaktivSituasjontype
+            ?: Ikkeyrkesaktivsituasjontype.ANNET
+
+        return IkkeYrkesaktivVedtaksbrev.av(brevbestilling.toBuilder()
+            .medBegrunnelseFritekst(behandlingsresultat.begrunnelseFritekst)
+            .medInnledningFritekst(behandlingsresultat.innledningFritekst)
+            .medFullmektigNavn(null)
+            .medNyVurderingBakgrunn(null) //TODO: Legg til ved ny vurdering
+            .medOppholdsLand(lovvalgsperiode.lovvalgsland.name)
+            .medPeriodeFom(lovvalgsperiode.fom)
+            .medPeriodeTom(lovvalgsperiode.tom)
+            .medBestemmelse(bestemmelse.name())
+            .medIkkeyrkesaktivSituasjontype(ikkeYrkesaktivSituasjontype)
+            .medArtikkel(bestemmelse.beskrivelse)
+            .build()
         )
     }
 }

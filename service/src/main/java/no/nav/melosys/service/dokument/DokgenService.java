@@ -32,6 +32,7 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static no.nav.melosys.domain.kodeverk.Mottakerroller.FULLMEKTIG;
 import static org.springframework.util.StringUtils.hasText;
 
 @Service
@@ -301,18 +302,7 @@ public class DokgenService {
                 .medFritekstvedleggTittel(brevbestillingDto.getFritekstTittel())
                 .medFritekstvedleggTekst(brevbestillingDto.getFritekst());
 
-            case IKKE_YRKESAKTIV_VEDTAKSBREV -> new IkkeYrkesaktivBrevbestilling.Builder()
-                .medArtikkel("artikkel")
-//                .medBestemmelse("Bestemmelse")
-                .medFullmektigNavn("Fullmektig navn")
-//                .medIkkeyrkesaktivSituasjontype(Ikkeyrkesaktivsituasjontype.STUDENT)
-                .medOppholdsLand("Spania")
-//                .medPeriodeFom(LocalDate.now())
-//                .medPeriodeTom(LocalDate.now())
-                .medNyVurderingFritekst("Ny vurdering fritekst")
-                .medBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst())
-                .medNyVurderingBakgrunn("NYE_OPPLYSNINGER")
-                .medInnledningFritekst(brevbestillingDto.getInnledningFritekst());
+            case IKKE_YRKESAKTIV_VEDTAKSBREV -> new IkkeYrkesaktivBrevbestilling.Builder().medDistribusjonstype(Distribusjonstype.VEDTAK);
 
             default -> new DokgenBrevbestilling.Builder<>().medDistribusjonstype(Distribusjonstype.VIKTIG);
         };
