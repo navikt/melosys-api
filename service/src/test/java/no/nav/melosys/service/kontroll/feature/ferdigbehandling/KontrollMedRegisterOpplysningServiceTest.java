@@ -1,18 +1,17 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.exception.ValideringException;
-import no.nav.melosys.exception.validering.KontrollfeilDto;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -21,6 +20,7 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
+import no.nav.melosys.service.validering.Kontrollfeil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,8 +29,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
@@ -87,12 +85,9 @@ class KontrollMedRegisterOpplysningServiceTest {
         when(persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID())).thenReturn("fnr");
         when(lovvalgsperiodeService.hentLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
-        Consumer<ValideringException> medFeilkode = v -> assertThat(v.getFeilkoder())
-            .extracting(KontrollfeilDto::getKode).containsExactly(Kontroll_begrunnelser.INGEN_SLUTTDATO.getKode());
-
-        assertThatThrownBy(() -> kontrollMedRegisterOpplysning.kontrollerVedtak(behandling, behandlingsresultat, Sakstyper.EU_EOS, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, null))
-            .isInstanceOfSatisfying(ValideringException.class, medFeilkode)
-            .hasMessage("Feil i validering. Kan ikke fatte vedtak.");
+        Collection<Kontrollfeil> kontrollfeilCollection = kontrollMedRegisterOpplysning.kontrollerVedtak(behandling, behandlingsresultat, Sakstyper.EU_EOS, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, null);
+        assertThat(kontrollfeilCollection).hasSize(1);
+        assertThat(kontrollfeilCollection.stream().findFirst().get().getKode().getKode()).isEqualTo(Kontroll_begrunnelser.INGEN_SLUTTDATO.getKode());
     }
 
     @Test
@@ -116,15 +111,9 @@ class KontrollMedRegisterOpplysningServiceTest {
         var feilIgnoreres = Set.of(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
         var annenFeilIgnoreres = Set.of(Kontroll_begrunnelser.MANGLER_VIRKSOMHET);
 
+        assertThat(kontrollMedRegisterOpplysning.kontroller(behandlingID, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, feilIgnoreres)).isEmpty();
 
-        assertDoesNotThrow(
-            () -> kontrollMedRegisterOpplysning.kontroller(behandlingID, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, feilIgnoreres)
-        );
-
-        assertThatThrownBy(() ->
-            kontrollMedRegisterOpplysning.kontroller(behandlingID, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, annenFeilIgnoreres))
-            .isInstanceOf(ValideringException.class)
-            .hasMessage("Feil i validering. Kan ikke fatte vedtak.");
+        assertThat(kontrollMedRegisterOpplysning.kontroller(behandlingID, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, annenFeilIgnoreres)).hasSize(1);
     }
 
     private Behandlingsresultat lagBehandlingsresultat() {
