@@ -12,7 +12,6 @@ import no.nav.melosys.domain.PeriodeOmLovvalg;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -44,7 +43,7 @@ class KontrollMedRegisteropplysning {
         this.unleash = unleash;
     }
 
-    public Collection<Kontrollfeil> kontroller(long behandlingId, Behandlingsresultattyper behandlingsresultattype, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) throws ValideringException {
+    public Collection<Kontrollfeil> kontroller(long behandlingId, Behandlingsresultattyper behandlingsresultattype, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         Sakstyper sakstype = behandling.getFagsak().getType();
         Behandlingsresultat behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
@@ -55,7 +54,7 @@ class KontrollMedRegisteropplysning {
                                                      Behandlingsresultat behandlingsresultat,
                                                      Sakstyper sakstype,
                                                      Behandlingsresultattyper behandlingsresultattype,
-                                                     Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) throws ValideringException {
+                                                     Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) {
         hentNyeRegisteropplysninger(behandlingsresultat, behandling);
         return kontroll.kontrollerVedtak(behandling.getId(), sakstype, behandlingsresultattype, kontrollerSomSkalIgnoreres);
     }

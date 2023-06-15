@@ -1,9 +1,10 @@
 package no.nav.melosys.tjenester.gui.kontroll;
 
+import java.util.Collection;
+
 import io.swagger.annotations.Api;
-import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.ValideringException;
+import no.nav.melosys.exception.validering.KontrollerFerdigbehandlingDto;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
@@ -16,8 +17,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.util.Collection;
 
 @Protected
 @RestController
@@ -46,7 +45,7 @@ public class KontrollTjeneste {
     }
 
     @PostMapping("/ferdigbehandling")
-    public ResponseEntity<Void> kontrollerFerdigbehandling(@RequestBody FerdigbehandlingKontrollerDto ferdigbehandlingKontrollerDto) throws ValideringException {
+    public ResponseEntity<KontrollerFerdigbehandlingDto> kontrollerFerdigbehandling(@RequestBody FerdigbehandlingKontrollerDto ferdigbehandlingKontrollerDto) {
 
         if (ferdigbehandlingKontrollerDto.vedtakstype() == null) {
             throw new FunksjonellException("Vedtakstype mangler.");
@@ -63,13 +62,6 @@ public class KontrollTjeneste {
             ferdigbehandlingKontrollerDto.kontrollerSomSkalIgnoreres()
         );
 
-        //TODO: Gjør om fra kasting av exception til å returnere dto
-        if (!kontrollfeil.isEmpty()) {
-            throw new ValideringException("Feil i validering. Kan ikke fatte vedtak.",
-                kontrollfeil.stream().map(Kontrollfeil::tilDto).toList());
-        }
-
-
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(new KontrollerFerdigbehandlingDto(kontrollfeil.stream().map(Kontrollfeil::tilDto).toList()));
     }
 }

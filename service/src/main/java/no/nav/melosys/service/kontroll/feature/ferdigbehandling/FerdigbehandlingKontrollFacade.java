@@ -8,7 +8,6 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +25,7 @@ public class FerdigbehandlingKontrollFacade {
     }
 
     @Transactional
-    public Collection<Kontrollfeil> kontroller(long behandlingId, boolean skalRegisteropplysningerOppdateres, Behandlingsresultattyper behandlingsresultattype, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) throws ValideringException {
+    public Collection<Kontrollfeil> kontroller(long behandlingId, boolean skalRegisteropplysningerOppdateres, Behandlingsresultattyper behandlingsresultattype, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) {
         if (skalRegisteropplysningerOppdateres) {
             return kontrollerKontrollMedRegisteropplysning.kontroller(behandlingId, behandlingsresultattype, kontrollerSomSkalIgnoreres);
         } else {
@@ -35,7 +34,7 @@ public class FerdigbehandlingKontrollFacade {
     }
 
     @Transactional(readOnly = true)
-    public Collection<Kontrollfeil> kontroller(long behandlingId, Behandlingsresultattyper behandlingsresultattype, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) throws ValideringException {
+    public Collection<Kontrollfeil> kontroller(long behandlingId, Behandlingsresultattyper behandlingsresultattype, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) {
         return kontroll.kontroller(behandlingId, behandlingsresultattype, kontrollerSomSkalIgnoreres);
     }
 
@@ -44,7 +43,7 @@ public class FerdigbehandlingKontrollFacade {
                                                                             Behandlingsresultat behandlingsresultat,
                                                                             Sakstyper sakstype,
                                                                             Behandlingsresultattyper behandlingsresultattype,
-                                                                            Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) throws ValideringException {
+                                                                            Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) {
         return kontrollerKontrollMedRegisteropplysning.kontrollerVedtak(behandling, behandlingsresultat, sakstype, behandlingsresultattype, kontrollerSomSkalIgnoreres);
     }
 }

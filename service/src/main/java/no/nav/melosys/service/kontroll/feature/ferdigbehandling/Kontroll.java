@@ -13,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.person.Persondata;
-import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -51,13 +50,13 @@ class Kontroll {
         this.unleash = unleash;
     }
 
-    public Collection<Kontrollfeil> kontroller(long behandlingId, Behandlingsresultattyper behandlingsresultattype, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) throws ValideringException {
+    public Collection<Kontrollfeil> kontroller(long behandlingId, Behandlingsresultattyper behandlingsresultattype, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) {
         var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         var sakstype = behandling.getFagsak().getType();
         return kontrollerVedtak(behandlingId, sakstype, behandlingsresultattype, kontrollerSomSkalIgnoreres);
     }
 
-    public Collection<Kontrollfeil> kontrollerVedtak(long behandlingID, Sakstyper sakstype, Behandlingsresultattyper behandlingsresultattype, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) throws ValideringException {
+    public Collection<Kontrollfeil> kontrollerVedtak(long behandlingID, Sakstyper sakstype, Behandlingsresultattyper behandlingsresultattype, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) {
         return utførKontroller(behandlingID, sakstype, behandlingsresultattype).stream()
             .filter(feil -> skalViseFeil(feil, kontrollerSomSkalIgnoreres, behandlingID))
             .toList();
