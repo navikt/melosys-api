@@ -7,7 +7,6 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Ikkeyrkesaktivsituasjontype;
 public class IkkeYrkesaktivBrevbestilling extends DokgenBrevbestilling {
     private String begrunnelseFritekst;
     private String innledningFritekst;
-    private String fullmektigNavn;
     private boolean brukerSkalHaKopi;
     private String nyVurderingBakgrunn;
     private String nyVurderingFritekst;
@@ -27,7 +26,6 @@ public class IkkeYrkesaktivBrevbestilling extends DokgenBrevbestilling {
         super(builder);
         this.begrunnelseFritekst = builder.begrunnelseFritekst;
         this.innledningFritekst = builder.innledningFritekst;
-        this.fullmektigNavn = builder.fullmektigNavn;
         this.brukerSkalHaKopi = builder.brukerSkalHaKopi;
         this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
         this.oppholdsLand = builder.oppholdsLand;
@@ -49,10 +47,6 @@ public class IkkeYrkesaktivBrevbestilling extends DokgenBrevbestilling {
 
     public String getNyVurderingBakgrunn() {
         return nyVurderingBakgrunn;
-    }
-
-    public String getFullmektigNavn() {
-        return fullmektigNavn;
     }
 
     public boolean isBrukerSkalHaKopi() {
@@ -95,7 +89,6 @@ public class IkkeYrkesaktivBrevbestilling extends DokgenBrevbestilling {
     public static final class Builder extends DokgenBrevbestilling.Builder<Builder> {
         private String begrunnelseFritekst;
         private String innledningFritekst;
-        private String fullmektigNavn;
         private String oppholdsLand;
         private boolean brukerSkalHaKopi;
         private String nyVurderingBakgrunn;
@@ -113,7 +106,6 @@ public class IkkeYrkesaktivBrevbestilling extends DokgenBrevbestilling {
             super(ikkeYrkesaktivBrevbestilling);
             this.begrunnelseFritekst = ikkeYrkesaktivBrevbestilling.begrunnelseFritekst;
             this.innledningFritekst = ikkeYrkesaktivBrevbestilling.innledningFritekst;
-            this.fullmektigNavn = ikkeYrkesaktivBrevbestilling.fullmektigNavn;
             this.brukerSkalHaKopi = ikkeYrkesaktivBrevbestilling.brukerSkalHaKopi;
             this.oppholdsLand = ikkeYrkesaktivBrevbestilling.oppholdsLand;
             this.periodeFom = ikkeYrkesaktivBrevbestilling.periodeFom;
@@ -162,11 +154,6 @@ public class IkkeYrkesaktivBrevbestilling extends DokgenBrevbestilling {
 
         public Builder medInnledningFritekst(String innledningFritekst) {
             this.innledningFritekst = innledningFritekst;
-            return this;
-        }
-
-        public Builder medFullmektigNavn(String fullmektigNavn) {
-            this.fullmektigNavn = fullmektigNavn;
             return this;
         }
 
