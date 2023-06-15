@@ -174,38 +174,35 @@ class DokgenMalMapper(
             )
 
             Produserbaredokumenter.IKKE_YRKESAKTIV_VEDTAKSBREV -> lagIkkeYrkesaktivVedtaksbrev(brevbestilling as IkkeYrkesaktivBrevbestilling)
-            else -> throw FunksjonellException(
-                String.format(
-                    "ProduserbartDokument %s er ikke støttet av melosys-dokgen",
-                    brevbestilling.produserbartdokument
-                )
-            )
+
+            else -> throw FunksjonellException("ProduserbartDokument ${brevbestilling.produserbartdokument} er ikke støttet av melosys-dokgen")
         }
     }
 
-    private fun lagIkkeYrkesaktivVedtaksbrev(brevbestilling: IkkeYrkesaktivBrevbestilling): IkkeYrkesaktivVedtaksbrev {
+    internal fun lagIkkeYrkesaktivVedtaksbrev(brevbestilling: IkkeYrkesaktivBrevbestilling): IkkeYrkesaktivVedtaksbrev {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandling.id)
-        val lovvalgsperioder = behandlingsresultat.lovvalgsperioder
         val lovvalgsperiode: Lovvalgsperiode =
-            lovvalgsperioder.firstOrNull() ?: throw FunksjonellException("Lovvalgsperiode mangler")
+            behandlingsresultat.lovvalgsperioder.firstOrNull()
+                ?: throw FunksjonellException("Lovvalgsperiode mangler for behandling: ${brevbestilling.behandling.id})")
+
         val bestemmelse = lovvalgsperiode.bestemmelse
         val mottatteOpplysningerData =
             behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as Soeknad
         val ikkeYrkesaktivSituasjontype = mottatteOpplysningerData.ikkeYrkesaktivSituasjontype
             ?: Ikkeyrkesaktivsituasjontype.ANNET
 
-        return IkkeYrkesaktivVedtaksbrev.av(brevbestilling.toBuilder()
-            .medBegrunnelseFritekst(behandlingsresultat.begrunnelseFritekst)
-            .medInnledningFritekst(behandlingsresultat.innledningFritekst)
-            .medFullmektigNavn(null)
-            .medNyVurderingBakgrunn(null) //TODO: Legg til ved ny vurdering
-            .medOppholdsLand(lovvalgsperiode.lovvalgsland.name)
-            .medPeriodeFom(lovvalgsperiode.fom)
-            .medPeriodeTom(lovvalgsperiode.tom)
-            .medBestemmelse(bestemmelse.name())
-            .medIkkeyrkesaktivSituasjontype(ikkeYrkesaktivSituasjontype)
-            .medArtikkel(bestemmelse.beskrivelse)
-            .build()
+        return IkkeYrkesaktivVedtaksbrev.av(
+            brevbestilling.toBuilder()
+                .medBegrunnelseFritekst(behandlingsresultat.begrunnelseFritekst)
+                .medInnledningFritekst(behandlingsresultat.innledningFritekst)
+                .medNyVurderingBakgrunn(brevbestilling.nyVurderingBakgrunn ?: "bør støtte null")
+                .medOppholdsLand(lovvalgsperiode.lovvalgsland.beskrivelse)
+                .medPeriodeFom(lovvalgsperiode.fom)
+                .medPeriodeTom(lovvalgsperiode.tom)
+                .medBestemmelse(bestemmelse.name())
+                .medIkkeyrkesaktivSituasjontype(ikkeYrkesaktivSituasjontype)
+                .medArtikkel(bestemmelse.beskrivelse)
+                .build()
         )
     }
 }
