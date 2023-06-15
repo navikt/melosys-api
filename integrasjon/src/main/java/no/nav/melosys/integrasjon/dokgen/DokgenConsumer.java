@@ -1,5 +1,8 @@
 package no.nav.melosys.integrasjon.dokgen;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.integrasjon.dokgen.dto.DokgenDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +21,17 @@ public class DokgenConsumer {
 
     public byte[] lagPdf(String malNavn, DokgenDto dokgenDto, boolean bestillKopi, boolean bestillUtkast) {
         log.info("Produserer PDF i melosys-dokgen. Mal: {}, som kopi {}", malNavn, bestillKopi);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        // Kun for testing husk å fjern
+        try {
+            String value = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(dokgenDto);
+            System.out.printf(value);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
         return webClient.post()
             .uri("/mal/{malNavn}/lag-pdf?somKopi={bestillKopi}&utkast={bestillUtkast}", malNavn, bestillKopi, bestillUtkast)
             .bodyValue(dokgenDto)

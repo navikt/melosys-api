@@ -3,7 +3,6 @@ package no.nav.melosys.service.dokument;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.temporal.TemporalAmount;
 import java.util.*;
 
 import no.nav.melosys.domain.Behandling;
@@ -14,7 +13,6 @@ import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Ikkeyrkesaktivsituasjontype;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.integrasjon.dokgen.DokgenConsumer;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
@@ -305,16 +303,16 @@ public class DokgenService {
 
             case IKKE_YRKESAKTIV_VEDTAKSBREV -> new IkkeYrkesaktivBrevbestilling.Builder()
                 .medArtikkel("artikkel")
-                .medBestemmelse("Bestemmelse")
+//                .medBestemmelse("Bestemmelse")
                 .medFullmektigNavn("Fullmektig navn")
-                .medIkkeyrkesaktivSituasjontype(Ikkeyrkesaktivsituasjontype.STUDENT)
+//                .medIkkeyrkesaktivSituasjontype(Ikkeyrkesaktivsituasjontype.STUDENT)
                 .medOppholdsLand("Spania")
-                .medPeriodeFom(LocalDate.now())
-                .medPeriodeTom(LocalDate.now())
+//                .medPeriodeFom(LocalDate.now())
+//                .medPeriodeTom(LocalDate.now())
                 .medNyVurderingFritekst("Ny vurdering fritekst")
-                .medBegrunnelseFritekst("Ny begrunnelse fritekst")
+                .medBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst())
                 .medNyVurderingBakgrunn("NYE_OPPLYSNINGER")
-                .medInnledningFritekst("Innledning fritekst");
+                .medInnledningFritekst(brevbestillingDto.getInnledningFritekst());
 
             default -> new DokgenBrevbestilling.Builder<>().medDistribusjonstype(Distribusjonstype.VIKTIG);
         };
