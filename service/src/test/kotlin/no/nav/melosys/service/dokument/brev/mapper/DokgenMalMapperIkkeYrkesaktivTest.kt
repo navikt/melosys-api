@@ -54,7 +54,7 @@ class DokgenMalMapperIkkeYrkesaktivTest {
 
     @Test
     fun test() {
-        val behandling = Behandling().apply {
+        val behandling = Behandling().apply behandling@{
             id = 1L
             tema = Behandlingstema.IKKE_YRKESAKTIV
             type = Behandlingstyper.FØRSTEGANG
@@ -64,11 +64,11 @@ class DokgenMalMapperIkkeYrkesaktivTest {
                     ikkeYrkesaktivSituasjontype = Ikkeyrkesaktivsituasjontype.STUDENT
                 })
             }
-        }
-        behandling.fagsak = Fagsak().apply {
-            saksnummer = "MEL-1"
-            type = Sakstyper.EU_EOS
-            behandlinger = listOf(behandling)
+            fagsak = Fagsak().apply {
+                saksnummer = "MEL-1"
+                type = Sakstyper.EU_EOS
+                behandlinger = listOf(this@behandling)
+            }
         }
         val behandlingsresultat = Behandlingsresultat().apply {
             id = 1L
@@ -110,6 +110,7 @@ class DokgenMalMapperIkkeYrkesaktivTest {
                 get("innledningFritekst").asText().shouldBe("innledningFritekst")
                 get("begrunnelseFritekst").asText().shouldBe("begrunnelseFritekst")
             }
+            get("ikkeYrkesaktivSituasjontype").asText().shouldBe("STUDENT")
         }
 
         vedtaksbrev.toJsonNode.toPrettyString().also(::println)
