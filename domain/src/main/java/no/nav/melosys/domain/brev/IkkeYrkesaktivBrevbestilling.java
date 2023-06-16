@@ -5,17 +5,17 @@ import java.time.LocalDate;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikkeyrkesaktivsituasjontype;
 
 public class IkkeYrkesaktivBrevbestilling extends DokgenBrevbestilling {
+
     private String begrunnelseFritekst;
     private String innledningFritekst;
-    private boolean brukerSkalHaKopi;
-    private String nyVurderingBakgrunn;
+    private String nyVurderingBakgrunn; //TODO: https://jira.adeo.no/browse/MELOSYS-5942
     private String nyVurderingFritekst;
     private String oppholdsLand;
     private LocalDate periodeFom;
     private LocalDate periodeTom;
     private String bestemmelse;
-    private Ikkeyrkesaktivsituasjontype ikkeYrkesaktivSituasjontype;
     private String artikkel;
+    private Ikkeyrkesaktivsituasjontype ikkeYrkesaktivSituasjontype;
 
     public IkkeYrkesaktivBrevbestilling() {
         super();
@@ -26,7 +26,6 @@ public class IkkeYrkesaktivBrevbestilling extends DokgenBrevbestilling {
         super(builder);
         this.begrunnelseFritekst = builder.begrunnelseFritekst;
         this.innledningFritekst = builder.innledningFritekst;
-        this.brukerSkalHaKopi = builder.brukerSkalHaKopi;
         this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
         this.oppholdsLand = builder.oppholdsLand;
         this.periodeFom = builder.periodeFom;
@@ -47,10 +46,6 @@ public class IkkeYrkesaktivBrevbestilling extends DokgenBrevbestilling {
 
     public String getNyVurderingBakgrunn() {
         return nyVurderingBakgrunn;
-    }
-
-    public boolean isBrukerSkalHaKopi() {
-        return brukerSkalHaKopi;
     }
 
     @Override
@@ -90,7 +85,6 @@ public class IkkeYrkesaktivBrevbestilling extends DokgenBrevbestilling {
         private String begrunnelseFritekst;
         private String innledningFritekst;
         private String oppholdsLand;
-        private boolean brukerSkalHaKopi;
         private String nyVurderingBakgrunn;
         private String nyVurderingFritekst;
         private LocalDate periodeFom;
@@ -106,7 +100,6 @@ public class IkkeYrkesaktivBrevbestilling extends DokgenBrevbestilling {
             super(ikkeYrkesaktivBrevbestilling);
             this.begrunnelseFritekst = ikkeYrkesaktivBrevbestilling.begrunnelseFritekst;
             this.innledningFritekst = ikkeYrkesaktivBrevbestilling.innledningFritekst;
-            this.brukerSkalHaKopi = ikkeYrkesaktivBrevbestilling.brukerSkalHaKopi;
             this.oppholdsLand = ikkeYrkesaktivBrevbestilling.oppholdsLand;
             this.periodeFom = ikkeYrkesaktivBrevbestilling.periodeFom;
             this.periodeTom = ikkeYrkesaktivBrevbestilling.periodeTom;
@@ -159,11 +152,6 @@ public class IkkeYrkesaktivBrevbestilling extends DokgenBrevbestilling {
 
         public Builder medOppholdsLand(String oppholdsLand) {
             this.oppholdsLand = oppholdsLand;
-            return this;
-        }
-
-        public Builder medBrukerSkalHaKopi(boolean brukerSkalHaKopi) {
-            this.brukerSkalHaKopi = brukerSkalHaKopi;
             return this;
         }
 
