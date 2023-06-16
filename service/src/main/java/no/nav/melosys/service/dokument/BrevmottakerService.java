@@ -147,8 +147,7 @@ public class BrevmottakerService {
             case BRUKER -> avklarMottakereForBruker(produserbartDokument, behandling, forhåndsvisning);
             case VIRKSOMHET -> avklarMottakereForVirksomhet(behandling);
             case ARBEIDSGIVER -> avklarMottakereForArbeidsgiver(behandling, kunAvklarteVirksomheter);
-            case UTENLANDSK_TRYGDEMYNDIGHET ->
-                avklarMottakereForUtenlandskTrygdeyndighet(mottaker, behandling, produserbartDokument);
+            case UTENLANDSK_TRYGDEMYNDIGHET -> avklarMottakereForUtenlandskTrygdeyndighet(mottaker, behandling, produserbartDokument);
             case NORSK_MYNDIGHET -> avklarMottakereForNorskMyndighet(mottaker);
             case FULLMEKTIG -> avklarMottakereForFullmektig(behandling.getFagsak());
             default -> throw new FunksjonellException("%s støttes ikke.".formatted(mottaker.getRolle()));

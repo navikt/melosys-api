@@ -21,8 +21,8 @@ public class IkkeYrkesaktivVedtaksbrev extends DokgenDto {
     private final String nyVurderingBakgrunn;
     private final String oppholdsland;
     private final IkkeYrkesaktivPeriode periode;
-    private final String artikkel;
     private final String bestemmelse;
+    private final String artikkel;
     private final IkkeYrkesaktivInnvilgelse innvilgelse;
     private final Ikkeyrkesaktivsituasjontype ikkeYrkesaktivSituasjontype;
 
@@ -41,7 +41,6 @@ public class IkkeYrkesaktivVedtaksbrev extends DokgenDto {
         this.artikkel = brevbestilling.getArtikkel();
         this.ikkeYrkesaktivSituasjontype = brevbestilling.getIkkeYrkesaktivSituasjontype();
     }
-
 
     public String getArtikkel() {
         return artikkel;

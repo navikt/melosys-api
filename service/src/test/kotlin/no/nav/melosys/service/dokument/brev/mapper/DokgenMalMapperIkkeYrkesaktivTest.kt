@@ -113,7 +113,7 @@ class DokgenMalMapperIkkeYrkesaktivTest {
             get("ikkeYrkesaktivSituasjontype").asText().shouldBe("STUDENT")
         }
 
-        vedtaksbrev.toJsonNode.toPrettyString().also(::println)
+        // vedtaksbrev.toJsonNode.toPrettyString().also(::println)
     }
 
     private val Any.toJsonNode: JsonNode
@@ -123,5 +123,4 @@ class DokgenMalMapperIkkeYrkesaktivTest {
                 .registerModule(JavaTimeModule())
                 .valueToTree(this)
         }
-
 }
