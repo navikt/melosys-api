@@ -28,13 +28,11 @@ class DokgenMalMapper(
         // Henter opplysninger på nytt for å sikre at korrekt adresse benyttes (med mindre myndighet)
         val brevbestillingBuilder = mottattBrevbestilling.toBuilder()
         berikBestillingMedPersondata(brevbestillingBuilder, mottattBrevbestilling.behandling, mottaker)
-        val dto = lagDokgenDtoFraBestilling(brevbestillingBuilder.build())
-        val mottakerDto = dto.mottaker
-        if (Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET.kode == mottakerDto.type) {
-            return dto
+        return lagDokgenDtoFraBestilling(brevbestillingBuilder.build()).apply {
+            if (Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET.kode != this.mottaker.type) {
+                this.mottaker = lagMottakerUtenKoder(this.mottaker)
+            }
         }
-        dto.mottaker = lagMottakerUtenKoder(mottakerDto)
-        return dto
     }
 
     private fun lagMottakerUtenKoder(mottakerMedKoder: Mottaker): Mottaker {
