@@ -7,7 +7,6 @@ import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.Representerer
-import no.nav.melosys.domain.kodeverk.begrunnelser.Ikkeyrkesaktivsituasjontype
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.exception.FunksjonellException
@@ -188,19 +187,17 @@ class DokgenMalMapper(
         val bestemmelse = lovvalgsperiode.bestemmelse
         val mottatteOpplysningerData =
             behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as Soeknad
-        val ikkeYrkesaktivSituasjontype = mottatteOpplysningerData.ikkeYrkesaktivSituasjontype
-            ?: Ikkeyrkesaktivsituasjontype.ANNET
 
         return IkkeYrkesaktivVedtaksbrev.av(
             brevbestilling.toBuilder()
                 .medBegrunnelseFritekst(behandlingsresultat.begrunnelseFritekst)
                 .medInnledningFritekst(behandlingsresultat.innledningFritekst)
-                .medNyVurderingBakgrunn(brevbestilling.nyVurderingBakgrunn ?: "bør støtte null")
+                .medNyVurderingBakgrunn(brevbestilling.nyVurderingBakgrunn)
                 .medOppholdsLand(lovvalgsperiode.lovvalgsland.beskrivelse)
                 .medPeriodeFom(lovvalgsperiode.fom)
                 .medPeriodeTom(lovvalgsperiode.tom)
                 .medBestemmelse(bestemmelse.name())
-                .medIkkeyrkesaktivSituasjontype(ikkeYrkesaktivSituasjontype)
+                .medIkkeyrkesaktivSituasjontype(mottatteOpplysningerData.ikkeYrkesaktivSituasjontype)
                 .medArtikkel(bestemmelse.beskrivelse)
                 .build()
         )
