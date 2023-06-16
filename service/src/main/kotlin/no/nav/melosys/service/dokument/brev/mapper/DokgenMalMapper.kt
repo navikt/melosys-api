@@ -1,125 +1,181 @@
-package no.nav.melosys.service.dokument.brev.mapper;
+package no.nav.melosys.service.dokument.brev.mapper
 
-import java.time.Instant;
-import java.util.List;
-
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.brev.*;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Mottakerroller;
-import no.nav.melosys.domain.kodeverk.Representerer;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.integrasjon.dokgen.dto.*;
-import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
-import org.springframework.stereotype.Component;
-
-import static java.lang.String.format;
-import static org.springframework.util.StringUtils.hasText;
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.brev.*
+import no.nav.melosys.domain.kodeverk.Land_iso2
+import no.nav.melosys.domain.kodeverk.Landkoder
+import no.nav.melosys.domain.kodeverk.Mottakerroller
+import no.nav.melosys.domain.kodeverk.Representerer
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.integrasjon.dokgen.dto.*
+import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker
+import org.springframework.stereotype.Component
+import org.springframework.util.StringUtils
 
 @Component
-public class DokgenMalMapper {
-
-    private final DokgenMapperDatahenter dokgenMapperDatahenter;
-    private final InnvilgelseFtrlMapper innvilgelseFtrlMapper;
-    private final TrygdeavtaleMapper trygdeavtaleMapper;
-
-    public DokgenMalMapper(DokgenMapperDatahenter dokgenMapperDatahenter,
-                           InnvilgelseFtrlMapper innvilgelseFtrlMapper,
-                           TrygdeavtaleMapper trygdeavtaleMapper) {
-        this.dokgenMapperDatahenter = dokgenMapperDatahenter;
-        this.innvilgelseFtrlMapper = innvilgelseFtrlMapper;
-        this.trygdeavtaleMapper = trygdeavtaleMapper;
-    }
-
-    public DokgenDto mapBehandling(DokgenBrevbestilling mottattBrevbestilling, no.nav.melosys.domain.brev.Mottaker mottaker) {
+class DokgenMalMapper(
+    private val dokgenMapperDatahenter: DokgenMapperDatahenter,
+    private val innvilgelseFtrlMapper: InnvilgelseFtrlMapper,
+    private val trygdeavtaleMapper: TrygdeavtaleMapper
+) {
+    fun mapBehandling(
+        mottattBrevbestilling: DokgenBrevbestilling,
+        mottaker: no.nav.melosys.domain.brev.Mottaker
+    ): DokgenDto {
         // Henter opplysninger på nytt for å sikre at korrekt adresse benyttes (med mindre myndighet)
-        var brevbestillingBuilder = mottattBrevbestilling.toBuilder();
-        berikBestillingMedPersondata(brevbestillingBuilder, mottattBrevbestilling.getBehandling(), mottaker);
-
-        DokgenDto dto = lagDokgenDtoFraBestilling(brevbestillingBuilder.build());
-
-        Mottaker mottakerDto = dto.getMottaker();
-        if (Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET.getKode().equals(mottakerDto.type())) {
-            return dto;
+        val brevbestillingBuilder = mottattBrevbestilling.toBuilder()
+        berikBestillingMedPersondata(brevbestillingBuilder, mottattBrevbestilling.behandling, mottaker)
+        val dto = lagDokgenDtoFraBestilling(brevbestillingBuilder.build())
+        val mottakerDto = dto.mottaker
+        if (Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET.kode == mottakerDto.type) {
+            return dto
         }
-
-        dto.setMottaker(lagMottakerUtenKoder(mottakerDto));
-        return dto;
+        dto.mottaker = lagMottakerUtenKoder(mottakerDto)
+        return dto
     }
 
-    private Mottaker lagMottakerUtenKoder(Mottaker mottakerMedKoder) {
-        String poststed = mottakerMedKoder.poststed();
-        if (Landkoder.NO.getKode().equals(mottakerMedKoder.land()) && hasText(mottakerMedKoder.postnr())) {
-            poststed = dokgenMapperDatahenter.hentNorskPoststed(mottakerMedKoder.postnr());
+    private fun lagMottakerUtenKoder(mottakerMedKoder: Mottaker): Mottaker {
+        var poststed = mottakerMedKoder.poststed
+        if (Landkoder.NO.kode == mottakerMedKoder.land && StringUtils.hasText(mottakerMedKoder.postnr)) {
+            poststed = dokgenMapperDatahenter.hentNorskPoststed(mottakerMedKoder.postnr)
         }
-        String land = (dokgenMapperDatahenter.hentLandnavnFraLandkode(mottakerMedKoder.land()));
-        return new Mottaker(mottakerMedKoder.navn(), mottakerMedKoder.adresselinjer(), mottakerMedKoder.postnr(), poststed, land, mottakerMedKoder.type(), mottakerMedKoder.region());
+        val land = dokgenMapperDatahenter.hentLandnavnFraLandkode(mottakerMedKoder.land)
+        return Mottaker(
+            mottakerMedKoder.navn,
+            mottakerMedKoder.adresselinjer,
+            mottakerMedKoder.postnr,
+            poststed,
+            land,
+            mottakerMedKoder.type,
+            mottakerMedKoder.region
+        )
     }
 
-    private void berikBestillingMedPersondata(DokgenBrevbestilling.Builder<?> mottattBrevbestilling, Behandling behandling, no.nav.melosys.domain.brev.Mottaker mottaker) {
+    private fun berikBestillingMedPersondata(
+        mottattBrevbestilling: DokgenBrevbestilling.Builder<*>,
+        behandling: Behandling,
+        mottaker: no.nav.melosys.domain.brev.Mottaker
+    ) {
         mottattBrevbestilling
             .medPersonDokument(dokgenMapperDatahenter.hentPersondata(behandling))
-            .medPersonMottaker(dokgenMapperDatahenter.hentPersonMottaker(mottaker));
+            .medPersonMottaker(dokgenMapperDatahenter.hentPersonMottaker(mottaker))
     }
 
-    private Avslagbrev hentAvslagsbrev(DokgenBrevbestilling brevbestilling) {
-        List<Instant> mangelbrevDatoer = dokgenMapperDatahenter.hentMangelbrevDatoer(brevbestilling);
-
-        return Avslagbrev.av(((AvslagBrevbestilling) brevbestilling).toBuilder().build(), mangelbrevDatoer);
+    private fun hentAvslagsbrev(brevbestilling: DokgenBrevbestilling): Avslagbrev {
+        val mangelbrevDatoer = dokgenMapperDatahenter.hentMangelbrevDatoer(brevbestilling)
+        return Avslagbrev.av((brevbestilling as AvslagBrevbestilling).toBuilder().build(), mangelbrevDatoer)
     }
 
-    private DokgenDto lagDokgenDtoFraBestilling(DokgenBrevbestilling brevbestilling) {
-        return switch (brevbestilling.getProduserbartdokument()) {
-            case MELDING_FORVENTET_SAKSBEHANDLINGSTID, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD -> SaksbehandlingstidSoknad.av(
+    private fun lagDokgenDtoFraBestilling(brevbestilling: DokgenBrevbestilling): DokgenDto {
+        return when (brevbestilling.produserbartdokument) {
+            Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID, Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD -> SaksbehandlingstidSoknad.av(
                 brevbestilling.toBuilder()
-                    .medAvsenderLand(dokgenMapperDatahenter.hentLandnavnFraLandkode(brevbestilling.getAvsenderLand()))
+                    .medAvsenderLand(dokgenMapperDatahenter.hentLandnavnFraLandkode(brevbestilling.avsenderLand))
                     .build(),
-                Saksbehandlingstid.beregnSaksbehandlingsfrist(brevbestilling.getForsendelseMottatt())
-            );
-            case MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> SaksbehandlingstidKlage.av(brevbestilling,
-                Saksbehandlingstid.beregnSaksbehandlingsfrist(brevbestilling.getForsendelseMottatt()));
-            case MANGELBREV_BRUKER -> MangelbrevBruker.av(
-                ((MangelbrevBrevbestilling) brevbestilling).toBuilder()
-                    .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId()))
-                    .build(),
-                DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
-            );
-            case MANGELBREV_ARBEIDSGIVER -> MangelbrevArbeidsgiver.av(
-                ((MangelbrevBrevbestilling) brevbestilling).toBuilder()
-                    .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId()))
-                    .medFullmektigNavn(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.BRUKER))
+                Saksbehandlingstid.beregnSaksbehandlingsfrist(brevbestilling.forsendelseMottatt)
+            )
+
+            Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE -> SaksbehandlingstidKlage.av(
+                brevbestilling,
+                Saksbehandlingstid.beregnSaksbehandlingsfrist(brevbestilling.forsendelseMottatt)
+            )
+
+            Produserbaredokumenter.MANGELBREV_BRUKER -> MangelbrevBruker.av(
+                (brevbestilling as MangelbrevBrevbestilling).toBuilder()
+                    .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().id))
                     .build(),
                 DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
-            );
-            case INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> innvilgelseFtrlMapper.map((InnvilgelseBrevbestilling) brevbestilling);
-            case TRYGDEAVTALE_GB -> trygdeavtaleMapper.map((InnvilgelseBrevbestilling) brevbestilling.toBuilder()
-                .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId())).build(), Land_iso2.GB);
-            case TRYGDEAVTALE_US -> trygdeavtaleMapper.map((InnvilgelseBrevbestilling) brevbestilling.toBuilder()
-                .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId())).build(), Land_iso2.US);
-            case TRYGDEAVTALE_CAN -> trygdeavtaleMapper.map((InnvilgelseBrevbestilling) brevbestilling.toBuilder()
-                .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId())).build(), Land_iso2.CA);
-            case TRYGDEAVTALE_AU -> trygdeavtaleMapper.map((InnvilgelseBrevbestilling) brevbestilling.toBuilder()
-                .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().getId())).build(), Land_iso2.AU);
-            case GENERELT_FRITEKSTBREV_BRUKER -> FritekstbrevBruker.av(((FritekstbrevBrevbestilling) brevbestilling).toBuilder()
-                    .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.BRUKER)).build(),
+            )
+
+            Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER -> MangelbrevArbeidsgiver.av(
+                (brevbestilling as MangelbrevBrevbestilling).toBuilder()
+                    .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.getBehandling().id))
+                    .medFullmektigNavn(
+                        dokgenMapperDatahenter.hentFullmektigNavn(
+                            brevbestilling.getBehandling().fagsak,
+                            Representerer.BRUKER
+                        )
+                    )
+                    .build(),
+                DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
+            )
+
+            Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> innvilgelseFtrlMapper.map((brevbestilling as InnvilgelseBrevbestilling))
+            Produserbaredokumenter.TRYGDEAVTALE_GB -> trygdeavtaleMapper.map(
+                brevbestilling.toBuilder()
+                    .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.behandling.id))
+                    .build() as InnvilgelseBrevbestilling, Land_iso2.GB
+            )
+
+            Produserbaredokumenter.TRYGDEAVTALE_US -> trygdeavtaleMapper.map(
+                brevbestilling.toBuilder()
+                    .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.behandling.id))
+                    .build() as InnvilgelseBrevbestilling, Land_iso2.US
+            )
+
+            Produserbaredokumenter.TRYGDEAVTALE_CAN -> trygdeavtaleMapper.map(
+                brevbestilling.toBuilder()
+                    .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.behandling.id))
+                    .build() as InnvilgelseBrevbestilling, Land_iso2.CA
+            )
+
+            Produserbaredokumenter.TRYGDEAVTALE_AU -> trygdeavtaleMapper.map(
+                brevbestilling.toBuilder()
+                    .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.behandling.id))
+                    .build() as InnvilgelseBrevbestilling, Land_iso2.AU
+            )
+
+            Produserbaredokumenter.GENERELT_FRITEKSTBREV_BRUKER -> FritekstbrevBruker.av(
+                (brevbestilling as FritekstbrevBrevbestilling).toBuilder()
+                    .medNavnFullmektig(
+                        dokgenMapperDatahenter.hentFullmektigNavn(
+                            brevbestilling.getBehandling().fagsak,
+                            Representerer.BRUKER
+                        )
+                    ).build(),
                 Mottakerroller.BRUKER
-            );
-            case GENERELT_FRITEKSTBREV_VIRKSOMHET -> FritekstbrevVirksomhet.av(
-                ((FritekstbrevBrevbestilling) brevbestilling).toBuilder().build(), Mottakerroller.VIRKSOMHET
-            );
-            case GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> FritekstbrevBruker.av(((FritekstbrevBrevbestilling) brevbestilling).toBuilder()
-                    .medNavnFullmektig(dokgenMapperDatahenter.hentFullmektigNavn(brevbestilling.getBehandling().getFagsak(), Representerer.ARBEIDSGIVER)).build(),
+            )
+
+            Produserbaredokumenter.GENERELT_FRITEKSTBREV_VIRKSOMHET -> FritekstbrevVirksomhet.av(
+                (brevbestilling as FritekstbrevBrevbestilling).toBuilder().build(), Mottakerroller.VIRKSOMHET
+            )
+
+            Produserbaredokumenter.GENERELT_FRITEKSTBREV_ARBEIDSGIVER -> FritekstbrevBruker.av(
+                (brevbestilling as FritekstbrevBrevbestilling).toBuilder()
+                    .medNavnFullmektig(
+                        dokgenMapperDatahenter.hentFullmektigNavn(
+                            brevbestilling.getBehandling().fagsak,
+                            Representerer.ARBEIDSGIVER
+                        )
+                    ).build(),
                 Mottakerroller.ARBEIDSGIVER
-            );
-            case FRITEKSTBREV -> FritekstbrevNorskMyndighet.av(((FritekstbrevBrevbestilling) brevbestilling).toBuilder().build());
-            case AVSLAG_MANGLENDE_OPPLYSNINGER -> hentAvslagsbrev(brevbestilling);
-            case MELDING_HENLAGT_SAK -> Henleggelsesbrev.av(((HenleggelseBrevbestilling) brevbestilling).toBuilder().build());
-            case GENERELT_FRITEKSTVEDLEGG -> Fritekstvedlegg.av(((FritekstvedleggBrevbestilling) brevbestilling).toBuilder().build());
-            case UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV -> FritekstbrevTrygdemyndighet.av((FritekstbrevBrevbestilling) brevbestilling, Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
-            default -> throw new FunksjonellException(
-                format("ProduserbartDokument %s er ikke støttet av melosys-dokgen",
-                    brevbestilling.getProduserbartdokument()));
-        };
+            )
+
+            Produserbaredokumenter.FRITEKSTBREV -> FritekstbrevNorskMyndighet.av(
+                (brevbestilling as FritekstbrevBrevbestilling).toBuilder().build()
+            )
+
+            Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER -> hentAvslagsbrev(brevbestilling)
+            Produserbaredokumenter.MELDING_HENLAGT_SAK -> Henleggelsesbrev.av(
+                (brevbestilling as HenleggelseBrevbestilling).toBuilder().build()
+            )
+
+            Produserbaredokumenter.GENERELT_FRITEKSTVEDLEGG -> Fritekstvedlegg.av(
+                (brevbestilling as FritekstvedleggBrevbestilling).toBuilder().build()
+            )
+
+            Produserbaredokumenter.UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV -> FritekstbrevTrygdemyndighet.av(
+                brevbestilling as FritekstbrevBrevbestilling,
+                Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET
+            )
+
+            else -> throw FunksjonellException(
+                String.format(
+                    "ProduserbartDokument %s er ikke støttet av melosys-dokgen",
+                    brevbestilling.produserbartdokument
+                )
+            )
+        }
     }
 }
