@@ -24,110 +24,110 @@ public class DokumentproduksjonsInfoMapper {
 
     private static final ImmutableMap<Produserbaredokumenter, DokumentproduksjonsInfo> DOKUMENTPRODUKSJONS_INFO_MAP;
     static final Set<Produserbaredokumenter> DOKUMENTMALER_PRODSATT = Set.of(
-            AVSLAG_MANGLENDE_OPPLYSNINGER,
-            GENERELT_FRITEKSTBREV_BRUKER,
-            GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
-            GENERELT_FRITEKSTBREV_VIRKSOMHET,
-            MANGELBREV_ARBEIDSGIVER,
-            MANGELBREV_BRUKER,
-            MELDING_FORVENTET_SAKSBEHANDLINGSTID,
-            MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
-            TRYGDEAVTALE_GB,
-            MELDING_HENLAGT_SAK,
-            GENERELT_FRITEKSTVEDLEGG,
-            TRYGDEAVTALE_US,
-            TRYGDEAVTALE_CAN,
-            FRITEKSTBREV,
-            IKKE_YRKESAKTIV_VEDTAKSBREV
+        AVSLAG_MANGLENDE_OPPLYSNINGER,
+        GENERELT_FRITEKSTBREV_BRUKER,
+        GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
+        GENERELT_FRITEKSTBREV_VIRKSOMHET,
+        MANGELBREV_ARBEIDSGIVER,
+        MANGELBREV_BRUKER,
+        MELDING_FORVENTET_SAKSBEHANDLINGSTID,
+        MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
+        TRYGDEAVTALE_GB,
+        MELDING_HENLAGT_SAK,
+        GENERELT_FRITEKSTVEDLEGG,
+        TRYGDEAVTALE_US,
+        TRYGDEAVTALE_CAN,
+        FRITEKSTBREV,
+        IKKE_YRKESAKTIV_VEDTAKSBREV
     );
 
     static {
         DOKUMENTPRODUKSJONS_INFO_MAP = Maps.immutableEnumMap(ImmutableMap.<Produserbaredokumenter, DokumentproduksjonsInfo>builder()
-                .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID,
-                        new DokumentproduksjonsInfo("saksbehandlingstid_soknad",
-                                DokumentKategoriKode.IB.getKode(),
-                                JournalforingsTittel.FORVALTNINGSMELDING.getTittel())
-                )
-                .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
-                        new DokumentproduksjonsInfo("saksbehandlingstid_soknad",
-                                DokumentKategoriKode.IB.getKode(),
-                                JournalforingsTittel.FORVALTNINGSMELDING.getTittel())
-                )
-                .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
-                        new DokumentproduksjonsInfo("saksbehandlingstid_klage",
-                                DokumentKategoriKode.IB.getKode(),
-                                JournalforingsTittel.FORVALTNINGSMELDING.getTittel())
-                )
-                .put(MANGELBREV_BRUKER,
-                        new DokumentproduksjonsInfo("mangelbrev_bruker",
-                                DokumentKategoriKode.IB.getKode(),
-                                JournalforingsTittel.MANGELBREV.getTittel())
-                )
-                .put(MANGELBREV_ARBEIDSGIVER,
-                        new DokumentproduksjonsInfo("mangelbrev_arbeidsgiver",
-                                DokumentKategoriKode.IB.getKode(),
-                                JournalforingsTittel.MANGELBREV.getTittel())
-                )
-                .put(INNVILGELSE_FOLKETRYGDLOVEN_2_8,
-                        new DokumentproduksjonsInfo("innvilgelse_ftrl_2_8",
-                                DokumentKategoriKode.VB.getKode(),
-                                JournalforingsTittel.INNVILGELSE_FTRL_2_8.getTittel())
-                )
-                .put(TRYGDEAVTALE_GB,
-                        new DokumentproduksjonsInfo("trygdeavtale_gb",
-                                DokumentKategoriKode.VB.getKode(),
-                                JournalforingsTittel.TRYGDEAVTALE.getTittel(),
-                                Map.of(VedleggTyper.VEDTAKSBREV, JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
-                                        VedleggTyper.ATTEST, JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel())))
-                .put(TRYGDEAVTALE_US,
-                        new DokumentproduksjonsInfo("trygdeavtale_us",
-                                DokumentKategoriKode.VB.getKode(),
-                                JournalforingsTittel.TRYGDEAVTALE.getTittel(),
-                                Map.of(VedleggTyper.VEDTAKSBREV, JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
-                                        VedleggTyper.ATTEST, JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel())))
-                .put(TRYGDEAVTALE_CAN,
-                        new DokumentproduksjonsInfo("trygdeavtale_ca",
-                                DokumentKategoriKode.VB.getKode(),
-                                JournalforingsTittel.TRYGDEAVTALE.getTittel(),
-                                Map.of(VedleggTyper.VEDTAKSBREV, JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
-                                        VedleggTyper.ATTEST, JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel())))
-                .put(TRYGDEAVTALE_AU,
-                        new DokumentproduksjonsInfo("trygdeavtale_au",
-                                DokumentKategoriKode.VB.getKode(),
-                                JournalforingsTittel.TRYGDEAVTALE.getTittel(),
-                                Map.of(VedleggTyper.VEDTAKSBREV, JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
-                                        VedleggTyper.ATTEST, JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel())))
-                .put(GENERELT_FRITEKSTBREV_BRUKER,
-                        new DokumentproduksjonsInfo("fritekstbrev",
-                                DokumentKategoriKode.IB.getKode()))
-                .put(GENERELT_FRITEKSTBREV_VIRKSOMHET,
-                        new DokumentproduksjonsInfo("fritekstbrev",
-                                DokumentKategoriKode.IB.getKode()))
-                .put(GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
-                        new DokumentproduksjonsInfo("fritekstbrev",
-                                DokumentKategoriKode.IB.getKode()))
-                .put(FRITEKSTBREV,
-                        new DokumentproduksjonsInfo("fritekstbrev",
-                                DokumentKategoriKode.IB.getKode()))
-                .put(AVSLAG_MANGLENDE_OPPLYSNINGER,
-                        new DokumentproduksjonsInfo("avslag_manglende_opplysninger",
-                                DokumentKategoriKode.VB.getKode(),
-                                JournalforingsTittel.AVSLAG_MANGLENDE_OPPLYSNINGER.getTittel()))
-                .put(MELDING_HENLAGT_SAK,
-                        new DokumentproduksjonsInfo("henleggelse",
-                                DokumentKategoriKode.IB.getKode(),
-                                JournalforingsTittel.MELDING_HENLAGT_SAK.getTittel()))
-                .put(GENERELT_FRITEKSTVEDLEGG,
-                        new DokumentproduksjonsInfo("fritekstvedlegg",
-                                DokumentKategoriKode.IB.getKode()))
-                .put(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV,
-                        new DokumentproduksjonsInfo("trygdeavtale_fritekstbrev",
-                                DokumentKategoriKode.IB.getKode()))
-                        .put(IKKE_YRKESAKTIV_VEDTAKSBREV,
-                                new DokumentproduksjonsInfo("ikke_yrkesaktiv_vedtaksbrev",
-                                        DokumentKategoriKode.VB.getKode(),
-                                        JournalforingsTittel.IKKE_YRKESAKTIV_VEDTAKSBREV.getTittel()))
-                .build());
+            .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID,
+                new DokumentproduksjonsInfo("saksbehandlingstid_soknad",
+                    DokumentKategoriKode.IB.getKode(),
+                    JournalforingsTittel.FORVALTNINGSMELDING.getTittel())
+            )
+            .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
+                new DokumentproduksjonsInfo("saksbehandlingstid_soknad",
+                    DokumentKategoriKode.IB.getKode(),
+                    JournalforingsTittel.FORVALTNINGSMELDING.getTittel())
+            )
+            .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
+                new DokumentproduksjonsInfo("saksbehandlingstid_klage",
+                    DokumentKategoriKode.IB.getKode(),
+                    JournalforingsTittel.FORVALTNINGSMELDING.getTittel())
+            )
+            .put(MANGELBREV_BRUKER,
+                new DokumentproduksjonsInfo("mangelbrev_bruker",
+                    DokumentKategoriKode.IB.getKode(),
+                    JournalforingsTittel.MANGELBREV.getTittel())
+            )
+            .put(MANGELBREV_ARBEIDSGIVER,
+                new DokumentproduksjonsInfo("mangelbrev_arbeidsgiver",
+                    DokumentKategoriKode.IB.getKode(),
+                    JournalforingsTittel.MANGELBREV.getTittel())
+            )
+            .put(INNVILGELSE_FOLKETRYGDLOVEN_2_8,
+                new DokumentproduksjonsInfo("innvilgelse_ftrl_2_8",
+                    DokumentKategoriKode.VB.getKode(),
+                    JournalforingsTittel.INNVILGELSE_FTRL_2_8.getTittel())
+            )
+            .put(TRYGDEAVTALE_GB,
+                new DokumentproduksjonsInfo("trygdeavtale_gb",
+                    DokumentKategoriKode.VB.getKode(),
+                    JournalforingsTittel.TRYGDEAVTALE.getTittel(),
+                    Map.of(VedleggTyper.VEDTAKSBREV, JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
+                        VedleggTyper.ATTEST, JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel())))
+            .put(TRYGDEAVTALE_US,
+                new DokumentproduksjonsInfo("trygdeavtale_us",
+                    DokumentKategoriKode.VB.getKode(),
+                    JournalforingsTittel.TRYGDEAVTALE.getTittel(),
+                    Map.of(VedleggTyper.VEDTAKSBREV, JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
+                        VedleggTyper.ATTEST, JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel())))
+            .put(TRYGDEAVTALE_CAN,
+                new DokumentproduksjonsInfo("trygdeavtale_ca",
+                    DokumentKategoriKode.VB.getKode(),
+                    JournalforingsTittel.TRYGDEAVTALE.getTittel(),
+                    Map.of(VedleggTyper.VEDTAKSBREV, JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
+                        VedleggTyper.ATTEST, JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel())))
+            .put(TRYGDEAVTALE_AU,
+                new DokumentproduksjonsInfo("trygdeavtale_au",
+                    DokumentKategoriKode.VB.getKode(),
+                    JournalforingsTittel.TRYGDEAVTALE.getTittel(),
+                    Map.of(VedleggTyper.VEDTAKSBREV, JournalforingsTittel.TRYGDEAVTALE_VEDTAKSBREV.getTittel(),
+                        VedleggTyper.ATTEST, JournalforingsTittel.TRYGDEAVTALE_ATTEST.getTittel())))
+            .put(GENERELT_FRITEKSTBREV_BRUKER,
+                new DokumentproduksjonsInfo("fritekstbrev",
+                    DokumentKategoriKode.IB.getKode()))
+            .put(GENERELT_FRITEKSTBREV_VIRKSOMHET,
+                new DokumentproduksjonsInfo("fritekstbrev",
+                    DokumentKategoriKode.IB.getKode()))
+            .put(GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
+                new DokumentproduksjonsInfo("fritekstbrev",
+                    DokumentKategoriKode.IB.getKode()))
+            .put(FRITEKSTBREV,
+                new DokumentproduksjonsInfo("fritekstbrev",
+                    DokumentKategoriKode.IB.getKode()))
+            .put(AVSLAG_MANGLENDE_OPPLYSNINGER,
+                new DokumentproduksjonsInfo("avslag_manglende_opplysninger",
+                    DokumentKategoriKode.VB.getKode(),
+                    JournalforingsTittel.AVSLAG_MANGLENDE_OPPLYSNINGER.getTittel()))
+            .put(MELDING_HENLAGT_SAK,
+                new DokumentproduksjonsInfo("henleggelse",
+                    DokumentKategoriKode.IB.getKode(),
+                    JournalforingsTittel.MELDING_HENLAGT_SAK.getTittel()))
+            .put(GENERELT_FRITEKSTVEDLEGG,
+                new DokumentproduksjonsInfo("fritekstvedlegg",
+                    DokumentKategoriKode.IB.getKode()))
+            .put(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV,
+                new DokumentproduksjonsInfo("trygdeavtale_fritekstbrev",
+                    DokumentKategoriKode.IB.getKode()))
+            .put(IKKE_YRKESAKTIV_VEDTAKSBREV,
+                new DokumentproduksjonsInfo("ikke_yrkesaktiv_vedtaksbrev",
+                    DokumentKategoriKode.VB.getKode(),
+                    JournalforingsTittel.IKKE_YRKESAKTIV_VEDTAKSBREV.getTittel()))
+            .build());
     }
 
     public DokumentproduksjonsInfoMapper(Unleash unleash) {
@@ -136,8 +136,8 @@ public class DokumentproduksjonsInfoMapper {
 
     public Set<Produserbaredokumenter> utledTilgjengeligeMaler() {
         return DOKUMENTPRODUKSJONS_INFO_MAP.keySet().stream()
-                .filter(isEnabled())
-                .collect(toSet());
+            .filter(isEnabled())
+            .collect(toSet());
     }
 
     private Predicate<Produserbaredokumenter> isEnabled() {
