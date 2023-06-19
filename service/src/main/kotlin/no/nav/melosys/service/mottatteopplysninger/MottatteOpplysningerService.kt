@@ -44,7 +44,7 @@ class MottatteOpplysningerService(
             if (saksbehandlingRegler.harTomFlyt(behandling) || !behandlingKanRedigeresAvSaksbehandler) {
                 throw IkkeFunnetException("Finner ikke mottatteOpplysninger for behandling $behandlingID")
             } else {
-                opprettSøknadEllerAnmodningEllerAttest(behandling, null, null)
+                opprettSøknadEllerAnmodningEllerAttest(behandling,  Periode(), Soeknadsland())
             }
         }
 

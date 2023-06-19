@@ -33,8 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentPeriode;
-import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentSøknadsland;
+import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.*;
 
 @Service
 public class OppgaveService {
@@ -333,7 +332,7 @@ public class OppgaveService {
         Optional<MottatteOpplysninger> mottatteOpplysninger = mottatteOpplysningerService.finnMottatteOpplysninger(behandling.getId());
         if (mottatteOpplysninger.isPresent()) {
             var mottatteOpplysningerData = mottatteOpplysninger.get().getMottatteOpplysningerData();
-            Soeknadsland søknadsland = hentSøknadsland(mottatteOpplysningerData);
+            Soeknadsland søknadsland = hentLand(mottatteOpplysningerData);
             behOppgaveDto.setLand(SoeknadslandDto.av(søknadsland));
             behOppgaveDto.setPeriode(mapPeriode(mottatteOpplysningerData));
         }
@@ -366,6 +365,10 @@ public class OppgaveService {
 
     private static PeriodeDto mapPeriode(MottatteOpplysningerData mottatteOpplysningerData) {
         Periode periode = hentPeriode(mottatteOpplysningerData);
+        if (periode == null) {
+            log.error("Periode er null ved mapping. Dette skal ikke skje.");
+            return new PeriodeDto(null, null);
+        }
         return new PeriodeDto(periode.getFom(), periode.getTom());
     }
 

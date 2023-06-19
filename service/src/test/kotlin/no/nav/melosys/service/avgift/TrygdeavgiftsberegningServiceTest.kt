@@ -87,7 +87,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                     tomDato = TOM
                     type = Inntektskildetype.INNTEKT_FRA_UTLANDET
                     isArbeidsgiversavgiftBetalesTilSkatt = false
-                    isTrygdeavgiftBetalesTilSkatt = false
+                    isOrdinærTrygdeavgiftBetalesTilSkatt = false
                     avgiftspliktigInntektMnd = Penger(10000.0)
                 })
             }
@@ -142,7 +142,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                     fomDato = FOM
                     tomDato = TOM
                     type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
-                    isTrygdeavgiftBetalesTilSkatt = true
+                    isOrdinærTrygdeavgiftBetalesTilSkatt = true
                     isArbeidsgiversavgiftBetalesTilSkatt = true
                     avgiftspliktigInntektMnd = null
                 })

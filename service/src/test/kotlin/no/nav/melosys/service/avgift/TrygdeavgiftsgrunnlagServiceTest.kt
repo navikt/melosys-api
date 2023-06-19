@@ -28,7 +28,6 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
-import java.math.BigInteger
 import java.time.LocalDate
 import kotlin.test.Test
 
@@ -165,7 +164,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
                     tomDato = tom
                     type = Inntektskildetype.INNTEKT_FRA_UTLANDET
                     isArbeidsgiversavgiftBetalesTilSkatt = false
-                    isTrygdeavgiftBetalesTilSkatt = true
+                    isOrdinærTrygdeavgiftBetalesTilSkatt = true
                     avgiftspliktigInntektMnd = Penger(BigDecimal.valueOf(30000))
                     trygdeavgiftsgrunnlag =
                         lagretBehandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag
@@ -175,7 +174,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
                     tomDato = tom
                     type = Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE
                     isArbeidsgiversavgiftBetalesTilSkatt = false
-                    isTrygdeavgiftBetalesTilSkatt = true
+                    isOrdinærTrygdeavgiftBetalesTilSkatt = true
                     avgiftspliktigInntektMnd = Penger(BigDecimal.valueOf(10000))
                     trygdeavgiftsgrunnlag =
                         lagretBehandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag
@@ -185,7 +184,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
                     tomDato = tom
                     type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
                     isArbeidsgiversavgiftBetalesTilSkatt = true
-                    isTrygdeavgiftBetalesTilSkatt = true
+                    isOrdinærTrygdeavgiftBetalesTilSkatt = true
                     avgiftspliktigInntektMnd = null
                     trygdeavgiftsgrunnlag =
                         lagretBehandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag

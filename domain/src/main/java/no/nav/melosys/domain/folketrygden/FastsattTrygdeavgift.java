@@ -79,20 +79,20 @@ public class FastsattTrygdeavgift {
             || trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT;
     }
 
-    private Trygdeavgiftmottaker getTrygdeavgiftMottaker() {
+    public Trygdeavgiftmottaker getTrygdeavgiftMottaker() {
         var inntektsperioder = trygdeavgiftsgrunnlag.getInntektsperioder();
 
         if (trygdeavgiftBetalesTilNavOgSkatt(inntektsperioder)) {
             return Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT;
         }
-        return inntektsperioder.stream().allMatch(Inntektsperiode::isTrygdeavgiftBetalesTilSkatt)
+        return inntektsperioder.stream().allMatch(Inntektsperiode::isTrygdeavgiftBetalesKunTilSkatt)
             ? Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
             : Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV;
     }
 
     private static boolean trygdeavgiftBetalesTilNavOgSkatt(List<Inntektsperiode> inntektsperioder) {
-        boolean ordinærTrygdeavgiftTilSkatt = inntektsperioder.stream().anyMatch(Inntektsperiode::isTrygdeavgiftBetalesTilSkatt);
-        boolean ordinærTrygdeavgiftTilNav = inntektsperioder.stream().anyMatch(inntektsperiode -> !inntektsperiode.isTrygdeavgiftBetalesTilSkatt());
-        return (ordinærTrygdeavgiftTilSkatt && ordinærTrygdeavgiftTilNav) || inntektsperioder.stream().anyMatch(Inntektsperiode::trygdeavgiftBetalesBådeTilNavOgSkatt);
+        boolean ordinærTrygdeavgiftTilSkatt = inntektsperioder.stream().anyMatch(Inntektsperiode::isOrdinærTrygdeavgiftBetalesTilSkatt);
+        boolean ordinærTrygdeavgiftTilNav = inntektsperioder.stream().anyMatch(inntektsperiode -> !inntektsperiode.isOrdinærTrygdeavgiftBetalesTilSkatt());
+        return (ordinærTrygdeavgiftTilSkatt && ordinærTrygdeavgiftTilNav) || inntektsperioder.stream().anyMatch(Inntektsperiode::isTrygdeavgiftBetalesBådeTilNavOgSkatt);
     }
 }
