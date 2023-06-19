@@ -27,6 +27,9 @@ public class BrevmottakerMapper {
             Map.entry(MANGELBREV_BRUKER, new Mottakerliste.Builder()
                 .medHovedMottaker(BRUKER).build()),
 
+            Map.entry(IKKE_YRKESAKTIV_VEDTAKSBREV, new Mottakerliste.Builder()
+                .medHovedMottaker(BRUKER).build()),
+
             Map.entry(MANGELBREV_ARBEIDSGIVER, new Mottakerliste.Builder()
                 .medHovedMottaker(ARBEIDSGIVER)
                 .medBrevkopiRegler(

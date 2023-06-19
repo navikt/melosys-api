@@ -1,12 +1,15 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
 import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.domain.PeriodeOmLovvalg
 import no.nav.melosys.domain.brev.*
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.Representerer
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.*
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker
@@ -60,9 +63,30 @@ class DokgenMalMapper(
             .medPersonMottaker(dokgenMapperDatahenter.hentPersonMottaker(mottaker))
     }
 
-    private fun hentAvslagsbrev(brevbestilling: DokgenBrevbestilling): Avslagbrev {
+    private fun lagAvslagsbrev(brevbestilling: DokgenBrevbestilling): Avslagbrev {
         val mangelbrevDatoer = dokgenMapperDatahenter.hentMangelbrevDatoer(brevbestilling)
         return Avslagbrev.av((brevbestilling as AvslagBrevbestilling).toBuilder().build(), mangelbrevDatoer)
+    }
+
+    internal fun lagIkkeYrkesaktivVedtaksbrev(brevbestilling: IkkeYrkesaktivBrevbestilling): IkkeYrkesaktivVedtaksbrev {
+        val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandling.id)
+        val lovvalgsperiode = behandlingsresultat.hentValidertPeriodeOmLovvalg();
+        val bestemmelse = lovvalgsperiode.bestemmelse
+        val mottatteOpplysningerData = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as Soeknad
+
+        return IkkeYrkesaktivVedtaksbrev.av(
+            brevbestilling.toBuilder()
+                .medBegrunnelseFritekst(behandlingsresultat.begrunnelseFritekst)
+                .medInnledningFritekst(behandlingsresultat.innledningFritekst)
+                .medNyVurderingBakgrunn(brevbestilling.nyVurderingBakgrunn) //TODO https://jira.adeo.no/browse/MELOSYS-5942
+                .medOppholdsLand(lovvalgsperiode.lovvalgsland.beskrivelse)
+                .medPeriodeFom(lovvalgsperiode.fom)
+                .medPeriodeTom(lovvalgsperiode.tom)
+                .medBestemmelse(bestemmelse.name())
+                .medIkkeyrkesaktivSituasjontype(mottatteOpplysningerData.ikkeYrkesaktivSituasjontype)
+                .medArtikkel(bestemmelse.beskrivelse)
+                .build()
+        )
     }
 
     private fun lagDokgenDtoFraBestilling(brevbestilling: DokgenBrevbestilling): DokgenDto {
@@ -154,7 +178,7 @@ class DokgenMalMapper(
                 (brevbestilling as FritekstbrevBrevbestilling).toBuilder().build()
             )
 
-            Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER -> hentAvslagsbrev(brevbestilling)
+            Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER -> lagAvslagsbrev(brevbestilling)
             Produserbaredokumenter.MELDING_HENLAGT_SAK -> Henleggelsesbrev.av(
                 (brevbestilling as HenleggelseBrevbestilling).toBuilder().build()
             )
@@ -167,6 +191,8 @@ class DokgenMalMapper(
                 brevbestilling as FritekstbrevBrevbestilling,
                 Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET
             )
+
+            Produserbaredokumenter.IKKE_YRKESAKTIV_VEDTAKSBREV -> lagIkkeYrkesaktivVedtaksbrev(brevbestilling as IkkeYrkesaktivBrevbestilling)
 
             else -> throw FunksjonellException("ProduserbartDokument ${brevbestilling.produserbartdokument} er ikke støttet av melosys-dokgen")
         }

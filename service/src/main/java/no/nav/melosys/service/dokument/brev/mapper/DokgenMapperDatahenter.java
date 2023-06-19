@@ -5,7 +5,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
@@ -125,5 +128,7 @@ public class DokgenMapperDatahenter {
             .sorted(Comparator.naturalOrder())
             .toList();
     }
-
+    public Behandlingsresultat hentBehandlingsresultat(Long behandlingId) {
+        return behandlingsresultatService.hentBehandlingsresultat(behandlingId);
+    }
 }
