@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import io.swagger.annotations.Api;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.validering.KontrollerFerdigbehandlingDto;
+import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerFerdigbehandlingDto;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
