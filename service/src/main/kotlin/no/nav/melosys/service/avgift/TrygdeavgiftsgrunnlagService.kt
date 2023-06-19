@@ -103,14 +103,16 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
                     if (inntektskildeRequest.avgiftspliktigInntektMnd == null) null
                     else Penger(inntektskildeRequest.avgiftspliktigInntektMnd)
                 this.isArbeidsgiversavgiftBetalesTilSkatt = inntektskildeRequest.arbeidsgiversavgiftBetales
-                this.isTrygdeavgiftBetalesTilSkatt = !ordinærTrygdeavgiftBetalesTilNav(request, inntektskildeRequest)
+                this.isTrygdeavgiftBetalesTilSkatt = ordinærTrygdeavgiftBetalesTilSkatt(request, inntektskildeRequest)
             }
         })
 
-    private fun ordinærTrygdeavgiftBetalesTilNav(
+    private fun ordinærTrygdeavgiftBetalesTilSkatt(
         request: OppdaterTrygdeavgiftsgrunnlagRequest, inntektskildeRequest: InntektskildeRequest
     ): Boolean {
-        return request.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG || inntektskildeRequest.type == Inntektskildetype.FN_SKATTEFRITAK
+        return request.skatteplikttype != Skatteplikttype.IKKE_SKATTEPLIKTIG
+            && inntektskildeRequest.type != Inntektskildetype.FN_SKATTEFRITAK
+            && inntektskildeRequest.type != Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE
     }
 
     @Transactional(readOnly = true)
