@@ -44,6 +44,8 @@ public class BehandlingsresultatService {
             behandlingsresultat.getLovvalgsperioder().clear();
             behandlingsresultat.setMedlemAvFolketrygden(null);
             behandlingsresultat.setUtfallRegistreringUnntak(null);
+            behandlingsresultat.setBegrunnelseFritekst(null);
+            behandlingsresultat.setInnledningFritekst(null);
             vilkaarsresultatService.tømVilkårForBehandlingsresultat(behandlingsresultat);
             behandlingsresultatRepository.save(behandlingsresultat);
         }

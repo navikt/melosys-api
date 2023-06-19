@@ -61,6 +61,8 @@ class BehandlingsresultatServiceTest {
         behandlingsresultat.setVilkaarsresultater(new HashSet<>(Collections.singleton(new Vilkaarsresultat())));
         behandlingsresultat.setMedlemAvFolketrygden(new MedlemAvFolketrygden());
         behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.GODKJENT);
+        behandlingsresultat.setInnledningFritekst("Innledning fritekst");
+        behandlingsresultat.setBegrunnelseFritekst("Begrunnelse fritekst");
 
         when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
 
@@ -72,6 +74,8 @@ class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultat.getLovvalgsperioder()).isEmpty();
         assertThat(behandlingsresultat.getMedlemAvFolketrygden()).isNull();
         assertThat(behandlingsresultat.getUtfallRegistreringUnntak()).isNull();
+        assertThat(behandlingsresultat.getInnledningFritekst()).isNull();
+        assertThat(behandlingsresultat.getBegrunnelseFritekst()).isNull();
         verify(vilkaarsresultatService).tømVilkårForBehandlingsresultat(behandlingsresultat);
     }
 
