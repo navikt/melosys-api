@@ -22,6 +22,7 @@ import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +40,7 @@ public class TrygdeavtaleVedtakService {
     private final OppgaveService oppgaveService;
     private final DokgenService dokgenService;
     private final FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
+    private final SaksbehandlingRegler saksbehandlingRegler;
 
 
     public TrygdeavtaleVedtakService(BehandlingsresultatService behandlingsresultatService,
@@ -46,13 +48,15 @@ public class TrygdeavtaleVedtakService {
                                      ProsessinstansService prosessinstansService,
                                      OppgaveService oppgaveService,
                                      DokgenService dokgenService,
-                                     FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade) {
+                                     FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade,
+                                     SaksbehandlingRegler saksbehandlingRegler) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.behandlingService = behandlingService;
         this.prosessinstansService = prosessinstansService;
         this.oppgaveService = oppgaveService;
         this.dokgenService = dokgenService;
         this.ferdigbehandlingKontrollFacade = ferdigbehandlingKontrollFacade;
+        this.saksbehandlingRegler = saksbehandlingRegler;
     }
 
     public void fattVedtak(Behandling behandling, FattVedtakRequest request) throws ValideringException {
@@ -93,6 +97,9 @@ public class TrygdeavtaleVedtakService {
     private BrevbestillingDto lagBrevbestilling(Behandling behandling, FattVedtakRequest request) {
         if (request.getBehandlingsresultatTypeKode() == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
             return lagAvslagMangledeOpplysningerBrevbestilling(request);
+        }
+        if (saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling.getFagsak().getType(), behandling.getTema())) {
+            return lagTrygdeavtaleBrevbestilling(request, Produserbaredokumenter.IKKE_YRKESAKTIV_VEDTAKSBREV);
         }
         Optional<Produserbaredokumenter> produserbaredokumenter = behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.landkoder.stream()
             .map(Land_iso2::valueOf)
