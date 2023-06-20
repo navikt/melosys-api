@@ -87,7 +87,12 @@ public class TrygdeavtaleVedtakService {
         behandling.getFagsak().setStatus(Saksstatuser.MEDLEMSKAP_AVKLART);
         behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
 
-        prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling, request);
+        if(saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling.getFagsak().getType(), behandling.getTema())) {
+            prosessinstansService.opprettProsessinstansIverksettIkkeYreksaktiv(behandling, behandling.getFagsak().getStatus());
+        } else {
+            prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling, request);
+        }
+
 
         BrevbestillingDto brevbestillingDto = lagBrevbestilling(behandling, request);
         dokgenService.produserOgDistribuerBrev(behandlingID, brevbestillingDto);

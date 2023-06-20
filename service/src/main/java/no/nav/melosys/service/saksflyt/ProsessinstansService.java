@@ -364,6 +364,17 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
+    public void opprettProsessinstansIverksettIkkeYreksaktiv(Behandling behandling, Saksstatuser saksstatus) {
+        Prosessinstans prosessinstans = new ProsessinstansBuilder()
+            .medBehandling(behandling)
+            .medType(ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV)
+            .build();
+
+        prosessinstans.setData(SAKSSTATUS, saksstatus);
+
+        lagre(prosessinstans);
+    }
+
     public void opprettProsessinstansGodkjennUnntaksperiode(Behandling behandling, boolean varsleUtland, String fritekst, MelosysEessiMelding melosysEessiMelding) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
