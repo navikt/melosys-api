@@ -67,6 +67,9 @@ import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.utpeking.UtpekingService;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
+import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
+import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static no.nav.melosys.domain.kodeverk.Mottakerroller.ARBEIDSGIVER;
@@ -95,6 +98,11 @@ final class DokumentServiceTest {
         dokSysFasade = mock(DoksysFasade.class);
         behandlingsresultatService = mock(BehandlingsresultatService.class);
         dokumentService = lagDokumentService(null);
+    }
+
+    @BeforeEach
+    void beforeEach() {
+        SpringSubjectHandler.set(new TestSubjectHandler());
     }
 
     @Test

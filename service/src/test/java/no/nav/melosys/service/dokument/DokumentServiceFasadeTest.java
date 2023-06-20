@@ -8,6 +8,8 @@ import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
+import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +45,7 @@ class DokumentServiceFasadeTest {
 
     @BeforeEach
     void init() {
+        SpringSubjectHandler.set(new TestSubjectHandler());
         dokumentServiceFasade = new DokumentServiceFasade(mockDokumentService,
             mockDokgenService, mockBehandlingService, applicationEventPublisher);
         Mockito.reset(
