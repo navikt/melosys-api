@@ -9,7 +9,7 @@
 
     <appender name="auditLogger" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} | %X{correlation-id} | %logger{10} | %highlight(%level) | %msg%n</pattern>
+            <pattern>AUDIT: %d{HH:mm:ss.SSS} | %X{correlation-id} | %logger{10} | %highlight(%level) | %msg%n</pattern>
         </encoder>
     </appender>
 
