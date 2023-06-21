@@ -31,7 +31,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
-import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.*;
+import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentLand;
+import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentPeriode;
 
 @Protected
 @RestController
@@ -132,12 +133,12 @@ public class FagsakTjeneste {
     public List<FagsakOppsummeringDto> hentFagsaker(@RequestBody FagsakSokDto fagsakSokDto) {
 
         if (StringUtils.isNotEmpty(fagsakSokDto.ident())) {
-            aksesskontroll.autoriserFolkeregisterIdent(fagsakSokDto.ident());
+            aksesskontroll.auditAutoriserFolkeregisterIdent(fagsakSokDto.ident(), "Søk på saker knyttet til folkeregisterident.");
             return tilFagsakOppsummeringDtoer(fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, fagsakSokDto.ident()));
         } else if (StringUtils.isNotEmpty(fagsakSokDto.saksnummer())) {
             Optional<Fagsak> fagsak = fagsakService.finnFagsakFraSaksnummer(fagsakSokDto.saksnummer());
             if (fagsak.isPresent()) {
-                aksesskontroll.autoriserSakstilgang(fagsak.get());
+                aksesskontroll.auditAutoriserSakstilgang(fagsak.get(), "Søk på saker med saksnummer.");
                 return tilFagsakOppsummeringDtoer(Collections.singletonList(fagsak.get()));
             }
         } else if (StringUtils.isNotEmpty(fagsakSokDto.orgnr())) {

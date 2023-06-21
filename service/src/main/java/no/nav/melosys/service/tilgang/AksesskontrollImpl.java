@@ -3,10 +3,13 @@ package no.nav.melosys.service.tilgang;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.integrasjon.felles.mdc.MDCOperations;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import no.nav.melosys.sikkerhet.logging.AuditEvent;
+import no.nav.melosys.sikkerhet.logging.AuditEventType;
 import no.nav.melosys.sikkerhet.logging.AuditLogger;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +39,26 @@ public class AksesskontrollImpl implements Aksesskontroll {
         this.brukertilgangKontroll = brukertilgangKontroll;
         this.redigerbarKontroll = redigerbarKontroll;
         this.oppgaveService = oppgaveService;
+    }
+
+    @Override
+    public void auditAutoriserFolkeregisterIdent(String fnr, String kontekst) {
+        logAudit(AuditEventType.READ, fnr, kontekst);
+        brukertilgangKontroll.validerTilgangTilFolkeregisterIdent(fnr);
+    }
+
+    @Override
+    public void auditAutoriserSakstilgang(Fagsak fagsak, String kontekst) {
+        String aktørID = fagsak.finnBrukersAktørID().orElse(null);
+        if (aktørID != null) {
+            logAudit(AuditEventType.READ, aktørID, kontekst);
+            brukertilgangKontroll.validerTilgangTilAktørID(aktørID);
+        }
+    }
+
+    private void logAudit(AuditEventType eventType, String personIdent, String message) {
+        AuditEvent auditEvent = new AuditEvent(eventType, SubjectHandler.getInstance().getUserID(), personIdent, message, MDCOperations.getCorrelationId());
+        auditLogger.log(auditEvent);
     }
 
     @Override

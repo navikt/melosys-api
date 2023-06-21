@@ -9,8 +9,6 @@ data class AuditEvent(
 )
 
 enum class AuditEventType() {
-    CREATE,
     READ,
     UPDATE,
-    DELETE,
 }
