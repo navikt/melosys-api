@@ -12,7 +12,8 @@ data class OppgaveMigreringsOppdatering(
     val oppgaveType: Oppgavetyper?,
     val beskrivelse: String?,
     val mappingError: String? = null,
-    var oppgaveOppdateringError: String? = null
+    var oppgaveOppdateringError: String? = null,
+    var sedListe: List<String> = emptyList()
 ) {
     constructor(mappingError: String?) : this(
         null,

@@ -17,6 +17,7 @@ import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
 import no.nav.melosys.repository.BehandlingRepositoryForOppgaveMigrering
+import no.nav.melosys.repository.ProsessinstansRepository
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -59,6 +60,7 @@ class OppgaveMigreringTest {
         every { behandlingRepository.finnSaksOgBehandlingTyperOgTema(any()) } returns migreringsListe.map { it.sak }
 
         val oppgaveFasade = mockk<OppgaveFasade>()
+        val prosessinstansRepository = mockk<ProsessinstansRepository>()
 
         val migreringsSak = migreringsListe.first()
         every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer("MEL-1") } returns migreringsSak.oppgaver
@@ -70,7 +72,8 @@ class OppgaveMigreringTest {
         OppgaveMigrering(
             behandlingRepository,
             oppgaveFasade,
-            migreringsRapport
+            migreringsRapport,
+            prosessinstansRepository
         ).migrering(null, null, false)
 
         verify(exactly = 0) { oppgaveFasade.oppdaterOppgave(any(), any()) }
@@ -109,6 +112,7 @@ class OppgaveMigreringTest {
         every { behandlingRepository.finnSaksOgBehandlingTyperOgTema(any()) } returns migreringsListe.map { it.sak }
 
         val oppgaveFasade = mockk<OppgaveFasade>()
+        val prosessinstansRepository = mockk<ProsessinstansRepository>()
 
         every { oppgaveFasade.oppdaterOppgave(any(), any()) } answers {
             val id = firstArg<String>()
@@ -134,7 +138,8 @@ class OppgaveMigreringTest {
         OppgaveMigrering(
             behandlingRepository,
             oppgaveFasade,
-            migreringsRapport
+            migreringsRapport,
+            prosessinstansRepository
         ).migrering(null, null, false)
 
         migreringsRapport.status().forEach {
