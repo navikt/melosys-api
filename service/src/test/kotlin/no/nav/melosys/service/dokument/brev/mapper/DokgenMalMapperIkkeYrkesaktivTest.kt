@@ -23,6 +23,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
+import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.service.dokument.DokgenTestData
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -62,6 +63,7 @@ class DokgenMalMapperIkkeYrkesaktivTest {
             mottatteOpplysninger = MottatteOpplysninger().apply {
                 setMottatteOpplysningerdata(Soeknad().apply {
                     ikkeYrkesaktivSituasjontype = Ikkeyrkesaktivsituasjontype.STUDENT
+                    soeknadsland = Soeknadsland(listOf(Land_iso2.CA.kode), false)
                 })
             }
             fagsak = Fagsak().apply {
@@ -77,7 +79,7 @@ class DokgenMalMapperIkkeYrkesaktivTest {
             lovvalgsperioder = setOf(Lovvalgsperiode().apply {
                 fom = LocalDate.of(2020, 1, 1)
                 tom = LocalDate.of(2021, 2, 1)
-                lovvalgsland = Land_iso2.DK
+                lovvalgsland = Land_iso2.NO
                 bestemmelse = Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_2
             })
             innledningFritekst = "innledningFritekst"
@@ -97,7 +99,7 @@ class DokgenMalMapperIkkeYrkesaktivTest {
 
 
         vedtaksbrev.toJsonNode.apply {
-            get("oppholdsland").asText().shouldBe("Danmark")
+            get("oppholdsland").asText().shouldBe("Canada")
             get("nyVurderingBakgrunn").asText().shouldBe("nyVurderingBakgrunn")
             get("sakstype").asText().shouldBe("EU_EOS")
             get("artikkel").asText().shouldBe("Rfo. 883/2004 art.11(2)")
