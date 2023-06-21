@@ -37,7 +37,8 @@ public class DokumentproduksjonsInfoMapper {
         GENERELT_FRITEKSTVEDLEGG,
         TRYGDEAVTALE_US,
         TRYGDEAVTALE_CAN,
-        FRITEKSTBREV
+        FRITEKSTBREV,
+        IKKE_YRKESAKTIV_VEDTAKSBREV
     );
 
     static {
@@ -122,6 +123,10 @@ public class DokumentproduksjonsInfoMapper {
             .put(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV,
                 new DokumentproduksjonsInfo("trygdeavtale_fritekstbrev",
                     DokumentKategoriKode.IB.getKode()))
+            .put(IKKE_YRKESAKTIV_VEDTAKSBREV,
+                new DokumentproduksjonsInfo("ikke_yrkesaktiv_vedtaksbrev",
+                    DokumentKategoriKode.VB.getKode(),
+                    JournalforingsTittel.IKKE_YRKESAKTIV_VEDTAKSBREV.getTittel()))
             .build());
     }
 
@@ -166,7 +171,8 @@ public class DokumentproduksjonsInfoMapper {
         TRYGDEAVTALE_VEDTAKSBREV("Vedtak om medlemskap"),
         TRYGDEAVTALE_ATTEST("Attest for utsendt arbeidstaker"),
         AVSLAG_MANGLENDE_OPPLYSNINGER("Avslag pga manglende opplysninger"),
-        MELDING_HENLAGT_SAK("Henleggelse av søknad");
+        MELDING_HENLAGT_SAK("Henleggelse av søknad"),
+        IKKE_YRKESAKTIV_VEDTAKSBREV("Vedtak om medlemskap");
 
         private final String tittel;
 
