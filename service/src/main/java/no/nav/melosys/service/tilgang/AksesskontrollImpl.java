@@ -7,6 +7,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import no.nav.melosys.sikkerhet.logging.AuditLogger;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,17 +18,19 @@ import static no.nav.melosys.service.tilgang.Aksesstype.SKRIV;
 @Transactional(readOnly = true)
 public class AksesskontrollImpl implements Aksesskontroll {
 
+    private final AuditLogger auditLogger;
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
     private final BrukertilgangKontroll brukertilgangKontroll;
     private final RedigerbarKontroll redigerbarKontroll;
     private final OppgaveService oppgaveService;
 
-    public AksesskontrollImpl(FagsakService fagsakService,
+    public AksesskontrollImpl(AuditLogger auditLogger, FagsakService fagsakService,
                               BehandlingService behandlingService,
                               BrukertilgangKontroll brukertilgangKontroll,
                               RedigerbarKontroll redigerbarKontroll,
                               OppgaveService oppgaveService) {
+        this.auditLogger = auditLogger;
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.brukertilgangKontroll = brukertilgangKontroll;

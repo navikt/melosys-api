@@ -1,5 +1,7 @@
 package no.nav.melosys.service.tilgang;
 
+import java.util.Set;
+
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -8,13 +10,12 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.sikkerhet.logging.AuditLogger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -51,7 +52,7 @@ class AksesskontrollImplTest {
         fagsak.getAktører().add(aktoer);
         fagsak.setSaksnummer(saksnummer);
 
-        aksesskontroll = new AksesskontrollImpl(fagsakService, behandlingService, brukertilgangKontroll, redigerbarKontroll, oppgaveService);
+        aksesskontroll = new AksesskontrollImpl(new AuditLogger(), fagsakService, behandlingService, brukertilgangKontroll, redigerbarKontroll, oppgaveService);
     }
 
     @Test
