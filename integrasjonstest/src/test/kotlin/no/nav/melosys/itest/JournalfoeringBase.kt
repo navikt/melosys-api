@@ -38,7 +38,7 @@ class JournalfoeringBase(
     protected val prosessinstansRepository: ProsessinstansRepository,
 ) : ComponentTestBase() {
 
-    private val mockServer: WireMockServer =
+    protected val mockServer: WireMockServer =
         WireMockServer(WireMockConfiguration.wireMockConfig().port(8094))
 
     private val processUUID = UUID.randomUUID()
