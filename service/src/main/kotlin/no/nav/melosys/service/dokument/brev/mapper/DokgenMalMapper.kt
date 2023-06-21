@@ -73,13 +73,14 @@ class DokgenMalMapper(
         val lovvalgsperiode = behandlingsresultat.hentValidertPeriodeOmLovvalg();
         val bestemmelse = lovvalgsperiode.bestemmelse
         val mottatteOpplysningerData = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as Soeknad
+        val oppholdsland = Land_iso2.valueOf(mottatteOpplysningerData.soeknadsland.landkoder.get(0)).beskrivelse
 
         return IkkeYrkesaktivVedtaksbrev.av(
             brevbestilling.toBuilder()
                 .medBegrunnelseFritekst(behandlingsresultat.begrunnelseFritekst)
                 .medInnledningFritekst(behandlingsresultat.innledningFritekst)
                 .medNyVurderingBakgrunn(brevbestilling.nyVurderingBakgrunn) //TODO https://jira.adeo.no/browse/MELOSYS-5942
-                .medOppholdsLand(lovvalgsperiode.lovvalgsland.beskrivelse)
+                .medOppholdsLand(oppholdsland)
                 .medPeriodeFom(lovvalgsperiode.fom)
                 .medPeriodeTom(lovvalgsperiode.tom)
                 .medBestemmelse(bestemmelse.name())
