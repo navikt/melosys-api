@@ -101,8 +101,6 @@ public class EosVedtakService {
             );
         }
 
-        oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), request.getFritekst(), request.getNyVurderingBakgrunn());
-
         if (prosessinstansService.harVedtakInstans(behandlingID)) {
             throw new FunksjonellException("Det finnes allerede en vedtak-prosess for behandling " + behandling);
         }
@@ -115,6 +113,7 @@ public class EosVedtakService {
             brevbestillingDto.setProduserbardokument(Produserbaredokumenter.IKKE_YRKESAKTIV_VEDTAKSBREV);
             dokgenService.produserOgDistribuerBrev(behandlingID, brevbestillingDto);
         } else {
+            oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), request.getFritekst(), request.getNyVurderingBakgrunn());
             Set<String> mottakerinstitusjoner = avklarMottakerInstitusjoner(behandling, request.getMottakerinstitusjoner(), behandlingsresultat);
             prosessinstansService.opprettProsessinstansIverksettVedtakEos(behandling, request.getBehandlingsresultatTypeKode(),
                 request.getFritekst(), request.getFritekstSed(), mottakerinstitusjoner, request.isKopiTilArbeidsgiver());
