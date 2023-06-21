@@ -71,7 +71,7 @@ public class MedlemskapsperiodeService {
 
 
         Medlemskapsperiode medlemskapsperiode = medlemskapsperiodeRepository.save(nyMedlemskapsperiode);
-        oppdatereTrygdeavgiftsgrunnlag(medlemAvFolketrygden, behandlingsresultatID);
+        oppdatereTrygdeavgiftsgrunnlag(behandlingsresultatID, medlemAvFolketrygden);
         return medlemskapsperiode;
     }
 
@@ -92,15 +92,16 @@ public class MedlemskapsperiodeService {
         oppdaterMedlemskapsperiode(medlemskapsperiode, fom, tom, innvilgelsesResultat, trygdedekning);
 
         MedlemAvFolketrygden medlemAvFolketrygden = medlemskapsperiode.getMedlemAvFolketrygden();
-        oppdatereTrygdeavgiftsgrunnlag(medlemAvFolketrygden, behandlingsresultatID);
+        oppdatereTrygdeavgiftsgrunnlag(behandlingsresultatID, medlemAvFolketrygden);
 
         return medlemskapsperiodeRepository.save(medlemskapsperiode);
     }
 
-    private void oppdatereTrygdeavgiftsgrunnlag(MedlemAvFolketrygden medlemAvFolketrygden, Long behandlingsresultatID) {
+    private void oppdatereTrygdeavgiftsgrunnlag(Long behandlingsresultatID, MedlemAvFolketrygden medlemAvFolketrygden) {
         if (medlemAvFolketrygden.getFastsattTrygdeavgift() != null && medlemAvFolketrygden.getFastsattTrygdeavgift().getTrygdeavgiftsgrunnlag() != null) {
             List<Inntektsperiode> inntektsperioder = medlemAvFolketrygden.getFastsattTrygdeavgift().getTrygdeavgiftsgrunnlag().getInntektsperioder();
-            Skatteplikttype skatteplikttype = medlemAvFolketrygden.getFastsattTrygdeavgift().getTrygdeavgiftsgrunnlag().getSkatteforholdTilNorge().stream().findFirst().map(SkatteforholdTilNorge::getSkatteplikttype).orElseThrow();
+            Skatteplikttype skatteplikttype = medlemAvFolketrygden.getFastsattTrygdeavgift().getTrygdeavgiftsgrunnlag().getSkatteforholdTilNorge().stream().findFirst()
+                .map(SkatteforholdTilNorge::getSkatteplikttype).orElseThrow(() -> new RuntimeException("SkattepliktType ikke funnet, skal ikke skje for medlemAvFolketrygden :" + medlemAvFolketrygden.getId()));
             trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(behandlingsresultatID, new OppdaterTrygdeavgiftsgrunnlagRequest(skatteplikttype, inntektsperioder.stream().map(InntektskildeRequest::new).toList()));
         }
     }
@@ -139,7 +140,7 @@ public class MedlemskapsperiodeService {
             .orElseThrow(() -> new IkkeFunnetException("Finner ingen medlemskapsperiode med id " + medlemskapsperiodeID + " for behandling " + behandlingsresultatID));
 
         medlemAvFolketrygden.removeMedlemskapsperioder(medlemskapsperiode);
-        oppdatereTrygdeavgiftsgrunnlag(medlemAvFolketrygden, behandlingsresultatID);
+        oppdatereTrygdeavgiftsgrunnlag(behandlingsresultatID, medlemAvFolketrygden);
     }
 
     public Collection<Trygdedekninger> hentGyldigeTrygdedekninger() {

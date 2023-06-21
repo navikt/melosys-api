@@ -30,18 +30,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class MedlemskapsperiodeServiceTest {
 
     @Mock
-    private MedlemskapsperiodeRepository medlemskapsperiodeRepository;
+    private MedlemskapsperiodeRepository medlemskapsperiodeRepositoryMock;
     @Mock
-    private MedlemAvFolketrygdenService medlemAvFolketrygdenService;
+    private MedlemAvFolketrygdenService medlemAvFolketrygdenServiceMock;
     @Mock
-    private TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService;
+    private TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagServiceMock;
 
     private MedlemskapsperiodeService medlemskapsperiodeService;
 
@@ -53,18 +52,18 @@ class MedlemskapsperiodeServiceTest {
 
     @BeforeEach
     void setup() {
-        medlemskapsperiodeService = new MedlemskapsperiodeService(medlemskapsperiodeRepository, medlemAvFolketrygdenService, trygdeavgiftsgrunnlagService);
+        medlemskapsperiodeService = new MedlemskapsperiodeService(medlemskapsperiodeRepositoryMock, medlemAvFolketrygdenServiceMock, trygdeavgiftsgrunnlagServiceMock);
     }
 
     @Test
     void hentMedlemskapsperioder() {
         medlemskapsperiodeService.hentMedlemskapsperioder(1L);
-        verify(medlemAvFolketrygdenService).finnMedlemAvFolketrygden(1L);
+        verify(medlemAvFolketrygdenServiceMock).finnMedlemAvFolketrygden(1L);
     }
 
     @Test
     void opprettMedlemskapsperiode_finnesIngenEksisterende_kasterException() {
-        when(medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID))
+        when(medlemAvFolketrygdenServiceMock.hentMedlemAvFolketrygden(behandlingsresultatID))
             .thenReturn(lagMedlemAvFolketrygden());
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -79,14 +78,14 @@ class MedlemskapsperiodeServiceTest {
         final var eksisterende = lagMedlemskapsperiode();
         MedlemAvFolketrygden medlemAvFolketrygden = lagMedlemAvFolketrygden(eksisterende);
         medlemAvFolketrygden.setFastsattTrygdeavgift(lagFastsattTrygdeavgift());
-        when(medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID))
+        when(medlemAvFolketrygdenServiceMock.hentMedlemAvFolketrygden(behandlingsresultatID))
             .thenReturn(medlemAvFolketrygden);
 
         medlemskapsperiodeService.opprettMedlemskapsperiode(behandlingsresultatID, LocalDate.now().minusYears(1), LocalDate.now(),
             InnvilgelsesResultat.AVSLAATT, Trygdedekninger.HELSEDEL);
 
-        verify(medlemskapsperiodeRepository).save(medlemskapsperiodeCaptor.capture());
-        verify(trygdeavgiftsgrunnlagService).oppdaterTrygdeavgiftsgrunnlag(eq(behandlingsresultatID), any());
+        verify(medlemskapsperiodeRepositoryMock).save(medlemskapsperiodeCaptor.capture());
+        verify(trygdeavgiftsgrunnlagServiceMock).oppdaterTrygdeavgiftsgrunnlag(eq(behandlingsresultatID), any());
         assertThat(medlemskapsperiodeCaptor.getValue()).isNotNull()
             .extracting(
                 Medlemskapsperiode::getArbeidsland,
@@ -105,14 +104,15 @@ class MedlemskapsperiodeServiceTest {
         final var medlemskapsperiode = lagMedlemskapsperiode();
         MedlemAvFolketrygden medlemAvFolketrygden = lagMedlemAvFolketrygden(medlemskapsperiode);
         medlemskapsperiode.setMedlemAvFolketrygden(medlemAvFolketrygden);
-        when(medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID))
+        when(medlemAvFolketrygdenServiceMock.hentMedlemAvFolketrygden(behandlingsresultatID))
             .thenReturn(medlemAvFolketrygden);
 
         LocalDate nå = LocalDate.now();
         medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID, nå, nå,
             InnvilgelsesResultat.AVSLAATT, Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER);
 
-        verify(medlemskapsperiodeRepository).save(medlemskapsperiode);
+        verify(medlemskapsperiodeRepositoryMock).save(medlemskapsperiode);
+        verifyNoInteractions(trygdeavgiftsgrunnlagServiceMock);
         assertThat(medlemskapsperiode)
             .extracting(Medlemskapsperiode::getFom, Medlemskapsperiode::getTom,
                 Medlemskapsperiode::getInnvilgelsesresultat, Medlemskapsperiode::getTrygdedekning)
@@ -125,19 +125,19 @@ class MedlemskapsperiodeServiceTest {
         MedlemAvFolketrygden medlemAvFolketrygden = lagMedlemAvFolketrygden(medlemskapsperiode);
         medlemAvFolketrygden.setFastsattTrygdeavgift(lagFastsattTrygdeavgift());
         medlemskapsperiode.setMedlemAvFolketrygden(medlemAvFolketrygden);
-        when(medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID))
+        when(medlemAvFolketrygdenServiceMock.hentMedlemAvFolketrygden(behandlingsresultatID))
             .thenReturn(medlemAvFolketrygden);
 
         LocalDate nå = LocalDate.now();
         medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID, nå, nå,
             InnvilgelsesResultat.AVSLAATT, Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER);
 
-        verify(medlemskapsperiodeRepository).save(medlemskapsperiode);
+        verify(medlemskapsperiodeRepositoryMock).save(medlemskapsperiode);
         assertThat(medlemskapsperiode)
             .extracting(Medlemskapsperiode::getFom, Medlemskapsperiode::getTom,
                 Medlemskapsperiode::getInnvilgelsesresultat, Medlemskapsperiode::getTrygdedekning)
             .containsExactly(nå, nå, InnvilgelsesResultat.AVSLAATT, Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER);
-        verify(trygdeavgiftsgrunnlagService).oppdaterTrygdeavgiftsgrunnlag(eq(behandlingsresultatID), any());
+        verify(trygdeavgiftsgrunnlagServiceMock).oppdaterTrygdeavgiftsgrunnlag(eq(behandlingsresultatID), any());
     }
 
     private FastsattTrygdeavgift lagFastsattTrygdeavgift() {
@@ -169,7 +169,7 @@ class MedlemskapsperiodeServiceTest {
     @Test
     void oppdaterMedlemskapsperiode_trygdedekningStøttesIkke_kasterException() {
         final var medlemskapsperiode = lagMedlemskapsperiode();
-        when(medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID))
+        when(medlemAvFolketrygdenServiceMock.hentMedlemAvFolketrygden(behandlingsresultatID))
             .thenReturn(lagMedlemAvFolketrygden(medlemskapsperiode));
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -181,7 +181,7 @@ class MedlemskapsperiodeServiceTest {
     @Test
     void oppdaterMedlemskapsperiode_tomDatoErFørFomDato_kasterException() {
         final var medlemskapsperiode = lagMedlemskapsperiode();
-        when(medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID))
+        when(medlemAvFolketrygdenServiceMock.hentMedlemAvFolketrygden(behandlingsresultatID))
             .thenReturn(lagMedlemAvFolketrygden(medlemskapsperiode));
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -192,7 +192,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     void oppdaterMedlemskapsperiode_utenTrygdedekning_oppdateres() {
-        when(medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID))
+        when(medlemAvFolketrygdenServiceMock.hentMedlemAvFolketrygden(behandlingsresultatID))
             .thenReturn(lagMedlemAvFolketrygden(lagMedlemskapsperiode()));
 
         LocalDate nå = LocalDate.now();
@@ -204,7 +204,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     void oppdaterMedlemskapsperiode_finnerIkkeMedlemskapsperiode_kasterException() {
-        when(medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID))
+        when(medlemAvFolketrygdenServiceMock.hentMedlemAvFolketrygden(behandlingsresultatID))
             .thenReturn(lagMedlemAvFolketrygden());
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingsresultatID, 0, LocalDate.now(),
@@ -214,7 +214,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     void slettMedlemskapsperiode_erEnesteMedlemskapsperiode_kasterException() {
-        when(medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID))
+        when(medlemAvFolketrygdenServiceMock.hentMedlemAvFolketrygden(behandlingsresultatID))
             .thenReturn(lagMedlemAvFolketrygden(lagMedlemskapsperiode()));
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -224,7 +224,7 @@ class MedlemskapsperiodeServiceTest {
 
     @Test
     void slettMedlemskapsperiode_finnerIkkeMedlemskapsperiode_kasterException() {
-        when(medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID))
+        when(medlemAvFolketrygdenServiceMock.hentMedlemAvFolketrygden(behandlingsresultatID))
             .thenReturn(lagMedlemAvFolketrygden());
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -238,13 +238,14 @@ class MedlemskapsperiodeServiceTest {
         var medlemskapsperiode2 = lagMedlemskapsperiode();
         medlemskapsperiode2.setId(123321L);
         var medlemAvFolketrygden = lagMedlemAvFolketrygden(medlemskapsperiode1, medlemskapsperiode2);
-        when(medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID))
+        when(medlemAvFolketrygdenServiceMock.hentMedlemAvFolketrygden(behandlingsresultatID))
             .thenReturn(medlemAvFolketrygden);
 
 
         medlemskapsperiodeService.slettMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID);
 
 
+        verifyNoInteractions(trygdeavgiftsgrunnlagServiceMock);
         assertThat(medlemAvFolketrygden.getMedlemskapsperioder()).hasSize(1);
     }
 
@@ -255,14 +256,14 @@ class MedlemskapsperiodeServiceTest {
         medlemskapsperiode2.setId(123321L);
         var medlemAvFolketrygden = lagMedlemAvFolketrygden(medlemskapsperiode1, medlemskapsperiode2);
         medlemAvFolketrygden.setFastsattTrygdeavgift(lagFastsattTrygdeavgift());
-        when(medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID))
+        when(medlemAvFolketrygdenServiceMock.hentMedlemAvFolketrygden(behandlingsresultatID))
             .thenReturn(medlemAvFolketrygden);
 
 
         medlemskapsperiodeService.slettMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID);
 
 
-        verify(trygdeavgiftsgrunnlagService).oppdaterTrygdeavgiftsgrunnlag(eq(behandlingsresultatID), any());
+        verify(trygdeavgiftsgrunnlagServiceMock).oppdaterTrygdeavgiftsgrunnlag(eq(behandlingsresultatID), any());
         assertThat(medlemAvFolketrygden.getMedlemskapsperioder()).hasSize(1);
     }
 
