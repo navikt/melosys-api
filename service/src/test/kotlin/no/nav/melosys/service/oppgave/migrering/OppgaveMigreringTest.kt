@@ -59,9 +59,10 @@ class OppgaveMigreringTest {
         val behandlingRepository = mockk<BehandlingRepositoryForOppgaveMigrering>()
         every { behandlingRepository.finnSaksOgBehandlingTyperOgTema(any()) } returns migreringsListe.map { it.sak }
 
-        val oppgaveFasade = mockk<OppgaveFasade>()
         val prosessinstansRepository = mockk<ProsessinstansRepository>()
+        every { prosessinstansRepository.findAllMottakSedByBehandling_IdOrSedLåsReferanse(any()) }.returns(emptyList())
 
+        val oppgaveFasade = mockk<OppgaveFasade>()
         val migreringsSak = migreringsListe.first()
         every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer("MEL-1") } returns migreringsSak.oppgaver
         every { behandlingRepository.findWithSaksopplysningerById(migreringsSak.sak.behandlingID) } returns lagBehandling(
@@ -111,9 +112,10 @@ class OppgaveMigreringTest {
         val behandlingRepository = mockk<BehandlingRepositoryForOppgaveMigrering>()
         every { behandlingRepository.finnSaksOgBehandlingTyperOgTema(any()) } returns migreringsListe.map { it.sak }
 
-        val oppgaveFasade = mockk<OppgaveFasade>()
         val prosessinstansRepository = mockk<ProsessinstansRepository>()
+        every { prosessinstansRepository.findAllMottakSedByBehandling_IdOrSedLåsReferanse(any()) }.returns(emptyList())
 
+        val oppgaveFasade = mockk<OppgaveFasade>()
         every { oppgaveFasade.oppdaterOppgave(any(), any()) } answers {
             val id = firstArg<String>()
             val oppgaveOppdatering = secondArg<OppgaveOppdatering>()
