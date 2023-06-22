@@ -42,8 +42,8 @@ class AuditLogger {
             duid = auditEvent.destinationUserId,
             requestMethod = request?.method,
             requestURI = request?.requestURI,
-            msg = auditEvent.message,
-            sproc = auditEvent.sourceProcessName
+            message = auditEvent.message,
+            sourceProcessName = auditEvent.sourceProcessName
         )
     }
 
@@ -52,8 +52,8 @@ class AuditLogger {
         val duid: String,
         val requestMethod: String?,
         val requestURI: String?,
-        val msg: String?,
-        val sproc: String?,
+        val message: String?,
+        val sourceProcessName: String?,
         val end: Long = System.currentTimeMillis()
     ) {
         override fun toString(): String {
@@ -62,8 +62,8 @@ class AuditLogger {
                 "end=$end " +
                 "requestMethod=${requestMethod ?: "N/A"} " +
                 "request=${requestURI ?: "N/A"} " +
-                "sproc=${sproc ?: "N/A"} " +
-                if (msg != null) "msg=$msg " else ""
+                "sproc=${sourceProcessName ?: "N/A"} " +
+                if (message != null) "msg=$message " else ""
         }
     }
 }
