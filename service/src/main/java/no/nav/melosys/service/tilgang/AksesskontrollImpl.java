@@ -3,10 +3,14 @@ package no.nav.melosys.service.tilgang;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.integrasjon.felles.mdc.MDCOperations;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import no.nav.melosys.sikkerhet.logging.AuditEvent;
+import no.nav.melosys.sikkerhet.logging.AuditEventType;
+import no.nav.melosys.sikkerhet.logging.AuditLogger;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,22 +21,44 @@ import static no.nav.melosys.service.tilgang.Aksesstype.SKRIV;
 @Transactional(readOnly = true)
 public class AksesskontrollImpl implements Aksesskontroll {
 
+    private final AuditLogger auditLogger;
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
     private final BrukertilgangKontroll brukertilgangKontroll;
     private final RedigerbarKontroll redigerbarKontroll;
     private final OppgaveService oppgaveService;
 
-    public AksesskontrollImpl(FagsakService fagsakService,
+    public AksesskontrollImpl(AuditLogger auditLogger, FagsakService fagsakService,
                               BehandlingService behandlingService,
                               BrukertilgangKontroll brukertilgangKontroll,
                               RedigerbarKontroll redigerbarKontroll,
                               OppgaveService oppgaveService) {
+        this.auditLogger = auditLogger;
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.brukertilgangKontroll = brukertilgangKontroll;
         this.redigerbarKontroll = redigerbarKontroll;
         this.oppgaveService = oppgaveService;
+    }
+
+    @Override
+    public void auditAutoriserFolkeregisterIdent(String fnr, String kontekst) {
+        logAudit(AuditEventType.READ, fnr, kontekst);
+        brukertilgangKontroll.validerTilgangTilFolkeregisterIdent(fnr);
+    }
+
+    @Override
+    public void auditAutoriserSakstilgang(Fagsak fagsak, String kontekst) {
+        String aktørID = fagsak.finnBrukersAktørID().orElse(null);
+        if (aktørID != null) {
+            logAudit(AuditEventType.READ, aktørID, kontekst);
+            brukertilgangKontroll.validerTilgangTilAktørID(aktørID);
+        }
+    }
+
+    private void logAudit(AuditEventType eventType, String personIdent, String message) {
+        AuditEvent auditEvent = new AuditEvent(eventType, SubjectHandler.getInstance().getUserID(), personIdent, message, MDCOperations.getCorrelationId());
+        auditLogger.log(auditEvent);
     }
 
     @Override

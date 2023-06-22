@@ -1,5 +1,7 @@
 package no.nav.melosys.service.tilgang;
 
+import java.util.Set;
+
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -8,19 +10,27 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
+import no.nav.melosys.sikkerhet.logging.AuditEvent;
+import no.nav.melosys.sikkerhet.logging.AuditLogger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AksesskontrollImplTest {
+
+    @Spy
+    private AuditLogger auditLogger = new AuditLogger();
 
     @Mock
     private BehandlingService behandlingService;
@@ -32,6 +42,9 @@ class AksesskontrollImplTest {
     private RedigerbarKontroll redigerbarKontroll;
     @Mock
     private OppgaveService oppgaveService;
+
+    @Captor
+    private ArgumentCaptor<AuditEvent> auditCaptor;
 
     private Aksesskontroll aksesskontroll;
 
@@ -51,7 +64,31 @@ class AksesskontrollImplTest {
         fagsak.getAktører().add(aktoer);
         fagsak.setSaksnummer(saksnummer);
 
-        aksesskontroll = new AksesskontrollImpl(fagsakService, behandlingService, brukertilgangKontroll, redigerbarKontroll, oppgaveService);
+        SubjectHandler.set(new TestSubjectHandler());
+
+        aksesskontroll = new AksesskontrollImpl(auditLogger, fagsakService, behandlingService, brukertilgangKontroll, redigerbarKontroll, oppgaveService);
+    }
+
+    @Test
+    void auditAutoriserFolkeregisterIdent_auditOgSjekkTilgang() {
+        aksesskontroll.auditAutoriserFolkeregisterIdent("fnr", "melding");
+
+        verify(auditLogger).log(auditCaptor.capture());
+        assertThat(auditCaptor.getValue().getSourceUserId()).isNotNull();
+        assertThat(auditCaptor.getValue().getDestinationUserId()).isEqualTo("fnr");
+        assertThat(auditCaptor.getValue().getMessage()).isEqualTo("melding");
+        verify(brukertilgangKontroll).validerTilgangTilFolkeregisterIdent("fnr");
+    }
+
+    @Test
+    void auditAutoriserSakstilgang_audigOgSjekkTilgang() {
+        aksesskontroll.auditAutoriserSakstilgang(fagsak, "melding");
+
+        verify(auditLogger).log(auditCaptor.capture());
+        assertThat(auditCaptor.getValue().getSourceUserId()).isNotNull();
+        assertThat(auditCaptor.getValue().getDestinationUserId()).isEqualTo(fagsak.finnBrukersAktørID().get());
+        assertThat(auditCaptor.getValue().getMessage()).isEqualTo("melding");
+        verify(brukertilgangKontroll).validerTilgangTilAktørID(fagsak.finnBrukersAktørID().get());
     }
 
     @Test
