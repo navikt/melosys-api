@@ -5,19 +5,21 @@ import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.SakOgBehandlingDTO
 import no.nav.melosys.domain.Tema
 import no.nav.melosys.domain.dokument.sed.SedDokument
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.saksflyt.ProsessDataKey
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
 import no.nav.melosys.repository.BehandlingRepositoryForOppgaveMigrering
+import no.nav.melosys.repository.ProsessinstansRepository
 import no.nav.melosys.service.lovligekombinasjoner.GyldigeKombinasjoner
 import no.nav.melosys.service.oppgave.*
-import no.nav.melosys.service.oppgave.OppgaveGosysMapping
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
@@ -29,6 +31,7 @@ class OppgaveMigrering(
     private val behandlingRepository: BehandlingRepositoryForOppgaveMigrering,
     private val oppgaveFasade: OppgaveFasade,
     private val migreringsRapport: MigreringsRapport,
+    private val prosessinstansRepository: ProsessinstansRepository
 ) {
     @Volatile
     var stopMigrering: Boolean = false
@@ -164,7 +167,8 @@ class OppgaveMigrering(
             val oppgavetype: Oppgavetyper = sakOgBehandling.utledOppgaveType()
             val beskrivelse: String = sakOgBehandling.utledBeskrivelse()
             val tema: Tema = sakOgBehandling.utledTema()
-            return OppgaveMigreringsOppdatering(oppgaveBehandlingstema, null, tema, oppgavetype, beskrivelse)
+            val sedListe = finnSEDKobletTilBehandling(sakOgBehandling.behandlingID)
+            return OppgaveMigreringsOppdatering(oppgaveBehandlingstema, null, tema, oppgavetype, beskrivelse, null, null, sedListe)
         } catch (e: Exception) {
             val gyldige = GyldigeKombinasjoner.finnGyldige(
                 sakOgBehandling.sakstype,
@@ -175,6 +179,17 @@ class OppgaveMigrering(
             val mappingError = "${sakOgBehandling.saksnummer}: gyldige:${gyldige.size}  ${e.message}"
             migreringsRapport.mappingFeiler(mappingError)
             return OppgaveMigreringsOppdatering(mappingError)
+        }
+    }
+
+    private fun finnSEDKobletTilBehandling(behandlingID: Long): List<String> {
+        val mottakSedKobletTilBehandling =
+            prosessinstansRepository.findAllMottakSedByBehandling_IdOrSedLåsReferanse(behandlingID)
+        return mottakSedKobletTilBehandling.map {
+            it.getData(
+                ProsessDataKey.EESSI_MELDING,
+                MelosysEessiMelding::class.java
+            ).sedType
         }
     }
 

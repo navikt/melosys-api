@@ -17,6 +17,7 @@ import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
 import no.nav.melosys.repository.BehandlingRepositoryForOppgaveMigrering
+import no.nav.melosys.repository.ProsessinstansRepository
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -58,8 +59,10 @@ class OppgaveMigreringTest {
         val behandlingRepository = mockk<BehandlingRepositoryForOppgaveMigrering>()
         every { behandlingRepository.finnSaksOgBehandlingTyperOgTema(any()) } returns migreringsListe.map { it.sak }
 
-        val oppgaveFasade = mockk<OppgaveFasade>()
+        val prosessinstansRepository = mockk<ProsessinstansRepository>()
+        every { prosessinstansRepository.findAllMottakSedByBehandling_IdOrSedLåsReferanse(any()) }.returns(emptyList())
 
+        val oppgaveFasade = mockk<OppgaveFasade>()
         val migreringsSak = migreringsListe.first()
         every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer("MEL-1") } returns migreringsSak.oppgaver
         every { behandlingRepository.findWithSaksopplysningerById(migreringsSak.sak.behandlingID) } returns lagBehandling(
@@ -70,7 +73,8 @@ class OppgaveMigreringTest {
         OppgaveMigrering(
             behandlingRepository,
             oppgaveFasade,
-            migreringsRapport
+            migreringsRapport,
+            prosessinstansRepository
         ).migrering(null, null, false)
 
         verify(exactly = 0) { oppgaveFasade.oppdaterOppgave(any(), any()) }
@@ -108,8 +112,10 @@ class OppgaveMigreringTest {
         val behandlingRepository = mockk<BehandlingRepositoryForOppgaveMigrering>()
         every { behandlingRepository.finnSaksOgBehandlingTyperOgTema(any()) } returns migreringsListe.map { it.sak }
 
-        val oppgaveFasade = mockk<OppgaveFasade>()
+        val prosessinstansRepository = mockk<ProsessinstansRepository>()
+        every { prosessinstansRepository.findAllMottakSedByBehandling_IdOrSedLåsReferanse(any()) }.returns(emptyList())
 
+        val oppgaveFasade = mockk<OppgaveFasade>()
         every { oppgaveFasade.oppdaterOppgave(any(), any()) } answers {
             val id = firstArg<String>()
             val oppgaveOppdatering = secondArg<OppgaveOppdatering>()
@@ -134,7 +140,8 @@ class OppgaveMigreringTest {
         OppgaveMigrering(
             behandlingRepository,
             oppgaveFasade,
-            migreringsRapport
+            migreringsRapport,
+            prosessinstansRepository
         ).migrering(null, null, false)
 
         migreringsRapport.status().forEach {
