@@ -48,9 +48,10 @@ public interface ProsessinstansRepository extends JpaRepository<Prosessinstans, 
 
     @Query("""
         SELECT p1 FROM Prosessinstans p1
-        WHERE p1.type = 'MOTTAK_SED' AND (p1.behandling.id = ?1 OR p1.låsReferanse in (SELECT p2.låsReferanse FROM Prosessinstans p2 WHERE p2.behandling.id = ?1))
+        WHERE p1.behandling.id = ?1 OR p1.låsReferanse in (SELECT p2.låsReferanse FROM Prosessinstans p2 WHERE p2.behandling.id = ?1)
+        ORDER BY p1.registrertDato
         """)
-    Collection<Prosessinstans> findAllMottakSedByBehandling_IdOrSedLåsReferanse(long id);
+    Collection<Prosessinstans> findAllByBehandling_IdOrSedLåsReferanse(long id);
 
     @Query(value = "SELECT * FROM PROSESSINSTANS p WHERE p.PROSESS_TYPE = 'MOTTAK_SED' AND p.\"DATA\" LIKE '%X100%'",
         nativeQuery = true)

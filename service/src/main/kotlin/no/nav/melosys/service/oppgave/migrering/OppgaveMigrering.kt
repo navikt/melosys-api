@@ -183,14 +183,11 @@ class OppgaveMigrering(
     }
 
     private fun finnSEDKobletTilBehandling(behandlingID: Long): List<String> {
-        val mottakSedKobletTilBehandling =
-            prosessinstansRepository.findAllMottakSedByBehandling_IdOrSedLåsReferanse(behandlingID)
-        return mottakSedKobletTilBehandling.map {
-            it.getData(
-                ProsessDataKey.EESSI_MELDING,
-                MelosysEessiMelding::class.java
-            ).sedType
-        }
+        return prosessinstansRepository.findAllByBehandling_IdOrSedLåsReferanse(behandlingID)
+            .map { it.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding::class.java, null) }
+            .filterNotNull()
+            .distinctBy { it.sedId }
+            .map { it.sedType }
     }
 
     private fun SakOgBehandlingDTO.utledOppgaveBehandlingstema(): OppgaveBehandlingstema? =
