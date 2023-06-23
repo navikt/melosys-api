@@ -5,11 +5,15 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock
+import io.kotest.assertions.withClue
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import no.finn.unleash.FakeUnleash
+import no.nav.melosys.domain.Behandlingsmaate
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
@@ -18,6 +22,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.domain.saksflyt.ProsessType
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
+import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.ProsessinstansRepository
 import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -42,6 +47,7 @@ class IkkeYrkesaktivVedtakIT(
     @Autowired oppgaveService: OppgaveService,
     @Autowired prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
+    @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val unleash: FakeUnleash,
     @Autowired private val oAuthMockServer: OAuthMockServer,
     @Autowired private val mottatteOpplysningerService: MottatteOpplysningerService,
@@ -72,7 +78,7 @@ class IkkeYrkesaktivVedtakIT(
     }
 
     @Test
-    fun `ikke yrkesaktiv vedtak - eøs`() {
+    fun `ikke yrkesaktiv vedtak - eøs - innvigelse med bestemmelse FO_883_2004_ART11_2`() {
         unleash.enable(ToggleName.IKKEYRKESAKTIV_FLYT)
 
         val behandling = journalførOgVentTilProsesserErFerdige(
@@ -96,6 +102,7 @@ class IkkeYrkesaktivVedtakIT(
                     )
                     soeknadsland = Soeknadsland(listOf(Landkoder.DE.kode), false)
                 }
+
         mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandling.id, mottatteOpplysninger.toJsonNode)
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
 
@@ -121,12 +128,42 @@ class IkkeYrkesaktivVedtakIT(
             .medBestillersId("komponent test")
             .build()
 
+
         executeAndWait(
             waitForprosessType = ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
             alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
         ) {
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
+
+
+        behandlingsresultatService.hentBehandlingsresultat(behandling.id).apply {
+            type.shouldBe(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND)
+            behandlingsmåte.shouldBe(Behandlingsmaate.MANUELT)
+            begrunnelseFritekst.shouldBe("begrunnelse")
+            utfallRegistreringUnntak.shouldBe(Utfallregistreringunntak.GODKJENT)
+            fastsattAvLand.shouldBe(Land_iso2.NO)
+        }
+        lovvalgsperiodeService.hentLovvalgsperiode(behandling.id).apply {
+            innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+            bestemmelse.shouldBe(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_2)
+            lovvalgsland.shouldBe(Land_iso2.NO)
+            medlemskapstype.shouldBe(Medlemskapstyper.PLIKTIG)
+            dekning.shouldBe(Trygdedekninger.FULL_DEKNING)
+            fom.shouldBe(LocalDate.of(2022, 1, 1))
+            tom.shouldBe(LocalDate.of(2022, 2, 1))
+        }
+        behandlingRepository.findById(behandling.id).orElse(null)
+            .shouldNotBeNull().apply {
+                withClue("Behandlingsstatus skal være AVSLUTTET") {
+                    status.shouldBe(Behandlingsstatus.AVSLUTTET)
+                }
+                fagsak.apply {
+                    withClue("Saksstatus skal være OPPRETTET") {
+                        status.shouldBe(Saksstatuser.OPPRETTET)
+                    }
+                }
+            }
     }
 
     private val Any.toJsonNode: JsonNode
