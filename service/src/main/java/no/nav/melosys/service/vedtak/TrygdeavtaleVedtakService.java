@@ -78,18 +78,17 @@ public class TrygdeavtaleVedtakService {
             );
         }
 
-        oppdaterBehandlingsresultat(behandlingsresultat, request);
-
         if (prosessinstansService.harVedtakInstans(behandlingID)) {
             throw new FunksjonellException("Det finnes allerede en vedtak-prosess for behandling " + behandling);
         }
 
-        behandling.getFagsak().setStatus(Saksstatuser.MEDLEMSKAP_AVKLART);
         behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
 
         if(saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling.getFagsak().getType(), behandling.getTema())) {
             prosessinstansService.opprettProsessinstansIverksettIkkeYreksaktiv(behandling, behandling.getFagsak().getStatus());
         } else {
+            behandling.getFagsak().setStatus(Saksstatuser.MEDLEMSKAP_AVKLART); // TODO: Egen oppgave for fjerne denne som ikke brukes
+            oppdaterBehandlingsresultat(behandlingsresultat, request);
             prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling, request);
         }
 
