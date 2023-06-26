@@ -43,7 +43,7 @@ public class Trygdeavgiftsperiode {
     @JoinColumn(name = "inntektsperiode_id")
     private Inntektsperiode grunnlagInntekstperiode;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "medlemskapsperiode_id")
     private Medlemskapsperiode grunnlagMedlemskapsperiode;
 

@@ -1,14 +1,17 @@
 package no.nav.melosys.domain;
 
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
+import javax.persistence.*;
+
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-
-import javax.persistence.*;
-import java.time.LocalDate;
-import java.util.Objects;
 
 @Entity
 @Table(name = "medlemskapsperiode")
@@ -44,6 +47,9 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
 
     @Column(name = "medlperiode_id")
     private Long medlPeriodeID;
+
+    @OneToMany(mappedBy = "grunnlagMedlemskapsperiode", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private Collection<Trygdeavgiftsperiode> trygdeavgiftsperioder = new HashSet<>(1);
 
     public Long getId() {
         return id;
