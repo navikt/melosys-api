@@ -161,7 +161,6 @@ public class Oppgaveplukker {
             OppgaveTilbakelegging oppgaveTilbakelegging = new OppgaveTilbakelegging();
             oppgaveTilbakelegging.setOppgaveId(oppgaveId);
             oppgaveTilbakelegging.setSaksbehandlerId(saksbehandlerID);
-            oppgaveTilbakelegging.setBegrunnelse(tilbakelegging.getBegrunnelse());
             oppgaveTilbakelegging.setRegistrertDato(LocalDateTime.now());
             oppgaveTilbakkeleggingRepo.save(oppgaveTilbakelegging);
         }
