@@ -4,9 +4,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.ValideringException;
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.service.tilgang.Aksesstype;
 import no.nav.melosys.service.vedtak.FattVedtakRequest;
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -26,12 +24,10 @@ import org.springframework.web.context.WebApplicationContext;
 public class VedtakTjeneste {
     private final VedtaksfattingFasade vedtaksfattingFasade;
     private final Aksesskontroll aksesskontroll;
-    private final FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
 
-    public VedtakTjeneste(VedtaksfattingFasade vedtaksfattingFasade, Aksesskontroll aksesskontroll, FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade) {
+    public VedtakTjeneste(VedtaksfattingFasade vedtaksfattingFasade, Aksesskontroll aksesskontroll) {
         this.vedtaksfattingFasade = vedtaksfattingFasade;
         this.aksesskontroll = aksesskontroll;
-        this.ferdigbehandlingKontrollFacade = ferdigbehandlingKontrollFacade;
     }
 
     @PostMapping("{behandlingID}/fatt")
@@ -56,23 +52,6 @@ public class VedtakTjeneste {
         }
         aksesskontroll.autoriserSkriv(behandlingID);
         vedtaksfattingFasade.endreVedtak(behandlingID, endreVedtakDto.getBegrunnelseKode(), endreVedtakDto.getFritekst(), endreVedtakDto.getFritekstSed());
-        return ResponseEntity.noContent().build();
-    }
-
-    /**
-     * @deprecated Flyttes til KontrollTjeneste
-     */
-    @Deprecated
-    @PostMapping("{behandlingID}/kontroller")
-    @ApiOperation(value = "Gjør kontroll på vedtaket, og returnerer eventuelle feilmeldinger som liste med KontrollfeilDto")
-    public ResponseEntity<Void> kontrollerVedtak(@PathVariable("behandlingID") long behandlingID,
-                                                 @RequestParam(value = "skalRegisteropplysningerOppdateres", required = false) boolean skalRegisteropplysningerOppdateres,
-                                                 @RequestBody FattVedtakDto fattVedtakDto) throws ValideringException {
-        if (fattVedtakDto.getVedtakstype() == null) {
-            throw new FunksjonellException("Vedtakstype mangler.");
-        }
-        aksesskontroll.autoriser(behandlingID, skalRegisteropplysningerOppdateres ? Aksesstype.SKRIV : Aksesstype.LES);
-        ferdigbehandlingKontrollFacade.kontroller(behandlingID, skalRegisteropplysningerOppdateres, fattVedtakDto.getBehandlingsresultatTypeKode(), null);
         return ResponseEntity.noContent().build();
     }
 

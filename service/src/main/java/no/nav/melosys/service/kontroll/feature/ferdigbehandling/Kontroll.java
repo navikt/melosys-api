@@ -13,7 +13,6 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.person.Persondata;
-import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -51,21 +50,16 @@ class Kontroll {
         this.unleash = unleash;
     }
 
-    public void kontroller(long behandlingId, Behandlingsresultattyper behandlingsresultattype, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) throws ValideringException {
+    public Collection<Kontrollfeil> kontroller(long behandlingId, Behandlingsresultattyper behandlingsresultattype, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) {
         var behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
         var sakstype = behandling.getFagsak().getType();
-        kontrollerVedtak(behandlingId, sakstype, behandlingsresultattype, kontrollerSomSkalIgnoreres);
+        return kontrollerVedtak(behandlingId, sakstype, behandlingsresultattype, kontrollerSomSkalIgnoreres);
     }
 
-    public void kontrollerVedtak(long behandlingID, Sakstyper sakstype, Behandlingsresultattyper behandlingsresultattype, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) throws ValideringException {
-        Collection<Kontrollfeil> kontrollfeil = utførKontroller(behandlingID, sakstype, behandlingsresultattype).stream()
+    public Collection<Kontrollfeil> kontrollerVedtak(long behandlingID, Sakstyper sakstype, Behandlingsresultattyper behandlingsresultattype, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) {
+        return utførKontroller(behandlingID, sakstype, behandlingsresultattype).stream()
             .filter(feil -> skalViseFeil(feil, kontrollerSomSkalIgnoreres, behandlingID))
             .toList();
-
-        if (!kontrollfeil.isEmpty()) {
-            throw new ValideringException("Feil i validering. Kan ikke fatte vedtak.",
-                kontrollfeil.stream().map(Kontrollfeil::tilDto).toList());
-        }
     }
 
     private boolean skalViseFeil(Kontrollfeil kontrollfeil, Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres, long behandlingID) {

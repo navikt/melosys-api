@@ -140,20 +140,4 @@ class VedtakTjenesteTest {
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.message", containsString("BegrunnelseKode mangler.")));
     }
-
-    @Test
-    void kontrollerVedtak() throws Exception {
-        var dto = new FattVedtakDto();
-        dto.setBehandlingsresultatTypeKode(Behandlingsresultattyper.HENLEGGELSE);
-        dto.setVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK);
-        dto.setBegrunnelseFritekst("Begrunnelse");
-
-
-        mockMvc.perform(post(BASE_URL + "/{behandlingID}/kontroller", BEHANDLING_ID)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(dto)))
-            .andExpect(status().isNoContent());
-
-        verify(aksesskontroll).autoriser(BEHANDLING_ID, Aksesstype.LES);
-    }
 }
