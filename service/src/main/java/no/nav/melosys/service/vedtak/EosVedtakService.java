@@ -1,5 +1,10 @@
 package no.nav.melosys.service.vedtak;
 
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.VedtakMetadataLagretEvent;
@@ -28,11 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.ApplicationEventMulticaster;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
 
 import static no.nav.melosys.domain.kodeverk.Utfallregistreringunntak.GODKJENT;
 import static no.nav.melosys.service.vedtak.VedtaksfattingFasade.FRIST_KLAGE_UKER;
@@ -108,7 +108,7 @@ public class EosVedtakService {
 
         if (saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling.getFagsak().getType(), behandling.getTema())) {
             behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
-            prosessinstansService.opprettProsessinstansIverksettIkkeYreksaktiv(behandling, behandling.getFagsak().getStatus());
+            prosessinstansService.opprettProsessinstansIverksettIkkeYreksaktiv(behandling);
             var brevbestillingDto = new BrevbestillingDto();
             brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
             brevbestillingDto.setProduserbardokument(Produserbaredokumenter.IKKE_YRKESAKTIV_VEDTAKSBREV);
