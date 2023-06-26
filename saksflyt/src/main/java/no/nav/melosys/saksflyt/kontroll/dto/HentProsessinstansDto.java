@@ -8,6 +8,7 @@ public record HentProsessinstansDto(UUID id,
                                     String saksnummer,
                                     String prosessType,
                                     LocalDateTime endretDato,
+                                    LocalDateTime registrertDato,
                                     String feiletSteg,
                                     String sisteFeilmelding,
                                     String correlationId) {

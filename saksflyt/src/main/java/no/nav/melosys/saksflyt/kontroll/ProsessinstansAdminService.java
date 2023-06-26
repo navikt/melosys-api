@@ -108,6 +108,7 @@ public class ProsessinstansAdminService {
             saksnummer,
             prosessinstans.getType().getKode(),
             prosessinstans.getEndretDato(),
+            prosessinstans.getRegistrertDato(),
             ProsessflytDefinisjon.hentNesteSteg(prosessinstans.getType(), prosessinstans.getSistFullførtSteg())
                 .map(ProsessSteg::getKode)
                 .orElse(null),
