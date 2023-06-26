@@ -215,6 +215,15 @@ public final class ProsessflytDefinisjon {
             )
         );
 
+        PROSESS_FLYT_MAP.put(
+            ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
+            new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
+                LAGRE_LOVVALGSPERIODE_MEDL,
+                AVSLUTT_SAK_OG_BEHANDLING
+            )
+        );
+
+
         PROSESS_FLYT_MAP.put(ProsessType.MOTTAK_SED,
             new ProsessFlyt(ProsessType.MOTTAK_SED,
                 SED_MOTTAK_RUTING

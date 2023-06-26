@@ -11,11 +11,16 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Ikkeyrkesaktivsituasjontype;
 import no.nav.melosys.domain.serializer.LovvalgBestemmelseDeserializer;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+/**
+ * Sjekker at alle subtyper av DokgenBrevbestilling kan deserialiseres til riktig type.
+ * Eksempel: Dersom alle feltene til subklasse X også inneholder i subklasse Z, vil deserialiseringen feile.
+ */
 class DokgenBrevbestillingTest {
     private final ObjectMapper dataMapper = new ObjectMapper()
         .registerModule(new JavaTimeModule())
@@ -39,8 +44,12 @@ class DokgenBrevbestillingTest {
             node.put(a.getName(), a.getType().getSimpleName());
             if (a.getType().getSimpleName().equals("boolean")) {
                 node.put(a.getName(), false);
+            } else if (a.getType().getSimpleName().equals("LocalDate")) {
+                node.put(a.getName(), "2022-02-02");
             } else if (a.getType().getSimpleName().equals(Mottakerroller.class.getSimpleName())) {
                 node.put(a.getName(), Mottakerroller.NORSK_MYNDIGHET.name());
+            } else if (a.getType().getSimpleName().equals(Ikkeyrkesaktivsituasjontype.class.getSimpleName())) {
+                node.put(a.getName(), Ikkeyrkesaktivsituasjontype.ANNET.name());
             } else if (a.getType().getSimpleName().equals(Representerer.class.getSimpleName())) {
                 node.put(a.getName(), Representerer.BRUKER.name());
             } else {

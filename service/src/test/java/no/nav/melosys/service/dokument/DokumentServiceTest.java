@@ -105,6 +105,11 @@ final class DokumentServiceTest {
         dokumentService = lagDokumentService(null);
     }
 
+    @BeforeEach
+    void beforeEach() {
+        SpringSubjectHandler.set(new TestSubjectHandler());
+    }
+
     @Test
     void produserInnvilgelsesbrev_medFullmektig_senderTilBrukerOgFullmektig() {
         DokumentService dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock());
