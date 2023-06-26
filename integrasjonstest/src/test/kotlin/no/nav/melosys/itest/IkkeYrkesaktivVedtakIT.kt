@@ -22,6 +22,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_il
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
+import no.nav.melosys.domain.mottatteopplysninger.SoeknadIkkeYrkesaktiv
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.domain.saksflyt.ProsessType
@@ -195,7 +196,7 @@ class IkkeYrkesaktivVedtakIT(
                     )
                     soeknadsland = Soeknadsland(listOf(Landkoder.DE.kode), false)
                 }.apply {
-                    (this as Soeknad).ikkeYrkesaktivSituasjontype = Ikkeyrkesaktivsituasjontype.STUDENT
+                    (this as SoeknadIkkeYrkesaktiv).ikkeYrkesaktivSituasjontype = Ikkeyrkesaktivsituasjontype.STUDENT
                 }
 
         mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandling.id, mottatteOpplysninger.toJsonNode)
