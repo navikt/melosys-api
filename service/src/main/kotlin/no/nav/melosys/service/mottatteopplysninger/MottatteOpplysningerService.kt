@@ -5,6 +5,7 @@ import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
 import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.mottatteopplysninger.*
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
@@ -44,7 +45,7 @@ class MottatteOpplysningerService(
             if (saksbehandlingRegler.harTomFlyt(behandling) || !behandlingKanRedigeresAvSaksbehandler) {
                 throw IkkeFunnetException("Finner ikke mottatteOpplysninger for behandling $behandlingID")
             } else {
-                opprettSøknadEllerAnmodningEllerAttest(behandling,  Periode(), Soeknadsland())
+                opprettSøknadEllerAnmodningEllerAttest(behandling, Periode(), Soeknadsland())
             }
         }
 
@@ -131,9 +132,15 @@ class MottatteOpplysningerService(
         }
 
         val type = when (sakstype) {
-            Sakstyper.EU_EOS -> Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
+            Sakstyper.EU_EOS -> when (behandling.tema) {
+                Behandlingstema.IKKE_YRKESAKTIV -> Mottatteopplysningertyper.SØKNAD_IKKE_YRKESAKTIV
+                else -> Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
+            }
             Sakstyper.FTRL -> Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN
-            Sakstyper.TRYGDEAVTALE -> Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE
+            Sakstyper.TRYGDEAVTALE -> when (behandling.tema) {
+                Behandlingstema.IKKE_YRKESAKTIV -> Mottatteopplysningertyper.SØKNAD_IKKE_YRKESAKTIV
+                else -> Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE
+            }
         }
 
         val mottatteOpplysninger = opprettMottatteOpplysninger(

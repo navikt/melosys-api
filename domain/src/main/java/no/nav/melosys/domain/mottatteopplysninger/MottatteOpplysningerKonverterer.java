@@ -20,6 +20,7 @@ public final class MottatteOpplysningerKonverterer {
         mapper.put(Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS, Soeknad.class);
         mapper.put(Mottatteopplysningertyper.SED, SedGrunnlag.class);
         mapper.put(Mottatteopplysningertyper.ANMODNING_ELLER_ATTEST, AnmodningEllerAttest.class);
+        mapper.put(Mottatteopplysningertyper.SØKNAD_IKKE_YRKESAKTIV, SoeknadIkkeYrkesaktiv.class);
         objectMapper.registerModule(new JavaTimeModule());
     }
 
