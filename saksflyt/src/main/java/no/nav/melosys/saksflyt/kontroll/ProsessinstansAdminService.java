@@ -31,7 +31,7 @@ public class ProsessinstansAdminService {
     public List<HentProsessinstansDto> hentFeiledeProsessinstanser() {
         return prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET).stream()
             .map(this::mapTilHentProsessinstansDto)
-            .sorted(Comparator.comparing(HentProsessinstansDto::endretDato))
+            .sorted(Comparator.comparing(HentProsessinstansDto::registrertDato))
             .toList();
     }
 
