@@ -364,13 +364,13 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansIverksettIkkeYreksaktiv(Behandling behandling, Saksstatuser saksstatus) {
+    public void opprettProsessinstansIverksettIkkeYreksaktiv(Behandling behandling) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
             .medType(ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV)
             .build();
 
-        prosessinstans.setData(SAKSSTATUS, saksstatus);
+        prosessinstans.setData(SAKSSTATUS, Saksstatuser.LOVVALG_AVKLART);
 
         lagre(prosessinstans);
     }
