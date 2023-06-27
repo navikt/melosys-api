@@ -60,7 +60,7 @@ class OppgaveMigreringTest {
         every { behandlingRepository.finnSaksOgBehandlingTyperOgTema(any()) } returns migreringsListe.map { it.sak }
 
         val prosessinstansRepository = mockk<ProsessinstansRepository>()
-        every { prosessinstansRepository.findAllByBehandling_IdOrSedLåsReferanse(any()) }.returns(emptyList())
+        every { prosessinstansRepository.findAllByBehandling_Id(any()) }.returns(emptyList())
 
         val oppgaveFasade = mockk<OppgaveFasade>()
         val migreringsSak = migreringsListe.first()
@@ -113,7 +113,7 @@ class OppgaveMigreringTest {
         every { behandlingRepository.finnSaksOgBehandlingTyperOgTema(any()) } returns migreringsListe.map { it.sak }
 
         val prosessinstansRepository = mockk<ProsessinstansRepository>()
-        every { prosessinstansRepository.findAllByBehandling_IdOrSedLåsReferanse(any()) }.returns(emptyList())
+        every { prosessinstansRepository.findAllByBehandling_Id(any()) }.returns(emptyList())
 
         val oppgaveFasade = mockk<OppgaveFasade>()
         every { oppgaveFasade.oppdaterOppgave(any(), any()) } answers {
