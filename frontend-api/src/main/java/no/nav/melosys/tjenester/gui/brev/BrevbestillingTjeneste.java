@@ -8,7 +8,6 @@ import no.nav.melosys.domain.brev.NorskMyndighet;
 import no.nav.melosys.service.brev.BrevbestillingFasade;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.tjenester.gui.BrevmalListeBygger;
 import no.nav.melosys.tjenester.gui.dto.brev.*;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.http.*;
