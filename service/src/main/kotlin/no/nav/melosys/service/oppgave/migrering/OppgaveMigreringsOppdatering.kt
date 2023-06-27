@@ -13,7 +13,7 @@ data class OppgaveMigreringsOppdatering(
     val beskrivelse: String?,
     val mappingError: String? = null,
     var oppgaveOppdateringError: String? = null,
-    var sedListe: List<String> = emptyList()
+    var sedListe: MutableList<String> = mutableListOf()
 ) {
     constructor(mappingError: String?) : this(
         null,

@@ -167,7 +167,7 @@ class OppgaveMigrering(
             val oppgavetype: Oppgavetyper = sakOgBehandling.utledOppgaveType()
             val beskrivelse: String = sakOgBehandling.utledBeskrivelse()
             val tema: Tema = sakOgBehandling.utledTema()
-            val sedListe = finnSEDKobletTilBehandling(sakOgBehandling.behandlingID)
+            val sedListe = finnSEDKobletTilBehandling(sakOgBehandling)
             return OppgaveMigreringsOppdatering(oppgaveBehandlingstema, null, tema, oppgavetype, beskrivelse, null, null, sedListe)
         } catch (e: Exception) {
             val gyldige = GyldigeKombinasjoner.finnGyldige(
@@ -182,12 +182,35 @@ class OppgaveMigrering(
         }
     }
 
-    private fun finnSEDKobletTilBehandling(behandlingID: Long): List<String> {
-        return prosessinstansRepository.findAllByBehandling_IdOrSedLåsReferanse(behandlingID)
+    private fun finnSEDKobletTilBehandling(it: SakOgBehandlingDTO): MutableList<String> {
+        if (!relevanteBehandlinger(it)) {
+            return mutableListOf()
+        }
+
+        val prosessinstanserMedBehandling = prosessinstansRepository.findAllByBehandling_Id(it.behandlingID)
+        val prosessinstanserMedSedLåsReferanse = prosessinstanserMedBehandling.map { it.låsReferanse }.filterNotNull()
+            .map { prosessinstansRepository.findAllByLåsReferanseStartingWith(it) }.flatten()
+
+        return (prosessinstanserMedBehandling + prosessinstanserMedSedLåsReferanse)
+            .asSequence()
+            .sortedBy { it.registrertDato }
             .map { it.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding::class.java, null) }
             .filterNotNull()
             .distinctBy { it.sedId }
             .map { it.sedType }
+            .toMutableList()
+    }
+
+    private fun relevanteBehandlinger(it: SakOgBehandlingDTO): Boolean {
+        return it.sakstype == Sakstyper.EU_EOS
+            && it.sakstema == Sakstemaer.UNNTAK
+            && listOf(
+            Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND,
+            Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
+            Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
+        ).contains(it.behandlingstema)
+            && it.behandlingstype == Behandlingstyper.FØRSTEGANG
+            && it.behandlingstatus == Behandlingsstatus.VURDER_DOKUMENT
     }
 
     private fun SakOgBehandlingDTO.utledOppgaveBehandlingstema(): OppgaveBehandlingstema? =
