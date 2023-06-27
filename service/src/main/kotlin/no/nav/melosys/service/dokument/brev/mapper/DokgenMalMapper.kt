@@ -7,7 +7,7 @@ import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.Representerer
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad
+import no.nav.melosys.domain.mottatteopplysninger.SoeknadIkkeYrkesaktiv
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.integrasjon.dokgen.dto.*
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker
@@ -69,7 +69,7 @@ class DokgenMalMapper(
     internal fun lagIkkeYrkesaktivVedtaksbrev(brevbestilling: IkkeYrkesaktivBrevbestilling): IkkeYrkesaktivVedtaksbrev {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandling.id)
         val lovvalgsperiode = behandlingsresultat.hentValidertPeriodeOmLovvalg()
-        val mottatteOpplysningerData = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as Soeknad
+        val mottatteOpplysningerData = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SoeknadIkkeYrkesaktiv
         val oppholdsland = Land_iso2.valueOf(mottatteOpplysningerData.soeknadsland.landkoder.get(0)).beskrivelse
         val bestemmelse = lovvalgsperiode.bestemmelse
         val bestemmelseBeskrivelse = bestemmelse.beskrivelse
