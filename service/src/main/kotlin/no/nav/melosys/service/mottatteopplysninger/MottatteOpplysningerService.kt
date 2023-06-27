@@ -122,31 +122,33 @@ class MottatteOpplysningerService(
 
         val sakstype: Sakstyper = behandling.fagsak.type
 
-        val mottatteOpplysningerData = when (sakstype) {
-            Sakstyper.EU_EOS -> Soeknad()
-            Sakstyper.FTRL -> SoeknadFtrl()
-            Sakstyper.TRYGDEAVTALE -> SoeknadTrygdeavtale()
+        val mottatteOpplysningerType = if (behandling.tema == Behandlingstema.IKKE_YRKESAKTIV) {
+            Mottatteopplysningertyper.SØKNAD_IKKE_YRKESAKTIV
+        } else {
+            when (sakstype) {
+                Sakstyper.EU_EOS -> Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
+                Sakstyper.FTRL -> Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN
+                Sakstyper.TRYGDEAVTALE -> Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE
+            }
+        }
+
+        val mottatteOpplysningerData = if (behandling.tema == Behandlingstema.IKKE_YRKESAKTIV) {
+            SoeknadIkkeYrkesaktiv()
+        } else {
+            when (sakstype) {
+                Sakstyper.EU_EOS -> Soeknad()
+                Sakstyper.FTRL -> SoeknadFtrl()
+                Sakstyper.TRYGDEAVTALE -> SoeknadTrygdeavtale()
+            }
         }.apply {
             this.periode = periode
             this.soeknadsland = soeknadsland
         }
 
-        val type = when (sakstype) {
-            Sakstyper.EU_EOS -> when (behandling.tema) {
-                Behandlingstema.IKKE_YRKESAKTIV -> Mottatteopplysningertyper.SØKNAD_IKKE_YRKESAKTIV
-                else -> Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
-            }
-            Sakstyper.FTRL -> Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN
-            Sakstyper.TRYGDEAVTALE -> when (behandling.tema) {
-                Behandlingstema.IKKE_YRKESAKTIV -> Mottatteopplysningertyper.SØKNAD_IKKE_YRKESAKTIV
-                else -> Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE
-            }
-        }
-
         val mottatteOpplysninger = opprettMottatteOpplysninger(
             behandlingID = behandlingID,
             mottatteOpplysningerData = mottatteOpplysningerData,
-            type = type,
+            type = mottatteOpplysningerType,
             versjon = VERSJON_SOEKNAD_GRUNNLAG
         )
 
