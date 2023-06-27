@@ -21,6 +21,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca_qc
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.domain.mottatteopplysninger.SoeknadIkkeYrkesaktiv
@@ -118,6 +119,55 @@ class DokgenMalMapperIkkeYrkesaktivTest {
 
         // vedtaksbrev.toJsonNode.toPrettyString().also(::println)
     }
+
+
+    @Test
+    fun `test at artikkel blir splittet opp riktig fra bestemmelsesbeskrivelsen`() {
+        val behandling = Behandling().apply behandling@{
+            id = 2L
+            tema = Behandlingstema.IKKE_YRKESAKTIV
+            type = Behandlingstyper.FØRSTEGANG
+            mottatteOpplysninger = MottatteOpplysninger().apply {
+                setMottatteOpplysningerdata(Soeknad().apply {
+                    soeknadsland = Soeknadsland(listOf(Land_iso2.CA_QC.kode), false)
+                })
+            }
+            fagsak = Fagsak().apply {
+                saksnummer = "MEL-2"
+                type = Sakstyper.TRYGDEAVTALE
+                behandlinger = listOf(this@behandling)
+            }
+        }
+        val behandlingsresultat = Behandlingsresultat().apply {
+            id = 2L
+            type = Behandlingsresultattyper.IKKE_FASTSATT
+            this.behandling = behandling
+            lovvalgsperioder = setOf(Lovvalgsperiode().apply {
+                fom = LocalDate.of(2020, 1, 1)
+                tom = LocalDate.of(2021, 2, 1)
+                lovvalgsland = Land_iso2.NO
+                bestemmelse = Lovvalgsbestemmelser_trygdeavtale_ca_qc.QUE_ART7_3
+            })
+        }
+
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(any()) } returns behandlingsresultat
+
+        val vedtaksbrev = dokgenMalMapper.lagIkkeYrkesaktivVedtaksbrev(
+            IkkeYrkesaktivBrevbestilling.Builder()
+                .medPersonMottaker(DokgenTestData.lagPersondata())
+                .medPersonDokument(DokgenTestData.lagPersondata())
+                .medBehandling(behandling)
+                .build()
+        )
+
+
+        vedtaksbrev.toJsonNode.apply {
+            get("artikkel").asText().shouldBe("artikkel 7 nr. 3")
+        }
+
+        // vedtaksbrev.toJsonNode.toPrettyString().also(::println)
+    }
+
 
     private val Any.toJsonNode: JsonNode
         get() {
