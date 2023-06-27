@@ -6,6 +6,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock
 import io.kotest.assertions.withClue
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.maps.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.finn.unleash.FakeUnleash
@@ -171,6 +173,21 @@ class IkkeYrkesaktivVedtakIT(
                     }
                 }
             }
+
+        MedlRepo.repo.values
+            .shouldHaveSize(1)
+            .first()
+            .apply {
+                fraOgMed.shouldBe(LocalDate.of(2022, 1, 1))
+                tilOgMed.shouldBe(LocalDate.of(2022, 2, 1))
+                status.shouldBe("GYLD")
+                dekning.shouldBe("Full")
+                medlem.shouldBe(true)
+                lovvalgsland.shouldBe("NOR")
+                lovvalg.shouldBe("ENDL")
+                grunnlag.shouldBe("FO_11_2")
+                sporingsinformasjon?.kildedokument.shouldBe("Henv_Soknad")
+            }
     }
 
     @Test
@@ -260,6 +277,22 @@ class IkkeYrkesaktivVedtakIT(
                     }
                 }
             }
+
+        MedlRepo.repo.values
+            .shouldHaveSize(1)
+            .first()
+            .apply {
+                fraOgMed.shouldBe(LocalDate.of(2022, 1, 1))
+                tilOgMed.shouldBe(LocalDate.of(2022, 2, 1))
+                status.shouldBe("GYLD")
+                dekning.shouldBe("Full")
+                medlem.shouldBe(true)
+                lovvalgsland.shouldBe("NOR")
+                lovvalg.shouldBe("ENDL")
+                grunnlag.shouldBe("FO_11_3_e")
+                sporingsinformasjon?.kildedokument.shouldBe("Henv_Soknad")
+            }
+
     }
 
     @Test
@@ -284,7 +317,7 @@ class IkkeYrkesaktivVedtakIT(
                         LocalDate.of(2022, 1, 1),
                         LocalDate.of(2022, 2, 1),
                     )
-                    soeknadsland = Soeknadsland(listOf(Landkoder.DE.kode), false)
+                    soeknadsland = Soeknadsland(listOf(Land_iso2.IL.kode), false)
                 }
         mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandling.id, mottatteOpplysninger.toJsonNode)
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
@@ -347,6 +380,21 @@ class IkkeYrkesaktivVedtakIT(
                 }
             }
 
+        MedlRepo.repo.values
+            .shouldHaveSize(1)
+            .first()
+            .apply {
+                println(toJsonNode.toPrettyString())
+                fraOgMed.shouldBe(LocalDate.of(2022, 1, 1))
+                tilOgMed.shouldBe(LocalDate.of(2022, 2, 1))
+                status.shouldBe("GYLD")
+                dekning.shouldBe("Full")
+                medlem.shouldBe(true)
+                lovvalgsland.shouldBe("NOR")
+                lovvalg.shouldBe("ENDL")
+                grunnlag.shouldBe("Israel_6_5")
+                sporingsinformasjon?.kildedokument.shouldBe("Henv_Soknad")
+            }
     }
 
 
