@@ -70,7 +70,7 @@ class DokgenMalMapper(
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandling.id)
         val lovvalgsperiode = behandlingsresultat.hentValidertPeriodeOmLovvalg()
         val mottatteOpplysningerData = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SoeknadIkkeYrkesaktiv
-        val oppholdsland = Land_iso2.valueOf(mottatteOpplysningerData.soeknadsland.landkoder.get(0)).beskrivelse
+        val oppholdsland = Land_iso2.valueOf(mottatteOpplysningerData.oppholdUtland.oppholdslandkoder.get(0)).beskrivelse
         val bestemmelse = lovvalgsperiode.bestemmelse
         val bestemmelseBeskrivelse = bestemmelse.beskrivelse
         val artikkel = bestemmelseBeskrivelse.substringAfterLast('-', bestemmelseBeskrivelse).trim()
