@@ -1,8 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Lovvalgsperiode
-import no.nav.melosys.domain.PeriodeOmLovvalg
 import no.nav.melosys.domain.brev.*
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Landkoder
@@ -70,10 +68,12 @@ class DokgenMalMapper(
 
     internal fun lagIkkeYrkesaktivVedtaksbrev(brevbestilling: IkkeYrkesaktivBrevbestilling): IkkeYrkesaktivVedtaksbrev {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandling.id)
-        val lovvalgsperiode = behandlingsresultat.hentValidertPeriodeOmLovvalg();
-        val bestemmelse = lovvalgsperiode.bestemmelse
+        val lovvalgsperiode = behandlingsresultat.hentValidertPeriodeOmLovvalg()
         val mottatteOpplysningerData = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as Soeknad
         val oppholdsland = Land_iso2.valueOf(mottatteOpplysningerData.soeknadsland.landkoder.get(0)).beskrivelse
+        val bestemmelse = lovvalgsperiode.bestemmelse
+        val bestemmelseBeskrivelse = bestemmelse.beskrivelse
+        val artikkel = bestemmelseBeskrivelse.substringAfterLast('-', bestemmelseBeskrivelse).trim()
 
         return IkkeYrkesaktivVedtaksbrev.av(
             brevbestilling.toBuilder()
@@ -85,7 +85,7 @@ class DokgenMalMapper(
                 .medPeriodeTom(lovvalgsperiode.tom)
                 .medBestemmelse(bestemmelse.name())
                 .medIkkeyrkesaktivSituasjontype(mottatteOpplysningerData.ikkeYrkesaktivSituasjontype)
-                .medArtikkel(bestemmelse.beskrivelse)
+                .medArtikkel(artikkel)
                 .build()
         )
     }
