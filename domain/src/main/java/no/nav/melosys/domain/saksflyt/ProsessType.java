@@ -38,7 +38,8 @@ public enum ProsessType implements Kodeverk {
     REGISTRERING_UNNTAK_NY_BEHANDLING("REGISTRERING_UNNTAK_NY_BEHANDLING", "Registrering av unntak - ny behandling"),
     SEND_BREV("SEND_BREV", "Send brev til én mottaker via doksys"),
     UTPEKING_AVVIS("UTPEKING_AVVIS", "Avviser utpeking mottatt i en A003"),
-    VIDERESEND_SOKNAD("VIDERESEND_SOKNAD", "Videresend søknad");
+    VIDERESEND_SOKNAD("VIDERESEND_SOKNAD", "Videresend søknad"),
+    IVERKSETT_VEDTAK_IKKE_YRKESAKTIV("IVERKSETT_VEDTAK_IKKE_YRKESAKTIV", "Iverksett vedtak Ikke yrkesaktiv" );
 
     private final String kode;
     private final String beskrivelse;

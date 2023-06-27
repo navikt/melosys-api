@@ -31,7 +31,7 @@ public class ProsessinstansAdminService {
     public List<HentProsessinstansDto> hentFeiledeProsessinstanser() {
         return prosessinstansRepository.findAllByStatus(ProsessStatus.FEILET).stream()
             .map(this::mapTilHentProsessinstansDto)
-            .sorted(Comparator.comparing(HentProsessinstansDto::endretDato))
+            .sorted(Comparator.comparing(HentProsessinstansDto::registrertDato))
             .toList();
     }
 
@@ -108,6 +108,7 @@ public class ProsessinstansAdminService {
             saksnummer,
             prosessinstans.getType().getKode(),
             prosessinstans.getEndretDato(),
+            prosessinstans.getRegistrertDato(),
             ProsessflytDefinisjon.hentNesteSteg(prosessinstans.getType(), prosessinstans.getSistFullførtSteg())
                 .map(ProsessSteg::getKode)
                 .orElse(null),

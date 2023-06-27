@@ -5,6 +5,7 @@ import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper
 import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.mottatteopplysninger.*
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
@@ -44,7 +45,7 @@ class MottatteOpplysningerService(
             if (saksbehandlingRegler.harTomFlyt(behandling) || !behandlingKanRedigeresAvSaksbehandler) {
                 throw IkkeFunnetException("Finner ikke mottatteOpplysninger for behandling $behandlingID")
             } else {
-                opprettSøknadEllerAnmodningEllerAttest(behandling,  Periode(), Soeknadsland())
+                opprettSøknadEllerAnmodningEllerAttest(behandling, Periode(), Soeknadsland())
             }
         }
 
@@ -121,25 +122,33 @@ class MottatteOpplysningerService(
 
         val sakstype: Sakstyper = behandling.fagsak.type
 
-        val mottatteOpplysningerData = when (sakstype) {
-            Sakstyper.EU_EOS -> Soeknad()
-            Sakstyper.FTRL -> SoeknadFtrl()
-            Sakstyper.TRYGDEAVTALE -> SoeknadTrygdeavtale()
+        val mottatteOpplysningerType = if (behandling.tema == Behandlingstema.IKKE_YRKESAKTIV) {
+            Mottatteopplysningertyper.SØKNAD_IKKE_YRKESAKTIV
+        } else {
+            when (sakstype) {
+                Sakstyper.EU_EOS -> Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
+                Sakstyper.FTRL -> Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN
+                Sakstyper.TRYGDEAVTALE -> Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE
+            }
+        }
+
+        val mottatteOpplysningerData = if (behandling.tema == Behandlingstema.IKKE_YRKESAKTIV) {
+            SoeknadIkkeYrkesaktiv()
+        } else {
+            when (sakstype) {
+                Sakstyper.EU_EOS -> Soeknad()
+                Sakstyper.FTRL -> SoeknadFtrl()
+                Sakstyper.TRYGDEAVTALE -> SoeknadTrygdeavtale()
+            }
         }.apply {
             this.periode = periode
             this.soeknadsland = soeknadsland
         }
 
-        val type = when (sakstype) {
-            Sakstyper.EU_EOS -> Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS
-            Sakstyper.FTRL -> Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN
-            Sakstyper.TRYGDEAVTALE -> Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE
-        }
-
         val mottatteOpplysninger = opprettMottatteOpplysninger(
             behandlingID = behandlingID,
             mottatteOpplysningerData = mottatteOpplysningerData,
-            type = type,
+            type = mottatteOpplysningerType,
             versjon = VERSJON_SOEKNAD_GRUNNLAG
         )
 

@@ -19,6 +19,7 @@ import no.nav.melosys.exception.validering.KontrollfeilDto;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,6 +46,8 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
+    @Mock
+    private FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
 
     private BestemBehandlingsmåteSvarAnmodningUnntak bestemBehandlingsmåteSvarAnmodningUnntak;
 
@@ -58,7 +61,7 @@ class BestemBehandlingsmåteSvarAnmodningUnntakTest {
         AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
         anmodningsperiodeSvar.setAnmodningsperiode(anmodningsperiode);
         anmodningsperiode.setAnmodningsperiodeSvar(anmodningsperiodeSvar);
-        bestemBehandlingsmåteSvarAnmodningUnntak = new BestemBehandlingsmåteSvarAnmodningUnntak(anmodningsperiodeService, behandlingService, behandlingsresultatService, vedtakService, lovvalgsperiodeService);
+        bestemBehandlingsmåteSvarAnmodningUnntak = new BestemBehandlingsmåteSvarAnmodningUnntak(anmodningsperiodeService, behandlingService, behandlingsresultatService, vedtakService, lovvalgsperiodeService, ferdigbehandlingKontrollFacade);
         when(anmodningsperiodeService.hentAnmodningsperioder(anyLong())).thenReturn(Collections.singleton(anmodningsperiode));
     }
 

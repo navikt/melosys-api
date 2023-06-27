@@ -62,12 +62,12 @@ class ProsessinstansAdminServiceTest {
         assertThat(prosessinstanser)
             .flatExtracting(HentProsessinstansDto::id,
                 HentProsessinstansDto::behandlingId, HentProsessinstansDto::saksnummer,
-                HentProsessinstansDto::endretDato, HentProsessinstansDto::prosessType,
-                HentProsessinstansDto::feiletSteg, HentProsessinstansDto::sisteFeilmelding,
-                HentProsessinstansDto::correlationId)
+                HentProsessinstansDto::endretDato, HentProsessinstansDto::registrertDato,
+                HentProsessinstansDto::prosessType, HentProsessinstansDto::feiletSteg,
+                HentProsessinstansDto::sisteFeilmelding, HentProsessinstansDto::correlationId)
             .containsExactly(prosessinstans.getId(),
                 prosessinstans.getBehandling().getId(), prosessinstans.getBehandling().getFagsak().getSaksnummer(),
-                prosessinstans.getEndretDato(), prosessinstans.getType().getKode(),
+                prosessinstans.getEndretDato(), prosessinstans.getRegistrertDato(), prosessinstans.getType().getKode(),
                 CURRENT_PROSESS_STEG.getKode(), sisteFeilmelding, prosessinstans.getData(ProsessDataKey.CORRELATION_ID_SAKSFLYT));
     }
 

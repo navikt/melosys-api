@@ -1,6 +1,7 @@
 package no.nav.melosys.service.vedtak;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
@@ -22,7 +23,9 @@ import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
+import no.nav.melosys.service.validering.Kontrollfeil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -39,6 +42,7 @@ public class TrygdeavtaleVedtakService {
     private final OppgaveService oppgaveService;
     private final DokgenService dokgenService;
     private final FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
+    private final SaksbehandlingRegler saksbehandlingRegler;
 
 
     public TrygdeavtaleVedtakService(BehandlingsresultatService behandlingsresultatService,
@@ -46,13 +50,15 @@ public class TrygdeavtaleVedtakService {
                                      ProsessinstansService prosessinstansService,
                                      OppgaveService oppgaveService,
                                      DokgenService dokgenService,
-                                     FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade) {
+                                     FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade,
+                                     SaksbehandlingRegler saksbehandlingRegler) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.behandlingService = behandlingService;
         this.prosessinstansService = prosessinstansService;
         this.oppgaveService = oppgaveService;
         this.dokgenService = dokgenService;
         this.ferdigbehandlingKontrollFacade = ferdigbehandlingKontrollFacade;
+        this.saksbehandlingRegler = saksbehandlingRegler;
     }
 
     public void fattVedtak(Behandling behandling, FattVedtakRequest request) throws ValideringException {
@@ -65,25 +71,35 @@ public class TrygdeavtaleVedtakService {
         behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
 
         if (behandlingsresultat.erInnvilgelse()) {
-            ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
+            Collection<Kontrollfeil> kontrollfeil = ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
                 behandling,
                 behandlingsresultat,
                 Sakstyper.TRYGDEAVTALE,
                 Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN,
                 null
             );
-        }
 
-        oppdaterBehandlingsresultat(behandlingsresultat, request);
+            if (!kontrollfeil.isEmpty()) {
+                throw new ValideringException("Feil i validering. Kan ikke fatte vedtak.",
+                    kontrollfeil.stream().map(Kontrollfeil::tilDto).toList());
+            }
+        }
 
         if (prosessinstansService.harVedtakInstans(behandlingID)) {
             throw new FunksjonellException("Det finnes allerede en vedtak-prosess for behandling " + behandling);
         }
 
-        behandling.getFagsak().setStatus(Saksstatuser.MEDLEMSKAP_AVKLART);
         behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
 
-        prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling, request);
+        if(saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling.getFagsak().getType(), behandling.getTema())) {
+            behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
+            prosessinstansService.opprettProsessinstansIverksettIkkeYreksaktiv(behandling);
+        } else {
+            behandling.getFagsak().setStatus(Saksstatuser.MEDLEMSKAP_AVKLART); // TODO: Egen oppgave for fjerne denne som ikke brukes
+            oppdaterBehandlingsresultat(behandlingsresultat, request);
+            prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling, request);
+        }
+
 
         BrevbestillingDto brevbestillingDto = lagBrevbestilling(behandling, request);
         dokgenService.produserOgDistribuerBrev(behandlingID, brevbestillingDto);
@@ -93,6 +109,9 @@ public class TrygdeavtaleVedtakService {
     private BrevbestillingDto lagBrevbestilling(Behandling behandling, FattVedtakRequest request) {
         if (request.getBehandlingsresultatTypeKode() == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
             return lagAvslagMangledeOpplysningerBrevbestilling(request);
+        }
+        if (saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling.getFagsak().getType(), behandling.getTema())) {
+            return lagTrygdeavtaleBrevbestilling(request, Produserbaredokumenter.IKKE_YRKESAKTIV_VEDTAKSBREV);
         }
         Optional<Produserbaredokumenter> produserbaredokumenter = behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.landkoder.stream()
             .map(Land_iso2::valueOf)

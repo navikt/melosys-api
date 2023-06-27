@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.sed;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -24,7 +25,9 @@ import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.unntak.AnmodningsperiodeService;
+import no.nav.melosys.service.validering.Kontrollfeil;
 import no.nav.melosys.service.vedtak.VedtaksfattingFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,17 +50,20 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
     private final BehandlingsresultatService behandlingsresultatService;
     private final VedtaksfattingFasade vedtaksfattingFasade;
     private final LovvalgsperiodeService lovvalgsperiodeService;
+    private final FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
 
     public BestemBehandlingsmåteSvarAnmodningUnntak(AnmodningsperiodeService anmodningsperiodeService,
                                                     BehandlingService behandlingService,
                                                     BehandlingsresultatService behandlingsresultatService,
                                                     VedtaksfattingFasade vedtaksfattingFasade,
-                                                    LovvalgsperiodeService lovvalgsperiodeService) {
+                                                    LovvalgsperiodeService lovvalgsperiodeService,
+                                                    FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade) {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.vedtaksfattingFasade = vedtaksfattingFasade;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
+        this.ferdigbehandlingKontrollFacade = ferdigbehandlingKontrollFacade;
     }
 
     static {
@@ -80,8 +86,10 @@ public class BestemBehandlingsmåteSvarAnmodningUnntak implements StegBehandler 
             Collections.singleton(Lovvalgsperiode.av(anmodningsperiode.getAnmodningsperiodeSvar(), Medlemskapstyper.PLIKTIG))
         );
 
+        Collection<Kontrollfeil> kontrollfeil = ferdigbehandlingKontrollFacade.kontroller(behandlingID, true, Behandlingsresultattyper.FASTSATT_LOVVALGSLAND, Collections.emptySet());
+
         boolean vedtakFattesAutomatisk = vedtakFattesAutomatisk(behandlingID, anmodningsperiode, melosysEessiMelding);
-        if (vedtakFattesAutomatisk) {
+        if (kontrollfeil.isEmpty() && vedtakFattesAutomatisk) {
             log.info("Mottatt svar {} på anmodning om unntak for behandling {}. Iverksetter vedtak",
                 Anmodningsperiodesvartyper.INNVILGELSE, behandlingID);
             fattVedtak(behandlingID);

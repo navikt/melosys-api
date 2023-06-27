@@ -48,7 +48,7 @@ public class KontrollTjenesteTest {
         mockMvc.perform(post(BASE_URL + "/ferdigbehandling")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(dto)))
-            .andExpect(status().isNoContent());
+            .andExpect(status().isOk());
     }
 
     @Test

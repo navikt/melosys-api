@@ -1,14 +1,16 @@
 package no.nav.melosys.tjenester.gui.kontroll;
 
+import java.util.Collection;
+
 import io.swagger.annotations.Api;
-import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.ValideringException;
+import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerFerdigbehandlingDto;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Aksesstype;
+import no.nav.melosys.service.validering.Kontrollfeil;
 import no.nav.melosys.tjenester.gui.dto.kontroller.FerdigbehandlingKontrollerDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
@@ -43,7 +45,7 @@ public class KontrollTjeneste {
     }
 
     @PostMapping("/ferdigbehandling")
-    public ResponseEntity<Void> kontrollerFerdigbehandling(@RequestBody FerdigbehandlingKontrollerDto ferdigbehandlingKontrollerDto) throws ValideringException {
+    public ResponseEntity<KontrollerFerdigbehandlingDto> kontrollerFerdigbehandling(@RequestBody FerdigbehandlingKontrollerDto ferdigbehandlingKontrollerDto) {
 
         if (ferdigbehandlingKontrollerDto.vedtakstype() == null) {
             throw new FunksjonellException("Vedtakstype mangler.");
@@ -53,13 +55,13 @@ public class KontrollTjeneste {
             ferdigbehandlingKontrollerDto.skalRegisteropplysningerOppdateres() ? Aksesstype.SKRIV : Aksesstype.LES
         );
 
-        ferdigbehandlingKontrollFacade.kontroller(
+        Collection<Kontrollfeil> kontrollfeil = ferdigbehandlingKontrollFacade.kontroller(
             ferdigbehandlingKontrollerDto.behandlingID(),
             ferdigbehandlingKontrollerDto.skalRegisteropplysningerOppdateres(),
             ferdigbehandlingKontrollerDto.behandlingsresultattype(),
             ferdigbehandlingKontrollerDto.kontrollerSomSkalIgnoreres()
         );
 
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(new KontrollerFerdigbehandlingDto(kontrollfeil.stream().map(Kontrollfeil::tilDto).toList()));
     }
 }
