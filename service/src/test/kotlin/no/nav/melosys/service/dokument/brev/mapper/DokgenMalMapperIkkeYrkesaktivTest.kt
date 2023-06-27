@@ -24,6 +24,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca_qc
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.SoeknadIkkeYrkesaktiv
+import no.nav.melosys.domain.mottatteopplysninger.data.OppholdUtland
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.service.dokument.DokgenTestData
 import org.junit.jupiter.api.BeforeEach
@@ -55,7 +56,7 @@ class DokgenMalMapperIkkeYrkesaktivTest {
     }
 
     @Test
-    fun test() {
+    fun `lager riktig data til brevet i DokGen`() {
         val behandling = Behandling().apply behandling@{
             id = 1L
             tema = Behandlingstema.IKKE_YRKESAKTIV
@@ -64,7 +65,9 @@ class DokgenMalMapperIkkeYrkesaktivTest {
             mottatteOpplysninger = MottatteOpplysninger().apply {
                 setMottatteOpplysningerdata(SoeknadIkkeYrkesaktiv().apply {
                     ikkeYrkesaktivSituasjontype = Ikkeyrkesaktivsituasjontype.STUDENT
-                    soeknadsland = Soeknadsland(listOf(Land_iso2.CA.kode), false)
+                    oppholdUtland = OppholdUtland().apply {
+                        oppholdslandkoder = listOf(Land_iso2.CA.kode)
+                    }
                 })
             }
             fagsak = Fagsak().apply {
@@ -121,7 +124,7 @@ class DokgenMalMapperIkkeYrkesaktivTest {
 
 
     @Test
-    fun `test at artikkel blir splittet opp riktig fra bestemmelsesbeskrivelsen`() {
+    fun `artikkel blir splittet opp riktig fra bestemmelsesbeskrivelsen`() {
         val behandling = Behandling().apply behandling@{
             id = 2L
             tema = Behandlingstema.IKKE_YRKESAKTIV
