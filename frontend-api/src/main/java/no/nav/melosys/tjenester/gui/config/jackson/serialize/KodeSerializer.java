@@ -7,7 +7,6 @@ import java.util.Set;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;
@@ -21,11 +20,9 @@ public class KodeSerializer extends StdSerializer<Kodeverk> {
     private static final Collection<Class<? extends Kodeverk>> IKKE_MAPPES_TIL_KODE_DTO = Set.of(
         Avsendertyper.class, Mottatteopplysningertyper.class, Fartsomrader.class, Flyvningstyper.class,
         Folketrygdloven_kap2_bestemmelser.class, Innretningstyper.class, InnvilgelsesResultat.class,
-        Loenn_forhold.class, Medlemskapstyper.class, Saerligeavgiftsgrupper.class,
-        Tema.class, Trygdedekninger.class, Vilkaar.class,
-        Vurderingsutfall_trygdeavgift_norsk_inntekt.class, Vurderingsutfall_trygdeavgift_utenlandsk_inntekt.class,
-        Mottakerroller.class, Aktoersroller.class, Trygdeavtale_myndighetsland.class, Land_iso2.class,
-        Skatteplikttype.class, Inntektskildetype.class, Ikkeyrkesaktivsituasjontype.class
+        Medlemskapstyper.class, Tema.class, Trygdedekninger.class, Vilkaar.class, Mottakerroller.class,
+        Aktoersroller.class, Trygdeavtale_myndighetsland.class, Land_iso2.class, Skatteplikttype.class,
+        Inntektskildetype.class, Ikkeyrkesaktivsituasjontype.class
     );
 
     public KodeSerializer() {
