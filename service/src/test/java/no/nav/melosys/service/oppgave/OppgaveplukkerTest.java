@@ -155,46 +155,6 @@ class OppgaveplukkerTest {
         assertThat(oppgave).isNotPresent();
     }
 
-
-
-    @Test
-    void leggTilbakeOppgave_medBegrunnelse() {
-        Behandling behandling = opprettBehandling();
-        Fagsak fagsak = opprettFagsak(SAKSNUMMER_1);
-        fagsak.setGsakSaksnummer(GSAK_SAKSNUMMER);
-        behandling.setFagsak(fagsak);
-
-        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
-
-        final String oppgaveId = String.valueOf(GSAK_SAKSNUMMER);
-        final Oppgave.Builder oppgaveBuilder = new Oppgave.Builder();
-        oppgaveBuilder.setOppgaveId(oppgaveId);
-        oppgaveBuilder.setPrioritet(PrioritetType.valueOf("HOY"));
-        final String saksbehandlerID = "test";
-        final String begrunnelse = "Oppgaven er kjedelig";
-        when(oppgaveService.hentÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER_1)).thenReturn(oppgaveBuilder.build());
-
-
-        when(oppgaveTilbakkeleggingRepo.save(any(OppgaveTilbakelegging.class))).then(arguments -> {
-            OppgaveTilbakelegging oppgaveTilbakelegging = arguments.getArgument(0);
-            assertThat(oppgaveTilbakelegging.getOppgaveId()).isEqualTo(oppgaveId);
-            assertThat(oppgaveTilbakelegging.getSaksbehandlerId()).isEqualTo(saksbehandlerID);
-            assertThat(oppgaveTilbakelegging.getBegrunnelse()).isEqualTo(begrunnelse);
-            return oppgaveTilbakelegging;
-        }).getMock();
-
-        TilbakeleggingDto tilbakelegging = new TilbakeleggingDto();
-        tilbakelegging.setBehandlingID(BEHANDLING_ID);
-        tilbakelegging.setBegrunnelse(begrunnelse);
-
-
-        oppgaveplukker.leggTilbakeOppgave(saksbehandlerID, tilbakelegging);
-
-
-        verify(oppgaveFasade).leggTilbakeOppgave(oppgaveId);
-        verify(oppgaveTilbakkeleggingRepo).save(any(OppgaveTilbakelegging.class));
-    }
-
     @Test
     void leggTilbakeOppgave_venterPåDokumentasjon() {
         Behandling behandling = opprettBehandling();

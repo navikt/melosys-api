@@ -6,8 +6,6 @@ public class TilbakeleggingDto {
 
     private Long behandlingID;
 
-    private String begrunnelse;
-
     @JsonProperty("venterPaaDokumentasjon")
     private boolean venterPåDokumentasjon;
 
@@ -17,14 +15,6 @@ public class TilbakeleggingDto {
 
     public void setBehandlingID(Long behandlingID) {
         this.behandlingID = behandlingID;
-    }
-
-    public String getBegrunnelse() {
-        return begrunnelse;
-    }
-
-    public void setBegrunnelse(String begrunnelse) {
-        this.begrunnelse = begrunnelse;
     }
 
     public boolean isVenterPåDokumentasjon() {
