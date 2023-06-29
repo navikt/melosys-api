@@ -2,6 +2,7 @@ package no.nav.melosys.domain
 
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -13,7 +14,8 @@ data class SakOgBehandlingDTO(
     val sakstema: Sakstemaer,
     val behandlingstype: Behandlingstyper,
     val behandlingstema: Behandlingstema,
-    val behandlingstatus: Behandlingsstatus
+    val behandlingstatus: Behandlingsstatus,
+    val behandlingsresultattype: Behandlingsresultattyper
 ) {
     fun erRedigerbar(): Boolean {
         return erAktiv() && behandlingstatus != Behandlingsstatus.IVERKSETTER_VEDTAK &&
