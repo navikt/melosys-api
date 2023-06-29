@@ -187,6 +187,10 @@ public final class MedlPeriodeKonverter {
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART8_2, GrunnlagMedl.STORBRIT_NIRLAND_8_2);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART9, GrunnlagMedl.STORBRIT_NIRLAND_9);
 
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART5_4, GrunnlagMedl.STORBRIT_NIRLAND_5_4);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_2, GrunnlagMedl.STORBRIT_NIRLAND_6_2);
+        tbl.put(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART8_5, GrunnlagMedl.STORBRIT_NIRLAND_8_5);
+
         // Sveits
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_ch.CHE, GrunnlagMedl.SVEITS);
         tbl.put(Lovvalgsbestemmelser_trygdeavtale_ch.CHE_ART8, GrunnlagMedl.SVEITS_8);
