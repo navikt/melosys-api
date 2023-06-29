@@ -167,8 +167,7 @@ class OppgaveMigrering(
             val oppgavetype: Oppgavetyper = sakOgBehandling.utledOppgaveType()
             val beskrivelse: String = sakOgBehandling.utledBeskrivelse()
             val tema: Tema = sakOgBehandling.utledTema()
-            val sedListe = finnSEDKobletTilBehandling(sakOgBehandling)
-            return OppgaveMigreringsOppdatering(oppgaveBehandlingstema, null, tema, oppgavetype, beskrivelse, null, null, sedListe)
+            return OppgaveMigreringsOppdatering(oppgaveBehandlingstema, null, tema, oppgavetype, beskrivelse)
         } catch (e: Exception) {
             val gyldige = GyldigeKombinasjoner.finnGyldige(
                 sakOgBehandling.sakstype,
