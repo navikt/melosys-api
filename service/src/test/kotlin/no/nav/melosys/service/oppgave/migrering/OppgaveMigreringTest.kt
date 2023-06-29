@@ -10,6 +10,7 @@ import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
@@ -36,7 +37,8 @@ class OppgaveMigreringTest {
                     sakstema = Sakstemaer.UNNTAK,
                     behandlingstype = Behandlingstyper.FØRSTEGANG,
                     behandlingstema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND,
-                    behandlingstatus = Behandlingsstatus.VURDER_DOKUMENT
+                    behandlingstatus = Behandlingsstatus.VURDER_DOKUMENT,
+                    behandlingsresultattype = Behandlingsresultattyper.FERDIGBEHANDLET
                 ),
                 oppgaver = listOf(
                     Oppgave.Builder()
