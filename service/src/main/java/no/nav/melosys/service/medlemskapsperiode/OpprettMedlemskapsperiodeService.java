@@ -49,22 +49,22 @@ public class OpprettMedlemskapsperiodeService {
         validerVilkår(behandlingsresultat, bestemmelse);
 
         var medlemAvFolketrygden = hentEllerOpprettMedlemAvFolketrygden(behandlingsresultat, bestemmelse);
-        medlemAvFolketrygden.getMedlemskapsperioder().clear();
 
-        var behandling = behandlingsresultat.getBehandling();
-        SoeknadFtrl søknad = (SoeknadFtrl) behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
+        if (medlemAvFolketrygden.getMedlemskapsperioder().isEmpty()) {
+            var behandling = behandlingsresultat.getBehandling();
+            SoeknadFtrl søknad = (SoeknadFtrl) behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
+            var medlemskapsperioder = new UtledMedlemskapsperioder().lagMedlemskapsperioder(
+                new UtledMedlemskapsperioderRequest(
+                    søknad.periode,
+                    søknad.getTrygdedekning(),
+                    utledMottaksdato.getMottaksdato(behandling),
+                    søknad.soeknadsland.landkoder.stream().collect(onlyElement())
+                )
+            );
+            medlemAvFolketrygden.getMedlemskapsperioder().addAll(medlemskapsperioder);
+            medlemskapsperioder.forEach(m -> m.setMedlemAvFolketrygden(medlemAvFolketrygden));
+        }
 
-        var medlemskapsperioder = new UtledMedlemskapsperioder().lagMedlemskapsperioder(
-            new UtledMedlemskapsperioderRequest(
-                søknad.periode,
-                søknad.getTrygdedekning(),
-                utledMottaksdato.getMottaksdato(behandling),
-                søknad.soeknadsland.landkoder.stream().collect(onlyElement())
-            )
-        );
-
-        medlemAvFolketrygden.getMedlemskapsperioder().addAll(medlemskapsperioder);
-        medlemskapsperioder.forEach(m -> m.setMedlemAvFolketrygden(medlemAvFolketrygden));
         return medlemAvFolketrygdenRepository.save(medlemAvFolketrygden).getMedlemskapsperioder();
     }
 
