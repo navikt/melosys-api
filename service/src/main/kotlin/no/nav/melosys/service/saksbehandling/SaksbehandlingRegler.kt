@@ -63,15 +63,15 @@ class SaksbehandlingRegler(
         behandlingstype: Behandlingstyper,
         behandlingstema: Behandlingstema
     ): Boolean {
+        if (sakstema == Sakstemaer.TRYGDEAVGIFT) return true
+        if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE) return true
+
         if (harRegistreringUnntakFraMedlemskapFlyt(
                 sakstype,
                 sakstema,
                 behandlingstema,
             )
         ) return false
-
-        if (sakstema == Sakstemaer.TRYGDEAVGIFT) return true
-        if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE) return true
 
         return when (behandlingstema) {
             ARBEID_KUN_NORGE,
@@ -114,14 +114,10 @@ class SaksbehandlingRegler(
             return true
         }
 
-        if (sakstype == Sakstyper.TRYGDEAVTALE && listOf(
-                REGISTRERING_UNNTAK,
-                ANMODNING_OM_UNNTAK_HOVEDREGEL
-            ).contains(behandlingstema)
-        ) {
-            return true
-        }
-        return false
+        return sakstype == Sakstyper.TRYGDEAVTALE && listOf(
+            REGISTRERING_UNNTAK,
+            ANMODNING_OM_UNNTAK_HOVEDREGEL
+        ).contains(behandlingstema)
     }
 
     fun harIkkeYrkesaktivFlyt(
