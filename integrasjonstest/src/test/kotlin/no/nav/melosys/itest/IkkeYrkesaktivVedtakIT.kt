@@ -7,7 +7,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.client.WireMock
 import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.maps.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.finn.unleash.FakeUnleash
@@ -15,15 +14,13 @@ import no.nav.melosys.domain.Behandlingsmaate
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikkeyrkesaktivsituasjontype
-import no.nav.melosys.domain.kodeverk.begrunnelser.Sokkel
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_il
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb
 import no.nav.melosys.domain.mottatteopplysninger.SoeknadIkkeYrkesaktiv
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
@@ -296,7 +293,7 @@ class IkkeYrkesaktivVedtakIT(
     }
 
     @Test
-    fun `ikke yrkesaktiv vedtak - trygdeavtale`() {
+    fun `ikke yrkesaktiv vedtak - trygdeavtale - Storbritania medl`() {
 
         val behandling = journalførOgVentTilProsesserErFerdige(
             journalfoeringOpprettDto = defaultJournalføringDto().apply {
@@ -317,7 +314,7 @@ class IkkeYrkesaktivVedtakIT(
                         LocalDate.of(2022, 1, 1),
                         LocalDate.of(2022, 2, 1),
                     )
-                    soeknadsland = Soeknadsland(listOf(Land_iso2.IL.kode), false)
+                    soeknadsland = Soeknadsland(listOf(Land_iso2.GB.kode), false)
                 }
         mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandling.id, mottatteOpplysninger.toJsonNode)
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
@@ -327,7 +324,7 @@ class IkkeYrkesaktivVedtakIT(
 
         lovvalgsperiodeService.lagreLovvalgsperioder(behandling.id, listOf(Lovvalgsperiode().apply {
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-            bestemmelse = Lovvalgsbestemmelser_trygdeavtale_il.ISR_ART6_5
+            bestemmelse = Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART5_4
             lovvalgsland = Land_iso2.NO
             medlemskapstype = Medlemskapstyper.PLIKTIG
             dekning = Trygdedekninger.FULL_DEKNING
@@ -361,7 +358,7 @@ class IkkeYrkesaktivVedtakIT(
         }
         lovvalgsperiodeService.hentLovvalgsperiode(behandling.id).apply {
             innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
-            bestemmelse.shouldBe(Lovvalgsbestemmelser_trygdeavtale_il.ISR_ART6_5)
+            bestemmelse.shouldBe(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART5_4)
             lovvalgsland.shouldBe(Land_iso2.NO)
             medlemskapstype.shouldBe(Medlemskapstyper.PLIKTIG)
             dekning.shouldBe(Trygdedekninger.FULL_DEKNING)
@@ -392,7 +389,7 @@ class IkkeYrkesaktivVedtakIT(
                 medlem.shouldBe(true)
                 lovvalgsland.shouldBe("NOR")
                 lovvalg.shouldBe("ENDL")
-                grunnlag.shouldBe("Israel_6_5")
+                grunnlag.shouldBe("Storbrit_NIrland_5_4")
                 sporingsinformasjon?.kildedokument.shouldBe("Henv_Soknad")
             }
     }

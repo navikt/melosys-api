@@ -145,6 +145,9 @@ public enum GrunnlagMedl {
     STORBRIT_NIRLAND_7_3("Storbrit_NIrland_7_3"),
     STORBRIT_NIRLAND_8_2("Storbrit_NIrland_8_2"),
     STORBRIT_NIRLAND_9("Storbrit_NIrland_9"),
+    STORBRIT_NIRLAND_5_4("Storbrit_NIrland_5_4"),
+    STORBRIT_NIRLAND_6_2("Storbrit_NIrland_6_2"),
+    STORBRIT_NIRLAND_8_5("Storbrit_NIrland_8_5"),
 
     SVEITS("Sveits"),
     SVEITS_8("Sveits_8"),
