@@ -11,6 +11,7 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerRequest;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -24,15 +25,18 @@ public class HentRegisteropplysninger implements StegBehandler {
 
     private final RegisteropplysningerService registeropplysningerService;
     private final BehandlingService behandlingService;
+    private final SaksbehandlingRegler saksbehandlingRegler;
     private final PersondataFasade persondataFasade;
     private final RegisteropplysningerFactory registeropplysningerFactory;
 
     public HentRegisteropplysninger(RegisteropplysningerService registeropplysningerService,
                                     BehandlingService behandlingService,
+                                    SaksbehandlingRegler saksbehandlingRegler,
                                     PersondataFasade persondataFasade,
                                     RegisteropplysningerFactory registeropplysningerFactory) {
         this.registeropplysningerService = registeropplysningerService;
         this.behandlingService = behandlingService;
+        this.saksbehandlingRegler = saksbehandlingRegler;
         this.persondataFasade = persondataFasade;
         this.registeropplysningerFactory = registeropplysningerFactory;
     }
@@ -47,7 +51,10 @@ public class HentRegisteropplysninger implements StegBehandler {
         Behandling behandling = behandlingService.hentBehandling(prosessinstans.getBehandling().getId());
         boolean erForVirksomhet = behandling.getFagsak().getHovedpartRolle() == Aktoersroller.VIRKSOMHET;
 
-        if (!behandling.getFagsak().erSakstypeEøs() || erForVirksomhet) {
+        boolean harRegistreringUnntakFraMedlemskapFlyt = saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling);
+        boolean harIkkeYrkesaktivFlyt = saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling.getFagsak().getType(), behandling.getTema());
+
+        if (harRegistreringUnntakFraMedlemskapFlyt || harIkkeYrkesaktivFlyt || !behandling.getFagsak().erSakstypeEøs() || erForVirksomhet) {
             log.debug("Hopper over steg {} fordi sak {} har sakstype {} og behandlingstema {}", HENT_REGISTEROPPLYSNINGER.getKode(), behandling.getFagsak().getSaksnummer(), behandling.getFagsak().getType(), behandling.getTema());
             return;
         }

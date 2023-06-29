@@ -19,6 +19,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerFactory;
@@ -58,10 +59,12 @@ class HentRegisteropplysningerTest {
     private final Behandling behandling = new Behandling();
     private final String aktørID = "54321";
 
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
+
     @BeforeEach
     public void setUp() {
-        registeropplysningerFactory = new RegisteropplysningerFactory(saksbehandlingRegler, new FakeUnleash());
-        hentRegisteropplysninger = new HentRegisteropplysninger(registeropplysningerService, behandlingService, persondataFasade, registeropplysningerFactory);
+        registeropplysningerFactory = new RegisteropplysningerFactory(saksbehandlingRegler, fakeUnleash);
+        hentRegisteropplysninger = new HentRegisteropplysninger(registeropplysningerService, behandlingService, saksbehandlingRegler, persondataFasade, registeropplysningerFactory);
 
         behandling.setId(222L);
 
@@ -165,6 +168,46 @@ class HentRegisteropplysningerTest {
     void utfør_sakstypeTrygdeavtale_ingentingLagres() {
         behandling.setTema(Behandlingstema.YRKESAKTIV);
         behandling.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
+
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        mottatteOpplysninger.setMottatteOpplysningerdata(new SoeknadTrygdeavtale());
+        behandling.setMottatteOpplysninger(mottatteOpplysninger);
+
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        hentRegisteropplysninger.utfør(prosessinstans);
+
+        verify(registeropplysningerService, never()).hentOgLagreOpplysninger(any());
+    }
+
+    @Test
+    void utfør_sakstypeEøsOgUnntak_ingentingLagres() {
+        fakeUnleash.enable(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP);
+        behandling.setTema(Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR);
+        behandling.getFagsak().setType(Sakstyper.EU_EOS);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
+        when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)).thenReturn(true);
+
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        mottatteOpplysninger.setMottatteOpplysningerdata(new SoeknadTrygdeavtale());
+        behandling.setMottatteOpplysninger(mottatteOpplysninger);
+
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        hentRegisteropplysninger.utfør(prosessinstans);
+
+        verify(registeropplysningerService, never()).hentOgLagreOpplysninger(any());
+    }
+
+    @Test
+    void utfør_sakstypeEøsOgIkkeYrkesaktiv_ingentingLagres() {
+        fakeUnleash.enable(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP);
+        behandling.setTema(Behandlingstema.IKKE_YRKESAKTIV);
+        behandling.getFagsak().setType(Sakstyper.EU_EOS);
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
+        when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)).thenReturn(true);
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerdata(new SoeknadTrygdeavtale());
