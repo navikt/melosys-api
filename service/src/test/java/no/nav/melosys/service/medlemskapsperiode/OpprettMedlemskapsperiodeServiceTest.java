@@ -2,10 +2,7 @@ package no.nav.melosys.service.medlemskapsperiode;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
-import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Vilkaarsresultat;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -29,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class OpprettMedlemskapsperiodeServiceTest {
@@ -62,6 +59,25 @@ class OpprettMedlemskapsperiodeServiceTest {
         assertThat(
             opprettMedlemskapsperiodeService.utledMedlemskapsperioderFraSøknad(behandlingsresultatID, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A)
         ).isNotEmpty();
+        verify(medlemAvFolketrygdenRepository, times(2)).save(any());
+    }
+
+    @Test
+    void utledMedlemskapsperioderFraSøknad_dataFraSøknadSatt_medlemskapsperioderEksisterer() {
+        Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
+        behandlingsresultat.getVilkaarsresultater().add(lagOppfyltVilkår(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID));
+        MedlemAvFolketrygden medlemAvFolketrygden = new MedlemAvFolketrygden();
+        Medlemskapsperiode medlemskapsperiode = new Medlemskapsperiode();
+        medlemAvFolketrygden.addMedlemskapsperioder(medlemskapsperiode);
+        behandlingsresultat.setMedlemAvFolketrygden(medlemAvFolketrygden);
+
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
+        when(medlemAvFolketrygdenRepository.save(medlemAvFolketrygden)).thenReturn(medlemAvFolketrygden);
+
+        assertThat(
+            opprettMedlemskapsperiodeService.utledMedlemskapsperioderFraSøknad(behandlingsresultatID, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A)
+        ).isNotEmpty();
+        verify(medlemAvFolketrygdenRepository, times(1)).save(medlemAvFolketrygden);
     }
 
     @Test
