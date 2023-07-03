@@ -40,6 +40,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.springframework.context.ApplicationEventPublisher
+import java.time.Instant
 import java.util.*
 
 @ExtendWith(MockKExtension::class)
@@ -89,7 +90,9 @@ internal class EndreSakServiceTest {
             soeknadsland = Soeknadsland()
         }
         val aktivBehandling = SaksbehandlingDataFactory.lagBehandling(opprinneligFagsak, mottatteOpplysningerData)
+        aktivBehandling.sisteOpplysningerHentetDato = Instant.now()
         opprinneligFagsak.behandlinger.add(aktivBehandling)
+
         every { fagsakService.hentFagsak(saksnummer) } returns opprinneligFagsak
         every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(MottatteOpplysninger())
 
@@ -337,7 +340,7 @@ internal class EndreSakServiceTest {
     }
 
     @Test
-    fun `endring av sak, ikke tom flyt - oppdater, opprett ny søknad, men oppfrisker ikke saksopplysninger når unntaksregistrering`() {
+    fun `endring av sak, ikke tom flyt - oppdater, opprett ny søknad, oppfrisker ikke når registeropplysninger ikke har blitt hentet før`() {
         val saksnummer = "MEL-125"
         val opprinneligFagsak = lagFagsak(saksnummer, TRYGDEAVTALE, TRYGDEAVGIFT)
         val mottatteOpplysningerData = MottatteOpplysningerData().apply {
@@ -367,50 +370,6 @@ internal class EndreSakServiceTest {
                 EU_EOS,
                 UNNTAK,
                 A1_ANMODNING_OM_UNNTAK_PAPIR,
-                FØRSTEGANG,
-                UNDER_BEHANDLING,
-                null
-            )
-        }
-        verify { mottatteOpplysningerService.slettOpplysninger(aktivBehandling.id) }
-        verify { mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(aktivBehandling, any(), any()) }
-        verify(exactly = 0) { oppfriskSaksopplysningerService.oppfriskSaksopplysning(aktivBehandling.id, false) }
-
-        verify { applicationEventPublisher.publishEvent(any()) }
-    }
-
-    @Test
-    fun `endring av sak, ikke tom flyt - oppdater, opprett ny søknad, men oppfrisker ikke saksopplysninger når ikkeYrkesaktiv`() {
-        val saksnummer = "MEL-126"
-        val opprinneligFagsak = lagFagsak(saksnummer, TRYGDEAVTALE, TRYGDEAVGIFT)
-        val mottatteOpplysningerData = MottatteOpplysningerData().apply {
-            periode = Periode()
-            soeknadsland = Soeknadsland()
-        }
-        val aktivBehandling = SaksbehandlingDataFactory.lagBehandling(opprinneligFagsak, mottatteOpplysningerData)
-        opprinneligFagsak.behandlinger.add(aktivBehandling)
-        every { fagsakService.hentFagsak(saksnummer) } returns opprinneligFagsak
-        every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(MottatteOpplysninger())
-        every {saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(EU_EOS, MEDLEMSKAP_LOVVALG, IKKE_YRKESAKTIV)} returns false
-        every {saksbehandlingRegler.harIkkeYrkesaktivFlyt(EU_EOS, IKKE_YRKESAKTIV)} returns true
-
-        endreSakService.endre(
-            saksnummer,
-            EU_EOS,
-            MEDLEMSKAP_LOVVALG,
-            IKKE_YRKESAKTIV,
-            FØRSTEGANG,
-            UNDER_BEHANDLING,
-            null
-        )
-
-
-        verify {
-            fagsakService.oppdaterFagsakOgBehandling(
-                saksnummer,
-                EU_EOS,
-                MEDLEMSKAP_LOVVALG,
-                IKKE_YRKESAKTIV,
                 FØRSTEGANG,
                 UNDER_BEHANDLING,
                 null

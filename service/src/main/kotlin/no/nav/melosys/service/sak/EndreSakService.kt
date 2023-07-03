@@ -90,10 +90,7 @@ class EndreSakService(
                 gjenopprettMottatteOpplysninger(nySakstype, behandling)
             }
 
-            val harIkkeYrkesaktivFlyt = saksbehandlingRegler.harIkkeYrkesaktivFlyt(nySakstype, nyBehandlingstema)
-            val harUnntakregistreringsflyt = saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(nySakstype, nySakstema, nyBehandlingstema);
-
-            if (!harIkkeYrkesaktivFlyt && !harUnntakregistreringsflyt) {
+            if (behandling.sisteOpplysningerHentetDato != null) {
                 oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
             }
         }
