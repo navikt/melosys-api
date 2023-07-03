@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.Sivilstand;
 import no.nav.melosys.domain.person.Navn;
@@ -40,13 +41,14 @@ class FamiliemedlemServiceTest {
 
     private FamiliemedlemService familiemedlemService;
 
+    private final FakeUnleash unleash = new FakeUnleash();
 
     @BeforeEach
     public void beforeEach() {
         this.familiemedlemService = new FamiliemedlemService(behandlingService,
             saksopplysningerService,
             new EktefelleEllerPartnerFamiliemedlemFilter(pdlConsumer),
-            pdlConsumer);
+            pdlConsumer, unleash);
     }
 
     @Test
