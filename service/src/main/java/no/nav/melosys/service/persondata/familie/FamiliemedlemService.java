@@ -1,14 +1,10 @@
 package no.nav.melosys.service.persondata.familie;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.person.Folkeregisteridentifikator;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.integrasjon.pdl.PDLConsumer;
 import no.nav.melosys.integrasjon.pdl.dto.person.ForelderBarnRelasjon;
 import no.nav.melosys.integrasjon.pdl.dto.person.Person;
@@ -20,6 +16,13 @@ import no.nav.melosys.service.persondata.mapping.FolkeregisteridentOversetter;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import static java.time.temporal.ChronoUnit.YEARS;
 
 @Service
@@ -28,15 +31,17 @@ public class FamiliemedlemService {
     private final SaksopplysningerService saksopplysningerService;
     private final EktefelleEllerPartnerFamiliemedlemFilter ektefelleEllerPartnerFamiliemedlemFilter;
     private final PDLConsumer pdlConsumer;
+    private final Unleash unleash;
 
     public FamiliemedlemService(BehandlingService behandlingService,
                                 SaksopplysningerService saksopplysningerService,
                                 EktefelleEllerPartnerFamiliemedlemFilter ektefelleEllerPartnerFamiliemedlemFilter,
-                                PDLConsumer pdlConsumer) {
+                                PDLConsumer pdlConsumer, Unleash unleash) {
         this.behandlingService = behandlingService;
         this.saksopplysningerService = saksopplysningerService;
         this.ektefelleEllerPartnerFamiliemedlemFilter = ektefelleEllerPartnerFamiliemedlemFilter;
         this.pdlConsumer = pdlConsumer;
+        this.unleash = unleash;
     }
 
     public Set<Familiemedlem> hentFamiliemedlemmerFraBehandlingID(long behandlingID) {
@@ -66,7 +71,11 @@ public class FamiliemedlemService {
         }
         familiemedlemmer.addAll(ektefelleEllerPartnerFamiliemedlemFilter.hentEktefelleEllerPartnerFraSivilstander(
             hovedperson.sivilstand()));
-        familiemedlemmer.addAll(hentBarn(hovedperson));
+        if (unleash.isEnabled(ToggleName.BARN_HAR_NULL_FNR)) {
+            familiemedlemmer.addAll(hentBarn(hovedperson));
+        } else {
+            familiemedlemmer.addAll(hentBarnGammel(hovedperson));
+        }
         return familiemedlemmer;
     }
 
@@ -90,8 +99,19 @@ public class FamiliemedlemService {
             forelderBarnRelasjon.relatertPersonsRolle());
     }
 
-
     private Set<Familiemedlem> hentBarn(Person person) {
+        Folkeregisteridentifikator folkeregisteridentifikator = FolkeregisteridentOversetter
+            .oversett(person.folkeregisteridentifikator());
+        return person.forelderBarnRelasjon().stream()
+            .filter(ForelderBarnRelasjon::erBarn)
+            .map(ForelderBarnRelasjon::relatertPersonsIdent)
+            .filter(Objects::nonNull)
+            .map(pdlConsumer::hentBarn)
+            .map(barn -> FamiliemedlemOversetter.oversettBarn(barn, folkeregisteridentifikator))
+            .collect(Collectors.toUnmodifiableSet());
+    }
+
+    private Set<Familiemedlem> hentBarnGammel(Person person) {
         Folkeregisteridentifikator folkeregisteridentifikator = FolkeregisteridentOversetter
             .oversett(person.folkeregisteridentifikator());
         return person.forelderBarnRelasjon().stream()
