@@ -1,7 +1,9 @@
 package no.nav.melosys.service.oppgave.migrering
 
+import no.nav.melosys.domain.SakOgBehandlingDTO
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.service.oppgave.OppgaveGosysMapping
@@ -12,10 +14,12 @@ import java.io.File
 @Disabled("brukes for å lage html filer fra MigreringsRapport json fil")
 class LagRapportTest {
 
+    val jsonrapportPath = "./jsonrapport.json"
+    val lagrePath = "./folderTilLagring"
+
     @Test
     fun `mangler oppgave`() {
-        val migreringsRapport =
-            Migrering.migreringsRapportFraJson("/Users/rune/div/dryrun-prod-0607/jsonrapport-prod-0607.json")
+        val migreringsRapport = Migrering.migreringsRapportFraJson(jsonrapportPath)
 
         document {
             table {
@@ -24,37 +28,48 @@ class LagRapportTest {
                     item(bc = "BurlyWood") { "Sakstema" }
                     item(bc = "BurlyWood") { "Behandlingstype" }
                     item(bc = "BurlyWood") { "Behandlingstema" }
-                    item(bc = "BurlyWood") { "saksnummer" }
+                    item(bc = "BurlyWood") { "Behandlingstatus" }
+                    item(bc = "BurlyWood") { "Behandlingsresultattype" }
+                    item(bc = "BurlyWood") { "Saksnummer" }
                     item(bc = "Orange") { "Mapping regel" }
 
                     item(bc = "DarkSalmon") { "Beskrivelsesfelt" }
                     item(bc = "DarkSalmon") { "Beskrivelse" }
+                    item(bc = "DarkSalmon") { "Etterfølgende SEDer" }
                     item(bc = "DarkSalmon") { "Behandlingstema" }
                     item(bc = "DarkSalmon") { "Behandlingstema beskrivelse" }
                 }
 
                 migreringsRapport.sortedMigreringsListe().asSequence()
                     .filter { it.oppgaver.isEmpty() }
+                    .filter { relevanteBehandlinger(it.sak) }
                     .forEach {
                         val sak = it.sak
-                        val ny: OppgaveGosysMapping.Oppgave =
-                            OppgaveMigrering.finnOppgave(
-                                sak.sakstype,
-                                sak.sakstema,
-                                sak.behandlingstema,
-                                sak.behandlingstype
-                            )
-                        val fargeFraRegelTuffet = when (ny.regelTruffet) {
+                        val ny: OppgaveGosysMapping.Oppgave? =
+                            try {
+                                OppgaveMigrering.finnOppgave(
+                                    sak.sakstype,
+                                    sak.sakstema,
+                                    sak.behandlingstema,
+                                    sak.behandlingstype
+                                )
+                            } catch (e: Exception) {
+                                println(e.message)
+                                null
+                            }
+                        val fargeFraRegelTuffet = when (ny?.regelTruffet) {
                             OppgaveGosysMapping.Regel.FRA_TABELL -> "MintCream"
                             OppgaveGosysMapping.Regel.HENVENDELSE -> "MistyRose"
                             OppgaveGosysMapping.Regel.HENVENDELSE_OG_VIRKSOMHET -> "Orchid"
                             OppgaveGosysMapping.Regel.KUN_VED_MIGRERING -> "LightSalmon"
+                            else -> "Red"
                         }
-                        val fontFraRegelTruffet = when (ny.regelTruffet) {
+                        val fontFraRegelTruffet = when (ny?.regelTruffet) {
                             OppgaveGosysMapping.Regel.FRA_TABELL -> Font.NORMAL
                             OppgaveGosysMapping.Regel.HENVENDELSE -> Font.ITALIC
                             OppgaveGosysMapping.Regel.HENVENDELSE_OG_VIRKSOMHET -> Font.STRONG
                             OppgaveGosysMapping.Regel.KUN_VED_MIGRERING -> Font.ITALIC
+                            else -> Font.ITALIC
                         }
                         val erGyldig = OppgaveMigrering.erGyldig(
                             sak.sakstype,
@@ -62,39 +77,55 @@ class LagRapportTest {
                             sak.behandlingstype,
                             sak.behandlingstema
                         )
+
+                        val sedFinnesIListe =
+                            !relevanteBehandlinger(it.sak) || (it.ny.sedListe.isNotEmpty() && it.ny.sedListe[0] == it.ny.beskrivelse)
+                        val sedListeBc = if (sedFinnesIListe) "PeachPuff" else "Red"
+                        val sedListeSomVises =
+                            if (sedFinnesIListe) it.ny.sedListe.filterIndexed { index, _ -> index > 0 }
+                            else it.ny.sedListe
+
                         val bc = if (erGyldig) "OldLace" else "Red"
                         tr {
                             item(bc = bc) { sak.sakstype }
                             item(bc = bc) { sak.sakstema }
                             item(bc = bc) { sak.behandlingstype }
                             item(bc = bc) { sak.behandlingstema }
+                            item(bc = bc) { sak.behandlingstatus }
+                            item(bc = bc) { sak.behandlingsresultattype }
                             item(bc = bc) { it.sak.saksnummer }
-                            item(bc = fargeFraRegelTuffet, font = fontFraRegelTruffet) { ny.regelTruffet.beskrivelse }
+                            item(bc = fargeFraRegelTuffet, font = fontFraRegelTruffet) {
+                                ny?.regelTruffet?.beskrivelse ?: "error"
+                            }
 
-                            item(bc = "PeachPuff") { ny.beskrivelsefelt }
+                            item(bc = "PeachPuff") { ny?.beskrivelsefelt }
                             item(bc = "PeachPuff") { it.ny.beskrivelse ?: "" }
-                            item(bc = "PeachPuff") { ny.oppgaveBehandlingstema?.kode }
-                            item(bc = "PeachPuff") { ny.oppgaveBehandlingstema?.name }
-
+                            item(bc = sedListeBc) { sedListeSomVises.joinToString(" ") }
+                            item(bc = "PeachPuff") { ny?.oppgaveBehandlingstema?.kode }
+                            item(bc = "PeachPuff") { ny?.oppgaveBehandlingstema?.name }
                         }
                     }
-                tr {
-                    (0..4).forEach { item { "" } }
-                    (0..4).forEach { item { "" } }
-                }
-
             }
         }.run {
-            export(HtmlExporter()).let {
-                File("/Users/rune/div/mangler-oppgave.html").writeText(it)
-            }
+            export(HtmlExporter()).let { File("$lagrePath/mangler-oppgave.html").writeText(it) }
         }
+    }
+
+    private fun relevanteBehandlinger(it: SakOgBehandlingDTO): Boolean {
+        return it.sakstype == Sakstyper.EU_EOS
+            && it.sakstema == Sakstemaer.UNNTAK
+            && listOf(
+            Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND,
+            Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
+            Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
+        ).contains(it.behandlingstema)
+            && it.behandlingstype == Behandlingstyper.FØRSTEGANG
+            && it.behandlingstatus == Behandlingsstatus.VURDER_DOKUMENT
     }
 
     @Test
     fun `mangler oppgave - gruppert`() {
-        val migreringsRapport =
-            Migrering.migreringsRapportFraJson("/Users/rune/div/dryrun-prod-0607/jsonrapport-prod-0607.json")
+        val migreringsRapport = Migrering.migreringsRapportFraJson(jsonrapportPath)
 
         document {
             table {
@@ -120,24 +151,31 @@ class LagRapportTest {
                     .map { it.key to it.value.size }
                     .sortedBy { it.second }.toList().reversed().forEach { (sak, count) ->
                         sum += count
-                        val ny: OppgaveGosysMapping.Oppgave =
-                            OppgaveMigrering.finnOppgave(
-                                sak.sakstype,
-                                sak.sakstema,
-                                sak.behandlingstema,
-                                sak.behandlingstype
-                            )
-                        val fargeFraRegelTuffet = when (ny.regelTruffet) {
+                        val ny: OppgaveGosysMapping.Oppgave? =
+                            try {
+                                OppgaveMigrering.finnOppgave(
+                                    sak.sakstype,
+                                    sak.sakstema,
+                                    sak.behandlingstema,
+                                    sak.behandlingstype
+                                )
+                            } catch (e: Exception) {
+                                println(e.message)
+                                null
+                            }
+                        val fargeFraRegelTuffet = when (ny?.regelTruffet) {
                             OppgaveGosysMapping.Regel.FRA_TABELL -> "MintCream"
                             OppgaveGosysMapping.Regel.HENVENDELSE -> "MistyRose"
                             OppgaveGosysMapping.Regel.HENVENDELSE_OG_VIRKSOMHET -> "Orchid"
                             OppgaveGosysMapping.Regel.KUN_VED_MIGRERING -> "LightSalmon"
+                            else -> "Red"
                         }
-                        val fontFraRegelTruffet = when (ny.regelTruffet) {
+                        val fontFraRegelTruffet = when (ny?.regelTruffet) {
                             OppgaveGosysMapping.Regel.FRA_TABELL -> Font.NORMAL
                             OppgaveGosysMapping.Regel.HENVENDELSE -> Font.ITALIC
                             OppgaveGosysMapping.Regel.HENVENDELSE_OG_VIRKSOMHET -> Font.STRONG
                             OppgaveGosysMapping.Regel.KUN_VED_MIGRERING -> Font.ITALIC
+                            else -> Font.ITALIC
                         }
                         val erGyldig = OppgaveMigrering.erGyldig(
                             sak.sakstype,
@@ -151,34 +189,33 @@ class LagRapportTest {
                             item(bc = bc) { sak.sakstema }
                             item(bc = bc) { sak.behandlingstype }
                             item(bc = bc) { sak.behandlingstema }
-                            item(bc = fargeFraRegelTuffet, font = fontFraRegelTruffet) { ny.regelTruffet.beskrivelse }
+                            item(bc = fargeFraRegelTuffet, font = fontFraRegelTruffet) {
+                                ny?.regelTruffet?.beskrivelse ?: "error"
+                            }
                             item(bc = "PaleGoldenRod", font = Font.STRONG) { count }
 
-                            item(bc = "PeachPuff") { ny.beskrivelsefelt }
+                            item(bc = "PeachPuff") { ny?.beskrivelsefelt }
                             item(bc = "PeachPuff") { sak.beskrivelse ?: "" }
-                            item(bc = "PeachPuff") { ny.oppgaveBehandlingstema?.kode }
-                            item(bc = "PeachPuff") { ny.oppgaveBehandlingstema?.name }
+                            item(bc = "PeachPuff") { ny?.oppgaveBehandlingstema?.kode }
+                            item(bc = "PeachPuff") { ny?.oppgaveBehandlingstema?.name }
 
                         }
                     }
                 tr {
-                    (0..4).forEach { item { "" } }
+                    (0..5).forEach { item { "" } }
                     item(bc = "PaleGoldenRod", font = Font.STRONG) { sum }
                     (0..4).forEach { item { "" } }
                 }
 
             }
         }.run {
-            export(HtmlExporter()).let {
-                File("/Users/rune/div/mangler-oppgave_gruppert.html").writeText(it)
-            }
+            export(HtmlExporter()).let { File("$lagrePath/mangler-oppgave_gruppert.html").writeText(it) }
         }
     }
 
     @Test
     fun `rapport over oppgaver som er blitt forandtert slik at de er forsjellig fra migreringen`() {
-        val migreringsRapport =
-            Migrering.migreringsRapportFraJson("/Users/rune/div/dryrun-prod-0607/jsonrapport-prod-0607.json")
+        val migreringsRapport = Migrering.migreringsRapportFraJson(jsonrapportPath)
 
         document {
             table {
@@ -287,9 +324,7 @@ class LagRapportTest {
 
             }
         }.run {
-            export(HtmlExporter()).let {
-                File("/Users/rune/div/forskjell-migrering.html").writeText(it)
-            }
+            export(HtmlExporter()).let { File("$lagrePath/forskjell-migrering.html").writeText(it) }
         }
     }
 
