@@ -119,7 +119,7 @@ public class BehandlingTjeneste {
         behandlingOppsummeringDto.setEndretDato(behandling.getEndretDato());
         behandlingOppsummeringDto.setEndretAvNavn(saksbehandlerService.finnNavnForIdent(behandling.getEndretAv()).orElse(behandling.getEndretAv()));
         behandlingOppsummeringDto.setRegistrertDato(behandling.getRegistrertDato());
-        behandlingOppsummeringDto.setSisteOpplysningerHentetDato(behandling.getSistOpplysningerHentetDato());
+        behandlingOppsummeringDto.setSisteOpplysningerHentetDato(behandling.getSisteOpplysningerHentetDato());
         behandlingOppsummeringDto.setSvarFrist(behandling.getDokumentasjonSvarfristDato());
         behandlingOppsummeringDto.setBehandlingsfrist(behandling.getBehandlingsfrist());
         behandlingOppsummeringDto.setBehandlingsresultattype(behandlingsresultat.getType());
