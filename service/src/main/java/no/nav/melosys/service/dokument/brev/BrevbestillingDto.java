@@ -32,9 +32,7 @@ public final class BrevbestillingDto {
     private List<FritekstvedleggDto> fritekstvedlegg;
     private String dokumentTittel;
     private String saksbehandlerNrToIdent;
-    @Deprecated(since = "Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel")
     private String begrunnelseKode;
-    @Deprecated(since = "Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel")
     private String ytterligereInformasjon;
 
     public BrevbestillingDto() {
@@ -63,10 +61,8 @@ public final class BrevbestillingDto {
         List<FritekstvedleggDto> fritekstvedlegg,
         String dokumentTittel,
         String saksbehandlerNrToIdent,
-        @Deprecated(since = "Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel")
-            String begrunnelseKode,
-        @Deprecated(since = "Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel")
-            String ytterligereInformasjon) {
+        String begrunnelseKode,
+        String ytterligereInformasjon) {
 
         this.produserbardokument = produserbardokument;
         this.mottaker = mottaker;
@@ -325,12 +321,10 @@ public final class BrevbestillingDto {
         return saksbehandlerNrToIdent;
     }
 
-    @Deprecated(since = "Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel")
     public String getBegrunnelseKode() {
         return begrunnelseKode;
     }
 
-    @Deprecated(since = "Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel")
     public String getYtterligereInformasjon() {
         return ytterligereInformasjon;
     }
