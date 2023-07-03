@@ -26,7 +26,8 @@ object Migrering {
         val sakstema: Sakstemaer,
         val behandlingstype: Behandlingstyper,
         val behandlingstema: Behandlingstema,
-        val beskrivelse: String? = null
+        val beskrivelse: String? = null,
+        val behandlingstatus: String? = null,
     )
 
     internal data class TableRowSingle(
