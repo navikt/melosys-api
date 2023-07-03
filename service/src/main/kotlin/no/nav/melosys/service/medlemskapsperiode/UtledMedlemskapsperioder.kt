@@ -85,7 +85,7 @@ class UtledMedlemskapsperioder {
                 ),
                 lagPeriode(
                     periode,
-                    Trygdedekninger.PENSJONSDEL,
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
                     request.arbeidsland,
                     InnvilgelsesResultat.INNVILGET
                 )
@@ -125,17 +125,17 @@ class UtledMedlemskapsperioder {
 
     private fun fjernPensjonsdel(trygdedekning: Trygdedekninger): Trygdedekninger =
         when (trygdedekning) {
-            Trygdedekninger.HELSE_OG_PENSJONSDEL -> Trygdedekninger.HELSEDEL
-            Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER -> Trygdedekninger.HELSEDEL_MED_SYKE_OG_FORELDREPENGER
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON -> Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER -> Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER
             else -> throw FunksjonellException("Trygdedekning $trygdedekning har ikke pensjonsdel")
         }
 
 
     private fun harPensjonsdel(trygdedekninger: Trygdedekninger): Boolean =
-        trygdedekninger == Trygdedekninger.HELSE_OG_PENSJONSDEL || trygdedekninger == Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER
+        trygdedekninger == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON || trygdedekninger == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
 
 
     private fun erKunPensjonsdel(trygdedekning: Trygdedekninger): Boolean =
-        trygdedekning == Trygdedekninger.PENSJONSDEL
+        trygdedekning == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
 
 }

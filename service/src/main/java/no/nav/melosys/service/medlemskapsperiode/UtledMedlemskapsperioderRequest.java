@@ -3,10 +3,9 @@ package no.nav.melosys.service.medlemskapsperiode;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.ErPeriode;
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
-import static no.nav.melosys.domain.kodeverk.Trygdedekninger.PENSJONSDEL;
+import static no.nav.melosys.domain.kodeverk.Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE;
 
 public class UtledMedlemskapsperioderRequest {
 
@@ -42,6 +41,6 @@ public class UtledMedlemskapsperioderRequest {
     }
 
     public boolean erPensjonsdel() {
-        return trygdedekning == PENSJONSDEL;
+        return trygdedekning == FTRL_2_9_FØRSTE_LEDD_A_HELSE;
     }
 }

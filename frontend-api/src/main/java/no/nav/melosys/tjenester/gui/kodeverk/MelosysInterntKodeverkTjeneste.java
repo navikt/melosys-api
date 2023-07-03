@@ -38,11 +38,11 @@ import static no.nav.melosys.domain.kodeverk.Trygdedekninger.*;
 public class MelosysInterntKodeverkTjeneste {
 
     private static final List<String> definedOrderTrygdedekning = List.of(
-        HELSEDEL.getKode(),
-        HELSEDEL_MED_SYKE_OG_FORELDREPENGER.getKode(),
-        PENSJONSDEL.getKode(),
-        HELSE_OG_PENSJONSDEL.getKode(),
-        HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER.getKode());
+        FTRL_2_9_FØRSTE_LEDD_A_HELSE.getKode(),
+        FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER.getKode(),
+        FTRL_2_9_FØRSTE_LEDD_B_PENSJON.getKode(),
+        FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON.getKode(),
+        FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER.getKode());
 
     private final MedlemskapsperiodeService medlemskapsperiodeService;
 
