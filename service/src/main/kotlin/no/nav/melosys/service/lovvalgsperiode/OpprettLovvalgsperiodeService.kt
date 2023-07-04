@@ -12,6 +12,7 @@ import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
 @Service
@@ -22,6 +23,7 @@ class OpprettLovvalgsperiodeService(
     val saksbehandlingRegler: SaksbehandlingRegler
 ) {
 
+    @Transactional
     fun opprettLovvalgsperiode(
         behandlingId: Long,
         request: OpprettLovvalgsperiodeRequest
