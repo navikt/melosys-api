@@ -121,6 +121,12 @@ class SaksbehandlingRegler(
     }
 
     fun harIkkeYrkesaktivFlyt(
+        behandling: Behandling
+    ): Boolean {
+        return harIkkeYrkesaktivFlyt(behandling.fagsak.type, behandling.tema)
+    }
+
+    fun harIkkeYrkesaktivFlyt(
         sakstype: Sakstyper,
         behandlingstema: Behandlingstema
     ): Boolean {

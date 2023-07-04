@@ -52,7 +52,7 @@ public class HentRegisteropplysninger implements StegBehandler {
         boolean erForVirksomhet = behandling.getFagsak().getHovedpartRolle() == Aktoersroller.VIRKSOMHET;
 
         boolean harRegistreringUnntakFraMedlemskapFlyt = saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling);
-        boolean harIkkeYrkesaktivFlyt = saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling.getFagsak().getType(), behandling.getTema());
+        boolean harIkkeYrkesaktivFlyt = saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling);
 
         if (harRegistreringUnntakFraMedlemskapFlyt || harIkkeYrkesaktivFlyt || !behandling.getFagsak().erSakstypeEøs() || erForVirksomhet) {
             log.debug("Hopper over steg {} fordi sak {} har sakstype {} og behandlingstema {}", HENT_REGISTEROPPLYSNINGER.getKode(), behandling.getFagsak().getSaksnummer(), behandling.getFagsak().getType(), behandling.getTema());

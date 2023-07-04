@@ -91,7 +91,7 @@ public class TrygdeavtaleVedtakService {
 
         behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
 
-        if(saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling.getFagsak().getType(), behandling.getTema())) {
+        if(saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)) {
             behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
             prosessinstansService.opprettProsessinstansIverksettIkkeYreksaktiv(behandling);
         } else {
@@ -110,7 +110,7 @@ public class TrygdeavtaleVedtakService {
         if (request.getBehandlingsresultatTypeKode() == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
             return lagAvslagMangledeOpplysningerBrevbestilling(request);
         }
-        if (saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling.getFagsak().getType(), behandling.getTema())) {
+        if (saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)) {
             return lagTrygdeavtaleBrevbestilling(request, Produserbaredokumenter.IKKE_YRKESAKTIV_VEDTAKSBREV);
         }
         Optional<Produserbaredokumenter> produserbaredokumenter = behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.landkoder.stream()
