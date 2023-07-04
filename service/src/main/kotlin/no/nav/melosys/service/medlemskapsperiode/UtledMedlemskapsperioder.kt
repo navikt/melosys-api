@@ -136,6 +136,6 @@ class UtledMedlemskapsperioder {
 
 
     private fun erKunPensjonsdel(trygdedekning: Trygdedekninger): Boolean =
-        trygdedekning == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+        trygdedekning == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON
 
 }

@@ -123,7 +123,7 @@ class TrygdeavgiftTjenesteTest {
         trygdeavgift.setTrygdeavgiftsbeløpMd(new Penger(BigDecimal.valueOf(10000)));
 
         var medlemskapsperiode = new Medlemskapsperiode();
-        medlemskapsperiode.setTrygdedekning(Trygdedekninger.HELSEDEL);
+        medlemskapsperiode.setTrygdedekning(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE);
         trygdeavgift.setGrunnlagMedlemskapsperiode(medlemskapsperiode);
 
         var inntektsperiode = new Inntektsperiode();

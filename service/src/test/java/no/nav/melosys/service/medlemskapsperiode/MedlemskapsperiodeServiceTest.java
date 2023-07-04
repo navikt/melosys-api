@@ -82,7 +82,7 @@ class MedlemskapsperiodeServiceTest {
             .thenReturn(medlemAvFolketrygden);
 
         medlemskapsperiodeService.opprettMedlemskapsperiode(behandlingsresultatID, LocalDate.now().minusYears(1), LocalDate.now(),
-            InnvilgelsesResultat.AVSLAATT, Trygdedekninger.HELSEDEL);
+            InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE);
 
         verify(medlemskapsperiodeRepositoryMock).save(medlemskapsperiodeCaptor.capture());
         verify(trygdeavgiftsgrunnlagServiceMock).oppdaterTrygdeavgiftsgrunnlag(eq(behandlingsresultatID), any());
@@ -95,7 +95,7 @@ class MedlemskapsperiodeServiceTest {
             .containsExactly(
                 eksisterende.getArbeidsland(),
                 InnvilgelsesResultat.AVSLAATT,
-                Trygdedekninger.HELSEDEL,
+                Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
                 eksisterende.getMedlemskapstype());
     }
 
@@ -109,14 +109,14 @@ class MedlemskapsperiodeServiceTest {
 
         LocalDate nå = LocalDate.now();
         medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID, nå, nå,
-            InnvilgelsesResultat.AVSLAATT, Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER);
+            InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER);
 
         verify(medlemskapsperiodeRepositoryMock).save(medlemskapsperiode);
         verifyNoInteractions(trygdeavgiftsgrunnlagServiceMock);
         assertThat(medlemskapsperiode)
             .extracting(Medlemskapsperiode::getFom, Medlemskapsperiode::getTom,
                 Medlemskapsperiode::getInnvilgelsesresultat, Medlemskapsperiode::getTrygdedekning)
-            .containsExactly(nå, nå, InnvilgelsesResultat.AVSLAATT, Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER);
+            .containsExactly(nå, nå, InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER);
     }
 
     @Test
@@ -130,13 +130,13 @@ class MedlemskapsperiodeServiceTest {
 
         LocalDate nå = LocalDate.now();
         medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID, nå, nå,
-            InnvilgelsesResultat.AVSLAATT, Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER);
+            InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER);
 
         verify(medlemskapsperiodeRepositoryMock).save(medlemskapsperiode);
         assertThat(medlemskapsperiode)
             .extracting(Medlemskapsperiode::getFom, Medlemskapsperiode::getTom,
                 Medlemskapsperiode::getInnvilgelsesresultat, Medlemskapsperiode::getTrygdedekning)
-            .containsExactly(nå, nå, InnvilgelsesResultat.AVSLAATT, Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER);
+            .containsExactly(nå, nå, InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER);
         verify(trygdeavgiftsgrunnlagServiceMock).oppdaterTrygdeavgiftsgrunnlag(eq(behandlingsresultatID), any());
     }
 
@@ -186,7 +186,7 @@ class MedlemskapsperiodeServiceTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID, LocalDate.now(),
-                LocalDate.now().minusDays(1), InnvilgelsesResultat.AVSLAATT, Trygdedekninger.HELSE_OG_PENSJONSDEL))
+                LocalDate.now().minusDays(1), InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON))
             .withMessageContaining("kan ikke være før");
     }
 
@@ -208,7 +208,7 @@ class MedlemskapsperiodeServiceTest {
             .thenReturn(lagMedlemAvFolketrygden());
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> medlemskapsperiodeService.oppdaterMedlemskapsperiode(behandlingsresultatID, 0, LocalDate.now(),
-                LocalDate.now(), InnvilgelsesResultat.DELVIS_INNVILGET, Trygdedekninger.HELSE_OG_PENSJONSDEL))
+                LocalDate.now(), InnvilgelsesResultat.DELVIS_INNVILGET, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON))
             .withMessageContaining("har ingen");
     }
 
