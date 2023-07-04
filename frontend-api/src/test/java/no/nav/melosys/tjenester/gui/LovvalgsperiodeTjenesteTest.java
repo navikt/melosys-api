@@ -1,10 +1,5 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -17,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.lovvalgsperiode.OpprettLovvalgsperiodeService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.periode.LovvalgsperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
@@ -26,6 +22,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
 import static org.hamcrest.Matchers.equalTo;
@@ -54,6 +55,8 @@ final class LovvalgsperiodeTjenesteTest {
     private LovvalgsperiodeService lovvalgsperiodeService;
     @MockBean
     private Aksesskontroll aksesskontroll;
+    @MockBean
+    private OpprettLovvalgsperiodeService opprettLovvalgsperiodeService;
     @Autowired
     private MockMvc mockMvc;
     @Autowired
