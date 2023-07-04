@@ -10,7 +10,9 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.lovvalgsperiode.OpprettLovvalgsperiodeService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
+import no.nav.melosys.tjenester.gui.dto.OpprettLovvalgsperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.periode.LovvalgsperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
 import no.nav.security.token.support.core.api.Protected;
@@ -27,10 +29,12 @@ import org.springframework.web.context.WebApplicationContext;
 public class LovvalgsperiodeTjeneste {
 
     private final LovvalgsperiodeService lovvalgsperiodeService;
+    private final OpprettLovvalgsperiodeService opprettEllerOppdaterLovvalgsperiode;
     private final Aksesskontroll aksesskontroll;
 
-    public LovvalgsperiodeTjeneste(LovvalgsperiodeService lovvalgsperiodeService, Aksesskontroll aksesskontroll) {
+    public LovvalgsperiodeTjeneste(LovvalgsperiodeService lovvalgsperiodeService, OpprettLovvalgsperiodeService opprettEllerOppdaterLovvalgsperiode, Aksesskontroll aksesskontroll) {
         this.lovvalgsperiodeService = lovvalgsperiodeService;
+        this.opprettEllerOppdaterLovvalgsperiode = opprettEllerOppdaterLovvalgsperiode;
         this.aksesskontroll = aksesskontroll;
     }
 
@@ -45,6 +49,17 @@ public class LovvalgsperiodeTjeneste {
             .map(LovvalgsperiodeDto::av)
             .toList();
         return ResponseEntity.ok(resultat);
+    }
+
+    @PostMapping("{behandlingID}/opprett")
+    @ApiOperation("Oppretter eller oppdaterer en lovvalgsperiode")
+    @ApiResponses({@ApiResponse(code = 404, message = "Dersom behandlingsid-en ikke fins.")})
+    public ResponseEntity<Collection<LovvalgsperiodeDto>> opprettEllerOppdaterLovvalgsperiode(@PathVariable("behandlingID") long behandlingsid,
+                                                                                  @RequestBody OpprettLovvalgsperiodeDto opprettLovvalgsperiodeDto) {
+        aksesskontroll.autoriserSkriv(behandlingsid);
+
+        return ResponseEntity.ok(List.of(LovvalgsperiodeDto.av(
+            opprettEllerOppdaterLovvalgsperiode.opprettLovvalgsperiode(behandlingsid, opprettLovvalgsperiodeDto.tilRequest()))));
     }
 
     @PostMapping("{behandlingID}")
