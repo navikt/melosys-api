@@ -24,7 +24,8 @@ public class BehandlingsresultatDto {
     private BehandlingsresultatDto(Behandlingsresultattyper behandlingsresultatTypeKode,
                                    String begrunnelseFritekst,
                                    String innledningFritekst,
-                                   String nyVurderingBakgrunn, String utfallRegistreringUnntak,
+                                   String nyVurderingBakgrunn,
+                                   String utfallRegistreringUnntak,
                                    String utfallUtpeking,
                                    String vedtakstype,
                                    List<String> kontrollresultatBegrunnelseKoder) {
