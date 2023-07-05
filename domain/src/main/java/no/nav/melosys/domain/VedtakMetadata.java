@@ -26,9 +26,6 @@ public class VedtakMetadata extends RegistreringsInfo {
     @Column(name = "vedtak_type", nullable = false)
     private Vedtakstyper vedtakstype;
 
-    @Column(name = "ny_vurdering_bakgrunn")
-    private String nyVurderingBakgrunn;
-
     @MapsId
     @OneToOne(optional = false)
     @JoinColumn(name = "behandlingsresultat_id")
@@ -72,14 +69,6 @@ public class VedtakMetadata extends RegistreringsInfo {
 
     public void setBehandlingsresultat(final Behandlingsresultat behandlingsresultat) {
         this.behandlingsresultat = behandlingsresultat;
-    }
-
-    public String getNyVurderingBakgrunn() {
-        return nyVurderingBakgrunn;
-    }
-
-    public void setNyVurderingBakgrunn(String nyVurderingBakgrunn) {
-        this.nyVurderingBakgrunn = nyVurderingBakgrunn;
     }
 
     @Override

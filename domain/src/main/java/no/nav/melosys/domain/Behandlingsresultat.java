@@ -48,6 +48,9 @@ public class Behandlingsresultat extends RegistreringsInfo {
     @Column(name = "innledning_fritekst")
     private String innledningFritekst;
 
+    @Column(name = "ny_vurdering_bakgrunn")
+    private String nyVurderingBakgrunn;
+
     @OneToOne(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private VedtakMetadata vedtakMetadata;
 
@@ -427,7 +430,6 @@ public class Behandlingsresultat extends RegistreringsInfo {
     }
 
     public void settVedtakMetadata(Vedtakstyper vedtakstype,
-                                   String nyVurderingBakgrunn,
                                    LocalDate klagefrist) {
         if (vedtakMetadata == null) {
             vedtakMetadata = new VedtakMetadata();
@@ -439,7 +441,6 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
         vedtakMetadata.setVedtakstype(vedtakstype);
         vedtakMetadata.setVedtaksdato(Instant.now());
-        vedtakMetadata.setNyVurderingBakgrunn(nyVurderingBakgrunn);
         vedtakMetadata.setVedtakKlagefrist(klagefrist);
     }
 
@@ -457,5 +458,13 @@ public class Behandlingsresultat extends RegistreringsInfo {
             "id=" + id +
             ", type=" + type +
             '}';
+    }
+
+    public String getNyVurderingBakgrunn() {
+        return nyVurderingBakgrunn;
+    }
+
+    public void setNyVurderingBakgrunn(String nyVurderingBakgrunn) {
+        this.nyVurderingBakgrunn = nyVurderingBakgrunn;
     }
 }
