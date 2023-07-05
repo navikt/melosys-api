@@ -23,7 +23,7 @@ public class VedtakMetadata extends RegistreringsInfo {
     private LocalDate vedtakKlagefrist;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "vedtak_type", nullable = true)
+    @Column(name = "vedtak_type", nullable = false)
     private Vedtakstyper vedtakstype;
 
     @MapsId
