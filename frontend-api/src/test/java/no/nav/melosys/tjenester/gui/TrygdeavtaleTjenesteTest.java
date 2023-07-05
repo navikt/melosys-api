@@ -209,9 +209,7 @@ class TrygdeavtaleTjenesteTest {
 
     @Test
     void hentTrygdeavtaleInfo_somNyVurdering_returnererKorrekt() throws Exception {
-        var vedtakMetadata = new VedtakMetadata();
         behandlingsresultat.setNyVurderingBakgrunn(Nyvurderingbakgrunner.NYE_OPPLYSNINGER.getKode());
-        behandlingsresultat.setVedtakMetadata(vedtakMetadata);
         behandling.setType(Behandlingstyper.NY_VURDERING);
 
         when(behandlingService.hentBehandlingMedSaksopplysninger(1L)).thenReturn(behandling);
