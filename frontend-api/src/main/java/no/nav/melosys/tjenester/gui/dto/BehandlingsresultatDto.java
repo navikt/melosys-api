@@ -15,6 +15,7 @@ public class BehandlingsresultatDto {
     private final List<String> begrunnelseKoder;
     private final String begrunnelseFritekst;
     private final String innledningFritekst;
+    private final String nyVurderingBakgrunn;
     private final String utfallRegistreringUnntak;
     private final String utfallUtpeking;
     private final String vedtakstype;
@@ -23,12 +24,13 @@ public class BehandlingsresultatDto {
     private BehandlingsresultatDto(Behandlingsresultattyper behandlingsresultatTypeKode,
                                    String begrunnelseFritekst,
                                    String innledningFritekst,
-                                   String utfallRegistreringUnntak,
+                                   String nyVurderingBakgrunn, String utfallRegistreringUnntak,
                                    String utfallUtpeking,
                                    String vedtakstype,
                                    List<String> kontrollresultatBegrunnelseKoder) {
         this.behandlingsresultatTypeKode = behandlingsresultatTypeKode.getKode();
         this.innledningFritekst = innledningFritekst;
+        this.nyVurderingBakgrunn = nyVurderingBakgrunn;
         this.utfallUtpeking = utfallUtpeking;
         this.begrunnelseKoder = new ArrayList<>();
         this.begrunnelseFritekst = begrunnelseFritekst;
@@ -42,6 +44,7 @@ public class BehandlingsresultatDto {
             resultat.getType(),
             resultat.getBegrunnelseFritekst(),
             resultat.getInnledningFritekst(),
+            resultat.getNyVurderingBakgrunn(),
             resultat.getUtfallRegistreringUnntak() != null ? resultat.getUtfallRegistreringUnntak().getKode() : null,
             resultat.getUtfallUtpeking() != null ? resultat.getUtfallUtpeking().getKode() : null,
             resultat.getVedtakMetadata() != null ? resultat.getVedtakMetadata().getVedtakstype().getKode() : null,
@@ -52,8 +55,8 @@ public class BehandlingsresultatDto {
             .map(BehandlingsresultatBegrunnelse::getKode)
             .forEach(dto.getBegrunnelseKoder()::add);
 
-        if (resultat.getVedtakMetadata() != null && resultat.getVedtakMetadata().getNyVurderingBakgrunn() != null) {
-            dto.getBegrunnelseKoder().add(resultat.getVedtakMetadata().getNyVurderingBakgrunn());
+        if (resultat.getNyVurderingBakgrunn() != null) {
+            dto.getBegrunnelseKoder().add(resultat.getNyVurderingBakgrunn());
         }
         return dto;
     }
@@ -88,5 +91,9 @@ public class BehandlingsresultatDto {
 
     public List<String> getKontrollresultatBegrunnelseKoder() {
         return kontrollresultatBegrunnelseKoder;
+    }
+
+    public String getNyVurderingBakgrunn() {
+        return nyVurderingBakgrunn;
     }
 }

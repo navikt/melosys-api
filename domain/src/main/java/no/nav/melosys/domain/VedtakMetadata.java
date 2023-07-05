@@ -23,11 +23,8 @@ public class VedtakMetadata extends RegistreringsInfo {
     private LocalDate vedtakKlagefrist;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "vedtak_type", nullable = false)
+    @Column(name = "vedtak_type", nullable = true)
     private Vedtakstyper vedtakstype;
-
-    @Column(name = "ny_vurdering_bakgrunn")
-    private String nyVurderingBakgrunn;
 
     @MapsId
     @OneToOne(optional = false)
@@ -72,14 +69,6 @@ public class VedtakMetadata extends RegistreringsInfo {
 
     public void setBehandlingsresultat(final Behandlingsresultat behandlingsresultat) {
         this.behandlingsresultat = behandlingsresultat;
-    }
-
-    public String getNyVurderingBakgrunn() {
-        return nyVurderingBakgrunn;
-    }
-
-    public void setNyVurderingBakgrunn(String nyVurderingBakgrunn) {
-        this.nyVurderingBakgrunn = nyVurderingBakgrunn;
     }
 
     @Override
