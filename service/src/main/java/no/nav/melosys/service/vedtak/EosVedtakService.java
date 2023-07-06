@@ -161,7 +161,8 @@ public class EosVedtakService {
             behandlingsresultatService.oppdaterUtfallUtpeking(behandling.getId(), GODKJENT);
         }
 
-        behandlingsresultat.settVedtakMetadata(vedtakstype, nyVurderingBakgrunn, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+        behandlingsresultat.setNyVurderingBakgrunn(nyVurderingBakgrunn);
+        behandlingsresultat.settVedtakMetadata(vedtakstype, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
         behandlingsresultat.setBegrunnelseFritekst(behandlingresultatBegrunnelseFritekst);
         behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
         behandlingsresultatService.lagre(behandlingsresultat);
