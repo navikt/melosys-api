@@ -79,7 +79,7 @@ class DokgenMalMapper(
             brevbestilling.toBuilder()
                 .medBegrunnelseFritekst(behandlingsresultat.begrunnelseFritekst)
                 .medInnledningFritekst(behandlingsresultat.innledningFritekst)
-                .medNyVurderingBakgrunn(brevbestilling.nyVurderingBakgrunn) //TODO https://jira.adeo.no/browse/MELOSYS-5942
+                .medNyVurderingBakgrunn(behandlingsresultat.nyVurderingBakgrunn)
                 .medOppholdsLand(oppholdsland)
                 .medPeriodeFom(lovvalgsperiode.fom)
                 .medPeriodeTom(lovvalgsperiode.tom)
