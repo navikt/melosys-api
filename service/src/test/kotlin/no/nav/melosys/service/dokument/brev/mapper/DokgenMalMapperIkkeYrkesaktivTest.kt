@@ -85,6 +85,7 @@ class DokgenMalMapperIkkeYrkesaktivTest {
             })
             innledningFritekst = "innledningFritekst"
             begrunnelseFritekst = "begrunnelseFritekst"
+            nyVurderingBakgrunn = "nyVurderingBakgrunn"
         }
 
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(any()) } returns behandlingsresultat
@@ -94,14 +95,12 @@ class DokgenMalMapperIkkeYrkesaktivTest {
                 .medPersonMottaker(DokgenTestData.lagPersondata())
                 .medPersonDokument(DokgenTestData.lagPersondata())
                 .medBehandling(behandling)
-                .medNyVurderingBakgrunn("nyVurderingBakgrunn")
                 .build()
         )
 
 
         vedtaksbrev.toJsonNode.apply {
             get("oppholdsland").asText().shouldBe("Canada")
-            get("nyVurderingBakgrunn").asText().shouldBe("nyVurderingBakgrunn")
             get("sakstype").asText().shouldBe("EU_EOS")
             get("artikkel").asText().shouldBe("Rfo. 883/2004 art.11(2)")
             get("bestemmelse").asText().shouldBe("FO_883_2004_ART11_2")
@@ -112,6 +111,7 @@ class DokgenMalMapperIkkeYrkesaktivTest {
             get("innvilgelse").apply {
                 get("innledningFritekst").asText().shouldBe("innledningFritekst")
                 get("begrunnelseFritekst").asText().shouldBe("begrunnelseFritekst")
+                get("nyVurderingBakgrunn").asText().shouldBe("nyVurderingBakgrunn")
             }
             get("ikkeYrkesaktivSituasjontype").asText().shouldBe("STUDENT")
         }
