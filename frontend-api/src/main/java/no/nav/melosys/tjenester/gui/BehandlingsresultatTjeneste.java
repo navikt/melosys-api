@@ -6,10 +6,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.service.behandling.AngiBehandlingsresultatService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.tjenester.gui.dto.AngiBehandlingsresultattypeDto;
-import no.nav.melosys.tjenester.gui.dto.BehandlingsresultatDto;
-import no.nav.melosys.tjenester.gui.dto.LagreFritekstDto;
-import no.nav.melosys.tjenester.gui.dto.OppdaterUtfallRegistreringUnntakDto;
+import no.nav.melosys.tjenester.gui.dto.*;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
@@ -57,6 +54,19 @@ public class BehandlingsresultatTjeneste {
                 behandlingID,
                 lagreFritekstDto.begrunnelseFritekst(),
                 lagreFritekstDto.innledningFritekst())
+        ));
+    }
+
+    @Transactional
+    @PostMapping("{behandlingID}/resultat/nyvurderingbakgrunn")
+    @ApiOperation(value = "Oppdater fritekstene begrunnelseFritekst og innledningFritekst i behandlingsresultatet",
+        response = BehandlingsresultatDto.class)
+    public ResponseEntity<BehandlingsresultatDto> oppdaterNyVurderingBakgrunn(@PathVariable("behandlingID") long behandlingID,
+                                                                              @RequestBody LagreNyVurderingBakgrunnDto nyVurderingBakgrunn) {
+        aksesskontroll.autoriserSkriv(behandlingID);
+
+        return ResponseEntity.ok(BehandlingsresultatDto.av(
+            behandlingsresultatService.oppdaterNyVurderingBakgrunn(behandlingID, nyVurderingBakgrunn.nyVurderingBakgrunn())
         ));
     }
 
