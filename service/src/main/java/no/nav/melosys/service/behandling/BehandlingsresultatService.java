@@ -265,7 +265,6 @@ public class BehandlingsresultatService {
         behandlingsresultatRepository.save(behandlingsresultat);
     }
 
-    @Transactional
     public Behandlingsresultat oppdaterFritekster(long behandlingID, String begrunnelseFritekst, String innledningFritekst) {
         final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
         behandlingsresultat.setBegrunnelseFritekst(begrunnelseFritekst);
@@ -273,7 +272,6 @@ public class BehandlingsresultatService {
         return behandlingsresultatRepository.save(behandlingsresultat);
     }
 
-    @Transactional
     public Behandlingsresultat oppdaterNyVurderingBakgrunn(long behandlingID, String nyVurderingBakgrunn) {
         final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
 
