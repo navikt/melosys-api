@@ -1,6 +1,5 @@
 package no.nav.melosys.service.sak;
 
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.service.AdminTjeneste;
 import no.nav.security.token.support.core.api.Unprotected;
 import org.slf4j.Logger;
