@@ -1,6 +1,8 @@
 package no.nav.melosys.service.behandling;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -9,10 +11,12 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
+import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
@@ -265,6 +269,14 @@ public class BehandlingsresultatService {
         final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
         behandlingsresultat.setBegrunnelseFritekst(begrunnelseFritekst);
         behandlingsresultat.setInnledningFritekst(innledningFritekst);
+        return behandlingsresultatRepository.save(behandlingsresultat);
+    }
+
+    public Behandlingsresultat oppdaterNyVurderingBakgrunn(long behandlingID, String nyVurderingBakgrunn) {
+        final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
+
+        behandlingsresultat.setNyVurderingBakgrunn(nyVurderingBakgrunn);
+
         return behandlingsresultatRepository.save(behandlingsresultat);
     }
 }
