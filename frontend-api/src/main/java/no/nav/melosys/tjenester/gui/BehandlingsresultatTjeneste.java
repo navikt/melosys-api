@@ -59,7 +59,7 @@ public class BehandlingsresultatTjeneste {
 
     @Transactional
     @PostMapping("{behandlingID}/resultat/nyvurderingbakgrunn")
-    @ApiOperation(value = "Oppdater fritekstene begrunnelseFritekst og innledningFritekst i behandlingsresultatet",
+    @ApiOperation(value = "Oppdater nyVurderingBakgrunn i behandlingsresultatet",
         response = BehandlingsresultatDto.class)
     public ResponseEntity<BehandlingsresultatDto> oppdaterNyVurderingBakgrunn(@PathVariable("behandlingID") long behandlingID,
                                                                               @RequestBody LagreNyVurderingBakgrunnDto nyVurderingBakgrunn) {
