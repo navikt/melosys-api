@@ -219,6 +219,7 @@ public final class ProsessflytDefinisjon {
             ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
             new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
                 LAGRE_LOVVALGSPERIODE_MEDL,
+                SEND_VEDTAKSBREV_INNLAND,
                 AVSLUTT_SAK_OG_BEHANDLING
             )
         );

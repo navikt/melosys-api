@@ -20,7 +20,6 @@ import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -67,8 +66,6 @@ class EosVedtakServiceTest {
     private FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
     @Mock
     private SaksbehandlingRegler saksbehandlingRegler;
-    @Mock
-    private DokgenService dokgenService;
 
     private EosVedtakService vedtakService;
     private final long behandlingID = 1L;
@@ -79,7 +76,7 @@ class EosVedtakServiceTest {
     @BeforeEach
     void setUp() {
         vedtakService = new EosVedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService,
-            eessiService, landvelgerService, avklartefaktaService, melosysEventMulticaster, ferdigbehandlingKontrollFacade, saksbehandlingRegler, dokgenService);
+            eessiService, landvelgerService, avklartefaktaService, melosysEventMulticaster, ferdigbehandlingKontrollFacade, saksbehandlingRegler);
 
         SpringSubjectHandler.set(new TestSubjectHandler());
 

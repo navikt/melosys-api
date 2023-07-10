@@ -25,8 +25,10 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -45,13 +47,15 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final ProsessinstansService prosessinstansService;
+    private final SaksbehandlingRegler saksbehandlingRegler;
 
     public SendVedtaksbrevInnland(BehandlingService behandlingService,
                                   BehandlingsresultatService behandlingsresultatService,
-                                  ProsessinstansService prosessinstansService) {
+                                  ProsessinstansService prosessinstansService, SaksbehandlingRegler saksbehandlingRegler) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.prosessinstansService = prosessinstansService;
+        this.saksbehandlingRegler = saksbehandlingRegler;
     }
 
     @Override
@@ -125,23 +129,38 @@ public class SendVedtaksbrevInnland implements StegBehandler {
                                       String saksbehandler,
                                       String begrunnelseKode,
                                       String fritekst) {
-        Produserbaredokumenter innvilgelseType = (resultat.erInnvilgelseFlereLand())
-            ? INNVILGELSE_YRKESAKTIV_FLERE_LAND : INNVILGELSE_YRKESAKTIV;
 
-        List<Mottaker> mottakerListe = new ArrayList<>(List.of(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN)));
+        boolean harIkkeYrkesaktivFlyt = saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling.getFagsak().getType(), behandling.getTema());
+        Produserbaredokumenter produserbaredokument = hentProduserbaredokument(resultat, harIkkeYrkesaktivFlyt);
+
+        List<Mottaker> mottakerListe = new ArrayList<>(List.of(Mottaker.medRolle(Mottakerroller.BRUKER)));
         if (brevSendesTilStatligSkatteoppkreving(
             resultat.hentLovvalgsperiode(),
             behandling.getMottatteOpplysninger()
         )) {
             mottakerListe.add(Mottaker.av(NorskMyndighet.SKATTEINNKREVER_UTLAND));
         }
+        if (!harIkkeYrkesaktivFlyt) {
+            mottakerListe.add(Mottaker.av(NorskMyndighet.SKATTEETATEN));
+        }
 
-        DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProduserbartDokument(innvilgelseType)
+        DoksysBrevbestilling innvilgelseBrukerOgSkatt = new DoksysBrevbestilling.Builder().medProduserbartDokument(produserbaredokument)
             .medAvsenderID(saksbehandler)
             .medBegrunnelseKode(begrunnelseKode)
             .medFritekst(fritekst)
             .build();
         prosessinstansService.opprettProsessinstanserSendBrev(behandling, innvilgelseBrukerOgSkatt, mottakerListe);
+    }
+
+    @NotNull
+    private static Produserbaredokumenter hentProduserbaredokument(Behandlingsresultat resultat, boolean harIkkeYrkesaktivFlyt) {
+        if (harIkkeYrkesaktivFlyt) {
+            return IKKE_YRKESAKTIV_VEDTAKSBREV;
+        }
+        if (resultat.erInnvilgelseFlereLand()) {
+            return INNVILGELSE_YRKESAKTIV_FLERE_LAND;
+        }
+        return INNVILGELSE_YRKESAKTIV;
     }
 
     private void sendUtpekingsbrev(Behandling behandling, String saksbehandler, String fritekst) {
