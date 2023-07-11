@@ -66,7 +66,7 @@ public class LovvalgsperiodeTjeneste {
 
     @PutMapping("/behandlinger/{behandlingID}/lovvalgsperioder/{lovvalgsperiodeId}")
     @ApiOperation("Oppdaterer en lovvalgsperiode")
-    @ApiResponses({@ApiResponse(code = 404, message = "Dersom behandlingsid-en ikke fins.")})
+    @ApiResponses({@ApiResponse(code = 404, message = "Dersom lovvalgsperiode-en ikke fins.")})
     public ResponseEntity<LovvalgsperiodeDto> oppdaterLovvalgsperiode(@PathVariable("behandlingID") long behandlingsid,
                                                                       @PathVariable("lovvalgsperiodeId") long lovvalgsperiodeId,
                                                                       @RequestBody LovvalgsperiodeDto lovvalgsperiodeDto) {
@@ -74,6 +74,16 @@ public class LovvalgsperiodeTjeneste {
 
         return ResponseEntity.ok(LovvalgsperiodeDto.av(
             lovvalgsperiodeService.oppdaterLovvalgsperiode(lovvalgsperiodeId, lovvalgsperiodeDto.til())));
+    }
+
+    @DeleteMapping("/behandlinger/{behandlingID}/lovvalgsperioder/{lovvalgsperiodeId}")
+    @ApiOperation("Sletter en lovvalgsperiode")
+    public ResponseEntity<LovvalgsperiodeDto> slettLovvalgsperiode(@PathVariable("behandlingID") long behandlingsid,
+                                                                      @PathVariable("lovvalgsperiodeId") long lovvalgsperiodeId) {
+        aksesskontroll.autoriserSkriv(behandlingsid);
+
+        lovvalgsperiodeService.slettLovvalgsperiode(lovvalgsperiodeId);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/lovvalgsperioder/{behandlingID}")

@@ -79,6 +79,11 @@ public class LovvalgsperiodeService {
         return lovvalgsperiodeRepo.save(lagretLovvalgsperiode);
     }
 
+    @Transactional
+    public void slettLovvalgsperiode(long lovvalgsperiodeId) {
+        lovvalgsperiodeRepo.deleteById(lovvalgsperiodeId);
+    }
+
     @Transactional(propagation = Propagation.REQUIRED)
     public Collection<Lovvalgsperiode> lagreLovvalgsperioder(long behandlingsid, Collection<Lovvalgsperiode> lovvalgsperioder) {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepo.findById(behandlingsid)
