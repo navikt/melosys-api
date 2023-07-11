@@ -19,30 +19,30 @@ public class Lovvalgsperiode implements PeriodeOmLovvalg {
     @JoinColumn(name = "beh_resultat_id", nullable = false, updatable = false)
     private Behandlingsresultat behandlingsresultat;
 
-    @Column(name = "fom_dato", nullable = false, updatable = false)
+    @Column(name = "fom_dato", nullable = false)
     private LocalDate fom;
 
-    @Column(name = "tom_dato", updatable = false)
+    @Column(name = "tom_dato")
     private LocalDate tom;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "lovvalgsland", updatable = false)
+    @Column(name = "lovvalgsland")
     private Land_iso2 lovvalgsland;
 
-    @Column(name = "lovvalg_bestemmelse", updatable = false)
+    @Column(name = "lovvalg_bestemmelse")
     @Convert(converter = LovvalgBestemmelsekonverterer.class)
     private LovvalgBestemmelse bestemmelse;
 
-    @Column(name = "tillegg_bestemmelse", updatable = false)
+    @Column(name = "tillegg_bestemmelse")
     @Convert(converter = LovvalgBestemmelsekonverterer.class)
     private LovvalgBestemmelse tilleggsbestemmelse;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "innvilgelse_resultat", nullable = false, updatable = false)
+    @Column(name = "innvilgelse_resultat", nullable = false)
     private InnvilgelsesResultat innvilgelsesresultat;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "medlemskapstype", updatable = false)
+    @Column(name = "medlemskapstype")
     private Medlemskapstyper medlemskapstype;
 
     @Enumerated(EnumType.STRING)
