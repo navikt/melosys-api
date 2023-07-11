@@ -1,6 +1,9 @@
 package no.nav.melosys.service.lovvalgsbestemmelse
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldContainAll
+import io.kotest.matchers.collections.shouldContainExactly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import no.nav.melosys.domain.kodeverk.Land_iso2
@@ -8,7 +11,13 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.*
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_987_2009.*
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser.*
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004.*
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us
@@ -25,9 +34,49 @@ internal class LovvalgsbestemmelseServiceTest {
             Sakstyper.EU_EOS, null, Behandlingstema.IKKE_YRKESAKTIV, null
         ).shouldBe(
             setOf(
-                Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_2,
-                Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E,
-                Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_1
+                FO_883_2004_ART11_2,
+                FO_883_2004_ART11_3E,
+                FO_883_2004_ART16_1
+            )
+        )
+    }
+
+    @Test
+    fun hentLovvalgsperioder_eueosUnntak_liste() {
+        lovvalgsbestemmelseService.hentLovvalgsbestemmelser(
+            Sakstyper.EU_EOS, null, Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR, null
+        ).shouldContainExactly(
+            setOf(
+                FO_1408_1971_ART14_2_A,
+                FO_1408_1971_ART14_2_B,
+                FO_1408_1971_ART14A_2,
+                FO_1408_1971_ART14C_A,
+                FO_1408_1971_ART14C_B,
+                FO_883_2004_ART11_3A,
+                FO_883_2004_ART11_3B,
+                FO_883_2004_ART11_3C,
+                FO_883_2004_ART11_3D,
+                FO_883_2004_ART11_3E,
+                FO_883_2004_ART11_4,
+                FO_883_2004_ART11_4_2,
+                FO_883_2004_ART12_1,
+                FO_883_2004_ART12_2,
+                FO_883_2004_ART13_1A,
+                FO_883_2004_ART13_1B1,
+                FO_883_2004_ART13_1B2,
+                FO_883_2004_ART13_1B3,
+                FO_883_2004_ART13_1B4,
+                FO_883_2004_ART13_2A,
+                FO_883_2004_ART13_2B,
+                FO_883_2004_ART13_3,
+                FO_883_2004_ART13_4,
+                FO_883_2004_ART15,
+                FO_883_2004_ART16_1,
+                FO_883_2004_ART16_2,
+                FO_987_2009_ART14_11,
+                FO_883_2004_ART11_2,
+                FO_883_2004_ART11_4_1,
+                FO_883_2004_ART11_5,
             )
         )
     }
