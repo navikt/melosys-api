@@ -63,6 +63,7 @@ class BehandlingsresultatServiceTest {
         behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.GODKJENT);
         behandlingsresultat.setInnledningFritekst("Innledning fritekst");
         behandlingsresultat.setBegrunnelseFritekst("Begrunnelse fritekst");
+        behandlingsresultat.setNyVurderingBakgrunn("ny vurdering bakgrunn");
 
         when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
 
@@ -76,6 +77,7 @@ class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultat.getUtfallRegistreringUnntak()).isNull();
         assertThat(behandlingsresultat.getInnledningFritekst()).isNull();
         assertThat(behandlingsresultat.getBegrunnelseFritekst()).isNull();
+        assertThat(behandlingsresultat.getNyVurderingBakgrunn()).isNull();
         verify(vilkaarsresultatService).tømVilkårForBehandlingsresultat(behandlingsresultat);
     }
 

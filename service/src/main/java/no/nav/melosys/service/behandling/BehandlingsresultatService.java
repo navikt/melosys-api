@@ -50,6 +50,7 @@ public class BehandlingsresultatService {
             behandlingsresultat.setUtfallRegistreringUnntak(null);
             behandlingsresultat.setBegrunnelseFritekst(null);
             behandlingsresultat.setInnledningFritekst(null);
+            behandlingsresultat.setNyVurderingBakgrunn(null);
             vilkaarsresultatService.tømVilkårForBehandlingsresultat(behandlingsresultat);
             behandlingsresultatRepository.save(behandlingsresultat);
         }

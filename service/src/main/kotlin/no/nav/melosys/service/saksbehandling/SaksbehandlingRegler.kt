@@ -124,10 +124,7 @@ class SaksbehandlingRegler(
         sakstype: Sakstyper,
         behandlingstema: Behandlingstema
     ): Boolean {
-        if (unleash.isEnabled(IKKEYRKESAKTIV_FLYT) && (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE) && behandlingstema == IKKE_YRKESAKTIV) {
-            return true
-        }
-        return false
+        return unleash.isEnabled(IKKEYRKESAKTIV_FLYT) && (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE) && behandlingstema == IKKE_YRKESAKTIV
     }
 
     companion object {
