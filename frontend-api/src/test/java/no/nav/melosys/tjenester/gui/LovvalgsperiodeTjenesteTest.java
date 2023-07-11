@@ -40,7 +40,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = {LovvalgsperiodeTjeneste.class})
 final class LovvalgsperiodeTjenesteTest {
     private static final LocalDate FOM = LocalDate.now();
-    private static final LovvalgsperiodeDto FORVENTET = new LovvalgsperiodeDto(new PeriodeDto(FOM, FOM),
+    private static final LovvalgsperiodeDto FORVENTET = new LovvalgsperiodeDto("1",
+        new PeriodeDto(FOM, FOM),
         Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2,
         Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1,
         Land_iso2.SK,
@@ -133,7 +134,9 @@ final class LovvalgsperiodeTjenesteTest {
             .andExpect(responseBody(objectMapper).containsObjectAsJson(lovvalgsperiodeDtos, new TypeReference<List<LovvalgsperiodeDto>>() {
             }));
 
-        verify(lovvalgsperiodeService).lagreLovvalgsperioder(42L, lagLovvalgsperiode());
+        var lovvalgsperiodeSomBlirLagret = lagLovvalgsperiode();
+        lovvalgsperiodeSomBlirLagret.get(0).setId(null);
+        verify(lovvalgsperiodeService).lagreLovvalgsperioder(42L, lovvalgsperiodeSomBlirLagret);
 
         verify(aksesskontroll).autoriserSkriv(42L);
     }
@@ -151,6 +154,7 @@ final class LovvalgsperiodeTjenesteTest {
 
     private List<Lovvalgsperiode> lagLovvalgsperiode() {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setId(Long.parseLong(FORVENTET.periodeID));
         lovvalgsperiode.setFom(FORVENTET.periode.getFom());
         lovvalgsperiode.setTom(FORVENTET.periode.getTom());
         lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);
