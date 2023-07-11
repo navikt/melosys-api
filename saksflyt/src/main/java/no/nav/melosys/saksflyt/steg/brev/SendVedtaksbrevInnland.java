@@ -131,7 +131,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
                                       String fritekst) {
 
         boolean harIkkeYrkesaktivFlyt = saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling.getFagsak().getType(), behandling.getTema());
-        Produserbaredokumenter produserbaredokument = hentProduserbaredokument(resultat, harIkkeYrkesaktivFlyt);
+        Produserbaredokumenter produserbaredokument = hentProduserbarDokumentForInnvilgelse(resultat, harIkkeYrkesaktivFlyt);
 
         List<Mottaker> mottakerListe = new ArrayList<>(List.of(Mottaker.medRolle(Mottakerroller.BRUKER)));
         if (brevSendesTilStatligSkatteoppkreving(
@@ -153,7 +153,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     }
 
     @NotNull
-    private static Produserbaredokumenter hentProduserbaredokument(Behandlingsresultat resultat, boolean harIkkeYrkesaktivFlyt) {
+    private static Produserbaredokumenter hentProduserbarDokumentForInnvilgelse(Behandlingsresultat resultat, boolean harIkkeYrkesaktivFlyt) {
         if (harIkkeYrkesaktivFlyt) {
             return IKKE_YRKESAKTIV_VEDTAKSBREV;
         }
