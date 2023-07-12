@@ -9,17 +9,17 @@ public class MottakerDto {
     private Mottakerroller rolle;
     private boolean orgnrSettesAvSaksbehandler;
     private Collection<MottakerAdresseDto> adresser;
-    private String feilmelding;
+    private MottakerFeilmeldingDto mottakerFeilmeldingDto;
 
     public MottakerDto() {
     }
 
-    public MottakerDto(String type, Mottakerroller rolle, boolean orgnrSettesAvSaksbehandler, Collection<MottakerAdresseDto> adresser, String feilmelding) {
+    public MottakerDto(String type, Mottakerroller rolle, boolean orgnrSettesAvSaksbehandler, Collection<MottakerAdresseDto> adresser, MottakerFeilmeldingDto mottakerFeilmeldingDto) {
         this.type = type;
         this.rolle = rolle;
         this.orgnrSettesAvSaksbehandler = orgnrSettesAvSaksbehandler;
         this.adresser = adresser;
-        this.feilmelding = feilmelding;
+        this.mottakerFeilmeldingDto = mottakerFeilmeldingDto;
     }
 
     public void setType(String type) {
@@ -38,8 +38,8 @@ public class MottakerDto {
         this.adresser = adresser;
     }
 
-    public void setFeilmelding(String feilmelding) {
-        this.feilmelding = feilmelding;
+    public void setFeilmelding(MottakerFeilmeldingDto mottakerFeilmeldingDto) {
+        this.mottakerFeilmeldingDto = mottakerFeilmeldingDto;
     }
 
     public String getType() {
@@ -58,7 +58,7 @@ public class MottakerDto {
         return adresser;
     }
 
-    public String getFeilmelding() {
-        return feilmelding;
+    public MottakerFeilmeldingDto getFeilmelding() {
+        return mottakerFeilmeldingDto;
     }
 }

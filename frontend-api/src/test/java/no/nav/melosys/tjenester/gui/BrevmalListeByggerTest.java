@@ -207,12 +207,11 @@ class BrevmalListeByggerTest {
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
-
         assertThat(tilgjengeligeMaler).hasSize(4);
         assertThat(tilgjengeligeMaler.get(0).getMottaker())
             .extracting(
                 MottakerDto::getType,
-                MottakerDto::getFeilmelding)
+                mottaker -> mottaker.getFeilmelding().tittel())
             .containsExactly(
                 MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.getBeskrivelse(),
                 Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
@@ -232,7 +231,7 @@ class BrevmalListeByggerTest {
         assertThat(tilgjengeligeMaler.get(1).getMottaker())
             .extracting(
                 MottakerDto::getType,
-                MottakerDto::getFeilmelding)
+                mottaker -> mottaker.getFeilmelding().tittel())
             .containsExactly(
                 MottakerType.ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG.getBeskrivelse(),
                 Kontroll_begrunnelser.INGEN_ARBEIDSGIVERE.getBeskrivelse());
