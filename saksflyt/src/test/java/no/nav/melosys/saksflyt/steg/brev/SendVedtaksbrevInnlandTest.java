@@ -11,8 +11,9 @@ import no.nav.melosys.domain.brev.NorskMyndighet;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
@@ -23,6 +24,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.BrevData;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,16 +55,19 @@ class SendVedtaksbrevInnlandTest {
     private ProsessinstansService prosessinstansService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
+    @Mock
+    private SaksbehandlingRegler saksbehandlingRegler;
 
-    private final Behandling behandling = lagBehandling();
+    private Behandling behandling;
 
     private SendVedtaksbrevInnland sendVedtaksbrevInnland;
 
     @BeforeEach
     public void setUp() {
+        behandling = lagBehandling();
         when(behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLINGID)).thenReturn(behandling);
 
-        sendVedtaksbrevInnland = new SendVedtaksbrevInnland(behandlingService, behandlingsresultatService, prosessinstansService);
+        sendVedtaksbrevInnland = new SendVedtaksbrevInnland(behandlingService, behandlingsresultatService, prosessinstansService, saksbehandlingRegler);
     }
 
     @Test
@@ -149,6 +154,38 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
+    void utfør_innvilgelse_FO_883_2004_ART11_2_ikke_yrkesaktiv_vedtakSendes() {
+        behandling.setTema(Behandlingstema.IKKE_YRKESAKTIV);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_2)));
+        when(saksbehandlingRegler.harIkkeYrkesaktivFlyt(Sakstyper.EU_EOS, Behandlingstema.IKKE_YRKESAKTIV)).thenReturn(true);
+
+
+        sendVedtaksbrevInnland.utfør(lagProsessinstans());
+
+
+        var mottakere = List.of(Mottaker.medRolle(BRUKER));
+        verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
+        assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(IKKE_YRKESAKTIV_VEDTAKSBREV);
+    }
+
+    @Test
+    void utfør_avslagManglendeOppl_ikke_yrkesaktiv_bestillerAvslagManglendeOppl() {
+        behandling.setTema(Behandlingstema.IKKE_YRKESAKTIV);
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultatUtenPerioder(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL));
+
+
+        sendVedtaksbrevInnland.utfør(lagProsessinstans());
+
+
+        verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(List.of(Mottaker.medRolle(BRUKER))));
+        assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(AVSLAG_MANGLENDE_OPPLYSNINGER);
+        verify(prosessinstansService, never()).opprettProsessinstansSendBrev(eq(behandling), any(DoksysBrevbestilling.class), eq(Mottaker.medRolle(ARBEIDSGIVER)));
+    }
+
+
+    @Test
     void utfør_utpeking13_1B1_senderOrienteringsbrev() {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
             .thenReturn(lagBehandlingsresultat(lagUtpekingsperiode(), lagLovvalgsperiode(FO_883_2004_ART13_1B1, LocalDate.now(), Land_iso2.SE, true)));
@@ -178,6 +215,8 @@ class SendVedtaksbrevInnlandTest {
     void utfør_innvilgelse13_1AMedUtenlandskForetak_senderBrevTilStatligSkatteoppkreving() {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
             .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(FO_883_2004_ART13_1A)));
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
+            .thenReturn(lagBehandlingsresultat(lagInnvilgetLovvalgsperiode(FO_883_2004_ART13_1A)));
         ForetakUtland arbeidsgiverUtland = new ForetakUtland();
         arbeidsgiverUtland.selvstendigNæringsvirksomhet = false;
         behandling.getMottatteOpplysninger().getMottatteOpplysningerData().foretakUtland.add(arbeidsgiverUtland);
@@ -186,7 +225,7 @@ class SendVedtaksbrevInnlandTest {
         sendVedtaksbrevInnland.utfør(lagProsessinstans());
 
 
-        var mottakere = List.of(Mottaker.medRolle(BRUKER), Mottaker.av(NorskMyndighet.SKATTEETATEN), Mottaker.av(NorskMyndighet.SKATTEINNKREVER_UTLAND));
+        var mottakere = List.of(Mottaker.medRolle(BRUKER), Mottaker.av(NorskMyndighet.SKATTEINNKREVER_UTLAND), Mottaker.av(NorskMyndighet.SKATTEETATEN));
         verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
         assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(INNVILGELSE_YRKESAKTIV_FLERE_LAND);
     }
@@ -385,11 +424,11 @@ class SendVedtaksbrevInnlandTest {
         return lagInnvilgetLovvalgsperiode(FO_883_2004_ART16_1);
     }
 
-    private static Lovvalgsperiode lagInnvilgetLovvalgsperiode(Lovvalgbestemmelser_883_2004 bestemmelse) {
+    private static Lovvalgsperiode lagInnvilgetLovvalgsperiode(LovvalgBestemmelse bestemmelse) {
         return lagLovvalgsperiode(bestemmelse, LocalDate.now(), Land_iso2.NO, true);
     }
 
-    private static Lovvalgsperiode lagLovvalgsperiode(Lovvalgbestemmelser_883_2004 bestemmelse, LocalDate fom, Land_iso2 land, boolean innvilget) {
+    private static Lovvalgsperiode lagLovvalgsperiode(LovvalgBestemmelse bestemmelse, LocalDate fom, Land_iso2 land, boolean innvilget) {
         Lovvalgsperiode periode = new Lovvalgsperiode();
         periode.setFom(fom);
         periode.setTom(fom.plusDays(1));

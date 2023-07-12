@@ -98,20 +98,16 @@ public class TrygdeavtaleVedtakService {
             behandling.getFagsak().setStatus(Saksstatuser.MEDLEMSKAP_AVKLART); // TODO: Egen oppgave for fjerne denne som ikke brukes
             oppdaterBehandlingsresultat(behandlingsresultat, request);
             prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling, request);
+            BrevbestillingDto brevbestillingDto = lagBrevbestilling(behandling, request);
+            dokgenService.produserOgDistribuerBrev(behandlingID, brevbestillingDto);
         }
 
-
-        BrevbestillingDto brevbestillingDto = lagBrevbestilling(behandling, request);
-        dokgenService.produserOgDistribuerBrev(behandlingID, brevbestillingDto);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
     }
 
     private BrevbestillingDto lagBrevbestilling(Behandling behandling, FattVedtakRequest request) {
         if (request.getBehandlingsresultatTypeKode() == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
             return lagAvslagMangledeOpplysningerBrevbestilling(request);
-        }
-        if (saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)) {
-            return lagTrygdeavtaleBrevbestilling(request, Produserbaredokumenter.IKKE_YRKESAKTIV_VEDTAKSBREV);
         }
         Optional<Produserbaredokumenter> produserbaredokumenter = behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.landkoder.stream()
             .map(Land_iso2::valueOf)
