@@ -4,7 +4,13 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
+import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.medl.GrunnlagMedl;
 import no.nav.melosys.integrasjon.medl.MedlPeriodeKonverter;
@@ -15,6 +21,7 @@ import no.nav.melosys.repository.TidligereMedlemsperiodeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -87,6 +94,52 @@ class LovvalgsperiodeServiceTest {
 
         assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() ->
             lovvalgsperiodeService.lagreLovvalgsperioder(BEH_ID, lovvalgsperioder)).withMessageContaining("fins ikke");
+    }
+
+    @Test
+    void oppdaterLovvalgsperiode_lovvalgsperiodeFinnes_oppdatererFelt() {
+        var eksisterendeLovvalgsperiode = new Lovvalgsperiode();
+        eksisterendeLovvalgsperiode.setId(3L);
+        when(lovvalgsperiodeRepository.findById(3L)).thenReturn(Optional.of(eksisterendeLovvalgsperiode));
+
+        var request = new Lovvalgsperiode();
+        request.setFom(LocalDate.now());
+        request.setTom(LocalDate.now());
+        request.setLovvalgsland(Land_iso2.BA);
+        request.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3E);
+        request.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1);
+        request.setInnvilgelsesresultat(InnvilgelsesResultat.DELVIS_INNVILGET);
+        request.setDekning(Trygdedekninger.FULL_DEKNING);
+        request.setMedlemskapstype(Medlemskapstyper.FRIVILLIG);
+        request.setMedlPeriodeID(23L);
+
+        ArgumentCaptor<Lovvalgsperiode> captor = ArgumentCaptor.forClass(Lovvalgsperiode.class);
+
+
+        lovvalgsperiodeService.oppdaterLovvalgsperiode(3L, request);
+
+
+        verify(lovvalgsperiodeRepository).save(captor.capture());
+        assertThat(captor.getValue())
+            .isNotNull()
+            .extracting(
+                "fom", "tom", "lovvalgsland", "bestemmelse",
+                "tilleggsbestemmelse", "innvilgelsesresultat",
+                "medlemskapstype", "dekning", "medlPeriodeID")
+            .containsExactly(
+                request.getFom(), request.getTom(), request.getLovvalgsland(), request.getBestemmelse(),
+                request.getTilleggsbestemmelse(), request.getInnvilgelsesresultat(),
+                request.getMedlemskapstype(), request.getDekning(), request.getMedlPeriodeID());
+    }
+
+    @Test
+    void oppdaterLovvalgsperiode_lovvalgsperiodeFinnesIkke_kasterException() {
+        var request = new Lovvalgsperiode();
+        when(lovvalgsperiodeRepository.findById(3L)).thenReturn(Optional.empty());
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> lovvalgsperiodeService.oppdaterLovvalgsperiode(3L, request))
+            .withMessageContaining("Lovvalgsperioden 3 finnes ikke");
     }
 
     @Test
