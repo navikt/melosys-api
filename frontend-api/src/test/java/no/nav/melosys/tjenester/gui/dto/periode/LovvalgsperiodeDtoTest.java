@@ -37,8 +37,7 @@ class LovvalgsperiodeDtoTest {
 
     @Test
     void mapKonstruktørLagerSammeObjektSomOrdinærKonstruktør() throws Exception {
-        Map<String, String> json = new ObjectMapper().readValue(JSON_EKSEMPEL, new TypeReference<Map<String, String>>() {
-        });
+        Map<String, String> json = new ObjectMapper().readValue(JSON_EKSEMPEL, new TypeReference<>() {});
         LovvalgsperiodeDto resultat = new LovvalgsperiodeDto(json);
         LovvalgsperiodeDto forventet = lagLovvalgsperiodeDtoFraMap(json);
         Assertions.assertThat(resultat).usingRecursiveComparison().isEqualTo(forventet);
@@ -46,8 +45,7 @@ class LovvalgsperiodeDtoTest {
 
     @Test
     void mapKonstruktørLagerSammeObjektSomOrdinærKonstruktørUtenLandkodeUtenMedlemskapstypeOgLovvalgsbestemmelse() throws Exception {
-        Map<String, String> json = new ObjectMapper().readValue(JSON_EKSEMPEL, new TypeReference<Map<String, String>>() {
-        });
+        Map<String, String> json = new ObjectMapper().readValue(JSON_EKSEMPEL, new TypeReference<>() {});
         json.remove("lovvalgsland");
         json.remove("medlemskapstype");
         json.remove("lovvalgsbestemmelse");
@@ -59,6 +57,7 @@ class LovvalgsperiodeDtoTest {
 
     private static LovvalgsperiodeDto lagLovvalgsperiodeDtoFraMap(Map<String, String> json) {
         LovvalgsperiodeDto forventet = new LovvalgsperiodeDto(
+            null,
             new PeriodeDto(LocalDate.parse(json.get("fomDato")), LocalDate.parse(json.get("tomDato"))),
             enumVerdiEllerNull(Lovvalgbestemmelser_883_2004.class, json.get("lovvalgsbestemmelse")),
             Tilleggsbestemmelser_883_2004.valueOf(json.get("tilleggBestemmelse")),

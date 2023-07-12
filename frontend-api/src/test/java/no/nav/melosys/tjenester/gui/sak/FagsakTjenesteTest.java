@@ -65,7 +65,8 @@ class FagsakTjenesteTest {
     private static final String BASE_URL = "/api/fagsaker";
     private static final LocalDate FOM = LocalDate.now();
     private static final LocalDate TOM = LocalDate.now();
-    private static final LovvalgsperiodeDto FORVENTET_LOVVALGSPERIODE = new LovvalgsperiodeDto(new PeriodeDto(FOM, TOM),
+    private static final LovvalgsperiodeDto FORVENTET_LOVVALGSPERIODE = new LovvalgsperiodeDto(
+        "1L", new PeriodeDto(FOM, TOM),
         Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2,
         Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1,
         Land_iso2.SK,

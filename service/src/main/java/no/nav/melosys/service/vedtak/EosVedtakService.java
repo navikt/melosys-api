@@ -110,7 +110,7 @@ public class EosVedtakService {
         }
         behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
 
-        if (saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling.getFagsak().getType(), behandling.getTema())) {
+        if (saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)) {
             behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
             prosessinstansService.opprettProsessinstansIverksettIkkeYreksaktiv(behandling);
         } else {
