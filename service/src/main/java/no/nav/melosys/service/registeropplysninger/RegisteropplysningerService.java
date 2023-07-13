@@ -182,14 +182,9 @@ public class RegisteropplysningerService {
         }
 
         RegisteropplysningerPeriodeFactory.Periode periodeForYtelser = registeropplysningerPeriodeFactory.hentPeriodeForInntekt(fom, tom, behandling);
-        List<Saksopplysning> utbetalingOpplysninger = List.of();
 
-        if (unleash.isEnabled("melosys.utbetalinger.v2")) {
-            Saksopplysning saksopplysning = utbetaldataRestService.hentUtbetalingerBarnetrygd(registeropplysningerRequest.getFnr(), periodeForYtelser.fom.atDay(1), periodeForYtelser.tom.atDay(1));
-            utbetalingOpplysninger = List.of(saksopplysning);
-        }
-
-        return utbetalingOpplysninger;
+        Saksopplysning saksopplysning = utbetaldataRestService.hentUtbetalingerBarnetrygd(registeropplysningerRequest.getFnr(), periodeForYtelser.fom.atDay(1), periodeForYtelser.tom.atDay(1));
+        return saksopplysning != null ? List.of(saksopplysning) : List.of();
     }
 
     private List<Saksopplysning> hentOrganisasjonsopplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {
