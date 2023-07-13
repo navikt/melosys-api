@@ -14,14 +14,12 @@ import org.springframework.web.bind.annotation.*;
 public class FagsakAdminTjeneste implements AdminTjeneste {
     private final String apiKey;
     private final HenleggFagsakService henleggFagsakService;
-    private final FagsakService fagsakService;
 
     private static final Logger log = LoggerFactory.getLogger(FagsakAdminTjeneste.class);
 
-    public FagsakAdminTjeneste(@Value("${Melosys-admin.apikey}") String apiKey, HenleggFagsakService henleggFagsakService, FagsakService fagsakService) {
+    public FagsakAdminTjeneste(@Value("${Melosys-admin.apikey}") String apiKey, HenleggFagsakService henleggFagsakService) {
         this.apiKey = apiKey;
         this.henleggFagsakService = henleggFagsakService;
-        this.fagsakService = fagsakService;
     }
 
     @PutMapping("/{saksnummer}/henlegg-bortfalt")
@@ -31,17 +29,6 @@ public class FagsakAdminTjeneste implements AdminTjeneste {
 
         log.info("Forsøker å henlegge sak {}", saksnummer);
         henleggFagsakService.henleggSakEllerBehandlingSomBortfalt(saksnummer);
-
-        return ResponseEntity.noContent().build();
-    }
-
-    @PutMapping("/{saksnummer}/ferdigbehandle-sak")
-    public ResponseEntity<Void> ferdigbehandleSak(@PathVariable String saksnummer,
-                                                         @RequestHeader(API_KEY_HEADER) String apiKey) {
-        validerApikey(apiKey);
-
-        log.info("Forsøker å ferdigbehandle sak {}", saksnummer);
-        fagsakService.ferdigbehandleSak(saksnummer);
 
         return ResponseEntity.noContent().build();
     }
