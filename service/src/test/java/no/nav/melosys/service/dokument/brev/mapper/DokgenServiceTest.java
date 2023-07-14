@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.Saksopplysning;
@@ -27,7 +26,6 @@ import no.nav.melosys.service.behandling.UtledMottaksdato;
 import no.nav.melosys.service.bruker.SaksbehandlerService;
 import no.nav.melosys.service.dokument.BrevmottakerService;
 import no.nav.melosys.service.dokument.DokgenService;
-import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.FritekstvedleggDto;
@@ -88,13 +86,9 @@ class DokgenServiceTest {
     @Mock
     private TrygdeavtaleMapper mockTrygdeavtaleMapper;
     @Mock
-    private DokumentHentingService mockDokumentHentingService;
-    @Mock
     private UtledMottaksdato mockUtledMottaksdato;
     @Captor
     private ArgumentCaptor<DokgenBrevbestilling> brevbestillingCaptor;
-
-    private final FakeUnleash unleash = new FakeUnleash();
 
     private DokgenService dokgenService;
 
@@ -102,11 +96,11 @@ class DokgenServiceTest {
 
     @BeforeEach
     void init() {
-        DokgenMapperDatahenter dokgenMapperDatahenter = new DokgenMapperDatahenter(mockBehandlingsresultatService, mockEregFasade,
-            mockPersondataFasade, mockDokumentHentingService, mockKodeverkService);
+        DokgenMapperDatahenter dokgenMapperDatahenter = new DokgenMapperDatahenter(
+            mockBehandlingsresultatService, mockEregFasade, mockPersondataFasade, mockKodeverkService);
 
-        dokgenService = new DokgenService(mockDokgenConsumer, new DokumentproduksjonsInfoMapper(unleash),
-            mockJoarkFasade,
+        dokgenService = new DokgenService(
+            mockDokgenConsumer, new DokumentproduksjonsInfoMapper(), mockJoarkFasade,
             new DokgenMalMapper(dokgenMapperDatahenter, mockInnvilgelseFtrlMapper, mockTrygdeavtaleMapper),
             mockBehandlingsService, mockEregFasade, mockKontaktOpplysningService,
             mockBrevMottakerService, mockProsessinstansService, mockSaksbehandlerService,
@@ -548,8 +542,6 @@ class DokgenServiceTest {
 
     @Test
     void erTilgjengeligDokgenmal() {
-        unleash.enableAll();
-
         assertThat(dokgenService.erTilgjengeligDokgenmal(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)).isTrue();
         assertThat(dokgenService.erTilgjengeligDokgenmal(ATTEST_A1)).isFalse();
     }
