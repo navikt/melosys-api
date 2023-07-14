@@ -1,31 +1,23 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
 import java.time.Instant;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FellesKodeverk;
-import no.nav.melosys.domain.arkiv.Journalpost;
-import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Avsendertyper;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER;
 import static org.springframework.util.StringUtils.hasText;
 
 @Component
@@ -35,16 +27,13 @@ public class DokgenMapperDatahenter {
     private final EregFasade eregFasade;
     private final KodeverkService kodeverkService;
     private final PersondataFasade persondataFasade;
-    private final DokumentHentingService dokumentHentingService;
 
     protected DokgenMapperDatahenter(BehandlingsresultatService behandlingsresultatService,
                                      EregFasade eregFasade,
                                      PersondataFasade persondataFasade,
-                                     DokumentHentingService dokumentHentingService,
                                      KodeverkService kodeverkService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.eregFasade = eregFasade;
-        this.dokumentHentingService = dokumentHentingService;
         this.kodeverkService = kodeverkService;
         this.persondataFasade = persondataFasade;
     }
@@ -107,27 +96,6 @@ public class DokgenMapperDatahenter {
         throw new FunksjonellException("PersonMottaker mangler aktørID og personIdent");
     }
 
-    String hentSammensattNavn(String fnr) {
-        return persondataFasade.hentSammensattNavn(fnr);
-    }
-
-    public List<Instant> hentMangelbrevDatoer(DokgenBrevbestilling brevbestilling) {
-        String saksnummer = brevbestilling.getBehandling().getFagsak().getSaksnummer();
-        Behandling behandling = brevbestilling.getBehandling();
-
-        List<Journalpost> dokumenter = dokumentHentingService.hentJournalposter(saksnummer).stream().filter(dokument ->
-            dokument.getHoveddokument().getTittel().equals(MELDING_MANGLENDE_OPPLYSNINGER.getBeskrivelse())
-                && dokument.getForsendelseJournalfoert() != null
-                && dokument.getForsendelseJournalfoert().isAfter(behandling.getRegistrertDato())
-                && dokument.getAvsenderType().equals(Avsendertyper.PERSON)
-        ).toList();
-
-        return dokumenter.stream()
-            .map(Journalpost::getForsendelseJournalfoert)
-            .filter(Objects::nonNull)
-            .sorted(Comparator.naturalOrder())
-            .toList();
-    }
     public Behandlingsresultat hentBehandlingsresultat(Long behandlingId) {
         return behandlingsresultatService.hentBehandlingsresultat(behandlingId);
     }
