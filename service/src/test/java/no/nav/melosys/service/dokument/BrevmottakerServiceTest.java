@@ -300,7 +300,7 @@ class BrevmottakerServiceTest {
 
     @Test
     void gittForvaltningsmelding_skalHovedmottakerVæreBruker() {
-        assertThat(brevmottakerService.hentMottakerliste(MELDING_FORVENTET_SAKSBEHANDLINGSTID, 123))
+        assertThat(brevmottakerService.hentMottakerliste(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, 123))
             .extracting(
                 Mottakerliste::getHovedMottaker,
                 Mottakerliste::getKopiMottakere,
@@ -502,13 +502,6 @@ class BrevmottakerServiceTest {
             );
     }
 
-
-    @Test
-    void avklarMottakerRolleFraDokument_tilBruker_girRolleBruker() {
-        Mottakerroller mottakerRolle = brevmottakerService.avklarMottakerRolleFraDokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
-
-        assertThat(mottakerRolle).isEqualTo(BRUKER);
-    }
 
     @Test
     void avklarMottakerRolleFraDokument_tilArbeidsgiver_girRolleArbeidsgiver() {

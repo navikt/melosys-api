@@ -43,11 +43,6 @@ public class DokumentproduksjonsInfoMapper {
 
     static {
         DOKUMENTPRODUKSJONS_INFO_MAP = Maps.immutableEnumMap(ImmutableMap.<Produserbaredokumenter, DokumentproduksjonsInfo>builder()
-            .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID,
-                new DokumentproduksjonsInfo("saksbehandlingstid_soknad",
-                    DokumentKategoriKode.IB.getKode(),
-                    JournalforingsTittel.FORVALTNINGSMELDING.getTittel())
-            )
             .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
                 new DokumentproduksjonsInfo("saksbehandlingstid_soknad",
                     DokumentKategoriKode.IB.getKode(),
