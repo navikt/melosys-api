@@ -57,7 +57,7 @@ public class BrevmottakerService {
 
     Mottakerroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) {
         return switch (produserbartDokument) {
-            case AVSLAG_YRKESAKTIV, ORIENTERING_ANMODNING_UNNTAK, MELDING_HENLAGT_SAK,
+            case AVSLAG_YRKESAKTIV, ORIENTERING_ANMODNING_UNNTAK,
                 INNVILGELSE_YRKESAKTIV, IKKE_YRKESAKTIV_VEDTAKSBREV -> Mottakerroller.BRUKER;
             case INNVILGELSE_ARBEIDSGIVER, AVSLAG_ARBEIDSGIVER -> Mottakerroller.ARBEIDSGIVER;
             case ANMODNING_UNNTAK, ATTEST_A1 -> Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET;
