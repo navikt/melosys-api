@@ -1,10 +1,5 @@
 package no.nav.melosys.service.dokument;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.*;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.arkiv.Journalpost;
@@ -32,7 +27,14 @@ import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.kodeverk.Mottakerroller.FULLMEKTIG;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import static org.springframework.util.StringUtils.hasText;
 
 @Service
@@ -190,8 +192,7 @@ public class DokgenService {
     }
 
     public boolean erTilgjengeligDokgenmal(Produserbaredokumenter produserbartDokument) {
-        Set<Produserbaredokumenter> tilgjengeligeMaler = dokumentproduksjonsInfoMapper.utledTilgjengeligeMaler();
-        return tilgjengeligeMaler.contains(produserbartDokument);
+        return dokumentproduksjonsInfoMapper.tilgjengeligeMalerIDokgen().contains(produserbartDokument);
     }
 
     private void settOrganisasjonsOpplysninger(Behandling behandling, String orgnr,
@@ -301,7 +302,6 @@ public class DokgenService {
             case GENERELT_FRITEKSTVEDLEGG -> new FritekstvedleggBrevbestilling.Builder()
                 .medFritekstvedleggTittel(brevbestillingDto.getFritekstTittel())
                 .medFritekstvedleggTekst(brevbestillingDto.getFritekst());
-
             case IKKE_YRKESAKTIV_VEDTAKSBREV -> new IkkeYrkesaktivBrevbestilling.Builder().medDistribusjonstype(Distribusjonstype.VEDTAK);
 
             default -> new DokgenBrevbestilling.Builder<>().medDistribusjonstype(Distribusjonstype.VIKTIG);

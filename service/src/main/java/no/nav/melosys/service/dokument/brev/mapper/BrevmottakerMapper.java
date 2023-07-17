@@ -15,9 +15,6 @@ public class BrevmottakerMapper {
 
     static {
         BREV_MOTTAKER_MAP = Map.ofEntries(
-            Map.entry(MELDING_FORVENTET_SAKSBEHANDLINGSTID, new Mottakerliste.Builder()
-                .medHovedMottaker(BRUKER).build()),
-
             Map.entry(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, new Mottakerliste.Builder()
                 .medHovedMottaker(BRUKER).build()),
 

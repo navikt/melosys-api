@@ -15,7 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.Mottakerroller.BRUKER;
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -51,7 +51,7 @@ class SendForvaltningsmeldingTest {
 
 
         verify(behandlingService).hentBehandlingMedSaksopplysninger(behandlingID);
-        verify(brevBestiller).bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID, List.of(Mottaker.medRolle(BRUKER)), null, "TEST", null, behandling);
+        verify(brevBestiller).bestill(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, List.of(Mottaker.medRolle(BRUKER)), null, "TEST", null, behandling);
     }
 
     @Test

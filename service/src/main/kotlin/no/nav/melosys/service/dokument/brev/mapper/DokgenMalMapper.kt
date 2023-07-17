@@ -61,15 +61,11 @@ class DokgenMalMapper(
             .medPersonMottaker(dokgenMapperDatahenter.hentPersonMottaker(mottaker))
     }
 
-    private fun lagAvslagsbrev(brevbestilling: DokgenBrevbestilling): Avslagbrev {
-        val mangelbrevDatoer = dokgenMapperDatahenter.hentMangelbrevDatoer(brevbestilling)
-        return Avslagbrev.av((brevbestilling as AvslagBrevbestilling).toBuilder().build(), mangelbrevDatoer)
-    }
-
     internal fun lagIkkeYrkesaktivVedtaksbrev(brevbestilling: IkkeYrkesaktivBrevbestilling): IkkeYrkesaktivVedtaksbrev {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandling.id)
         val lovvalgsperiode = behandlingsresultat.hentValidertPeriodeOmLovvalg()
-        val mottatteOpplysningerData = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SoeknadIkkeYrkesaktiv
+        val mottatteOpplysningerData =
+            behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData as SoeknadIkkeYrkesaktiv
         val oppholdsland = Land_iso2.valueOf(mottatteOpplysningerData.soeknadsland.landkoder.get(0)).beskrivelse
         val bestemmelse = lovvalgsperiode.bestemmelse
         val bestemmelseBeskrivelse = bestemmelse.beskrivelse
@@ -92,7 +88,7 @@ class DokgenMalMapper(
 
     private fun lagDokgenDtoFraBestilling(brevbestilling: DokgenBrevbestilling): DokgenDto {
         return when (brevbestilling.produserbartdokument) {
-            Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID, Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD -> SaksbehandlingstidSoknad.av(
+            Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD -> SaksbehandlingstidSoknad.av(
                 brevbestilling.toBuilder()
                     .medAvsenderLand(dokgenMapperDatahenter.hentLandnavnFraLandkode(brevbestilling.avsenderLand))
                     .build(),
@@ -179,7 +175,9 @@ class DokgenMalMapper(
                 (brevbestilling as FritekstbrevBrevbestilling).toBuilder().build()
             )
 
-            Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER -> lagAvslagsbrev(brevbestilling)
+            Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER -> Avslagbrev.av(
+                (brevbestilling as AvslagBrevbestilling).toBuilder().build()
+            )
             Produserbaredokumenter.MELDING_HENLAGT_SAK -> Henleggelsesbrev.av(
                 (brevbestilling as HenleggelseBrevbestilling).toBuilder().build()
             )

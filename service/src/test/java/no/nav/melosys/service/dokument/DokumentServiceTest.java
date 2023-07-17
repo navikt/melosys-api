@@ -34,7 +34,6 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.doksys.DoksysFasade;
 import no.nav.melosys.integrasjon.doksys.Dokumentbestilling;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.integrasjon.kodeverk.KodeOppslag;
 import no.nav.melosys.integrasjon.kodeverk.Kodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
@@ -334,7 +333,6 @@ final class DokumentServiceTest {
         AnmodningsperiodeService anmodningsperiodeService = mock(AnmodningsperiodeService.class);
         MottatteOpplysningerService mottatteOpplysningerService = mock(MottatteOpplysningerService.class);
         BehandlingsresultatService behandlingsresultatService = mock(BehandlingsresultatService.class);
-        JoarkService joarkService = mock(JoarkService.class);
         VilkaarsresultatRepository vilkaarsresultatRepository = mock(VilkaarsresultatRepository.class);
         LandvelgerService landvelgerService = new LandvelgerService(avklartefaktaService, behandlingsresultatService,
             mottatteOpplysningerService);
@@ -344,7 +342,7 @@ final class DokumentServiceTest {
         UtpekingService utpekingService = mock(UtpekingService.class);
         VilkaarsresultatService vilkaarsresultatService = mock(VilkaarsresultatService.class);
         PersondataFasade persondataFasade = mock(PersondataFasade.class);
-        return new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService, joarkService,
+        return new BrevDataByggerVelger(anmodningsperiodeService, avklartefaktaService,
             landvelgerService, lovvalgsperiodeService, saksopplysningerService, utenlandskMyndighetService,
             utpekingService, vilkaarsresultatRepository, vilkaarsresultatService, persondataFasade, mottatteOpplysningerService);
     }

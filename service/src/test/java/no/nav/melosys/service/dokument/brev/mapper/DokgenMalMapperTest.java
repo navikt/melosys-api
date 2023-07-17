@@ -1,12 +1,13 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.arkiv.ArkivDokument;
-import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.dokument.felles.Periode;
@@ -19,7 +20,6 @@ import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
@@ -95,7 +95,7 @@ class DokgenMalMapperTest {
         Behandling behandling = lagBehandling();
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
-            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
+            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
             .medBehandling(behandling)
             .medForsendelseMottatt(Instant.now())
             .build();
@@ -126,7 +126,7 @@ class DokgenMalMapperTest {
         Behandling behandling = lagBehandling();
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
-            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
+            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
             .medBehandling(behandling)
             .medForsendelseMottatt(Instant.now())
             .build();
@@ -154,7 +154,7 @@ class DokgenMalMapperTest {
         Behandling behandling = lagBehandling();
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
-            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
+            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
             .medBehandling(behandling)
             .medForsendelseMottatt(Instant.now())
             .build();
@@ -183,7 +183,7 @@ class DokgenMalMapperTest {
         Behandling behandling = lagBehandling();
         LocalDate forsendelseMottattDato = LocalDate.of(2022, 1, 19);
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
-            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
+            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
             .medBehandling(behandling)
             .medForsendelseMottatt(forsendelseMottattDato.atStartOfDay(ZoneId.of("Europe/Paris")).toInstant())
             .medAvsendertype(Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET)
@@ -215,7 +215,7 @@ class DokgenMalMapperTest {
         Behandling behandling = lagBehandling();
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
-            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
+            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
             .medBehandling(behandling)
             .medOrg(lagOrg())
             .medForsendelseMottatt(Instant.now())
@@ -248,7 +248,7 @@ class DokgenMalMapperTest {
         org.getOrganisasjonDetaljer().postadresse = emptyList();
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
-            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
+            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
             .medBehandling(behandling)
             .medOrg(org)
             .medForsendelseMottatt(Instant.now())
@@ -277,7 +277,7 @@ class DokgenMalMapperTest {
         Behandling behandling = lagBehandling();
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
-            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID)
+            .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
             .medBehandling(behandling)
             .medOrg(lagOrg())
             .medKontaktopplysning(lagKontaktOpplysning())
@@ -575,58 +575,6 @@ class DokgenMalMapperTest {
     }
 
     @Test
-    void skalMappeTilAvslagbrevMedRiktigeMangelbrevdatoer() {
-        LocalDate datoOktober = LocalDate.of(2021, 10, 9);
-        LocalDate datoDesember = LocalDate.of(2021, 12, 9);
-        Behandling behandling = lagBehandling(lagFagsak(true));
-        behandling.setRegistrertDato(LocalDateTime.of(2021, 10, 1, 0, 0).toInstant(ZoneOffset.UTC));
-        when(mockDokgenMapperDatahenter.hentMangelbrevDatoer(any())).thenReturn(List.of(
-            datoOktober.atStartOfDay(ZoneId.systemDefault()).toInstant(),
-            datoDesember.atStartOfDay(ZoneId.systemDefault()).toInstant()));
-        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
-        when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
-        DokgenBrevbestilling brevbestilling = new AvslagBrevbestilling.Builder()
-            .medProduserbartdokument(AVSLAG_MANGLENDE_OPPLYSNINGER)
-            .medBehandling(behandling)
-            .medFritekst("Hei")
-            .build();
-
-        Avslagbrev avslagbrev = (Avslagbrev) dokgenMalMapper.mapBehandling(brevbestilling, lagMottaker(BRUKER));
-
-        assertThat(avslagbrev.getMottaker().type()).isEqualTo(BRUKER.getKode());
-        assertThat(avslagbrev.getBehandlingstype()).isEqualTo(Behandlingstyper.FØRSTEGANG.getKode());
-        assertThat(avslagbrev.getMangelbrevDatoer()).containsExactly(
-            datoOktober,
-            datoDesember);
-        assertThat(avslagbrev.getMangelbrevDatoer()).isSorted();
-        assertThat(avslagbrev.getFritekst()).isEqualTo("Hei");
-    }
-
-    @Test
-    void skalMappeAvslagsbrevMedRiktigAvsenderType() {
-        LocalDate datoOktober = LocalDate.of(2021, 10, 9);
-        LocalDate datoNovember = LocalDate.of(2021, 11, 10);
-        Journalpost journalPostVirksomhet = lagJournalpost(datoNovember);
-        journalPostVirksomhet.setAvsenderType(Avsendertyper.ORGANISASJON);
-        Behandling behandling = lagBehandling(lagFagsak(true));
-        behandling.setRegistrertDato(LocalDateTime.of(2021, 10, 1, 0, 0).toInstant(ZoneOffset.UTC));
-        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
-        when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
-        when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
-        when(mockDokgenMapperDatahenter.hentMangelbrevDatoer(any())).thenReturn(List.of(
-            datoOktober.atStartOfDay(ZoneId.systemDefault()).toInstant()));
-
-        DokgenBrevbestilling brevbestilling = new AvslagBrevbestilling.Builder()
-            .medProduserbartdokument(AVSLAG_MANGLENDE_OPPLYSNINGER)
-            .medBehandling(behandling)
-            .build();
-
-        Avslagbrev avslagbrev = (Avslagbrev) dokgenMalMapper.mapBehandling(brevbestilling, lagMottaker(BRUKER));
-
-        assertThat(avslagbrev.getMangelbrevDatoer()).containsExactly(datoOktober);
-    }
-
-    @Test
     void skalMappeAvslagsbrevPgaManglendeOpplysningerTilBruker() {
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
         when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
@@ -639,18 +587,6 @@ class DokgenMalMapperTest {
         DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottaker(BRUKER));
 
         assertThat(dokgenDto.getMottaker().type()).isEqualTo(BRUKER.getKode());
-    }
-
-    private Journalpost lagJournalpost(LocalDate forsendelseJournalfoertDato) {
-        Instant forsteDato = forsendelseJournalfoertDato.atStartOfDay(ZoneId.of("Europe/Paris")).toInstant();
-        ArkivDokument arkivDokument = new ArkivDokument();
-        arkivDokument.setTittel(MELDING_MANGLENDE_OPPLYSNINGER.getBeskrivelse());
-        Journalpost journalpost = new Journalpost("1");
-        journalpost.setHoveddokument(arkivDokument);
-        journalpost.setForsendelseJournalfoert(forsteDato);
-        journalpost.setAvsenderType(Avsendertyper.PERSON);
-
-        return journalpost;
     }
 
     private InnvilgelseBrevbestilling lagInnvilgelseBrevbestilling() {
