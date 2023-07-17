@@ -24,9 +24,7 @@ import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkReque
 import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
 
-@Service
 public class InntektService implements InntektFasade {
 
     private static final Logger log = LoggerFactory.getLogger(InntektService.class);
