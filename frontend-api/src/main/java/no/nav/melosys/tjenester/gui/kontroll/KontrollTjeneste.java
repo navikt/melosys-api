@@ -11,8 +11,8 @@ import no.nav.melosys.service.persondata.PersondataService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Aksesstype;
 import no.nav.melosys.service.validering.Kontrollfeil;
-import no.nav.melosys.tjenester.gui.dto.kontroller.BrukerKontrollerDto;
 import no.nav.melosys.tjenester.gui.dto.kontroller.FerdigbehandlingKontrollerDto;
+import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerBrukerDto;
 import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerFerdigbehandlingDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
@@ -49,8 +49,8 @@ public class KontrollTjeneste {
     }
 
     @PostMapping("/harRegistrertAdresse")
-    public ResponseEntity<Boolean> harRegistrertAdresse(@RequestBody BrukerKontrollerDto brukerKontrollerDto) {
-        var bostedsadresse = persondataService.hentPerson(brukerKontrollerDto.brukerID()).finnBostedsadresse();
+    public ResponseEntity<Boolean> harRegistrertAdresse(@RequestBody KontrollerBrukerDto kontrollerBrukerDto) {
+        var bostedsadresse = persondataService.hentPerson(kontrollerBrukerDto.brukerID()).finnBostedsadresse();
 
         return ResponseEntity.ok(bostedsadresse.isPresent());
     }

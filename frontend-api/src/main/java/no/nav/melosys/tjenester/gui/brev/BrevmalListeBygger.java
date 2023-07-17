@@ -121,16 +121,18 @@ public class BrevmalListeBygger {
         try {
             List<BrevAdresse> brevAdresser = brevmalListeService.hentBrevAdresseTilMottakere(behandlingId, rolle);
 
-            if (brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty)) {
+            if (rolle == Mottakerroller.BRUKER || rolle == Mottakerroller.FULLMEKTIG || rolle == Mottakerroller.VIRKSOMHET && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty)) {
                 if (rolle == Mottakerroller.BRUKER || rolle == Mottakerroller.FULLMEKTIG) {
                     FeilmeldingDto feilmeldingDto = new FeilmeldingDto(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse(), List.of(new FeilmeldingUnderpunkt(rolle.getBeskrivelse() + " må enten registrere adresse i Folkeregisteret eller kontaktadresse via nav.no.")));
                     mottakerDto.setFeilmelding(feilmeldingDto);
-                } else if ((rolle == Mottakerroller.VIRKSOMHET) && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty)) {
+                }
+                
+                if (rolle == Mottakerroller.VIRKSOMHET) {
                     FeilmeldingDto feilmeldingDto = new FeilmeldingDto(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse(), List.of());
                     mottakerDto.setFeilmelding(feilmeldingDto);
-                } else {
-                    mottakerDto.setAdresser(brevAdresser.stream().map(MottakerAdresseDto::av).toList());
                 }
+            } else {
+                mottakerDto.setAdresser(brevAdresser.stream().map(MottakerAdresseDto::av).toList());
             }
         } catch (TekniskException e) {
             if ("Finner ikke arbeidsforholddokument".equals(e.getMessage())) {
