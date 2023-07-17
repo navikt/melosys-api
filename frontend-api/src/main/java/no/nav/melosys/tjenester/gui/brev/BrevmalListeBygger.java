@@ -120,21 +120,22 @@ public class BrevmalListeBygger {
     private void leggTilAdresseOgFeilmelding(MottakerDto mottakerDto, Mottakerroller rolle, long behandlingId) {
         try {
             List<BrevAdresse> brevAdresser = brevmalListeService.hentBrevAdresseTilMottakere(behandlingId, rolle);
-            
-            if ((rolle == Mottakerroller.BRUKER || rolle == Mottakerroller.VIRKSOMHET) && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty)) {
-                MottakerFeilmeldingDto mottakerFeilmeldingDto = new MottakerFeilmeldingDto(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse(), List.of());
 
+            if (brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty)) {
                 if (rolle == Mottakerroller.BRUKER || rolle == Mottakerroller.FULLMEKTIG) {
-                    mottakerFeilmeldingDto = new MottakerFeilmeldingDto(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse(), List.of(new FeilmeldingUnderpunkter(rolle.getBeskrivelse() + " må enten registrere adresse i Folkeregisteret eller kontaktadresse via nav.no.")));
+                    FeilmeldingDto feilmeldingDto = new FeilmeldingDto(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse(), List.of(new FeilmeldingUnderpunkt(rolle.getBeskrivelse() + " må enten registrere adresse i Folkeregisteret eller kontaktadresse via nav.no.")));
+                    mottakerDto.setFeilmelding(feilmeldingDto);
+                } else if ((rolle == Mottakerroller.VIRKSOMHET) && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty)) {
+                    FeilmeldingDto feilmeldingDto = new FeilmeldingDto(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse(), List.of());
+                    mottakerDto.setFeilmelding(feilmeldingDto);
+                } else {
+                    mottakerDto.setAdresser(brevAdresser.stream().map(MottakerAdresseDto::av).toList());
                 }
-                mottakerDto.setFeilmelding(mottakerFeilmeldingDto);
-            } else {
-                mottakerDto.setAdresser(brevAdresser.stream().map(MottakerAdresseDto::av).toList());
             }
         } catch (TekniskException e) {
             if ("Finner ikke arbeidsforholddokument".equals(e.getMessage())) {
-                MottakerFeilmeldingDto mottakerFeilmeldingDto = new MottakerFeilmeldingDto(Kontroll_begrunnelser.INGEN_ARBEIDSGIVERE.getBeskrivelse(), new ArrayList<>());
-                mottakerDto.setFeilmelding(mottakerFeilmeldingDto);
+                FeilmeldingDto feilmeldingDto = new FeilmeldingDto(Kontroll_begrunnelser.INGEN_ARBEIDSGIVERE.getBeskrivelse(), new ArrayList<>());
+                mottakerDto.setFeilmelding(feilmeldingDto);
             } else {
                 throw new TekniskException(e);
             }

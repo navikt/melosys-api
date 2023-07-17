@@ -11,6 +11,7 @@ import no.nav.melosys.service.persondata.PersondataService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Aksesstype;
 import no.nav.melosys.service.validering.Kontrollfeil;
+import no.nav.melosys.tjenester.gui.dto.kontroller.BrukerKontrollerDto;
 import no.nav.melosys.tjenester.gui.dto.kontroller.FerdigbehandlingKontrollerDto;
 import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerFerdigbehandlingDto;
 import no.nav.security.token.support.core.api.Protected;
@@ -47,9 +48,9 @@ public class KontrollTjeneste {
         return ResponseEntity.ok(eessiService.erBucAapen(behandling.getFagsak().getGsakSaksnummer()));
     }
 
-    @GetMapping("{fnr}/harRegistrertAdresse")
-    public ResponseEntity<Boolean> harRegistrertAdresse(@PathVariable("fnr") String fnr) {
-        var bostedsadresse = persondataService.hentPerson(fnr).finnBostedsadresse();
+    @PostMapping("/harRegistrertAdresse")
+    public ResponseEntity<Boolean> harRegistrertAdresse(@RequestBody BrukerKontrollerDto brukerKontrollerDto) {
+        var bostedsadresse = persondataService.hentPerson(brukerKontrollerDto.brukerID()).finnBostedsadresse();
 
         return ResponseEntity.ok(bostedsadresse.isPresent());
     }
