@@ -55,6 +55,9 @@ public class BrevmottakerService {
         this.behandlingService = behandlingService;
     }
 
+    /**
+     * Brukes av doksys for å utlede mottaker-rolle
+     */
     Mottakerroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) {
         return switch (produserbartDokument) {
             case AVSLAG_YRKESAKTIV, ORIENTERING_ANMODNING_UNNTAK,
