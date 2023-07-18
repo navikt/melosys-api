@@ -52,6 +52,16 @@ public class AksesskontrollImpl implements Aksesskontroll {
     }
 
     @Override
+    public void auditAutoriserSkriv(long behandlingID, String kontekst) {
+        var behandling = behandlingService.hentBehandling(behandlingID);
+        String aktørID = behandling.getFagsak().finnBrukersAktørID().orElse(null);
+        if (aktørID != null) {
+            logAudit(AuditEventType.UPDATE, aktørID, kontekst);
+            autoriser(behandling, SKRIV, Ressurs.UKJENT, false);
+        }
+    }
+
+    @Override
     public void auditAutoriserFolkeregisterIdent(String fnr, String kontekst) {
         logAudit(AuditEventType.READ, fnr, kontekst);
         brukertilgangKontroll.validerTilgangTilFolkeregisterIdent(fnr);
