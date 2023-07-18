@@ -82,7 +82,7 @@ public class BehandlingTjeneste {
     public ResponseEntity<BehandlingDto> hentBehandling(@PathVariable("behandlingID") long behandlingID) {
         String saksbehandlerID = SubjectHandler.getInstance().getUserID();
         log.debug("Saksbehandler {} ber om å hente behandling {}.", saksbehandlerID, behandlingID);
-        aksesskontroll.autoriser(behandlingID);
+        aksesskontroll.auditAutoriser(behandlingID, "Innsyn i behandling " + behandlingID);
 
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         behandlingService.oppdaterBehandlingsstatusHvisTilhørendeSaksbehandler(behandling, saksbehandlerID);

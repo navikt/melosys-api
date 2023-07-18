@@ -5,6 +5,7 @@ import no.nav.melosys.domain.Fagsak;
 
 public interface Aksesskontroll {
 
+    void auditAutoriser(long behandlingID, String kontekst);
     void auditAutoriserFolkeregisterIdent(String ident, String kontekst);
     void auditAutoriserSakstilgang(Fagsak fagsak, String kontekst);
 
