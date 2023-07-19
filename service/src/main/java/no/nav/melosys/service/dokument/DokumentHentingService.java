@@ -27,6 +27,10 @@ public class DokumentHentingService {
         return joarkFasade.hentDokument(journalpostID, dokumentID);
     }
 
+    public Journalpost hentJournalpost(String journalpostID) {
+        return joarkFasade.hentJournalpost(journalpostID);
+    }
+
     /**
      * Henter journalposter knyttet til en sak med et gitt saksnummer
      */
