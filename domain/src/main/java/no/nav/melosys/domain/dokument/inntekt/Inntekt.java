@@ -97,6 +97,10 @@ public class Inntekt {
 
     public String informasjonsstatus; //"http://nav.no/kodeverk/Kodeverk/Informasjonsstatuser"
 
+    public void setBeskrivelse(String beskrivelse) {
+        this.beskrivelse = beskrivelse;
+    }
+
     @XmlTransient
     private String beskrivelse;
 

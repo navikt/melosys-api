@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 
 data class InntektResponse(
-    val arbeidsInntektMaaned: List<ArbeidsInntektMaaned>? = null,
+    val arbeidsInntektMaaned: List<ArbeidsInntektMaaned> = listOf(),
     val ident: Aktoer
 ) {
     private val objectMapper = ObjectMapper().registerModule(JavaTimeModule())
@@ -42,7 +42,7 @@ data class InntektResponse(
         val inntektskilde: String? = null,
         val inntektsperiodetype: String? = null,
         val inntektsstatus: String? = null,
-        val leveringstidspunkt: YearMonth? = null,
+        val leveringstidspunkt: YearMonth,
         val opptjeningsland: String? = null,
         val opptjeningsperiodeFom: LocalDate? = null,
         val opptjeningsperiodeTom: LocalDate? = null,
