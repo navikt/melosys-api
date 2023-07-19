@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.inntk.inntekt
 
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.felles.CallIdAware
 import org.springframework.http.MediaType
 import org.springframework.retry.annotation.Retryable
@@ -15,6 +16,6 @@ open class InntektRestConsumer(private val webClient: WebClient) : CallIdAware {
             .bodyValue(inntektRequest)
             .retrieve()
             .bodyToMono<InntektResponse>()
-            .block()!!
+            .block() ?: throw TekniskException("InntektResponse er null")
     }
 }

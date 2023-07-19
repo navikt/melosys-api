@@ -1,9 +1,10 @@
 package no.nav.melosys.integrasjon.inntk.inntekt
 
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldNotBeNull
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
@@ -78,9 +79,12 @@ class InntektRestConsumerTest(
 
 
     @Test
-    fun test() {
+    fun `hent inntekt liste og sjekk at vi bruker token fra azure`() {
         serviceUnderTestMockServer.stubFor(
-            post("/inntektskomponenten/rs/api/v1")
+            WireMock.post("/inntektskomponenten/rs/api/v1")
+                .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
+                .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                 .willReturn(
                     WireMock.aResponse()
                         .withStatus(200)
@@ -89,7 +93,7 @@ class InntektRestConsumerTest(
                 )
         )
 
-        val hentInntektListe = inntektRestConsumer.hentInntektListe(
+        val inntektListe = inntektRestConsumer.hentInntektListe(
             InntektRequest(
                 ainntektsfilter = "MedlemskapA-inntekt",
                 formaal = "Medlemskap",
@@ -99,15 +103,10 @@ class InntektRestConsumerTest(
             )
         )
 
-        println(hentInntektListe.arbeidsInntektMaaned!!.size)
-
+        inntektListe.arbeidsInntektMaaned
+            .shouldNotBeNull()
+            .shouldHaveSize(2)
     }
-
-    fun post(url: String): MappingBuilder =
-        WireMock.post(url)
-            .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
-            .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
-            .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
 
     companion object {
         val json = """
