@@ -1,5 +1,7 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.Collections;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.service.dokument.DokumentHentingService;
@@ -12,8 +14,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -37,7 +37,7 @@ class DokumentTjenesteTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private static final String BASE_URL = "/api/dokumenter";
+    private static final String BASE_URL = "/api/fagsaker";
 
 
     @Test
@@ -45,7 +45,7 @@ class DokumentTjenesteTest {
         var dokument = new byte[1];
         when(dokumentHentingService.hentDokument(anyString(), anyString())).thenReturn(dokument);
 
-        mockMvc.perform(get(BASE_URL + "/pdf/{journalpostID}/{dokumentID}", "1", "2")
+        mockMvc.perform(get(BASE_URL + "/{saksnummer}/dokumenter/{journalpostID}/{dokumentID}", "1", "2", "3")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
@@ -54,7 +54,7 @@ class DokumentTjenesteTest {
     void hentDokumenter() throws Exception {
         when(dokumentHentingService.hentJournalposter(anyString())).thenReturn(Collections.emptyList());
 
-        mockMvc.perform(get(BASE_URL + "/oversikt/{saksnummer}", "1")
+        mockMvc.perform(get(BASE_URL + "/{saksnummer}/dokumenter", "1")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
     }
@@ -64,7 +64,7 @@ class DokumentTjenesteTest {
         var sedPdfData = new SedPdfData();
         when(eessiService.genererSedPdf(anyLong(), any(SedType.class), any(SedPdfData.class))).thenReturn(new byte[1]);
 
-        mockMvc.perform(post(BASE_URL + "/pdf/sed/utkast/{behandlingID}/{sedType}", 1L, SedType.A003)
+        mockMvc.perform(post(BASE_URL + "/behandlinger/{behandlingID}/sed/{sedType}/utkast", 1L, SedType.A003)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(sedPdfData)))
             .andExpect(status().isOk());

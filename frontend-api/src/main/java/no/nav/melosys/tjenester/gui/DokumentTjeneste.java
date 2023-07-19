@@ -1,5 +1,8 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.Comparator;
+import java.util.List;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.eessi.SedType;
@@ -16,14 +19,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Protected
 @RestController
-@RequestMapping("/dokumenter")
-@Api(tags = {"dokumenter"})
+@RequestMapping("/fagsaker")
+@Api(tags = {"dokumenter", "fagsaker"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class DokumentTjeneste {
     private static final String APPLICATION_PDF = "application/pdf";
@@ -41,27 +40,28 @@ public class DokumentTjeneste {
         this.aksesskontroll = aksesskontroll;
     }
 
-    @GetMapping(value = "/pdf/{journalpostID}/{dokumentID}", produces = {APPLICATION_PDF, APPLICATION_JSON_UTF8})
+    @GetMapping(value = "/{saksnummer}/dokumenter/{journalpostID}/{dokumentID}", produces = {APPLICATION_PDF, APPLICATION_JSON_UTF8})
     @ApiOperation(value = "hent dokument knyttet til journalpost", response = byte[].class)
-    public ResponseEntity<byte[]> hentDokument(@PathVariable("journalpostID") String journalpostID,
+    public ResponseEntity<byte[]> hentDokument(@PathVariable("saksnummer") String saksnummer,
+                                               @PathVariable("journalpostID") String journalpostID,
                                                @PathVariable("dokumentID") String dokumentID) {
-        byte[] dokument;
-        dokument = dokumentHentingService.hentDokument(journalpostID, dokumentID);
+        aksesskontroll.auditAutoriserSakstilgang(saksnummer, "Innsyn i dokument"); //TODO
+        byte[] dokument = dokumentHentingService.hentDokument(journalpostID, dokumentID);
         return lagResponseAvDokument(dokument, String.format("journalpost-dok-%s.pdf", dokumentID));
     }
 
-    @GetMapping("/oversikt/{saksnummer}")
+    @GetMapping("/{saksnummer}/dokumenter")
     @ApiOperation(value = "Henter alle dokumenter knyttet til en fagsak", response = JournalpostInfoDto.class, responseContainer = "List")
     public ResponseEntity<List<JournalpostInfoDto>> hentDokumenter(@PathVariable("saksnummer") String saksnummer) {
         List<JournalpostInfoDto> dokumentListe = dokumentHentingService.hentJournalposter(saksnummer)
             .stream()
             .map(JournalpostInfoDto::av)
             .sorted(Comparator.comparing(JournalpostInfoDto::hentGjeldendeTidspunkt, Comparator.nullsFirst(Comparator.reverseOrder())))
-            .collect(Collectors.toList());
+            .toList();
         return ResponseEntity.ok(dokumentListe);
     }
 
-    @PostMapping(value = "pdf/sed/utkast/{behandlingID}/{sedType}",
+    @PostMapping(value = "/behandlinger/{behandlingID}/sed/{sedType}/utkast",
         produces = {MediaType.APPLICATION_PDF_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<byte[]> produserUtkastSed(@PathVariable("behandlingID") long behandlingID,
                                                     @PathVariable("sedType") SedType sedType,

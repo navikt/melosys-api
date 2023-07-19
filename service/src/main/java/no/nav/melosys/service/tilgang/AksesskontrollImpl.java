@@ -56,6 +56,11 @@ public class AksesskontrollImpl implements Aksesskontroll {
         }
     }
 
+    @Override
+    public void auditAutoriserSakstilgang(String saksnummer, String kontekst) {
+        auditAutoriserSakstilgang(fagsakService.hentFagsak(saksnummer), kontekst);
+    }
+
     private void logAudit(AuditEventType eventType, String personIdent, String message) {
         AuditEvent auditEvent = new AuditEvent(eventType, SubjectHandler.getInstance().getUserID(), personIdent, message, MDCOperations.getCorrelationId());
         auditLogger.log(auditEvent);

@@ -7,6 +7,7 @@ public interface Aksesskontroll {
 
     void auditAutoriserFolkeregisterIdent(String ident, String kontekst);
     void auditAutoriserSakstilgang(Fagsak fagsak, String kontekst);
+    void auditAutoriserSakstilgang(String saksnummer, String kontekst);
 
     void autoriserSakstilgang(String saksnummer);
     void autoriserSakstilgang(Fagsak fagsak);
