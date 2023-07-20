@@ -123,12 +123,11 @@ class InntektRestConsumerTest(
                     .first().apply {
                         beloep.shouldBe(BigDecimal(50000))
                         tilleggsinformasjon.shouldNotBeNull()
-                            .tilleggsinformasjonDetaljer.
-                            shouldBeInstanceOf<InntektResponse.Svalbardinntekt>().apply {
-                            betaltTrygdeavgift.shouldBe(BigDecimal(50000))
-                            antallDager.shouldBe(40)
+                            .tilleggsinformasjonDetaljer.shouldBeInstanceOf<InntektResponse.Svalbardinntekt>().apply {
+                                betaltTrygdeavgift.shouldBe(BigDecimal(50000))
+                                antallDager.shouldBe(40)
 
-                        }
+                            }
                     }
             }
     }
