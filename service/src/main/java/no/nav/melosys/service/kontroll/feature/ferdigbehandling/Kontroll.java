@@ -129,7 +129,7 @@ class Kontroll {
         SaksopplysningerData saksopplysningerData = hentSaksopplysningerData(behandling);
 
         return new FerdigbehandlingKontrollData(medlemskapDokument, persondata, mottatteOpplysningerData,
-            lovvalgsperiode, opprinneligLovvalgsperiode, saksopplysningerData);
+            lovvalgsperiode, opprinneligLovvalgsperiode, saksopplysningerData, behandling.getTema());
     }
 
     private FerdigbehandlingKontrollData hentVedtakKontrollDataFTRL(Behandling behandling) {
