@@ -2,7 +2,12 @@ package no.nav.melosys.integrasjon.inntk.inntekt
 
 import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.dokument.inntekt.*
-import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon
+import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon
+import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned
+import no.nav.melosys.domain.dokument.inntekt.Avvik
+import no.nav.melosys.domain.dokument.inntekt.Inntekt
+import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.*
+import no.nav.melosys.integrasjon.inntk.inntekt.InntektResponse.TilleggsinformasjonDetaljerType.*
 import java.time.LocalDateTime
 
 class InntektKonverter {
@@ -32,11 +37,7 @@ class InntektKonverter {
                                     inntektsperiodetype = it.inntektsperiodetype
                                     inntektsstatus = it.inntektsstatus
                                     levereringstidspunkt = LocalDateTime.of(
-                                        it.leveringstidspunkt.year,
-                                        it.leveringstidspunkt.month,
-                                        1,
-                                        0,
-                                        0
+                                        it.leveringstidspunkt.year, it.leveringstidspunkt.month, 1, 0, 0
                                     )
                                     opptjeningsland = it.opptjeningsland
                                     skattemessigBosattLand = it.skattemessigBosattLand
@@ -46,8 +47,9 @@ class InntektKonverter {
                                     virksomhetID = it.virksomhet?.identifikator
                                     tilleggsinformasjon = Tilleggsinformasjon().apply {
                                         kategori = it.tilleggsinformasjon?.kategori
-                                        // TODO: tilleggsinformasjonDetaljer blir litt mer komplisert å mappe, trenger vi dette?
-                                        //tilleggsinformasjonDetaljer = it.tilleggsinformasjon.tilleggsinformasjonDetaljer
+                                        tilleggsinformasjonDetaljer = mapTilleggsinformasjonDetaljer(
+                                            it.tilleggsinformasjon?.tilleggsinformasjonDetaljer
+                                        )
                                     }
                                     inntektsmottakerID = it.inntektsmottaker?.identifikator
                                     inngaarIGrunnlagForTrekk = it.inngaarIGrunnlagForTrekk
@@ -62,4 +64,61 @@ class InntektKonverter {
             }
         }
     }
+
+
+    private fun mapTilleggsinformasjonDetaljer(tilleggsinformasjonDetaljer: InntektResponse.TilleggsinformasjonDetaljer?): TilleggsinformasjonDetaljer? =
+        when (tilleggsinformasjonDetaljer?.detaljerType) {
+            ALDERSUFOEREETTERLATTEAVTALEFESTETOGKRIGSPENSJON ->
+                PensjonOgUfoere().apply {
+                    val it =
+                        tilleggsinformasjonDetaljer as InntektResponse.AldersUfoereEtterlatteAvtalefestetOgKrigspensjon
+                    grunnpensjonbeløp = it.grunnpensjonbeloep
+                    heravEtterlattepensjon = it.heravEtterlattepensjon
+                    pensjonsgrad = it.pensjonsgrad
+                    tidsrom = Periode().apply {
+                        fom = it.tidsromFom
+                        tom = it.tidsromTom
+                    }
+                }
+
+            BARNEPENSJONOGUNDERHOLDSBIDRAG ->
+                BarnepensjonOgUnderholdsbidrag().apply {
+                    val it = tilleggsinformasjonDetaljer as InntektResponse.BarnepensjonOgUnderholdsbidrag
+                    forsørgersFødselnummer = it.forsoergersFoedselnummer
+                    tidsrom = Periode().apply {
+                        fom = it.tidsromFom
+                        tom = it.tidsromTom
+                    }
+                }
+
+            BONUSFRAFORSVARET -> BonusFraForsvaret().apply {
+                val it = tilleggsinformasjonDetaljer as InntektResponse.BonusFraForsvaret
+                åretUtbetalingenGjelderFor = it.aaretUtbetalingenGjelderFor
+            }
+
+            ETTERBETALINGSPERIODE -> Etterbetalingsperiode().apply {
+                val it = tilleggsinformasjonDetaljer as InntektResponse.Etterbetalingsperiode
+                etterbetalingsperiode = Periode().apply {
+                    fom = it.etterbetalingsperiodeFom
+                    tom = it.etterbetalingsperiodeTom
+                }
+            }
+
+            INNTJENINGSFORHOLD -> Inntjeningsforhold().apply {
+                val it = tilleggsinformasjonDetaljer as InntektResponse.Inntjeningsforhold
+                inntjeningsforhold = it.spesielleInntjeningsforhold
+            }
+
+            REISEKOSTOGLOSJI -> Svalbardinntekt().apply {
+                val it = tilleggsinformasjonDetaljer as InntektResponse.Svalbardinntekt
+                antallDager = it.antallDager
+                betaltTrygdeavgift = it.betaltTrygdeavgift
+            }
+
+            SVALBARDINNTEKT -> ReiseKostOgLosji().apply {
+                val it = tilleggsinformasjonDetaljer as InntektResponse.ReiseKostOgLosji
+                persontype = it.persontype
+            }
+            else -> null
+        }
 }

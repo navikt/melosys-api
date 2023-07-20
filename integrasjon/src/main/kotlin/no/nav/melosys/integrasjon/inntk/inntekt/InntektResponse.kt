@@ -1,5 +1,9 @@
 package no.nav.melosys.integrasjon.inntk.inntekt
 
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
@@ -7,6 +11,7 @@ import no.nav.melosys.exception.TekniskException
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.Year
 import java.time.YearMonth
 
 data class InntektResponse(
@@ -64,10 +69,6 @@ data class InntektResponse(
         val kategori: String? = null,
         val tilleggsinformasjonDetaljer: TilleggsinformasjonDetaljer? = null
     )
-
-    class TilleggsinformasjonDetaljer(
-    )
-
     enum class InntektType {
         LOENNSINNTEKT,
         NAERINGSINNTEKT,
@@ -118,4 +119,107 @@ data class InntektResponse(
         val utbetaler: Aktoer? = null,
         val fradragGjelder: Aktoer? = null
     )
+
+    @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "detaljerType")
+    @JsonSubTypes(
+        JsonSubTypes.Type(value = AldersUfoereEtterlatteAvtalefestetOgKrigspensjon::class, name = AldersUfoereEtterlatteAvtalefestetOgKrigspensjon.TYPE),
+        JsonSubTypes.Type(value = BarnepensjonOgUnderholdsbidrag::class, name = BarnepensjonOgUnderholdsbidrag.TYPE),
+        JsonSubTypes.Type(value = BonusFraForsvaret::class, name = BonusFraForsvaret.TYPE),
+        JsonSubTypes.Type(value = Etterbetalingsperiode::class, name = Etterbetalingsperiode.TYPE),
+        JsonSubTypes.Type(value = Inntjeningsforhold::class, name = Inntjeningsforhold.TYPE),
+        JsonSubTypes.Type(value = Svalbardinntekt::class, name = Svalbardinntekt.TYPE),
+        JsonSubTypes.Type(value = ReiseKostOgLosji::class, name = ReiseKostOgLosji.TYPE)
+    )
+    open class TilleggsinformasjonDetaljer @JsonCreator constructor(
+        @JsonIgnore val detaljerType: TilleggsinformasjonDetaljerType
+    ) {
+        companion object {
+            const val TYPE = "TilleggsinformasjonDetaljer"
+        }
+    }
+
+    data class AldersUfoereEtterlatteAvtalefestetOgKrigspensjon(
+        val grunnpensjonbeloep: BigDecimal? = null,
+        val heravEtterlattepensjon: BigDecimal? = null,
+        val pensjonsgrad: Int? = null,
+        val tidsromFom: LocalDate? = null,
+        val tidsromTom: LocalDate? = null,
+        val tilleggspensjonbeloep: BigDecimal? = null,
+        val ufoeregradpensjonsgrad: Int? = null
+    ) : TilleggsinformasjonDetaljer(TilleggsinformasjonDetaljerType.ALDERSUFOEREETTERLATTEAVTALEFESTETOGKRIGSPENSJON) {
+
+        companion object {
+            const val TYPE = "ALDERSUFOEREETTERLATTEAVTALEFESTETOGKRIGSPENSJON"
+        }
+    }
+
+    data class BarnepensjonOgUnderholdsbidrag(
+        val forsoergersFoedselnummer: String? = null,
+        val tidsromFom: LocalDate? = null,
+        val tidsromTom: LocalDate? = null
+    ) : TilleggsinformasjonDetaljer(TilleggsinformasjonDetaljerType.BARNEPENSJONOGUNDERHOLDSBIDRAG) {
+
+        companion object {
+            const val TYPE = "BARNEPENSJONOGUNDERHOLDSBIDRAG"
+        }
+    }
+
+    data class BonusFraForsvaret(
+        val aaretUtbetalingenGjelderFor: Year? = null
+    ) : TilleggsinformasjonDetaljer(TilleggsinformasjonDetaljerType.BONUSFRAFORSVARET) {
+
+        companion object {
+            const val TYPE = "BONUSFRAFORSVARET"
+        }
+    }
+
+    data class Etterbetalingsperiode(
+        val etterbetalingsperiodeFom: LocalDate? = null,
+        val etterbetalingsperiodeTom: LocalDate? = null
+    ) : TilleggsinformasjonDetaljer(TilleggsinformasjonDetaljerType.ETTERBETALINGSPERIODE) {
+
+        companion object {
+            const val TYPE = "ETTERBETALINGSPERIODE"
+        }
+    }
+
+    data class Inntjeningsforhold(
+        val spesielleInntjeningsforhold: String? = null
+    ) : TilleggsinformasjonDetaljer(TilleggsinformasjonDetaljerType.INNTJENINGSFORHOLD) {
+
+        companion object {
+            const val TYPE = "INNTJENINGSFORHOLD"
+        }
+    }
+
+    data class ReiseKostOgLosji(
+        val persontype: String? = null
+    ) : TilleggsinformasjonDetaljer(TilleggsinformasjonDetaljerType.REISEKOSTOGLOSJI) {
+
+        companion object {
+            const val TYPE = "REISEKOSTOGLOSJI"
+        }
+    }
+
+    data class Svalbardinntekt(
+        var antallDager : Int? = null,
+        val betaltTrygdeavgift: BigDecimal? = null
+
+    ) : TilleggsinformasjonDetaljer(TilleggsinformasjonDetaljerType.SVALBARDINNTEKT) {
+
+        companion object {
+            const val TYPE = "SVALBARDINNTEKT"
+        }
+    }
+
+    enum class TilleggsinformasjonDetaljerType {
+        ALDERSUFOEREETTERLATTEAVTALEFESTETOGKRIGSPENSJON,
+        BARNEPENSJONOGUNDERHOLDSBIDRAG,
+        BONUSFRAFORSVARET,
+        ETTERBETALINGSPERIODE,
+        INNTJENINGSFORHOLD,
+        REISEKOSTOGLOSJI,
+        SVALBARDINNTEKT
+    }
+
 }

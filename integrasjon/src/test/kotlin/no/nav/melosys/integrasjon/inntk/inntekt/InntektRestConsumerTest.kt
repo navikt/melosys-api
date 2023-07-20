@@ -5,6 +5,8 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
@@ -21,6 +23,8 @@ import org.springframework.context.annotation.Import
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
+import java.math.BigDecimal
+import java.time.Year
 import java.time.YearMonth
 import java.util.*
 
@@ -67,9 +71,9 @@ class InntektRestConsumerTest(
 
     @BeforeEach
     fun before() {
+        ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "prossesSteg")
         serviceUnderTestMockServer.resetAll()
         oAuthMockServer.reset()
-        ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "prossesSteg")
     }
 
     @AfterEach
@@ -89,7 +93,7 @@ class InntektRestConsumerTest(
                     WireMock.aResponse()
                         .withStatus(200)
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(json)
+                        .withBody(inntektJsonResponse)
                 )
         )
 
@@ -106,10 +110,31 @@ class InntektRestConsumerTest(
         inntektListe.arbeidsInntektMaaned
             .shouldNotBeNull()
             .shouldHaveSize(2)
+            .map { it.arbeidsInntektInformasjon?.inntektListe }
+            .apply {
+                first().shouldNotBeNull().shouldHaveSize(1)
+                    .first().apply {
+                        beloep.shouldBe(BigDecimal(50000))
+                        tilleggsinformasjon.shouldNotBeNull()
+                            .tilleggsinformasjonDetaljer.shouldBeInstanceOf<InntektResponse.BonusFraForsvaret>()
+                            .aaretUtbetalingenGjelderFor.shouldBe(Year.of(1980))
+                    }
+                last().shouldNotBeNull().shouldHaveSize(1)
+                    .first().apply {
+                        beloep.shouldBe(BigDecimal(50000))
+                        tilleggsinformasjon.shouldNotBeNull()
+                            .tilleggsinformasjonDetaljer.
+                            shouldBeInstanceOf<InntektResponse.Svalbardinntekt>().apply {
+                            betaltTrygdeavgift.shouldBe(BigDecimal(50000))
+                            antallDager.shouldBe(40)
+
+                        }
+                    }
+            }
     }
 
     companion object {
-        val json = """
+        val inntektJsonResponse = """
             {
                 "arbeidsInntektMaaned": [
                     {
@@ -140,7 +165,14 @@ class InntektRestConsumerTest(
                                     "inngaarIGrunnlagForTrekk": true,
                                     "utloeserArbeidsgiveravgift": true,
                                     "informasjonsstatus": "InngaarAlltid",
-                                    "beskrivelse": "fastloenn"
+                                    "beskrivelse": "fastloenn",
+                                    "tilleggsinformasjon": {
+                                        "kategori": "bla",
+                                        "tilleggsinformasjonDetaljer": {
+                                            "detaljerType": "BONUSFRAFORSVARET",
+                                            "aaretUtbetalingenGjelderFor": 1980
+                                        }
+                                    }
                                 }
                             ]
                         }
@@ -173,7 +205,15 @@ class InntektRestConsumerTest(
                                     "inngaarIGrunnlagForTrekk": true,
                                     "utloeserArbeidsgiveravgift": true,
                                     "informasjonsstatus": "InngaarAlltid",
-                                    "beskrivelse": "fastloenn"
+                                    "beskrivelse": "fastloenn",
+                                    "tilleggsinformasjon": {
+                                        "kategori": "bla",
+                                        "tilleggsinformasjonDetaljer": {
+                                            "detaljerType": "SVALBARDINNTEKT",
+                                            "antallDager": 40,
+                                            "betaltTrygdeavgift": "50000"
+                                        }
+                                    }
                                 }
                             ]
                         }
