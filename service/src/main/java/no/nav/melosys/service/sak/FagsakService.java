@@ -296,6 +296,11 @@ public class FagsakService {
         fagsakRepository.save(fagsak);
     }
 
+    public void oppdaterSakstema(Fagsak fagsak, Sakstemaer nySakstema) {
+        fagsak.setTema(nySakstema);
+        fagsakRepository.save(fagsak);
+    }
+
     public List<Fagsak> hentFagsaker(Collection<String> saksnumre) {
         return fagsakRepository.findAllBySaksnummerIn(saksnumre);
     }

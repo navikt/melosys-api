@@ -1,6 +1,7 @@
 package no.nav.melosys.service.eessi;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,10 +35,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
 
 @ExtendWith(MockitoExtension.class)
 class ArbeidFlereLandSedRuterTest {
@@ -226,5 +227,48 @@ class ArbeidFlereLandSedRuterTest {
         verify(prosessinstansService).opprettProsessinstansNyBehandlingArbeidFlereLand(
             melosysEessiMelding, Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, gsakSaksnummer
         );
+    }
+
+    @Test
+    void finnSakOgBestemRuting_SakstemaUnntakMedNorskLovvalg_endresTilMedlemskapLovvalg() {
+        fagsak = new Fagsak();
+        fagsak.setBehandlinger(List.of(behandling));
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
+        when(fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer)).thenReturn(Optional.of(fagsak));
+
+        arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer);
+
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(behandling, melosysEessiMelding);
+    }
+
+    @Test
+    void finnSakOgBestemRuting_SakstemaMedlemskapLovvalgMedUtenlandskLovvalg_endresTilUnntak() {
+        behandling = new Behandling();
+        behandling.setId(behandlingID);
+        fagsak = new Fagsak();
+        fagsak.setBehandlinger(List.of(behandling));
+        fagsak.setTema(Sakstemaer.UNNTAK);
+        behandling.setFagsak(fagsak);
+        behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setBehandling(behandling);
+
+        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setLovvalgsland(Land_iso2.SE);
+        lovvalgsperiode.setFom(LocalDate.now());
+        lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
+        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
+
+        melosysEessiMelding.setLovvalgsland(Landkoder.SE.getKode());
+        melosysEessiMelding.setPeriode(new Periode(lovvalgsperiode.getFom(), lovvalgsperiode.getTom().plusDays(1)));
+        prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
+        when(fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer)).thenReturn(Optional.of(fagsak));
+
+        arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer);
+
+        verify(prosessinstansService).opprettProsessinstansSedJournalføring(behandling, melosysEessiMelding);
     }
 }

@@ -98,6 +98,12 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
             }
 
             opprettJournalføringProsess(melosysEessiMelding, eksisterendeBehandling);
+        } else if (nyttBehandlingstema.equals(Behandlingstema.BESLUTNING_LOVVALG_NORGE) && eksisterendeBehandling.getFagsak().getTema().equals(Sakstemaer.UNNTAK)) {
+            fagsakService.oppdaterSakstema(fagsak.get(), Sakstemaer.MEDLEMSKAP_LOVVALG);
+            opprettJournalføringProsess(melosysEessiMelding, eksisterendeBehandling);
+        } else if (nyttBehandlingstema.equals(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND) && eksisterendeBehandling.getFagsak().getTema().equals(Sakstemaer.MEDLEMSKAP_LOVVALG)) {
+            fagsakService.oppdaterSakstema(fagsak.get(), Sakstemaer.UNNTAK);
+            opprettJournalføringProsess(melosysEessiMelding, eksisterendeBehandling);
         } else {
             opprettJournalføringProsess(melosysEessiMelding, eksisterendeBehandling);
         }

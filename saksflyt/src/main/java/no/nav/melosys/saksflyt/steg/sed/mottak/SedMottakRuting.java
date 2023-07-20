@@ -59,7 +59,8 @@ public class SedMottakRuting implements StegBehandler {
 
             Long arkivsakID = eessiService.finnSakForRinasaksnummer(eessiMelding.getRinaSaksnummer()).orElse(null);
             var sedType = SedType.valueOf(eessiMelding.getSedType());
-            hentSedRuterForSedType(sedType).rutSedTilBehandling(prosessinstans, arkivsakID);
+            var sedRuter = hentSedRuterForSedType(sedType);
+            sedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
         }
     }
 
