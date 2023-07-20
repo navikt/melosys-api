@@ -12,10 +12,8 @@ import no.nav.melosys.integrasjon.inntk.inntekt.*
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import java.time.YearMonth
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class InntektRestServiceTest {
 
     private val inntektRestConsumer = mockk<InntektRestConsumer>()

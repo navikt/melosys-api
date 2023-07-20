@@ -10,7 +10,7 @@ import java.time.YearMonth
 private val log = KotlinLogging.logger { }
 
 open class InntektRestService(
-    private val inntektRestConsumer: InntektRestConsumer,
+    private val inntektRestConsumer: InntektRestConsumer
 ) : InntektFasade {
     private val inntektKonverter = InntektKonverter()
 
@@ -23,11 +23,9 @@ open class InntektRestService(
             type = SaksopplysningType.INNTK
             versjon = INNTEKT_VERSJON
         }
-
     }
 
     private fun hentInntekt(personID: String, fom: YearMonth, tom: YearMonth): InntektResponse {
-        log.info("hentInntektListe: personID=$personID, fom=$fom, tom=$tom")
         if (fom.isBefore(JANUAR_2015) && tom.isBefore(JANUAR_2015)) {
             log.info("Hele perioden er fra før $JANUAR_2015 som inntektskomponenten ikke støtter. Lager en tom respons")
             return InntektResponse(ident = Aktoer(personID, AktoerType.AKTOER_ID))
@@ -43,7 +41,7 @@ open class InntektRestService(
         )
     }
 
-    private fun yearMonth(fom: YearMonth, tom: YearMonth): YearMonth? =
+    private fun yearMonth(fom: YearMonth, tom: YearMonth): YearMonth =
         if (fom.isBefore(tom)) {
             log.info("Periode har fom dato $JANUAR_2015 som inntektskomponent ikke støtter, henter inntekt med fom $fom")
             JANUAR_2015

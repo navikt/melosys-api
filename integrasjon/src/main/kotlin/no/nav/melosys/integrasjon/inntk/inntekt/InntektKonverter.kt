@@ -41,9 +41,10 @@ class InntektKonverter {
                                     )
                                     opptjeningsland = it.opptjeningsland
                                     skattemessigBosattLand = it.skattemessigBosattLand
-                                    utbetaltIPeriode = it.utbetaltIMaaned // Er dette riktig?
+                                    utbetaltIPeriode = it.utbetaltIMaaned
                                     opplysningspliktigID = it.opplysningspliktig?.identifikator
-                                    inntektsinnsenderID = null // TODO: Hva skal denne være?
+                                    // Denne finnes ikke restApi, og tror ikke den er i bruk https://nav-it.slack.com/archives/CLMJJ882W/p1689859452879089?thread_ts=1689168417.802869&cid=CLMJJ882W
+                                    inntektsinnsenderID = null
                                     virksomhetID = it.virksomhet?.identifikator
                                     tilleggsinformasjon = Tilleggsinformasjon().apply {
                                         kategori = it.tilleggsinformasjon?.kategori
@@ -119,6 +120,7 @@ class InntektKonverter {
                 val it = tilleggsinformasjonDetaljer as InntektResponse.ReiseKostOgLosji
                 persontype = it.persontype
             }
+
             else -> null
         }
 }

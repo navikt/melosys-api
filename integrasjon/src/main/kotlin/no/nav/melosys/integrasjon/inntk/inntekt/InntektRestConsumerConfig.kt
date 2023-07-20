@@ -48,6 +48,6 @@ class InntektRestConsumerConfig(
 
     companion object {
         private const val CONSUMER_ID = "srvmelosys"
-        private val CLIENT_NAME = "inntekt"
+        private const val CLIENT_NAME = "inntekt"
     }
 }
