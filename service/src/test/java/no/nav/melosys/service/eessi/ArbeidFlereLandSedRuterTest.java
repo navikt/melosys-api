@@ -234,6 +234,11 @@ class ArbeidFlereLandSedRuterTest {
         fagsak = new Fagsak();
         fagsak.setBehandlinger(List.of(behandling));
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_NORGE);
+        behandling.setFagsak(fagsak);
+        behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setBehandling(behandling);
+        melosysEessiMelding.setLovvalgsland(Landkoder.SE.getKode());
 
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
@@ -241,34 +246,26 @@ class ArbeidFlereLandSedRuterTest {
 
         arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer);
 
-        verify(prosessinstansService).opprettProsessinstansSedJournalføring(behandling, melosysEessiMelding);
+        verify(prosessinstansService).opprettProsessinstansNyBehandlingArbeidFlereLand(melosysEessiMelding, Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND, gsakSaksnummer);
     }
 
     @Test
     void finnSakOgBestemRuting_SakstemaMedlemskapLovvalgMedUtenlandskLovvalg_endresTilUnntak() {
-        behandling = new Behandling();
-        behandling.setId(behandlingID);
         fagsak = new Fagsak();
         fagsak.setBehandlinger(List.of(behandling));
         fagsak.setTema(Sakstemaer.UNNTAK);
+        behandling.setTema(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND);
         behandling.setFagsak(fagsak);
         behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setBehandling(behandling);
+        melosysEessiMelding.setLovvalgsland(Landkoder.NO.getKode());
 
-        Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
-        lovvalgsperiode.setLovvalgsland(Land_iso2.SE);
-        lovvalgsperiode.setFom(LocalDate.now());
-        lovvalgsperiode.setTom(LocalDate.now().plusYears(1));
-        behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
-
-        melosysEessiMelding.setLovvalgsland(Landkoder.SE.getKode());
-        melosysEessiMelding.setPeriode(new Periode(lovvalgsperiode.getFom(), lovvalgsperiode.getTom().plusDays(1)));
         prosessinstans.setData(ProsessDataKey.EESSI_MELDING, melosysEessiMelding);
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
         when(fagsakService.finnFagsakFraArkivsakID(gsakSaksnummer)).thenReturn(Optional.of(fagsak));
 
         arbeidFlereLandSedRuter.rutSedTilBehandling(prosessinstans, gsakSaksnummer);
 
-        verify(prosessinstansService).opprettProsessinstansSedJournalføring(behandling, melosysEessiMelding);
+        verify(prosessinstansService).opprettProsessinstansNyBehandlingArbeidFlereLand(melosysEessiMelding, Behandlingstema.BESLUTNING_LOVVALG_NORGE, gsakSaksnummer);
     }
 }

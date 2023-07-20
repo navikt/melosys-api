@@ -70,12 +70,11 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
         final Behandlingstema nyttBehandlingstema = hentBehandlingstema(melosysEessiMelding);
 
         if (eksisterendeBehandling.getTema() != nyttBehandlingstema) {
-
+            validerLovligeKombinasjoner(nyttBehandlingstema, eksisterendeBehandling.getFagsak());
             validerNorgeIkkeUtpektOgVedtakIkkeFattet(eksisterendeBehandling, behandlingsresultat);
             log.info("Ny A003 resulterer i nytt behandlingstema {}", nyttBehandlingstema);
             opprettNyBehandling(melosysEessiMelding, arkivsakID);
         } else if (eksisterendeBehandling.erBeslutningLovvalgAnnetLand() && periodeErEndret(melosysEessiMelding, behandlingsresultat)) {
-
             log.info("Mottatt oppdatert A003 i {}, rinasak {} hvor et annet land er utpekt",
                 fagsak.get().getSaksnummer(), melosysEessiMelding.getRinaSaksnummer());
             opprettNyBehandling(melosysEessiMelding, arkivsakID);
@@ -97,12 +96,6 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
                 );
             }
 
-            opprettJournalføringProsess(melosysEessiMelding, eksisterendeBehandling);
-        } else if (nyttBehandlingstema.equals(Behandlingstema.BESLUTNING_LOVVALG_NORGE) && eksisterendeBehandling.getFagsak().getTema().equals(Sakstemaer.UNNTAK)) {
-            fagsakService.oppdaterSakstema(fagsak.get(), Sakstemaer.MEDLEMSKAP_LOVVALG);
-            opprettJournalføringProsess(melosysEessiMelding, eksisterendeBehandling);
-        } else if (nyttBehandlingstema.equals(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND) && eksisterendeBehandling.getFagsak().getTema().equals(Sakstemaer.MEDLEMSKAP_LOVVALG)) {
-            fagsakService.oppdaterSakstema(fagsak.get(), Sakstemaer.UNNTAK);
             opprettJournalføringProsess(melosysEessiMelding, eksisterendeBehandling);
         } else {
             opprettJournalføringProsess(melosysEessiMelding, eksisterendeBehandling);
@@ -153,6 +146,16 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
             throw new FunksjonellException(String.format(
                     "Det er allerede fattet vedtak på behandling %s med tema %s. Støtte for omgjøring ikke implementert",
                     behandling.getId(), behandling.getTema()));
+        }
+    }
+
+    private void validerLovligeKombinasjoner(Behandlingstema nyttBehandlingsTema, Fagsak fagsak) {
+        if (fagsak.getTema() != null) {
+            if (nyttBehandlingsTema.equals(Behandlingstema.BESLUTNING_LOVVALG_NORGE) && fagsak.getTema().equals(Sakstemaer.UNNTAK)) {
+                fagsakService.oppdaterSakstema(fagsak, Sakstemaer.MEDLEMSKAP_LOVVALG);
+            } else if (nyttBehandlingsTema.equals(Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND) && fagsak.getTema().equals(Sakstemaer.MEDLEMSKAP_LOVVALG)) {
+                fagsakService.oppdaterSakstema(fagsak, Sakstemaer.UNNTAK);
+            }
         }
     }
 }
