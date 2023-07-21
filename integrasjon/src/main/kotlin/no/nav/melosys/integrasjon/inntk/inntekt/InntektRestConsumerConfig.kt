@@ -23,7 +23,6 @@ class InntektRestConsumerConfig(
         systemContextExchangeFilter: GenericAuthFilterFactory,
         correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
     ): InntektRestConsumer {
-        println("url: $url")
         return InntektRestConsumer(
             webClientBuilder
                 .baseUrl(url)
