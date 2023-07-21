@@ -25,7 +25,7 @@ class FerdigbehandlingKontrollTest {
             fom = NOW
             tom = NOW.plusMonths(12)
         }
-        val kontrollData = FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null)
+        val kontrollData = FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null)
 
 
         val kontrollfeil = FerdigbehandlingKontroll.periodeOver12Måneder(kontrollData)
@@ -41,7 +41,7 @@ class FerdigbehandlingKontrollTest {
             fom = NOW
             tom = NOW.plusYears(5)
         }
-        val kontrollData = FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null)
+        val kontrollData = FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null)
 
 
         val kontrollfeil = FerdigbehandlingKontroll.periodeOverFemÅr(kontrollData)
@@ -57,7 +57,7 @@ class FerdigbehandlingKontrollTest {
             fom = NOW
             tom = NOW.plusYears(5)
         }
-        val kontrollData = FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null)
+        val kontrollData = FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null)
 
 
         val kontrollfeil = FerdigbehandlingKontroll.periodeOverFemÅr(kontrollData)
@@ -90,6 +90,7 @@ class FerdigbehandlingKontrollTest {
             null,
             lovvalgsperiode,
             null,
+            null,
             null
         )
         val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
@@ -121,6 +122,7 @@ class FerdigbehandlingKontrollTest {
             null,
             lovvalgsperiode,
             null,
+            null,
             null
         )
         val kontrollfeil = FerdigbehandlingKontroll.overlappendeMedlemsperiode(kontrollData)
@@ -151,6 +153,7 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             lovvalgsperiode,
+            null,
             null,
             null
         )

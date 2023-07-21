@@ -7,6 +7,7 @@ import no.nav.melosys.domain.PeriodeOmLovvalg;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca;
 import no.nav.melosys.domain.mottatteopplysninger.SoeknadTrygdeavtale;
 import no.nav.melosys.service.kontroll.feature.arbeidutland.kontroll.ArbeidUtlandKontroll;
@@ -113,7 +114,9 @@ final class FerdigbehandlingKontroll {
     }
 
     public static Kontrollfeil orgnrErOpphørt(FerdigbehandlingKontrollData kontrollData) {
-        return kontrollData.saksopplysningerData().harOpphørtAvklartVirksomhet()
+        var behandlingstema = kontrollData.behandlingstema();
+        return (behandlingstema == Behandlingstema.UTSENDT_ARBEIDSTAKER || behandlingstema == Behandlingstema.ARBEID_TJENESTEPERSON_ELLER_FLY)
+            && kontrollData.saksopplysningerData().harOpphørtAvklartVirksomhet()
             ? new Kontrollfeil(Kontroll_begrunnelser.OPPHØRT_ARBEIDSGIVER)
             : null;
     }
