@@ -27,7 +27,7 @@ open class InntektRestService(
 
     private fun hentInntekt(personID: String, fom: YearMonth, tom: YearMonth): InntektResponse {
         if (fom.isBefore(JANUAR_2015) && tom.isBefore(JANUAR_2015)) {
-            log.info("Hele perioden er fra før $JANUAR_2015 som inntektskomponenten ikke støtter. Lager en tom respons")
+            log.info("Hele perioden($fom -> $tom) er fra før $JANUAR_2015 som inntektskomponenten ikke støtter. Lager en tom respons")
             return InntektResponse(ident = Aktoer(personID, AktoerType.AKTOER_ID))
         }
         return inntektRestConsumer.hentInntektListe(
@@ -35,15 +35,15 @@ open class InntektRestService(
                 ainntektsfilter = AINNTEKTSFILTER,
                 formaal = FORMAAL,
                 ident = Aktoer(personID, AktoerType.AKTOER_ID),
-                maanedFom = yearMonth(fom, tom),
+                maanedFom = begrensFom(fom),
                 maanedTom = tom
             )
         )
     }
 
-    private fun yearMonth(fom: YearMonth, tom: YearMonth): YearMonth =
-        if (fom.isBefore(tom)) {
-            log.info("Periode har fom dato $JANUAR_2015 som inntektskomponent ikke støtter, henter inntekt med fom $fom")
+    private fun begrensFom(fom: YearMonth): YearMonth =
+        if (fom.isBefore(JANUAR_2015)) {
+            log.info("Periode har fom dato $fom som inntektskomponent ikke støtter, henter inntekt med fom $JANUAR_2015")
             JANUAR_2015
         } else fom
 
