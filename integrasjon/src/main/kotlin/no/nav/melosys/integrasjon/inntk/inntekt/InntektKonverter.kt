@@ -43,7 +43,8 @@ class InntektKonverter {
                                     skattemessigBosattLand = it.skattemessigBosattLand
                                     utbetaltIPeriode = it.utbetaltIMaaned
                                     opplysningspliktigID = it.opplysningspliktig?.identifikator
-                                    // Denne finnes ikke restApi, og tror ikke den er i bruk https://nav-it.slack.com/archives/CLMJJ882W/p1689859452879089?thread_ts=1689168417.802869&cid=CLMJJ882W
+                                    // Denne finnes ikke i restApi, og tror ikke den er i bruk
+                                    // https://nav-it.slack.com/archives/CLMJJ882W/p1689859452879089?thread_ts=1689168417.802869&cid=CLMJJ882W
                                     inntektsinnsenderID = null
                                     virksomhetID = it.virksomhet?.identifikator
                                     tilleggsinformasjon = Tilleggsinformasjon().apply {
