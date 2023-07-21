@@ -1,21 +1,37 @@
 package no.nav.melosys.integrasjon.inntk
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import mu.KotlinLogging
 import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.SaksopplysningKildesystem
 import no.nav.melosys.domain.SaksopplysningType
 import no.nav.melosys.integrasjon.inntk.inntekt.*
+import org.springframework.stereotype.Service
 import java.time.YearMonth
 
 private val log = KotlinLogging.logger { }
 
-open class InntektRestService(
+@Service
+class InntektRestService(
     private val inntektRestConsumer: InntektRestConsumer
 ) : InntektFasade {
     private val inntektKonverter = InntektKonverter()
 
+    private val Any.toJsonNode: JsonNode
+        get() {
+            return jacksonObjectMapper()
+                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                .registerModule(JavaTimeModule())
+                .valueToTree(this)
+        }
+
     override fun hentInntektListe(personID: String, fom: YearMonth, tom: YearMonth): Saksopplysning {
+        log.info("hentInntektListe($personID, $fom, $tom)")
         val inntekt = hentInntekt(personID, fom, tom)
+        log.info(inntekt.toJsonNode.toPrettyString())
         return inntektKonverter.lagSaksopplysning(inntekt).apply {
             leggTilKildesystemOgMottattDokument(
                 SaksopplysningKildesystem.INNTK, inntekt.tilJsonString()
