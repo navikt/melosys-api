@@ -85,7 +85,7 @@ class InntektRestConsumerTest(
     @Test
     fun `hent inntekt liste og sjekk at vi bruker token fra azure`() {
         serviceUnderTestMockServer.stubFor(
-            WireMock.post("/inntektskomponenten/rs/api/v1")
+            WireMock.post("/inntektskomponenten/rs/api/v1/hentinntektliste")
                 .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
                 .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
                 .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
