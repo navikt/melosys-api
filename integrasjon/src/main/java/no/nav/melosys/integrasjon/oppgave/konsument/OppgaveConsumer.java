@@ -41,6 +41,7 @@ public class OppgaveConsumer extends RestErrorHandler {
         return hentOppgaveListe(oppgaveSearchRequest, 0);
     }
 
+    //TODO er dette effektivt?
     private List<OppgaveDto> hentOppgaveListe(OppgaveSearchRequest oppgaveSearchRequest, int offset) {
         final OppgaveSvar oppgaveSvar = hentOppgaveSvar(oppgaveSearchRequest, offset);
         if (oppgaveSvar == null) {

@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -59,8 +60,7 @@ public class SedMottakRuting implements StegBehandler {
 
             Long arkivsakID = eessiService.finnSakForRinasaksnummer(eessiMelding.getRinaSaksnummer()).orElse(null);
             var sedType = SedType.valueOf(eessiMelding.getSedType());
-            var sedRuter = hentSedRuterForSedType(sedType);
-            sedRuter.rutSedTilBehandling(prosessinstans, arkivsakID);
+            hentSedRuterForSedType(sedType).rutSedTilBehandling(prosessinstans, arkivsakID);
         }
     }
 

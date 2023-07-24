@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.Periode;
@@ -66,7 +67,7 @@ class ArbeidFlereLandSedRuterTest {
 
     @BeforeEach
     public void setup() {
-        arbeidFlereLandSedRuter = new ArbeidFlereLandSedRuter(prosessinstansService, fagsakService, behandlingService, behandlingsresultatService, oppgaveService);
+        arbeidFlereLandSedRuter = new ArbeidFlereLandSedRuter(prosessinstansService, fagsakService, behandlingService, behandlingsresultatService, oppgaveService, new FakeUnleash());
 
         behandling = new Behandling();
         behandling.setId(behandlingID);

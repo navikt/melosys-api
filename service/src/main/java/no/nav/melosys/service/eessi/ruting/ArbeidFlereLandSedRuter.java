@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
@@ -37,16 +38,19 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final OppgaveService oppgaveService;
+    private final Unleash unleash;
 
     public ArbeidFlereLandSedRuter(ProsessinstansService prosessinstansService, FagsakService fagsakService,
                                    BehandlingService behandlingService,
                                    BehandlingsresultatService behandlingsresultatService,
-                                   OppgaveService oppgaveService) {
+                                   OppgaveService oppgaveService,
+                                   Unleash unleash) {
         this.prosessinstansService = prosessinstansService;
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
+        this.unleash = unleash;
     }
 
     @Override
@@ -70,7 +74,7 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
         final Behandlingstema nyttBehandlingstema = hentBehandlingstema(melosysEessiMelding);
 
         if (eksisterendeBehandling.getTema() != nyttBehandlingstema) {
-            validerLovligeKombinasjoner(nyttBehandlingstema, eksisterendeBehandling.getFagsak());
+            if (unleash.isEnabled("melosys.validerLovligeKombinasjoner")) validerLovligeKombinasjoner(nyttBehandlingstema, eksisterendeBehandling.getFagsak());
             validerNorgeIkkeUtpektOgVedtakIkkeFattet(eksisterendeBehandling, behandlingsresultat);
             log.info("Ny A003 resulterer i nytt behandlingstema {}", nyttBehandlingstema);
             opprettNyBehandling(melosysEessiMelding, arkivsakID);
