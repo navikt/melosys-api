@@ -7,6 +7,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
+import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersondataService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Aksesstype;
@@ -34,7 +35,7 @@ public class KontrollTjeneste {
     private final BehandlingService behandlingService;
 
     public KontrollTjeneste(FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade, Aksesskontroll aksesskontroll,
-                            EessiService eessiService, BehandlingService behandlingService, PersondataService persondataService) {
+                            EessiService eessiService, BehandlingService behandlingService, PersondataService persondataService, PersondataFasade persondataFasade) {
         this.ferdigbehandlingKontrollFacade = ferdigbehandlingKontrollFacade;
         this.aksesskontroll = aksesskontroll;
         this.eessiService = eessiService;
@@ -50,9 +51,11 @@ public class KontrollTjeneste {
 
     @PostMapping("/harRegistrertAdresse")
     public ResponseEntity<Boolean> harRegistrertAdresse(@RequestBody KontrollerBrukerDto kontrollerBrukerDto) {
-        var bostedsadresse = persondataService.hentPerson(kontrollerBrukerDto.brukerID()).finnBostedsadresse();
+        var person = persondataService.hentPerson(kontrollerBrukerDto.brukerID());
+        var personHarRegistrertAdresse = !person.manglerRegistrertAdresse();
+        var personHarRegistrertAdressePostnummer = !person.manglerPostnummer();
 
-        return ResponseEntity.ok(bostedsadresse.isPresent());
+        return ResponseEntity.ok(personHarRegistrertAdresse && personHarRegistrertAdressePostnummer);
     }
 
     @PostMapping("/ferdigbehandling")

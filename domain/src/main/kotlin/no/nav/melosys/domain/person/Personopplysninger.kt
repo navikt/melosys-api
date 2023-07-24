@@ -26,7 +26,6 @@ data class Personopplysninger(
     @JsonProperty("statsborgerskap") var statsborgerskap: Collection<Statsborgerskap>
 ) : Persondata {
 
-
     override fun erPersonDød(): Boolean = dødsfall?.dødsdato() != null
 
     override fun harStrengtAdressebeskyttelse(): Boolean = adressebeskyttelser.any { it.erStrengtFortrolig() }
@@ -35,6 +34,7 @@ data class Personopplysninger(
         oppholdsadresser.isEmpty()
 
     override fun manglerBostedsadresse(): Boolean = finnBostedsadresse().isEmpty
+    override fun manglerPostnummer(): Boolean = bostedsadresse?.strukturertAdresse?.postnummer?.isEmpty() ?: true
 
     override fun hentFolkeregisterident(): String? = folkeregisteridentifikator?.identifikasjonsnummer()
 
