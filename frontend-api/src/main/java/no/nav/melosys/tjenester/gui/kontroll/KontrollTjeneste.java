@@ -9,11 +9,12 @@ import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersondataService;
+import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Aksesstype;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import no.nav.melosys.tjenester.gui.dto.kontroller.FerdigbehandlingKontrollerDto;
-import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerBrukerDto;
+import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerBrukerFullmektigDto;
 import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerFerdigbehandlingDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
@@ -29,18 +30,20 @@ import org.springframework.web.context.WebApplicationContext;
 public class KontrollTjeneste {
 
     private final PersondataService persondataService;
+    private final OrganisasjonOppslagService organisasjonOppslagService;
     private final FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
     private final Aksesskontroll aksesskontroll;
     private final EessiService eessiService;
     private final BehandlingService behandlingService;
 
     public KontrollTjeneste(FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade, Aksesskontroll aksesskontroll,
-                            EessiService eessiService, BehandlingService behandlingService, PersondataService persondataService, PersondataFasade persondataFasade) {
+                            EessiService eessiService, BehandlingService behandlingService, PersondataService persondataService, PersondataFasade persondataFasade, OrganisasjonOppslagService organisasjonOppslagService) {
         this.ferdigbehandlingKontrollFacade = ferdigbehandlingKontrollFacade;
         this.aksesskontroll = aksesskontroll;
         this.eessiService = eessiService;
         this.behandlingService = behandlingService;
         this.persondataService = persondataService;
+        this.organisasjonOppslagService = organisasjonOppslagService;
     }
 
     @GetMapping("{behandlingId}/erBucAapen")
@@ -50,12 +53,16 @@ public class KontrollTjeneste {
     }
 
     @PostMapping("/harRegistrertAdresse")
-    public ResponseEntity<Boolean> harRegistrertAdresse(@RequestBody KontrollerBrukerDto kontrollerBrukerDto) {
-        var person = persondataService.hentPerson(kontrollerBrukerDto.brukerID());
-        var personHarRegistrertAdresse = !person.manglerRegistrertAdresse();
-        var personHarRegistrertAdressePostnummer = !person.manglerPostnummer();
+    public ResponseEntity<Boolean> harRegistrertAdresse(@RequestBody KontrollerBrukerFullmektigDto kontrollerBrukerFullmektigDto) {
+        if (!kontrollerBrukerFullmektigDto.brukerID().isEmpty()) {
+            var person = persondataService.hentPerson(kontrollerBrukerFullmektigDto.brukerID());
+            var personHarRegistrertAdresse = !person.manglerRegistrertAdresse();
+            var personHarRegistrertAdressePostnummer = !person.manglerPostnummer();
 
-        return ResponseEntity.ok(personHarRegistrertAdresse && personHarRegistrertAdressePostnummer);
+            return ResponseEntity.ok(personHarRegistrertAdresse && personHarRegistrertAdressePostnummer);
+        }
+
+        return ResponseEntity.ok(!organisasjonOppslagService.hentOrganisasjon(kontrollerBrukerFullmektigDto.orgnr()).organisasjonDetaljer.hentStrukturertForretningsadresse().erTom());
     }
 
     @PostMapping("/ferdigbehandling")

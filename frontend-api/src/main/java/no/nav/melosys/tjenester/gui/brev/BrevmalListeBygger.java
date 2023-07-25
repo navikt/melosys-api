@@ -121,7 +121,7 @@ public class BrevmalListeBygger {
         try {
             List<BrevAdresse> brevAdresser = brevmalListeService.hentBrevAdresseTilMottakere(behandlingId, rolle);
 
-            if (rolle == Mottakerroller.BRUKER || rolle == Mottakerroller.FULLMEKTIG && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty)) {
+            if ((rolle == Mottakerroller.BRUKER || rolle == Mottakerroller.FULLMEKTIG) && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty)) {
                 FeilmeldingDto feilmeldingDto = new FeilmeldingDto(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse(), List.of(new FeilmeldingUnderpunkt(rolle.getBeskrivelse() + " må enten registrere adresse i Folkeregisteret eller kontaktadresse via nav.no.")));
                 mottakerDto.setFeilmelding(feilmeldingDto);
             } else if (rolle == Mottakerroller.VIRKSOMHET && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty)) {
