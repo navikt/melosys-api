@@ -88,7 +88,7 @@ public class BehandlingsresultatService {
     public void lagreNyttBehandlingsresultat(Behandling behandling) {
         Behandlingsresultat nyttBehandlingsresultat = new Behandlingsresultat();
         nyttBehandlingsresultat.setBehandling(behandling);
-        nyttBehandlingsresultat.setType(Behandlingsresultattyper.IKKE_FASTSATT);
+        nyttBehandlingsresultat.setType(Behandlingsresultattyper.IKKE_FASTSATT); //TODO fjern hardkoding?
         nyttBehandlingsresultat.setBehandlingsmåte(Behandlingsmaate.MANUELT);
         behandlingsresultatRepository.save(nyttBehandlingsresultat);
     }
@@ -214,6 +214,7 @@ public class BehandlingsresultatService {
         }
     }
 
+    //TODO gjenbruk metode herifra
     public void oppdaterBehandlingsresultattype(Long id, Behandlingsresultattyper behandlingsresultattype) {
         Optional<Behandlingsresultat> optionalBehandlingsresultat = behandlingsresultatRepository.findById(id);
         if (optionalBehandlingsresultat.isPresent()) {
@@ -253,7 +254,13 @@ public class BehandlingsresultatService {
             throw new FunksjonellException("Utfall for utpeking er allerede satt for behandlingsresultat " + behandlingID);
         }
 
-        //behandlingsresultat.setType(??); FIXME
+        //TODO verifiser
+        if (utfallUtpeking.equals(Utfallregistreringunntak.GODKJENT) || utfallUtpeking.equals(Utfallregistreringunntak.DELVIS_GODKJENT)) {
+            behandlingsresultat.setType(Behandlingsresultattyper.REGISTRERT_UNNTAK);
+        } else if (utfallUtpeking.equals(Utfallregistreringunntak.IKKE_GODKJENT)) {
+            behandlingsresultat.setType(Behandlingsresultattyper.FERDIGBEHANDLET);
+        }
+
         behandlingsresultat.setUtfallUtpeking(utfallUtpeking);
         behandlingsresultatRepository.save(behandlingsresultat);
     }

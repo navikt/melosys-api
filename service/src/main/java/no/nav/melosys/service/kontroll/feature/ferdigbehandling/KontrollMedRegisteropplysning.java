@@ -59,6 +59,7 @@ class KontrollMedRegisteropplysning {
         return kontroll.kontrollerVedtak(behandling.getId(), sakstype, behandlingsresultattype, kontrollerSomSkalIgnoreres);
     }
 
+    //TODO
     private void hentNyeRegisteropplysninger(Behandlingsresultat behandlingsresultat, Behandling behandling) {
         var folketrygdenToggleEnabled = unleash.isEnabled("melosys.folketrygden.mvp");
 
