@@ -127,6 +127,13 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
         this.medlPeriodeID = medlPeriodeID;
     }
 
+    public Collection<Trygdeavgiftsperiode> getTrygdeavgiftsperioder() {
+        return trygdeavgiftsperioder;
+    }
+    public void setTrygdeavgiftsperioder(Collection<Trygdeavgiftsperiode> trygdeavgiftsperioder) {
+        this.trygdeavgiftsperioder = trygdeavgiftsperioder;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -140,12 +147,13 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
             innvilgelsesresultat == that.innvilgelsesresultat &&
             medlemskapstype == that.medlemskapstype &&
             trygdedekning == that.trygdedekning &&
-            Objects.equals(medlPeriodeID, that.medlPeriodeID);
+            Objects.equals(medlPeriodeID, that.medlPeriodeID) &&
+            Objects.equals(trygdeavgiftsperioder, that.trygdeavgiftsperioder);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, medlemAvFolketrygden, fom, tom, arbeidsland, innvilgelsesresultat, medlemskapstype, trygdedekning, medlPeriodeID);
+        return Objects.hash(id, medlemAvFolketrygden, fom, tom, arbeidsland, innvilgelsesresultat, medlemskapstype, trygdedekning, medlPeriodeID, trygdeavgiftsperioder);
     }
 
     @Override

@@ -6,7 +6,9 @@ import javax.persistence.*;
 
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
+import no.nav.melosys.domain.avgift.SkatteforholdTilNorge;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
+import no.nav.melosys.domain.kodeverk.Skatteplikttype;
 
 @Entity
 @Table(name = "medlem_av_folketrygden")
@@ -78,5 +80,10 @@ public class MedlemAvFolketrygden {
     public void setFastsattTrygdeavgift(FastsattTrygdeavgift fastsattTrygdeavgift) {
         fastsattTrygdeavgift.setMedlemAvFolketrygden(this);
         this.fastsattTrygdeavgift = fastsattTrygdeavgift;
+    }
+
+    public Skatteplikttype getSkatteplikttype() {
+        return fastsattTrygdeavgift.getTrygdeavgiftsgrunnlag().getSkatteforholdTilNorge().stream().findFirst()
+            .map(SkatteforholdTilNorge::getSkatteplikttype).orElseThrow(() -> new RuntimeException("SkattepliktType ikke funnet, skal ikke skje for medlemAvFolketrygden :" + id));
     }
 }

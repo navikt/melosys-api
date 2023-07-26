@@ -82,7 +82,7 @@ public class FtrlVedtakService {
 
     private BrevbestillingDto lagInnvilgelseFolketrygdloven(FattVedtakRequest request) {
         var brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setProduserbardokument(Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN_2_8);
+        brevbestillingDto.setProduserbardokument(Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN);
         brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
         brevbestillingDto.setKopiMottakere(request.getKopiMottakere());
         brevbestillingDto.setInnledningFritekst(request.getInnledningFritekst());

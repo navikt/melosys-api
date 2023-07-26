@@ -1,0 +1,54 @@
+package no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl
+
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
+import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.kodeverk.Inntektskildetype
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Trygdedekninger
+import java.math.BigDecimal
+import java.time.LocalDate
+
+class Periode(
+    @field:JsonSerialize(using = LocalDateSerializer::class) val fom: LocalDate,
+    @field:JsonSerialize(
+        using = LocalDateSerializer::class
+    ) val tom: LocalDate,
+    val trygdedekning: Trygdedekninger,
+    val avgiftssats: BigDecimal,
+    val avgiftPerMd: BigDecimal,
+    val inntektskildetype: Inntektskildetype?,
+    val avgiftspliktigInntektPerMd: BigDecimal,
+    val innvilgelsesResultat: InnvilgelsesResultat
+) {
+    companion object {
+        fun av(medlemskapsperiode: Medlemskapsperiode): List<Periode> =
+            medlemskapsperiode.trygdeavgiftsperioder.map {
+                Periode(
+                    it.periodeFra,
+                    it.periodeTil,
+                    medlemskapsperiode.trygdedekning,
+                    it.trygdesats,
+                    it.trygdeavgiftsbeløpMd.verdi,
+                    it.grunnlagInntekstperiode.type,
+                    it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi,
+                    medlemskapsperiode.innvilgelsesresultat
+                )
+            }.toMutableList().also {
+                if (medlemskapsperiode.innvilgelsesresultat != InnvilgelsesResultat.INNVILGET) {
+                    it.add(
+                        Periode(
+                            medlemskapsperiode.fom,
+                            medlemskapsperiode.tom,
+                            medlemskapsperiode.trygdedekning,
+                            BigDecimal.ZERO,
+                            BigDecimal.ZERO,
+                            null,
+                            BigDecimal.ZERO,
+                            medlemskapsperiode.innvilgelsesresultat
+                        )
+                    )
+                }
+            }
+    }
+}

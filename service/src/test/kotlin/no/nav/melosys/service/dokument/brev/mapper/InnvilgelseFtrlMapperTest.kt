@@ -7,10 +7,12 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
@@ -19,6 +21,7 @@ import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.dokument.DokgenTestData
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
@@ -26,6 +29,7 @@ import org.joda.time.DateTime
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -50,30 +54,30 @@ internal class InnvilgelseFtrlMapperTest {
     }
 
     @Test
-    fun map_InnvilgetMedOmfattetFamilieKunNorskInntektFullstendigInnvilget_populererFelter() {
+    fun map_InnvilgetKunNorskInntektInnvilget_populererFelter() {
         mockHappyCase()
 
         innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling()).shouldNotBeNull()
             .apply {
                 datoMottatt.shouldBe(LocalDate.EPOCH)
-                perioder.shouldHaveSize(1)
-                isErFullstendigInnvilget.shouldBeTrue()
-                ftrl_2_8_begrunnelse.shouldBe(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_MULTINASJONALT_SELSKAP.kode)
+                perioder.shouldHaveSize(1).first().apply {
+                    innvilgelsesResultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                }
+                ftrl_2_8_begrunnelse.shouldBe(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_MULTINASJONALT_SELSKAP)
                 innvilgelse.apply {
-                    innledningFritekst().shouldBeNull()
-                    begrunnelseFritekst().shouldBe(BEGRUNNELSE_FRITEKST)
-                    ektefelleFritekst().shouldBeNull()
-                    barnFritekst().shouldBeNull()
+                    innledningFritekst.shouldBeNull()
+                    begrunnelseFritekst.shouldBe(BEGRUNNELSE_FRITEKST)
+                    ektefelleFritekst.shouldBeNull()
+                    barnFritekst.shouldBeNull()
                 }
                 saksbehandlerNavn.shouldBe(SAKSBEHANDLER_NAVN)
-                arbeidsgiverNavn.shouldBe(ARBEIDSGIVER_NAVN)
+                arbeidsgivere.shouldHaveSize(1).first().shouldBe(ARBEIDSGIVER_NAVN)
                 arbeidsland.shouldBe(Landkoder.AT.beskrivelse)
-                isTrygdeavtaleMedArbeidsland.shouldBeFalse()
+                trygdeavtaleMedArbeidsland.shouldBeFalse()
                 arbeidsgiverFullmektigNavn.shouldBeNull()
-                isBrukerHarFullmektig.shouldBeFalse()
-                avgiftssatsAar.shouldBe(DateTime.now().year.toString())
-                saksinfo.apply {
-                    fnr().shouldBe(DokgenTestData.FNR_BRUKER)
+                brukerHarFullmektig.shouldBeFalse()
+                saksinfo.shouldBeInstanceOf<SaksinfoBruker>().apply {
+                    fnr.shouldBe(DokgenTestData.FNR_BRUKER)
                     saksnummer().shouldBe(SAKSNUMMER)
                     navnBruker().shouldBe(DokgenTestData.SAMMENSATT_NAVN_BRUKER)
                 }
@@ -93,12 +97,12 @@ internal class InnvilgelseFtrlMapperTest {
         every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.GB.kode) } returns Landkoder.GB.beskrivelse
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat().apply {
             behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland =
-                Soeknadsland(listOf("GB"), false)
+                Soeknadsland(listOf(Landkoder.GB.kode), false)
         }
 
         innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling()).apply {
             arbeidsland.shouldBe(Landkoder.GB.beskrivelse)
-            isTrygdeavtaleMedArbeidsland.shouldBeTrue()
+            trygdeavtaleMedArbeidsland.shouldBeTrue()
         }
     }
 
@@ -110,6 +114,8 @@ internal class InnvilgelseFtrlMapperTest {
             medlemAvFolketrygden.medlemskapsperioder = listOf(
                 medlemAvFolketrygden.medlemskapsperioder.iterator().next(),
                 Medlemskapsperiode().apply {
+                    fom = LocalDate.EPOCH.plusMonths(1)
+                    tom = LocalDate.EPOCH.plusMonths(4)
                     innvilgelsesresultat = InnvilgelsesResultat.DELVIS_INNVILGET
                     medlemskapstype = Medlemskapstyper.FRIVILLIG
                     trygdedekning = Trygdedekninger.HELSEDEL
@@ -120,7 +126,8 @@ internal class InnvilgelseFtrlMapperTest {
 
         innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling()).apply {
             perioder.shouldHaveSize(2)
-            isErFullstendigInnvilget.shouldBeFalse()
+            perioder[0].innvilgelsesResultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+            perioder[1].innvilgelsesResultat.shouldBe(InnvilgelsesResultat.DELVIS_INNVILGET)
         }
     }
 
@@ -143,6 +150,9 @@ internal class InnvilgelseFtrlMapperTest {
                 vilkaar = Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE
                 begrunnelser = setOf(VilkaarBegrunnelse().apply {
                     kode = Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_MULTINASJONALT_SELSKAP.kode
+                    vilkaarsresultat = Vilkaarsresultat().apply {
+                        begrunnelseFritekst = "<p>Vilkårresultat begrunnels fritekst</p>"
+                    }
                 })
             })
             behandling = DokgenTestData.lagBehandling()
@@ -160,17 +170,42 @@ internal class InnvilgelseFtrlMapperTest {
 
     private fun lagMedlemAvFolketrygden(): MedlemAvFolketrygden = MedlemAvFolketrygden().apply {
         medlemskapsperioder = lagMedlemskapsperioder(this)
-        fastsattTrygdeavgift = FastsattTrygdeavgift()
+        fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
+            trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
+                inntektsperioder = listOf(Inntektsperiode().apply { isOrdinærTrygdeavgiftBetalesTilSkatt = true })
+                skatteforholdTilNorge =
+                    setOf(SkatteforholdTilNorge().apply { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG })
+            }
+        }
         bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
     }
 
     private fun lagMedlemskapsperioder(medlemAvFolketrygden: MedlemAvFolketrygden): List<Medlemskapsperiode> =
         listOf(Medlemskapsperiode().apply {
+            fom = LocalDate.EPOCH.plusMonths(1)
+            tom = LocalDate.EPOCH.plusMonths(4)
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             medlemskapstype = Medlemskapstyper.FRIVILLIG
             trygdedekning = Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER
+            trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
             this.medlemAvFolketrygden = medlemAvFolketrygden
         })
+
+    private fun lagTrygdeavgiftsperioder(): List<Trygdeavgiftsperiode> =
+        listOf(Trygdeavgiftsperiode().apply {
+            periodeFra = LocalDate.EPOCH.plusMonths(1)
+            periodeTil = LocalDate.EPOCH.plusMonths(4)
+            trygdesats = BigDecimal.ZERO
+            trygdeavgiftsbeløpMd = Penger(0.0)
+            grunnlagInntekstperiode = lagGrunnlagInntektsperiode()
+        })
+
+    private fun lagGrunnlagInntektsperiode(): Inntektsperiode =
+        Inntektsperiode().apply {
+            type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+            isArbeidsgiversavgiftBetalesTilSkatt = true
+            avgiftspliktigInntektMnd = Penger(0.0)
+        }
 
     private fun mockHappyCase() {
         every { mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(ofType()) } returns lagAvklarteVirksomheter()

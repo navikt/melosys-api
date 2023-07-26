@@ -42,10 +42,10 @@ public class DokumentproduksjonsInfoMapper {
                     DokumentKategoriKode.IB.getKode(),
                     JournalforingsTittel.MANGELBREV.getTittel())
             )
-            .put(INNVILGELSE_FOLKETRYGDLOVEN_2_8,
-                new DokumentproduksjonsInfo("innvilgelse_ftrl_2_8",
+            .put(INNVILGELSE_FOLKETRYGDLOVEN,
+                new DokumentproduksjonsInfo("innvilgelse_ftrl",
                     DokumentKategoriKode.VB.getKode(),
-                    JournalforingsTittel.INNVILGELSE_FTRL_2_8.getTittel())
+                    JournalforingsTittel.INNVILGELSE_FTRL.getTittel())
             )
             .put(TRYGDEAVTALE_GB,
                 new DokumentproduksjonsInfo("trygdeavtale_gb",
@@ -130,7 +130,7 @@ public class DokumentproduksjonsInfoMapper {
     private enum JournalforingsTittel {
         FORVALTNINGSMELDING("Melding om forventet saksbehandlingstid"),
         MANGELBREV("Melding om manglende opplysninger"),
-        INNVILGELSE_FTRL_2_8("Vedtak om frivillig medlemskap"),
+        INNVILGELSE_FTRL("Vedtak om frivillig medlemskap"),
         TRYGDEAVTALE("Vedtak om medlemskap, Attest for utsendt arbeidstaker"),
         TRYGDEAVTALE_VEDTAKSBREV("Vedtak om medlemskap"),
         TRYGDEAVTALE_ATTEST("Attest for utsendt arbeidstaker"),
