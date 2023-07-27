@@ -130,6 +130,7 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
     public Collection<Trygdeavgiftsperiode> getTrygdeavgiftsperioder() {
         return trygdeavgiftsperioder;
     }
+
     public void setTrygdeavgiftsperioder(Collection<Trygdeavgiftsperiode> trygdeavgiftsperioder) {
         this.trygdeavgiftsperioder = trygdeavgiftsperioder;
     }

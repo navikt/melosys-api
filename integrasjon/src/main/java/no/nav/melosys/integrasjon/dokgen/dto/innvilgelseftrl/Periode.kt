@@ -10,8 +10,8 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 class Periode(
-    @field:JsonSerialize(using = LocalDateSerializer::class) val fom: LocalDate,
-    @field:JsonSerialize(
+    @JsonSerialize(using = LocalDateSerializer::class) val fom: LocalDate,
+    @JsonSerialize(
         using = LocalDateSerializer::class
     ) val tom: LocalDate,
     val trygdedekning: Trygdedekninger,

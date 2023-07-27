@@ -84,6 +84,7 @@ public class MedlemAvFolketrygden {
 
     public Skatteplikttype getSkatteplikttype() {
         return fastsattTrygdeavgift.getTrygdeavgiftsgrunnlag().getSkatteforholdTilNorge().stream().findFirst()
-            .map(SkatteforholdTilNorge::getSkatteplikttype).orElseThrow(() -> new RuntimeException("SkattepliktType ikke funnet, skal ikke skje for medlemAvFolketrygden :" + id));
+            .map(SkatteforholdTilNorge::getSkatteplikttype)
+            .orElseThrow(() -> new RuntimeException("SkattepliktType ikke funnet, skal ikke skje for medlemAvFolketrygden :" + id));
     }
 }

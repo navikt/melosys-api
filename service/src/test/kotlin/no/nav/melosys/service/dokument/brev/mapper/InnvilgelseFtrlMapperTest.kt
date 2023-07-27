@@ -2,6 +2,7 @@ package no.nav.melosys.service.dokument.brev.mapper
 
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
@@ -59,23 +60,7 @@ internal class InnvilgelseFtrlMapperTest {
 
         innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling()).shouldNotBeNull()
             .apply {
-                datoMottatt.shouldBe(LocalDate.EPOCH)
-                perioder.shouldHaveSize(1).first().apply {
-                    innvilgelsesResultat.shouldBe(InnvilgelsesResultat.INNVILGET)
-                }
-                ftrl_2_8_begrunnelse.shouldBe(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_MULTINASJONALT_SELSKAP)
-                innvilgelse.apply {
-                    innledningFritekst.shouldBeNull()
-                    begrunnelseFritekst.shouldBe(BEGRUNNELSE_FRITEKST)
-                    ektefelleFritekst.shouldBeNull()
-                    barnFritekst.shouldBeNull()
-                }
                 saksbehandlerNavn.shouldBe(SAKSBEHANDLER_NAVN)
-                arbeidsgivere.shouldHaveSize(1).first().shouldBe(ARBEIDSGIVER_NAVN)
-                arbeidsland.shouldBe(Landkoder.AT.beskrivelse)
-                trygdeavtaleMedArbeidsland.shouldBeFalse()
-                arbeidsgiverFullmektigNavn.shouldBeNull()
-                brukerHarFullmektig.shouldBeFalse()
                 saksinfo.shouldBeInstanceOf<SaksinfoBruker>().apply {
                     fnr.shouldBe(DokgenTestData.FNR_BRUKER)
                     saksnummer().shouldBe(SAKSNUMMER)
@@ -88,6 +73,27 @@ internal class InnvilgelseFtrlMapperTest {
                     poststed().shouldBe(DokgenTestData.POSTSTED_BRUKER)
                     land().shouldBeNull()
                 }
+
+                datoMottatt.shouldBe(LocalDate.EPOCH)
+                innvilgelse.apply {
+                    innledningFritekst.shouldBeNull()
+                    begrunnelseFritekst.shouldBe(BEGRUNNELSE_FRITEKST)
+                    ektefelleFritekst.shouldBeNull()
+                    barnFritekst.shouldBeNull()
+                }
+                brukerHarFullmektig.shouldBeFalse()
+                perioder.shouldHaveSize(1).first().apply {
+                    innvilgelsesResultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                }
+                bestemmelse.shouldBe(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8)
+                skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
+                ftrl_2_8_begrunnelse.shouldBe(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN)
+                begrunnelseAnnenGrunnFritekst.shouldBe("<p>Vilkårresultat begrunnelse fritekst</p>")
+                arbeidsgivere.shouldHaveSize(1).first().shouldBe(ARBEIDSGIVER_NAVN)
+                arbeidsland.shouldBe(Landkoder.AT.beskrivelse)
+                trygdeavtaleMedArbeidsland.shouldBeFalse()
+                arbeidsgiverFullmektigNavn.shouldBeNull()
+                betalerArbeidsgiveravgift.shouldBeTrue()
             }
     }
 
@@ -126,8 +132,8 @@ internal class InnvilgelseFtrlMapperTest {
 
         innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling()).apply {
             perioder.shouldHaveSize(2)
-            perioder[0].innvilgelsesResultat.shouldBe(InnvilgelsesResultat.INNVILGET)
-            perioder[1].innvilgelsesResultat.shouldBe(InnvilgelsesResultat.DELVIS_INNVILGET)
+                .map { it.innvilgelsesResultat }
+                .shouldContainExactlyInAnyOrder(InnvilgelsesResultat.INNVILGET, InnvilgelsesResultat.DELVIS_INNVILGET)
         }
     }
 
@@ -148,16 +154,19 @@ internal class InnvilgelseFtrlMapperTest {
             medlemAvFolketrygden = lagMedlemAvFolketrygden()
             vilkaarsresultater = setOf(Vilkaarsresultat().apply {
                 vilkaar = Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE
-                begrunnelser = setOf(VilkaarBegrunnelse().apply {
-                    kode = Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_MULTINASJONALT_SELSKAP.kode
-                    vilkaarsresultat = Vilkaarsresultat().apply {
-                        begrunnelseFritekst = "<p>Vilkårresultat begrunnels fritekst</p>"
-                    }
-                })
+                begrunnelser = setOf(lagVilkaarBegrunnelse(this))
             })
             behandling = DokgenTestData.lagBehandling()
         }
     }
+
+    private fun lagVilkaarBegrunnelse(vilkårsresultat: Vilkaarsresultat): VilkaarBegrunnelse =
+        VilkaarBegrunnelse().apply {
+            kode = Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANNEN_GRUNN.kode
+            vilkaarsresultat = vilkårsresultat.apply {
+                begrunnelseFritekst = "<p>Vilkårresultat begrunnelse fritekst</p>"
+            }
+        }
 
     private fun lagAvklarteVirksomheter(): List<AvklartVirksomhet> = listOf(
         AvklartVirksomhet(

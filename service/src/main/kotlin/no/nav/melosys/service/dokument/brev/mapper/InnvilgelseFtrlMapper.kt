@@ -45,7 +45,7 @@ class InnvilgelseFtrlMapper(
             )
             .trygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftMottaker)
             .skatteplikttype(medlemAvFolketrygden.skatteplikttype)
-            .ftrl_2_8_begrunnelse(hentSaerligBegrunnelse(behandlingsresultat.vilkaarsresultater))
+            .ftrl_2_8_begrunnelse(hentFtrlNærTilknytningNorgeBegrunnelse(behandlingsresultat.vilkaarsresultater))
             .begrunnelseAnnenGrunnFritekst(hentSaerligBegrunnelseFritekst(behandlingsresultat.vilkaarsresultater))
             .arbeidsgivere(
                 avklarteVirksomheterService.hentNorskeArbeidsgivere(brevbestilling.behandling).map { it.navn })
@@ -74,7 +74,7 @@ class InnvilgelseFtrlMapper(
         // TODO("Venter på avklaring om dette faktisk stemmer: https://navno.sharepoint.com/:w:/r/sites/TeamMelosys/Shared%20Documents/Fag/Brev/Brev%20-%20folketrygdloven/Vedtak/Vedtak%20om%20innvilgelse%20av%20frivillig%20medlemskap%20i%20folketrygden%20V.2%20.docx?d=wc848a8c72d714c3bb5b832e32e5db907&csf=1&web=1&e=JnIG1L&nav=eyJjIjoyMDE4MjI1NTMwfQ")
         medlemskapsperioder.any { it.trygdeavgiftsperioder.any { it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt } }
 
-    private fun hentSaerligBegrunnelse(vilkaarsresultater: Set<Vilkaarsresultat>): Ftrl_2_8_naer_tilknytning_norge_begrunnelser? =
+    private fun hentFtrlNærTilknytningNorgeBegrunnelse(vilkaarsresultater: Set<Vilkaarsresultat>): Ftrl_2_8_naer_tilknytning_norge_begrunnelser? =
         vilkaarsresultater
             .filter { it.vilkaar == Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE }
             .map { it.begrunnelser.iterator().next().kode }

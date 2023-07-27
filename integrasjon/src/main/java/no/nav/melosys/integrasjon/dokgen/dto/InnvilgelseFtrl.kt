@@ -10,7 +10,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.felles.Innvilgelse
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.Periode
 import java.time.LocalDate
 
-class InnvilgelseFtrl (
+class InnvilgelseFtrl(
     brevbestilling: InnvilgelseBrevbestilling,
     @JsonSerialize(using = LocalDateSerializer::class)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
@@ -32,9 +32,10 @@ class InnvilgelseFtrl (
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     class Builder(val brevbestilling: InnvilgelseBrevbestilling) {
-        private val datoMottatt = if (brevbestilling.forsendelseMottatt != null) instantTilLocalDate(brevbestilling.forsendelseMottatt) else null
+        private val datoMottatt = instantTilLocalDate(brevbestilling.forsendelseMottatt)
         private val innvilgelse = Innvilgelse.av(brevbestilling)
-        private val brukerHarFullmektig = brevbestilling.behandling.fagsak.finnRepresentant(Representerer.BRUKER).isPresent
+        private val brukerHarFullmektig =
+            brevbestilling.behandling.fagsak.finnRepresentant(Representerer.BRUKER).isPresent
 
         private var perioder: List<Periode> = emptyList()
         private var bestemmelse: Folketrygdloven_kap2_bestemmelser? = null
