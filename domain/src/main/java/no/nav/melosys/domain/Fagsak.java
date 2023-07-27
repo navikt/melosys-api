@@ -274,6 +274,13 @@ public class Fagsak extends RegistreringsInfo {
         }
     }
 
+    public Boolean harBrukerRepresentant() {
+        return aktører
+            .stream()
+            .filter(a -> a.getRolle() == REPRESENTANT)
+            .anyMatch(aktoer -> aktoer.getRepresenterer() == Representerer.BRUKER || aktoer.getRepresenterer() == Representerer.BEGGE);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

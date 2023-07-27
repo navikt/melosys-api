@@ -56,6 +56,10 @@ public class BrevAdresse {
         return adresselinjer == null || adresselinjer.stream().allMatch(String::isBlank);
     }
 
+    public boolean isPostnrEmpty() {
+        return postnr == null || postnr.isBlank();
+    }
+
     public static class Builder {
         public String mottakerNavn;
         public String orgnr;
