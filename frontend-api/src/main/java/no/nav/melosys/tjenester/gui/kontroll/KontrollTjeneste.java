@@ -1,6 +1,8 @@
 package no.nav.melosys.tjenester.gui.kontroll;
 
 import java.util.Collection;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 import io.swagger.annotations.Api;
 import no.nav.melosys.exception.FunksjonellException;
@@ -56,13 +58,22 @@ public class KontrollTjeneste {
     public ResponseEntity<Boolean> harRegistrertAdresse(@RequestBody KontrollerBrukerFullmektigDto kontrollerBrukerFullmektigDto) {
         if (!kontrollerBrukerFullmektigDto.brukerID().isEmpty()) {
             var person = persondataService.hentPerson(kontrollerBrukerFullmektigDto.brukerID());
-            var personHarRegistrertAdresse = !person.manglerRegistrertAdresse();
-            var personHarRegistrertAdressePostnummer = !person.manglerPostnummer();
 
-            return ResponseEntity.ok(personHarRegistrertAdresse && personHarRegistrertAdressePostnummer);
+            var personHarRegistrertAdresse = Stream.of(
+                    person.finnBostedsadresse(),
+                    person.finnOppholdsadresse(),
+                    person.finnKontaktadresse())
+                .filter(Optional::isPresent)
+                .map(Optional::get).anyMatch(personAdresse -> !personAdresse.strukturertAdresse().erTom() && !personAdresse.strukturertAdresse().getPostnummer().isBlank());
+
+            return ResponseEntity.ok(personHarRegistrertAdresse);
         }
 
-        return ResponseEntity.ok(!organisasjonOppslagService.hentOrganisasjon(kontrollerBrukerFullmektigDto.orgnr()).organisasjonDetaljer.hentStrukturertForretningsadresse().erTom());
+        var organisasjon = organisasjonOppslagService.hentOrganisasjon(kontrollerBrukerFullmektigDto.orgnr());
+        var organisasjonHarRegistrertPostadresse = !organisasjon.getPostadresse().erTom() && !organisasjon.getPostadresse().getPostnummer().isBlank();
+        var organisasjonHarRegistrertForretningsadresse = !organisasjon.getForretningsadresse().erTom() && !organisasjon.getForretningsadresse().getPostnummer().isBlank();
+
+        return ResponseEntity.ok(organisasjonHarRegistrertPostadresse || organisasjonHarRegistrertForretningsadresse);
     }
 
     @PostMapping("/ferdigbehandling")
