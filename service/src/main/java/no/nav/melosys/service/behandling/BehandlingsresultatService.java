@@ -88,7 +88,7 @@ public class BehandlingsresultatService {
     public void lagreNyttBehandlingsresultat(Behandling behandling) {
         Behandlingsresultat nyttBehandlingsresultat = new Behandlingsresultat();
         nyttBehandlingsresultat.setBehandling(behandling);
-        nyttBehandlingsresultat.setType(Behandlingsresultattyper.IKKE_FASTSATT); //TODO fjern hardkoding?
+        nyttBehandlingsresultat.setType(Behandlingsresultattyper.IKKE_FASTSATT);
         nyttBehandlingsresultat.setBehandlingsmåte(Behandlingsmaate.MANUELT);
         behandlingsresultatRepository.save(nyttBehandlingsresultat);
     }
@@ -238,7 +238,7 @@ public class BehandlingsresultatService {
             throw new FunksjonellException("Utfall for registrering av unntak er allerede satt for behandlingsresultat " + behandlingID);
         }
 
-        behandlingsresultat.setType(Behandlingsresultattyper.REGISTRERT_UNNTAK);
+        behandlingsresultat.setType(finnKorrektBehandlingsResultat(utfallRegistreringUnntak));
         oppdaterUtfallRegistreringUnntak(behandlingID, utfallRegistreringUnntak);
     }
 
@@ -254,15 +254,18 @@ public class BehandlingsresultatService {
             throw new FunksjonellException("Utfall for utpeking er allerede satt for behandlingsresultat " + behandlingID);
         }
 
-        //TODO verifiser
-        if (utfallUtpeking.equals(Utfallregistreringunntak.GODKJENT) || utfallUtpeking.equals(Utfallregistreringunntak.DELVIS_GODKJENT)) {
-            behandlingsresultat.setType(Behandlingsresultattyper.REGISTRERT_UNNTAK);
-        } else if (utfallUtpeking.equals(Utfallregistreringunntak.IKKE_GODKJENT)) {
-            behandlingsresultat.setType(Behandlingsresultattyper.FERDIGBEHANDLET);
-        }
-
+        behandlingsresultat.setType(finnKorrektBehandlingsResultat(utfallUtpeking));
         behandlingsresultat.setUtfallUtpeking(utfallUtpeking);
         behandlingsresultatRepository.save(behandlingsresultat);
+    }
+
+    private static Behandlingsresultattyper finnKorrektBehandlingsResultat(Utfallregistreringunntak utfallregistreringunntak) {
+        if (utfallregistreringunntak.equals(Utfallregistreringunntak.GODKJENT) || utfallregistreringunntak.equals(Utfallregistreringunntak.DELVIS_GODKJENT)) {
+            return (Behandlingsresultattyper.REGISTRERT_UNNTAK);
+        } else if (utfallregistreringunntak.equals(Utfallregistreringunntak.IKKE_GODKJENT)) {
+            return(Behandlingsresultattyper.FERDIGBEHANDLET);
+        }
+        return Behandlingsresultattyper.IKKE_FASTSATT;
     }
 
     public void oppdaterBegrunnelser(long behandlingID, Set<BehandlingsresultatBegrunnelse> begrunnelser, String begrunnelseFritekst) {
