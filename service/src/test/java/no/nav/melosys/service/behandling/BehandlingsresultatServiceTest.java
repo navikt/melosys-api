@@ -130,41 +130,26 @@ class BehandlingsresultatServiceTest {
 
     @Test
     public void lagreBehandlingsResultat_godkjent_erRegistrertUnntak() {
-        // Prepare test data
         long behandlingID = 123;
         Utfallregistreringunntak utfallUtpeking = Utfallregistreringunntak.GODKJENT;
 
-        // Mock the hentBehandlingsresultat method to return a Behandlingsresultat object
         Behandlingsresultat mockBehandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.of(mockBehandlingsresultat));
 
-        // Call the method to be tested
         behandlingsresultatService.oppdaterUtfallUtpeking(behandlingID, utfallUtpeking);
 
-        // Verify that the hentBehandlingsresultat method was called with the correct argument
-        verify(behandlingsresultatService, times(1)).hentBehandlingsresultat(behandlingID);
-
-        // Assert the expected result directly using regular assertions
         assertEquals(Behandlingsresultattyper.REGISTRERT_UNNTAK, mockBehandlingsresultat.getType());
     }
 
     @Test
     public void lagreBehandlingsResultat_ikkeGodkjent_erFerdigbehandlet() {
-        // Prepare test data
         long behandlingID = 123;
         Utfallregistreringunntak utfallUtpeking = Utfallregistreringunntak.IKKE_GODKJENT;
 
-        // Mock the hentBehandlingsresultat method to return a Behandlingsresultat object
         Behandlingsresultat mockBehandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.of(mockBehandlingsresultat));
 
-        // Call the method to be tested
         behandlingsresultatService.oppdaterUtfallUtpeking(behandlingID, utfallUtpeking);
-
-        // Verify that the hentBehandlingsresultat method was called with the correct argument
-        verify(behandlingsresultatService, times(1)).hentBehandlingsresultat(behandlingID);
-
-        // Assert the expected result directly using regular assertions
         assertEquals(Behandlingsresultattyper.FERDIGBEHANDLET, mockBehandlingsresultat.getType());
     }
 

@@ -214,7 +214,6 @@ public class BehandlingsresultatService {
         }
     }
 
-    //TODO gjenbruk metode herifra
     public void oppdaterBehandlingsresultattype(Long id, Behandlingsresultattyper behandlingsresultattype) {
         Optional<Behandlingsresultat> optionalBehandlingsresultat = behandlingsresultatRepository.findById(id);
         if (optionalBehandlingsresultat.isPresent()) {
