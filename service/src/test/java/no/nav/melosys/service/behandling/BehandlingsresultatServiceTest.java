@@ -27,11 +27,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -125,6 +127,47 @@ class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultat.getBehandlingsmåte()).isEqualTo(Behandlingsmaate.MANUELT);
         assertThat(behandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.IKKE_FASTSATT);
     }
+
+    @Test
+    public void lagreBehandlingsResultat_godkjent_erRegistrertUnntak() {
+        // Prepare test data
+        long behandlingID = 123;
+        Utfallregistreringunntak utfallUtpeking = Utfallregistreringunntak.GODKJENT;
+
+        // Mock the hentBehandlingsresultat method to return a Behandlingsresultat object
+        Behandlingsresultat mockBehandlingsresultat = new Behandlingsresultat();
+        when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.of(mockBehandlingsresultat));
+
+        // Call the method to be tested
+        behandlingsresultatService.oppdaterUtfallUtpeking(behandlingID, utfallUtpeking);
+
+        // Verify that the hentBehandlingsresultat method was called with the correct argument
+        verify(behandlingsresultatService, times(1)).hentBehandlingsresultat(behandlingID);
+
+        // Assert the expected result directly using regular assertions
+        assertEquals(Behandlingsresultattyper.REGISTRERT_UNNTAK, mockBehandlingsresultat.getType());
+    }
+
+    @Test
+    public void lagreBehandlingsResultat_ikkeGodkjent_erFerdigbehandlet() {
+        // Prepare test data
+        long behandlingID = 123;
+        Utfallregistreringunntak utfallUtpeking = Utfallregistreringunntak.IKKE_GODKJENT;
+
+        // Mock the hentBehandlingsresultat method to return a Behandlingsresultat object
+        Behandlingsresultat mockBehandlingsresultat = new Behandlingsresultat();
+        when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.of(mockBehandlingsresultat));
+
+        // Call the method to be tested
+        behandlingsresultatService.oppdaterUtfallUtpeking(behandlingID, utfallUtpeking);
+
+        // Verify that the hentBehandlingsresultat method was called with the correct argument
+        verify(behandlingsresultatService, times(1)).hentBehandlingsresultat(behandlingID);
+
+        // Assert the expected result directly using regular assertions
+        assertEquals(Behandlingsresultattyper.FERDIGBEHANDLET, mockBehandlingsresultat.getType());
+    }
+
 
     @Test
     void replikerBehandlingOgBehandlingsresultat_replikererBehandlingsresultatObjekterOgCollections()
@@ -294,7 +337,6 @@ class BehandlingsresultatServiceTest {
 
         verify(behandlingsresultatRepo).save(behandlingsresultat);
     }
-
     @Test
     void settUtfallRegistreringUnntakOgType_alleredeSatt_kasterException() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
