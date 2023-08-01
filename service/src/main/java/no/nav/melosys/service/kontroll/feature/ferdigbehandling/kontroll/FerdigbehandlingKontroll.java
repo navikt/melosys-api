@@ -1,6 +1,7 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll;
 
 import java.util.Arrays;
+import java.util.List;
 
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.PeriodeOmLovvalg;
@@ -122,8 +123,24 @@ final class FerdigbehandlingKontroll {
     }
 
     static Kontrollfeil adresseRegistrert(FerdigbehandlingKontrollData kontrollData) {
-        return PersonRegler.harRegistrertAdresse(kontrollData.persondata(), kontrollData.mottatteOpplysningerData())
-            ? null : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
+        var representant = kontrollData.representant();
+        var harRepresentant = representant != null;
+
+        var representatKontrollfeil = new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE, List.of("Fullmektig må enten registrere adresse i Folkeregisteret eller kontaktadresse via nav.no"));
+        var brukerKontrollfeil = new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE, List.of("Bruker må enten registrere adresse i Folkeregisteret eller kontaktadresse via nav.no"));
+
+        if (harRepresentant && representant.erOrganisasjon()) {
+            var organisasjon = kontrollData.organisasjonDokument();
+            var organisasjonHarRegistrertPostadresse = !organisasjon.getPostadresse().erTom() && !organisasjon.getPostadresse().getPostnummer().isBlank();
+            var organisasjonHarRegistrertForretningsadresse = !organisasjon.getForretningsadresse().erTom() && !organisasjon.getForretningsadresse().getPostnummer().isBlank();
+            return (organisasjonHarRegistrertPostadresse || organisasjonHarRegistrertForretningsadresse) ? null : representatKontrollfeil;
+        }
+
+        if (harRepresentant && representant.erPerson()) {
+            return PersonRegler.harRegistrertAdresse(kontrollData.persondataFullmektig(), kontrollData.mottatteOpplysningerData()) ? null : representatKontrollfeil;
+        }
+
+        return PersonRegler.harRegistrertAdresse(kontrollData.persondata(), kontrollData.mottatteOpplysningerData()) ? null : brukerKontrollfeil;
     }
 
     private static boolean erBestemmelseDerTrygdeavtaleAttestSendes(LovvalgBestemmelse bestemmelse) {

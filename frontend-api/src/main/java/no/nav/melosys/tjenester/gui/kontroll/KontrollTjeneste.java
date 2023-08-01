@@ -64,7 +64,7 @@ public class KontrollTjeneste {
                     person.finnOppholdsadresse(),
                     person.finnKontaktadresse())
                 .filter(Optional::isPresent)
-                .map(Optional::get).anyMatch(personAdresse -> !personAdresse.strukturertAdresse().erTom() && !personAdresse.strukturertAdresse().getPostnummer().isBlank());
+                .map(Optional::get).anyMatch(personAdresse -> personAdresse.strukturertAdresse() != null && !personAdresse.strukturertAdresse().erTom() && !personAdresse.strukturertAdresse().getPostnummer().isBlank());
 
             return ResponseEntity.ok(personHarRegistrertAdresse);
         }

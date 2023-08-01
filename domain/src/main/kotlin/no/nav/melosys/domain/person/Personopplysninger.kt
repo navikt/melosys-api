@@ -30,8 +30,21 @@ data class Personopplysninger(
 
     override fun harStrengtAdressebeskyttelse(): Boolean = adressebeskyttelser.any { it.erStrengtFortrolig() }
 
-    override fun manglerRegistrertAdresse(): Boolean = bostedsadresse == null && kontaktadresser.isEmpty() &&
-        oppholdsadresser.isEmpty()
+    override fun manglerRegistrertAdresse(): Boolean {
+        val harRegistrertAdresse = listOf(
+            finnBostedsadresse(),
+            finnOppholdsadresse(),
+            finnKontaktadresse()
+        )
+            .filter { it.isPresent }
+            .map { it.get() }
+            .any {
+                it.strukturertAdresse() != null && !it.strukturertAdresse()
+                    .erTom() && !it.strukturertAdresse().postnummer.isBlank()
+            }
+        return !harRegistrertAdresse
+    }
+
 
     override fun manglerBostedsadresse(): Boolean = finnBostedsadresse().isEmpty
     override fun manglerPostnummer(): Boolean = bostedsadresse?.strukturertAdresse?.postnummer?.isEmpty() ?: true

@@ -28,6 +28,7 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
+import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,6 +57,8 @@ class KontrollTest {
     private PersondataFasade persondataFasade;
     @Mock
     private SaksbehandlingRegler saksbehandlingRegler;
+    @Mock
+    private OrganisasjonOppslagService organisasjonOppslagService;
 
     private final long behandlingID = 1L;
     private final Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
@@ -64,7 +67,6 @@ class KontrollTest {
     private final Behandling behandling = lagBehandling(mottatteOpplysningerData);
     private final FakeUnleash unleash = new FakeUnleash();
     private Kontroll kontroll;
-
 
     @BeforeEach
     void setup() {
@@ -77,7 +79,7 @@ class KontrollTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
 
         unleash.enableAll();
-        kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, avklarteVirksomheterService, persondataFasade, saksbehandlingRegler, unleash);
+        kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, avklarteVirksomheterService, persondataFasade, organisasjonOppslagService, saksbehandlingRegler, unleash);
     }
 
     @Test

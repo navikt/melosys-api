@@ -5,9 +5,12 @@ import java.util.Objects;
 import java.util.Set;
 
 import no.finn.unleash.Unleash;
+import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -21,6 +24,7 @@ import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.Ferdigbehan
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.SaksopplysningerData;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import org.slf4j.Logger;
@@ -38,14 +42,16 @@ class Kontroll {
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final PersondataFasade persondataFasade;
+    private final OrganisasjonOppslagService organisasjonOppslagService;
     private final SaksbehandlingRegler saksbehandlingRegler;
     private final Unleash unleash;
 
-    public Kontroll(BehandlingService behandlingService, LovvalgsperiodeService lovvalgsperiodeService, AvklarteVirksomheterService avklarteVirksomheterService, PersondataFasade persondataFasade, SaksbehandlingRegler saksbehandlingRegler, Unleash unleash) {
+    public Kontroll(BehandlingService behandlingService, LovvalgsperiodeService lovvalgsperiodeService, AvklarteVirksomheterService avklarteVirksomheterService, PersondataFasade persondataFasade, OrganisasjonOppslagService organisasjonOppslagService, SaksbehandlingRegler saksbehandlingRegler, Unleash unleash) {
         this.behandlingService = behandlingService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.persondataFasade = persondataFasade;
+        this.organisasjonOppslagService = organisasjonOppslagService;
         this.saksbehandlingRegler = saksbehandlingRegler;
         this.unleash = unleash;
     }
@@ -110,37 +116,73 @@ class Kontroll {
 
     private FerdigbehandlingKontrollData hentKontrollDataForAvslagOgHenleggelse(Behandling behandling) {
         MottatteOpplysningerData mottatteOpplysningerData = null;
+        Aktoer representant = behandling.getFagsak().finnRepresentant(Representerer.BRUKER).orElse(null);
+        Persondata persondata = hentPersondata(behandling);
+        OrganisasjonDokument organisasjon = null;
+        Persondata persondataFullmektig = null;
 
+        if (representant != null && representant.erOrganisasjon()) {
+            organisasjon = organisasjonOppslagService.hentOrganisasjon(representant.getOrgnr());
+        }
         if (!saksbehandlingRegler.harTomFlyt(behandling)) {
             mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         }
-        Persondata persondata = hentPersondata(behandling);
+        if (representant != null && representant.erPerson()) {
+            persondataFullmektig = hentPersondata(representant.getPersonIdent());
+        }
+
         SaksopplysningerData saksopplysningerData = hentSaksopplysningerData(behandling);
 
-        return FerdigbehandlingKontrollData.lagKontrollDataForAvslag(persondata, mottatteOpplysningerData, saksopplysningerData);
+        return FerdigbehandlingKontrollData.lagKontrollDataForAvslag(persondata, mottatteOpplysningerData, saksopplysningerData, representant, organisasjon, persondataFullmektig);
     }
 
     private FerdigbehandlingKontrollData hentVedtakKontrollData(Behandling behandling) {
+        Aktoer representant = behandling.getFagsak().finnRepresentant(Representerer.BRUKER).orElse(null);
+        SaksopplysningerData saksopplysningerData = hentSaksopplysningerData(behandling);
+        OrganisasjonDokument organisasjon = null;
+        Persondata persondataFullmektig = null;
+
+        if (representant != null && representant.erOrganisasjon()) {
+            organisasjon = organisasjonOppslagService.hentOrganisasjon(representant.getOrgnr());
+        }
+        if (representant != null && representant.erPerson()) {
+            persondataFullmektig = hentPersondata(representant.getPersonIdent());
+        }
+
         Lovvalgsperiode lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId());
         Lovvalgsperiode opprinneligLovvalgsperiode = lovvalgsperiodeService.finnOpprinneligLovvalgsperiode(behandling.getId()).orElse(null);
         MottatteOpplysningerData mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();
         Persondata persondata = hentPersondata(behandling);
-        SaksopplysningerData saksopplysningerData = hentSaksopplysningerData(behandling);
 
         return new FerdigbehandlingKontrollData(medlemskapDokument, persondata, mottatteOpplysningerData,
-            lovvalgsperiode, opprinneligLovvalgsperiode, saksopplysningerData, behandling.getTema());
+            lovvalgsperiode, opprinneligLovvalgsperiode, saksopplysningerData, behandling.getTema(), representant, organisasjon, persondataFullmektig);
     }
 
     private FerdigbehandlingKontrollData hentVedtakKontrollDataFTRL(Behandling behandling) {
+        Aktoer representant = behandling.getFagsak().finnRepresentant(Representerer.BRUKER).orElse(null);
         MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();
         MottatteOpplysningerData mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         Persondata persondata = hentPersondata(behandling);
-        return FerdigbehandlingKontrollData.lagKontrollDataForFTRL(persondata, mottatteOpplysningerData, medlemskapDokument);
+        OrganisasjonDokument organisasjon = null;
+        Persondata persondataFullmektig = null;
+
+        if (representant != null && representant.erOrganisasjon()) {
+            organisasjon = organisasjonOppslagService.hentOrganisasjon(representant.getOrgnr());
+        }
+        if (representant != null && representant.erPerson()) {
+            persondataFullmektig = hentPersondata(representant.getPersonIdent());
+        }
+
+        return FerdigbehandlingKontrollData.lagKontrollDataForFTRL(persondata, mottatteOpplysningerData, medlemskapDokument, representant, organisasjon, persondataFullmektig);
     }
 
     private Persondata hentPersondata(Behandling behandling) {
         return persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
+    }
+
+    private Persondata hentPersondata(String brukerID) {
+        return persondataFasade.hentPerson(brukerID);
     }
 
     private SaksopplysningerData hentSaksopplysningerData(Behandling behandling) {
