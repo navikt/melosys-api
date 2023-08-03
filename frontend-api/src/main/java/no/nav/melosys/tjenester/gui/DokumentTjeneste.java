@@ -24,7 +24,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 @Protected
 @RestController
-@Api(tags = {"dokumenter", "fagsaker", "behandlinger"})
+@RequestMapping("/dokumenter")
+@Api(tags = {"dokumenter"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class DokumentTjeneste {
     private static final String APPLICATION_PDF = "application/pdf";
@@ -42,7 +43,7 @@ public class DokumentTjeneste {
         this.aksesskontroll = aksesskontroll;
     }
 
-    @GetMapping(value = "/dokumenter/{journalpostID}/{dokumentID}", produces = {APPLICATION_PDF, APPLICATION_JSON_UTF8})
+    @GetMapping(value = "/{journalpostID}/{dokumentID}", produces = {APPLICATION_PDF, APPLICATION_JSON_UTF8})
     @ApiOperation(value = "hent dokument knyttet til journalpost", response = byte[].class)
     public ResponseEntity<byte[]> hentDokument(@PathVariable("journalpostID") String journalpostID,
                                                @PathVariable("dokumentID") String dokumentID) {
@@ -59,8 +60,25 @@ public class DokumentTjeneste {
         return lagResponseAvDokument(dokument, String.format("journalpost-dok-%s.pdf", dokumentID));
     }
 
+    @GetMapping(value = "/pdf/{journalpostID}/{dokumentID}", produces = {APPLICATION_PDF, APPLICATION_JSON_UTF8})
+    @ApiOperation(value = "hent dokument knyttet til journalpost", response = byte[].class)
+    public ResponseEntity<byte[]> hentDokumentDeprecated(@PathVariable("journalpostID") String journalpostID,
+                                               @PathVariable("dokumentID") String dokumentID) {
+
+        Journalpost journalpost = dokumentHentingService.hentJournalpost(journalpostID);
+        if (journalpost.getBrukerIdType() == BrukerIdType.AKTØR_ID) {
+            aksesskontroll.auditAutoriserAktørID(journalpost.getBrukerId(), "Innsyn i dokument" + journalpost.getHoveddokument().getTittel());
+        }
+        if (journalpost.getBrukerIdType() == BrukerIdType.FOLKEREGISTERIDENT) {
+            aksesskontroll.auditAutoriserFolkeregisterIdent(journalpost.getBrukerId(), "Innsyn i dokument " + journalpost.getHoveddokument().getTittel());
+        }
+
+        byte[] dokument = dokumentHentingService.hentDokument(journalpostID, dokumentID);
+        return lagResponseAvDokument(dokument, String.format("journalpost-dok-%s.pdf", dokumentID));
+    }
+
     @Deprecated
-    @GetMapping("fagsaker/{saksnummer}/dokumenter")
+    @GetMapping("/oversikt/{saksnummer}")
     @ApiOperation(value = "Henter alle dokumenter knyttet til en fagsak", response = JournalpostInfoDto.class, responseContainer = "List")
     public ResponseEntity<List<JournalpostInfoDto>> hentDokumenter(@PathVariable("saksnummer") String saksnummer) {
         List<JournalpostInfoDto> dokumentListe = dokumentHentingService.hentJournalposter(saksnummer)
@@ -72,7 +90,7 @@ public class DokumentTjeneste {
     }
 
     @Deprecated
-    @PostMapping(value = "/behandlinger/{behandlingID}/sed/{sedType}/utkast",
+    @PostMapping(value = "/pdf/sed/utkast/{behandlingID}/{sedType}",
         produces = {MediaType.APPLICATION_PDF_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<byte[]> produserUtkastSed(@PathVariable("behandlingID") long behandlingID,
                                                     @PathVariable("sedType") SedType sedType,
