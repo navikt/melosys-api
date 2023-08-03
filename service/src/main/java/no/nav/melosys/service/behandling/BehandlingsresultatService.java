@@ -253,7 +253,6 @@ public class BehandlingsresultatService {
             throw new FunksjonellException("Utfall for utpeking er allerede satt for behandlingsresultat " + behandlingID);
         }
 
-        behandlingsresultat.setType(finnKorrektBehandlingsResultat(utfallUtpeking));
         behandlingsresultat.setUtfallUtpeking(utfallUtpeking);
         behandlingsresultatRepository.save(behandlingsresultat);
     }
