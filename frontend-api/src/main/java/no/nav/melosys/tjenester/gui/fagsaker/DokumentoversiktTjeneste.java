@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.sak;
+package no.nav.melosys.tjenester.gui.fagsaker;
 
 import java.util.Comparator;
 import java.util.List;
