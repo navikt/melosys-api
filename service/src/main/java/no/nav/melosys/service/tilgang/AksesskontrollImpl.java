@@ -42,6 +42,12 @@ public class AksesskontrollImpl implements Aksesskontroll {
     }
 
     @Override
+    public void auditAutoriserAktørID(String aktørID, String kontekst) {
+        logAudit(AuditEventType.READ, aktørID, kontekst);
+        brukertilgangKontroll.validerTilgangTilAktørID(aktørID);
+    }
+
+    @Override
     public void auditAutoriser(long behandlingID, String kontekst) {
         var behandling = behandlingService.hentBehandling(behandlingID);
         String aktørID = behandling.getFagsak().finnBrukersAktørID().orElse(null);
@@ -69,11 +75,7 @@ public class AksesskontrollImpl implements Aksesskontroll {
 
     @Override
     public void auditAutoriserSakstilgang(Fagsak fagsak, String kontekst) {
-        String aktørID = fagsak.finnBrukersAktørID().orElse(null);
-        if (aktørID != null) {
-            logAudit(AuditEventType.READ, aktørID, kontekst);
-            brukertilgangKontroll.validerTilgangTilAktørID(aktørID);
-        }
+        fagsak.finnBrukersAktørID().ifPresent(aktørID -> auditAutoriserAktørID(aktørID, kontekst));
     }
 
     private void logAudit(AuditEventType eventType, String personIdent, String message) {
