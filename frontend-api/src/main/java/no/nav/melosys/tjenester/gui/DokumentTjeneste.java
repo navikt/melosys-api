@@ -60,6 +60,7 @@ public class DokumentTjeneste {
         return lagResponseAvDokument(dokument, String.format("journalpost-dok-%s.pdf", dokumentID));
     }
 
+    @Deprecated(since = "MELOSYS-5899")
     @GetMapping(value = "/pdf/{journalpostID}/{dokumentID}", produces = {APPLICATION_PDF, APPLICATION_JSON_UTF8})
     @ApiOperation(value = "hent dokument knyttet til journalpost", response = byte[].class)
     public ResponseEntity<byte[]> hentDokumentDeprecated(@PathVariable("journalpostID") String journalpostID,
@@ -77,7 +78,7 @@ public class DokumentTjeneste {
         return lagResponseAvDokument(dokument, String.format("journalpost-dok-%s.pdf", dokumentID));
     }
 
-    @Deprecated
+    @Deprecated(since = "MELOSYS-5899")
     @GetMapping("/oversikt/{saksnummer}")
     @ApiOperation(value = "Henter alle dokumenter knyttet til en fagsak", response = JournalpostInfoDto.class, responseContainer = "List")
     public ResponseEntity<List<JournalpostInfoDto>> hentDokumenter(@PathVariable("saksnummer") String saksnummer) {
@@ -89,7 +90,7 @@ public class DokumentTjeneste {
         return ResponseEntity.ok(dokumentListe);
     }
 
-    @Deprecated
+    @Deprecated(since = "MELOSYS-5899")
     @PostMapping(value = "/pdf/sed/utkast/{behandlingID}/{sedType}",
         produces = {MediaType.APPLICATION_PDF_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<byte[]> produserUtkastSed(@PathVariable("behandlingID") long behandlingID,
