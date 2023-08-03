@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
+
 @Protected
 @RestController
 @Api(tags = {"dokumenter", "fagsaker", "behandlinger"})
@@ -58,6 +59,7 @@ public class DokumentTjeneste {
         return lagResponseAvDokument(dokument, String.format("journalpost-dok-%s.pdf", dokumentID));
     }
 
+    @Deprecated
     @GetMapping("fagsaker/{saksnummer}/dokumenter")
     @ApiOperation(value = "Henter alle dokumenter knyttet til en fagsak", response = JournalpostInfoDto.class, responseContainer = "List")
     public ResponseEntity<List<JournalpostInfoDto>> hentDokumenter(@PathVariable("saksnummer") String saksnummer) {
@@ -69,6 +71,7 @@ public class DokumentTjeneste {
         return ResponseEntity.ok(dokumentListe);
     }
 
+    @Deprecated
     @PostMapping(value = "/behandlinger/{behandlingID}/sed/{sedType}/utkast",
         produces = {MediaType.APPLICATION_PDF_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<byte[]> produserUtkastSed(@PathVariable("behandlingID") long behandlingID,
