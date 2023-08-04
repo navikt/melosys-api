@@ -19,18 +19,18 @@ public record FerdigbehandlingKontrollData(
     Behandlingstema behandlingstema,
     Aktoer representant,
     OrganisasjonDokument organisasjonDokument,
-    Persondata persondataFullmektig
+    Persondata persondataRepresentant
 ) {
 
     public static FerdigbehandlingKontrollData lagKontrollDataForAvslag(Persondata persondata,
                                                                         MottatteOpplysningerData mottatteOpplysningerData,
-                                                                        SaksopplysningerData saksopplysningerData, Aktoer representant, OrganisasjonDokument organisasjonDokument, Persondata persondataFullmektig) {
-        return new FerdigbehandlingKontrollData(null, persondata, mottatteOpplysningerData, null, null, saksopplysningerData, null, representant, organisasjonDokument, persondataFullmektig);
+                                                                        SaksopplysningerData saksopplysningerData, Aktoer representant, OrganisasjonDokument organisasjonDokument, Persondata persondataRepresentant) {
+        return new FerdigbehandlingKontrollData(null, persondata, mottatteOpplysningerData, null, null, saksopplysningerData, null, representant, organisasjonDokument, persondataRepresentant);
     }
 
     public static FerdigbehandlingKontrollData lagKontrollDataForFTRL(Persondata persondata,
                                                                       MottatteOpplysningerData mottatteOpplysningerData,
-                                                                      MedlemskapDokument medlemskapDokument, Aktoer representant, OrganisasjonDokument organisasjonDokument, Persondata persondataFullmektig) {
-        return new FerdigbehandlingKontrollData(medlemskapDokument, persondata, mottatteOpplysningerData, null, null, null, null, representant, organisasjonDokument, persondataFullmektig);
+                                                                      MedlemskapDokument medlemskapDokument, Aktoer representant, OrganisasjonDokument organisasjonDokument, Persondata persondataRepresentant) {
+        return new FerdigbehandlingKontrollData(medlemskapDokument, persondata, mottatteOpplysningerData, null, null, null, null, representant, organisasjonDokument, persondataRepresentant);
     }
 }

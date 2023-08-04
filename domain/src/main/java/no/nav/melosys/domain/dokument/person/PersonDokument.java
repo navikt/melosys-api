@@ -63,7 +63,8 @@ public class PersonDokument implements Persondata {
                 finnOppholdsadresse(),
                 finnKontaktadresse())
             .filter(Optional::isPresent)
-            .map(Optional::get).anyMatch(personAdresse -> personAdresse.strukturertAdresse() != null && !personAdresse.strukturertAdresse().erTom() && !personAdresse.strukturertAdresse().getPostnummer().isBlank());
+            .map(Optional::get)
+            .anyMatch(personAdresse -> personAdresse.harRegistrertAdresse());
 
         return !personHarRegistrertAdresse;
     }

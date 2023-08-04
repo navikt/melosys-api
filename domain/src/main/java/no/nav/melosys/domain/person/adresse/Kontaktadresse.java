@@ -18,6 +18,11 @@ public record Kontaktadresse(
     boolean erHistorisk
 ) implements PersonAdresse {
 
+    @Override
+    public boolean harRegistrertAdresse() {
+        StrukturertAdresse adresse = hentEllerLagStrukturertAdresse();
+        return adresse != null && !adresse.erTom() && !adresse.getPostnummer().isBlank();
+    }
     public StrukturertAdresse hentEllerLagStrukturertAdresse() {
         if (strukturertAdresse != null) {
             return strukturertAdresse;

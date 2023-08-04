@@ -6,6 +6,7 @@ import java.util.List;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.PeriodeOmLovvalg;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -124,23 +125,37 @@ final class FerdigbehandlingKontroll {
 
     static Kontrollfeil adresseRegistrert(FerdigbehandlingKontrollData kontrollData) {
         var representant = kontrollData.representant();
-        var harRepresentant = representant != null;
+        boolean harRepresentant = representant != null;
 
-        var representatKontrollfeil = new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE, List.of("Fullmektig må enten registrere adresse i Folkeregisteret eller kontaktadresse via nav.no"));
-        var brukerKontrollfeil = new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE, List.of("Bruker må enten registrere adresse i Folkeregisteret eller kontaktadresse via nav.no"));
+        var brukerKontrollfeil = new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE, List.of(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER.getBeskrivelse()));
 
-        if (harRepresentant && representant.erOrganisasjon()) {
-            var organisasjon = kontrollData.organisasjonDokument();
-            var organisasjonHarRegistrertPostadresse = !organisasjon.getPostadresse().erTom() && !organisasjon.getPostadresse().getPostnummer().isBlank();
-            var organisasjonHarRegistrertForretningsadresse = !organisasjon.getForretningsadresse().erTom() && !organisasjon.getForretningsadresse().getPostnummer().isBlank();
-            return (organisasjonHarRegistrertPostadresse || organisasjonHarRegistrertForretningsadresse) ? null : representatKontrollfeil;
-        }
-
-        if (harRepresentant && representant.erPerson()) {
-            return PersonRegler.harRegistrertAdresse(kontrollData.persondataFullmektig(), kontrollData.mottatteOpplysningerData()) ? null : representatKontrollfeil;
+        if (harRepresentant) {
+            return håndterRepresentantBrukerOgOrganisasjon(kontrollData, representant.erOrganisasjon());
         }
 
         return PersonRegler.harRegistrertAdresse(kontrollData.persondata(), kontrollData.mottatteOpplysningerData()) ? null : brukerKontrollfeil;
+    }
+
+    private static Kontrollfeil håndterRepresentantBrukerOgOrganisasjon(FerdigbehandlingKontrollData kontrollData, boolean representantErOrganisasjon) {
+        if (representantErOrganisasjon) return erOrganisasjonAdresseRegistrert(kontrollData);
+
+        return erPersonAdresseRegistrert(kontrollData);
+    }
+
+    private static Kontrollfeil erPersonAdresseRegistrert(FerdigbehandlingKontrollData kontrollData) {
+        Kontrollfeil representatKontrollfeil = new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE, List.of(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT.getBeskrivelse()));
+
+        return PersonRegler.harRegistrertAdresse(kontrollData.persondataRepresentant(), kontrollData.mottatteOpplysningerData()) ? null : representatKontrollfeil;
+    }
+
+    private static Kontrollfeil erOrganisasjonAdresseRegistrert(FerdigbehandlingKontrollData kontrollData) {
+        Kontrollfeil representatKontrollfeil = new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE, List.of(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT.getBeskrivelse()));
+
+        OrganisasjonDokument organisasjon = kontrollData.organisasjonDokument();
+        boolean organisasjonHarRegistrertPostadresse = organisasjon.harRegistrertPostadresse();
+        boolean organisasjonHarRegistrertForretningsadresse = organisasjon.harRegistrertForretningsadresse();
+
+        return (organisasjonHarRegistrertPostadresse || organisasjonHarRegistrertForretningsadresse) ? null : representatKontrollfeil;
     }
 
     private static boolean erBestemmelseDerTrygdeavtaleAttestSendes(LovvalgBestemmelse bestemmelse) {

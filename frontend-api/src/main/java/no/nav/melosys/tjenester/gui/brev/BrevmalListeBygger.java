@@ -126,8 +126,8 @@ public class BrevmalListeBygger {
             List<BrevAdresse> brevAdresser = brevmalListeService.hentBrevAdresseTilMottakere(behandlingId, rolle);
 
             if ((rolle == Mottakerroller.BRUKER || rolle == Mottakerroller.FULLMEKTIG) && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty) || brevAdresser.stream().allMatch(BrevAdresse::isPostnrEmpty)) {
-                String feilmeldingRolle = rolle == Mottakerroller.BRUKER ? "Bruker" : "Fullmektig";
-                FeilmeldingDto feilmeldingDto = new FeilmeldingDto(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse(), List.of(new FeilmeldingUnderpunkt(feilmeldingRolle + " må enten registrere adresse i Folkeregisteret eller kontaktadresse via nav.no.")));
+                String feilmelding = rolle == Mottakerroller.BRUKER ? Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER.getBeskrivelse() : Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT.getBeskrivelse();
+                FeilmeldingDto feilmeldingDto = new FeilmeldingDto(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse(), List.of(new FeilmeldingUnderpunkt(feilmelding)));
                 mottakerDto.setFeilmelding(feilmeldingDto);
             } else if (rolle == Mottakerroller.VIRKSOMHET && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty) || brevAdresser.stream().allMatch(BrevAdresse::isPostnrEmpty)) {
                 FeilmeldingDto feilmeldingDto = new FeilmeldingDto(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse(), List.of());

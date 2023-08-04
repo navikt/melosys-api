@@ -15,4 +15,9 @@ public record Oppholdsadresse(
     LocalDateTime registrertDato,
     boolean erHistorisk
 ) implements PersonAdresse {
+
+    @Override
+    public boolean harRegistrertAdresse() {
+        return strukturertAdresse != null && !strukturertAdresse.erTom() && !strukturertAdresse.getPostnummer().isBlank();
+    }
 }
