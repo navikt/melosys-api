@@ -202,7 +202,7 @@ class FerdigbehandlingKontrollTest {
         )
         val kontrollfeil = FerdigbehandlingKontroll.adresseRegistrert(kontrollData)
 
-        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE)
+        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER)
     }
 
     @Test
@@ -278,7 +278,7 @@ class FerdigbehandlingKontrollTest {
         )
         val kontrollfeil = FerdigbehandlingKontroll.adresseRegistrert(kontrollData)
 
-        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE)
+        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT)
     }
 
     private fun lagAktoerRepresentantOrganisasjon(): Aktoer {

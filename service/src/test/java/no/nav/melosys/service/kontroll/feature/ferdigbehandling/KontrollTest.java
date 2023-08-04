@@ -137,7 +137,7 @@ class KontrollTest {
 
         assertThat(resultat)
             .extracting(Kontrollfeil::getKode)
-            .contains(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
+            .contains(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER);
     }
 
     @Test
@@ -150,7 +150,7 @@ class KontrollTest {
 
         assertThat(resultat)
             .extracting(Kontrollfeil::getKode)
-            .contains(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
+            .contains(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER);
     }
 
     @Test
@@ -219,8 +219,7 @@ class KontrollTest {
 
         Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.IKKE_FASTSATT);
 
-
-        assertThat(resultat).extracting(Kontrollfeil::getKode).contains(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
+        assertThat(resultat).extracting(Kontrollfeil::getKode).contains(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER);
     }
 
 

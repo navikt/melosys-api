@@ -1,7 +1,6 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll;
 
 import java.util.Arrays;
-import java.util.List;
 
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.PeriodeOmLovvalg;
@@ -127,7 +126,7 @@ final class FerdigbehandlingKontroll {
         var representant = kontrollData.representant();
         boolean harRepresentant = representant != null;
 
-        var brukerKontrollfeil = new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE, List.of(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER.getBeskrivelse()));
+        var brukerKontrollfeil = new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER);
 
         if (harRepresentant) {
             return håndterRepresentantBrukerOgOrganisasjon(kontrollData, representant.erOrganisasjon());
@@ -143,13 +142,13 @@ final class FerdigbehandlingKontroll {
     }
 
     private static Kontrollfeil erPersonAdresseRegistrert(FerdigbehandlingKontrollData kontrollData) {
-        Kontrollfeil representatKontrollfeil = new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE, List.of(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT.getBeskrivelse()));
+        Kontrollfeil representantKontrollfeil = new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT);
 
-        return PersonRegler.harRegistrertAdresse(kontrollData.persondataRepresentant(), kontrollData.mottatteOpplysningerData()) ? null : representatKontrollfeil;
+        return PersonRegler.harRegistrertAdresse(kontrollData.persondataRepresentant(), kontrollData.mottatteOpplysningerData()) ? null : representantKontrollfeil;
     }
 
     private static Kontrollfeil erOrganisasjonAdresseRegistrert(FerdigbehandlingKontrollData kontrollData) {
-        Kontrollfeil representatKontrollfeil = new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE, List.of(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT.getBeskrivelse()));
+        Kontrollfeil representatKontrollfeil = new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT);
 
         OrganisasjonDokument organisasjon = kontrollData.organisasjonDokument();
         boolean organisasjonHarRegistrertPostadresse = organisasjon.harRegistrertPostadresse();
