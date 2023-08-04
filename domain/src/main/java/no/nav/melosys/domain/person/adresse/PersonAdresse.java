@@ -1,8 +1,8 @@
 package no.nav.melosys.domain.person.adresse;
 
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
-
 import java.time.LocalDate;
+
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 
 public interface PersonAdresse {
     String coAdressenavn();
@@ -13,4 +13,5 @@ public interface PersonAdresse {
     String kilde();
     boolean erHistorisk();
 
+    boolean harRegistrertAdresse();
 }

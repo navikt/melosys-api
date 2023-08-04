@@ -5,6 +5,7 @@ import java.util.Arrays;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.PeriodeOmLovvalg;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
+import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -122,8 +123,38 @@ final class FerdigbehandlingKontroll {
     }
 
     static Kontrollfeil adresseRegistrert(FerdigbehandlingKontrollData kontrollData) {
-        return PersonRegler.harRegistrertAdresse(kontrollData.persondata(), kontrollData.mottatteOpplysningerData())
-            ? null : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
+        var representant = kontrollData.representant();
+        boolean harRepresentant = representant != null;
+
+        var brukerKontrollfeil = new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER);
+
+        if (harRepresentant) {
+            return håndterRepresentantBrukerOgOrganisasjon(kontrollData, representant.erOrganisasjon());
+        }
+
+        return PersonRegler.harRegistrertAdresse(kontrollData.persondata(), kontrollData.mottatteOpplysningerData()) ? null : brukerKontrollfeil;
+    }
+
+    private static Kontrollfeil håndterRepresentantBrukerOgOrganisasjon(FerdigbehandlingKontrollData kontrollData, boolean representantErOrganisasjon) {
+        if (representantErOrganisasjon) return erOrganisasjonAdresseRegistrert(kontrollData);
+
+        return erPersonAdresseRegistrert(kontrollData);
+    }
+
+    private static Kontrollfeil erPersonAdresseRegistrert(FerdigbehandlingKontrollData kontrollData) {
+        Kontrollfeil representantKontrollfeil = new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT);
+
+        return PersonRegler.harRegistrertAdresse(kontrollData.persondataRepresentant(), kontrollData.mottatteOpplysningerData()) ? null : representantKontrollfeil;
+    }
+
+    private static Kontrollfeil erOrganisasjonAdresseRegistrert(FerdigbehandlingKontrollData kontrollData) {
+        Kontrollfeil representatKontrollfeil = new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT);
+
+        OrganisasjonDokument organisasjon = kontrollData.organisasjonDokument();
+        boolean organisasjonHarRegistrertPostadresse = organisasjon.harRegistrertPostadresse();
+        boolean organisasjonHarRegistrertForretningsadresse = organisasjon.harRegistrertForretningsadresse();
+
+        return (organisasjonHarRegistrertPostadresse || organisasjonHarRegistrertForretningsadresse) ? null : representatKontrollfeil;
     }
 
     private static boolean erBestemmelseDerTrygdeavtaleAttestSendes(LovvalgBestemmelse bestemmelse) {

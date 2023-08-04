@@ -13,4 +13,9 @@ public record Bostedsadresse(
     String kilde,
     boolean erHistorisk
 ) implements PersonAdresse {
+
+    @Override
+    public boolean harRegistrertAdresse() {
+        return strukturertAdresse != null && !strukturertAdresse.erTom() && !strukturertAdresse.getPostnummer().isBlank();
+    }
 }

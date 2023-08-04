@@ -8,9 +8,9 @@ import javax.xml.bind.annotation.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import no.nav.melosys.domain.AbstraktOrganisasjon;
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -46,6 +46,14 @@ public class OrganisasjonDokument extends AbstraktOrganisasjon implements Saksop
         if (organisasjonDetaljer == null) return null;
 
         return organisasjonDetaljer.hentStrukturertPostadresse();
+    }
+
+    public boolean harRegistrertPostadresse() {
+        return getPostadresse() != null && !getPostadresse().erTom() && !getPostadresse().getPostnummer().isBlank();
+    }
+
+    public boolean harRegistrertForretningsadresse() {
+        return getForretningsadresse() != null && !getForretningsadresse().erTom() && !getForretningsadresse().getPostnummer().isBlank();
     }
 
     // Hvis man ikke har bruk for historikk på navn så er det best å bruke navn på nivå organisasjon.
