@@ -135,8 +135,10 @@ class BehandlingsresultatServiceTest {
 
         Behandlingsresultat mockBehandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.of(mockBehandlingsresultat));
+        when(behandlingsresultatRepo.findWithKontrollresultaterById(behandlingID)).thenReturn(Optional.of(mockBehandlingsresultat));
 
-        behandlingsresultatService.oppdaterUtfallUtpeking(behandlingID, utfallUtpeking);
+
+        behandlingsresultatService.settUtfallRegistreringUnntakOgType(behandlingID, utfallUtpeking);
 
         assertEquals(Behandlingsresultattyper.REGISTRERT_UNNTAK, mockBehandlingsresultat.getType());
     }
@@ -148,8 +150,9 @@ class BehandlingsresultatServiceTest {
 
         Behandlingsresultat mockBehandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.of(mockBehandlingsresultat));
+        when(behandlingsresultatRepo.findWithKontrollresultaterById(behandlingID)).thenReturn(Optional.of(mockBehandlingsresultat));
 
-        behandlingsresultatService.oppdaterUtfallUtpeking(behandlingID, utfallUtpeking);
+        behandlingsresultatService.settUtfallRegistreringUnntakOgType(behandlingID, utfallUtpeking);
         assertEquals(Behandlingsresultattyper.FERDIGBEHANDLET, mockBehandlingsresultat.getType());
     }
 
