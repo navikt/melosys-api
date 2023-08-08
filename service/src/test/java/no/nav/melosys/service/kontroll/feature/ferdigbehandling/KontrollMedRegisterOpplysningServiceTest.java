@@ -18,6 +18,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
+import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.validering.Kontrollfeil;
@@ -51,15 +52,17 @@ class KontrollMedRegisterOpplysningServiceTest {
     private SaksbehandlingRegler saksbehandlingRegler;
     @Mock
     private RegisteropplysningerService registeropplysningerService;
+    @Mock
+    private OrganisasjonOppslagService organisasjonOppslagService;
     private KontrollMedRegisteropplysning kontrollMedRegisterOpplysning;
 
     private final long behandlingID = 1L;
     private final Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
     private final MedlemskapDokument medlemskapDokument = new MedlemskapDokument();
+
     private final MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
     private final Behandling behandling = lagBehandling(mottatteOpplysningerData);
     private final FakeUnleash unleash = new FakeUnleash();
-
 
     @BeforeEach
     void setup() {
@@ -72,7 +75,7 @@ class KontrollMedRegisterOpplysningServiceTest {
         behandling.getSaksopplysninger().add(medlSaksopplysning);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
 
-        Kontroll kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, avklarteVirksomheterService, persondataFasade, saksbehandlingRegler, unleash);
+        Kontroll kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, avklarteVirksomheterService, persondataFasade, organisasjonOppslagService, saksbehandlingRegler, unleash);
         kontrollMedRegisterOpplysning = new KontrollMedRegisteropplysning(behandlingService, behandlingsresultatService, persondataFasade,
             registeropplysningerService, kontroll, unleash);
 
@@ -108,7 +111,7 @@ class KontrollMedRegisterOpplysningServiceTest {
         when(persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID())).thenReturn("fnr");
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser());
 
-        var feilIgnoreres = Set.of(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
+        var feilIgnoreres = Set.of(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER);
         var annenFeilIgnoreres = Set.of(Kontroll_begrunnelser.MANGLER_VIRKSOMHET);
 
         assertThat(kontrollMedRegisterOpplysning.kontroller(behandlingID, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, feilIgnoreres)).isEmpty();

@@ -7,6 +7,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.persondata.PersondataService;
+import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.kontroller.FerdigbehandlingKontrollerDto;
 import no.nav.melosys.tjenester.gui.kontroll.KontrollTjeneste;
@@ -35,6 +36,8 @@ public class KontrollTjenesteTest {
     private BehandlingService behandlingService;
     @MockBean
     private PersondataService persondataService;
+    @MockBean
+    private OrganisasjonOppslagService organisasjonOppslagService;
 
     @Autowired
     private MockMvc mockMvc;
