@@ -367,7 +367,7 @@ public class ProsessinstansService {
     public void opprettProsessinstansIverksettIkkeYreksaktiv(Behandling behandling, String fritekst) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
-            .medBegrunnelseFritekst(fritekst) // Nødvendig dersom resultat ikke er innvilgelse
+            .medBegrunnelseFritekst(fritekst) // Trengs dersom avslag pga manglende opplysninger
             .medType(ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV)
             .build();
 
