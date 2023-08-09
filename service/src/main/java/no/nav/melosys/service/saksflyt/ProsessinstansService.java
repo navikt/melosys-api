@@ -364,7 +364,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansIverksettIkkeYreksaktiv(Behandling behandling, String fritekst) {
+    public void opprettProsessinstansIverksettIkkeYrkesaktiv(Behandling behandling, String fritekst) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
             .medBegrunnelseFritekst(fritekst) // Trengs dersom avslag pga manglende opplysninger

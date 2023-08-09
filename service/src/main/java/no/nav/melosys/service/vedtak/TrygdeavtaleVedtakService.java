@@ -93,7 +93,7 @@ public class TrygdeavtaleVedtakService {
 
         if(saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)) {
             behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
-            prosessinstansService.opprettProsessinstansIverksettIkkeYreksaktiv(behandling, request.getFritekst());
+            prosessinstansService.opprettProsessinstansIverksettIkkeYrkesaktiv(behandling, request.getFritekst());
         } else {
             behandling.getFagsak().setStatus(Saksstatuser.MEDLEMSKAP_AVKLART); // TODO: Egen oppgave for fjerne denne som ikke brukes
             oppdaterBehandlingsresultat(behandlingsresultat, request);
