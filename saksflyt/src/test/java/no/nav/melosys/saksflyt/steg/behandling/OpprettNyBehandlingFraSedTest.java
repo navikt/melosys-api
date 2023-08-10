@@ -4,19 +4,18 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import com.google.common.collect.Lists;
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.*;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,6 +41,10 @@ class OpprettNyBehandlingFraSedTest {
     private JoarkFasade joarkFasade;
     @Mock
     private OppgaveService oppgaveFasade;
+    @Mock
+    private BehandlingsresultatService behandlingsresultatService;
+
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     private final LocalDate mottaksdato = LocalDate.EPOCH;
 
@@ -49,7 +52,8 @@ class OpprettNyBehandlingFraSedTest {
 
     @BeforeEach
     public void setup() {
-        opprettNyBehandlingFraSed = new OpprettNyBehandlingFraSed(fagsakService, behandlingService, oppgaveFasade, joarkFasade);
+        fakeUnleash.enableAll();
+        opprettNyBehandlingFraSed = new OpprettNyBehandlingFraSed(fagsakService, behandlingService, oppgaveFasade, joarkFasade, behandlingsresultatService, fakeUnleash);
     }
 
     @Test
@@ -108,6 +112,7 @@ class OpprettNyBehandlingFraSedTest {
 
         verify(oppgaveFasade).ferdigstillOppgave(oppgave.getOppgaveId());
         verify(behandlingService).avsluttBehandling(behandling.getId());
+        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.FERDIGBEHANDLET);
         verify(behandlingService).nyBehandling(
             fagsak, Behandlingsstatus.UNDER_BEHANDLING, Behandlingstyper.FØRSTEGANG, behandlingstema, journalpostID, dokumentID,
             mottaksdato, Behandlingsaarsaktyper.SED, null);
