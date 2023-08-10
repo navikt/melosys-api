@@ -256,12 +256,20 @@ public class Fagsak extends RegistreringsInfo {
         return Sakstyper.EU_EOS == sakstype;
     }
 
-    public boolean erSakstypeTrygdeavtale(){
+    public boolean erSakstypeTrygdeavtale() {
         return erSakstypeTrygdeavtale(type);
     }
 
-    public static boolean erSakstypeTrygdeavtale(Sakstyper sakstyper){
-        return Sakstyper.TRYGDEAVTALE == sakstyper;
+    public static boolean erSakstypeTrygdeavtale(Sakstyper sakstype) {
+        return Sakstyper.TRYGDEAVTALE == sakstype;
+    }
+
+    public boolean erSakstypeFtrl() {
+        return erSakstypeFtrl(type);
+    }
+
+    public static boolean erSakstypeFtrl(Sakstyper sakstype) {
+        return Sakstyper.FTRL == sakstype;
     }
 
     public Aktoersroller getHovedpartRolle() {
