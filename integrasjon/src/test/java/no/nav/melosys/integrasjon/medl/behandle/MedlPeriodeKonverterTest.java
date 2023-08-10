@@ -39,7 +39,7 @@ class MedlPeriodeKonverterTest {
 
     @Test
     void tilGrunnlagMedltype_Ftrl() {
-        assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8)).isEqualTo(GrunnlagMedl.FTL_2_8);
+        assertThat(MedlPeriodeKonverter.tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A)).isEqualTo(GrunnlagMedl.FTL_2_8_1_ledd_a);
 
         assertThatExceptionOfType(TekniskException.class)
             .isThrownBy(() -> MedlPeriodeKonverter.tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_5))
