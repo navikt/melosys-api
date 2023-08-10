@@ -93,7 +93,6 @@ public class EosVedtakService {
 
             Collection<Kontrollfeil> kontrollfeil = ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
                 behandling,
-                behandlingsresultat,
                 Sakstyper.EU_EOS,
                 request.getBehandlingsresultatTypeKode(),
                 kontrollerSomSkalIgnoreres
