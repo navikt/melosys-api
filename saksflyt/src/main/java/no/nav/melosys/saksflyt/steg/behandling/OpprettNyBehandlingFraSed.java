@@ -84,7 +84,7 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
     private void avsluttTidligereBehandling(Fagsak fagsak) {
         var aktivBehandling = fagsak.hentAktivBehandling();
         if (aktivBehandling != null) {
-            if (unleash.isEnabled("melosys.oppdater.behandlingsresultat ")) behandlingsresultatService.oppdaterBehandlingsresultattype(aktivBehandling.getId(), Behandlingsresultattyper.FERDIGBEHANDLET);
+            if (unleash.isEnabled("melosys.oppdater.behandlingsresultat")) behandlingsresultatService.oppdaterBehandlingsresultattype(aktivBehandling.getId(), Behandlingsresultattyper.FERDIGBEHANDLET);
             behandlingService.avsluttBehandling(aktivBehandling.getId());
         }
     }
