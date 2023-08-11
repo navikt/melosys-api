@@ -120,11 +120,12 @@ class KontrollTest {
     }
 
     @Test
-    void utførKontroller_FTRL_returnererTomCollection() {
+    void utførKontroller_FTRL_returnerer_adresse_mangler() {
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser());
         Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.FTRL, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
 
-        assertThat(resultat).isEmpty();
+        assertThat(resultat).extracting(Kontrollfeil::getKode)
+            .contains(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER);
     }
 
     @Test

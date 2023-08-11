@@ -5,6 +5,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import io.swagger.annotations.Api;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -17,6 +19,7 @@ import no.nav.melosys.service.tilgang.Aksesstype;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import no.nav.melosys.tjenester.gui.dto.kontroller.FerdigbehandlingKontrollerDto;
 import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerBrukerFullmektigDto;
+import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerBrukerFullmektigResponseDto;
 import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerFerdigbehandlingDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
@@ -55,9 +58,32 @@ public class KontrollTjeneste {
     }
 
     @PostMapping("/harRegistrertAdresse")
-    public ResponseEntity<Boolean> harRegistrertAdresse(@RequestBody KontrollerBrukerFullmektigDto kontrollerBrukerFullmektigDto) {
-        if (!kontrollerBrukerFullmektigDto.brukerID().isEmpty()) {
-            var person = persondataService.hentPerson(kontrollerBrukerFullmektigDto.brukerID());
+    public ResponseEntity<KontrollerBrukerFullmektigResponseDto> harRegistrertAdresse(@RequestBody KontrollerBrukerFullmektigDto kontrollerBrukerFullmektigDto) {
+        var brukerID = kontrollerBrukerFullmektigDto.brukerID();
+        var orgnr = kontrollerBrukerFullmektigDto.orgnr();
+        var rolle = Aktoersroller.BRUKER;
+
+        var responseDto = new KontrollerBrukerFullmektigResponseDto(false, rolle);
+
+        if (kontrollerBrukerFullmektigDto.behandlingID() != null) {
+            var behandling = behandlingService.hentBehandling(kontrollerBrukerFullmektigDto.behandlingID());
+            var representantBruker = behandling.getFagsak().finnRepresentant(Representerer.BRUKER);
+            if (representantBruker.isPresent()) {
+                if (representantBruker.get().erPerson()) {
+                    brukerID = representantBruker.get().getPersonIdent();
+                }
+                if (representantBruker.get().erOrganisasjon()) {
+                    orgnr = representantBruker.get().getOrgnr();
+                }
+                rolle = Aktoersroller.REPRESENTANT;
+            } else {
+                brukerID = behandling.getFagsak().finnBrukersAktørID().get();
+                rolle = Aktoersroller.BRUKER;
+            }
+        }
+
+        if (!brukerID.isEmpty()) {
+            var person = persondataService.hentPerson(brukerID);
 
             var personHarRegistrertAdresse = Stream.of(
                     person.finnBostedsadresse(),
@@ -65,15 +91,22 @@ public class KontrollTjeneste {
                     person.finnKontaktadresse())
                 .filter(Optional::isPresent)
                 .map(Optional::get).anyMatch(personAdresse -> personAdresse.harRegistrertAdresse());
-
-            return ResponseEntity.ok(personHarRegistrertAdresse);
+            responseDto.setHarRegistrertAdresse(personHarRegistrertAdresse);
+            responseDto.setRolle(rolle);
+            return ResponseEntity.ok(responseDto);
         }
 
-        var organisasjon = organisasjonOppslagService.hentOrganisasjon(kontrollerBrukerFullmektigDto.orgnr());
+        responseDto.setHarRegistrertAdresse(orgHarAdresse(orgnr));
+        responseDto.setRolle(rolle);
+        return ResponseEntity.ok(responseDto);
+    }
+
+    private Boolean orgHarAdresse(String orgnr) {
+        var organisasjon = organisasjonOppslagService.hentOrganisasjon(orgnr);
         var organisasjonHarRegistrertPostadresse = !organisasjon.getPostadresse().erTom() && !organisasjon.getPostadresse().getPostnummer().isBlank();
         var organisasjonHarRegistrertForretningsadresse = !organisasjon.getForretningsadresse().erTom() && !organisasjon.getForretningsadresse().getPostnummer().isBlank();
 
-        return ResponseEntity.ok(organisasjonHarRegistrertPostadresse || organisasjonHarRegistrertForretningsadresse);
+        return (organisasjonHarRegistrertPostadresse || organisasjonHarRegistrertForretningsadresse);
     }
 
     @PostMapping("/ferdigbehandling")

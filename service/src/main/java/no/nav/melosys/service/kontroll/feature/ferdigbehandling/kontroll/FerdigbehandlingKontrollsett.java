@@ -1,6 +1,5 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll;
 
-import java.util.Collections;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -21,7 +20,7 @@ public class FerdigbehandlingKontrollsett {
         }
         return switch (sakstype) {
             case EU_EOS -> REGELSETT_EU_EOS;
-            case FTRL -> Collections.emptySet();
+            case FTRL -> REGELSETT_FTRL;
             case TRYGDEAVTALE -> REGELSETT_TRYGDEAVTALER;
         };
     }
@@ -30,6 +29,10 @@ public class FerdigbehandlingKontrollsett {
         return REGELSETT_AVSLAG_HENLEGGELSE;
     }
 
+    private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_FTRL = Set.of(
+        FerdigbehandlingKontroll::adresseRegistrert
+    );
+    
     private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_EU_EOS = Set.of(
         FerdigbehandlingKontroll::adresseRegistrert,
         FerdigbehandlingKontroll::overlappendePeriode,
