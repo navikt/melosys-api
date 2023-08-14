@@ -31,18 +31,7 @@ class InnvilgelseFtrlMapper(
             behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland.landkoder[0]
 
         return InnvilgelseFtrl.Builder(brevbestilling)
-            .perioder(
-                medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder
-                    .map { Periode.av(it) }
-                    .toMutableList()
-                    .also {
-                        it.addAll(
-                            medlemAvFolketrygden.medlemskapsperioder
-                                .map { Periode.avIkkeInnvilgetPeriode(it) }
-                                .filterNotNull()
-                        )
-                    }
-            )
+            .perioder(mapPerioder(medlemAvFolketrygden))
             .bestemmelse(medlemAvFolketrygden.bestemmelse)
             .avslåttHelsedelFørMottaksdato(
                 erAvslåttHelsedelFørMottaksdato(
@@ -66,6 +55,13 @@ class InnvilgelseFtrlMapper(
             )
             .betalerArbeidsgiveravgift(erBetalerArbeidsgiveravgift(medlemAvFolketrygden.fastsattTrygdeavgift))
             .build()
+    }
+
+    private fun mapPerioder(medlemAvFolketrygden: MedlemAvFolketrygden): List<Periode> {
+        val perioder = medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.map { Periode.av(it) }
+        val tommePerioder =
+            medlemAvFolketrygden.medlemskapsperioder.map { Periode.avIkkeInnvilgetPeriode(it) }.filterNotNull()
+        return perioder + tommePerioder
     }
 
     private fun erAvslåttHelsedelFørMottaksdato(
