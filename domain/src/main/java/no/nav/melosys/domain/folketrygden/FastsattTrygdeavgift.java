@@ -6,10 +6,8 @@ import java.util.Set;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.avgift.Inntektsperiode;
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
-import no.nav.melosys.domain.kodeverk.Skatteplikttype;
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer;
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker;
 
@@ -90,12 +88,6 @@ public class FastsattTrygdeavgift {
         return inntektsperioder.stream().allMatch(Inntektsperiode::isTrygdeavgiftBetalesKunTilSkatt)
             ? Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
             : Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV;
-    }
-
-    public Skatteplikttype utledSkatteplikttype() {
-        return trygdeavgiftsgrunnlag.getSkatteforholdTilNorge().stream().findFirst()
-            .map(SkatteforholdTilNorge::getSkatteplikttype)
-            .orElseThrow(() -> new RuntimeException("SkattepliktType ikke funnet, skal ikke skje for fastsattTrygdeavgift :" + id));
     }
 
     private static boolean trygdeavgiftBetalesTilNavOgSkatt(List<Inntektsperiode> inntektsperioder) {

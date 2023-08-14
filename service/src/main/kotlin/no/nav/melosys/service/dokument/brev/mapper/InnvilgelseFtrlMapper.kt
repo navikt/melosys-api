@@ -1,8 +1,8 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
-import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.Vilkaarsresultat
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling
+import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Representerer
@@ -32,9 +32,16 @@ class InnvilgelseFtrlMapper(
 
         return InnvilgelseFtrl.Builder(brevbestilling)
             .perioder(
-                medlemAvFolketrygden.medlemskapsperioder
-                    .flatMap { Periode.av(it) }
-                    .toList()
+                medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder
+                    .map { Periode.av(it) }
+                    .toMutableList()
+                    .also {
+                        it.addAll(
+                            medlemAvFolketrygden.medlemskapsperioder
+                                .map { Periode.avIkkeInnvilgetPeriode(it) }
+                                .filterNotNull()
+                        )
+                    }
             )
             .bestemmelse(medlemAvFolketrygden.bestemmelse)
             .avslåttHelsedelFørMottaksdato(
@@ -44,7 +51,7 @@ class InnvilgelseFtrlMapper(
                 )
             )
             .trygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftMottaker)
-            .skatteplikttype(medlemAvFolketrygden.fastsattTrygdeavgift.utledSkatteplikttype())
+            .skatteplikttype(medlemAvFolketrygden.utledSkatteplikttype())
             .ftrl_2_8_begrunnelse(hentFtrlNærTilknytningNorgeBegrunnelse(behandlingsresultat.vilkaarsresultater))
             .begrunnelseAnnenGrunnFritekst(hentSaerligBegrunnelseFritekst(behandlingsresultat.vilkaarsresultater))
             .arbeidsgivere(
@@ -57,7 +64,7 @@ class InnvilgelseFtrlMapper(
                     Representerer.ARBEIDSGIVER
                 )
             )
-            .betalerArbeidsgiveravgift(erBetalerArbeidsgiveravgift(medlemAvFolketrygden.medlemskapsperioder))
+            .betalerArbeidsgiveravgift(erBetalerArbeidsgiveravgift(medlemAvFolketrygden.fastsattTrygdeavgift))
             .build()
     }
 
@@ -70,9 +77,8 @@ class InnvilgelseFtrlMapper(
                 && it.fom.isBefore(LocalDate.ofInstant(mottaksdato, ZoneId.systemDefault()))
         }
 
-    private fun erBetalerArbeidsgiveravgift(medlemskapsperioder: Collection<Medlemskapsperiode>) =
-        // TODO("Venter på avklaring om dette faktisk stemmer: https://navno.sharepoint.com/:w:/r/sites/TeamMelosys/Shared%20Documents/Fag/Brev/Brev%20-%20folketrygdloven/Vedtak/Vedtak%20om%20innvilgelse%20av%20frivillig%20medlemskap%20i%20folketrygden%20V.2%20.docx?d=wc848a8c72d714c3bb5b832e32e5db907&csf=1&web=1&e=JnIG1L&nav=eyJjIjoyMDE4MjI1NTMwfQ")
-        medlemskapsperioder.any { it.trygdeavgiftsperioder.any { it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt } }
+    private fun erBetalerArbeidsgiveravgift(fastsattTrygdeavgift: FastsattTrygdeavgift) =
+        fastsattTrygdeavgift.trygdeavgiftsperioder.any { it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt }
 
     private fun hentFtrlNærTilknytningNorgeBegrunnelse(vilkaarsresultater: Set<Vilkaarsresultat>): Ftrl_2_8_naer_tilknytning_norge_begrunnelser? =
         vilkaarsresultater

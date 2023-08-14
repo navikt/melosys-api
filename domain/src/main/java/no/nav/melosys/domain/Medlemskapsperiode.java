@@ -127,14 +127,6 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
         this.medlPeriodeID = medlPeriodeID;
     }
 
-    public Collection<Trygdeavgiftsperiode> getTrygdeavgiftsperioder() {
-        return trygdeavgiftsperioder;
-    }
-
-    public void setTrygdeavgiftsperioder(Collection<Trygdeavgiftsperiode> trygdeavgiftsperioder) {
-        this.trygdeavgiftsperioder = trygdeavgiftsperioder;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

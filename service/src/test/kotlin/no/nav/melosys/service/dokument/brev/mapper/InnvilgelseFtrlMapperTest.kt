@@ -185,6 +185,7 @@ internal class InnvilgelseFtrlMapperTest {
                 skatteforholdTilNorge =
                     setOf(SkatteforholdTilNorge().apply { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG })
             }
+            trygdeavgiftsperioder = lagTrygdeavgiftsperioder(medlemskapsperioder.first())
         }
         bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
     }
@@ -196,17 +197,17 @@ internal class InnvilgelseFtrlMapperTest {
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             medlemskapstype = Medlemskapstyper.FRIVILLIG
             trygdedekning = Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER
-            trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
             this.medlemAvFolketrygden = medlemAvFolketrygden
         })
 
-    private fun lagTrygdeavgiftsperioder(): List<Trygdeavgiftsperiode> =
-        listOf(Trygdeavgiftsperiode().apply {
+    private fun lagTrygdeavgiftsperioder(medlemskapsperiode: Medlemskapsperiode): Set<Trygdeavgiftsperiode> =
+        setOf(Trygdeavgiftsperiode().apply {
             periodeFra = LocalDate.EPOCH.plusMonths(1)
             periodeTil = LocalDate.EPOCH.plusMonths(4)
             trygdesats = BigDecimal.ZERO
             trygdeavgiftsbeløpMd = Penger(0.0)
             grunnlagInntekstperiode = lagGrunnlagInntektsperiode()
+            grunnlagMedlemskapsperiode = medlemskapsperiode
         })
 
     private fun lagGrunnlagInntektsperiode(): Inntektsperiode =

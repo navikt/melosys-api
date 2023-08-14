@@ -81,4 +81,10 @@ public class MedlemAvFolketrygden {
         fastsattTrygdeavgift.setMedlemAvFolketrygden(this);
         this.fastsattTrygdeavgift = fastsattTrygdeavgift;
     }
+
+    public Skatteplikttype utledSkatteplikttype() {
+        return fastsattTrygdeavgift.getTrygdeavgiftsgrunnlag().getSkatteforholdTilNorge().stream().findFirst()
+            .map(SkatteforholdTilNorge::getSkatteplikttype)
+            .orElseThrow(() -> new RuntimeException("SkattepliktType ikke funnet, skal ikke skje for medlemAvFolketrygden :" + id));
+    }
 }

@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
 import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
@@ -22,33 +23,30 @@ class Periode(
     val innvilgelsesResultat: InnvilgelsesResultat
 ) {
     companion object {
-        fun av(medlemskapsperiode: Medlemskapsperiode): List<Periode> =
-            medlemskapsperiode.trygdeavgiftsperioder.map {
+        fun av(trygdeavgiftsperiode: Trygdeavgiftsperiode): Periode =
+            Periode(
+                trygdeavgiftsperiode.periodeFra,
+                trygdeavgiftsperiode.periodeTil,
+                trygdeavgiftsperiode.grunnlagMedlemskapsperiode.trygdedekning,
+                trygdeavgiftsperiode.trygdesats,
+                trygdeavgiftsperiode.trygdeavgiftsbeløpMd.verdi,
+                trygdeavgiftsperiode.grunnlagInntekstperiode.type,
+                trygdeavgiftsperiode.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi,
+                trygdeavgiftsperiode.grunnlagMedlemskapsperiode.innvilgelsesresultat
+            )
+
+        fun avIkkeInnvilgetPeriode(medlemskapsperiode: Medlemskapsperiode): Periode? =
+            if (medlemskapsperiode.innvilgelsesresultat != InnvilgelsesResultat.INNVILGET)
                 Periode(
-                    it.periodeFra,
-                    it.periodeTil,
+                    medlemskapsperiode.fom,
+                    medlemskapsperiode.tom,
                     medlemskapsperiode.trygdedekning,
-                    it.trygdesats,
-                    it.trygdeavgiftsbeløpMd.verdi,
-                    it.grunnlagInntekstperiode.type,
-                    it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi,
+                    BigDecimal.ZERO,
+                    BigDecimal.ZERO,
+                    null,
+                    BigDecimal.ZERO,
                     medlemskapsperiode.innvilgelsesresultat
                 )
-            }.toMutableList().also {
-                if (medlemskapsperiode.innvilgelsesresultat != InnvilgelsesResultat.INNVILGET) {
-                    it.add(
-                        Periode(
-                            medlemskapsperiode.fom,
-                            medlemskapsperiode.tom,
-                            medlemskapsperiode.trygdedekning,
-                            BigDecimal.ZERO,
-                            BigDecimal.ZERO,
-                            null,
-                            BigDecimal.ZERO,
-                            medlemskapsperiode.innvilgelsesresultat
-                        )
-                    )
-                }
-            }
+            else null
     }
 }
