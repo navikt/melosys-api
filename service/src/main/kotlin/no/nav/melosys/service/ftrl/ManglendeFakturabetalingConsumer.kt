@@ -1,7 +1,7 @@
 package no.nav.melosys.service.ftrl
 
 import mu.KotlinLogging
-import no.nav.melosys.domain.ftrl.FakturaMottattMelding
+import no.nav.melosys.domain.ftrl.ManglendeFakturabetalingMelding
 import no.nav.melosys.service.sak.OpprettBehandlingForSak
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.beans.factory.annotation.Autowired
@@ -9,18 +9,18 @@ import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Service
 
 @Service
-class FakturaMottattConsumer(
+class ManglendeFakturabetalingConsumer(
     @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak
 ) {
     private val log = KotlinLogging.logger { }
 
     @KafkaListener(
-        clientIdPrefix = "aiven-melosys-fakturamottatt-consumer",
-        topics = ["\${kafka.aiven.fakturamottatt.topic}"],
-        containerFactory = "aivenFakturaMottattMeldingListenerContainerFactory"
+        clientIdPrefix = "aiven-melosys-manglende-fakturabetaling-consumer",
+        topics = ["\${kafka.aiven.manglende-fakturabetaling.topic}"],
+        containerFactory = "aivenManglendeFakturabetalingMeldingListenerContainerFactory"
     )
     fun lesFakturaMottattMelding(
-        consumerRecord: ConsumerRecord<String, FakturaMottattMelding>
+        consumerRecord: ConsumerRecord<String, ManglendeFakturabetalingMelding>
     ) {
         val fakturaMottattMelding = consumerRecord.value()
         try {
