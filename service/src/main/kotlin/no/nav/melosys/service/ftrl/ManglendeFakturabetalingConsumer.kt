@@ -19,17 +19,17 @@ class ManglendeFakturabetalingConsumer(
         topics = ["\${kafka.aiven.manglende-fakturabetaling.topic}"],
         containerFactory = "aivenManglendeFakturabetalingMeldingListenerContainerFactory"
     )
-    fun lesFakturaMottattMelding(
+    fun lesManglendeFakturabetalingMelding(
         consumerRecord: ConsumerRecord<String, ManglendeFakturabetalingMelding>
     ) {
-        val fakturaMottattMelding = consumerRecord.value()
+        val manglendeFakturebetalingMelding = consumerRecord.value()
         try {
             opprettBehandlingForSak.opprettBehandlingManglendeInnbetaling(
-                fakturaMottattMelding.behandlingId,
-                fakturaMottattMelding.mottaksDato
+                manglendeFakturebetalingMelding.behandlingId,
+                manglendeFakturebetalingMelding.mottaksDato
             )
         } catch (e: Exception) {
-            log.error("Feil ved mottak av FakturaMottatt med consumer record key ${consumerRecord.key()}", e)
+            log.error("Feil ved mottak av ManglendeFakturabetaling med consumer record key ${consumerRecord.key()}", e)
         }
     }
 }
