@@ -8,7 +8,6 @@ import java.util.Set;
 
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.avgift.Inntektsperiode;
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Skatteplikttype;
@@ -100,7 +99,7 @@ public class MedlemskapsperiodeService {
     private void oppdatereTrygdeavgiftsgrunnlag(Long behandlingsresultatID, MedlemAvFolketrygden medlemAvFolketrygden) {
         if (medlemAvFolketrygden.getFastsattTrygdeavgift() != null && medlemAvFolketrygden.getFastsattTrygdeavgift().getTrygdeavgiftsgrunnlag() != null) {
             List<Inntektsperiode> inntektsperioder = medlemAvFolketrygden.getFastsattTrygdeavgift().getTrygdeavgiftsgrunnlag().getInntektsperioder();
-            Skatteplikttype skatteplikttype = medlemAvFolketrygden.getSkatteplikttype();
+            Skatteplikttype skatteplikttype = medlemAvFolketrygden.utledSkatteplikttype();
             trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(behandlingsresultatID, new OppdaterTrygdeavgiftsgrunnlagRequest(skatteplikttype, inntektsperioder.stream().map(InntektskildeRequest::new).toList()));
         }
     }

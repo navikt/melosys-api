@@ -44,7 +44,7 @@ class InnvilgelseFtrlMapper(
                 )
             )
             .trygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftMottaker)
-            .skatteplikttype(medlemAvFolketrygden.skatteplikttype)
+            .skatteplikttype(medlemAvFolketrygden.utledSkatteplikttype())
             .ftrl_2_8_begrunnelse(hentFtrlNærTilknytningNorgeBegrunnelse(behandlingsresultat.vilkaarsresultater))
             .begrunnelseAnnenGrunnFritekst(hentSaerligBegrunnelseFritekst(behandlingsresultat.vilkaarsresultater))
             .arbeidsgivere(
