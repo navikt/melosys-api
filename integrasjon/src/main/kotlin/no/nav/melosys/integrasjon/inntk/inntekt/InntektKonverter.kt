@@ -72,56 +72,61 @@ class InntektKonverter {
         when (tilleggsinformasjonDetaljer?.detaljerType) {
             ALDERSUFOEREETTERLATTEAVTALEFESTETOGKRIGSPENSJON ->
                 PensjonOgUfoere().apply {
-                    val it =
-                        tilleggsinformasjonDetaljer as InntektResponse.AldersUfoereEtterlatteAvtalefestetOgKrigspensjon
-                    grunnpensjonbeløp = it.grunnpensjonbeloep
-                    heravEtterlattepensjon = it.heravEtterlattepensjon
-                    pensjonsgrad = it.pensjonsgrad
-                    tidsrom = Periode().apply {
-                        fom = it.tidsromFom
-                        tom = it.tidsromTom
+                    (tilleggsinformasjonDetaljer as InntektResponse.AldersUfoereEtterlatteAvtalefestetOgKrigspensjon).let {
+                        grunnpensjonbeløp = it.grunnpensjonbeloep
+                        heravEtterlattepensjon = it.heravEtterlattepensjon
+                        pensjonsgrad = it.pensjonsgrad
+                        tidsrom = Periode().apply {
+                            fom = it.tidsromFom
+                            tom = it.tidsromTom
+                        }
                     }
                 }
 
             BARNEPENSJONOGUNDERHOLDSBIDRAG ->
                 BarnepensjonOgUnderholdsbidrag().apply {
-                    val it = tilleggsinformasjonDetaljer as InntektResponse.BarnepensjonOgUnderholdsbidrag
-                    forsørgersFødselnummer = it.forsoergersFoedselnummer
-                    tidsrom = Periode().apply {
-                        fom = it.tidsromFom
-                        tom = it.tidsromTom
+                    (tilleggsinformasjonDetaljer as InntektResponse.BarnepensjonOgUnderholdsbidrag).let {
+                        forsørgersFødselnummer = it.forsoergersFoedselnummer
+                        tidsrom = Periode().apply {
+                            fom = it.tidsromFom
+                            tom = it.tidsromTom
+                        }
                     }
                 }
 
             BONUSFRAFORSVARET -> BonusFraForsvaret().apply {
-                val it = tilleggsinformasjonDetaljer as InntektResponse.BonusFraForsvaret
-                åretUtbetalingenGjelderFor = it.aaretUtbetalingenGjelderFor
+                (tilleggsinformasjonDetaljer as InntektResponse.BonusFraForsvaret).let {
+                    åretUtbetalingenGjelderFor = it.aaretUtbetalingenGjelderFor
+                }
             }
 
             ETTERBETALINGSPERIODE -> Etterbetalingsperiode().apply {
-                val it = tilleggsinformasjonDetaljer as InntektResponse.Etterbetalingsperiode
-                etterbetalingsperiode = Periode().apply {
-                    fom = it.etterbetalingsperiodeFom
-                    tom = it.etterbetalingsperiodeTom
+                (tilleggsinformasjonDetaljer as InntektResponse.Etterbetalingsperiode).let {
+                    etterbetalingsperiode = Periode().apply {
+                        fom = it.etterbetalingsperiodeFom
+                        tom = it.etterbetalingsperiodeTom
+                    }
                 }
             }
 
             INNTJENINGSFORHOLD -> Inntjeningsforhold().apply {
-                val it = tilleggsinformasjonDetaljer as InntektResponse.Inntjeningsforhold
-                inntjeningsforhold = it.spesielleInntjeningsforhold
+                (tilleggsinformasjonDetaljer as InntektResponse.Inntjeningsforhold).let {
+                    inntjeningsforhold = it.spesielleInntjeningsforhold
+                }
             }
 
             REISEKOSTOGLOSJI -> Svalbardinntekt().apply {
-                val it = tilleggsinformasjonDetaljer as InntektResponse.Svalbardinntekt
-                antallDager = it.antallDager
-                betaltTrygdeavgift = it.betaltTrygdeavgift
+                (tilleggsinformasjonDetaljer as InntektResponse.Svalbardinntekt).let {
+                    antallDager = it.antallDager
+                    betaltTrygdeavgift = it.betaltTrygdeavgift
+                }
             }
 
             SVALBARDINNTEKT -> ReiseKostOgLosji().apply {
-                val it = tilleggsinformasjonDetaljer as InntektResponse.ReiseKostOgLosji
-                persontype = it.persontype
+                (tilleggsinformasjonDetaljer as InntektResponse.ReiseKostOgLosji).let {
+                    persontype = it.persontype
+                }
             }
-
             else -> null
         }
 }
