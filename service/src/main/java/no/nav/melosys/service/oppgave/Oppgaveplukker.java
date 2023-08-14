@@ -146,7 +146,7 @@ public class Oppgaveplukker {
 
     private Set<String> hentAlleOppgaveBehandlingstemaTilSøk(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema) {
         return Arrays.stream(Behandlingstyper.values())
-            .filter(behandlingstype -> !GyldigeKombinasjoner.finnGyldige(sakstype, sakstema, behandlingstype, behandlingstema).isEmpty())
+            .filter(behandlingstype -> OppgaveFactory.erGyldigOppgave(sakstype, sakstema, behandlingstema, behandlingstype))
             .map(behandlingstype -> oppgaveFactory.utledOppgaveBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype).getKode())
             .collect(Collectors.toSet());
     }

@@ -92,6 +92,7 @@ class OppgaveFactory {
 
     companion object {
         private const val FRIST_FERDIGSTILLELSE_JFR_OPPG: Long = 7
+        private val oppgaveGosysMapping: OppgaveGosysMapping = OppgaveGosysMapping()
 
         @JvmStatic
         fun lagJournalføringsoppgave(journalpostID: String): Oppgave.Builder {
@@ -102,5 +103,14 @@ class OppgaveFactory {
                 .setJournalpostId(journalpostID)
                 .setFristFerdigstillelse(LocalDate.now().plusDays(FRIST_FERDIGSTILLELSE_JFR_OPPG))
         }
+
+        @JvmStatic
+        fun erGyldigOppgave(
+            sakstype: Sakstyper,
+            sakstema: Sakstemaer,
+            behandlingstema: Behandlingstema,
+            behandlingstype: Behandlingstyper?
+        ): Boolean =
+            oppgaveGosysMapping.finnOppgaveOrNull(sakstype, sakstema, behandlingstema, behandlingstype) != null
     }
 }
