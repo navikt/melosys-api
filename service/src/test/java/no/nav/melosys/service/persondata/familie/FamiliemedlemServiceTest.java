@@ -1,11 +1,5 @@
 package no.nav.melosys.service.persondata.familie;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.Sivilstand;
 import no.nav.melosys.domain.person.Navn;
@@ -22,6 +16,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 import static no.nav.melosys.service.SaksbehandlingDataFactory.lagInaktivBehandlingSomIkkeResulterIVedtak;
 import static no.nav.melosys.service.persondata.PdlObjectFactory.lagPerson;
@@ -41,14 +40,12 @@ class FamiliemedlemServiceTest {
 
     private FamiliemedlemService familiemedlemService;
 
-    private final FakeUnleash unleash = new FakeUnleash();
-
     @BeforeEach
     public void beforeEach() {
         this.familiemedlemService = new FamiliemedlemService(behandlingService,
             saksopplysningerService,
             new EktefelleEllerPartnerFamiliemedlemFilter(pdlConsumer),
-            pdlConsumer, unleash);
+            pdlConsumer);
     }
 
     @Test
