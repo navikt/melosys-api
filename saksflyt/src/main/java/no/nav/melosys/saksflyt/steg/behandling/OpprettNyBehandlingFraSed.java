@@ -19,6 +19,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import static no.nav.melosys.featuretoggle.ToggleName.OPPDATER_BEHANDLINGSRESULTAT;
+
 @Component
 public class OpprettNyBehandlingFraSed implements StegBehandler {
 
@@ -84,7 +86,7 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
     private void avsluttTidligereBehandling(Fagsak fagsak) {
         var aktivBehandling = fagsak.hentAktivBehandling();
         if (aktivBehandling != null) {
-            if (unleash.isEnabled("melosys.oppdater.behandlingsresultat")) behandlingsresultatService.oppdaterBehandlingsresultattype(aktivBehandling.getId(), Behandlingsresultattyper.FERDIGBEHANDLET);
+            if (unleash.isEnabled(OPPDATER_BEHANDLINGSRESULTAT)) behandlingsresultatService.oppdaterBehandlingsresultattype(aktivBehandling.getId(), Behandlingsresultattyper.FERDIGBEHANDLET);
             behandlingService.avsluttBehandling(aktivBehandling.getId());
         }
     }

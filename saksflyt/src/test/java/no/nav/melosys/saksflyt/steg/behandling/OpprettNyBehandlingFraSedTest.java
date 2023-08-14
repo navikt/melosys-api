@@ -24,6 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static no.nav.melosys.featuretoggle.ToggleName.OPPDATER_BEHANDLINGSRESULTAT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
@@ -52,7 +53,7 @@ class OpprettNyBehandlingFraSedTest {
 
     @BeforeEach
     public void setup() {
-        fakeUnleash.enableAll();
+        fakeUnleash.enable(OPPDATER_BEHANDLINGSRESULTAT);
         opprettNyBehandlingFraSed = new OpprettNyBehandlingFraSed(fagsakService, behandlingService, oppgaveFasade, joarkFasade, behandlingsresultatService, fakeUnleash);
     }
 
