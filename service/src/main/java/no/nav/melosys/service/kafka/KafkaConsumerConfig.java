@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import no.nav.melosys.domain.ftrl.FakturaMottattMelding;
 import no.nav.melosys.service.soknad.SoknadMottatt;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -56,6 +57,13 @@ public class KafkaConsumerConfig {
         KafkaProperties kafkaProperties, @Value("${kafka.aiven.eessi.groupid}") String groupId
     ) {
         return kafkaListenerContainerFactory(MelosysEessiMelding.class, kafkaProperties, groupId);
+    }
+
+    @Bean
+    public KafkaListenerContainerFactory<ConcurrentMessageListenerContainer<String, FakturaMottattMelding>> aivenFakturaMottattMeldingListenerContainerFactory(
+        KafkaProperties kafkaProperties, @Value("${kafka.aiven.fakturamottatt.groupid}") String groupId
+    ) {
+        return kafkaListenerContainerFactory(FakturaMottattMelding.class, kafkaProperties, groupId);
     }
 
     @Bean

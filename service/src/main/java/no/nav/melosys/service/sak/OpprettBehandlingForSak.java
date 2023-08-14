@@ -40,13 +40,12 @@ public class OpprettBehandlingForSak {
     }
 
     @Transactional
-    public void opprettBehandlingManglendeInnbetaling(String vedtaksId) {
-        String[] saksnummerOgBehandlingsId = vedtaksId.split("-");
-        String saksnummer = saksnummerOgBehandlingsId[0];
-        Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
+    public void opprettBehandlingManglendeInnbetaling(long behandlingId) {
+        Behandling behandling = behandlingService.hentBehandling(behandlingId);
+        Fagsak fagsak = behandling.getFagsak();
         final Behandling sistBehandling = fagsak.hentSistRegistrertBehandling();
 
-        opprettBehandling(saksnummer, lagOpprettSakDto(sistBehandling));
+        opprettBehandling(fagsak.getSaksnummer(), lagOpprettSakDto(sistBehandling));
     }
 
     @NotNull

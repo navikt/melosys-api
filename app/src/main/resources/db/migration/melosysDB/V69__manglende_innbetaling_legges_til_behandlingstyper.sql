@@ -1,0 +1,1 @@
+INSERT INTO behandling_type (kode, navn) VALUES ('MANGLENDE_INNBETALING_TRYGDEAVGIFT', 'Vurdering manglende innbetaling trygdeavgift');
