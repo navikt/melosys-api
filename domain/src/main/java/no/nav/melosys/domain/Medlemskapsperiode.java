@@ -140,13 +140,12 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
             innvilgelsesresultat == that.innvilgelsesresultat &&
             medlemskapstype == that.medlemskapstype &&
             trygdedekning == that.trygdedekning &&
-            Objects.equals(medlPeriodeID, that.medlPeriodeID) &&
-            Objects.equals(trygdeavgiftsperioder, that.trygdeavgiftsperioder);
+            Objects.equals(medlPeriodeID, that.medlPeriodeID);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, medlemAvFolketrygden, fom, tom, arbeidsland, innvilgelsesresultat, medlemskapstype, trygdedekning, medlPeriodeID, trygdeavgiftsperioder);
+        return Objects.hash(id, medlemAvFolketrygden, fom, tom, arbeidsland, innvilgelsesresultat, medlemskapstype, trygdedekning, medlPeriodeID);
     }
 
     @Override
