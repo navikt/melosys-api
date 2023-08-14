@@ -157,6 +157,30 @@ class AnmodningUnntakServiceTest {
             Lovvalgsperiode.av(lagAnmodningsperiodeSvar(), Medlemskapstyper.PLIKTIG));
         verify(prosessinstansService).opprettProsessinstansAnmodningOmUnntakMottakSvar(behandling, FRITEKST_SED);
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
+        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.REGISTRERT_UNNTAK);
+    }
+
+    @Test
+    void anmodningOmUnntakSvar_ikkeGodkjent_forventBehandlingsResultatFerdigbehandlet() {
+        Behandling behandling = lagBehandling();
+        behandling.setTema(Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL);
+        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
+        Saksopplysning saksopplysning = new Saksopplysning();
+        saksopplysning.setType(SEDOPPL);
+
+        SedDokument sedDokument = new SedDokument();
+        sedDokument.setRinaSaksnummer("55667788");
+        saksopplysning.setDokument(sedDokument);
+
+        behandling.setSaksopplysninger(Set.of(saksopplysning));
+
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
+        when(anmodningsperiodeService.hentAnmodningsperiodeSvarForBehandling(anyLong())).thenReturn(lagAnmodningsperiodeSvarNegativt());
+        when(eessiService.kanOppretteSedTyperPåBuc(anyString(), any(SedType.class))).thenReturn(true);
+
+        anmodningUnntakService.anmodningOmUnntakSvar(BEHANDLING_ID, FRITEKST_SED);
+
+        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(BEHANDLING_ID, Behandlingsresultattyper.FERDIGBEHANDLET);
     }
 
     @Test
@@ -244,6 +268,13 @@ class AnmodningUnntakServiceTest {
     private static AnmodningsperiodeSvar lagAnmodningsperiodeSvar() {
         AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
         anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.INNVILGELSE);
+        anmodningsperiodeSvar.setAnmodningsperiode(lagAnmodningsperiode());
+        return anmodningsperiodeSvar;
+    }
+
+    private static AnmodningsperiodeSvar lagAnmodningsperiodeSvarNegativt() {
+        AnmodningsperiodeSvar anmodningsperiodeSvar = new AnmodningsperiodeSvar();
+        anmodningsperiodeSvar.setAnmodningsperiodeSvarType(Anmodningsperiodesvartyper.AVSLAG);
         anmodningsperiodeSvar.setAnmodningsperiode(lagAnmodningsperiode());
         return anmodningsperiodeSvar;
     }
