@@ -16,6 +16,9 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Service
 public class OpprettBehandlingForSak {
     private final FagsakService fagsakService;
@@ -40,22 +43,22 @@ public class OpprettBehandlingForSak {
     }
 
     @Transactional
-    public void opprettBehandlingManglendeInnbetaling(long behandlingId) {
+    public void opprettBehandlingManglendeInnbetaling(long behandlingId, LocalDate mottaksDato) {
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
         Fagsak fagsak = behandling.getFagsak();
         final Behandling sistBehandling = fagsak.hentSistRegistrertBehandling();
 
-        opprettBehandling(fagsak.getSaksnummer(), lagOpprettSakDto(sistBehandling));
+        opprettBehandling(fagsak.getSaksnummer(), lagOpprettSakDto(sistBehandling, mottaksDato));
     }
 
     @NotNull
-    private static OpprettSakDto lagOpprettSakDto(Behandling sistBehandling) {
+    private static OpprettSakDto lagOpprettSakDto(Behandling sistBehandling, LocalDate mottaksDato) {
         OpprettSakDto opprettSakDto = new OpprettSakDto();
         opprettSakDto.setBehandlingstema(sistBehandling.getTema());
         opprettSakDto.setBehandlingstype(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT);
         opprettSakDto.setBehandlingsaarsakType(sistBehandling.getBehandlingsårsak().getType());
         opprettSakDto.setBehandlingsaarsakFritekst(sistBehandling.getBehandlingsårsak().getFritekst());
-        opprettSakDto.setMottaksdato(sistBehandling.getBehandlingsårsak().getMottaksdato());
+        opprettSakDto.setMottaksdato(mottaksDato);
         return opprettSakDto;
     }
 

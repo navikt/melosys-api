@@ -22,8 +22,12 @@ class FakturaMottattConsumer(
     fun lesFakturaMottattMelding(
         consumerRecord: ConsumerRecord<String, FakturaMottattMelding>
     ) {
+        val fakturaMottattMelding = consumerRecord.value()
         try {
-            opprettBehandlingForSak.opprettBehandlingManglendeInnbetaling(consumerRecord.value().behandlingId)
+            opprettBehandlingForSak.opprettBehandlingManglendeInnbetaling(
+                fakturaMottattMelding.behandlingId,
+                fakturaMottattMelding.mottaksDato
+            )
         } catch (e: Exception) {
             log.error("Feil ved mottak av FakturaMottatt med consumer record key ${consumerRecord.key()}", e)
         }

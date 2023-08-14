@@ -1,7 +1,10 @@
 package no.nav.melosys.domain.ftrl
 
-data class FakturaMottattMelding (
-    val behandlingId: Long
+import java.time.LocalDate
+
+data class FakturaMottattMelding(
+    val behandlingId: Long,
+    val mottaksDato: LocalDate
 )
 
 
