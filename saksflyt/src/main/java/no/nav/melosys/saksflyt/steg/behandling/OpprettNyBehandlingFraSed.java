@@ -3,10 +3,7 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.*;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
@@ -15,11 +12,14 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import static no.nav.melosys.featuretoggle.ToggleName.OPPDATER_BEHANDLINGSRESULTAT;
 
 @Component
 public class OpprettNyBehandlingFraSed implements StegBehandler {
@@ -30,15 +30,21 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
     private final BehandlingService behandlingService;
     private final OppgaveService oppgaveService;
     private final JoarkFasade joarkFasade;
+    private final BehandlingsresultatService behandlingsresultatService;
+    private final Unleash unleash;
 
     public OpprettNyBehandlingFraSed(FagsakService fagsakService,
                                      BehandlingService behandlingService,
                                      OppgaveService oppgaveService,
-                                     JoarkFasade joarkFasade) {
+                                     JoarkFasade joarkFasade,
+                                     BehandlingsresultatService behandlingsresultatService,
+                                     Unleash unleash) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.joarkFasade = joarkFasade;
         this.oppgaveService = oppgaveService;
+        this.behandlingsresultatService = behandlingsresultatService;
+        this.unleash = unleash;
     }
 
     @Override
@@ -79,8 +85,8 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
 
     private void avsluttTidligereBehandling(Fagsak fagsak) {
         var aktivBehandling = fagsak.hentAktivBehandling();
-
         if (aktivBehandling != null) {
+            if (unleash.isEnabled(OPPDATER_BEHANDLINGSRESULTAT)) behandlingsresultatService.oppdaterBehandlingsresultattype(aktivBehandling.getId(), Behandlingsresultattyper.FERDIGBEHANDLET);
             behandlingService.avsluttBehandling(aktivBehandling.getId());
         }
     }
