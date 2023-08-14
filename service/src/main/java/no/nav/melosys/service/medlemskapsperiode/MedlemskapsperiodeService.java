@@ -99,7 +99,7 @@ public class MedlemskapsperiodeService {
     private void oppdatereTrygdeavgiftsgrunnlag(Long behandlingsresultatID, MedlemAvFolketrygden medlemAvFolketrygden) {
         if (medlemAvFolketrygden.getFastsattTrygdeavgift() != null && medlemAvFolketrygden.getFastsattTrygdeavgift().getTrygdeavgiftsgrunnlag() != null) {
             List<Inntektsperiode> inntektsperioder = medlemAvFolketrygden.getFastsattTrygdeavgift().getTrygdeavgiftsgrunnlag().getInntektsperioder();
-            Skatteplikttype skatteplikttype = medlemAvFolketrygden.utledSkatteplikttype();
+            Skatteplikttype skatteplikttype = medlemAvFolketrygden.getFastsattTrygdeavgift().utledSkatteplikttype();
             trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(behandlingsresultatID, new OppdaterTrygdeavgiftsgrunnlagRequest(skatteplikttype, inntektsperioder.stream().map(InntektskildeRequest::new).toList()));
         }
     }
