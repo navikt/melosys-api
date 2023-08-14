@@ -1,8 +1,9 @@
 package no.nav.melosys.domain.person.adresse;
 
-import java.time.LocalDate;
-
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import org.apache.commons.lang3.StringUtils;
+
+import java.time.LocalDate;
 
 public record Bostedsadresse(
     StrukturertAdresse strukturertAdresse,
@@ -13,4 +14,9 @@ public record Bostedsadresse(
     String kilde,
     boolean erHistorisk
 ) implements PersonAdresse {
+
+    @Override
+    public boolean harRegistrertAdresse() {
+        return strukturertAdresse != null && !strukturertAdresse.erTom() && !StringUtils.isBlank(strukturertAdresse.getPostnummer());
+    }
 }

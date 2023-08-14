@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 import no.nav.melosys.domain.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
+import org.apache.commons.lang3.StringUtils;
 
 public record Kontaktadresse(
     StrukturertAdresse strukturertAdresse,
@@ -17,6 +18,12 @@ public record Kontaktadresse(
     LocalDateTime registrertDato,
     boolean erHistorisk
 ) implements PersonAdresse {
+
+    @Override
+    public boolean harRegistrertAdresse() {
+        StrukturertAdresse adresse = hentEllerLagStrukturertAdresse();
+        return adresse != null && !adresse.erTom() && !StringUtils.isBlank(adresse.getPostnummer());
+    }
 
     public StrukturertAdresse hentEllerLagStrukturertAdresse() {
         if (strukturertAdresse != null) {

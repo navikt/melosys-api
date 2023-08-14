@@ -1,6 +1,11 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.Collections;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.nav.melosys.domain.arkiv.ArkivDokument;
+import no.nav.melosys.domain.arkiv.BrukerIdType;
+import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.service.dokument.DokumentHentingService;
 import no.nav.melosys.service.dokument.brev.SedPdfData;
@@ -12,8 +17,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.Collections;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -42,12 +45,28 @@ class DokumentTjenesteTest {
 
     @Test
     void hentDokument() throws Exception {
+        when(dokumentHentingService.hentJournalpost(anyString())).thenReturn(new Journalpost("jpID"));
         var dokument = new byte[1];
         when(dokumentHentingService.hentDokument(anyString(), anyString())).thenReturn(dokument);
 
-        mockMvc.perform(get(BASE_URL + "/pdf/{journalpostID}/{dokumentID}", "1", "2")
+        mockMvc.perform(get(BASE_URL + "/{journalpostID}/{dokumentID}", "1", "2", "3")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    void hentDokument_journalpostMedFnr_auditLogging() throws Exception {
+        Journalpost journalpost = new Journalpost("jpID");
+        journalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
+        journalpost.setBrukerId("fnr");
+        journalpost.setHoveddokument(new ArkivDokument());
+        when(dokumentHentingService.hentJournalpost(anyString())).thenReturn(journalpost);
+        when(dokumentHentingService.hentDokument(anyString(), anyString())).thenReturn(new byte[1]);
+
+        mockMvc.perform(get(BASE_URL + "/{journalpostID}/{dokumentID}", "1", "2", "3")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+        verify(aksesskontroll).auditAutoriserFolkeregisterIdent(eq("fnr"), anyString());
     }
 
     @Test

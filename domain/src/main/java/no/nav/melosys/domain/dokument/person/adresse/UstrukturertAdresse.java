@@ -1,10 +1,9 @@
 package no.nav.melosys.domain.dokument.person.adresse;
 
+import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlType;
-
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import no.nav.melosys.domain.dokument.felles.Land;
@@ -40,6 +39,11 @@ public class UstrukturertAdresse {
             postnr,
             poststed) &&
             land == null;
+    }
+
+    @JsonIgnore
+    public boolean postnummerErTom() {
+        return postnr.isBlank();
     }
 
     @JsonIgnore

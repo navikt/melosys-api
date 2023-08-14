@@ -237,7 +237,7 @@ public class BehandlingsresultatService {
             throw new FunksjonellException("Utfall for registrering av unntak er allerede satt for behandlingsresultat " + behandlingID);
         }
 
-        behandlingsresultat.setType(Behandlingsresultattyper.REGISTRERT_UNNTAK);
+        behandlingsresultat.setType(finnKorrektBehandlingsResultat(utfallRegistreringUnntak));
         oppdaterUtfallRegistreringUnntak(behandlingID, utfallRegistreringUnntak);
     }
 
@@ -253,9 +253,17 @@ public class BehandlingsresultatService {
             throw new FunksjonellException("Utfall for utpeking er allerede satt for behandlingsresultat " + behandlingID);
         }
 
-        //behandlingsresultat.setType(??); FIXME
         behandlingsresultat.setUtfallUtpeking(utfallUtpeking);
         behandlingsresultatRepository.save(behandlingsresultat);
+    }
+
+    private static Behandlingsresultattyper finnKorrektBehandlingsResultat(Utfallregistreringunntak utfallregistreringunntak) {
+        if (utfallregistreringunntak.equals(Utfallregistreringunntak.GODKJENT) || utfallregistreringunntak.equals(Utfallregistreringunntak.DELVIS_GODKJENT)) {
+            return (Behandlingsresultattyper.REGISTRERT_UNNTAK);
+        } else if (utfallregistreringunntak.equals(Utfallregistreringunntak.IKKE_GODKJENT)) {
+            return(Behandlingsresultattyper.FERDIGBEHANDLET);
+        }
+        return Behandlingsresultattyper.IKKE_FASTSATT;
     }
 
     public void oppdaterBegrunnelser(long behandlingID, Set<BehandlingsresultatBegrunnelse> begrunnelser, String begrunnelseFritekst) {

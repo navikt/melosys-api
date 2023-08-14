@@ -26,15 +26,25 @@ data class Personopplysninger(
     @JsonProperty("statsborgerskap") var statsborgerskap: Collection<Statsborgerskap>
 ) : Persondata {
 
-
     override fun erPersonDød(): Boolean = dødsfall?.dødsdato() != null
 
     override fun harStrengtAdressebeskyttelse(): Boolean = adressebeskyttelser.any { it.erStrengtFortrolig() }
 
-    override fun manglerRegistrertAdresse(): Boolean = bostedsadresse == null && kontaktadresser.isEmpty() &&
-        oppholdsadresser.isEmpty()
+    override fun manglerRegistrertAdresse(): Boolean {
+        val personHarRegistrertAdresse = listOf(
+            finnBostedsadresse(),
+            finnOppholdsadresse(),
+            finnKontaktadresse()
+        )
+            .filter { it.isPresent }
+            .map { it.get() }
+            .any { it.harRegistrertAdresse() }
+        return !personHarRegistrertAdresse
+    }
+
 
     override fun manglerBostedsadresse(): Boolean = finnBostedsadresse().isEmpty
+    override fun manglerPostnummer(): Boolean = bostedsadresse?.strukturertAdresse?.postnummer?.isEmpty() ?: true
 
     override fun hentFolkeregisterident(): String? = folkeregisteridentifikator?.identifikasjonsnummer()
 
