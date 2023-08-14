@@ -83,13 +83,15 @@ public class BehandlingTjeneste {
         String saksbehandlerID = SubjectHandler.getInstance().getUserID();
         log.debug("Saksbehandler {} ber om å hente behandling {}.", saksbehandlerID, behandlingID);
 
-        if (aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandlingID)) {
-            aksesskontroll.auditAutoriserSkriv(behandlingID, "Saksbehandling for behandling " + behandlingID);
+        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
+        String saksnummer = behandling.getFagsak().getSaksnummer();
+
+        if (aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandlerID)) {
+            aksesskontroll.auditAutoriserSkriv(behandlingID, "Saksbehandling og endringer for sak %s (behandling %d)".formatted(saksnummer, behandlingID));
         } else {
-            aksesskontroll.auditAutoriser(behandlingID, "Innsyn i behandling " + behandlingID);
+            aksesskontroll.auditAutoriser(behandlingID, "Innsyn i behandling %d på sak %s".formatted(behandlingID, saksnummer));
         }
 
-        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
         behandlingService.oppdaterBehandlingsstatusHvisTilhørendeSaksbehandler(behandling, saksbehandlerID);
         BehandlingDto behandlingDto = tilBehandlingDto(behandling, saksbehandlerID);
         return ResponseEntity.ok(behandlingDto);

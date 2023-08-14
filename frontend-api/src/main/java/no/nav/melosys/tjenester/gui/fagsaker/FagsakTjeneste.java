@@ -133,12 +133,12 @@ public class FagsakTjeneste {
     public List<FagsakOppsummeringDto> hentFagsaker(@RequestBody FagsakSokDto fagsakSokDto) {
 
         if (StringUtils.isNotEmpty(fagsakSokDto.ident())) {
-            aksesskontroll.auditAutoriserFolkeregisterIdent(fagsakSokDto.ident(), "Søk på saker knyttet til folkeregisterident.");
+            aksesskontroll.auditAutoriserFolkeregisterIdent(fagsakSokDto.ident(), "Søk på person med ident. Oversikt over saker og behandlinger.");
             return tilFagsakOppsummeringDtoer(fagsakService.hentFagsakerMedAktør(Aktoersroller.BRUKER, fagsakSokDto.ident()));
         } else if (StringUtils.isNotEmpty(fagsakSokDto.saksnummer())) {
             Optional<Fagsak> fagsak = fagsakService.finnFagsakFraSaksnummer(fagsakSokDto.saksnummer());
             if (fagsak.isPresent()) {
-                aksesskontroll.auditAutoriserSakstilgang(fagsak.get(), "Søk på saker med saksnummer.");
+                aksesskontroll.auditAutoriserSakstilgang(fagsak.get(), "Søk på sak med saksnummer. Oversikt over saker og behandlinger.");
                 return tilFagsakOppsummeringDtoer(Collections.singletonList(fagsak.get()));
             }
         } else if (StringUtils.isNotEmpty(fagsakSokDto.orgnr())) {
