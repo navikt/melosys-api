@@ -105,6 +105,7 @@ public class JournalfoeringService {
 
         if (journalpost.mottaksKanalErEessi()) {
             validerKanOppretteSakFraSed(journalpost);
+            opprettUtsattJournalpostDersomEksisterer(journalpost);
         }
 
         fellesValidering(journalfoeringDto);
@@ -119,6 +120,11 @@ public class JournalfoeringService {
 
         opprettJournalføringNySakProsessinstans(journalpost, journalfoeringDto, sakstype, sakstema, behandlingstema,
             behandlingstype);
+    }
+
+    private void opprettUtsattJournalpostDersomEksisterer(Journalpost journalpost) {
+        final MelosysEessiMelding melosysEessiMelding = eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId());
+        eessiService.opprettJournalpostForTidligereSed(melosysEessiMelding.getRinaSaksnummer());
     }
 
     private void validerOpprettelseSak(JournalfoeringOpprettDto journalfoeringDto,
