@@ -26,7 +26,7 @@ public final class MedlPeriodeKonverter {
     }
 
     private static final BiMap<LovvalgBestemmelse, GrunnlagMedl> lovvalgsbestemmelseTilGrunnlagMedlTabell;
-    private static final Map<Folketrygdloven_kap2_bestemmelser, GrunnlagMedl> ftrlKap2BestemmelserGrunnLagMedlTabell;
+    private static final Map<Folketrygdloven_kap2_bestemmelser, GrunnlagMedl> ftrlKap2BestemmelserTilGrunnLagMedlTabell;
 
     private static final Collection<LovvalgBestemmelse> TILLEGGSBESTEMMELSER_MAPPES_TIL_MEDL = Set.of(
         Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1,
@@ -227,16 +227,9 @@ public final class MedlPeriodeKonverter {
         lovvalgsbestemmelseTilGrunnlagMedlTabell = tbl;
 
 
-        ftrlKap2BestemmelserGrunnLagMedlTabell = Map.of(
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8, GrunnlagMedl.FTL_2_8,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A, GrunnlagMedl.FTL_2_8,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_B, GrunnlagMedl.FTL_2_8,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_C, GrunnlagMedl.FTL_2_8,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_D, GrunnlagMedl.FTL_2_8,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD, GrunnlagMedl.FTL_2_8,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_TREDJE_LEDD, GrunnlagMedl.FTL_2_8,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FJERDE_LEDD, GrunnlagMedl.FTL_2_8,
-            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FEMTE_LEDD, GrunnlagMedl.FTL_2_8
+        ftrlKap2BestemmelserTilGrunnLagMedlTabell = Map.of(
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A, GrunnlagMedl.FTL_2_8_1_ledd_a,
+            Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_ANDRE_LEDD, GrunnlagMedl.FTL_2_8_2_ledd
         );
     }
 
@@ -250,12 +243,9 @@ public final class MedlPeriodeKonverter {
         };
     }
 
-    public static DekningMedl tilMedlTrygdeDekningFtrl(Trygdedekninger dekning, Folketrygdloven_kap2_bestemmelser bestemmelse) {
+    public static DekningMedl tilMedlTrygdeDekning(Trygdedekninger dekning, Folketrygdloven_kap2_bestemmelser bestemmelse) {
         return switch (bestemmelse) {
-            case FTRL_KAP2_2_8, FTRL_KAP2_2_8_FØRSTE_LEDD_A, FTRL_KAP2_2_8_FØRSTE_LEDD_B,
-                FTRL_KAP2_2_8_FØRSTE_LEDD_C, FTRL_KAP2_2_8_FØRSTE_LEDD_D, FTRL_KAP2_2_8_ANDRE_LEDD,
-                FTRL_KAP2_2_8_TREDJE_LEDD, FTRL_KAP2_2_8_FJERDE_LEDD, FTRL_KAP2_2_8_FEMTE_LEDD ->
-                mapForFtrlKap2_8(dekning);
+            case FTRL_KAP2_2_8_FØRSTE_LEDD_A, FTRL_KAP2_2_8_ANDRE_LEDD -> mapForFtrlKap2_8(dekning);
             default -> throw new TekniskException("Bestemmelse støttes ikke for FTRL: " + bestemmelse.getKode());
         };
     }
@@ -267,7 +257,7 @@ public final class MedlPeriodeKonverter {
             case PENSJONSDEL -> DekningMedl.FTRL_2_9_1_LEDD_B;
             case HELSE_OG_PENSJONSDEL -> DekningMedl.FTRL_2_9_1_LEDD_C;
             case HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER -> DekningMedl.FTRL_2_9_2_LEDD_1C;
-            default -> throw new TekniskException("Dekningstype støttes ikke for FTRL:" + dekning.getKode());
+            default -> throw new TekniskException("Dekningstype støttes ikke for FTRL: " + dekning.getKode());
         };
     }
 
@@ -290,7 +280,7 @@ public final class MedlPeriodeKonverter {
     }
 
     public static GrunnlagMedl tilGrunnlagMedltype(Folketrygdloven_kap2_bestemmelser bestemmelse) {
-        return ofNullable(ftrlKap2BestemmelserGrunnLagMedlTabell.get(bestemmelse))
+        return ofNullable(ftrlKap2BestemmelserTilGrunnLagMedlTabell.get(bestemmelse))
             .orElseThrow(() -> new TekniskException("Folketrygdloven bestemmelse støttes ikke. Kode: " +
                 bestemmelse.getKode() + " Beskrivelse: " + bestemmelse.getBeskrivelse()));
     }
@@ -314,11 +304,5 @@ public final class MedlPeriodeKonverter {
             bestemmelse = lovvalgsperiode.getBestemmelse();
         }
         return bestemmelse;
-    }
-
-    private static boolean harOvergangsregler(LovvalgBestemmelse bestemmelse) {
-        return bestemmelse != null
-            && (bestemmelse.equals(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87_8)
-            || bestemmelse.equals(Tilleggsbestemmelser_883_2004.FO_883_2004_ART87A));
     }
 }

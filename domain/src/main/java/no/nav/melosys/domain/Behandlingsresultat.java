@@ -1,11 +1,5 @@
 package no.nav.melosys.domain;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
-import javax.persistence.*;
-
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.*;
@@ -14,6 +8,12 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.exception.FunksjonellException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import javax.persistence.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 
@@ -253,7 +253,8 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public boolean erAvslag() {
         return erAvslagManglendeOpplysninger() || (type == Behandlingsresultattyper.AVSLAG_SØKNAD)
-            || (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND && hentLovvalgsperiode().erAvslått());
+            || (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND && hentLovvalgsperiode().erAvslått())
+            || (type == Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN && finnMedlemskapsperioder().stream().noneMatch(Medlemskapsperiode::erInnvilget));
     }
 
     public boolean erAvslagManglendeOpplysninger() {
@@ -368,14 +369,8 @@ public class Behandlingsresultat extends RegistreringsInfo {
         return utpekingsperioder.stream().findFirst();
     }
 
-    public Medlemskapsperiode hentValidertMedlemskapsPeriode() {
-        return finnValidertMedlemskapsPeriode()
-            .orElseThrow(() -> new NoSuchElementException("Ingen medlemskapsPerioder finnes for behandlingsresultat " + id));
-    }
-
-    public Optional<Medlemskapsperiode> finnValidertMedlemskapsPeriode() {
-        Collection<Medlemskapsperiode> medlemskapsPerioder = medlemAvFolketrygden.getMedlemskapsperioder();
-        return medlemskapsPerioder.stream().findFirst();
+    public Collection<Medlemskapsperiode> finnMedlemskapsperioder() {
+        return medlemAvFolketrygden.getMedlemskapsperioder();
     }
 
     public Set<VilkaarBegrunnelse> hentVilkaarbegrunnelser(Vilkaar vilkaarType) {

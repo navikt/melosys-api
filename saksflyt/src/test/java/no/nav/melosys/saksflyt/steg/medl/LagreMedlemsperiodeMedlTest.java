@@ -6,9 +6,9 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,85 +18,106 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Collections.emptyList;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static no.nav.melosys.domain.kodeverk.InnvilgelsesResultat.AVSLAATT;
+import static no.nav.melosys.domain.kodeverk.InnvilgelsesResultat.INNVILGET;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class LagreMedlemsperiodeMedlTest {
 
     public static final long BEHANDLING_ID = 123L;
-    @Mock
-    private MedlemAvFolketrygdenService medlemAvFolketrygdenService;
 
     @Mock
     private MedlPeriodeService medlPeriodeService;
-
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
 
     private LagreMedlemsperiodeMedl lagreMedlemsperiodeMedl;
 
-    Behandlingsresultat behandlingsresultat = mock(Behandlingsresultat.class);
+    private Prosessinstans prosessinstans;
 
     @BeforeEach
     void init() {
-        lagreMedlemsperiodeMedl = new LagreMedlemsperiodeMedl(medlemAvFolketrygdenService, medlPeriodeService, behandlingsresultatService);
-        when(behandlingsresultat.erAvslag()).thenReturn(false);
+        lagreMedlemsperiodeMedl = new LagreMedlemsperiodeMedl(medlPeriodeService, behandlingsresultatService);
+        prosessinstans = lagProsessInstans();
     }
 
     @Test
-    void utfør_feilerUtenMedlemskapsperiode() {
-        when(medlemAvFolketrygdenService.hentMedlemAvFolketrygden(anyLong())).thenReturn(lagMedlemAvFolketrygden());
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+    void utfør_ingenMedlemskapsperioder_erAvslag_gjørIngenting() {
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID))
+            .thenReturn(lagBehandlingsresulat(emptyList()));
 
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> lagreMedlemsperiodeMedl.utfør(lagProsessInstans()))
-            .withMessageContaining("Ingen medlemskapsperioder funnet for behandling");
+
+        lagreMedlemsperiodeMedl.utfør(prosessinstans);
+
+
+        verifyNoInteractions(medlPeriodeService);
     }
 
     @Test
-    void utfør_erInnvilgelse_oppretterMedlPerioder() {
-        MedlemAvFolketrygden medlemAvFolketrygden = lagMedlemAvFolketrygden(new Medlemskapsperiode(), new Medlemskapsperiode());
-        when(medlemAvFolketrygdenService.hentMedlemAvFolketrygden(anyLong())).thenReturn(medlemAvFolketrygden);
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+    void utfør_ingenInnvilgedeMedlemskapsperioder_erAvslag_gjørIngenting() {
+        var medlemskapsperioder = List.of(lagMedlemskapsperiode(AVSLAATT), lagMedlemskapsperiode(AVSLAATT));
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID))
+            .thenReturn(lagBehandlingsresulat(medlemskapsperioder));
+
+
+        lagreMedlemsperiodeMedl.utfør(prosessinstans);
+
+
+        verifyNoInteractions(medlPeriodeService);
+    }
+
+    @Test
+    void utfør_innvilgedeMedlemskapsperioder_oppretterMedlPerioder() {
+        var medlemskapsperioder = List.of(lagMedlemskapsperiode(INNVILGET), lagMedlemskapsperiode(INNVILGET));
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID))
+            .thenReturn(lagBehandlingsresulat(medlemskapsperioder));
+
 
         lagreMedlemsperiodeMedl.utfør(lagProsessInstans());
 
-        verify(medlPeriodeService, times(2)).opprettPeriodeEndelig(BEHANDLING_ID, medlemAvFolketrygden.getMedlemskapsperioder().iterator().next());
+
+        verify(medlPeriodeService, times(2)).opprettPeriodeEndelig(eq(BEHANDLING_ID), any(Medlemskapsperiode.class));
     }
 
     @Test
-    void utfør_erInnvilgelse_opprettPerioder_Idempotent() {
-        Medlemskapsperiode lagretPeriode = new Medlemskapsperiode();
-        lagretPeriode.setMedlPeriodeID(123L);
-        MedlemAvFolketrygden medlemAvFolketrygden = lagMedlemAvFolketrygden(lagretPeriode, new Medlemskapsperiode());
+    void utfør_innvilgedeMedlemskapsperioderMedMedlPeriodeID_oppdatererEksisterendeMedlPerioder() {
+        var medlemskapsperioder = List.of(lagMedlemskapsperiode(INNVILGET), lagMedlemskapsperiode(INNVILGET));
+        medlemskapsperioder.forEach(medlemskapsperiode -> medlemskapsperiode.setMedlPeriodeID(1L));
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID))
+            .thenReturn(lagBehandlingsresulat(medlemskapsperioder));
 
-        when(medlemAvFolketrygdenService.hentMedlemAvFolketrygden(anyLong())).thenReturn(medlemAvFolketrygden);
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         lagreMedlemsperiodeMedl.utfør(lagProsessInstans());
 
-        verify(medlPeriodeService, times(1)).opprettPeriodeEndelig(eq(BEHANDLING_ID), any(Medlemskapsperiode.class));
+
+        verify(medlPeriodeService, times(2)).oppdaterPeriodeEndelig(eq(BEHANDLING_ID), any(Medlemskapsperiode.class));
     }
 
     private Prosessinstans lagProsessInstans() {
+        Behandling behandling = new Behandling();
+        behandling.setId(BEHANDLING_ID);
+
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setBehandling(lagBehandling());
+        prosessinstans.setBehandling(behandling);
         return prosessinstans;
     }
 
-    private Behandling lagBehandling() {
-        Behandling behandling = new Behandling();
-        behandling.setId(BEHANDLING_ID);
-        return behandling;
+
+    private Behandlingsresultat lagBehandlingsresulat(List<Medlemskapsperiode> medlemskapsperioder) {
+        MedlemAvFolketrygden medlemAvFolketrygden = new MedlemAvFolketrygden();
+        medlemAvFolketrygden.setMedlemskapsperioder(medlemskapsperioder);
+
+        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setType(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
+        behandlingsresultat.setMedlemAvFolketrygden(medlemAvFolketrygden);
+        return behandlingsresultat;
     }
 
-    private MedlemAvFolketrygden lagMedlemAvFolketrygden(Medlemskapsperiode... medlemskapsperioder) {
-        MedlemAvFolketrygden medlemAvFolketrygden = new MedlemAvFolketrygden();
-        medlemAvFolketrygden.setMedlemskapsperioder(medlemskapsperioder.length > 0 ? List.of(medlemskapsperioder) : emptyList());
-        return medlemAvFolketrygden;
+    private Medlemskapsperiode lagMedlemskapsperiode(InnvilgelsesResultat innvilgelsesResultat) {
+        var medlemskapsperiode = new Medlemskapsperiode();
+        medlemskapsperiode.setInnvilgelsesresultat(innvilgelsesResultat);
+        return medlemskapsperiode;
     }
 }

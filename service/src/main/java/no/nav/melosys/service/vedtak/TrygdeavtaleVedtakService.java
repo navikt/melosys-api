@@ -73,7 +73,6 @@ public class TrygdeavtaleVedtakService {
         if (behandlingsresultat.erInnvilgelse()) {
             Collection<Kontrollfeil> kontrollfeil = ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
                 behandling,
-                behandlingsresultat,
                 Sakstyper.TRYGDEAVTALE,
                 Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN,
                 null
