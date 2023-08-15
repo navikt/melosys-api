@@ -29,10 +29,6 @@ public class FerdigbehandlingKontrollsett {
         return REGELSETT_AVSLAG_HENLEGGELSE;
     }
 
-    private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_FTRL = Set.of(
-        FerdigbehandlingKontroll::adresseRegistrert
-    );
-    
     private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_EU_EOS = Set.of(
         FerdigbehandlingKontroll::adresseRegistrert,
         FerdigbehandlingKontroll::overlappendePeriode,
@@ -41,6 +37,10 @@ public class FerdigbehandlingKontrollsett {
         FerdigbehandlingKontroll::arbeidsstedManglerFelter,
         FerdigbehandlingKontroll::foretakUtlandManglerFelter,
         FerdigbehandlingKontroll::orgnrErOpphørt
+    );
+
+    private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_FTRL = Set.of(
+        FerdigbehandlingKontroll::adresseRegistrert
     );
 
     private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_TRYGDEAVTALER = Set.of(

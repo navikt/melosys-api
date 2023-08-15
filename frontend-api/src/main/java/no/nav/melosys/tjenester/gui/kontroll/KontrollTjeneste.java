@@ -18,8 +18,8 @@ import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Aksesstype;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import no.nav.melosys.tjenester.gui.dto.kontroller.FerdigbehandlingKontrollerDto;
-import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerBrukerFullmektigDto;
-import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerBrukerFullmektigResponseDto;
+import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerAdresseBrukerFullmektigDto;
+import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerAdresseBrukerFullmektigResponseDto;
 import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerFerdigbehandlingDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
@@ -58,15 +58,13 @@ public class KontrollTjeneste {
     }
 
     @PostMapping("/harRegistrertAdresse")
-    public ResponseEntity<KontrollerBrukerFullmektigResponseDto> harRegistrertAdresse(@RequestBody KontrollerBrukerFullmektigDto kontrollerBrukerFullmektigDto) {
-        var brukerID = kontrollerBrukerFullmektigDto.brukerID();
-        var orgnr = kontrollerBrukerFullmektigDto.orgnr();
+    public ResponseEntity<KontrollerAdresseBrukerFullmektigResponseDto> harRegistrertAdresse(@RequestBody KontrollerAdresseBrukerFullmektigDto kontrollerAdresseBrukerFullmektigDto) {
+        var brukerID = kontrollerAdresseBrukerFullmektigDto.brukerID();
+        var orgnr = kontrollerAdresseBrukerFullmektigDto.orgnr();
         var rolle = Aktoersroller.BRUKER;
 
-        var responseDto = new KontrollerBrukerFullmektigResponseDto(false, rolle);
-
-        if (kontrollerBrukerFullmektigDto.behandlingID() != null) {
-            var behandling = behandlingService.hentBehandling(kontrollerBrukerFullmektigDto.behandlingID());
+        if (kontrollerAdresseBrukerFullmektigDto.behandlingID() != null) {
+            var behandling = behandlingService.hentBehandling(kontrollerAdresseBrukerFullmektigDto.behandlingID());
             var representantBruker = behandling.getFagsak().finnRepresentant(Representerer.BRUKER);
             if (representantBruker.isPresent()) {
                 if (representantBruker.get().erPerson()) {
@@ -91,13 +89,11 @@ public class KontrollTjeneste {
                     person.finnKontaktadresse())
                 .filter(Optional::isPresent)
                 .map(Optional::get).anyMatch(personAdresse -> personAdresse.harRegistrertAdresse());
-            responseDto.setHarRegistrertAdresse(personHarRegistrertAdresse);
-            responseDto.setRolle(rolle);
+            var responseDto = new KontrollerAdresseBrukerFullmektigResponseDto(rolle, personHarRegistrertAdresse);
             return ResponseEntity.ok(responseDto);
         }
 
-        responseDto.setHarRegistrertAdresse(orgHarAdresse(orgnr));
-        responseDto.setRolle(rolle);
+        var responseDto = new KontrollerAdresseBrukerFullmektigResponseDto(rolle, orgHarAdresse(orgnr));
         return ResponseEntity.ok(responseDto);
     }
 

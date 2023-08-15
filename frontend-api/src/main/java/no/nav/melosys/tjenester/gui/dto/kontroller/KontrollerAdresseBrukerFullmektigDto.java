@@ -1,9 +1,9 @@
 package no.nav.melosys.tjenester.gui.dto.kontroller;
 
-public record KontrollerBrukerFullmektigDto(
+public record KontrollerAdresseBrukerFullmektigDto(
     String brukerID,
     String orgnr,
-    Integer behandlingID
+    Long behandlingID
 ) {
 
 }
