@@ -21,7 +21,6 @@ import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -133,46 +132,81 @@ public class BehandlingsresultatService {
             medlemAvFolketrygdenReplika.getMedlemskapsperioder().add(medlemskapsperiodeReplika);
         }
 
-        FastsattTrygdeavgift fastsattTrygdeavgiftReplika = (FastsattTrygdeavgift) BeanUtils.cloneBean(behandlingsresultat.getMedlemAvFolketrygden().getFastsattTrygdeavgift());
+        replikerFastsattTrygdeavgift(behandlingsresultat.getMedlemAvFolketrygden(), medlemAvFolketrygdenReplika);
+
+        medlemAvFolketrygdenReplika.getMedlemskapsperioder().forEach(medlemskapsperiode -> medlemskapsperiode.setId(null));
+        behandlingsresultatsreplika.setMedlemAvFolketrygden(medlemAvFolketrygdenReplika);
+    }
+
+    private void replikerFastsattTrygdeavgift(MedlemAvFolketrygden medlemAvFolketrygden, MedlemAvFolketrygden medlemAvFolketrygdenReplika)
+        throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        FastsattTrygdeavgift fastsattTrygdeavgiftReplika = (FastsattTrygdeavgift) BeanUtils.cloneBean(medlemAvFolketrygden.getFastsattTrygdeavgift());
         fastsattTrygdeavgiftReplika.setMedlemAvFolketrygden(medlemAvFolketrygdenReplika);
         fastsattTrygdeavgiftReplika.setId(null);
         fastsattTrygdeavgiftReplika.setTrygdeavgiftsperioder(new HashSet<>());
 
-        Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlagReplika = (Trygdeavgiftsgrunnlag) BeanUtils.cloneBean(behandlingsresultat.getMedlemAvFolketrygden().getFastsattTrygdeavgift().getTrygdeavgiftsgrunnlag());
+        replikerTrygdeavgiftsgrunnlag(medlemAvFolketrygden.getFastsattTrygdeavgift(), fastsattTrygdeavgiftReplika);
+
+        replikerTrygdeavgiftsperioder(medlemAvFolketrygden, medlemAvFolketrygdenReplika);
+
+        fastsattTrygdeavgiftReplika.getTrygdeavgiftsgrunnlag().getInntektsperioder()
+            .forEach(inntektsperiode -> inntektsperiode.setId(null));
+        fastsattTrygdeavgiftReplika.getTrygdeavgiftsgrunnlag().getSkatteforholdTilNorge()
+            .forEach(skatteforholdTilNorge -> skatteforholdTilNorge.setId(null));
+
+        medlemAvFolketrygdenReplika.setFastsattTrygdeavgift(fastsattTrygdeavgiftReplika);
+    }
+
+    private void replikerTrygdeavgiftsgrunnlag(FastsattTrygdeavgift fastsattTrygdeavgift, FastsattTrygdeavgift fastsattTrygdeavgiftReplika)
+        throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlagReplika = (Trygdeavgiftsgrunnlag) BeanUtils.cloneBean(fastsattTrygdeavgift.getTrygdeavgiftsgrunnlag());
         trygdeavgiftsgrunnlagReplika.setFastsattTrygdeavgift(fastsattTrygdeavgiftReplika);
         trygdeavgiftsgrunnlagReplika.setId(null);
         trygdeavgiftsgrunnlagReplika.setSkatteforholdTilNorge(new HashSet<>());
         trygdeavgiftsgrunnlagReplika.setInntektsperioder(new ArrayList<>());
 
-        for (SkatteforholdTilNorge skatteforholdTilNorge : behandlingsresultat.getMedlemAvFolketrygden().getFastsattTrygdeavgift().getTrygdeavgiftsgrunnlag().getSkatteforholdTilNorge()) {
+        for (SkatteforholdTilNorge skatteforholdTilNorge : fastsattTrygdeavgift.getTrygdeavgiftsgrunnlag().getSkatteforholdTilNorge()) {
             SkatteforholdTilNorge skatteforholdTilNorgeReplika = (SkatteforholdTilNorge) BeanUtils.cloneBean(skatteforholdTilNorge);
             skatteforholdTilNorgeReplika.setTrygdeavgiftsgrunnlag(trygdeavgiftsgrunnlagReplika);
             trygdeavgiftsgrunnlagReplika.getSkatteforholdTilNorge().add(skatteforholdTilNorgeReplika);
         }
 
-        for (Inntektsperiode inntektsperiode : behandlingsresultat.getMedlemAvFolketrygden().getFastsattTrygdeavgift().getTrygdeavgiftsgrunnlag().getInntektsperioder()) {
+        for (Inntektsperiode inntektsperiode : fastsattTrygdeavgift.getTrygdeavgiftsgrunnlag().getInntektsperioder()) {
             Inntektsperiode inntektsperiodeReplika = (Inntektsperiode) BeanUtils.cloneBean(inntektsperiode);
             inntektsperiodeReplika.setTrygdeavgiftsgrunnlag(trygdeavgiftsgrunnlagReplika);
             trygdeavgiftsgrunnlagReplika.getInntektsperioder().add(inntektsperiodeReplika);
         }
 
-        for (Trygdeavgiftsperiode trygdeavgiftsperiode : behandlingsresultat.getMedlemAvFolketrygden().getFastsattTrygdeavgift().getTrygdeavgiftsperioder()) {
+        fastsattTrygdeavgiftReplika.setTrygdeavgiftsgrunnlag(trygdeavgiftsgrunnlagReplika);
+    }
+
+    private void replikerTrygdeavgiftsperioder(MedlemAvFolketrygden medlemAvFolketrygden, MedlemAvFolketrygden medlemAvFolketrygdenReplika)
+        throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        var fastsattTrygdeavgiftReplika = medlemAvFolketrygdenReplika.getFastsattTrygdeavgift();
+        var trygdeavgiftgrunnlagReplika = fastsattTrygdeavgiftReplika.getTrygdeavgiftsgrunnlag();
+
+        for (Trygdeavgiftsperiode trygdeavgiftsperiode : medlemAvFolketrygden.getFastsattTrygdeavgift().getTrygdeavgiftsperioder()) {
             Trygdeavgiftsperiode trygdeavgiftsperiodeReplika = (Trygdeavgiftsperiode) BeanUtils.cloneBean(trygdeavgiftsperiode);
             trygdeavgiftsperiodeReplika.setFastsattTrygdeavgift(fastsattTrygdeavgiftReplika);
             trygdeavgiftsperiodeReplika.setId(null);
-            trygdeavgiftsperiodeReplika.setGrunnlagMedlemskapsperiode(medlemAvFolketrygdenReplika.getMedlemskapsperioder().stream().filter(medlemskapsperiode -> Objects.equals(medlemskapsperiode.getId(), trygdeavgiftsperiode.getGrunnlagMedlemskapsperiode().getId())).findFirst().orElse(null));
-            trygdeavgiftsperiodeReplika.setGrunnlagInntekstperiode(trygdeavgiftsgrunnlagReplika.getInntektsperioder().stream().filter(inntektsperiode -> Objects.equals(inntektsperiode.getId(), trygdeavgiftsperiode.getGrunnlagInntekstperiode().getId())).findFirst().orElse(null));
-            trygdeavgiftsperiodeReplika.setGrunnlagSkatteforholdTilNorge(trygdeavgiftsgrunnlagReplika.getSkatteforholdTilNorge().stream().filter(skatteforholdTilNorge -> Objects.equals(skatteforholdTilNorge.getId(), trygdeavgiftsperiode.getGrunnlagSkatteforholdTilNorge().getId())).findFirst().orElse(null));
+
+            trygdeavgiftsperiodeReplika.setGrunnlagMedlemskapsperiode(
+                medlemAvFolketrygdenReplika.getMedlemskapsperioder().stream()
+                    .filter(medlemskapsperiode -> Objects.equals(medlemskapsperiode.getId(), trygdeavgiftsperiode.getGrunnlagMedlemskapsperiode().getId()))
+                    .findFirst().orElse(null));
+
+            trygdeavgiftsperiodeReplika.setGrunnlagInntekstperiode(
+                trygdeavgiftgrunnlagReplika.getInntektsperioder().stream()
+                    .filter(inntektsperiode -> Objects.equals(inntektsperiode.getId(), trygdeavgiftsperiode.getGrunnlagInntekstperiode().getId()))
+                    .findFirst().orElse(null));
+
+            trygdeavgiftsperiodeReplika.setGrunnlagSkatteforholdTilNorge(
+                trygdeavgiftgrunnlagReplika.getSkatteforholdTilNorge().stream()
+                    .filter(skatteforholdTilNorge -> Objects.equals(skatteforholdTilNorge.getId(), trygdeavgiftsperiode.getGrunnlagSkatteforholdTilNorge().getId()))
+                    .findFirst().orElse(null));
+
             fastsattTrygdeavgiftReplika.getTrygdeavgiftsperioder().add(trygdeavgiftsperiodeReplika);
         }
-
-        medlemAvFolketrygdenReplika.getMedlemskapsperioder().forEach(medlemskapsperiode -> medlemskapsperiode.setId(null));
-        trygdeavgiftsgrunnlagReplika.getInntektsperioder().forEach(inntektsperiode -> inntektsperiode.setId(null));
-        trygdeavgiftsgrunnlagReplika.getSkatteforholdTilNorge().forEach(skatteforholdTilNorge -> skatteforholdTilNorge.setId(null));
-
-        fastsattTrygdeavgiftReplika.setTrygdeavgiftsgrunnlag(trygdeavgiftsgrunnlagReplika);
-        medlemAvFolketrygdenReplika.setFastsattTrygdeavgift(fastsattTrygdeavgiftReplika);
-        behandlingsresultatsreplika.setMedlemAvFolketrygden(medlemAvFolketrygdenReplika);
     }
 
     private void replikerUtpekingsperioder(Behandlingsresultat behandlingsresultat, Behandlingsresultat behandlingsresultatsreplika)
