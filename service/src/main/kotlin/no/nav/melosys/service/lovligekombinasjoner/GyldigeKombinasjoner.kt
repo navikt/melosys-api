@@ -8,6 +8,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 class GyldigeKombinasjoner {
 
     companion object {
+        @JvmStatic
         fun finnGyldige(
             sakstype: Sakstyper? = null,
             sakstema: Sakstemaer? = null,
