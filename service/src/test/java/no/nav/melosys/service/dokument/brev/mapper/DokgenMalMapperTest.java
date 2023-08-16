@@ -14,10 +14,7 @@ import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
-import no.nav.melosys.domain.kodeverk.Avsendertyper;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Landkoder;
-import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
@@ -381,7 +378,7 @@ class DokgenMalMapperTest {
         Behandling behandling = lagBehandling(lagFagsak(true));
 
         DokgenBrevbestilling brevbestilling = new InnvilgelseBrevbestilling.Builder()
-            .medProduserbartdokument(INNVILGELSE_FOLKETRYGDLOVEN_2_8)
+            .medProduserbartdokument(INNVILGELSE_FOLKETRYGDLOVEN)
             .medBehandling(behandling)
             .medOrg(lagOrg())
             .medKontaktopplysning(lagKontaktOpplysning())
@@ -600,18 +597,18 @@ class DokgenMalMapperTest {
 
     private InnvilgelseFtrl lagInnvilgelseFtrl() {
         return new InnvilgelseFtrl.Builder(lagInnvilgelseBrevbestilling())
-            .perioder(null)
-            .erFullstendigInnvilget(true)
-            .ftrl_2_8_begrunnelse(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_MULTINASJONALT_SELSKAP.getBeskrivelse())
-            .arbeidsgiverNavn("Egon Olsen AS")
-            .arbeidsland("USA")
+            .perioder(emptyList())
+            .bestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8)
+            .avslåttHelsedelFørMottaksdato(false)
+            .trygdeavgiftMottaker(Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV)
+            .skatteplikttype(Skatteplikttype.SKATTEPLIKTIG)
+            .ftrl_2_8_begrunnelse(Ftrl_2_8_naer_tilknytning_norge_begrunnelser.ANSATT_I_MULTINASJONALT_SELSKAP)
+            .begrunnelseAnnenGrunnFritekst(null)
+            .arbeidsgivere(List.of("Egon Olsen AS"))
+            .arbeidsland(Land_iso2.US.getKode())
             .trygdeavtaleMedArbeidsland(false)
-            .vurderingTrygdeavgift(null)
-            .loennsforhold(null)
             .arbeidsgiverFullmektigNavn(null)
-            .avgiftssatsAar(String.valueOf(LocalDate.now().getYear()))
-            .loennNorgeSkattepliktig(false)
-            .loennUtlandSkattepliktig(false)
+            .betalerArbeidsgiveravgift(true)
             .build();
     }
 
