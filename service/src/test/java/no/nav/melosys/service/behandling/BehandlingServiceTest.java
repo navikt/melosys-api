@@ -41,7 +41,8 @@ import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -70,6 +71,8 @@ class BehandlingServiceTest {
     @Mock
     private UtledMottaksdato utledMottaksdato;
     @Mock
+    private ReplikerBehandlingsresultatService replikerBehandlingsresultatService;
+    @Mock
     private ApplicationEventPublisher applicationEventPublisher;
     private BehandlingService behandlingService;
     @Captor
@@ -83,7 +86,7 @@ class BehandlingServiceTest {
 
     @BeforeEach
     public void setUp() {
-        behandlingService = new BehandlingService(behandlingRepository, tidligereMedlemsperiodeRepo, behandlingsresultatService, oppgaveService, lovligeKombinasjonerService, utkastBrevService, applicationEventPublisher, utledMottaksdato);
+        behandlingService = new BehandlingService(behandlingRepository, tidligereMedlemsperiodeRepo, behandlingsresultatService, oppgaveService, lovligeKombinasjonerService, utkastBrevService, applicationEventPublisher, utledMottaksdato, replikerBehandlingsresultatService);
 
         behandling = new Behandling();
         behandling.setId(BEHANDLING_ID);
