@@ -424,6 +424,27 @@ class JournalfoeringServiceTest {
     }
 
     @Test
+    void journalførOgOpprettSak_opprettUtsattJournalpost_forventBlirKalt() {
+        MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
+        melosysEessiMelding.setRinaSaksnummer(RINA_SAKSNUMMER);
+        melosysEessiMelding.setJournalpostId("123");
+        FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS);
+        opprettDto.setFagsak(fagsakDto);
+        opprettDto.setJournalpostID("123");
+        journalpost.setMottaksKanal("EESSI");
+
+        when(eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId())).thenReturn(melosysEessiMelding);
+        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK_BRUKER), any()))
+            .thenReturn(new Prosessinstans());
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+        when(eessiService.støtterAutomatiskBehandling(any(MelosysEessiMelding.class))).thenReturn(Boolean.FALSE);
+
+        journalfoeringService.journalførOgOpprettSak(opprettDto);
+
+        verify(eessiService).opprettJournalpostForTidligereSed(anyString());
+    }
+
+    @Test
     void journalførOgOpprettSak_sedAlleredeTilknyttet_kasterException() {
         MelosysEessiMelding melosysEessiMelding = new MelosysEessiMelding();
         melosysEessiMelding.setRinaSaksnummer(RINA_SAKSNUMMER);
