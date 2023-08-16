@@ -50,6 +50,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
+import static no.nav.melosys.featuretoggle.ToggleName.IKKE_JOURNALFOER_UTEN_PID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
@@ -101,6 +102,7 @@ class JournalfoeringServiceTest {
         SpringSubjectHandler.set(new TestSubjectHandler());
 
         unleash.enable("melosys.folketrygden.mvp");
+        unleash.enable(IKKE_JOURNALFOER_UTEN_PID);
         journalpost = new Journalpost("123");
         journalpost.setHoveddokument(new ArkivDokument());
         journalpost.setForsendelseMottatt(Instant.EPOCH);

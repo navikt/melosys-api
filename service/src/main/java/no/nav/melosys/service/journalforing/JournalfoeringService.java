@@ -40,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
+import static no.nav.melosys.featuretoggle.ToggleName.IKKE_JOURNALFOER_UTEN_PID;
 import static no.nav.melosys.service.journalforing.UtledBehandlingsaarsak.utledÅrsaktype;
 
 @Service
@@ -55,6 +56,7 @@ public class JournalfoeringService {
     private final SaksbehandlingRegler saksbehandlingRegler;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
+    private final Unleash unleash;
 
     public JournalfoeringService(JoarkFasade joarkFasade,
                                  ProsessinstansService prosessinstansService,
@@ -72,6 +74,7 @@ public class JournalfoeringService {
         this.fagsakService = fagsakService;
         this.persondataFasade = persondataFasade;
         this.lovligeKombinasjonerService = lovligeKombinasjonerService;
+        this.unleash = unleash;
         this.saksbehandlingRegler = saksbehandlingRegler;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -105,7 +108,7 @@ public class JournalfoeringService {
 
         if (journalpost.mottaksKanalErEessi()) {
             validerKanOppretteSakFraSed(journalpost);
-            opprettUtsattJournalpostDersomEksisterer(journalpost);
+            if (unleash.isEnabled(IKKE_JOURNALFOER_UTEN_PID)) opprettUtsattJournalpostDersomEksisterer(journalpost);
         }
 
         fellesValidering(journalfoeringDto);
