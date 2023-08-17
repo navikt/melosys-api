@@ -81,7 +81,7 @@ class OpprettBetalingsplan(
 
         val fakturaserieDto =
             FakturaserieDto(
-                vedtaksId = "${fagsak.saksnummer}-$behandlingsId",
+                vedtaksId = behandlingsId.toString(),
                 fodselsnummer = foedselsNr,
                 referanseNAV = "Medlemskap og avgift",
                 fullmektig = fullmektigDto(fullmektig, kontaktopplysning),
