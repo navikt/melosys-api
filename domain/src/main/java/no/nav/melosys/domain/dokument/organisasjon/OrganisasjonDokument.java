@@ -48,14 +48,6 @@ public class OrganisasjonDokument extends AbstraktOrganisasjon implements Saksop
         return organisasjonDetaljer.hentStrukturertPostadresse();
     }
 
-    public boolean harRegistrertPostadresse() {
-        return getPostadresse() != null && !getPostadresse().erTom() && !getPostadresse().getPostnummer().isBlank();
-    }
-
-    public boolean harRegistrertForretningsadresse() {
-        return getForretningsadresse() != null && !getForretningsadresse().erTom() && !getForretningsadresse().getPostnummer().isBlank();
-    }
-
     // Hvis man ikke har bruk for historikk på navn så er det best å bruke navn på nivå organisasjon.
     public String lagSammenslåttNavn() {
         return navn == null ? "UKJENT" : String.join(" ", navn);
@@ -95,11 +87,19 @@ public class OrganisasjonDokument extends AbstraktOrganisasjon implements Saksop
         this.enhetstype = enhetstype;
     }
 
-    public StrukturertAdresse hentTilgjengeligAdresse() {
-        return postadresseMangler() ? getForretningsadresse() : getPostadresse();
+    public boolean harRegistrertPostadresse() {
+        return getPostadresse() != null && !getPostadresse().erTom() && !getPostadresse().getPostnummer().isBlank();
     }
 
-    private boolean postadresseMangler() {
-        return getPostadresse() == null || getPostadresse().erTom();
+    public boolean harRegistrertForretningsadresse() {
+        return getForretningsadresse() != null && !getForretningsadresse().erTom() && !getForretningsadresse().getPostnummer().isBlank();
+    }
+
+    public StrukturertAdresse hentTilgjengeligAdresse() {
+        return harRegistrertPostadresse() ? getPostadresse() : getForretningsadresse();
+    }
+
+    public boolean harRegistrertAdresse() {
+        return (harRegistrertPostadresse() || harRegistrertForretningsadresse());
     }
 }

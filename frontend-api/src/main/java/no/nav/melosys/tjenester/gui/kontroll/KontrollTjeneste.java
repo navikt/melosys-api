@@ -1,12 +1,9 @@
 package no.nav.melosys.tjenester.gui.kontroll;
 
 import java.util.Collection;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 import io.swagger.annotations.Api;
 import no.nav.melosys.domain.kodeverk.Representerer;
-import no.nav.melosys.domain.person.adresse.PersonAdresse;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -84,21 +81,12 @@ public class KontrollTjeneste {
 
     private boolean sjekkPersonHarRegisteredAddress(String brukerID) {
         var person = persondataService.hentPerson(brukerID);
-        return Stream.of(
-                person.finnBostedsadresse(),
-                person.finnOppholdsadresse(),
-                person.finnKontaktadresse())
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .anyMatch(PersonAdresse::harRegistrertAdresse);
+        return !person.manglerRegistrertAdresse();
     }
 
     private Boolean sjekkOrgHarAdresse(String orgnr) {
         var organisasjon = organisasjonOppslagService.hentOrganisasjon(orgnr);
-        var organisasjonHarRegistrertPostadresse = !organisasjon.getPostadresse().erTom() && !organisasjon.getPostadresse().getPostnummer().isBlank();
-        var organisasjonHarRegistrertForretningsadresse = !organisasjon.getForretningsadresse().erTom() && !organisasjon.getForretningsadresse().getPostnummer().isBlank();
-
-        return (organisasjonHarRegistrertPostadresse || organisasjonHarRegistrertForretningsadresse);
+        return organisasjon.harRegistrertAdresse();
     }
 
     @PostMapping("/ferdigbehandling")
