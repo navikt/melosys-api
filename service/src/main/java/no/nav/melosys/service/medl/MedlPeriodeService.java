@@ -202,20 +202,18 @@ public class MedlPeriodeService {
     private KildedokumenttypeMedl hentKildedokumenttype(Long behandlingID) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         boolean erSed = behandling.erBehandlingAvSed();
-        if (unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP)) {
-            var fagsaktype = behandling.getFagsak().getType();
-            var behandlingstema = behandling.getTema();
+        var fagsaktype = behandling.getFagsak().getType();
+        var behandlingstema = behandling.getTema();
 
-            if (fagsaktype.equals(Sakstyper.TRYGDEAVTALE)) {
-                if (behandlingstema == Behandlingstema.REGISTRERING_UNNTAK) {
-                    return KildedokumenttypeMedl.DOKUMENT;
-                } else if (behandlingstema == Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL) {
-                    return KildedokumenttypeMedl.HENV_SOKNAD;
-                }
-            } else if (fagsaktype.equals(Sakstyper.EU_EOS) &&
-                behandlingstema == Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR) {
-                return KildedokumenttypeMedl.A1;
+        if (fagsaktype.equals(Sakstyper.TRYGDEAVTALE)) {
+            if (behandlingstema == Behandlingstema.REGISTRERING_UNNTAK) {
+                return KildedokumenttypeMedl.DOKUMENT;
+            } else if (behandlingstema == Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL) {
+                return KildedokumenttypeMedl.HENV_SOKNAD;
             }
+        } else if (fagsaktype.equals(Sakstyper.EU_EOS) &&
+            behandlingstema == Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR) {
+            return KildedokumenttypeMedl.A1;
         }
 
         return erSed ? KildedokumenttypeMedl.SED : KildedokumenttypeMedl.HENV_SOKNAD;

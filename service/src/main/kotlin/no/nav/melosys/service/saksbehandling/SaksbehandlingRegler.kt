@@ -106,7 +106,7 @@ class SaksbehandlingRegler(
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema
     ): Boolean {
-        if (!unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP) || sakstema != Sakstemaer.UNNTAK) {
+        if (sakstema != Sakstemaer.UNNTAK) {
             return false
         }
 

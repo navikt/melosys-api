@@ -35,9 +35,6 @@ public class UnntaksregistreringTjeneste {
     @PostMapping("{behandlingID}")
     public ResponseEntity<Void> registrerUnntakFraMedlemskap(@PathVariable("behandlingID") Long behandlingID) {
         aksesskontroll.autoriserSkriv(behandlingID);
-        if (!unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP)) {
-            throw new FunksjonellException("Denne funksjonaliteten er ikke støttet enda");
-        }
 
         unntaksregistreringService.registrerUnntakFraMedlemskap(behandlingID);
 
