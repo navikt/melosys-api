@@ -20,6 +20,7 @@ import no.nav.melosys.domain.person.Master;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
+import no.nav.melosys.domain.person.adresse.PersonAdresse;
 import no.nav.melosys.domain.util.IsoLandkodeKonverterer;
 
 
@@ -59,24 +60,14 @@ public class PersonDokument implements Persondata {
     @Override
     public boolean manglerRegistrertAdresse() {
         var personHarRegistrertAdresse = Stream.of(
-                finnBostedsadresse(),
+                finnKontaktadresse(),
                 finnOppholdsadresse(),
-                finnKontaktadresse())
+                finnBostedsadresse())
             .filter(Optional::isPresent)
             .map(Optional::get)
-            .anyMatch(personAdresse -> personAdresse.harRegistrertAdresse());
+            .anyMatch(PersonAdresse::harRegistrertAdresse);
 
         return !personHarRegistrertAdresse;
-    }
-
-    @Override
-    public boolean manglerBostedsadresse() {
-        return bostedsadresse.erTom();
-    }
-
-    @Override
-    public boolean manglerPostnummer() {
-        return postadresse.postnummerErTom();
     }
 
     public Optional<Familiemedlem> hentAnnenForelder(String fnrGjeldendeForelder) {

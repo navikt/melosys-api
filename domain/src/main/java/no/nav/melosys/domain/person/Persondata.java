@@ -20,10 +20,6 @@ public interface Persondata extends SaksopplysningDokument {
 
     boolean manglerRegistrertAdresse();
 
-    boolean manglerBostedsadresse();
-
-    boolean manglerPostnummer();
-
     String hentFolkeregisterident();
 
     Set<Land> hentAlleStatsborgerskap();

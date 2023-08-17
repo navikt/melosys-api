@@ -43,9 +43,6 @@ data class Personopplysninger(
     }
 
 
-    override fun manglerBostedsadresse(): Boolean = finnBostedsadresse().isEmpty
-    override fun manglerPostnummer(): Boolean = bostedsadresse?.strukturertAdresse?.postnummer?.isEmpty() ?: true
-
     override fun hentFolkeregisterident(): String? = folkeregisteridentifikator?.identifikasjonsnummer()
 
     override fun hentAlleStatsborgerskap(): Set<Land> = statsborgerskap.map { s: Statsborgerskap ->
