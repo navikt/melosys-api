@@ -7,7 +7,6 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
-import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Sakstyper
@@ -60,13 +59,9 @@ class MedlPeriodeServiceTest {
 
     lateinit var medlPeriodeService: MedlPeriodeService
 
-    private val fakeUnleash = FakeUnleash()
-
 
     @BeforeEach
     fun setUp() {
-        fakeUnleash.enableAll()
-
         medlPeriodeService = MedlPeriodeService(
             persondataFasade,
             medlService,
@@ -75,9 +70,7 @@ class MedlPeriodeServiceTest {
             lovvalgsperiodeRepository,
             medlAnmodningsperiodeService,
             utpekingsperiodeRepository,
-            medlemskapsperiodeRepository,
-            fakeUnleash
-        )
+            medlemskapsperiodeRepository)
     }
 
     @Test
