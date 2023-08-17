@@ -17,10 +17,7 @@ import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Aksesstype;
 import no.nav.melosys.service.validering.Kontrollfeil;
-import no.nav.melosys.tjenester.gui.dto.kontroller.FerdigbehandlingKontrollerDto;
-import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerAdresseBrukerFullmektigDto;
-import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerAdresseBrukerFullmektigResponseDto;
-import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerFerdigbehandlingDto;
+import no.nav.melosys.tjenester.gui.dto.kontroller.*;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
@@ -59,45 +56,46 @@ public class KontrollTjeneste {
 
     @PostMapping("/harRegistrertAdresse")
     public ResponseEntity<KontrollerAdresseBrukerFullmektigResponseDto> harRegistrertAdresse(@RequestBody KontrollerAdresseBrukerFullmektigDto kontrollerAdresseBrukerFullmektigDto) {
-        var brukerID = kontrollerAdresseBrukerFullmektigDto.brukerID();
-        var orgnr = kontrollerAdresseBrukerFullmektigDto.orgnr();
-        var rolle = Aktoersroller.BRUKER;
+        AdressesjekkKontekst kontekst = new AdressesjekkKontekst(kontrollerAdresseBrukerFullmektigDto);
 
-        if (kontrollerAdresseBrukerFullmektigDto.behandlingID() != null) {
-            var behandling = behandlingService.hentBehandling(kontrollerAdresseBrukerFullmektigDto.behandlingID());
-            var representantBruker = behandling.getFagsak().finnRepresentant(Representerer.BRUKER);
-            if (representantBruker.isPresent()) {
-                if (representantBruker.get().erPerson()) {
-                    brukerID = representantBruker.get().getPersonIdent();
-                }
-                if (representantBruker.get().erOrganisasjon()) {
-                    orgnr = representantBruker.get().getOrgnr();
-                }
-                rolle = Aktoersroller.REPRESENTANT;
-            } else {
-                brukerID = behandling.getFagsak().finnBrukersAktørID().get();
-                rolle = Aktoersroller.BRUKER;
-            }
+        if (kontekst.getBehandlingID() != null) {
+            oppdaterKontekstForBehandling(kontekst);
         }
 
-        if (!brukerID.isEmpty()) {
-            var person = persondataService.hentPerson(brukerID);
-
-            var personHarRegistrertAdresse = Stream.of(
-                    person.finnBostedsadresse(),
-                    person.finnOppholdsadresse(),
-                    person.finnKontaktadresse())
-                .filter(Optional::isPresent)
-                .map(Optional::get).anyMatch(personAdresse -> personAdresse.harRegistrertAdresse());
-            var responseDto = new KontrollerAdresseBrukerFullmektigResponseDto(rolle, personHarRegistrertAdresse);
-            return ResponseEntity.ok(responseDto);
+        boolean harRegistrertAdresse;
+        if (!kontekst.getBrukerID().isEmpty()) {
+            harRegistrertAdresse = sjekkPersonHarRegisteredAddress(kontekst.getBrukerID());
+        } else {
+            harRegistrertAdresse = sjekkOrgHarAdresse(kontekst.getOrgnr());
         }
 
-        var responseDto = new KontrollerAdresseBrukerFullmektigResponseDto(rolle, orgHarAdresse(orgnr));
+        var responseDto = new KontrollerAdresseBrukerFullmektigResponseDto(kontekst.getRolle(), harRegistrertAdresse);
         return ResponseEntity.ok(responseDto);
     }
 
-    private Boolean orgHarAdresse(String orgnr) {
+    private void oppdaterKontekstForBehandling(AdressesjekkKontekst kontekst) {
+        var behandling = behandlingService.hentBehandling(kontekst.getBehandlingID());
+        var representantBruker = behandling.getFagsak().finnRepresentant(Representerer.BRUKER);
+        if (representantBruker.isPresent()) {
+            kontekst.oppdaterForRepresentantBruker(representantBruker.get());
+        } else {
+            kontekst.setBrukerID(behandling.getFagsak().finnBrukersAktørID().get());
+            kontekst.setRolle(Aktoersroller.BRUKER);
+        }
+    }
+
+    private boolean sjekkPersonHarRegisteredAddress(String brukerID) {
+        var person = persondataService.hentPerson(brukerID);
+        return Stream.of(
+                person.finnBostedsadresse(),
+                person.finnOppholdsadresse(),
+                person.finnKontaktadresse())
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .anyMatch(personAdresse -> personAdresse.harRegistrertAdresse());
+    }
+
+    private Boolean sjekkOrgHarAdresse(String orgnr) {
         var organisasjon = organisasjonOppslagService.hentOrganisasjon(orgnr);
         var organisasjonHarRegistrertPostadresse = !organisasjon.getPostadresse().erTom() && !organisasjon.getPostadresse().getPostnummer().isBlank();
         var organisasjonHarRegistrertForretningsadresse = !organisasjon.getForretningsadresse().erTom() && !organisasjon.getForretningsadresse().getPostnummer().isBlank();
