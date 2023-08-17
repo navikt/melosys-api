@@ -1,11 +1,13 @@
 package no.nav.melosys.service.medl;
 
-import no.finn.unleash.Unleash;
+import java.time.LocalDate;
+import java.util.Objects;
+import java.util.Optional;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlService;
 import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
@@ -18,10 +20,6 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
-import java.util.Objects;
-import java.util.Optional;
 
 @Service
 public class MedlPeriodeService {
@@ -36,8 +34,6 @@ public class MedlPeriodeService {
     private final UtpekingsperiodeRepository utpekingsperiodeRepository;
     private final MedlemskapsperiodeRepository medlemskapsperiodeRepository;
 
-    private final Unleash unleash;
-
     private static final String FEIL_VED_OPPDATERING_MEDL = "Opprettelse av periode i MEDL feilet med retur av null medlPeriodeID fra MEDL tjeneste for behandling ";
 
     public MedlPeriodeService(PersondataFasade persondataFasade,
@@ -47,8 +43,7 @@ public class MedlPeriodeService {
                               LovvalgsperiodeRepository lovvalgsperiodeRepository,
                               MedlAnmodningsperiodeService medlAnmodningsperiodeService,
                               UtpekingsperiodeRepository utpekingsperiodeRepository,
-                              MedlemskapsperiodeRepository medlemskapsperiodeRepository,
-                              Unleash unleash) {
+                              MedlemskapsperiodeRepository medlemskapsperiodeRepository) {
         this.persondataFasade = persondataFasade;
         this.medlService = medlService;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -57,7 +52,6 @@ public class MedlPeriodeService {
         this.medlAnmodningsperiodeService = medlAnmodningsperiodeService;
         this.utpekingsperiodeRepository = utpekingsperiodeRepository;
         this.medlemskapsperiodeRepository = medlemskapsperiodeRepository;
-        this.unleash = unleash;
     }
 
     public Saksopplysning hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom) {
