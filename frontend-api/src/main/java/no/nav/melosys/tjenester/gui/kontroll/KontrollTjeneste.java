@@ -92,7 +92,7 @@ public class KontrollTjeneste {
         return !person.manglerRegistrertAdresse();
     }
 
-    private Boolean sjekkOrgHarAdresse(String orgnr) {
+    private boolean sjekkOrgHarAdresse(String orgnr) {
         var organisasjon = organisasjonOppslagService.hentOrganisasjon(orgnr);
         return organisasjon.harRegistrertAdresse();
     }
