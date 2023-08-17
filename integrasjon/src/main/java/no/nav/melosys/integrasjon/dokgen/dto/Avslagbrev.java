@@ -20,6 +20,8 @@ public class Avslagbrev extends DokgenDto {
 
     private final String behandlingstype;
 
+    private final String behandlingstema;
+
     private Avslagbrev(AvslagBrevbestilling brevbestilling,
                        Mottakerroller mottakerType) {
         super(brevbestilling, mottakerType);
@@ -28,6 +30,7 @@ public class Avslagbrev extends DokgenDto {
         this.datoMottatt = instantTilLocalDate(brevbestilling.getForsendelseMottatt());
         this.sakstype = brevbestilling.getBehandling().getFagsak().getType().getKode();
         this.behandlingstype = brevbestilling.getBehandling().getType().getKode();
+        this.behandlingstema = brevbestilling.getBehandling().getTema().getKode();
     }
 
     public String getFritekst() {
@@ -48,6 +51,10 @@ public class Avslagbrev extends DokgenDto {
 
     public LocalDate getDatoMottatt() {
         return datoMottatt;
+    }
+
+    public String getBehandlingstema() {
+        return behandlingstema;
     }
 
     @Override
