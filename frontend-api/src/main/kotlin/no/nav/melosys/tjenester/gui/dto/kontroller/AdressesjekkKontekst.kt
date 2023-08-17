@@ -16,13 +16,18 @@ data class AdressesjekkKontekst(
     )
 
     fun oppdaterForRepresentantBruker(representant: Aktoer) {
+        this.rolle = Aktoersroller.REPRESENTANT
         if (representant.erPerson()) {
             this.brukerID = representant.getPersonIdent()
         }
         if (representant.erOrganisasjon()) {
             this.orgnr = representant.getOrgnr()
         }
-        this.rolle = Aktoersroller.REPRESENTANT
+    }
+
+    fun oppdaterForBruker(brukerID: String) {
+        this.rolle = Aktoersroller.BRUKER
+        this.brukerID = brukerID
     }
 }
 

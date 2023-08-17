@@ -5,13 +5,12 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import io.swagger.annotations.Api;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.person.adresse.PersonAdresse;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersondataService;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -39,7 +38,7 @@ public class KontrollTjeneste {
     private final BehandlingService behandlingService;
 
     public KontrollTjeneste(FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade, Aksesskontroll aksesskontroll,
-                            EessiService eessiService, BehandlingService behandlingService, PersondataService persondataService, PersondataFasade persondataFasade, OrganisasjonOppslagService organisasjonOppslagService) {
+                            EessiService eessiService, BehandlingService behandlingService, PersondataService persondataService, OrganisasjonOppslagService organisasjonOppslagService) {
         this.ferdigbehandlingKontrollFacade = ferdigbehandlingKontrollFacade;
         this.aksesskontroll = aksesskontroll;
         this.eessiService = eessiService;
@@ -79,8 +78,7 @@ public class KontrollTjeneste {
         if (representantBruker.isPresent()) {
             kontekst.oppdaterForRepresentantBruker(representantBruker.get());
         } else {
-            kontekst.setBrukerID(behandling.getFagsak().finnBrukersAktørID().get());
-            kontekst.setRolle(Aktoersroller.BRUKER);
+            kontekst.oppdaterForBruker(behandling.getFagsak().hentBrukersAktørID());
         }
     }
 
@@ -92,7 +90,7 @@ public class KontrollTjeneste {
                 person.finnKontaktadresse())
             .filter(Optional::isPresent)
             .map(Optional::get)
-            .anyMatch(personAdresse -> personAdresse.harRegistrertAdresse());
+            .anyMatch(PersonAdresse::harRegistrertAdresse);
     }
 
     private Boolean sjekkOrgHarAdresse(String orgnr) {

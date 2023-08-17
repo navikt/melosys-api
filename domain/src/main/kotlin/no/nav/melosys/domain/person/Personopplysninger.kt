@@ -32,9 +32,9 @@ data class Personopplysninger(
 
     override fun manglerRegistrertAdresse(): Boolean {
         val personHarRegistrertAdresse = listOf(
-            finnBostedsadresse(),
+            finnKontaktadresse(),
             finnOppholdsadresse(),
-            finnKontaktadresse()
+            finnBostedsadresse()
         )
             .filter { it.isPresent }
             .map { it.get() }
