@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
@@ -16,12 +15,11 @@ import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.integrasjon.inntk.InntektService;
+import no.nav.melosys.integrasjon.inntk.InntektFasade;
 import no.nav.melosys.integrasjon.utbetaling.UtbetaldataRestService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 import no.nav.melosys.service.medl.MedlPeriodeService;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,28 +45,23 @@ public class RegisteropplysningerService {
             .put(SaksopplysningType.UTBETAL, this::hentUtbetalingsopplysninger)
             .build());
 
-    private final PersondataFasade persondataFasade;
     private final MedlPeriodeService medlPeriodeService;
     private final EregFasade eregFasade;
     private final AaregFasade aaregFasade;
     private final BehandlingService behandlingService;
-    private final InntektService inntektService;
+    private final InntektFasade inntektService;
     private final SaksopplysningerService saksopplysningerService;
     private final RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory;
-    private final Unleash unleash;
     private final UtbetaldataRestService utbetaldataRestService;
 
-    public RegisteropplysningerService(PersondataFasade persondataFasade,
-                                       MedlPeriodeService medlPeriodeService,
+    public RegisteropplysningerService(MedlPeriodeService medlPeriodeService,
                                        EregFasade eregFasade,
                                        AaregFasade aaregFasade,
                                        BehandlingService behandlingService,
-                                       InntektService inntektService,
+                                       InntektFasade inntektService,
                                        SaksopplysningerService saksopplysningerService,
                                        RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory,
-                                       Unleash unleash,
                                        UtbetaldataRestService utbetaldataRestService) {
-        this.persondataFasade = persondataFasade;
         this.medlPeriodeService = medlPeriodeService;
         this.eregFasade = eregFasade;
         this.aaregFasade = aaregFasade;
@@ -76,7 +69,6 @@ public class RegisteropplysningerService {
         this.inntektService = inntektService;
         this.saksopplysningerService = saksopplysningerService;
         this.registeropplysningerPeriodeFactory = registeropplysningerPeriodeFactory;
-        this.unleash = unleash;
         this.utbetaldataRestService = utbetaldataRestService;
     }
 
@@ -182,14 +174,9 @@ public class RegisteropplysningerService {
         }
 
         RegisteropplysningerPeriodeFactory.Periode periodeForYtelser = registeropplysningerPeriodeFactory.hentPeriodeForInntekt(fom, tom, behandling);
-        List<Saksopplysning> utbetalingOpplysninger = List.of();
 
-        if (unleash.isEnabled("melosys.utbetalinger.v2")) {
-            Saksopplysning saksopplysning = utbetaldataRestService.hentUtbetalingerBarnetrygd(registeropplysningerRequest.getFnr(), periodeForYtelser.fom.atDay(1), periodeForYtelser.tom.atDay(1));
-            utbetalingOpplysninger = List.of(saksopplysning);
-        }
-
-        return utbetalingOpplysninger;
+        Saksopplysning saksopplysning = utbetaldataRestService.hentUtbetalingerBarnetrygd(registeropplysningerRequest.getFnr(), periodeForYtelser.fom.atDay(1), periodeForYtelser.tom.atDay(1));
+        return saksopplysning != null ? List.of(saksopplysning) : List.of();
     }
 
     private List<Saksopplysning> hentOrganisasjonsopplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {

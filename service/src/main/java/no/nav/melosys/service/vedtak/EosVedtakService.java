@@ -9,21 +9,21 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.VedtakMetadataLagretEvent;
 import no.nav.melosys.domain.eessi.BucType;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.DokgenService;
-import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -52,13 +52,12 @@ public class EosVedtakService {
     private final ApplicationEventMulticaster melosysEventMulticaster;
     private final FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
     private final SaksbehandlingRegler saksbehandlingRegler;
-    private final DokgenService dokgenService;
 
     public EosVedtakService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
                             OppgaveService oppgaveService, ProsessinstansService prosessinstansService,
                             EessiService eessiService, LandvelgerService landvelgerService,
                             AvklartefaktaService avklartefaktaService, ApplicationEventMulticaster melosysEventMulticaster,
-                            FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade, SaksbehandlingRegler saksbehandlingRegler, DokgenService dokgenService) {
+                            FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade, SaksbehandlingRegler saksbehandlingRegler) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
@@ -69,7 +68,6 @@ public class EosVedtakService {
         this.melosysEventMulticaster = melosysEventMulticaster;
         this.ferdigbehandlingKontrollFacade = ferdigbehandlingKontrollFacade;
         this.saksbehandlingRegler = saksbehandlingRegler;
-        this.dokgenService = dokgenService;
     }
 
     public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype) throws ValideringException {
@@ -95,7 +93,6 @@ public class EosVedtakService {
 
             Collection<Kontrollfeil> kontrollfeil = ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
                 behandling,
-                behandlingsresultat,
                 Sakstyper.EU_EOS,
                 request.getBehandlingsresultatTypeKode(),
                 kontrollerSomSkalIgnoreres
@@ -112,13 +109,9 @@ public class EosVedtakService {
         }
         behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
 
-        if (saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling.getFagsak().getType(), behandling.getTema())) {
+        if (saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)) {
             behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
-            prosessinstansService.opprettProsessinstansIverksettIkkeYreksaktiv(behandling);
-            var brevbestillingDto = new BrevbestillingDto();
-            brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
-            brevbestillingDto.setProduserbardokument(Produserbaredokumenter.IKKE_YRKESAKTIV_VEDTAKSBREV);
-            dokgenService.produserOgDistribuerBrev(behandlingID, brevbestillingDto);
+            prosessinstansService.opprettProsessinstansIverksettIkkeYrkesaktiv(behandling, request.getFritekst());
         } else {
             oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), request.getFritekst(), request.getNyVurderingBakgrunn());
             Set<String> mottakerinstitusjoner = avklarMottakerInstitusjoner(behandling, request.getMottakerinstitusjoner(), behandlingsresultat);
@@ -161,7 +154,8 @@ public class EosVedtakService {
             behandlingsresultatService.oppdaterUtfallUtpeking(behandling.getId(), GODKJENT);
         }
 
-        behandlingsresultat.settVedtakMetadata(vedtakstype, nyVurderingBakgrunn, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+        behandlingsresultat.setNyVurderingBakgrunn(nyVurderingBakgrunn);
+        behandlingsresultat.settVedtakMetadata(vedtakstype, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
         behandlingsresultat.setBegrunnelseFritekst(behandlingresultatBegrunnelseFritekst);
         behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
         behandlingsresultatService.lagre(behandlingsresultat);

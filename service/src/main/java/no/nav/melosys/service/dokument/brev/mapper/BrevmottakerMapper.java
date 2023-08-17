@@ -15,9 +15,6 @@ public class BrevmottakerMapper {
 
     static {
         BREV_MOTTAKER_MAP = Map.ofEntries(
-            Map.entry(MELDING_FORVENTET_SAKSBEHANDLINGSTID, new Mottakerliste.Builder()
-                .medHovedMottaker(BRUKER).build()),
-
             Map.entry(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, new Mottakerliste.Builder()
                 .medHovedMottaker(BRUKER).build()),
 
@@ -36,7 +33,7 @@ public class BrevmottakerMapper {
                     BRUKER_FÅR_KOPI
                 ).build()),
 
-            Map.entry(INNVILGELSE_FOLKETRYGDLOVEN_2_8, new Mottakerliste.Builder()
+            Map.entry(INNVILGELSE_FOLKETRYGDLOVEN, new Mottakerliste.Builder()
                 .medHovedMottaker(BRUKER)
                 .medBrevkopiRegler(
                     BRUKER_FÅR_KOPI_HVIS_FULLMEKTIG_FINNES,

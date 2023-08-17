@@ -16,7 +16,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER;
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MANGELBREV_BRUKER;
 
 @Component
 public class BehandlingEventListener {
@@ -33,7 +34,7 @@ public class BehandlingEventListener {
 
     @EventListener
     public void dokumentBestilt(DokumentBestiltEvent dokumentBestiltEvent) {
-        if (List.of(MELDING_MANGLENDE_OPPLYSNINGER, MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER).contains(dokumentBestiltEvent.getProduserbaredokumenter())) {
+        if (List.of(MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER).contains(dokumentBestiltEvent.getProduserbaredokumenter())) {
             var behandling = behandlingService.hentBehandling(dokumentBestiltEvent.getBehandlingID());
             if (behandling.erAktiv()) {
                 behandlingService.oppdaterStatusOgSvarfrist(
@@ -55,7 +56,7 @@ public class BehandlingEventListener {
                 final LocalDate frist = behandlingEndretAvSaksbehandlerEvent.getBehandlingsfrist();
 
                 log.info("Oppdaterer oppgave {} med behandlingstype {}, behandlingstema {} og fristFerdigstillelse {}",
-                    value.getOppgaveId(),  behandling.getType().getKode(), behandling.getTema().getKode(), frist
+                    value.getOppgaveId(), behandling.getType().getKode(), behandling.getTema().getKode(), frist
                 );
 
                 oppgaveService.oppdaterOppgave(

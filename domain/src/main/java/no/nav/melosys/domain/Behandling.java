@@ -130,7 +130,7 @@ public class Behandling extends RegistreringsInfo {
         this.saksopplysninger = saksopplysninger;
     }
 
-    public Instant getSistOpplysningerHentetDato() {
+    public Instant getSisteOpplysningerHentetDato() {
         return sisteOpplysningerHentetDato;
     }
 

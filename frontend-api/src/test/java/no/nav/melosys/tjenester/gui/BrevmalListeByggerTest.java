@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -26,6 +25,7 @@ import no.nav.melosys.service.brev.BrevmalListeService;
 import no.nav.melosys.service.brev.bestilling.HentBrevAdresseTilMottakereService;
 import no.nav.melosys.service.brev.bestilling.HentMuligeProduserbaredokumenterService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
+import no.nav.melosys.tjenester.gui.brev.BrevmalListeBygger;
 import no.nav.melosys.tjenester.gui.dto.brev.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -207,12 +207,11 @@ class BrevmalListeByggerTest {
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
-
         assertThat(tilgjengeligeMaler).hasSize(4);
         assertThat(tilgjengeligeMaler.get(0).getMottaker())
             .extracting(
                 MottakerDto::getType,
-                MottakerDto::getFeilmelding)
+                mottaker -> mottaker.getFeilmelding().tittel())
             .containsExactly(
                 MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.getBeskrivelse(),
                 Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
@@ -232,7 +231,7 @@ class BrevmalListeByggerTest {
         assertThat(tilgjengeligeMaler.get(1).getMottaker())
             .extracting(
                 MottakerDto::getType,
-                MottakerDto::getFeilmelding)
+                mottaker -> mottaker.getFeilmelding().tittel())
             .containsExactly(
                 MottakerType.ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG.getBeskrivelse(),
                 Kontroll_begrunnelser.INGEN_ARBEIDSGIVERE.getBeskrivelse());

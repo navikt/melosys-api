@@ -52,6 +52,7 @@ spec:
         - application: {{APP_NAME_MELOSYS_EESSI}}
         - application: {{APP_NAME_UTBETALING}}
         - application: {{APP_NAME_FAKTURERINGSKOMPONENTEN}}
+        - application: {{APP_NAME_INNTEKTSKOMPONENTEN}}
   webproxy: true
   vault:
     enabled: true
@@ -84,5 +85,7 @@ spec:
     value: {{NAIS_CLUSTER_NAME_FAKTURERINGSKOMPONENTEN}}
   - name: APP_NAME_UTBETALING
     value: {{APP_NAME_UTBETALING}}
+  - name: APP_NAME_INNTEKTSKOMPONENTEN
+    value: {{APP_NAME_INNTEKTSKOMPONENTEN}}
   kafka:
     pool: {{ KAFKA_POOL }}

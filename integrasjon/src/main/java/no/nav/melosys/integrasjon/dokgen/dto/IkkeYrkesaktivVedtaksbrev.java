@@ -18,7 +18,6 @@ public class IkkeYrkesaktivVedtaksbrev extends DokgenDto {
     private final LocalDate datoMottatt;
     private final String sakstype;
     private final String behandlingstype;
-    private final String nyVurderingBakgrunn;
     private final String oppholdsland;
     private final IkkeYrkesaktivPeriode periode;
     private final String bestemmelse;
@@ -33,8 +32,7 @@ public class IkkeYrkesaktivVedtaksbrev extends DokgenDto {
         this.datoMottatt = instantTilLocalDate(brevbestilling.getForsendelseMottatt());
         this.sakstype = fagsak.getType().getKode();
         this.behandlingstype = fagsak.hentSistOppdatertBehandling().getType().getKode();
-        this.innvilgelse = new IkkeYrkesaktivInnvilgelse(brevbestilling.getInnledningFritekst(), brevbestilling.getBegrunnelseFritekst(), brevbestilling.getNyVurderingFritekst());
-        this.nyVurderingBakgrunn = brevbestilling.getNyVurderingBakgrunn();
+        this.innvilgelse = new IkkeYrkesaktivInnvilgelse(brevbestilling.getInnledningFritekst(), brevbestilling.getBegrunnelseFritekst(), brevbestilling.getNyVurderingBakgrunn());
         this.oppholdsland = brevbestilling.getOppholdsLand();
         this.periode = new IkkeYrkesaktivPeriode(brevbestilling.getPeriodeFom(), brevbestilling.getPeriodeTom());
         this.bestemmelse = brevbestilling.getBestemmelse();
@@ -60,10 +58,6 @@ public class IkkeYrkesaktivVedtaksbrev extends DokgenDto {
 
     public String getBehandlingstype() {
         return behandlingstype;
-    }
-
-    public String getNyVurderingBakgrunn() {
-        return nyVurderingBakgrunn;
     }
 
     public IkkeYrkesaktivPeriode getPeriode() {

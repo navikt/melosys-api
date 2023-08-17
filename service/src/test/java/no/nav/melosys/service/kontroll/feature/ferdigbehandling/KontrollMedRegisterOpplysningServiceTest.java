@@ -5,7 +5,10 @@ import java.util.Collection;
 import java.util.Set;
 
 import no.finn.unleash.FakeUnleash;
-import no.nav.melosys.domain.*;
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.Saksopplysning;
+import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
@@ -15,9 +18,9 @@ import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
+import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.registeropplysninger.RegisteropplysningerService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.validering.Kontrollfeil;
@@ -40,8 +43,6 @@ class KontrollMedRegisterOpplysningServiceTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
-    private BehandlingsresultatService behandlingsresultatService;
-    @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
     private AvklarteVirksomheterService avklarteVirksomheterService;
@@ -51,15 +52,17 @@ class KontrollMedRegisterOpplysningServiceTest {
     private SaksbehandlingRegler saksbehandlingRegler;
     @Mock
     private RegisteropplysningerService registeropplysningerService;
+    @Mock
+    private OrganisasjonOppslagService organisasjonOppslagService;
     private KontrollMedRegisteropplysning kontrollMedRegisterOpplysning;
 
     private final long behandlingID = 1L;
     private final Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
     private final MedlemskapDokument medlemskapDokument = new MedlemskapDokument();
+
     private final MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
     private final Behandling behandling = lagBehandling(mottatteOpplysningerData);
     private final FakeUnleash unleash = new FakeUnleash();
-
 
     @BeforeEach
     void setup() {
@@ -72,20 +75,18 @@ class KontrollMedRegisterOpplysningServiceTest {
         behandling.getSaksopplysninger().add(medlSaksopplysning);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
 
-        Kontroll kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, avklarteVirksomheterService, persondataFasade, saksbehandlingRegler, unleash);
-        kontrollMedRegisterOpplysning = new KontrollMedRegisteropplysning(behandlingService, behandlingsresultatService, persondataFasade,
-            registeropplysningerService, kontroll, unleash);
+        Kontroll kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, avklarteVirksomheterService, persondataFasade, organisasjonOppslagService, saksbehandlingRegler, unleash);
+        kontrollMedRegisterOpplysning = new KontrollMedRegisteropplysning(behandlingService, persondataFasade, registeropplysningerService, kontroll);
 
         unleash.enableAll();
     }
 
     @Test
     void kontrollerVedtakMedNyeRegisteropplysninger_feilFraKontroller_kasterExceptionMedFeilkode() {
-        var behandlingsresultat = lagBehandlingsresultat();
         when(persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID())).thenReturn("fnr");
         when(lovvalgsperiodeService.hentLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
-        Collection<Kontrollfeil> kontrollfeilCollection = kontrollMedRegisterOpplysning.kontrollerVedtak(behandling, behandlingsresultat, Sakstyper.EU_EOS, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, null);
+        Collection<Kontrollfeil> kontrollfeilCollection = kontrollMedRegisterOpplysning.kontrollerVedtak(behandling, Sakstyper.EU_EOS, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN, null);
         assertThat(kontrollfeilCollection).hasSize(1);
         assertThat(kontrollfeilCollection.stream().findFirst().get().getKode().getKode()).isEqualTo(Kontroll_begrunnelser.INGEN_SLUTTDATO.getKode());
     }
@@ -93,8 +94,6 @@ class KontrollMedRegisterOpplysningServiceTest {
     @Test
     void kontrollerVedtak_oppdaterRegisteropplysninger_oppdatererRegisteropplysninger() throws ValideringException {
         lovvalgsperiode.setTom(LocalDate.now());
-        var behandlingsresultat = lagBehandlingsresultat();
-        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
         when(persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID())).thenReturn("fnr");
         when(lovvalgsperiodeService.hentLovvalgsperiode(behandlingID)).thenReturn(lovvalgsperiode);
 
@@ -104,21 +103,14 @@ class KontrollMedRegisterOpplysningServiceTest {
 
     @Test
     void kontrollerVedtak_AvslagPersonUtenRegistrertAdresse_returnererKode() {
-        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(lagBehandlingsresultat());
         when(persondataFasade.hentFolkeregisterident(behandling.getFagsak().hentBrukersAktørID())).thenReturn("fnr");
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser());
 
-        var feilIgnoreres = Set.of(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE);
+        var feilIgnoreres = Set.of(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER);
         var annenFeilIgnoreres = Set.of(Kontroll_begrunnelser.MANGLER_VIRKSOMHET);
 
         assertThat(kontrollMedRegisterOpplysning.kontroller(behandlingID, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, feilIgnoreres)).isEmpty();
 
         assertThat(kontrollMedRegisterOpplysning.kontroller(behandlingID, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL, annenFeilIgnoreres)).hasSize(1);
-    }
-
-    private Behandlingsresultat lagBehandlingsresultat() {
-        var behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
-        return behandlingsresultat;
     }
 }

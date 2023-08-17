@@ -98,12 +98,12 @@ class BehandlingsresultatTjenesteTest {
         behandlingsresultat.setType(Behandlingsresultattyper.IKKE_FASTSATT);
         behandlingsresultat.setBegrunnelseFritekst("Bruker har fått flyskrekk");
         behandlingsresultat.setInnledningFritekst("<p>Bruker har fått flyskrekk</>");
+        behandlingsresultat.setNyVurderingBakgrunn(Nyvurderingbakgrunner.FEIL_I_BEHANDLING.getKode());
         var begrunnelse = new BehandlingsresultatBegrunnelse();
         begrunnelse.setKode(Henleggelsesgrunner.ANNET.getKode());
         behandlingsresultat.setBehandlingsresultatBegrunnelser(Sets.newHashSet(begrunnelse));
         var vedtakMetadata = new VedtakMetadata();
         vedtakMetadata.setVedtakstype(Vedtakstyper.KORRIGERT_VEDTAK);
-        vedtakMetadata.setNyVurderingBakgrunn(Nyvurderingbakgrunner.FEIL_I_BEHANDLING.getKode());
         behandlingsresultat.setVedtakMetadata(vedtakMetadata);
         return behandlingsresultat;
     }

@@ -1,6 +1,8 @@
 package no.nav.melosys.service.behandling;
 
 import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -9,10 +11,12 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
+import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.apache.commons.beanutils.BeanUtils;
 import org.slf4j.Logger;
@@ -46,6 +50,7 @@ public class BehandlingsresultatService {
             behandlingsresultat.setUtfallRegistreringUnntak(null);
             behandlingsresultat.setBegrunnelseFritekst(null);
             behandlingsresultat.setInnledningFritekst(null);
+            behandlingsresultat.setNyVurderingBakgrunn(null);
             vilkaarsresultatService.tømVilkårForBehandlingsresultat(behandlingsresultat);
             behandlingsresultatRepository.save(behandlingsresultat);
         }
@@ -232,7 +237,7 @@ public class BehandlingsresultatService {
             throw new FunksjonellException("Utfall for registrering av unntak er allerede satt for behandlingsresultat " + behandlingID);
         }
 
-        behandlingsresultat.setType(Behandlingsresultattyper.REGISTRERT_UNNTAK);
+        behandlingsresultat.setType(finnKorrektBehandlingsResultat(utfallRegistreringUnntak));
         oppdaterUtfallRegistreringUnntak(behandlingID, utfallRegistreringUnntak);
     }
 
@@ -248,9 +253,17 @@ public class BehandlingsresultatService {
             throw new FunksjonellException("Utfall for utpeking er allerede satt for behandlingsresultat " + behandlingID);
         }
 
-        //behandlingsresultat.setType(??); FIXME
         behandlingsresultat.setUtfallUtpeking(utfallUtpeking);
         behandlingsresultatRepository.save(behandlingsresultat);
+    }
+
+    private static Behandlingsresultattyper finnKorrektBehandlingsResultat(Utfallregistreringunntak utfallregistreringunntak) {
+        if (utfallregistreringunntak.equals(Utfallregistreringunntak.GODKJENT) || utfallregistreringunntak.equals(Utfallregistreringunntak.DELVIS_GODKJENT)) {
+            return (Behandlingsresultattyper.REGISTRERT_UNNTAK);
+        } else if (utfallregistreringunntak.equals(Utfallregistreringunntak.IKKE_GODKJENT)) {
+            return(Behandlingsresultattyper.FERDIGBEHANDLET);
+        }
+        return Behandlingsresultattyper.IKKE_FASTSATT;
     }
 
     public void oppdaterBegrunnelser(long behandlingID, Set<BehandlingsresultatBegrunnelse> begrunnelser, String begrunnelseFritekst) {
@@ -265,6 +278,14 @@ public class BehandlingsresultatService {
         final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
         behandlingsresultat.setBegrunnelseFritekst(begrunnelseFritekst);
         behandlingsresultat.setInnledningFritekst(innledningFritekst);
+        return behandlingsresultatRepository.save(behandlingsresultat);
+    }
+
+    public Behandlingsresultat oppdaterNyVurderingBakgrunn(long behandlingID, String nyVurderingBakgrunn) {
+        final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
+
+        behandlingsresultat.setNyVurderingBakgrunn(nyVurderingBakgrunn);
+
         return behandlingsresultatRepository.save(behandlingsresultat);
     }
 }

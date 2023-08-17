@@ -5,7 +5,6 @@ import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningKildesystem;
@@ -16,11 +15,10 @@ import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.integrasjon.inntk.InntektService;
+import no.nav.melosys.integrasjon.inntk.InntektFasade;
 import no.nav.melosys.integrasjon.utbetaling.UtbetaldataRestService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,11 +36,8 @@ import static org.mockito.Mockito.*;
 @MockitoSettings(strictness = Strictness.LENIENT)
 class RegisteropplysningerServiceTest {
 
-    private static final String AKTØR_ID = "123321";
     private static final String FNR = "432234";
 
-    @Mock
-    private PersondataFasade persondataFasade;
     @Mock
     private MedlPeriodeService medlPeriodeService;
     @Mock
@@ -52,7 +47,7 @@ class RegisteropplysningerServiceTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
-    private InntektService inntektService;
+    private InntektFasade inntektService;
     @Mock
     private SaksopplysningerService saksopplysningerService;
     @Mock
@@ -60,16 +55,12 @@ class RegisteropplysningerServiceTest {
     @Mock
     private UtbetaldataRestService utbetaldataRestService;
 
-    private final FakeUnleash unleash = new FakeUnleash();
-
     private RegisteropplysningerService registeropplysningerService;
 
     @BeforeEach
     public void setUp() throws Exception {
-        unleash.enableAll();
-        registeropplysningerService = new RegisteropplysningerService(persondataFasade, medlPeriodeService, eregFasade, aaregFasade, behandlingService,
-            inntektService, saksopplysningerService, registeropplysningerPeriodeFactory, unleash, utbetaldataRestService);
-        when(persondataFasade.hentAktørIdForIdent(anyString())).thenReturn(AKTØR_ID);
+        registeropplysningerService = new RegisteropplysningerService(medlPeriodeService, eregFasade, aaregFasade, behandlingService,
+            inntektService, saksopplysningerService, registeropplysningerPeriodeFactory, utbetaldataRestService);
 
         when(aaregFasade.finnArbeidsforholdPrArbeidstaker(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.ARBFORH));
         when(medlPeriodeService.hentPeriodeListe(anyString(), anyLocalDate(), anyLocalDate())).thenReturn(lagSaksopplysning(SaksopplysningType.MEDL));
@@ -87,8 +78,6 @@ class RegisteropplysningerServiceTest {
 
     @Test
     void hentOgLagreOpplysninger_medAlleOpplysninger_alleBlirHentetOgLagret() {
-        unleash.disableAll();
-
         registeropplysningerService.hentOgLagreOpplysninger(
             RegisteropplysningerRequest.builder()
                 .behandlingID(2L)
@@ -114,8 +103,6 @@ class RegisteropplysningerServiceTest {
 
     @Test
     void hentOgLagreOpplysninger_medAlleOpplysningerIVilkårligRekkefølge_alleBlirHentetOgLagretIRettRekkefølge() {
-        unleash.disableAll();
-
         Arbeidsforhold arbeidsforhold = new Arbeidsforhold();
         arbeidsforhold.arbeidsgiverID = "123456789";
 

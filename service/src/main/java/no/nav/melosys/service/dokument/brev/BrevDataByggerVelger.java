@@ -1,7 +1,6 @@
 package no.nav.melosys.service.dokument.brev;
 
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
-import no.nav.melosys.integrasjon.joark.JoarkService;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Component;
 public class BrevDataByggerVelger {
     private final AnmodningsperiodeService anmodningsperiodeService;
     private final AvklartefaktaService avklartefaktaService;
-    private final JoarkService joarkService;
     private final LandvelgerService landvelgerService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final SaksopplysningerService saksopplysningerService;
@@ -33,7 +31,6 @@ public class BrevDataByggerVelger {
 
     public BrevDataByggerVelger(AnmodningsperiodeService anmodningsperiodeService,
                                 AvklartefaktaService avklartefaktaService,
-                                JoarkService joarkService,
                                 LandvelgerService landvelgerService,
                                 LovvalgsperiodeService lovvalgsperiodeService,
                                 SaksopplysningerService saksopplysningerService,
@@ -45,7 +42,6 @@ public class BrevDataByggerVelger {
                                 MottatteOpplysningerService mottatteOpplysningerService) {
         this.anmodningsperiodeService = anmodningsperiodeService;
         this.avklartefaktaService = avklartefaktaService;
-        this.joarkService = joarkService;
         this.landvelgerService = landvelgerService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.saksopplysningerService = saksopplysningerService;
@@ -62,26 +58,19 @@ public class BrevDataByggerVelger {
             case ATTEST_A1 -> lagBrevDataByggerA1(brevbestillingDto);
             case AVSLAG_ARBEIDSGIVER -> new BrevDataByggerAvslagArbeidsgiver(landvelgerService, lovvalgsperiodeService,
                 vilkaarsresultatRepository);
-            case AVSLAG_YRKESAKTIV ->
-                new BrevDataByggerAvslagYrkesaktiv(landvelgerService, anmodningsperiodeService, brevbestillingDto,
-                    vilkaarsresultatService);
-            case ORIENTERING_ANMODNING_UNNTAK ->
-                new BrevDataByggerAnmodningUnntak(landvelgerService, vilkaarsresultatService);
+            case AVSLAG_YRKESAKTIV -> new BrevDataByggerAvslagYrkesaktiv(landvelgerService, anmodningsperiodeService, brevbestillingDto,
+                vilkaarsresultatService);
+            case ORIENTERING_ANMODNING_UNNTAK -> new BrevDataByggerAnmodningUnntak(landvelgerService, vilkaarsresultatService);
             case ANMODNING_UNNTAK -> lagBrevDataByggerA001(brevbestillingDto);
             case INNVILGELSE_YRKESAKTIV -> lagBrevDataByggerInnvilgelse(brevbestillingDto);
             case INNVILGELSE_YRKESAKTIV_FLERE_LAND -> lagBrevDataByggerInnvilgelseFlereLand(brevbestillingDto);
-            case INNVILGELSE_ARBEIDSGIVER ->
-                new BrevDataByggerInnvilgelse(avklartefaktaService, landvelgerService, lovvalgsperiodeService,
-                    anmodningsperiodeService, brevbestillingDto,
-                    vilkaarsresultatService, persondataFasade,
-                    mottatteOpplysningerService);
+            case INNVILGELSE_ARBEIDSGIVER -> new BrevDataByggerInnvilgelse(avklartefaktaService, landvelgerService, lovvalgsperiodeService,
+                anmodningsperiodeService, brevbestillingDto,
+                vilkaarsresultatService, persondataFasade,
+                mottatteOpplysningerService);
             case ORIENTERING_UTPEKING_UTLAND -> new BrevDataByggerUtpekingAnnetLand(utpekingService, brevbestillingDto);
-            case ORIENTERING_VIDERESENDT_SOEKNAD ->
-                new BrevDataByggerVideresend(landvelgerService, utenlandskMyndighetService,
-                    brevbestillingDto);
-            case MELDING_MANGLENDE_OPPLYSNINGER, MELDING_FORVENTET_SAKSBEHANDLINGSTID ->
-                new BrevDataByggerMedMottattDato(
-                    brevbestillingDto, joarkService);
+            case ORIENTERING_VIDERESENDT_SOEKNAD -> new BrevDataByggerVideresend(landvelgerService, utenlandskMyndighetService,
+                brevbestillingDto);
             default -> new BrevDataByggerStandard(brevbestillingDto);
         };
     }

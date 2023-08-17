@@ -38,9 +38,7 @@ public record BrevbestillingRequest(
     List<FritekstvedleggDto> fritekstvedlegg,
     String dokumentTittel,
     String saksbehandlerNrToIdent,
-    @Deprecated(since = "Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel")
     String begrunnelseKode,
-    @Deprecated(since = "Benyttes i doksys, kommer til å bli erstattet av dokgen-variabel")
     String ytterligereInformasjon) {
 
     public BrevbestillingDto tilBrevbestillingDto(String bestillersId) {

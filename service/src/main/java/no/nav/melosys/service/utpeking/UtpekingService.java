@@ -141,7 +141,8 @@ public class UtpekingService {
     private void oppdaterBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
         behandlingsresultat.setType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
         behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
-        behandlingsresultat.settVedtakMetadata(Vedtakstyper.FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(
+        behandlingsresultat.setNyVurderingBakgrunn(null);
+        behandlingsresultat.settVedtakMetadata(Vedtakstyper.FØRSTEGANGSVEDTAK, LocalDate.now().plusWeeks(
             VedtaksfattingFasade.FRIST_KLAGE_UKER));
         behandlingsresultatService.lagre(behandlingsresultat);
 

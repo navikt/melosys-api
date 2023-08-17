@@ -1,12 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
@@ -14,40 +9,19 @@ import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 import no.nav.melosys.service.dokument.VedleggTyper;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toSet;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 
 @Component
 public class DokumentproduksjonsInfoMapper {
-    private final Unleash unleash;
-
     private static final ImmutableMap<Produserbaredokumenter, DokumentproduksjonsInfo> DOKUMENTPRODUKSJONS_INFO_MAP;
-    static final Set<Produserbaredokumenter> DOKUMENTMALER_PRODSATT = Set.of(
-        AVSLAG_MANGLENDE_OPPLYSNINGER,
-        GENERELT_FRITEKSTBREV_BRUKER,
-        GENERELT_FRITEKSTBREV_ARBEIDSGIVER,
-        GENERELT_FRITEKSTBREV_VIRKSOMHET,
-        MANGELBREV_ARBEIDSGIVER,
-        MANGELBREV_BRUKER,
-        MELDING_FORVENTET_SAKSBEHANDLINGSTID,
-        MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
-        TRYGDEAVTALE_GB,
-        MELDING_HENLAGT_SAK,
-        GENERELT_FRITEKSTVEDLEGG,
-        TRYGDEAVTALE_US,
-        TRYGDEAVTALE_CAN,
-        FRITEKSTBREV,
-        IKKE_YRKESAKTIV_VEDTAKSBREV
-    );
 
     static {
         DOKUMENTPRODUKSJONS_INFO_MAP = Maps.immutableEnumMap(ImmutableMap.<Produserbaredokumenter, DokumentproduksjonsInfo>builder()
-            .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID,
-                new DokumentproduksjonsInfo("saksbehandlingstid_soknad",
-                    DokumentKategoriKode.IB.getKode(),
-                    JournalforingsTittel.FORVALTNINGSMELDING.getTittel())
-            )
             .put(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
                 new DokumentproduksjonsInfo("saksbehandlingstid_soknad",
                     DokumentKategoriKode.IB.getKode(),
@@ -68,10 +42,10 @@ public class DokumentproduksjonsInfoMapper {
                     DokumentKategoriKode.IB.getKode(),
                     JournalforingsTittel.MANGELBREV.getTittel())
             )
-            .put(INNVILGELSE_FOLKETRYGDLOVEN_2_8,
-                new DokumentproduksjonsInfo("innvilgelse_ftrl_2_8",
+            .put(INNVILGELSE_FOLKETRYGDLOVEN,
+                new DokumentproduksjonsInfo("innvilgelse_ftrl",
                     DokumentKategoriKode.VB.getKode(),
-                    JournalforingsTittel.INNVILGELSE_FTRL_2_8.getTittel())
+                    JournalforingsTittel.INNVILGELSE_FTRL.getTittel())
             )
             .put(TRYGDEAVTALE_GB,
                 new DokumentproduksjonsInfo("trygdeavtale_gb",
@@ -109,6 +83,12 @@ public class DokumentproduksjonsInfoMapper {
             .put(FRITEKSTBREV,
                 new DokumentproduksjonsInfo("fritekstbrev",
                     DokumentKategoriKode.IB.getKode()))
+            .put(GENERELT_FRITEKSTVEDLEGG,
+                new DokumentproduksjonsInfo("fritekstvedlegg",
+                    DokumentKategoriKode.IB.getKode()))
+            .put(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV,
+                new DokumentproduksjonsInfo("trygdeavtale_fritekstbrev",
+                    DokumentKategoriKode.IB.getKode()))
             .put(AVSLAG_MANGLENDE_OPPLYSNINGER,
                 new DokumentproduksjonsInfo("avslag_manglende_opplysninger",
                     DokumentKategoriKode.VB.getKode(),
@@ -117,12 +97,6 @@ public class DokumentproduksjonsInfoMapper {
                 new DokumentproduksjonsInfo("henleggelse",
                     DokumentKategoriKode.IB.getKode(),
                     JournalforingsTittel.MELDING_HENLAGT_SAK.getTittel()))
-            .put(GENERELT_FRITEKSTVEDLEGG,
-                new DokumentproduksjonsInfo("fritekstvedlegg",
-                    DokumentKategoriKode.IB.getKode()))
-            .put(UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV,
-                new DokumentproduksjonsInfo("trygdeavtale_fritekstbrev",
-                    DokumentKategoriKode.IB.getKode()))
             .put(IKKE_YRKESAKTIV_VEDTAKSBREV,
                 new DokumentproduksjonsInfo("ikke_yrkesaktiv_vedtaksbrev",
                     DokumentKategoriKode.VB.getKode(),
@@ -130,18 +104,8 @@ public class DokumentproduksjonsInfoMapper {
             .build());
     }
 
-    public DokumentproduksjonsInfoMapper(Unleash unleash) {
-        this.unleash = unleash;
-    }
-
-    public Set<Produserbaredokumenter> utledTilgjengeligeMaler() {
-        return DOKUMENTPRODUKSJONS_INFO_MAP.keySet().stream()
-            .filter(isEnabled())
-            .collect(toSet());
-    }
-
-    private Predicate<Produserbaredokumenter> isEnabled() {
-        return key -> DOKUMENTMALER_PRODSATT.contains(key) || unleash.isEnabled("melosys.brev." + key.name());
+    public Set<Produserbaredokumenter> tilgjengeligeMalerIDokgen() {
+        return new HashSet<>(DOKUMENTPRODUKSJONS_INFO_MAP.keySet());
     }
 
     public String hentMalnavn(Produserbaredokumenter produserbartDokument) {
@@ -166,7 +130,7 @@ public class DokumentproduksjonsInfoMapper {
     private enum JournalforingsTittel {
         FORVALTNINGSMELDING("Melding om forventet saksbehandlingstid"),
         MANGELBREV("Melding om manglende opplysninger"),
-        INNVILGELSE_FTRL_2_8("Vedtak om frivillig medlemskap"),
+        INNVILGELSE_FTRL("Vedtak om frivillig medlemskap"),
         TRYGDEAVTALE("Vedtak om medlemskap, Attest for utsendt arbeidstaker"),
         TRYGDEAVTALE_VEDTAKSBREV("Vedtak om medlemskap"),
         TRYGDEAVTALE_ATTEST("Attest for utsendt arbeidstaker"),

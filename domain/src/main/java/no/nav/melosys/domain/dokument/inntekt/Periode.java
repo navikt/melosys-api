@@ -1,20 +1,20 @@
 package no.nav.melosys.domain.dokument.inntekt;
 
-import no.nav.melosys.domain.ErPeriode;
-import no.nav.melosys.domain.dokument.jaxb.XMLOffsetDateToLocalDate;
-
+import java.time.LocalDate;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import java.time.LocalDate;
+
+import no.nav.melosys.domain.ErPeriode;
+import no.nav.melosys.domain.dokument.jaxb.XMLOffsetDateToLocalDate;
 
 @XmlType(name = "Periode", namespace = "inntekt") // Løser navnekonflikt med no.nav.melosys.domain.dokument.felles.Periode
 public class Periode implements ErPeriode {
 
     @XmlJavaTypeAdapter(XMLOffsetDateToLocalDate.class)
-    private LocalDate fom;
+    public LocalDate fom;
 
     @XmlJavaTypeAdapter(XMLOffsetDateToLocalDate.class)
-    private LocalDate tom;
+    public LocalDate tom;
 
     @Override
     public LocalDate getFom() {

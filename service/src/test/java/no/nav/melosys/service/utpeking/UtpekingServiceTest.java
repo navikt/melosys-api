@@ -124,11 +124,11 @@ class UtpekingServiceTest {
         verify(ferdigbehandlingKontrollFacade).kontroller(behandlingID, behandlingsresultat.getType(), null);
 
         assertThat(behandlingsresultat)
-            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst, Behandlingsresultat::getFastsattAvLand)
-            .containsExactly(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND, null, Land_iso2.NO);
+            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst, Behandlingsresultat::getFastsattAvLand, Behandlingsresultat::getNyVurderingBakgrunn)
+            .containsExactly(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND, null, Land_iso2.NO, null);
         assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull()
-            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getNyVurderingBakgrunn, VedtakMetadata::getVedtakKlagefrist)
-            .containsExactly(Vedtakstyper.FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getVedtakKlagefrist)
+            .containsExactly(Vedtakstyper.FØRSTEGANGSVEDTAK, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
         Collection<Lovvalgsperiode> lagretLovvalgsperioder = lovvalgsperiodeCaptor.getValue();
         assertThat(lagretLovvalgsperioder).isNotEmpty().hasSize(1);
@@ -177,11 +177,11 @@ class UtpekingServiceTest {
         verify(eessiService).validerOgAvklarMottakerInstitusjonerForBuc(eq(mottakerInstitusjoner), landkoderCaptor.capture(), eq(BucType.LA_BUC_02));
         assertThat(landkoderCaptor.getValue()).containsExactlyInAnyOrder(Land_iso2.SE, Land_iso2.DK, Land_iso2.FI);
         assertThat(behandlingsresultat)
-            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst, Behandlingsresultat::getFastsattAvLand)
-            .containsExactly(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND, null, Land_iso2.NO);
+            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst, Behandlingsresultat::getFastsattAvLand, Behandlingsresultat::getNyVurderingBakgrunn)
+            .containsExactly(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND, null, Land_iso2.NO, null);
         assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull()
-            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getNyVurderingBakgrunn, VedtakMetadata::getVedtakKlagefrist)
-            .containsExactly(Vedtakstyper.FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getVedtakKlagefrist)
+            .containsExactly(Vedtakstyper.FØRSTEGANGSVEDTAK, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
     }
 
     @Test

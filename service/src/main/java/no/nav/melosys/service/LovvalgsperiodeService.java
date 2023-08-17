@@ -61,6 +61,29 @@ public class LovvalgsperiodeService {
         return lovvalgsperiode;
     }
 
+    @Transactional
+    public Lovvalgsperiode oppdaterLovvalgsperiode(long lovvalgsperiodeId, Lovvalgsperiode lovvalgsperiode) {
+        var lagretLovvalgsperiode = lovvalgsperiodeRepo.findById(lovvalgsperiodeId)
+            .orElseThrow(() -> new FunksjonellException(String.format("Lovvalgsperioden %s finnes ikke", lovvalgsperiodeId)));
+
+        lagretLovvalgsperiode.setFom(lovvalgsperiode.getFom());
+        lagretLovvalgsperiode.setTom(lovvalgsperiode.getTom());
+        lagretLovvalgsperiode.setLovvalgsland(lovvalgsperiode.getLovvalgsland());
+        lagretLovvalgsperiode.setBestemmelse(lovvalgsperiode.getBestemmelse());
+        lagretLovvalgsperiode.setTilleggsbestemmelse(lovvalgsperiode.getTilleggsbestemmelse());
+        lagretLovvalgsperiode.setInnvilgelsesresultat(lovvalgsperiode.getInnvilgelsesresultat());
+        lagretLovvalgsperiode.setDekning(lovvalgsperiode.getDekning());
+        lagretLovvalgsperiode.setMedlemskapstype(lovvalgsperiode.getMedlemskapstype());
+        lagretLovvalgsperiode.setMedlPeriodeID(lovvalgsperiode.getMedlPeriodeID());
+
+        return lovvalgsperiodeRepo.save(lagretLovvalgsperiode);
+    }
+
+    @Transactional
+    public void slettLovvalgsperiode(long lovvalgsperiodeId) {
+        lovvalgsperiodeRepo.deleteById(lovvalgsperiodeId);
+    }
+
     @Transactional(propagation = Propagation.REQUIRED)
     public Collection<Lovvalgsperiode> lagreLovvalgsperioder(long behandlingsid, Collection<Lovvalgsperiode> lovvalgsperioder) {
         Behandlingsresultat behandlingsresultat = behandlingsresultatRepo.findById(behandlingsid)
@@ -79,7 +102,7 @@ public class LovvalgsperiodeService {
         try {
             kopi = (Lovvalgsperiode) BeanUtils.cloneBean(periode);
         } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException |
-                 InstantiationException e) {
+            InstantiationException e) {
             throw new IllegalStateException(e);
         }
         kopi.setBehandlingsresultat(behandlingsresultat);

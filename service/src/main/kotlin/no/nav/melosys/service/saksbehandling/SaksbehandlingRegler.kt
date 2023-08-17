@@ -64,7 +64,7 @@ class SaksbehandlingRegler(
         behandlingstema: Behandlingstema
     ): Boolean {
         if (sakstema == Sakstemaer.TRYGDEAVGIFT) return true
-        if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE) return true
+        if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE || behandlingstype == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT) return true
 
         if (harRegistreringUnntakFraMedlemskapFlyt(
                 sakstype,
@@ -121,13 +121,16 @@ class SaksbehandlingRegler(
     }
 
     fun harIkkeYrkesaktivFlyt(
+        behandling: Behandling
+    ): Boolean {
+        return harIkkeYrkesaktivFlyt(behandling.fagsak.type, behandling.tema)
+    }
+
+    fun harIkkeYrkesaktivFlyt(
         sakstype: Sakstyper,
         behandlingstema: Behandlingstema
     ): Boolean {
-        if (unleash.isEnabled(IKKEYRKESAKTIV_FLYT) && (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE) && behandlingstema == IKKE_YRKESAKTIV) {
-            return true
-        }
-        return false
+        return unleash.isEnabled(IKKEYRKESAKTIV_FLYT) && (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE) && behandlingstema == IKKE_YRKESAKTIV
     }
 
     companion object {

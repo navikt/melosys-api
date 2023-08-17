@@ -55,10 +55,12 @@ public class BrevmottakerService {
         this.behandlingService = behandlingService;
     }
 
+    /**
+     * Brukes av doksys for å utlede mottaker-rolle
+     */
     Mottakerroller avklarMottakerRolleFraDokument(Produserbaredokumenter produserbartDokument) {
         return switch (produserbartDokument) {
-            case MELDING_FORVENTET_SAKSBEHANDLINGSTID, MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE,
-                AVSLAG_YRKESAKTIV, ORIENTERING_ANMODNING_UNNTAK, MELDING_MANGLENDE_OPPLYSNINGER, MELDING_HENLAGT_SAK,
+            case AVSLAG_YRKESAKTIV, ORIENTERING_ANMODNING_UNNTAK,
                 INNVILGELSE_YRKESAKTIV, IKKE_YRKESAKTIV_VEDTAKSBREV -> Mottakerroller.BRUKER;
             case INNVILGELSE_ARBEIDSGIVER, AVSLAG_ARBEIDSGIVER -> Mottakerroller.ARBEIDSGIVER;
             case ANMODNING_UNNTAK, ATTEST_A1 -> Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET;

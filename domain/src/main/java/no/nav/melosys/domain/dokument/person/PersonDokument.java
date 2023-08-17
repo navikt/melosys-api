@@ -1,5 +1,13 @@
 package no.nav.melosys.domain.dokument.person;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.brev.Postadresse;
@@ -13,13 +21,6 @@ import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 import no.nav.melosys.domain.util.IsoLandkodeKonverterer;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 
 /**
@@ -57,14 +58,25 @@ public class PersonDokument implements Persondata {
 
     @Override
     public boolean manglerRegistrertAdresse() {
-        return bostedsadresse.erTom() &&
-            postadresse.erTom() &&
-            midlertidigPostadresse.land == null;
+        var personHarRegistrertAdresse = Stream.of(
+                finnBostedsadresse(),
+                finnOppholdsadresse(),
+                finnKontaktadresse())
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .anyMatch(personAdresse -> personAdresse.harRegistrertAdresse());
+
+        return !personHarRegistrertAdresse;
     }
 
     @Override
     public boolean manglerBostedsadresse() {
         return bostedsadresse.erTom();
+    }
+
+    @Override
+    public boolean manglerPostnummer() {
+        return postadresse.postnummerErTom();
     }
 
     public Optional<Familiemedlem> hentAnnenForelder(String fnrGjeldendeForelder) {

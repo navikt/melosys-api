@@ -1,11 +1,5 @@
 package no.nav.melosys.service.persondata.familie;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.person.Folkeregisteridentifikator;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
@@ -19,6 +13,13 @@ import no.nav.melosys.service.persondata.mapping.FoedselOversetter;
 import no.nav.melosys.service.persondata.mapping.FolkeregisteridentOversetter;
 import no.nav.melosys.service.saksopplysninger.SaksopplysningerService;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.time.temporal.ChronoUnit.YEARS;
 
@@ -64,8 +65,7 @@ public class FamiliemedlemService {
         if (erPersonUnder18(hovedperson)) {
             familiemedlemmer.addAll(hentForeldre(hovedperson.forelderBarnRelasjon()));
         }
-        familiemedlemmer.addAll(ektefelleEllerPartnerFamiliemedlemFilter.hentEktefelleEllerPartnerFraSivilstander(
-            hovedperson.sivilstand()));
+        familiemedlemmer.addAll(ektefelleEllerPartnerFamiliemedlemFilter.hentEktefelleEllerPartnerFraSivilstander(hovedperson.sivilstand()));
         familiemedlemmer.addAll(hentBarn(hovedperson));
         return familiemedlemmer;
     }
@@ -90,13 +90,13 @@ public class FamiliemedlemService {
             forelderBarnRelasjon.relatertPersonsRolle());
     }
 
-
     private Set<Familiemedlem> hentBarn(Person person) {
         Folkeregisteridentifikator folkeregisteridentifikator = FolkeregisteridentOversetter
             .oversett(person.folkeregisteridentifikator());
         return person.forelderBarnRelasjon().stream()
             .filter(ForelderBarnRelasjon::erBarn)
             .map(ForelderBarnRelasjon::relatertPersonsIdent)
+            .filter(Objects::nonNull)
             .map(pdlConsumer::hentBarn)
             .map(barn -> FamiliemedlemOversetter.oversettBarn(barn, folkeregisteridentifikator))
             .collect(Collectors.toUnmodifiableSet());

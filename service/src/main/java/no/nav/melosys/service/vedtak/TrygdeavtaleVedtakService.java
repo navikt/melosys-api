@@ -73,7 +73,6 @@ public class TrygdeavtaleVedtakService {
         if (behandlingsresultat.erInnvilgelse()) {
             Collection<Kontrollfeil> kontrollfeil = ferdigbehandlingKontrollFacade.kontrollerVedtakMedRegisteropplysninger(
                 behandling,
-                behandlingsresultat,
                 Sakstyper.TRYGDEAVTALE,
                 Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN,
                 null
@@ -91,27 +90,23 @@ public class TrygdeavtaleVedtakService {
 
         behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
 
-        if(saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling.getFagsak().getType(), behandling.getTema())) {
+        if(saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)) {
             behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
-            prosessinstansService.opprettProsessinstansIverksettIkkeYreksaktiv(behandling);
+            prosessinstansService.opprettProsessinstansIverksettIkkeYrkesaktiv(behandling, request.getFritekst());
         } else {
             behandling.getFagsak().setStatus(Saksstatuser.MEDLEMSKAP_AVKLART); // TODO: Egen oppgave for fjerne denne som ikke brukes
             oppdaterBehandlingsresultat(behandlingsresultat, request);
             prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling, request);
+            BrevbestillingDto brevbestillingDto = lagBrevbestilling(behandling, request);
+            dokgenService.produserOgDistribuerBrev(behandlingID, brevbestillingDto);
         }
 
-
-        BrevbestillingDto brevbestillingDto = lagBrevbestilling(behandling, request);
-        dokgenService.produserOgDistribuerBrev(behandlingID, brevbestillingDto);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
     }
 
     private BrevbestillingDto lagBrevbestilling(Behandling behandling, FattVedtakRequest request) {
         if (request.getBehandlingsresultatTypeKode() == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
             return lagAvslagMangledeOpplysningerBrevbestilling(request);
-        }
-        if (saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling.getFagsak().getType(), behandling.getTema())) {
-            return lagTrygdeavtaleBrevbestilling(request, Produserbaredokumenter.IKKE_YRKESAKTIV_VEDTAKSBREV);
         }
         Optional<Produserbaredokumenter> produserbaredokumenter = behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.landkoder.stream()
             .map(Land_iso2::valueOf)
@@ -154,7 +149,8 @@ public class TrygdeavtaleVedtakService {
     }
 
     private void oppdaterBehandlingsresultat(Behandlingsresultat behandlingsresultat, FattVedtakRequest request) throws IkkeFunnetException {
-        behandlingsresultat.settVedtakMetadata(request.getVedtakstype(), request.getNyVurderingBakgrunn(), LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+        behandlingsresultat.settVedtakMetadata(request.getVedtakstype(), LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+        behandlingsresultat.setNyVurderingBakgrunn(request.getNyVurderingBakgrunn());
         behandlingsresultat.setBegrunnelseFritekst(request.getBegrunnelseFritekst());
         behandlingsresultat.setInnledningFritekst(request.getInnledningFritekst());
         behandlingsresultat.setFastsattAvLand(Land_iso2.NO);

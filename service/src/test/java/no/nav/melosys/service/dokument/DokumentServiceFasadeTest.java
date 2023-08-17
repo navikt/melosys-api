@@ -1,10 +1,7 @@
 package no.nav.melosys.service.dokument;
 
-import java.util.List;
-
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
-import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
@@ -19,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+
+import java.util.List;
 
 import static no.nav.melosys.domain.kodeverk.Mottakerroller.BRUKER;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID;
@@ -53,36 +52,6 @@ class DokumentServiceFasadeTest {
             mockDokumentService,
             mockBehandlingService
         );
-    }
-
-    @Test
-    void produserUtkast_skalKalleDokgenProduserUtkast() {
-        when(mockDokgenService.erTilgjengeligDokgenmal(any(Produserbaredokumenter.class))).thenReturn(true);
-
-        var brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID);
-        brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
-
-
-        dokumentServiceFasade.produserUtkast(1, brevbestillingDto);
-
-
-        verify(mockDokgenService).produserUtkast(anyLong(), any());
-        verifyNoInteractions(mockDokumentService);
-    }
-
-    @Test
-    void produserUtkast_skalKalleDokumentServiceProduserUtkast() {
-        when(mockDokgenService.erTilgjengeligDokgenmal(any(Produserbaredokumenter.class))).thenReturn(false);
-
-        var brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID);
-
-
-        dokumentServiceFasade.produserUtkast(1, brevbestillingDto);
-
-
-        verify(mockDokumentService).produserUtkast(anyLong(), eq(brevbestillingDto));
     }
 
     @Test

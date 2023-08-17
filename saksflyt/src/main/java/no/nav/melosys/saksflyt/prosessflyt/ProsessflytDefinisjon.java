@@ -197,8 +197,7 @@ public final class ProsessflytDefinisjon {
 
         PROSESS_FLYT_MAP.put(ProsessType.IVERKSETT_VEDTAK_FTRL,
             new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_FTRL,
-                // TODO: Dette steget er ikke fungerende nå, kommer i en ny task: MELOSYS-5584
-                //LAGRE_MEDLEMSKAPSPERIODE_MEDL,
+                LAGRE_MEDLEMSKAPSPERIODE_MEDL,
                 OPPRETT_AVGIFTSOPPGAVE,
                 OPPRETT_BETALINGSPLAN,
                 AVSLUTT_SAK_OG_BEHANDLING
@@ -219,6 +218,7 @@ public final class ProsessflytDefinisjon {
             ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
             new ProsessFlyt(ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV,
                 LAGRE_LOVVALGSPERIODE_MEDL,
+                SEND_VEDTAKSBREV_INNLAND,
                 AVSLUTT_SAK_OG_BEHANDLING
             )
         );

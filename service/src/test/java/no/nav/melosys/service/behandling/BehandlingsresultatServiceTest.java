@@ -27,11 +27,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,6 +65,7 @@ class BehandlingsresultatServiceTest {
         behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.GODKJENT);
         behandlingsresultat.setInnledningFritekst("Innledning fritekst");
         behandlingsresultat.setBegrunnelseFritekst("Begrunnelse fritekst");
+        behandlingsresultat.setNyVurderingBakgrunn("ny vurdering bakgrunn");
 
         when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
 
@@ -76,6 +79,7 @@ class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultat.getUtfallRegistreringUnntak()).isNull();
         assertThat(behandlingsresultat.getInnledningFritekst()).isNull();
         assertThat(behandlingsresultat.getBegrunnelseFritekst()).isNull();
+        assertThat(behandlingsresultat.getNyVurderingBakgrunn()).isNull();
         verify(vilkaarsresultatService).tømVilkårForBehandlingsresultat(behandlingsresultat);
     }
 
@@ -123,6 +127,35 @@ class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultat.getBehandlingsmåte()).isEqualTo(Behandlingsmaate.MANUELT);
         assertThat(behandlingsresultat.getType()).isEqualTo(Behandlingsresultattyper.IKKE_FASTSATT);
     }
+
+    @Test
+    public void lagreBehandlingsResultat_godkjent_erRegistrertUnntak() {
+        long behandlingID = 123;
+        Utfallregistreringunntak utfallUtpeking = Utfallregistreringunntak.GODKJENT;
+
+        Behandlingsresultat mockBehandlingsresultat = new Behandlingsresultat();
+        when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.of(mockBehandlingsresultat));
+        when(behandlingsresultatRepo.findWithKontrollresultaterById(behandlingID)).thenReturn(Optional.of(mockBehandlingsresultat));
+
+
+        behandlingsresultatService.settUtfallRegistreringUnntakOgType(behandlingID, utfallUtpeking);
+
+        assertEquals(Behandlingsresultattyper.REGISTRERT_UNNTAK, mockBehandlingsresultat.getType());
+    }
+
+    @Test
+    public void lagreBehandlingsResultat_ikkeGodkjent_erFerdigbehandlet() {
+        long behandlingID = 123;
+        Utfallregistreringunntak utfallUtpeking = Utfallregistreringunntak.IKKE_GODKJENT;
+
+        Behandlingsresultat mockBehandlingsresultat = new Behandlingsresultat();
+        when(behandlingsresultatRepo.findById(behandlingID)).thenReturn(Optional.of(mockBehandlingsresultat));
+        when(behandlingsresultatRepo.findWithKontrollresultaterById(behandlingID)).thenReturn(Optional.of(mockBehandlingsresultat));
+
+        behandlingsresultatService.settUtfallRegistreringUnntakOgType(behandlingID, utfallUtpeking);
+        assertEquals(Behandlingsresultattyper.FERDIGBEHANDLET, mockBehandlingsresultat.getType());
+    }
+
 
     @Test
     void replikerBehandlingOgBehandlingsresultat_replikererBehandlingsresultatObjekterOgCollections()
@@ -292,7 +325,6 @@ class BehandlingsresultatServiceTest {
 
         verify(behandlingsresultatRepo).save(behandlingsresultat);
     }
-
     @Test
     void settUtfallRegistreringUnntakOgType_alleredeSatt_kasterException() {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();

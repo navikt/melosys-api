@@ -1,6 +1,5 @@
 package no.nav.melosys.service.sak;
 
-import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.service.AdminTjeneste;
 import no.nav.security.token.support.core.api.Unprotected;
 import org.slf4j.Logger;
@@ -15,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 public class FagsakAdminTjeneste implements AdminTjeneste {
     private final String apiKey;
     private final HenleggFagsakService henleggFagsakService;
+
     private static final Logger log = LoggerFactory.getLogger(FagsakAdminTjeneste.class);
 
     public FagsakAdminTjeneste(@Value("${Melosys-admin.apikey}") String apiKey, HenleggFagsakService henleggFagsakService) {

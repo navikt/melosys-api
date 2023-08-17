@@ -20,7 +20,6 @@ import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.oppgave.OppgaveService;
@@ -67,8 +66,6 @@ class EosVedtakServiceTest {
     private FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
     @Mock
     private SaksbehandlingRegler saksbehandlingRegler;
-    @Mock
-    private DokgenService dokgenService;
 
     private EosVedtakService vedtakService;
     private final long behandlingID = 1L;
@@ -79,7 +76,7 @@ class EosVedtakServiceTest {
     @BeforeEach
     void setUp() {
         vedtakService = new EosVedtakService(behandlingService, behandlingsresultatService, oppgaveService, prosessinstansService,
-            eessiService, landvelgerService, avklartefaktaService, melosysEventMulticaster, ferdigbehandlingKontrollFacade, saksbehandlingRegler, dokgenService);
+            eessiService, landvelgerService, avklartefaktaService, melosysEventMulticaster, ferdigbehandlingKontrollFacade, saksbehandlingRegler);
 
         SpringSubjectHandler.set(new TestSubjectHandler());
 
@@ -105,12 +102,12 @@ class EosVedtakServiceTest {
             behandlingsresultatFritekst, null, mottakerinstitusjoner));
 
         assertThat(behandlingsresultat)
-            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst)
-            .containsExactly(FASTSATT_LOVVALGSLAND, behandlingsresultatFritekst);
+            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getNyVurderingBakgrunn, Behandlingsresultat::getBegrunnelseFritekst)
+            .containsExactly(FASTSATT_LOVVALGSLAND, null, behandlingsresultatFritekst);
 
         assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull()
-            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getNyVurderingBakgrunn, VedtakMetadata::getVedtakKlagefrist)
-            .containsExactly(FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getVedtakKlagefrist)
+            .containsExactly(FØRSTEGANGSVEDTAK, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
         verify(behandlingService).endreStatus(behandling, IVERKSETTER_VEDTAK);
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
@@ -122,7 +119,7 @@ class EosVedtakServiceTest {
             eq(true)
         );
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
-        verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), any(Behandlingsresultat.class), eq(Sakstyper.EU_EOS), any(Behandlingsresultattyper.class), eq(null));
+        verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), eq(Sakstyper.EU_EOS), any(Behandlingsresultattyper.class), eq(null));
     }
 
     @Test
@@ -136,12 +133,12 @@ class EosVedtakServiceTest {
             behandlingsresultatFritekst, "FRITEKST_SED", mottakerinstitusjoner));
 
         assertThat(behandlingsresultat)
-            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst)
-            .containsExactly(FASTSATT_LOVVALGSLAND, behandlingsresultatFritekst);
+            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getNyVurderingBakgrunn, Behandlingsresultat::getBegrunnelseFritekst)
+            .containsExactly(FASTSATT_LOVVALGSLAND, null, behandlingsresultatFritekst);
 
         assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull()
-            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getNyVurderingBakgrunn, VedtakMetadata::getVedtakKlagefrist)
-            .containsExactly(FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getVedtakKlagefrist)
+            .containsExactly(FØRSTEGANGSVEDTAK, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
         verify(behandlingService).endreStatus(behandling, IVERKSETTER_VEDTAK);
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
@@ -164,12 +161,12 @@ class EosVedtakServiceTest {
             behandlingsresultatFritekst, "FRITEKST_SED", null));
 
         assertThat(behandlingsresultat)
-            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst)
-            .containsExactly(FASTSATT_LOVVALGSLAND, behandlingsresultatFritekst);
+            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getNyVurderingBakgrunn, Behandlingsresultat::getBegrunnelseFritekst)
+            .containsExactly(FASTSATT_LOVVALGSLAND, null, behandlingsresultatFritekst);
 
         assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull()
-            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getNyVurderingBakgrunn, VedtakMetadata::getVedtakKlagefrist)
-            .containsExactly(FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getVedtakKlagefrist)
+            .containsExactly(FØRSTEGANGSVEDTAK, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
         verify(behandlingService).endreStatus(behandling, IVERKSETTER_VEDTAK);
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
@@ -198,12 +195,12 @@ class EosVedtakServiceTest {
             behandlingsresultatFritekst, "FRITEKST_SED", null));
 
         assertThat(behandlingsresultat)
-            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst)
-            .containsExactly(FASTSATT_LOVVALGSLAND, behandlingsresultatFritekst);
+            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getNyVurderingBakgrunn, Behandlingsresultat::getBegrunnelseFritekst)
+            .containsExactly(FASTSATT_LOVVALGSLAND, null, behandlingsresultatFritekst);
 
         assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull()
-            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getNyVurderingBakgrunn, VedtakMetadata::getVedtakKlagefrist)
-            .containsExactly(FØRSTEGANGSVEDTAK, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getVedtakKlagefrist)
+            .containsExactly(FØRSTEGANGSVEDTAK, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
             eq(behandling),
@@ -225,12 +222,12 @@ class EosVedtakServiceTest {
         vedtakService.fattVedtak(behandling, lagRequest(resultatType, vedtakstype, null, null, null));
 
         assertThat(behandlingsresultat)
-            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getBegrunnelseFritekst)
-            .containsExactly(resultatType, null);
+            .extracting(Behandlingsresultat::getType, Behandlingsresultat::getNyVurderingBakgrunn, Behandlingsresultat::getBegrunnelseFritekst)
+            .containsExactly(resultatType, null, null);
 
         assertThat(behandlingsresultat.getVedtakMetadata()).isNotNull()
-            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getNyVurderingBakgrunn, VedtakMetadata::getVedtakKlagefrist)
-            .containsExactly(vedtakstype, null, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+            .extracting(VedtakMetadata::getVedtakstype, VedtakMetadata::getVedtakKlagefrist)
+            .containsExactly(vedtakstype, LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
 
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakEos(
             eq(behandling),

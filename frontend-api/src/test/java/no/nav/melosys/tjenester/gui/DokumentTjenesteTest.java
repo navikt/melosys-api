@@ -1,15 +1,16 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.Collections;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import no.nav.melosys.domain.arkiv.ArkivDokument;
+import no.nav.melosys.domain.arkiv.BrukerIdType;
+import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.domain.kodeverk.Mottakerroller;
-import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.dokument.DokumentHentingService;
-import no.nav.melosys.service.dokument.DokumentServiceFasade;
 import no.nav.melosys.service.dokument.brev.SedPdfData;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
-import no.nav.melosys.tjenester.gui.dto.brev.BrevbestillingRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -17,22 +18,16 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Collections;
-
-import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {DokumentTjeneste.class})
 class DokumentTjenesteTest {
 
-    @MockBean
-    private DokumentServiceFasade dokumentServiceFasade;
     @MockBean
     private DokumentHentingService dokumentHentingService;
     @MockBean
@@ -50,12 +45,28 @@ class DokumentTjenesteTest {
 
     @Test
     void hentDokument() throws Exception {
+        when(dokumentHentingService.hentJournalpost(anyString())).thenReturn(new Journalpost("jpID"));
         var dokument = new byte[1];
         when(dokumentHentingService.hentDokument(anyString(), anyString())).thenReturn(dokument);
 
-        mockMvc.perform(get(BASE_URL + "/pdf/{journalpostID}/{dokumentID}", "1", "2")
+        mockMvc.perform(get(BASE_URL + "/{journalpostID}/{dokumentID}", "1", "2", "3")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    void hentDokument_journalpostMedFnr_auditLogging() throws Exception {
+        Journalpost journalpost = new Journalpost("jpID");
+        journalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
+        journalpost.setBrukerId("fnr");
+        journalpost.setHoveddokument(new ArkivDokument());
+        when(dokumentHentingService.hentJournalpost(anyString())).thenReturn(journalpost);
+        when(dokumentHentingService.hentDokument(anyString(), anyString())).thenReturn(new byte[1]);
+
+        mockMvc.perform(get(BASE_URL + "/{journalpostID}/{dokumentID}", "1", "2", "3")
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk());
+        verify(aksesskontroll).auditAutoriserFolkeregisterIdent(eq("fnr"), anyString());
     }
 
     @Test
@@ -65,19 +76,6 @@ class DokumentTjenesteTest {
         mockMvc.perform(get(BASE_URL + "/oversikt/{saksnummer}", "1")
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk());
-    }
-
-    @Test
-    void produserUtkastBrev() throws Exception {
-        BrevbestillingRequest brevBestillingDto = lagBrevbestillingMedMottaker(Mottakerroller.BRUKER);
-        when(dokumentServiceFasade.produserUtkast(anyLong(), any())).thenReturn(new byte[1]);
-
-        mockMvc.perform(post(BASE_URL + "/pdf/brev/utkast/{behandlingID}/{produserbartDokument}", 1L, Produserbaredokumenter.MELDING_HENLAGT_SAK)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(brevBestillingDto)))
-            .andExpect(status().isOk());
-
-        verify(dokumentServiceFasade).produserUtkast(anyLong(), any());
     }
 
     @Test
@@ -91,33 +89,5 @@ class DokumentTjenesteTest {
             .andExpect(status().isOk());
 
         verify(eessiService).genererSedPdf(anyLong(), any(SedType.class), any(SedPdfData.class));
-    }
-
-    @Test
-    void produserDokument() throws Exception {
-        var brevBestillingDto = lagBrevbestillingMedMottaker(Mottakerroller.BRUKER);
-
-        mockMvc.perform(post(BASE_URL + "/opprett/{behandlingID}/{produserbartDokument}", 1L, Produserbaredokumenter.MELDING_HENLAGT_SAK)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(brevBestillingDto)))
-            .andExpect(status().isNoContent());
-
-        verify(dokumentServiceFasade).produserUtkast(anyLong(), any());
-        verify(dokumentServiceFasade).produserDokument(anyLong(), any());
-    }
-
-    @Test
-    void produserDokumentFeilerMedManglendeMottaker() throws Exception {
-        var brevBestillingDto = lagBrevbestillingMedMottaker(null);
-
-        mockMvc.perform(post(BASE_URL + "/opprett/{behandlingID}/{produserbartDokument}", 1L, Produserbaredokumenter.MELDING_HENLAGT_SAK)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(brevBestillingDto)))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.message", containsString("Mottaker trengs for å bestille")));
-    }
-
-    private BrevbestillingRequest lagBrevbestillingMedMottaker(Mottakerroller rolle) {
-        return new BrevbestillingRequest(null, rolle, null, null, null, null, null, null, null, null, null, null, null, null, null, false, null, null, null, null, null, null, null);
     }
 }

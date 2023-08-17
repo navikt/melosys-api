@@ -44,25 +44,11 @@ public class TrygdeavtaleTjeneste {
         this.aksesskontroll = aksesskontroll;
     }
 
-    /***
-     *
-     * @deprecated
-     * Dette endepunket blir fjernet når trygdeavtale har tatt i bruk mottatteOpplysninger/{behandlingID}
-     */
-    @GetMapping("{behandlingID}")
-    @Transactional
-    @Deprecated()
-    public ResponseEntity<TrygdeavtaleInfoDto> hentTrygdeavtaleInfo(@PathVariable("behandlingID") long behandlingId,
-                                                                    @RequestParam(value = "virksomheter", required = false) boolean hentVirksomheter,
-                                                                    @RequestParam(value = "barnEktefeller", required = false) boolean hentBarnEktefeller) {
-        return hentTrygdeavtaleMottatteOpplysninger(behandlingId, hentVirksomheter, hentBarnEktefeller);
-    }
-
     @GetMapping("mottatteopplysninger/{behandlingID}")
     @Transactional
     public ResponseEntity<TrygdeavtaleInfoDto> hentTrygdeavtaleMottatteOpplysninger(@PathVariable("behandlingID") long behandlingId,
-                                                                                   @RequestParam(value = "virksomheter", required = false) boolean hentVirksomheter,
-                                                                                   @RequestParam(value = "barnEktefeller", required = false) boolean hentBarnEktefeller) {
+                                                                                    @RequestParam(value = "virksomheter", required = false) boolean hentVirksomheter,
+                                                                                    @RequestParam(value = "barnEktefeller", required = false) boolean hentBarnEktefeller) {
         String saksbehandler = SubjectHandler.getInstance().getUserID();
         log.debug("Melosys-trygdeavtale henter TrygdeavtaleInfo for behandling {} på vegne av saksbehandler {}.", behandlingId, saksbehandler);
         aksesskontroll.autoriser(behandlingId);
@@ -82,7 +68,7 @@ public class TrygdeavtaleTjeneste {
             hentBarnEktefeller ? trygdeavtaleService.hentFamiliemedlemmer(behandling) : Collections.emptyList(),
             behandlingsResultat.getInnledningFritekst(),
             behandlingsResultat.getBegrunnelseFritekst(),
-            behandlingsResultat.getVedtakMetadata() != null ? behandlingsResultat.getVedtakMetadata().getNyVurderingBakgrunn() : null
+            behandlingsResultat.getNyVurderingBakgrunn()
         ));
     }
 
@@ -97,21 +83,10 @@ public class TrygdeavtaleTjeneste {
 
     @PostMapping("resultat/{behandlingID}")
     public ResponseEntity<Void> overførTrygdeavtaleResultat(@PathVariable("behandlingID") long behandlingId,
-                                                @RequestBody TrygdeavtaleResultatDto trygdeavtaleResultatDto) {
+                                                            @RequestBody TrygdeavtaleResultatDto trygdeavtaleResultatDto) {
         aksesskontroll.autoriserSkriv(behandlingId);
         trygdeavtaleService.overførResultat(behandlingId, trygdeavtaleResultatDto.til());
 
         return ResponseEntity.noContent().build();
-    }
-
-    /***
-     *
-     * @deprecated
-     * Dette endepunket blir fjernet når trygdeavtale har tatt i bruk resultat/{behandlingID}
-     */
-    @PostMapping("{behandlingID}")
-    public ResponseEntity<Void> overførResultat(@PathVariable("behandlingID") long behandlingId,
-                                                @RequestBody TrygdeavtaleResultatDto trygdeavtaleResultatDto) {
-        return overførTrygdeavtaleResultat(behandlingId, trygdeavtaleResultatDto);
     }
 }

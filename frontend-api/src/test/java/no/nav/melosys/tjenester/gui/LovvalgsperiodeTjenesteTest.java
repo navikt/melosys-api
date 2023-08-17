@@ -1,10 +1,5 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -17,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.lovvalgsperiode.OpprettLovvalgsperiodeService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.periode.LovvalgsperiodeDto;
 import no.nav.melosys.tjenester.gui.dto.periode.PeriodeDto;
@@ -26,6 +22,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
 import static org.hamcrest.Matchers.equalTo;
@@ -39,7 +40,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = {LovvalgsperiodeTjeneste.class})
 final class LovvalgsperiodeTjenesteTest {
     private static final LocalDate FOM = LocalDate.now();
-    private static final LovvalgsperiodeDto FORVENTET = new LovvalgsperiodeDto(new PeriodeDto(FOM, FOM),
+    private static final LovvalgsperiodeDto FORVENTET = new LovvalgsperiodeDto("1",
+        new PeriodeDto(FOM, FOM),
         Lovvalgbestemmelser_883_2004.FO_883_2004_ART16_2,
         Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_4_1,
         Land_iso2.SK,
@@ -54,6 +56,8 @@ final class LovvalgsperiodeTjenesteTest {
     private LovvalgsperiodeService lovvalgsperiodeService;
     @MockBean
     private Aksesskontroll aksesskontroll;
+    @MockBean
+    private OpprettLovvalgsperiodeService opprettLovvalgsperiodeService;
     @Autowired
     private MockMvc mockMvc;
     @Autowired
@@ -130,7 +134,9 @@ final class LovvalgsperiodeTjenesteTest {
             .andExpect(responseBody(objectMapper).containsObjectAsJson(lovvalgsperiodeDtos, new TypeReference<List<LovvalgsperiodeDto>>() {
             }));
 
-        verify(lovvalgsperiodeService).lagreLovvalgsperioder(42L, lagLovvalgsperiode());
+        var lovvalgsperiodeSomBlirLagret = lagLovvalgsperiode();
+        lovvalgsperiodeSomBlirLagret.get(0).setId(null);
+        verify(lovvalgsperiodeService).lagreLovvalgsperioder(42L, lovvalgsperiodeSomBlirLagret);
 
         verify(aksesskontroll).autoriserSkriv(42L);
     }
@@ -148,6 +154,7 @@ final class LovvalgsperiodeTjenesteTest {
 
     private List<Lovvalgsperiode> lagLovvalgsperiode() {
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setId(Long.parseLong(FORVENTET.periodeID));
         lovvalgsperiode.setFom(FORVENTET.periode.getFom());
         lovvalgsperiode.setTom(FORVENTET.periode.getTom());
         lovvalgsperiode.setDekning(Trygdedekninger.FULL_DEKNING_EOSFO);

@@ -29,14 +29,6 @@ public class DokumentServiceFasade {
         this.applicationEventPublisher = applicationEventPublisher;
     }
 
-    @Deprecated(since = "Slettes når nytt endepunkt i 'BrevbestillingTjeneste' er klare")
-    public byte[] produserUtkast(long behandlingId, BrevbestillingDto brevbestillingDto) {
-        if (dokgenService.erTilgjengeligDokgenmal(brevbestillingDto.getProduserbardokument())) {
-            return dokgenService.produserUtkast(behandlingId, brevbestillingDto);
-        }
-        return dokumentService.produserUtkast(behandlingId, brevbestillingDto);
-    }
-
     @Transactional
     public void produserDokument(long behandlingId, BrevbestillingDto brevbestillingDto) {
         String saksbehandlerID = SubjectHandler.getInstance().getUserID();

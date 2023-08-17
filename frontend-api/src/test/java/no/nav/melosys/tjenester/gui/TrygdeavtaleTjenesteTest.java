@@ -209,9 +209,7 @@ class TrygdeavtaleTjenesteTest {
 
     @Test
     void hentTrygdeavtaleInfo_somNyVurdering_returnererKorrekt() throws Exception {
-        var vedtakMetadata = new VedtakMetadata();
-        vedtakMetadata.setNyVurderingBakgrunn(Nyvurderingbakgrunner.NYE_OPPLYSNINGER.getKode());
-        behandlingsresultat.setVedtakMetadata(vedtakMetadata);
+        behandlingsresultat.setNyVurderingBakgrunn(Nyvurderingbakgrunner.NYE_OPPLYSNINGER.getKode());
         behandling.setType(Behandlingstyper.NY_VURDERING);
 
         when(behandlingService.hentBehandlingMedSaksopplysninger(1L)).thenReturn(behandling);
@@ -231,7 +229,7 @@ class TrygdeavtaleTjenesteTest {
 
         assertThat(response).isNotNull();
         assertThat(response.behandlingstype()).isEqualTo(Behandlingstyper.NY_VURDERING.getKode());
-        assertThat(response.nyVurderingBakgrunn()).isEqualTo(vedtakMetadata.getNyVurderingBakgrunn());
+        assertThat(response.nyVurderingBakgrunn()).isEqualTo(behandlingsresultat.getNyVurderingBakgrunn());
     }
 
     @Test

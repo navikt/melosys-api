@@ -90,7 +90,9 @@ class EndreSakService(
                 gjenopprettMottatteOpplysninger(nySakstype, behandling)
             }
 
-            oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
+            if (behandling.sisteOpplysningerHentetDato != null) {
+                oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
+            }
         }
 
         if (sakEndres) {

@@ -119,6 +119,12 @@ public class AnmodningUnntakService {
         Lovvalgsperiode lovvalgsperiode = Lovvalgsperiode.av(anmodningsperiodeSvar, Medlemskapstyper.PLIKTIG);
         lovvalgsperiodeService.lagreLovvalgsperioder(behandlingID, Collections.singleton(lovvalgsperiode));
 
+        if (anmodningsperiodeSvar.erInnvilgelse() || anmodningsperiodeSvar.erGyldigDelvisInnvilgelse()) {
+            behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, Behandlingsresultattyper.REGISTRERT_UNNTAK);
+        } else {
+            behandlingsresultatService.oppdaterBehandlingsresultattype(behandlingID, Behandlingsresultattyper.FERDIGBEHANDLET);
+        }
+
         prosessinstansService.opprettProsessinstansAnmodningOmUnntakMottakSvar(behandling, ytterligereInfo);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }

@@ -14,6 +14,7 @@ public final class LovvalgsperiodeDto {
 
     private static final LovvalgBestemmelsekonverterer konverterer = new LovvalgBestemmelsekonverterer();
 
+    public final String periodeID;
     @JsonUnwrapped(suffix = "Dato")
     public final PeriodeDto periode;
     public final String lovvalgsbestemmelse;
@@ -24,7 +25,8 @@ public final class LovvalgsperiodeDto {
     public final String medlemskapstype;
     public final String medlemskapsperiodeID;
 
-    public LovvalgsperiodeDto(PeriodeDto periode,
+    public LovvalgsperiodeDto(String periodeID,
+                              PeriodeDto periode,
                               LovvalgBestemmelse lovvalgsbestemmelse,
                               LovvalgBestemmelse tilleggBestemmelse,
                               Land_iso2 lovvalgsland,
@@ -32,6 +34,7 @@ public final class LovvalgsperiodeDto {
                               Trygdedekninger trygdeDekning,
                               Medlemskapstyper medlemskapstype,
                               String medlemskapsperiodeID) {
+        this.periodeID = periodeID;
         this.periode = periode;
         this.lovvalgsbestemmelse = lovvalgsbestemmelse != null ? lovvalgsbestemmelse.name() : null;
         this.tilleggBestemmelse = tilleggBestemmelse != null ? tilleggBestemmelse.name() : null;
@@ -44,7 +47,8 @@ public final class LovvalgsperiodeDto {
 
     @JsonCreator
     LovvalgsperiodeDto(Map<String, String> json) {
-        this(new PeriodeDto(LocalDate.parse(json.get("fomDato")),
+        this(json.get("periodeID"),
+            new PeriodeDto(LocalDate.parse(json.get("fomDato")),
                 StringUtils.isEmpty(json.get("tomDato")) ? null : LocalDate.parse(json.get("tomDato"))),
             konverterLovvalgsBestemmelse(json.get("lovvalgsbestemmelse")),
             konverterLovvalgsBestemmelse(json.get("tilleggBestemmelse")),
@@ -62,9 +66,11 @@ public final class LovvalgsperiodeDto {
      * @return en ny DTO-instanse.
      */
     public static LovvalgsperiodeDto av(Lovvalgsperiode lovvalgsperiode) {
-        return new LovvalgsperiodeDto(new PeriodeDto(
-            lovvalgsperiode.getFom(),
-            lovvalgsperiode.getTom()),
+        return new LovvalgsperiodeDto(
+            lovvalgsperiode.getId().toString(),
+            new PeriodeDto(
+                lovvalgsperiode.getFom(),
+                lovvalgsperiode.getTom()),
             lovvalgsperiode.getBestemmelse(),
             lovvalgsperiode.getTilleggsbestemmelse(),
             lovvalgsperiode.getLovvalgsland(),
@@ -79,7 +85,7 @@ public final class LovvalgsperiodeDto {
      *
      * @return ett domeneobjekt initialisert fra denne instansen.
      */
-    public final Lovvalgsperiode til() {
+    public Lovvalgsperiode til() {
         Lovvalgsperiode resultat = new Lovvalgsperiode();
         resultat.setFom(periode.getFom());
         resultat.setTom(periode.getTom());

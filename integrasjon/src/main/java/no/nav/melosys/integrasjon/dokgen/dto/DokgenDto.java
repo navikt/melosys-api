@@ -60,7 +60,7 @@ public abstract class DokgenDto {
         this.mottaker = mottaker;
     }
 
-    protected LocalDate instantTilLocalDate(Instant datoOgTid) {
+    protected static LocalDate instantTilLocalDate(Instant datoOgTid) {
         return datoOgTid != null ? LocalDate.ofInstant(datoOgTid, ZoneId.systemDefault()) : null;
     }
 }

@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.sak;
+package no.nav.melosys.tjenester.gui.fagsaker;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

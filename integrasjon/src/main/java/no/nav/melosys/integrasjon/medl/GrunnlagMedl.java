@@ -32,7 +32,8 @@ public enum GrunnlagMedl {
     FO_1408_14_C_B("FO_1408_14c_b"),
     MEDFT("MEDFT"),
     IMEDEOS("IMEDEOS"),
-    FTL_2_8("FTL_2-8"),
+    FTL_2_8_1_ledd_a("FTL_2-8_1_ledd_a"),
+    FTL_2_8_2_ledd("FTL_2-8_2_ledd"),
 
     AUSTRALIA("Australia"),
     AUS_9_2("Australia_9_2"),

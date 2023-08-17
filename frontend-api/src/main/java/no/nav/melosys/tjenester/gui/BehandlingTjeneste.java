@@ -82,9 +82,16 @@ public class BehandlingTjeneste {
     public ResponseEntity<BehandlingDto> hentBehandling(@PathVariable("behandlingID") long behandlingID) {
         String saksbehandlerID = SubjectHandler.getInstance().getUserID();
         log.debug("Saksbehandler {} ber om å hente behandling {}.", saksbehandlerID, behandlingID);
-        aksesskontroll.autoriser(behandlingID);
 
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
+        String saksnummer = behandling.getFagsak().getSaksnummer();
+
+        if (aksesskontroll.behandlingKanRedigeresAvSaksbehandler(behandling, saksbehandlerID)) {
+            aksesskontroll.auditAutoriserSkriv(behandlingID, "Saksbehandling og endringer for sak %s (behandling %d)".formatted(saksnummer, behandlingID));
+        } else {
+            aksesskontroll.auditAutoriser(behandlingID, "Innsyn i behandling %d på sak %s".formatted(behandlingID, saksnummer));
+        }
+
         behandlingService.oppdaterBehandlingsstatusHvisTilhørendeSaksbehandler(behandling, saksbehandlerID);
         BehandlingDto behandlingDto = tilBehandlingDto(behandling, saksbehandlerID);
         return ResponseEntity.ok(behandlingDto);
@@ -119,7 +126,7 @@ public class BehandlingTjeneste {
         behandlingOppsummeringDto.setEndretDato(behandling.getEndretDato());
         behandlingOppsummeringDto.setEndretAvNavn(saksbehandlerService.finnNavnForIdent(behandling.getEndretAv()).orElse(behandling.getEndretAv()));
         behandlingOppsummeringDto.setRegistrertDato(behandling.getRegistrertDato());
-        behandlingOppsummeringDto.setSisteOpplysningerHentetDato(behandling.getSistOpplysningerHentetDato());
+        behandlingOppsummeringDto.setSisteOpplysningerHentetDato(behandling.getSisteOpplysningerHentetDato());
         behandlingOppsummeringDto.setSvarFrist(behandling.getDokumentasjonSvarfristDato());
         behandlingOppsummeringDto.setBehandlingsfrist(behandling.getBehandlingsfrist());
         behandlingOppsummeringDto.setBehandlingsresultattype(behandlingsresultat.getType());

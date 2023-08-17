@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester.gui.sak;
+package no.nav.melosys.tjenester.gui.fagsaker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.Fagsak;

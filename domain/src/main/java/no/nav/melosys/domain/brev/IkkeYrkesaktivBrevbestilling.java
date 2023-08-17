@@ -8,8 +8,7 @@ public class IkkeYrkesaktivBrevbestilling extends DokgenBrevbestilling {
 
     private String begrunnelseFritekst;
     private String innledningFritekst;
-    private String nyVurderingBakgrunn; //TODO: https://jira.adeo.no/browse/MELOSYS-5942
-    private String nyVurderingFritekst;
+    private String nyVurderingBakgrunn;
     private String oppholdsLand;
     private LocalDate periodeFom;
     private LocalDate periodeTom;
@@ -32,7 +31,6 @@ public class IkkeYrkesaktivBrevbestilling extends DokgenBrevbestilling {
         this.periodeTom = builder.periodeTom;
         this.bestemmelse = builder.bestemmelse;
         this.ikkeYrkesaktivSituasjontype = builder.ikkeYrkesaktivSituasjontype;
-        this.nyVurderingFritekst = builder.nyVurderingFritekst;
         this.artikkel = builder.artikkel;
     }
 
@@ -73,10 +71,6 @@ public class IkkeYrkesaktivBrevbestilling extends DokgenBrevbestilling {
         return ikkeYrkesaktivSituasjontype;
     }
 
-    public String getNyVurderingFritekst() {
-        return nyVurderingFritekst;
-    }
-
     public String getArtikkel() {
         return artikkel;
     }
@@ -86,7 +80,6 @@ public class IkkeYrkesaktivBrevbestilling extends DokgenBrevbestilling {
         private String innledningFritekst;
         private String oppholdsLand;
         private String nyVurderingBakgrunn;
-        private String nyVurderingFritekst;
         private LocalDate periodeFom;
         private LocalDate periodeTom;
         private String bestemmelse;
@@ -105,7 +98,6 @@ public class IkkeYrkesaktivBrevbestilling extends DokgenBrevbestilling {
             this.periodeTom = ikkeYrkesaktivBrevbestilling.periodeTom;
             this.bestemmelse = ikkeYrkesaktivBrevbestilling.bestemmelse;
             this.ikkeYrkesaktivSituasjontype = ikkeYrkesaktivBrevbestilling.ikkeYrkesaktivSituasjontype;
-            this.nyVurderingFritekst = ikkeYrkesaktivBrevbestilling.nyVurderingFritekst;
             this.nyVurderingBakgrunn = ikkeYrkesaktivBrevbestilling.nyVurderingBakgrunn;
             this.artikkel = ikkeYrkesaktivBrevbestilling.artikkel;
         }
@@ -117,11 +109,6 @@ public class IkkeYrkesaktivBrevbestilling extends DokgenBrevbestilling {
 
         public Builder medNyVurderingBakgrunn(String nyVurderingBakgrunn) {
             this.nyVurderingBakgrunn = nyVurderingBakgrunn;
-            return this;
-        }
-
-        public Builder medNyVurderingFritekst(String nyVurderingFritekst) {
-            this.nyVurderingFritekst = nyVurderingFritekst;
             return this;
         }
 

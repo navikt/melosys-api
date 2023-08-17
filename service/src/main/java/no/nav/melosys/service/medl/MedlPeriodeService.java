@@ -1,9 +1,5 @@
 package no.nav.melosys.service.medl;
 
-import java.time.LocalDate;
-import java.util.Objects;
-import java.util.Optional;
-
 import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -22,8 +18,10 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class MedlPeriodeService {
@@ -89,12 +87,11 @@ public class MedlPeriodeService {
 
     public void opprettPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, Long behandlingID) {
         String fnr = hentFnr(behandlingID);
-        log.info("Oppretter endelig periode i MEDL for behandling {}", behandlingID);
+        log.info("Oppretter endelig lovvalgsperiode i MEDL for behandling {}", behandlingID);
         Long medlPeriodeID = medlService.opprettPeriodeEndelig(fnr, lovvalgsperiode, hentKildedokumenttype(behandlingID));
         lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandlingID);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void opprettPeriodeEndelig(long behandlingId, Medlemskapsperiode medlemskapsperiode) {
         String fnr = hentFnr(behandlingId);
         log.info("Oppretter endelig medlemskapsperiode i MEDL for behandling {}", behandlingId);
@@ -108,9 +105,14 @@ public class MedlPeriodeService {
     }
 
     public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode) {
-        log.info("Oppdaterer MEDL-periode {} til status endelig", lovvalgsperiode.getMedlPeriodeID());
+        log.info("Oppdaterer MEDL-periode {} for lovvalgsperiode", lovvalgsperiode.getMedlPeriodeID());
         medlService.oppdaterPeriodeEndelig(lovvalgsperiode,
             hentKildedokumenttype(lovvalgsperiode.getBehandlingsresultat().getId()));
+    }
+
+    public void oppdaterPeriodeEndelig(long behandlingID, Medlemskapsperiode medlemskapsperiode) {
+        log.info("Oppdaterer MEDL-periode {} for medlemskapsperiode", medlemskapsperiode.getMedlPeriodeID());
+        medlService.oppdaterPeriodeEndelig(medlemskapsperiode, hentKildedokumenttype(behandlingID));
     }
 
     public void oppdaterPeriodeForeløpig(Lovvalgsperiode lovvalgsperiode) {

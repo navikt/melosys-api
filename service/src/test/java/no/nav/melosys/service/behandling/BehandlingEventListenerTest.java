@@ -1,5 +1,9 @@
 package no.nav.melosys.service.behandling;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.Optional;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.BehandlingEndretAvSaksbehandlerEvent;
 import no.nav.melosys.domain.Fagsak;
@@ -21,10 +25,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -63,24 +63,16 @@ class BehandlingEventListenerTest {
     }
 
     @Test
-    void dokumentBestilt_dokumentErMangelbrevBehandlingIkkeAktiv_ingenAksjon() {
+    void dokumentBestilt_dokumentErMangelbrevTilBrukerBehandlingIkkeAktiv_ingenAksjon() {
         behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
-        behandlingEventListener.dokumentBestilt(new DokumentBestiltEvent(BEHANDLING_ID, Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER));
+        behandlingEventListener.dokumentBestilt(new DokumentBestiltEvent(BEHANDLING_ID, Produserbaredokumenter.MANGELBREV_BRUKER));
         verify(behandlingService).hentBehandling(BEHANDLING_ID);
         verifyNoMoreInteractions(behandlingService);
     }
 
     @Test
-    void dokumentBestilt_dokumentErMangelbrevBehandlingErAktiv_oppdatererStatusOgFrist() {
-        behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
-        when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
-        behandlingEventListener.dokumentBestilt(new DokumentBestiltEvent(BEHANDLING_ID, Produserbaredokumenter.MELDING_MANGLENDE_OPPLYSNINGER));
-        verify(behandlingService).oppdaterStatusOgSvarfrist(eq(behandling), eq(Behandlingsstatus.AVVENT_DOK_PART), any(Instant.class));
-    }
-
-    @Test
-    void dokumentBestilt_dokumentErNyttMangelbrevTilBrukerBehandlingErAktiv_oppdatererStatusOgFrist() {
+    void dokumentBestilt_dokumentErMangelbrevTilBrukerBehandlingErAktiv_oppdatererStatusOgFrist() {
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
         behandlingEventListener.dokumentBestilt(new DokumentBestiltEvent(BEHANDLING_ID, Produserbaredokumenter.MANGELBREV_BRUKER));
@@ -88,7 +80,7 @@ class BehandlingEventListenerTest {
     }
 
     @Test
-    void dokumentBestilt_dokumentErNyttMangelbrevTilArbeidsgiverBehandlingErAktiv_oppdatererStatusOgFrist() {
+    void dokumentBestilt_dokumentErMangelbrevTilArbeidsgiverBehandlingErAktiv_oppdatererStatusOgFrist() {
         behandling.setStatus(Behandlingsstatus.UNDER_BEHANDLING);
         when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
         behandlingEventListener.dokumentBestilt(new DokumentBestiltEvent(BEHANDLING_ID, Produserbaredokumenter.MANGELBREV_ARBEIDSGIVER));

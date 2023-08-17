@@ -1,0 +1,320 @@
+package no.nav.melosys.service.lovvalgsperiode
+
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.throwable.shouldHaveMessage
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import io.mockk.slot
+import io.mockk.verify
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.domain.kodeverk.*
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.*
+import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
+import no.nav.melosys.domain.mottatteopplysninger.data.Periode
+import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.repository.LovvalgsperiodeRepository
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import java.time.LocalDate
+
+@ExtendWith(MockKExtension::class)
+class OpprettLovvalgsperiodeServiceTest {
+    @MockK
+    private lateinit var behandlingService: BehandlingService
+
+    @MockK
+    private lateinit var lovvalgsperiodeRepository: LovvalgsperiodeRepository
+
+    @MockK
+    private lateinit var behandlingsresultatService: BehandlingsresultatService
+
+    @MockK
+    private lateinit var saksbehandlingRegler: SaksbehandlingRegler
+
+    private val slotLovvalgsperiode = slot<Lovvalgsperiode>()
+
+    private lateinit var opprettLovvalgsperiodeService: OpprettLovvalgsperiodeService
+
+    @BeforeEach
+    fun setup() {
+        slotLovvalgsperiode.clear()
+        opprettLovvalgsperiodeService = OpprettLovvalgsperiodeService(
+            lovvalgsperiodeRepository,
+            behandlingService,
+            behandlingsresultatService,
+            saksbehandlingRegler
+        )
+    }
+
+    @Test
+    fun opprettLovvalgsperiode_unntaksregistreringsflyt_lagrerKorrekt() {
+        val request = requestForUnntaksregistreringFlyt(Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART9_3)
+        val behandling = lagBehandling(Land_iso2.AU)
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) } returns true
+        mockHappyCase(behandling)
+
+        opprettLovvalgsperiodeService.opprettLovvalgsperiode(1L, request)
+
+
+        verify(exactly = 1) { lovvalgsperiodeRepository.save(capture(slotLovvalgsperiode)) }
+        val lagretLovvalgsperiode = slotLovvalgsperiode.captured
+        lagretLovvalgsperiode.shouldNotBeNull()
+        lagretLovvalgsperiode.fom.shouldBe(request.fomDato)
+        lagretLovvalgsperiode.tom.shouldBe(request.tomDato)
+        lagretLovvalgsperiode.bestemmelse.shouldBe(request.lovvalgsbestemmelse)
+        lagretLovvalgsperiode.innvilgelsesresultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+        lagretLovvalgsperiode.lovvalgsland.shouldBe(Land_iso2.AU)
+        lagretLovvalgsperiode.medlemskapstype.shouldBe(Medlemskapstyper.UNNTATT)
+        lagretLovvalgsperiode.dekning.shouldBe(Trygdedekninger.UTEN_DEKNING)
+    }
+
+    @Test
+    fun opprettLovvalgsperiode_unntaksregistreringsflytQuebec_lagrerKorrekt() {
+        val request = requestForUnntaksregistreringFlyt(Lovvalgsbestemmelser_trygdeavtale_ca_qc.QUE)
+        val behandling = lagBehandling(Land_iso2.CA_QC)
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) } returns true
+        mockHappyCase(behandling)
+
+
+        opprettLovvalgsperiodeService.opprettLovvalgsperiode(1L, request)
+
+
+        verify(exactly = 1) { lovvalgsperiodeRepository.save(capture(slotLovvalgsperiode)) }
+        slotLovvalgsperiode.captured.shouldNotBeNull()
+        slotLovvalgsperiode.captured.lovvalgsland.shouldBe(Land_iso2.CA)
+    }
+
+    @Test
+    fun opprettLovvalgsperiode_unntaksregistreringsflytCAN_ART7_lagrerKorrekt() {
+        val request = requestForUnntaksregistreringFlyt(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART7)
+        val behandling = lagBehandling(Land_iso2.US)
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) } returns true
+        mockHappyCase(behandling)
+
+
+        opprettLovvalgsperiodeService.opprettLovvalgsperiode(1L, request)
+
+
+        verify(exactly = 1) { lovvalgsperiodeRepository.save(capture(slotLovvalgsperiode)) }
+        slotLovvalgsperiode.captured.shouldNotBeNull()
+        slotLovvalgsperiode.captured.medlemskapstype.shouldBe(Medlemskapstyper.DELVIS_UNNTATT)
+        slotLovvalgsperiode.captured.dekning.shouldBe(Trygdedekninger.UNNTATT_CAN_7_5_B)
+    }
+
+    @Test
+    fun opprettLovvalgsperiode_unntaksregistreringsflytCAN_ART11_lagrerKorrekt() {
+        val request = requestForUnntaksregistreringFlyt(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART11)
+        val behandling = lagBehandling(Land_iso2.US)
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) } returns true
+        mockHappyCase(behandling)
+
+
+        opprettLovvalgsperiodeService.opprettLovvalgsperiode(1L, request)
+
+
+        verify(exactly = 1) { lovvalgsperiodeRepository.save(capture(slotLovvalgsperiode)) }
+        slotLovvalgsperiode.captured.shouldNotBeNull()
+        slotLovvalgsperiode.captured.medlemskapstype.shouldBe(Medlemskapstyper.DELVIS_UNNTATT)
+        slotLovvalgsperiode.captured.dekning.shouldBe(Trygdedekninger.UNNTATT_CAN_7_5_B)
+    }
+
+    @Test
+    fun opprettLovvalgsperiode_unntaksregistreringsflytUSA_ART5_2_lagrerKorrekt() {
+        val request = requestForUnntaksregistreringFlyt(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_2)
+        val behandling = lagBehandling(Land_iso2.US)
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) } returns true
+        mockHappyCase(behandling)
+
+
+        opprettLovvalgsperiodeService.opprettLovvalgsperiode(1L, request)
+
+
+        verify(exactly = 1) { lovvalgsperiodeRepository.save(capture(slotLovvalgsperiode)) }
+        slotLovvalgsperiode.captured.shouldNotBeNull()
+        slotLovvalgsperiode.captured.medlemskapstype.shouldBe(Medlemskapstyper.DELVIS_UNNTATT)
+        slotLovvalgsperiode.captured.dekning.shouldBe(Trygdedekninger.UNNTATT_USA_5_2_G)
+    }
+
+    @Test
+    fun opprettLovvalgsperiode_unntaksregistreringsflytUSA_ART5_9_lagrerKorrekt() {
+        val request = requestForUnntaksregistreringFlyt(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_9)
+        val behandling = lagBehandling(Land_iso2.US)
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) } returns true
+        mockHappyCase(behandling)
+
+
+        opprettLovvalgsperiodeService.opprettLovvalgsperiode(1L, request)
+
+
+        verify(exactly = 1) { lovvalgsperiodeRepository.save(capture(slotLovvalgsperiode)) }
+        slotLovvalgsperiode.captured.shouldNotBeNull()
+        slotLovvalgsperiode.captured.medlemskapstype.shouldBe(Medlemskapstyper.DELVIS_UNNTATT)
+        slotLovvalgsperiode.captured.dekning.shouldBe(Trygdedekninger.UNNTATT_USA_5_2_G)
+    }
+
+    @Test
+    fun opprettLovvalgsperiode_unntaksregistreringsflytManglerFomDato_kasterFeil() {
+        every { behandlingService.hentBehandling(any()) } returns Behandling()
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns true
+        every { lovvalgsperiodeRepository.findByBehandlingsresultatId(any()) } returns emptyList()
+        val request = OpprettLovvalgsperiodeRequest(null, LocalDate.now(), null, null)
+
+
+        shouldThrow<FunksjonellException> { opprettLovvalgsperiodeService.opprettLovvalgsperiode(1L, request) }
+            .shouldHaveMessage("Kan ikke opprette lovvalgsperiode for unntakregistrering uten fom-dato")
+    }
+
+    @Test
+    fun opprettLovvalgsperiode_unntaksregistreringsflytTomDatoFørFomDato_kasterFeil() {
+        every { behandlingService.hentBehandling(any()) } returns Behandling()
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns true
+        every { lovvalgsperiodeRepository.findByBehandlingsresultatId(any()) } returns emptyList()
+        val request = OpprettLovvalgsperiodeRequest(LocalDate.now(), LocalDate.now().minusMonths(2), null, null)
+
+
+        shouldThrow<FunksjonellException> { opprettLovvalgsperiodeService.opprettLovvalgsperiode(1L, request) }
+            .shouldHaveMessage("Fom-dato ${request.fomDato} er etter tom-dato ${request.tomDato}")
+    }
+
+    @Test
+    fun opprettLovvalgsperiode_unntaksregistreringsflytManglerBestemmelse_kasterFeil() {
+        every { behandlingService.hentBehandling(any()) } returns Behandling()
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns true
+        every { lovvalgsperiodeRepository.findByBehandlingsresultatId(any()) } returns emptyList()
+        val request = OpprettLovvalgsperiodeRequest(LocalDate.now(), null, null, null)
+
+
+        shouldThrow<FunksjonellException> { opprettLovvalgsperiodeService.opprettLovvalgsperiode(1L, request) }
+            .shouldHaveMessage("Kan ikke opprette lovvalgsperiode for unntakregistrering uten bestemmelse")
+    }
+
+    private fun requestForUnntaksregistreringFlyt(bestemmelse: LovvalgBestemmelse): OpprettLovvalgsperiodeRequest =
+        OpprettLovvalgsperiodeRequest(
+            LocalDate.now(),
+            LocalDate.now().plusMonths(6),
+            bestemmelse,
+            null
+        )
+
+    @Test
+    fun opprettLovvalgsperiode_ikkeYrkesaktivflyt_lagrerKorrekt() {
+        val request =
+            requestForIkkeYrkesaktivFlyt(InnvilgelsesResultat.INNVILGET, Lovvalgsbestemmelser_trygdeavtale_ba.BIH)
+        val behandling = lagBehandling(Land_iso2.BA)
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) } returns false
+        every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling) } returns true
+        mockHappyCase(behandling)
+
+
+        opprettLovvalgsperiodeService.opprettLovvalgsperiode(1L, request)
+
+
+        verify(exactly = 1) { lovvalgsperiodeRepository.save(capture(slotLovvalgsperiode)) }
+        val lagretLovvalgsperiode = slotLovvalgsperiode.captured
+        lagretLovvalgsperiode.shouldNotBeNull()
+        lagretLovvalgsperiode.fom.shouldBe(behandling.mottatteOpplysninger.mottatteOpplysningerData.periode.fom)
+        lagretLovvalgsperiode.tom.shouldBe(behandling.mottatteOpplysninger.mottatteOpplysningerData.periode.tom)
+        lagretLovvalgsperiode.bestemmelse.shouldBe(request.lovvalgsbestemmelse)
+        lagretLovvalgsperiode.innvilgelsesresultat.shouldBe(request.innvilgelsesResultat)
+        lagretLovvalgsperiode.lovvalgsland.shouldBe(Land_iso2.NO)
+        lagretLovvalgsperiode.medlemskapstype.shouldBe(Medlemskapstyper.PLIKTIG)
+        lagretLovvalgsperiode.dekning.shouldBe(Trygdedekninger.FULL_DEKNING)
+    }
+
+    @Test
+    fun opprettLovvalgsperiode_ikkeYrkesaktivflytUtenBestemmelse_lagrerKorrekt() {
+        val request = requestForIkkeYrkesaktivFlyt(InnvilgelsesResultat.AVSLAATT, null)
+        val behandling = lagBehandling(Land_iso2.BA)
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) } returns false
+        every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling) } returns true
+        mockHappyCase(behandling)
+
+
+        opprettLovvalgsperiodeService.opprettLovvalgsperiode(1L, request)
+
+
+        verify(exactly = 1) { lovvalgsperiodeRepository.save(capture(slotLovvalgsperiode)) }
+        slotLovvalgsperiode.captured.shouldNotBeNull()
+        slotLovvalgsperiode.captured.bestemmelse.shouldBe(null)
+    }
+
+    @Test
+    fun opprettLovvalgsperiode_ikkeYrkesaktivflytManglerInnvilgelsesresultat_kasterFeil() {
+        every { behandlingService.hentBehandling(any()) } returns Behandling()
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false
+        every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns true
+        every { lovvalgsperiodeRepository.findByBehandlingsresultatId(any()) } returns emptyList()
+        val request = OpprettLovvalgsperiodeRequest(null, null, null, null)
+
+
+        shouldThrow<FunksjonellException> { opprettLovvalgsperiodeService.opprettLovvalgsperiode(1L, request) }
+            .shouldHaveMessage("Kan ikke opprette lovvalgsperiode for ikke-yrkesaktive uten innvilgelsesresultat")
+    }
+
+    private fun requestForIkkeYrkesaktivFlyt(
+        innvilgelsesResultat: InnvilgelsesResultat,
+        bestemmelse: LovvalgBestemmelse?
+    ): OpprettLovvalgsperiodeRequest =
+        OpprettLovvalgsperiodeRequest(
+            null,
+            null,
+            bestemmelse,
+            innvilgelsesResultat
+        )
+
+    @Test
+    fun opprettLovvalgsperiode_ikkeStoettetFlyt_kasterFeil() {
+        every { behandlingService.hentBehandling(any()) } returns Behandling()
+        every { lovvalgsperiodeRepository.findByBehandlingsresultatId(any()) } returns emptyList()
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false
+        every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns false
+        val request = OpprettLovvalgsperiodeRequest(null, null, null, null)
+
+
+        shouldThrow<FunksjonellException> { opprettLovvalgsperiodeService.opprettLovvalgsperiode(1L, request) }
+            .shouldHaveMessage("Støtter ikke opprettelse av lovvalgsperiode for denne flyten")
+    }
+
+    @Test
+    fun opprettLovvalgsperiode_flereEnnÉnLovvalgsperiode_kasterFeil() {
+        every { lovvalgsperiodeRepository.findByBehandlingsresultatId(any()) } returns listOf(
+            Lovvalgsperiode(),
+            Lovvalgsperiode()
+        )
+        val request = OpprettLovvalgsperiodeRequest(null, null, null, null)
+
+
+        shouldThrow<FunksjonellException> { opprettLovvalgsperiodeService.opprettLovvalgsperiode(1L, request) }
+            .shouldHaveMessage("Fant 2 lovvalgsperioder. Forventer maks én lovvalgsperiode")
+    }
+
+    private fun mockHappyCase(behandling: Behandling) {
+        every { behandlingService.hentBehandling(behandling.id) } returns behandling
+        every { lovvalgsperiodeRepository.findByBehandlingsresultatId(behandling.id) } returns emptyList()
+        every { behandlingsresultatService.hentBehandlingsresultat(behandling.id) } returns Behandlingsresultat()
+        every { lovvalgsperiodeRepository.save(any()) } returns Lovvalgsperiode()
+    }
+
+    private fun lagBehandling(land: Land_iso2): Behandling =
+        Behandling().apply {
+            id = 1L
+            fagsak = Fagsak().apply { type = Sakstyper.TRYGDEAVTALE }
+            mottatteOpplysninger = MottatteOpplysninger().apply {
+                setMottatteOpplysningerdata(AnmodningEllerAttest().apply {
+                    lovvalgsland = land
+                    periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(6))
+                })
+            }
+        }
+}
