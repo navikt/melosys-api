@@ -3,7 +3,9 @@ package no.nav.melosys.tjenester.gui.kontroll;
 import java.util.Collection;
 
 import io.swagger.annotations.Api;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -60,12 +62,18 @@ public class KontrollTjeneste {
 
         boolean harRegistrertAdresse;
         if (!kontekst.getBrukerID().isEmpty()) {
-            harRegistrertAdresse = sjekkPersonHarRegisteredAddress(kontekst.getBrukerID());
+            harRegistrertAdresse = sjekkPersonHarRegistrertAdresse(kontekst.getBrukerID());
         } else {
             harRegistrertAdresse = sjekkOrgHarAdresse(kontekst.getOrgnr());
         }
 
-        var responseDto = new KontrollerAdresseBrukerFullmektigResponseDto(kontekst.getRolle(), harRegistrertAdresse);
+        String kode;
+        if (kontekst.getRolle() == Aktoersroller.REPRESENTANT) {
+            kode = Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT.getKode();
+        } else {
+            kode = Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER.getKode();
+        }
+        var responseDto = new KontrollerAdresseBrukerFullmektigResponseDto(harRegistrertAdresse, kode);
         return ResponseEntity.ok(responseDto);
     }
 
@@ -79,7 +87,7 @@ public class KontrollTjeneste {
         }
     }
 
-    private boolean sjekkPersonHarRegisteredAddress(String brukerID) {
+    private boolean sjekkPersonHarRegistrertAdresse(String brukerID) {
         var person = persondataService.hentPerson(brukerID);
         return !person.manglerRegistrertAdresse();
     }
