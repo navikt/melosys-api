@@ -57,7 +57,7 @@ public class PersonDokument implements Persondata {
 
     @Override
     public boolean manglerGyldigRegistrertAdresse() {
-        return hentGjeldendePostadresse() != null;
+        return hentGjeldendePostadresse() == null;
     }
 
     @Override
