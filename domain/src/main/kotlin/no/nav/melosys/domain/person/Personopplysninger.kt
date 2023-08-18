@@ -38,7 +38,7 @@ data class Personopplysninger(
         )
             .filter { it.isPresent }
             .map { it.get() }
-            .any { it.harRegistrertAdresse() }
+            .any { it.erGyldig() }
         return !personHarRegistrertAdresse
     }
 
@@ -64,7 +64,7 @@ data class Personopplysninger(
     override fun getEtternavn(): String? = navn?.etternavn()
 
     @JsonIgnore
-    override fun getSammensattNavn(): String? = navn?.tilSammensattNavn();
+    override fun getSammensattNavn(): String? = navn?.tilSammensattNavn()
 
     override fun hentFamiliemedlemmer(): Set<Familiemedlem>? = familiemedlemmer
 
@@ -105,6 +105,7 @@ data class Personopplysninger(
     private fun hentGjeldendeKontaktadresseFraMaster(master: Master): Optional<Kontaktadresse> =
         kontaktadresser
             .filter { master.name.equals(it.master(), ignoreCase = true) }
+            .filter { it.erGyldig() }
             .maxByOrNull { it.registrertDato() }
             .let { Optional.ofNullable(it) }
 
@@ -116,6 +117,7 @@ data class Personopplysninger(
     private fun hentGjeldendeOppholdsadresseFraMaster(master: Master): Optional<Oppholdsadresse> =
         oppholdsadresser
             .filter { master.name.equals(it.master(), ignoreCase = true) }
+            .filter { it.erGyldig() }
             .maxByOrNull { it.registrertDato() }
             .let { Optional.ofNullable(it) }
 

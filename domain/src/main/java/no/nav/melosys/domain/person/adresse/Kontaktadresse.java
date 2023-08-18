@@ -20,9 +20,9 @@ public record Kontaktadresse(
 ) implements PersonAdresse {
 
     @Override
-    public boolean harRegistrertAdresse() {
+    public boolean erGyldig() {
         StrukturertAdresse adresse = hentEllerLagStrukturertAdresse();
-        return adresse != null && !adresse.erTom() && !StringUtils.isBlank(adresse.getPostnummer());
+        return !erHistorisk && adresse != null && !adresse.erTom() && !StringUtils.isBlank(adresse.getPostnummer());
     }
 
     public StrukturertAdresse hentEllerLagStrukturertAdresse() {

@@ -64,7 +64,7 @@ public class PersonDokument implements Persondata {
                 finnKontaktadresse())
             .filter(Optional::isPresent)
             .map(Optional::get)
-            .anyMatch(personAdresse -> personAdresse.harRegistrertAdresse());
+            .anyMatch(personAdresse -> personAdresse.erGyldig());
 
         return !personHarRegistrertAdresse;
     }
