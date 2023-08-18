@@ -16,6 +16,7 @@ import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.service.aktoer.KontaktopplysningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.ftrl.FaktureringsKomponentenHjelper
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Component
 import java.time.ZoneId
@@ -81,7 +82,7 @@ class OpprettBetalingsplan(
 
         val fakturaserieDto =
             FakturaserieDto(
-                vedtaksId = behandlingsId.toString(),
+                vedtaksId = FaktureringsKomponentenHjelper.konverterTilVedtaksId(fagsak.saksnummer, behandlingsId),
                 fodselsnummer = foedselsNr,
                 referanseNAV = "Medlemskap og avgift",
                 fullmektig = fullmektigDto(fullmektig, kontaktopplysning),
