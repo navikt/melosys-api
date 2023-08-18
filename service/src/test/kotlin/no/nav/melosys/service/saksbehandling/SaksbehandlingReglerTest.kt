@@ -380,38 +380,29 @@ class SaksbehandlingReglerTest {
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema,
-        toggle: Boolean,
         forventetResultat: Boolean
     ) {
-        if (toggle) {
-            unleash.enableAll()
-        } else {
-            unleash.disableAll()
-        }
         saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(
             sakstype, sakstema, behandlingstema
         ).shouldBe(forventetResultat)
     }
 
     private fun harRegistreringUnntakFraMedlemskapFlytData() = listOf(
-        arguments(Sakstyper.EU_EOS, Sakstemaer.UNNTAK, Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR, true, true),
+        arguments(Sakstyper.EU_EOS, Sakstemaer.UNNTAK, Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR, true),
         arguments(
             Sakstyper.TRYGDEAVTALE,
             Sakstemaer.UNNTAK,
             Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL,
-            true,
             true
         ),
-        arguments(Sakstyper.TRYGDEAVTALE, Sakstemaer.UNNTAK, Behandlingstema.REGISTRERING_UNNTAK, true, true),
-        arguments(Sakstyper.EU_EOS, Sakstemaer.UNNTAK, Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR, false, false),
+        arguments(Sakstyper.TRYGDEAVTALE, Sakstemaer.UNNTAK, Behandlingstema.REGISTRERING_UNNTAK, true),
         arguments(
             Sakstyper.EU_EOS,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
             Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR,
-            true,
             false
         ),
-        arguments(Sakstyper.TRYGDEAVTALE, Sakstemaer.UNNTAK, Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR, true, false)
+        arguments(Sakstyper.TRYGDEAVTALE, Sakstemaer.UNNTAK, Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR, false)
     )
 
     class BehandlingHolder {

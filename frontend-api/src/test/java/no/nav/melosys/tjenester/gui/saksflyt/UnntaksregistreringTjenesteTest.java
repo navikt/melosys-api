@@ -22,8 +22,6 @@ class UnntaksregistreringTjenesteTest {
     private UnntaksregistreringService unntaksregistreringService;
     @MockBean
     private Aksesskontroll aksesskontroll;
-    @MockBean
-    private Unleash unleash;
 
     @Autowired
     private MockMvc mockMvc;
@@ -33,25 +31,11 @@ class UnntaksregistreringTjenesteTest {
 
     @Test
     void registrerUnntakFraMedlemskap_togglePå_returnererNoContent() throws Exception {
-        when(unleash.isEnabled(any())).thenReturn(true);
-
         mockMvc.perform(post(BASE_URL + "/{behandlingID}", 1L)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNoContent());
 
         verify(aksesskontroll).autoriserSkriv(1L);
         verify(unntaksregistreringService).registrerUnntakFraMedlemskap(1L);
-    }
-
-    @Test
-    void registrerUnntakFraMedlemskap_toggleAv_returnererFeil() throws Exception {
-        when(unleash.isEnabled(any())).thenReturn(false);
-
-        mockMvc.perform(post(BASE_URL + "/{behandlingID}", 1L)
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest());
-
-        verify(aksesskontroll).autoriserSkriv(1L);
-        verify(unntaksregistreringService, never()).registrerUnntakFraMedlemskap(1L);
     }
 }

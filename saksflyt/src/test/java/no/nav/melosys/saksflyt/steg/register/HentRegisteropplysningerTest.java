@@ -183,7 +183,6 @@ class HentRegisteropplysningerTest {
 
     @Test
     void utfør_sakstypeEøsOgUnntak_ingentingLagres() {
-        fakeUnleash.enable(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP);
         behandling.setTema(Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR);
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
@@ -203,7 +202,6 @@ class HentRegisteropplysningerTest {
 
     @Test
     void utfør_sakstypeEøsOgIkkeYrkesaktiv_ingentingLagres() {
-        fakeUnleash.enable(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP);
         behandling.setTema(Behandlingstema.IKKE_YRKESAKTIV);
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
         behandling.setType(Behandlingstyper.FØRSTEGANG);

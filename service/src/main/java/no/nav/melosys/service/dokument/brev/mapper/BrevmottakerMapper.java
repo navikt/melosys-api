@@ -33,7 +33,7 @@ public class BrevmottakerMapper {
                     BRUKER_FÅR_KOPI
                 ).build()),
 
-            Map.entry(INNVILGELSE_FOLKETRYGDLOVEN_2_8, new Mottakerliste.Builder()
+            Map.entry(INNVILGELSE_FOLKETRYGDLOVEN, new Mottakerliste.Builder()
                 .medHovedMottaker(BRUKER)
                 .medBrevkopiRegler(
                     BRUKER_FÅR_KOPI_HVIS_FULLMEKTIG_FINNES,

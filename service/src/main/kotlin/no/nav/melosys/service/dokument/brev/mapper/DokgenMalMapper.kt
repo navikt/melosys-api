@@ -120,7 +120,7 @@ class DokgenMalMapper(
                 DokumentasjonSvarfrist.beregnFristPaaMangelbrevFraDagensDato()
             )
 
-            Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN_2_8 -> innvilgelseFtrlMapper.map((brevbestilling as InnvilgelseBrevbestilling))
+            Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN -> innvilgelseFtrlMapper.map((brevbestilling as InnvilgelseBrevbestilling))
             Produserbaredokumenter.TRYGDEAVTALE_GB -> trygdeavtaleMapper.map(
                 brevbestilling.toBuilder()
                     .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.behandling.id))

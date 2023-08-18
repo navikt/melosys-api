@@ -66,7 +66,7 @@ internal class OppgaveFactoryNyMappingTest {
                 it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.A1_ANMODNING_OM_UNNTAK_PAPIR
             }.filter {
                 it.oppgave.beskrivelsefelt != OppgaveGosysMapping.Beskrivelsefelt.BEHANDLINGSTEMA
-            }.shouldHaveSize(55).forEach { sak ->
+            }.shouldHaveSize(56).forEach { sak ->
                 val behandling = sak.lagBehandlingMedSpy()
                 val oppgave =
                     oppgaveFactory.lagBehandlingsoppgave(behandling, LocalDate.now(), behandling::hentSedDokument)

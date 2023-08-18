@@ -64,7 +64,7 @@ class SaksbehandlingRegler(
         behandlingstema: Behandlingstema
     ): Boolean {
         if (sakstema == Sakstemaer.TRYGDEAVGIFT) return true
-        if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE) return true
+        if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE || behandlingstype == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT) return true
 
         if (harRegistreringUnntakFraMedlemskapFlyt(
                 sakstype,
@@ -106,7 +106,7 @@ class SaksbehandlingRegler(
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema
     ): Boolean {
-        if (!unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP) || sakstema != Sakstemaer.UNNTAK) {
+        if (sakstema != Sakstemaer.UNNTAK) {
             return false
         }
 
