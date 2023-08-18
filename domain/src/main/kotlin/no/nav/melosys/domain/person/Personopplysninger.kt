@@ -30,7 +30,7 @@ data class Personopplysninger(
 
     override fun harStrengtAdressebeskyttelse(): Boolean = adressebeskyttelser.any { it.erStrengtFortrolig() }
 
-    override fun manglerRegistrertAdresse(): Boolean {
+    override fun manglerGyldigRegistrertAdresse(): Boolean {
         return hentGjeldendePostadresse() != null
     }
 
