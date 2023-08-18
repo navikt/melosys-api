@@ -25,7 +25,7 @@ class ManglendeFakturabetalingConsumer(
         val manglendeFakturebetalingMelding = consumerRecord.value()
         try {
             opprettBehandlingForSak.opprettBehandlingManglendeInnbetaling(
-                manglendeFakturebetalingMelding.behandlingId,
+                FaktureringsKomponentenHjelper.hentBehandingsId(manglendeFakturebetalingMelding.vedtaksId),
                 manglendeFakturebetalingMelding.mottaksDato
             )
         } catch (e: Exception) {
