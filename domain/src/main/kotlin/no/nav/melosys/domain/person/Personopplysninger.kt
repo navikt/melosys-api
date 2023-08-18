@@ -31,15 +31,7 @@ data class Personopplysninger(
     override fun harStrengtAdressebeskyttelse(): Boolean = adressebeskyttelser.any { it.erStrengtFortrolig() }
 
     override fun manglerRegistrertAdresse(): Boolean {
-        val personHarRegistrertAdresse = listOf(
-            finnBostedsadresse(),
-            finnOppholdsadresse(),
-            finnKontaktadresse()
-        )
-            .filter { it.isPresent }
-            .map { it.get() }
-            .any { it.erGyldig() }
-        return !personHarRegistrertAdresse
+        return hentGjeldendePostadresse() != null
     }
 
 
