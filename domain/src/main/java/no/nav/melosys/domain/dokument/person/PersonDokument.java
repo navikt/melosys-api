@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.adresse.SemistrukturertAdresse;
@@ -57,16 +56,8 @@ public class PersonDokument implements Persondata {
     }
 
     @Override
-    public boolean manglerRegistrertAdresse() {
-        var personHarRegistrertAdresse = Stream.of(
-                finnBostedsadresse(),
-                finnOppholdsadresse(),
-                finnKontaktadresse())
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .anyMatch(personAdresse -> personAdresse.harRegistrertAdresse());
-
-        return !personHarRegistrertAdresse;
+    public boolean manglerGyldigRegistrertAdresse() {
+        return hentGjeldendePostadresse() == null;
     }
 
     @Override

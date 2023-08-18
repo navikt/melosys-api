@@ -13,5 +13,5 @@ public interface PersonAdresse {
     String kilde();
     boolean erHistorisk();
 
-    boolean harRegistrertAdresse();
+    boolean erGyldig();
 }

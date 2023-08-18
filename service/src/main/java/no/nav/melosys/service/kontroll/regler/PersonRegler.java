@@ -22,6 +22,11 @@ public final class PersonRegler {
     }
 
     public static boolean harRegistrertAdresse(Persondata persondata, MottatteOpplysningerData mottatteOpplysningerData) {
-        return !persondata.manglerRegistrertAdresse() || !mottatteOpplysningerData.bosted.oppgittAdresse.erTom();
+        return !persondata.manglerGyldigRegistrertAdresse() || !mottatteOpplysningerData.bosted.oppgittAdresse.erTom();
+    }
+
+    // TODO Bør vi fortsatt ta hensyn til MottatteOpplysningerData her?
+    public static boolean harRegistrertAdresse(Persondata persondata) {
+        return !persondata.manglerGyldigRegistrertAdresse();
     }
 }

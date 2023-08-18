@@ -18,7 +18,7 @@ public interface Persondata extends SaksopplysningDokument {
 
     boolean harStrengtAdressebeskyttelse();
 
-    boolean manglerRegistrertAdresse();
+    boolean manglerGyldigRegistrertAdresse();
 
     boolean manglerBostedsadresse();
 

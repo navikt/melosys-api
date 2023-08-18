@@ -147,6 +147,6 @@ class PersonopplysningerTest {
     }
 
     private StrukturertAdresse lagStrukturertAdresse(String gatenavn) {
-        return new StrukturertAdresse(gatenavn, null, null, null, null, null);
+        return new StrukturertAdresse(gatenavn, null, "1234", null, null, null);
     }
 }

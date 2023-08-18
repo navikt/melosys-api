@@ -30,16 +30,8 @@ data class Personopplysninger(
 
     override fun harStrengtAdressebeskyttelse(): Boolean = adressebeskyttelser.any { it.erStrengtFortrolig() }
 
-    override fun manglerRegistrertAdresse(): Boolean {
-        val personHarRegistrertAdresse = listOf(
-            finnBostedsadresse(),
-            finnOppholdsadresse(),
-            finnKontaktadresse()
-        )
-            .filter { it.isPresent }
-            .map { it.get() }
-            .any { it.harRegistrertAdresse() }
-        return !personHarRegistrertAdresse
+    override fun manglerGyldigRegistrertAdresse(): Boolean {
+        return hentGjeldendePostadresse() == null
     }
 
 
@@ -64,7 +56,7 @@ data class Personopplysninger(
     override fun getEtternavn(): String? = navn?.etternavn()
 
     @JsonIgnore
-    override fun getSammensattNavn(): String? = navn?.tilSammensattNavn();
+    override fun getSammensattNavn(): String? = navn?.tilSammensattNavn()
 
     override fun hentFamiliemedlemmer(): Set<Familiemedlem>? = familiemedlemmer
 
@@ -105,6 +97,7 @@ data class Personopplysninger(
     private fun hentGjeldendeKontaktadresseFraMaster(master: Master): Optional<Kontaktadresse> =
         kontaktadresser
             .filter { master.name.equals(it.master(), ignoreCase = true) }
+            .filter { it.erGyldig() }
             .maxByOrNull { it.registrertDato() }
             .let { Optional.ofNullable(it) }
 
@@ -116,6 +109,7 @@ data class Personopplysninger(
     private fun hentGjeldendeOppholdsadresseFraMaster(master: Master): Optional<Oppholdsadresse> =
         oppholdsadresser
             .filter { master.name.equals(it.master(), ignoreCase = true) }
+            .filter { it.erGyldig() }
             .maxByOrNull { it.registrertDato() }
             .let { Optional.ofNullable(it) }
 

@@ -18,7 +18,7 @@ public record Oppholdsadresse(
 ) implements PersonAdresse {
 
     @Override
-    public boolean harRegistrertAdresse() {
-        return strukturertAdresse != null && !strukturertAdresse.erTom() && !StringUtils.isBlank(strukturertAdresse.getPostnummer());
+    public boolean erGyldig() {
+        return !erHistorisk && strukturertAdresse != null && !strukturertAdresse.erTom() && !StringUtils.isBlank(strukturertAdresse.getPostnummer());
     }
 }
