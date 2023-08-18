@@ -68,7 +68,7 @@ class OpprettMedlemskapsperiodeServiceTest {
         behandlingsresultat.getVilkaarsresultater().add(lagOppfyltVilkår(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID));
         MedlemAvFolketrygden medlemAvFolketrygden = new MedlemAvFolketrygden();
         Medlemskapsperiode medlemskapsperiode = new Medlemskapsperiode();
-        medlemAvFolketrygden.addMedlemskapsperioder(medlemskapsperiode);
+        medlemAvFolketrygden.addMedlemskapsperiode(medlemskapsperiode);
         behandlingsresultat.setMedlemAvFolketrygden(medlemAvFolketrygden);
 
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);

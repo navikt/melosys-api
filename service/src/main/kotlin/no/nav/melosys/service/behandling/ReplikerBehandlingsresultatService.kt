@@ -16,10 +16,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.lang.reflect.InvocationTargetException
 
 @Service
-class ReplikerBehandlingsresultatService(
-    val behandlingsresultatService: BehandlingsresultatService,
-    val behandlingService: BehandlingService
-) {
+class ReplikerBehandlingsresultatService(val behandlingsresultatService: BehandlingsresultatService) {
 
     @Transactional(rollbackFor = [Exception::class])
     @Throws(
@@ -69,6 +66,7 @@ class ReplikerBehandlingsresultatService(
             BeanUtils.cloneBean(behandlingsresultatOrig.medlemAvFolketrygden) as MedlemAvFolketrygden
         medlemAvFolketrygdenReplika.behandlingsresultat = behandlingsresultatReplika
         medlemAvFolketrygdenReplika.id = null
+        behandlingsresultatReplika.medlemAvFolketrygden = medlemAvFolketrygdenReplika
 
         medlemAvFolketrygdenReplika.medlemskapsperioder = HashSet()
         for (medlemskapsperiodeOrig in behandlingsresultatOrig.medlemAvFolketrygden.medlemskapsperioder) {
@@ -80,8 +78,6 @@ class ReplikerBehandlingsresultatService(
         replikerFastsattTrygdeavgift(behandlingsresultatOrig.medlemAvFolketrygden, medlemAvFolketrygdenReplika)
 
         medlemAvFolketrygdenReplika.medlemskapsperioder.onEach { it.id = null }
-
-        behandlingsresultatReplika.medlemAvFolketrygden = medlemAvFolketrygdenReplika
     }
 
     @Throws(
@@ -99,14 +95,13 @@ class ReplikerBehandlingsresultatService(
             BeanUtils.cloneBean(medlemAvFolketrygdenOrig.fastsattTrygdeavgift) as FastsattTrygdeavgift
         fastsattTrygdeavgiftReplika.medlemAvFolketrygden = medlemAvFolketrygdenReplika
         fastsattTrygdeavgiftReplika.id = null
+        medlemAvFolketrygdenReplika.setFastsattTrygdeavgift(fastsattTrygdeavgiftReplika)
 
         replikerTrygdeavgiftsgrunnlag(medlemAvFolketrygdenOrig.fastsattTrygdeavgift, fastsattTrygdeavgiftReplika)
         replikerTrygdeavgiftsperioder(medlemAvFolketrygdenOrig, medlemAvFolketrygdenReplika)
 
         fastsattTrygdeavgiftReplika.trygdeavgiftsgrunnlag.inntektsperioder.onEach { it.id = null }
         fastsattTrygdeavgiftReplika.trygdeavgiftsgrunnlag.skatteforholdTilNorge.onEach { it.id = null }
-
-        medlemAvFolketrygdenReplika.setFastsattTrygdeavgift(fastsattTrygdeavgiftReplika)
     }
 
     @Throws(

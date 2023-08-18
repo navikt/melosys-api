@@ -61,7 +61,7 @@ public class MedlemAvFolketrygden {
         this.medlemskapsperioder = medlemskapsperioder;
     }
 
-    public void addMedlemskapsperioder(Medlemskapsperiode medlemskapsperiode) {
+    public void addMedlemskapsperiode(Medlemskapsperiode medlemskapsperiode) {
         this.medlemskapsperioder.add(medlemskapsperiode);
         medlemskapsperiode.setMedlemAvFolketrygden(this);
     }
