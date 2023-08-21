@@ -123,7 +123,6 @@ class SaksbehandlingReglerTest {
                 false,
                 false
             ),
-            // ... Add other combinations
         )
 
 
