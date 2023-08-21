@@ -92,7 +92,7 @@ public class OrganisasjonDokument extends AbstraktOrganisasjon implements Saksop
     }
 
     public boolean harRegistrertForretningsadresse() {
-        return getForretningsadresse() != null && getPostadresse().erGyldig();
+        return getForretningsadresse() != null && getForretningsadresse().erGyldig();
     }
 
     public StrukturertAdresse hentTilgjengeligAdresse() {
