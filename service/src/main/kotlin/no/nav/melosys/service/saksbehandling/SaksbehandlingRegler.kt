@@ -85,6 +85,7 @@ class SaksbehandlingRegler(
 
             ANMODNING_OM_UNNTAK_HOVEDREGEL -> sakstype == Sakstyper.TRYGDEAVTALE
             YRKESAKTIV -> (sakstype == Sakstyper.FTRL && !unleash.isEnabled(FOLKETRYGDEN_MVP))
+            IKKE_YRKESAKTIV -> (sakstype === Sakstyper.FTRL)
 
             else -> return false
         }

@@ -15,6 +15,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -46,6 +47,102 @@ class SaksbehandlingReglerTest {
     @AfterEach
     fun afterEach() {
         unleash.resetAll()
+    }
+
+    fun testHarTomFlytParametere() =
+        listOf(
+            Arguments.of(
+                Sakstyper.TRYGDEAVTALE,
+                Sakstemaer.TRYGDEAVGIFT,
+                Behandlingstyper.HENVENDELSE,
+                Behandlingstema.IKKE_YRKESAKTIV,
+                false,
+                true
+            ),
+            Arguments.of(
+                Sakstyper.TRYGDEAVTALE,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
+                Behandlingstyper.HENVENDELSE,
+                Behandlingstema.IKKE_YRKESAKTIV,
+                false,
+                true
+            ),
+            Arguments.of(
+                Sakstyper.TRYGDEAVTALE,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
+                Behandlingstyper.KLAGE,
+                Behandlingstema.IKKE_YRKESAKTIV,
+                false,
+                true
+            ),
+            Arguments.of(
+                Sakstyper.TRYGDEAVTALE,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
+                Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT,
+                Behandlingstema.IKKE_YRKESAKTIV,
+                false,
+                true
+            ),
+            Arguments.of(
+                Sakstyper.TRYGDEAVTALE,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
+                Behandlingstyper.FØRSTEGANG,
+                Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET,
+                false,
+                true
+            ),
+            Arguments.of(
+                Sakstyper.EU_EOS,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
+                Behandlingstyper.FØRSTEGANG,
+                Behandlingstema.IKKE_YRKESAKTIV,
+                false,
+                false
+            ),
+            Arguments.of(
+                Sakstyper.FTRL,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
+                Behandlingstyper.FØRSTEGANG,
+                Behandlingstema.YRKESAKTIV,
+                true,
+                false
+            ),
+            Arguments.of(
+                Sakstyper.FTRL,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
+                Behandlingstyper.FØRSTEGANG,
+                Behandlingstema.IKKE_YRKESAKTIV,
+                false,
+                true
+            ),
+            Arguments.of(
+                Sakstyper.TRYGDEAVTALE,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
+                Behandlingstyper.FØRSTEGANG,
+                Behandlingstema.IKKE_YRKESAKTIV,
+                false,
+                false
+            ),
+            // ... Add other combinations
+        )
+
+
+    @ParameterizedTest
+    @MethodSource("testHarTomFlytParametere")
+    fun testHarTomFlyt(
+        sakstype: Sakstyper,
+        sakstema: Sakstemaer,
+        behandlingstype: Behandlingstyper,
+        behandlingstema: Behandlingstema,
+        ftrlToggleEnabled: Boolean = false,
+        expected: Boolean
+    ) {
+        if (ftrlToggleEnabled) {
+            unleash.enable(ToggleName.FOLKETRYGDEN_MVP);
+        }
+        val result = saksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema)
+
+        result.shouldBe(expected)
     }
 
     @ParameterizedTest(name = "{0} - {1} - {2} - {3}")
