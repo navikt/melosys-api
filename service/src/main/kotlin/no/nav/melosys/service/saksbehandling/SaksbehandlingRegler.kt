@@ -9,7 +9,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.featuretoggle.ToggleName.*
+import no.nav.melosys.featuretoggle.ToggleName.FOLKETRYGDEN_MVP
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import org.springframework.stereotype.Component
 
@@ -85,7 +85,6 @@ class SaksbehandlingRegler(
 
             ANMODNING_OM_UNNTAK_HOVEDREGEL -> sakstype == Sakstyper.TRYGDEAVTALE
             YRKESAKTIV -> (sakstype == Sakstyper.FTRL && !unleash.isEnabled(FOLKETRYGDEN_MVP))
-            IKKE_YRKESAKTIV -> (!unleash.isEnabled(IKKEYRKESAKTIV_FLYT))
 
             else -> return false
         }
@@ -130,7 +129,7 @@ class SaksbehandlingRegler(
         sakstype: Sakstyper,
         behandlingstema: Behandlingstema
     ): Boolean {
-        return unleash.isEnabled(IKKEYRKESAKTIV_FLYT) && (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE) && behandlingstema == IKKE_YRKESAKTIV
+        return (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE) && behandlingstema == IKKE_YRKESAKTIV
     }
 
     companion object {
