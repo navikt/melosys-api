@@ -1,13 +1,5 @@
 package no.nav.melosys.service.dokument.brev;
 
-import java.io.IOException;
-import java.io.StringReader;
-import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBException;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import no.nav.dok.brevdata.felles.v1.navfelles.Saksbehandler;
 import no.nav.dok.brevdata.felles.v1.navfelles.*;
 import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType;
@@ -37,6 +29,14 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
+import javax.xml.XMLConstants;
+import javax.xml.bind.JAXBException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.io.StringReader;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
 
@@ -80,7 +80,7 @@ public class BrevDataService {
             if (personManglerAdresseFraRegister(behandling.getFagsak().hentBrukersAktørID())) {
                 MottatteOpplysningerData grunnlagData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
                 StrukturertAdresse oppgittAdresse = grunnlagData.bosted.oppgittAdresse;
-                if (!oppgittAdresse.erTom()) {
+                if (oppgittAdresse.erGyldig()) {
                     metadata.berik = false;
                     metadata.postadresse = oppgittAdresse;
                     metadata.brukerNavn = persondataFasade.hentSammensattNavn(metadata.brukerID);
@@ -244,7 +244,7 @@ public class BrevDataService {
     private void brukOppgittBostedsadresse(Behandling behandling, Mottaker mottaker, String mottakerID) {
         MottatteOpplysningerData grunnlagData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         StrukturertAdresse oppgittAdresse = grunnlagData.bosted.oppgittAdresse;
-        if (oppgittAdresse.erTom()) {
+        if (!oppgittAdresse.erGyldig()) {
             throw new FunksjonellException(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
         }
         String navn = persondataFasade.hentSammensattNavn(mottakerID);
