@@ -1,10 +1,9 @@
 package no.nav.melosys.domain.person.adresse;
 
+import no.nav.melosys.domain.adresse.StrukturertAdresse;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import org.apache.commons.lang3.StringUtils;
 
 public record Oppholdsadresse(
     StrukturertAdresse strukturertAdresse,
@@ -19,6 +18,6 @@ public record Oppholdsadresse(
 
     @Override
     public boolean erGyldig() {
-        return !erHistorisk && strukturertAdresse != null && !strukturertAdresse.erTom() && !StringUtils.isBlank(strukturertAdresse.getPostnummer());
+        return !erHistorisk && strukturertAdresse != null && strukturertAdresse.erGyldig();
     }
 }
