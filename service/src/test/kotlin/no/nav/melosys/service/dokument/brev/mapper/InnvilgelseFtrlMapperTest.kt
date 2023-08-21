@@ -124,7 +124,7 @@ internal class InnvilgelseFtrlMapperTest {
                     tom = LocalDate.EPOCH.plusMonths(4)
                     innvilgelsesresultat = InnvilgelsesResultat.DELVIS_INNVILGET
                     medlemskapstype = Medlemskapstyper.FRIVILLIG
-                    trygdedekning = Trygdedekninger.HELSEDEL
+                    trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
                     medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
                 }
             )
@@ -196,7 +196,7 @@ internal class InnvilgelseFtrlMapperTest {
             tom = LocalDate.EPOCH.plusMonths(4)
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             medlemskapstype = Medlemskapstyper.FRIVILLIG
-            trygdedekning = Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER
+            trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
             this.medlemAvFolketrygden = medlemAvFolketrygden
         })
 
