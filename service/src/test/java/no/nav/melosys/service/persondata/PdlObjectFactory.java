@@ -1,11 +1,5 @@
 package no.nav.melosys.service.persondata;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
 import no.nav.melosys.integrasjon.pdl.dto.Endring;
 import no.nav.melosys.integrasjon.pdl.dto.Folkeregistermetadata;
 import no.nav.melosys.integrasjon.pdl.dto.Metadata;
@@ -15,6 +9,13 @@ import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Matrikkeladresse;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.UtenlandskAdresse;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Vegadresse;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
+import static no.nav.melosys.integrasjon.pdl.dto.Endringstype.OPPHOER;
 import static no.nav.melosys.integrasjon.pdl.dto.Endringstype.OPPRETT;
 
 public class PdlObjectFactory {
@@ -155,6 +156,19 @@ public class PdlObjectFactory {
             lagMetadata(registrertDato));
     }
 
+    public static Bostedsadresse lagUgyldigBostedsadresse() {
+        return new Bostedsadresse(
+                LocalDateTime.parse("2020-01-01T00:00:00"),
+                LocalDateTime.parse("2020-05-05T00:00:00"),
+                null,
+                null,
+                new Matrikkeladresse("", "4321"),
+                null,
+                null,
+                lagMetadataOpphørt()
+        );
+    }
+
     public static Metadata lagMetadata(LocalDateTime registrertDato) {
         return new Metadata("PDL", false,
             List.of(new Endring(OPPRETT, registrertDato, "Dolly")));
@@ -163,6 +177,11 @@ public class PdlObjectFactory {
     static Metadata lagMetadata() {
         return new Metadata("PDL", false,
             List.of(new Endring(OPPRETT, LocalDateTime.parse("2021-05-07T10:04:52"), "Dolly")));
+    }
+
+    private static Metadata lagMetadataOpphørt() {
+        return new Metadata("FREG", true, List.of(new Endring(OPPRETT, LocalDateTime.parse("2021-05-07T10:04:52"), "Freg")
+                , new Endring(OPPHOER, LocalDateTime.parse("2023-05-07T10:04:52"), "Bruker")));
     }
 
     static Folkeregistermetadata lagFolkeregistermetadata() {
