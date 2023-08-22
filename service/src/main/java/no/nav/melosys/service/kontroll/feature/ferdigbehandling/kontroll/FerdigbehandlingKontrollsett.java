@@ -1,12 +1,11 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll;
 
-import java.util.Collections;
-import java.util.Set;
-import java.util.function.Function;
-
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData;
 import no.nav.melosys.service.validering.Kontrollfeil;
+
+import java.util.Set;
+import java.util.function.Function;
 
 public class FerdigbehandlingKontrollsett {
 
@@ -21,7 +20,7 @@ public class FerdigbehandlingKontrollsett {
         }
         return switch (sakstype) {
             case EU_EOS -> REGELSETT_EU_EOS;
-            case FTRL -> Collections.emptySet();
+            case FTRL -> REGELSETT_FTRL;
             case TRYGDEAVTALE -> REGELSETT_TRYGDEAVTALER;
         };
     }
@@ -38,6 +37,10 @@ public class FerdigbehandlingKontrollsett {
         FerdigbehandlingKontroll::arbeidsstedManglerFelter,
         FerdigbehandlingKontroll::foretakUtlandManglerFelter,
         FerdigbehandlingKontroll::orgnrErOpphørt
+    );
+
+    private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_FTRL = Set.of(
+            FerdigbehandlingKontroll::adresseRegistrert
     );
 
     private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_TRYGDEAVTALER = Set.of(

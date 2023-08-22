@@ -1,9 +1,5 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
-
 import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
@@ -36,6 +32,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
 
 import static no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -120,11 +120,12 @@ class KontrollTest {
     }
 
     @Test
-    void utførKontroller_FTRL_returnererTomCollection() {
+    void utførKontroller_FTRL_returnerer_adresse_mangler() {
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser());
         Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.FTRL, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
 
-        assertThat(resultat).isEmpty();
+        assertThat(resultat).extracting(Kontrollfeil::getKode)
+                .contains(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER);
     }
 
     @Test
