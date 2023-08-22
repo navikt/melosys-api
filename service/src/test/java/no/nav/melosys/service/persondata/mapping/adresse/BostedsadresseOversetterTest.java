@@ -1,7 +1,5 @@
 package no.nav.melosys.service.persondata.mapping.adresse;
 
-import java.time.LocalDate;
-
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.integrasjon.pdl.dto.person.adresse.Bostedsadresse;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -9,6 +7,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDate;
+import java.util.List;
 
 import static no.nav.melosys.service.persondata.PdlObjectFactory.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,6 +21,17 @@ import static org.mockito.Mockito.when;
 class BostedsadresseOversetterTest {
     @Mock
     KodeverkService kodeverkService;
+
+    @Test
+    void finnOgOversett() {
+        Bostedsadresse ugyldigBostedsadresse = lagUgyldigBostedsadresse();
+        Bostedsadresse gyldigBostedsadresse = lagNorskBostedsadresse();
+        List<Bostedsadresse> addresser = List.of(ugyldigBostedsadresse, gyldigBostedsadresse);
+
+        no.nav.melosys.domain.person.adresse.Bostedsadresse result = BostedsadresseOversetter.finnGjeldende(addresser, kodeverkService);
+
+        assertThat(result.strukturertAdresse().getGatenavn()).isEqualTo(gyldigBostedsadresse.vegadresse().adressenavn());
+    }
 
     @Test
     void oversettVegadresse() {

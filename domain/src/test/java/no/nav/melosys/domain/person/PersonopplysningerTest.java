@@ -1,16 +1,17 @@
 package no.nav.melosys.domain.person;
 
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Set;
-
+import no.nav.melosys.domain.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.brev.Postadresse;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 import org.junit.jupiter.api.Test;
+
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,6 +21,14 @@ class PersonopplysningerTest {
     void hentGjeldendePostadresse_bareBostedsadresse_lagPostadresseFraBostedsadresse() {
         Postadresse gjeldendePostadresse =
             lagPersonopplysninger(Collections.emptyList(), Collections.emptyList(), lagBostedsadresse()).hentGjeldendePostadresse();
+
+        assertThat(gjeldendePostadresse.adresselinje1()).isEqualTo("gatenavnFraBostedsadresse");
+    }
+
+    @Test
+    void hentGjeldendePostadresse_ugyldigeKontaktadresser_lagPostadresseFraBostedsadresse() {
+        Postadresse gjeldendePostadresse =
+                lagPersonopplysninger(lagUgyldigeKontaktadresser(), Collections.emptyList(), lagBostedsadresse()).hentGjeldendePostadresse();
 
         assertThat(gjeldendePostadresse.adresselinje1()).isEqualTo("gatenavnFraBostedsadresse");
     }
@@ -105,6 +114,33 @@ class PersonopplysningerTest {
         );
     }
 
+    private Collection<Kontaktadresse> lagUgyldigeKontaktadresser() {
+        return Set.of(
+                new Kontaktadresse(
+                        lagStrukturertAdresse("gammelGatenavnKontaktadressePDL"),
+                        null,
+                        null,
+                        null,
+                        null,
+                        Master.FREG.name(),
+                        null,
+                        LocalDateTime.MIN,
+                        true
+                ),
+                new Kontaktadresse(
+                        null,
+                        lagSemistukturertAdresse(),
+                        null,
+                        null,
+                        null,
+                        Master.FREG.name(),
+                        null,
+                        LocalDateTime.MAX,
+                        false
+                )
+        );
+    }
+
     private Collection<Kontaktadresse> lagKontaktadresseFraFreg() {
         return Set.of(
             new Kontaktadresse(
@@ -148,5 +184,9 @@ class PersonopplysningerTest {
 
     private StrukturertAdresse lagStrukturertAdresse(String gatenavn) {
         return new StrukturertAdresse(gatenavn, null, "1234", null, null, null);
+    }
+
+    private SemistrukturertAdresse lagSemistukturertAdresse() {
+        return new SemistrukturertAdresse(null, null, null, null, "4321", "UKJENT","NO");
     }
 }

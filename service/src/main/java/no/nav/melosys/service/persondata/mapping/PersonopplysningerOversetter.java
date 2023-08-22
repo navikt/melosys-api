@@ -1,10 +1,5 @@
 package no.nav.melosys.service.persondata.mapping;
 
-import java.util.Collections;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import no.nav.melosys.domain.person.Personopplysninger;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
 import no.nav.melosys.integrasjon.pdl.dto.person.Person;
@@ -12,6 +7,11 @@ import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.mapping.adresse.BostedsadresseOversetter;
 import no.nav.melosys.service.persondata.mapping.adresse.KontaktadresseOversetter;
 import no.nav.melosys.service.persondata.mapping.adresse.OppholdsadresseOversetter;
+
+import java.util.Collections;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class PersonopplysningerOversetter {
     private PersonopplysningerOversetter() {
@@ -26,7 +26,7 @@ public final class PersonopplysningerOversetter {
                                                         KodeverkService kodeverkService) {
         return new Personopplysninger(
             person.adressebeskyttelse().stream().map(AdressebeskyttelseOversetter::oversett).collect(Collectors.toUnmodifiableSet()),
-            BostedsadresseOversetter.oversett(person.bostedsadresse(), kodeverkService),
+            BostedsadresseOversetter.finnGjeldende(person.bostedsadresse(), kodeverkService),
             DoedsfallOversetter.oversett(person.doedsfall()),
             familiemedlemmer,
             FoedselOversetter.oversett(person.foedsel()),
