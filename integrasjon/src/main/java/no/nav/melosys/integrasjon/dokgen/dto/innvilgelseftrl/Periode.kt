@@ -35,18 +35,16 @@ class Periode(
                 trygdeavgiftsperiode.grunnlagMedlemskapsperiode.innvilgelsesresultat
             )
 
-        fun avIkkeInnvilgetPeriode(medlemskapsperiode: Medlemskapsperiode): Periode? =
-            if (medlemskapsperiode.innvilgelsesresultat != InnvilgelsesResultat.INNVILGET)
-                Periode(
-                    medlemskapsperiode.fom,
-                    medlemskapsperiode.tom,
-                    medlemskapsperiode.trygdedekning,
-                    BigDecimal.ZERO,
-                    BigDecimal.ZERO,
-                    null,
-                    BigDecimal.ZERO,
-                    medlemskapsperiode.innvilgelsesresultat
-                )
-            else null
+        fun av(medlemskapsperiode: Medlemskapsperiode): Periode =
+            Periode(
+                medlemskapsperiode.fom,
+                medlemskapsperiode.tom,
+                medlemskapsperiode.trygdedekning,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                null,
+                BigDecimal.ZERO,
+                medlemskapsperiode.innvilgelsesresultat
+            )
     }
 }

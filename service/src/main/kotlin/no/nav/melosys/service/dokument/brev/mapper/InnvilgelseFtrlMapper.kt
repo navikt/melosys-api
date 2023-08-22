@@ -58,10 +58,9 @@ class InnvilgelseFtrlMapper(
     }
 
     private fun mapPerioder(medlemAvFolketrygden: MedlemAvFolketrygden): List<Periode> {
-        val perioder = medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.map { Periode.av(it) }
-        val tommePerioder =
-            medlemAvFolketrygden.medlemskapsperioder.map { Periode.avIkkeInnvilgetPeriode(it) }.filterNotNull()
-        return perioder + tommePerioder
+        val trygdeavgiftsperioder = medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.map { Periode.av(it) }
+        val medlemskapsperioder = medlemAvFolketrygden.medlemskapsperioder.map { Periode.av(it) }
+        return trygdeavgiftsperioder + medlemskapsperioder
     }
 
     private fun erAvslåttHelsedelFørMottaksdato(

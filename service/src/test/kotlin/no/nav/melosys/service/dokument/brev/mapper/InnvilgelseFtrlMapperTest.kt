@@ -82,7 +82,7 @@ internal class InnvilgelseFtrlMapperTest {
                     barnFritekst.shouldBeNull()
                 }
                 brukerHarFullmektig.shouldBeFalse()
-                perioder.shouldHaveSize(1).first().apply {
+                perioder.shouldHaveSize(2).first().apply {
                     innvilgelsesResultat.shouldBe(InnvilgelsesResultat.INNVILGET)
                 }
                 bestemmelse.shouldBe(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8)
@@ -131,9 +131,9 @@ internal class InnvilgelseFtrlMapperTest {
         }
 
         innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling()).apply {
-            perioder.shouldHaveSize(2)
+            perioder.shouldHaveSize(3)
                 .map { it.innvilgelsesResultat }
-                .shouldContainExactlyInAnyOrder(InnvilgelsesResultat.INNVILGET, InnvilgelsesResultat.DELVIS_INNVILGET)
+                .shouldContainExactlyInAnyOrder(InnvilgelsesResultat.INNVILGET, InnvilgelsesResultat.DELVIS_INNVILGET, InnvilgelsesResultat.INNVILGET)
         }
     }
 
