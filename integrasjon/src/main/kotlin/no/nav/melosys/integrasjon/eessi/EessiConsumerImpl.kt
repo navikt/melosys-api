@@ -87,7 +87,7 @@ open class EessiConsumerImpl(private val webClient: WebClient) : EessiConsumer, 
 
 
     override fun journalfoerTidligereSendteSedFor(rinaSaksnummer: String) {
-        webClient.get()
+        webClient.post()
             .uri("/journalfoerTidligereSendteSedFor/{rinaSaksnummer}", rinaSaksnummer)
             .retrieve()
             .bodyToMono<Void>()
