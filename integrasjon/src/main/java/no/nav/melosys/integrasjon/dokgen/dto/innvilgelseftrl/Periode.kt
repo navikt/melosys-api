@@ -29,9 +29,9 @@ class Periode(
                 trygdeavgiftsperiode.periodeTil,
                 trygdeavgiftsperiode.grunnlagMedlemskapsperiode.trygdedekning,
                 trygdeavgiftsperiode.trygdesats,
-                trygdeavgiftsperiode.trygdeavgiftsbeløpMd.verdi,
+                trygdeavgiftsperiode.trygdeavgiftsbeløpMd?.verdi ?: BigDecimal.ZERO,
                 trygdeavgiftsperiode.grunnlagInntekstperiode.type,
-                trygdeavgiftsperiode.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi,
+                trygdeavgiftsperiode.grunnlagInntekstperiode.avgiftspliktigInntektMnd?.verdi ?: BigDecimal.ZERO,
                 trygdeavgiftsperiode.grunnlagMedlemskapsperiode.innvilgelsesresultat
             )
 
