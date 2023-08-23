@@ -60,7 +60,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: pre-deploy
-        uses: navikt/digihot-deploy/actions/pre-deploy@v2
+        uses: navikt/digihot-deploy/actions/pre-deploy@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Deploy til dev (Q2)
@@ -83,7 +83,7 @@ jobs:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
           SLACK_MESSAGE: ${{ env.COMMIT_MSG }}
       - name: post-deploy
-        uses: navikt/digihot-deploy/actions/post-deploy@v2
+        uses: navikt/digihot-deploy/actions/post-deploy@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: draft release

@@ -22,7 +22,7 @@ jobs:
           VAR: IMAGE=${{ env.IMAGE }}
           VARS: nais/vars-prod.json
       - name: post-production
-        uses: navikt/digihot-deploy/actions/post-production@v2
+        uses: navikt/digihot-deploy/actions/post-production@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Get commit message
