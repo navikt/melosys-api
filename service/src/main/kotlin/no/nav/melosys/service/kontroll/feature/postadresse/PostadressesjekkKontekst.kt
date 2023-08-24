@@ -10,10 +10,10 @@ data class PostadressesjekkKontekst(
     var orgnr: String?,
     var rolle: Aktoersroller
 ) {
-    constructor(behandlingID: Long, brukerID: String, orgnr: String) : this(
+    constructor(behandlingID: Long?, brukerID: String?, orgnr: String?) : this(
         behandlingID,
-        orgnr,
         brukerID,
+        orgnr,
         Aktoersroller.BRUKER
     )
 

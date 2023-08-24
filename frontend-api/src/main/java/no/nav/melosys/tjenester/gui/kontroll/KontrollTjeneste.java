@@ -1,5 +1,8 @@
 package no.nav.melosys.tjenester.gui.kontroll;
 
+import java.util.Collection;
+import java.util.List;
+
 import io.swagger.annotations.Api;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -19,9 +22,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.util.Collection;
-import java.util.List;
 
 @Protected
 @RestController
@@ -50,7 +50,7 @@ public class KontrollTjeneste {
         return ResponseEntity.ok(eessiService.erBucAapen(behandling.getFagsak().getGsakSaksnummer()));
     }
 
-    @PostMapping("/harRegistrertAdresse")
+    @PostMapping("/adresse")
     public ResponseEntity<KontrollerAdresseBrukerFullmektigResponse> harRegistrertAdresse(@RequestBody KontrollerAdresseBrukerFullmektigDto kontrollDto) {
         var kontekst = new PostadressesjekkKontekst(kontrollDto.getBehandlingID(), kontrollDto.getBrukerID(), kontrollDto.getOrgnr());
         List<Kontrollfeil> kontrollfeilList = postadresseKontrollService.kontroller(kontekst);
