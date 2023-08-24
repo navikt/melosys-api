@@ -9,13 +9,13 @@ import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.SoeknadFtrl;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 /**
  * Scenarioer definert på https://confluence.adeo.no/pages/viewpage.action?pageId=387109283
@@ -266,7 +266,75 @@ class UtledMedlemskapsperioderTest {
 
         Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForNyVurdering(request, List.of(opprinneligMedlemskapsperiode), opprinneligSøknad);
 
-        assertThat(response).hasSize(4);
+        assertThat(response).hasSize(4)
+            .extracting(
+                Medlemskapsperiode::getFom, Medlemskapsperiode::getTom,
+                Medlemskapsperiode::getTrygdedekning, Medlemskapsperiode::getInnvilgelsesresultat
+            )
+            .containsExactlyInAnyOrder(
+                tuple(
+                    søknadsPeriode.getFom(), opprinneligPeriode.getFom().minusDays(1),
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER, InnvilgelsesResultat.AVSLAATT
+                ),
+                tuple(
+                    søknadsPeriode.getFom(), opprinneligPeriode.getFom().minusDays(1),
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON, InnvilgelsesResultat.INNVILGET
+                ),
+                tuple(
+                    opprinneligPeriode.getFom(), nyMottaksdato.minusDays(1),
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON, InnvilgelsesResultat.INNVILGET
+                ),
+                tuple(
+                    nyMottaksdato, søknadsPeriode.getTom(),
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER, InnvilgelsesResultat.INNVILGET
+                )
+            );
+
+    }
+
+    // Ny vurdering
+    // Eksempel 2
+
+    @Test
+    void lagMedlemskapsperioderForNyVurdering_leggerTilPensjonsdelUtviderPeriode_pensjonsdelLagtTilBakITidPeriodeForlengetMenHelsedelAvslåttBakITid() {
+        var opprinneligPeriode = new Periode(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-12-31"));
+        var opprinneligTrygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE;
+        var opprinneligMedlemskapsperiode = lagMedlemskapsperiode(
+            opprinneligPeriode.getFom(), opprinneligPeriode.getTom(), arbeidsland,
+            InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, opprinneligTrygdedekning);
+        var opprinneligSøknad = new SoeknadFtrl();
+        opprinneligSøknad.setTrygdedekning(opprinneligTrygdedekning);
+        opprinneligSøknad.periode = opprinneligPeriode;
+        opprinneligSøknad.soeknadsland = new Soeknadsland(List.of(arbeidsland), false);
+
+        var søknadsPeriode = new Periode(LocalDate.parse("2023-01-01"), LocalDate.parse("2024-03-01"));
+        var trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON;
+        var nyMottaksdato = LocalDate.parse("2024-04-15");
+
+        var request = new UtledMedlemskapsperioderRequest(søknadsPeriode, trygdedekning, nyMottaksdato, arbeidsland);
+
+        Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForNyVurdering(request, List.of(opprinneligMedlemskapsperiode), opprinneligSøknad);
+
+        assertThat(response)
+            .hasSize(3)
+            .extracting(
+                Medlemskapsperiode::getFom, Medlemskapsperiode::getTom,
+                Medlemskapsperiode::getTrygdedekning, Medlemskapsperiode::getInnvilgelsesresultat
+            )
+            .containsExactlyInAnyOrder(
+                tuple(
+                    opprinneligPeriode.getFom(), opprinneligPeriode.getTom(),
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON, InnvilgelsesResultat.INNVILGET
+                ),
+                tuple(
+                    opprinneligPeriode.getTom().plusDays(1), søknadsPeriode.getTom(),
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, InnvilgelsesResultat.AVSLAATT
+                ),
+                tuple(
+                    opprinneligPeriode.getTom().plusDays(1), søknadsPeriode.getTom(),
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON, InnvilgelsesResultat.INNVILGET
+                )
+            );
     }
 
     private Medlemskapsperiode lagMedlemskapsperiode(LocalDate fom, LocalDate tom, String arbeidsland, InnvilgelsesResultat innvilgelsesResultat, Medlemskapstyper medlemskapstype, Trygdedekninger trygdedekning) {
