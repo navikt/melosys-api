@@ -1,5 +1,10 @@
 package no.nav.melosys.service.behandling;
 
+import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.*;
+
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
@@ -23,11 +28,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.lang.reflect.InvocationTargetException;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.*;
 
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.metrics.MetrikkerNavn.*;
@@ -54,6 +54,7 @@ public class BehandlingService {
     private final UtkastBrevService utkastBrevService;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final UtledMottaksdato utledMottaksdato;
+    private final ReplikerBehandlingsresultatService replikerBehandlingsresultatService;
     private final Counter behandlingerAvsluttet = Metrics.counter(BEHANDLINGER_AVSLUTTET);
 
     public BehandlingService(BehandlingRepository behandlingRepository,
@@ -63,7 +64,8 @@ public class BehandlingService {
                              @Lazy LovligeKombinasjonerService lovligeKombinasjonerService,
                              UtkastBrevService utkastBrevService,
                              ApplicationEventPublisher applicationEventPublisher,
-                             UtledMottaksdato utledMottaksdato) {
+                             UtledMottaksdato utledMottaksdato,
+                             ReplikerBehandlingsresultatService replikerBehandlingsresultatService) {
         this.behandlingRepository = behandlingRepository;
         this.tidligereMedlemsperiodeRepository = tidligereMedlemsperiodeRepository;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -72,6 +74,7 @@ public class BehandlingService {
         this.utkastBrevService = utkastBrevService;
         this.applicationEventPublisher = applicationEventPublisher;
         this.utledMottaksdato = utledMottaksdato;
+        this.replikerBehandlingsresultatService = replikerBehandlingsresultatService;
     }
 
     public Behandling hentBehandling(long behandlingId) {
@@ -242,7 +245,7 @@ public class BehandlingService {
             behandlingsreplika = replikerBehandlingUtenMottatteOpplysningerSaksopplysningerOgResultat(tidligsteInaktiveBehandling, behandlingstype);
             behandlingsresultatService.lagreNyttBehandlingsresultat(behandlingsreplika);
         } catch (InvocationTargetException | NoSuchMethodException | InstantiationException |
-            IllegalAccessException e) {
+                 IllegalAccessException e) {
             throw new TekniskException(String.format("Klarte ikke replikere behandling %s for fagsak %s",
                 tidligsteInaktiveBehandling.getId(), tidligsteInaktiveBehandling.getFagsak().getSaksnummer()), e);
         }
@@ -275,9 +278,9 @@ public class BehandlingService {
         Behandling behandlingsreplika;
         try {
             behandlingsreplika = replikerBehandling(tidligsteInaktiveBehandling, behandlingstype);
-            behandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika);
+            replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingsreplika);
         } catch (InvocationTargetException | NoSuchMethodException | InstantiationException |
-            IllegalAccessException e) {
+                 IllegalAccessException e) {
             throw new TekniskException(String.format("Klarte ikke replikere behandling %s for fagsak %s",
                 tidligsteInaktiveBehandling.getId(), tidligsteInaktiveBehandling.getFagsak().getSaksnummer()), e);
         }
