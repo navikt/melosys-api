@@ -262,9 +262,10 @@ class UtledMedlemskapsperioderTest {
         var trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER;
         var nyMottaksdato = LocalDate.parse("2023-02-15");
 
-        var request = new UtledMedlemskapsperioderRequest(søknadsPeriode, trygdedekning, nyMottaksdato, arbeidsland);
+        var request = new UtledMedlemskapsperiodeNyVurderingRequest(
+            søknadsPeriode, trygdedekning, nyMottaksdato, arbeidsland, List.of(opprinneligMedlemskapsperiode), opprinneligSøknad);
 
-        Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForNyVurdering(request, List.of(opprinneligMedlemskapsperiode), opprinneligSøknad);
+        Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForNyVurdering(request);
 
         assertThat(response).hasSize(4)
             .extracting(
@@ -311,9 +312,10 @@ class UtledMedlemskapsperioderTest {
         var trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON;
         var nyMottaksdato = LocalDate.parse("2024-04-15");
 
-        var request = new UtledMedlemskapsperioderRequest(søknadsPeriode, trygdedekning, nyMottaksdato, arbeidsland);
+        var request = new UtledMedlemskapsperiodeNyVurderingRequest(
+            søknadsPeriode, trygdedekning, nyMottaksdato, arbeidsland, List.of(opprinneligMedlemskapsperiode), opprinneligSøknad);
 
-        Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForNyVurdering(request, List.of(opprinneligMedlemskapsperiode), opprinneligSøknad);
+        Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForNyVurdering(request);
 
         assertThat(response)
             .hasSize(3)

@@ -7,7 +7,7 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
 public class UtledMedlemskapsperioderRequest {
 
-    private ErPeriode søknadsperiode;
+    private final ErPeriode søknadsperiode;
     private final Trygdedekninger trygdedekning;
     private final LocalDate mottaksdatoSøknad;
     private final String arbeidsland;
@@ -20,10 +20,6 @@ public class UtledMedlemskapsperioderRequest {
         this.trygdedekning = trygdedekning;
         this.mottaksdatoSøknad = mottaksdatoSøknad;
         this.arbeidsland = arbeidsland;
-    }
-
-    public void setSøknadsperiode(ErPeriode søknadsperiode) {
-        this.søknadsperiode = søknadsperiode;
     }
 
     public ErPeriode getSøknadsperiode() {
@@ -40,5 +36,9 @@ public class UtledMedlemskapsperioderRequest {
 
     public String getArbeidsland() {
         return arbeidsland;
+    }
+
+    public static UtledMedlemskapsperioderRequest av(UtledMedlemskapsperiodeNyVurderingRequest request, ErPeriode søknadsperiode) {
+        return new UtledMedlemskapsperioderRequest(søknadsperiode, request.getTrygdedekning(), request.getMottaksdatoSøknad(), request.getArbeidsland());
     }
 }

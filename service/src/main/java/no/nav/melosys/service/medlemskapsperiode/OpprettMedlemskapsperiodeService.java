@@ -53,17 +53,20 @@ public class OpprettMedlemskapsperiodeService {
             var behandling = behandlingsresultat.getBehandling();
             SoeknadFtrl søknad = (SoeknadFtrl) behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
             Collection<Medlemskapsperiode> medlemskapsperioder;
-            if (behandling.erNyVurdering() && behandling.getOpprinneligBehandling() != null) {
-                var opprinneligBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getOpprinneligBehandling().getId());
+
+            var opprinneligBehandling = behandling.getOpprinneligBehandling();
+            if (behandling.erNyVurdering() && opprinneligBehandling != null) {
+                var opprinneligBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.getId());
+                var opprinneligSøknad = (SoeknadFtrl) opprinneligBehandling.getMottatteOpplysninger().getMottatteOpplysningerData();
+
                 medlemskapsperioder = new UtledMedlemskapsperioder().lagMedlemskapsperioderForNyVurdering(
-                    new UtledMedlemskapsperioderRequest(
+                    new UtledMedlemskapsperiodeNyVurderingRequest(
                         søknad.periode,
                         søknad.getTrygdedekning(),
                         utledMottaksdato.getMottaksdato(behandling),
-                        søknad.soeknadsland.landkoder.stream().collect(onlyElement())
-                    ),
-                    opprinneligBehandlingsresultat.getMedlemAvFolketrygden().getMedlemskapsperioder(),
-                    (SoeknadFtrl) opprinneligBehandlingsresultat.getBehandling().getMottatteOpplysninger().getMottatteOpplysningerData()
+                        søknad.soeknadsland.landkoder.stream().collect(onlyElement()),
+                        opprinneligBehandlingsresultat.getMedlemAvFolketrygden().getMedlemskapsperioder(),
+                        opprinneligSøknad)
                 );
             } else {
                 medlemskapsperioder = new UtledMedlemskapsperioder().lagMedlemskapsperioder(

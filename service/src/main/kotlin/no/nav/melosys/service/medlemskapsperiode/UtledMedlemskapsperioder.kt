@@ -6,7 +6,6 @@ import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import no.nav.melosys.domain.mottatteopplysninger.SoeknadFtrl
 import no.nav.melosys.exception.FunksjonellException
 import org.apache.commons.beanutils.BeanUtils
 import org.springframework.data.util.Pair
@@ -14,30 +13,29 @@ import java.time.LocalDate
 
 class UtledMedlemskapsperioder {
 
-    fun lagMedlemskapsperioderForNyVurdering(
-        request: UtledMedlemskapsperioderRequest,
-        opprinneligeMedlemskapsperioder: MutableCollection<Medlemskapsperiode>,
-        opprinneligSøknad: SoeknadFtrl
-    ): MutableCollection<Medlemskapsperiode> {
+    fun lagMedlemskapsperioderForNyVurdering(request: UtledMedlemskapsperiodeNyVurderingRequest): MutableCollection<Medlemskapsperiode> {
         val medlemskapsperioder = mutableListOf<Medlemskapsperiode>()
-        if (opprinneligeMedlemskapsperioder.isEmpty()) return medlemskapsperioder
-        validerOpprinneligeMedlemskapsperioder(opprinneligeMedlemskapsperioder)
+        if (request.opprinneligeMedlemskapsperioder.isEmpty()) return medlemskapsperioder
+        validerOpprinneligeMedlemskapsperioder(request.opprinneligeMedlemskapsperioder)
 
-        opprinneligeMedlemskapsperioder.forEach {
+        request.opprinneligeMedlemskapsperioder.forEach {
             medlemskapsperioder.add(
                 (BeanUtils.cloneBean(it) as Medlemskapsperiode).apply { id = null }
             )
         }
         medlemskapsperioder.sortBy { it.fom }
 
-        if (opprinneligSøknad.trygdedekning != request.trygdedekning) {
-            håndterEndretTrygdedekning(medlemskapsperioder, opprinneligSøknad.trygdedekning, request)
+        if (request.opprinneligSøknad.trygdedekning != request.trygdedekning) {
+            endreTrygdedekning(medlemskapsperioder, request.opprinneligSøknad.trygdedekning, request)
         }
-
-        if (opprinneligSøknad.periode.fom != request.søknadsperiode.fom || opprinneligSøknad.periode.tom != request.søknadsperiode.tom) {
-            utvidEllerForkortPeriode(medlemskapsperioder, opprinneligSøknad.periode, request)
+        val opprinneligPeriode = request.opprinneligSøknad.periode
+        if (opprinneligPeriode.fom != request.søknadsperiode.fom) {
+            utvidEllerForkortFom(medlemskapsperioder, opprinneligPeriode.fom, request)
         }
-        if (opprinneligSøknad.soeknadsland.landkoder.first() != request.arbeidsland) {
+        if (opprinneligPeriode.tom != request.søknadsperiode.tom) {
+            utvidEllerForkortTom(medlemskapsperioder, opprinneligPeriode.tom, request)
+        }
+        if (request.opprinneligSøknad.soeknadsland.landkoder.first() != request.arbeidsland) {
             medlemskapsperioder.onEach { it.arbeidsland = request.arbeidsland }
         }
 
@@ -50,10 +48,10 @@ class UtledMedlemskapsperioder {
         }
     }
 
-    private fun håndterEndretTrygdedekning(
+    private fun endreTrygdedekning(
         medlemskapsperioder: MutableList<Medlemskapsperiode>,
         opprinneligTrygdedekning: Trygdedekninger,
-        request: UtledMedlemskapsperioderRequest
+        request: UtledMedlemskapsperiodeNyVurderingRequest
     ) {
         val trygdedekningOppdatertMedPensjonsdel =
             (opprinneligTrygdedekning == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE && request.trygdedekning == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON)
@@ -87,32 +85,40 @@ class UtledMedlemskapsperioder {
         }
     }
 
-    private fun utvidEllerForkortPeriode(
+    private fun utvidEllerForkortFom(
         medlemskapsperioder: MutableList<Medlemskapsperiode>,
-        opprinneligPeriode: no.nav.melosys.domain.mottatteopplysninger.data.Periode,
-        request: UtledMedlemskapsperioderRequest
+        opprinneligFom: LocalDate,
+        request: UtledMedlemskapsperiodeNyVurderingRequest
     ) {
-        val opprinneligFom = opprinneligPeriode.fom
-        val opprinneligTom = opprinneligPeriode.tom
         val nyFom = request.søknadsperiode.fom
-        val nyTom = request.søknadsperiode.tom
 
         if (nyFom.isBefore(opprinneligFom)) {
             val utvidetPeriode = Periode(nyFom, opprinneligFom.minusDays(1))
-            medlemskapsperioder.addAll(lagMedlemskapsperioder(request.apply { setSøknadsperiode(utvidetPeriode) }))
+            val utvidetPeriodeRequest = UtledMedlemskapsperioderRequest.av(request, utvidetPeriode)
+            medlemskapsperioder.addAll(lagMedlemskapsperioder(utvidetPeriodeRequest))
             medlemskapsperioder.sortBy { it.fom }
-        }
-        if (nyFom.isAfter(opprinneligFom)) {
+        } else if (nyFom.isAfter(opprinneligFom)) {
             val førstePeriodeEtterNyFom = medlemskapsperioder.first { it.tom == null || it.tom.isAfter(nyFom) }
             medlemskapsperioder.subList(0, medlemskapsperioder.indexOf(førstePeriodeEtterNyFom)).clear()
             medlemskapsperioder.filter { it.fom == førstePeriodeEtterNyFom.fom }.onEach { it.fom = nyFom }
         }
+    }
+
+    private fun utvidEllerForkortTom(
+        medlemskapsperioder: MutableList<Medlemskapsperiode>,
+        opprinneligTom: LocalDate?,
+        request: UtledMedlemskapsperiodeNyVurderingRequest
+    ) {
+        val nyTom = request.søknadsperiode.tom
 
         if (opprinneligTom != null && (nyTom == null || nyTom.isAfter(opprinneligTom))) {
             val utvidetPeriode = Periode(opprinneligTom.plusDays(1), nyTom)
-            medlemskapsperioder.addAll(lagMedlemskapsperioder(request.apply { setSøknadsperiode(utvidetPeriode) }))
+            val utvidetPeriodeRequest = UtledMedlemskapsperioderRequest.av(request, utvidetPeriode)
+            medlemskapsperioder.addAll(lagMedlemskapsperioder(utvidetPeriodeRequest))
             medlemskapsperioder.sortBy { it.fom }
-        } else if ((opprinneligTom == null && nyTom != null) || (opprinneligTom != null && nyTom.isBefore(opprinneligTom))) {
+        } else if (
+            (opprinneligTom == null && nyTom != null) || (opprinneligTom != null && nyTom.isBefore(opprinneligTom))
+        ) {
             val sistePeriodeFørNyTom = medlemskapsperioder.last { it.fom.isBefore(nyTom) }
             val sistePeriodeIndex = medlemskapsperioder.indexOf(sistePeriodeFørNyTom)
             medlemskapsperioder.subList(sistePeriodeIndex + 1, medlemskapsperioder.size).clear()
