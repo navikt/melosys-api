@@ -74,7 +74,7 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
         final Behandlingstema nyttBehandlingstema = hentBehandlingstema(melosysEessiMelding);
 
         if (eksisterendeBehandling.getTema() != nyttBehandlingstema) {
-            if (unleash.isEnabled("melosys.validerLovligeKombinasjoner")) validerLovligeKombinasjoner(nyttBehandlingstema, eksisterendeBehandling.getFagsak());
+            validerLovligeKombinasjoner(nyttBehandlingstema, eksisterendeBehandling.getFagsak());
             validerNorgeIkkeUtpektOgVedtakIkkeFattet(eksisterendeBehandling, behandlingsresultat);
             log.info("Ny A003 resulterer i nytt behandlingstema {}", nyttBehandlingstema);
             opprettNyBehandling(melosysEessiMelding, arkivsakID);
