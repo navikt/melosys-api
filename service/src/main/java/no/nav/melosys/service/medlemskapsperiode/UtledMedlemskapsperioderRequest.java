@@ -5,11 +5,9 @@ import java.time.LocalDate;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
-import static no.nav.melosys.domain.kodeverk.Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE;
-
 public class UtledMedlemskapsperioderRequest {
 
-    private final ErPeriode søknadsperiode;
+    private ErPeriode søknadsperiode;
     private final Trygdedekninger trygdedekning;
     private final LocalDate mottaksdatoSøknad;
     private final String arbeidsland;
@@ -22,6 +20,10 @@ public class UtledMedlemskapsperioderRequest {
         this.trygdedekning = trygdedekning;
         this.mottaksdatoSøknad = mottaksdatoSøknad;
         this.arbeidsland = arbeidsland;
+    }
+
+    public void setSøknadsperiode(ErPeriode søknadsperiode) {
+        this.søknadsperiode = søknadsperiode;
     }
 
     public ErPeriode getSøknadsperiode() {
@@ -38,9 +40,5 @@ public class UtledMedlemskapsperioderRequest {
 
     public String getArbeidsland() {
         return arbeidsland;
-    }
-
-    public boolean erPensjonsdel() {
-        return trygdedekning == FTRL_2_9_FØRSTE_LEDD_A_HELSE;
     }
 }

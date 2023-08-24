@@ -10,7 +10,6 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -53,14 +52,30 @@ public class OpprettMedlemskapsperiodeService {
         if (medlemAvFolketrygden.getMedlemskapsperioder().isEmpty()) {
             var behandling = behandlingsresultat.getBehandling();
             SoeknadFtrl søknad = (SoeknadFtrl) behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
-            var medlemskapsperioder = new UtledMedlemskapsperioder().lagMedlemskapsperioder(
-                new UtledMedlemskapsperioderRequest(
-                    søknad.periode,
-                    søknad.getTrygdedekning(),
-                    utledMottaksdato.getMottaksdato(behandling),
-                    søknad.soeknadsland.landkoder.stream().collect(onlyElement())
-                )
-            );
+            Collection<Medlemskapsperiode> medlemskapsperioder;
+            if (behandling.erNyVurdering() && behandling.getOpprinneligBehandling() != null) {
+                var opprinneligBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getOpprinneligBehandling().getId());
+                medlemskapsperioder = new UtledMedlemskapsperioder().lagMedlemskapsperioderForNyVurdering(
+                    new UtledMedlemskapsperioderRequest(
+                        søknad.periode,
+                        søknad.getTrygdedekning(),
+                        utledMottaksdato.getMottaksdato(behandling),
+                        søknad.soeknadsland.landkoder.stream().collect(onlyElement())
+                    ),
+                    opprinneligBehandlingsresultat.getMedlemAvFolketrygden().getMedlemskapsperioder(),
+                    (SoeknadFtrl) opprinneligBehandlingsresultat.getBehandling().getMottatteOpplysninger().getMottatteOpplysningerData()
+                );
+            } else {
+                medlemskapsperioder = new UtledMedlemskapsperioder().lagMedlemskapsperioder(
+                    new UtledMedlemskapsperioderRequest(
+                        søknad.periode,
+                        søknad.getTrygdedekning(),
+                        utledMottaksdato.getMottaksdato(behandling),
+                        søknad.soeknadsland.landkoder.stream().collect(onlyElement()))
+                );
+            }
+
+
             medlemAvFolketrygden.getMedlemskapsperioder().addAll(medlemskapsperioder);
             medlemskapsperioder.forEach(m -> m.setMedlemAvFolketrygden(medlemAvFolketrygden));
         }
@@ -80,7 +95,7 @@ public class OpprettMedlemskapsperiodeService {
     }
 
     private void validerSakstype(Fagsak fagsak) {
-        if (fagsak.getType() != Sakstyper.FTRL) {
+        if (!fagsak.erSakstypeFtrl()) {
             throw new FunksjonellException("Kan ikke opprette medlemskapsperioder for sakstype " + fagsak.getType());
         }
     }
