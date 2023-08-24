@@ -85,6 +85,15 @@ open class EessiConsumerImpl(private val webClient: WebClient) : EessiConsumer, 
             .bodyToMono<ByteArray>()
             .block()!!
 
+
+    override fun journalfoerTidligereSendteSedFor(rinaSaksnummer: String) {
+        webClient.post()
+            .uri("/journalfoerTidligereSendteSedFor/{rinaSaksnummer}", rinaSaksnummer)
+            .retrieve()
+            .bodyToMono<Void>()
+            .block()
+    }
+
     override fun hentTilknyttedeBucer(gsakSaksnummer: Long, statuser: List<String>) =
         webClient.get()
             .uri("/sak/{arkivSakID}/bucer?statuser={statuser}", gsakSaksnummer, statuser.toTypedArray())

@@ -109,8 +109,9 @@ public final class TestdataFactory {
     static GeografiskAdresse lagOrgadresse(String postnummer) {
         SemistrukturertAdresse semistrukturertAdresse = new SemistrukturertAdresse();
         semistrukturertAdresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(2), LocalDate.now().plusDays(2)));
-        semistrukturertAdresse.setLandkode("NO");
+        semistrukturertAdresse.setAdresselinje1("Testgata 3");
         semistrukturertAdresse.setPostnr(postnummer);
+        semistrukturertAdresse.setLandkode("NO");
         return semistrukturertAdresse;
     }
 }

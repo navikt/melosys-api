@@ -77,19 +77,19 @@ class TrygdeavgiftsberegningsRequestMapper {
 
     private fun avgiftsdekningerFraTrygdedekning(trygdedekning: Trygdedekninger): Set<Avgiftsdekning> {
         return when (trygdedekning) {
-            Trygdedekninger.HELSEDEL ->
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE ->
                 setOf(Avgiftsdekning.HELSEDEL_UTEN_SYKEPENGER)
 
-            Trygdedekninger.HELSEDEL_MED_SYKE_OG_FORELDREPENGER ->
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER ->
                 setOf(Avgiftsdekning.HELSEDEL_MED_SYKEPENGER)
 
-            Trygdedekninger.PENSJONSDEL ->
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON ->
                 setOf(Avgiftsdekning.PENSJONSDEL_UTEN_YRKESSKADETRYGD)
 
-            Trygdedekninger.HELSE_OG_PENSJONSDEL ->
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON ->
                 setOf(Avgiftsdekning.HELSEDEL_UTEN_SYKEPENGER, Avgiftsdekning.PENSJONSDEL_UTEN_YRKESSKADETRYGD)
 
-            Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER ->
+            Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER ->
                 setOf(Avgiftsdekning.HELSEDEL_MED_SYKEPENGER, Avgiftsdekning.PENSJONSDEL_UTEN_YRKESSKADETRYGD)
 
             else -> throw FunksjonellException("Kan ikke finne avgiftsdekninger fra trygdedekning " + trygdedekning)

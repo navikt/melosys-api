@@ -117,7 +117,7 @@ class MedlemskapsperiodeTjenesteTest {
         medlemskapsperiode.setArbeidsland("BR");
         medlemskapsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.DELVIS_INNVILGET);
         medlemskapsperiode.setMedlemskapstype(Medlemskapstyper.FRIVILLIG);
-        medlemskapsperiode.setTrygdedekning(Trygdedekninger.HELSE_OG_PENSJONSDEL);
+        medlemskapsperiode.setTrygdedekning(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON);
         return medlemskapsperiode;
     }
 

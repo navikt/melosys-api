@@ -82,7 +82,7 @@ internal class InnvilgelseFtrlMapperTest {
                     barnFritekst.shouldBeNull()
                 }
                 brukerHarFullmektig.shouldBeFalse()
-                perioder.shouldHaveSize(1).first().apply {
+                perioder.shouldHaveSize(2).first().apply {
                     innvilgelsesResultat.shouldBe(InnvilgelsesResultat.INNVILGET)
                 }
                 bestemmelse.shouldBe(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8)
@@ -124,16 +124,16 @@ internal class InnvilgelseFtrlMapperTest {
                     tom = LocalDate.EPOCH.plusMonths(4)
                     innvilgelsesresultat = InnvilgelsesResultat.DELVIS_INNVILGET
                     medlemskapstype = Medlemskapstyper.FRIVILLIG
-                    trygdedekning = Trygdedekninger.HELSEDEL
+                    trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
                     medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
                 }
             )
         }
 
         innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling()).apply {
-            perioder.shouldHaveSize(2)
+            perioder.shouldHaveSize(3)
                 .map { it.innvilgelsesResultat }
-                .shouldContainExactlyInAnyOrder(InnvilgelsesResultat.INNVILGET, InnvilgelsesResultat.DELVIS_INNVILGET)
+                .shouldContainExactlyInAnyOrder(InnvilgelsesResultat.INNVILGET, InnvilgelsesResultat.DELVIS_INNVILGET, InnvilgelsesResultat.INNVILGET)
         }
     }
 
@@ -196,7 +196,7 @@ internal class InnvilgelseFtrlMapperTest {
             tom = LocalDate.EPOCH.plusMonths(4)
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             medlemskapstype = Medlemskapstyper.FRIVILLIG
-            trygdedekning = Trygdedekninger.HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER
+            trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
             this.medlemAvFolketrygden = medlemAvFolketrygden
         })
 

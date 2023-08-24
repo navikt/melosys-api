@@ -29,24 +29,22 @@ class Periode(
                 trygdeavgiftsperiode.periodeTil,
                 trygdeavgiftsperiode.grunnlagMedlemskapsperiode.trygdedekning,
                 trygdeavgiftsperiode.trygdesats,
-                trygdeavgiftsperiode.trygdeavgiftsbeløpMd.verdi,
+                trygdeavgiftsperiode.trygdeavgiftsbeløpMd?.verdi ?: BigDecimal.ZERO,
                 trygdeavgiftsperiode.grunnlagInntekstperiode.type,
-                trygdeavgiftsperiode.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi,
+                trygdeavgiftsperiode.grunnlagInntekstperiode.avgiftspliktigInntektMnd?.verdi ?: BigDecimal.ZERO,
                 trygdeavgiftsperiode.grunnlagMedlemskapsperiode.innvilgelsesresultat
             )
 
-        fun avIkkeInnvilgetPeriode(medlemskapsperiode: Medlemskapsperiode): Periode? =
-            if (medlemskapsperiode.innvilgelsesresultat != InnvilgelsesResultat.INNVILGET)
-                Periode(
-                    medlemskapsperiode.fom,
-                    medlemskapsperiode.tom,
-                    medlemskapsperiode.trygdedekning,
-                    BigDecimal.ZERO,
-                    BigDecimal.ZERO,
-                    null,
-                    BigDecimal.ZERO,
-                    medlemskapsperiode.innvilgelsesresultat
-                )
-            else null
+        fun av(medlemskapsperiode: Medlemskapsperiode): Periode =
+            Periode(
+                medlemskapsperiode.fom,
+                medlemskapsperiode.tom,
+                medlemskapsperiode.trygdedekning,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO,
+                null,
+                BigDecimal.ZERO,
+                medlemskapsperiode.innvilgelsesresultat
+            )
     }
 }

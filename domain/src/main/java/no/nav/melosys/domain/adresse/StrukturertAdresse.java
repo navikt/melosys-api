@@ -1,10 +1,10 @@
 package no.nav.melosys.domain.adresse;
 
-import java.util.List;
-import java.util.stream.Stream;
-
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
+import java.util.stream.Stream;
 
 import static no.nav.melosys.domain.adresse.Adresse.sammenslå;
 
@@ -45,21 +45,6 @@ public class StrukturertAdresse implements Adresse {
         this.postnummer = postnummer;
         this.poststed = poststed;
         this.landkode = landkode;
-    }
-
-    @Override
-    public boolean erTom() {
-        return StringUtils.isAllEmpty(tilleggsnavn, gatenavn, husnummerEtasjeLeilighet, postboks, postnummer, poststed,
-            region, landkode);
-    }
-
-    @Override
-    public List<String> toList() {
-        return Stream.of(tilleggsnavn, sammenslå(gatenavn, husnummerEtasjeLeilighet),
-                postboks, postnummer, poststed, region,
-                landkode != null ? Land_iso2.valueOf(landkode).getBeskrivelse() : "")
-            .filter(StringUtils::isNotEmpty)
-            .toList();
     }
 
     @Override
@@ -130,5 +115,26 @@ public class StrukturertAdresse implements Adresse {
 
     public void setLandkode(String landkode) {
         this.landkode = landkode;
+    }
+
+    @Override
+    public List<String> toList() {
+        return Stream.of(tilleggsnavn, sammenslå(gatenavn, husnummerEtasjeLeilighet),
+                        postboks, postnummer, poststed, region,
+                        landkode != null ? Land_iso2.valueOf(landkode).getBeskrivelse() : "")
+                .filter(StringUtils::isNotEmpty)
+                .toList();
+    }
+
+    @Override
+    public boolean erTom() {
+        return StringUtils.isAllEmpty(tilleggsnavn, gatenavn, husnummerEtasjeLeilighet, postboks, postnummer, poststed,
+                region, landkode);
+    }
+
+    public boolean erGyldig() {
+        if (erTom()) return false;
+        if (StringUtils.isBlank(postnummer)) return false;
+        return !StringUtils.isBlank(gatenavn) || !StringUtils.isBlank(tilleggsnavn);
     }
 }

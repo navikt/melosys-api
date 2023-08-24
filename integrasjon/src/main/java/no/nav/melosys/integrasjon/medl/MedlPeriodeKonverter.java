@@ -252,12 +252,12 @@ public final class MedlPeriodeKonverter {
 
     private static DekningMedl mapForFtrlKap2_8(Trygdedekninger dekning) {
         return switch (dekning) {
-            case HELSEDEL -> DekningMedl.FTRL_2_9_1_LEDD_A;
-            case HELSEDEL_MED_SYKE_OG_FORELDREPENGER -> DekningMedl.FTRL_2_9_2_LEDD_1A;
-            case PENSJONSDEL -> DekningMedl.FTRL_2_9_1_LEDD_B;
-            case HELSE_OG_PENSJONSDEL -> DekningMedl.FTRL_2_9_1_LEDD_C;
-            case HELSE_OG_PENSJONSDEL_MED_SYKE_OG_FORELDREPENGER -> DekningMedl.FTRL_2_9_2_LEDD_1C;
-            default -> throw new TekniskException("Dekningstype støttes ikke for FTRL: " + dekning.getKode());
+            case FTRL_2_9_FØRSTE_LEDD_A_HELSE -> DekningMedl.FTRL_2_9_1_LEDD_A;
+            case FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER -> DekningMedl.FTRL_2_9_2_LEDD_1A;
+            case FTRL_2_9_FØRSTE_LEDD_B_PENSJON -> DekningMedl.FTRL_2_9_1_LEDD_B;
+            case FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON -> DekningMedl.FTRL_2_9_1_LEDD_C;
+            case FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER -> DekningMedl.FTRL_2_9_2_LEDD_1C;
+            default -> throw new TekniskException("Dekningstype støttes ikke for FTRL:" + dekning.getKode());
         };
     }
 

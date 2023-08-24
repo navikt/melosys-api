@@ -52,7 +52,6 @@ public class FerdigbehandlingKontrollsett {
     );
 
     private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_UNNTAKSREGISTRERING = Set.of(
-        FerdigbehandlingKontroll::adresseRegistrert,
         FerdigbehandlingKontroll::overlappendeMedlemsperiode,
         FerdigbehandlingKontroll::periodeManglerSluttdato,
         FerdigbehandlingKontroll::overlappendeUnntaksperiode

@@ -6,8 +6,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
-import no.nav.melosys.service.persondata.PersondataService;
-import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
+import no.nav.melosys.service.kontroll.feature.postadresse.PostadresseKontrollService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.kontroller.FerdigbehandlingKontrollerDto;
 import no.nav.melosys.tjenester.gui.kontroll.KontrollTjeneste;
@@ -27,17 +26,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class KontrollTjenesteTest {
 
     @MockBean
-    private FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
-    @MockBean
     private Aksesskontroll aksesskontroll;
+    @MockBean
+    private FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
     @MockBean
     private EessiService eessiService;
     @MockBean
     private BehandlingService behandlingService;
     @MockBean
-    private PersondataService persondataService;
-    @MockBean
-    private OrganisasjonOppslagService organisasjonOppslagService;
+    private PostadresseKontrollService postadresseKontrollService;
 
     @Autowired
     private MockMvc mockMvc;

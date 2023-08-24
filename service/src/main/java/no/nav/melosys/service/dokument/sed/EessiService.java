@@ -279,6 +279,10 @@ public class EessiService {
         return eessiConsumer.genererSedPdf(sedDataDto, sedType);
     }
 
+    public void opprettJournalpostForTidligereSed(String rinaSaksnummer) {
+        eessiConsumer.journalfoerTidligereSendteSedFor(rinaSaksnummer);
+    }
+
     public SedType hentSedTypeForAnmodningUnntakSvar(Long behandlingID) {
         return hentSedTypeForAnmodningUnntakSvar(behandlingsresultatService.hentBehandlingsresultat(behandlingID));
     }
