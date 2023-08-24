@@ -289,7 +289,7 @@ class ReplikerBehandlingsresultatServiceTest {
         medlemskapsperiode.tom = LocalDate.now()
         medlemskapsperiode.arbeidsland = "YO"
         medlemskapsperiode.medlemskapstype = Medlemskapstyper.PLIKTIG
-        medlemskapsperiode.trygdedekning = Trygdedekninger.HELSE_OG_PENSJONSDEL
+        medlemskapsperiode.trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
         medlemskapsperiode.medlPeriodeID = 123L
         return medlemskapsperiode
     }
