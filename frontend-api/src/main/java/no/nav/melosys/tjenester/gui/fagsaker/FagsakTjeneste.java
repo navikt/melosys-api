@@ -12,6 +12,7 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -54,11 +55,19 @@ public class FagsakTjeneste {
     private final OrganisasjonOppslagService organisasjonOppslagService;
     private final OpprettBehandlingForSak opprettBehandlingForSak;
 
-    public FagsakTjeneste(FagsakService fagsakService, Aksesskontroll aksesskontroll, MottatteOpplysningerService mottatteOpplysningerService,
-                          OpprettSak opprettSak, EndreSakService endreSakService,
-                          BehandlingsresultatService behandlingsresultatService, PersondataFasade persondataFasade,
-                          SaksopplysningerService saksopplysningerService, OrganisasjonOppslagService organisasjonOppslagService,
-                          OpprettBehandlingForSak opprettBehandlingForSak) {
+    private final MedlemAvFolketrygdenService medlemAvFolketrygdenService;
+
+    public FagsakTjeneste(FagsakService fagsakService,
+                          Aksesskontroll aksesskontroll,
+                          MottatteOpplysningerService mottatteOpplysningerService,
+                          OpprettSak opprettSak,
+                          EndreSakService endreSakService,
+                          BehandlingsresultatService behandlingsresultatService,
+                          PersondataFasade persondataFasade,
+                          SaksopplysningerService saksopplysningerService,
+                          OrganisasjonOppslagService organisasjonOppslagService,
+                          OpprettBehandlingForSak opprettBehandlingForSak,
+                          MedlemAvFolketrygdenService medlemAvFolketrygdenService) {
         this.fagsakService = fagsakService;
         this.aksesskontroll = aksesskontroll;
         this.mottatteOpplysningerService = mottatteOpplysningerService;
@@ -69,7 +78,7 @@ public class FagsakTjeneste {
         this.saksopplysningerService = saksopplysningerService;
         this.organisasjonOppslagService = organisasjonOppslagService;
         this.opprettBehandlingForSak = opprettBehandlingForSak;
-
+        this.medlemAvFolketrygdenService = medlemAvFolketrygdenService;
     }
 
     @GetMapping("/{saksnr}")
@@ -244,6 +253,15 @@ public class FagsakTjeneste {
             var periode = new PeriodeDto(lovvalgsperiode.getFom(), lovvalgsperiode.getTom());
             behandlingOversiktDto.setLovvalgsperiode(periode);
         });
+
+        var medlemAvFolketrygden = medlemAvFolketrygdenService.finnMedlemAvFolketrygdenMedMedlemskapsperioder(behandling.getId());
+
+        if (medlemAvFolketrygden.isPresent()) {
+            var periode = new PeriodeDto(
+                medlemAvFolketrygden.get().utledMedlemskapsperiodeFom(),
+                medlemAvFolketrygden.get().utledMedlemskapsperiodeTom());
+            behandlingOversiktDto.setMedlemskapsperiode(periode);
+        }
     }
 
     private String hentNavn(List<Behandling> behandlinger) {

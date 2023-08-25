@@ -1,6 +1,8 @@
 package no.nav.melosys.domain.folketrygden;
 
+import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import javax.persistence.*;
 
@@ -87,4 +89,20 @@ public class MedlemAvFolketrygden {
             .map(SkatteforholdTilNorge::getSkatteplikttype)
             .orElseThrow(() -> new RuntimeException("SkattepliktType ikke funnet, skal ikke skje for medlemAvFolketrygden :" + id));
     }
+
+
+    public LocalDate utledMedlemskapsperiodeFom() {
+        return medlemskapsperioder.stream()
+            .filter(Medlemskapsperiode::erInnvilget)
+            .min(Comparator.comparing(Medlemskapsperiode::getFom))
+            .map(Medlemskapsperiode::getFom).orElse(null);
+    }
+
+    public LocalDate utledMedlemskapsperiodeTom() {
+        return medlemskapsperioder.stream()
+            .filter(Medlemskapsperiode::erInnvilget)
+            .max(Comparator.comparing(Medlemskapsperiode::getTom))
+            .map(Medlemskapsperiode::getTom).orElse(null);
+    }
+
 }

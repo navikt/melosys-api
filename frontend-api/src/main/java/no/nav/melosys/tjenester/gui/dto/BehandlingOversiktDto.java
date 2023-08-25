@@ -15,6 +15,7 @@ public class BehandlingOversiktDto {
     private Behandlingstyper behandlingstype;
     private Behandlingstema behandlingstema;
     private PeriodeDto lovvalgsperiode;
+    private PeriodeDto medlemskapsperiode;
     private SoeknadslandDto land;
     private PeriodeDto soknadsperiode;
     private Instant opprettetDato;
@@ -99,5 +100,13 @@ public class BehandlingOversiktDto {
 
     public void setSvarFrist(Instant svarFrist) {
         this.svarFrist = svarFrist;
+    }
+
+    public PeriodeDto getMedlemskapsperiode() {
+        return medlemskapsperiode;
+    }
+
+    public void setMedlemskapsperiode(PeriodeDto medlemskapsperiode) {
+        this.medlemskapsperiode = medlemskapsperiode;
     }
 }
