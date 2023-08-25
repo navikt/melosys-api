@@ -8,7 +8,6 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
 import no.nav.melosys.exception.FunksjonellException
@@ -28,13 +27,14 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
     ): Trygdeavgiftsgrunnlag {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
         val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
-        val medlemskapsperioder = medlemAvFolketrygden.medlemskapsperioder
 
-        validerAtMedlemskapsperioderFinnes(medlemskapsperioder)
+        validerAtMedlemskapsperioderFinnes(medlemAvFolketrygden.medlemskapsperioder)
         fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden.fastsattTrygdeavgift)
 
-        val fomDato = utledFomDato(medlemskapsperioder)
-        val tomDato = utledTomDato(medlemskapsperioder)
+        val fomDato = medlemAvFolketrygden.utledMedlemskapsperiodeFom()
+            ?: throw FunksjonellException("Klarte ikke finne startdatoen på medlemskapet")
+        val tomDato = medlemAvFolketrygden.utledMedlemskapsperiodeTom()
+            ?: throw FunksjonellException("Klarte ikke finne sluttdatoen på medlemskapet")
 
         medlemAvFolketrygden.fastsattTrygdeavgift = eksisterendeEllerNyFastsattTrygdeavgift(medlemAvFolketrygden)
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag =
@@ -57,18 +57,6 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
             throw FunksjonellException("Kan ikke oppdatere trygdeavgiftsgrunnlaget før medlemskapsperioder finnes")
         }
     }
-
-    private fun utledFomDato(medlemskapsperioder: Collection<Medlemskapsperiode>): LocalDate =
-        medlemskapsperioder
-            .filter { it.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET }
-            .minByOrNull { it.fom }?.fom
-            ?: throw FunksjonellException("Klarte ikke finne startdatoen på medlemskapet")
-
-    private fun utledTomDato(medlemskapsperioder: Collection<Medlemskapsperiode>): LocalDate =
-        medlemskapsperioder
-            .filter { it.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET }
-            .maxByOrNull { it.tom }?.tom
-            ?: throw FunksjonellException("Klarte ikke finne sluttdatoen på medlemskapet")
 
     private fun eksisterendeEllerNyFastsattTrygdeavgift(medlemAvFolketrygden: MedlemAvFolketrygden): FastsattTrygdeavgift =
         medlemAvFolketrygden.fastsattTrygdeavgift ?: FastsattTrygdeavgift().apply {
