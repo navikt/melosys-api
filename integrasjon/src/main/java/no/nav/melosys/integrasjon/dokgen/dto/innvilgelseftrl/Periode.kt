@@ -23,28 +23,33 @@ class Periode(
     val innvilgelsesResultat: InnvilgelsesResultat
 ) {
     companion object {
-        fun av(trygdeavgiftsperiode: Trygdeavgiftsperiode): Periode =
-            Periode(
-                trygdeavgiftsperiode.periodeFra,
-                trygdeavgiftsperiode.periodeTil,
-                trygdeavgiftsperiode.grunnlagMedlemskapsperiode.trygdedekning,
-                trygdeavgiftsperiode.trygdesats,
-                trygdeavgiftsperiode.trygdeavgiftsbeløpMd?.verdi ?: BigDecimal.ZERO,
-                trygdeavgiftsperiode.grunnlagInntekstperiode.type,
-                trygdeavgiftsperiode.grunnlagInntekstperiode.avgiftspliktigInntektMnd?.verdi ?: BigDecimal.ZERO,
-                trygdeavgiftsperiode.grunnlagMedlemskapsperiode.innvilgelsesresultat
-            )
-
-        fun av(medlemskapsperiode: Medlemskapsperiode): Periode =
-            Periode(
-                medlemskapsperiode.fom,
-                medlemskapsperiode.tom,
-                medlemskapsperiode.trygdedekning,
-                BigDecimal.ZERO,
-                BigDecimal.ZERO,
-                null,
-                BigDecimal.ZERO,
-                medlemskapsperiode.innvilgelsesresultat
-            )
+        fun av(medlemskapsperiode: Medlemskapsperiode): List<Periode> =
+            medlemskapsperiode.trygdeavgiftsperioder.map {
+                Periode(
+                    it.periodeFra,
+                    it.periodeTil,
+                    medlemskapsperiode.trygdedekning,
+                    it.trygdesats,
+                    it.trygdeavgiftsbeløpMd.verdi,
+                    it.grunnlagInntekstperiode.type,
+                    it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi,
+                    medlemskapsperiode.innvilgelsesresultat
+                )
+            }.toMutableList().also {
+                if (medlemskapsperiode.innvilgelsesresultat != InnvilgelsesResultat.INNVILGET) {
+                    it.add(
+                        Periode(
+                            medlemskapsperiode.fom,
+                            medlemskapsperiode.tom,
+                            medlemskapsperiode.trygdedekning,
+                            BigDecimal.ZERO,
+                            BigDecimal.ZERO,
+                            null,
+                            BigDecimal.ZERO,
+                            medlemskapsperiode.innvilgelsesresultat
+                        )
+                    )
+                }
+            }
     }
 }
