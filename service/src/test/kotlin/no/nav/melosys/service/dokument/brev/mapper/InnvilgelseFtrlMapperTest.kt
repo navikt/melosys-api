@@ -113,7 +113,7 @@ internal class InnvilgelseFtrlMapperTest {
     }
 
     @Test
-    fun map_delvisInnvilget_populererFelter() {
+    fun map_innvilgetOgAvslaatt_populererFelter() {
         mockHappyCase()
         val behandlingsresultat = lagBehandlingsResultat()
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat.apply {
@@ -122,7 +122,7 @@ internal class InnvilgelseFtrlMapperTest {
                 Medlemskapsperiode().apply {
                     fom = LocalDate.EPOCH.plusMonths(1)
                     tom = LocalDate.EPOCH.plusMonths(4)
-                    innvilgelsesresultat = InnvilgelsesResultat.DELVIS_INNVILGET
+                    innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
                     medlemskapstype = Medlemskapstyper.FRIVILLIG
                     trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
                     medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
@@ -133,7 +133,7 @@ internal class InnvilgelseFtrlMapperTest {
         innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling()).apply {
             perioder.shouldHaveSize(2)
                 .map { it.innvilgelsesResultat }
-                .shouldContainExactlyInAnyOrder(InnvilgelsesResultat.INNVILGET, InnvilgelsesResultat.DELVIS_INNVILGET)
+                .shouldContainExactlyInAnyOrder(InnvilgelsesResultat.INNVILGET, InnvilgelsesResultat.AVSLAATT)
         }
     }
 

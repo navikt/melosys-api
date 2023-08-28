@@ -131,7 +131,7 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
         return trygdeavgiftsperioder;
     }
 
-    @Deprecated(since = "Bare for test...")
+    @Deprecated(since = "Bare for test...", forRemoval = false)
     public void setTrygdeavgiftsperioder(Collection<Trygdeavgiftsperiode> trygdeavgiftsperioder) {
         this.trygdeavgiftsperioder = trygdeavgiftsperioder;
     }
