@@ -1,12 +1,16 @@
 package no.nav.melosys.domain.folketrygden;
 
+import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
+import no.nav.melosys.domain.avgift.SkatteforholdTilNorge;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
+import no.nav.melosys.domain.kodeverk.Skatteplikttype;
 
 @Entity
 @Table(name = "medlem_av_folketrygden")
@@ -61,7 +65,7 @@ public class MedlemAvFolketrygden {
         this.medlemskapsperioder = medlemskapsperioder;
     }
 
-    public void addMedlemskapsperioder(Medlemskapsperiode medlemskapsperiode) {
+    public void addMedlemskapsperiode(Medlemskapsperiode medlemskapsperiode) {
         this.medlemskapsperioder.add(medlemskapsperiode);
         medlemskapsperiode.setMedlemAvFolketrygden(this);
     }
@@ -79,4 +83,26 @@ public class MedlemAvFolketrygden {
         fastsattTrygdeavgift.setMedlemAvFolketrygden(this);
         this.fastsattTrygdeavgift = fastsattTrygdeavgift;
     }
+
+    public Skatteplikttype utledSkatteplikttype() {
+        return fastsattTrygdeavgift.getTrygdeavgiftsgrunnlag().getSkatteforholdTilNorge().stream().findFirst()
+            .map(SkatteforholdTilNorge::getSkatteplikttype)
+            .orElseThrow(() -> new RuntimeException("SkattepliktType ikke funnet, skal ikke skje for medlemAvFolketrygden :" + id));
+    }
+
+
+    public LocalDate utledMedlemskapsperiodeFom() {
+        return medlemskapsperioder.stream()
+            .filter(Medlemskapsperiode::erInnvilget)
+            .min(Comparator.comparing(Medlemskapsperiode::getFom))
+            .map(Medlemskapsperiode::getFom).orElse(null);
+    }
+
+    public LocalDate utledMedlemskapsperiodeTom() {
+        return medlemskapsperioder.stream()
+            .filter(Medlemskapsperiode::erInnvilget)
+            .max(Comparator.comparing(Medlemskapsperiode::getTom))
+            .map(Medlemskapsperiode::getTom).orElse(null);
+    }
+
 }

@@ -49,11 +49,13 @@ public class DokumentTjeneste {
                                                @PathVariable("dokumentID") String dokumentID) {
 
         Journalpost journalpost = dokumentHentingService.hentJournalpost(journalpostID);
+        String saksnummerMelding = (journalpost.getSaksnummer() != null) ? "på sak " + journalpost.getSaksnummer() : "";
+
         if (journalpost.getBrukerIdType() == BrukerIdType.AKTØR_ID) {
-            aksesskontroll.auditAutoriserAktørID(journalpost.getBrukerId(), "Innsyn i dokument" + journalpost.getHoveddokument().getTittel());
+            aksesskontroll.auditAutoriserAktørID(journalpost.getBrukerId(), "Innsyn i dokument %s %s".formatted(journalpost.getHoveddokument().getTittel(), saksnummerMelding));
         }
         if (journalpost.getBrukerIdType() == BrukerIdType.FOLKEREGISTERIDENT) {
-            aksesskontroll.auditAutoriserFolkeregisterIdent(journalpost.getBrukerId(), "Innsyn i dokument " + journalpost.getHoveddokument().getTittel());
+            aksesskontroll.auditAutoriserFolkeregisterIdent(journalpost.getBrukerId(), "Innsyn i dokument %s %s".formatted(journalpost.getHoveddokument().getTittel(), saksnummerMelding));
         }
 
         byte[] dokument = dokumentHentingService.hentDokument(journalpostID, dokumentID);
@@ -67,11 +69,13 @@ public class DokumentTjeneste {
                                                @PathVariable("dokumentID") String dokumentID) {
 
         Journalpost journalpost = dokumentHentingService.hentJournalpost(journalpostID);
+        String saksnummerMelding = (journalpost.getSaksnummer() != null) ? "på sak " + journalpost.getSaksnummer() : "";
+
         if (journalpost.getBrukerIdType() == BrukerIdType.AKTØR_ID) {
-            aksesskontroll.auditAutoriserAktørID(journalpost.getBrukerId(), "Innsyn i dokument" + journalpost.getHoveddokument().getTittel());
+            aksesskontroll.auditAutoriserAktørID(journalpost.getBrukerId(), "Innsyn i dokument %s %s".formatted(journalpost.getHoveddokument().getTittel(), saksnummerMelding));
         }
         if (journalpost.getBrukerIdType() == BrukerIdType.FOLKEREGISTERIDENT) {
-            aksesskontroll.auditAutoriserFolkeregisterIdent(journalpost.getBrukerId(), "Innsyn i dokument " + journalpost.getHoveddokument().getTittel());
+            aksesskontroll.auditAutoriserFolkeregisterIdent(journalpost.getBrukerId(), "Innsyn i dokument %s %s".formatted(journalpost.getHoveddokument().getTittel(), saksnummerMelding));
         }
 
         byte[] dokument = dokumentHentingService.hentDokument(journalpostID, dokumentID);

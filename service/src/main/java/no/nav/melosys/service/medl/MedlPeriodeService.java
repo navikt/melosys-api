@@ -4,12 +4,10 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlService;
 import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
@@ -22,8 +20,6 @@ import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class MedlPeriodeService {
@@ -38,8 +34,6 @@ public class MedlPeriodeService {
     private final UtpekingsperiodeRepository utpekingsperiodeRepository;
     private final MedlemskapsperiodeRepository medlemskapsperiodeRepository;
 
-    private final Unleash unleash;
-
     private static final String FEIL_VED_OPPDATERING_MEDL = "Opprettelse av periode i MEDL feilet med retur av null medlPeriodeID fra MEDL tjeneste for behandling ";
 
     public MedlPeriodeService(PersondataFasade persondataFasade,
@@ -49,8 +43,7 @@ public class MedlPeriodeService {
                               LovvalgsperiodeRepository lovvalgsperiodeRepository,
                               MedlAnmodningsperiodeService medlAnmodningsperiodeService,
                               UtpekingsperiodeRepository utpekingsperiodeRepository,
-                              MedlemskapsperiodeRepository medlemskapsperiodeRepository,
-                              Unleash unleash) {
+                              MedlemskapsperiodeRepository medlemskapsperiodeRepository) {
         this.persondataFasade = persondataFasade;
         this.medlService = medlService;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -59,7 +52,6 @@ public class MedlPeriodeService {
         this.medlAnmodningsperiodeService = medlAnmodningsperiodeService;
         this.utpekingsperiodeRepository = utpekingsperiodeRepository;
         this.medlemskapsperiodeRepository = medlemskapsperiodeRepository;
-        this.unleash = unleash;
     }
 
     public Saksopplysning hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom) {
@@ -89,12 +81,11 @@ public class MedlPeriodeService {
 
     public void opprettPeriodeEndelig(Lovvalgsperiode lovvalgsperiode, Long behandlingID) {
         String fnr = hentFnr(behandlingID);
-        log.info("Oppretter endelig periode i MEDL for behandling {}", behandlingID);
+        log.info("Oppretter endelig lovvalgsperiode i MEDL for behandling {}", behandlingID);
         Long medlPeriodeID = medlService.opprettPeriodeEndelig(fnr, lovvalgsperiode, hentKildedokumenttype(behandlingID));
         lagreMedlPeriodeId(medlPeriodeID, lovvalgsperiode, behandlingID);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void opprettPeriodeEndelig(long behandlingId, Medlemskapsperiode medlemskapsperiode) {
         String fnr = hentFnr(behandlingId);
         log.info("Oppretter endelig medlemskapsperiode i MEDL for behandling {}", behandlingId);
@@ -108,9 +99,14 @@ public class MedlPeriodeService {
     }
 
     public void oppdaterPeriodeEndelig(Lovvalgsperiode lovvalgsperiode) {
-        log.info("Oppdaterer MEDL-periode {} til status endelig", lovvalgsperiode.getMedlPeriodeID());
+        log.info("Oppdaterer MEDL-periode {} for lovvalgsperiode", lovvalgsperiode.getMedlPeriodeID());
         medlService.oppdaterPeriodeEndelig(lovvalgsperiode,
             hentKildedokumenttype(lovvalgsperiode.getBehandlingsresultat().getId()));
+    }
+
+    public void oppdaterPeriodeEndelig(long behandlingID, Medlemskapsperiode medlemskapsperiode) {
+        log.info("Oppdaterer MEDL-periode {} for medlemskapsperiode", medlemskapsperiode.getMedlPeriodeID());
+        medlService.oppdaterPeriodeEndelig(medlemskapsperiode, hentKildedokumenttype(behandlingID));
     }
 
     public void oppdaterPeriodeForeløpig(Lovvalgsperiode lovvalgsperiode) {
@@ -200,20 +196,18 @@ public class MedlPeriodeService {
     private KildedokumenttypeMedl hentKildedokumenttype(Long behandlingID) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
         boolean erSed = behandling.erBehandlingAvSed();
-        if (unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP)) {
-            var fagsaktype = behandling.getFagsak().getType();
-            var behandlingstema = behandling.getTema();
+        var fagsaktype = behandling.getFagsak().getType();
+        var behandlingstema = behandling.getTema();
 
-            if (fagsaktype.equals(Sakstyper.TRYGDEAVTALE)) {
-                if (behandlingstema == Behandlingstema.REGISTRERING_UNNTAK) {
-                    return KildedokumenttypeMedl.DOKUMENT;
-                } else if (behandlingstema == Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL) {
-                    return KildedokumenttypeMedl.HENV_SOKNAD;
-                }
-            } else if (fagsaktype.equals(Sakstyper.EU_EOS) &&
-                behandlingstema == Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR) {
-                return KildedokumenttypeMedl.A1;
+        if (fagsaktype.equals(Sakstyper.TRYGDEAVTALE)) {
+            if (behandlingstema == Behandlingstema.REGISTRERING_UNNTAK) {
+                return KildedokumenttypeMedl.DOKUMENT;
+            } else if (behandlingstema == Behandlingstema.ANMODNING_OM_UNNTAK_HOVEDREGEL) {
+                return KildedokumenttypeMedl.HENV_SOKNAD;
             }
+        } else if (fagsaktype.equals(Sakstyper.EU_EOS) &&
+            behandlingstema == Behandlingstema.A1_ANMODNING_OM_UNNTAK_PAPIR) {
+            return KildedokumenttypeMedl.A1;
         }
 
         return erSed ? KildedokumenttypeMedl.SED : KildedokumenttypeMedl.HENV_SOKNAD;

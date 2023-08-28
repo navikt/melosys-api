@@ -1,12 +1,10 @@
 package no.nav.melosys.service.registeropplysninger;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.springframework.stereotype.Component;
 
@@ -17,11 +15,9 @@ import org.springframework.stereotype.Component;
 public class RegisteropplysningerFactory {
 
     private final SaksbehandlingRegler saksbehandlingRegler;
-    private final Unleash unleash;
 
-    public RegisteropplysningerFactory(SaksbehandlingRegler saksbehandlingRegler, Unleash unleash) {
+    public RegisteropplysningerFactory(SaksbehandlingRegler saksbehandlingRegler) {
         this.saksbehandlingRegler = saksbehandlingRegler;
-        this.unleash = unleash;
     }
 
     public RegisteropplysningerRequest.SaksopplysningTyper utledSaksopplysningTyper(
@@ -41,16 +37,13 @@ public class RegisteropplysningerFactory {
                 ARBEID_TJENESTEPERSON_ELLER_FLY,
                 ARBEID_NORGE_BOSATT_ANNET_LAND,
                 ARBEID_I_UTLANDET,
+                IKKE_YRKESAKTIV,
                 YRKESAKTIV -> hentSaksopplysningTyperForBehandlingAvSøknad();
             case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE ->
                 hentSaksopplysningTyperForRegistreringAvUnntak();
             case ANMODNING_OM_UNNTAK_HOVEDREGEL -> hentSaksopplysningTyperForAnmodningOmUnntak();
             case BESLUTNING_LOVVALG_NORGE, BESLUTNING_LOVVALG_ANNET_LAND ->
                 hentSaksopplysningTyperForBeslutningOmLovvalg();
-            case IKKE_YRKESAKTIV -> {
-                if (unleash.isEnabled(ToggleName.IKKEYRKESAKTIV_FLYT)) yield hentSaksopplysningTyperForBehandlingAvSøknad();
-                throw new TekniskException("Kan ikke utlede relevante saksopplysninger fra behandlingstema " + behandlingstema);
-            }
             default -> throw new TekniskException(
                 "Kan ikke utlede relevante saksopplysninger fra behandlingstema " + behandlingstema);
         };

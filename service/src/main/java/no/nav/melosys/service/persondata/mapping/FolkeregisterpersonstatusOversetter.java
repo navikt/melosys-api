@@ -1,13 +1,13 @@
 package no.nav.melosys.service.persondata.mapping;
 
-import java.util.Collection;
-import java.util.Comparator;
-
 import no.nav.melosys.domain.kodeverk.Personstatuser;
 import no.nav.melosys.domain.person.Folkeregisterpersonstatus;
 import no.nav.melosys.integrasjon.pdl.dto.HarMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collection;
+import java.util.Comparator;
 
 public final class FolkeregisterpersonstatusOversetter {
     private static final Logger log = LoggerFactory.getLogger(FolkeregisterpersonstatusOversetter.class);
@@ -30,7 +30,7 @@ public final class FolkeregisterpersonstatusOversetter {
             personstatus.getBeskrivelse(),
             folkeregisterpersonstatus.metadata().master(),
             folkeregisterpersonstatus.hentKilde(),
-            folkeregisterpersonstatus.folkeregistermetadata().gyldighetstidspunkt().toLocalDate(),
+            folkeregisterpersonstatus.folkeregistermetadata().gyldighetstidspunkt() != null ? folkeregisterpersonstatus.folkeregistermetadata().gyldighetstidspunkt().toLocalDate() : null,
             folkeregisterpersonstatus.metadata().historisk()
         );
     }

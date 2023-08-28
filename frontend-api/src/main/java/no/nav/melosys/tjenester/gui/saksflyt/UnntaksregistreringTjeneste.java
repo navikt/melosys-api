@@ -1,9 +1,6 @@
 package no.nav.melosys.tjenester.gui.saksflyt;
 
 import io.swagger.annotations.Api;
-import no.finn.unleash.Unleash;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.UnntaksregistreringService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.security.token.support.core.api.Protected;
@@ -23,21 +20,16 @@ import org.springframework.web.context.WebApplicationContext;
 public class UnntaksregistreringTjeneste {
 
     private final Aksesskontroll aksesskontroll;
-    private final Unleash unleash;
     private final UnntaksregistreringService unntaksregistreringService;
 
-    public UnntaksregistreringTjeneste(Aksesskontroll aksesskontroll, Unleash unleash, UnntaksregistreringService unntaksregistreringService) {
+    public UnntaksregistreringTjeneste(Aksesskontroll aksesskontroll, UnntaksregistreringService unntaksregistreringService) {
         this.aksesskontroll = aksesskontroll;
-        this.unleash = unleash;
         this.unntaksregistreringService = unntaksregistreringService;
     }
 
     @PostMapping("{behandlingID}")
     public ResponseEntity<Void> registrerUnntakFraMedlemskap(@PathVariable("behandlingID") Long behandlingID) {
         aksesskontroll.autoriserSkriv(behandlingID);
-        if (!unleash.isEnabled(ToggleName.REGISTRERING_UNNTAK_FRA_MEDLEMSKAP)) {
-            throw new FunksjonellException("Denne funksjonaliteten er ikke støttet enda");
-        }
 
         unntaksregistreringService.registrerUnntakFraMedlemskap(behandlingID);
 

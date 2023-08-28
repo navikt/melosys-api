@@ -9,7 +9,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.featuretoggle.ToggleName.*
+import no.nav.melosys.featuretoggle.ToggleName.FOLKETRYGDEN_MVP
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import org.springframework.stereotype.Component
 
@@ -64,7 +64,7 @@ class SaksbehandlingRegler(
         behandlingstema: Behandlingstema
     ): Boolean {
         if (sakstema == Sakstemaer.TRYGDEAVGIFT) return true
-        if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE) return true
+        if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE || behandlingstype == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT) return true
 
         if (harRegistreringUnntakFraMedlemskapFlyt(
                 sakstype,
@@ -85,7 +85,7 @@ class SaksbehandlingRegler(
 
             ANMODNING_OM_UNNTAK_HOVEDREGEL -> sakstype == Sakstyper.TRYGDEAVTALE
             YRKESAKTIV -> (sakstype == Sakstyper.FTRL && !unleash.isEnabled(FOLKETRYGDEN_MVP))
-            IKKE_YRKESAKTIV -> (!unleash.isEnabled(IKKEYRKESAKTIV_FLYT))
+            IKKE_YRKESAKTIV -> (sakstype === Sakstyper.FTRL)
 
             else -> return false
         }
@@ -106,7 +106,7 @@ class SaksbehandlingRegler(
         sakstema: Sakstemaer,
         behandlingstema: Behandlingstema
     ): Boolean {
-        if (!unleash.isEnabled(REGISTRERING_UNNTAK_FRA_MEDLEMSKAP) || sakstema != Sakstemaer.UNNTAK) {
+        if (sakstema != Sakstemaer.UNNTAK) {
             return false
         }
 
@@ -130,7 +130,7 @@ class SaksbehandlingRegler(
         sakstype: Sakstyper,
         behandlingstema: Behandlingstema
     ): Boolean {
-        return unleash.isEnabled(IKKEYRKESAKTIV_FLYT) && (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE) && behandlingstema == IKKE_YRKESAKTIV
+        return (sakstype == Sakstyper.EU_EOS || sakstype == Sakstyper.TRYGDEAVTALE) && behandlingstema == IKKE_YRKESAKTIV
     }
 
     companion object {

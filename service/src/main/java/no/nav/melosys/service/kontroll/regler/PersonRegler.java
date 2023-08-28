@@ -1,10 +1,10 @@
 package no.nav.melosys.service.kontroll.regler;
 
-import java.util.Optional;
-
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
+
+import java.util.Optional;
 
 public final class PersonRegler {
     private static final String NORGE_ISO2_LANDKODE = "NO";
@@ -22,6 +22,11 @@ public final class PersonRegler {
     }
 
     public static boolean harRegistrertAdresse(Persondata persondata, MottatteOpplysningerData mottatteOpplysningerData) {
-        return !persondata.manglerRegistrertAdresse() || !mottatteOpplysningerData.bosted.oppgittAdresse.erTom();
+        return !persondata.manglerGyldigRegistrertAdresse() || mottatteOpplysningerData.bosted.oppgittAdresse.erGyldig();
+    }
+
+    // TODO Bør vi fortsatt ta hensyn til MottatteOpplysningerData her?
+    public static boolean harRegistrertAdresse(Persondata persondata) {
+        return !persondata.manglerGyldigRegistrertAdresse();
     }
 }

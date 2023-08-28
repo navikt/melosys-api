@@ -13,6 +13,7 @@
   "APP_NAME_MEDL": "medlemskap-medl-api",
   "APP_NAME_MELOSYS_EESSI": "melosys-eessi",
   "APP_NAME_FAKTURERINGSKOMPONENTEN": "faktureringskomponenten-q2",
+  "APP_NAME_INNTEKTSKOMPONENTEN": "inntektskomponenten",
   "NAIS_CLUSTER_NAME_FAKTURERINGSKOMPONENTEN": "dev-gcp",
   "APP_NAME_UTBETALING": "sokos-utbetaldata"
 }

@@ -15,6 +15,7 @@ import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.behandling.ReplikerBehandlingsresultatService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,12 +23,12 @@ import org.springframework.context.annotation.Import
 import java.time.Instant
 import java.time.LocalDate
 
-@Import(value = [BehandlingsresultatService::class])
+@Import(value = [ReplikerBehandlingsresultatService::class, BehandlingsresultatService::class])
 internal class BehandlingsresultatServiceIT(
     @Autowired
     private val behandlingRepository: BehandlingRepository,
     @Autowired
-    private val behandlingsresultatService: BehandlingsresultatService,
+    private val replikerBehandlingsresultatService: ReplikerBehandlingsresultatService,
     @Autowired
     private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired
@@ -41,7 +42,7 @@ internal class BehandlingsresultatServiceIT(
 
         val behandlingsresultat = lagBehandlingsresultat(behandlinger.orginal)
         behandlingsresultatRepository.save(behandlingsresultat)
-        behandlingsresultatService.replikerBehandlingsresultat(behandlinger.orginal, behandlinger.replika)
+        replikerBehandlingsresultatService.replikerBehandlingsresultat(behandlinger.orginal, behandlinger.replika)
 
         val replikaResultat = behandlingsresultatRepository.findById(behandlinger.replika.id).get()
 

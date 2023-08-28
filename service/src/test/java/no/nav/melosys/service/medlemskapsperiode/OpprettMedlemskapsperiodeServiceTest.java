@@ -68,7 +68,7 @@ class OpprettMedlemskapsperiodeServiceTest {
         behandlingsresultat.getVilkaarsresultater().add(lagOppfyltVilkår(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID));
         MedlemAvFolketrygden medlemAvFolketrygden = new MedlemAvFolketrygden();
         Medlemskapsperiode medlemskapsperiode = new Medlemskapsperiode();
-        medlemAvFolketrygden.addMedlemskapsperioder(medlemskapsperiode);
+        medlemAvFolketrygden.addMedlemskapsperiode(medlemskapsperiode);
         behandlingsresultat.setMedlemAvFolketrygden(medlemAvFolketrygden);
 
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
@@ -115,7 +115,7 @@ class OpprettMedlemskapsperiodeServiceTest {
 
         søknad.periode = new Periode(LocalDate.now(), null);
         søknad.soeknadsland.landkoder.add("BR");
-        søknad.setTrygdedekning(Trygdedekninger.HELSEDEL_MED_SYKE_OG_FORELDREPENGER);
+        søknad.setTrygdedekning(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER);
         mottatteOpplysninger.setMottatteOpplysningerdata(søknad);
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
         behandlingsresultat.setBehandling(behandling);

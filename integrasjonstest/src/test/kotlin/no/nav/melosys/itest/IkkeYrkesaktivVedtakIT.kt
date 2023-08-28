@@ -9,7 +9,6 @@ import io.kotest.assertions.withClue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Behandlingsmaate
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.kodeverk.*
@@ -25,7 +24,6 @@ import no.nav.melosys.domain.mottatteopplysninger.SoeknadIkkeYrkesaktiv
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.domain.saksflyt.ProsessType
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
@@ -54,7 +52,6 @@ class IkkeYrkesaktivVedtakIT(
     @Autowired prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val behandlingsresultatService: BehandlingsresultatService,
     @Autowired private val behandlingRepository: BehandlingRepository,
-    @Autowired private val unleash: FakeUnleash,
     @Autowired private val oAuthMockServer: OAuthMockServer,
     @Autowired private val mottatteOpplysningerService: MottatteOpplysningerService,
     @Autowired private val lovvalgsperiodeService: LovvalgsperiodeService,
@@ -66,8 +63,6 @@ class IkkeYrkesaktivVedtakIT(
     @BeforeEach
     fun setup() {
         oAuthMockServer.start()
-        unleash.resetAll()
-        unleash.enable(ToggleName.IKKEYRKESAKTIV_FLYT)
 
         mockServer.stubFor(
             WireMock.post("/api/v1/mal/ikke_yrkesaktiv_vedtaksbrev/lag-pdf?somKopi=false&utkast=false").willReturn(

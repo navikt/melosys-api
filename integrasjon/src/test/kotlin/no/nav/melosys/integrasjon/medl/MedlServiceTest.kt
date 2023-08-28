@@ -269,9 +269,9 @@ internal class MedlServiceTest {
                     tilOgMed = medlemskapsperiode.tom,
                     status = PeriodestatusMedl.GYLD.kode,
                     dekning = DekningMedl.FTRL_2_9_1_LEDD_A.kode,
-                    lovvalgsland = "BEL",
+                    lovvalgsland = "NOR",
                     lovvalg = LovvalgMedl.ENDL.kode,
-                    grunnlag = GrunnlagMedl.FTL_2_8.kode,
+                    grunnlag = GrunnlagMedl.FTL_2_8_1_ledd_a.kode,
                     sporingsinformasjon = MedlemskapsunntakForPost.SporingsinformasjonForPost(
                         kildedokument = KildedokumenttypeMedl.HENV_SOKNAD.getKode()
                     )
@@ -358,11 +358,11 @@ internal class MedlServiceTest {
     private fun lagMedlemskapsPeriode() = Medlemskapsperiode().apply {
         medlemskapstype = Medlemskapstyper.FRIVILLIG
         arbeidsland = Landkoder.BE.kode
-        trygdedekning = Trygdedekninger.HELSEDEL
+        trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
         fom = LocalDate.now()
         tom = LocalDate.now().plusYears(1)
         medlemAvFolketrygden =
-            MedlemAvFolketrygden().apply { bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8 }
+            MedlemAvFolketrygden().apply { bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A }
     }
 
     fun lagBehandlingsresultatMedOvergangsregelbestemmelser(): Behandlingsresultat {

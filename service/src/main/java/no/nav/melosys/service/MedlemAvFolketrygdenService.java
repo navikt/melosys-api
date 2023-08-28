@@ -25,6 +25,10 @@ public class MedlemAvFolketrygdenService {
         return medlemAvFolketrygdenRepository.findByBehandlingsresultatId(behandlingsresultatID);
     }
 
+    public Optional<MedlemAvFolketrygden> finnMedlemAvFolketrygdenMedMedlemskapsperioder(long behandlingsresultatID) {
+        return medlemAvFolketrygdenRepository.findWithMedlemskapsperioderByBehandlingsresultatId(behandlingsresultatID);
+    }
+
     public MedlemAvFolketrygden lagre(MedlemAvFolketrygden medlemAvFolketrygden) {
         return medlemAvFolketrygdenRepository.save(medlemAvFolketrygden);
     }

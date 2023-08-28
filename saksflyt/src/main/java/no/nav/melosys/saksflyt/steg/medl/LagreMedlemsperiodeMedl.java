@@ -1,32 +1,21 @@
 package no.nav.melosys.saksflyt.steg.medl;
 
-import java.util.Collection;
-
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
-import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.springframework.stereotype.Component;
 
-import static org.springframework.util.ObjectUtils.isEmpty;
-
 @Component
 public class LagreMedlemsperiodeMedl implements StegBehandler {
 
-    private final MedlemAvFolketrygdenService medlemAvFolketrygdenService;
     private final MedlPeriodeService medlPeriodeService;
     private final BehandlingsresultatService behandlingsresultatService;
 
-    public LagreMedlemsperiodeMedl(MedlemAvFolketrygdenService medlemAvFolketrygdenService,
-                                   MedlPeriodeService medlPeriodeService,
+    public LagreMedlemsperiodeMedl(MedlPeriodeService medlPeriodeService,
                                    BehandlingsresultatService behandlingsresultatService) {
-        this.medlemAvFolketrygdenService = medlemAvFolketrygdenService;
         this.medlPeriodeService = medlPeriodeService;
         this.behandlingsresultatService = behandlingsresultatService;
     }
@@ -38,29 +27,25 @@ public class LagreMedlemsperiodeMedl implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
-        Behandling behandling = prosessinstans.getBehandling();
-        long behandlingId = behandling.getId();
-        Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
+        long behandlingId = prosessinstans.getBehandling().getId();
+        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
 
-        if (resultat.erAvslag()) {
+        if (behandlingsresultat.erAvslag()) {
             return;
         }
 
-        var medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingId);
-        Collection<Medlemskapsperiode> medlemskapsperioder = medlemAvFolketrygden.getMedlemskapsperioder();
-
-        if (medlemskapsperioder.isEmpty()) {
-            throw new FunksjonellException("Ingen medlemskapsperioder funnet for behandling " + behandlingId);
-        }
-
-        for (Medlemskapsperiode medlemskapsperiode : medlemskapsperioder) {
-            opprettMedlPeriode(behandlingId, medlemskapsperiode);
+        var innvilgedeMedlemskapsperioder = behandlingsresultat.finnMedlemskapsperioder()
+            .stream().filter(Medlemskapsperiode::erInnvilget).toList();
+        for (Medlemskapsperiode medlemskapsperiode : innvilgedeMedlemskapsperioder) {
+            opprettEllerOppdaterMedlPeriode(behandlingId, medlemskapsperiode);
         }
     }
 
-    private void opprettMedlPeriode(long behandlingId, Medlemskapsperiode medlemskapsperiode) {
-        if (isEmpty(medlemskapsperiode.getMedlPeriodeID())) {
+    private void opprettEllerOppdaterMedlPeriode(long behandlingId, Medlemskapsperiode medlemskapsperiode) {
+        if (medlemskapsperiode.getMedlPeriodeID() == null) {
             medlPeriodeService.opprettPeriodeEndelig(behandlingId, medlemskapsperiode);
+        } else {
+            medlPeriodeService.oppdaterPeriodeEndelig(behandlingId, medlemskapsperiode);
         }
     }
 }

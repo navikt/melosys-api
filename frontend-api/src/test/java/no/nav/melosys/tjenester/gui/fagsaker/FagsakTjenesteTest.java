@@ -10,12 +10,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
-import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
-import no.nav.melosys.domain.dokument.sed.SedDokument;
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
@@ -25,6 +24,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
+import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -97,6 +97,8 @@ class FagsakTjenesteTest {
     @MockBean
     @SuppressWarnings("unused")
     private static OpprettBehandlingForSak opprettBehandlingForSak;
+    @MockBean
+    private static MedlemAvFolketrygdenService medlemAvFolketrygdenService;
 
     @Autowired
     private MockMvc mockMvc;
@@ -183,7 +185,7 @@ class FagsakTjenesteTest {
         behandling.setFagsak(fagsak);
         behandling.setId(123L);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
-        mockFagsakTjeneste(fagsak);
+        mockFagsakTjeneste(fagsak, null);
         var fagsakSokDto = new FagsakSokDto(FNR, null, null);
 
         mockMvc.perform(post(BASE_URL + "/sok")
@@ -214,7 +216,44 @@ class FagsakTjenesteTest {
             .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.fom", equalTo("2019-01-01")))
             .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.tom", equalTo("2019-02-01")))
             .andExpect(jsonPath("$[0].behandlingOversikter[0].lovvalgsperiode.fom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.getFom().toString())))
-            .andExpect(jsonPath("$[0].behandlingOversikter[0].lovvalgsperiode.tom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.getTom().toString())));
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].lovvalgsperiode.tom", equalTo(FORVENTET_LOVVALGSPERIODE.periode.getTom().toString())))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].medlemskapsperiode", equalTo(null)));
+    }
+
+    @Test
+    void hentFagsaker_medMedlemAvFolketrygdenOgMedlemskapsperioder_verifiserErMappetKorrekt() throws Exception {
+        long behandlingID = 123L;
+        String saksnummer = "MEL-1";
+
+        var fagsak = SaksbehandlingDataFactory.lagFagsak(saksnummer);
+        var behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        behandling.setId(behandlingID);
+        fagsak.setBehandlinger(Collections.singletonList(behandling));
+        var behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setMedlemAvFolketrygden(new MedlemAvFolketrygden());
+        var medlemskapsperiode = new Medlemskapsperiode();
+        medlemskapsperiode.setFom(FOM);
+        medlemskapsperiode.setTom(TOM);
+        medlemskapsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
+        behandlingsresultat.getMedlemAvFolketrygden().setMedlemskapsperioder(List.of(medlemskapsperiode));
+        mockFagsakTjeneste(fagsak, behandlingsresultat);
+
+        var fagsakSokDto = new FagsakSokDto(FNR, null, null);
+
+        mockMvc.perform(post(BASE_URL + "/sok")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(fagsakSokDto)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].hovedpartRolle", equalTo(Aktoersroller.BRUKER.toString())))
+            .andExpect(jsonPath("$[0].saksnummer", equalTo(saksnummer)))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].land.landkoder[0]", equalTo(Landkoder.DK.getKode())))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].land.landkoder[0]", is(not(equalTo(FORVENTET_LOVVALGSPERIODE.lovvalgsland)))))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.fom", equalTo("2019-01-01")))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].soknadsperiode.tom", equalTo("2019-02-01")))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].lovvalgsperiode", equalTo(null)))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].medlemskapsperiode.fom", equalTo(FOM.toString())))
+            .andExpect(jsonPath("$[0].behandlingOversikter[0].medlemskapsperiode.tom", equalTo(TOM.toString())));
     }
 
     @Test
@@ -227,7 +266,7 @@ class FagsakTjenesteTest {
         Aktoer aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.BRUKER);
         fagsak.setAktører(Set.of(aktoer));
-        mockFagsakTjeneste(fagsak);
+        mockFagsakTjeneste(fagsak, null);
         var fagsakSokDto = new FagsakSokDto(FNR, null, null);
 
         mockMvc.perform(post(BASE_URL + "/sok")
@@ -250,7 +289,7 @@ class FagsakTjenesteTest {
         aktoer.setOrgnr(ORGNR);
         aktoer.setRolle(Aktoersroller.VIRKSOMHET);
         fagsak.setAktører(Set.of(aktoer));
-        mockFagsakTjeneste(fagsak);
+        mockFagsakTjeneste(fagsak, null);
         var organisajonsdokument = new OrganisasjonDokument();
         organisajonsdokument.setNavn("Moe Organisasjon");
         when(organisasjonOppslagService.hentOrganisasjon(ORGNR)).thenReturn(organisajonsdokument);
@@ -274,7 +313,7 @@ class FagsakTjenesteTest {
         var aktoer = new Aktoer();
         aktoer.setRolle(Aktoersroller.VIRKSOMHET);
         fagsak.setAktører(Set.of(aktoer));
-        mockFagsakTjeneste(fagsak);
+        mockFagsakTjeneste(fagsak, null);
         var fagsakSokDto = new FagsakSokDto(null, null, ORGNR);
 
         mockMvc.perform(post(BASE_URL + "/sok")
@@ -321,32 +360,23 @@ class FagsakTjenesteTest {
         verify(fagsakService).ferdigbehandleSak("123");
     }
 
-    private void mockFagsakTjeneste(Fagsak fagsak) {
+    private void mockFagsakTjeneste(Fagsak fagsak, Behandlingsresultat eksisterendeBehres) {
         Soeknad søknadDokument = SaksbehandlingDataFactory.lagSøknadDokument();
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setMottatteOpplysningerdata(søknadDokument);
-        Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
-
-        behandlingsresultat.getLovvalgsperioder().add(lagLovvalgsPeriode());
+        Behandlingsresultat nyttBehres = new Behandlingsresultat();
+        nyttBehres.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
+        nyttBehres.getLovvalgsperioder().add(lagLovvalgsPeriode());
+        Behandlingsresultat behandlingsresultat = eksisterendeBehres == null ? nyttBehres : eksisterendeBehres;
 
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
         when(behandlingsresultatService.hentBehandlingsresultatMedLovvalgsperioder(anyLong())).thenReturn(behandlingsresultat);
         when(mottatteOpplysningerService.finnMottatteOpplysninger(fagsak.getBehandlinger().get(0).getId())).thenReturn(Optional.of(mottatteOpplysninger));
+        when(medlemAvFolketrygdenService.finnMedlemAvFolketrygdenMedMedlemskapsperioder(anyLong())).thenReturn(Optional.ofNullable(behandlingsresultat.getMedlemAvFolketrygden()));
         when(fagsakService.hentFagsak("123")).thenReturn(fagsak);
         when(persondataFasade.hentSammensattNavn(any())).thenReturn("Joe Moe");
         doReturn(List.of(fagsak)).when(fagsakService).hentFagsakerMedAktør(Aktoersroller.BRUKER, FNR);
         doReturn(List.of(fagsak)).when(fagsakService).hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, ORGNR);
-    }
-
-    private void mockNorskSedDokumentMedPeriode(long behandlingID, LocalDate fom, LocalDate tom) {
-        var sedDokument = new SedDokument();
-        sedDokument.setLovvalgslandKode(Landkoder.NO);
-
-        var periode = new Periode(fom, tom);
-        sedDokument.setLovvalgsperiode(periode);
-
-        when(saksopplysningerService.finnSedOpplysninger(behandlingID)).thenReturn(Optional.of(sedDokument));
     }
 
     private void mockFagsakMedBehandling(long behandlingID, String saksnummer) {
@@ -355,7 +385,7 @@ class FagsakTjenesteTest {
         behandling.setFagsak(fagsak);
         behandling.setId(behandlingID);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
-        mockFagsakTjeneste(fagsak);
+        mockFagsakTjeneste(fagsak, null);
     }
 
     private Lovvalgsperiode lagLovvalgsPeriode() {

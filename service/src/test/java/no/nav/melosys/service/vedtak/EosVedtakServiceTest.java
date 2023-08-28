@@ -119,7 +119,7 @@ class EosVedtakServiceTest {
             eq(true)
         );
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(any());
-        verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), any(Behandlingsresultat.class), eq(Sakstyper.EU_EOS), any(Behandlingsresultattyper.class), eq(null));
+        verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), eq(Sakstyper.EU_EOS), any(Behandlingsresultattyper.class), eq(null));
     }
 
     @Test

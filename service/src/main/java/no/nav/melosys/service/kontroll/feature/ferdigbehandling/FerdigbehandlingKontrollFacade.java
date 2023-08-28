@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Set;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -40,10 +39,9 @@ public class FerdigbehandlingKontrollFacade {
 
     @Transactional
     public Collection<Kontrollfeil> kontrollerVedtakMedRegisteropplysninger(Behandling behandling,
-                                                                            Behandlingsresultat behandlingsresultat,
                                                                             Sakstyper sakstype,
                                                                             Behandlingsresultattyper behandlingsresultattype,
                                                                             Set<Kontroll_begrunnelser> kontrollerSomSkalIgnoreres) {
-        return kontrollerKontrollMedRegisteropplysning.kontrollerVedtak(behandling, behandlingsresultat, sakstype, behandlingsresultattype, kontrollerSomSkalIgnoreres);
+        return kontrollerKontrollMedRegisteropplysning.kontrollerVedtak(behandling, sakstype, behandlingsresultattype, kontrollerSomSkalIgnoreres);
     }
 }

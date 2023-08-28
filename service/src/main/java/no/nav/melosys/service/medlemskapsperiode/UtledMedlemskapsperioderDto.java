@@ -3,22 +3,19 @@ package no.nav.melosys.service.medlemskapsperiode;
 import java.time.LocalDate;
 
 import no.nav.melosys.domain.ErPeriode;
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 
-import static no.nav.melosys.domain.kodeverk.Trygdedekninger.PENSJONSDEL;
-
-public class UtledMedlemskapsperioderRequest {
+public class UtledMedlemskapsperioderDto {
 
     private final ErPeriode søknadsperiode;
     private final Trygdedekninger trygdedekning;
     private final LocalDate mottaksdatoSøknad;
     private final String arbeidsland;
 
-    public UtledMedlemskapsperioderRequest(ErPeriode søknadsperiode,
-                                           Trygdedekninger trygdedekning,
-                                           LocalDate mottaksdatoSøknad,
-                                           String arbeidsland) {
+    public UtledMedlemskapsperioderDto(ErPeriode søknadsperiode,
+                                       Trygdedekninger trygdedekning,
+                                       LocalDate mottaksdatoSøknad,
+                                       String arbeidsland) {
         this.søknadsperiode = søknadsperiode;
         this.trygdedekning = trygdedekning;
         this.mottaksdatoSøknad = mottaksdatoSøknad;
@@ -41,7 +38,7 @@ public class UtledMedlemskapsperioderRequest {
         return arbeidsland;
     }
 
-    public boolean erPensjonsdel() {
-        return trygdedekning == PENSJONSDEL;
+    public static UtledMedlemskapsperioderDto av(UtledMedlemskapsperiodeNyVurderingDto request, ErPeriode søknadsperiode) {
+        return new UtledMedlemskapsperioderDto(søknadsperiode, request.getTrygdedekning(), request.getMottaksdatoSøknad(), request.getArbeidsland());
     }
 }

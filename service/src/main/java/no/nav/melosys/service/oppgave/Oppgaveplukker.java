@@ -12,6 +12,7 @@ import no.nav.melosys.domain.oppgave.OppgaveTilbakelegging;
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade;
 import no.nav.melosys.repository.OppgaveTilbakeleggingRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.lovligekombinasjoner.GyldigeKombinasjoner;
 import no.nav.melosys.service.oppgave.dto.PlukkOppgaveInnDto;
 import no.nav.melosys.service.oppgave.dto.TilbakeleggingDto;
 import no.nav.melosys.service.sak.FagsakService;
@@ -79,7 +80,7 @@ public class Oppgaveplukker {
     private List<Oppgave> filtrerOppgaver(PlukkOppgaveInnDto plukkDto, List<Oppgave> utildelteOppgaver) {
         Set<String> saksnumre = utildelteOppgaver.stream().map(Oppgave::getSaksnummer).collect(Collectors.toSet());
         Map<String, Fagsak> sasksnummerFagsakMap = fagsakService.hentFagsaker(saksnumre).stream()
-                .collect(Collectors.toMap(Fagsak::getSaksnummer, Function.identity()));
+            .collect(Collectors.toMap(Fagsak::getSaksnummer, Function.identity()));
 
         int antallSakSomIkkeMatcherSøk = 0;
         int antallSakSomVenter = 0;
@@ -114,8 +115,8 @@ public class Oppgaveplukker {
 
     private boolean fagsakMatcherSøk(Fagsak fagsak, PlukkOppgaveInnDto plukkDto) {
         return fagsak != null && fagsak.getType() == plukkDto.sakstype()
-                && fagsak.getTema() == plukkDto.sakstema()
-                && fagsak.getBehandlinger().stream().anyMatch(behandling -> behandling.getTema() == plukkDto.behandlingstema());
+            && fagsak.getTema() == plukkDto.sakstema()
+            && fagsak.getBehandlinger().stream().anyMatch(behandling -> behandling.getTema() == plukkDto.behandlingstema());
     }
 
     private boolean venterPåDokumentasjonEllerFagligAvklaring(Fagsak fagsak) {
@@ -126,7 +127,7 @@ public class Oppgaveplukker {
         if (behandling.erVenterForDokumentasjon()) {
             if (behandling.getDokumentasjonSvarfristDato() == null) {
                 log.warn("Behandling {} tilhørende {} avventer dokumentasjon, men har ingen svarfristdato.",
-                        behandling.getId(), fagsak.getSaksnummer());
+                    behandling.getId(), fagsak.getSaksnummer());
                 return true;
             }
             return Instant.now().isBefore(behandling.getDokumentasjonSvarfristDato());
@@ -145,8 +146,9 @@ public class Oppgaveplukker {
 
     private Set<String> hentAlleOppgaveBehandlingstemaTilSøk(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema) {
         return Arrays.stream(Behandlingstyper.values())
-                .map(behandlingstype -> oppgaveFactory.utledOppgaveBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype).getKode())
-                .collect(Collectors.toSet());
+            .filter(behandlingstype -> OppgaveFactory.erGyldigOppgave(sakstype, sakstema, behandlingstema, behandlingstype))
+            .map(behandlingstype -> oppgaveFactory.utledOppgaveBehandlingstema(sakstype, sakstema, behandlingstema, behandlingstype).getKode())
+            .collect(Collectors.toSet());
     }
 
     @Transactional

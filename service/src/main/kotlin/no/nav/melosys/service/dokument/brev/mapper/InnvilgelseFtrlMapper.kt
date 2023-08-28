@@ -1,17 +1,21 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
-import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.Vilkaarsresultat
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling
+import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Representerer
 import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland
 import no.nav.melosys.domain.kodeverk.Vilkaar
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrl
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.Periode
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import org.springframework.stereotype.Component
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import javax.transaction.Transactional
 
 @Component
@@ -21,25 +25,26 @@ class InnvilgelseFtrlMapper(
 ) {
     @Transactional
     fun map(brevbestilling: InnvilgelseBrevbestilling): InnvilgelseFtrl {
-        val behandlingId = brevbestilling.behandlingId
-        val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(behandlingId)
+        val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
         val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
+        val arbeidsland =
+            behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland.landkoder[0]
 
-        //NOTE Henter i første versjon av FTRL kun en norsk arbeidsgiver og forventer ett registert arbeidsland
-        val norskeArbeidsgivere = avklarteVirksomheterService.hentNorskeArbeidsgivere(brevbestilling.behandling)[0]
-        val mottatteOpplysningerData = behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData
-        val soeknadsland = mottatteOpplysningerData.soeknadsland
-        val arbeidsland = soeknadsland.landkoder[0]
-        val medlemskapsperioder = medlemAvFolketrygden.medlemskapsperioder
         return InnvilgelseFtrl.Builder(brevbestilling)
-            .perioder(
-                medlemskapsperioder
-                    .map { m: Medlemskapsperiode? -> Periode(m) }
-                    .toList()
+            .perioder(mapPerioder(medlemAvFolketrygden))
+            .bestemmelse(medlemAvFolketrygden.bestemmelse)
+            .avslåttHelsedelFørMottaksdato(
+                erAvslåttHelsedelFørMottaksdato(
+                    brevbestilling.forsendelseMottatt,
+                    medlemAvFolketrygden
+                )
             )
-            .erFullstendigInnvilget(erFullstendigInnvilget(medlemskapsperioder))
-            .ftrl_2_8_begrunnelse(hentSaerligBegrunnelse(behandlingsresultat))
-            .arbeidsgiverNavn(norskeArbeidsgivere.navn)
+            .trygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftMottaker)
+            .skatteplikttype(medlemAvFolketrygden.utledSkatteplikttype())
+            .ftrl_2_8_begrunnelse(hentFtrlNærTilknytningNorgeBegrunnelse(behandlingsresultat.vilkaarsresultater))
+            .begrunnelseAnnenGrunnFritekst(hentSaerligBegrunnelseFritekst(behandlingsresultat.vilkaarsresultater))
+            .arbeidsgivere(
+                avklarteVirksomheterService.hentNorskeArbeidsgivere(brevbestilling.behandling).map { it.navn })
             .arbeidsland(dokgenMapperDatahenter.hentLandnavnFraLandkode(arbeidsland))
             .trygdeavtaleMedArbeidsland(harTrygdeavtaleMedArbeidsland(arbeidsland))
             .arbeidsgiverFullmektigNavn(
@@ -48,17 +53,39 @@ class InnvilgelseFtrlMapper(
                     Representerer.ARBEIDSGIVER
                 )
             )
-            .avgiftssatsAar(LocalDate.now().year.toString())
+            .betalerArbeidsgiveravgift(erBetalerArbeidsgiveravgift(medlemAvFolketrygden.fastsattTrygdeavgift))
             .build()
     }
 
-    private fun erFullstendigInnvilget(medlemskapsperioder: Collection<Medlemskapsperiode>): Boolean =
-        medlemskapsperioder.all { it.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET }
+    private fun mapPerioder(medlemAvFolketrygden: MedlemAvFolketrygden): List<Periode> {
+        val trygdeavgiftsperioder = medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.map { Periode.av(it) }
+        val medlemskapsperioder = medlemAvFolketrygden.medlemskapsperioder.map { Periode.av(it) }
+        return trygdeavgiftsperioder + medlemskapsperioder
+    }
 
-    private fun hentSaerligBegrunnelse(behandlingsresultat: Behandlingsresultat): String? =
-        behandlingsresultat.vilkaarsresultater
+    private fun erAvslåttHelsedelFørMottaksdato(
+        mottaksdato: Instant,
+        medlemAvFolketrygden: MedlemAvFolketrygden
+    ): Boolean =
+        medlemAvFolketrygden.medlemskapsperioder.any {
+            it.innvilgelsesresultat == InnvilgelsesResultat.AVSLAATT
+                && it.fom.isBefore(LocalDate.ofInstant(mottaksdato, ZoneId.systemDefault()))
+        }
+
+    private fun erBetalerArbeidsgiveravgift(fastsattTrygdeavgift: FastsattTrygdeavgift) =
+        fastsattTrygdeavgift.trygdeavgiftsperioder.any { it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt }
+
+    private fun hentFtrlNærTilknytningNorgeBegrunnelse(vilkaarsresultater: Set<Vilkaarsresultat>): Ftrl_2_8_naer_tilknytning_norge_begrunnelser? =
+        vilkaarsresultater
             .filter { it.vilkaar == Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE }
             .map { it.begrunnelser.iterator().next().kode }
+            .map { Ftrl_2_8_naer_tilknytning_norge_begrunnelser.valueOf(it) }
+            .firstOrNull()
+
+    private fun hentSaerligBegrunnelseFritekst(vilkaarsresultater: Set<Vilkaarsresultat>): String? =
+        vilkaarsresultater
+            .filter { it.vilkaar == Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE }
+            .map { it.begrunnelser.iterator().next().vilkaarsresultat.begrunnelseFritekst }
             .firstOrNull()
 
     private fun harTrygdeavtaleMedArbeidsland(arbeidsland: String): Boolean =
