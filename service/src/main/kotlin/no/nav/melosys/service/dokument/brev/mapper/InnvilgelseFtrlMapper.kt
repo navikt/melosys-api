@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
+import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.Vilkaarsresultat
 import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
@@ -53,7 +54,7 @@ class InnvilgelseFtrlMapper(
                     Representerer.ARBEIDSGIVER
                 )
             )
-            .betalerArbeidsgiveravgift(erBetalerArbeidsgiveravgift(medlemAvFolketrygden.fastsattTrygdeavgift))
+            .betalerArbeidsgiveravgift(erBetalerArbeidsgiveravgift(medlemAvFolketrygden.medlemskapsperioder))
             .build()
     }
 
@@ -69,8 +70,8 @@ class InnvilgelseFtrlMapper(
                 && it.fom.isBefore(LocalDate.ofInstant(mottaksdato, ZoneId.systemDefault()))
         }
 
-    private fun erBetalerArbeidsgiveravgift(fastsattTrygdeavgift: FastsattTrygdeavgift) =
-        fastsattTrygdeavgift.trygdeavgiftsperioder.any { it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt }
+    private fun erBetalerArbeidsgiveravgift(medlemskapsperioder: Collection<Medlemskapsperiode>) =
+        medlemskapsperioder.any { it.trygdeavgiftsperioder.any { it.grunnlagInntekstperiode.isArbeidsgiversavgiftBetalesTilSkatt } }
 
     private fun hentFtrlNærTilknytningNorgeBegrunnelse(vilkaarsresultater: Set<Vilkaarsresultat>): Ftrl_2_8_naer_tilknytning_norge_begrunnelser? =
         vilkaarsresultater
