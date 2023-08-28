@@ -53,11 +53,7 @@ class UtledMedlemskapsperioder {
         opprinneligTrygdedekning: Trygdedekninger,
         dto: UtledMedlemskapsperiodeNyVurderingDto
     ) {
-        val trygdedekningOppdatertMedPensjonsdel =
-            (opprinneligTrygdedekning == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE && dto.trygdedekning == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON)
-                || (opprinneligTrygdedekning == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER && dto.trygdedekning == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER)
-
-        if (trygdedekningOppdatertMedPensjonsdel) {
+        if (trygdedekningOppdatertMedPensjonsdel(opprinneligTrygdedekning, dto.trygdedekning)) {
             medlemskapsperioder
                 .filter { !datoErTidligereEnn2ÅrFørMottaksdato(it.tom, dto.mottaksdatoSøknad) }
                 .onEach { it.trygdedekning = leggTilPensjonsdel(it.trygdedekning) }
@@ -236,6 +232,22 @@ class UtledMedlemskapsperioder {
             Periode(splitFra, periode.tom)
         )
 
+    private fun trygdedekningOppdatertMedPensjonsdel(
+        opprinneligTrygdedekning: Trygdedekninger,
+        nyTrygdedekning: Trygdedekninger
+    ): Boolean {
+        if (opprinneligTrygdedekning == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+            && nyTrygdedekning == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
+        ) {
+            return true
+        }
+        if (opprinneligTrygdedekning == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER
+            && nyTrygdedekning == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
+        ) {
+            return true
+        }
+        return false
+    }
 
     private fun fjernPensjonsdel(trygdedekning: Trygdedekninger): Trygdedekninger =
         when (trygdedekning) {
