@@ -37,7 +37,7 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            lagMedlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, trygdedekning)
+            lagMedlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), InnvilgelsesResultat.INNVILGET, trygdedekning)
         );
     }
 
@@ -50,7 +50,7 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            lagMedlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, trygdedekning)
+            lagMedlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), InnvilgelsesResultat.INNVILGET, trygdedekning)
         );
     }
 
@@ -65,7 +65,7 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            lagMedlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.PLIKTIG, trygdedekning)
+            lagMedlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), InnvilgelsesResultat.AVSLAATT, trygdedekning)
         );
     }
 
@@ -80,7 +80,7 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            lagMedlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, trygdedekning)
+            lagMedlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), InnvilgelsesResultat.INNVILGET, trygdedekning)
         );
     }
 
@@ -93,7 +93,7 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            lagMedlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, trygdedekning)
+            lagMedlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), InnvilgelsesResultat.INNVILGET, trygdedekning)
         );
     }
 
@@ -106,7 +106,7 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            lagMedlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.PLIKTIG, trygdedekning)
+            lagMedlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), InnvilgelsesResultat.AVSLAATT, trygdedekning)
         );
     }
 
@@ -121,9 +121,9 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            lagMedlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.PLIKTIG, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE),
-            lagMedlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON),
-            lagMedlemskapsperiode(mottaksdato, søknadsPeriode.getTom(), arbeidsland, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, trygdedekning)
+            lagMedlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE),
+            lagMedlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), InnvilgelsesResultat.INNVILGET, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON),
+            lagMedlemskapsperiode(mottaksdato, søknadsPeriode.getTom(), InnvilgelsesResultat.INNVILGET, trygdedekning)
         );
     }
 
@@ -136,9 +136,9 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            lagMedlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.PLIKTIG, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER),
-            lagMedlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON),
-            lagMedlemskapsperiode(mottaksdato, søknadsPeriode.getTom(), arbeidsland, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, trygdedekning)
+            lagMedlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER),
+            lagMedlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), InnvilgelsesResultat.INNVILGET, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON),
+            lagMedlemskapsperiode(mottaksdato, søknadsPeriode.getTom(), InnvilgelsesResultat.INNVILGET, trygdedekning)
         );
     }
 
@@ -151,9 +151,9 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            lagMedlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.PLIKTIG, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE),
-            lagMedlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON),
-            lagMedlemskapsperiode(mottaksdato, søknadsPeriode.getTom(), arbeidsland, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, trygdedekning)
+            lagMedlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE),
+            lagMedlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), InnvilgelsesResultat.INNVILGET, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON),
+            lagMedlemskapsperiode(mottaksdato, søknadsPeriode.getTom(), InnvilgelsesResultat.INNVILGET, trygdedekning)
         );
     }
 
@@ -166,9 +166,9 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            lagMedlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.PLIKTIG, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE),
-            lagMedlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON),
-            lagMedlemskapsperiode(mottaksdato, søknadsPeriode.getTom(), arbeidsland, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, trygdedekning)
+            lagMedlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE),
+            lagMedlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), InnvilgelsesResultat.INNVILGET, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON),
+            lagMedlemskapsperiode(mottaksdato, søknadsPeriode.getTom(), InnvilgelsesResultat.INNVILGET, trygdedekning)
         );
     }
 
@@ -181,8 +181,8 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            lagMedlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.PLIKTIG, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE),
-            lagMedlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON)
+            lagMedlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE),
+            lagMedlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), InnvilgelsesResultat.INNVILGET, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON)
         );
     }
 
@@ -196,8 +196,8 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            lagMedlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.PLIKTIG, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER),
-            lagMedlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON)
+            lagMedlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER),
+            lagMedlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), InnvilgelsesResultat.INNVILGET, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON)
         );
     }
 
@@ -212,8 +212,8 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            lagMedlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), arbeidsland, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.PLIKTIG, trygdedekning),
-            lagMedlemskapsperiode(mottaksdato, søknadsPeriode.getTom(), arbeidsland, InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, trygdedekning)
+            lagMedlemskapsperiode(søknadsPeriode.getFom(), mottaksdato.minusDays(1), InnvilgelsesResultat.AVSLAATT, trygdedekning),
+            lagMedlemskapsperiode(mottaksdato, søknadsPeriode.getTom(), InnvilgelsesResultat.INNVILGET, trygdedekning)
         );
     }
 
@@ -226,7 +226,7 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            lagMedlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.PLIKTIG, trygdedekning)
+            lagMedlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), InnvilgelsesResultat.AVSLAATT, trygdedekning)
         );
     }
 
@@ -239,7 +239,7 @@ class UtledMedlemskapsperioderTest {
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
         ).containsOnly(
-            lagMedlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), arbeidsland, InnvilgelsesResultat.AVSLAATT, Medlemskapstyper.PLIKTIG, trygdedekning)
+            lagMedlemskapsperiode(søknadsPeriode.getFom(), søknadsPeriode.getTom(), InnvilgelsesResultat.AVSLAATT, trygdedekning)
         );
     }
 
@@ -251,8 +251,7 @@ class UtledMedlemskapsperioderTest {
         var opprinneligPeriode = new Periode(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-12-31"));
         var opprinneligTrygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON;
         var opprinneligMedlemskapsperiode = lagMedlemskapsperiode(
-            opprinneligPeriode.getFom(), opprinneligPeriode.getTom(), arbeidsland,
-            InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, opprinneligTrygdedekning);
+            opprinneligPeriode.getFom(), opprinneligPeriode.getTom(), InnvilgelsesResultat.INNVILGET, opprinneligTrygdedekning);
         var opprinneligSøknad = new SoeknadFtrl();
         opprinneligSøknad.setTrygdedekning(opprinneligTrygdedekning);
         opprinneligSøknad.periode = opprinneligPeriode;
@@ -301,8 +300,7 @@ class UtledMedlemskapsperioderTest {
         var opprinneligPeriode = new Periode(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-12-31"));
         var opprinneligTrygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE;
         var opprinneligMedlemskapsperiode = lagMedlemskapsperiode(
-            opprinneligPeriode.getFom(), opprinneligPeriode.getTom(), arbeidsland,
-            InnvilgelsesResultat.INNVILGET, Medlemskapstyper.PLIKTIG, opprinneligTrygdedekning);
+            opprinneligPeriode.getFom(), opprinneligPeriode.getTom(), InnvilgelsesResultat.INNVILGET, opprinneligTrygdedekning);
         var opprinneligSøknad = new SoeknadFtrl();
         opprinneligSøknad.setTrygdedekning(opprinneligTrygdedekning);
         opprinneligSøknad.periode = opprinneligPeriode;
@@ -339,16 +337,14 @@ class UtledMedlemskapsperioderTest {
             );
     }
 
-    private Medlemskapsperiode lagMedlemskapsperiode(LocalDate fom, LocalDate tom, String arbeidsland, InnvilgelsesResultat innvilgelsesResultat, Medlemskapstyper medlemskapstype, Trygdedekninger trygdedekning) {
+    private Medlemskapsperiode lagMedlemskapsperiode(LocalDate fom, LocalDate tom, InnvilgelsesResultat innvilgelsesResultat, Trygdedekninger trygdedekning) {
         var forventetMedlemskapsperiode = new Medlemskapsperiode();
         forventetMedlemskapsperiode.setFom(fom);
         forventetMedlemskapsperiode.setTom(tom);
         forventetMedlemskapsperiode.setArbeidsland(arbeidsland);
         forventetMedlemskapsperiode.setInnvilgelsesresultat(innvilgelsesResultat);
-        forventetMedlemskapsperiode.setMedlemskapstype(medlemskapstype);
+        forventetMedlemskapsperiode.setMedlemskapstype(Medlemskapstyper.PLIKTIG);
         forventetMedlemskapsperiode.setTrygdedekning(trygdedekning);
         return forventetMedlemskapsperiode;
     }
-
-
 }
