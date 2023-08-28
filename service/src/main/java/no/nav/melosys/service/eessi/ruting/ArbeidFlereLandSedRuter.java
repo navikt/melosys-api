@@ -38,19 +38,16 @@ public class ArbeidFlereLandSedRuter implements SedRuterForSedTyper {
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final OppgaveService oppgaveService;
-    private final Unleash unleash;
 
     public ArbeidFlereLandSedRuter(ProsessinstansService prosessinstansService, FagsakService fagsakService,
                                    BehandlingService behandlingService,
                                    BehandlingsresultatService behandlingsresultatService,
-                                   OppgaveService oppgaveService,
-                                   Unleash unleash) {
+                                   OppgaveService oppgaveService) {
         this.prosessinstansService = prosessinstansService;
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.oppgaveService = oppgaveService;
-        this.unleash = unleash;
     }
 
     @Override
