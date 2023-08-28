@@ -26,12 +26,13 @@ class OppgaveMigreringAdminTjeneste(
         @RequestHeader(AdminTjeneste.API_KEY_HEADER) apiKey: String?,
         @RequestParam(required = false) bruker: String?,
         @RequestParam(required = false) saksnummer: String?,
-        @RequestParam(required = false, defaultValue = "true") dryrun: Boolean
+        @RequestParam(required = false, defaultValue = "true") dryrun: Boolean,
+        @RequestBody(required = false) saksFilter: OppgaveMigrering.SaksFilter = OppgaveMigrering.SaksFilter()
     ): ResponseEntity<Unit> {
         log.info("Migrer oppgave for bruker $bruker for sak $saksnummer dryrun $dryrun")
         validerApikey(apiKey)
 
-        oppgaveMigrering.go(bruker, saksnummer, dryrun)
+        oppgaveMigrering.go(bruker, saksnummer, dryrun, saksFilter)
 
         return ResponseEntity.noContent().build()
     }
