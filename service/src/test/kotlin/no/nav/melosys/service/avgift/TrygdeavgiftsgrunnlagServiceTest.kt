@@ -1,7 +1,10 @@
 package no.nav.melosys.service.avgift
 
 import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.matchers.collections.*
+import io.kotest.matchers.collections.shouldBeEmpty
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -66,6 +69,39 @@ class TrygdeavgiftsgrunnlagServiceTest {
                 BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(Skatteplikttype.SKATTEPLIKTIG, emptyList())
             )
         }.message.shouldContain("Kan ikke oppdatere trygdeavgiftsgrunnlaget før medlemskapsperioder finnes")
+    }
+
+    @Test
+    fun oppdaterTrygdeavgiftsgrunnlag_ingenMedlemskapsperioderInnvilget_kasterFeil() {
+        behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            medlemskapsperioder = listOf(Medlemskapsperiode()
+                .apply { innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT })
+        }
+
+
+        shouldThrow<FunksjonellException> {
+            trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
+                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(Skatteplikttype.SKATTEPLIKTIG, emptyList())
+            )
+        }.message.shouldContain("Klarte ikke finne startdatoen på medlemskapet")
+    }
+
+    @Test
+    fun oppdaterTrygdeavgiftsgrunnlag_medlemskapsperiodeÅpenSluttdato_kasterFeil() {
+        behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            medlemskapsperioder = listOf(Medlemskapsperiode()
+                .apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    fom = LocalDate.now()
+                })
+        }
+
+
+        shouldThrow<FunksjonellException> {
+            trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
+                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(Skatteplikttype.SKATTEPLIKTIG, emptyList())
+            )
+        }.message.shouldContain("Klarte ikke finne sluttdatoen på medlemskapet")
     }
 
     @Test
