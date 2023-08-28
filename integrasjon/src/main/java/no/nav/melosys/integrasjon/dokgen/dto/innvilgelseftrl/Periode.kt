@@ -43,7 +43,7 @@ class Periode(
                     medlemskapsperiode.innvilgelsesresultat
                 )
             }.toMutableList().also {
-                if (medlemskapsperiode.innvilgelsesresultat != InnvilgelsesResultat.INNVILGET) {
+                if (!medlemskapsperiode.erInnvilget()) {
                     it.add(
                         Periode(
                             medlemskapsperiode.fom,
