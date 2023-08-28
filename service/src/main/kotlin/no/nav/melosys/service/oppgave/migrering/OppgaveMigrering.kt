@@ -53,9 +53,9 @@ class OppgaveMigrering(
 
     @Async
     @Synchronized
-    fun go(bruker: String?, saksnummer: String?, dryrun: Boolean) {
+    fun go(bruker: String?, saksnummer: String?, dryrun: Boolean, saksFilter: SaksFilter = SaksFilter()) {
         ThreadLocalAccessInfo.executeProcess("Migrer oppgaver") {
-            migrering(bruker, saksnummer, dryrun)
+            migrering(bruker, saksnummer, dryrun, saksFilter)
         }
     }
 
@@ -77,7 +77,12 @@ class OppgaveMigrering(
         return behandlingRepository.finnSaksOgBehandlingTyperOgTema(behandlingsstatuser)
     }
 
-    internal fun migrering(bruker: String?, saksnummer: String?, dryrun: Boolean) {
+    internal fun migrering(
+        bruker: String?,
+        saksnummer: String?,
+        dryrun: Boolean,
+        saksFilter: SaksFilter = SaksFilter()
+    ) {
         log.info("Utfører OppgaveMigrering")
         finnSaker(bruker, saksnummer).apply {
             migreringsRapport.antallSakerFunnet = size
@@ -96,6 +101,8 @@ class OppgaveMigrering(
             it.oppgaver.size == 1 && erGyldig(it.sak)
         }.filterNot {
             it.ny.fantIkkeOppgaveMapping()
+        }.filter {
+            saksFilter.filtrer(it.sak)
         }.forEach {
             oppdaterOppgave(dryrun, it)
         }
@@ -333,5 +340,18 @@ class OppgaveMigrering(
                         "sakstype:$sakstype, sakstema:$sakstema, behandlingstema:$behandlingstema, behandlingstype:$behandlingstype"
                 )
         }
+    }
+
+    data class SaksFilter(
+        val sakstyper: List<Sakstyper> = listOf(),
+        val sakstemar: List<Sakstemaer> = listOf(),
+        val behandlingstyper: List<Behandlingstyper> = listOf(),
+        val behandlingstemaer: List<Behandlingstema> = listOf()
+    ) {
+        fun filtrer(sak: SakOgBehandlingDTO): Boolean = (sakstyper.isEmpty() || sak.sakstype in sakstyper) &&
+            (sakstemar.isEmpty() || sak.sakstema in sakstemar) &&
+            (behandlingstemaer.isEmpty() || sak.behandlingstema in behandlingstemaer) &&
+            (behandlingstyper.isEmpty() || sak.behandlingstype in behandlingstyper)
+
     }
 }

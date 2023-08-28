@@ -1,6 +1,10 @@
 package no.nav.melosys.service.oppgave
 
 import mu.KotlinLogging
+import no.nav.melosys.domain.kodeverk.Sakstemaer
+import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.service.AdminTjeneste
 import no.nav.melosys.service.oppgave.migrering.MigreringsRapport
 import no.nav.melosys.service.oppgave.migrering.OppgaveMigrering
@@ -26,12 +30,19 @@ class OppgaveMigreringAdminTjeneste(
         @RequestHeader(AdminTjeneste.API_KEY_HEADER) apiKey: String?,
         @RequestParam(required = false) bruker: String?,
         @RequestParam(required = false) saksnummer: String?,
-        @RequestParam(required = false, defaultValue = "true") dryrun: Boolean
+        @RequestParam(required = false, defaultValue = "true") dryrun: Boolean,
+        @RequestBody(required = false) saksFilter: OppgaveMigrering.SaksFilter =
+            OppgaveMigrering.SaksFilter(
+                sakstyper = listOf(Sakstyper.EU_EOS),
+                sakstemar = listOf(Sakstemaer.MEDLEMSKAP_LOVVALG),
+                behandlingstemaer = listOf(Behandlingstema.UTSENDT_SELVSTENDIG),
+                behandlingstyper = listOf(Behandlingstyper.FØRSTEGANG)
+            )
     ): ResponseEntity<Unit> {
         log.info("Migrer oppgave for bruker $bruker for sak $saksnummer dryrun $dryrun")
         validerApikey(apiKey)
 
-        oppgaveMigrering.go(bruker, saksnummer, dryrun)
+        oppgaveMigrering.go(bruker, saksnummer, dryrun, saksFilter)
 
         return ResponseEntity.noContent().build()
     }
