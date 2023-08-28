@@ -32,7 +32,7 @@ class UtledMedlemskapsperioderTest {
     void lagMedlemskapsperioder_søknadsperiodeStarterPåMottaksdato_genererMedlemskapsperiodeForHeleSøknadsperiodeMedOppgittTrygdedekning() {
         final Periode søknadsPeriode = new Periode(mottaksdato, mottaksdato.plusYears(1));
         final Trygdedekninger trygdedekning = Trygdedekninger.FULL_DEKNING_FTRL;
-        var request = new UtledMedlemskapsperioderRequest(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
+        var request = new UtledMedlemskapsperioderDto(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
 
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -45,7 +45,7 @@ class UtledMedlemskapsperioderTest {
     void lagMedlemskapsperioder_søknadsperiodeStarter20DagerFørMottaksdato_helePeriodenBlirInnvilgetMedSøktTrygdedekning() {
         final Periode søknadsPeriode = new Periode(mottaksdato.minusDays(20), mottaksdato.plusYears(1));
         final Trygdedekninger trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER;
-        var request = new UtledMedlemskapsperioderRequest(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
+        var request = new UtledMedlemskapsperioderDto(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
 
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -60,7 +60,7 @@ class UtledMedlemskapsperioderTest {
     void lagMedlemskapsperiode_søknadsperiodeStarterMerEnnToÅrFørMottaksDato_helePeriodenBlirAvslåttMedSøktTrygdedekning() {
         final Periode søknadsPeriode = new Periode(mottaksdato.minusYears(3), mottaksdato);
         final Trygdedekninger trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER;
-        var request = new UtledMedlemskapsperioderRequest(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
+        var request = new UtledMedlemskapsperioderDto(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
 
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -75,7 +75,7 @@ class UtledMedlemskapsperioderTest {
     void lagMedlemskapsperiode_søknadsperiodenStarter1ÅrFørMottaksdatoTrygdedekningErPensjonsdel_helePeriodenBlirInnvilgetMedPensjonsdel() {
         final Periode søknadsPeriode = new Periode(mottaksdato.minusYears(1), mottaksdato);
         final Trygdedekninger trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON;
-        var request = new UtledMedlemskapsperioderRequest(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
+        var request = new UtledMedlemskapsperioderDto(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
 
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -88,7 +88,7 @@ class UtledMedlemskapsperioderTest {
     void lagMedlemskapsperiode_søknadsperiodenStarter2ÅrFørMottaksdatoTrygdedekningErPensjonsdel_helePeriodenBlirInnvilgetMedPensjonsdel() {
         final Periode søknadsPeriode = new Periode(mottaksdato.minusYears(2), mottaksdato.minusYears(1));
         final Trygdedekninger trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON;
-        var request = new UtledMedlemskapsperioderRequest(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
+        var request = new UtledMedlemskapsperioderDto(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
 
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -101,7 +101,7 @@ class UtledMedlemskapsperioderTest {
     void lagMedlemskapsperiode_søknadsperiodenStarter3ÅrFørMottaksdatoTrygdedekningErPensjonsdel_helePeriodenBlirAvslåttMedPensjonsdel() {
         final Periode søknadsPeriode = new Periode(mottaksdato.minusYears(3), mottaksdato);
         final Trygdedekninger trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON;
-        var request = new UtledMedlemskapsperioderRequest(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
+        var request = new UtledMedlemskapsperioderDto(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
 
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -116,7 +116,7 @@ class UtledMedlemskapsperioderTest {
     void lagMedlemskapsperiode_søknadsperiodenStarter15MndFørMottaksdatoMedHelseOgPensjonsdelSlutter4MndEtterMottaksdato_enAvslåttOgInnvilgetMedSammePeriodeOgEnInnvilgetPeriode() {
         final Periode søknadsPeriode = new Periode(mottaksdato.minusMonths(15), mottaksdato.plusMonths(4));
         final Trygdedekninger trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON;
-        var request = new UtledMedlemskapsperioderRequest(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
+        var request = new UtledMedlemskapsperioderDto(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
 
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -131,7 +131,7 @@ class UtledMedlemskapsperioderTest {
     void lagMedlemskapsperiode_søknadsperiodenStarter15MndFørMottaksdatoMedHelseOgPensjonsdelMedSykeOgForeldrepengerSlutter4MndEtterMottaksdato_enAvslåttOgInnvilgetMedSammePeriodeOgEnInnvilgetPeriode() {
         final Periode søknadsPeriode = new Periode(mottaksdato.minusMonths(15), mottaksdato.plusMonths(4));
         final Trygdedekninger trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER;
-        var request = new UtledMedlemskapsperioderRequest(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
+        var request = new UtledMedlemskapsperioderDto(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
 
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -146,7 +146,7 @@ class UtledMedlemskapsperioderTest {
     void lagMedlemskapsperiode_søknadsperiodenStarter1MndOg1DagFørMottaksdatoMedHelseOgPensjonsdelSlutter4MndEtterMottaksdato_enAvslåttOgInnvilgetMedSammePeriodeOgEnInnvilgetPeriode() {
         final Periode søknadsPeriode = new Periode(mottaksdato.minusMonths(1).minusDays(1), mottaksdato.plusMonths(4));
         final Trygdedekninger trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON;
-        var request = new UtledMedlemskapsperioderRequest(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
+        var request = new UtledMedlemskapsperioderDto(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
 
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -161,7 +161,7 @@ class UtledMedlemskapsperioderTest {
     void lagMedlemskapsperiode_søknadsperiodenStarter15MndFørMottaksdatoUtenSluttdatoMedHelseOgPensjonsdel_enAvslåttOgInnvilgetMedSammePeriodeOgEnInnvilgetPeriode() {
         final Periode søknadsPeriode = new Periode(mottaksdato.minusMonths(15), null);
         final Trygdedekninger trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON;
-        var request = new UtledMedlemskapsperioderRequest(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
+        var request = new UtledMedlemskapsperioderDto(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
 
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -176,7 +176,7 @@ class UtledMedlemskapsperioderTest {
     void lagMedlemskapsperiode_søknadsperiodenStarter15MndFørMottaksdatoSluttdato3MndFørMottaksdatoMedHelseOgPensjonsdel_avslåttOriginalDekningMenInnvilgetMedKunPensjonsdelForSøknadsperioden() {
         final Periode søknadsPeriode = new Periode(mottaksdato.minusMonths(15), mottaksdato.minusMonths(3));
         final Trygdedekninger trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON;
-        var request = new UtledMedlemskapsperioderRequest(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
+        var request = new UtledMedlemskapsperioderDto(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
 
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -191,7 +191,7 @@ class UtledMedlemskapsperioderTest {
     void lagMedlemskapsperiode_søknadsperiodenStarter15MndFørMottaksdatoSluttdato3MndFørMottaksdatoMedHelseOgPensjonsdelMedSykeOgForeldrePenger_avslåttOriginalDekningMenInnvilgetMedKunPensjonsdelMedSykeForeldrepengerForSøknadsperioden() {
         final Periode søknadsPeriode = new Periode(mottaksdato.minusMonths(15), mottaksdato.minusMonths(3));
         final Trygdedekninger trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER;
-        var request = new UtledMedlemskapsperioderRequest(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
+        var request = new UtledMedlemskapsperioderDto(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
 
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -207,7 +207,7 @@ class UtledMedlemskapsperioderTest {
     void lagMedlemskapsperiode_søknadsperiodenStarter2MndFørMottaksdatoSluttdato1ÅrEtterMottaksdatoMedHelsedel_toPerioderAvslåttFremTilMottaksdato() {
         final Periode søknadsPeriode = new Periode(mottaksdato.minusMonths(2), mottaksdato.plusYears(1));
         final Trygdedekninger trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE;
-        var request = new UtledMedlemskapsperioderRequest(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
+        var request = new UtledMedlemskapsperioderDto(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
 
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -221,7 +221,7 @@ class UtledMedlemskapsperioderTest {
     void lagMedlemskapsperiode_søknadsperiodenStarter30mndFørMottaksdatoSluttdato1ÅrFørMottaksdatoMedHelsedel_enPeriodeAvslått() {
         final Periode søknadsPeriode = new Periode(mottaksdato.minusMonths(30), mottaksdato.minusYears(1));
         final Trygdedekninger trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER;
-        var request = new UtledMedlemskapsperioderRequest(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
+        var request = new UtledMedlemskapsperioderDto(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
 
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -234,7 +234,7 @@ class UtledMedlemskapsperioderTest {
     void lagMedlemskapsperiode_søknadsperiodenStarter30mndFørMottaksdatoSluttdato1ÅrEtterMottaksdatoMedHelsedel_enPeriodeAvslåttEnInnvilget() {
         final Periode søknadsPeriode = new Periode(mottaksdato.minusMonths(30), mottaksdato.plusYears(1));
         final Trygdedekninger trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER;
-        var request = new UtledMedlemskapsperioderRequest(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
+        var request = new UtledMedlemskapsperioderDto(søknadsPeriode, trygdedekning, mottaksdato, arbeidsland);
 
         assertThat(
             utledMedlemskapsperioder.lagMedlemskapsperioder(request)
@@ -262,7 +262,7 @@ class UtledMedlemskapsperioderTest {
         var trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER;
         var nyMottaksdato = LocalDate.parse("2023-02-15");
 
-        var request = new UtledMedlemskapsperiodeNyVurderingRequest(
+        var request = new UtledMedlemskapsperiodeNyVurderingDto(
             søknadsPeriode, trygdedekning, nyMottaksdato, arbeidsland, List.of(opprinneligMedlemskapsperiode), opprinneligSøknad);
 
         Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForNyVurdering(request);
@@ -312,7 +312,7 @@ class UtledMedlemskapsperioderTest {
         var trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON;
         var nyMottaksdato = LocalDate.parse("2024-04-15");
 
-        var request = new UtledMedlemskapsperiodeNyVurderingRequest(
+        var request = new UtledMedlemskapsperiodeNyVurderingDto(
             søknadsPeriode, trygdedekning, nyMottaksdato, arbeidsland, List.of(opprinneligMedlemskapsperiode), opprinneligSøknad);
 
         Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForNyVurdering(request);

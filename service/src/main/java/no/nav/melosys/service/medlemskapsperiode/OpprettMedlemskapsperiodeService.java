@@ -60,7 +60,7 @@ public class OpprettMedlemskapsperiodeService {
                 var opprinneligSøknad = (SoeknadFtrl) opprinneligBehandling.getMottatteOpplysninger().getMottatteOpplysningerData();
 
                 medlemskapsperioder = new UtledMedlemskapsperioder().lagMedlemskapsperioderForNyVurdering(
-                    new UtledMedlemskapsperiodeNyVurderingRequest(
+                    new UtledMedlemskapsperiodeNyVurderingDto(
                         søknad.periode,
                         søknad.getTrygdedekning(),
                         utledMottaksdato.getMottaksdato(behandling),
@@ -70,7 +70,7 @@ public class OpprettMedlemskapsperiodeService {
                 );
             } else {
                 medlemskapsperioder = new UtledMedlemskapsperioder().lagMedlemskapsperioder(
-                    new UtledMedlemskapsperioderRequest(
+                    new UtledMedlemskapsperioderDto(
                         søknad.periode,
                         søknad.getTrygdedekning(),
                         utledMottaksdato.getMottaksdato(behandling),

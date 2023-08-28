@@ -13,30 +13,30 @@ import java.time.LocalDate
 
 class UtledMedlemskapsperioder {
 
-    fun lagMedlemskapsperioderForNyVurdering(request: UtledMedlemskapsperiodeNyVurderingRequest): MutableCollection<Medlemskapsperiode> {
+    fun lagMedlemskapsperioderForNyVurdering(dto: UtledMedlemskapsperiodeNyVurderingDto): MutableCollection<Medlemskapsperiode> {
         val medlemskapsperioder = mutableListOf<Medlemskapsperiode>()
-        if (request.opprinneligeMedlemskapsperioder.isEmpty()) return medlemskapsperioder
-        validerOpprinneligeMedlemskapsperioder(request.opprinneligeMedlemskapsperioder)
+        if (dto.opprinneligeMedlemskapsperioder.isEmpty()) return medlemskapsperioder
+        validerOpprinneligeMedlemskapsperioder(dto.opprinneligeMedlemskapsperioder)
 
-        request.opprinneligeMedlemskapsperioder.forEach {
+        dto.opprinneligeMedlemskapsperioder.forEach {
             medlemskapsperioder.add(
                 (BeanUtils.cloneBean(it) as Medlemskapsperiode).apply { id = null }
             )
         }
         medlemskapsperioder.sortBy { it.fom }
 
-        if (request.opprinneligSøknad.trygdedekning != request.trygdedekning) {
-            endreTrygdedekning(medlemskapsperioder, request.opprinneligSøknad.trygdedekning, request)
+        if (dto.opprinneligSøknad.trygdedekning != dto.trygdedekning) {
+            endreTrygdedekning(medlemskapsperioder, dto.opprinneligSøknad.trygdedekning, dto)
         }
-        val opprinneligPeriode = request.opprinneligSøknad.periode
-        if (opprinneligPeriode.fom != request.søknadsperiode.fom) {
-            utvidEllerForkortFom(medlemskapsperioder, opprinneligPeriode.fom, request)
+        val opprinneligPeriode = dto.opprinneligSøknad.periode
+        if (opprinneligPeriode.fom != dto.søknadsperiode.fom) {
+            utvidEllerForkortFom(medlemskapsperioder, opprinneligPeriode.fom, dto)
         }
-        if (opprinneligPeriode.tom != request.søknadsperiode.tom) {
-            utvidEllerForkortTom(medlemskapsperioder, opprinneligPeriode.tom, request)
+        if (opprinneligPeriode.tom != dto.søknadsperiode.tom) {
+            utvidEllerForkortTom(medlemskapsperioder, opprinneligPeriode.tom, dto)
         }
-        if (request.opprinneligSøknad.soeknadsland.landkoder.first() != request.arbeidsland) {
-            medlemskapsperioder.onEach { it.arbeidsland = request.arbeidsland }
+        if (dto.opprinneligSøknad.soeknadsland.landkoder.first() != dto.arbeidsland) {
+            medlemskapsperioder.onEach { it.arbeidsland = dto.arbeidsland }
         }
 
         return medlemskapsperioder
@@ -51,21 +51,21 @@ class UtledMedlemskapsperioder {
     private fun endreTrygdedekning(
         medlemskapsperioder: MutableList<Medlemskapsperiode>,
         opprinneligTrygdedekning: Trygdedekninger,
-        request: UtledMedlemskapsperiodeNyVurderingRequest
+        dto: UtledMedlemskapsperiodeNyVurderingDto
     ) {
         val trygdedekningOppdatertMedPensjonsdel =
-            (opprinneligTrygdedekning == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE && request.trygdedekning == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON)
-                || (opprinneligTrygdedekning == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER && request.trygdedekning == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER)
+            (opprinneligTrygdedekning == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE && dto.trygdedekning == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON)
+                || (opprinneligTrygdedekning == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER && dto.trygdedekning == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER)
 
         if (trygdedekningOppdatertMedPensjonsdel) {
             medlemskapsperioder
-                .filter { !datoErTidligereEnn2ÅrFørMottaksdato(it.tom, request.mottaksdatoSøknad) }
+                .filter { !datoErTidligereEnn2ÅrFørMottaksdato(it.tom, dto.mottaksdatoSøknad) }
                 .onEach { it.trygdedekning = leggTilPensjonsdel(it.trygdedekning) }
         } else {
             val deltePerioder = mutableListOf<Medlemskapsperiode>()
             medlemskapsperioder.forEach {
-                if (it.fom.isBefore(request.mottaksdatoSøknad) && it.tom.isAfter(request.mottaksdatoSøknad)) {
-                    val splittetPeriode = splitPeriode(Periode(it.fom, it.tom), request.mottaksdatoSøknad)
+                if (it.fom.isBefore(dto.mottaksdatoSøknad) && it.tom.isAfter(dto.mottaksdatoSøknad)) {
+                    val splittetPeriode = splitPeriode(Periode(it.fom, it.tom), dto.mottaksdatoSøknad)
                     deltePerioder.add(
                         lagPeriode(
                             splittetPeriode.second,
@@ -80,22 +80,22 @@ class UtledMedlemskapsperioder {
             medlemskapsperioder.addAll(deltePerioder)
             medlemskapsperioder.sortBy { it.fom }
             medlemskapsperioder
-                .filter { it.fom == request.mottaksdatoSøknad || it.fom.isAfter(request.mottaksdatoSøknad) }
-                .onEach { it.trygdedekning = request.trygdedekning }
+                .filter { it.fom == dto.mottaksdatoSøknad || it.fom.isAfter(dto.mottaksdatoSøknad) }
+                .onEach { it.trygdedekning = dto.trygdedekning }
         }
     }
 
     private fun utvidEllerForkortFom(
         medlemskapsperioder: MutableList<Medlemskapsperiode>,
         opprinneligFom: LocalDate,
-        request: UtledMedlemskapsperiodeNyVurderingRequest
+        dto: UtledMedlemskapsperiodeNyVurderingDto
     ) {
-        val nyFom = request.søknadsperiode.fom
+        val nyFom = dto.søknadsperiode.fom
 
         if (nyFom.isBefore(opprinneligFom)) {
             val utvidetPeriode = Periode(nyFom, opprinneligFom.minusDays(1))
-            val utvidetPeriodeRequest = UtledMedlemskapsperioderRequest.av(request, utvidetPeriode)
-            medlemskapsperioder.addAll(lagMedlemskapsperioder(utvidetPeriodeRequest))
+            val utvidetPeriodeDto = UtledMedlemskapsperioderDto.av(dto, utvidetPeriode)
+            medlemskapsperioder.addAll(lagMedlemskapsperioder(utvidetPeriodeDto))
             medlemskapsperioder.sortBy { it.fom }
         } else if (nyFom.isAfter(opprinneligFom)) {
             val førstePeriodeEtterNyFom = medlemskapsperioder.first { it.tom == null || it.tom.isAfter(nyFom) }
@@ -107,14 +107,14 @@ class UtledMedlemskapsperioder {
     private fun utvidEllerForkortTom(
         medlemskapsperioder: MutableList<Medlemskapsperiode>,
         opprinneligTom: LocalDate?,
-        request: UtledMedlemskapsperiodeNyVurderingRequest
+        dto: UtledMedlemskapsperiodeNyVurderingDto
     ) {
-        val nyTom = request.søknadsperiode.tom
+        val nyTom = dto.søknadsperiode.tom
 
         if (opprinneligTom != null && (nyTom == null || nyTom.isAfter(opprinneligTom))) {
             val utvidetPeriode = Periode(opprinneligTom.plusDays(1), nyTom)
-            val utvidetPeriodeRequest = UtledMedlemskapsperioderRequest.av(request, utvidetPeriode)
-            medlemskapsperioder.addAll(lagMedlemskapsperioder(utvidetPeriodeRequest))
+            val utvidetPeriodeDto = UtledMedlemskapsperioderDto.av(dto, utvidetPeriode)
+            medlemskapsperioder.addAll(lagMedlemskapsperioder(utvidetPeriodeDto))
             medlemskapsperioder.sortBy { it.fom }
         } else if (
             (opprinneligTom == null && nyTom != null) || (opprinneligTom != null && nyTom.isBefore(opprinneligTom))
@@ -126,59 +126,59 @@ class UtledMedlemskapsperioder {
         }
     }
 
-    fun lagMedlemskapsperioder(request: UtledMedlemskapsperioderRequest): Collection<Medlemskapsperiode> {
-        val søknadsperiode = request.søknadsperiode
+    fun lagMedlemskapsperioder(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
+        val søknadsperiode = dto.søknadsperiode
 
-        val enMånedFørMottaksdato = request.mottaksdatoSøknad.minusMonths(1)
+        val enMånedFørMottaksdato = dto.mottaksdatoSøknad.minusMonths(1)
         if (søknadsperiode.fom == enMånedFørMottaksdato || søknadsperiode.fom.isAfter(enMånedFørMottaksdato)) {
             return setOf(
                 lagPeriode(
                     søknadsperiode,
-                    request.trygdedekning,
-                    request.arbeidsland,
+                    dto.trygdedekning,
+                    dto.arbeidsland,
                     InnvilgelsesResultat.INNVILGET
                 )
             )
         }
 
-        if (datoErTidligereEnn2ÅrFørMottaksdato(søknadsperiode.fom, request.mottaksdatoSøknad)) {
+        if (datoErTidligereEnn2ÅrFørMottaksdato(søknadsperiode.fom, dto.mottaksdatoSøknad)) {
             return setOf(
                 lagPeriode(
                     søknadsperiode,
-                    request.trygdedekning,
-                    request.arbeidsland,
+                    dto.trygdedekning,
+                    dto.arbeidsland,
                     InnvilgelsesResultat.AVSLAATT
                 )
             )
         }
 
-        return lagMedlemskapsperioderPeriodeStarterMindreEnn2ÅrFørMottaksdato(request)
+        return lagMedlemskapsperioderPeriodeStarterMindreEnn2ÅrFørMottaksdato(dto)
     }
 
-    private fun lagMedlemskapsperioderPeriodeStarterMindreEnn2ÅrFørMottaksdato(request: UtledMedlemskapsperioderRequest): Collection<Medlemskapsperiode> {
-        val søknadsperiode = request.søknadsperiode
+    private fun lagMedlemskapsperioderPeriodeStarterMindreEnn2ÅrFørMottaksdato(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
+        val søknadsperiode = dto.søknadsperiode
 
-        if (erKunPensjonsdel(request.trygdedekning)) {
+        if (erKunPensjonsdel(dto.trygdedekning)) {
             return setOf(
                 lagPeriode(
                     søknadsperiode,
-                    request.trygdedekning,
-                    request.arbeidsland,
+                    dto.trygdedekning,
+                    dto.arbeidsland,
                     InnvilgelsesResultat.INNVILGET
                 )
             )
         }
 
-        if (søknadsperiode.tom != null && søknadsperiode.tom.isBefore(request.mottaksdatoSøknad)) {
-            return lagMedlemskapsperioderForPeriodeFørMottaksdato(søknadsperiode, request)
+        if (søknadsperiode.tom != null && søknadsperiode.tom.isBefore(dto.mottaksdatoSøknad)) {
+            return lagMedlemskapsperioderForPeriodeFørMottaksdato(søknadsperiode, dto)
         }
 
-        val splittetPeriode = splitPeriode(søknadsperiode, request.mottaksdatoSøknad)
-        return lagMedlemskapsperioderForPeriodeFørMottaksdato(splittetPeriode.first, request).plus(
+        val splittetPeriode = splitPeriode(søknadsperiode, dto.mottaksdatoSøknad)
+        return lagMedlemskapsperioderForPeriodeFørMottaksdato(splittetPeriode.first, dto).plus(
             lagPeriode(
                 splittetPeriode.second,
-                request.trygdedekning,
-                request.arbeidsland,
+                dto.trygdedekning,
+                dto.arbeidsland,
                 InnvilgelsesResultat.INNVILGET
             )
         )
@@ -187,28 +187,28 @@ class UtledMedlemskapsperioder {
 
     private fun lagMedlemskapsperioderForPeriodeFørMottaksdato(
         periode: ErPeriode,
-        request: UtledMedlemskapsperioderRequest
+        dto: UtledMedlemskapsperioderDto
     ): Collection<Medlemskapsperiode> {
-        return if (harPensjonsdel(request.trygdedekning)) {
+        return if (harPensjonsdel(dto.trygdedekning)) {
             mutableSetOf(
                 lagPeriode(
                     periode,
-                    fjernPensjonsdel(request.trygdedekning),
-                    request.arbeidsland,
+                    fjernPensjonsdel(dto.trygdedekning),
+                    dto.arbeidsland,
                     InnvilgelsesResultat.AVSLAATT
                 ),
                 lagPeriode(
                     periode,
                     Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON,
-                    request.arbeidsland,
+                    dto.arbeidsland,
                     InnvilgelsesResultat.INNVILGET
                 )
             )
         } else mutableSetOf(
             lagPeriode(
                 periode,
-                request.trygdedekning,
-                request.arbeidsland,
+                dto.trygdedekning,
+                dto.arbeidsland,
                 InnvilgelsesResultat.AVSLAATT
             )
         )
