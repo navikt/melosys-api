@@ -12,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.domain.saksflyt.ProsessDataKey
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
@@ -104,7 +105,11 @@ class OppgaveMigrering(
         }.filter {
             saksFilter.filtrer(it.sak)
         }.forEach {
-            oppdaterOppgave(dryrun, it)
+            if (it.oppgaver.isEmpty()) {
+                lagOppgave(dryrun, it)
+            } else {
+                oppdaterOppgave(dryrun, it)
+            }
         }
         log.info("OppgaveMigrering utført! ${if (stopMigrering) "Stoppet manuelt!" else ""}")
         lagRapport()
@@ -130,6 +135,33 @@ class OppgaveMigrering(
         }
         if (oppgaver.size > 1) {
             migreringsRapport.sakerMedFlereOppgaver("fant ${oppgaver.size} oppgaver for: ${sak.saksnummer}")
+        }
+    }
+
+    private fun lagOppgave(dryrun: Boolean, migreringsSak: MigreringsSak) {
+        if (dryrun) {
+            migreringsRapport.antallOppgaverLaget++
+            return
+        }
+
+        val sak = migreringsSak.sak
+        val oppdatering = migreringsSak.ny
+        val oppgave = Oppgave.Builder()
+            .setOppgavetype(oppdatering.oppgaveType)
+            .setBehandlingstema(oppdatering.oppgaveBehandlingstema?.kode)
+            .setTema(oppdatering.tema)
+            .setBeskrivelse("Gjennopprettet oppgave til behandling i Melosys - <${sak.saksnummer}>")
+            .build()
+        try {
+            oppgaveFasade.opprettOppgave(oppgave)
+            migreringsRapport.antallOppgaverLaget++
+        } catch (e: Exception) {
+            migreringsSak.ny.oppgaveOppdateringError = e.message
+            log.error("lagOppgave feilet for ${sak.saksnummer}(${sak.behandlingID})", e)
+            migreringsRapport.migreringFeilet++
+            var sleepTime = 100L * migreringsRapport.migreringFeilet
+            if (sleepTime > 1000) sleepTime = 1000
+            Thread.sleep(sleepTime)
         }
     }
 
