@@ -1,6 +1,7 @@
 package no.nav.melosys.tjenester.gui.kontroll;
 
 import java.util.Collection;
+import java.util.List;
 
 import io.swagger.annotations.Api;
 import no.nav.melosys.exception.FunksjonellException;
@@ -13,8 +14,9 @@ import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Aksesstype;
 import no.nav.melosys.service.validering.Kontrollfeil;
 import no.nav.melosys.tjenester.gui.dto.kontroller.FerdigbehandlingKontrollerDto;
-import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerBrukerFullmektigDto;
-import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerFerdigbehandlingDto;
+import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerAdresseBrukerFullmektigDto;
+import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerAdresseBrukerFullmektigResponse;
+import no.nav.melosys.tjenester.gui.dto.kontroller.KontrollerFerdigbehandlingResponse;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
@@ -48,14 +50,15 @@ public class KontrollTjeneste {
         return ResponseEntity.ok(eessiService.erBucAapen(behandling.getFagsak().getGsakSaksnummer()));
     }
 
-    @PostMapping("/harRegistrertAdresse")
-    public ResponseEntity<Boolean> harRegistrertAdresse(@RequestBody KontrollerBrukerFullmektigDto kontrollerBrukerFullmektigDto) {
-        var kontekst = new PostadressesjekkKontekst(kontrollerBrukerFullmektigDto.brukerID(), kontrollerBrukerFullmektigDto.orgnr());
-        return ResponseEntity.ok(postadresseKontrollService.harRegistrertAdresse(kontekst));
+    @PostMapping("/adresse")
+    public ResponseEntity<KontrollerAdresseBrukerFullmektigResponse> harRegistrertAdresse(@RequestBody KontrollerAdresseBrukerFullmektigDto kontrollDto) {
+        var kontekst = new PostadressesjekkKontekst(kontrollDto.getBehandlingID(), kontrollDto.getBrukerID(), kontrollDto.getOrgnr());
+        List<Kontrollfeil> kontrollfeilList = postadresseKontrollService.kontroller(kontekst);
+        return ResponseEntity.ok(new KontrollerAdresseBrukerFullmektigResponse(kontrollfeilList.stream().map(Kontrollfeil::tilDto).toList()));
     }
 
     @PostMapping("/ferdigbehandling")
-    public ResponseEntity<KontrollerFerdigbehandlingDto> kontrollerFerdigbehandling(@RequestBody FerdigbehandlingKontrollerDto ferdigbehandlingKontrollerDto) {
+    public ResponseEntity<KontrollerFerdigbehandlingResponse> kontrollerFerdigbehandling(@RequestBody FerdigbehandlingKontrollerDto ferdigbehandlingKontrollerDto) {
 
         if (ferdigbehandlingKontrollerDto.vedtakstype() == null) {
             throw new FunksjonellException("Vedtakstype mangler.");
@@ -72,6 +75,6 @@ public class KontrollTjeneste {
             ferdigbehandlingKontrollerDto.kontrollerSomSkalIgnoreres()
         );
 
-        return ResponseEntity.ok(new KontrollerFerdigbehandlingDto(kontrollfeil.stream().map(Kontrollfeil::tilDto).toList()));
+        return ResponseEntity.ok(new KontrollerFerdigbehandlingResponse(kontrollfeil.stream().map(Kontrollfeil::tilDto).toList()));
     }
 }

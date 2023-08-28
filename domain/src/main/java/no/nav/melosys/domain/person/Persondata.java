@@ -1,10 +1,5 @@
 package no.nav.melosys.domain.person;
 
-import java.time.LocalDate;
-import java.util.Optional;
-import java.util.Set;
-import javax.annotation.Nullable;
-
 import no.nav.melosys.domain.brev.Postadresse;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
@@ -13,16 +8,17 @@ import no.nav.melosys.domain.person.adresse.Kontaktadresse;
 import no.nav.melosys.domain.person.adresse.Oppholdsadresse;
 import no.nav.melosys.domain.person.familie.Familiemedlem;
 
+import javax.annotation.Nullable;
+import java.time.LocalDate;
+import java.util.Optional;
+import java.util.Set;
+
 public interface Persondata extends SaksopplysningDokument {
     boolean erPersonDød();
 
     boolean harStrengtAdressebeskyttelse();
 
     boolean manglerGyldigRegistrertAdresse();
-
-    boolean manglerBostedsadresse();
-
-    boolean manglerPostnummer();
 
     String hentFolkeregisterident();
 
