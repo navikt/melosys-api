@@ -15,10 +15,10 @@ class Periode(
         using = LocalDateSerializer::class
     ) val tom: LocalDate,
     val trygdedekning: Trygdedekninger,
-    val avgiftssats: BigDecimal?,
-    val avgiftPerMd: BigDecimal?,
+    val avgiftssats: BigDecimal,
+    val avgiftPerMd: BigDecimal,
     val inntektskildetype: Inntektskildetype?,
-    val avgiftspliktigInntektPerMd: BigDecimal?,
+    val avgiftspliktigInntektPerMd: BigDecimal,
     val innvilgelsesResultat: InnvilgelsesResultat
 ) {
 
