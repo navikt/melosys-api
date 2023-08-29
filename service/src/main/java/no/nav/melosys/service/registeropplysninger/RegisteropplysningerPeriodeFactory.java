@@ -3,7 +3,6 @@ package no.nav.melosys.service.registeropplysninger;
 import java.time.LocalDate;
 import java.time.YearMonth;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

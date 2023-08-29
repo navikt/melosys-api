@@ -1,8 +1,9 @@
 package no.nav.melosys.featuretoggle;
 
+import io.getunleash.strategy.Strategy;
+
 import java.util.Map;
 
-import no.finn.unleash.strategy.Strategy;
 
 class IsTestStrategy implements Strategy {
 

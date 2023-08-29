@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.faktureringskomponenten
 
+import io.getunleash.Unleash
 import mu.KotlinLogging
-import no.finn.unleash.Unleash
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak

@@ -1,11 +1,11 @@
 package no.nav.melosys.service.saksbehandling
 
+import io.getunleash.FakeUnleash
 import io.kotest.matchers.shouldBe
 import io.mockk.MockKAdditionalAnswerScope
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak

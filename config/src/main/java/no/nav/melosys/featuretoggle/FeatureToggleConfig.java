@@ -3,10 +3,10 @@ package no.nav.melosys.featuretoggle;
 import java.util.Collections;
 import java.util.List;
 
-import no.finn.unleash.DefaultUnleash;
-import no.finn.unleash.FakeUnleash;
-import no.finn.unleash.Unleash;
-import no.finn.unleash.util.UnleashConfig;
+import io.getunleash.DefaultUnleash;
+import io.getunleash.FakeUnleash;
+import io.getunleash.Unleash;
+import io.getunleash.util.UnleashConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;

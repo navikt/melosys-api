@@ -2,7 +2,7 @@ package no.nav.melosys.service.lovligekombinasjoner;
 
 import java.util.Set;
 
-import no.finn.unleash.FakeUnleash;
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;

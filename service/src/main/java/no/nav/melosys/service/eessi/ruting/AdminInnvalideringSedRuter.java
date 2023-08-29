@@ -2,7 +2,6 @@ package no.nav.melosys.service.eessi.ruting;
 
 import java.util.*;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.SedInformasjon;

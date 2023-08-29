@@ -5,7 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
-import no.finn.unleash.Unleash;
+import io.getunleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;

@@ -3,7 +3,6 @@ package no.nav.melosys.service.oppgave;
 
 import java.util.List;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;

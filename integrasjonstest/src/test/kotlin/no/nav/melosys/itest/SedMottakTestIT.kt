@@ -1,12 +1,12 @@
 package no.nav.melosys.itest
 
+import io.getunleash.FakeUnleash
 import io.kotest.assertions.extracting
 import io.kotest.matchers.collections.shouldContain
 import io.kotest.matchers.collections.shouldContainExactly
 import io.kotest.matchers.collections.shouldContainInOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Lovvalgsperiode
 import no.nav.melosys.domain.arkiv.*
 import no.nav.melosys.domain.eessi.*

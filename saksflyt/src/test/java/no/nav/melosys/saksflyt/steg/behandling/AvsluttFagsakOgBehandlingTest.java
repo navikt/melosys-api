@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import java.util.Collections;
 import java.util.Set;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
