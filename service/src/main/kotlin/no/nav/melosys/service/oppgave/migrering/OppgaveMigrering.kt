@@ -6,28 +6,36 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Fagsystem
 import no.nav.melosys.domain.SakOgBehandlingDTO
 import no.nav.melosys.domain.Tema
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
+import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.oppgave.Oppgave
+import no.nav.melosys.domain.oppgave.PrioritetType
 import no.nav.melosys.domain.saksflyt.ProsessDataKey
 import no.nav.melosys.exception.TekniskException
+import no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
 import no.nav.melosys.repository.BehandlingRepositoryForOppgaveMigrering
+import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.repository.ProsessinstansRepository
 import no.nav.melosys.service.lovligekombinasjoner.GyldigeKombinasjoner
 import no.nav.melosys.service.oppgave.*
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
+import java.time.LocalDate
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 private val log = KotlinLogging.logger { }
 
@@ -36,7 +44,8 @@ class OppgaveMigrering(
     private val behandlingRepository: BehandlingRepositoryForOppgaveMigrering,
     private val oppgaveFasade: OppgaveFasade,
     private val migreringsRapport: MigreringsRapport,
-    private val prosessinstansRepository: ProsessinstansRepository
+    private val prosessinstansRepository: ProsessinstansRepository,
+    private val fagsakRepository: FagsakRepository
 ) {
     @Volatile
     var stopMigrering: Boolean = false
@@ -105,7 +114,7 @@ class OppgaveMigrering(
                 ny = nyOppgaveMapping(it)
             )
         }.filter {
-            if(options.lagManglendeOppgaver) it.oppgaver.isEmpty()
+            if (options.lagManglendeOppgaver) it.oppgaver.isEmpty()
             else options.migrerOppgaver
         }.filter {
             erGyldig(it.sak)
@@ -117,7 +126,7 @@ class OppgaveMigrering(
         }.forEach {
             if (it.oppgaver.isEmpty() && options.lagManglendeOppgaver) {
                 lagOppgave(dryrun, it)
-            } else if(options.migrerOppgaver) {
+            } else if (options.migrerOppgaver) {
                 oppdaterOppgave(dryrun, it)
             }
         }
@@ -154,13 +163,28 @@ class OppgaveMigrering(
             return
         }
 
+
         val sak = migreringsSak.sak
         val oppdatering = migreringsSak.ny
+        val fagSak = fagsakRepository.findBySaksnummer(sak.saksnummer).orElseThrow {
+            TekniskException("Fant ikke ${sak.saksnummer}")
+        }
+
         val oppgave = Oppgave.Builder()
+            .setAktørId(fagSak.hentBrukersAktørID())
+            .setSaksnummer(sak.saksnummer)
+            .setBehandlesAvApplikasjon(Fagsystem.MELOSYS)
+            .setOpprettetTidspunkt(ZonedDateTime.ofInstant(fagSak.registrertDato, ZoneId.systemDefault()))
+            .setFristFerdigstillelse(LocalDate.ofInstant(fagSak.registrertDato, ZoneId.systemDefault()).plusMonths(1))
+            .setJournalpostId(sak.initierendeJournalpostId)
+            .setPrioritet(PrioritetType.NORM)
+            .setTildeltEnhetsnr(MELOSYS_ENHET_ID.toString())
+            .setAktivDato(LocalDate.now()) // skal vi bruke nå?
+            .setStatus(Saksstatuser.OPPRETTET.name)
             .setOppgavetype(oppdatering.oppgaveType)
             .setBehandlingstema(oppdatering.oppgaveBehandlingstema?.kode)
             .setTema(oppdatering.tema)
-            .setBeskrivelse("Gjennopprettet oppgave til behandling i Melosys - <${sak.saksnummer}>")
+            .setBeskrivelse("Gjennopprettet oppgave til behandling i Melosys - ${sak.saksnummer}")
             .build()
         try {
             oppgaveFasade.opprettOppgave(oppgave)
