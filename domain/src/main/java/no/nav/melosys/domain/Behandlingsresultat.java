@@ -370,6 +370,9 @@ public class Behandlingsresultat extends RegistreringsInfo {
     }
 
     public Collection<Medlemskapsperiode> finnMedlemskapsperioder() {
+        if (medlemAvFolketrygden == null) {
+            return Collections.emptyList();
+        }
         return medlemAvFolketrygden.getMedlemskapsperioder();
     }
 
