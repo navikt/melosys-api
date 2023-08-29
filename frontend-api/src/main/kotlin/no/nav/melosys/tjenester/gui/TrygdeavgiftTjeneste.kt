@@ -1,10 +1,12 @@
 package no.nav.melosys.tjenester.gui
 
 import io.swagger.annotations.Api
+import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.BeregnetTrygdeavgiftDto
+import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftMottakerDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftsgrunnlagDto
 import no.nav.security.token.support.core.api.Protected
 import org.springframework.http.ResponseEntity
@@ -26,6 +28,14 @@ class TrygdeavgiftTjeneste(
 
         return trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlag(behandlingID)
             ?.let { ResponseEntity.ok(TrygdeavgiftsgrunnlagDto(it)) } ?: ResponseEntity.noContent().build()
+    }
+
+    @GetMapping("/mottaker")
+    fun hentTrygdeavgiftMottaker(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<TrygdeavgiftMottakerDto> {
+        aksesskontroll.autoriser(behandlingID)
+
+        return trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlag(behandlingID)
+            ?.let { ResponseEntity.ok(TrygdeavgiftMottakerDto(it.fastsattTrygdeavgift.trygdeavgiftMottaker)) } ?: ResponseEntity.noContent().build()
     }
 
     @PutMapping("/grunnlag")

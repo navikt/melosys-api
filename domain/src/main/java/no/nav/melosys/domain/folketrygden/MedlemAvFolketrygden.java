@@ -80,7 +80,6 @@ public class MedlemAvFolketrygden {
     }
 
     public void setFastsattTrygdeavgift(FastsattTrygdeavgift fastsattTrygdeavgift) {
-        fastsattTrygdeavgift.setMedlemAvFolketrygden(this);
         this.fastsattTrygdeavgift = fastsattTrygdeavgift;
     }
 
