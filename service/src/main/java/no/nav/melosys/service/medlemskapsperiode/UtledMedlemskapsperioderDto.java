@@ -38,7 +38,11 @@ public class UtledMedlemskapsperioderDto {
         return arbeidsland;
     }
 
-    public static UtledMedlemskapsperioderDto av(UtledMedlemskapsperiodeNyVurderingDto request, ErPeriode søknadsperiode) {
-        return new UtledMedlemskapsperioderDto(søknadsperiode, request.getTrygdedekning(), request.getMottaksdatoSøknad(), request.getArbeidsland());
+    public static UtledMedlemskapsperioderDto av(UtledMedlemskapsperiodeNyVurderingDto dto) {
+        return new UtledMedlemskapsperioderDto(dto.getSøknadsperiode(), dto.getTrygdedekning(), dto.getMottaksdatoSøknad(), dto.getArbeidsland());
+    }
+
+    public static UtledMedlemskapsperioderDto av(UtledMedlemskapsperiodeNyVurderingDto dto, ErPeriode søknadsperiode) {
+        return new UtledMedlemskapsperioderDto(søknadsperiode, dto.getTrygdedekning(), dto.getMottaksdatoSøknad(), dto.getArbeidsland());
     }
 }
