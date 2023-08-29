@@ -13,11 +13,14 @@ import java.time.LocalDate
 
 class UtledMedlemskapsperioder {
 
-    fun lagMedlemskapsperioderForNyVurdering(dto: UtledMedlemskapsperiodeNyVurderingDto): MutableCollection<Medlemskapsperiode> {
-        val medlemskapsperioder = mutableListOf<Medlemskapsperiode>()
-        if (dto.opprinneligeMedlemskapsperioder.isEmpty()) return medlemskapsperioder
+    fun lagMedlemskapsperioderForNyVurdering(dto: UtledMedlemskapsperiodeNyVurderingDto): Collection<Medlemskapsperiode> {
+        if (dto.opprinneligeMedlemskapsperioder.isEmpty()) {
+            return lagMedlemskapsperioder(UtledMedlemskapsperioderDto.av(dto))
+        }
+
         validerOpprinneligeMedlemskapsperioder(dto.opprinneligeMedlemskapsperioder)
 
+        val medlemskapsperioder = mutableListOf<Medlemskapsperiode>()
         dto.opprinneligeMedlemskapsperioder.forEach {
             medlemskapsperioder.add(
                 (BeanUtils.cloneBean(it) as Medlemskapsperiode).apply { id = null }
