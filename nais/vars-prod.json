@@ -3,6 +3,7 @@
   "KAFKA_POOL": "nav-prod",
   "VAULT_CLUSTER": "prod",
   "APP_NAME": "melosys",
+  "NAMESPACE": "teammelosys",
   "TENANT_URL": "nav.no",
   "GROUP_MELOSYS_INNLOGGING": "0d7c7755-fd5d-46ee-bbb9-975484cfb5b1",
   "APP_NAME_FRONTEND": "melosys-web",
@@ -15,5 +16,6 @@
   "APP_NAME_FAKTURERINGSKOMPONENTEN": "faktureringskomponenten",
   "APP_NAME_INNTEKTSKOMPONENTEN": "inntektskomponenten",
   "NAIS_CLUSTER_NAME_FAKTURERINGSKOMPONENTEN": "prod-gcp",
-  "APP_NAME_UTBETALING": "sokos-utbetaldata"
+  "APP_NAME_UTBETALING": "sokos-utbetaldata",
+  "UNLEASH_ENVIRONMENT": "production"
 }

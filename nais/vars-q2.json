@@ -3,6 +3,7 @@
   "KAFKA_POOL": "nav-dev",
   "VAULT_CLUSTER": "dev",
   "APP_NAME": "melosys",
+  "NAMESPACE": "teammelosys",
   "TENANT_URL": "trygdeetaten.no",
   "GROUP_MELOSYS_INNLOGGING": "52981246-8032-40f0-863a-2bd2844f2d57",
   "APP_NAME_FRONTEND": "melosys-web",
@@ -15,5 +16,6 @@
   "APP_NAME_FAKTURERINGSKOMPONENTEN": "faktureringskomponenten-q2",
   "APP_NAME_INNTEKTSKOMPONENTEN": "inntektskomponenten",
   "NAIS_CLUSTER_NAME_FAKTURERINGSKOMPONENTEN": "dev-gcp",
-  "APP_NAME_UTBETALING": "sokos-utbetaldata"
+  "APP_NAME_UTBETALING": "sokos-utbetaldata",
+  "UNLEASH_ENVIRONMENT": "development"
 }

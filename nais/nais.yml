@@ -2,7 +2,7 @@ apiVersion: nais.io/v1alpha1
 kind: Application
 metadata:
   name: {{APP_NAME}}
-  namespace: teammelosys
+  namespace: {{NAMESPACE}}
   labels:
     team: teammelosys
 spec:
@@ -44,6 +44,8 @@ spec:
         - application: {{APP_NAME_FRONTEND}}
         - application: {{APP_NAME_TRYGDEAVTALE}}
     outbound:
+      external:
+        - host: "https://melosys-unleash-api.nav.cloud.nais.io"
       rules:
         - application: {{APP_NAME_OPPGAVE}}
         - application: {{APP_NAME_PDL}}
@@ -87,5 +89,7 @@ spec:
     value: {{APP_NAME_UTBETALING}}
   - name: APP_NAME_INNTEKTSKOMPONENTEN
     value: {{APP_NAME_INNTEKTSKOMPONENTEN}}
+  envFrom:
+    - secret: {{APP_NAME}}-unleash-api-token
   kafka:
     pool: {{ KAFKA_POOL }}
