@@ -105,6 +105,9 @@ class OppgaveMigrering(
                 ny = nyOppgaveMapping(it)
             )
         }.filter {
+            if(options.lagManglendeOppgaver) it.oppgaver.isEmpty()
+            else options.migrerOppgaver
+        }.filter {
             erGyldig(it.sak)
         }.onEach {
             migreringsRapport.antallSakerProssessert++
