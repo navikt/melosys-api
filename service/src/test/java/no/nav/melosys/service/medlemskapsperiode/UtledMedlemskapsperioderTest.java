@@ -3,6 +3,7 @@ package no.nav.melosys.service.medlemskapsperiode;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.domain.Medlemskapsperiode;
@@ -335,6 +336,24 @@ class UtledMedlemskapsperioderTest {
                     Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON, InnvilgelsesResultat.INNVILGET
                 )
             );
+    }
+
+    @Test
+    void lagMedlemskapsperioderForNyVurdering_ingenOpprinneligeMedlemskapsperioder_lagerFørstegangsMedlemskapsperioder() {
+        var opprinneligSøknad = new SoeknadFtrl();
+
+        var søknadsPeriode = new Periode(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-12-31"));
+        var trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON;
+        var nyMottaksdato = LocalDate.parse("2023-01-01");
+
+        var request = new UtledMedlemskapsperiodeNyVurderingDto(
+            søknadsPeriode, trygdedekning, nyMottaksdato, arbeidsland, Collections.emptyList(), opprinneligSøknad);
+
+
+        Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForNyVurdering(request);
+
+
+        assertThat(response).isNotEmpty();
     }
 
     private Medlemskapsperiode lagMedlemskapsperiode(LocalDate fom, LocalDate tom, InnvilgelsesResultat innvilgelsesResultat, Trygdedekninger trygdedekning) {
