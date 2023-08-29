@@ -33,7 +33,6 @@ import no.nav.melosys.service.oppgave.*
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
-import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZonedDateTime
 
@@ -170,16 +169,17 @@ class OppgaveMigrering(
             TekniskException("Fant ikke ${sak.saksnummer}")
         }
 
+        val registrertDato = ZonedDateTime.ofInstant(fagSak.registrertDato, ZoneId.systemDefault())
         val oppgave = Oppgave.Builder()
             .setAktørId(fagSak.hentBrukersAktørID())
             .setSaksnummer(sak.saksnummer)
             .setBehandlesAvApplikasjon(Fagsystem.MELOSYS)
-            .setOpprettetTidspunkt(ZonedDateTime.ofInstant(fagSak.registrertDato, ZoneId.systemDefault()))
-            .setFristFerdigstillelse(LocalDate.ofInstant(fagSak.registrertDato, ZoneId.systemDefault()).plusMonths(1))
+            .setOpprettetTidspunkt(registrertDato)
+            .setFristFerdigstillelse(registrertDato.toLocalDate().plusMonths(1))
             .setJournalpostId(sak.initierendeJournalpostId)
             .setPrioritet(PrioritetType.NORM)
             .setTildeltEnhetsnr(MELOSYS_ENHET_ID.toString())
-            .setAktivDato(LocalDate.now()) // skal vi bruke nå?
+            .setAktivDato(registrertDato.toLocalDate())
             .setStatus(Saksstatuser.OPPRETTET.name)
             .setOppgavetype(oppdatering.oppgaveType)
             .setBehandlingstema(oppdatering.oppgaveBehandlingstema?.kode)
