@@ -10,6 +10,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 data class SakOgBehandlingDTO(
     val saksnummer: String,
     val behandlingID: Long,
+    val initierendeJournalpostId: String,
     val sakstype: Sakstyper,
     val sakstema: Sakstemaer,
     val behandlingstype: Behandlingstyper,
