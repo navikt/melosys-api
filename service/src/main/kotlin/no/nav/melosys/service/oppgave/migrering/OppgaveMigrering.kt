@@ -1,5 +1,9 @@
 package no.nav.melosys.service.oppgave.migrering
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.SakOgBehandlingDTO
@@ -54,9 +58,9 @@ class OppgaveMigrering(
 
     @Async
     @Synchronized
-    fun go(bruker: String?, saksnummer: String?, dryrun: Boolean, saksFilter: SaksFilter = SaksFilter()) {
+    fun go(bruker: String?, saksnummer: String?, dryrun: Boolean, options: Options = Options()) {
         ThreadLocalAccessInfo.executeProcess("Migrer oppgaver") {
-            migrering(bruker, saksnummer, dryrun, saksFilter)
+            migrering(bruker, saksnummer, dryrun, options)
         }
     }
 
@@ -82,32 +86,35 @@ class OppgaveMigrering(
         bruker: String?,
         saksnummer: String?,
         dryrun: Boolean,
-        saksFilter: SaksFilter = SaksFilter()
+        options: Options = Options()
     ) {
-        log.info("Utfører OppgaveMigrering")
+        log.info(
+            "Utfører OppgaveMigrering. \n" +
+                options.toJsonNode.toPrettyString()
+        )
         finnSaker(bruker, saksnummer).apply {
             migreringsRapport.antallSakerFunnet = size
         }.filter { it.erRedigerbar() }.sortedBy { it.saksnummer }.apply {
             migreringsRapport.antallSakerErRedigerbar = size
-        }.asSequence().filter { !stopMigrering }.map {
+        }.asSequence().filter {
+            options.saksFilter.filtrer(it)
+        }.filter { !stopMigrering }.map {
             MigreringsSak(
                 sak = it,
                 oppgaver = oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(it.saksnummer),
                 ny = nyOppgaveMapping(it)
             )
+        }.filter {
+            erGyldig(it.sak)
         }.onEach {
             migreringsRapport.antallSakerProssessert++
             leggTilRapport(it)
-        }.filter {
-            it.oppgaver.size == 1 && erGyldig(it.sak)
         }.filterNot {
             it.ny.fantIkkeOppgaveMapping()
-        }.filter {
-            saksFilter.filtrer(it.sak)
         }.forEach {
-            if (it.oppgaver.isEmpty()) {
+            if (it.oppgaver.isEmpty() && options.lagManglendeOppgaver) {
                 lagOppgave(dryrun, it)
-            } else {
+            } else if(options.migrerOppgaver) {
                 oppdaterOppgave(dryrun, it)
             }
         }
@@ -340,6 +347,14 @@ class OppgaveMigrering(
         }
     }
 
+    private val Any.toJsonNode: JsonNode
+        get() {
+            return jacksonObjectMapper()
+                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                .registerModule(JavaTimeModule())
+                .valueToTree(this)
+        }
+
     internal class OppgaveGosysMappingMedRegler : OppgaveGosysMapping() {
         override fun finnOppgave(
             sakstype: Sakstyper,
@@ -373,6 +388,12 @@ class OppgaveMigrering(
                 )
         }
     }
+
+    data class Options(
+        val migrerOppgaver: Boolean = true,
+        val lagManglendeOppgaver: Boolean = false,
+        val saksFilter: SaksFilter = SaksFilter()
+    )
 
     data class SaksFilter(
         val sakstyper: List<Sakstyper> = listOf(),
