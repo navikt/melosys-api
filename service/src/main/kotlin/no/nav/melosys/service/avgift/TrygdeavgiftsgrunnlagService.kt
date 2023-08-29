@@ -61,6 +61,7 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
     private fun eksisterendeEllerNyFastsattTrygdeavgift(medlemAvFolketrygden: MedlemAvFolketrygden): FastsattTrygdeavgift =
         medlemAvFolketrygden.fastsattTrygdeavgift ?: FastsattTrygdeavgift().apply {
             this.trygdeavgiftstype = Trygdeavgift_typer.FORELØPIG
+            this.medlemAvFolketrygden = medlemAvFolketrygden
         }
 
     private fun eksisterendeEllerNyttTrygdeavgiftsgrunnlag(medlemAvFolketrygden: MedlemAvFolketrygden): Trygdeavgiftsgrunnlag =

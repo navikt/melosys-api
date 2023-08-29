@@ -92,6 +92,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 })
             }
         }
+        medlemAvFolketrygden.fastsattTrygdeavgift.medlemAvFolketrygden = medlemAvFolketrygden
         every { mockMedlemAvFolketrygdenService.lagre(any()) }.returns(medlemAvFolketrygden)
         every { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
             .returns(
