@@ -12,7 +12,6 @@ import io.kotest.matchers.types.shouldNotBeInstanceOf
 import io.mockk.*
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.finn.unleash.FakeUnleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsaarsak
 import no.nav.melosys.domain.Fagsak
@@ -33,11 +32,9 @@ import no.nav.melosys.repository.MottatteOpplysningerRepository
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.UtledMottaksdato
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
-import no.nav.melosys.service.tilgang.Aksesskontroll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Mockito
 import org.mockito.junit.jupiter.MockitoExtension
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -71,6 +68,7 @@ internal class MottatteOpplysningerServiceTest {
             )
         )
         every { saksbehandlingRegler.harTomFlyt(any()) } returns false
+        every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns false
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false
     }
 
@@ -131,6 +129,7 @@ internal class MottatteOpplysningerServiceTest {
         }.shouldHaveMessage("Finner ikke mottatteOpplysninger for behandling ${behandlingID}")
     }
 
+    @Test
     fun opprettSøknadEllerAnmodningEllerAttest_tomFlyt_lagerIkkeAnmodningEllerAttest() {
         every { saksbehandlingRegler.harTomFlyt(any()) } returns true
         val prosessinstans = Prosessinstans().apply {
@@ -354,8 +353,8 @@ internal class MottatteOpplysningerServiceTest {
             mottatteOpplysningerRepositoryMock.save(capture(slot))
         }
         slot.captured.apply {
-            mottatteOpplysningerData.shouldBeInstanceOf<SoeknadFtrl>()
-            this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN)
+            mottatteOpplysningerData.shouldBeInstanceOf<SøknadNorgeEllerUtenforEØS>()
+            this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_YRKESAKTIVE_NORGE_ELLER_UTENFOR_EØS)
             this.behandling.shouldBe(behandling)
             mottaksdato.shouldBe(mottattDato)
             mottatteOpplysningerData.apply {
@@ -366,7 +365,7 @@ internal class MottatteOpplysningerServiceTest {
     }
 
     @Test
-    fun opprettSøknadTrygdeavtale_harPeriodeOgLand_setterPeriodeOgLandOgHarRettType() {
+    fun opprettSøknadForTrygdeavtale_harPeriodeOgLand_setterPeriodeOgLandOgHarRettType() {
         val behandling = lagBehandling(
             Sakstyper.TRYGDEAVTALE,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
@@ -388,8 +387,8 @@ internal class MottatteOpplysningerServiceTest {
             mottatteOpplysningerRepositoryMock.save(capture(slot))
         }
         slot.captured.apply {
-            mottatteOpplysningerData.shouldBeInstanceOf<SoeknadTrygdeavtale>()
-            this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE)
+            mottatteOpplysningerData.shouldBeInstanceOf<SøknadNorgeEllerUtenforEØS>()
+            this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_YRKESAKTIVE_NORGE_ELLER_UTENFOR_EØS)
             this.behandling.shouldBe(behandling)
             mottaksdato.shouldBe(mottattDato)
             mottatteOpplysningerData.apply {
@@ -443,7 +442,7 @@ internal class MottatteOpplysningerServiceTest {
     }
 
     @Test
-    fun opprettSøknad_FTRL_brukbBehandlingsårsak() {
+    fun opprettSøknadForFTRL_brukBehandlingsårsak() {
         val dagensDato = LocalDate.now()
         val behandling = setupMock(
             Sakstyper.FTRL,
@@ -465,8 +464,8 @@ internal class MottatteOpplysningerServiceTest {
             joarkFasadeMock wasNot Called
         }
         slot.captured.apply {
-            mottatteOpplysningerData.shouldBeInstanceOf<Soeknad>()
-            this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN)
+            mottatteOpplysningerData.shouldBeInstanceOf<SøknadNorgeEllerUtenforEØS>()
+            this.type.shouldBe(Mottatteopplysningertyper.SØKNAD_YRKESAKTIVE_NORGE_ELLER_UTENFOR_EØS)
             this.behandling.shouldBe(behandling)
             mottaksdato.shouldBe(dagensDato)
         }

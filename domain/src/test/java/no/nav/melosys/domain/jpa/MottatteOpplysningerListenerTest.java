@@ -9,8 +9,11 @@ import java.nio.file.Paths;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.melosys.domain.mottatteopplysninger.*;
 import no.nav.melosys.domain.kodeverk.Mottatteopplysningertyper;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
+import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -30,32 +33,32 @@ class MottatteOpplysningerListenerTest {
     }
 
     @Test
-    void lastMottatteOpplysninger_erSøknadFtrl_forventTypeSoeknadFtrl() throws URISyntaxException, IOException {
+    void lastMottatteOpplysninger_erSøknadFtrl_forventTypeSøknadNorgeEllerUtenforEØS() throws URISyntaxException, IOException {
         URI søknadURI = (getClass().getClassLoader().getResource("soeknad/soeknad.json")).toURI();
         String json = new String(Files.readAllBytes(Paths.get(søknadURI)));
 
         mottatteOpplysninger.setJsonData(json);
-        mottatteOpplysninger.setType(Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN);
+        mottatteOpplysninger.setType(Mottatteopplysningertyper.SØKNAD_YRKESAKTIVE_NORGE_ELLER_UTENFOR_EØS);
         mottatteOpplysningerListener.lastMottatteOpplysninger(mottatteOpplysninger);
 
         assertThat(mottatteOpplysninger.getMottatteOpplysningerData()).isNotNull();
-        assertThat(mottatteOpplysninger.getMottatteOpplysningerData()).isInstanceOf(SoeknadFtrl.class);
+        assertThat(mottatteOpplysninger.getMottatteOpplysningerData()).isInstanceOf(SøknadNorgeEllerUtenforEØS.class);
 
         JsonNode jsonNode = objectMapper.readTree(json);
         assertKonvertering(jsonNode, mottatteOpplysninger.getMottatteOpplysningerData());
     }
 
     @Test
-    void lastMottatteOpplysninger_erSøknadTrygdeavtale_forventTypeSoeknadTrygdeavtale() throws URISyntaxException, IOException {
+    void lastMottatteOpplysninger_erSøknadTrygdeavtale_forventTypeSøknadNorgeEllerUtenforEØS() throws URISyntaxException, IOException {
         URI søknadURI = (getClass().getClassLoader().getResource("soeknad/soeknad.json")).toURI();
         String json = new String(Files.readAllBytes(Paths.get(søknadURI)));
 
         mottatteOpplysninger.setJsonData(json);
-        mottatteOpplysninger.setType(Mottatteopplysningertyper.SØKNAD_TRYGDEAVTALE);
+        mottatteOpplysninger.setType(Mottatteopplysningertyper.SØKNAD_YRKESAKTIVE_NORGE_ELLER_UTENFOR_EØS);
         mottatteOpplysningerListener.lastMottatteOpplysninger(mottatteOpplysninger);
 
         assertThat(mottatteOpplysninger.getMottatteOpplysningerData()).isNotNull();
-        assertThat(mottatteOpplysninger.getMottatteOpplysningerData()).isInstanceOf(SoeknadTrygdeavtale.class);
+        assertThat(mottatteOpplysninger.getMottatteOpplysningerData()).isInstanceOf(SøknadNorgeEllerUtenforEØS.class);
 
         JsonNode jsonNode = objectMapper.readTree(json);
         assertKonvertering(jsonNode, mottatteOpplysninger.getMottatteOpplysningerData());
@@ -83,13 +86,13 @@ class MottatteOpplysningerListenerTest {
     }
 
     private void assertKonvertering(JsonNode jsonNode, MottatteOpplysningerData data) {
-        assertThat(data.arbeidPaaLand.fysiskeArbeidssteder.size())
-            .isEqualTo(jsonNode.get("arbeidPaaLand").withArray("fysiskeArbeidssteder").size());
-        assertThat(data.foretakUtland.size()).isEqualTo(jsonNode.withArray("foretakUtland").size());
-        assertThat(data.maritimtArbeid.size()).isEqualTo(jsonNode.withArray("maritimtArbeid").size());
+        assertThat(data.arbeidPaaLand.fysiskeArbeidssteder)
+            .hasSize(jsonNode.get("arbeidPaaLand").withArray("fysiskeArbeidssteder").size());
+        assertThat(data.foretakUtland).hasSize(jsonNode.withArray("foretakUtland").size());
+        assertThat(data.maritimtArbeid).hasSize(jsonNode.withArray("maritimtArbeid").size());
         assertThat(data.bosted.intensjonOmRetur).isEqualTo(jsonNode.get("bosted").get("intensjonOmRetur").booleanValue());
-        assertThat(data.personOpplysninger.utenlandskIdent.size())
-            .isEqualTo(jsonNode.get("personOpplysninger").withArray("utenlandskIdent").size());
+        assertThat(data.personOpplysninger.utenlandskIdent)
+            .hasSize(jsonNode.get("personOpplysninger").withArray("utenlandskIdent").size());
         assertThat(data.selvstendigArbeid.selvstendigForetak.get(0).orgnr)
             .isEqualTo(jsonNode.get("selvstendigArbeid").withArray("selvstendigForetak").get(0).get("orgnr").textValue());
     }

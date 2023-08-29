@@ -150,21 +150,4 @@ public class MottatteOpplysninger {
     public void setMottatteOpplysningerdata(MottatteOpplysningerData mottatteOpplysningerData) {
         this.mottatteOpplysningerData = mottatteOpplysningerData;
     }
-
-    public boolean erSøknad() {
-        return erSøknadOmA1() || erSøknadFtrl();
-    }
-
-    public boolean erSøknadOmA1() {
-        return type == Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS
-            || type == Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS;
-    }
-
-    public boolean erSøknadFtrl() {
-        return type == Mottatteopplysningertyper.SØKNAD_FOLKETRYGDEN;
-    }
-
-    public boolean erSed() {
-        return this.type == Mottatteopplysningertyper.SED;
-    }
 }
