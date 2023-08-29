@@ -9,7 +9,7 @@ open class FaktureringskomponentenConsumer(private val webClient: WebClient) : J
 
     fun lagFakturaSerie(fakturaserieDto: FakturaserieDto) =
         webClient.post()
-            .uri("/fakturaserie")
+            .uri("/fakturaserier")
             .bodyValue(fakturaserieDto)
             .retrieve()
             .bodyToMono<String>()

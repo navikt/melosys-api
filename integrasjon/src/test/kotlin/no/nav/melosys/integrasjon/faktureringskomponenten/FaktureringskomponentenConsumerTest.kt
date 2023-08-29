@@ -83,7 +83,7 @@ class FaktureringskomponentenConsumerTest(
         )
 
         serviceUnderTestMockServer.stubFor(
-            post("/fakturaserie")
+            post("/fakturaserier")
                 .withRequestBody(WireMock.equalToJson(json))
                 .willReturn(
                     WireMock.aResponse()
