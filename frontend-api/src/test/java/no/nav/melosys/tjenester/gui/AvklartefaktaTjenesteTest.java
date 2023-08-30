@@ -15,8 +15,6 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.AvklartefaktaOppsummeringDto;
-import no.nav.melosys.tjenester.gui.dto.LagreMedfolgendeFamilieDto;
-import no.nav.melosys.tjenester.gui.dto.MedfolgendeFamilieDto;
 import no.nav.melosys.tjenester.gui.dto.VirksomheterDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,27 +99,6 @@ class AvklartefaktaTjenesteTest {
                 .content(objectMapper.writeValueAsString(virksomheterDto)))
             .andExpect(status().isOk())
             .andExpect(responseBody(objectMapper).containsObjectAsJson(AvklartefaktaOppsummeringDto.av(dtos), AvklartefaktaOppsummeringDto.class));
-    }
-
-    @Test
-    void lagreMedfolgendeFamilieSomAvklarteFakta() throws Exception {
-        LagreMedfolgendeFamilieDto lagreMedfolgendeFamilieDto = new LagreMedfolgendeFamilieDto(lagMedfolgendeFamilieDtoSet());
-        Set<AvklartefaktaDto> dtos = lagAvklarteFaktaDtoSet();
-        when(avklartefaktaService.hentAlleAvklarteFakta(eq(1L))).thenReturn(dtos);
-
-        mockMvc.perform(post(BASE_URL + "/{behandlingID}/medfolgendeFamilie", 1L)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(lagreMedfolgendeFamilieDto)))
-            .andExpect(status().isOk())
-            .andExpect(responseBody(objectMapper).containsObjectAsJson(AvklartefaktaOppsummeringDto.av(dtos), AvklartefaktaOppsummeringDto.class));
-    }
-
-    private static Set<MedfolgendeFamilieDto> lagMedfolgendeFamilieDtoSet() {
-        return Set.of(
-            new MedfolgendeFamilieDto(uuid1, true, null, null),
-            new MedfolgendeFamilieDto(uuid2, false, OVER_18_AR.getKode(), "fritekstForUuid2"),
-            new MedfolgendeFamilieDto(uuid3, true, null, null),
-            new MedfolgendeFamilieDto(uuid4, false, SAMBOER_UTEN_FELLES_BARN.getKode(), "fritekstForUuid4"));
     }
 
     private static Set<AvklartefaktaDto> lagAvklarteFaktaDtoSet() {

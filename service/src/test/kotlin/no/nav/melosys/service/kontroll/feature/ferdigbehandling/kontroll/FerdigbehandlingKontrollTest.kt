@@ -19,7 +19,6 @@ import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.Ferdigbehan
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
-import java.util.List
 
 class FerdigbehandlingKontrollTest {
 
@@ -326,7 +325,7 @@ class FerdigbehandlingKontrollTest {
 
     private fun lagMottatteOpplysningerdata(): MottatteOpplysningerData? {
         val mottatteOpplysningerData = MottatteOpplysningerData()
-        mottatteOpplysningerData.soeknadsland = Soeknadsland(List.of("AT"), false)
+        mottatteOpplysningerData.soeknadsland = Soeknadsland(listOf("AT"), false)
         return mottatteOpplysningerData
     }
 }

@@ -29,9 +29,7 @@ class InntektRestService(
         }
 
     override fun hentInntektListe(personID: String, fom: YearMonth, tom: YearMonth): Saksopplysning {
-        log.info("hentInntektListe($personID, $fom, $tom)")
         val inntekt = hentInntekt(personID, fom, tom)
-        log.info(inntekt.toJsonNode.toPrettyString())
         return inntektKonverter.lagSaksopplysning(inntekt).apply {
             leggTilKildesystemOgMottattDokument(
                 SaksopplysningKildesystem.INNTK, inntekt.tilJsonString()
