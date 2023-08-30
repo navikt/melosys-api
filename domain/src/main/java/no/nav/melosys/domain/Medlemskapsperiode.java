@@ -127,6 +127,15 @@ public class Medlemskapsperiode implements ErPeriode, HarBestemmelse<Folketrygdl
         this.medlPeriodeID = medlPeriodeID;
     }
 
+    public Collection<Trygdeavgiftsperiode> getTrygdeavgiftsperioder() {
+        return trygdeavgiftsperioder;
+    }
+
+    @Deprecated(since = "Bare for test...", forRemoval = false)
+    public void setTrygdeavgiftsperioder(Collection<Trygdeavgiftsperiode> trygdeavgiftsperioder) {
+        this.trygdeavgiftsperioder = trygdeavgiftsperioder;
+    }
+
     public boolean erInnvilget() {
         return innvilgelsesresultat == InnvilgelsesResultat.INNVILGET;
     }
