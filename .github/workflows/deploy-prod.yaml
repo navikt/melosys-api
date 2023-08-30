@@ -20,7 +20,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: prod-fss
-          RESOURCE: nais/nais.yml
+          RESOURCE: nais/nais.yml, nais/unleash-apitoken.yml
           VAR: IMAGE=${{ env.IMAGE }}
           VARS: nais/vars-prod.json
       - name: post-production

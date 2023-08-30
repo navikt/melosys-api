@@ -82,7 +82,7 @@ jobs:
         env:
           APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
           CLUSTER: ${{github.event.inputs.environment == 'prod' && 'prod-fss' || 'dev-fss' }}
-          RESOURCE: nais/nais.yml
+          RESOURCE: nais/nais.yml, nais/unleash-apitoken.yml
           VAR: IMAGE=${{ env.IMAGE }}
           VARS: nais/vars-${{github.event.inputs.environment}}.json
       - name: Get commit message
