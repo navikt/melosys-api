@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Diskresjonskode;
@@ -83,6 +84,8 @@ class OppgaveServiceTest {
 
     private final OppgaveFactory oppgaveFactory = new OppgaveFactory();
 
+    private final FakeUnleash unleash = new FakeUnleash();
+
     @BeforeEach
     public void setUp() {
         this.oppgaveService = new OppgaveService(
@@ -94,7 +97,8 @@ class OppgaveServiceTest {
                 persondataFasade,
                 eregFasade,
                 utledMottaksdato,
-                oppgaveFactory);
+                oppgaveFactory,
+                unleash);
 
         oppgave = new Oppgave.Builder()
                 .setOppgavetype(Oppgavetyper.BEH_SAK_MK)
