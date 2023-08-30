@@ -336,7 +336,7 @@ internal class MottatteOpplysningerServiceTest {
         val behandling = setupMock(
             Sakstyper.FTRL,
             Sakstemaer.MEDLEMSKAP_LOVVALG,
-            Behandlingstema.ARBEID_I_UTLANDET
+            Behandlingstema.YRKESAKTIV
         )
         val periode = Periode(
             LocalDate.of(2021, 1, 1),

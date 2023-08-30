@@ -62,7 +62,7 @@ class AvsluttFagsakOgBehandlingTest {
         behandling = new Behandling();
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setId(123L);
-        behandling.setTema(Behandlingstema.ARBEID_I_UTLANDET);
+        behandling.setTema(Behandlingstema.YRKESAKTIV);
 
         fagsak = new Fagsak();
         fagsak.setSaksnummer(saksnummer);

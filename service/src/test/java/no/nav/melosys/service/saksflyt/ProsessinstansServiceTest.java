@@ -623,7 +623,7 @@ class ProsessinstansServiceTest {
         opprettSakDto.setSakstype(Sakstyper.FTRL);
         opprettSakDto.setSakstema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         opprettSakDto.setBehandlingstype(Behandlingstyper.FØRSTEGANG);
-        opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_I_UTLANDET);
+        opprettSakDto.setBehandlingstema(Behandlingstema.YRKESAKTIV);
         String journalpostID = "journalpostID";
 
 
@@ -636,7 +636,7 @@ class ProsessinstansServiceTest {
         assertThat(prosessinstans.getData(ProsessDataKey.SAKSTYPE, Sakstyper.class)).isEqualTo(Sakstyper.FTRL);
         assertThat(prosessinstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class)).isEqualTo(Sakstemaer.MEDLEMSKAP_LOVVALG);
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class)).isEqualTo(Behandlingstyper.FØRSTEGANG);
-        assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class)).isEqualTo(Behandlingstema.ARBEID_I_UTLANDET);
+        assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class)).isEqualTo(Behandlingstema.YRKESAKTIV);
         assertThat(prosessinstans.getData(ProsessDataKey.BRUKER_ID)).isEqualTo(opprettSakDto.getBrukerID());
         assertThat(prosessinstans.getData(ProsessDataKey.OPPGAVE_ID)).isEqualTo(opprettSakDto.getOppgaveID());
         assertThat(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID)).isEqualTo(journalpostID);
@@ -649,7 +649,7 @@ class ProsessinstansServiceTest {
     void opprettProsessinstansNySakFTRLTrygdeavtale_altOk_setterProsessInstansKorrekt() {
         OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.FTRL);
-        opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_I_UTLANDET);
+        opprettSakDto.setBehandlingstema(Behandlingstema.YRKESAKTIV);
         String journalpostID = "journalpostID";
 
 

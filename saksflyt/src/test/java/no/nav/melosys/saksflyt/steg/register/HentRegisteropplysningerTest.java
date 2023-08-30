@@ -142,7 +142,7 @@ class HentRegisteropplysningerTest {
 
     @Test
     void utfør_sakstypeFtrl_ingentingLagres() {
-        behandling.setTema(Behandlingstema.ARBEID_I_UTLANDET);
+        behandling.setTema(Behandlingstema.YRKESAKTIV);
         behandling.getFagsak().setType(Sakstyper.FTRL);
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
