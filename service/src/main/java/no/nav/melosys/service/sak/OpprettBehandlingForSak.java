@@ -1,5 +1,7 @@
 package no.nav.melosys.service.sak;
 
+import java.time.LocalDate;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
@@ -15,9 +17,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Service
 public class OpprettBehandlingForSak {
@@ -43,8 +42,9 @@ public class OpprettBehandlingForSak {
     }
 
     @Transactional
-    public void opprettBehandlingManglendeInnbetaling(long behandlingId, LocalDate mottaksDato) {
-        Behandling behandling = behandlingService.hentBehandling(behandlingId);
+    public void opprettBehandlingManglendeInnbetaling(String fakturaserieId, LocalDate mottaksDato) {
+        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultatAvFakturaserieId(fakturaserieId);
+        Behandling behandling = behandlingService.hentBehandling(behandlingsresultat.getBehandling().getId());
         Fagsak fagsak = behandling.getFagsak();
         final Behandling sistBehandling = fagsak.hentSistRegistrertBehandling();
 

@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.faktureringskomponenten
 import mu.KotlinLogging
 import no.finn.unleash.Unleash
 import no.nav.melosys.domain.Aktoer
+import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.Kontaktopplysning
 import no.nav.melosys.domain.kodeverk.Representerer
@@ -16,7 +17,6 @@ import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.service.aktoer.KontaktopplysningService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
-import no.nav.melosys.service.ftrl.FaktureringsKomponentenHjelper
 import no.nav.melosys.service.persondata.PersondataService
 import org.springframework.stereotype.Component
 import java.time.ZoneId
@@ -80,10 +80,18 @@ class OpprettBetalingsplan(
             FaktureringsIntervall.MANEDLIG
         )
 
+        var forrigeAktivBehandling: Behandling? = null
+        var forrigeFakturaserieId: String? = null
+        if (fagsak.behandlinger.isNotEmpty()) {
+            forrigeAktivBehandling = fagsak.hentSistOppdatertBehandling()
+            forrigeFakturaserieId =
+                behandlingsresultatService.hentBehandlingsresultat(forrigeAktivBehandling.id).fakturaserieId
+        }
+
         val fakturaserieDto =
             FakturaserieDto(
-                vedtaksId = FaktureringsKomponentenHjelper.konverterTilVedtaksId(fagsak.saksnummer, behandlingsId),
                 fodselsnummer = foedselsNr,
+                referanseId = forrigeFakturaserieId,
                 referanseNAV = "Medlemskap og avgift",
                 fullmektig = fullmektigDto(fullmektig, kontaktopplysning),
                 fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
@@ -95,7 +103,21 @@ class OpprettBetalingsplan(
 
         log.info("Oppretter betalingsplan for behandling: $behandlingsId")
 
-        faktureringskomponentenConsumer.lagFakturaSerie(fakturaserieDto)
+        try {
+
+
+            val response = faktureringskomponentenConsumer.lagFakturaSerie(fakturaserieDto)
+            val fakturaserieIdResponse = response.referanseId
+            if (fakturaserieIdResponse != null) {
+                behandlingsresultat.apply {
+                    fakturaserieId = fakturaserieIdResponse;
+                }
+                behandlingsresultatService.lagre(behandlingsresultat)
+            }
+
+        } catch (e: Exception) {
+            log.error("Kunne ikke lage fakturaserie, behandlingsId: $behandlingsId")
+        }
     }
 
     private fun hentKontaktopplysning(

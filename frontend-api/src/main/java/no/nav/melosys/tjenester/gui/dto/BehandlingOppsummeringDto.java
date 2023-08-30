@@ -13,6 +13,7 @@ public class BehandlingOppsummeringDto {
     private Behandlingsstatus behandlingsstatus;
     private Behandlingstyper behandlingstype;
     private Behandlingstema behandlingstema;
+    private String fakturaserieId;
     private Instant registrertDato;
     private Instant endretDato;
     private String endretAvNavn;
@@ -99,5 +100,13 @@ public class BehandlingOppsummeringDto {
 
     public void setBehandlingsresultattype(Behandlingsresultattyper behandlingsresultattype) {
         this.behandlingsresultattype = behandlingsresultattype;
+    }
+
+    public String getFakturaserieId() {
+        return fakturaserieId;
+    }
+
+    public void setFakturaserieId(String fakturaserieId) {
+        this.fakturaserieId = fakturaserieId;
     }
 }

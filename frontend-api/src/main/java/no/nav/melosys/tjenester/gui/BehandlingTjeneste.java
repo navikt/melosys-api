@@ -130,6 +130,7 @@ public class BehandlingTjeneste {
         behandlingOppsummeringDto.setSvarFrist(behandling.getDokumentasjonSvarfristDato());
         behandlingOppsummeringDto.setBehandlingsfrist(behandling.getBehandlingsfrist());
         behandlingOppsummeringDto.setBehandlingsresultattype(behandlingsresultat.getType());
+        behandlingOppsummeringDto.setFakturaserieId(behandlingsresultat.getFakturaserieId());
         return behandlingOppsummeringDto;
     }
 }

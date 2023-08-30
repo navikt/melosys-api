@@ -55,6 +55,11 @@ public class BehandlingsresultatService {
             .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid));
     }
 
+    public Behandlingsresultat hentBehandlingsresultatAvFakturaserieId(String fakturaserieId) {
+        return behandlingsresultatRepository.findByFakturaserieId(fakturaserieId)
+            .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + fakturaserieId));
+    }
+
     public Behandlingsresultat hentBehandlingsresultatMedAnmodningsperioder(long behandlingsid) {
         return behandlingsresultatRepository.findWithAnmodningsperioderById(behandlingsid)
             .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid));

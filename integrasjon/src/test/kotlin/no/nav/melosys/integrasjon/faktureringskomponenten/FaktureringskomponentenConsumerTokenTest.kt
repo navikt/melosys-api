@@ -39,7 +39,11 @@ class FaktureringskomponentenConsumerTokenTest(
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
     @Autowired oAuthMockServer: OAuthMockServer
-) : ConsumerWireMockTestBase<String, String>(mockServiceUnderTestPort, mockSecurityPort, oAuthMockServer) {
+) : ConsumerWireMockTestBase<String, FaktureringskomponentResponse>(
+    mockServiceUnderTestPort,
+    mockSecurityPort,
+    oAuthMockServer
+) {
 
     @Test
     fun authorizationSkalKommeFraSystem() {
@@ -86,14 +90,21 @@ class FaktureringskomponentenConsumerTokenTest(
         return WireMock.post(UrlPattern.ANY)
     }
 
-    override fun getMockData(): String = "[]"
+    override fun getMockData(): String = "{\n" +
+        "  \"type\": \"Invoice\",\n" +
+        "  \"title\": \"Invoice #12345\",\n" +
+        "  \"status\": 200,\n" +
+        "  \"instance\": \"https://example.com/invoices/12345\",\n" +
+        "  \"referanseId\": \"12345\",\n" +
+        "  \"detail\": \"Invoice details go here\"\n" +
+        "}"
 
     override fun executeRequest() =
         faktureringskomponentenConsumer.lagFakturaSerie(lagFakturaserieDto())
 
 
     private fun lagFakturaserieDto(
-        vedtaksnummer: String = "MEL-123",
+        referanseId: String? = null,
         fodselsnummer: String = "12345678911",
         fullmektig: FullmektigDto = FullmektigDto("11987654321", "123456789", "Ole Brum"),
         referanseBruker: String = "Nasse Nøff",
@@ -110,8 +121,8 @@ class FaktureringskomponentenConsumerTokenTest(
         ),
     ): FakturaserieDto {
         return FakturaserieDto(
-            vedtaksnummer,
             fodselsnummer,
+            referanseId,
             fullmektig,
             referanseBruker,
             referanseNav,
