@@ -4,6 +4,7 @@ package no.nav.melosys.service.oppgave;
 import java.util.*;
 import javax.annotation.Nullable;
 
+import io.getunleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RegistreringsInfo;
@@ -48,6 +49,7 @@ public class OppgaveService {
     private final EregFasade eregFasade;
     private final UtledMottaksdato utledMottaksdato;
     private final OppgaveFactory oppgaveFactory;
+    private final Unleash unleash;
 
     private static final String UKJENT = "UKJENT";
 
@@ -59,7 +61,8 @@ public class OppgaveService {
                           PersondataFasade persondataFasade,
                           EregFasade eregFasade,
                           UtledMottaksdato utledMottaksdato,
-                          OppgaveFactory oppgaveFactory) {
+                          OppgaveFactory oppgaveFactory,
+                          Unleash unleash) {
         this.behandlingService = behandlingService;
         this.fagsakService = fagsakService;
         this.oppgaveFasade = oppgaveFasade;
@@ -69,9 +72,15 @@ public class OppgaveService {
         this.eregFasade = eregFasade;
         this.utledMottaksdato = utledMottaksdato;
         this.oppgaveFactory = oppgaveFactory;
+        this.unleash = unleash;
     }
 
     public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) {
+        if (unleash.isEnabled("melosys.test.ny.unleash.config")) {
+            log.info("New toggle enabled");
+        } else {
+            log.info("New toggle disabled");
+        }
         Collection<Oppgave> oppgaverFraDomain = oppgaveFasade.finnOppgaverMedAnsvarlig(ansvarligID);
         return oppgaverTilDtoer(oppgaverFraDomain);
     }
