@@ -1,10 +1,13 @@
 package no.nav.melosys.service.avgift
 
+import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.exception.ValideringException
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftsberegningsRequestMapper
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningResponse
@@ -25,7 +28,18 @@ class TrygdeavgiftsberegningService
         val medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)
         val fastsattTrygdeavgift = medlemAvFolketrygden.fastsattTrygdeavgift
 
+        val innvilgedeMedlemskapsperioder =
+            medlemAvFolketrygden.medlemskapsperioder.filter { it.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET }
+
         valider(medlemAvFolketrygden)
+        if (!erInntektperioderDekkendeForMedlemskapsperioder(
+                fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder,
+                innvilgedeMedlemskapsperioder
+            )
+        ) throw ValideringException(
+            "Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)",
+            null
+        )
 
         fastsattTrygdeavgift.trygdeavgiftsperioder.clear()
 
@@ -33,8 +47,6 @@ class TrygdeavgiftsberegningService
             return emptySet()
         }
 
-        val innvilgedeMedlemskapsperioder =
-            medlemAvFolketrygden.medlemskapsperioder.filter { it.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET }
 
         val (trygdeavgiftsberegningRequest, UUID_DBID_MAPS) =
             TrygdeavgiftsberegningsRequestMapper().map(
@@ -54,7 +66,13 @@ class TrygdeavgiftsberegningService
         UUID_DBID_MAPS: List<Map<UUID, Long>>
     ) =
         beregnetTrygdeavgift.forEach {
-            fastsattTrygdeavgift.trygdeavgiftsperioder.add(lagTrygdeavgiftsperiode(fastsattTrygdeavgift, it, UUID_DBID_MAPS))
+            fastsattTrygdeavgift.trygdeavgiftsperioder.add(
+                lagTrygdeavgiftsperiode(
+                    fastsattTrygdeavgift,
+                    it,
+                    UUID_DBID_MAPS
+                )
+            )
         }
 
     private fun lagTrygdeavgiftsperiode(
@@ -109,4 +127,29 @@ class TrygdeavgiftsberegningService
         return medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)?.fastsattTrygdeavgift?.trygdeavgiftsperioder
             ?: emptySet()
     }
+
+    companion object {
+        fun erInntektperioderDekkendeForMedlemskapsperioder(
+            inntektsperioder: List<Inntektsperiode>,
+            medlemskapsperioder: List<Medlemskapsperiode>
+        ): Boolean {
+            val sortertInntektsperioder = inntektsperioder.sortedBy { it.fomDato }
+            var tom = sortertInntektsperioder.first().tomDato
+            for (i in sortertInntektsperioder.indices) {
+                val aktivFom = sortertInntektsperioder[i].fomDato
+                val aktivTom = sortertInntektsperioder[i].tomDato
+                if (aktivFom.isBefore(tom.plusDays(1)) || aktivFom.isEqual(tom.plusDays(1))) {
+                    if (aktivTom.isAfter(tom)) {
+                        tom = aktivTom
+                    }
+                } else {
+                    return false
+                }
+            }
+
+            val sortertMedlemskapsperiode = medlemskapsperioder.sortedBy { it.fom }
+            return sortertMedlemskapsperiode.first().fom == sortertInntektsperioder.first().fomDato && sortertMedlemskapsperiode.last().tom == tom
+        }
+    }
+
 }
