@@ -45,7 +45,7 @@ spec:
         - application: {{APP_NAME_TRYGDEAVTALE}}
     outbound:
       external:
-        - host: "https://melosys-unleash-api.nav.cloud.nais.io"
+        - host: "melosys-unleash-api.nav.cloud.nais.io"
       rules:
         - application: {{APP_NAME_OPPGAVE}}
         - application: {{APP_NAME_PDL}}
