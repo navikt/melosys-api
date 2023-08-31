@@ -192,11 +192,13 @@ class BrevDataServiceTest {
     void lagBrevXML_fangerOgKasterException() {
         Behandling behandling = lagBehandling(lagSøknadDokumentTomAdresse());
         var mottaker = lagMottaker(Mottakerroller.BRUKER);
-        doThrow(new RuntimeException("test")).when(persondataFasade).hentSammensattNavn(anyString());
+        Exception kastetException = new RuntimeException("test");
+        doThrow(kastetException).when(persondataFasade).hentPerson(anyString());
 
         assertThatExceptionOfType(TekniskException.class).isThrownBy(
-            () -> service.lagBrevXML(INNVILGELSE_ARBEIDSGIVER, mottaker, null, behandling, lagBrevData())).withMessageContaining(
-            "Feil ved bygging av data til XML-generering MOCK-1");
+            () -> service.lagBrevXML(INNVILGELSE_ARBEIDSGIVER, mottaker, null, behandling, lagBrevData()))
+            .withMessageContaining("Feil ved bygging av data til XML-generering MOCK-1")
+            .withCause(kastetException);
     }
 
     @Test
