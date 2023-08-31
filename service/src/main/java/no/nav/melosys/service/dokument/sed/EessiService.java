@@ -276,6 +276,7 @@ public class EessiService {
     }
 
     public void opprettJournalpostForTidligereSed(String rinaSaksnummer) {
+        log.info("Oppretter journalpost for tidligere sendt sed for rinasak {}", rinaSaksnummer);
         eessiConsumer.journalfoerTidligereSendteSedFor(rinaSaksnummer);
     }
 
