@@ -138,6 +138,8 @@ public class BrevDataService {
             brevXmlElement = doc.getDocumentElement();
         } catch (JAXBException | SAXException | ParserConfigurationException | IOException e) {
             throw new TekniskException("XML genereringsfeil " + behandling.getFagsak().getSaksnummer(), e);
+        } catch (Exception e) {
+            throw new TekniskException("Feil ved bygging av data til XML-generering " + behandling.getFagsak().getSaksnummer(), e);
         }
         return brevXmlElement;
     }
