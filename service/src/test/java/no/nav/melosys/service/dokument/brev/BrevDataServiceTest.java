@@ -172,8 +172,7 @@ class BrevDataServiceTest {
             case BRUKER -> mottaker.setAktørId(AKTØRID);
             case ARBEIDSGIVER, VIRKSOMHET, NORSK_MYNDIGHET -> mottaker.setOrgnr(ORGNR);
             case UTENLANDSK_TRYGDEMYNDIGHET -> mottaker.setInstitusjonID("HR:987");
-            case FULLMEKTIG ->
-                throw new IllegalArgumentException("Bruk lagMottakerFullmektig() for fullmekitg mottaker");
+            case FULLMEKTIG -> throw new IllegalArgumentException("Bruk lagMottakerFullmektig() for fullmekitg mottaker");
         }
         return mottaker;
     }
