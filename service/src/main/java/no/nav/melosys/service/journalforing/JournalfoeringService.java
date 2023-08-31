@@ -112,7 +112,7 @@ public class JournalfoeringService {
 
         if (unleash.isEnabled(IKKE_JOURNALFOER_UTEN_PID)){
             final MelosysEessiMelding melosysEessiMelding = eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId());
-            eessiService.opprettJournalpostForTidligereSed(melosysEessiMelding.getRinaSaksnummer());
+            if (melosysEessiMelding != null) eessiService.opprettJournalpostForTidligereSed(melosysEessiMelding.getRinaSaksnummer());
         }
 
         fellesValidering(journalfoeringDto);
