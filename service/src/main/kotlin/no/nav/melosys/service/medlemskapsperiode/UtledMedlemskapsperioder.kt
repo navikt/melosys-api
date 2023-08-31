@@ -21,11 +21,13 @@ class UtledMedlemskapsperioder {
         validerOpprinneligeMedlemskapsperioder(dto.opprinneligeMedlemskapsperioder)
 
         val medlemskapsperioder = mutableListOf<Medlemskapsperiode>()
-        dto.opprinneligeMedlemskapsperioder.forEach {
-            medlemskapsperioder.add(
-                (BeanUtils.cloneBean(it) as Medlemskapsperiode).apply { id = null }
-            )
-        }
+        dto.opprinneligeMedlemskapsperioder
+            .filter { it.erInnvilget() }
+            .forEach {
+                medlemskapsperioder.add(
+                    (BeanUtils.cloneBean(it) as Medlemskapsperiode).apply { id = null }
+                )
+            }
         medlemskapsperioder.sortBy { it.fom }
 
         if (dto.opprinneligSøknad.trygdedekning != dto.trygdedekning) {

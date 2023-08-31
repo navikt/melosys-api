@@ -356,6 +356,43 @@ class UtledMedlemskapsperioderTest {
         assertThat(response).isNotEmpty();
     }
 
+    @Test
+    void lagMedlemskapsperioderForNyVurdering_forkorterPeriode_forkorterInnvilgetPeriodeOverførerIkkeAvslåttPeriode() {
+        var opprinneligPeriode = new Periode(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-12-31"));
+        var opprinneligTrygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON;
+        var opprinneligMedlemskapsperiode = lagMedlemskapsperiode(
+            opprinneligPeriode.getFom(), opprinneligPeriode.getTom(), InnvilgelsesResultat.INNVILGET, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON);
+        var opprinneligAvslåttMedlemskapsperiode = lagMedlemskapsperiode(
+            opprinneligPeriode.getFom(), opprinneligPeriode.getTom(), InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE);
+        var opprinneligSøknad = new SoeknadFtrl();
+        opprinneligSøknad.setTrygdedekning(opprinneligTrygdedekning);
+        opprinneligSøknad.periode = opprinneligPeriode;
+        opprinneligSøknad.soeknadsland = new Soeknadsland(List.of(arbeidsland), false);
+
+        var søknadsPeriode = new Periode(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-10-31"));
+        var nyMottaksdato = LocalDate.parse("2023-12-15");
+
+        var request = new UtledMedlemskapsperiodeNyVurderingDto(
+            søknadsPeriode, opprinneligTrygdedekning, nyMottaksdato, arbeidsland, List.of(opprinneligMedlemskapsperiode, opprinneligAvslåttMedlemskapsperiode), opprinneligSøknad);
+
+
+        Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForNyVurdering(request);
+
+
+        assertThat(response)
+            .hasSize(1)
+            .extracting(
+                Medlemskapsperiode::getFom, Medlemskapsperiode::getTom,
+                Medlemskapsperiode::getTrygdedekning, Medlemskapsperiode::getInnvilgelsesresultat
+            )
+            .containsExactlyInAnyOrder(
+                tuple(
+                    opprinneligPeriode.getFom(), søknadsPeriode.getTom(),
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON, InnvilgelsesResultat.INNVILGET
+                )
+            );
+    }
+
     private Medlemskapsperiode lagMedlemskapsperiode(LocalDate fom, LocalDate tom, InnvilgelsesResultat innvilgelsesResultat, Trygdedekninger trygdedekning) {
         var forventetMedlemskapsperiode = new Medlemskapsperiode();
         forventetMedlemskapsperiode.setFom(fom);
