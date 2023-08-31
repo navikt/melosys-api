@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.featuretoggle.ToggleName.OPPDATER_BEHANDLINGSRESULTAT;
 
 @Component
 public class OpprettNyBehandlingFraSed implements StegBehandler {
@@ -31,20 +30,17 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
     private final OppgaveService oppgaveService;
     private final JoarkFasade joarkFasade;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final Unleash unleash;
 
     public OpprettNyBehandlingFraSed(FagsakService fagsakService,
                                      BehandlingService behandlingService,
                                      OppgaveService oppgaveService,
                                      JoarkFasade joarkFasade,
-                                     BehandlingsresultatService behandlingsresultatService,
-                                     Unleash unleash) {
+                                     BehandlingsresultatService behandlingsresultatService) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
         this.joarkFasade = joarkFasade;
         this.oppgaveService = oppgaveService;
         this.behandlingsresultatService = behandlingsresultatService;
-        this.unleash = unleash;
     }
 
     @Override
@@ -86,7 +82,7 @@ public class OpprettNyBehandlingFraSed implements StegBehandler {
     private void avsluttTidligereBehandling(Fagsak fagsak) {
         var aktivBehandling = fagsak.hentAktivBehandling();
         if (aktivBehandling != null) {
-            if (unleash.isEnabled(OPPDATER_BEHANDLINGSRESULTAT)) behandlingsresultatService.oppdaterBehandlingsresultattype(aktivBehandling.getId(), Behandlingsresultattyper.FERDIGBEHANDLET);
+            behandlingsresultatService.oppdaterBehandlingsresultattype(aktivBehandling.getId(), Behandlingsresultattyper.FERDIGBEHANDLET);
             behandlingService.avsluttBehandling(aktivBehandling.getId());
         }
     }
