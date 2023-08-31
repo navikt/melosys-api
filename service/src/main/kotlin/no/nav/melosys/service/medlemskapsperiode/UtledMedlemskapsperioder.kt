@@ -94,9 +94,16 @@ class UtledMedlemskapsperioder {
         val nyFom = dto.søknadsperiode.fom
 
         if (nyFom.isBefore(opprinneligFom)) {
-            val utvidetPeriode = Periode(nyFom, opprinneligFom.minusDays(1))
-            val utvidetPeriodeDto = UtledMedlemskapsperioderDto.av(dto, utvidetPeriode)
-            medlemskapsperioder.addAll(lagMedlemskapsperioder(utvidetPeriodeDto))
+            val nyePerioder = lagUtvidetMedlemskapsperioder(nyFom, opprinneligFom.minusDays(1), dto)
+
+            val periodeSomKanSlåsSammen =
+                nyePerioder.firstOrNull { harLikTrygdedekningOgInnvilgelsesresultat(it, medlemskapsperioder.first()) }
+            if (periodeSomKanSlåsSammen != null) {
+                medlemskapsperioder.first().fom = periodeSomKanSlåsSammen.fom
+                nyePerioder.remove(periodeSomKanSlåsSammen)
+            }
+
+            nyePerioder.forEach { medlemskapsperioder.add(it) }
             medlemskapsperioder.sortBy { it.fom }
         } else if (nyFom.isAfter(opprinneligFom)) {
             val førstePeriodeEtterNyFom = medlemskapsperioder.first { it.tom == null || it.tom.isAfter(nyFom) }
@@ -113,9 +120,16 @@ class UtledMedlemskapsperioder {
         val nyTom = dto.søknadsperiode.tom
 
         if (opprinneligTom != null && (nyTom == null || nyTom.isAfter(opprinneligTom))) {
-            val utvidetPeriode = Periode(opprinneligTom.plusDays(1), nyTom)
-            val utvidetPeriodeDto = UtledMedlemskapsperioderDto.av(dto, utvidetPeriode)
-            medlemskapsperioder.addAll(lagMedlemskapsperioder(utvidetPeriodeDto))
+            val nyePerioder = lagUtvidetMedlemskapsperioder(opprinneligTom.plusDays(1), nyTom, dto)
+
+            val periodeSomKanSlåsSammen =
+                nyePerioder.firstOrNull { harLikTrygdedekningOgInnvilgelsesresultat(it, medlemskapsperioder.last()) }
+            if (periodeSomKanSlåsSammen != null) {
+                medlemskapsperioder.last().tom = periodeSomKanSlåsSammen.tom
+                nyePerioder.remove(periodeSomKanSlåsSammen)
+            }
+
+            nyePerioder.forEach { medlemskapsperioder.add(it) }
             medlemskapsperioder.sortBy { it.fom }
         } else if (
             (opprinneligTom == null && nyTom != null) || (opprinneligTom != null && nyTom.isBefore(opprinneligTom))
@@ -125,6 +139,16 @@ class UtledMedlemskapsperioder {
             medlemskapsperioder.subList(sistePeriodeIndex + 1, medlemskapsperioder.size).clear()
             medlemskapsperioder.filter { it.tom == sistePeriodeFørNyTom.tom }.onEach { it.tom = nyTom }
         }
+    }
+
+    fun lagUtvidetMedlemskapsperioder(
+        fom: LocalDate,
+        tom: LocalDate,
+        dto: UtledMedlemskapsperiodeNyVurderingDto
+    ): MutableCollection<Medlemskapsperiode> {
+        val utvidetPeriode = Periode(fom, tom)
+        val utvidetPeriodeDto = UtledMedlemskapsperioderDto.av(dto, utvidetPeriode)
+        return lagMedlemskapsperioder(utvidetPeriodeDto).toMutableList()
     }
 
     fun lagMedlemskapsperioder(dto: UtledMedlemskapsperioderDto): Collection<Medlemskapsperiode> {
@@ -268,6 +292,12 @@ class UtledMedlemskapsperioder {
             else -> trygdedekning
         }
 
+    fun harLikTrygdedekningOgInnvilgelsesresultat(
+        medlemskapsperiode1: Medlemskapsperiode,
+        medlemskapsperiode2: Medlemskapsperiode
+    ): Boolean =
+        medlemskapsperiode1.trygdedekning == medlemskapsperiode2.trygdedekning &&
+            medlemskapsperiode1.innvilgelsesresultat == medlemskapsperiode2.innvilgelsesresultat
 
     private fun harPensjonsdel(trygdedekninger: Trygdedekninger): Boolean =
         trygdedekninger == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON || trygdedekninger == Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
