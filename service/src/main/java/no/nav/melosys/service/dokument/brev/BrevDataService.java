@@ -97,9 +97,11 @@ public class BrevDataService {
     private String avklarMottakerId(no.nav.melosys.domain.brev.Mottaker mottaker, Kontaktopplysning kontaktopplysning) {
         return switch (mottaker.getRolle()) {
             case ARBEIDSGIVER -> avklarMottakerIDForOrg(mottaker, kontaktopplysning);
-            case FULLMEKTIG -> mottaker.erOrganisasjon() ? avklarMottakerIDForOrg(mottaker, kontaktopplysning) : mottaker.getPersonIdent();
+            case FULLMEKTIG ->
+                mottaker.erOrganisasjon() ? avklarMottakerIDForOrg(mottaker, kontaktopplysning) : mottaker.getPersonIdent();
             case BRUKER -> persondataFasade.hentFolkeregisterident(mottaker.getAktørId());
-            case UTENLANDSK_TRYGDEMYNDIGHET -> mottaker.erUtenlandskMyndighet() ? mottaker.getInstitusjonID() : mottaker.getOrgnr();
+            case UTENLANDSK_TRYGDEMYNDIGHET ->
+                mottaker.erUtenlandskMyndighet() ? mottaker.getInstitusjonID() : mottaker.getOrgnr();
             case NORSK_MYNDIGHET -> mottaker.getOrgnr();
             default -> throw new TekniskException(mottaker.getRolle() + " støttes ikke.");
         };
@@ -138,6 +140,8 @@ public class BrevDataService {
             brevXmlElement = doc.getDocumentElement();
         } catch (JAXBException | SAXException | ParserConfigurationException | IOException e) {
             throw new TekniskException("XML genereringsfeil " + behandling.getFagsak().getSaksnummer(), e);
+        } catch (Exception e) {
+            throw new TekniskException("Feil ved bygging av data til XML-generering " + behandling.getFagsak().getSaksnummer(), e);
         }
         return brevXmlElement;
     }
@@ -175,8 +179,10 @@ public class BrevDataService {
         return switch (mottaker.getRolle()) {
             case BRUKER -> lagMottakerForBruker(behandling, mottakerID);
             case ARBEIDSGIVER, NORSK_MYNDIGHET -> lagMottakerForOrganisasjon(mottakerID);
-            case UTENLANDSK_TRYGDEMYNDIGHET -> mottaker.erUtenlandskMyndighet() ? lagMottakerForUtenlandskTrygdemyndighet(mottaker) : lagMottakerForOrganisasjon(mottakerID);
-            case FULLMEKTIG -> mottaker.erOrganisasjon() ? lagMottakerForOrganisasjon(mottakerID) : lagMottakerForRepresentantPerson(behandling, mottakerID);
+            case UTENLANDSK_TRYGDEMYNDIGHET ->
+                mottaker.erUtenlandskMyndighet() ? lagMottakerForUtenlandskTrygdemyndighet(mottaker) : lagMottakerForOrganisasjon(mottakerID);
+            case FULLMEKTIG ->
+                mottaker.erOrganisasjon() ? lagMottakerForOrganisasjon(mottakerID) : lagMottakerForRepresentantPerson(behandling, mottakerID);
             default -> throw new TekniskException(mottaker.getRolle() + " støttes ikke.");
         };
     }
