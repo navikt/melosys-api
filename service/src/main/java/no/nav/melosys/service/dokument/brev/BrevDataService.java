@@ -97,11 +97,9 @@ public class BrevDataService {
     private String avklarMottakerId(no.nav.melosys.domain.brev.Mottaker mottaker, Kontaktopplysning kontaktopplysning) {
         return switch (mottaker.getRolle()) {
             case ARBEIDSGIVER -> avklarMottakerIDForOrg(mottaker, kontaktopplysning);
-            case FULLMEKTIG ->
-                mottaker.erOrganisasjon() ? avklarMottakerIDForOrg(mottaker, kontaktopplysning) : mottaker.getPersonIdent();
+            case FULLMEKTIG -> mottaker.erOrganisasjon() ? avklarMottakerIDForOrg(mottaker, kontaktopplysning) : mottaker.getPersonIdent();
             case BRUKER -> persondataFasade.hentFolkeregisterident(mottaker.getAktørId());
-            case UTENLANDSK_TRYGDEMYNDIGHET ->
-                mottaker.erUtenlandskMyndighet() ? mottaker.getInstitusjonID() : mottaker.getOrgnr();
+            case UTENLANDSK_TRYGDEMYNDIGHET -> mottaker.erUtenlandskMyndighet() ? mottaker.getInstitusjonID() : mottaker.getOrgnr();
             case NORSK_MYNDIGHET -> mottaker.getOrgnr();
             default -> throw new TekniskException(mottaker.getRolle() + " støttes ikke.");
         };
