@@ -273,7 +273,7 @@ public class DokgenService {
                 .medManglerInfoFritekst(brevbestillingDto.getManglerFritekst())
                 .medKontaktpersonNavn(brevbestillingDto.getKontaktpersonNavn())
                 .medBrukerSkalHaKopi(inneholderBrukerSomKopimottaker(brevbestillingDto.getKopiMottakere()));
-            case INNVILGELSE_FOLKETRYGDLOVEN, TRYGDEAVTALE_GB, TRYGDEAVTALE_US, TRYGDEAVTALE_CAN, TRYGDEAVTALE_AU -> new InnvilgelseBrevbestilling.Builder()
+            case TRYGDEAVTALE_GB, TRYGDEAVTALE_US, TRYGDEAVTALE_CAN, TRYGDEAVTALE_AU -> new InnvilgelseBrevbestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK)
                 .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
                 .medBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst())
@@ -281,6 +281,11 @@ public class DokgenService {
                 .medBarnFritekst(brevbestillingDto.getBarnFritekst())
                 .medVirksomhetArbeidsgiverSkalHaKopi(inneholderArbeidsgiverSomKopimottaker(brevbestillingDto.getKopiMottakere()))
                 .medNyVurderingBakgrunn(brevbestillingDto.getNyVurderingBakgrunn());
+            case INNVILGELSE_FOLKETRYGDLOVEN -> new InnvilgelseFtrlBrevbestilling.Builder()
+                .medDistribusjonstype(Distribusjonstype.VEDTAK)
+                .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
+                .medBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst())
+                .medTrygdeavgiftFritekst(brevbestillingDto.getTrygdeavgiftFritekst());
             case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET,
                 UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV, FRITEKSTBREV -> new FritekstbrevBrevbestilling.Builder()
                 .medDistribusjonstype(brevbestillingDto.getDistribusjonstype())

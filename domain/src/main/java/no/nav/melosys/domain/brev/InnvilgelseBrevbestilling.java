@@ -13,7 +13,7 @@ public class InnvilgelseBrevbestilling extends DokgenBrevbestilling {
         //Tom constructor på grunn av deserialsering i prosessinstans
     }
 
-    private InnvilgelseBrevbestilling(InnvilgelseBrevbestilling.Builder builder) {
+    protected InnvilgelseBrevbestilling(InnvilgelseBrevbestilling.Builder builder) {
         super(builder);
         this.innledningFritekst = builder.innledningFritekst;
         this.begrunnelseFritekst = builder.begrunnelseFritekst;

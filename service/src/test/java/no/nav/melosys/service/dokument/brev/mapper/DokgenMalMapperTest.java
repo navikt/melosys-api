@@ -23,6 +23,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.*;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Innvilgelse;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Person;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoVirksomhet;
+import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrl;
 import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.attest.*;
 import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse.InnvilgelseTrygdeavtale;
 import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse.Soknad;
