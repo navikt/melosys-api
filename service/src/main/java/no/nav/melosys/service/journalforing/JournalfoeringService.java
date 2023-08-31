@@ -111,8 +111,7 @@ public class JournalfoeringService {
         }
 
         if (unleash.isEnabled(IKKE_JOURNALFOER_UTEN_PID)){
-            final MelosysEessiMelding melosysEessiMelding = eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId());
-            if (melosysEessiMelding != null) eessiService.opprettJournalpostForTidligereSed(melosysEessiMelding.getRinaSaksnummer());
+            journalFoerTidligereSedDersomEksisterer(journalpost);
         }
 
         fellesValidering(journalfoeringDto);
@@ -127,6 +126,11 @@ public class JournalfoeringService {
 
         opprettJournalføringNySakProsessinstans(journalpost, journalfoeringDto, sakstype, sakstema, behandlingstema,
             behandlingstype);
+    }
+
+    private void journalFoerTidligereSedDersomEksisterer(Journalpost journalpost) {
+        final MelosysEessiMelding melosysEessiMelding = eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId());
+        if (melosysEessiMelding != null) eessiService.opprettJournalpostForTidligereSed(melosysEessiMelding.getRinaSaksnummer());
     }
 
     private void validerOpprettelseSak(JournalfoeringOpprettDto journalfoeringDto,
