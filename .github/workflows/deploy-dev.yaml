@@ -8,6 +8,9 @@ on:
       - "CODEOWNERS"
     branches:
       - master
+permissions:
+    contents: write
+    packages: write
 env:
   docker_image: ghcr.io/${{ github.repository }}/melosys-api:${{ github.sha }}
 
