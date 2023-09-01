@@ -5,15 +5,15 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
-import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.exception.ValideringException
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftsberegningsRequestMapper
 import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningResponse
 import no.nav.melosys.service.MedlemAvFolketrygdenService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.threeten.extra.LocalDateRange
+import java.time.DateTimeException
 import java.util.*
 
 @Service
@@ -29,17 +29,14 @@ class TrygdeavgiftsberegningService
         val fastsattTrygdeavgift = medlemAvFolketrygden.fastsattTrygdeavgift
 
         val innvilgedeMedlemskapsperioder =
-            medlemAvFolketrygden.medlemskapsperioder.filter { it.innvilgelsesresultat == InnvilgelsesResultat.INNVILGET }
+            medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }
 
         valider(medlemAvFolketrygden)
-        if (!erInntektperioderDekkendeForMedlemskapsperioder(
-                fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder,
-                innvilgedeMedlemskapsperioder
-            )
-        ) throw ValideringException(
-            "Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)",
-            null
+        validerInntekstperioderDekkerMedlemskapsperioder(
+            fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder,
+            innvilgedeMedlemskapsperioder
         )
+
 
         fastsattTrygdeavgift.trygdeavgiftsperioder.clear()
 
@@ -129,26 +126,35 @@ class TrygdeavgiftsberegningService
     }
 
     companion object {
-        fun erInntektperioderDekkendeForMedlemskapsperioder(
+        fun validerInntekstperioderDekkerMedlemskapsperioder(
             inntektsperioder: List<Inntektsperiode>,
             medlemskapsperioder: List<Medlemskapsperiode>
-        ): Boolean {
-            val sortertInntektsperioder = inntektsperioder.sortedBy { it.fomDato }
-            var tom = sortertInntektsperioder.first().tomDato
-            for (i in sortertInntektsperioder.indices) {
-                val aktivFom = sortertInntektsperioder[i].fomDato
-                val aktivTom = sortertInntektsperioder[i].tomDato
-                if (aktivFom.isBefore(tom.plusDays(1)) || aktivFom.isEqual(tom.plusDays(1))) {
-                    if (aktivTom.isAfter(tom)) {
-                        tom = aktivTom
+        ) {
+            val inntektperiodeRange = inntektsperioder.sortedBy { it.fomDato }
+                .map { inntektsperiode -> LocalDateRange.ofClosed(inntektsperiode.fomDato, inntektsperiode.tomDato) }
+
+            var totaltRange: LocalDateRange? = null
+            try {
+                for (range in inntektperiodeRange) {
+                    totaltRange = if (totaltRange == null) {
+                        range
+                    } else {
+                        totaltRange.union(range)
                     }
-                } else {
-                    return false
                 }
+            } catch (ex: DateTimeException) {
+                throw FunksjonellException("Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
             }
 
+
             val sortertMedlemskapsperiode = medlemskapsperioder.sortedBy { it.fom }
-            return sortertMedlemskapsperiode.first().fom == sortertInntektsperioder.first().fomDato && sortertMedlemskapsperiode.last().tom == tom
+            if (LocalDateRange.ofClosed(
+                    sortertMedlemskapsperiode.first().fom,
+                    sortertMedlemskapsperiode.last().tom
+                ) != totaltRange
+            ) {
+                throw FunksjonellException("Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
+            }
         }
     }
 

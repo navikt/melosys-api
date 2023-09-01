@@ -1,10 +1,10 @@
 package no.nav.melosys.service.avgift
 
+import io.kotest.assertions.throwables.shouldNotThrowAny
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldNotBeNull
-import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -19,7 +19,6 @@ import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.exception.ValideringException
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.service.MedlemAvFolketrygdenService
@@ -270,13 +269,13 @@ internal class TrygdeavgiftsberegningServiceTest {
         every { mockMedlemAvFolketrygdenService.lagre(any()) }.returns(medlemAvFolketrygden)
         every { mockTrygdeavgiftConsumer.beregnTrygdeavgift(ofType(TrygdeavgiftsberegningRequest::class)) }
 
-        shouldThrow<ValideringException> {
+        shouldThrow<FunksjonellException> {
             trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLING_ID)
         }.message.shouldContain("Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
     }
 
     @Test
-    fun `Inntektsperioder er uten opphold og starter slutter på samme dato som medlemskapsperioder - true`() {
+    fun `Inntektsperioder er uten opphold og starter slutter på samme dato som medlemskapsperioder - ok`() {
         val medlemskapsperioder: List<Medlemskapsperiode> = listOf(
             lagMedlemskapsperiode(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-01-31")),
             lagMedlemskapsperiode(LocalDate.parse("2023-02-01"), LocalDate.parse("2023-02-28")),
@@ -289,10 +288,12 @@ internal class TrygdeavgiftsberegningServiceTest {
             lagInntektsperiode(LocalDate.parse("2023-03-01"), LocalDate.parse("2023-05-31"))
         )
 
-        TrygdeavgiftsberegningService.erInntektperioderDekkendeForMedlemskapsperioder(
-            inntektsperioder,
-            medlemskapsperioder
-        ).shouldBe(true)
+        shouldNotThrowAny {
+            TrygdeavgiftsberegningService.validerInntekstperioderDekkerMedlemskapsperioder(
+                inntektsperioder,
+                medlemskapsperioder
+            )
+        }
     }
 
     @Test
@@ -309,10 +310,12 @@ internal class TrygdeavgiftsberegningServiceTest {
             lagInntektsperiode(LocalDate.parse("2023-03-01"), LocalDate.parse("2023-05-05"))
         )
 
-        TrygdeavgiftsberegningService.erInntektperioderDekkendeForMedlemskapsperioder(
-            inntektsperioder,
-            medlemskapsperioder
-        ).shouldBe(false)
+        shouldThrow<FunksjonellException> {
+            TrygdeavgiftsberegningService.validerInntekstperioderDekkerMedlemskapsperioder(
+                inntektsperioder,
+                medlemskapsperioder
+            )
+        }.message.shouldContain("Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
     }
 
     @Test
@@ -329,10 +332,12 @@ internal class TrygdeavgiftsberegningServiceTest {
             lagInntektsperiode(LocalDate.parse("2023-03-01"), LocalDate.parse("2023-05-31"))
         )
 
-        TrygdeavgiftsberegningService.erInntektperioderDekkendeForMedlemskapsperioder(
-            inntektsperioder,
-            medlemskapsperioder
-        ).shouldBe(false)
+        shouldThrow<FunksjonellException> {
+            TrygdeavgiftsberegningService.validerInntekstperioderDekkerMedlemskapsperioder(
+                inntektsperioder,
+                medlemskapsperioder
+            )
+        }.message.shouldContain("Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
     }
 
     @Test
@@ -349,14 +354,16 @@ internal class TrygdeavgiftsberegningServiceTest {
             lagInntektsperiode(LocalDate.parse("2023-03-01"), LocalDate.parse("2023-05-31"))
         )
 
-        TrygdeavgiftsberegningService.erInntektperioderDekkendeForMedlemskapsperioder(
-            inntektsperioder,
-            medlemskapsperioder
-        ).shouldBe(false)
+        shouldThrow<FunksjonellException> {
+            TrygdeavgiftsberegningService.validerInntekstperioderDekkerMedlemskapsperioder(
+                inntektsperioder,
+                medlemskapsperioder
+            )
+        }.message.shouldContain("Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
     }
 
     @Test
-    fun `Inntektsperioder har flere med samme fom dato uten opphold- true`() {
+    fun `Inntektsperioder har flere med samme fom dato uten opphold- ok`() {
         val medlemskapsperioder: List<Medlemskapsperiode> = listOf(
             lagMedlemskapsperiode(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-01-31")),
             lagMedlemskapsperiode(LocalDate.parse("2023-02-01"), LocalDate.parse("2023-02-28")),
@@ -370,10 +377,10 @@ internal class TrygdeavgiftsberegningServiceTest {
             lagInntektsperiode(LocalDate.parse("2023-02-22"), LocalDate.parse("2023-05-31")),
         )
 
-        TrygdeavgiftsberegningService.erInntektperioderDekkendeForMedlemskapsperioder(
+        TrygdeavgiftsberegningService.validerInntekstperioderDekkerMedlemskapsperioder(
             inntektsperioder,
             medlemskapsperioder
-        ).shouldBe(true)
+        )
     }
 
     private fun lagMedlemskapsperiode(fom: LocalDate, tom: LocalDate): Medlemskapsperiode {

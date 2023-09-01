@@ -468,6 +468,11 @@
                 <artifactId>jboss-logging-processor</artifactId>
                 <version>${org.jboss.logging.annotations.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.threeten</groupId>
+                <artifactId>threeten-extra</artifactId>
+                <version>1.7.2</version>
+            </dependency>
 
             <!-- NAV felleskomponenter -->
             <dependency>
