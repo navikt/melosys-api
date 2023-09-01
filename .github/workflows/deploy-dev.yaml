@@ -1,4 +1,7 @@
 name: deploy-dev
+permissions:
+    contents: write
+    packages: write
 on:
   push:
     paths-ignore:
