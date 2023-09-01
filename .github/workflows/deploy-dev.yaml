@@ -1,7 +1,4 @@
 name: deploy-dev
-permissions:
-    contents: write
-    packages: write
 on:
   push:
     paths-ignore:
@@ -11,6 +8,9 @@ on:
       - "CODEOWNERS"
     branches:
       - master
+permissions:
+    contents: write
+    packages: write
 env:
   docker_image: ghcr.io/${{ github.repository }}/melosys-api:${{ github.sha }}
 
