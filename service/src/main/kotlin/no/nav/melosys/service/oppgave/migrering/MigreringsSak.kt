@@ -5,7 +5,7 @@ import no.nav.melosys.domain.oppgave.Oppgave
 
 data class MigreringsSak(
     val sak: SakOgBehandlingDTO,
-    val oppgaver: List<Oppgave>,
+    val oppgaver: MutableList<Oppgave>,
     val ny: OppgaveMigreringsOppdatering,
 ) {
 

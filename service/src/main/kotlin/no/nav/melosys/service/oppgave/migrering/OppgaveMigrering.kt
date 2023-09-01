@@ -5,10 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import mu.KotlinLogging
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.Fagsystem
-import no.nav.melosys.domain.SakOgBehandlingDTO
-import no.nav.melosys.domain.Tema
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
@@ -107,9 +104,10 @@ class OppgaveMigrering(
         }.asSequence().filter {
             options.saksFilter.filtrer(it)
         }.filter { !stopMigrering }.map {
+            val oppgaver = oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(it.saksnummer)
             MigreringsSak(
                 sak = it,
-                oppgaver = oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(it.saksnummer),
+                oppgaver = oppgaver.ifEmpty { mutableListOf() },
                 ny = nyOppgaveMapping(it)
             )
         }.filter {
@@ -159,7 +157,7 @@ class OppgaveMigrering(
     private fun lagOppgave(dryrun: Boolean, migreringsSak: MigreringsSak) {
         val sak = migreringsSak.sak
         val oppdatering = migreringsSak.ny
-        val fagSak = fagsakRepository.findBySaksnummer(sak.saksnummer).orElseThrow {
+        val fagSak: Fagsak = fagsakRepository.findBySaksnummer(sak.saksnummer).orElseThrow {
             TekniskException("Fant ikke ${sak.saksnummer}")
         }
         val initierendeJournalpostId =
@@ -184,12 +182,17 @@ class OppgaveMigrering(
             .setBeskrivelse("Gjennopprettet oppgave til behandling i Melosys")
             .build()
         try {
-            if (dryrun) {
-                migreringsRapport.antallOppgaverLaget++
-                return
+            if (migreringsSak.oppgaver.isNotEmpty())
+                throw TekniskException("Oppgave(r)(${migreringsSak.oppgaver.map { it.oppgaveId }}) finnes allerede for sak:${sak.saksnummer}")
+            if (!dryrun) {
+                val oppgaveId = oppgaveFasade.opprettOppgave(oppgave)
+                log.info("laget manglende oppgave id:$oppgaveId")
+                oppgaveFasade.hentOppgave(oppgaveId).also {
+                    migreringsSak.oppgaver.add(it)
+                }
+            } else {
+                migreringsSak.oppgaver.add(oppgave)
             }
-            val oppgaveId = oppgaveFasade.opprettOppgave(oppgave)
-            log.info("oppgave($oppgaveId) laget")
             migreringsRapport.antallOppgaverLaget++
         } catch (e: Exception) {
             migreringsSak.ny.oppgaveOppdateringError = e.message
