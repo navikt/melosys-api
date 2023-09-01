@@ -40,9 +40,8 @@ class OppgaveMigreringTest {
                     behandlingstema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND,
                     behandlingstatus = Behandlingsstatus.VURDER_DOKUMENT,
                     behandlingsresultattype = Behandlingsresultattyper.FERDIGBEHANDLET,
-                    initierendeJournalpostId = "1",
                 ),
-                oppgaver = listOf(
+                oppgaver = mutableListOf(
                     Oppgave.Builder()
                         .setOppgaveId("1")
                         .setBehandlingstema("ab0490")

@@ -162,6 +162,9 @@ class OppgaveMigrering(
         val fagSak = fagsakRepository.findBySaksnummer(sak.saksnummer).orElseThrow {
             TekniskException("Fant ikke ${sak.saksnummer}")
         }
+        val initierendeJournalpostId =
+            behandlingRepository.findWithSaksopplysningerById(sak.behandlingID)?.initierendeJournalpostId
+                ?: throw TekniskException("Fant ikke initierendeDokumentId for ${sak.saksnummer}")
 
         val registrertDato = ZonedDateTime.ofInstant(fagSak.registrertDato, ZoneId.systemDefault())
         val oppgave = Oppgave.Builder()
@@ -170,7 +173,7 @@ class OppgaveMigrering(
             .setBehandlesAvApplikasjon(Fagsystem.MELOSYS)
             .setOpprettetTidspunkt(registrertDato)
             .setFristFerdigstillelse(registrertDato.toLocalDate().plusMonths(1))
-            .setJournalpostId(sak.initierendeJournalpostId)
+            .setJournalpostId(initierendeJournalpostId)
             .setPrioritet(PrioritetType.NORM)
             .setTildeltEnhetsnr(MELOSYS_ENHET_ID.toString())
             .setAktivDato(registrertDato.toLocalDate())
