@@ -157,12 +157,6 @@ class OppgaveMigrering(
     }
 
     private fun lagOppgave(dryrun: Boolean, migreringsSak: MigreringsSak) {
-        if (dryrun) {
-            migreringsRapport.antallOppgaverLaget++
-            return
-        }
-
-
         val sak = migreringsSak.sak
         val oppdatering = migreringsSak.ny
         val fagSak = fagsakRepository.findBySaksnummer(sak.saksnummer).orElseThrow {
@@ -184,10 +178,15 @@ class OppgaveMigrering(
             .setOppgavetype(oppdatering.oppgaveType)
             .setBehandlingstema(oppdatering.oppgaveBehandlingstema?.kode)
             .setTema(oppdatering.tema)
-            .setBeskrivelse("Gjennopprettet oppgave til behandling i Melosys - ${sak.saksnummer}")
+            .setBeskrivelse("Gjennopprettet oppgave til behandling i Melosys")
             .build()
         try {
-            oppgaveFasade.opprettOppgave(oppgave)
+            if (dryrun) {
+                migreringsRapport.antallOppgaverLaget++
+                return
+            }
+            val oppgaveId = oppgaveFasade.opprettOppgave(oppgave)
+            log.info("oppgave($oppgaveId) laget")
             migreringsRapport.antallOppgaverLaget++
         } catch (e: Exception) {
             migreringsSak.ny.oppgaveOppdateringError = e.message
