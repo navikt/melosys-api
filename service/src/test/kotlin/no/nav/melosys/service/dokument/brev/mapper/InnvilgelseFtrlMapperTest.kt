@@ -15,7 +15,7 @@ import io.mockk.junit5.MockKExtension
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
-import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling
+import no.nav.melosys.domain.brev.InnvilgelseFtrlBrevbestilling
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
@@ -26,7 +26,6 @@ import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.dokument.DokgenTestData
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
-import org.joda.time.DateTime
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -58,7 +57,7 @@ internal class InnvilgelseFtrlMapperTest {
     fun map_InnvilgetKunNorskInntektInnvilget_populererFelter() {
         mockHappyCase()
 
-        innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling()).shouldNotBeNull()
+        innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).shouldNotBeNull()
             .apply {
                 saksbehandlerNavn.shouldBe(SAKSBEHANDLER_NAVN)
                 saksinfo.shouldBeInstanceOf<SaksinfoBruker>().apply {
@@ -75,12 +74,9 @@ internal class InnvilgelseFtrlMapperTest {
                 }
 
                 datoMottatt.shouldBe(LocalDate.EPOCH)
-                innvilgelse.apply {
-                    innledningFritekst.shouldBeNull()
-                    begrunnelseFritekst.shouldBe(BEGRUNNELSE_FRITEKST)
-                    ektefelleFritekst.shouldBeNull()
-                    barnFritekst.shouldBeNull()
-                }
+                innledningFritekst.shouldBeNull()
+                begrunnelseFritekst.shouldBe(BEGRUNNELSE_FRITEKST)
+                trygdeavgiftFritekst.shouldBe(TRYGDEAVGIFT_FRITEKST)
                 brukerHarFullmektig.shouldBeFalse()
                 perioder.shouldHaveSize(1).first().apply {
                     innvilgelsesResultat.shouldBe(InnvilgelsesResultat.INNVILGET)
@@ -106,7 +102,7 @@ internal class InnvilgelseFtrlMapperTest {
                 Soeknadsland(listOf(Landkoder.GB.kode), false)
         }
 
-        innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling()).apply {
+        innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).apply {
             arbeidsland.shouldBe(Landkoder.GB.beskrivelse)
             trygdeavtaleMedArbeidsland.shouldBeTrue()
         }
@@ -130,20 +126,21 @@ internal class InnvilgelseFtrlMapperTest {
             )
         }
 
-        innvilgelseFtrlMapper.map(lagInnvilgelseBrevbestilling()).apply {
+        innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).apply {
             perioder.shouldHaveSize(2)
                 .map { it.innvilgelsesResultat }
                 .shouldContainExactlyInAnyOrder(InnvilgelsesResultat.INNVILGET, InnvilgelsesResultat.AVSLAATT)
         }
     }
 
-    private fun lagInnvilgelseBrevbestilling(): InnvilgelseBrevbestilling {
-        return InnvilgelseBrevbestilling.Builder()
+    private fun lagInnvilgelseFtrlBrevbestilling(): InnvilgelseFtrlBrevbestilling {
+        return InnvilgelseFtrlBrevbestilling.Builder()
             .medBehandling(DokgenTestData.lagBehandling())
             .medPersonDokument(DokgenTestData.lagPersondata())
             .medPersonMottaker(DokgenTestData.lagPersondata())
             .medForsendelseMottatt(Instant.EPOCH)
             .medBegrunnelseFritekst(BEGRUNNELSE_FRITEKST)
+            .medTrygdeavgiftFritekst(TRYGDEAVGIFT_FRITEKST)
             .medSaksbehandlerNavn(SAKSBEHANDLER_NAVN)
             .build()
     }
@@ -224,7 +221,8 @@ internal class InnvilgelseFtrlMapperTest {
     }
 
     companion object {
-        const val BEGRUNNELSE_FRITEKST = "Begrunnelse fritekst"
+        const val BEGRUNNELSE_FRITEKST = "<p>Begrunnelse fritekst</p>"
+        const val TRYGDEAVGIFT_FRITEKST = "<p>Trygdeavgift fritekst</p>"
         const val SAKSBEHANDLER_NAVN = "Fetter Anton"
         const val ARBEIDSGIVER_NAVN = "Bang Hansen"
         const val SAKSNUMMER = "MEL-123"
