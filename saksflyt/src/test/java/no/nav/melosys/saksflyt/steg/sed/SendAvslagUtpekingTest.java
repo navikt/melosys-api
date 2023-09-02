@@ -45,7 +45,6 @@ class SendAvslagUtpekingTest {
     private BehandlingService behandlingService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
-    private Unleash unleash = new FakeUnleash();
 
     private SendAvslagUtpeking sendAvslagUtpeking;
     private EessiService eessiService;
@@ -54,7 +53,7 @@ class SendAvslagUtpekingTest {
     @BeforeEach
     public void settOpp() {
         eessiService = new EessiService(behandlingService, behandlingsresultatService, eessiConsumer, joarkFasade,
-            sedDataBygger, sedDataGrunnlagFactory, unleash);
+            sedDataBygger, sedDataGrunnlagFactory);
         sendAvslagUtpeking = new SendAvslagUtpeking(eessiService);
 
         SedDokument sedDokument = new SedDokument();

@@ -40,7 +40,7 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag =
             eksisterendeEllerNyttTrygdeavgiftsgrunnlag(medlemAvFolketrygden).apply {
                 this.skatteforholdTilNorge = lagSkatteforholdTilNorge(request, fomDato, tomDato)
-                this.inntektsperioder = lagInntektsperioder(request, fomDato, tomDato)
+                this.inntektsperioder = lagInntektsperioder(request)
             }
         behandlingsresultatService.lagre(behandlingsresultat)
 
@@ -80,13 +80,11 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
 
     private fun lagInntektsperioder(
         request: OppdaterTrygdeavgiftsgrunnlagRequest,
-        fomDato: LocalDate,
-        tomDato: LocalDate,
     ): List<Inntektsperiode> =
         (request.inntektskilder.map { inntektskildeRequest: InntektskildeRequest ->
             Inntektsperiode().apply {
-                this.fomDato = fomDato
-                this.tomDato = tomDato
+                this.fomDato = inntektskildeRequest.fomDato
+                this.tomDato = inntektskildeRequest.tomDato
                 this.type = inntektskildeRequest.type
                 this.avgiftspliktigInntektMnd =
                     if (inntektskildeRequest.avgiftspliktigInntektMnd == null) null

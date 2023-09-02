@@ -108,7 +108,10 @@ public class JournalfoeringService {
 
         if (journalpost.mottaksKanalErEessi()) {
             validerKanOppretteSakFraSed(journalpost);
-            if (unleash.isEnabled(IKKE_JOURNALFOER_UTEN_PID)) opprettUtsattJournalpostDersomEksisterer(journalpost);
+        }
+
+        if (unleash.isEnabled(IKKE_JOURNALFOER_UTEN_PID)){
+            journalFoerTidligereSedDersomEksisterer(journalpost);
         }
 
         fellesValidering(journalfoeringDto);
@@ -125,9 +128,9 @@ public class JournalfoeringService {
             behandlingstype);
     }
 
-    private void opprettUtsattJournalpostDersomEksisterer(Journalpost journalpost) {
+    private void journalFoerTidligereSedDersomEksisterer(Journalpost journalpost) {
         final MelosysEessiMelding melosysEessiMelding = eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId());
-        eessiService.opprettJournalpostForTidligereSed(melosysEessiMelding.getRinaSaksnummer());
+        if (melosysEessiMelding != null) eessiService.opprettJournalpostForTidligereSed(melosysEessiMelding.getRinaSaksnummer());
     }
 
     private void validerOpprettelseSak(JournalfoeringOpprettDto journalfoeringDto,
@@ -269,6 +272,8 @@ public class JournalfoeringService {
             validerKanTilknytteJournalpostForSedTilSak(journalpost, saksnummer);
         }
 
+        if (unleash.isEnabled(IKKE_JOURNALFOER_UTEN_PID)) eessiService.opprettJournalpostForTidligereSed(journalfoeringDto.getSaksnummer());
+
         fellesValidering(journalfoeringDto);
 
         log.info("{} knytter journalpost {} til eksisterende sak {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
@@ -304,6 +309,8 @@ public class JournalfoeringService {
         if (sistBehandling.erAktiv()) {
             behandlingService.avsluttBehandling(sistBehandling.getId());
         }
+
+        if (unleash.isEnabled(IKKE_JOURNALFOER_UTEN_PID)) eessiService.opprettJournalpostForTidligereSed(journalfoeringDto.getSaksnummer());
 
         log.info("{} knytter journalpost {} til sak {} og lager ny vurdering", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
 
@@ -429,6 +436,7 @@ public class JournalfoeringService {
     public void journalførSed(JournalfoeringSedDto journalfoeringSedDto) {
         validerJournalfoerSed(journalfoeringSedDto);
         MelosysEessiMelding eessiMelding = eessiService.hentSedTilknyttetJournalpost(journalfoeringSedDto.getJournalpostID());
+        if (unleash.isEnabled(IKKE_JOURNALFOER_UTEN_PID)) eessiService.opprettJournalpostForTidligereSed(eessiMelding.getRinaSaksnummer());
         prosessinstansService.opprettProsessinstansSedMottak(eessiMelding, persondataFasade.hentAktørIdForIdent(journalfoeringSedDto.getBrukerID()));
     }
 

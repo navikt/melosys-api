@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.*;
 
 import com.google.common.collect.Sets;
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
@@ -62,8 +61,6 @@ class EessiServiceTest {
     @Mock
     private SedDataGrunnlagFactory dokumentdataGrunnlagFactory;
 
-    private FakeUnleash unleash = new FakeUnleash();
-
     private EessiService eessiService;
 
     private static final long BEHANDLING_ID = 1L;
@@ -88,7 +85,7 @@ class EessiServiceTest {
     @BeforeEach
     void setup() {
         eessiService = new EessiService(behandlingService, behandlingsresultatService, eessiConsumer, joarkFasade,
-            sedDataBygger, dokumentdataGrunnlagFactory, unleash);
+            sedDataBygger, dokumentdataGrunnlagFactory);
     }
 
     private static Behandling lagBehandling() {
