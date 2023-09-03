@@ -77,6 +77,13 @@ jobs:
     needs: build
     steps:
       - uses: actions/checkout@v3
+      - name: deploy new Unleash Apikey to ${{github.event.inputs.environment}}
+        uses: nais/deploy/actions/deploy@v1
+        env:
+          APIKEY: ${{ secrets.NAIS_DEPLOY_APIKEY }}
+          CLUSTER: ${{github.event.inputs.environment == 'prod' && 'prod-fss' || 'dev-fss' }}
+          RESOURCE: nais/unleash-apitoken.yml
+          VARS: nais/vars-${{github.event.inputs.environment}}.json
       - name: deploy to ${{github.event.inputs.environment}}
         uses: nais/deploy/actions/deploy@v1
         env:
