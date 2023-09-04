@@ -35,6 +35,8 @@ class FerdigstillJournalpostSedTest {
     @Mock
     private EessiService eessiService;
 
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
+
     private FerdigstillJournalpostSed ferdigstillJournalpostSed;
 
     private static final String JOURNALPOST_ID = "jp123";
@@ -47,7 +49,7 @@ class FerdigstillJournalpostSedTest {
 
     @BeforeEach
     public void setUp() {
-        ferdigstillJournalpostSed = new FerdigstillJournalpostSed(joarkFasade, persondataFasade, oppgaveFactory, new FakeUnleash(), eessiService);
+        ferdigstillJournalpostSed = new FerdigstillJournalpostSed(joarkFasade, persondataFasade, oppgaveFactory, fakeUnleash, eessiService);
     }
 
     @Test
