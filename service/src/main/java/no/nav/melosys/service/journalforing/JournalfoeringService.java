@@ -123,11 +123,6 @@ public class JournalfoeringService {
             behandlingstype);
     }
 
-    private void journalFoerTidligereSedDersomEksisterer(Journalpost journalpost) {
-        final MelosysEessiMelding melosysEessiMelding = eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId());
-        if (melosysEessiMelding != null) eessiService.opprettJournalpostForTidligereSed(melosysEessiMelding.getRinaSaksnummer());
-    }
-
     private void validerOpprettelseSak(JournalfoeringOpprettDto journalfoeringDto,
                                        Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema,
                                        Behandlingstyper behandlingstype) {
