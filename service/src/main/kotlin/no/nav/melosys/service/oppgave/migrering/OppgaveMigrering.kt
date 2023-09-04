@@ -162,7 +162,10 @@ class OppgaveMigrering(
         }
         val initierendeJournalpostId =
             behandlingRepository.findWithSaksopplysningerById(sak.behandlingID)?.initierendeJournalpostId
-                ?: throw TekniskException("Fant ikke initierendeDokumentId for ${sak.saksnummer}")
+
+        if (initierendeJournalpostId == null) {
+            log.info("Fant ikke initierendeJournalpostId for ${sak.saksnummer}")
+        }
 
         val registrertDato = ZonedDateTime.ofInstant(fagSak.registrertDato, ZoneId.systemDefault())
         val oppgave = Oppgave.Builder()
