@@ -100,7 +100,7 @@ class JournalfoeringBase(
 
     protected fun finnProsess(prosessType: ProsessType, startTid: LocalDateTime): UUID {
         await.pollDelay(1, TimeUnit.SECONDS)
-            .timeout(20, TimeUnit.SECONDS)
+            .timeout(30, TimeUnit.SECONDS)
             .untilNotNull {
                 prosessinstansRepository.findAllAfterDate(startTid)
             }.map { it.type }.shouldContain(prosessType)

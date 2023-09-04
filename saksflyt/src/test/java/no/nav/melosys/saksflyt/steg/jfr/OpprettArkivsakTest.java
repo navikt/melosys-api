@@ -18,7 +18,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.TemaFactory.fraBehandlingstema;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.when;
@@ -34,6 +33,7 @@ class OpprettArkivsakTest {
     private OpprettArkivsak opprettArkivsak;
 
     private final OppgaveFactory oppgaveFactory = new OppgaveFactory();
+
     @BeforeEach
     public void setUp() {
         opprettArkivsak = new OpprettArkivsak(fagsakService, arkivsakService, oppgaveFactory);
@@ -61,8 +61,7 @@ class OpprettArkivsakTest {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
 
-        when(arkivsakService.opprettSakForBruker(fagsak.getSaksnummer(), fraBehandlingstema(behandling.getTema()),
-            aktørID)).thenReturn(forventetArkivsakID);
+        when(arkivsakService.opprettSakForBruker(fagsak.getSaksnummer(), oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema()), aktørID)).thenReturn(forventetArkivsakID);
         opprettArkivsak.utfør(prosessinstans);
 
         assertThat(fagsak.getGsakSaksnummer()).isEqualTo(forventetArkivsakID);
