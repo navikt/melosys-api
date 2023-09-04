@@ -89,6 +89,8 @@ spec:
     value: {{APP_NAME_UTBETALING}}
   - name: APP_NAME_INNTEKTSKOMPONENTEN
     value: {{APP_NAME_INNTEKTSKOMPONENTEN}}
+  - name: APP_NAME
+    value: {{APP_NAME}}
   envFrom:
     - secret: {{APP_NAME}}-unleash-api-token
   kafka:
