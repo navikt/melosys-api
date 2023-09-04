@@ -368,7 +368,7 @@ class UtledMedlemskapsperioderTest {
             opprinneligPeriode.getFom(), opprinneligPeriode.getTom(), InnvilgelsesResultat.INNVILGET, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON);
         var opprinneligAvslåttMedlemskapsperiode = lagMedlemskapsperiode(
             opprinneligPeriode.getFom(), opprinneligPeriode.getTom(), InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE);
-        var opprinneligSøknad = new SoeknadFtrl();
+        var opprinneligSøknad = new SøknadNorgeEllerUtenforEØS();
         opprinneligSøknad.setTrygdedekning(opprinneligTrygdedekning);
         opprinneligSøknad.periode = opprinneligPeriode;
         opprinneligSøknad.soeknadsland = new Soeknadsland(List.of(arbeidsland), false);
@@ -403,7 +403,7 @@ class UtledMedlemskapsperioderTest {
         var opprinneligTrygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON;
         var opprinneligMedlemskapsperiode = lagMedlemskapsperiode(
             opprinneligPeriode.getFom(), opprinneligPeriode.getTom(), InnvilgelsesResultat.INNVILGET, opprinneligTrygdedekning);
-        var opprinneligSøknad = new SoeknadFtrl();
+        var opprinneligSøknad = new SøknadNorgeEllerUtenforEØS();
         opprinneligSøknad.setTrygdedekning(opprinneligTrygdedekning);
         opprinneligSøknad.periode = opprinneligPeriode;
         opprinneligSøknad.soeknadsland = new Soeknadsland(List.of(arbeidsland), false);
@@ -437,7 +437,7 @@ class UtledMedlemskapsperioderTest {
         var opprinneligTrygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE;
         var opprinneligMedlemskapsperiode = lagMedlemskapsperiode(
             opprinneligPeriode.getFom(), opprinneligPeriode.getTom(), InnvilgelsesResultat.INNVILGET, opprinneligTrygdedekning);
-        var opprinneligSøknad = new SoeknadFtrl();
+        var opprinneligSøknad = new SøknadNorgeEllerUtenforEØS();
         opprinneligSøknad.setTrygdedekning(opprinneligTrygdedekning);
         opprinneligSøknad.periode = opprinneligPeriode;
         opprinneligSøknad.soeknadsland = new Soeknadsland(List.of(arbeidsland), false);
@@ -480,7 +480,7 @@ class UtledMedlemskapsperioderTest {
             opprinneligPeriode.getFom(), opprinneligMottaksdato.minusDays(1), InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE);
         var opprinneligMedlemskapsperiode = lagMedlemskapsperiode(
             opprinneligMottaksdato, opprinneligPeriode.getTom(), InnvilgelsesResultat.INNVILGET, opprinneligTrygdedekning);
-        var opprinneligSøknad = new SoeknadFtrl();
+        var opprinneligSøknad = new SøknadNorgeEllerUtenforEØS();
         opprinneligSøknad.setTrygdedekning(opprinneligTrygdedekning);
         opprinneligSøknad.periode = opprinneligPeriode;
         opprinneligSøknad.soeknadsland = new Soeknadsland(List.of(arbeidsland), false);
