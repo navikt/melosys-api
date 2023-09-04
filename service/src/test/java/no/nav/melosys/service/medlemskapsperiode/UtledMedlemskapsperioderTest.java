@@ -10,7 +10,7 @@ import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.domain.mottatteopplysninger.SoeknadFtrl;
+import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import org.junit.jupiter.api.Test;
@@ -253,7 +253,7 @@ class UtledMedlemskapsperioderTest {
         var opprinneligTrygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON;
         var opprinneligMedlemskapsperiode = lagMedlemskapsperiode(
             opprinneligPeriode.getFom(), opprinneligPeriode.getTom(), InnvilgelsesResultat.INNVILGET, opprinneligTrygdedekning);
-        var opprinneligSøknad = new SoeknadFtrl();
+        var opprinneligSøknad = new SøknadNorgeEllerUtenforEØS();
         opprinneligSøknad.setTrygdedekning(opprinneligTrygdedekning);
         opprinneligSøknad.periode = opprinneligPeriode;
         opprinneligSøknad.soeknadsland = new Soeknadsland(List.of(arbeidsland), false);
@@ -265,7 +265,9 @@ class UtledMedlemskapsperioderTest {
         var request = new UtledMedlemskapsperiodeNyVurderingDto(
             søknadsPeriode, trygdedekning, nyMottaksdato, arbeidsland, List.of(opprinneligMedlemskapsperiode), opprinneligSøknad);
 
+
         Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForNyVurdering(request);
+
 
         assertThat(response).hasSize(4)
             .extracting(
@@ -302,7 +304,7 @@ class UtledMedlemskapsperioderTest {
         var opprinneligTrygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE;
         var opprinneligMedlemskapsperiode = lagMedlemskapsperiode(
             opprinneligPeriode.getFom(), opprinneligPeriode.getTom(), InnvilgelsesResultat.INNVILGET, opprinneligTrygdedekning);
-        var opprinneligSøknad = new SoeknadFtrl();
+        var opprinneligSøknad = new SøknadNorgeEllerUtenforEØS();
         opprinneligSøknad.setTrygdedekning(opprinneligTrygdedekning);
         opprinneligSøknad.periode = opprinneligPeriode;
         opprinneligSøknad.soeknadsland = new Soeknadsland(List.of(arbeidsland), false);
@@ -314,7 +316,9 @@ class UtledMedlemskapsperioderTest {
         var request = new UtledMedlemskapsperiodeNyVurderingDto(
             søknadsPeriode, trygdedekning, nyMottaksdato, arbeidsland, List.of(opprinneligMedlemskapsperiode), opprinneligSøknad);
 
+
         Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForNyVurdering(request);
+
 
         assertThat(response)
             .hasSize(3)
@@ -340,7 +344,7 @@ class UtledMedlemskapsperioderTest {
 
     @Test
     void lagMedlemskapsperioderForNyVurdering_ingenOpprinneligeMedlemskapsperioder_lagerFørstegangsMedlemskapsperioder() {
-        var opprinneligSøknad = new SoeknadFtrl();
+        var opprinneligSøknad = new SøknadNorgeEllerUtenforEØS();
 
         var søknadsPeriode = new Periode(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-12-31"));
         var trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON;
@@ -354,6 +358,171 @@ class UtledMedlemskapsperioderTest {
 
 
         assertThat(response).isNotEmpty();
+    }
+
+    @Test
+    void lagMedlemskapsperioderForNyVurdering_forkorterPeriode_forkorterInnvilgetPeriodeOverførerIkkeAvslåttPeriode() {
+        var opprinneligPeriode = new Periode(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-12-31"));
+        var opprinneligTrygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON;
+        var opprinneligMedlemskapsperiode = lagMedlemskapsperiode(
+            opprinneligPeriode.getFom(), opprinneligPeriode.getTom(), InnvilgelsesResultat.INNVILGET, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON);
+        var opprinneligAvslåttMedlemskapsperiode = lagMedlemskapsperiode(
+            opprinneligPeriode.getFom(), opprinneligPeriode.getTom(), InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE);
+        var opprinneligSøknad = new SøknadNorgeEllerUtenforEØS();
+        opprinneligSøknad.setTrygdedekning(opprinneligTrygdedekning);
+        opprinneligSøknad.periode = opprinneligPeriode;
+        opprinneligSøknad.soeknadsland = new Soeknadsland(List.of(arbeidsland), false);
+
+        var søknadsPeriode = new Periode(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-10-31"));
+        var nyMottaksdato = LocalDate.parse("2023-12-15");
+
+        var request = new UtledMedlemskapsperiodeNyVurderingDto(
+            søknadsPeriode, opprinneligTrygdedekning, nyMottaksdato, arbeidsland, List.of(opprinneligMedlemskapsperiode, opprinneligAvslåttMedlemskapsperiode), opprinneligSøknad);
+
+
+        Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForNyVurdering(request);
+
+
+        assertThat(response)
+            .hasSize(1)
+            .extracting(
+                Medlemskapsperiode::getFom, Medlemskapsperiode::getTom,
+                Medlemskapsperiode::getTrygdedekning, Medlemskapsperiode::getInnvilgelsesresultat
+            )
+            .containsExactlyInAnyOrder(
+                tuple(
+                    opprinneligPeriode.getFom(), søknadsPeriode.getTom(),
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON, InnvilgelsesResultat.INNVILGET
+                )
+            );
+    }
+
+    @Test
+    void lagMedlemskapsperioderForNyVurdering_endrerSøknadsperiode_utviderEksisterendePeriodeDersomNyePerioderHarLikDekningOgResultat() {
+        var opprinneligPeriode = new Periode(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-12-31"));
+        var opprinneligTrygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON;
+        var opprinneligMedlemskapsperiode = lagMedlemskapsperiode(
+            opprinneligPeriode.getFom(), opprinneligPeriode.getTom(), InnvilgelsesResultat.INNVILGET, opprinneligTrygdedekning);
+        var opprinneligSøknad = new SøknadNorgeEllerUtenforEØS();
+        opprinneligSøknad.setTrygdedekning(opprinneligTrygdedekning);
+        opprinneligSøknad.periode = opprinneligPeriode;
+        opprinneligSøknad.soeknadsland = new Soeknadsland(List.of(arbeidsland), false);
+
+        var søknadsPeriode = new Periode(LocalDate.parse("2022-12-01"), LocalDate.parse("2024-01-31"));
+        var nyMottaksdato = LocalDate.parse("2023-02-15");
+
+        var request = new UtledMedlemskapsperiodeNyVurderingDto(
+            søknadsPeriode, opprinneligTrygdedekning, nyMottaksdato, arbeidsland, List.of(opprinneligMedlemskapsperiode), opprinneligSøknad);
+
+
+        Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForNyVurdering(request);
+
+
+        assertThat(response).hasSize(1)
+            .extracting(
+                Medlemskapsperiode::getFom, Medlemskapsperiode::getTom,
+                Medlemskapsperiode::getTrygdedekning, Medlemskapsperiode::getInnvilgelsesresultat
+            )
+            .containsExactlyInAnyOrder(
+                tuple(
+                    søknadsPeriode.getFom(), søknadsPeriode.getTom(),
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON, InnvilgelsesResultat.INNVILGET
+                )
+            );
+    }
+
+    @Test
+    void lagMedlemskapsperioderForNyVurdering_endrerSøknadsperiode_utviderIkkeEksisterendePeriodeSidenNyPeriodeHarUliktDekningOgResultat() {
+        var opprinneligPeriode = new Periode(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-12-31"));
+        var opprinneligTrygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE;
+        var opprinneligMedlemskapsperiode = lagMedlemskapsperiode(
+            opprinneligPeriode.getFom(), opprinneligPeriode.getTom(), InnvilgelsesResultat.INNVILGET, opprinneligTrygdedekning);
+        var opprinneligSøknad = new SøknadNorgeEllerUtenforEØS();
+        opprinneligSøknad.setTrygdedekning(opprinneligTrygdedekning);
+        opprinneligSøknad.periode = opprinneligPeriode;
+        opprinneligSøknad.soeknadsland = new Soeknadsland(List.of(arbeidsland), false);
+
+        var søknadsPeriode = new Periode(LocalDate.parse("2022-12-01"), LocalDate.parse("2023-12-31"));
+        var nyMottaksdato = LocalDate.parse("2023-02-15");
+
+        var request = new UtledMedlemskapsperiodeNyVurderingDto(
+            søknadsPeriode, opprinneligTrygdedekning, nyMottaksdato, arbeidsland, List.of(opprinneligMedlemskapsperiode), opprinneligSøknad);
+
+
+        Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForNyVurdering(request);
+
+
+        assertThat(response).hasSize(2)
+            .extracting(
+                Medlemskapsperiode::getFom, Medlemskapsperiode::getTom,
+                Medlemskapsperiode::getTrygdedekning, Medlemskapsperiode::getInnvilgelsesresultat
+            )
+            .containsExactlyInAnyOrder(
+                tuple(
+                    søknadsPeriode.getFom(), opprinneligMedlemskapsperiode.getFom().minusDays(1),
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, InnvilgelsesResultat.AVSLAATT
+                ),
+                tuple(
+                    opprinneligPeriode.getFom(), opprinneligPeriode.getTom(),
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, InnvilgelsesResultat.INNVILGET
+                )
+            );
+    }
+
+    @Test
+    void lagMedlemskapsperioderForNyVurdering_endrerSøknadsperiode_utviderEksisterendeInnvilgetPeriodeSomHarSammeDekning() {
+        var opprinneligMottaksdato = LocalDate.parse("2023-06-01");
+        var opprinneligPeriode = new Periode(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-12-31"));
+        var opprinneligTrygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON;
+        var opprinneligDelvisInnvilgetMedlemskapsperiode = lagMedlemskapsperiode(
+            opprinneligPeriode.getFom(), opprinneligMottaksdato.minusDays(1), InnvilgelsesResultat.INNVILGET, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON);
+        var opprinneligAvslåttMedlemskapsperiode = lagMedlemskapsperiode(
+            opprinneligPeriode.getFom(), opprinneligMottaksdato.minusDays(1), InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE);
+        var opprinneligMedlemskapsperiode = lagMedlemskapsperiode(
+            opprinneligMottaksdato, opprinneligPeriode.getTom(), InnvilgelsesResultat.INNVILGET, opprinneligTrygdedekning);
+        var opprinneligSøknad = new SøknadNorgeEllerUtenforEØS();
+        opprinneligSøknad.setTrygdedekning(opprinneligTrygdedekning);
+        opprinneligSøknad.periode = opprinneligPeriode;
+        opprinneligSøknad.soeknadsland = new Soeknadsland(List.of(arbeidsland), false);
+
+        var søknadsPeriode = new Periode(LocalDate.parse("2022-12-01"), LocalDate.parse("2024-01-31"));
+        var nyMottaksdato = LocalDate.parse("2024-02-15");
+
+        var request = new UtledMedlemskapsperiodeNyVurderingDto(
+            søknadsPeriode, opprinneligTrygdedekning, nyMottaksdato, arbeidsland,
+            List.of(opprinneligDelvisInnvilgetMedlemskapsperiode, opprinneligAvslåttMedlemskapsperiode, opprinneligMedlemskapsperiode), opprinneligSøknad);
+
+
+        Collection<Medlemskapsperiode> response = utledMedlemskapsperioder.lagMedlemskapsperioderForNyVurdering(request);
+
+
+        assertThat(response).hasSize(5)
+            .extracting(
+                Medlemskapsperiode::getFom, Medlemskapsperiode::getTom,
+                Medlemskapsperiode::getTrygdedekning, Medlemskapsperiode::getInnvilgelsesresultat
+            )
+            .containsExactlyInAnyOrder(
+                tuple(
+                    søknadsPeriode.getFom(), opprinneligPeriode.getFom().minusDays(1),
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, InnvilgelsesResultat.AVSLAATT
+                ),
+                tuple(
+                    søknadsPeriode.getFom(), opprinneligMottaksdato.minusDays(1),
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON, InnvilgelsesResultat.INNVILGET
+                ),
+                tuple(
+                    opprinneligMottaksdato, opprinneligPeriode.getTom(),
+                    opprinneligTrygdedekning, InnvilgelsesResultat.INNVILGET
+                ),
+                tuple(
+                    opprinneligPeriode.getTom().plusDays(1), søknadsPeriode.getTom(),
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_B_PENSJON, InnvilgelsesResultat.INNVILGET
+                ),
+                tuple(
+                    opprinneligPeriode.getTom().plusDays(1), søknadsPeriode.getTom(),
+                    Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE, InnvilgelsesResultat.AVSLAATT
+                )
+            );
     }
 
     private Medlemskapsperiode lagMedlemskapsperiode(LocalDate fom, LocalDate tom, InnvilgelsesResultat innvilgelsesResultat, Trygdedekninger trygdedekning) {

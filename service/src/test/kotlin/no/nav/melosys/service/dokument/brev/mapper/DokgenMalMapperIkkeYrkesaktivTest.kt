@@ -23,7 +23,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca_qc
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
-import no.nav.melosys.domain.mottatteopplysninger.SoeknadIkkeYrkesaktiv
+import no.nav.melosys.domain.mottatteopplysninger.SøknadIkkeYrkesaktiv
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.service.dokument.DokgenTestData
 import org.junit.jupiter.api.BeforeEach
@@ -62,7 +62,8 @@ class DokgenMalMapperIkkeYrkesaktivTest {
             type = Behandlingstyper.FØRSTEGANG
             status = Behandlingsstatus.UNDER_BEHANDLING
             mottatteOpplysninger = MottatteOpplysninger().apply {
-                setMottatteOpplysningerdata(SoeknadIkkeYrkesaktiv().apply {
+                setMottatteOpplysningerdata(
+                    SøknadIkkeYrkesaktiv().apply {
                     ikkeYrkesaktivSituasjontype = Ikkeyrkesaktivsituasjontype.STUDENT
                     soeknadsland = Soeknadsland(listOf(Land_iso2.CA.kode), false)
                 })
@@ -127,7 +128,8 @@ class DokgenMalMapperIkkeYrkesaktivTest {
             tema = Behandlingstema.IKKE_YRKESAKTIV
             type = Behandlingstyper.FØRSTEGANG
             mottatteOpplysninger = MottatteOpplysninger().apply {
-                setMottatteOpplysningerdata(SoeknadIkkeYrkesaktiv().apply {
+                setMottatteOpplysningerdata(
+                    SøknadIkkeYrkesaktiv().apply {
                     soeknadsland = Soeknadsland(listOf(Land_iso2.CA_QC.kode), false)
                 })
             }

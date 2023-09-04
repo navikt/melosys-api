@@ -6,7 +6,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
@@ -57,19 +56,16 @@ public class EessiService {
     private final EessiConsumer eessiConsumer;
     private final SedDataBygger sedDataBygger;
     private final SedDataGrunnlagFactory dataGrunnlagFactory;
-    private final Unleash unleash;
 
     public EessiService(BehandlingService behandlingService, BehandlingsresultatService behandlingsresultatService,
                         EessiConsumer eessiConsumer, JoarkFasade joarkFasade,
-                        SedDataBygger sedDataBygger, SedDataGrunnlagFactory dataGrunnlagFactory,
-                        Unleash unleash) {
+                        SedDataBygger sedDataBygger, SedDataGrunnlagFactory dataGrunnlagFactory) {
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.joarkFasade = joarkFasade;
         this.eessiConsumer = eessiConsumer;
         this.sedDataBygger = sedDataBygger;
         this.dataGrunnlagFactory = dataGrunnlagFactory;
-        this.unleash = unleash;
     }
 
     public Collection<Vedlegg> lagEessiVedlegg(Fagsak fagsak, Collection<DokumentReferanse> vedleggReferanser) {
@@ -280,6 +276,7 @@ public class EessiService {
     }
 
     public void opprettJournalpostForTidligereSed(String rinaSaksnummer) {
+        log.info("Oppretter journalpost for tidligere sendt sed for rinasak {}", rinaSaksnummer);
         eessiConsumer.journalfoerTidligereSendteSedFor(rinaSaksnummer);
     }
 

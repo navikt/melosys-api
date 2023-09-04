@@ -10,7 +10,7 @@ import no.nav.melosys.domain.kodeverk.Trygdedekninger;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.SoeknadFtrl;
+import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
@@ -111,7 +111,7 @@ class OpprettMedlemskapsperiodeServiceTest {
         behandling.setFagsak(fagsak);
         behandling.setTema(Behandlingstema.YRKESAKTIV);
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        SoeknadFtrl søknad = new SoeknadFtrl();
+        SøknadNorgeEllerUtenforEØS søknad = new SøknadNorgeEllerUtenforEØS();
 
         søknad.periode = new Periode(LocalDate.now(), null);
         søknad.soeknadsland.landkoder.add("BR");

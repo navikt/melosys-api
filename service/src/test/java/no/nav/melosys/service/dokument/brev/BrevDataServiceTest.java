@@ -23,6 +23,7 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
@@ -185,6 +186,19 @@ class BrevDataServiceTest {
             default -> throw new IllegalArgumentException("Mottakertype må være person eller organisasjon");
         }
         return mottaker;
+    }
+
+    @Test
+    void lagBrevXML_fangerOgKasterException() {
+        Behandling behandling = lagBehandling(lagSøknadDokumentTomAdresse());
+        var mottaker = lagMottaker(Mottakerroller.BRUKER);
+        Exception kastetException = new RuntimeException("test");
+        doThrow(kastetException).when(persondataFasade).hentPerson(anyString());
+
+        assertThatExceptionOfType(TekniskException.class).isThrownBy(
+            () -> service.lagBrevXML(INNVILGELSE_ARBEIDSGIVER, mottaker, null, behandling, lagBrevData()))
+            .withMessageContaining("Feil ved bygging av data til XML-generering MOCK-1")
+            .withCause(kastetException);
     }
 
     @Test

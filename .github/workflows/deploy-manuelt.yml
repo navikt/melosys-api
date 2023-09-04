@@ -6,6 +6,10 @@ on:
         required: true
         default: 'q2'
 
+permissions:
+  contents: write
+  packages: write
+
 env:
   IMAGE: ghcr.io/${{ github.repository }}/melosys-api:${{ github.sha }}
   IMAGE_MANIFEST: https://ghcr.io/v2/${{ github.repository }}/melosys-api/manifests/${{ github.sha }}

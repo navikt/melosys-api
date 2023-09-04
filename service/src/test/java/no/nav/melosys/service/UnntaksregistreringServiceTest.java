@@ -10,7 +10,7 @@ import no.nav.melosys.domain.kodeverk.Utfallregistreringunntak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.SoeknadFtrl;
+import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -124,7 +124,7 @@ class UnntaksregistreringServiceTest {
     @Test
     void registrerUnntakFraMedlemskap_mottatteOpplysningerDataIkkeAnmodningEllerAttest_kasterFeil() {
         var behandling = lagBehandling(null, null, null);
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new SoeknadFtrl());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new SøknadNorgeEllerUtenforEØS());
         var behandlingsresultat = new Behandlingsresultat();
 
         when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);

@@ -164,7 +164,7 @@ class OpprettSakTest {
     void nySakOgBehandlingFraOppgave_sakstypeFtrl_oppretterProsess() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.FTRL);
-        opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_I_UTLANDET);
+        opprettSakDto.setBehandlingstema(Behandlingstema.YRKESAKTIV);
         opprettSakDto.setBehandlingstype(Behandlingstyper.FØRSTEGANG);
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
         when(oppgaveService.hentOppgaveMedOppgaveID(opprettSakDto.getOppgaveID())).thenReturn(oppgave);
@@ -348,7 +348,7 @@ class OpprettSakTest {
     void validerOpprettSakDto_nullSøknad_okForFTRL() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.FTRL);
-        opprettSakDto.setBehandlingstema(Behandlingstema.ARBEID_I_UTLANDET);
+        opprettSakDto.setBehandlingstema(Behandlingstema.YRKESAKTIV);
         opprettSakDto.setBehandlingstype(Behandlingstyper.FØRSTEGANG);
         opprettSakDto.setSoknadDto(null);
         Oppgave oppgave = new Oppgave.Builder().setOppgavetype(Oppgavetyper.BEH_SAK_MK).setJournalpostId("1234").build();
