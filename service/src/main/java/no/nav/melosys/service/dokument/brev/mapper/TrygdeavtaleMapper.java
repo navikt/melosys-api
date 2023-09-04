@@ -18,7 +18,7 @@ import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.SoeknadTrygdeavtale;
+import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS;
 import no.nav.melosys.domain.mottatteopplysninger.data.IdentType;
 import no.nav.melosys.domain.mottatteopplysninger.data.MedfolgendeFamilie;
 import no.nav.melosys.domain.person.Persondata;
@@ -229,8 +229,8 @@ public class TrygdeavtaleMapper {
     }
 
     private RepresentantTrygdeavtale lagRepresentant(MottatteOpplysninger mottatteOpplysninger) {
-        var soeknadTrygdeavtale = (SoeknadTrygdeavtale) mottatteOpplysninger.getMottatteOpplysningerData();
-        var representantIUtlandet = soeknadTrygdeavtale.getRepresentantIUtlandet();
+        var søknad = (SøknadNorgeEllerUtenforEØS) mottatteOpplysninger.getMottatteOpplysningerData();
+        var representantIUtlandet = søknad.getRepresentantIUtlandet();
         if (representantIUtlandet == null) {
             throw new FunksjonellException(Kontroll_begrunnelser.ATTEST_MANGLER_ARBEIDSSTED.getBeskrivelse());
         }

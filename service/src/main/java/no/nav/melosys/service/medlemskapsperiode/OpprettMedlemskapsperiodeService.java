@@ -8,7 +8,7 @@ import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.mottatteopplysninger.SoeknadFtrl;
+import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.MedlemAvFolketrygdenRepository;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -51,13 +51,13 @@ public class OpprettMedlemskapsperiodeService {
 
         if (medlemAvFolketrygden.getMedlemskapsperioder().isEmpty()) {
             var behandling = behandlingsresultat.getBehandling();
-            SoeknadFtrl søknad = (SoeknadFtrl) behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
+            SøknadNorgeEllerUtenforEØS søknad = (SøknadNorgeEllerUtenforEØS) behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
             Collection<Medlemskapsperiode> medlemskapsperioder;
 
             var opprinneligBehandling = behandling.getOpprinneligBehandling();
             if (behandling.erNyVurdering() && opprinneligBehandling != null) {
                 var opprinneligBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.getId());
-                var opprinneligSøknad = (SoeknadFtrl) opprinneligBehandling.getMottatteOpplysninger().getMottatteOpplysningerData();
+                var opprinneligSøknad = (SøknadNorgeEllerUtenforEØS) opprinneligBehandling.getMottatteOpplysninger().getMottatteOpplysningerData();
 
                 medlemskapsperioder = new UtledMedlemskapsperioder().lagMedlemskapsperioderForNyVurdering(
                     new UtledMedlemskapsperiodeNyVurderingDto(

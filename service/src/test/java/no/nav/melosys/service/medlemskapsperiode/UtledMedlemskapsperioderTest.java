@@ -10,7 +10,7 @@ import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.domain.mottatteopplysninger.SoeknadFtrl;
+import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import org.junit.jupiter.api.Test;
@@ -253,7 +253,7 @@ class UtledMedlemskapsperioderTest {
         var opprinneligTrygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON;
         var opprinneligMedlemskapsperiode = lagMedlemskapsperiode(
             opprinneligPeriode.getFom(), opprinneligPeriode.getTom(), InnvilgelsesResultat.INNVILGET, opprinneligTrygdedekning);
-        var opprinneligSøknad = new SoeknadFtrl();
+        var opprinneligSøknad = new SøknadNorgeEllerUtenforEØS();
         opprinneligSøknad.setTrygdedekning(opprinneligTrygdedekning);
         opprinneligSøknad.periode = opprinneligPeriode;
         opprinneligSøknad.soeknadsland = new Soeknadsland(List.of(arbeidsland), false);
@@ -304,7 +304,7 @@ class UtledMedlemskapsperioderTest {
         var opprinneligTrygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE;
         var opprinneligMedlemskapsperiode = lagMedlemskapsperiode(
             opprinneligPeriode.getFom(), opprinneligPeriode.getTom(), InnvilgelsesResultat.INNVILGET, opprinneligTrygdedekning);
-        var opprinneligSøknad = new SoeknadFtrl();
+        var opprinneligSøknad = new SøknadNorgeEllerUtenforEØS();
         opprinneligSøknad.setTrygdedekning(opprinneligTrygdedekning);
         opprinneligSøknad.periode = opprinneligPeriode;
         opprinneligSøknad.soeknadsland = new Soeknadsland(List.of(arbeidsland), false);
@@ -344,7 +344,7 @@ class UtledMedlemskapsperioderTest {
 
     @Test
     void lagMedlemskapsperioderForNyVurdering_ingenOpprinneligeMedlemskapsperioder_lagerFørstegangsMedlemskapsperioder() {
-        var opprinneligSøknad = new SoeknadFtrl();
+        var opprinneligSøknad = new SøknadNorgeEllerUtenforEØS();
 
         var søknadsPeriode = new Periode(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-12-31"));
         var trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON;
