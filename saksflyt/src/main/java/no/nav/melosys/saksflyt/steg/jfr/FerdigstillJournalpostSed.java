@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.Journalposttype;
@@ -10,11 +11,14 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import static no.nav.melosys.featuretoggle.ToggleName.IKKE_JOURNALFOER_UTEN_PID;
 
 @Component
 public class FerdigstillJournalpostSed implements StegBehandler {
@@ -24,12 +28,19 @@ public class FerdigstillJournalpostSed implements StegBehandler {
     private final JoarkFasade joarkFasade;
     private final PersondataFasade persondataFasade;
     private final OppgaveFactory oppgaveFactory;
+    private final Unleash unleash;
+    private final EessiService eessiService;
 
     public FerdigstillJournalpostSed(JoarkFasade joarkFasade,
-                                     PersondataFasade persondataFasade, OppgaveFactory oppgaveFactory) {
+                                     PersondataFasade persondataFasade,
+                                     OppgaveFactory oppgaveFactory,
+                                     Unleash unleash,
+                                     EessiService eessiService) {
         this.joarkFasade = joarkFasade;
         this.persondataFasade = persondataFasade;
         this.oppgaveFactory = oppgaveFactory;
+        this.unleash = unleash;
+        this.eessiService = eessiService;
     }
 
     @Override
@@ -66,6 +77,10 @@ public class FerdigstillJournalpostSed implements StegBehandler {
             joarkFasade.oppdaterOgFerdigstillJournalpost(eessiMelding.getJournalpostId(), journalpostOppdatering);
 
             log.info("Journalpost {} ferdigstilt for behandling {}", eessiMelding.getJournalpostId(), behandling.getId());
+
+            if (unleash.isEnabled(IKKE_JOURNALFOER_UTEN_PID)) {
+                eessiService.opprettJournalpostForTidligereSed(eessiMelding.getRinaSaksnummer());
+            }
         }
     }
 

@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -14,6 +15,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
+import no.nav.melosys.service.dokument.sed.EessiService;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,6 +32,8 @@ class FerdigstillJournalpostSedTest {
     private JoarkFasade joarkFasade;
     @Mock
     private PersondataFasade persondataFasade;
+    @Mock
+    private EessiService eessiService;
 
     private FerdigstillJournalpostSed ferdigstillJournalpostSed;
 
@@ -43,7 +47,7 @@ class FerdigstillJournalpostSedTest {
 
     @BeforeEach
     public void setUp() {
-        ferdigstillJournalpostSed = new FerdigstillJournalpostSed(joarkFasade, persondataFasade, oppgaveFactory);
+        ferdigstillJournalpostSed = new FerdigstillJournalpostSed(joarkFasade, persondataFasade, oppgaveFactory, new FakeUnleash(), eessiService);
     }
 
     @Test
