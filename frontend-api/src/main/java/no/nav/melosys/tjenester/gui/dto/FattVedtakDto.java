@@ -19,6 +19,7 @@ public class FattVedtakDto {
     private String begrunnelseFritekst;
     private String ektefelleFritekst;
     private String barnFritekst;
+    private String trygdeavgiftFritekst;
     private List<KopiMottakerDto> kopiMottakere;
     private FaktureringsIntervall betalingsintervall;
     private Boolean kopiTilArbeidsgiver;
@@ -46,7 +47,7 @@ public class FattVedtakDto {
     public void setKopiTilArbeidsgiver(final Boolean kopiTilArbeidsgiver) {
         this.kopiTilArbeidsgiver = kopiTilArbeidsgiver;
     }
-    
+
     public String getFritekst() {
         return fritekst;
     }
@@ -91,6 +92,10 @@ public class FattVedtakDto {
         return barnFritekst;
     }
 
+    public String getTrygdeavgiftFritekst() {
+        return trygdeavgiftFritekst;
+    }
+
     public List<KopiMottakerDto> getKopiMottakere() {
         return kopiMottakere;
     }
@@ -113,6 +118,10 @@ public class FattVedtakDto {
 
     public void setBarnFritekst(String barnFritekst) {
         this.barnFritekst = barnFritekst;
+    }
+
+    public void setTrygdeavgiftFritekst(String trygdeavgiftFritekst) {
+        this.trygdeavgiftFritekst = trygdeavgiftFritekst;
     }
 
     public void setKopiMottakere(List<KopiMottakerDto> kopiMottakere) {

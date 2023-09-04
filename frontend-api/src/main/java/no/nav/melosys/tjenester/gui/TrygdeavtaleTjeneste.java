@@ -68,6 +68,7 @@ public class TrygdeavtaleTjeneste {
             hentBarnEktefeller ? trygdeavtaleService.hentFamiliemedlemmer(behandling) : Collections.emptyList(),
             behandlingsResultat.getInnledningFritekst(),
             behandlingsResultat.getBegrunnelseFritekst(),
+            behandlingsResultat.getTrygdeavgiftFritekst(),
             behandlingsResultat.getNyVurderingBakgrunn()
         ));
     }

@@ -22,9 +22,11 @@ public record TrygdeavtaleInfoDto(
     FamilieDto ektefelleSamboer,
     String innledningFritekst,
     String begrunnelseFritekst,
-    String nyVurderingBakgrunn) {
+    String trygdeavgiftFritekst,
+    String nyVurderingBakgrunn
+) {
 
-    public TrygdeavtaleInfoDto(String aktoerId, String behandlingstema, String behandlingstype, boolean redigerbart, Periode periode, Trygdeavtale_myndighetsland soeknadsland, Map<String, String> virksomheter, List<MedfolgendeFamilie> familie, String innledingFritekst, String begrunnelseFritekst, String nyVurderingBakgrunn) {
+    public TrygdeavtaleInfoDto(String aktoerId, String behandlingstema, String behandlingstype, boolean redigerbart, Periode periode, Trygdeavtale_myndighetsland soeknadsland, Map<String, String> virksomheter, List<MedfolgendeFamilie> familie, String innledingFritekst, String begrunnelseFritekst, String trygdeavgiftFritekst, String nyVurderingBakgrunn) {
         this(
             aktoerId,
             behandlingstema,
@@ -39,6 +41,7 @@ public record TrygdeavtaleInfoDto(
                 .stream().findFirst().orElse(null),
             innledingFritekst,
             begrunnelseFritekst,
+            trygdeavgiftFritekst,
             nyVurderingBakgrunn
         );
     }

@@ -100,6 +100,7 @@ public class FtrlVedtakService {
         behandlingsresultat.setNyVurderingBakgrunn(request.getNyVurderingBakgrunn());
         behandlingsresultat.setBegrunnelseFritekst(request.getBegrunnelseFritekst());
         behandlingsresultat.setInnledningFritekst(request.getInnledningFritekst());
+        behandlingsresultat.setTrygdeavgiftFritekst(request.getTrygdeavgiftFritekst());
         behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
 
         behandlingsresultatService.lagre(behandlingsresultat);
