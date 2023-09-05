@@ -18,6 +18,7 @@ import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
 import no.nav.melosys.repository.BehandlingRepositoryForOppgaveMigrering
+import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.repository.ProsessinstansRepository
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
 import org.junit.jupiter.api.Disabled
@@ -38,9 +39,9 @@ class OppgaveMigreringTest {
                     behandlingstype = Behandlingstyper.FØRSTEGANG,
                     behandlingstema = Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND,
                     behandlingstatus = Behandlingsstatus.VURDER_DOKUMENT,
-                    behandlingsresultattype = Behandlingsresultattyper.FERDIGBEHANDLET
+                    behandlingsresultattype = Behandlingsresultattyper.FERDIGBEHANDLET,
                 ),
-                oppgaver = listOf(
+                oppgaver = mutableListOf(
                     Oppgave.Builder()
                         .setOppgaveId("1")
                         .setBehandlingstema("ab0490")
@@ -71,12 +72,15 @@ class OppgaveMigreringTest {
             migreringsSak
         )
 
+        val fagsakRepository = mockk<FagsakRepository>()
+
         val migreringsRapport = MigreringsRapport(StandardEnvironment())
         OppgaveMigrering(
             behandlingRepository,
             oppgaveFasade,
             migreringsRapport,
-            prosessinstansRepository
+            prosessinstansRepository,
+            fagsakRepository
         ).migrering(null, null, false)
 
         verify(exactly = 0) { oppgaveFasade.oppdaterOppgave(any(), any()) }
@@ -138,12 +142,14 @@ class OppgaveMigreringTest {
             )
         }
 
+        val fagsakRepository = mockk<FagsakRepository>()
         val migreringsRapport = MigreringsRapport(StandardEnvironment())
         OppgaveMigrering(
             behandlingRepository,
             oppgaveFasade,
             migreringsRapport,
-            prosessinstansRepository
+            prosessinstansRepository,
+            fagsakRepository
         ).migrering(null, null, false)
 
         migreringsRapport.status().forEach {

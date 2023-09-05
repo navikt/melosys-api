@@ -1,5 +1,13 @@
 package no.nav.melosys.service.dokument;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.arkiv.Journalpost;
@@ -26,14 +34,6 @@ import no.nav.melosys.service.dokument.brev.mapper.DokumentproduksjonsInfoMapper
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 import static org.springframework.util.StringUtils.hasText;
 
@@ -273,14 +273,15 @@ public class DokgenService {
                 .medManglerInfoFritekst(brevbestillingDto.getManglerFritekst())
                 .medKontaktpersonNavn(brevbestillingDto.getKontaktpersonNavn())
                 .medBrukerSkalHaKopi(inneholderBrukerSomKopimottaker(brevbestillingDto.getKopiMottakere()));
-            case TRYGDEAVTALE_GB, TRYGDEAVTALE_US, TRYGDEAVTALE_CAN, TRYGDEAVTALE_AU -> new InnvilgelseBrevbestilling.Builder()
-                .medDistribusjonstype(Distribusjonstype.VEDTAK)
-                .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
-                .medBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst())
-                .medEktefelleFritekst(brevbestillingDto.getEktefelleFritekst())
-                .medBarnFritekst(brevbestillingDto.getBarnFritekst())
-                .medVirksomhetArbeidsgiverSkalHaKopi(inneholderArbeidsgiverSomKopimottaker(brevbestillingDto.getKopiMottakere()))
-                .medNyVurderingBakgrunn(brevbestillingDto.getNyVurderingBakgrunn());
+            case TRYGDEAVTALE_GB, TRYGDEAVTALE_US, TRYGDEAVTALE_CAN, TRYGDEAVTALE_AU ->
+                new InnvilgelseBrevbestilling.Builder()
+                    .medDistribusjonstype(Distribusjonstype.VEDTAK)
+                    .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
+                    .medBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst())
+                    .medEktefelleFritekst(brevbestillingDto.getEktefelleFritekst())
+                    .medBarnFritekst(brevbestillingDto.getBarnFritekst())
+                    .medVirksomhetArbeidsgiverSkalHaKopi(inneholderArbeidsgiverSomKopimottaker(brevbestillingDto.getKopiMottakere()))
+                    .medNyVurderingBakgrunn(brevbestillingDto.getNyVurderingBakgrunn());
             case INNVILGELSE_FOLKETRYGDLOVEN -> new InnvilgelseFtrlBrevbestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK)
                 .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
@@ -306,8 +307,10 @@ public class DokgenService {
                 .medBegrunnelseKode(brevbestillingDto.getBegrunnelseKode());
             case GENERELT_FRITEKSTVEDLEGG -> new FritekstvedleggBrevbestilling.Builder()
                 .medFritekstvedleggTittel(brevbestillingDto.getFritekstTittel())
-                .medFritekstvedleggTekst(brevbestillingDto.getFritekst());
-            case IKKE_YRKESAKTIV_VEDTAKSBREV -> new IkkeYrkesaktivBrevbestilling.Builder().medDistribusjonstype(Distribusjonstype.VEDTAK);
+                .medFritekstvedleggTekst(brevbestillingDto.getFritekst())
+                .medMottakerType(brevbestillingDto.getMottaker());
+            case IKKE_YRKESAKTIV_VEDTAKSBREV ->
+                new IkkeYrkesaktivBrevbestilling.Builder().medDistribusjonstype(Distribusjonstype.VEDTAK);
 
             default -> new DokgenBrevbestilling.Builder<>().medDistribusjonstype(Distribusjonstype.VIKTIG);
         };

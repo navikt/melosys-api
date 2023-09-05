@@ -110,10 +110,6 @@ public class JournalfoeringService {
             validerKanOppretteSakFraSed(journalpost);
         }
 
-        if (unleash.isEnabled(IKKE_JOURNALFOER_UTEN_PID)){
-            journalFoerTidligereSedDersomEksisterer(journalpost);
-        }
-
         fellesValidering(journalfoeringDto);
 
         final var sakstype = Sakstyper.valueOf(journalfoeringDto.getFagsak().getSakstype());
@@ -126,6 +122,9 @@ public class JournalfoeringService {
 
         opprettJournalføringNySakProsessinstans(journalpost, journalfoeringDto, sakstype, sakstema, behandlingstema,
             behandlingstype);
+        if (unleash.isEnabled(IKKE_JOURNALFOER_UTEN_PID)){
+            journalFoerTidligereSedDersomEksisterer(journalpost);
+        }
     }
 
     private void journalFoerTidligereSedDersomEksisterer(Journalpost journalpost) {
@@ -272,7 +271,6 @@ public class JournalfoeringService {
             validerKanTilknytteJournalpostForSedTilSak(journalpost, saksnummer);
         }
 
-        if (unleash.isEnabled(IKKE_JOURNALFOER_UTEN_PID)) eessiService.opprettJournalpostForTidligereSed(journalfoeringDto.getSaksnummer());
 
         fellesValidering(journalfoeringDto);
 
@@ -284,6 +282,7 @@ public class JournalfoeringService {
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringDto.isIngenVurdering());
 
         prosessinstansService.lagre(prosessinstans);
+        if (unleash.isEnabled(IKKE_JOURNALFOER_UTEN_PID)) eessiService.opprettJournalpostForTidligereSed(journalfoeringDto.getSaksnummer());
     }
 
     @Transactional
@@ -310,7 +309,6 @@ public class JournalfoeringService {
             behandlingService.avsluttBehandling(sistBehandling.getId());
         }
 
-        if (unleash.isEnabled(IKKE_JOURNALFOER_UTEN_PID)) eessiService.opprettJournalpostForTidligereSed(journalfoeringDto.getSaksnummer());
 
         log.info("{} knytter journalpost {} til sak {} og lager ny vurdering", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
 
@@ -324,6 +322,7 @@ public class JournalfoeringService {
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
 
         prosessinstansService.lagre(prosessinstans);
+        if (unleash.isEnabled(IKKE_JOURNALFOER_UTEN_PID)) eessiService.opprettJournalpostForTidligereSed(journalfoeringDto.getSaksnummer());
     }
 
     private static LocalDate utledMottaksdato(LocalDate datoFraSaksbehandler, Journalpost journalpost) {
@@ -436,8 +435,8 @@ public class JournalfoeringService {
     public void journalførSed(JournalfoeringSedDto journalfoeringSedDto) {
         validerJournalfoerSed(journalfoeringSedDto);
         MelosysEessiMelding eessiMelding = eessiService.hentSedTilknyttetJournalpost(journalfoeringSedDto.getJournalpostID());
-        if (unleash.isEnabled(IKKE_JOURNALFOER_UTEN_PID)) eessiService.opprettJournalpostForTidligereSed(eessiMelding.getRinaSaksnummer());
         prosessinstansService.opprettProsessinstansSedMottak(eessiMelding, persondataFasade.hentAktørIdForIdent(journalfoeringSedDto.getBrukerID()));
+        if (unleash.isEnabled(IKKE_JOURNALFOER_UTEN_PID)) eessiService.opprettJournalpostForTidligereSed(eessiMelding.getRinaSaksnummer());
     }
 
     private void validerJournalfoerSed(JournalfoeringSedDto journalfoeringSedDto) {
