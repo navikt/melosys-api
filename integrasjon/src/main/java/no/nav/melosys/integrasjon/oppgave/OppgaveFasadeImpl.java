@@ -117,7 +117,10 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     private String opprettOppgave(Oppgave oppgave, boolean erSensitiv) {
         LocalDate idag = LocalDate.now();
         OpprettOppgaveDto oppgaveDto = new OpprettOppgaveDto();
-        oppgaveDto.setAktivDato(idag);
+        oppgaveDto.setAktivDato(oppgave.getAktivDato());
+        if (oppgaveDto.getAktivDato() == null) {
+            oppgaveDto.setAktivDato(idag);
+        }
         oppgaveDto.setAktørId(oppgave.getAktørId());
         oppgaveDto.setOrgnr(oppgave.getOrgnr());
         oppgaveDto.setBehandlingstema(oppgave.getBehandlingstema());
