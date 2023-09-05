@@ -40,7 +40,6 @@ import org.springframework.transaction.annotation.Transactional;
 import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
-import static no.nav.melosys.featuretoggle.ToggleName.IKKE_JOURNALFOER_UTEN_PID;
 import static no.nav.melosys.service.journalforing.UtledBehandlingsaarsak.utledÅrsaktype;
 
 @Service
@@ -122,14 +121,6 @@ public class JournalfoeringService {
 
         opprettJournalføringNySakProsessinstans(journalpost, journalfoeringDto, sakstype, sakstema, behandlingstema,
             behandlingstype);
-        if (unleash.isEnabled(IKKE_JOURNALFOER_UTEN_PID)){
-            journalFoerTidligereSedDersomEksisterer(journalpost);
-        }
-    }
-
-    private void journalFoerTidligereSedDersomEksisterer(Journalpost journalpost) {
-        final MelosysEessiMelding melosysEessiMelding = eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId());
-        if (melosysEessiMelding != null) eessiService.opprettJournalpostForTidligereSed(melosysEessiMelding.getRinaSaksnummer());
     }
 
     private void validerOpprettelseSak(JournalfoeringOpprettDto journalfoeringDto,
@@ -282,7 +273,6 @@ public class JournalfoeringService {
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringDto.isIngenVurdering());
 
         prosessinstansService.lagre(prosessinstans);
-        if (unleash.isEnabled(IKKE_JOURNALFOER_UTEN_PID)) eessiService.opprettJournalpostForTidligereSed(journalfoeringDto.getSaksnummer());
     }
 
     @Transactional
@@ -322,7 +312,6 @@ public class JournalfoeringService {
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
 
         prosessinstansService.lagre(prosessinstans);
-        if (unleash.isEnabled(IKKE_JOURNALFOER_UTEN_PID)) eessiService.opprettJournalpostForTidligereSed(journalfoeringDto.getSaksnummer());
     }
 
     private static LocalDate utledMottaksdato(LocalDate datoFraSaksbehandler, Journalpost journalpost) {
@@ -436,7 +425,6 @@ public class JournalfoeringService {
         validerJournalfoerSed(journalfoeringSedDto);
         MelosysEessiMelding eessiMelding = eessiService.hentSedTilknyttetJournalpost(journalfoeringSedDto.getJournalpostID());
         prosessinstansService.opprettProsessinstansSedMottak(eessiMelding, persondataFasade.hentAktørIdForIdent(journalfoeringSedDto.getBrukerID()));
-        if (unleash.isEnabled(IKKE_JOURNALFOER_UTEN_PID)) eessiService.opprettJournalpostForTidligereSed(eessiMelding.getRinaSaksnummer());
     }
 
     private void validerJournalfoerSed(JournalfoeringSedDto journalfoeringSedDto) {
