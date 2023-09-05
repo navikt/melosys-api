@@ -14,7 +14,7 @@ public class Fritekstvedlegg extends DokgenDto {
     }
 
     public static Fritekstvedlegg av(FritekstvedleggBrevbestilling brevbestilling) {
-        return new Fritekstvedlegg(brevbestilling, Mottakerroller.BRUKER);
+        return new Fritekstvedlegg(brevbestilling, brevbestilling.getMottakerType());
     }
 
     public String getFritekstTittel() {
