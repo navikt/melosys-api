@@ -29,8 +29,8 @@ public class AvslagTjeneste {
 
     @PostMapping("{behandlingID}/manglende-opplysninger")
     @ApiOperation(value = "Avslår behandling pga manglende opplysninger")
-    public ResponseEntity<Void> fattVedtak(@PathVariable("behandlingID") long behandlingID,
-                                           @RequestBody AvslagDto avslagDto) {
+    public ResponseEntity<Void> avslåPgaManglendeOpplysninger(@PathVariable("behandlingID") long behandlingID,
+                                                              @RequestBody AvslagDto avslagDto) {
         aksesskontroll.autoriserSkriv(behandlingID);
 
         avslagService.avslåPgaManglendeOpplysninger(behandlingID, avslagDto.getFritekst(), SubjectHandler.getInstance().getUserID());
