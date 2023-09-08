@@ -39,6 +39,7 @@ public class FeatureToggleConfig {
                 .apiKey(environment.getProperty("unleash.token"))
                 .appName(environment.getProperty("unleash.appname"))
                 .projectName("default")
+                .instanceId("default")
                 .unleashAPI(UNLEASH_URL)
                 .build();
 
