@@ -91,7 +91,7 @@ spec:
     value: {{APP_NAME_INNTEKTSKOMPONENTEN}}
   - name: APP_NAME
     value: {{APP_NAME}}
-  envFrom:
-    - secret: {{APP_NAME}}-unleash-api-token
+  - name: UNLEASH_API_TOKEN
+    value: {{APP_NAME}}-unleash-api-token
   kafka:
     pool: {{ KAFKA_POOL }}
