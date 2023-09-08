@@ -37,7 +37,7 @@ public class FeatureToggleConfig {
         } else {
             var unleashConfig = UnleashConfig.builder()
                 .apiKey(environment.getProperty("unleash.token"))
-                .appName("unleash.appname")
+                .appName(environment.getProperty("unleash.appname"))
                 .projectName("default")
                 .unleashAPI(UNLEASH_URL)
                 .build();
