@@ -10,6 +10,8 @@ import io.getunleash.strategy.GradualRolloutRandomStrategy;
 import io.getunleash.strategy.GradualRolloutSessionIdStrategy;
 import io.getunleash.strategy.GradualRolloutUserIdStrategy;
 import io.getunleash.util.UnleashConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +21,7 @@ import org.springframework.core.env.Environment;
 public class FeatureToggleConfig {
 
     private final String UNLEASH_URL = "https://melosys-unleash-api.nav.cloud.nais.io/api";
+    private static final Logger log = LoggerFactory.getLogger(FeatureToggleConfig.class);
 
     @Bean
     public Unleash unleash(Environment environment, @Value("${unleash.token}") String token, @Value("${unleash.appname}") String appName) {
@@ -38,6 +41,8 @@ public class FeatureToggleConfig {
                 .projectName("default")
                 .unleashAPI(UNLEASH_URL)
                 .build();
+
+            log.info("Debug melosys q1 unleash: " + unleashConfig.getAppName() + " " + UNLEASH_URL);
 
             return new DefaultUnleash(
                 unleashConfig,
