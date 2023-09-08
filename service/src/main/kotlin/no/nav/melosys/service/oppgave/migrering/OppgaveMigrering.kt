@@ -1,28 +1,37 @@
 package no.nav.melosys.service.oppgave.migrering
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import mu.KotlinLogging
-import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.SakOgBehandlingDTO
-import no.nav.melosys.domain.Tema
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
+import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.oppgave.Oppgave
+import no.nav.melosys.domain.oppgave.PrioritetType
 import no.nav.melosys.domain.saksflyt.ProsessDataKey
 import no.nav.melosys.exception.TekniskException
+import no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
 import no.nav.melosys.repository.BehandlingRepositoryForOppgaveMigrering
+import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.repository.ProsessinstansRepository
 import no.nav.melosys.service.lovligekombinasjoner.GyldigeKombinasjoner
 import no.nav.melosys.service.oppgave.*
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.springframework.scheduling.annotation.Async
 import org.springframework.stereotype.Component
+import java.time.ZoneId
+import java.time.ZonedDateTime
 
 private val log = KotlinLogging.logger { }
 
@@ -31,7 +40,8 @@ class OppgaveMigrering(
     private val behandlingRepository: BehandlingRepositoryForOppgaveMigrering,
     private val oppgaveFasade: OppgaveFasade,
     private val migreringsRapport: MigreringsRapport,
-    private val prosessinstansRepository: ProsessinstansRepository
+    private val prosessinstansRepository: ProsessinstansRepository,
+    private val fagsakRepository: FagsakRepository
 ) {
     @Volatile
     var stopMigrering: Boolean = false
@@ -53,9 +63,9 @@ class OppgaveMigrering(
 
     @Async
     @Synchronized
-    fun go(bruker: String?, saksnummer: String?, dryrun: Boolean) {
+    fun go(bruker: String?, saksnummer: String?, dryrun: Boolean, options: Options = Options()) {
         ThreadLocalAccessInfo.executeProcess("Migrer oppgaver") {
-            migrering(bruker, saksnummer, dryrun)
+            migrering(bruker, saksnummer, dryrun, options)
         }
     }
 
@@ -77,27 +87,45 @@ class OppgaveMigrering(
         return behandlingRepository.finnSaksOgBehandlingTyperOgTema(behandlingsstatuser)
     }
 
-    internal fun migrering(bruker: String?, saksnummer: String?, dryrun: Boolean) {
-        log.info("Utfører OppgaveMigrering")
+    internal fun migrering(
+        bruker: String?,
+        saksnummer: String?,
+        dryrun: Boolean,
+        options: Options = Options()
+    ) {
+        log.info(
+            "Utfører OppgaveMigrering. \n" +
+                options.toJsonNode.toPrettyString()
+        )
         finnSaker(bruker, saksnummer).apply {
             migreringsRapport.antallSakerFunnet = size
         }.filter { it.erRedigerbar() }.sortedBy { it.saksnummer }.apply {
             migreringsRapport.antallSakerErRedigerbar = size
-        }.asSequence().filter { !stopMigrering }.map {
+        }.asSequence().filter {
+            options.saksFilter.filtrer(it)
+        }.filter { !stopMigrering }.map {
+            val oppgaver = oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(it.saksnummer)
             MigreringsSak(
                 sak = it,
-                oppgaver = oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(it.saksnummer),
+                oppgaver = oppgaver.ifEmpty { mutableListOf() },
                 ny = nyOppgaveMapping(it)
             )
+        }.filter {
+            if (options.lagManglendeOppgaver) it.oppgaver.isEmpty()
+            else options.migrerOppgaver
+        }.filter {
+            erGyldig(it.sak)
         }.onEach {
             migreringsRapport.antallSakerProssessert++
             leggTilRapport(it)
-        }.filter {
-            it.oppgaver.size == 1 && erGyldig(it.sak)
         }.filterNot {
             it.ny.fantIkkeOppgaveMapping()
         }.forEach {
-            oppdaterOppgave(dryrun, it)
+            if (it.oppgaver.isEmpty() && options.lagManglendeOppgaver) {
+                lagOppgave(dryrun, it)
+            } else if (options.migrerOppgaver) {
+                oppdaterOppgave(dryrun, it)
+            }
         }
         log.info("OppgaveMigrering utført! ${if (stopMigrering) "Stoppet manuelt!" else ""}")
         lagRapport()
@@ -123,6 +151,60 @@ class OppgaveMigrering(
         }
         if (oppgaver.size > 1) {
             migreringsRapport.sakerMedFlereOppgaver("fant ${oppgaver.size} oppgaver for: ${sak.saksnummer}")
+        }
+    }
+
+    private fun lagOppgave(dryrun: Boolean, migreringsSak: MigreringsSak) {
+        val sak = migreringsSak.sak
+        val oppdatering = migreringsSak.ny
+        val fagSak: Fagsak = fagsakRepository.findBySaksnummer(sak.saksnummer).orElseThrow {
+            TekniskException("Fant ikke ${sak.saksnummer}")
+        }
+        val initierendeJournalpostId =
+            behandlingRepository.findWithSaksopplysningerById(sak.behandlingID)?.initierendeJournalpostId
+
+        if (initierendeJournalpostId == null) {
+            log.info("Fant ikke initierendeJournalpostId for ${sak.saksnummer}")
+        }
+
+        try {
+            val registrertDato = ZonedDateTime.ofInstant(fagSak.registrertDato, ZoneId.systemDefault())
+            val oppgave = Oppgave.Builder()
+                .setAktørId(fagSak.hentBrukersAktørID())
+                .setSaksnummer(sak.saksnummer)
+                .setBehandlesAvApplikasjon(Fagsystem.MELOSYS)
+                .setOpprettetTidspunkt(registrertDato)
+                .setFristFerdigstillelse(registrertDato.toLocalDate().plusMonths(1))
+                .setJournalpostId(initierendeJournalpostId)
+                .setPrioritet(PrioritetType.NORM)
+                .setTildeltEnhetsnr(MELOSYS_ENHET_ID.toString())
+                .setAktivDato(registrertDato.toLocalDate())
+                .setStatus(Saksstatuser.OPPRETTET.name)
+                .setOppgavetype(oppdatering.oppgaveType)
+                .setBehandlingstema(oppdatering.oppgaveBehandlingstema?.kode)
+                .setTema(oppdatering.tema)
+                .setBeskrivelse("Gjennopprettet oppgave til behandling i Melosys")
+                .build()
+
+            if (migreringsSak.oppgaver.isNotEmpty())
+                throw TekniskException("Oppgave(r)(${migreringsSak.oppgaver.map { it.oppgaveId }}) finnes allerede for sak:${sak.saksnummer}")
+            if (!dryrun) {
+                val oppgaveId = oppgaveFasade.opprettOppgave(oppgave)
+                log.info("laget manglende oppgave id:$oppgaveId")
+                oppgaveFasade.hentOppgave(oppgaveId).also {
+                    migreringsSak.oppgaver.add(it)
+                }
+            } else {
+                migreringsSak.oppgaver.add(oppgave)
+            }
+            migreringsRapport.antallOppgaverLaget++
+        } catch (e: Exception) {
+            migreringsSak.ny.oppgaveOppdateringError = e.message
+            log.error("lagOppgave feilet for ${sak.saksnummer}(${sak.behandlingID})", e)
+            migreringsRapport.migreringFeilet++
+            var sleepTime = 100L * migreringsRapport.migreringFeilet
+            if (sleepTime > 1000) sleepTime = 1000
+            Thread.sleep(sleepTime)
         }
     }
 
@@ -301,6 +383,14 @@ class OppgaveMigrering(
         }
     }
 
+    private val Any.toJsonNode: JsonNode
+        get() {
+            return jacksonObjectMapper()
+                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+                .registerModule(JavaTimeModule())
+                .valueToTree(this)
+        }
+
     internal class OppgaveGosysMappingMedRegler : OppgaveGosysMapping() {
         override fun finnOppgave(
             sakstype: Sakstyper,
@@ -333,5 +423,24 @@ class OppgaveMigrering(
                         "sakstype:$sakstype, sakstema:$sakstema, behandlingstema:$behandlingstema, behandlingstype:$behandlingstype"
                 )
         }
+    }
+
+    data class Options(
+        val migrerOppgaver: Boolean = true,
+        val lagManglendeOppgaver: Boolean = false,
+        val saksFilter: SaksFilter = SaksFilter()
+    )
+
+    data class SaksFilter(
+        val sakstyper: List<Sakstyper> = listOf(),
+        val sakstemar: List<Sakstemaer> = listOf(),
+        val behandlingstyper: List<Behandlingstyper> = listOf(),
+        val behandlingstemaer: List<Behandlingstema> = listOf()
+    ) {
+        fun filtrer(sak: SakOgBehandlingDTO): Boolean = (sakstyper.isEmpty() || sak.sakstype in sakstyper) &&
+            (sakstemar.isEmpty() || sak.sakstema in sakstemar) &&
+            (behandlingstemaer.isEmpty() || sak.behandlingstema in behandlingstemaer) &&
+            (behandlingstyper.isEmpty() || sak.behandlingstype in behandlingstyper)
+
     }
 }

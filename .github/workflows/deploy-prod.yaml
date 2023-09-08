@@ -2,6 +2,8 @@ name: deploy-prod
 on:
   release:
     types: [published]
+permissions:
+    contents: write
 jobs:
   deploy-prod:
     runs-on: ubuntu-latest-8-cores

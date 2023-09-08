@@ -5,10 +5,12 @@ import no.nav.melosys.domain.ftrl.ManglendeFakturabetalingMelding
 import no.nav.melosys.service.sak.OpprettBehandlingForSak
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Profile
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Service
 
 @Service
+@Profile("!local-q1 & !local-q2")
 class ManglendeFakturabetalingConsumer(
     @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak
 ) {

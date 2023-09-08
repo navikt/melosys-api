@@ -14,8 +14,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.domain.mottatteopplysninger.SoeknadFtrl;
-import no.nav.melosys.domain.mottatteopplysninger.SoeknadTrygdeavtale;
+import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS;
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -47,8 +46,6 @@ class HentRegisteropplysningerTest {
     @Mock
     private SaksbehandlingRegler saksbehandlingRegler;
 
-    private RegisteropplysningerFactory registeropplysningerFactory;
-
     private HentRegisteropplysninger hentRegisteropplysninger;
 
     @Captor
@@ -59,7 +56,7 @@ class HentRegisteropplysningerTest {
 
     @BeforeEach
     public void setUp() {
-        registeropplysningerFactory = new RegisteropplysningerFactory(saksbehandlingRegler);
+        RegisteropplysningerFactory registeropplysningerFactory = new RegisteropplysningerFactory(saksbehandlingRegler);
         hentRegisteropplysninger = new HentRegisteropplysninger(registeropplysningerService, behandlingService, saksbehandlingRegler, persondataFasade, registeropplysningerFactory);
 
         behandling.setId(222L);
@@ -145,11 +142,11 @@ class HentRegisteropplysningerTest {
 
     @Test
     void utfør_sakstypeFtrl_ingentingLagres() {
-        behandling.setTema(Behandlingstema.ARBEID_I_UTLANDET);
+        behandling.setTema(Behandlingstema.YRKESAKTIV);
         behandling.getFagsak().setType(Sakstyper.FTRL);
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(new SoeknadFtrl());
+        mottatteOpplysninger.setMottatteOpplysningerdata(new SøknadNorgeEllerUtenforEØS());
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
         Prosessinstans prosessinstans = new Prosessinstans();
@@ -166,7 +163,7 @@ class HentRegisteropplysningerTest {
         behandling.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(new SoeknadTrygdeavtale());
+        mottatteOpplysninger.setMottatteOpplysningerdata(new SøknadNorgeEllerUtenforEØS());
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
         Prosessinstans prosessinstans = new Prosessinstans();
@@ -185,7 +182,7 @@ class HentRegisteropplysningerTest {
         when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)).thenReturn(true);
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(new SoeknadTrygdeavtale());
+        mottatteOpplysninger.setMottatteOpplysningerdata(new SøknadNorgeEllerUtenforEØS());
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
         Prosessinstans prosessinstans = new Prosessinstans();
@@ -204,7 +201,7 @@ class HentRegisteropplysningerTest {
         when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)).thenReturn(true);
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(new SoeknadTrygdeavtale());
+        mottatteOpplysninger.setMottatteOpplysningerdata(new SøknadNorgeEllerUtenforEØS());
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
         Prosessinstans prosessinstans = new Prosessinstans();

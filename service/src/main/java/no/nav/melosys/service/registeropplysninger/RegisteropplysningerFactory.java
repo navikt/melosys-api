@@ -36,7 +36,6 @@ public class RegisteropplysningerFactory {
                 ARBEID_FLERE_LAND,
                 ARBEID_TJENESTEPERSON_ELLER_FLY,
                 ARBEID_NORGE_BOSATT_ANNET_LAND,
-                ARBEID_I_UTLANDET,
                 IKKE_YRKESAKTIV,
                 YRKESAKTIV -> hentSaksopplysningTyperForBehandlingAvSøknad();
             case REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING, REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE ->
