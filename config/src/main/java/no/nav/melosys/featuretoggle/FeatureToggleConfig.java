@@ -7,6 +7,8 @@ import io.getunleash.DefaultUnleash;
 import io.getunleash.FakeUnleash;
 import io.getunleash.Unleash;
 import io.getunleash.strategy.GradualRolloutRandomStrategy;
+import io.getunleash.strategy.GradualRolloutSessionIdStrategy;
+import io.getunleash.strategy.GradualRolloutUserIdStrategy;
 import io.getunleash.util.UnleashConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -33,11 +35,14 @@ public class FeatureToggleConfig {
             var unleashConfig = UnleashConfig.builder()
                 .apiKey(token)
                 .appName(appName)
+                .projectName("default")
                 .unleashAPI(UNLEASH_URL)
                 .build();
 
             return new DefaultUnleash(
                 unleashConfig,
+                new GradualRolloutSessionIdStrategy(),
+                new GradualRolloutUserIdStrategy(),
                 new GradualRolloutRandomStrategy(),
                 new ByUserIdStrategy()
             );
