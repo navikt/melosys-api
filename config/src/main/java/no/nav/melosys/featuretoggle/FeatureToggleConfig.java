@@ -36,14 +36,14 @@ public class FeatureToggleConfig {
             return fakeUnleash;
         } else {
             var unleashConfig = UnleashConfig.builder()
-                .apiKey(System.getenv("unleash.token"))
+                .apiKey(System.getenv(environment.getProperty("unleash.token")))
                 .appName(environment.getProperty("unleash.appname"))
                 .projectName("default")
                 .instanceId("default")
                 .unleashAPI(UNLEASH_URL)
                 .build();
 
-            log.info("Debug melosys q1 unleash: " + unleashConfig.getAppName() + " " + UNLEASH_URL + System.getenv("unleash.token"));
+            log.info("Debug melosys q1 unleash: " + unleashConfig.getAppName() + " " + UNLEASH_URL + environment.getProperty("unleash.token"));
 
             return new DefaultUnleash(
                 unleashConfig,
