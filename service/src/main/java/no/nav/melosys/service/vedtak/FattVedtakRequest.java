@@ -18,6 +18,7 @@ public class FattVedtakRequest {
     private final String begrunnelseFritekst;
     private final String ektefelleFritekst;
     private final String barnFritekst;
+    private final String trygdeavgiftFritekst;
     private final List<KopiMottakerDto> kopiMottakere;
     private final Boolean kopiTilArbeidsgiver;
     private final String bestillersId;
@@ -60,6 +61,10 @@ public class FattVedtakRequest {
         return barnFritekst;
     }
 
+    public String getTrygdeavgiftFritekst() {
+        return trygdeavgiftFritekst;
+    }
+
     public List<KopiMottakerDto> getKopiMottakere() {
         return kopiMottakere;
     }
@@ -82,6 +87,7 @@ public class FattVedtakRequest {
         this.begrunnelseFritekst = builder.begrunnelseFritekst;
         this.ektefelleFritekst = builder.ektefelleFritekst;
         this.barnFritekst = builder.barnFritekst;
+        this.trygdeavgiftFritekst = builder.trygdeavgiftFritekst;
         this.kopiMottakere = builder.kopiMottakere;
         this.kopiTilArbeidsgiver = builder.kopiTilArbeidsgiver;
         this.bestillersId = builder.bestillersId;
@@ -108,6 +114,7 @@ public class FattVedtakRequest {
         private String begrunnelseFritekst;
         private String ektefelleFritekst;
         private String barnFritekst;
+        private String trygdeavgiftFritekst;
         private List<KopiMottakerDto> kopiMottakere;
         private Boolean kopiTilArbeidsgiver;
         private String bestillersId;
@@ -192,6 +199,11 @@ public class FattVedtakRequest {
 
         public Builder medBarnFritekst(String barnFritekst) {
             this.barnFritekst = barnFritekst;
+            return this;
+        }
+
+        public Builder medTrygdeavgiftFritekst(String trygdeavgiftFritekst) {
+            this.trygdeavgiftFritekst = trygdeavgiftFritekst;
             return this;
         }
 

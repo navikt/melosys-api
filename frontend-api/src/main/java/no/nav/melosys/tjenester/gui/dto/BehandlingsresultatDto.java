@@ -15,6 +15,7 @@ public class BehandlingsresultatDto {
     private final List<String> begrunnelseKoder;
     private final String begrunnelseFritekst;
     private final String innledningFritekst;
+    private final String trygdeavgiftFritekst;
     private final String nyVurderingBakgrunn;
     private final String utfallRegistreringUnntak;
     private final String utfallUtpeking;
@@ -24,6 +25,7 @@ public class BehandlingsresultatDto {
     private BehandlingsresultatDto(Behandlingsresultattyper behandlingsresultatTypeKode,
                                    String begrunnelseFritekst,
                                    String innledningFritekst,
+                                   String trygdeavgiftFritekst,
                                    String nyVurderingBakgrunn,
                                    String utfallRegistreringUnntak,
                                    String utfallUtpeking,
@@ -31,6 +33,7 @@ public class BehandlingsresultatDto {
                                    List<String> kontrollresultatBegrunnelseKoder) {
         this.behandlingsresultatTypeKode = behandlingsresultatTypeKode.getKode();
         this.innledningFritekst = innledningFritekst;
+        this.trygdeavgiftFritekst = trygdeavgiftFritekst;
         this.nyVurderingBakgrunn = nyVurderingBakgrunn;
         this.utfallUtpeking = utfallUtpeking;
         this.begrunnelseKoder = new ArrayList<>();
@@ -45,6 +48,7 @@ public class BehandlingsresultatDto {
             resultat.getType(),
             resultat.getBegrunnelseFritekst(),
             resultat.getInnledningFritekst(),
+            resultat.getTrygdeavgiftFritekst(),
             resultat.getNyVurderingBakgrunn(),
             resultat.getUtfallRegistreringUnntak() != null ? resultat.getUtfallRegistreringUnntak().getKode() : null,
             resultat.getUtfallUtpeking() != null ? resultat.getUtfallUtpeking().getKode() : null,
@@ -76,6 +80,10 @@ public class BehandlingsresultatDto {
 
     public String getInnledningFritekst() {
         return innledningFritekst;
+    }
+
+    public String getTrygdeavgiftFritekst() {
+        return trygdeavgiftFritekst;
     }
 
     public String getUtfallRegistreringUnntak() {
