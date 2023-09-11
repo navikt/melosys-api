@@ -22,11 +22,9 @@ public class FeatureToggleConfig {
 
     private final String UNLEASH_URL = "https://melosys-unleash-api.nav.cloud.nais.io/api";
     private static final Logger log = LoggerFactory.getLogger(FeatureToggleConfig.class);
-    @Value("${APP_NAME}-unleash-api-token")
-    private String unleashApiToken;
 
     @Bean
-    public Unleash unleash(Environment environment) {
+    public Unleash unleash(Environment environment, @Value("${unleash.token}") String token) {
 
         if (!Collections.disjoint(List.of(environment.getActiveProfiles()), List.of("local", "local-mock", "local-q2"))) {
             var localUnleash = new LocalUnleash();
@@ -38,14 +36,14 @@ public class FeatureToggleConfig {
             return fakeUnleash;
         } else {
             var unleashConfig = UnleashConfig.builder()
-                .apiKey(unleashApiToken)
+                .apiKey(token)
                 .appName(environment.getProperty("unleash.appname"))
                 .projectName("default")
                 .instanceId("default")
                 .unleashAPI(UNLEASH_URL)
                 .build();
 
-            log.info("Debug melosys q1 unleash: " + unleashConfig.getAppName() + " " + UNLEASH_URL + unleashApiToken);
+            log.info("Debug melosys q1 unleash: " + unleashConfig.getAppName() + " " + UNLEASH_URL);
 
             return new DefaultUnleash(
                 unleashConfig,

@@ -66,9 +66,12 @@ spec:
     path: /internal/prometheus
   ingresses:
   - "https://{{ URL }}"
-  envFrom:
-    - secret: {{APP_NAME}}-unleash-api-token
   env:
+  - name: API_TOKEN_UNLEASH
+    valueFrom:
+      secretKeyRef:
+        name: melosys-q1
+        key: {{APP_NAME}}-unleash-api-token
   - name: SPRING_PROFILES_ACTIVE
     value: nais
   - name: GROUP_MELOSYS_INNLOGGING
