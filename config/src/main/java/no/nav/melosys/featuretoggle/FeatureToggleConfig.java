@@ -43,7 +43,7 @@ public class FeatureToggleConfig {
                 .unleashAPI(UNLEASH_URL)
                 .build();
 
-            log.info("Debug melosys q1 unleash: " + unleashConfig.getAppName() + " " + UNLEASH_URL);
+            log.info("Debug melosys q1 unleash: " + unleashConfig.getAppName() + " " + UNLEASH_URL + "T: " + environment.getProperty("unleash.token"));
 
             return new DefaultUnleash(
                 unleashConfig,
