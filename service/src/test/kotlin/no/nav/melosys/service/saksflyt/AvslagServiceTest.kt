@@ -79,16 +79,17 @@ class AvslagServiceTest {
         verify(exactly = 1) { fagsakService.avsluttFagsakOgBehandling(behandling.fagsak, Saksstatuser.LOVVALG_AVKLART) }
         verify(exactly = 1) { oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.fagsak.saksnummer) }
 
-        val lagretBehandlingsresultat = slotBehandlingsresultat.captured
-        lagretBehandlingsresultat.fastsattAvLand.shouldBe(Land_iso2.NO)
-        lagretBehandlingsresultat.type.shouldBe(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL)
-        lagretBehandlingsresultat.vedtakMetadata.vedtakKlagefrist.shouldNotBeNull()
-        lagretBehandlingsresultat.vedtakMetadata.vedtakstype.shouldBeNull()
-
-        val lagretBrevbestillingDto = slotBrevbestillingDto.captured
-        lagretBrevbestillingDto.produserbardokument.shouldBe(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER)
-        lagretBrevbestillingDto.mottaker.shouldBe(Mottakerroller.BRUKER)
-        lagretBrevbestillingDto.bestillersId.shouldBe("Z123456")
-        lagretBrevbestillingDto.fritekst.shouldBe("fritekst")
+        slotBehandlingsresultat.captured.run {
+            fastsattAvLand.shouldBe(Land_iso2.NO)
+            type.shouldBe(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL)
+            vedtakMetadata.vedtakKlagefrist.shouldNotBeNull()
+            vedtakMetadata.vedtakstype.shouldBeNull()
+        }
+        slotBrevbestillingDto.captured.run {
+            produserbardokument.shouldBe(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER)
+            mottaker.shouldBe(Mottakerroller.BRUKER)
+            bestillersId.shouldBe("Z123456")
+            fritekst.shouldBe("fritekst")
+        }
     }
 }
