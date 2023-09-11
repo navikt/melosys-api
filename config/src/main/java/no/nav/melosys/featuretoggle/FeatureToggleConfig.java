@@ -24,7 +24,7 @@ public class FeatureToggleConfig {
     private static final Logger log = LoggerFactory.getLogger(FeatureToggleConfig.class);
 
     @Bean
-    public Unleash unleash(Environment environment, @Value("${unleash.token}") String token, @Value("${unleash.appName}") String appName) {
+    public Unleash unleash(Environment environment, @Value("${unleash.token}") String token) {
 
         if (!Collections.disjoint(List.of(environment.getActiveProfiles()), List.of("local", "local-mock", "local-q2"))) {
             var localUnleash = new LocalUnleash();
@@ -37,7 +37,6 @@ public class FeatureToggleConfig {
         } else {
             var unleashConfig = UnleashConfig.builder()
                 .apiKey(token)
-                .appName(appName)
                 .unleashAPI(UNLEASH_URL)
                 .build();
 
