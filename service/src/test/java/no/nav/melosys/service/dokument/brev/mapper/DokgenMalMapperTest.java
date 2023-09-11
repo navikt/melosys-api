@@ -616,6 +616,7 @@ class DokgenMalMapperTest {
     private InnvilgelseFtrlBrevbestilling lagInnvilgelseFtrlBrevbestilling() {
         return new InnvilgelseFtrlBrevbestilling.Builder()
             .medInnledningFritekst("Innledning")
+            .medBegrunnelseFritekst("Begrunnelse")
             .medTrygdeavgiftFritekst("Trygdeavgift fritekst")
             .medBehandling(lagBehandling())
             .medPersonDokument(lagPersondata())
