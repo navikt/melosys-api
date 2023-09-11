@@ -22,6 +22,7 @@ public record BrevbestillingUtkast(
     String begrunnelseFritekst,
     String ektefelleFritekst,
     String barnFritekst,
+    String trygdeavgiftFritekst,
     String kontaktpersonNavn,
     List<KopiMottakerUtkast> kopiMottakere,
     String fritekstTittel,

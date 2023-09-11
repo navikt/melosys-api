@@ -20,6 +20,7 @@ public final class BrevbestillingDto {
     private String begrunnelseFritekst;
     private String ektefelleFritekst;
     private String barnFritekst;
+    private String trygdeavgiftFritekst;
     private String kontaktpersonNavn;
     private List<KopiMottakerDto> kopiMottakere;
     private String bestillersId;
@@ -49,6 +50,7 @@ public final class BrevbestillingDto {
         String begrunnelseFritekst,
         String ektefelleFritekst,
         String barnFritekst,
+        String trygdeavgiftFritekst,
         String kontaktpersonNavn,
         List<KopiMottakerDto> kopiMottakere,
         String bestillersId,
@@ -74,6 +76,7 @@ public final class BrevbestillingDto {
         this.begrunnelseFritekst = begrunnelseFritekst;
         this.ektefelleFritekst = ektefelleFritekst;
         this.barnFritekst = barnFritekst;
+        this.trygdeavgiftFritekst = trygdeavgiftFritekst;
         this.kontaktpersonNavn = kontaktpersonNavn;
         this.kopiMottakere = kopiMottakere;
         this.bestillersId = bestillersId;
@@ -108,6 +111,7 @@ public final class BrevbestillingDto {
             brevbestillingUtkast.begrunnelseFritekst(),
             brevbestillingUtkast.ektefelleFritekst(),
             brevbestillingUtkast.barnFritekst(),
+            brevbestillingUtkast.trygdeavgiftFritekst(),
             brevbestillingUtkast.kontaktpersonNavn(),
             brevbestillingUtkast.kopiMottakere().stream().map(KopiMottakerDto::av).toList(),
             bestillersId,
@@ -163,6 +167,10 @@ public final class BrevbestillingDto {
 
     public void setBarnFritekst(String barnFritekst) {
         this.barnFritekst = barnFritekst;
+    }
+
+    public void setTrygdeavtaleFritekst(String barnFritekst) {
+        this.trygdeavgiftFritekst = trygdeavgiftFritekst;
     }
 
     public void setKontaktpersonNavn(String kontaktpersonNavn) {
@@ -264,6 +272,10 @@ public final class BrevbestillingDto {
         return barnFritekst;
     }
 
+    public String getTrygdeavgiftFritekst() {
+        return trygdeavgiftFritekst;
+    }
+
     public String getKontaktpersonNavn() {
         return kontaktpersonNavn;
     }
@@ -344,6 +356,7 @@ public final class BrevbestillingDto {
             Objects.equals(this.begrunnelseFritekst, that.begrunnelseFritekst) &&
             Objects.equals(this.ektefelleFritekst, that.ektefelleFritekst) &&
             Objects.equals(this.barnFritekst, that.barnFritekst) &&
+            Objects.equals(this.trygdeavgiftFritekst, that.trygdeavgiftFritekst) &&
             Objects.equals(this.kontaktpersonNavn, that.kontaktpersonNavn) &&
             Objects.equals(this.kopiMottakere, that.kopiMottakere) &&
             Objects.equals(this.bestillersId, that.bestillersId) &&
@@ -362,7 +375,7 @@ public final class BrevbestillingDto {
 
     @Override
     public int hashCode() {
-        return Objects.hash(produserbardokument, mottaker, orgnr, orgnrNorskMyndighet, institusjonId, innledningFritekst, manglerFritekst, begrunnelseFritekst, ektefelleFritekst, barnFritekst, kontaktpersonNavn, kopiMottakere, bestillersId, fritekstTittel, fritekst, distribusjonstype, kontaktopplysninger, nyVurderingBakgrunn, saksVedlegg, fritekstvedlegg, dokumentTittel, begrunnelseKode, ytterligereInformasjon);
+        return Objects.hash(produserbardokument, mottaker, orgnr, orgnrNorskMyndighet, institusjonId, innledningFritekst, manglerFritekst, begrunnelseFritekst, ektefelleFritekst, barnFritekst, trygdeavgiftFritekst, kontaktpersonNavn, kopiMottakere, bestillersId, fritekstTittel, fritekst, distribusjonstype, kontaktopplysninger, nyVurderingBakgrunn, saksVedlegg, fritekstvedlegg, dokumentTittel, begrunnelseKode, ytterligereInformasjon);
     }
 
     @Override
@@ -378,6 +391,7 @@ public final class BrevbestillingDto {
             "begrunnelseFritekst=" + begrunnelseFritekst + ", " +
             "ektefelleFritekst=" + ektefelleFritekst + ", " +
             "barnFritekst=" + barnFritekst + ", " +
+            "trygdeavtaleFritekst=" + trygdeavgiftFritekst + ", " +
             "kontaktpersonNavn=" + kontaktpersonNavn + ", " +
             "kopiMottakere=" + kopiMottakere + ", " +
             "bestillersId=" + bestillersId + ", " +

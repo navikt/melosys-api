@@ -48,6 +48,9 @@ public class Behandlingsresultat extends RegistreringsInfo {
     @Column(name = "innledning_fritekst")
     private String innledningFritekst;
 
+    @Column(name = "trygdeavgift_fritekst")
+    private String trygdeavgiftFritekst;
+
     @Column(name = "ny_vurdering_bakgrunn")
     private String nyVurderingBakgrunn;
 
@@ -140,6 +143,14 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public void setInnledningFritekst(String innledningFritekst) {
         this.innledningFritekst = innledningFritekst;
+    }
+
+    public String getTrygdeavgiftFritekst() {
+        return trygdeavgiftFritekst;
+    }
+
+    public void setTrygdeavgiftFritekst(String trygdeavgiftFritekst) {
+        this.trygdeavgiftFritekst = trygdeavgiftFritekst;
     }
 
     public VedtakMetadata getVedtakMetadata() {
