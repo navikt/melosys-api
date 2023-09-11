@@ -70,7 +70,7 @@ spec:
   - name: API_TOKEN_UNLEASH
     valueFrom:
       secretKeyRef:
-        name: {{APP_NAME}}-unleash-api-token
+        name: melosys-q1-unleash-api-token
         key: UNLEASH_SERVER_API_TOKEN
   - name: SPRING_PROFILES_ACTIVE
     value: nais
