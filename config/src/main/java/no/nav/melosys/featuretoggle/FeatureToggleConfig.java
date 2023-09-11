@@ -21,7 +21,7 @@ import org.springframework.core.env.Environment;
 public class FeatureToggleConfig {
 
     private final String UNLEASH_URL = "https://melosys-unleash-api.nav.cloud.nais.io/api";
-    private static final Logger log = LoggerFactory.getLogger(FeatureToggleConfig.class);
+    private final String APP_NAME = "Melosys-api";
 
     @Bean
     public Unleash unleash(Environment environment, @Value("${unleash.token}") String token) {
@@ -37,6 +37,7 @@ public class FeatureToggleConfig {
         } else {
             var unleashConfig = UnleashConfig.builder()
                 .apiKey(token)
+                .appName(APP_NAME)
                 .unleashAPI(UNLEASH_URL)
                 .build();
 
