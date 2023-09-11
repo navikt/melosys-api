@@ -24,7 +24,7 @@ public class FeatureToggleConfig {
     private static final Logger log = LoggerFactory.getLogger(FeatureToggleConfig.class);
 
     @Bean
-    public Unleash unleash(Environment environment, @Value("${unleash.token}") String token) {
+    public Unleash unleash(Environment environment, @Value("${unleash.token}") String token, @Value("${unleash.appName}") String appName) {
 
         if (!Collections.disjoint(List.of(environment.getActiveProfiles()), List.of("local", "local-mock", "local-q2"))) {
             var localUnleash = new LocalUnleash();
@@ -37,13 +37,9 @@ public class FeatureToggleConfig {
         } else {
             var unleashConfig = UnleashConfig.builder()
                 .apiKey(token)
-                .appName(environment.getProperty("unleash.appname"))
-                .projectName("default")
-                .instanceId("default")
+                .appName(appName)
                 .unleashAPI(UNLEASH_URL)
                 .build();
-
-            log.info("Debug melosys q1 unleash: " + unleashConfig.getAppName() + " " + UNLEASH_URL);
 
             return new DefaultUnleash(
                 unleashConfig,
