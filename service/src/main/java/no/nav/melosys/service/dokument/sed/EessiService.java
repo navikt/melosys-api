@@ -207,7 +207,6 @@ public class EessiService {
     public void lagreSaksrelasjon(Long arkivsakID, String rinaSaksnummer, String bucType) {
         log.info("Lagrer saksrelasjon mellom arkivsak {} og rinasak {}", arkivsakID, rinaSaksnummer);
         eessiConsumer.lagreSaksrelasjon(new SaksrelasjonDto(arkivsakID, rinaSaksnummer, bucType));
-        eessiConsumer.journalfoerTidligereSendteSedFor(rinaSaksnummer);
     }
 
     public void sendAnmodningUnntakSvar(long behandlingId, String ytterligereInformasjon) {
