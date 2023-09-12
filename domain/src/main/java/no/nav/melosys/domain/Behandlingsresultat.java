@@ -54,8 +54,8 @@ public class Behandlingsresultat extends RegistreringsInfo {
     @Column(name = "ny_vurdering_bakgrunn")
     private String nyVurderingBakgrunn;
 
-    @Column(name = "fakturaserie_id")
-    private String fakturaserieId;
+    @Column(name = "fakturaserie_referanse")
+    private String fakturaserieReferanse;
 
     @OneToOne(mappedBy = "behandlingsresultat", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private VedtakMetadata vedtakMetadata;
@@ -478,11 +478,11 @@ public class Behandlingsresultat extends RegistreringsInfo {
         this.nyVurderingBakgrunn = nyVurderingBakgrunn;
     }
 
-    public String getFakturaserieId() {
-        return fakturaserieId;
+    public String getFakturaserieReferanse() {
+        return fakturaserieReferanse;
     }
 
-    public void setFakturaserieId(String fakturaserieId) {
-        this.fakturaserieId = fakturaserieId;
+    public void setFakturaserieReferanse(String fakturaserieReferanse) {
+        this.fakturaserieReferanse = fakturaserieReferanse;
     }
 }

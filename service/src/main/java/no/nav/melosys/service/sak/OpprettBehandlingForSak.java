@@ -1,12 +1,9 @@
 package no.nav.melosys.service.sak;
 
-import java.time.LocalDate;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -14,7 +11,6 @@ import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,27 +35,6 @@ public class OpprettBehandlingForSak {
         this.lovligeKombinasjonerService = lovligeKombinasjonerService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
-    }
-
-    @Transactional
-    public void opprettBehandlingManglendeInnbetaling(String fakturaserieId, LocalDate mottaksDato) {
-        var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultatAvFakturaserieId(fakturaserieId);
-        Behandling behandling = behandlingService.hentBehandling(behandlingsresultat.getBehandling().getId());
-        Fagsak fagsak = behandling.getFagsak();
-        final Behandling sistBehandling = fagsak.hentSistRegistrertBehandling();
-
-        opprettBehandling(fagsak.getSaksnummer(), lagOpprettSakDto(sistBehandling, mottaksDato));
-    }
-
-    @NotNull
-    private static OpprettSakDto lagOpprettSakDto(Behandling sistBehandling, LocalDate mottaksDato) {
-        OpprettSakDto opprettSakDto = new OpprettSakDto();
-        opprettSakDto.setBehandlingstema(sistBehandling.getTema());
-        opprettSakDto.setBehandlingstype(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT);
-        opprettSakDto.setBehandlingsaarsakType(sistBehandling.getBehandlingsårsak().getType());
-        opprettSakDto.setBehandlingsaarsakFritekst(sistBehandling.getBehandlingsårsak().getFritekst());
-        opprettSakDto.setMottaksdato(mottaksDato);
-        return opprettSakDto;
     }
 
     @Transactional

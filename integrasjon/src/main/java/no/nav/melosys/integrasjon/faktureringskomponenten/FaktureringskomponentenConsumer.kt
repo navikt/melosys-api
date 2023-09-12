@@ -5,13 +5,8 @@ import no.nav.melosys.integrasjon.felles.JsonRestIntegrasjon
 import org.springframework.web.reactive.function.client.WebClient
 import org.springframework.web.reactive.function.client.bodyToMono
 
-data class FaktureringskomponentResponse(
-    val type: String,
-    val title: String?,
-    val status: Int,
-    val instance: String?,
-    val referanseId: String?,
-    val detail: String?
+data class NyFakturaserieResponseDto(
+    val fakturaserieReferanse: String,
 )
 
 open class FaktureringskomponentenConsumer(private val webClient: WebClient) : JsonRestIntegrasjon {
@@ -21,6 +16,6 @@ open class FaktureringskomponentenConsumer(private val webClient: WebClient) : J
             .uri("/fakturaserier")
             .bodyValue(fakturaserieDto)
             .retrieve()
-            .bodyToMono<FaktureringskomponentResponse>()
+            .bodyToMono<NyFakturaserieResponseDto>()
             .block()!!
 }

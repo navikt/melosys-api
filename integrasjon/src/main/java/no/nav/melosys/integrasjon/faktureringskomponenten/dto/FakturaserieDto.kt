@@ -2,7 +2,7 @@ package no.nav.melosys.integrasjon.faktureringskomponenten.dto
 
 data class FakturaserieDto(
     val fodselsnummer: String,
-    val referanseId: String?,
+    val fakturaserieReferanse: String?,
     val fullmektig: FullmektigDto?,
     val referanseBruker: String,
     val referanseNAV: String,

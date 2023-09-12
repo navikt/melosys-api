@@ -39,7 +39,7 @@ class FaktureringskomponentenConsumerTokenTest(
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int,
     @Value("\${mockserver.security.port}") mockSecurityPort: Int,
     @Autowired oAuthMockServer: OAuthMockServer
-) : ConsumerWireMockTestBase<String, FaktureringskomponentResponse>(
+) : ConsumerWireMockTestBase<String, NyFakturaserieResponseDto>(
     mockServiceUnderTestPort,
     mockSecurityPort,
     oAuthMockServer
@@ -91,12 +91,7 @@ class FaktureringskomponentenConsumerTokenTest(
     }
 
     override fun getMockData(): String = "{\n" +
-        "  \"type\": \"Invoice\",\n" +
-        "  \"title\": \"Invoice #12345\",\n" +
-        "  \"status\": 200,\n" +
-        "  \"instance\": \"https://example.com/invoices/12345\",\n" +
-        "  \"referanseId\": \"12345\",\n" +
-        "  \"detail\": \"Invoice details go here\"\n" +
+        "  \"fakturaserieReferanse\": \"123\"\n" +
         "}"
 
     override fun executeRequest() =
@@ -104,7 +99,7 @@ class FaktureringskomponentenConsumerTokenTest(
 
 
     private fun lagFakturaserieDto(
-        referanseId: String? = null,
+        fakturaserieReferanse: String? = null,
         fodselsnummer: String = "12345678911",
         fullmektig: FullmektigDto = FullmektigDto("11987654321", "123456789", "Ole Brum"),
         referanseBruker: String = "Nasse Nøff",
@@ -122,7 +117,7 @@ class FaktureringskomponentenConsumerTokenTest(
     ): FakturaserieDto {
         return FakturaserieDto(
             fodselsnummer,
-            referanseId,
+            fakturaserieReferanse,
             fullmektig,
             referanseBruker,
             referanseNav,

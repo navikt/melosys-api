@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class BehandlingsresultatService {
     private static final Logger log = LoggerFactory.getLogger(BehandlingsresultatService.class);
     private static final String KAN_IKKE_FINNE_BEHANDLINGSRESULTAT = "Kan ikke finne behandlingsresultat for behandling: ";
+    private static final String KAN_IKKE_FINNE_BEHANDLINGSRESULTAT_FAKTURASERIE_REFERANSE = "Kan ikke finne behandlingsresultat med fakturaserie referanse: ";
 
     private final BehandlingsresultatRepository behandlingsresultatRepository;
     private final VilkaarsresultatService vilkaarsresultatService;
@@ -55,9 +56,9 @@ public class BehandlingsresultatService {
             .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid));
     }
 
-    public Behandlingsresultat hentBehandlingsresultatAvFakturaserieId(String fakturaserieId) {
-        return behandlingsresultatRepository.findByFakturaserieId(fakturaserieId)
-            .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + fakturaserieId));
+    public Behandlingsresultat hentBehandlingsresultatAvFakturaserieReferanse(String fakturaserieReferanse) {
+        return behandlingsresultatRepository.findByFakturaserieReferanse(fakturaserieReferanse)
+            .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT_FAKTURASERIE_REFERANSE + fakturaserieReferanse));
     }
 
     public Behandlingsresultat hentBehandlingsresultatMedAnmodningsperioder(long behandlingsid) {

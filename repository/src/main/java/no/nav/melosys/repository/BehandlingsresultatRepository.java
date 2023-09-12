@@ -16,7 +16,7 @@ public interface BehandlingsresultatRepository extends CrudRepository<Behandling
     @EntityGraph(attributePaths = {"anmodningsperioder"}, type = EntityGraph.EntityGraphType.LOAD)
     Optional<Behandlingsresultat> findWithAnmodningsperioderById(Long behandlingID);
 
-    Optional<Behandlingsresultat> findByFakturaserieId(String fakturaserieId);
+    Optional<Behandlingsresultat> findByFakturaserieReferanse(String fakturaserieReferanse);
 
     @EntityGraph(attributePaths = {"lovvalgsperioder"}, type = EntityGraph.EntityGraphType.LOAD)
     Optional<Behandlingsresultat> findWithLovvalgsperioderById(Long behandlingID);

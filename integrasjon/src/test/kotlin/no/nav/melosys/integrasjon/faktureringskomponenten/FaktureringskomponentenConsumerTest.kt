@@ -107,7 +107,7 @@ class FaktureringskomponentenConsumerTest(
 
 
     private fun lagFakturaserieDto(
-        referanseId: String? = null,
+        fakturaserieReferanse: String? = null,
         fodselsnummer: String = "12345678911",
         fullmektig: FullmektigDto = FullmektigDto("11987654321", "123456789", "Ole Brum"),
         referanseBruker: String = "Nasse Nøff",
@@ -125,7 +125,7 @@ class FaktureringskomponentenConsumerTest(
     ): FakturaserieDto {
         return FakturaserieDto(
             fodselsnummer,
-            referanseId,
+            fakturaserieReferanse,
             fullmektig,
             referanseBruker,
             referanseNav,
