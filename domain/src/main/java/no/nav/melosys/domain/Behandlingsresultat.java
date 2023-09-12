@@ -437,7 +437,9 @@ public class Behandlingsresultat extends RegistreringsInfo {
             || erInnvilgelseFlereLand()
             || erUtpeking());
     }
-
+    public void settVedtakMetadata(LocalDate klagefrist) {
+        settVedtakMetadata(null, klagefrist);
+    }
     public void settVedtakMetadata(Vedtakstyper vedtakstype,
                                    LocalDate klagefrist) {
         if (vedtakMetadata == null) {
@@ -455,10 +457,6 @@ public class Behandlingsresultat extends RegistreringsInfo {
 
     public boolean harVedtak() {
         return vedtakMetadata != null;
-    }
-
-    public boolean erUtpekingNorgeAvvist() {
-        return type == Behandlingsresultattyper.UTPEKING_NORGE_AVVIST;
     }
 
     @Override

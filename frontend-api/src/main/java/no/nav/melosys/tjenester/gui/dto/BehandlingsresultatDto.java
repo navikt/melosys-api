@@ -52,7 +52,8 @@ public class BehandlingsresultatDto {
             resultat.getNyVurderingBakgrunn(),
             resultat.getUtfallRegistreringUnntak() != null ? resultat.getUtfallRegistreringUnntak().getKode() : null,
             resultat.getUtfallUtpeking() != null ? resultat.getUtfallUtpeking().getKode() : null,
-            resultat.getVedtakMetadata() != null ? resultat.getVedtakMetadata().getVedtakstype().getKode() : null,
+            resultat.getVedtakMetadata() != null && resultat.getVedtakMetadata().getVedtakstype() != null
+                ? resultat.getVedtakMetadata().getVedtakstype().getKode() : null,
             resultat.getKontrollresultater().stream().map(Kontrollresultat::getBegrunnelse).map(Kontroll_begrunnelser::getKode).collect(Collectors.toList())
         );
 
