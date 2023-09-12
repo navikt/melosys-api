@@ -76,11 +76,6 @@ public class OppgaveService {
     }
 
     public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) {
-        if (unleash.isEnabled("melosys.test.ny.unleash.config")) {
-            log.info("New toggle enabled");
-        } else {
-            log.info("New toggle disabled");
-        }
         Collection<Oppgave> oppgaverFraDomain = oppgaveFasade.finnOppgaverMedAnsvarlig(ansvarligID);
         return oppgaverTilDtoer(oppgaverFraDomain);
     }
