@@ -1,6 +1,7 @@
 package no.nav.melosys.domain.brev;
 
 public class InnvilgelseFtrlBrevbestilling extends DokgenBrevbestilling {
+    private String nyVurderingBakgrunn;
     private String innledningFritekst;
     private String begrunnelseFritekst;
     private String trygdeavgiftFritekst;
@@ -12,6 +13,7 @@ public class InnvilgelseFtrlBrevbestilling extends DokgenBrevbestilling {
 
     private InnvilgelseFtrlBrevbestilling(Builder builder) {
         super(builder);
+        this.nyVurderingBakgrunn = builder.nyVurderingBakgrunn;
         this.innledningFritekst = builder.innledningFritekst;
         this.begrunnelseFritekst = builder.begrunnelseFritekst;
         this.trygdeavgiftFritekst = builder.trygdeavgiftFritekst;
@@ -33,7 +35,12 @@ public class InnvilgelseFtrlBrevbestilling extends DokgenBrevbestilling {
         return new Builder(this);
     }
 
+    public String getNyVurderingBakgrunn() {
+        return nyVurderingBakgrunn;
+    }
+
     public static final class Builder extends DokgenBrevbestilling.Builder<Builder> {
+        private String nyVurderingBakgrunn;
         private String innledningFritekst;
         private String begrunnelseFritekst;
         private String trygdeavgiftFritekst;
@@ -43,6 +50,7 @@ public class InnvilgelseFtrlBrevbestilling extends DokgenBrevbestilling {
 
         public Builder(InnvilgelseFtrlBrevbestilling innvilgelseBrevbestilling) {
             super(innvilgelseBrevbestilling);
+            this.nyVurderingBakgrunn = innvilgelseBrevbestilling.nyVurderingBakgrunn;
             this.innledningFritekst = innvilgelseBrevbestilling.innledningFritekst;
             this.begrunnelseFritekst = innvilgelseBrevbestilling.begrunnelseFritekst;
             this.trygdeavgiftFritekst = innvilgelseBrevbestilling.trygdeavgiftFritekst;
@@ -60,6 +68,11 @@ public class InnvilgelseFtrlBrevbestilling extends DokgenBrevbestilling {
 
         public Builder medTrygdeavgiftFritekst(String trygdeavgiftFritekst) {
             this.trygdeavgiftFritekst = trygdeavgiftFritekst;
+            return this;
+        }
+
+        public Builder medNyVurderingBakgrunn(String nyVurderingBakgrunn) {
+            this.nyVurderingBakgrunn = nyVurderingBakgrunn;
             return this;
         }
 

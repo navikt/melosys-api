@@ -284,6 +284,7 @@ public class DokgenService {
                     .medNyVurderingBakgrunn(brevbestillingDto.getNyVurderingBakgrunn());
             case INNVILGELSE_FOLKETRYGDLOVEN -> new InnvilgelseFtrlBrevbestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK)
+                .medNyVurderingBakgrunn(brevbestillingDto.getNyVurderingBakgrunn())
                 .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
                 .medBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst())
                 .medTrygdeavgiftFritekst(brevbestillingDto.getTrygdeavgiftFritekst());
