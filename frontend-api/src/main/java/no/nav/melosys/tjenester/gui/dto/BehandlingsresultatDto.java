@@ -21,6 +21,7 @@ public class BehandlingsresultatDto {
     private final String utfallUtpeking;
     private final String vedtakstype;
     private final List<String> kontrollresultatBegrunnelseKoder;
+    private final String fakturaserieReferanse;
 
     private BehandlingsresultatDto(Behandlingsresultattyper behandlingsresultatTypeKode,
                                    String begrunnelseFritekst,
@@ -30,7 +31,8 @@ public class BehandlingsresultatDto {
                                    String utfallRegistreringUnntak,
                                    String utfallUtpeking,
                                    String vedtakstype,
-                                   List<String> kontrollresultatBegrunnelseKoder) {
+                                   List<String> kontrollresultatBegrunnelseKoder,
+                                   String fakturaserieReferanse) {
         this.behandlingsresultatTypeKode = behandlingsresultatTypeKode.getKode();
         this.innledningFritekst = innledningFritekst;
         this.trygdeavgiftFritekst = trygdeavgiftFritekst;
@@ -41,6 +43,7 @@ public class BehandlingsresultatDto {
         this.utfallRegistreringUnntak = utfallRegistreringUnntak;
         this.vedtakstype = vedtakstype;
         this.kontrollresultatBegrunnelseKoder = kontrollresultatBegrunnelseKoder;
+        this.fakturaserieReferanse = fakturaserieReferanse;
     }
 
     public static BehandlingsresultatDto av(Behandlingsresultat resultat) {
@@ -54,8 +57,8 @@ public class BehandlingsresultatDto {
             resultat.getUtfallUtpeking() != null ? resultat.getUtfallUtpeking().getKode() : null,
             resultat.getVedtakMetadata() != null && resultat.getVedtakMetadata().getVedtakstype() != null
                 ? resultat.getVedtakMetadata().getVedtakstype().getKode() : null,
-            resultat.getKontrollresultater().stream().map(Kontrollresultat::getBegrunnelse).map(Kontroll_begrunnelser::getKode).collect(Collectors.toList())
-        );
+            resultat.getKontrollresultater().stream().map(Kontrollresultat::getBegrunnelse).map(Kontroll_begrunnelser::getKode).collect(Collectors.toList()),
+            resultat.getFakturaserieReferanse());
 
         resultat.getBehandlingsresultatBegrunnelser().stream()
             .map(BehandlingsresultatBegrunnelse::getKode)
@@ -105,5 +108,9 @@ public class BehandlingsresultatDto {
 
     public String getNyVurderingBakgrunn() {
         return nyVurderingBakgrunn;
+    }
+
+    public String getFakturaserieReferanse() {
+        return fakturaserieReferanse;
     }
 }

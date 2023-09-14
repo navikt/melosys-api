@@ -55,8 +55,6 @@ class InnvilgelseArbeidsgiverBrevMapperTest {
         brevDataInnvilgelse.lovvalgsperiode = lagLovvalgsperiode();
         brevDataInnvilgelse.personNavn = "For Etter";
         String resultat = instans.mapTilBrevXML(fellesType, navFelles, behandling, behandlingsresultat, brevDataInnvilgelse);
-        // TODO: Vurder å bruke XMLUnit e.l. til å sammenlikne XML-strengen
-        // grundig mot forventninger.
         assertThat(resultat).matches("(?s)\\<\\?xml version=\"\\d\\.\\d+\" .*>\n.*");
         assertThat(":navn>For Etter</ns").isSubstringOf(resultat);
     }
