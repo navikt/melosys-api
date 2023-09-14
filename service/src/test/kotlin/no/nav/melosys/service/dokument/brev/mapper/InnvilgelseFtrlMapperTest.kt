@@ -20,6 +20,7 @@ import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker
@@ -59,6 +60,8 @@ internal class InnvilgelseFtrlMapperTest {
 
         innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).shouldNotBeNull()
             .apply {
+                behandlingstype.shouldBe(Behandlingstyper.FØRSTEGANG)
+                nyVurderingBakgrunn.shouldBe("NYE_OPPLYSNINGER")
                 saksbehandlerNavn.shouldBe(SAKSBEHANDLER_NAVN)
                 saksinfo.shouldBeInstanceOf<SaksinfoBruker>().apply {
                     fnr.shouldBe(DokgenTestData.FNR_BRUKER)
@@ -142,6 +145,7 @@ internal class InnvilgelseFtrlMapperTest {
             .medBegrunnelseFritekst(BEGRUNNELSE_FRITEKST)
             .medTrygdeavgiftFritekst(TRYGDEAVGIFT_FRITEKST)
             .medSaksbehandlerNavn(SAKSBEHANDLER_NAVN)
+            .medNyVurderingBakgrunn("NYE_OPPLYSNINGER")
             .build()
     }
 
@@ -153,6 +157,7 @@ internal class InnvilgelseFtrlMapperTest {
                 vilkaar = Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE
                 begrunnelser = setOf(lagVilkaarBegrunnelse(this))
             })
+            nyVurderingBakgrunn = "NYE_OPPLYSNINGER"
             behandling = DokgenTestData.lagBehandling()
         }
     }

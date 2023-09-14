@@ -6,11 +6,13 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
 import no.nav.melosys.domain.brev.InnvilgelseFtrlBrevbestilling
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.Periode
 import java.time.LocalDate
 
 class InnvilgelseFtrl(
     brevbestilling: InnvilgelseFtrlBrevbestilling,
+    val behandlingstype: Behandlingstyper,
     @JsonSerialize(using = LocalDateSerializer::class)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     val datoMottatt: LocalDate?,
@@ -21,6 +23,7 @@ class InnvilgelseFtrl(
     val skatteplikttype: Skatteplikttype?,
     val ftrl_2_8_begrunnelse: Ftrl_2_8_naer_tilknytning_norge_begrunnelser?,
     val begrunnelseAnnenGrunnFritekst: String?,
+    val nyVurderingBakgrunn: String?,
     val innledningFritekst: String?,
     val begrunnelseFritekst: String?,
     val trygdeavgiftFritekst: String?,
@@ -37,6 +40,7 @@ class InnvilgelseFtrl(
         private val brukerHarFullmektig =
             brevbestilling.behandling.fagsak.finnRepresentant(Representerer.BRUKER).isPresent
 
+        private var behandlingstype: Behandlingstyper = Behandlingstyper.FØRSTEGANG
         private var perioder: List<Periode> = emptyList()
         private var bestemmelse: Folketrygdloven_kap2_bestemmelser? = null
         private var avslåttHelsedelFørMottaksdato = false
@@ -44,6 +48,7 @@ class InnvilgelseFtrl(
         private var skatteplikttype: Skatteplikttype? = null
         private var ftrl_2_8_begrunnelse: Ftrl_2_8_naer_tilknytning_norge_begrunnelser? = null
         private var begrunnelseAnnenGrunnFritekst: String? = null
+        private var nyVurderingBakgrunn: String? = null
         private var innledningFritekst: String? = null
         private var begrunnelseFritekst: String? = null
         private var trygdeavgiftFritekst: String? = null
@@ -52,6 +57,11 @@ class InnvilgelseFtrl(
         private var trygdeavtaleMedArbeidsland = false
         private var arbeidsgiverFullmektigNavn: String? = null
         private var betalerArbeidsgiveravgift = false
+
+        fun behandlingstype(behandlingstype: Behandlingstyper): Builder {
+            this.behandlingstype = behandlingstype
+            return this
+        }
 
         fun perioder(perioder: List<Periode>): Builder {
             this.perioder = perioder
@@ -86,6 +96,11 @@ class InnvilgelseFtrl(
         fun begrunnelseAnnenGrunnFritekst(begrunnelseAnnenGrunnFritekst: String?): Builder {
             this.begrunnelseAnnenGrunnFritekst = begrunnelseAnnenGrunnFritekst
             return this
+        }
+
+        fun nyVurderingBakgrunn(nyVurderingBakgrunn: String?): Builder {
+            this.nyVurderingBakgrunn = nyVurderingBakgrunn
+            return this;
         }
 
         fun innledningFritekst(innledningFritekst: String?): Builder {
@@ -131,6 +146,7 @@ class InnvilgelseFtrl(
         fun build(): InnvilgelseFtrl {
             return InnvilgelseFtrl(
                 brevbestilling,
+                behandlingstype,
                 datoMottatt,
                 perioder,
                 bestemmelse,
@@ -139,6 +155,7 @@ class InnvilgelseFtrl(
                 skatteplikttype,
                 ftrl_2_8_begrunnelse,
                 begrunnelseAnnenGrunnFritekst,
+                nyVurderingBakgrunn,
                 innledningFritekst,
                 begrunnelseFritekst,
                 trygdeavgiftFritekst,

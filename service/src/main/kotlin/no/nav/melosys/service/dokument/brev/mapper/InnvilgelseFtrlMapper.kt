@@ -31,6 +31,7 @@ class InnvilgelseFtrlMapper(
             behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland.landkoder[0]
 
         return InnvilgelseFtrl.Builder(brevbestilling)
+            .behandlingstype(behandlingsresultat.behandling.type)
             .perioder(mapPerioder(medlemAvFolketrygden))
             .bestemmelse(medlemAvFolketrygden.bestemmelse)
             .avslåttHelsedelFørMottaksdato(
@@ -43,6 +44,7 @@ class InnvilgelseFtrlMapper(
             .skatteplikttype(medlemAvFolketrygden.utledSkatteplikttype())
             .ftrl_2_8_begrunnelse(hentFtrlNærTilknytningNorgeBegrunnelse(behandlingsresultat.vilkaarsresultater))
             .begrunnelseAnnenGrunnFritekst(hentSaerligBegrunnelseFritekst(behandlingsresultat.vilkaarsresultater))
+            .nyVurderingBakgrunn(brevbestilling.nyVurderingBakgrunn)
             .innledningFritekst(brevbestilling.innledningFritekst)
             .begrunnelseFritekst(brevbestilling.begrunnelseFritekst)
             .trygdeavgiftFritekst(brevbestilling.trygdeavgiftFritekst)
