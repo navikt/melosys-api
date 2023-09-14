@@ -22,11 +22,10 @@ class OrganisasjonResponse {
     @JsonSubTypes(
         JsonSubTypes.Type(value = JuridiskEnhet::class, name = "JuridiskEnhet"),
         JsonSubTypes.Type(value = Organisasjonsledd::class, name = "Organisasjonsledd"),
-        JsonSubTypes.Type(value = Virksomhet::class, name = "Virksomhet"),
+        JsonSubTypes.Type(value = Virksomhet::class, name = "Virksomhet")
     )
     open class Organisasjon(
         val organisasjonDetaljer: OrganisasjonDetaljer? = null,
-        val type: String? = null
     ) : OrganisasjonBase() {
 
         fun tilJsonString(): String = try {
@@ -39,11 +38,11 @@ class OrganisasjonResponse {
         }
     }
 
-    class Virksomhet : Organisasjon() {
-        val bestaarAvOrganisasjonsledd: List<BestaarAvOrganisasjonsledd>? = null
-        val inngaarIJuridiskEnheter: List<InngaarIJuridiskEnhet>? = null
+    data class Virksomhet(
+        val bestaarAvOrganisasjonsledd: List<BestaarAvOrganisasjonsledd>? = null,
+        val inngaarIJuridiskEnheter: List<InngaarIJuridiskEnhet>? = null,
         val virksomhetDetaljer: VirksomhetDetaljer? = null
-    }
+    ) : Organisasjon()
 
     class VirksomhetDetaljer {
         val oppstartsdato: LocalDate? = null
@@ -108,7 +107,7 @@ class OrganisasjonResponse {
         val fusjoner: List<JuridiskEnhetFusjon> = listOf(),
         val knytninger: List<JuridiskEnhetKnytning> = listOf(),
         val juridiskEnhetDetaljer: JuridiskEnhetDetaljer? = null
-    ) : Organisasjon(type = "JuridiskEnhet")
+    ) : Organisasjon()
 
     data class BestaarAvOrganisasjonsledd(
         val bruksperiode: Bruksperiode? = null,
@@ -141,7 +140,7 @@ class OrganisasjonResponse {
         val driverVirksomheter: List<DriverVirksomhet> = emptyList(),
         val inngaarIJuridiskEnheter: List<InngaarIJuridiskEnhet> = emptyList(),
         val organisasjonsleddDetaljer: OrganisasjonsleddDetaljer? = null
-    ) : Organisasjon(type = "Organisasjonsledd") // Assuming Organisasjon is also converted to Kotlin
+    ) : Organisasjon()
 
 
     data class Navn(
