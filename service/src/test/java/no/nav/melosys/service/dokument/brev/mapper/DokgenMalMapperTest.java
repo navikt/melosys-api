@@ -675,6 +675,7 @@ class DokgenMalMapperTest {
         semistrukturertAdresse.setAdresselinje1(FORRETNINGSADRESSE_ORG);
         semistrukturertAdresse.setPostnr(POSTNR_ORG);
         semistrukturertAdresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(2), LocalDate.now().plusDays(2)));
+        semistrukturertAdresse.setLandkode("NO");
         return semistrukturertAdresse;
     }
 }

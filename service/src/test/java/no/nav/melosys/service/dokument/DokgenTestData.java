@@ -95,7 +95,7 @@ public final class DokgenTestData {
             null, null, null, "PDL", null, false);
 
         final var kontaktadresse = new Kontaktadresse(
-            new StrukturertAdresse(ADRESSELINJE_1_BRUKER, null, POSTNR_BRUKER, POSTSTED_BRUKER, null, null),
+            new StrukturertAdresse(ADRESSELINJE_1_BRUKER, null, POSTNR_BRUKER, POSTSTED_BRUKER, null, "NO"),
             null, null, null, null, "PDL", null, null,
             false);
 
@@ -174,6 +174,7 @@ public final class DokgenTestData {
         semistrukturertAdresse.setAdresselinje1(POSTBOKS_ORG);
         semistrukturertAdresse.setPostnr(POSTNR_ORG);
         semistrukturertAdresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(2), LocalDate.now().plusDays(2)));
+        semistrukturertAdresse.setLandkode("NO");
         return semistrukturertAdresse;
     }
 
