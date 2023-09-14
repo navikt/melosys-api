@@ -2,7 +2,7 @@ package no.nav.melosys.service.ftrl
 
 import mu.KotlinLogging
 import no.nav.melosys.domain.ftrl.ManglendeFakturabetalingMelding
-import no.nav.melosys.service.sak.OpprettBehandlingForSak
+import no.nav.melosys.service.behandling.OpprettManglendeInntbetalingBehandling
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Profile
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 @Service
 @Profile("!local-q1 & !local-q2")
 class ManglendeFakturabetalingConsumer(
-    @Autowired private val opprettBehandlingForSak: OpprettBehandlingForSak
+    @Autowired private val opprettManglendeInntbetalingBehandling: OpprettManglendeInntbetalingBehandling
 ) {
     private val log = KotlinLogging.logger { }
 
@@ -26,8 +26,8 @@ class ManglendeFakturabetalingConsumer(
     ) {
         val manglendeFakturebetalingMelding = consumerRecord.value()
         try {
-            opprettBehandlingForSak.opprettBehandlingManglendeInnbetaling(
-                FaktureringsKomponentenHjelper.hentBehandingsId(manglendeFakturebetalingMelding.vedtaksId),
+            opprettManglendeInntbetalingBehandling.opprettBehandlingManglendeInnbetaling(
+                manglendeFakturebetalingMelding.fakturaserieReferanse,
                 manglendeFakturebetalingMelding.mottaksDato
             )
         } catch (e: Exception) {
