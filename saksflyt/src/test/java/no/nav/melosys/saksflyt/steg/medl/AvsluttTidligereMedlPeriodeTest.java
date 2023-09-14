@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,7 +55,7 @@ public class AvsluttTidligereMedlPeriodeTest {
 
         Prosessinstans prosessinstans = hentProsessinstans(behandling, true);
         avsluttTidligereMedlPeriode.utfør(prosessinstans);
-        verify(medlPeriodeService).avsluttTidligerMedlPeriode(any(Fagsak.class));
+        verify(medlPeriodeService).avsluttTidligerMedlPeriode(anyString());
     }
 
     private Fagsak hentFagsak() {
