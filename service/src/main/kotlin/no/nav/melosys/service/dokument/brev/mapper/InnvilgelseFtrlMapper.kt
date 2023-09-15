@@ -2,8 +2,7 @@ package no.nav.melosys.service.dokument.brev.mapper
 
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.Vilkaarsresultat
-import no.nav.melosys.domain.brev.InnvilgelseBrevbestilling
-import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
+import no.nav.melosys.domain.brev.InnvilgelseFtrlBrevbestilling
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Representerer
@@ -25,13 +24,14 @@ class InnvilgelseFtrlMapper(
     private val dokgenMapperDatahenter: DokgenMapperDatahenter
 ) {
     @Transactional
-    fun map(brevbestilling: InnvilgelseBrevbestilling): InnvilgelseFtrl {
+    fun map(brevbestilling: InnvilgelseFtrlBrevbestilling): InnvilgelseFtrl {
         val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
         val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
         val arbeidsland =
             behandlingsresultat.behandling.mottatteOpplysninger.mottatteOpplysningerData.soeknadsland.landkoder[0]
 
         return InnvilgelseFtrl.Builder(brevbestilling)
+            .behandlingstype(behandlingsresultat.behandling.type)
             .perioder(mapPerioder(medlemAvFolketrygden))
             .bestemmelse(medlemAvFolketrygden.bestemmelse)
             .avslåttHelsedelFørMottaksdato(
@@ -44,6 +44,10 @@ class InnvilgelseFtrlMapper(
             .skatteplikttype(medlemAvFolketrygden.utledSkatteplikttype())
             .ftrl_2_8_begrunnelse(hentFtrlNærTilknytningNorgeBegrunnelse(behandlingsresultat.vilkaarsresultater))
             .begrunnelseAnnenGrunnFritekst(hentSaerligBegrunnelseFritekst(behandlingsresultat.vilkaarsresultater))
+            .nyVurderingBakgrunn(brevbestilling.nyVurderingBakgrunn)
+            .innledningFritekst(brevbestilling.innledningFritekst)
+            .begrunnelseFritekst(brevbestilling.begrunnelseFritekst)
+            .trygdeavgiftFritekst(brevbestilling.trygdeavgiftFritekst)
             .arbeidsgivere(
                 avklarteVirksomheterService.hentNorskeArbeidsgivere(brevbestilling.behandling).map { it.navn })
             .arbeidsland(dokgenMapperDatahenter.hentLandnavnFraLandkode(arbeidsland))
