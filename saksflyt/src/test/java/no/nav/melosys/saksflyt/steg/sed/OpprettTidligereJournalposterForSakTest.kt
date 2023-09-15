@@ -18,21 +18,21 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.junit.jupiter.MockitoExtension
 
 @ExtendWith(MockitoExtension::class)
-class OpprettTidligereJournalpostForSakTest {
+class OpprettTidligereJournalposterForSakTest {
 
     private val eessiService: EessiService = mockk()
     private val joarkFasade: JoarkFasade = mockk()
 
     private val fakeUnleash = FakeUnleash()
 
-    private lateinit var opprettTidligereJournalpostForSak: OpprettTidligereJournalpostForSak
+    private lateinit var opprettTidligereJournalposterForSak: OpprettTidligereJournalposterForSak
 
     private val JOURNALPOST_ID = "123"
 
     @BeforeEach
     fun setup() {
         fakeUnleash.enableAll()
-        opprettTidligereJournalpostForSak = OpprettTidligereJournalpostForSak(joarkFasade, eessiService, fakeUnleash)
+        opprettTidligereJournalposterForSak = OpprettTidligereJournalposterForSak(joarkFasade, eessiService, fakeUnleash)
     }
 
     @Test
@@ -56,7 +56,7 @@ class OpprettTidligereJournalpostForSakTest {
         every { eessiService.hentSedTilknyttetJournalpost(JOURNALPOST_ID) } returns melosysEessiMelding
         every { eessiService.opprettJournalpostForTidligereSed(any()) } returns Unit
 
-        opprettTidligereJournalpostForSak.utfør(prosessinstans)
+        opprettTidligereJournalposterForSak.utfør(prosessinstans)
 
         verify(exactly = 1) {
             eessiService.opprettJournalpostForTidligereSed(melosysEessiMelding.rinaSaksnummer)
@@ -81,7 +81,7 @@ class OpprettTidligereJournalpostForSakTest {
 
         every { eessiService.opprettJournalpostForTidligereSed(any()) } returns Unit
 
-        opprettTidligereJournalpostForSak.utfør(prosessinstans)
+        opprettTidligereJournalposterForSak.utfør(prosessinstans)
 
         verify(exactly = 1) {
             eessiService.opprettJournalpostForTidligereSed(melosysEessiMelding.rinaSaksnummer)
