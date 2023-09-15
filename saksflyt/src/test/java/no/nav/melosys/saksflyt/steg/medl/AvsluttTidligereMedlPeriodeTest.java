@@ -47,7 +47,7 @@ public class AvsluttTidligereMedlPeriodeTest {
     }
 
     @Test
-    public void utfør_erEndring_verifiserAvsluttTidligereMedlPeriode() throws Exception {
+    public void utfør_erEndring_verifiserAvsluttTidligereMedlPeriode() {
 
         Behandling behandling = new Behandling();
         behandling.setId(1L);
@@ -55,7 +55,7 @@ public class AvsluttTidligereMedlPeriodeTest {
 
         Prosessinstans prosessinstans = hentProsessinstans(behandling, true);
         avsluttTidligereMedlPeriode.utfør(prosessinstans);
-        verify(medlPeriodeService).avsluttTidligerMedlPeriode(anyString());
+        verify(medlPeriodeService).avsluttTidligerMedlPeriode("MEL-123");
     }
 
     private Fagsak hentFagsak() {
@@ -65,6 +65,7 @@ public class AvsluttTidligereMedlPeriodeTest {
         behandling.setRegistrertDato(Instant.now());
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         fagsak.setBehandlinger(Collections.singletonList(behandling));
+        fagsak.setSaksnummer("MEL-123");
 
         return fagsak;
     }
