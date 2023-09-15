@@ -3,7 +3,6 @@
   "KAFKA_POOL": "nav-dev",
   "VAULT_CLUSTER": "dev",
   "APP_NAME": "melosys-q1",
-  "NAMESPACE": "teammelosys",
   "TENANT_URL": "trygdeetaten.no",
   "GROUP_MELOSYS_INNLOGGING": "52981246-8032-40f0-863a-2bd2844f2d57",
   "APP_NAME_FRONTEND": "melosys-web-q1",

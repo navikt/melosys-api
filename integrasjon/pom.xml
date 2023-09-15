@@ -36,7 +36,7 @@
         <dependency>
             <groupId>io.getunleash</groupId>
             <artifactId>unleash-client-java</artifactId>
-            <version>8.3.0</version>
+            <version>${unleash.version}</version>
         </dependency>
 
         <dependency>

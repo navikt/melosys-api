@@ -1,6 +1,6 @@
 package no.nav.melosys.saksflyt.steg.sed
 
-import no.finn.unleash.Unleash
+import io.getunleash.Unleash
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.saksflyt.ProsessDataKey
 import no.nav.melosys.domain.saksflyt.ProsessSteg
@@ -16,7 +16,8 @@ import java.util.*
 @Component
 class OpprettTidligereJournalposterForSak(private val joarkFasade: JoarkFasade,
                                           private val eessiService: EessiService,
-                                          private val unleash: Unleash) : StegBehandler {
+                                          private val unleash: Unleash
+) : StegBehandler {
     override fun inngangsSteg(): ProsessSteg {
         return ProsessSteg.OPPRETT_TIDLIGERE_JOURNALPOSTER_FOR_SAK
     }
