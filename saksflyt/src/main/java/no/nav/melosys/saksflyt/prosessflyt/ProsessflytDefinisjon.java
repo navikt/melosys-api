@@ -116,6 +116,7 @@ public final class ProsessflytDefinisjon {
             new ProsessFlyt(ProsessType.JFR_KNYTT,
                 OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
                 OPPDATER_SAKSRELASJON,
+                OPPRETT_TIDLIGERE_JOURNALPOSTER_FOR_SAK,
                 JFR_SETT_VURDER_DOKUMENT,
                 JFR_TILDEL_BEHANDLINGSOPPGAVE
             )
