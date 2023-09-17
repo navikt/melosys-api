@@ -5,6 +5,7 @@ import java.util.*;
 import javax.annotation.Nullable;
 
 import io.getunleash.Unleash;
+import io.getunleash.UnleashContext;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RegistreringsInfo;
@@ -76,7 +77,10 @@ public class OppgaveService {
     }
 
     public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) {
-        if (unleash.isEnabled("melosys.test.ny.unleash.config")) log.info("Test unleash brukerident");
+        UnleashContext context = UnleashContext.builder()
+            .userId(ansvarligID).build();
+        if (unleash.isEnabled("melosys.test.ny.unleash.config", UnleashContext.builder().userId(ansvarligID).build()))
+            log.info("Test unleash brukerident");
         Collection<Oppgave> oppgaverFraDomain = oppgaveFasade.finnOppgaverMedAnsvarlig(ansvarligID);
         return oppgaverTilDtoer(oppgaverFraDomain);
     }

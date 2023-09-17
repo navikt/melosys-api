@@ -9,6 +9,7 @@ import io.getunleash.Unleash;
 import io.getunleash.strategy.GradualRolloutRandomStrategy;
 import io.getunleash.strategy.GradualRolloutSessionIdStrategy;
 import io.getunleash.strategy.GradualRolloutUserIdStrategy;
+import io.getunleash.strategy.UserWithIdStrategy;
 import io.getunleash.util.UnleashConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +47,7 @@ public class FeatureToggleConfig {
                 new GradualRolloutSessionIdStrategy(),
                 new GradualRolloutUserIdStrategy(),
                 new GradualRolloutRandomStrategy(),
-                new ByUserIdStrategy()
+                new UserWithIdStrategy()
             );
         }
     }
