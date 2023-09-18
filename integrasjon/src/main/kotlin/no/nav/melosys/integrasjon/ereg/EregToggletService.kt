@@ -1,6 +1,6 @@
 package no.nav.melosys.integrasjon.ereg
 
-import no.finn.unleash.Unleash
+import io.getunleash.Unleash
 import no.nav.melosys.domain.Saksopplysning
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Service
