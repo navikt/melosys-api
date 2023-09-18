@@ -42,7 +42,7 @@ class Periode(
                     it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi,
                     medlemskapsperiode.innvilgelsesresultat
                 )
-            }.toMutableList().also {//TODO hvorfor har vi dette?
+            }.toMutableList().also {
                 if (!medlemskapsperiode.erInnvilget()) {
                     it.add(
                         Periode(

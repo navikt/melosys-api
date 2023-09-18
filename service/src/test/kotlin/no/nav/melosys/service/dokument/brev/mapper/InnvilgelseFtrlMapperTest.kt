@@ -137,6 +137,38 @@ internal class InnvilgelseFtrlMapperTest {
                 .map { it.innvilgelsesResultat }
                 .shouldContainExactlyInAnyOrder(InnvilgelsesResultat.INNVILGET, InnvilgelsesResultat.AVSLAATT)
         }
+        innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).apply {
+            medlemskapsPerioder.shouldHaveSize(2)
+                .map { it.innvilgelsesResultat }
+                .shouldContainExactlyInAnyOrder(InnvilgelsesResultat.INNVILGET, InnvilgelsesResultat.AVSLAATT)
+        }
+    }
+
+    @Test
+    fun map_innvilgetOgAvslaatt_populererFelter_ingen_avgiftsperioder() {
+        mockHappyCase()
+        val behandlingsresultat = lagBehandlingsResultat()
+        every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat.apply {
+            medlemAvFolketrygden.medlemskapsperioder = listOf(
+                Medlemskapsperiode().apply {
+                    fom = LocalDate.EPOCH.plusMonths(1)
+                    tom = LocalDate.EPOCH.plusMonths(4)
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    medlemskapstype = Medlemskapstyper.FRIVILLIG
+                    trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE
+                    medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
+                }
+            )
+        }
+
+        innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).apply {
+            avgiftsPerioder.shouldHaveSize(0)
+        }
+        innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).apply {
+            medlemskapsPerioder.shouldHaveSize(1)
+                .map { it.innvilgelsesResultat }
+                .shouldContainExactlyInAnyOrder(InnvilgelsesResultat.INNVILGET)
+        }
     }
 
     private fun lagInnvilgelseFtrlBrevbestilling(): InnvilgelseFtrlBrevbestilling {
