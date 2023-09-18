@@ -18,7 +18,7 @@ class InnvilgelseFtrl(
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     val datoMottatt: LocalDate?,
     val perioder: List<Periode>,
-    val medlemLemskapsPerioder: List<Medlemskapsperiode>,
+    val medlemskapsPerioder: List<Medlemskapsperiode>,
     val bestemmelse: Folketrygdloven_kap2_bestemmelser?,
     val avslåttHelsedelFørMottaksdato: Boolean,
     val trygdeavgiftMottaker: Trygdeavgiftmottaker?,
