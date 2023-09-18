@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.faktureringskomponenten
 
+import io.getunleash.Unleash
 import mu.KotlinLogging
-import no.finn.unleash.Unleash
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
@@ -12,6 +12,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey
 import no.nav.melosys.domain.saksflyt.ProsessSteg
 import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.featuretoggle.ToggleName.FOLKETRYGDEN_MVP
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
 import no.nav.melosys.saksflyt.steg.StegBehandler
@@ -41,7 +42,7 @@ class OpprettBetalingsplan(
     }
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        if (!unleash.isEnabled("melosys.folketrygden.mvp")) {
+        if (!unleash.isEnabled(FOLKETRYGDEN_MVP)) {
             return
         }
 

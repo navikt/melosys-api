@@ -1,6 +1,6 @@
 package no.nav.melosys.service.saksbehandling
 
-import no.finn.unleash.Unleash
+import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Sakstemaer

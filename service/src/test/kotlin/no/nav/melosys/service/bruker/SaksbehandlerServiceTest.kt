@@ -4,7 +4,6 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import no.finn.unleash.FakeUnleash
 import no.nav.melosys.integrasjon.azuread.AzureAdService
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
@@ -17,13 +16,11 @@ class SaksbehandlerServiceTest {
 
     private var azureAdService = mockk<AzureAdService>()
     private val subjectHandler: SubjectHandler = mockk<SpringSubjectHandler>()
-    private val unleash = FakeUnleash()
     private lateinit var saksbehandlerService: SaksbehandlerService
 
     @BeforeEach
     fun setup() {
-        unleash.enableAll()
-        saksbehandlerService = SaksbehandlerService(azureAdService, unleash)
+        saksbehandlerService = SaksbehandlerService(azureAdService)
         SubjectHandler.set(subjectHandler)
     }
 

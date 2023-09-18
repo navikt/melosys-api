@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.google.common.base.Enums;
-import no.finn.unleash.Unleash;
+import io.getunleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;

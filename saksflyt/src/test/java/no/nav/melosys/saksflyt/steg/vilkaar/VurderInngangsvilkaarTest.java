@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.steg.vilkaar;
 import java.time.LocalDate;
 import java.util.List;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;

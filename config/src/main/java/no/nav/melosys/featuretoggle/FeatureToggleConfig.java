@@ -3,10 +3,17 @@ package no.nav.melosys.featuretoggle;
 import java.util.Collections;
 import java.util.List;
 
-import no.finn.unleash.DefaultUnleash;
-import no.finn.unleash.FakeUnleash;
-import no.finn.unleash.Unleash;
-import no.finn.unleash.util.UnleashConfig;
+import io.getunleash.DefaultUnleash;
+import io.getunleash.FakeUnleash;
+import io.getunleash.Unleash;
+import io.getunleash.strategy.GradualRolloutRandomStrategy;
+import io.getunleash.strategy.GradualRolloutSessionIdStrategy;
+import io.getunleash.strategy.GradualRolloutUserIdStrategy;
+import io.getunleash.strategy.UserWithIdStrategy;
+import io.getunleash.util.UnleashConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -14,8 +21,11 @@ import org.springframework.core.env.Environment;
 @Configuration
 public class FeatureToggleConfig {
 
+    private final String UNLEASH_URL = "https://melosys-unleash-api.nav.cloud.nais.io/api";
+    private final String APP_NAME = "Melosys-api";
+
     @Bean
-    public Unleash unleash(Environment environment) {
+    public Unleash unleash(Environment environment, @Value("${unleash.token}") String token) {
 
         if (!Collections.disjoint(List.of(environment.getActiveProfiles()), List.of("local", "local-mock", "local-q2"))) {
             var localUnleash = new LocalUnleash();
@@ -27,13 +37,17 @@ public class FeatureToggleConfig {
             return fakeUnleash;
         } else {
             var unleashConfig = UnleashConfig.builder()
-                .appName("melosys")
-                .unleashAPI("https://unleash.nais.io/api/")
+                .apiKey(token)
+                .appName(APP_NAME)
+                .unleashAPI(UNLEASH_URL)
                 .build();
 
             return new DefaultUnleash(
                 unleashConfig,
-                new IsTestStrategy(environment.getProperty("APP_ENVIRONMENT")),
+                new GradualRolloutSessionIdStrategy(),
+                new GradualRolloutUserIdStrategy(),
+                new GradualRolloutRandomStrategy(),
+                new UserWithIdStrategy(),
                 new ByUserIdStrategy()
             );
         }

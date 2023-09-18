@@ -3,7 +3,7 @@ package no.nav.melosys.service.sak;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import no.finn.unleash.FakeUnleash;
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;

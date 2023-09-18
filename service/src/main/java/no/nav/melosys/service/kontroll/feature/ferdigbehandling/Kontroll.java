@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 
-import no.finn.unleash.Unleash;
+import io.getunleash.Unleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
