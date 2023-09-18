@@ -154,17 +154,6 @@ class BrevDataServiceTest {
         assertThat(utenlandskMyndighet.institusjonskode).isEqualTo(tyskMyndighet.institusjonskode);
     }
 
-    @Test
-    void lagMottaker_personUtenRegistrertAdresseGirFunksjonellException() {
-        Behandling behandling = lagBehandling(lagSøknadDokumentTomAdresse());
-        var mottaker = lagMottaker(Mottakerroller.BRUKER);
-        when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser());
-
-        assertThatExceptionOfType(FunksjonellException.class).isThrownBy(
-            () -> service.lagMottaker(mottaker, null, behandling)).withMessageContaining(
-            Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
-    }
-
     private static no.nav.melosys.domain.brev.Mottaker lagMottaker(Mottakerroller rolle) {
         var mottaker = new no.nav.melosys.domain.brev.Mottaker();
         mottaker.setRolle(rolle);
@@ -186,19 +175,6 @@ class BrevDataServiceTest {
             default -> throw new IllegalArgumentException("Mottakertype må være person eller organisasjon");
         }
         return mottaker;
-    }
-
-    @Test
-    void lagBrevXML_fangerOgKasterException() {
-        Behandling behandling = lagBehandling(lagSøknadDokumentTomAdresse());
-        var mottaker = lagMottaker(Mottakerroller.BRUKER);
-        Exception kastetException = new RuntimeException("test");
-        doThrow(kastetException).when(persondataFasade).hentPerson(anyString());
-
-        assertThatExceptionOfType(TekniskException.class).isThrownBy(
-            () -> service.lagBrevXML(INNVILGELSE_ARBEIDSGIVER, mottaker, null, behandling, lagBrevData()))
-            .withMessageContaining("Feil ved bygging av data til XML-generering MOCK-1")
-            .withCause(kastetException);
     }
 
     @Test
@@ -322,7 +298,7 @@ class BrevDataServiceTest {
 
         var behandling = lagBehandling(new MottatteOpplysningerData());
 
-        var brevMottaker = service.lagMottaker(mottaker, null, behandling);
+        var brevMottaker = service.lagMottaker(mottaker, null);
 
         Mottaker expectedBrevMottaker = new Person();
         expectedBrevMottaker.setTypeKode(AktoerType.PERSON);
@@ -344,7 +320,7 @@ class BrevDataServiceTest {
 
         var behandling = lagBehandling(new MottatteOpplysningerData());
 
-        var brevMottaker = service.lagMottaker(mottaker, null, behandling);
+        var brevMottaker = service.lagMottaker(mottaker, null);
 
         Mottaker expectedBrevMottaker = new Organisasjon();
         expectedBrevMottaker.setId(ORGNR);
@@ -362,7 +338,7 @@ class BrevDataServiceTest {
         var mottaker = lagMottakerMyndighet();
         var behandling = lagBehandling(new MottatteOpplysningerData());
 
-        var brevMottaker = service.lagMottaker(mottaker, null, behandling);
+        var brevMottaker = service.lagMottaker(mottaker, null);
 
         var myndighet = lagUtenlandskMyndighet();
         Mottaker expectedBrevMottaker = new Person();
@@ -390,7 +366,7 @@ class BrevDataServiceTest {
 
         var behandling = lagBehandling(new MottatteOpplysningerData());
 
-        var brevMottaker = service.lagMottaker(mottaker, null, behandling);
+        var brevMottaker = service.lagMottaker(mottaker, null);
 
         Mottaker expectedBrevMottaker = new Organisasjon();
         expectedBrevMottaker.setId(ORGNR);
@@ -412,7 +388,7 @@ class BrevDataServiceTest {
 
         var behandling = lagBehandling(new MottatteOpplysningerData());
 
-        var brevMottaker = service.lagMottaker(mottaker, null, behandling);
+        var brevMottaker = service.lagMottaker(mottaker, null);
 
         Mottaker expectedBrevMottaker = new Person();
         expectedBrevMottaker.setTypeKode(AktoerType.PERSON);
@@ -434,7 +410,7 @@ class BrevDataServiceTest {
 
         var behandling = lagBehandling(new MottatteOpplysningerData());
 
-        var brevMottaker = service.lagMottaker(mottaker, null, behandling);
+        var brevMottaker = service.lagMottaker(mottaker, null);
 
         Mottaker expectedBrevMottaker = new Organisasjon();
         expectedBrevMottaker.setId(REP_ORGNR);

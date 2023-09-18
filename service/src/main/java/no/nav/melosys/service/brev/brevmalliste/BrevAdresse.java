@@ -1,6 +1,7 @@
 package no.nav.melosys.service.brev.brevmalliste;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -57,7 +58,7 @@ public class BrevAdresse {
     }
 
     public boolean isPostnrEmpty() {
-        return postnr == null || postnr.isBlank();
+        return "NO".equals(land) && (postnr == null || postnr.isBlank());
     }
 
     public static class Builder {
