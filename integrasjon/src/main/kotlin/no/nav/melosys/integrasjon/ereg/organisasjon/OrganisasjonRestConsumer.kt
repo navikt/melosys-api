@@ -7,8 +7,8 @@ import org.springframework.web.reactive.function.client.bodyToMono
 
 open class OrganisasjonRestConsumer(private val webClient: WebClient) {
 
-    fun hentOrganisasjon(inntektRequest: OrganisasjonRequest): OrganisasjonResponse.Organisasjon {
-        return webClient.get().uri("/organisasjon/{orgnummer}", inntektRequest.orgnummer)
+    fun hentOrganisasjon(orgnummer: String): OrganisasjonResponse.Organisasjon {
+        return webClient.get().uri("/organisasjon/{orgnummer}", orgnummer)
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .bodyToMono<OrganisasjonResponse.Organisasjon>()

@@ -84,7 +84,7 @@ class OrganisasjonRestConsumerTest(
         lagStub(orgnummer)
 
 
-        val organisasjon = organisasjonRestConsumer.hentOrganisasjon(OrganisasjonRequest(orgnummer = orgnummer))
+        val organisasjon = organisasjonRestConsumer.hentOrganisasjon(orgnummer)
 
 
         organisasjon.shouldBeTypeOf<JuridiskEnhet>().apply {
@@ -146,7 +146,7 @@ class OrganisasjonRestConsumerTest(
         lagStub(orgnummer)
 
 
-        val organisasjon = organisasjonRestConsumer.hentOrganisasjon(OrganisasjonRequest(orgnummer = orgnummer))
+        val organisasjon = organisasjonRestConsumer.hentOrganisasjon(orgnummer)
 
 
         organisasjon.shouldBeTypeOf<Virksomhet>().apply {
@@ -202,7 +202,7 @@ class OrganisasjonRestConsumerTest(
         val orgnummer = "974774577"
         lagStub(orgnummer)
 
-        val organisasjon = organisasjonRestConsumer.hentOrganisasjon(OrganisasjonRequest(orgnummer = orgnummer))
+        val organisasjon = organisasjonRestConsumer.hentOrganisasjon(orgnummer)
 
 
         organisasjon.shouldBeTypeOf<Organisasjonsledd>().apply {
