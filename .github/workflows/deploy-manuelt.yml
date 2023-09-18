@@ -43,7 +43,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Maven
         uses: actions/cache@v3
         with:
@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-latest-8-cores
     needs: build
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: deploy new Unleash Apikey to ${{github.event.inputs.environment}}
         uses: nais/deploy/actions/deploy@v1
         env:
