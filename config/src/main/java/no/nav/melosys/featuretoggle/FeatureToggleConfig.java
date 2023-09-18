@@ -47,7 +47,8 @@ public class FeatureToggleConfig {
                 new GradualRolloutSessionIdStrategy(),
                 new GradualRolloutUserIdStrategy(),
                 new GradualRolloutRandomStrategy(),
-                new UserWithIdStrategy()
+                new UserWithIdStrategy(),
+                new ByUserIdStrategy()
             );
         }
     }
