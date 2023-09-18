@@ -15,22 +15,27 @@ public class BehandlingsresultatDto {
     private final List<String> begrunnelseKoder;
     private final String begrunnelseFritekst;
     private final String innledningFritekst;
+    private final String trygdeavgiftFritekst;
     private final String nyVurderingBakgrunn;
     private final String utfallRegistreringUnntak;
     private final String utfallUtpeking;
     private final String vedtakstype;
     private final List<String> kontrollresultatBegrunnelseKoder;
+    private final String fakturaserieReferanse;
 
     private BehandlingsresultatDto(Behandlingsresultattyper behandlingsresultatTypeKode,
                                    String begrunnelseFritekst,
                                    String innledningFritekst,
+                                   String trygdeavgiftFritekst,
                                    String nyVurderingBakgrunn,
                                    String utfallRegistreringUnntak,
                                    String utfallUtpeking,
                                    String vedtakstype,
-                                   List<String> kontrollresultatBegrunnelseKoder) {
+                                   List<String> kontrollresultatBegrunnelseKoder,
+                                   String fakturaserieReferanse) {
         this.behandlingsresultatTypeKode = behandlingsresultatTypeKode.getKode();
         this.innledningFritekst = innledningFritekst;
+        this.trygdeavgiftFritekst = trygdeavgiftFritekst;
         this.nyVurderingBakgrunn = nyVurderingBakgrunn;
         this.utfallUtpeking = utfallUtpeking;
         this.begrunnelseKoder = new ArrayList<>();
@@ -38,6 +43,7 @@ public class BehandlingsresultatDto {
         this.utfallRegistreringUnntak = utfallRegistreringUnntak;
         this.vedtakstype = vedtakstype;
         this.kontrollresultatBegrunnelseKoder = kontrollresultatBegrunnelseKoder;
+        this.fakturaserieReferanse = fakturaserieReferanse;
     }
 
     public static BehandlingsresultatDto av(Behandlingsresultat resultat) {
@@ -45,12 +51,14 @@ public class BehandlingsresultatDto {
             resultat.getType(),
             resultat.getBegrunnelseFritekst(),
             resultat.getInnledningFritekst(),
+            resultat.getTrygdeavgiftFritekst(),
             resultat.getNyVurderingBakgrunn(),
             resultat.getUtfallRegistreringUnntak() != null ? resultat.getUtfallRegistreringUnntak().getKode() : null,
             resultat.getUtfallUtpeking() != null ? resultat.getUtfallUtpeking().getKode() : null,
-            resultat.getVedtakMetadata() != null ? resultat.getVedtakMetadata().getVedtakstype().getKode() : null,
-            resultat.getKontrollresultater().stream().map(Kontrollresultat::getBegrunnelse).map(Kontroll_begrunnelser::getKode).collect(Collectors.toList())
-        );
+            resultat.getVedtakMetadata() != null && resultat.getVedtakMetadata().getVedtakstype() != null
+                ? resultat.getVedtakMetadata().getVedtakstype().getKode() : null,
+            resultat.getKontrollresultater().stream().map(Kontrollresultat::getBegrunnelse).map(Kontroll_begrunnelser::getKode).collect(Collectors.toList()),
+            resultat.getFakturaserieReferanse());
 
         resultat.getBehandlingsresultatBegrunnelser().stream()
             .map(BehandlingsresultatBegrunnelse::getKode)
@@ -78,6 +86,10 @@ public class BehandlingsresultatDto {
         return innledningFritekst;
     }
 
+    public String getTrygdeavgiftFritekst() {
+        return trygdeavgiftFritekst;
+    }
+
     public String getUtfallRegistreringUnntak() {
         return utfallRegistreringUnntak;
     }
@@ -96,5 +108,9 @@ public class BehandlingsresultatDto {
 
     public String getNyVurderingBakgrunn() {
         return nyVurderingBakgrunn;
+    }
+
+    public String getFakturaserieReferanse() {
+        return fakturaserieReferanse;
     }
 }

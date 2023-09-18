@@ -22,7 +22,8 @@ public record TrygdeavtaleInfoDto(
     FamilieDto ektefelleSamboer,
     String innledningFritekst,
     String begrunnelseFritekst,
-    String nyVurderingBakgrunn) {
+    String nyVurderingBakgrunn
+) {
 
     public TrygdeavtaleInfoDto(String aktoerId, String behandlingstema, String behandlingstype, boolean redigerbart, Periode periode, Trygdeavtale_myndighetsland soeknadsland, Map<String, String> virksomheter, List<MedfolgendeFamilie> familie, String innledingFritekst, String begrunnelseFritekst, String nyVurderingBakgrunn) {
         this(

@@ -1,14 +1,12 @@
 package no.nav.melosys.featuretoggle;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.BiFunction;
+import io.getunleash.*;
+import io.getunleash.lang.Nullable;
+
+import java.util.*;
+import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
-import no.finn.unleash.*;
-import no.finn.unleash.lang.Nullable;
 
 public final class LocalUnleash implements Unleash {
     private boolean enableAll = false;
@@ -34,20 +32,23 @@ public final class LocalUnleash implements Unleash {
     }
 
     @Override
-    public boolean isEnabled(
-        String toggleName,
-        UnleashContext context,
-        BiFunction<String, UnleashContext, Boolean> fallbackAction) {
-        return isEnabled(toggleName, fallbackAction);
+    public boolean isEnabled(String toggleName, UnleashContext context) {
+        return Unleash.super.isEnabled(toggleName, context);
     }
 
     @Override
-    public boolean isEnabled(
-        String toggleName, BiFunction<String, UnleashContext, Boolean> fallbackAction) {
-        if (!features.containsKey(toggleName)) {
-            return fallbackAction.apply(toggleName, UnleashContext.builder().build());
-        }
-        return isEnabled(toggleName);
+    public boolean isEnabled(String toggleName, UnleashContext context, boolean defaultSetting) {
+        return Unleash.super.isEnabled(toggleName, context, defaultSetting);
+    }
+
+    @Override
+    public boolean isEnabled(String toggleName, BiPredicate<String, UnleashContext> fallbackAction) {
+        return Unleash.super.isEnabled(toggleName, fallbackAction);
+    }
+
+    @Override
+    public boolean isEnabled(String s, UnleashContext unleashContext, BiPredicate<String, UnleashContext> biPredicate) {
+        return false; //TODO se om vi faktisk bruker dette
     }
 
     @Override
@@ -77,6 +78,11 @@ public final class LocalUnleash implements Unleash {
     @Override
     public List<String> getFeatureToggleNames() {
         return more().getFeatureToggleNames();
+    }
+
+    @Override
+    public void shutdown() {
+        Unleash.super.shutdown();
     }
 
     @Override
@@ -147,6 +153,11 @@ public final class LocalUnleash implements Unleash {
         @Override
         public List<String> getFeatureToggleNames() {
             return new ArrayList<>(features.keySet());
+        }
+
+        @Override
+        public Optional<FeatureToggle> getFeatureToggleDefinition(String s) {
+            return Optional.empty();
         }
 
         @Override

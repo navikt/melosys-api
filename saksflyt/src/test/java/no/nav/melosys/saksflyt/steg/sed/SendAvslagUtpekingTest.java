@@ -3,8 +3,8 @@ package no.nav.melosys.saksflyt.steg.sed;
 import java.time.LocalDate;
 import java.util.Set;
 
-import no.finn.unleash.FakeUnleash;
-import no.finn.unleash.Unleash;
+import io.getunleash.FakeUnleash;
+import io.getunleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;

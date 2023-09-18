@@ -1,6 +1,5 @@
 package no.nav.melosys.service.sak;
 
-import no.finn.unleash.Unleash;
 import no.nav.melosys.domain.Fagsystem;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.integrasjon.sak.SakConsumer;

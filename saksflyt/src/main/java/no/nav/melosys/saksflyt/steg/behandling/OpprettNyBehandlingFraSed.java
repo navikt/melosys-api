@@ -1,6 +1,6 @@
 package no.nav.melosys.saksflyt.steg.behandling;
 
-import no.finn.unleash.Unleash;
+import io.getunleash.Unleash;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.behandlinger.*;

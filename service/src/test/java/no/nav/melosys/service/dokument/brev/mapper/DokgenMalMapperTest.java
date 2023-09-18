@@ -23,6 +23,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.*;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Innvilgelse;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Person;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoVirksomhet;
+import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrl;
 import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.attest.*;
 import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse.InnvilgelseTrygdeavtale;
 import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse.Soknad;
@@ -370,14 +371,14 @@ class DokgenMalMapperTest {
     }
 
     @Test
-    void skalMappeInnvilgelsesbrevTilBruker() {
+    void skalMappeFtrlInnvilgelsesbrevTilBruker() {
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
         when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
         when(mockInnvilgelseFtrlMapper.map(any())).thenReturn(lagInnvilgelseFtrl());
 
         Behandling behandling = lagBehandling(lagFagsak(true));
 
-        DokgenBrevbestilling brevbestilling = new InnvilgelseBrevbestilling.Builder()
+        DokgenBrevbestilling brevbestilling = new InnvilgelseFtrlBrevbestilling.Builder()
             .medProduserbartdokument(INNVILGELSE_FOLKETRYGDLOVEN)
             .medBehandling(behandling)
             .medOrg(lagOrg())
@@ -596,7 +597,7 @@ class DokgenMalMapperTest {
     }
 
     private InnvilgelseFtrl lagInnvilgelseFtrl() {
-        return new InnvilgelseFtrl.Builder(lagInnvilgelseBrevbestilling())
+        return new InnvilgelseFtrl.Builder(lagInnvilgelseFtrlBrevbestilling())
             .perioder(emptyList())
             .bestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8)
             .avslåttHelsedelFørMottaksdato(false)
@@ -609,6 +610,17 @@ class DokgenMalMapperTest {
             .trygdeavtaleMedArbeidsland(false)
             .arbeidsgiverFullmektigNavn(null)
             .betalerArbeidsgiveravgift(true)
+            .build();
+    }
+
+    private InnvilgelseFtrlBrevbestilling lagInnvilgelseFtrlBrevbestilling() {
+        return new InnvilgelseFtrlBrevbestilling.Builder()
+            .medInnledningFritekst("Innledning")
+            .medBegrunnelseFritekst("Begrunnelse")
+            .medTrygdeavgiftFritekst("Trygdeavgift fritekst")
+            .medBehandling(lagBehandling())
+            .medPersonDokument(lagPersondata())
+            .medPersonMottaker(lagPersondata())
             .build();
     }
 

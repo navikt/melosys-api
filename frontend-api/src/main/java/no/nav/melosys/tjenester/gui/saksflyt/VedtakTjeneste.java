@@ -65,6 +65,7 @@ public class VedtakTjeneste {
             .medBegrunnelseFritekst(fattVedtakDto.getBegrunnelseFritekst())
             .medEktefelleFritekst(fattVedtakDto.getEktefelleFritekst())
             .medBarnFritekst(fattVedtakDto.getBarnFritekst())
+            .medTrygdeavgiftFritekst(fattVedtakDto.getTrygdeavgiftFritekst())
             .medKopiMottakere(fattVedtakDto.getKopiMottakere())
             .medBehandlingsresultat(fattVedtakDto.getBehandlingsresultatTypeKode())
             .medVedtakstype(fattVedtakDto.getVedtakstype())

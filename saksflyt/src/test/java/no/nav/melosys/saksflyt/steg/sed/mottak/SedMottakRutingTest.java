@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.steg.sed.mottak;
 import java.util.Collections;
 import java.util.Optional;
 
-import no.finn.unleash.FakeUnleash;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
