@@ -1,6 +1,10 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling;
 
-import no.finn.unleash.FakeUnleash;
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.List;
+
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Saksopplysning;

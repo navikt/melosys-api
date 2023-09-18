@@ -1,7 +1,7 @@
 package no.nav.melosys.featuretoggle
 
+import io.getunleash.strategy.Strategy
 import mu.KotlinLogging
-import no.finn.unleash.strategy.Strategy
 import no.nav.melosys.sikkerhet.context.SubjectHandler
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import java.util.*
@@ -47,6 +47,6 @@ internal class ByUserIdStrategy : Strategy {
 
     companion object {
         const val STACK_TRACE_LINE_BEFORE_UNLEASH_IS_ENABLED =
-            "no.finn.unleash.DefaultUnleash.isEnabled(DefaultUnleash.java:93"
+            "io.getunleash.DefaultUnleash.isEnabled(DefaultUnleash.java:93"
     }
 }

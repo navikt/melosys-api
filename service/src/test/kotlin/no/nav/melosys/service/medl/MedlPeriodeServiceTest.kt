@@ -23,6 +23,7 @@ import no.nav.melosys.repository.UtpekingsperiodeRepository
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataFasade
+import no.nav.melosys.service.sak.FagsakService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -57,6 +58,9 @@ class MedlPeriodeServiceTest {
     @MockK
     lateinit var medlemskapsperiodeRepository: MedlemskapsperiodeRepository
 
+    @MockK
+    lateinit var fagsakService: FagsakService
+
     lateinit var medlPeriodeService: MedlPeriodeService
 
 
@@ -70,7 +74,8 @@ class MedlPeriodeServiceTest {
             lovvalgsperiodeRepository,
             medlAnmodningsperiodeService,
             utpekingsperiodeRepository,
-            medlemskapsperiodeRepository)
+            medlemskapsperiodeRepository,
+            fagsakService)
     }
 
     @Test
@@ -280,8 +285,9 @@ class MedlPeriodeServiceTest {
                 setOf(Lovvalgsperiode().apply { medlPeriodeID = MEDL_PERIODE_ID })
         }
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+        every { fagsakService.hentFagsak("MEL-1") } returns fagsak
 
-        medlPeriodeService.avsluttTidligerMedlPeriode(fagsak)
+        medlPeriodeService.avsluttTidligerMedlPeriode("MEL-1")
 
         verify { behandlingsresultatService.hentBehandlingsresultat(1L) }
         verify { medlService.avvisPeriode(MEDL_PERIODE_ID, StatusaarsakMedl.AVVIST) }
@@ -297,8 +303,9 @@ class MedlPeriodeServiceTest {
         }
         val behandlingsresultat = Behandlingsresultat().apply { lovvalgsperioder = setOf() }
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns behandlingsresultat
+        every { fagsakService.hentFagsak("MEL-1") } returns fagsak
 
-        medlPeriodeService.avsluttTidligerMedlPeriode(fagsak)
+        medlPeriodeService.avsluttTidligerMedlPeriode("MEL-1")
 
         verify { behandlingsresultatService.hentBehandlingsresultat(1L) }
         verify(exactly = 0) { medlService.avvisPeriode(any(), any()) }

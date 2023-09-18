@@ -11,15 +11,19 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlService;
 import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
+import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.repository.MedlemskapsperiodeRepository;
 import no.nav.melosys.repository.UtpekingsperiodeRepository;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.sak.FagsakService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
 
 @Service
 public class MedlPeriodeService {
@@ -33,6 +37,7 @@ public class MedlPeriodeService {
     private final MedlAnmodningsperiodeService medlAnmodningsperiodeService;
     private final UtpekingsperiodeRepository utpekingsperiodeRepository;
     private final MedlemskapsperiodeRepository medlemskapsperiodeRepository;
+    private final FagsakService fagsakService;
 
     private static final String FEIL_VED_OPPDATERING_MEDL = "Opprettelse av periode i MEDL feilet med retur av null medlPeriodeID fra MEDL tjeneste for behandling ";
 
@@ -43,7 +48,8 @@ public class MedlPeriodeService {
                               LovvalgsperiodeRepository lovvalgsperiodeRepository,
                               MedlAnmodningsperiodeService medlAnmodningsperiodeService,
                               UtpekingsperiodeRepository utpekingsperiodeRepository,
-                              MedlemskapsperiodeRepository medlemskapsperiodeRepository) {
+                              MedlemskapsperiodeRepository medlemskapsperiodeRepository,
+                              FagsakService fagsakService) {
         this.persondataFasade = persondataFasade;
         this.medlService = medlService;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -52,6 +58,7 @@ public class MedlPeriodeService {
         this.medlAnmodningsperiodeService = medlAnmodningsperiodeService;
         this.utpekingsperiodeRepository = utpekingsperiodeRepository;
         this.medlemskapsperiodeRepository = medlemskapsperiodeRepository;
+        this.fagsakService = fagsakService;
     }
 
     public Saksopplysning hentPeriodeListe(String fnr, LocalDate fom, LocalDate tom) {
@@ -130,7 +137,10 @@ public class MedlPeriodeService {
         avvisPeriode(medlPeriodeID, StatusaarsakMedl.OPPHORT);
     }
 
-    public void avsluttTidligerMedlPeriode(Fagsak fagsak) {
+    @Transactional
+    public void avsluttTidligerMedlPeriode(String saksnummer) {
+        var fagsak = fagsakService.hentFagsak(saksnummer);
+
         Optional<Behandling> optionalBehandling = fagsak.finnTidligstInaktivBehandling();
         if (optionalBehandling.isPresent()) {
             Optional<Lovvalgsperiode> lovvalgsperiode = finnLovvalgsperiode(optionalBehandling.get());

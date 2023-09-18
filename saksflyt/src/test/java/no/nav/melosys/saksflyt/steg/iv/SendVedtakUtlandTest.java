@@ -6,8 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
-import no.finn.unleash.FakeUnleash;
-import no.finn.unleash.Unleash;
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;

@@ -4,9 +4,9 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.getunleash.Unleash;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import no.finn.unleash.Unleash;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
