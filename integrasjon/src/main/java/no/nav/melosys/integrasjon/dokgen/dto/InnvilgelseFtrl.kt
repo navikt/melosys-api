@@ -1,9 +1,9 @@
 package no.nav.melosys.integrasjon.dokgen.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
-import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.brev.InnvilgelseFtrlBrevbestilling
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
@@ -17,8 +17,10 @@ class InnvilgelseFtrl(
     @JsonSerialize(using = LocalDateSerializer::class)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     val datoMottatt: LocalDate?,
-    val perioder: List<Periode>,
-    val medlemskapsPerioder: List<Medlemskapsperiode>,
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    val avgiftsPerioder: List<Periode>,
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    val medlemskapsPerioder: List<Periode>,
     val bestemmelse: Folketrygdloven_kap2_bestemmelser?,
     val avslåttHelsedelFørMottaksdato: Boolean,
     val trygdeavgiftMottaker: Trygdeavgiftmottaker?,
@@ -43,8 +45,8 @@ class InnvilgelseFtrl(
             brevbestilling.behandling.fagsak.finnRepresentant(Representerer.BRUKER).isPresent
 
         private var behandlingstype: Behandlingstyper = Behandlingstyper.FØRSTEGANG
-        private var perioder: List<Periode> = emptyList()
-        private var medlemLemskapsPerioder: List<Medlemskapsperiode> = emptyList()
+        private var avgiftsPerioder: List<Periode> = emptyList()
+        private var medlemskapsPerioder: List<Periode> = emptyList()
         private var bestemmelse: Folketrygdloven_kap2_bestemmelser? = null
         private var avslåttHelsedelFørMottaksdato = false
         private var trygdeavgiftMottaker: Trygdeavgiftmottaker? = null
@@ -66,13 +68,13 @@ class InnvilgelseFtrl(
             return this
         }
 
-        fun perioder(perioder: List<Periode>): Builder {
-            this.perioder = perioder
+        fun avgiftsPerioder(avgiftsPerioder: List<Periode>): Builder {
+            this.avgiftsPerioder = avgiftsPerioder
             return this
         }
 
-        fun medlemskapsPerioder(medlemskapsPerioder: List<Medlemskapsperiode> ): Builder {
-            this.medlemLemskapsPerioder = medlemskapsPerioder
+        fun medlemskapsPerioder(medlemskapsPerioder: List<Periode> ): Builder {
+            this.medlemskapsPerioder = medlemskapsPerioder
             return this
         }
 
@@ -156,8 +158,8 @@ class InnvilgelseFtrl(
                 brevbestilling,
                 behandlingstype,
                 datoMottatt,
-                perioder,
-                medlemLemskapsPerioder,
+                avgiftsPerioder,
+                medlemskapsPerioder,
                 bestemmelse,
                 avslåttHelsedelFørMottaksdato,
                 trygdeavgiftMottaker,

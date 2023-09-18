@@ -32,8 +32,8 @@ class InnvilgelseFtrlMapper(
 
         return InnvilgelseFtrl.Builder(brevbestilling)
             .behandlingstype(behandlingsresultat.behandling.type)
-            .perioder(mapPerioder(medlemAvFolketrygden))
-            .medlemskapsPerioder(ArrayList(medlemAvFolketrygden.medlemskapsperioder))
+            .avgiftsPerioder(mapAvgiftsPerioder(medlemAvFolketrygden))
+            .medlemskapsPerioder(mapMedlemskapsPerioder(medlemAvFolketrygden))
             .bestemmelse(medlemAvFolketrygden.bestemmelse)
             .avslåttHelsedelFørMottaksdato(
                 erAvslåttHelsedelFørMottaksdato(
@@ -63,8 +63,17 @@ class InnvilgelseFtrlMapper(
             .build()
     }
 
-    private fun mapPerioder(medlemAvFolketrygden: MedlemAvFolketrygden): List<Periode> =
+    private fun mapAvgiftsPerioder(medlemAvFolketrygden: MedlemAvFolketrygden): List<Periode> =
         medlemAvFolketrygden.medlemskapsperioder.flatMap { Periode.av(it) }
+    private fun mapMedlemskapsPerioder(medlemAvFolketrygden: MedlemAvFolketrygden): List<Periode> =
+        medlemAvFolketrygden.medlemskapsperioder.map {
+                Periode(
+                    it.fom,
+                    it.tom,
+                    it.trygdedekning,
+                    it.innvilgelsesresultat
+                )
+        };
 
     private fun erAvslåttHelsedelFørMottaksdato(
         mottaksdato: Instant,

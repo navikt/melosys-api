@@ -81,7 +81,10 @@ internal class InnvilgelseFtrlMapperTest {
                 begrunnelseFritekst.shouldBe(BEGRUNNELSE_FRITEKST)
                 trygdeavgiftFritekst.shouldBe(TRYGDEAVGIFT_FRITEKST)
                 brukerHarFullmektig.shouldBeFalse()
-                perioder.shouldHaveSize(1).first().apply {
+                avgiftsPerioder.shouldHaveSize(1).first().apply {
+                    innvilgelsesResultat.shouldBe(InnvilgelsesResultat.INNVILGET)
+                }
+                medlemskapsPerioder.shouldHaveSize(1).first().apply {
                     innvilgelsesResultat.shouldBe(InnvilgelsesResultat.INNVILGET)
                 }
                 bestemmelse.shouldBe(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8)
@@ -130,7 +133,7 @@ internal class InnvilgelseFtrlMapperTest {
         }
 
         innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).apply {
-            perioder.shouldHaveSize(2)
+            avgiftsPerioder.shouldHaveSize(2)
                 .map { it.innvilgelsesResultat }
                 .shouldContainExactlyInAnyOrder(InnvilgelsesResultat.INNVILGET, InnvilgelsesResultat.AVSLAATT)
         }

@@ -22,7 +22,7 @@ class Periode(
     val innvilgelsesResultat: InnvilgelsesResultat
 ) {
 
-    private constructor(
+    constructor(
         fom: LocalDate,
         tom: LocalDate,
         trygdedekning: Trygdedekninger,
