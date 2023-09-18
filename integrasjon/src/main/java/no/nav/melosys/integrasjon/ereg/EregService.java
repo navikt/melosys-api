@@ -19,11 +19,9 @@ import no.nav.tjeneste.virksomhet.organisasjon.v4.meldinger.HentOrganisasjonRequ
 import no.nav.tjeneste.virksomhet.organisasjon.v4.meldinger.HentOrganisasjonResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 @Service
-@Primary
 public class EregService implements EregFasade {
     private static final Logger log = LoggerFactory.getLogger(EregService.class);
     private static final String ORGANISASJON_VERSJON = "4.0";
