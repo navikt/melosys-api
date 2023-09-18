@@ -1,18 +1,15 @@
 package no.nav.melosys.integrasjon.ereg.organisasjon
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeTypeOf
-import no.nav.melosys.exception.TekniskException
+import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonResponse.*
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
@@ -69,14 +66,6 @@ class OrganisasjonRestConsumerTest(
     fun after() {
         ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
     }
-
-    private val Any.toJsonNode: JsonNode
-        get() {
-            return jacksonObjectMapper()
-                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-                .registerModule(JavaTimeModule())
-                .valueToTree(this)
-        }
 
     @Test
     fun `hent organisasjon av type JuridiskEnhet`() {
@@ -272,10 +261,33 @@ class OrganisasjonRestConsumerTest(
         }
     }
 
+    @Test
+    fun `kast IkkeFunnetException når ikke funnet`() {
+        val orgnummer = "11111111111"
+        serviceUnderTestMockServer.stubFor(
+            WireMock.get("/ereg/v2/organisasjon/$orgnummer")
+                .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(404)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody("{\n" +
+                            "    \"melding\": \"Ingen organisasjon med organisasjonsnummer $orgnummer ble funnet\"\n" +
+                            "}")
+                )
+        )
+
+        shouldThrow<IkkeFunnetException> {
+            organisasjonRestConsumer.hentOrganisasjon(orgnummer)
+        }
+    }
+
+
     private fun lagStub(orgnummer: String) {
         val fil = "mock/organisasjon/$orgnummer.json"
         val jsonData = OrganisasjonRestConsumerTest::class.java.classLoader.getResource(fil)
-            ?.readText(StandardCharsets.UTF_8) ?: throw TekniskException("Fant ikke $fil")
+            ?.readText(StandardCharsets.UTF_8) ?: throw IkkeFunnetException("Fant ikke $fil")
         serviceUnderTestMockServer.stubFor(
             WireMock.get("/ereg/v2/organisasjon/$orgnummer")
                 .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
