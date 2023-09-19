@@ -14,7 +14,7 @@ import java.time.LocalDateTime
 class OrganisasjonResponse {
 
     open class OrganisasjonBase(
-        val organisasjonsnummer: String? = null,
+        val organisasjonsnummer: String,
         val navn: Navn? = null
     )
 
@@ -26,7 +26,9 @@ class OrganisasjonResponse {
     )
     open class Organisasjon(
         val organisasjonDetaljer: OrganisasjonDetaljer? = null,
-    ) : OrganisasjonBase() {
+        organisasjonsnummer: String,
+        navn: Navn? = null
+    ) : OrganisasjonBase(organisasjonsnummer, navn) {
 
         fun tilJsonString(): String = try {
             jacksonObjectMapper()
@@ -38,11 +40,13 @@ class OrganisasjonResponse {
         }
     }
 
-    data class Virksomhet(
+    open class Virksomhet(
         val bestaarAvOrganisasjonsledd: List<BestaarAvOrganisasjonsledd>? = null,
         val inngaarIJuridiskEnheter: List<InngaarIJuridiskEnhet>? = null,
-        val virksomhetDetaljer: VirksomhetDetaljer? = null
-    ) : Organisasjon()
+        val virksomhetDetaljer: VirksomhetDetaljer? = null,
+        organisasjonsnummer: String,
+        organisasjonDetaljer: OrganisasjonDetaljer? = null,
+    ) : Organisasjon(organisasjonDetaljer, organisasjonsnummer)
 
     class VirksomhetDetaljer {
         val oppstartsdato: LocalDate? = null
@@ -52,14 +56,16 @@ class OrganisasjonResponse {
         val ubemannetVirksomhet: Boolean? = null
     }
 
-    open class VirksomhetNoekkelinfo : OrganisasjonBase()
+    open class VirksomhetNoekkelinfo(organisasjonsnummer: String, navn: Navn? = null) : OrganisasjonBase(organisasjonsnummer, navn)
 
-    data class DriverVirksomhet(
+    class DriverVirksomhet(
         val bruksperiode: Bruksperiode? = null,
-        val gyldighetsperiode: Gyldighetsperiode? = null
-    ) : VirksomhetNoekkelinfo()
+        val gyldighetsperiode: Gyldighetsperiode? = null,
+        organisasjonsnummer: String,
+        navn: Navn? = null,
+    ) : VirksomhetNoekkelinfo(organisasjonsnummer, navn)
 
-        data class JuridiskEnhetFisjon(
+    data class JuridiskEnhetFisjon(
         val bruksperiode: Bruksperiode? = null,
         val gyldighetsperiode: Gyldighetsperiode? = null,
         val virkningsdato: LocalDate? = null,
@@ -100,14 +106,16 @@ class OrganisasjonResponse {
     )
 
 
-    data class JuridiskEnhet(
+    class JuridiskEnhet(
         val bestaarAvOrganisasjonsledd: List<BestaarAvOrganisasjonsledd> = listOf(),
         val driverVirksomheter: List<DriverVirksomhet> = listOf(),
         val fisjoner: List<JuridiskEnhetFisjon> = listOf(),
         val fusjoner: List<JuridiskEnhetFusjon> = listOf(),
         val knytninger: List<JuridiskEnhetKnytning> = listOf(),
-        val juridiskEnhetDetaljer: JuridiskEnhetDetaljer? = null
-    ) : Organisasjon()
+        val juridiskEnhetDetaljer: JuridiskEnhetDetaljer? = null,
+        organisasjonsnummer: String,
+        organisasjonDetaljer: OrganisasjonDetaljer? = null,
+    ) : Organisasjon(organisasjonDetaljer, organisasjonsnummer)
 
     data class BestaarAvOrganisasjonsledd(
         val bruksperiode: Bruksperiode? = null,
@@ -127,21 +135,25 @@ class OrganisasjonResponse {
         val sektorkode: String? = null
     )
 
-    abstract class JuridiskEnhetNoekkelinfo : OrganisasjonBase()
+    abstract class JuridiskEnhetNoekkelinfo(organisasjonsnummer: String, navn: Navn? = null) : OrganisasjonBase(organisasjonsnummer, navn)
 
-    data class InngaarIJuridiskEnhet(
+    class InngaarIJuridiskEnhet(
         val bruksperiode: Bruksperiode? = null,
-        val gyldighetsperiode: Gyldighetsperiode? = null
-    ) : JuridiskEnhetNoekkelinfo()
+        val gyldighetsperiode: Gyldighetsperiode? = null,
+        organisasjonsnummer: String,
+        navn: Navn? = null
+    ) : JuridiskEnhetNoekkelinfo(organisasjonsnummer, navn)
 
-    data class Organisasjonsledd(
+    class Organisasjonsledd(
         val organisasjonsleddUnder: List<BestaarAvOrganisasjonsledd> = emptyList(),
         val organisasjonsleddOver: List<BestaarAvOrganisasjonsledd> = emptyList(),
         val driverVirksomheter: List<DriverVirksomhet> = emptyList(),
         val inngaarIJuridiskEnheter: List<InngaarIJuridiskEnhet> = emptyList(),
-        val organisasjonsleddDetaljer: OrganisasjonsleddDetaljer? = null
-    ) : Organisasjon()
-
+        val organisasjonsleddDetaljer: OrganisasjonsleddDetaljer? = null,
+        organisasjonDetaljer: OrganisasjonDetaljer? = null,
+        organisasjonsnummer: String,
+        navn: Navn? = null,
+    ) : Organisasjon(organisasjonDetaljer, organisasjonsnummer, navn)
 
     data class Navn(
         val bruksperiode: Bruksperiode,

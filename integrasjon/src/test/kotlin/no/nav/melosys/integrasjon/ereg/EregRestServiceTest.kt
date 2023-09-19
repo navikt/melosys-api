@@ -25,7 +25,8 @@ class EregRestServiceTest {
     @BeforeEach
     fun before() {
         every { organisasjonRestConsumer.hentOrganisasjon("873102322") } returns Organisasjon(
-            OrganisasjonDetaljer(
+            organisasjonsnummer = "873102322",
+            organisasjonDetaljer =  OrganisasjonDetaljer(
                 navn = listOf(
                     Navn(
                         bruksperiode = Bruksperiode(LocalDateTime.now()),
@@ -59,6 +60,4 @@ class EregRestServiceTest {
     fun finnOrganisasjon_finnerIkkeOrganisasjon_returnererTomVerdi() {
         eregService.finnOrganisasjon("111111111").shouldNotBePresent()
     }
-
-
 }
