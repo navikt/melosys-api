@@ -21,7 +21,7 @@ class OrganisasjonRestConsumerConfig(
 ) : WebClientConfig, CallIdAware {
 
     @Bean
-    fun inntektRestConsumerConsumer(
+    fun organisasjonRestConsumer(
         webClientBuilder: WebClient.Builder,
         correlationIdOutgoingFilter: CorrelationIdOutgoingFilter
     ): OrganisasjonRestConsumer {
