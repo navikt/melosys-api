@@ -6,6 +6,7 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer
 import no.nav.melosys.domain.dokument.organisasjon.Organisasjonsnavn
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse
+import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
 import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Epost
 import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Telefonnummer
 import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonResponse
@@ -61,11 +62,18 @@ class EregDtoTilSaksopplysningKonverter {
         } ?: return emptyList()
     }
 
-    private fun tilGeografiskAdresse(adresser: List<OrganisasjonResponse.Adresse>?): List<GeografiskAdresse> {
+    private fun tilGeografiskAdresse(adresser: List<OrganisasjonResponse.Adresse>?): List<SemistrukturertAdresse> {
         return adresser?.map {
-            GeografiskAdresse().apply {
+            SemistrukturertAdresse().apply {
                 bruksperiode = it.bruksperiode.tilPeriode()
                 gyldighetsperiode = it.gyldighetsperiode.tilPeriode()
+                landkode = it.landkode
+                adresselinje1 = it.adresselinje1
+                adresselinje2 = it.adresselinje2
+                adresselinje3 = it.adresselinje3
+                postnr = it.postnummer
+                poststed = it.poststed
+                kommunenr = it.kommunenummer
                 landkode = it.landkode
             }
         } ?: return emptyList()
