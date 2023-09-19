@@ -66,7 +66,7 @@ class OpprettBetalingsplan(
         val kontaktopplysning = hentKontaktopplysning(fagsak, fullmektig)
         val foedselsNr = pdlService.finnFolkeregisterident(fagsak.hentBrukersAktørID())
             .orElseThrow { FunksjonellException("Kunne ikke finne fødselsnummer fra PDL") }
-        val intervall = hentBetalingsIntervall(prosessinstans, FaktureringsIntervall.MANEDLIG)
+        val intervall = hentBetalingsIntervall(prosessinstans, FaktureringsIntervall.KVARTAL)
 
         val forrigeFakturaserieReferanse = hentForrigeFakturaserieReferanse(fagsak)
 
