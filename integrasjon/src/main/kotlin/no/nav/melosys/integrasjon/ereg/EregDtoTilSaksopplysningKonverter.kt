@@ -5,7 +5,6 @@ import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer
 import no.nav.melosys.domain.dokument.organisasjon.Organisasjonsnavn
-import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
 import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Epost
 import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Telefonnummer
