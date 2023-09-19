@@ -29,15 +29,23 @@ public class LagreMedlemsperiodeMedl implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
         long behandlingId = prosessinstans.getBehandling().getId();
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
-
-        if (behandlingsresultat.erAvslag()) {
-            return;
-        }
+        var behandling = behandlingsresultat.getBehandling();
 
         var innvilgedeMedlemskapsperioder = behandlingsresultat.finnMedlemskapsperioder()
             .stream().filter(Medlemskapsperiode::erInnvilget).toList();
-        for (Medlemskapsperiode medlemskapsperiode : innvilgedeMedlemskapsperioder) {
-            opprettEllerOppdaterMedlPeriode(behandlingId, medlemskapsperiode);
+        if (behandling.erNyVurdering()) {
+            if (behandlingsresultat.erAvslag()) {
+                medlPeriodeService.avsluttTidligerMedlPeriode(behandling.getFagsak().getSaksnummer());
+            } else {
+                medlPeriodeService.erstattMedlemskapsperioder(innvilgedeMedlemskapsperioder, behandling.getOpprinneligBehandling().getId(), behandlingId);
+            }
+        } else {
+            if (behandlingsresultat.erAvslag()) {
+                return;
+            }
+            for (Medlemskapsperiode medlemskapsperiode : innvilgedeMedlemskapsperioder) {
+                opprettEllerOppdaterMedlPeriode(behandlingId, medlemskapsperiode);
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 package no.nav.melosys.service.medl;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -11,7 +12,6 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.medl.KildedokumenttypeMedl;
 import no.nav.melosys.integrasjon.medl.MedlService;
 import no.nav.melosys.integrasjon.medl.StatusaarsakMedl;
-import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.repository.LovvalgsperiodeRepository;
 import no.nav.melosys.repository.MedlemskapsperiodeRepository;
 import no.nav.melosys.repository.UtpekingsperiodeRepository;
@@ -149,6 +149,33 @@ public class MedlPeriodeService {
                 avvisPeriode(lovvalgsperiode.get().getMedlPeriodeID());
             }
         }
+    }
+
+    @Transactional
+    public void erstattMedlemskapsperioder(List<Medlemskapsperiode> nyeMedlemskapsperioder,
+                                           long opprinneligBehandlingId,
+                                           long nyBehandlingId) {
+        var gamleMedlemskapsperioder =
+            (List<Medlemskapsperiode>) behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId).finnMedlemskapsperioder();
+
+        for (Medlemskapsperiode medlemskapsperiode : gamleMedlemskapsperioder) {
+            if (!eksistererMedlIdIMedlemskapsperioder(nyeMedlemskapsperioder, medlemskapsperiode)) {
+                avvisPeriodeOpphørt(medlemskapsperiode.getMedlPeriodeID());
+            }
+        }
+        for (Medlemskapsperiode medlemskapsperiode : nyeMedlemskapsperioder) {
+            if (!eksistererMedlIdIMedlemskapsperioder(gamleMedlemskapsperioder, medlemskapsperiode)) {
+                opprettPeriodeEndelig(nyBehandlingId, medlemskapsperiode);
+            }
+        }
+    }
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    private boolean eksistererMedlIdIMedlemskapsperioder(List<Medlemskapsperiode> medlemskapsperioder,
+                                                         Medlemskapsperiode medlemskapsperiode) {
+        return medlemskapsperioder.stream().anyMatch(periode ->
+            Objects.equals(periode.getMedlPeriodeID(), medlemskapsperiode.getMedlPeriodeID())
+        );
     }
 
     private void avvisPeriode(long medlPeriodeId, StatusaarsakMedl statusaarsakMedl) {

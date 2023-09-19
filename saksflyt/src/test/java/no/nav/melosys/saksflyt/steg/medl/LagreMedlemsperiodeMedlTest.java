@@ -4,10 +4,12 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
@@ -93,6 +95,46 @@ class LagreMedlemsperiodeMedlTest {
 
 
         verify(medlPeriodeService, times(2)).oppdaterPeriodeEndelig(eq(BEHANDLING_ID), any(Medlemskapsperiode.class));
+    }
+
+    @Test
+    void utfør_avslutterMedlemskapsperioder_nårDetErNyVurderingOgAvslag() {
+        var medlemskapsperioder = List.of(lagMedlemskapsperiode(AVSLAATT), lagMedlemskapsperiode(AVSLAATT));
+        Behandlingsresultat behandlingsresultat = lagBehandlingsresulat(medlemskapsperioder);
+        Prosessinstans prosessinstans = lagProsessInstans();
+        prosessinstans.getBehandling().setType(Behandlingstyper.NY_VURDERING);
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("MEL-1");
+        prosessinstans.getBehandling().setFagsak(fagsak);
+        behandlingsresultat.setBehandling(prosessinstans.getBehandling());
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+        lagreMedlemsperiodeMedl.utfør(prosessinstans);
+
+
+        verify(medlPeriodeService).avsluttTidligerMedlPeriode(eq("MEL-1"));
+    }
+
+    @Test
+    void utfør_avslutterMedlemskapsperioder_nårDetErNyVurderingOgInnvilgelse() {
+        Medlemskapsperiode innvilgetMedlemskapsperiode = lagMedlemskapsperiode(INNVILGET);
+        var medlemskapsperioder = List.of(lagMedlemskapsperiode(AVSLAATT), innvilgetMedlemskapsperiode);
+        Behandlingsresultat behandlingsresultat = lagBehandlingsresulat(medlemskapsperioder);
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("MEL-1");
+        Behandling opprinneligBehandling = new Behandling();
+        opprinneligBehandling.setId(1L);
+        opprinneligBehandling.setFagsak(fagsak);
+        Prosessinstans prosessinstans = lagProsessInstans();
+        prosessinstans.getBehandling().setType(Behandlingstyper.NY_VURDERING);
+        prosessinstans.getBehandling().setOpprinneligBehandling(opprinneligBehandling);
+        prosessinstans.getBehandling().setFagsak(fagsak);
+        behandlingsresultat.setBehandling(prosessinstans.getBehandling());
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+        lagreMedlemsperiodeMedl.utfør(prosessinstans);
+
+        verify(medlPeriodeService).erstattMedlemskapsperioder(eq(List.of(innvilgetMedlemskapsperiode)), eq(1L), eq(123L));
     }
 
     private Prosessinstans lagProsessInstans() {

@@ -8,6 +8,7 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
+
 
 @ExtendWith(MockKExtension::class)
 class MedlPeriodeServiceTest {
@@ -75,7 +77,8 @@ class MedlPeriodeServiceTest {
             medlAnmodningsperiodeService,
             utpekingsperiodeRepository,
             medlemskapsperiodeRepository,
-            fagsakService)
+            fagsakService
+        )
     }
 
     @Test
@@ -309,6 +312,79 @@ class MedlPeriodeServiceTest {
 
         verify { behandlingsresultatService.hentBehandlingsresultat(1L) }
         verify(exactly = 0) { medlService.avvisPeriode(any(), any()) }
+    }
+
+    @Test
+    fun erstattMedlemskapsperioder_skalKunOppretteNyePerioder_nårGammelListeErTom() {
+        setupHappyPathBehandling()
+        every { medlemskapsperiodeRepository.save(any()) } returns Medlemskapsperiode()
+        every { medlService.opprettPeriodeEndelig(any(), any(), any()) } returns MEDL_PERIODE_ID
+        val medlemskapsperiode1 = Medlemskapsperiode().apply { fom = LocalDate.now().minusDays(1) }
+        val medlemskapsperiode2 = Medlemskapsperiode().apply { fom = LocalDate.now().plusDays(1) }
+        val nyListe = listOf(medlemskapsperiode1, medlemskapsperiode2);
+
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns Behandlingsresultat()
+
+        medlPeriodeService.erstattMedlemskapsperioder(nyListe, 1L, 2L)
+
+        verify(exactly = 1) { medlService.opprettPeriodeEndelig("12345678901", medlemskapsperiode1, KildedokumenttypeMedl.HENV_SOKNAD) }
+        verify(exactly = 1) { medlService.opprettPeriodeEndelig("12345678901", medlemskapsperiode2, KildedokumenttypeMedl.HENV_SOKNAD) }
+    }
+
+    @Test
+    fun erstattMedlemskapsperioder_skalKunAvviseGamlePerioder_nårNyListeErTom() {
+        setupHappyPathBehandling()
+        val gammelMedlemskapsperiode = Medlemskapsperiode().apply { medlPeriodeID = 1L }
+        val gammelListe = listOf(gammelMedlemskapsperiode)
+        val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = gammelListe }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns Behandlingsresultat().apply {
+            this.medlemAvFolketrygden = medlemAvFolketrygden
+        }
+
+        medlPeriodeService.erstattMedlemskapsperioder(emptyList(), 1L, 2L)
+
+        verify(exactly = 1) { medlService.avvisPeriode(1L, StatusaarsakMedl.OPPHORT) }
+        verify(exactly = 0) { medlService.opprettPeriodeEndelig(any(), any(), any()) }
+    }
+
+    @Test
+    fun erstattMedlemskapsperioder_skalOppretteNyeOgAvviseGamle_nårBeggeListerErIkkeTomme_menIngenFellesElementer() {
+        setupHappyPathBehandling()
+        every { medlemskapsperiodeRepository.save(any()) } returns Medlemskapsperiode()
+        val gammelMedlemskapsperiode = Medlemskapsperiode().apply { medlPeriodeID = 1L }
+        val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = listOf(gammelMedlemskapsperiode) }
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns Behandlingsresultat().apply {
+            this.medlemAvFolketrygden = medlemAvFolketrygden
+        }
+        val nyMedlemskapsperiode = Medlemskapsperiode()
+
+        medlPeriodeService.erstattMedlemskapsperioder(listOf(nyMedlemskapsperiode), 1L, 2L)
+
+        verify(exactly = 1) { medlService.avvisPeriode(gammelMedlemskapsperiode.medlPeriodeID, StatusaarsakMedl.OPPHORT) }
+        verify(exactly = 1) { medlService.opprettPeriodeEndelig("12345678901", nyMedlemskapsperiode, KildedokumenttypeMedl.HENV_SOKNAD) }
+    }
+
+    @Test
+    fun erstattMedlemskapsperioder_skalKunBehandleForskjellene_nårBeggeListerHarFellesElementer() {
+        setupHappyPathBehandling()
+        every { medlemskapsperiodeRepository.save(any()) } returns Medlemskapsperiode()
+        val fellesMedlemskapsperiode = Medlemskapsperiode().apply { medlPeriodeID = 1L }
+        val gammelMedlemskapsperiode = Medlemskapsperiode().apply  {medlPeriodeID = 2L }
+        val gammelListe = listOf(fellesMedlemskapsperiode, gammelMedlemskapsperiode)
+        val nyMedlemskapsperiode = Medlemskapsperiode()
+        val nyListe = listOf(fellesMedlemskapsperiode, nyMedlemskapsperiode)
+        val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = gammelListe }
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns Behandlingsresultat().apply {
+            this.medlemAvFolketrygden = medlemAvFolketrygden
+        }
+
+        medlPeriodeService.erstattMedlemskapsperioder(nyListe, 1L, 2L)
+
+        verify(exactly = 1) { medlService.avvisPeriode(gammelMedlemskapsperiode.medlPeriodeID, StatusaarsakMedl.OPPHORT) }
+        verify(exactly = 1) { medlService.opprettPeriodeEndelig("12345678901", nyMedlemskapsperiode, KildedokumenttypeMedl.HENV_SOKNAD) }
+        verify(exactly = 0) { medlService.opprettPeriodeEndelig("12345678901", fellesMedlemskapsperiode, KildedokumenttypeMedl.HENV_SOKNAD) }
+        verify(exactly = 0) { medlService.avvisPeriode(fellesMedlemskapsperiode.medlPeriodeID, StatusaarsakMedl.OPPHORT) }
     }
 
     private fun setupHappyPathBehandling(
