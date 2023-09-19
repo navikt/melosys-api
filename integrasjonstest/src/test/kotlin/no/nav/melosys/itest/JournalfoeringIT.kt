@@ -49,7 +49,7 @@ class JournalfoeringIT(
     @BeforeEach
     fun setup() {
         oAuthMockServer.start()
-        unleash.resetAll()
+        unleash.enableAll()
     }
 
     @AfterEach
