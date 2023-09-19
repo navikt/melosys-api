@@ -28,9 +28,12 @@ class EregRestApi {
             organisasjonsnummer = orgnummer,
             juridiskEnhetDetaljer = OR.JuridiskEnhetDetaljer(sektorkode = "2100", enhetstype = "AS"),
             organisasjonDetaljer = OR.OrganisasjonDetaljer(
+                registreringsdato = fomLdt,
                 navn = listOf(
                     OR.Navn(
-                        bruksperiode = bruksperiode, gyldighetsperiode = gyldighetsperiode, sammensattnavn = organisasjonModell.navn
+                        bruksperiode = bruksperiode, gyldighetsperiode = gyldighetsperiode,
+                        sammensattnavn = organisasjonModell.navn,
+                        navnelinje1 = organisasjonModell.navn,
                     )
                 ),
                 enhetstyper = listOf(OR.Enhetstype(bruksperiode, gyldighetsperiode, "AS")),
