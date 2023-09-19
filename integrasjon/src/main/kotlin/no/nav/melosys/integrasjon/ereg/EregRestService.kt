@@ -43,7 +43,7 @@ class EregRestService(
         (hentOrganisasjon(orgnr).dokument as OrganisasjonDokument).getNavn()
 
     companion object {
-        const val EREG_REST_VERSJON = "REST 1.0"
+        const val EREG_REST_VERSJON = "REST 2.0"
     }
 
 }
