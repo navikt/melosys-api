@@ -150,10 +150,14 @@ class LagreMedlemsperiodeMedlTest {
     private Behandlingsresultat lagBehandlingsresulat(List<Medlemskapsperiode> medlemskapsperioder) {
         MedlemAvFolketrygden medlemAvFolketrygden = new MedlemAvFolketrygden();
         medlemAvFolketrygden.setMedlemskapsperioder(medlemskapsperioder);
+        Behandling behandling = new Behandling();
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
         behandlingsresultat.setMedlemAvFolketrygden(medlemAvFolketrygden);
+        behandlingsresultat.setBehandling(behandling);
+
         return behandlingsresultat;
     }
 
