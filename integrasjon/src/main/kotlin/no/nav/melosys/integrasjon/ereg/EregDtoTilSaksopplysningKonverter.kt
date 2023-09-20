@@ -13,6 +13,10 @@ import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonResponse
 class EregDtoTilSaksopplysningKonverter {
     fun lagSaksopplysning(organisasjon: OrganisasjonResponse.Organisasjon): Saksopplysning = Saksopplysning().apply {
         dokument = OrganisasjonDokument().apply {
+            orgnummer = organisasjon.organisasjonsnummer
+            sektorkode = finSektorkode(organisasjon)
+            oppstartsdato = null // finnes ikke, vi har registreringsdato, opphoersdato, sistEndret, stiftelsesdato
+            enhetstype = organisasjon.organisasjonDetaljer?.enhetstyper?.first { it.enhetstype != null }?.enhetstype
             navn = listOf(organisasjon.navn?.sammensattnavn ?: "UKJENT")
             organisasjonDetaljer = OrganisasjonsDetaljer().apply {
                 orgnummer = organisasjon.organisasjonsnummer
@@ -26,6 +30,20 @@ class EregDtoTilSaksopplysningKonverter {
             }
         }
     }
+
+    private fun finSektorkode(organisasjon: OrganisasjonResponse.Organisasjon): String? {
+        return when (organisasjon) {
+            is OrganisasjonResponse.JuridiskEnhet -> organisasjon.juridiskEnhetDetaljer?.sektorkode
+            is OrganisasjonResponse.Organisasjonsledd -> organisasjon.organisasjonsleddDetaljer?.sektorkode
+            is OrganisasjonResponse.Virksomhet -> finnSektorkode(organisasjon)
+            else -> null
+        }
+    }
+
+    private fun finnSektorkode(organisasjon: OrganisasjonResponse.Virksomhet) =
+        organisasjon.bestaarAvOrganisasjonsledd?.first {
+            it.organisasjonsledd?.organisasjonsleddDetaljer?.sektorkode != null
+        }?.organisasjonsledd?.organisasjonsleddDetaljer?.sektorkode
 
     private fun tilNavn(navn: List<OrganisasjonResponse.Navn>?): List<Organisasjonsnavn> = navn?.map {
         Organisasjonsnavn().apply {
