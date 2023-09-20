@@ -81,7 +81,7 @@ internal class InnvilgelseFtrlMapperTest {
                 begrunnelseFritekst.shouldBe(BEGRUNNELSE_FRITEKST)
                 trygdeavgiftFritekst.shouldBe(TRYGDEAVGIFT_FRITEKST)
                 brukerHarFullmektig.shouldBeFalse()
-                avgiftsPerioder.shouldHaveSize(1).first().apply {
+                avgiftsPerioder.shouldHaveSize(2).first().apply {
                 }
                 medlemskapsPerioder.shouldHaveSize(1).first().apply {
                     innvilgelsesResultat.shouldBe(InnvilgelsesResultat.INNVILGET)
@@ -146,6 +146,7 @@ internal class InnvilgelseFtrlMapperTest {
         mockHappyCase()
         val behandlingsresultat = lagBehandlingsResultat()
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns behandlingsresultat.apply {
+            medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder = emptySet()
             medlemAvFolketrygden.medlemskapsperioder = listOf(
                 Medlemskapsperiode().apply {
                     fom = LocalDate.EPOCH.plusMonths(1)
@@ -219,6 +220,7 @@ internal class InnvilgelseFtrlMapperTest {
                 skatteforholdTilNorge =
                     setOf(SkatteforholdTilNorge().apply { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG })
             }
+            trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
         }
         bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8
     }
@@ -230,18 +232,25 @@ internal class InnvilgelseFtrlMapperTest {
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
             medlemskapstype = Medlemskapstyper.FRIVILLIG
             trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER
-            trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
+            trygdeavgiftsperioder = lagTrygdeavgiftsperioder().toList()
             this.medlemAvFolketrygden = medlemAvFolketrygden
         })
 
-    private fun lagTrygdeavgiftsperioder(): List<Trygdeavgiftsperiode> =
-        listOf(Trygdeavgiftsperiode().apply {
+    private fun lagTrygdeavgiftsperioder(): Set<Trygdeavgiftsperiode> =
+        setOf(Trygdeavgiftsperiode().apply {
             periodeFra = LocalDate.EPOCH.plusMonths(1)
             periodeTil = LocalDate.EPOCH.plusMonths(4)
             trygdesats = BigDecimal.ZERO
             trygdeavgiftsbeløpMd = Penger(0.0)
             grunnlagInntekstperiode = lagGrunnlagInntektsperiode()
-        })
+        },
+            Trygdeavgiftsperiode().apply {
+                periodeFra = LocalDate.EPOCH.plusMonths(5)
+                periodeTil = LocalDate.EPOCH.plusMonths(8)
+                trygdesats = BigDecimal(0.05)
+                trygdeavgiftsbeløpMd = Penger(500.0)
+                grunnlagInntekstperiode = lagGrunnlagInntektsperiode()
+            })
 
     private fun lagGrunnlagInntektsperiode(): Inntektsperiode =
         Inntektsperiode().apply {
