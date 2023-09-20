@@ -155,16 +155,16 @@ public class MedlPeriodeService {
     public void erstattMedlemskapsperioder(List<Medlemskapsperiode> nyeMedlemskapsperioder,
                                            long opprinneligBehandlingId,
                                            long nyBehandlingId) {
-        var gamleMedlemskapsperioder =
+        var opprinneligeMedlemskapsperioder =
             (List<Medlemskapsperiode>) behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId).finnMedlemskapsperioder();
 
-        for (Medlemskapsperiode medlemskapsperiode : gamleMedlemskapsperioder) {
+        for (Medlemskapsperiode medlemskapsperiode : opprinneligeMedlemskapsperioder) {
             if (!eksistererMedlIdIMedlemskapsperioder(nyeMedlemskapsperioder, medlemskapsperiode)) {
                 avvisPeriodeOpphørt(medlemskapsperiode.getMedlPeriodeID());
             }
         }
         for (Medlemskapsperiode medlemskapsperiode : nyeMedlemskapsperioder) {
-            if (!eksistererMedlIdIMedlemskapsperioder(gamleMedlemskapsperioder, medlemskapsperiode)) {
+            if (!eksistererMedlIdIMedlemskapsperioder(opprinneligeMedlemskapsperioder, medlemskapsperiode)) {
                 opprettPeriodeEndelig(nyBehandlingId, medlemskapsperiode);
             }
         }
