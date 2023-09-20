@@ -71,7 +71,7 @@ class InnvilgelseFtrlMapper(
                 it.trygdesats,
                 it.trygdeavgiftsbeløpMd.verdi,
                 it.grunnlagInntekstperiode.type,
-                it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi,
+                it.grunnlagInntekstperiode.avgiftspliktigInntektMnd?.verdi,
             )
         }
 
