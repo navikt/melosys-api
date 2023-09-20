@@ -19,7 +19,7 @@ class InnvilgelseFtrl(
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     val datoMottatt: LocalDate?,
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    val avgiftsPerioder: List<AvgiftsperiodeDto>,
+    val avgiftsperioder: List<AvgiftsperiodeDto>,
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val medlemskapsPerioder: List<MedlemskapsperiodeDto>,
     val bestemmelse: Folketrygdloven_kap2_bestemmelser?,
@@ -46,8 +46,8 @@ class InnvilgelseFtrl(
             brevbestilling.behandling.fagsak.finnRepresentant(Representerer.BRUKER).isPresent
 
         private var behandlingstype: Behandlingstyper = Behandlingstyper.FØRSTEGANG
-        private var avgiftsPerioder: List<AvgiftsperiodeDto> = emptyList()
-        private var medlemskapsPerioder: List<MedlemskapsperiodeDto> = emptyList()
+        private var avgiftsperioder: List<AvgiftsperiodeDto> = emptyList()
+        private var medlemskapsperioder: List<MedlemskapsperiodeDto> = emptyList()
         private var bestemmelse: Folketrygdloven_kap2_bestemmelser? = null
         private var avslåttHelsedelFørMottaksdato = false
         private var trygdeavgiftMottaker: Trygdeavgiftmottaker? = null
@@ -70,12 +70,12 @@ class InnvilgelseFtrl(
         }
 
         fun avgiftsPerioder(avgiftsPerioder: List<AvgiftsperiodeDto>): Builder {
-            this.avgiftsPerioder = avgiftsPerioder
+            this.avgiftsperioder = avgiftsPerioder
             return this
         }
 
         fun medlemskapsPerioder(medlemskapsPerioder: List<MedlemskapsperiodeDto> ): Builder {
-            this.medlemskapsPerioder = medlemskapsPerioder
+            this.medlemskapsperioder = medlemskapsPerioder
             return this
         }
 
@@ -159,8 +159,8 @@ class InnvilgelseFtrl(
                 brevbestilling,
                 behandlingstype,
                 datoMottatt,
-                avgiftsPerioder,
-                medlemskapsPerioder,
+                avgiftsperioder,
+                medlemskapsperioder,
                 bestemmelse,
                 avslåttHelsedelFørMottaksdato,
                 trygdeavgiftMottaker,

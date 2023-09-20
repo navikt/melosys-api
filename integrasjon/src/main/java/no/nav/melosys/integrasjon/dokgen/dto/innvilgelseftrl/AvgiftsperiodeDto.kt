@@ -13,6 +13,6 @@ data class AvgiftsperiodeDto(
     ) val tom: LocalDate,
     val avgiftssats: BigDecimal,
     val avgiftPerMd: BigDecimal,
-    val inntektskildetype: Inntektskildetype?,
-    val avgiftspliktigInntektPerMd: BigDecimal,
+    val inntektskildetype: Inntektskildetype,
+    val avgiftspliktigInntektPerMd: BigDecimal?,
 )

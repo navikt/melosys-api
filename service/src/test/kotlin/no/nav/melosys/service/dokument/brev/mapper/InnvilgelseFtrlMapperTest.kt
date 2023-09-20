@@ -81,8 +81,7 @@ internal class InnvilgelseFtrlMapperTest {
                 begrunnelseFritekst.shouldBe(BEGRUNNELSE_FRITEKST)
                 trygdeavgiftFritekst.shouldBe(TRYGDEAVGIFT_FRITEKST)
                 brukerHarFullmektig.shouldBeFalse()
-                avgiftsPerioder.shouldHaveSize(2).first().apply {
-                }
+                avgiftsperioder.shouldHaveSize(2)
                 medlemskapsPerioder.shouldHaveSize(1).first().apply {
                     innvilgelsesResultat.shouldBe(InnvilgelsesResultat.INNVILGET)
                 }
@@ -132,9 +131,7 @@ internal class InnvilgelseFtrlMapperTest {
         }
 
         innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).apply {
-            avgiftsPerioder.shouldHaveSize(2)
-        }
-        innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).apply {
+            avgiftsperioder.shouldHaveSize(2)
             medlemskapsPerioder.shouldHaveSize(2)
                 .map { it.innvilgelsesResultat }
                 .shouldContainExactlyInAnyOrder(InnvilgelsesResultat.INNVILGET, InnvilgelsesResultat.AVSLAATT)
@@ -160,9 +157,7 @@ internal class InnvilgelseFtrlMapperTest {
         }
 
         innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).apply {
-            avgiftsPerioder.shouldHaveSize(0)
-        }
-        innvilgelseFtrlMapper.map(lagInnvilgelseFtrlBrevbestilling()).apply {
+            avgiftsperioder.shouldHaveSize(0)
             medlemskapsPerioder.shouldHaveSize(1)
                 .map { it.innvilgelsesResultat }
                 .shouldContainExactlyInAnyOrder(InnvilgelsesResultat.INNVILGET)
