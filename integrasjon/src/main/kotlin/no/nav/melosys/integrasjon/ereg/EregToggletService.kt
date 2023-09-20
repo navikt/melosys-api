@@ -2,6 +2,7 @@ package no.nav.melosys.integrasjon.ereg
 
 import io.getunleash.Unleash
 import no.nav.melosys.domain.Saksopplysning
+import no.nav.melosys.featuretoggle.ToggleName.MELOSYS_EREG_ORGANISASJON
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Service
 import java.util.*
@@ -32,9 +33,5 @@ class EregToggletService(
             return eregRestService.hentOrganisasjonNavn(orgnummer)
         }
         return eregService.hentOrganisasjonNavn(orgnummer)
-    }
-
-    companion object {
-        const val MELOSYS_EREG_ORGANISASJON = "melosys.ereg.organisasjon"
     }
 }
