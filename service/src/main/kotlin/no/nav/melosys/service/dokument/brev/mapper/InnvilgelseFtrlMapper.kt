@@ -10,8 +10,7 @@ import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrl
-import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.Avgiftsperiode
-import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.Medlemskapsperiode
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import org.springframework.stereotype.Component
 import java.time.Instant
@@ -64,9 +63,9 @@ class InnvilgelseFtrlMapper(
             .build()
     }
 
-    private fun mapAvgiftsPerioder(medlemAvFolketrygden: MedlemAvFolketrygden): List<Avgiftsperiode> =
+    private fun mapAvgiftsPerioder(medlemAvFolketrygden: MedlemAvFolketrygden): List<AvgiftsperiodeDto> =
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.map {
-            Avgiftsperiode(
+            AvgiftsperiodeDto(
                 it.periodeFra,
                 it.periodeTil,
                 it.trygdesats,
@@ -76,9 +75,9 @@ class InnvilgelseFtrlMapper(
             )
         }
 
-    private fun mapMedlemskapsPerioder(medlemAvFolketrygden: MedlemAvFolketrygden): List<no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.Medlemskapsperiode> =
+    private fun mapMedlemskapsPerioder(medlemAvFolketrygden: MedlemAvFolketrygden): List<no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto> =
         medlemAvFolketrygden.medlemskapsperioder.map {
-            no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.Medlemskapsperiode(
+            no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto(
                 it.fom,
                 it.tom,
                 it.trygdedekning,

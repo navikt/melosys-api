@@ -6,7 +6,7 @@ import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import java.time.LocalDate
 
-data class Medlemskapsperiode(
+data class MedlemskapsperiodeDto(
     @JsonSerialize(using = LocalDateSerializer::class) val fom: LocalDate,
     @JsonSerialize(
         using = LocalDateSerializer::class

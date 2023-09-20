@@ -6,7 +6,7 @@ import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import java.math.BigDecimal
 import java.time.LocalDate
 
-data class Avgiftsperiode(
+data class AvgiftsperiodeDto(
     @JsonSerialize(using = LocalDateSerializer::class) val fom: LocalDate,
     @JsonSerialize(
         using = LocalDateSerializer::class

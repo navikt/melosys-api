@@ -8,8 +8,8 @@ import no.nav.melosys.domain.brev.InnvilgelseFtrlBrevbestilling
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.Avgiftsperiode
-import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.Medlemskapsperiode
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto
 import java.time.LocalDate
 
 class InnvilgelseFtrl(
@@ -19,9 +19,9 @@ class InnvilgelseFtrl(
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     val datoMottatt: LocalDate?,
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    val avgiftsPerioder: List<Avgiftsperiode>,
+    val avgiftsPerioder: List<AvgiftsperiodeDto>,
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    val medlemskapsPerioder: List<Medlemskapsperiode>,
+    val medlemskapsPerioder: List<MedlemskapsperiodeDto>,
     val bestemmelse: Folketrygdloven_kap2_bestemmelser?,
     val avslåttHelsedelFørMottaksdato: Boolean,
     val trygdeavgiftMottaker: Trygdeavgiftmottaker?,
@@ -46,8 +46,8 @@ class InnvilgelseFtrl(
             brevbestilling.behandling.fagsak.finnRepresentant(Representerer.BRUKER).isPresent
 
         private var behandlingstype: Behandlingstyper = Behandlingstyper.FØRSTEGANG
-        private var avgiftsPerioder: List<Avgiftsperiode> = emptyList()
-        private var medlemskapsPerioder: List<Medlemskapsperiode> = emptyList()
+        private var avgiftsPerioder: List<AvgiftsperiodeDto> = emptyList()
+        private var medlemskapsPerioder: List<MedlemskapsperiodeDto> = emptyList()
         private var bestemmelse: Folketrygdloven_kap2_bestemmelser? = null
         private var avslåttHelsedelFørMottaksdato = false
         private var trygdeavgiftMottaker: Trygdeavgiftmottaker? = null
@@ -69,12 +69,12 @@ class InnvilgelseFtrl(
             return this
         }
 
-        fun avgiftsPerioder(avgiftsPerioder: List<Avgiftsperiode>): Builder {
+        fun avgiftsPerioder(avgiftsPerioder: List<AvgiftsperiodeDto>): Builder {
             this.avgiftsPerioder = avgiftsPerioder
             return this
         }
 
-        fun medlemskapsPerioder(medlemskapsPerioder: List<Medlemskapsperiode> ): Builder {
+        fun medlemskapsPerioder(medlemskapsPerioder: List<MedlemskapsperiodeDto> ): Builder {
             this.medlemskapsPerioder = medlemskapsPerioder
             return this
         }
