@@ -78,7 +78,7 @@ internal class EndreSakServiceTest {
     }
 
     @Test
-    fun `endring av sak, ikke tom flyt - oppdater, opprett ny søknad og oppfrisk saksopplysninger`() {
+    fun `endring av sak, ikke ingen flyt - oppdater, opprett ny søknad og oppfrisk saksopplysninger`() {
         val saksnummer = "MEL-123"
         val opprinneligFagsak = lagFagsak(saksnummer, TRYGDEAVTALE, TRYGDEAVGIFT)
         val mottatteOpplysningerData = MottatteOpplysningerData().apply {
@@ -121,7 +121,7 @@ internal class EndreSakServiceTest {
     }
 
     @Test
-    fun `endring av sak, tom flyt - slett mottate opplysninger hvis finnes, opprett ikke nye`() {
+    fun `endring av sak, ingen flyt - slett mottate opplysninger hvis finnes, opprett ikke nye`() {
         val saksnummer = "MEL-123"
         val fagsak = SaksbehandlingDataFactory.lagFagsak(saksnummer)
         val mottatteOpplysningerData = MottatteOpplysningerData().apply {
@@ -336,7 +336,7 @@ internal class EndreSakServiceTest {
     }
 
     @Test
-    fun `endring av sak, ikke tom flyt - oppdater, opprett ny søknad, oppfrisker ikke når registeropplysninger ikke har blitt hentet før`() {
+    fun `endring av sak, ikke ingen flyt - oppdater, opprett ny søknad, oppfrisker ikke når registeropplysninger ikke har blitt hentet før`() {
         val saksnummer = "MEL-125"
         val opprinneligFagsak = lagFagsak(saksnummer, TRYGDEAVTALE, TRYGDEAVGIFT)
         val mottatteOpplysningerData = MottatteOpplysningerData().apply {
