@@ -35,9 +35,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.kotlin.any
-import org.mockito.kotlin.verifyNoInteractions
-import org.mockito.kotlin.verifyNoMoreInteractions
 import org.springframework.context.ApplicationEventPublisher
 import java.time.Instant
 import java.util.*
@@ -134,7 +131,7 @@ internal class EndreSakServiceTest {
         fagsak.behandlinger.add(SaksbehandlingDataFactory.lagBehandling(fagsak, mottatteOpplysningerData))
         every { fagsakService.hentFagsak(saksnummer) } returns fagsak
         every { mottatteOpplysningerService.finnMottatteOpplysninger(any()) } returns Optional.of(MottatteOpplysninger())
-        every { saksbehandlingRegler.harTomFlyt(any(), any(), any(), any()) } returns true
+        every { saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any()) } returns true
 
 
         endreSakService.endre(saksnummer, FTRL, TRYGDEAVGIFT, YRKESAKTIV, FØRSTEGANG, AVVENT_FAGLIG_AVKLARING, null)

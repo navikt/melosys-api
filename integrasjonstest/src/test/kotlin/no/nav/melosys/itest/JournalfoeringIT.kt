@@ -211,7 +211,7 @@ class JournalfoeringIT(
     }
 
     @Test
-    fun journalførOgOpprettAndregangsBehandling_fraTomflyt_flytMedPeriodeOgLand() {
+    fun journalførOgOpprettAndregangsBehandling_fraIngenFlyt_flytMedPeriodeOgLand() {
         val journalfoeringOpprettDto = defaultJournalføringDto().apply {
             fagsak.sakstype = Sakstyper.EU_EOS.kode
             fagsak.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode

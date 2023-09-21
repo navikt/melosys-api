@@ -77,7 +77,7 @@ class EndreSakService(
         )
 
         if (sakEndres || behandlingTemaEllerTypeEndres) {
-            if (saksbehandlingRegler.harTomFlyt(
+            if (saksbehandlingRegler.harIngenFlyt(
                     nySakstype,
                     nySakstema,
                     nyBehandlingstype,

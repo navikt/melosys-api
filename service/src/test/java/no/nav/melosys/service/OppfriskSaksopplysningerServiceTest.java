@@ -99,15 +99,15 @@ class OppfriskSaksopplysningerServiceTest {
     }
 
     @Test
-    void oppfriskSaksopplysning_virksomhetTomFlyt() {
+    void oppfriskSaksopplysning_virksomhetIngenFlyt() {
         Behandling behandling = lagBehandling();
         Aktoer virksomhet = new Aktoer();
         virksomhet.setRolle(Aktoersroller.VIRKSOMHET);
         behandling.getFagsak().setAktører(Set.of(virksomhet));
         behandling.setType(Behandlingstyper.HENVENDELSE);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(saksbehandlingRegler.harTomFlyt(any(), any(), any(), any())).thenReturn(true);
-        when(saksbehandlingRegler.harTomFlyt(any())).thenReturn(true);
+        when(saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any())).thenReturn(true);
+        when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(true);
 
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
@@ -180,15 +180,15 @@ class OppfriskSaksopplysningerServiceTest {
     }
 
     @Test
-    void oppfriskSaksopplysning_harTomFlyt_henterIkkeInngangsvilkår() {
+    void oppfriskSaksopplysning_harIngenFlyt_henterIkkeInngangsvilkår() {
         Behandling behandling = lagBehandling();
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
         behandling.setType(Behandlingstyper.HENVENDELSE);
 
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
-        when(saksbehandlingRegler.harTomFlyt(any())).thenReturn(true);
-        when(saksbehandlingRegler.harTomFlyt(any(), any(), any(), any())).thenReturn(true);
+        when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(true);
+        when(saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any())).thenReturn(true);
 
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
 

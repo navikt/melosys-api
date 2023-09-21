@@ -213,12 +213,12 @@ class HentRegisteropplysningerTest {
     }
 
     @Test
-    void utfør_harTomFlyt_henterIngenting() {
+    void utfør_harIngenFlyt_henterIngenting() {
         behandling.setTema(Behandlingstema.TRYGDETID);
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
         var prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
-        when(saksbehandlingRegler.harTomFlyt(any(), any(), any(), any())).thenReturn(true);
+        when(saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any())).thenReturn(true);
 
         hentRegisteropplysninger.utfør(prosessinstans);
 

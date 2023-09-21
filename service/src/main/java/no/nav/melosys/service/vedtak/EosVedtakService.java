@@ -166,7 +166,7 @@ public class EosVedtakService {
     private Set<String> avklarMottakerInstitusjoner(Behandling behandling,
                                                     Set<String> mottakerinstitusjoner,
                                                     Behandlingsresultat behandlingsresultat) {
-        if (saksbehandlingRegler.harTomFlyt(behandling)) {
+        if (saksbehandlingRegler.harIngenFlyt(behandling)) {
             return Collections.emptySet();
         }
 

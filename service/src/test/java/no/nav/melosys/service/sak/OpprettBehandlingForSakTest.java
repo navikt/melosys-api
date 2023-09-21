@@ -166,7 +166,7 @@ class OpprettBehandlingForSakTest {
     }
 
     @Test
-    void opprettBehandling_opprettetBehandlingFårTomFlyt_oppretterProsessSomIkkeReplikerer() {
+    void opprettBehandling_opprettetBehandlingFårIngenFlyt_oppretterProsessSomIkkeReplikerer() {
         OpprettSakDto opprettSakDto = lagOpprettSakDto();
         opprettSakDto.setBehandlingstema(Behandlingstema.PENSJONIST);
         opprettSakDto.setBehandlingstype(Behandlingstyper.HENVENDELSE);
