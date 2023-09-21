@@ -242,6 +242,7 @@ class OpprettSakTest {
         final Journalpost journalpost = lagJournalpost(Journalposttype.INN, "EESSI");
         when(journalfoeringService.hentJournalpost(JP_ID)).thenReturn(journalpost);
         when(journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost)).thenReturn(Optional.of(new Fagsak()));
+        when(saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any())).thenReturn(true);
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto))
