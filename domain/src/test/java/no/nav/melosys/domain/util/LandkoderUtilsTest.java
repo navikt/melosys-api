@@ -31,7 +31,7 @@ public class LandkoderUtilsTest {
         // Sjekker at alle iso3-koder er inkludert i mappere (Bortsett fra Statsløs og Ukjent)
         for (String landkodeIso3 : hentLandIso3()) {
             if (Objects.equals(landkodeIso3, Land.STATSLØS)) continue;
-            if (Objects.equals(landkodeIso3, Land.UKJENT)) continue;
+            if (Land.UKJENT.contains(landkodeIso3)) continue;
 
             String landkodeIso2 = IsoLandkodeKonverterer.tilIso2(landkodeIso3);
             String resultatSomIso3 = IsoLandkodeKonverterer.tilIso3(landkodeIso2);

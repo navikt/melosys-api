@@ -2,6 +2,9 @@ package no.nav.melosys.domain.dokument.felles;
 
 import no.nav.melosys.domain.FellesKodeverk;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Land extends AbstraktKodeverkHjelper {
     public static final String BELGIA = "BEL";
     public static final String BULGARIA = "BGR";
@@ -37,13 +40,14 @@ public class Land extends AbstraktKodeverkHjelper {
     public static final String SVEITS = "CHE";
     public static final String SVERIGE = "SWE";
     public static final String TYSKLAND = "DEU";
-    public static final String UKJENT = "???";
+    public static final List<String> UKJENT = List.of("???", "XUK");
     public static final String UNGARN = "HUN";
     public static final String ØSTERRIKE = "AUT";
     public static final String ÅLAND = "ALA";
 
     // Brukes av JAXB
-    public Land() {}
+    public Land() {
+    }
 
     public Land(String landkode) {
         this.kode = landkode;
@@ -59,7 +63,7 @@ public class Land extends AbstraktKodeverkHjelper {
     }
 
     public boolean erUkjent() {
-        return UKJENT.equals(kode);
+        return UKJENT.contains(kode);
     }
 
     @Override
