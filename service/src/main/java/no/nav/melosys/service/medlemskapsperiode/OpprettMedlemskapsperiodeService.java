@@ -88,13 +88,17 @@ public class OpprettMedlemskapsperiodeService {
 
     private MedlemAvFolketrygden hentEllerOpprettMedlemAvFolketrygden(Behandlingsresultat behandlingsresultat, Folketrygdloven_kap2_bestemmelser bestemmelse) {
         if (behandlingsresultat.getMedlemAvFolketrygden() != null) {
-            return behandlingsresultat.getMedlemAvFolketrygden();
+            MedlemAvFolketrygden medlemAvFolketrygden = behandlingsresultat.getMedlemAvFolketrygden();
+            if (!behandlingsresultat.getMedlemAvFolketrygden().getBestemmelse().equals(bestemmelse)) {
+                medlemAvFolketrygden.setBestemmelse(bestemmelse);
+            }
+            return medlemAvFolketrygden;
         }
 
         var medlemAvFolketrygden = new MedlemAvFolketrygden();
         medlemAvFolketrygden.setBehandlingsresultat(behandlingsresultat);
         medlemAvFolketrygden.setBestemmelse(bestemmelse);
-        return medlemAvFolketrygdenRepository.save(medlemAvFolketrygden);
+        return medlemAvFolketrygden;
     }
 
     private void validerSakstype(Fagsak fagsak) {
