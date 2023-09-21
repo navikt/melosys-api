@@ -32,8 +32,8 @@ class InnvilgelseFtrlMapper(
 
         return InnvilgelseFtrl.Builder(brevbestilling)
             .behandlingstype(behandlingsresultat.behandling.type)
-            .avgiftsPerioder(mapAvgiftsPerioder(medlemAvFolketrygden))
-            .medlemskapsPerioder(mapMedlemskapsPerioder(medlemAvFolketrygden))
+            .avgiftsperioder(mapAvgiftsPerioder(medlemAvFolketrygden))
+            .medlemskapsperioder(mapMedlemskapsPerioder(medlemAvFolketrygden))
             .bestemmelse(medlemAvFolketrygden.bestemmelse)
             .avslåttHelsedelFørMottaksdato(
                 erAvslåttHelsedelFørMottaksdato(

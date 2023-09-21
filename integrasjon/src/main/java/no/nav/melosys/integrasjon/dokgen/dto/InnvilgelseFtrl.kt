@@ -21,7 +21,7 @@ class InnvilgelseFtrl(
     @JsonInclude(JsonInclude.Include.NON_NULL)
     val avgiftsperioder: List<AvgiftsperiodeDto>,
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    val medlemskapsPerioder: List<MedlemskapsperiodeDto>,
+    val medlemskapsperioder: List<MedlemskapsperiodeDto>,
     val bestemmelse: Folketrygdloven_kap2_bestemmelser?,
     val avslåttHelsedelFørMottaksdato: Boolean,
     val trygdeavgiftMottaker: Trygdeavgiftmottaker?,
@@ -69,13 +69,13 @@ class InnvilgelseFtrl(
             return this
         }
 
-        fun avgiftsPerioder(avgiftsPerioder: List<AvgiftsperiodeDto>): Builder {
-            this.avgiftsperioder = avgiftsPerioder
+        fun avgiftsperioder(avgiftsperioder: List<AvgiftsperiodeDto>): Builder {
+            this.avgiftsperioder = avgiftsperioder
             return this
         }
 
-        fun medlemskapsPerioder(medlemskapsPerioder: List<MedlemskapsperiodeDto> ): Builder {
-            this.medlemskapsperioder = medlemskapsPerioder
+        fun medlemskapsperioder(medlemskapsperioder: List<MedlemskapsperiodeDto> ): Builder {
+            this.medlemskapsperioder = medlemskapsperioder
             return this
         }
 

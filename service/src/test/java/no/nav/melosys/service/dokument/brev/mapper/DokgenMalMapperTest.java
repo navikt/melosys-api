@@ -598,8 +598,8 @@ class DokgenMalMapperTest {
 
     private InnvilgelseFtrl lagInnvilgelseFtrl() {
         return new InnvilgelseFtrl.Builder(lagInnvilgelseFtrlBrevbestilling())
-            .avgiftsPerioder(emptyList())
-            .medlemskapsPerioder(emptyList())
+            .avgiftsperioder(emptyList())
+            .medlemskapsperioder(emptyList())
             .bestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8)
             .avslåttHelsedelFørMottaksdato(false)
             .trygdeavgiftMottaker(Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV)
