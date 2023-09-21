@@ -124,7 +124,7 @@ class Kontroll {
         if (representant != null && representant.erOrganisasjon()) {
             organisasjon = organisasjonOppslagService.hentOrganisasjon(representant.getOrgnr());
         }
-        if (!saksbehandlingRegler.harTomFlyt(behandling)) {
+        if (!saksbehandlingRegler.harIngenFlyt(behandling)) {
             mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         }
         if (representant != null && representant.erPerson()) {

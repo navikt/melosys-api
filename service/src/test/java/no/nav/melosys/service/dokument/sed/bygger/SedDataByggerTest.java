@@ -599,7 +599,7 @@ class SedDataByggerTest {
         behandling.setType(Behandlingstyper.HENVENDELSE);
         behandling.setFagsak(fagsak);
         var søknad = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
-        when(saksbehandlingRegler.harTomFlyt(any())).thenReturn(true);
+        when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(true);
 
         var sedData = dataBygger.lag(lagGrunnlagMedSøknad(), behandlingsresultat, PeriodeType.LOVVALGSPERIODE);
 

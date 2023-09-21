@@ -50,7 +50,6 @@ import java.util.Set;
 
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
-import static no.nav.melosys.featuretoggle.ToggleName.IKKE_JOURNALFOER_UTEN_PID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
@@ -102,13 +101,12 @@ class JournalfoeringServiceTest {
         SpringSubjectHandler.set(new TestSubjectHandler());
 
         unleash.enable("melosys.folketrygden.mvp");
-        unleash.enable(IKKE_JOURNALFOER_UTEN_PID);
         journalpost = new Journalpost("123");
         journalpost.setHoveddokument(new ArkivDokument());
         journalpost.setForsendelseMottatt(Instant.EPOCH);
 
         this.journalfoeringService = new JournalfoeringService(joarkFasade, prosessinstansService, eessiService, fagsakService,
-            persondataFasade, lovligeKombinasjonerService, unleash, saksbehandlingRegler, behandlingService, behandlingsresultatService);
+            persondataFasade, lovligeKombinasjonerService, saksbehandlingRegler, behandlingService, behandlingsresultatService);
         opprettDto = new JournalfoeringOpprettDto();
         opprettDto.setJournalpostID("setJournalpostID");
         opprettDto.setOppgaveID("setOppgaveID");

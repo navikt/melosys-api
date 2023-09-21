@@ -108,7 +108,7 @@ class VurderInngangsvilkaarTest {
 
     @Test
     void utfør_behandlingstemaBeslutningLovvalgAnnetLandToggleAv_vurdererIkkeInngangsvilkår() {
-        when(saksbehandlingRegler.harTomFlyt(any())).thenReturn(false);
+        when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(false);
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         behandling.setType(Behandlingstyper.NY_VURDERING);

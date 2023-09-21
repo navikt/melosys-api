@@ -98,7 +98,7 @@ public class OppfriskSaksopplysningerService {
 
         if (behandling.getFagsak().erSakstypeEøs()
             && behandling.harPeriodeOgLand()
-            && !saksbehandlingRegler.harTomFlyt(behandling)
+            && !saksbehandlingRegler.harIngenFlyt(behandling)
             && behandling.kanResultereIVedtak()
             && !inngangsvilkaarService.oppfyllervurderingEF_883_2004(behandlingID)) {
             inngangsvilkaarService.vurderOgLagreInngangsvilkår(

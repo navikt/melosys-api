@@ -96,7 +96,7 @@ public class VilkaarsresultatService {
     public void tømVilkårForBehandlingsresultat(Behandlingsresultat behandlingsresultat) {
         var behandling = behandlingsresultat.getBehandling();
         var fagsak = behandling.getFagsak();
-        if (fagsak.erSakstypeEøs() && !saksbehandlingRegler.harTomFlyt(behandling)) {
+        if (fagsak.erSakstypeEøs() && !saksbehandlingRegler.harIngenFlyt(behandling)) {
             vilkaarsresultatRepo.deleteByBehandlingsresultatAndVilkaarNotIn(behandlingsresultat, IMMUTABLE_VILKAAR);
         } else {
             vilkaarsresultatRepo.deleteByBehandlingsresultatId(behandlingsresultat.getId());

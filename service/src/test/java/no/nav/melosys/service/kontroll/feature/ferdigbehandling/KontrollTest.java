@@ -37,10 +37,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.List;
-
 import static no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -101,10 +97,10 @@ class KontrollTest {
     }
 
     @Test
-    void utførKontroller_avslagTomFlyt__returnererTomCollection() {
+    void utførKontroller_avslagIngenFlyt__returnererTomCollection() {
         behandling.setType(Behandlingstyper.HENVENDELSE);
         behandling.setMottatteOpplysninger(null);
-        when(saksbehandlingRegler.harTomFlyt(any())).thenReturn(true);
+        when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(true);
 
         Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
 

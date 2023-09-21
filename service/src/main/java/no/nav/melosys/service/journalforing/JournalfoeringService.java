@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Optional;
 
 import com.google.common.base.Enums;
-import io.getunleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Journalpost;
@@ -55,7 +54,6 @@ public class JournalfoeringService {
     private final SaksbehandlingRegler saksbehandlingRegler;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
-    private final Unleash unleash;
 
     public JournalfoeringService(JoarkFasade joarkFasade,
                                  ProsessinstansService prosessinstansService,
@@ -63,7 +61,6 @@ public class JournalfoeringService {
                                  FagsakService fagsakService,
                                  PersondataFasade persondataFasade,
                                  LovligeKombinasjonerService lovligeKombinasjonerService,
-                                 Unleash unleash,
                                  SaksbehandlingRegler saksbehandlingRegler,
                                  BehandlingService behandlingService,
                                  BehandlingsresultatService behandlingsresultatService) {
@@ -73,7 +70,6 @@ public class JournalfoeringService {
         this.fagsakService = fagsakService;
         this.persondataFasade = persondataFasade;
         this.lovligeKombinasjonerService = lovligeKombinasjonerService;
-        this.unleash = unleash;
         this.saksbehandlingRegler = saksbehandlingRegler;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
@@ -320,7 +316,7 @@ public class JournalfoeringService {
 
     private boolean skalSetteSøknadslandOgPeriode(Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
         return erSakstypeEøs(sakstype)
-            && !saksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema)
+            && !saksbehandlingRegler.harIngenFlyt(sakstype, sakstema, behandlingstype, behandlingstema)
             && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(sakstype, sakstema, behandlingstema)
             && !saksbehandlingRegler.harIkkeYrkesaktivFlyt(sakstype, behandlingstema);
     }
