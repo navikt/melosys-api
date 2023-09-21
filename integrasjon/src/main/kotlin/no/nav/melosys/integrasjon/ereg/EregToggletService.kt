@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service
 import java.util.*
 
 @Service
-@Primary // Flyttet fra EregService - Vi burde se om vi kan fjerne @Primary helt når vi rydder bort toggle
+@Primary
+// @Primary Flyttet fra EregService - Vi burde se om vi kan fjerne den helt
+// når vi rydder bort toggle melosys.ereg.organisasjon
 class EregToggletService(
     private var unleash: Unleash,
     private val eregService: EregService,
