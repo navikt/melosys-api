@@ -89,9 +89,7 @@ public class OpprettMedlemskapsperiodeService {
     private MedlemAvFolketrygden hentEllerOpprettMedlemAvFolketrygden(Behandlingsresultat behandlingsresultat, Folketrygdloven_kap2_bestemmelser bestemmelse) {
         if (behandlingsresultat.getMedlemAvFolketrygden() != null) {
             MedlemAvFolketrygden medlemAvFolketrygden = behandlingsresultat.getMedlemAvFolketrygden();
-            if (!behandlingsresultat.getMedlemAvFolketrygden().getBestemmelse().equals(bestemmelse)) {
-                medlemAvFolketrygden.setBestemmelse(bestemmelse);
-            }
+            medlemAvFolketrygden.setBestemmelse(bestemmelse);
             return medlemAvFolketrygden;
         }
 
