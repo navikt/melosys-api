@@ -59,7 +59,7 @@ class OpprettMedlemskapsperiodeServiceTest {
         assertThat(
             opprettMedlemskapsperiodeService.utledMedlemskapsperioderFraSøknad(behandlingsresultatID, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A)
         ).isNotEmpty();
-        verify(medlemAvFolketrygdenRepository, times(2)).save(any());
+        verify(medlemAvFolketrygdenRepository, times(1)).save(any());
     }
 
     @Test
