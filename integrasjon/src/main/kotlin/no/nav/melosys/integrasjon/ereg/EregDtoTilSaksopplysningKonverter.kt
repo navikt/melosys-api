@@ -58,7 +58,6 @@ class EregDtoTilSaksopplysningKonverter {
         Telefonnummer().apply {
             identifikator = it.nummer
             type = it.telefontype
-            retningsnummer = null // skal vi finne ut retningsnummer?
             bruksperiode = it.bruksperiode.tilPeriode()
             gyldighetsperiode = it.gyldighetsperiode.tilPeriode()
         }
