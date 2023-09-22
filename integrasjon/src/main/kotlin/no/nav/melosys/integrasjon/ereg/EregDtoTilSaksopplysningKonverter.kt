@@ -15,7 +15,7 @@ class EregDtoTilSaksopplysningKonverter {
         dokument = OrganisasjonDokument().apply {
             orgnummer = organisasjon.organisasjonsnummer
             sektorkode = finSektorkode(organisasjon)
-            oppstartsdato = null // finnes ikke, vi har registreringsdato, opphoersdato, sistEndret, stiftelsesdato
+            oppstartsdato = null // fjerns når vi ikke lengre bruker gammelt soap api - MELOSYS-6134
             enhetstype = organisasjon.organisasjonDetaljer?.enhetstyper?.first { it.enhetstype != null }?.enhetstype
             navn = listOf(organisasjon.navn?.sammensattnavn ?: "UKJENT")
             organisasjonDetaljer = OrganisasjonsDetaljer().apply {
@@ -58,6 +58,7 @@ class EregDtoTilSaksopplysningKonverter {
         Telefonnummer().apply {
             identifikator = it.nummer
             type = it.telefontype
+            retningsnummer = null // fjerns når vi ikke lengre bruker gammelt soap api - MELOSYS-6134
             bruksperiode = it.bruksperiode.tilPeriode()
             gyldighetsperiode = it.gyldighetsperiode.tilPeriode()
         }
