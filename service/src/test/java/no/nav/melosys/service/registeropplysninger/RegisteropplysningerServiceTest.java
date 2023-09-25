@@ -15,7 +15,7 @@ import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.integrasjon.inntk.InntektRestService;
+import no.nav.melosys.integrasjon.inntk.InntektService;
 import no.nav.melosys.integrasjon.utbetaling.UtbetaldataRestService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
@@ -47,7 +47,7 @@ class RegisteropplysningerServiceTest {
     @Mock
     private BehandlingService behandlingService;
     @Mock
-    private InntektRestService inntektService;
+    private InntektService inntektService;
     @Mock
     private SaksopplysningerService saksopplysningerService;
     @Mock

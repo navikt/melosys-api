@@ -11,7 +11,7 @@ import java.time.YearMonth
 private val log = KotlinLogging.logger { }
 
 @Service
-class InntektRestService(
+class InntektService(
     private val inntektRestConsumer: InntektRestConsumer
 ) {
     private val inntektKonverter = InntektKonverter()
