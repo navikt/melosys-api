@@ -7,7 +7,9 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.OAuthMockServer
+import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonRestConsumerTest
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
 import no.nav.melosys.integrasjon.reststs.RestStsClient
@@ -24,6 +26,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import java.math.BigDecimal
+import java.nio.charset.StandardCharsets
 import java.time.Year
 import java.time.YearMonth
 import java.util.*
@@ -93,7 +96,7 @@ class InntektRestConsumerTest(
                     WireMock.aResponse()
                         .withStatus(200)
                         .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                        .withBody(inntektJsonResponse)
+                        .withBody(hentRessurs("mock/inntekt/inntektConsumerResponse.json"))
                 )
         )
 
@@ -103,127 +106,46 @@ class InntektRestConsumerTest(
                 formaal = "Medlemskap",
                 ident = Aktoer("personID", AktoerType.AKTOER_ID),
                 maanedFom = YearMonth.of(2022, 1),
-                maanedTom = YearMonth.of(2022, 2),
+                maanedTom = YearMonth.of(2022, 3),
             )
         )
 
         inntektListe.arbeidsInntektMaaned
             .shouldNotBeNull()
-            .shouldHaveSize(2)
+            .shouldHaveSize(3)
             .map { it.arbeidsInntektInformasjon?.inntektListe }
-            .apply {
+            .run {
                 first().shouldNotBeNull().shouldHaveSize(1)
-                    .first().apply {
+                    .first().run {
                         beloep.shouldBe(BigDecimal(50000))
                         tilleggsinformasjon.shouldNotBeNull()
                             .tilleggsinformasjonDetaljer.shouldBeInstanceOf<InntektResponse.BonusFraForsvaret>()
                             .aaretUtbetalingenGjelderFor.shouldBe(Year.of(1980))
                     }
-                last().shouldNotBeNull().shouldHaveSize(1)
-                    .first().apply {
+                get(1).shouldNotBeNull().shouldHaveSize(1)
+                    .first().run {
                         beloep.shouldBe(BigDecimal(50000))
                         tilleggsinformasjon.shouldNotBeNull()
-                            .tilleggsinformasjonDetaljer.shouldBeInstanceOf<InntektResponse.Svalbardinntekt>().apply {
+                            .tilleggsinformasjonDetaljer.shouldBeInstanceOf<InntektResponse.ReiseKostOgLosji>().run {
+                                persontype.shouldBe("norskPendler")
+
+                            }
+                    }
+                last().shouldNotBeNull().shouldHaveSize(1)
+                    .first().run {
+                        beloep.shouldBe(BigDecimal(50000))
+                        tilleggsinformasjon.shouldNotBeNull()
+                            .tilleggsinformasjonDetaljer.shouldBeInstanceOf<InntektResponse.Svalbardinntekt>().run {
                                 betaltTrygdeavgift.shouldBe(BigDecimal(50000))
                                 antallDager.shouldBe(40)
 
                             }
                     }
             }
+
+
     }
 
-    companion object {
-        val inntektJsonResponse = """
-            {
-                "arbeidsInntektMaaned": [
-                    {
-                        "aarMaaned": "2022-02",
-                        "arbeidsInntektInformasjon": {
-                            "inntektListe": [
-                                {
-                                    "inntektType": "LOENNSINNTEKT",
-                                    "beloep": 50000,
-                                    "fordel": "kontantytelse",
-                                    "inntektskilde": "A-ordningen",
-                                    "inntektsperiodetype": "Maaned",
-                                    "inntektsstatus": "LoependeInnrapportert",
-                                    "leveringstidspunkt": "2023-07",
-                                    "utbetaltIMaaned": "2022-02",
-                                    "opplysningspliktig": {
-                                        "identifikator": "928497704",
-                                        "aktoerType": "ORGANISASJON"
-                                    },
-                                    "virksomhet": {
-                                        "identifikator": "907670201",
-                                        "aktoerType": "ORGANISASJON"
-                                    },
-                                    "inntektsmottaker": {
-                                        "identifikator": "2395801903843",
-                                        "aktoerType": "AKTOER_ID"
-                                    },
-                                    "inngaarIGrunnlagForTrekk": true,
-                                    "utloeserArbeidsgiveravgift": true,
-                                    "informasjonsstatus": "InngaarAlltid",
-                                    "beskrivelse": "fastloenn",
-                                    "tilleggsinformasjon": {
-                                        "kategori": "bla",
-                                        "tilleggsinformasjonDetaljer": {
-                                            "detaljerType": "BONUSFRAFORSVARET",
-                                            "aaretUtbetalingenGjelderFor": 1980
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    {
-                        "aarMaaned": "2022-01",
-                        "arbeidsInntektInformasjon": {
-                            "inntektListe": [
-                                {
-                                    "inntektType": "LOENNSINNTEKT",
-                                    "beloep": 50000,
-                                    "fordel": "kontantytelse",
-                                    "inntektskilde": "A-ordningen",
-                                    "inntektsperiodetype": "Maaned",
-                                    "inntektsstatus": "LoependeInnrapportert",
-                                    "leveringstidspunkt": "2023-07",
-                                    "utbetaltIMaaned": "2022-01",
-                                    "opplysningspliktig": {
-                                        "identifikator": "928497704",
-                                        "aktoerType": "ORGANISASJON"
-                                    },
-                                    "virksomhet": {
-                                        "identifikator": "907670201",
-                                        "aktoerType": "ORGANISASJON"
-                                    },
-                                    "inntektsmottaker": {
-                                        "identifikator": "2395801903843",
-                                        "aktoerType": "AKTOER_ID"
-                                    },
-                                    "inngaarIGrunnlagForTrekk": true,
-                                    "utloeserArbeidsgiveravgift": true,
-                                    "informasjonsstatus": "InngaarAlltid",
-                                    "beskrivelse": "fastloenn",
-                                    "tilleggsinformasjon": {
-                                        "kategori": "bla",
-                                        "tilleggsinformasjonDetaljer": {
-                                            "detaljerType": "SVALBARDINNTEKT",
-                                            "antallDager": 40,
-                                            "betaltTrygdeavgift": "50000"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    }
-                ],
-                "ident": {
-                    "identifikator": "2395801903843",
-                    "aktoerType": "AKTOER_ID"
-                }
-            }
-        """.trimIndent()
-    }
+    fun hentRessurs(fil: String): String = OrganisasjonRestConsumerTest::class.java.classLoader.getResource(fil)
+        ?.readText(StandardCharsets.UTF_8) ?: throw IkkeFunnetException("Fant ikke $fil")
 }
-

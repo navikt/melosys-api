@@ -115,14 +115,14 @@ class InntektKonverter {
                 }
             }
 
-            REISEKOSTOGLOSJI -> Svalbardinntekt().apply {
+            SVALBARDINNTEKT -> Svalbardinntekt().apply {
                 (tilleggsinformasjonDetaljer as InntektResponse.Svalbardinntekt).let {
                     antallDager = it.antallDager
                     betaltTrygdeavgift = it.betaltTrygdeavgift
                 }
             }
 
-            SVALBARDINNTEKT -> ReiseKostOgLosji().apply {
+            REISEKOSTOGLOSJI -> ReiseKostOgLosji().apply {
                 (tilleggsinformasjonDetaljer as InntektResponse.ReiseKostOgLosji).let {
                     persontype = it.persontype
                 }
