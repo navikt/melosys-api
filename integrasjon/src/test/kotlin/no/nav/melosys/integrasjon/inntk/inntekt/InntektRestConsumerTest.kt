@@ -114,28 +114,28 @@ class InntektRestConsumerTest(
             .shouldNotBeNull()
             .shouldHaveSize(3)
             .map { it.arbeidsInntektInformasjon?.inntektListe }
-            .apply {
+            .run {
                 first().shouldNotBeNull().shouldHaveSize(1)
-                    .first().apply {
+                    .first().run {
                         beloep.shouldBe(BigDecimal(50000))
                         tilleggsinformasjon.shouldNotBeNull()
                             .tilleggsinformasjonDetaljer.shouldBeInstanceOf<InntektResponse.BonusFraForsvaret>()
                             .aaretUtbetalingenGjelderFor.shouldBe(Year.of(1980))
                     }
                 get(1).shouldNotBeNull().shouldHaveSize(1)
-                    .first().apply {
+                    .first().run {
                         beloep.shouldBe(BigDecimal(50000))
                         tilleggsinformasjon.shouldNotBeNull()
-                            .tilleggsinformasjonDetaljer.shouldBeInstanceOf<InntektResponse.ReiseKostOgLosji>().apply {
+                            .tilleggsinformasjonDetaljer.shouldBeInstanceOf<InntektResponse.ReiseKostOgLosji>().run {
                                 persontype.shouldBe("norskPendler")
 
                             }
                     }
                 last().shouldNotBeNull().shouldHaveSize(1)
-                    .first().apply {
+                    .first().run {
                         beloep.shouldBe(BigDecimal(50000))
                         tilleggsinformasjon.shouldNotBeNull()
-                            .tilleggsinformasjonDetaljer.shouldBeInstanceOf<InntektResponse.Svalbardinntekt>().apply {
+                            .tilleggsinformasjonDetaljer.shouldBeInstanceOf<InntektResponse.Svalbardinntekt>().run {
                                 betaltTrygdeavgift.shouldBe(BigDecimal(50000))
                                 antallDager.shouldBe(40)
 
