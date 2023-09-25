@@ -12,7 +12,6 @@ import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.BonusFraForsvaret
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.ReiseKostOgLosji
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Svalbardinntekt
 import no.nav.melosys.exception.IkkeFunnetException
-import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonRestConsumerTest
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.math.BigDecimal
@@ -80,7 +79,7 @@ class InntekKonverterTest {
 
     }
 
-    fun hentRessurs(fil: String): String = OrganisasjonRestConsumerTest::class.java.classLoader.getResource(fil)
+    fun hentRessurs(fil: String): String = InntekKonverterTest::class.java.classLoader.getResource(fil)
         ?.readText(StandardCharsets.UTF_8) ?: throw IkkeFunnetException("Fant ikke $fil")
 }
 
