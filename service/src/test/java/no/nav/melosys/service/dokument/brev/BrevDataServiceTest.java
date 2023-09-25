@@ -497,24 +497,10 @@ class BrevDataServiceTest {
         return aktørArbRep;
     }
 
-    private static Aktoer hentRepresentantPersonAktør() {
-        Aktoer aktørArbRep = new Aktoer();
-        aktørArbRep.setRolle(Aktoersroller.REPRESENTANT);
-        aktørArbRep.setPersonIdent(REP_FNR);
-        aktørArbRep.setRepresenterer(Representerer.ARBEIDSGIVER);
-        return aktørArbRep;
-    }
-
     private Soeknad lagSøknadDokument() {
         Soeknad søknad = new Soeknad();
         søknad.bosted.oppgittAdresse = lagStrukturertAdresse();
         return søknad;
-    }
-
-    private Soeknad lagSøknadDokumentTomAdresse() {
-        Soeknad soeknad = new Soeknad();
-        soeknad.bosted.oppgittAdresse = new StrukturertAdresse();
-        return soeknad;
     }
 
     private NorskPostadresse lagPlassholderAdresse() {

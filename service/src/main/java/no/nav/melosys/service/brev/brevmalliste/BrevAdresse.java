@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import no.nav.melosys.domain.kodeverk.Land_iso2;
 import org.apache.commons.lang3.StringUtils;
 
 public class BrevAdresse {
@@ -58,7 +59,7 @@ public class BrevAdresse {
     }
 
     public boolean isPostnrEmpty() {
-        return "NO".equals(land) && (postnr == null || postnr.isBlank());
+        return Land_iso2.NO.name().equals(land) && (postnr == null || postnr.isBlank());
     }
 
     public static class Builder {
