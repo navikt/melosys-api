@@ -57,7 +57,7 @@ public class OppfriskSaksopplysningerService {
     }
 
     @Transactional
-    public void oppfriskSaksopplysning(long behandlingID, boolean medFamilierelasjoner) {
+    public void oppfriskSaksopplysning(long behandlingID, boolean medFamilierelasjoner, boolean periodeOver5aar) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
         if (behandling.erUtsending() && anmodningsperiodeService.harSendtAnmodningsperiode(behandlingID)) {
@@ -85,6 +85,7 @@ public class OppfriskSaksopplysningerService {
             .informasjonsbehov(medFamilierelasjoner
                 ? Informasjonsbehov.MED_FAMILIERELASJONER
                 : Informasjonsbehov.STANDARD)
+            .hentOpplysningerFor5aar(periodeOver5aar)
             .build();
 
         log.info("Starter oppfrisking av behandlingID: {} ", behandlingID);

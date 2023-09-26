@@ -91,7 +91,7 @@ class EndreSakService(
             }
 
             if (behandling.sisteOpplysningerHentetDato != null) {
-                oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
+                oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false, false)
             }
         }
 
