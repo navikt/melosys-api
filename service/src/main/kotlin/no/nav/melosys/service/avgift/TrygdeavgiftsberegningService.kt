@@ -121,7 +121,9 @@ class TrygdeavgiftsberegningService
 
     @Transactional(readOnly = true)
     fun hentTrygdeavgiftsberegning(behandlingsresultatID: Long): Set<Trygdeavgiftsperiode> {
-        return medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)?.fastsattTrygdeavgift?.trygdeavgiftsperioder
+        return medlemAvFolketrygdenService.finnMedlemAvFolketrygden(behandlingsresultatID)
+            .map { it.fastsattTrygdeavgift?.trygdeavgiftsperioder }
+            .orElse(null)
             ?: emptySet()
     }
 
