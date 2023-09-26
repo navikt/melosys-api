@@ -157,19 +157,19 @@ public final class ProsessflytDefinisjon {
         PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK,
             new ProsessFlyt(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK,
                 REPLIKER_BEHANDLING,
-                OPPRETT_OPPGAVE,
-                LAGRE_FAKTURASERIE_REFERANSE
+                LAGRE_FAKTURASERIE_REFERANSE,
+                OPPRETT_OPPGAVE
             )
         );
 
         PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK,
             new ProsessFlyt(ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK,
                 OPPRETT_NY_BEHANDLING,
+                LAGRE_FAKTURASERIE_REFERANSE,
                 OPPRETT_MOTTATTEOPPLYSNINGER,
                 HENT_REGISTEROPPLYSNINGER,
                 VURDER_INNGANGSVILKÅR,
-                OPPRETT_OPPGAVE,
-                LAGRE_FAKTURASERIE_REFERANSE
+                OPPRETT_OPPGAVE
             )
         );
 
