@@ -11,8 +11,12 @@ public class ArbeidsInntektInformasjon {
 
     @JsonProperty("arbeidsforholdFrilanserListe")
     public List<ArbeidsforholdFrilanser> arbeidsforholdListe = new ArrayList<>();
-    
+
     public List<Inntekt> getInntektListe() {
+        if (inntektListe == null) {
+            // det må gjøres siden inntektListe er satt til null i konvertering og lagret i databasen
+            inntektListe = new ArrayList<>();
+        }
         return inntektListe;
     }
 
