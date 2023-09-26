@@ -92,6 +92,7 @@ public class ProsessinstansService {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK);
 
+        prosessinstans.setData(FAKTURASERIE_REFERANSE, opprettSakDto.getFakturaserieReferanse());
         prosessinstans.setData(SAKSNUMMER, saksnummer);
         prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
         prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
@@ -107,6 +108,7 @@ public class ProsessinstansService {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK);
 
+        prosessinstans.setData(FAKTURASERIE_REFERANSE, opprettSakDto.getFakturaserieReferanse());
         prosessinstans.setData(SAKSNUMMER, saksnummer);
         prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
         prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
