@@ -60,6 +60,28 @@ internal class TrygdeavgiftsberegningServiceTest {
     fun hentTrygdeavgiftsberegning_ingenTrygdeavgift_returnerTomListe() {
         medlemAvFolketrygden.fastsattTrygdeavgift = FastsattTrygdeavgift()
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder = null
+        every { mockMedlemAvFolketrygdenService.finnMedlemAvFolketrygden(BEHANDLING_ID) }.returns(Optional.of(medlemAvFolketrygden))
+
+
+        trygdeavgiftsberegningService.hentTrygdeavgiftsberegning(BEHANDLING_ID)
+            .shouldNotBeNull()
+            .shouldBeEmpty()
+    }
+
+    @Test
+    fun hentTrygdeavgiftsberegning_ingenFastsattTrygdeavgift_returnerTomListe() {
+        medlemAvFolketrygden.fastsattTrygdeavgift = null
+        every { mockMedlemAvFolketrygdenService.finnMedlemAvFolketrygden(BEHANDLING_ID) }.returns(Optional.of(medlemAvFolketrygden))
+
+
+        trygdeavgiftsberegningService.hentTrygdeavgiftsberegning(BEHANDLING_ID)
+            .shouldNotBeNull()
+            .shouldBeEmpty()
+    }
+
+    @Test
+    fun hentTrygdeavgiftsberegning_ingenMedlemAvFolketrygden_returnerTomListe() {
+        every { mockMedlemAvFolketrygdenService.finnMedlemAvFolketrygden(BEHANDLING_ID) }.returns(Optional.empty())
 
 
         trygdeavgiftsberegningService.hentTrygdeavgiftsberegning(BEHANDLING_ID)
