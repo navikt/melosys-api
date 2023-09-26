@@ -116,7 +116,7 @@ internal class EndreSakServiceTest {
         }
         verify { mottatteOpplysningerService.slettOpplysninger(aktivBehandling.id) }
         verify { mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(aktivBehandling, any(), any()) }
-        verify { oppfriskSaksopplysningerService.oppfriskSaksopplysning(aktivBehandling.id, false) }
+        verify { oppfriskSaksopplysningerService.oppfriskSaksopplysning(aktivBehandling.id, false, false) }
         verify { applicationEventPublisher.publishEvent(any()) }
     }
 
@@ -373,7 +373,7 @@ internal class EndreSakServiceTest {
         }
         verify { mottatteOpplysningerService.slettOpplysninger(aktivBehandling.id) }
         verify { mottatteOpplysningerService.opprettSøknadEllerAnmodningEllerAttest(aktivBehandling, any(), any()) }
-        verify(exactly = 0) { oppfriskSaksopplysningerService.oppfriskSaksopplysning(aktivBehandling.id, false) }
+        verify(exactly = 0) { oppfriskSaksopplysningerService.oppfriskSaksopplysning(aktivBehandling.id, false, false) }
 
         verify { applicationEventPublisher.publishEvent(any()) }
     }

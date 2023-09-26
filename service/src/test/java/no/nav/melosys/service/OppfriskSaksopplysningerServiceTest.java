@@ -90,7 +90,7 @@ class OppfriskSaksopplysningerServiceTest {
         when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
 
 
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false, false);
 
 
         verify(behandlingsresultatService).tømBehandlingsresultat(anyLong());
@@ -110,7 +110,7 @@ class OppfriskSaksopplysningerServiceTest {
         when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(true);
 
 
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false, false);
 
 
         verify(behandlingsresultatService).tømBehandlingsresultat(anyLong());
@@ -125,7 +125,7 @@ class OppfriskSaksopplysningerServiceTest {
         when(anmodningsperiodeService.harSendtAnmodningsperiode(BEHANDLING_ID)).thenReturn(true);
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false))
+            .isThrownBy(() -> oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false, false))
             .withMessageContaining("Anmodning om unntak er sendt");
     }
 
@@ -138,7 +138,7 @@ class OppfriskSaksopplysningerServiceTest {
         when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
         when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
 
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false, false);
 
         verify(ufmKontrollService).utførKontrollerOgRegistrerFeil(BEHANDLING_ID);
     }
@@ -159,7 +159,7 @@ class OppfriskSaksopplysningerServiceTest {
         when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
         when(inngangsvilkaarService.vurderOgLagreInngangsvilkår(anyLong(), anyList(), anyBoolean(), any(Periode.class))).thenReturn(true);
 
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false, false);
 
         verify(inngangsvilkaarService).vurderOgLagreInngangsvilkår(eq(behandling.getId()), eq(List.of("SE")), eq(false), any(Periode.class));
     }
@@ -173,7 +173,7 @@ class OppfriskSaksopplysningerServiceTest {
         when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
 
 
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false, false);
 
 
         verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any(Periode.class));
@@ -190,7 +190,7 @@ class OppfriskSaksopplysningerServiceTest {
         when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(true);
         when(saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any())).thenReturn(true);
 
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false, false);
 
 
         verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any(Periode.class));
@@ -206,7 +206,7 @@ class OppfriskSaksopplysningerServiceTest {
         when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
 
 
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false, false);
 
 
         verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any(Periode.class));
@@ -222,7 +222,7 @@ class OppfriskSaksopplysningerServiceTest {
         when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
 
 
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false, false);
 
 
         verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any(Periode.class));
@@ -238,7 +238,7 @@ class OppfriskSaksopplysningerServiceTest {
         when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
 
 
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false, false);
 
 
         verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any(Periode.class));
@@ -251,7 +251,7 @@ class OppfriskSaksopplysningerServiceTest {
         when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
         ArgumentCaptor<RegisteropplysningerRequest> requestCaptor = ArgumentCaptor.forClass(RegisteropplysningerRequest.class);
 
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false, false);
 
         verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
         assertThat(requestCaptor.getValue().getInformasjonsbehov()).isEqualTo(Informasjonsbehov.STANDARD);
@@ -264,7 +264,7 @@ class OppfriskSaksopplysningerServiceTest {
         when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
         ArgumentCaptor<RegisteropplysningerRequest> requestCaptor = ArgumentCaptor.forClass(RegisteropplysningerRequest.class);
 
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, true);
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, true, false);
 
         verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
         assertThat(requestCaptor.getValue().getInformasjonsbehov()).isEqualTo(Informasjonsbehov.MED_FAMILIERELASJONER);
