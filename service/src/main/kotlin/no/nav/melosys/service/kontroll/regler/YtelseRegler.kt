@@ -31,11 +31,10 @@ object YtelseRegler {
         return utbetaltIPeriode == fom || utbetaltIPeriode == tom
     }
 
-    private fun hentYtelseFraOffentlige(inntektDokument: InntektDokument): Collection<YtelseFraOffentlige> =
-        inntektDokument.arbeidsInntektMaanedListe
-            .asSequence()
-            .mapNotNull { it.arbeidsInntektInformasjon?.inntektListe }
-            .flatten()
-            .filterIsInstance<YtelseFraOffentlige>()
-            .toList()
+private fun hentYtelseFraOffentlige(inntektDokument: InntektDokument): Collection<YtelseFraOffentlige> =
+    inntektDokument.arbeidsInntektMaanedListe
+        .mapNotNull { it.arbeidsInntektInformasjon?.inntektListe }
+        .flatten()
+        .filterIsInstance<YtelseFraOffentlige>()
+        .toList()
 }
