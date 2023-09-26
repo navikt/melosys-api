@@ -59,7 +59,7 @@ class InntektKonverter {
                                     informasjonsstatus = it.informasjonsstatus
                                     beskrivelse = it.beskrivelse
                                 }
-                            }
+                            } ?: emptyList()
                         }
                     }
                 }

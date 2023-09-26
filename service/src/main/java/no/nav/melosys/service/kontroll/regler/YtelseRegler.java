@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.Collection;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon;
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned;
@@ -57,10 +56,11 @@ public final class YtelseRegler {
             .map(ArbeidsInntektMaaned::getArbeidsInntektInformasjon)
             .filter(Objects::nonNull)
             .map(ArbeidsInntektInformasjon::getInntektListe)
+            .filter(Objects::nonNull)
             .flatMap(Collection::stream)
             .filter(YtelseFraOffentlige.class::isInstance)
             .map(YtelseFraOffentlige.class::cast)
             .filter(Objects::nonNull)
-            .collect(Collectors.toList());
+            .toList();
     }
 }

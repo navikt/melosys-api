@@ -77,6 +77,23 @@ class YtelseReglerTest {
         ).shouldBeTrue()
     }
 
+    @Test
+    fun `utbetaltYtelserFraOffentligIPeriode ikke kast null pointer exception når inntektListe er null`() {
+        val fom = LocalDate.now().plusYears(1)
+        val tom = LocalDate.now().plusYears(2)
+        YtelseRegler.utbetaltYtelserFraOffentligIPeriode(
+            InntektDokument().apply {
+                arbeidsInntektMaanedListe = listOf(ArbeidsInntektMaaned().apply {
+                    arbeidsInntektInformasjon = ArbeidsInntektInformasjon().apply {
+                        inntektListe = null
+                    }
+                })
+            },
+            fom,
+            tom
+        ).shouldBeFalse()
+    }
+
     private fun hentInntektDokument(medYtelserFraOffentlig: Boolean, fom: LocalDate): InntektDokument = InntektDokument().apply {
         arbeidsInntektMaanedListe = listOf(hentArbeidsInntektMaaned(medYtelserFraOffentlig, fom))
 
