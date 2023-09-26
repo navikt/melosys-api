@@ -183,6 +183,24 @@ class RegisteropplysningerServiceTest {
         verify(behandlingService).lagre(any(Behandling.class));
     }
 
+    @Test
+    void hentOgLagreOpplysninger_medAlleOpplysninger_skalHaMinimum5AarPeriode() {
+        LocalDate fom = LocalDate.now().minusYears(1);
+        LocalDate tom = LocalDate.now().plusYears(1);
+
+        registeropplysningerService.hentOgLagreOpplysninger(
+            RegisteropplysningerRequest.builder()
+                .behandlingID(2L)
+                .saksopplysningTyper(RegisteropplysningerRequest.hentSaksopplysningTyperSomLagres())
+                .fom(fom)
+                .tom(tom)
+                .fnr(FNR)
+                .hentOpplysningerFor5aar(true)
+                .build());
+
+        verify(registeropplysningerPeriodeFactory).hentPeriodeForArbeidsforhold(fom.minusYears(5), tom);
+    }
+
 
     @Test
     void hentOgLagreOpplysninger_feilIPeriode_kanIkkeHenteOpplysningerSomBrukerPeriode() {

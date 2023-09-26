@@ -141,6 +141,32 @@ class HentRegisteropplysningerTest {
     }
 
     @Test
+    void utfør_behandlingstemaUtsendtArbeidstaker_henterPeriodeFraSøknadMed5EkstraAar() {
+        String ident = "143545";
+        when(persondataFasade.hentFolkeregisterident(aktørID)).thenReturn(ident);
+
+        behandling.getFagsak().setType(Sakstyper.EU_EOS);
+        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+
+        Periode periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
+        MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
+        mottatteOpplysninger.setMottatteOpplysningerdata(new Soeknad());
+        mottatteOpplysninger.getMottatteOpplysningerData().periode = periode;
+        behandling.setMottatteOpplysninger(mottatteOpplysninger);
+
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+
+        hentRegisteropplysninger.utfør(prosessinstans);
+
+        verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
+
+        assertThat(requestCaptor.getValue())
+            .extracting(RegisteropplysningerRequest::getBehandlingID, RegisteropplysningerRequest::getFnr, RegisteropplysningerRequest::getFom, RegisteropplysningerRequest::getTom)
+            .containsExactly(behandling.getId(), ident, periode.getFom().minusYears(5), periode.getTom());
+    }
+
+    @Test
     void utfør_sakstypeFtrl_ingentingLagres() {
         behandling.setTema(Behandlingstema.YRKESAKTIV);
         behandling.getFagsak().setType(Sakstyper.FTRL);
