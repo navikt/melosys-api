@@ -41,7 +41,7 @@ class MottatteOpplysningerService(
     ): MottatteOpplysninger? =
         finnMottatteOpplysninger(behandlingID).orElseGet {
             val behandling = behandlingService.hentBehandling(behandlingID)
-            if (saksbehandlingRegler.harTomFlyt(behandling) || !behandlingKanRedigeresAvSaksbehandler) {
+            if (saksbehandlingRegler.harIngenFlyt(behandling) || !behandlingKanRedigeresAvSaksbehandler) {
                 throw IkkeFunnetException("Finner ikke mottatteOpplysninger for behandling $behandlingID")
             } else {
                 opprettSøknadEllerAnmodningEllerAttest(behandling, Periode(), Soeknadsland())
@@ -114,7 +114,7 @@ class MottatteOpplysningerService(
         behandling: Behandling, periode: Periode?, soeknadsland: Soeknadsland?
     ): MottatteOpplysninger? {
         val behandlingID = behandling.id
-        if (saksbehandlingRegler.harTomFlyt(behandling)) {
+        if (saksbehandlingRegler.harIngenFlyt(behandling)) {
             log.info { "Søknad trengs ikke og opprettes ikke for behandling $behandlingID med tema ${behandling.tema}" }
             return null
         }

@@ -99,8 +99,10 @@ public class HenleggFagsakService {
 
     private void henleggSakSomBortfalt(Fagsak fagsak) {
         log.info("Fagsak {}: {}", fagsak.getSaksnummer(), Saksstatuser.HENLAGT_BORTFALT.getBeskrivelse());
-        fagsak.getBehandlinger().forEach(behandling -> behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE_BORTFALT));
-        fagsak.getBehandlinger().forEach(behandling -> behandling.setStatus(Behandlingsstatus.AVSLUTTET));
+        fagsak.getBehandlinger().forEach(behandling -> {
+            behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.HENLEGGELSE_BORTFALT);
+            if (behandling.getStatus() != Behandlingsstatus.AVSLUTTET) behandlingService.avsluttBehandling(behandling.getId());
+        });
         fagsak.setStatus(Saksstatuser.HENLAGT_BORTFALT);
         fagsakService.lagre(fagsak);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());

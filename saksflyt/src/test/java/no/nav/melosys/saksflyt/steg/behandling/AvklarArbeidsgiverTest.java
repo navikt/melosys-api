@@ -108,8 +108,8 @@ class AvklarArbeidsgiverTest {
     }
 
     @Test
-    void utfør_medTomFlyt_arbeidsgiverAvklaresIkke() {
-        when(saksbehandlingRegler.harTomFlyt(any())).thenReturn(true);
+    void utfør_medIngenFlyt_arbeidsgiverAvklaresIkke() {
+        when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(true);
         behandling.setType(Behandlingstyper.HENVENDELSE);
 
         avklarArbeidsgiver.utfør(prosessinstans);

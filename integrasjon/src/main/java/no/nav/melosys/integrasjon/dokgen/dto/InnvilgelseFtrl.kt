@@ -1,13 +1,15 @@
 package no.nav.melosys.integrasjon.dokgen.dto
 
 import com.fasterxml.jackson.annotation.JsonFormat
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
 import no.nav.melosys.domain.brev.InnvilgelseFtrlBrevbestilling
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
-import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.Periode
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto
 import java.time.LocalDate
 
 class InnvilgelseFtrl(
@@ -16,7 +18,10 @@ class InnvilgelseFtrl(
     @JsonSerialize(using = LocalDateSerializer::class)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     val datoMottatt: LocalDate?,
-    val perioder: List<Periode>,
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    val avgiftsperioder: List<AvgiftsperiodeDto>,
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    val medlemskapsperioder: List<MedlemskapsperiodeDto>,
     val bestemmelse: Folketrygdloven_kap2_bestemmelser?,
     val avslåttHelsedelFørMottaksdato: Boolean,
     val trygdeavgiftMottaker: Trygdeavgiftmottaker?,
@@ -41,7 +46,8 @@ class InnvilgelseFtrl(
             brevbestilling.behandling.fagsak.finnRepresentant(Representerer.BRUKER).isPresent
 
         private var behandlingstype: Behandlingstyper = Behandlingstyper.FØRSTEGANG
-        private var perioder: List<Periode> = emptyList()
+        private var avgiftsperioder: List<AvgiftsperiodeDto> = emptyList()
+        private var medlemskapsperioder: List<MedlemskapsperiodeDto> = emptyList()
         private var bestemmelse: Folketrygdloven_kap2_bestemmelser? = null
         private var avslåttHelsedelFørMottaksdato = false
         private var trygdeavgiftMottaker: Trygdeavgiftmottaker? = null
@@ -63,8 +69,13 @@ class InnvilgelseFtrl(
             return this
         }
 
-        fun perioder(perioder: List<Periode>): Builder {
-            this.perioder = perioder
+        fun avgiftsperioder(avgiftsperioder: List<AvgiftsperiodeDto>): Builder {
+            this.avgiftsperioder = avgiftsperioder
+            return this
+        }
+
+        fun medlemskapsperioder(medlemskapsperioder: List<MedlemskapsperiodeDto> ): Builder {
+            this.medlemskapsperioder = medlemskapsperioder
             return this
         }
 
@@ -148,7 +159,8 @@ class InnvilgelseFtrl(
                 brevbestilling,
                 behandlingstype,
                 datoMottatt,
-                perioder,
+                avgiftsperioder,
+                medlemskapsperioder,
                 bestemmelse,
                 avslåttHelsedelFørMottaksdato,
                 trygdeavgiftMottaker,

@@ -59,7 +59,16 @@ class InntektKonverter {
                                     informasjonsstatus = it.informasjonsstatus
                                     beskrivelse = it.beskrivelse
                                 }
-                            }
+                            } ?: emptyList()
+                            arbeidsforholdListe = aim.arbeidsInntektInformasjon?.arbeidsforholdListe?.map {
+                                ArbeidsforholdFrilanser().apply {
+                                    frilansPeriode = Periode().apply {
+                                        fom = it.frilansPeriodeFom
+                                        tom = it.frilansPeriodeTom
+                                    }
+                                    yrke = it.yrke
+                                }
+                            } ?: emptyList()
                         }
                     }
                 }
@@ -115,14 +124,14 @@ class InntektKonverter {
                 }
             }
 
-            REISEKOSTOGLOSJI -> Svalbardinntekt().apply {
+            SVALBARDINNTEKT -> Svalbardinntekt().apply {
                 (tilleggsinformasjonDetaljer as InntektResponse.Svalbardinntekt).let {
                     antallDager = it.antallDager
                     betaltTrygdeavgift = it.betaltTrygdeavgift
                 }
             }
 
-            SVALBARDINNTEKT -> ReiseKostOgLosji().apply {
+            REISEKOSTOGLOSJI -> ReiseKostOgLosji().apply {
                 (tilleggsinformasjonDetaljer as InntektResponse.ReiseKostOgLosji).let {
                     persontype = it.persontype
                 }

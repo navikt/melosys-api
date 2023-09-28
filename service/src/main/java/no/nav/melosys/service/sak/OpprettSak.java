@@ -115,7 +115,7 @@ public class OpprettSak {
             hovedpart, sakstype, sakstema, behandlingstema, behandlingstype);
 
         if (erSakstypeEøs(sakstype)
-            && !saksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema)
+            && !saksbehandlingRegler.harIngenFlyt(sakstype, sakstema, behandlingstype, behandlingstema)
             && !saksbehandlingRegler.harIkkeYrkesaktivFlyt(sakstype, behandlingstema)
             && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(sakstype, sakstema, behandlingstema)) {
             validerSøknadData(opprettSakDto.getSoknadDto());

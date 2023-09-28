@@ -49,7 +49,7 @@ class SaksbehandlingReglerTest {
         unleash.resetAll()
     }
 
-    fun testHarTomFlytParametere() =
+    fun testHarIngenFlytParametere() =
         listOf(
             Arguments.of(
                 Sakstyper.TRYGDEAVTALE,
@@ -127,8 +127,8 @@ class SaksbehandlingReglerTest {
 
 
     @ParameterizedTest
-    @MethodSource("testHarTomFlytParametere")
-    fun testHarTomFlyt(
+    @MethodSource("testHarIngenFlytParametere")
+    fun testHarIngenFlyt(
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstype: Behandlingstyper,
@@ -139,7 +139,7 @@ class SaksbehandlingReglerTest {
         if (ftrlToggleEnabled) {
             unleash.enable(ToggleName.FOLKETRYGDEN_MVP);
         }
-        val result = saksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema)
+        val result = saksbehandlingRegler.harIngenFlyt(sakstype, sakstema, behandlingstype, behandlingstema)
 
         result.shouldBe(expected)
     }

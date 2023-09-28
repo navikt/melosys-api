@@ -24,7 +24,7 @@ class SaksbehandlingRegler(
         behandlingstype: Behandlingstyper,
         behandlingstema: Behandlingstema
     ): Boolean {
-        if (harTomFlyt(
+        if (harIngenFlyt(
                 fagsak.type,
                 fagsak.tema,
                 behandlingstype,
@@ -41,7 +41,7 @@ class SaksbehandlingRegler(
     internal fun finnBehandlingSomKanReplikeres(behandlinger: List<Behandling>) =
         behandlinger
             .filter { it.erInaktiv() }
-            .filter { !harTomFlyt(it) }
+            .filter { !harIngenFlyt(it) }
             .firstOrNull {
                 val behandlingsresultat = behandlingsresultatRepository.findById(it.id)
                 behandlingstyperSomKanReplikeres.contains(it.type)
@@ -49,15 +49,15 @@ class SaksbehandlingRegler(
                     && !behandlingsresultattyperSomIkkeKanReplikeres.contains(behandlingsresultat.get().type)
             }
 
-    fun harTomFlyt(behandling: Behandling): Boolean =
-        harTomFlyt(
+    fun harIngenFlyt(behandling: Behandling): Boolean =
+        harIngenFlyt(
             behandling.fagsak.type,
             behandling.fagsak.tema,
             behandling.type,
             behandling.tema
         )
 
-    fun harTomFlyt(
+    fun harIngenFlyt(
         sakstype: Sakstyper,
         sakstema: Sakstemaer,
         behandlingstype: Behandlingstyper,

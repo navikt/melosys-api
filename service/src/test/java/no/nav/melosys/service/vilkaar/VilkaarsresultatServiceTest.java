@@ -102,7 +102,7 @@ class VilkaarsresultatServiceTest {
     }
 
     @Test
-    void tømVilkårForBehandlingsresultat_sakstypeEøsMenTomFlyt_sletterAlleVilkår() {
+    void tømVilkårForBehandlingsresultat_sakstypeEøsMenIngenFlyt_sletterAlleVilkår() {
         long behandlingID = 1L;
         var fagsak = new Fagsak();
         fagsak.setType(Sakstyper.EU_EOS);
@@ -114,7 +114,7 @@ class VilkaarsresultatServiceTest {
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setId(behandlingID);
         behandlingsresultat.setBehandling(behandling);
-        when(saksbehandlingRegler.harTomFlyt(any())).thenReturn(true);
+        when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(true);
 
 
         vilkaarsresultatService.tømVilkårForBehandlingsresultat(behandlingsresultat);
