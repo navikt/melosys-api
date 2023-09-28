@@ -23,11 +23,12 @@ class OpprettManglendeInntbetalingBehandling(
         val fagsak = behandling.fagsak
         val sistBehandling = fagsak.hentSistRegistrertBehandling()
 
-        opprettBehandlingForSak.opprettBehandling(fagsak.saksnummer, lagOpprettSakDto(sistBehandling, mottaksDato))
+        opprettBehandlingForSak.opprettBehandling(fagsak.saksnummer, lagOpprettSakDto(sistBehandling, mottaksDato, fakturaserieReferanse))
     }
 
-    private fun lagOpprettSakDto(sistBehandling: Behandling, mottaksDato: LocalDate): OpprettSakDto {
+    private fun lagOpprettSakDto(sistBehandling: Behandling, mottaksDato: LocalDate, fakturaserieReferanse: String?): OpprettSakDto {
         val opprettSakDto = OpprettSakDto()
+        opprettSakDto.fakturaserieReferanse = fakturaserieReferanse
         opprettSakDto.behandlingstema = sistBehandling.tema
         opprettSakDto.behandlingstype = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
         opprettSakDto.behandlingsaarsakType = sistBehandling.behandlingsårsak.type
