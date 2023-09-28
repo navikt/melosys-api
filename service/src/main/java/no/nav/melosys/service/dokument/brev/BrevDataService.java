@@ -99,7 +99,8 @@ public class BrevDataService {
             case ARBEIDSGIVER -> avklarMottakerIDForOrg(mottaker, kontaktopplysning);
             case FULLMEKTIG -> mottaker.erOrganisasjon() ? avklarMottakerIDForOrg(mottaker, kontaktopplysning) : mottaker.getPersonIdent();
             case BRUKER -> persondataFasade.hentFolkeregisterident(mottaker.getAktørId());
-            case UTENLANDSK_TRYGDEMYNDIGHET -> mottaker.erUtenlandskMyndighet() ? mottaker.getInstitusjonID() : mottaker.getOrgnr();
+            case UTENLANDSK_TRYGDEMYNDIGHET ->
+                mottaker.erUtenlandskMyndighet() ? mottaker.getInstitusjonID() : mottaker.getOrgnr();
             case NORSK_MYNDIGHET -> mottaker.getOrgnr();
             default -> throw new TekniskException(mottaker.getRolle() + " støttes ikke.");
         };
@@ -162,7 +163,7 @@ public class BrevDataService {
 
         navFelles.setBehandlendeEnhet(lagNavEnhet());
         navFelles.setKontaktinformasjon(BrevDataUtils.lagKontaktInformasjon());
-        navFelles.setMottaker(lagMottaker(mottaker, kontaktopplysning, behandling));
+        navFelles.setMottaker(lagMottaker(mottaker, kontaktopplysning));
         navFelles.setSakspart(lagSakspart(behandling));
 
         Saksbehandler saksbehandler = lagSaksbehandler(brevData.saksbehandler);
@@ -171,32 +172,30 @@ public class BrevDataService {
         return navFelles;
     }
 
-    Mottaker lagMottaker(no.nav.melosys.domain.brev.Mottaker mottaker, Kontaktopplysning kontaktopplysning, Behandling behandling) {
+    Mottaker lagMottaker(no.nav.melosys.domain.brev.Mottaker mottaker, Kontaktopplysning kontaktopplysning) {
         String mottakerID = avklarMottakerId(mottaker, kontaktopplysning);
 
         return switch (mottaker.getRolle()) {
-            case BRUKER -> lagMottakerForBruker(behandling, mottakerID);
+            case BRUKER -> lagMottakerForBruker(mottakerID);
             case ARBEIDSGIVER, NORSK_MYNDIGHET -> lagMottakerForOrganisasjon(mottakerID);
-            case UTENLANDSK_TRYGDEMYNDIGHET -> mottaker.erUtenlandskMyndighet() ? lagMottakerForUtenlandskTrygdemyndighet(mottaker) : lagMottakerForOrganisasjon(mottakerID);
-            case FULLMEKTIG -> mottaker.erOrganisasjon() ? lagMottakerForOrganisasjon(mottakerID) : lagMottakerForRepresentantPerson(behandling, mottakerID);
+            case UTENLANDSK_TRYGDEMYNDIGHET ->
+                mottaker.erUtenlandskMyndighet() ? lagMottakerForUtenlandskTrygdemyndighet(mottaker) : lagMottakerForOrganisasjon(mottakerID);
+            case FULLMEKTIG ->
+                mottaker.erOrganisasjon() ? lagMottakerForOrganisasjon(mottakerID) : lagMottakerForRepresentantPerson(mottakerID);
             default -> throw new TekniskException(mottaker.getRolle() + " støttes ikke.");
         };
     }
 
-    private Mottaker lagMottakerForBruker(Behandling behandling, String mottakerID) {
+    private Mottaker lagMottakerForBruker(String mottakerID) {
         Mottaker mottaker = new Person();
         mottaker.setTypeKode(AktoerType.PERSON);
         mottaker.setSpraakkode(Spraakkode.NB);
         mottaker.setId(mottakerID);
 
-        if (personManglerAdresseFraRegister(behandling.getFagsak().hentBrukersAktørID())) {
-            brukOppgittBostedsadresse(behandling, mottaker, mottakerID);
-        } else {
-            mottaker.setMottakeradresse(lagNorskPostadresse());
-            mottaker.setBerik(true);
-            mottaker.setNavn(PLASSHOLDER_TEKST);
-            mottaker.setKortNavn(PLASSHOLDER_TEKST);
-        }
+        mottaker.setMottakeradresse(lagNorskPostadresse());
+        mottaker.setBerik(true);
+        mottaker.setNavn(PLASSHOLDER_TEKST);
+        mottaker.setKortNavn(PLASSHOLDER_TEKST);
         return mottaker;
     }
 
@@ -212,20 +211,16 @@ public class BrevDataService {
         return mottaker;
     }
 
-    private Mottaker lagMottakerForRepresentantPerson(Behandling behandling, String mottakerID) {
+    private Mottaker lagMottakerForRepresentantPerson(String mottakerID) {
         Mottaker mottaker = new Person();
         mottaker.setTypeKode(AktoerType.PERSON);
         mottaker.setSpraakkode(Spraakkode.NB);
         mottaker.setId(mottakerID);
 
-        if (personManglerAdresseFraRegister(mottakerID)) {
-            brukOppgittBostedsadresse(behandling, mottaker, mottakerID);
-        } else {
-            mottaker.setMottakeradresse(lagNorskPostadresse());
-            mottaker.setBerik(true);
-            mottaker.setNavn(PLASSHOLDER_TEKST);
-            mottaker.setKortNavn(PLASSHOLDER_TEKST);
-        }
+        mottaker.setMottakeradresse(lagNorskPostadresse());
+        mottaker.setBerik(true);
+        mottaker.setNavn(PLASSHOLDER_TEKST);
+        mottaker.setKortNavn(PLASSHOLDER_TEKST);
         return mottaker;
     }
 
@@ -241,19 +236,6 @@ public class BrevDataService {
         mottaker.setSpraakkode(Spraakkode.NB);
         mottaker.setMottakeradresse(lagUtendlanskAdresse(utenlandskMyndighet));
         return mottaker;
-    }
-
-    private void brukOppgittBostedsadresse(Behandling behandling, Mottaker mottaker, String mottakerID) {
-        MottatteOpplysningerData grunnlagData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
-        StrukturertAdresse oppgittAdresse = grunnlagData.bosted.oppgittAdresse;
-        if (!oppgittAdresse.erGyldig()) {
-            throw new FunksjonellException(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
-        }
-        String navn = persondataFasade.hentSammensattNavn(mottakerID);
-        mottaker.setMottakeradresse(lagAdresse(oppgittAdresse));
-        mottaker.setBerik(false);
-        mottaker.setNavn(navn);
-        mottaker.setKortNavn(navn);
     }
 
     private Saksbehandler lagSaksbehandler(String ident) {
