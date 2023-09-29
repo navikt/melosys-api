@@ -13,24 +13,25 @@ import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
+import no.nav.melosys.service.avgift.dto.SkatteforholdTilNorgeRequest
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDate
 
 @Service
 class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: BehandlingsresultatService) {
 
     @Transactional
     fun oppdaterTrygdeavgiftsgrunnlag(
-        behandlingsresultatID: Long, request: OppdaterTrygdeavgiftsgrunnlagRequest
+        behandlingID: Long, request: OppdaterTrygdeavgiftsgrunnlagRequest
     ): Trygdeavgiftsgrunnlag {
-        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
         val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
 
         validerAtMedlemskapsperioderFinnes(medlemAvFolketrygden.medlemskapsperioder)
         fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden.fastsattTrygdeavgift)
 
+        // TODO: Validering på skatteforholdsperioder
         val fomDato = medlemAvFolketrygden.utledMedlemskapsperiodeFom()
             ?: throw FunksjonellException("Klarte ikke finne startdatoen på medlemskapet")
         val tomDato = medlemAvFolketrygden.utledMedlemskapsperiodeTom()
@@ -39,12 +40,12 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
         medlemAvFolketrygden.fastsattTrygdeavgift = eksisterendeEllerNyFastsattTrygdeavgift(medlemAvFolketrygden)
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag =
             eksisterendeEllerNyttTrygdeavgiftsgrunnlag(medlemAvFolketrygden).apply {
-                this.skatteforholdTilNorge = lagSkatteforholdTilNorge(request, fomDato, tomDato)
+                this.skatteforholdTilNorge = lagSkatteforholdTilNorge(request)
                 this.inntektsperioder = lagInntektsperioder(request)
             }
         behandlingsresultatService.lagre(behandlingsresultat)
 
-        return hentTrygdeavgiftsgrunnlag(behandlingsresultatID)
+        return hentTrygdeavgiftsgrunnlag(behandlingID)
             ?: throw FunksjonellException("Noe skjedde ved lagring av trygdeavgiftsgrunnlaget")
     }
 
@@ -69,14 +70,15 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
 
 
     private fun lagSkatteforholdTilNorge(
-        request: OppdaterTrygdeavgiftsgrunnlagRequest,
-        fomDato: LocalDate,
-        tomDato: LocalDate,
-    ): Set<SkatteforholdTilNorge> = setOf(SkatteforholdTilNorge().apply {
-        this.fomDato = fomDato
-        this.tomDato = tomDato
-        this.skatteplikttype = request.skatteplikttype
-    })
+        request: OppdaterTrygdeavgiftsgrunnlagRequest
+    ): List<SkatteforholdTilNorge> =
+        (request.skatteforholdTilNorgeList.map { skatteforholdTilNorgeRequest: SkatteforholdTilNorgeRequest ->
+            SkatteforholdTilNorge().apply {
+                this.fomDato = skatteforholdTilNorgeRequest.fomDato
+                this.tomDato = skatteforholdTilNorgeRequest.tomDato
+                this.skatteplikttype = skatteforholdTilNorgeRequest.skatteplikttype
+            }
+        })
 
     private fun lagInntektsperioder(
         request: OppdaterTrygdeavgiftsgrunnlagRequest,
@@ -98,12 +100,21 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
     private fun ordinærTrygdeavgiftBetalesTilNav(
         request: OppdaterTrygdeavgiftsgrunnlagRequest, inntektskildeRequest: InntektskildeRequest
     ): Boolean {
-        return request.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG || inntektskildeRequest.type == Inntektskildetype.FN_SKATTEFRITAK
+        return request.skatteforholdTilNorgeList.maxBy { it.tomDato }.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG || inntektskildeRequest.type ==
+            Inntektskildetype
+            .FN_SKATTEFRITAK
     }
 
     @Transactional(readOnly = true)
-    fun hentTrygdeavgiftsgrunnlag(behandlingsresultatID: Long): Trygdeavgiftsgrunnlag? {
-        return behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID).getMedlemAvFolketrygden()
-            ?.getFastsattTrygdeavgift()?.getTrygdeavgiftsgrunnlag()
+    fun hentTrygdeavgiftsgrunnlag(behandlingID: Long): Trygdeavgiftsgrunnlag? {
+        val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
+        val behandling = behandlingsresultat.behandling
+        val trygdeavgiftsgrunnlag = behandlingsresultat.medlemAvFolketrygden?.fastsattTrygdeavgift?.trygdeavgiftsgrunnlag
+        if (trygdeavgiftsgrunnlag == null && behandling.erNyVurdering() && behandling.opprinneligBehandling != null) {
+            val forrigeBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.opprinneligBehandling.id)
+            return forrigeBehandlingsresultat.medlemAvFolketrygden?.fastsattTrygdeavgift?.trygdeavgiftsgrunnlag
+        } else {
+            return trygdeavgiftsgrunnlag
+        }
     }
 }

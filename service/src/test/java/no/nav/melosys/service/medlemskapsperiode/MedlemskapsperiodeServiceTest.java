@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.avgift.Inntektsperiode;
@@ -158,7 +157,7 @@ class MedlemskapsperiodeServiceTest {
         skatteforholdTilNorge.setFomDato(LocalDate.of(2023, 1, 1));
         skatteforholdTilNorge.setTomDato(LocalDate.of(2023, 12, 1));
         skatteforholdTilNorge.setSkatteplikttype(Skatteplikttype.SKATTEPLIKTIG);
-        Set<SkatteforholdTilNorge> skatteforholdTilNorgeList = Set.of(skatteforholdTilNorge);
+        List<SkatteforholdTilNorge> skatteforholdTilNorgeList = Arrays.asList(skatteforholdTilNorge);
 
         trygdeavgiftsgrunnlag.setInntektsperioder(inntektsperiodeList);
         trygdeavgiftsgrunnlag.setSkatteforholdTilNorge(skatteforholdTilNorgeList);
