@@ -31,12 +31,6 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
         validerAtMedlemskapsperioderFinnes(medlemAvFolketrygden.medlemskapsperioder)
         fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden.fastsattTrygdeavgift)
 
-        // TODO: Validering på skatteforholdsperioder
-        val fomDato = medlemAvFolketrygden.utledMedlemskapsperiodeFom()
-            ?: throw FunksjonellException("Klarte ikke finne startdatoen på medlemskapet")
-        val tomDato = medlemAvFolketrygden.utledMedlemskapsperiodeTom()
-            ?: throw FunksjonellException("Klarte ikke finne sluttdatoen på medlemskapet")
-
         medlemAvFolketrygden.fastsattTrygdeavgift = eksisterendeEllerNyFastsattTrygdeavgift(medlemAvFolketrygden)
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag =
             eksisterendeEllerNyttTrygdeavgiftsgrunnlag(medlemAvFolketrygden).apply {
