@@ -48,7 +48,7 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
             ?: throw FunksjonellException("Noe skjedde ved lagring av trygdeavgiftsgrunnlaget")
     }
 
-    private fun fjernTrygdeavgiftsperioderOmDeFinnes(fastsattTrygdeavgift: FastsattTrygdeavgift?) {
+    fun fjernTrygdeavgiftsperioderOmDeFinnes(fastsattTrygdeavgift: FastsattTrygdeavgift?) {
         fastsattTrygdeavgift?.trygdeavgiftsperioder?.clear()
     }
 
@@ -99,9 +99,8 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
     private fun ordinærTrygdeavgiftBetalesTilNav(
         request: OppdaterTrygdeavgiftsgrunnlagRequest, inntektskildeRequest: InntektskildeRequest
     ): Boolean {
-        return request.skatteforholdTilNorgeList.maxBy { it.tomDato }.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG || inntektskildeRequest.type ==
-            Inntektskildetype
-            .FN_SKATTEFRITAK
+        return request.skatteforholdTilNorgeList.any { it.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG } || inntektskildeRequest.type ==
+            Inntektskildetype.FN_SKATTEFRITAK
     }
 
     @Transactional(readOnly = true)

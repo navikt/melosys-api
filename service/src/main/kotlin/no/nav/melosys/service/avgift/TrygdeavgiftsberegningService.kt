@@ -168,7 +168,7 @@ class TrygdeavgiftsberegningService
             val skatteforholdDateRange = skatteforholdTilNorge.sortedBy { it.fomDato }
                 .map { skatteforhold -> LocalDateRange.ofClosed(skatteforhold.fomDato, skatteforhold.tomDato) }
 
-            harOverlapp(skatteforholdDateRange)
+            validerHarOverlapp(skatteforholdDateRange)
 
             var samletSkatteforholdDateRange: LocalDateRange? = null
             try {
@@ -194,7 +194,7 @@ class TrygdeavgiftsberegningService
             }
         }
 
-        fun harOverlapp(dateRanges: List<LocalDateRange>) {
+        fun validerHarOverlapp(dateRanges: List<LocalDateRange>) {
             for (i in dateRanges.indices) {
                 val range1 = dateRanges[i]
 

@@ -3,12 +3,9 @@ package no.nav.melosys.service.medlemskapsperiode;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.Medlemskapsperiode;
-import no.nav.melosys.domain.avgift.Inntektsperiode;
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
@@ -17,9 +14,6 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.MedlemskapsperiodeRepository;
 import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
-import no.nav.melosys.service.avgift.dto.InntektskildeRequest;
-import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest;
-import no.nav.melosys.service.avgift.dto.SkatteforholdTilNorgeRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -71,7 +65,7 @@ public class MedlemskapsperiodeService {
 
 
         Medlemskapsperiode medlemskapsperiode = medlemskapsperiodeRepository.save(nyMedlemskapsperiode);
-        oppdatereTrygdeavgiftsgrunnlag(behandlingsresultatID, medlemAvFolketrygden);
+        fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden);
         return medlemskapsperiode;
     }
 
@@ -92,20 +86,15 @@ public class MedlemskapsperiodeService {
         oppdaterMedlemskapsperiode(medlemskapsperiode, fom, tom, innvilgelsesResultat, trygdedekning);
 
         MedlemAvFolketrygden medlemAvFolketrygden = medlemskapsperiode.getMedlemAvFolketrygden();
-        oppdatereTrygdeavgiftsgrunnlag(behandlingsresultatID, medlemAvFolketrygden);
+        fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden);
 
         return medlemskapsperiodeRepository.save(medlemskapsperiode);
     }
 
-    private void oppdatereTrygdeavgiftsgrunnlag(Long behandlingsresultatID, MedlemAvFolketrygden medlemAvFolketrygden) {
-        if (medlemAvFolketrygden.getFastsattTrygdeavgift() != null && medlemAvFolketrygden.getFastsattTrygdeavgift().getTrygdeavgiftsgrunnlag() != null) {
-            List<Inntektsperiode> inntektsperioder =
-                medlemAvFolketrygden.getFastsattTrygdeavgift().getTrygdeavgiftsgrunnlag().getInntektsperioder();
-            List<SkatteforholdTilNorge> skatteforholdTilNorge =
-                medlemAvFolketrygden.getFastsattTrygdeavgift().getTrygdeavgiftsgrunnlag().getSkatteforholdTilNorge();
-            trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(behandlingsresultatID,
-                new OppdaterTrygdeavgiftsgrunnlagRequest(skatteforholdTilNorge.stream().map(SkatteforholdTilNorgeRequest::new).toList(),
-                    inntektsperioder.stream().map(InntektskildeRequest::new).toList()));
+    // TODO: MELOSYS-6148
+    private void fjernTrygdeavgiftsperioderOmDeFinnes(MedlemAvFolketrygden medlemAvFolketrygden) {
+        if (medlemAvFolketrygden.getFastsattTrygdeavgift() != null) {
+            trygdeavgiftsgrunnlagService.fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden.getFastsattTrygdeavgift());
         }
     }
 
@@ -143,7 +132,7 @@ public class MedlemskapsperiodeService {
             .orElseThrow(() -> new IkkeFunnetException("Finner ingen medlemskapsperiode med id " + medlemskapsperiodeID + " for behandling " + behandlingsresultatID));
 
         medlemAvFolketrygden.removeMedlemskapsperioder(medlemskapsperiode);
-        oppdatereTrygdeavgiftsgrunnlag(behandlingsresultatID, medlemAvFolketrygden);
+        fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden);
     }
 
     public Collection<Trygdedekninger> hentGyldigeTrygdedekninger() {
