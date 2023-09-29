@@ -84,7 +84,7 @@ class MedlemskapsperiodeServiceTest {
             InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE);
 
         verify(medlemskapsperiodeRepositoryMock).save(medlemskapsperiodeCaptor.capture());
-        verify(trygdeavgiftsgrunnlagServiceMock).oppdaterTrygdeavgiftsgrunnlag(eq(behandlingsresultatID), any());
+        verify(trygdeavgiftsgrunnlagServiceMock).fjernTrygdeavgiftsperioderOmDeFinnes(any());
         assertThat(medlemskapsperiodeCaptor.getValue()).isNotNull()
             .extracting(
                 Medlemskapsperiode::getArbeidsland,
@@ -136,7 +136,7 @@ class MedlemskapsperiodeServiceTest {
             .extracting(Medlemskapsperiode::getFom, Medlemskapsperiode::getTom,
                 Medlemskapsperiode::getInnvilgelsesresultat, Medlemskapsperiode::getTrygdedekning)
             .containsExactly(nå, nå, InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER);
-        verify(trygdeavgiftsgrunnlagServiceMock).oppdaterTrygdeavgiftsgrunnlag(eq(behandlingsresultatID), any());
+        verify(trygdeavgiftsgrunnlagServiceMock).fjernTrygdeavgiftsperioderOmDeFinnes(any());
     }
 
     private FastsattTrygdeavgift lagFastsattTrygdeavgift() {
@@ -249,7 +249,7 @@ class MedlemskapsperiodeServiceTest {
     }
 
     @Test
-    void slettMedlemskapsperiode_oppdatererTrygdeavgift_slettes() {
+    void slettMedlemskapsperiode_fjernTrygdeavgiftsperioder_slettes() {
         var medlemskapsperiode1 = lagMedlemskapsperiode();
         var medlemskapsperiode2 = lagMedlemskapsperiode();
         medlemskapsperiode2.setId(123321L);
@@ -262,7 +262,7 @@ class MedlemskapsperiodeServiceTest {
         medlemskapsperiodeService.slettMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID);
 
 
-        verify(trygdeavgiftsgrunnlagServiceMock).oppdaterTrygdeavgiftsgrunnlag(eq(behandlingsresultatID), any());
+        verify(trygdeavgiftsgrunnlagServiceMock).fjernTrygdeavgiftsperioderOmDeFinnes(any());
         assertThat(medlemAvFolketrygden.getMedlemskapsperioder()).hasSize(1);
     }
 
