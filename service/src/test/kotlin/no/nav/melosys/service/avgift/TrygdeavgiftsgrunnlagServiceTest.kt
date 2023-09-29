@@ -14,25 +14,30 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
+import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
+import no.nav.melosys.service.avgift.dto.SkatteforholdTilNorgeRequest
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 import java.time.LocalDate
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 @ExtendWith(MockKExtension::class)
 class TrygdeavgiftsgrunnlagServiceTest {
@@ -43,20 +48,72 @@ class TrygdeavgiftsgrunnlagServiceTest {
     private lateinit var trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService
 
     private lateinit var behandlingsresultat: Behandlingsresultat
+    private lateinit var forrigeBehandlingsresultat: Behandlingsresultat
     private val slotBehandlingsresultat = slot<Behandlingsresultat>()
     private val BEHANDLING_ID: Long = 1291
+    private val FORRIGE_BEHANDLING_ID: Long = 1292
 
 
     @BeforeEach
     fun setup() {
         trygdeavgiftsgrunnlagService = TrygdeavgiftsgrunnlagService(mockBehandlingsresultatService)
         behandlingsresultat = Behandlingsresultat()
+        forrigeBehandlingsresultat = Behandlingsresultat()
         every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
+        every { mockBehandlingsresultatService.hentBehandlingsresultat(FORRIGE_BEHANDLING_ID) }.returns(forrigeBehandlingsresultat)
     }
 
     @Test
     fun hentTrygdeavgiftsgrunnlag_ingenGrunnlag_returnerNull() {
+        behandlingsresultat.behandling = Behandling().apply {
+            type = Behandlingstyper.FØRSTEGANG
+        }
         trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlag(BEHANDLING_ID).shouldBeNull()
+    }
+
+    @Test
+    fun hentTrygdeavgiftsgrunnlag_ingenGrunnlag_nyVurdering_returnererGammeltGrunnlag() {
+        behandlingsresultat.behandling = Behandling().apply {
+            type = Behandlingstyper.NY_VURDERING
+            opprinneligBehandling = Behandling().apply { id = FORRIGE_BEHANDLING_ID }
+        }
+        forrigeBehandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
+                trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
+                    id = 10
+                }
+            }
+        }
+
+        val trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlag(BEHANDLING_ID)
+
+        assertEquals(10, trygdeavgiftsgrunnlag?.id)
+    }
+
+    @Test
+    fun hentTrygdeavgiftsgrunnlag_grunnlagFinnes_nyVurdering_returnererNyttGrunnlag() {
+        behandlingsresultat.behandling = Behandling().apply {
+            type = Behandlingstyper.NY_VURDERING
+            opprinneligBehandling = Behandling().apply { id = FORRIGE_BEHANDLING_ID }
+        }
+        behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
+                trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
+                    id = 50
+                }
+            }
+        }
+        forrigeBehandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
+                trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
+                    id = 10
+                }
+            }
+        }
+
+        val trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlag(BEHANDLING_ID)
+
+        assertEquals(50, trygdeavgiftsgrunnlag?.id)
     }
 
     @Test
@@ -66,7 +123,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
-                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(Skatteplikttype.SKATTEPLIKTIG, emptyList())
+                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(emptyList(), emptyList())
             )
         }.message.shouldContain("Kan ikke oppdatere trygdeavgiftsgrunnlaget før medlemskapsperioder finnes")
     }
@@ -81,7 +138,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
-                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(Skatteplikttype.SKATTEPLIKTIG, emptyList())
+                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(emptyList(), emptyList())
             )
         }.message.shouldContain("Klarte ikke finne startdatoen på medlemskapet")
     }
@@ -99,7 +156,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
         shouldThrow<FunksjonellException> {
             trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
-                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(Skatteplikttype.SKATTEPLIKTIG, emptyList())
+                BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(emptyList(), emptyList())
             )
         }.message.shouldContain("Klarte ikke finne sluttdatoen på medlemskapet")
     }
@@ -121,45 +178,13 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
 
         trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
-            BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(Skatteplikttype.SKATTEPLIKTIG, emptyList())
+            BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(emptyList(), emptyList())
         )
 
 
         verify { mockBehandlingsresultatService.lagre(capture(slotBehandlingsresultat)) }
         slotBehandlingsresultat.captured.shouldNotBeNull()
         slotBehandlingsresultat.captured.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.shouldBeEmpty()
-    }
-
-    @Test
-    fun oppdaterTrygdeavgiftsgrunnlag_flereMedlemskapsperioder_riktigSkatteforhold() {
-        val nå = LocalDate.now()
-        every { mockBehandlingsresultatService.lagre(any()) }.returns(Unit)
-        behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
-            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
-                fom = nå.minusMonths(6)
-                tom = nå.minusMonths(1)
-                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-            }, Medlemskapsperiode().apply {
-                fom = nå.minusMonths(1)
-                tom = nå.plusMonths(3)
-                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-            })
-        }
-
-
-        trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
-            BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(Skatteplikttype.SKATTEPLIKTIG, emptyList())
-        )
-
-
-        verify { mockBehandlingsresultatService.lagre(capture(slotBehandlingsresultat)) }
-        slotBehandlingsresultat.captured.shouldNotBeNull()
-        val skatteforholdTilNorge =
-            slotBehandlingsresultat.captured.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge
-        skatteforholdTilNorge.shouldHaveSize(1)
-        skatteforholdTilNorge.first().skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
-        skatteforholdTilNorge.first().fomDato.shouldBe(nå.minusMonths(6))
-        skatteforholdTilNorge.first().tomDato.shouldBe(nå.plusMonths(3))
     }
 
     @Test
@@ -178,7 +203,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
         trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
             BEHANDLING_ID, OppdaterTrygdeavgiftsgrunnlagRequest(
-                Skatteplikttype.SKATTEPLIKTIG, listOf(
+                listOf(SkatteforholdTilNorgeRequest(fom, tom, Skatteplikttype.SKATTEPLIKTIG)), listOf(
                     InntektskildeRequest(Inntektskildetype.INNTEKT_FRA_UTLANDET, false, BigDecimal.valueOf(30000), fom, tom),
                     InntektskildeRequest(Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE, false, BigDecimal.valueOf(10000), fom, tom),
                     InntektskildeRequest(Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE, true, null, fom, tom)

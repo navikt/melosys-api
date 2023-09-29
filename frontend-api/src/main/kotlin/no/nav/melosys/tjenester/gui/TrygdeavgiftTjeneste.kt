@@ -1,7 +1,6 @@
 package no.nav.melosys.tjenester.gui
 
 import io.swagger.annotations.Api
-import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
 import no.nav.melosys.service.tilgang.Aksesskontroll
