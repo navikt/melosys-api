@@ -98,24 +98,6 @@ class LagreMedlemsperiodeMedlTest {
     }
 
     @Test
-    void utfør_avslutterMedlemskapsperioder_nårDetErNyVurderingOgAvslag() {
-        var medlemskapsperioder = List.of(lagMedlemskapsperiode(AVSLAATT), lagMedlemskapsperiode(AVSLAATT));
-        Behandlingsresultat behandlingsresultat = lagBehandlingsresulat(medlemskapsperioder);
-        Prosessinstans prosessinstans = lagProsessInstans();
-        prosessinstans.getBehandling().setType(Behandlingstyper.NY_VURDERING);
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-1");
-        prosessinstans.getBehandling().setFagsak(fagsak);
-        behandlingsresultat.setBehandling(prosessinstans.getBehandling());
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
-
-        lagreMedlemsperiodeMedl.utfør(prosessinstans);
-
-
-        verify(medlPeriodeService).avsluttTidligerMedlPeriode(eq("MEL-1"));
-    }
-
-    @Test
     void utfør_avslutterMedlemskapsperioder_nårDetErNyVurderingOgInnvilgelse() {
         Medlemskapsperiode innvilgetMedlemskapsperiode = lagMedlemskapsperiode(INNVILGET);
         var medlemskapsperioder = List.of(lagMedlemskapsperiode(AVSLAATT), innvilgetMedlemskapsperiode);
