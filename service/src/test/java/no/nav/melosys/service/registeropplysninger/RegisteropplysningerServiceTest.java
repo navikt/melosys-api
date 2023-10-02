@@ -184,7 +184,7 @@ class RegisteropplysningerServiceTest {
     }
 
     @Test
-    void hentOgLagreOpplysninger_medAlleOpplysninger_skalHaMinimum5AarPeriode() {
+    void hentOgLagreOpplysninger_medAlleOpplysninger_skalHente5AarFoerFom() {
         LocalDate fom = LocalDate.now().minusYears(1);
         LocalDate tom = LocalDate.now().plusYears(1);
 

@@ -87,7 +87,7 @@ public class RegisteropplysningerRequest {
         private LocalDate fom;
         private LocalDate tom;
         private Informasjonsbehov informasjonsbehov;
-        private boolean hentOpplysningerFor5aar;
+        private boolean hentRegisteropplysninger5AarFoerFom;
 
         RegisteropplysningerRequestBuilder() {
         }
@@ -123,13 +123,13 @@ public class RegisteropplysningerRequest {
         }
 
         public RegisteropplysningerRequestBuilder hentOpplysningerFor5aar(boolean hentOpplysningerFor5aar) {
-            this.hentOpplysningerFor5aar = hentOpplysningerFor5aar;
+            this.hentRegisteropplysninger5AarFoerFom = hentOpplysningerFor5aar;
             return this;
         }
 
         public RegisteropplysningerRequest build() {
             valider();
-            return new RegisteropplysningerRequest(behandlingID, saksopplysningTyper.getOpplysningstyper(), fnr, fom, tom, informasjonsbehov, hentOpplysningerFor5aar);
+            return new RegisteropplysningerRequest(behandlingID, saksopplysningTyper.getOpplysningstyper(), fnr, fom, tom, informasjonsbehov, hentRegisteropplysninger5AarFoerFom);
         }
 
         private void valider() {
