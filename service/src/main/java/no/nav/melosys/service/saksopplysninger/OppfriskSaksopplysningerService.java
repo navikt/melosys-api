@@ -57,7 +57,7 @@ public class OppfriskSaksopplysningerService {
     }
 
     @Transactional
-    public void oppfriskSaksopplysning(long behandlingID, boolean medFamilierelasjoner, boolean periodeOver5aar) {
+    public void oppfriskSaksopplysning(long behandlingID, boolean periodeOver5aar) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
         if (behandling.erUtsending() && anmodningsperiodeService.harSendtAnmodningsperiode(behandlingID)) {
@@ -82,9 +82,7 @@ public class OppfriskSaksopplysningerService {
             .fnr(brukerID)
             .fom(periode.getFom())
             .tom(periode.getTom())
-            .informasjonsbehov(medFamilierelasjoner
-                ? Informasjonsbehov.MED_FAMILIERELASJONER
-                : Informasjonsbehov.STANDARD)
+            .informasjonsbehov(Informasjonsbehov.STANDARD)
             .hentOpplysningerFor5aar(periodeOver5aar)
             .build();
 
