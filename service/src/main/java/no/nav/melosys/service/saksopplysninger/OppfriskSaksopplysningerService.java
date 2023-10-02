@@ -82,7 +82,6 @@ public class OppfriskSaksopplysningerService {
             .fnr(brukerID)
             .fom(periode.getFom())
             .tom(periode.getTom())
-            .informasjonsbehov(Informasjonsbehov.STANDARD)
             .hentOpplysningerFor5aar(periodeOver5aar)
             .build();
 

@@ -3,12 +3,10 @@ package no.nav.melosys.service.registeropplysninger;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.exception.TekniskException;
 import org.apache.commons.lang3.StringUtils;
 
@@ -20,17 +18,15 @@ public class RegisteropplysningerRequest {
     private final String fnr;
     private LocalDate fom;
     private final LocalDate tom;
-    private final Informasjonsbehov informasjonsbehov;
     private final boolean hentOpplysningerFor5aar;
 
     private RegisteropplysningerRequest(Long behandlingID, Set<SaksopplysningType> opplysningstyper,
-                                        String fnr, LocalDate fom, LocalDate tom, Informasjonsbehov informasjonsbehov, boolean hentOpplysningerFor5aar) {
+                                        String fnr, LocalDate fom, LocalDate tom, boolean hentOpplysningerFor5aar) {
         this.behandlingID = behandlingID;
         this.opplysningstyper = opplysningstyper;
         this.fnr = fnr;
         this.fom = fom;
         this.tom = tom;
-        this.informasjonsbehov = informasjonsbehov;
         this.hentOpplysningerFor5aar = hentOpplysningerFor5aar;
     }
 
@@ -62,10 +58,6 @@ public class RegisteropplysningerRequest {
         return tom;
     }
 
-    public Informasjonsbehov getInformasjonsbehov() {
-        return Objects.requireNonNullElse(informasjonsbehov, Informasjonsbehov.STANDARD);
-    }
-
     public boolean hentOpplysningerFor5aar() {
         return hentOpplysningerFor5aar;
     }
@@ -73,7 +65,7 @@ public class RegisteropplysningerRequest {
     RegisteropplysningerRequest lagKopiUtenPeriodeOgOpplysningstyperSomKreverPeriode() {
         Set<SaksopplysningType> opplysningstyperSet = new HashSet<>(getOpplysningstyper());
         opplysningstyperSet.removeAll(SaksopplysningType.KREVER_PERIODE);
-        return new RegisteropplysningerRequest(getBehandlingID(), opplysningstyperSet, getFnr(), null, null, getInformasjonsbehov(), hentOpplysningerFor5aar());
+        return new RegisteropplysningerRequest(getBehandlingID(), opplysningstyperSet, getFnr(), null, null, hentOpplysningerFor5aar());
     }
 
     public static SaksopplysningTyper hentSaksopplysningTyperSomLagres() {
@@ -86,8 +78,7 @@ public class RegisteropplysningerRequest {
         private String fnr;
         private LocalDate fom;
         private LocalDate tom;
-        private Informasjonsbehov informasjonsbehov;
-        private boolean hentRegisteropplysninger5AarFoerFom;
+        private boolean hentRegisteropplysninger5AarFørFom;
 
         RegisteropplysningerRequestBuilder() {
         }
@@ -117,19 +108,14 @@ public class RegisteropplysningerRequest {
             return this;
         }
 
-        public RegisteropplysningerRequestBuilder informasjonsbehov(Informasjonsbehov informasjonsbehov) {
-            this.informasjonsbehov = informasjonsbehov;
-            return this;
-        }
-
         public RegisteropplysningerRequestBuilder hentOpplysningerFor5aar(boolean hentOpplysningerFor5aar) {
-            this.hentRegisteropplysninger5AarFoerFom = hentOpplysningerFor5aar;
+            this.hentRegisteropplysninger5AarFørFom = hentOpplysningerFor5aar;
             return this;
         }
 
         public RegisteropplysningerRequest build() {
             valider();
-            return new RegisteropplysningerRequest(behandlingID, saksopplysningTyper.getOpplysningstyper(), fnr, fom, tom, informasjonsbehov, hentRegisteropplysninger5AarFoerFom);
+            return new RegisteropplysningerRequest(behandlingID, saksopplysningTyper.getOpplysningstyper(), fnr, fom, tom, hentRegisteropplysninger5AarFørFom);
         }
 
         private void valider() {

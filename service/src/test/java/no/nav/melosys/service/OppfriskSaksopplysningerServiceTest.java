@@ -244,19 +244,6 @@ class OppfriskSaksopplysningerServiceTest {
         verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any(Periode.class));
     }
 
-    @Test
-    void oppfriskSaksopplysning_utenFamilierelasjoner_girForventetInformasjonsbehov() {
-        Behandling behandling = lagBehandling();
-        when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
-        when(persondataFasade.hentFolkeregisterident(anyString())).thenReturn("322211");
-        ArgumentCaptor<RegisteropplysningerRequest> requestCaptor = ArgumentCaptor.forClass(RegisteropplysningerRequest.class);
-
-        oppfriskSaksopplysningerService.oppfriskSaksopplysning(BEHANDLING_ID, false);
-
-        verify(registeropplysningerService).hentOgLagreOpplysninger(requestCaptor.capture());
-        assertThat(requestCaptor.getValue().getInformasjonsbehov()).isEqualTo(Informasjonsbehov.STANDARD);
-    }
-
     private Saksopplysning lagSED() {
         Saksopplysning sed = new Saksopplysning();
         SedDokument sedDokument = new SedDokument();
