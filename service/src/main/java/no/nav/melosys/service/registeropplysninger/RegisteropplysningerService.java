@@ -83,6 +83,9 @@ public class RegisteropplysningerService {
             log.info("Var ingen registeropplysninger å hente for behandling {}", registeropplysningerRequest.getBehandlingID());
             return;
         }
+        if (registeropplysningerRequest.hentOpplysningerFor5aar()) {
+            registeropplysningerRequest.setFom(registeropplysningerRequest.getFom().minusYears(5));
+        }
 
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(registeropplysningerRequest.getBehandlingID());
 
