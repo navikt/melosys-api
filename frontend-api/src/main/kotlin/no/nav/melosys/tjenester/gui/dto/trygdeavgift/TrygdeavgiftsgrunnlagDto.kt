@@ -1,18 +1,17 @@
 package no.nav.melosys.tjenester.gui.dto.trygdeavgift
 
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
-import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
 
 data class TrygdeavgiftsgrunnlagDto(
-    val skatteplikttype: Skatteplikttype,
+    val skatteforholdsperioder: List<SkatteforholdTilNorgeDto>,
     val inntektskilder: List<InntekskildeDto>
 ) {
     constructor(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag) : this(
-        trygdeavgiftsgrunnlag.skatteforholdTilNorge.first().skatteplikttype,
+        (trygdeavgiftsgrunnlag.skatteforholdTilNorge.map { SkatteforholdTilNorgeDto(it) }),
         (trygdeavgiftsgrunnlag.inntektsperioder.map { InntekskildeDto(it) })
     )
 
     fun tilRequest(): OppdaterTrygdeavgiftsgrunnlagRequest =
-        OppdaterTrygdeavgiftsgrunnlagRequest(skatteplikttype, (inntektskilder.map { it.tilRequest() }))
+        OppdaterTrygdeavgiftsgrunnlagRequest((skatteforholdsperioder.map { it.tilRequest() }), (inntektskilder.map { it.tilRequest() }))
 }

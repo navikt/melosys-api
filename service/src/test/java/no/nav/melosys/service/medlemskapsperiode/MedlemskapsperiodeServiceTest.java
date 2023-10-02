@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.avgift.Inntektsperiode;
@@ -85,7 +84,7 @@ class MedlemskapsperiodeServiceTest {
             InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE);
 
         verify(medlemskapsperiodeRepositoryMock).save(medlemskapsperiodeCaptor.capture());
-        verify(trygdeavgiftsgrunnlagServiceMock).oppdaterTrygdeavgiftsgrunnlag(eq(behandlingsresultatID), any());
+        verify(trygdeavgiftsgrunnlagServiceMock).fjernTrygdeavgiftsperioderOmDeFinnes(any());
         assertThat(medlemskapsperiodeCaptor.getValue()).isNotNull()
             .extracting(
                 Medlemskapsperiode::getArbeidsland,
@@ -137,7 +136,7 @@ class MedlemskapsperiodeServiceTest {
             .extracting(Medlemskapsperiode::getFom, Medlemskapsperiode::getTom,
                 Medlemskapsperiode::getInnvilgelsesresultat, Medlemskapsperiode::getTrygdedekning)
             .containsExactly(nå, nå, InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_ANDRE_LEDD_HELSE_PENSJON_SYKE_FORELDREPENGER);
-        verify(trygdeavgiftsgrunnlagServiceMock).oppdaterTrygdeavgiftsgrunnlag(eq(behandlingsresultatID), any());
+        verify(trygdeavgiftsgrunnlagServiceMock).fjernTrygdeavgiftsperioderOmDeFinnes(any());
     }
 
     private FastsattTrygdeavgift lagFastsattTrygdeavgift() {
@@ -158,7 +157,7 @@ class MedlemskapsperiodeServiceTest {
         skatteforholdTilNorge.setFomDato(LocalDate.of(2023, 1, 1));
         skatteforholdTilNorge.setTomDato(LocalDate.of(2023, 12, 1));
         skatteforholdTilNorge.setSkatteplikttype(Skatteplikttype.SKATTEPLIKTIG);
-        Set<SkatteforholdTilNorge> skatteforholdTilNorgeList = Set.of(skatteforholdTilNorge);
+        List<SkatteforholdTilNorge> skatteforholdTilNorgeList = Arrays.asList(skatteforholdTilNorge);
 
         trygdeavgiftsgrunnlag.setInntektsperioder(inntektsperiodeList);
         trygdeavgiftsgrunnlag.setSkatteforholdTilNorge(skatteforholdTilNorgeList);
@@ -250,7 +249,7 @@ class MedlemskapsperiodeServiceTest {
     }
 
     @Test
-    void slettMedlemskapsperiode_oppdatererTrygdeavgift_slettes() {
+    void slettMedlemskapsperiode_fjernTrygdeavgiftsperioder_slettes() {
         var medlemskapsperiode1 = lagMedlemskapsperiode();
         var medlemskapsperiode2 = lagMedlemskapsperiode();
         medlemskapsperiode2.setId(123321L);
@@ -263,7 +262,7 @@ class MedlemskapsperiodeServiceTest {
         medlemskapsperiodeService.slettMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID);
 
 
-        verify(trygdeavgiftsgrunnlagServiceMock).oppdaterTrygdeavgiftsgrunnlag(eq(behandlingsresultatID), any());
+        verify(trygdeavgiftsgrunnlagServiceMock).fjernTrygdeavgiftsperioderOmDeFinnes(any());
         assertThat(medlemAvFolketrygden.getMedlemskapsperioder()).hasSize(1);
     }
 

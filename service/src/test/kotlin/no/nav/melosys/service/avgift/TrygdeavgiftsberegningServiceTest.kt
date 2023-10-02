@@ -60,6 +60,28 @@ internal class TrygdeavgiftsberegningServiceTest {
     fun hentTrygdeavgiftsberegning_ingenTrygdeavgift_returnerTomListe() {
         medlemAvFolketrygden.fastsattTrygdeavgift = FastsattTrygdeavgift()
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder = null
+        every { mockMedlemAvFolketrygdenService.finnMedlemAvFolketrygden(BEHANDLING_ID) }.returns(Optional.of(medlemAvFolketrygden))
+
+
+        trygdeavgiftsberegningService.hentTrygdeavgiftsberegning(BEHANDLING_ID)
+            .shouldNotBeNull()
+            .shouldBeEmpty()
+    }
+
+    @Test
+    fun hentTrygdeavgiftsberegning_ingenFastsattTrygdeavgift_returnerTomListe() {
+        medlemAvFolketrygden.fastsattTrygdeavgift = null
+        every { mockMedlemAvFolketrygdenService.finnMedlemAvFolketrygden(BEHANDLING_ID) }.returns(Optional.of(medlemAvFolketrygden))
+
+
+        trygdeavgiftsberegningService.hentTrygdeavgiftsberegning(BEHANDLING_ID)
+            .shouldNotBeNull()
+            .shouldBeEmpty()
+    }
+
+    @Test
+    fun hentTrygdeavgiftsberegning_ingenMedlemAvFolketrygden_returnerTomListe() {
+        every { mockMedlemAvFolketrygdenService.finnMedlemAvFolketrygden(BEHANDLING_ID) }.returns(Optional.empty())
 
 
         trygdeavgiftsberegningService.hentTrygdeavgiftsberegning(BEHANDLING_ID)
@@ -78,7 +100,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         })
         medlemAvFolketrygden.fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
             trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
-                skatteforholdTilNorge = setOf(SkatteforholdTilNorge().apply {
+                skatteforholdTilNorge = listOf(SkatteforholdTilNorge().apply {
                     id = 1L
                     fomDato = FOM
                     tomDato = TOM
@@ -141,7 +163,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         })
         medlemAvFolketrygden.fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
             trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
-                skatteforholdTilNorge = setOf(SkatteforholdTilNorge().apply {
+                skatteforholdTilNorge = listOf(SkatteforholdTilNorge().apply {
                     id = 1L
                     fomDato = FOM
                     tomDato = TOM
@@ -240,7 +262,7 @@ internal class TrygdeavgiftsberegningServiceTest {
 
         medlemAvFolketrygden.fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
             trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
-                skatteforholdTilNorge = setOf(SkatteforholdTilNorge().apply {
+                skatteforholdTilNorge = listOf(SkatteforholdTilNorge().apply {
                     id = 1L
                     fomDato = FOM
                     tomDato = TOM
@@ -383,6 +405,114 @@ internal class TrygdeavgiftsberegningServiceTest {
         )
     }
 
+    @Test
+    fun `SkatteforholdTilNorge er uten opphold og starter slutter på samme dato som medlemskapsperioder - ok`() {
+        val medlemskapsperioder: List<Medlemskapsperiode> = listOf(
+            lagMedlemskapsperiode(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-01-31")),
+            lagMedlemskapsperiode(LocalDate.parse("2023-02-01"), LocalDate.parse("2023-02-28")),
+            lagMedlemskapsperiode(LocalDate.parse("2023-03-01"), LocalDate.parse("2023-05-31"))
+        )
+
+        val skatteforholdTilNorge: List<SkatteforholdTilNorge> = listOf(
+            lagSkatteforholdTilNorge(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-01-15")),
+            lagSkatteforholdTilNorge(LocalDate.parse("2023-01-16"), LocalDate.parse("2023-02-28")),
+            lagSkatteforholdTilNorge(LocalDate.parse("2023-03-01"), LocalDate.parse("2023-05-31"))
+        )
+
+        shouldNotThrowAny {
+            TrygdeavgiftsberegningService.validerSkatteforholdTilNorgeDekkerMedlemskapsperioderOgOverlapperIkke(
+                skatteforholdTilNorge,
+                medlemskapsperioder
+            )
+        }
+    }
+
+    @Test
+    fun `SkatteforholdTilNorge er uten opphold og slutter ikke på samme dato som medlemskapsperioder - false`() {
+        val medlemskapsperioder: List<Medlemskapsperiode> = listOf(
+            lagMedlemskapsperiode(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-01-31")),
+            lagMedlemskapsperiode(LocalDate.parse("2023-02-01"), LocalDate.parse("2023-02-28")),
+            lagMedlemskapsperiode(LocalDate.parse("2023-03-01"), LocalDate.parse("2023-05-31"))
+        )
+
+        val skatteforholdTilNorge: List<SkatteforholdTilNorge> = listOf(
+            lagSkatteforholdTilNorge(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-01-15")),
+            lagSkatteforholdTilNorge(LocalDate.parse("2023-01-16"), LocalDate.parse("2023-02-28")),
+            lagSkatteforholdTilNorge(LocalDate.parse("2023-03-01"), LocalDate.parse("2023-05-05"))
+        )
+
+        shouldThrow<FunksjonellException> {
+            TrygdeavgiftsberegningService.validerSkatteforholdTilNorgeDekkerMedlemskapsperioderOgOverlapperIkke(
+                skatteforholdTilNorge,
+                medlemskapsperioder
+            )
+        }.message.shouldContain("Skatteforholdsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
+    }
+
+    @Test
+    fun `SkatteforholdTilNorge er uten opphold og starter ikke på samme dato som medlemskapsperioder - false`() {
+        val medlemskapsperioder: List<Medlemskapsperiode> = listOf(
+            lagMedlemskapsperiode(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-01-31")),
+            lagMedlemskapsperiode(LocalDate.parse("2023-02-01"), LocalDate.parse("2023-02-28")),
+            lagMedlemskapsperiode(LocalDate.parse("2023-03-01"), LocalDate.parse("2023-05-31"))
+        )
+
+        val skatteforholdTilNorge: List<SkatteforholdTilNorge> = listOf(
+            lagSkatteforholdTilNorge(LocalDate.parse("2023-01-03"), LocalDate.parse("2023-01-15")),
+            lagSkatteforholdTilNorge(LocalDate.parse("2023-01-16"), LocalDate.parse("2023-02-28")),
+            lagSkatteforholdTilNorge(LocalDate.parse("2023-03-01"), LocalDate.parse("2023-05-31"))
+        )
+
+        shouldThrow<FunksjonellException> {
+            TrygdeavgiftsberegningService.validerSkatteforholdTilNorgeDekkerMedlemskapsperioderOgOverlapperIkke(
+                skatteforholdTilNorge,
+                medlemskapsperioder
+            )
+        }.message.shouldContain("Skatteforholdsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
+    }
+
+    @Test
+    fun `SkatteforholdTilNorge har et opphold - false`() {
+        val medlemskapsperioder: List<Medlemskapsperiode> = listOf(
+            lagMedlemskapsperiode(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-01-31")),
+            lagMedlemskapsperiode(LocalDate.parse("2023-02-01"), LocalDate.parse("2023-02-28")),
+            lagMedlemskapsperiode(LocalDate.parse("2023-03-01"), LocalDate.parse("2023-05-31"))
+        )
+
+        val skatteforholdTilNorge: List<SkatteforholdTilNorge> = listOf(
+            lagSkatteforholdTilNorge(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-01-15")),
+            lagSkatteforholdTilNorge(LocalDate.parse("2023-01-16"), LocalDate.parse("2023-02-20")),
+            lagSkatteforholdTilNorge(LocalDate.parse("2023-03-01"), LocalDate.parse("2023-05-31"))
+        )
+
+        shouldThrow<FunksjonellException> {
+            TrygdeavgiftsberegningService.validerSkatteforholdTilNorgeDekkerMedlemskapsperioderOgOverlapperIkke(
+                skatteforholdTilNorge,
+                medlemskapsperioder
+            )
+        }.message.shouldContain("Skatteforholdsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
+    }
+
+    @Test
+    fun `SkatteforholdTilNorge har to perioder som overlapper med 1 dag - false`() {
+        val medlemskapsperioder: List<Medlemskapsperiode> = listOf(
+            lagMedlemskapsperiode(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-01-31")),
+            lagMedlemskapsperiode(LocalDate.parse("2023-02-01"), LocalDate.parse("2023-05-31"))
+        )
+
+        val skatteforholdTilNorge: List<SkatteforholdTilNorge> = listOf(
+            lagSkatteforholdTilNorge(LocalDate.parse("2023-01-01"), LocalDate.parse("2023-02-28")),
+            lagSkatteforholdTilNorge(LocalDate.parse("2023-02-28"), LocalDate.parse("2023-05-31")),
+        )
+
+        shouldThrow<FunksjonellException> {
+            TrygdeavgiftsberegningService.validerSkatteforholdTilNorgeDekkerMedlemskapsperioderOgOverlapperIkke(
+                skatteforholdTilNorge,
+                medlemskapsperioder
+            )
+        }.message.shouldContain("Skatteforholdsperiodene kan ikke overlappe")
+    }
+
     private fun lagMedlemskapsperiode(fom: LocalDate, tom: LocalDate): Medlemskapsperiode {
         return Medlemskapsperiode().apply {
             this.fom = fom
@@ -392,6 +522,13 @@ internal class TrygdeavgiftsberegningServiceTest {
 
     private fun lagInntektsperiode(fom: LocalDate, tom: LocalDate): Inntektsperiode {
         return Inntektsperiode().apply {
+            this.fomDato = fom
+            this.tomDato = tom
+        }
+    }
+
+    private fun lagSkatteforholdTilNorge(fom: LocalDate, tom: LocalDate): SkatteforholdTilNorge {
+        return SkatteforholdTilNorge().apply {
             this.fomDato = fom
             this.tomDato = tom
         }

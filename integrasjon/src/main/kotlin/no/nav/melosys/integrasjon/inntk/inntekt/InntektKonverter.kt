@@ -59,7 +59,16 @@ class InntektKonverter {
                                     informasjonsstatus = it.informasjonsstatus
                                     beskrivelse = it.beskrivelse
                                 }
-                            }
+                            } ?: emptyList()
+                            arbeidsforholdListe = aim.arbeidsInntektInformasjon?.arbeidsforholdListe?.map {
+                                ArbeidsforholdFrilanser().apply {
+                                    frilansPeriode = Periode().apply {
+                                        fom = it.frilansPeriodeFom
+                                        tom = it.frilansPeriodeTom
+                                    }
+                                    yrke = it.yrke
+                                }
+                            } ?: emptyList()
                         }
                     }
                 }

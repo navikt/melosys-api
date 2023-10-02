@@ -270,7 +270,7 @@ class ReplikerBehandlingsresultatServiceTest {
                 isArbeidsgiversavgiftBetalesTilSkatt = false
                 isOrdinærTrygdeavgiftBetalesTilSkatt = false
             })
-        trygdeavgiftsgrunnlag.skatteforholdTilNorge = mutableSetOf(
+        trygdeavgiftsgrunnlag.skatteforholdTilNorge = mutableListOf(
             SkatteforholdTilNorge().apply {
                 id = 1L
                 fomDato = LocalDate.now()

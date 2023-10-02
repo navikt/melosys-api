@@ -185,7 +185,8 @@ class DokgenServiceTest {
         when(mockEregFasade.hentOrganisasjon(any())).thenReturn(lagSaksopplysning());
         when(mockKontaktOpplysningService.hentKontaktopplysning(any(), any())).thenReturn(of(lagKontaktOpplysning()));
         when(mockUtledMottaksdato.getMottaksdato(any(), any())).thenReturn(LocalDate.now());
-
+        when(mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "9990")).thenReturn("Aker");
+        when(mockKodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, "NO")).thenReturn("Norge");
         Mottaker mottaker = lagRepresentant(ORGNR);
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
@@ -262,7 +263,8 @@ class DokgenServiceTest {
         when(mockEregFasade.hentOrganisasjon(any())).thenReturn(lagSaksopplysning());
         when(mockKontaktOpplysningService.hentKontaktopplysning(any(), any())).thenReturn(of(lagKontaktOpplysning()));
         when(mockUtledMottaksdato.getMottaksdato(any(), any())).thenReturn(LocalDate.now());
-
+        when(mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "9990")).thenReturn("Aker");
+        when(mockKodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, "NO")).thenReturn("Norge");
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(true), eq(false)))
             .thenReturn(List.of(lagRepresentant(ORGNR)));
 
@@ -290,7 +292,8 @@ class DokgenServiceTest {
         when(mockEregFasade.hentOrganisasjon(any())).thenReturn(lagSaksopplysning());
         when(mockKontaktOpplysningService.hentKontaktopplysning(any(), any())).thenReturn(of(lagKontaktOpplysning()));
         when(mockUtledMottaksdato.getMottaksdato(any(), any())).thenReturn(LocalDate.now());
-
+        when(mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "9990")).thenReturn("Aker");
+        when(mockKodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, "NO")).thenReturn("Norge");
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(true), eq(false)))
             .thenReturn(List.of(lagRepresentant(ORGNR)));
 

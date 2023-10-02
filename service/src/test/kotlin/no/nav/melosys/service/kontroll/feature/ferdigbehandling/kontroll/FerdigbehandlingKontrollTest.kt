@@ -272,7 +272,7 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             lagAktoerRepresentantOrganisasjon(),
-            lagOrganisasjonDokument("", "Testegate 4", "", "Testegate 5"),
+            lagOrganisasjonDokument("", "Testegate 4", "", "NO"),
             null
         )
         val kontrollfeil = FerdigbehandlingKontroll.adresseRegistrert(kontrollData)

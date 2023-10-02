@@ -1,12 +1,12 @@
 package no.nav.melosys.domain.avgift;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 @Entity
 @Table(name = "trygdeavgiftsgrunnlag")
@@ -20,9 +20,11 @@ public class Trygdeavgiftsgrunnlag {
     private FastsattTrygdeavgift fastsattTrygdeavgift;
 
     @OneToMany(mappedBy = "trygdeavgiftsgrunnlag", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    private Set<SkatteforholdTilNorge> skatteforholdTilNorge = new HashSet<>(1);
+    @Fetch(value = FetchMode.SUBSELECT)
+    private List<SkatteforholdTilNorge> skatteforholdTilNorge = new ArrayList<>(1);
 
     @OneToMany(mappedBy = "trygdeavgiftsgrunnlag", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @Fetch(value = FetchMode.SUBSELECT)
     private List<Inntektsperiode> inntektsperioder = new ArrayList<>(1);
 
     public Long getId() {
@@ -41,11 +43,11 @@ public class Trygdeavgiftsgrunnlag {
         this.fastsattTrygdeavgift = fastsattTrygdeavgift;
     }
 
-    public Set<SkatteforholdTilNorge> getSkatteforholdTilNorge() {
+    public List<SkatteforholdTilNorge> getSkatteforholdTilNorge() {
         return skatteforholdTilNorge;
     }
 
-    public void setSkatteforholdTilNorge(Set<SkatteforholdTilNorge> skatteforholdTilNorge) {
+    public void setSkatteforholdTilNorge(List<SkatteforholdTilNorge> skatteforholdTilNorge) {
         this.skatteforholdTilNorge.clear();
         skatteforholdTilNorge.forEach(forhold -> forhold.setTrygdeavgiftsgrunnlag(this));
         this.skatteforholdTilNorge.addAll(skatteforholdTilNorge);

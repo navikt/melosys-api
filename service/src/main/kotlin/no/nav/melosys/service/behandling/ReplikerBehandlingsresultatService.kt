@@ -120,7 +120,7 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
         trygdeavgiftsgrunnlagReplika.fastsattTrygdeavgift = fastsattTrygdeavgiftReplika
         trygdeavgiftsgrunnlagReplika.id = null
 
-        trygdeavgiftsgrunnlagReplika.setSkatteforholdTilNorge(HashSet())
+        trygdeavgiftsgrunnlagReplika.setSkatteforholdTilNorge(ArrayList())
         for (skatteforholdTilNorgeOrig in fastsattTrygdeavgiftOrig.trygdeavgiftsgrunnlag.skatteforholdTilNorge) {
             val skatteforholdTilNorgeReplika = BeanUtils.cloneBean(skatteforholdTilNorgeOrig) as SkatteforholdTilNorge
             skatteforholdTilNorgeReplika.trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlagReplika

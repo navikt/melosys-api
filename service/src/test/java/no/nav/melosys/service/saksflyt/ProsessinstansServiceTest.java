@@ -737,7 +737,6 @@ class ProsessinstansServiceTest {
         var doksysbrevbestilling = new DoksysBrevbestilling.Builder().medProduserbartDokument(INNVILGELSE_YRKESAKTIV).build();
         var mottaker = Mottaker.medRolle(Mottakerroller.BRUKER);
 
-
         prosessinstansService.opprettProsessinstansSendBrev(behandling, doksysbrevbestilling, mottaker);
 
 

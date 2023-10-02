@@ -73,7 +73,6 @@ internal class InnvilgelseFtrlMapperTest {
                     adresselinjer().shouldNotBeEmpty()
                     postnr().shouldBe(DokgenTestData.POSTNR_BRUKER)
                     poststed().shouldBe(DokgenTestData.POSTSTED_BRUKER)
-                    land().shouldBeNull()
                 }
 
                 datoMottatt.shouldBe(LocalDate.EPOCH)
@@ -213,7 +212,7 @@ internal class InnvilgelseFtrlMapperTest {
             trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
                 inntektsperioder = listOf(Inntektsperiode().apply { isOrdinærTrygdeavgiftBetalesTilSkatt = true })
                 skatteforholdTilNorge =
-                    setOf(SkatteforholdTilNorge().apply { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG })
+                    listOf(SkatteforholdTilNorge().apply { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG })
             }
             trygdeavgiftsperioder = lagTrygdeavgiftsperioder()
         }
