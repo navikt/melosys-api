@@ -42,11 +42,11 @@ data class InntektResponse(
     data class Inntekt(
         val inntektType: InntektType? = null,
         val arbeidsforholdREF: String? = null,
-        val beloep: BigDecimal? = null,
-        val fordel: String? = null,
-        val inntektskilde: String? = null,
+        val beloep: BigDecimal,
+        val fordel: String,
+        val inntektskilde: String,
         val inntektsperiodetype: String? = null,
-        val inntektsstatus: String? = null,
+        val inntektsstatus: String,
         val leveringstidspunkt: YearMonth,
         val opptjeningsland: String? = null,
         val opptjeningsperiodeFom: LocalDate? = null,
@@ -66,8 +66,8 @@ data class InntektResponse(
     )
 
     data class Tilleggsinformasjon(
-        val kategori: String? = null,
-        val tilleggsinformasjonDetaljer: TilleggsinformasjonDetaljer? = null
+        val kategori: String,
+        val tilleggsinformasjonDetaljer: TilleggsinformasjonDetaljer
     )
     enum class InntektType {
         LOENNSINNTEKT,

@@ -2,17 +2,14 @@ package no.nav.melosys.domain.dokument.inntekt;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import javax.xml.bind.annotation.*;
+import javax.validation.constraints.NotNull;
 
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import org.apache.commons.lang3.StringUtils;
 
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.FIELD)
 public class InntektDokument implements SaksopplysningDokument {
 
-    @XmlElementWrapper(name="arbeidsInntektMaanedListe")
-    @XmlElement(name="arbeidsInntektMaaned")
+    @NotNull
     public List<ArbeidsInntektMaaned> arbeidsInntektMaanedListe = new ArrayList<>();
 
     public List<ArbeidsInntektMaaned> getArbeidsInntektMaanedListe() {

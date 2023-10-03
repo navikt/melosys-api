@@ -3,25 +3,22 @@ package no.nav.melosys.domain.dokument.inntekt;
 
 import java.time.YearMonth;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
+import org.jetbrains.annotations.NotNull;
 
-@XmlAccessorType(XmlAccessType.FIELD)
 public class Avvik {
 
-    @XmlElement(required = true)
+    @NotNull
     private String ident;
 
-    @XmlElement(required = true)
+    @NotNull
     private String opplysningspliktigID;
 
     private String virksomhetID;
 
-    @XmlElement(required = true)
+    @NotNull
     private YearMonth avvikPeriode;
 
-    @XmlElement(required = true)
+    @NotNull
     private String tekst;
 
     public String getIdent() {

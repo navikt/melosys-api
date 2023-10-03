@@ -1,20 +1,14 @@
 package no.nav.melosys.domain.dokument.inntekt.inntektstype;
 
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
-
 import com.fasterxml.jackson.annotation.JsonView;
 import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.dokument.inntekt.Inntekt;
+import org.jetbrains.annotations.NotNull;
 
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Loennsinntekt")
 public class Loennsinntekt extends Inntekt {
 
-    @XmlElement(required = true)
+    @NotNull
     protected String beskrivelse; //"http://nav.no/kodeverk/Kodeverk/Loennsbeskrivelse"s
 
     @JsonView(DokumentView.Database.class)

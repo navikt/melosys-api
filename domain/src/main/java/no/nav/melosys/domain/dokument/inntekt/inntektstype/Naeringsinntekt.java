@@ -1,14 +1,11 @@
 package no.nav.melosys.domain.dokument.inntekt.inntektstype;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
-
 import no.nav.melosys.domain.dokument.inntekt.Inntekt;
+import org.jetbrains.annotations.NotNull;
 
-@XmlType(name = "Naeringsinntekt")
 public class Naeringsinntekt extends Inntekt {
 
-    @XmlElement(required = true)
+    @NotNull
     protected String beskrivelse; // http://nav.no/kodeverk/Kodeverk/Naeringsinntektsbeskrivelse
 
     @Override
