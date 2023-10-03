@@ -1,5 +1,10 @@
 package no.nav.melosys.service.medlemskapsperiode;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
+
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Medlemskapsperiode;
@@ -15,11 +20,6 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.behandling.UtledMottaksdato;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
 
 import static com.google.common.collect.MoreCollectors.onlyElement;
 import static java.lang.String.format;
@@ -50,25 +50,15 @@ public class OpprettMedlemskapsperiodeService {
         var medlemAvFolketrygden = hentEllerOpprettMedlemAvFolketrygden(behandlingsresultat, bestemmelse);
 
         if (medlemAvFolketrygden.getMedlemskapsperioder().isEmpty()) {
-            var behandling = behandlingsresultat.getBehandling();
-            SøknadNorgeEllerUtenforEØS søknad = (SøknadNorgeEllerUtenforEØS) behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
             Collection<Medlemskapsperiode> medlemskapsperioder;
-
+            var behandling = behandlingsresultat.getBehandling();
             var opprinneligBehandling = behandling.getOpprinneligBehandling();
+
             if (behandling.erNyVurdering() && opprinneligBehandling != null) {
                 var opprinneligBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.getId());
-                var opprinneligSøknad = (SøknadNorgeEllerUtenforEØS) opprinneligBehandling.getMottatteOpplysninger().getMottatteOpplysningerData();
-
-                medlemskapsperioder = new UtledMedlemskapsperioder().lagMedlemskapsperioderForNyVurdering(
-                    new UtledMedlemskapsperiodeNyVurderingDto(
-                        søknad.periode,
-                        søknad.getTrygdedekning(),
-                        utledMottaksdato.getMottaksdato(behandling),
-                        søknad.soeknadsland.landkoder.stream().collect(onlyElement()),
-                        opprinneligBehandlingsresultat.finnMedlemskapsperioder(),
-                        opprinneligSøknad)
-                );
+                medlemskapsperioder = new UtledMedlemskapsperioder().lagMedlemskapsperioderForNyVurdering(opprinneligBehandlingsresultat);
             } else {
+                SøknadNorgeEllerUtenforEØS søknad = (SøknadNorgeEllerUtenforEØS) behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
                 medlemskapsperioder = new UtledMedlemskapsperioder().lagMedlemskapsperioder(
                     new UtledMedlemskapsperioderDto(
                         søknad.periode,
@@ -77,7 +67,6 @@ public class OpprettMedlemskapsperiodeService {
                         søknad.soeknadsland.landkoder.stream().collect(onlyElement()))
                 );
             }
-
 
             medlemAvFolketrygden.getMedlemskapsperioder().addAll(medlemskapsperioder);
             medlemskapsperioder.forEach(m -> m.setMedlemAvFolketrygden(medlemAvFolketrygden));
