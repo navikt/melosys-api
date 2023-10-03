@@ -45,7 +45,7 @@
             "arbeidsInntektInformasjon": {
                 "inntektListe": [
                     {
-                        "inntektType": "LOENNSINNTEKT",
+                        "inntektType": "YTELSE_FRA_OFFENTLIGE",
                         "beloep": 50000,
                         "fordel": "kontantytelse",
                         "inntektskilde": "A-ordningen",
@@ -85,7 +85,7 @@
             "arbeidsInntektInformasjon": {
                 "inntektListe": [
                     {
-                        "inntektType": "LOENNSINNTEKT",
+                        "inntektType": "NAERINGSINNTEKT",
                         "beloep": 50000,
                         "fordel": "kontantytelse",
                         "inntektskilde": "A-ordningen",

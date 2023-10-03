@@ -6,7 +6,12 @@ import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned
 import no.nav.melosys.domain.dokument.inntekt.Avvik
 import no.nav.melosys.domain.dokument.inntekt.Inntekt
+import no.nav.melosys.domain.dokument.inntekt.inntektstype.Loennsinntekt
+import no.nav.melosys.domain.dokument.inntekt.inntektstype.Naeringsinntekt
+import no.nav.melosys.domain.dokument.inntekt.inntektstype.PensjonEllerTrygd
+import no.nav.melosys.domain.dokument.inntekt.inntektstype.YtelseFraOffentlige
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.*
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.inntk.inntekt.InntektResponse.TilleggsinformasjonDetaljerType.*
 import java.time.LocalDateTime
 
@@ -29,7 +34,7 @@ class InntektKonverter {
                         }
                         arbeidsInntektInformasjon = ArbeidsInntektInformasjon().apply {
                             inntektListe = aim.arbeidsInntektInformasjon?.inntektListe?.map {
-                                Inntekt().apply {
+                                lagSubtypeAvInntekt(it).apply {
                                     arbeidsforholdREF = it.arbeidsforholdREF
                                     beloep = it.beloep
                                     fordel = it.fordel
@@ -73,6 +78,16 @@ class InntektKonverter {
                     }
                 }
             }
+        }
+    }
+
+    private fun lagSubtypeAvInntekt(inntekt: InntektResponse.Inntekt): Inntekt {
+        return when(inntekt.inntektType) {
+            InntektResponse.InntektType.LOENNSINNTEKT -> Loennsinntekt()
+            InntektResponse.InntektType.NAERINGSINNTEKT -> Naeringsinntekt()
+            InntektResponse.InntektType.PENSJON_ELLER_TRYGD -> PensjonEllerTrygd()
+            InntektResponse.InntektType.YTELSE_FRA_OFFENTLIGE -> YtelseFraOffentlige()
+            null -> throw TekniskException("InntektType kan ikke være null")
         }
     }
 

@@ -37,8 +37,7 @@ public class BrevmottakerMapper {
                 .medHovedMottaker(BRUKER)
                 .medBrevkopiRegler(
                     BRUKER_FÅR_KOPI_HVIS_FULLMEKTIG_FINNES,
-                    ARBEIDSGIVER_FÅR_KOPI_HVIS_IKKE_SELVBETALENDE_BRUKER,
-                    SKATT_FÅR_KOPI_HVIS_AVGIFTSPLIKTIG_INNTEKT
+                    ARBEIDSGIVER_FÅR_KOPI_HVIS_IKKE_SELVBETALENDE_BRUKER
                 ).build()),
 
             Map.entry(TRYGDEAVTALE_GB, new Mottakerliste.Builder()
