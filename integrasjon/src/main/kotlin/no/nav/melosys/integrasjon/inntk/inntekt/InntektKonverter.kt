@@ -7,10 +7,14 @@ import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned
 import no.nav.melosys.domain.dokument.inntekt.Avvik
 import no.nav.melosys.domain.dokument.inntekt.Inntekt
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.*
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.inntk.inntekt.InntektResponse.TilleggsinformasjonDetaljerType.*
 import java.time.LocalDateTime
+import javax.validation.Validation
 
 class InntektKonverter {
+
+    private val validator = Validation.buildDefaultValidatorFactory().validator
 
     fun lagSaksopplysning(inntektResponse: InntektResponse): Saksopplysning {
         return Saksopplysning().apply {
@@ -26,7 +30,7 @@ class InntektKonverter {
                                 avvikPeriode = it.avvikPeriode
                                 tekst = it.tekst
                             }
-                        }
+                        } ?: emptyList()
                         arbeidsInntektInformasjon = ArbeidsInntektInformasjon().apply {
                             inntektListe = aim.arbeidsInntektInformasjon?.inntektListe?.map {
                                 Inntekt().apply {
@@ -47,12 +51,13 @@ class InntektKonverter {
                                     // https://nav-it.slack.com/archives/CLMJJ882W/p1689859452879089?thread_ts=1689168417.802869&cid=CLMJJ882W
                                     inntektsinnsenderID = null
                                     virksomhetID = it.virksomhet?.identifikator
-                                    tilleggsinformasjon = Tilleggsinformasjon().apply {
-                                        kategori = it.tilleggsinformasjon?.kategori
-                                        tilleggsinformasjonDetaljer = mapTilleggsinformasjonDetaljer(
-                                            it.tilleggsinformasjon?.tilleggsinformasjonDetaljer
-                                        )
-                                    }
+                                    tilleggsinformasjon = if (it.tilleggsinformasjon != null)
+                                        Tilleggsinformasjon().apply {
+                                            kategori = it.tilleggsinformasjon.kategori
+                                            tilleggsinformasjonDetaljer = mapTilleggsinformasjonDetaljer(
+                                                it.tilleggsinformasjon.tilleggsinformasjonDetaljer
+                                            )
+                                        } else null
                                     inntektsmottakerID = it.inntektsmottaker?.identifikator
                                     inngaarIGrunnlagForTrekk = it.inngaarIGrunnlagForTrekk
                                     utloeserArbeidsgiveravgift = it.utloeserArbeidsgiveravgift
@@ -138,4 +143,18 @@ class InntektKonverter {
             }
             else -> null
         }
+
+    private inline fun <T> T.apply(block: T.() -> Unit): T {
+        block()
+        return this.validate()
+    }
+
+    private fun <T> T.validate(): T {
+        validator.validate(this).run {
+            if (isNotEmpty()) throw TekniskException(
+                joinToString { "${it.rootBeanClass.simpleName}.${it.propertyPath} ${it.message}" }
+            )
+        }
+        return this
+    }
 }
