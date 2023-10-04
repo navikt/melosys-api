@@ -216,18 +216,6 @@ class LagreLovvalgsperiodeMedlTest {
     }
 
     @Test
-    void utfør_avslagManglendeOpplysningerIngenLovvalgsperiode_oppretterIkkeLovvalgsperiode() {
-        behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
-        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
-
-
-        lagreLovvalgsperiodeMedl.utfør(prosessinstans);
-
-
-        verifyNoInteractions(medlPeriodeService);
-    }
-
-    @Test
     void utfør_ikkeGodkjentRegistreringUnntak_oppretterIkkeLovvalgsperiode() {
         Fagsak fagsak = new Fagsak();
         fagsak.setType(Sakstyper.TRYGDEAVTALE);

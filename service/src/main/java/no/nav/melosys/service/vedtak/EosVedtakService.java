@@ -111,7 +111,7 @@ public class EosVedtakService {
 
         if (saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)) {
             behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
-            prosessinstansService.opprettProsessinstansIverksettIkkeYrkesaktiv(behandling, request.getFritekst());
+            prosessinstansService.opprettProsessinstansIverksettIkkeYrkesaktiv(behandling);
         } else {
             oppdaterBehandlingsresultat(behandlingsresultat, request.getVedtakstype(), request.getFritekst(), request.getNyVurderingBakgrunn());
             Set<String> mottakerinstitusjoner = avklarMottakerInstitusjoner(behandling, request.getMottakerinstitusjoner(), behandlingsresultat);
