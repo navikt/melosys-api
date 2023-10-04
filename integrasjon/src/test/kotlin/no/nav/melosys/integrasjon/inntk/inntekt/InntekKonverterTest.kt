@@ -6,8 +6,12 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.kotest.matchers.types.shouldBeTypeOf
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument
+import no.nav.melosys.domain.dokument.inntekt.inntektstype.Loennsinntekt
+import no.nav.melosys.domain.dokument.inntekt.inntektstype.Naeringsinntekt
+import no.nav.melosys.domain.dokument.inntekt.inntektstype.YtelseFraOffentlige
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.BonusFraForsvaret
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.ReiseKostOgLosji
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Svalbardinntekt
@@ -41,7 +45,7 @@ class InntekKonverterTest {
                 get(0).run {
                     aarMaaned.shouldBe(YearMonth.parse("2022-01"))
                     arbeidsInntektInformasjon.inntektListe.shouldHaveSize(1)
-                        .first().run {
+                        .first().shouldBeInstanceOf<Loennsinntekt>().run {
                             beloep.shouldBe(BigDecimal(50000))
                             tilleggsinformasjon
                                 .tilleggsinformasjonDetaljer
@@ -53,7 +57,7 @@ class InntekKonverterTest {
                 get(1).run {
                     aarMaaned.shouldBe(YearMonth.parse("2022-02"))
                     arbeidsInntektInformasjon.inntektListe.shouldHaveSize(1)
-                        .first().run {
+                        .first().shouldBeInstanceOf<YtelseFraOffentlige>().run {
                             beloep.shouldBe(BigDecimal(50000))
                             tilleggsinformasjon
                                 .tilleggsinformasjonDetaljer
@@ -64,7 +68,7 @@ class InntekKonverterTest {
                 get(2).run {
                     aarMaaned.shouldBe(YearMonth.parse("2022-03"))
                     arbeidsInntektInformasjon.inntektListe.shouldHaveSize(1)
-                        .first().run {
+                        .first().shouldBeInstanceOf<Naeringsinntekt>().run {
                             beloep.shouldBe(BigDecimal(50000))
                             tilleggsinformasjon
                                 .tilleggsinformasjonDetaljer

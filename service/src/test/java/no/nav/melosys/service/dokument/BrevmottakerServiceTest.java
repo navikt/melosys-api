@@ -387,7 +387,7 @@ class BrevmottakerServiceTest {
             .containsExactly(
                 BRUKER,
                 emptyList(),
-                List.of(SKATTEETATEN)
+                emptyList()
             );
 
         verify(behandlingsresultatService).hentBehandlingsresultat(123L);
@@ -407,7 +407,7 @@ class BrevmottakerServiceTest {
             .containsExactly(
                 BRUKER,
                 List.of(BRUKER, ARBEIDSGIVER),
-                List.of(SKATTEETATEN)
+                emptyList()
             );
 
         verify(behandlingsresultatService).hentBehandlingsresultat(123L);
