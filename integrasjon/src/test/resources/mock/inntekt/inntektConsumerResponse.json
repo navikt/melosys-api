@@ -12,6 +12,8 @@
                         "inntektsperiodetype": "Maaned",
                         "inntektsstatus": "LoependeInnrapportert",
                         "leveringstidspunkt": "2023-07",
+                        "opptjeningsperiodeFom": "2022-01-01",
+                        "opptjeningsperiodeTom": "2022-01-10",
                         "utbetaltIMaaned": "2022-01",
                         "opplysningspliktig": {
                             "identifikator": "928497704",
@@ -29,6 +31,7 @@
                         "utloeserArbeidsgiveravgift": true,
                         "informasjonsstatus": "InngaarAlltid",
                         "beskrivelse": "fastloenn",
+                        "antall" : 1,
                         "tilleggsinformasjon": {
                             "kategori": "bla",
                             "tilleggsinformasjonDetaljer": {
