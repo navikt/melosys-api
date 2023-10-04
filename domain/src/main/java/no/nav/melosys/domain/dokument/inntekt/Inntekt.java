@@ -28,7 +28,6 @@ public class Inntekt {
     @NotNull
     public String inntektsstatus; //"http://nav.no/kodeverk/Kodeverk/Inntektsstatuser"
 
-    @NotNull
     public LocalDateTime levereringstidspunkt;
 
     public String opptjeningsland;
@@ -62,6 +61,7 @@ public class Inntekt {
         this.beskrivelse = beskrivelse;
     }
 
+    @NotNull
     private String beskrivelse;
 
     public String getArbeidsforholdREF() {
