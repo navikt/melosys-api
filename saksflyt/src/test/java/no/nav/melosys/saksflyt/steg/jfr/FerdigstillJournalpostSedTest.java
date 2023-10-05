@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -34,8 +33,6 @@ class FerdigstillJournalpostSedTest {
     private PersondataFasade persondataFasade;
     @Mock
     private EessiService eessiService;
-
-    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     private FerdigstillJournalpostSed ferdigstillJournalpostSed;
 

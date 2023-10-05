@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.sed
 
-import io.getunleash.Unleash
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.saksflyt.ProsessDataKey
 import no.nav.melosys.domain.saksflyt.ProsessSteg
