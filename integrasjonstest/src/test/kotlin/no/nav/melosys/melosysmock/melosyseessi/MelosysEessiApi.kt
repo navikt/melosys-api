@@ -7,6 +7,7 @@ import no.nav.melosys.domain.eessi.sed.Lovvalgsperiode
 import no.nav.melosys.domain.eessi.sed.SedGrunnlagDto
 import no.nav.melosys.melosysmock.melosyseessi.MelosysEessiRepo.sedRepo
 import no.nav.security.token.support.core.api.Unprotected
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import java.time.ZoneOffset
 
@@ -66,6 +67,12 @@ class MelosysEessiApi {
         val currentList = sedRepo.getOrDefault(rinaSaksnummer, listOf())
         val newList = currentList + sedType
         sedRepo[rinaSaksnummer] = newList
+    }
+
+    @PostMapping("/journalfoerTidligereSendteSedFor/{rinaSaksnummer}")
+    @ResponseStatus(value = HttpStatus.OK)
+    fun journalfoerTidligereSendteSed(@PathVariable rinaSaksnummer: String?) {
+        println("Mock Journalfoerer tidligere sendt sed for rinaSaksnummer: $rinaSaksnummer")
     }
 }
 

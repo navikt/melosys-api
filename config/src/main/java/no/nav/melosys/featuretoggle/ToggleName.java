@@ -5,7 +5,5 @@ public class ToggleName {
 
     public static final String FOLKETRYGDEN_MVP = "melosys.folketrygden.mvp";
 
-    public static final String IKKE_JOURNALFOER_UTEN_PID = "melosys.eessi.ikkeJournalfoer.uten.personid";
-
     public static final String MELOSYS_EREG_ORGANISASJON = "melosys.ereg.organisasjon";
 }

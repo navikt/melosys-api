@@ -1,11 +1,9 @@
 package no.nav.melosys.saksflyt.steg.sed
 
-import io.getunleash.Unleash
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.saksflyt.ProsessDataKey
 import no.nav.melosys.domain.saksflyt.ProsessSteg
 import no.nav.melosys.domain.saksflyt.Prosessinstans
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.service.dokument.sed.EessiService
@@ -15,20 +13,17 @@ import java.util.*
 
 @Component
 class OpprettTidligereJournalposterForSak(private val joarkFasade: JoarkFasade,
-                                          private val eessiService: EessiService,
-                                          private val unleash: Unleash
+                                          private val eessiService: EessiService
 ) : StegBehandler {
     override fun inngangsSteg(): ProsessSteg {
         return ProsessSteg.OPPRETT_TIDLIGERE_JOURNALPOSTER_FOR_SAK
     }
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        if (unleash.isEnabled(ToggleName.IKKE_JOURNALFOER_UTEN_PID)) {
-            finnEessiMelding(prosessinstans).ifPresent { melosysEessiMelding: MelosysEessiMelding ->
-                eessiService.opprettJournalpostForTidligereSed(
-                    melosysEessiMelding.rinaSaksnummer
-                )
-            }
+        finnEessiMelding(prosessinstans).ifPresent { melosysEessiMelding: MelosysEessiMelding ->
+            eessiService.opprettJournalpostForTidligereSed(
+                melosysEessiMelding.rinaSaksnummer
+            )
         }
     }
 
