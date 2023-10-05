@@ -70,7 +70,7 @@ class InntektKonverter {
                                     inngaarIGrunnlagForTrekk = it.inngaarIGrunnlagForTrekk
                                     utloeserArbeidsgiveravgift = it.utloeserArbeidsgiveravgift
                                     informasjonsstatus = it.informasjonsstatus
-                                    beskrivelse = it.beskrivelse
+                                    beskrivelse = it.beskrivelse ?: throw TekniskException("Beskrivelse kan ikke være null")
                                 }
                             } ?: emptyList()
                             arbeidsforholdListe = aim.arbeidsInntektInformasjon?.arbeidsforholdListe?.map {
