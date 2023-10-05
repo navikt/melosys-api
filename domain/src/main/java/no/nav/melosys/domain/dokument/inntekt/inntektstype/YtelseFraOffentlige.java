@@ -5,15 +5,16 @@ import org.jetbrains.annotations.NotNull;
 
 public class YtelseFraOffentlige extends Inntekt {
 
-    @NotNull
     protected String beskrivelse; // http://nav.no/kodeverk/Kodeverk/YtelseFraOffentligeBeskrivelse
 
     @Override
+    @NotNull
     public String getBeskrivelse() {
         return beskrivelse;
     }
 
-    public void setBeskrivelse(String value) {
-        this.beskrivelse = value;
+    @Override
+    public void setBeskrivelse(@NotNull String beskrivelse) {
+        this.beskrivelse = beskrivelse;
     }
 }

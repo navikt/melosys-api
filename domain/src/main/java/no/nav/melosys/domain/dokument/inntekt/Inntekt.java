@@ -9,7 +9,7 @@ import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import org.jetbrains.annotations.NotNull;
 
-public class Inntekt {
+public abstract class Inntekt {
 
     @JsonView(DokumentView.Database.class)
     public String arbeidsforholdREF;
@@ -57,12 +57,8 @@ public class Inntekt {
 
     public String informasjonsstatus; //"http://nav.no/kodeverk/Kodeverk/Informasjonsstatuser"
 
-    public void setBeskrivelse(String beskrivelse) {
-        this.beskrivelse = beskrivelse;
-    }
+    public abstract void setBeskrivelse(@NotNull String beskrivelse);
 
-    @NotNull
-    private String beskrivelse;
 
     public String getArbeidsforholdREF() {
         return arbeidsforholdREF;
@@ -72,9 +68,8 @@ public class Inntekt {
         return beloep;
     }
 
-    public String getBeskrivelse() {
-        return beskrivelse;
-    }
+    @NotNull
+    public abstract String getBeskrivelse();
 
     public String getFordel() {
         return fordel;

@@ -8,18 +8,18 @@ import org.jetbrains.annotations.NotNull;
 
 public class Loennsinntekt extends Inntekt {
 
-    @NotNull
     protected String beskrivelse; //"http://nav.no/kodeverk/Kodeverk/Loennsbeskrivelse"s
 
     @JsonView(DokumentView.Database.class)
     protected Integer antall;
 
     @Override
+    @NotNull
     public String getBeskrivelse() {
         return beskrivelse;
     }
 
-    public void setBeskrivelse(String value) {
+    public void setBeskrivelse(@NotNull String value) {
         this.beskrivelse = value;
     }
 
