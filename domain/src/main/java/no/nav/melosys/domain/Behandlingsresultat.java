@@ -266,13 +266,8 @@ public class Behandlingsresultat extends RegistreringsInfo {
     }
 
     public boolean erAvslag() {
-        return erAvslagManglendeOpplysninger() || (type == Behandlingsresultattyper.AVSLAG_SØKNAD)
-            || (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND && hentLovvalgsperiode().erAvslått())
-            || (type == Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN && finnMedlemskapsperioder().stream().noneMatch(Medlemskapsperiode::erInnvilget));
-    }
-
-    public boolean erAvslagManglendeOpplysninger() {
-        return type == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL;
+        return (type == Behandlingsresultattyper.AVSLAG_SØKNAD)
+            || (type == Behandlingsresultattyper.FASTSATT_LOVVALGSLAND && hentLovvalgsperiode().erAvslått());
     }
 
     public boolean erAnmodningOmUnntak() {
@@ -440,9 +435,11 @@ public class Behandlingsresultat extends RegistreringsInfo {
             || erInnvilgelseFlereLand()
             || erUtpeking());
     }
+
     public void settVedtakMetadata(LocalDate klagefrist) {
         settVedtakMetadata(null, klagefrist);
     }
+
     public void settVedtakMetadata(Vedtakstyper vedtakstype,
                                    LocalDate klagefrist) {
         if (vedtakMetadata == null) {

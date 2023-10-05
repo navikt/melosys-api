@@ -30,10 +30,6 @@ public class LagreMedlemsperiodeMedl implements StegBehandler {
         long behandlingId = prosessinstans.getBehandling().getId();
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
 
-        if (behandlingsresultat.erAvslag()) {
-            return;
-        }
-
         var innvilgedeMedlemskapsperioder = behandlingsresultat.finnMedlemskapsperioder()
             .stream().filter(Medlemskapsperiode::erInnvilget).toList();
         for (Medlemskapsperiode medlemskapsperiode : innvilgedeMedlemskapsperioder) {

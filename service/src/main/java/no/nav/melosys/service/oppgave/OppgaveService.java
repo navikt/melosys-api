@@ -4,8 +4,6 @@ package no.nav.melosys.service.oppgave;
 import java.util.*;
 import javax.annotation.Nullable;
 
-import io.getunleash.Unleash;
-import io.getunleash.UnleashContext;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.RegistreringsInfo;
@@ -35,7 +33,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.*;
+import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentLand;
+import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentPeriode;
 
 @Service
 public class OppgaveService {
@@ -50,8 +49,6 @@ public class OppgaveService {
     private final EregFasade eregFasade;
     private final UtledMottaksdato utledMottaksdato;
     private final OppgaveFactory oppgaveFactory;
-    private final Unleash unleash;
-
     private static final String UKJENT = "UKJENT";
 
     public OppgaveService(BehandlingService behandlingService,
@@ -62,8 +59,7 @@ public class OppgaveService {
                           PersondataFasade persondataFasade,
                           EregFasade eregFasade,
                           UtledMottaksdato utledMottaksdato,
-                          OppgaveFactory oppgaveFactory,
-                          Unleash unleash) {
+                          OppgaveFactory oppgaveFactory) {
         this.behandlingService = behandlingService;
         this.fagsakService = fagsakService;
         this.oppgaveFasade = oppgaveFasade;
@@ -73,7 +69,6 @@ public class OppgaveService {
         this.eregFasade = eregFasade;
         this.utledMottaksdato = utledMottaksdato;
         this.oppgaveFactory = oppgaveFactory;
-        this.unleash = unleash;
     }
 
     public List<OppgaveDto> hentOppgaverMedAnsvarlig(String ansvarligID) {

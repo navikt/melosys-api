@@ -38,6 +38,10 @@ class InntektKonverter {
                         arbeidsInntektInformasjon = ArbeidsInntektInformasjon().apply {
                             inntektListe = aim.arbeidsInntektInformasjon?.inntektListe?.map {
                                 lagSubtypeAvInntekt(it).apply {
+                                    opptjeningsperiode = Periode().apply {
+                                        fom = it.opptjeningsperiodeFom
+                                        tom = it.opptjeningsperiodeTom
+                                    }
                                     arbeidsforholdREF = it.arbeidsforholdREF
                                     beloep = it.beloep
                                     fordel = it.fordel
@@ -86,8 +90,8 @@ class InntektKonverter {
     }
 
     private fun lagSubtypeAvInntekt(inntekt: InntektResponse.Inntekt): Inntekt {
-        return when(inntekt.inntektType) {
-            InntektResponse.InntektType.LOENNSINNTEKT -> Loennsinntekt()
+        return when (inntekt.inntektType) {
+            InntektResponse.InntektType.LOENNSINNTEKT -> Loennsinntekt().apply { antall = inntekt.antall }
             InntektResponse.InntektType.NAERINGSINNTEKT -> Naeringsinntekt()
             InntektResponse.InntektType.PENSJON_ELLER_TRYGD -> PensjonEllerTrygd()
             InntektResponse.InntektType.YTELSE_FRA_OFFENTLIGE -> YtelseFraOffentlige()

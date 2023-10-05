@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.math.BigDecimal
 import java.nio.charset.StandardCharsets
+import java.time.LocalDate
 import java.time.Year
 import java.time.YearMonth
 import java.time.temporal.ChronoUnit
@@ -47,6 +48,12 @@ class InntekKonverterTest {
                     arbeidsInntektInformasjon.inntektListe.shouldHaveSize(1)
                         .first().shouldBeInstanceOf<Loennsinntekt>().run {
                             beloep.shouldBe(BigDecimal(50000))
+                            opptjeningsperiode.shouldNotBeNull()
+                                .run {
+                                    fom.shouldBe(LocalDate.of(2022, 1, 1))
+                                    tom.shouldBe(LocalDate.of(2022, 1, 10))
+                                }
+                            antall.shouldBe(1)
                             tilleggsinformasjon
                                 .tilleggsinformasjonDetaljer
                                 .shouldBeTypeOf<BonusFraForsvaret>()
