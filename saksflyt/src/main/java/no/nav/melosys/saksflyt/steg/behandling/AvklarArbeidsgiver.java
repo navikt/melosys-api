@@ -81,7 +81,6 @@ public class AvklarArbeidsgiver implements StegBehandler {
 
     private boolean arbeidsgiverIkkeAvklares(Behandling behandling, Behandlingsresultat resultat) {
         return saksbehandlingRegler.harIngenFlyt(behandling)
-            || resultat.erAvslagManglendeOpplysninger()
             || erEøsMedArtikkel13(behandling, resultat);
     }
 

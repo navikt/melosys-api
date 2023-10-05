@@ -155,18 +155,6 @@ class AvklarArbeidsgiverTest {
     }
 
     @Test
-    void utfør_resultatAvslagManglendeOppl_arbeidsgiverAktoererSkalIkkeOpprettes() {
-        behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
-        behandlingsresultat.setLovvalgsperioder(new HashSet<>());
-
-
-        avklarArbeidsgiver.utfør(prosessinstans);
-
-
-        verify(aktoerService, never()).erstattEksisterendeArbeidsgiveraktører(any(), any());
-    }
-
-    @Test
     void utfør_trygdeavtaleSamtIkkeAvslagManglendeOpplysning_arbeidsgiverAktoerOpprettes() {
         fagsak.setType(Sakstyper.TRYGDEAVTALE);
         behandling.setTema(Behandlingstema.YRKESAKTIV);

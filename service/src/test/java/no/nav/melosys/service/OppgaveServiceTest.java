@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
 
-import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.person.Diskresjonskode;
@@ -84,28 +83,25 @@ class OppgaveServiceTest {
 
     private final OppgaveFactory oppgaveFactory = new OppgaveFactory();
 
-    private final FakeUnleash unleash = new FakeUnleash();
-
     @BeforeEach
     public void setUp() {
         this.oppgaveService = new OppgaveService(
-                behandlingService,
-                fagsakService,
-                oppgaveFasade,
-                saksopplysningerService,
-                mottatteOpplysningerService,
-                persondataFasade,
-                eregFasade,
-                utledMottaksdato,
-                oppgaveFactory,
-                unleash);
+            behandlingService,
+            fagsakService,
+            oppgaveFasade,
+            saksopplysningerService,
+            mottatteOpplysningerService,
+            persondataFasade,
+            eregFasade,
+            utledMottaksdato,
+            oppgaveFactory);
 
         oppgave = new Oppgave.Builder()
-                .setOppgavetype(Oppgavetyper.BEH_SAK_MK)
-                .setTilordnetRessurs(TILORDNET_RESSURS)
-                .setOppgaveId(BEH_OPPG_ID)
-                .setSaksnummer(SAKSNUMMER)
-                .build();
+            .setOppgavetype(Oppgavetyper.BEH_SAK_MK)
+            .setTilordnetRessurs(TILORDNET_RESSURS)
+            .setOppgaveId(BEH_OPPG_ID)
+            .setSaksnummer(SAKSNUMMER)
+            .build();
     }
 
     @Test
@@ -140,16 +136,16 @@ class OppgaveServiceTest {
         assertThat(mineSaker).hasSize(2);
 
         Optional<OppgaveDto> behOppgOpt = mineSaker.stream()
-                .filter(o -> o.getOppgaveID().equals(BEH_OPPG_ID))
-                .findFirst();
+            .filter(o -> o.getOppgaveID().equals(BEH_OPPG_ID))
+            .findFirst();
 
         assertThat(behOppgOpt).isPresent().get().isInstanceOf(BehandlingsoppgaveDto.class);
         assertThat(((BehandlingsoppgaveDto) behOppgOpt.get()).getBehandling().getBehandlingID()).isEqualTo(behandling.getId());
         assertThat(((BehandlingsoppgaveDto) behOppgOpt.get()).getLand()).isNotNull();
 
         Optional<OppgaveDto> jfrOppgOpt = mineSaker.stream()
-                .filter(o -> o.getOppgaveID().equals(JFR_OPPG_ID))
-                .findFirst();
+            .filter(o -> o.getOppgaveID().equals(JFR_OPPG_ID))
+            .findFirst();
 
         assertThat(jfrOppgOpt).isPresent().get().isInstanceOf(JournalfoeringsoppgaveDto.class);
     }
@@ -171,8 +167,8 @@ class OppgaveServiceTest {
         assertThat(mineSaker).hasSize(1);
 
         Optional<OppgaveDto> behOppgOpt = mineSaker.stream()
-                .filter(o -> o.getOppgaveID().equals(BEH_OPPG_ID))
-                .findFirst();
+            .filter(o -> o.getOppgaveID().equals(BEH_OPPG_ID))
+            .findFirst();
 
         assertThat(behOppgOpt).isPresent().get().isInstanceOf(BehandlingsoppgaveDto.class);
         assertThat(((BehandlingsoppgaveDto) behOppgOpt.get()).getBehandling().getBehandlingID()).isEqualTo(behandling.getId());
@@ -198,8 +194,8 @@ class OppgaveServiceTest {
         assertThat(mineSaker).hasSize(1);
 
         Optional<OppgaveDto> behOppgOpt = mineSaker.stream()
-                .filter(o -> o.getOppgaveID().equals(BEH_OPPG_ID))
-                .findFirst();
+            .filter(o -> o.getOppgaveID().equals(BEH_OPPG_ID))
+            .findFirst();
 
         assertThat(behOppgOpt).isPresent().get().isInstanceOf(BehandlingsoppgaveDto.class);
         assertThat(((BehandlingsoppgaveDto) behOppgOpt.get()).getBehandling().getBehandlingID()).isEqualTo(behandling.getId());
@@ -232,11 +228,11 @@ class OppgaveServiceTest {
     @Test
     void hentOppgaverMedAnsvarlig_aktøridOgOrgnrErNull_forventUkjentIdOgNavn() {
         var oppgave = new Oppgave.Builder()
-                .setOppgaveId(JFR_OPPG_ID)
-                .setOppgavetype(Oppgavetyper.JFR)
-                .setAktørId(null)
-                .setOrgnr(null)
-                .build();
+            .setOppgaveId(JFR_OPPG_ID)
+            .setOppgavetype(Oppgavetyper.JFR)
+            .setAktørId(null)
+            .setOrgnr(null)
+            .build();
         when(oppgaveFasade.finnOppgaverMedAnsvarlig(TILORDNET_RESSURS)).thenReturn(Set.of(oppgave));
 
 
@@ -257,11 +253,11 @@ class OppgaveServiceTest {
     @Test
     void hentOppgaverMedAnsvarlig_aktørIdEksisterer_forventFnrOgSammensattNavn() {
         var oppgave = new Oppgave.Builder()
-                .setOppgaveId(JFR_OPPG_ID)
-                .setOppgavetype(Oppgavetyper.JFR)
-                .setAktørId("1111")
-                .setOrgnr(null)
-                .build();
+            .setOppgaveId(JFR_OPPG_ID)
+            .setOppgavetype(Oppgavetyper.JFR)
+            .setAktørId("1111")
+            .setOrgnr(null)
+            .build();
 
         when(oppgaveFasade.finnOppgaverMedAnsvarlig(TILORDNET_RESSURS)).thenReturn(Set.of(oppgave));
         when(persondataFasade.finnFolkeregisterident("1111")).thenReturn(Optional.of("fnr"));
@@ -285,11 +281,11 @@ class OppgaveServiceTest {
     @Test
     void hentOppgaverMedAnsvarlig_orgnrEksisterer_forventOrgnrOgNavn() {
         var oppgave = new Oppgave.Builder()
-                .setOppgaveId(JFR_OPPG_ID)
-                .setOppgavetype(Oppgavetyper.JFR)
-                .setAktivDato(null)
-                .setOrgnr("2222")
-                .build();
+            .setOppgaveId(JFR_OPPG_ID)
+            .setOppgavetype(Oppgavetyper.JFR)
+            .setAktivDato(null)
+            .setOrgnr("2222")
+            .build();
         when(oppgaveFasade.finnOppgaverMedAnsvarlig(TILORDNET_RESSURS)).thenReturn(Set.of(oppgave));
         when(eregFasade.hentOrganisasjonNavn("2222")).thenReturn("organisasjonsnavn");
 
@@ -319,10 +315,10 @@ class OppgaveServiceTest {
     @Test
     void finnÅpenBehandlingsoppgaveMedFagsaksnummer_returnererOppgaveViStøtter_filtrererIkkeUtOppgave() {
         when(oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(
-                new Oppgave.Builder()
-                        .setTema(Tema.MED)
-                        .setOppgavetype(Oppgavetyper.BEH_SAK)
-                        .build()));
+            new Oppgave.Builder()
+                .setTema(Tema.MED)
+                .setOppgavetype(Oppgavetyper.BEH_SAK)
+                .build()));
 
         var oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER);
 
@@ -332,10 +328,10 @@ class OppgaveServiceTest {
     @Test
     void finnÅpenBehandlingsoppgaveMedFagsaksnummer_returnererTrygdeavgiftOppgave_filtrererUtOppgave() {
         when(oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer(SAKSNUMMER)).thenReturn(List.of(
-                new Oppgave.Builder()
-                        .setTema(Tema.TRY)
-                        .setOppgavetype(Oppgavetyper.VUR)
-                        .build()));
+            new Oppgave.Builder()
+                .setTema(Tema.TRY)
+                .setOppgavetype(Oppgavetyper.VUR)
+                .build()));
 
         var oppgave = oppgaveService.finnÅpenBehandlingsoppgaveMedFagsaksnummer(SAKSNUMMER);
 
@@ -443,7 +439,7 @@ class OppgaveServiceTest {
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
         behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new MottatteOpplysningerData());
         behandling.getMottatteOpplysninger().getMottatteOpplysningerData().personOpplysninger.medfolgendeFamilie
-                = List.of(MedfolgendeFamilie.tilBarnFraFnrOgNavn("fnrBarn", null));
+            = List.of(MedfolgendeFamilie.tilBarnFraFnrOgNavn("fnrBarn", null));
         when(persondataFasade.harStrengtFortroligAdresse("aktørID")).thenReturn(false);
         when(persondataFasade.harStrengtFortroligAdresse("fnrBarn")).thenReturn(true);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
@@ -464,9 +460,9 @@ class OppgaveServiceTest {
         var fagsak = behandling.getFagsak();
         fagsak.setBehandlinger(List.of(behandling));
         var oppgave1 = new Oppgave.Builder()
-                .setTilordnetRessurs("tilordnet ressurs 1").setOpprettetTidspunkt(LocalDate.now().atStartOfDay(ZoneId.systemDefault())).setStatus("FERDIGSTILT").build();
+            .setTilordnetRessurs("tilordnet ressurs 1").setOpprettetTidspunkt(LocalDate.now().atStartOfDay(ZoneId.systemDefault())).setStatus("FERDIGSTILT").build();
         var oppgave2 = new Oppgave.Builder()
-                .setTilordnetRessurs("tilordnet ressurs 2").setOpprettetTidspunkt(LocalDate.now().minusDays(2).atStartOfDay(ZoneId.systemDefault())).setStatus("FERDIGSTILT").build();
+            .setTilordnetRessurs("tilordnet ressurs 2").setOpprettetTidspunkt(LocalDate.now().minusDays(2).atStartOfDay(ZoneId.systemDefault())).setStatus("FERDIGSTILT").build();
 
         when(persondataFasade.harStrengtFortroligAdresse("aktørID")).thenReturn(false);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);

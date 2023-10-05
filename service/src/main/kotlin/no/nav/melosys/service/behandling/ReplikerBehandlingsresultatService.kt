@@ -68,17 +68,32 @@ class ReplikerBehandlingsresultatService(val behandlingsresultatService: Behandl
         medlemAvFolketrygdenReplika.id = null
         behandlingsresultatReplika.medlemAvFolketrygden = medlemAvFolketrygdenReplika
 
+        replikerKunInnvilgedeMedlemskapsperioder(behandlingsresultatOrig, medlemAvFolketrygdenReplika)
+
+        replikerFastsattTrygdeavgift(behandlingsresultatOrig.medlemAvFolketrygden, medlemAvFolketrygdenReplika)
+
+        medlemAvFolketrygdenReplika.medlemskapsperioder.onEach { it.id = null }
+    }
+
+    @Throws(
+        InvocationTargetException::class,
+        NoSuchMethodException::class,
+        InstantiationException::class,
+        IllegalAccessException::class
+    )
+    private fun replikerKunInnvilgedeMedlemskapsperioder(
+        behandlingsresultatOrig: Behandlingsresultat,
+        medlemAvFolketrygdenReplika: MedlemAvFolketrygden
+    ) {
         medlemAvFolketrygdenReplika.medlemskapsperioder = HashSet()
-        for (medlemskapsperiodeOrig in behandlingsresultatOrig.medlemAvFolketrygden.medlemskapsperioder) {
+
+        val innvilgedeMedlemskapsperioderOrig = behandlingsresultatOrig.medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }
+        for (medlemskapsperiodeOrig in innvilgedeMedlemskapsperioderOrig) {
             val medlemskapsperiodeReplika = BeanUtils.cloneBean(medlemskapsperiodeOrig) as Medlemskapsperiode
             medlemskapsperiodeReplika.medlemAvFolketrygden = medlemAvFolketrygdenReplika
             medlemskapsperiodeReplika.trygdeavgiftsperioder = HashSet()
             medlemAvFolketrygdenReplika.medlemskapsperioder.add(medlemskapsperiodeReplika)
         }
-
-        replikerFastsattTrygdeavgift(behandlingsresultatOrig.medlemAvFolketrygden, medlemAvFolketrygdenReplika)
-
-        medlemAvFolketrygdenReplika.medlemskapsperioder.onEach { it.id = null }
     }
 
     @Throws(

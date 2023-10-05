@@ -58,10 +58,6 @@ public class Land extends AbstraktKodeverkHjelper {
         return FellesKodeverk.LANDKODER;
     }
 
-    public boolean erUkjent() {
-        return UKJENT.equals(kode);
-    }
-
     @Override
     public String toString() {
         return kode;
