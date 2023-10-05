@@ -5,7 +5,6 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.saksflyt.ProsessDataKey
 import no.nav.melosys.domain.saksflyt.ProsessSteg
 import no.nav.melosys.domain.saksflyt.Prosessinstans
-import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.service.dokument.sed.EessiService
@@ -23,12 +22,10 @@ class OpprettTidligereJournalposterForSak(private val joarkFasade: JoarkFasade,
     }
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        if (unleash.isEnabled(ToggleName.IKKE_JOURNALFOER_UTEN_PID)) {
-            finnEessiMelding(prosessinstans).ifPresent { melosysEessiMelding: MelosysEessiMelding ->
-                eessiService.opprettJournalpostForTidligereSed(
-                    melosysEessiMelding.rinaSaksnummer
-                )
-            }
+        finnEessiMelding(prosessinstans).ifPresent { melosysEessiMelding: MelosysEessiMelding ->
+            eessiService.opprettJournalpostForTidligereSed(
+                melosysEessiMelding.rinaSaksnummer
+            )
         }
     }
 

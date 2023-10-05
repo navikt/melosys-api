@@ -18,8 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.featuretoggle.ToggleName.IKKE_JOURNALFOER_UTEN_PID;
-
 @Component
 public class FerdigstillJournalpostSed implements StegBehandler {
 
@@ -78,9 +76,7 @@ public class FerdigstillJournalpostSed implements StegBehandler {
 
             log.info("Journalpost {} ferdigstilt for behandling {}", eessiMelding.getJournalpostId(), behandling.getId());
 
-            if (unleash.isEnabled(IKKE_JOURNALFOER_UTEN_PID)) {
-                eessiService.opprettJournalpostForTidligereSed(eessiMelding.getRinaSaksnummer());
-            }
+            eessiService.opprettJournalpostForTidligereSed(eessiMelding.getRinaSaksnummer());
         }
     }
 
