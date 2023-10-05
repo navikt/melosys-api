@@ -26,18 +26,15 @@ public class FerdigstillJournalpostSed implements StegBehandler {
     private final JoarkFasade joarkFasade;
     private final PersondataFasade persondataFasade;
     private final OppgaveFactory oppgaveFactory;
-    private final Unleash unleash;
     private final EessiService eessiService;
 
     public FerdigstillJournalpostSed(JoarkFasade joarkFasade,
                                      PersondataFasade persondataFasade,
                                      OppgaveFactory oppgaveFactory,
-                                     Unleash unleash,
                                      EessiService eessiService) {
         this.joarkFasade = joarkFasade;
         this.persondataFasade = persondataFasade;
         this.oppgaveFactory = oppgaveFactory;
-        this.unleash = unleash;
         this.eessiService = eessiService;
     }
 

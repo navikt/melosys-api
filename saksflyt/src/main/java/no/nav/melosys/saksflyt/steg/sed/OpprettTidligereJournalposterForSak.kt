@@ -14,8 +14,7 @@ import java.util.*
 
 @Component
 class OpprettTidligereJournalposterForSak(private val joarkFasade: JoarkFasade,
-                                          private val eessiService: EessiService,
-                                          private val unleash: Unleash
+                                          private val eessiService: EessiService
 ) : StegBehandler {
     override fun inngangsSteg(): ProsessSteg {
         return ProsessSteg.OPPRETT_TIDLIGERE_JOURNALPOSTER_FOR_SAK

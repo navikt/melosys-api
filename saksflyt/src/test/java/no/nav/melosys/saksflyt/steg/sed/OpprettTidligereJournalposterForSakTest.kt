@@ -23,16 +23,13 @@ class OpprettTidligereJournalposterForSakTest {
     private val eessiService: EessiService = mockk()
     private val joarkFasade: JoarkFasade = mockk()
 
-    private val fakeUnleash = FakeUnleash()
-
     private lateinit var opprettTidligereJournalposterForSak: OpprettTidligereJournalposterForSak
 
     private val JOURNALPOST_ID = "123"
 
     @BeforeEach
     fun setup() {
-        fakeUnleash.enableAll()
-        opprettTidligereJournalposterForSak = OpprettTidligereJournalposterForSak(joarkFasade, eessiService, fakeUnleash)
+        opprettTidligereJournalposterForSak = OpprettTidligereJournalposterForSak(joarkFasade, eessiService)
     }
 
     @Test
