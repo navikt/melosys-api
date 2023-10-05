@@ -115,7 +115,7 @@ class InntekKonverterTest {
         var beloep: BigDecimal = BigDecimal(50000),
         var fordel: String = "kontantytelse",
         var inntektskilde: String = "A-ordningen",
-        var inntektsperiodetype: String? = "Maaned",
+        var inntektsperiodetype: String = "Maaned",
         var inntektsstatus: String = "LoependeInnrapportert",
         var leveringstidspunkt: YearMonth = YearMonth.now(),
         var opptjeningsland: String? = null,

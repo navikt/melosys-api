@@ -23,6 +23,7 @@ public abstract class Inntekt {
     @NotNull
     public String inntektskilde; //"http://nav.no/kodeverk/Kodeverk/InntektsInformasjonsopphav"
 
+    @NotNull
     public String inntektsperiodetype; //http://nav.no/kodeverk/Kodeverk/Inntektsperiodetyper
 
     @NotNull

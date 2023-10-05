@@ -150,7 +150,7 @@ class InntektRestConsumerTest(
     }
 
     @Test
-    fun test() {
+    fun `skal feile med DecodingException når felter som ikke kan være null er null`() {
         serviceUnderTestMockServer.stubFor(
             WireMock.post("/inntektskomponenten/rs/api/v1/hentinntektliste")
                 .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
@@ -174,12 +174,10 @@ class InntektRestConsumerTest(
                     maanedTom = YearMonth.of(2022, 3),
                 )
             )
-        }.message.apply {
-            shouldContain(
-                "JSON decoding error: Instantiation of [simple type, class no.nav.melosys.integrasjon.inntk.inntekt.InntektResponse\$Inntekt] " +
-                    "value failed for JSON property fordel due to missing (therefore NULL) value for creator parameter fordel which is a non-nullable type"
-            )
-        }
+        }.message.shouldContain(
+            "JSON decoding error: Instantiation of [simple type, class no.nav.melosys.integrasjon.inntk.inntekt.InntektResponse\$Inntekt] " +
+                "value failed for JSON property fordel due to missing (therefore NULL) value for creator parameter fordel which is a non-nullable type"
+        )
     }
 
     fun hentRessurs(fil: String): String = OrganisasjonRestConsumerTest::class.java.classLoader.getResource(fil)

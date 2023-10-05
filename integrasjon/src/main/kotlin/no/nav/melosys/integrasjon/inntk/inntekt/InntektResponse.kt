@@ -45,7 +45,7 @@ data class InntektResponse(
         val beloep: BigDecimal,
         val fordel: String,
         val inntektskilde: String,
-        val inntektsperiodetype: String? = null,
+        val inntektsperiodetype: String,
         val inntektsstatus: String,
         val leveringstidspunkt: YearMonth,
         val opptjeningsland: String? = null,
