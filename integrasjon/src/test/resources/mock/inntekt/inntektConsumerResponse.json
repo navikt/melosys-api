@@ -123,6 +123,23 @@
                     }
                 ]
             }
+        },
+        {
+            "aarMaaned": "2022-04",
+            "arbeidsInntektInformasjon": {
+                "inntektListe": [
+                    {
+                        "inntektType": "NAERINGSINNTEKT",
+                        "beloep": 50000,
+                        "fordel": "kontantytelse",
+                        "inntektskilde": "A-ordningen",
+                        "inntektsperiodetype": "Maaned",
+                        "inntektsstatus": "LoependeInnrapportert",
+                        "leveringstidspunkt": "2023-07",
+                        "beskrivelse": "fastloenn"
+                    }
+                ]
+            }
         }
     ],
     "ident": {
