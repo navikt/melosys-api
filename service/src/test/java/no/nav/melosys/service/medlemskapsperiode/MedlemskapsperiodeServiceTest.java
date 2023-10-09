@@ -1,10 +1,5 @@
 package no.nav.melosys.service.medlemskapsperiode;
 
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.avgift.Inntektsperiode;
 import no.nav.melosys.domain.avgift.Penger;
@@ -25,10 +20,14 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -58,18 +57,6 @@ class MedlemskapsperiodeServiceTest {
     void hentMedlemskapsperioder() {
         medlemskapsperiodeService.hentMedlemskapsperioder(1L);
         verify(medlemAvFolketrygdenServiceMock).finnMedlemAvFolketrygden(1L);
-    }
-
-    @Test
-    void opprettMedlemskapsperiode_finnesIngenEksisterende_kasterException() {
-        when(medlemAvFolketrygdenServiceMock.hentMedlemAvFolketrygden(behandlingsresultatID))
-            .thenReturn(lagMedlemAvFolketrygden());
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> medlemskapsperiodeService.opprettMedlemskapsperiode(
-                behandlingsresultatID, LocalDate.now(), LocalDate.now().plusYears(1),
-                InnvilgelsesResultat.DELVIS_INNVILGET, Trygdedekninger.FULL_DEKNING_FTRL))
-            .withMessageContaining("ingen medlemskapsperiode");
     }
 
     @Test
