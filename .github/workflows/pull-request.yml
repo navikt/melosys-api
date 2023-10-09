@@ -40,7 +40,7 @@ jobs:
         run: mvn clean verify --threads=8 -B -e -U --settings .github/settings.xml
 
       - name: Unit Test Report
-        uses: dorny/test-reporter@v1.6.0
+        uses: dorny/test-reporter@v1.7.0
         if: success() || failure()
         with:
           name: Unit Tests
@@ -52,7 +52,7 @@ jobs:
           fail-on-error: 'false'
 
       - name: Integration Test Report
-        uses: dorny/test-reporter@v1.6.0
+        uses: dorny/test-reporter@v1.7.0
         if: success() || failure()
         with:
           name: Integration Tests
