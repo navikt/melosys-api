@@ -46,10 +46,10 @@ jobs:
           name: Unit Tests for all modules
           path: '**/target/surefire-reports/TEST-*.xml'
           reporter: java-junit
-          list-suites: failed
-          list-tests: failed
-          only-summary: true
-          fail-on-error: false
+          list-suites: 'failed'
+          list-tests: 'failed'
+          only-summary: 'true'
+          fail-on-error: 'false'
 
       - name: Unit Test Report for Service
         uses: dorny/test-reporter@v1.6.0

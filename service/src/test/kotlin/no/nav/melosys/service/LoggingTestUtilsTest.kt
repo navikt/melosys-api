@@ -25,4 +25,9 @@ class LoggingTestUtilsTest {
             }
         }
     }
+
+    @Test
+    fun fail() {
+        "bare for å få en feile".shouldBe("aa")
+    }
 }
