@@ -26,7 +26,7 @@ class EregDtoTilSaksopplysningKonverterTests {
     }
 
     @Test
-    fun `finn enhetstype fra enhetstyper og bruk den nyeste når vi ikke har type detaljer `() {
+    fun `finn enhetstype fra enhetstyper og bruk den første i lista når vi ikke har type detaljer `() {
         val organisasjon = hentOrganisasjon("enhetstype-2.json")
 
         val saksopplysning = EregDtoTilSaksopplysningKonverter().lagSaksopplysning(organisasjon)
