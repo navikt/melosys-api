@@ -6,7 +6,7 @@ jobs:
   build:
     runs-on: ubuntu-latest-8-cores
     permissions:
-      contents: write
+      contents: read
       packages: read
       pull-requests: write
       checks: write
@@ -43,8 +43,19 @@ jobs:
         uses: dorny/test-reporter@v1.6.0
         if: success() || failure()
         with:
-          name: Unit Tests
+          name: Unit Tests for all modules
           path: '**/target/surefire-reports/TEST-*.xml'
+          reporter: java-junit
+          list-suites: 'failed'
+          list-tests: 'failed'
+          fail-on-error: 'false'
+
+      - name: Unit Test Report for Service
+        uses: dorny/test-reporter@v1.6.0
+        if: success() || failure()
+        with:
+          name: Unit Tests
+          path: '**/service/target/surefire-reports/TEST-*.xml'
           reporter: java-junit
           list-suites: 'failed'
           list-tests: 'failed'
