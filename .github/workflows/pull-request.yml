@@ -36,3 +36,13 @@ jobs:
           password: ${{ secrets.READER_TOKEN }}
       - name: Build and test
         run: mvn clean verify --threads=8 -B -e -U --settings .github/settings.xml
+
+      - name: Test Report
+        uses: dorny/test-reporter@v1.6.0
+        if: success() || failure()
+        with:
+          name: Java Tests
+          path: '**/target/surefire-reports/TEST-*.xml'
+          reporter: java-junit
+          fail-on-error: 'false'
+          
