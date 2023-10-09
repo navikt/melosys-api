@@ -44,9 +44,15 @@ jobs:
         if: success() || failure()
         with:
           name: Java Tests
-          path: |
-            '**/target/surefire-reports/TEST-*.xml'
-            '**/target/surefire-reports/IT-*.xml'
+          path: '**/target/surefire-reports/TEST-*.xml'
           reporter: java-junit
           fail-on-error: 'false'
 
+      - name: IT Report
+        uses: dorny/test-reporter@v1.6.0
+        if: success() || failure()
+        with:
+          name: Java Tests
+          path: '**/target/surefire-reports/IT-*.xml'
+          reporter: java-junit
+          fail-on-error: 'false'
