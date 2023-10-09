@@ -16,7 +16,7 @@ class EregDtoTilSaksopplysningKonverter {
             orgnummer = organisasjon.organisasjonsnummer
             sektorkode = finSektorkode(organisasjon)
             oppstartsdato = null // fjerns når vi ikke lengre bruker gammelt soap api - MELOSYS-6134
-            enhetstype = organisasjon.organisasjonDetaljer?.enhetstyper?.first { it.enhetstype != null }?.enhetstype
+            enhetstype = finnEnhetstype(organisasjon)
             navn = listOf(organisasjon.navn?.sammensattnavn ?: "UKJENT")
             organisasjonDetaljer = OrganisasjonsDetaljer().apply {
                 orgnummer = organisasjon.organisasjonsnummer
@@ -29,6 +29,15 @@ class EregDtoTilSaksopplysningKonverter {
                 opphoersdato = organisasjon.organisasjonDetaljer?.opphoersdato
             }
         }
+    }
+
+    private fun finnEnhetstype(organisasjon: OrganisasjonResponse.Organisasjon): String? {
+        return when (organisasjon) {
+            is OrganisasjonResponse.JuridiskEnhet -> organisasjon.juridiskEnhetDetaljer?.enhetstype
+            is OrganisasjonResponse.Organisasjonsledd -> organisasjon.organisasjonsleddDetaljer?.enhetstype
+            is OrganisasjonResponse.Virksomhet -> organisasjon.virksomhetDetaljer?.enhetstype
+            else -> null
+        } ?: organisasjon.organisasjonDetaljer.enhetstyper?.first { it.enhetstype != null }?.enhetstype
     }
 
     private fun finSektorkode(organisasjon: OrganisasjonResponse.Organisasjon): String? {
