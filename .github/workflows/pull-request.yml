@@ -6,8 +6,10 @@ jobs:
   build:
     runs-on: ubuntu-latest-8-cores
     permissions:
-      contents: read
+      contents: write
       packages: read
+      pull-requests: write
+      checks: write
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       PASSWORD: ${{ secrets.READER_TOKEN }}
@@ -45,4 +47,4 @@ jobs:
           path: '**/target/surefire-reports/TEST-*.xml'
           reporter: java-junit
           fail-on-error: 'false'
-          
+
