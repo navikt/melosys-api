@@ -19,6 +19,7 @@ public class Loennsinntekt extends Inntekt {
         return beskrivelse;
     }
 
+    @Override
     public void setBeskrivelse(@NotNull String value) {
         this.beskrivelse = value;
     }
