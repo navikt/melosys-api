@@ -52,7 +52,7 @@ data class InntektResponse(
         val opptjeningsperiodeFom: LocalDate? = null,
         val opptjeningsperiodeTom: LocalDate? = null,
         val skattemessigBosattLand: String? = null,
-        val utbetaltIMaaned: YearMonth? = null,
+        val utbetaltIMaaned: YearMonth,
         val opplysningspliktig: Aktoer? = null,
         val virksomhet: Aktoer? = null,
         val tilleggsinformasjon: Tilleggsinformasjon? = null,
