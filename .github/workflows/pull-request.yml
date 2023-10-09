@@ -39,20 +39,24 @@ jobs:
       - name: Build and test
         run: mvn clean verify --threads=8 -B -e -U --settings .github/settings.xml
 
-      - name: Test Report
+      - name: Unit Test Report
         uses: dorny/test-reporter@v1.6.0
         if: success() || failure()
         with:
-          name: Java Tests
+          name: Unit Tests
           path: '**/target/surefire-reports/TEST-*.xml'
           reporter: java-junit
+          list-suites: 'failed'
+          list-tests: 'failed'
           fail-on-error: 'false'
 
-      - name: IT Report
+      - name: Integration Test Report
         uses: dorny/test-reporter@v1.6.0
         if: success() || failure()
         with:
-          name: Java Tests
+          name: Integration Tests
           path: '**/target/failsafe-reports/TEST-*.xml'
           reporter: java-junit
+          list-suites: 'all'
+          list-tests: 'failed'
           fail-on-error: 'false'
