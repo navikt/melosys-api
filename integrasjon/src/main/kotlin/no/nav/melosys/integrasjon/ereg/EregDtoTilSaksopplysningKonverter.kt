@@ -20,13 +20,13 @@ class EregDtoTilSaksopplysningKonverter {
             navn = listOf(organisasjon.navn?.sammensattnavn ?: "UKJENT")
             organisasjonDetaljer = OrganisasjonsDetaljer().apply {
                 orgnummer = organisasjon.organisasjonsnummer
-                navn = tilNavn(organisasjon.organisasjonDetaljer?.navn)
-                forretningsadresse = tilGeografiskAdresse(organisasjon.organisasjonDetaljer?.forretningsadresser)
-                postadresse = tilGeografiskAdresse(organisasjon.organisasjonDetaljer?.postadresser)
-                telefon = tilTelefon(organisasjon.organisasjonDetaljer?.telefonnummer)
-                epostadresse = tilEpost(organisasjon.organisasjonDetaljer?.epostadresser)
-                naering = organisasjon.organisasjonDetaljer?.naeringer?.map { it.naeringskode } ?: emptyList()
-                opphoersdato = organisasjon.organisasjonDetaljer?.opphoersdato
+                navn = tilNavn(organisasjon.organisasjonDetaljer.navn)
+                forretningsadresse = tilGeografiskAdresse(organisasjon.organisasjonDetaljer.forretningsadresser)
+                postadresse = tilGeografiskAdresse(organisasjon.organisasjonDetaljer.postadresser)
+                telefon = tilTelefon(organisasjon.organisasjonDetaljer.telefonnummer)
+                epostadresse = tilEpost(organisasjon.organisasjonDetaljer.epostadresser)
+                naering = organisasjon.organisasjonDetaljer.naeringer?.map { it.naeringskode } ?: emptyList()
+                opphoersdato = organisasjon.organisasjonDetaljer.opphoersdato
             }
         }
     }
