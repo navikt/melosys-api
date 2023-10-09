@@ -45,8 +45,8 @@ jobs:
         with:
           name: Java Tests
           path: |
-            **/target/surefire-reports/TEST-*.xml
-            **/target/surefire-reports/IT-*.xml
+            '**/target/surefire-reports/TEST-*.xml'
+            '**/target/surefire-reports/IT-*.xml'
           reporter: java-junit
           fail-on-error: 'false'
 
