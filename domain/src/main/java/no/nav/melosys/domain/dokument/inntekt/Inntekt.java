@@ -38,6 +38,7 @@ public abstract class Inntekt {
     @JsonView(DokumentView.Database.class)
     public String skattemessigBosattLand;
 
+    @NotNull
     public YearMonth utbetaltIPeriode;
 
     public String opplysningspliktigID;
