@@ -239,12 +239,13 @@ class BehandlingsresultatServiceTest {
 
 
         behandlingsresultatService.oppdaterFritekster(
-            1L, "fritekst for begrunnelse", "fritekst for innledning");
+            1L, "fritekst for begrunnelse", "fritekst for innledning", "fritekst for trygdeavgift");
 
 
         verify(behandlingsresultatRepo).save(captor.capture());
         Behandlingsresultat capturedBehandlingsresultat = captor.getValue();
         assertThat(capturedBehandlingsresultat.getBegrunnelseFritekst()).isEqualTo("fritekst for begrunnelse");
         assertThat(capturedBehandlingsresultat.getInnledningFritekst()).isEqualTo("fritekst for innledning");
+        assertThat(capturedBehandlingsresultat.getTrygdeavgiftFritekst()).isEqualTo("fritekst for trygdeavgift");
     }
 }
