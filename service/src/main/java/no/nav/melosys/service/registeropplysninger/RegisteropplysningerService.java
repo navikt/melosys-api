@@ -15,7 +15,7 @@ import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.integrasjon.inntk.InntektFasade;
+import no.nav.melosys.integrasjon.inntk.InntektService;
 import no.nav.melosys.integrasjon.utbetaling.UtbetaldataRestService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
@@ -49,7 +49,7 @@ public class RegisteropplysningerService {
     private final EregFasade eregFasade;
     private final AaregFasade aaregFasade;
     private final BehandlingService behandlingService;
-    private final InntektFasade inntektService;
+    private final InntektService inntektService;
     private final SaksopplysningerService saksopplysningerService;
     private final RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory;
     private final UtbetaldataRestService utbetaldataRestService;
@@ -58,7 +58,7 @@ public class RegisteropplysningerService {
                                        EregFasade eregFasade,
                                        AaregFasade aaregFasade,
                                        BehandlingService behandlingService,
-                                       InntektFasade inntektService,
+                                       InntektService inntektService,
                                        SaksopplysningerService saksopplysningerService,
                                        RegisteropplysningerPeriodeFactory registeropplysningerPeriodeFactory,
                                        UtbetaldataRestService utbetaldataRestService) {

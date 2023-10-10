@@ -14,10 +14,10 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
-class InntektRestServiceTest {
+class InntektServiceTest {
 
     private val inntektRestConsumer = mockk<InntektRestConsumer>()
-    private lateinit var inntektRestService: InntektRestService
+    private lateinit var inntektService: InntektService
 
     @BeforeEach
     fun setup() {
@@ -32,12 +32,12 @@ class InntektRestServiceTest {
             aktoer
         )
 
-        inntektRestService = InntektRestService(inntektRestConsumer)
+        inntektService = InntektService(inntektRestConsumer)
     }
 
     @Test
     fun hentInntektListe_periodeEtterJan2015_henterInntekt() {
-        val saksopplysning: Saksopplysning = inntektRestService.hentInntektListe(
+        val saksopplysning: Saksopplysning = inntektService.hentInntektListe(
             personID = PERSON_ID,
             fom = YearMonth.of(2017, 6),
             tom = YearMonth.of(2017, 8)
@@ -48,7 +48,7 @@ class InntektRestServiceTest {
 
     @Test
     fun hentInntektListe_fomFørJan2015_henterInntektMedFomJan2015() {
-        val saksopplysning: Saksopplysning = inntektRestService.hentInntektListe(
+        val saksopplysning: Saksopplysning = inntektService.hentInntektListe(
             personID = PERSON_ID,
             fom = YearMonth.of(2014, 6),
             tom = YearMonth.of(2017, 8)
@@ -65,7 +65,7 @@ class InntektRestServiceTest {
     @Test
     fun hentInntektListe_helePeriodeFørJan2015_returnererTomInntektListe() {
         val saksopplysning: Saksopplysning =
-            inntektRestService.hentInntektListe(
+            inntektService.hentInntektListe(
                 personID = PERSON_ID,
                 fom = YearMonth.of(2012, 1),
                 tom = YearMonth.of(2014, 12)
