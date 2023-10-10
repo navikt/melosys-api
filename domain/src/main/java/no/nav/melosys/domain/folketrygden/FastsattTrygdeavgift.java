@@ -8,6 +8,8 @@ import javax.persistence.*;
 import no.nav.melosys.domain.avgift.Inntektsperiode;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
+import no.nav.melosys.domain.kodeverk.Inntektskildetype;
+import no.nav.melosys.domain.kodeverk.Skatteplikttype;
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer;
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker;
 
@@ -80,19 +82,32 @@ public class FastsattTrygdeavgift {
     }
 
     public Trygdeavgiftmottaker getTrygdeavgiftMottaker() {
-        var inntektsperioder = trygdeavgiftsgrunnlag.getInntektsperioder();
-
-        if (trygdeavgiftBetalesTilNavOgSkatt(inntektsperioder)) {
+        if (trygdeavgiftBetalesTilNavOgSkatt()) {
             return Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT;
         }
-        return inntektsperioder.stream().allMatch(Inntektsperiode::isTrygdeavgiftBetalesKunTilSkatt)
+        return isTrygdeavgiftBetalesKunTilSkatt()
             ? Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
             : Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV;
     }
 
-    private static boolean trygdeavgiftBetalesTilNavOgSkatt(List<Inntektsperiode> inntektsperioder) {
-        boolean ordinærTrygdeavgiftTilSkatt = inntektsperioder.stream().anyMatch(Inntektsperiode::isOrdinærTrygdeavgiftBetalesTilSkatt);
-        boolean ordinærTrygdeavgiftTilNav = inntektsperioder.stream().anyMatch(inntektsperiode -> !inntektsperiode.isOrdinærTrygdeavgiftBetalesTilSkatt());
-        return (ordinærTrygdeavgiftTilSkatt && ordinærTrygdeavgiftTilNav) || inntektsperioder.stream().anyMatch(Inntektsperiode::isTrygdeavgiftBetalesBådeTilNavOgSkatt);
+    private boolean trygdeavgiftBetalesTilNavOgSkatt() {
+        boolean ordinærTrygdeavgiftTilSkatt = trygdeavgiftsgrunnlag.getInntektsperioder().stream().anyMatch(Inntektsperiode::isOrdinærTrygdeavgiftBetalesTilSkatt);
+        boolean ordinærTrygdeavgiftTilNav = trygdeavgiftsgrunnlag.getInntektsperioder().stream().anyMatch(inntektsperiode -> !inntektsperiode.isOrdinærTrygdeavgiftBetalesTilSkatt());
+        return (ordinærTrygdeavgiftTilSkatt && ordinærTrygdeavgiftTilNav) || trygdeavgiftsgrunnlag.getInntektsperioder().stream().anyMatch(Inntektsperiode::isTrygdeavgiftBetalesBådeTilNavOgSkatt);
+    }
+
+    private boolean isTrygdeavgiftBetalesKunTilSkatt() {
+        return betalerArbeidsGiveravgiftOgTrygdeavgiftTilSkatt() || erSpesielGruppeOgBetalerArbeidsGiverAvgift();
+    }
+
+    private boolean betalerArbeidsGiveravgiftOgTrygdeavgiftTilSkatt() {
+        return trygdeavgiftsgrunnlag.getSkatteforholdTilNorge().stream().anyMatch(
+            skatteforholdTilNorge -> skatteforholdTilNorge.getSkatteplikttype().equals(Skatteplikttype.SKATTEPLIKTIG))
+            && trygdeavgiftsgrunnlag.getInntektsperioder().stream().allMatch(Inntektsperiode::isArbeidsgiversavgiftBetalesTilSkatt);
+    }
+
+    private boolean erSpesielGruppeOgBetalerArbeidsGiverAvgift() {
+        return trygdeavgiftsgrunnlag.getInntektsperioder().stream().allMatch(Inntektsperiode::isArbeidsgiversavgiftBetalesTilSkatt)
+            && trygdeavgiftsgrunnlag.getInntektsperioder().stream().anyMatch(inntektsperiode -> inntektsperiode.getType().equals(Inntektskildetype.MISJONÆR));
     }
 }
