@@ -60,7 +60,7 @@ public class OpprettMedlemskapsperiodeService {
                         søknad.periode,
                         søknad.getTrygdedekning(),
                         utledMottaksdato.getMottaksdato(behandling),
-                        søknad.soeknadsland.landkoder.stream().collect(onlyElement()))
+                        søknad.hentArbeidsland())
                 );
             }
 

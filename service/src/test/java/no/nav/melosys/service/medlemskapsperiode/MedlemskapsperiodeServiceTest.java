@@ -5,6 +5,8 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.avgift.Inntektsperiode;
 import no.nav.melosys.domain.avgift.Penger;
@@ -13,6 +15,9 @@ import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS;
+import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.MedlemskapsperiodeRepository;
 import no.nav.melosys.service.MedlemAvFolketrygdenService;
@@ -28,7 +33,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,27 +65,17 @@ class MedlemskapsperiodeServiceTest {
     }
 
     @Test
-    void opprettMedlemskapsperiode_finnesIngenEksisterende_kasterException() {
-        when(medlemAvFolketrygdenServiceMock.hentMedlemAvFolketrygden(behandlingsresultatID))
-            .thenReturn(lagMedlemAvFolketrygden());
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> medlemskapsperiodeService.opprettMedlemskapsperiode(
-                behandlingsresultatID, LocalDate.now(), LocalDate.now().plusYears(1),
-                InnvilgelsesResultat.DELVIS_INNVILGET, Trygdedekninger.FULL_DEKNING_FTRL))
-            .withMessageContaining("ingen medlemskapsperiode");
-    }
-
-    @Test
-    void opprettMedlemskapsperiode_finnesEksisterende_verifiserFårSammeArbeidslandOgBestemmelse() {
-        final var eksisterende = lagMedlemskapsperiode();
-        MedlemAvFolketrygden medlemAvFolketrygden = lagMedlemAvFolketrygden(eksisterende);
+    void opprettMedlemskapsperiode_lagrerKorrektMedlemskapsperiode() {
+        MedlemAvFolketrygden medlemAvFolketrygden = lagMedlemAvFolketrygden();
         medlemAvFolketrygden.setFastsattTrygdeavgift(lagFastsattTrygdeavgift());
+        medlemAvFolketrygden.setBehandlingsresultat(lagBehandlingsresultat());
         when(medlemAvFolketrygdenServiceMock.hentMedlemAvFolketrygden(behandlingsresultatID))
             .thenReturn(medlemAvFolketrygden);
 
+
         medlemskapsperiodeService.opprettMedlemskapsperiode(behandlingsresultatID, LocalDate.now().minusYears(1), LocalDate.now(),
             InnvilgelsesResultat.AVSLAATT, Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE);
+
 
         verify(medlemskapsperiodeRepositoryMock).save(medlemskapsperiodeCaptor.capture());
         verify(trygdeavgiftsgrunnlagServiceMock).fjernTrygdeavgiftsperioderOmDeFinnes(any());
@@ -92,10 +86,10 @@ class MedlemskapsperiodeServiceTest {
                 Medlemskapsperiode::getTrygdedekning,
                 Medlemskapsperiode::getMedlemskapstype)
             .containsExactly(
-                eksisterende.getArbeidsland(),
+                Land_iso2.AU.getKode(),
                 InnvilgelsesResultat.AVSLAATT,
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
-                eksisterende.getMedlemskapstype());
+                Medlemskapstyper.PLIKTIG);
     }
 
     @Test
@@ -212,16 +206,6 @@ class MedlemskapsperiodeServiceTest {
     }
 
     @Test
-    void slettMedlemskapsperiode_erEnesteMedlemskapsperiode_kasterException() {
-        when(medlemAvFolketrygdenServiceMock.hentMedlemAvFolketrygden(behandlingsresultatID))
-            .thenReturn(lagMedlemAvFolketrygden(lagMedlemskapsperiode()));
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> medlemskapsperiodeService.slettMedlemskapsperiode(behandlingsresultatID, medlemskapsperiodeID))
-            .withMessageContaining("minst en medlemskapsperiode");
-    }
-
-    @Test
     void slettMedlemskapsperiode_finnerIkkeMedlemskapsperiode_kasterException() {
         when(medlemAvFolketrygdenServiceMock.hentMedlemAvFolketrygden(behandlingsresultatID))
             .thenReturn(lagMedlemAvFolketrygden());
@@ -264,6 +248,16 @@ class MedlemskapsperiodeServiceTest {
 
         verify(trygdeavgiftsgrunnlagServiceMock).fjernTrygdeavgiftsperioderOmDeFinnes(any());
         assertThat(medlemAvFolketrygden.getMedlemskapsperioder()).hasSize(1);
+    }
+
+    private Behandlingsresultat lagBehandlingsresultat() {
+        var behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setBehandling(new Behandling());
+        behandlingsresultat.getBehandling().setMottatteOpplysninger(new MottatteOpplysninger());
+        var søknad = new SøknadNorgeEllerUtenforEØS();
+        søknad.soeknadsland = new Soeknadsland(List.of(Land_iso2.AU.getKode()), false);
+        behandlingsresultat.getBehandling().getMottatteOpplysninger().setMottatteOpplysningerdata(søknad);
+        return behandlingsresultat;
     }
 
     private MedlemAvFolketrygden lagMedlemAvFolketrygden(Medlemskapsperiode... medlemskapsperioder) {
