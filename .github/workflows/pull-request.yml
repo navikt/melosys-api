@@ -8,7 +8,6 @@ jobs:
     permissions:
       contents: read
       packages: read
-      pull-requests: write
       checks: write
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
