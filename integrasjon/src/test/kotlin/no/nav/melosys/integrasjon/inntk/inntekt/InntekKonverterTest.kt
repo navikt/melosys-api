@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.inntk.inntekt
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -17,6 +18,7 @@ import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.BonusFraForsvaret
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.ReiseKostOgLosji
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Svalbardinntekt
 import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.exception.TekniskException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.math.BigDecimal
@@ -24,12 +26,13 @@ import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 import java.time.Year
 import java.time.YearMonth
+import java.time.temporal.ChronoUnit
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class InntekKonverterTest {
 
     @Test
-    fun test() {
+    fun `skal kunne konverter valid inntekt response`() {
         val inntektResponse = jacksonObjectMapper()
             .registerModule(JavaTimeModule())
             .readValue<InntektResponse>(hentRessurs("mock/inntekt/inntektConsumerResponse.json"))
@@ -97,9 +100,86 @@ class InntekKonverterTest {
             }
     }
 
+    @Test
+    fun `skal feil om beskrivelse er null`() {
+        val aktoer = Aktoer("123456789", AktoerType.AKTOER_ID)
+        val inntektResponse = InntektResponse(
+            lagArbeidsInntektMaaned(
+                YearMonth.of(2022, 1),
+                YearMonth.of(2022, 1),
+                TestDataInntekt(
+                    beskrivelse = null
+                ),
+            ), aktoer
+        )
+        shouldThrow<TekniskException> {
+            InntektKonverter().lagSaksopplysning(inntektResponse)
+        }
+    }
+
+    data class TestDataInntekt(
+        var inntektType: InntektResponse.InntektType? = InntektResponse.InntektType.LOENNSINNTEKT,
+        var beloep: BigDecimal = BigDecimal(50000),
+        var fordel: String = "kontantytelse",
+        var inntektskilde: String = "A-ordningen",
+        var inntektsperiodetype: String = "Maaned",
+        var inntektsstatus: String = "LoependeInnrapportert",
+        var leveringstidspunkt: YearMonth = YearMonth.now(),
+        var opptjeningsland: String? = null,
+        var skattemessigBosattLand: String? = null,
+        var opplysningspliktig: Aktoer? = Aktoer("974761076", AktoerType.ORGANISASJON),
+        var virksomhet: Aktoer? = Aktoer("888888888", AktoerType.ORGANISASJON),
+        var inntektsmottaker: Aktoer? = Aktoer("123456789", AktoerType.AKTOER_ID),
+        var inngaarIGrunnlagForTrekk: Boolean? = true,
+        var utloeserArbeidsgiveravgift: Boolean? = true,
+        var informasjonsstatus: String? = "InngaarAlltid",
+        var beskrivelse: String? = "fastloenn",
+        var skatteOgAvgiftsregel: String? = null,
+        var antall: Int? = null,
+        var tilleggsinformasjon: InntektResponse.Tilleggsinformasjon? = InntektResponse.Tilleggsinformasjon(
+            kategori = "bla",
+            tilleggsinformasjonDetaljer = InntektResponse.BonusFraForsvaret(
+                aaretUtbetalingenGjelderFor = Year.of(1980)
+            )
+        )
+    )
+
+    private fun lagArbeidsInntektMaaned(
+        fom: YearMonth,
+        tom: YearMonth,
+        inntekt: TestDataInntekt = TestDataInntekt()
+    ): List<InntektResponse.ArbeidsInntektMaaned> = List(ChronoUnit.MONTHS.between(fom, tom).toInt() + 1) {
+        fom.plusMonths(it.toLong())
+    }.map { yearMonth ->
+        InntektResponse.ArbeidsInntektMaaned(
+            aarMaaned = yearMonth,
+            arbeidsInntektInformasjon = InntektResponse.ArbeidsInntektInformasjon(
+                arbeidsforholdListe = listOf(InntektResponse.ArbeidsforholdFrilanser()),
+                inntektListe = listOf(
+                    InntektResponse.Inntekt(
+                        inntektType = inntekt.inntektType,
+                        beloep = inntekt.beloep,
+                        fordel = inntekt.fordel,
+                        inntektskilde = inntekt.inntektskilde,
+                        inntektsperiodetype = inntekt.inntektsperiodetype,
+                        inntektsstatus = inntekt.inntektsstatus,
+                        leveringstidspunkt = inntekt.leveringstidspunkt,
+                        utbetaltIMaaned = yearMonth,
+                        opplysningspliktig = inntekt.opplysningspliktig,
+                        virksomhet = inntekt.virksomhet,
+                        inntektsmottaker = inntekt.inntektsmottaker,
+                        inngaarIGrunnlagForTrekk = inntekt.inngaarIGrunnlagForTrekk,
+                        utloeserArbeidsgiveravgift = inntekt.utloeserArbeidsgiveravgift,
+                        informasjonsstatus = inntekt.informasjonsstatus,
+                        beskrivelse = inntekt.beskrivelse,
+                        tilleggsinformasjon = inntekt.tilleggsinformasjon,
+                        skattemessigBosattLand = inntekt.skattemessigBosattLand,
+                    )
+                )
+            )
+        )
+    }
+
     fun hentRessurs(fil: String): String = InntekKonverterTest::class.java.classLoader.getResource(fil)
         ?.readText(StandardCharsets.UTF_8) ?: throw IkkeFunnetException("Fant ikke $fil")
 }
-
-
-

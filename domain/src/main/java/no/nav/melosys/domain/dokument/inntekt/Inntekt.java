@@ -4,68 +4,31 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 
-import javax.xml.bind.annotation.*;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
 import com.fasterxml.jackson.annotation.JsonView;
 import no.nav.melosys.domain.dokument.DokumentView;
-import no.nav.melosys.domain.dokument.inntekt.inntektstype.Loennsinntekt;
-import no.nav.melosys.domain.dokument.inntekt.inntektstype.Naeringsinntekt;
-import no.nav.melosys.domain.dokument.inntekt.inntektstype.PensjonEllerTrygd;
-import no.nav.melosys.domain.dokument.inntekt.inntektstype.YtelseFraOffentlige;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
-import no.nav.melosys.domain.dokument.jaxb.OffsetDateTimeXmlAdapter;
-import no.nav.melosys.domain.dokument.jaxb.YearMonthXmlAdapter;
+import org.jetbrains.annotations.NotNull;
 
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Inntekt", propOrder = {
-        "arbeidsforholdREF",
-        "beloep",
-        "fordel",
-        "inntektskilde",
-        "inntektsperiodetype",
-        "inntektsstatus",
-        "levereringstidspunkt",
-        "opptjeningsland",
-        "opptjeningsperiode",
-        "skattemessigBosattLand",
-        "utbetaltIPeriode",
-        "opplysningspliktigID",
-        "inntektsinnsenderID",
-        "virksomhetID",
-        "tilleggsinformasjon",
-        "inntektsmottakerID",
-        "inngaarIGrunnlagForTrekk",
-        "utloeserArbeidsgiveravgift",
-        "informasjonsstatus"
-})
-@XmlSeeAlso({
-        Loennsinntekt.class,
-        Naeringsinntekt.class,
-        PensjonEllerTrygd.class,
-        YtelseFraOffentlige.class
-})
-public class Inntekt {
+public abstract class Inntekt {
 
     @JsonView(DokumentView.Database.class)
     public String arbeidsforholdREF;
 
-    @XmlElement(required = true)
+    @NotNull
     public BigDecimal beloep;
 
-    @XmlElement(required = true)
+    @NotNull
     public String fordel; //Fordel http://nav.no/kodeverk/Kodeverk/Fordel
 
-    @XmlElement(required = true)
+    @NotNull
     public String inntektskilde; //"http://nav.no/kodeverk/Kodeverk/InntektsInformasjonsopphav"
 
-    @XmlElement(required = true)
+    @NotNull
     public String inntektsperiodetype; //http://nav.no/kodeverk/Kodeverk/Inntektsperiodetyper
 
-    @XmlElement(required = true)
+    @NotNull
     public String inntektsstatus; //"http://nav.no/kodeverk/Kodeverk/Inntektsstatuser"
 
-    @XmlJavaTypeAdapter(OffsetDateTimeXmlAdapter.class)
     public LocalDateTime levereringstidspunkt;
 
     public String opptjeningsland;
@@ -75,8 +38,7 @@ public class Inntekt {
     @JsonView(DokumentView.Database.class)
     public String skattemessigBosattLand;
 
-    @XmlJavaTypeAdapter(YearMonthXmlAdapter.class)
-    @XmlElement(required = true)
+    @NotNull
     public YearMonth utbetaltIPeriode;
 
     public String opplysningspliktigID;
@@ -97,12 +59,8 @@ public class Inntekt {
 
     public String informasjonsstatus; //"http://nav.no/kodeverk/Kodeverk/Informasjonsstatuser"
 
-    public void setBeskrivelse(String beskrivelse) {
-        this.beskrivelse = beskrivelse;
-    }
+    public abstract void setBeskrivelse(@NotNull String beskrivelse);
 
-    @XmlTransient
-    private String beskrivelse;
 
     public String getArbeidsforholdREF() {
         return arbeidsforholdREF;
@@ -112,9 +70,8 @@ public class Inntekt {
         return beloep;
     }
 
-    public String getBeskrivelse() {
-        return beskrivelse;
-    }
+    @NotNull
+    public abstract String getBeskrivelse();
 
     public String getFordel() {
         return fordel;

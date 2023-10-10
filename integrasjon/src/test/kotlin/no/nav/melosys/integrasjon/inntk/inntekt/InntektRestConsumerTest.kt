@@ -3,10 +3,12 @@ package no.nav.melosys.integrasjon.inntk.inntekt
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.OAuthMockServer
@@ -23,6 +25,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
+import org.springframework.core.codec.DecodingException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
@@ -149,6 +152,37 @@ class InntektRestConsumerTest(
             }
 
 
+    }
+
+    @Test
+    fun `skal feile med DecodingException når felter som ikke kan være null er null`() {
+        serviceUnderTestMockServer.stubFor(
+            WireMock.post("/inntektskomponenten/rs/api/v1/hentinntektliste")
+                .withHeader("Authorization", WireMock.equalTo("Bearer --azure-token-from-system--"))
+                .withHeader(HttpHeaders.ACCEPT, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                .withHeader(HttpHeaders.CONTENT_TYPE, WireMock.equalTo(MediaType.APPLICATION_JSON_VALUE))
+                .willReturn(
+                    WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(hentRessurs("mock/inntekt/inntektConsumerResponse-med-null.json"))
+                )
+        )
+
+        shouldThrow<DecodingException> {
+            inntektRestConsumer.hentInntektListe(
+                InntektRequest(
+                    ainntektsfilter = "MedlemskapA-inntekt",
+                    formaal = "Medlemskap",
+                    ident = Aktoer("personID", AktoerType.AKTOER_ID),
+                    maanedFom = YearMonth.of(2022, 1),
+                    maanedTom = YearMonth.of(2022, 3),
+                )
+            )
+        }.message.shouldContain(
+            "JSON decoding error: Instantiation of [simple type, class no.nav.melosys.integrasjon.inntk.inntekt.InntektResponse\$Inntekt] " +
+                "value failed for JSON property fordel due to missing (therefore NULL) value for creator parameter fordel which is a non-nullable type"
+        )
     }
 
     fun hentRessurs(fil: String): String = OrganisasjonRestConsumerTest::class.java.classLoader.getResource(fil)

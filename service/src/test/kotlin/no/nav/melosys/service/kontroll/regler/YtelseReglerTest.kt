@@ -6,6 +6,7 @@ import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned
 import no.nav.melosys.domain.dokument.inntekt.Inntekt
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument
+import no.nav.melosys.domain.dokument.inntekt.inntektstype.Loennsinntekt
 import no.nav.melosys.domain.dokument.inntekt.inntektstype.YtelseFraOffentlige
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -105,7 +106,7 @@ class YtelseReglerTest {
     }
 
     private fun hentInntektsListe(medYtelserFraOffentlig: Boolean, fom: LocalDate): List<Inntekt> =
-        listOf(Inntekt()) + if (medYtelserFraOffentlig) listOf(YtelseFraOffentlige().apply {
+        listOf(Loennsinntekt()) + if (medYtelserFraOffentlig) listOf(YtelseFraOffentlige().apply {
             utbetaltIPeriode = YearMonth.from(fom).plusMonths(1)
         }) else emptyList()
 }
