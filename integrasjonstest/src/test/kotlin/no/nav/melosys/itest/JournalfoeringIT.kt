@@ -61,7 +61,7 @@ class JournalfoeringIT(
         val journalfoeringOpprettDto = defaultJournalføringDto().apply {
             fagsak.sakstype = Sakstyper.EU_EOS.kode
             fagsak.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode
-            behandlingstypeKode = Behandlingstyper.KLAGE.kode
+            behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
             behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
         }
 
