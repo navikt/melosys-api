@@ -1,8 +1,5 @@
 package no.nav.melosys.service.avgift
 
-import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
@@ -13,8 +10,6 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningRespons
 import no.nav.melosys.service.MedlemAvFolketrygdenService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import org.threeten.extra.LocalDateRange
-import java.time.DateTimeException
 import java.util.*
 
 @Service
@@ -29,25 +24,15 @@ class TrygdeavgiftsberegningService
         val medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID)
         val fastsattTrygdeavgift = medlemAvFolketrygden.fastsattTrygdeavgift
 
-        val innvilgedeMedlemskapsperioder =
-            medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }
-
         valider(medlemAvFolketrygden)
-        validerInntekstperioderDekkerMedlemskapsperioder(
-            fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder,
-            innvilgedeMedlemskapsperioder
-        )
-        validerSkatteforholdTilNorgeDekkerMedlemskapsperioderOgOverlapperIkke(
-            fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge,
-            innvilgedeMedlemskapsperioder
-        )
-
         fastsattTrygdeavgift.trygdeavgiftsperioder.clear()
 
         if (!fastsattTrygdeavgift.skalBetalesTilNav()) {
             return emptySet()
         }
 
+        val innvilgedeMedlemskapsperioder =
+            medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }
 
         val (trygdeavgiftsberegningRequest, UUID_DBID_MAPS) =
             TrygdeavgiftsberegningsRequestMapper().map(
@@ -130,87 +115,4 @@ class TrygdeavgiftsberegningService
             .orElse(null)
             ?: emptySet()
     }
-
-    companion object {
-        fun validerInntekstperioderDekkerMedlemskapsperioder(
-            inntektsperioder: List<Inntektsperiode>,
-            medlemskapsperioder: List<Medlemskapsperiode>
-        ) {
-            val inntektsperiodeDateRange = inntektsperioder.sortedBy { it.fomDato }
-                .map { inntektsperiode -> LocalDateRange.ofClosed(inntektsperiode.fomDato, inntektsperiode.tomDato) }
-
-            var samletInntektsperiodeDateRange: LocalDateRange? = null
-            try {
-                for (range in inntektsperiodeDateRange) {
-                    samletInntektsperiodeDateRange = if (samletInntektsperiodeDateRange == null) {
-                        range
-                    } else {
-                        samletInntektsperiodeDateRange.union(range)
-                    }
-                }
-            } catch (ex: DateTimeException) {
-                throw FunksjonellException("Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
-            }
-
-
-            val sortertMedlemskapsperiode = medlemskapsperioder.sortedBy { it.fom }
-            if (LocalDateRange.ofClosed(
-                    sortertMedlemskapsperiode.first().fom,
-                    sortertMedlemskapsperiode.last().tom
-                ) != samletInntektsperiodeDateRange
-            ) {
-                throw FunksjonellException("Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
-            }
-        }
-
-        fun validerSkatteforholdTilNorgeDekkerMedlemskapsperioderOgOverlapperIkke(
-            skatteforholdTilNorge: List<SkatteforholdTilNorge>,
-            medlemskapsperioder: List<Medlemskapsperiode>
-        ) {
-            val skatteforholdDateRange = skatteforholdTilNorge.sortedBy { it.fomDato }
-                .map { skatteforhold -> LocalDateRange.ofClosed(skatteforhold.fomDato, skatteforhold.tomDato) }
-
-            validerHarOverlapp(skatteforholdDateRange)
-
-            var samletSkatteforholdDateRange: LocalDateRange? = null
-            try {
-                for (range in skatteforholdDateRange) {
-                    samletSkatteforholdDateRange = if (samletSkatteforholdDateRange == null) {
-                        range
-                    } else {
-                        samletSkatteforholdDateRange.union(range)
-                    }
-                }
-            } catch (ex: DateTimeException) {
-                throw FunksjonellException("Skatteforholdsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
-            }
-
-
-            val sortertMedlemskapsperiode = medlemskapsperioder.sortedBy { it.fom }
-            if (LocalDateRange.ofClosed(
-                    sortertMedlemskapsperiode.first().fom,
-                    sortertMedlemskapsperiode.last().tom
-                ) != samletSkatteforholdDateRange
-            ) {
-                throw FunksjonellException("Skatteforholdsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
-            }
-        }
-
-        fun validerHarOverlapp(dateRanges: List<LocalDateRange>) {
-            for (i in dateRanges.indices) {
-                val range1 = dateRanges[i]
-
-                for (j in dateRanges.indices) {
-                    if (i != j) {
-                        val range2 = dateRanges[j]
-
-                        if (range1.overlaps(range2)) {
-                            throw FunksjonellException("Skatteforholdsperiodene kan ikke overlappe")
-                        }
-                    }
-                }
-            }
-        }
-    }
-
 }
