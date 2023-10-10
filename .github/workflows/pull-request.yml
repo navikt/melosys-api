@@ -41,7 +41,7 @@ jobs:
 
       - name: Saksflyt Test Report
         uses: dorny/test-reporter@v1.7.0
-        if: success() || failure()
+        if: failure()
         with:
           name: Saksflyt Tests
           path: '**/saksflyt/target/surefire-reports/TEST-*.xml'
@@ -53,7 +53,7 @@ jobs:
 
       - name: Frontend-api Test Report
         uses: dorny/test-reporter@v1.7.0
-        if: success() || failure()
+        if:  failure()
         with:
           name: Frontend-api Tests
           path: '**/frontend-api/target/surefire-reports/TEST-*.xml'
@@ -65,7 +65,7 @@ jobs:
 
       - name: Service Test Report
         uses: dorny/test-reporter@v1.7.0
-        if: success() || failure()
+        if:  failure()
         with:
           name: Service Tests
           path: '**/service/target/surefire-reports/TEST-*.xml'
@@ -75,11 +75,11 @@ jobs:
           only-summary: 'true'
           fail-on-error: 'false'
 
-      - name: API-Integrasjon Test Report
+      - name: Integrasjon mot eksterne avhengigheter Test Report
         uses: dorny/test-reporter@v1.7.0
-        if: success() || failure()
+        if:  failure()
         with:
-          name: API-Integrasjon Tests
+          name: Integrasjon mot eksterne avhengigheter Tests
           path: '**/integrasjon/target/surefire-reports/TEST-*.xml'
           reporter: java-junit
           list-suites: 'failed'
@@ -89,7 +89,7 @@ jobs:
 
       - name: Domain Test Report
         uses: dorny/test-reporter@v1.7.0
-        if: success() || failure()
+        if:  failure()
         with:
           name: Domain Tests
           path: '**/domain/target/surefire-reports/TEST-*.xml'
@@ -101,7 +101,7 @@ jobs:
 
       - name: Config Test Report
         uses: dorny/test-reporter@v1.7.0
-        if: success() || failure()
+        if:  failure()
         with:
           name: Config Tests
           path: '**/config/target/surefire-reports/TEST-*.xml'
@@ -113,7 +113,7 @@ jobs:
 
       - name: Sikkerhet Test Report
         uses: dorny/test-reporter@v1.7.0
-        if: success() || failure()
+        if:  failure()
         with:
           name: Sikkerhet Tests
           path: '**/sikkerhet/target/surefire-reports/TEST-*.xml'
