@@ -16,19 +16,28 @@ class EregDtoTilSaksopplysningKonverter {
             orgnummer = organisasjon.organisasjonsnummer
             sektorkode = finSektorkode(organisasjon)
             oppstartsdato = null // fjerns når vi ikke lengre bruker gammelt soap api - MELOSYS-6134
-            enhetstype = organisasjon.organisasjonDetaljer?.enhetstyper?.first { it.enhetstype != null }?.enhetstype
+            enhetstype = finnEnhetstype(organisasjon)
             navn = listOf(organisasjon.navn?.sammensattnavn ?: "UKJENT")
             organisasjonDetaljer = OrganisasjonsDetaljer().apply {
                 orgnummer = organisasjon.organisasjonsnummer
-                navn = tilNavn(organisasjon.organisasjonDetaljer?.navn)
-                forretningsadresse = tilGeografiskAdresse(organisasjon.organisasjonDetaljer?.forretningsadresser)
-                postadresse = tilGeografiskAdresse(organisasjon.organisasjonDetaljer?.postadresser)
-                telefon = tilTelefon(organisasjon.organisasjonDetaljer?.telefonnummer)
-                epostadresse = tilEpost(organisasjon.organisasjonDetaljer?.epostadresser)
-                naering = organisasjon.organisasjonDetaljer?.naeringer?.map { it.naeringskode } ?: emptyList()
-                opphoersdato = organisasjon.organisasjonDetaljer?.opphoersdato
+                navn = tilNavn(organisasjon.organisasjonDetaljer.navn)
+                forretningsadresse = tilGeografiskAdresse(organisasjon.organisasjonDetaljer.forretningsadresser)
+                postadresse = tilGeografiskAdresse(organisasjon.organisasjonDetaljer.postadresser)
+                telefon = tilTelefon(organisasjon.organisasjonDetaljer.telefonnummer)
+                epostadresse = tilEpost(organisasjon.organisasjonDetaljer.epostadresser)
+                naering = organisasjon.organisasjonDetaljer.naeringer?.map { it.naeringskode } ?: emptyList()
+                opphoersdato = organisasjon.organisasjonDetaljer.opphoersdato
             }
         }
+    }
+
+    private fun finnEnhetstype(organisasjon: OrganisasjonResponse.Organisasjon): String? {
+        return when (organisasjon) {
+            is OrganisasjonResponse.JuridiskEnhet -> organisasjon.juridiskEnhetDetaljer?.enhetstype
+            is OrganisasjonResponse.Organisasjonsledd -> organisasjon.organisasjonsleddDetaljer?.enhetstype
+            is OrganisasjonResponse.Virksomhet -> organisasjon.virksomhetDetaljer?.enhetstype
+            else -> null
+        } ?: organisasjon.organisasjonDetaljer.enhetstyper?.first { it.enhetstype != null }?.enhetstype
     }
 
     private fun finSektorkode(organisasjon: OrganisasjonResponse.Organisasjon): String? {

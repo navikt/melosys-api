@@ -1,0 +1,63 @@
+{
+    "organisasjonsnummer": "901851573",
+    "type": "Virksomhet",
+    "navn": {
+        "sammensattnavn": "ELASTISK FYRSTINNE",
+        "navnelinje1": "ELASTISK FYRSTINNE",
+        "bruksperiode": {
+            "fom": "2021-03-02T14:19:37.229"
+        },
+        "gyldighetsperiode": {
+            "fom": "2021-03-02"
+        }
+    },
+    "organisasjonDetaljer": {
+        "registreringsdato": "2021-03-02T00:00:00",
+        "stiftelsesdato": "2021-03-02",
+        "enhetstyper": [
+            {
+                "enhetstype": "TULL",
+                "bruksperiode": {
+                    "fom": "2021-03-02T14:19:37.231"
+                },
+                "gyldighetsperiode": {
+                    "fom": "2021-03-02"
+                }
+            },
+            {
+                "enhetstype": "TØYS",
+                "bruksperiode": {
+                    "fom": "2021-03-02T14:19:37.231"
+                },
+                "gyldighetsperiode": {
+                    "fom": "2021-03-02"
+                }
+            }
+        ],
+        "navn": [
+            {
+                "sammensattnavn": "ELASTISK FYRSTINNE",
+                "navnelinje1": "ELASTISK FYRSTINNE",
+                "bruksperiode": {
+                    "fom": "2021-03-02T14:19:37.229"
+                },
+                "gyldighetsperiode": {
+                    "fom": "2021-03-02"
+                }
+            }
+        ],
+        "navSpesifikkInformasjon": {
+            "erIA": false,
+            "bruksperiode": {
+                "fom": "1900-01-01T00:00:00"
+            },
+            "gyldighetsperiode": {
+                "fom": "1900-01-01"
+            }
+        },
+        "sistEndret": "2021-03-02"
+    },
+    "virksomhetDetaljer": {
+        "enhetstype": "BEDR"
+    }
+}

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -42,7 +43,7 @@ class InntekKonverterTest {
             .shouldNotBeNull()
             .shouldBeTypeOf<InntektDokument>()
             .arbeidsInntektMaanedListe
-            .shouldHaveSize(3)
+            .shouldHaveSize(4)
             .toList()
             .run {
                 get(0).run {
@@ -89,8 +90,14 @@ class InntekKonverterTest {
 
                         }
                 }
+                get(3).run {
+                    aarMaaned.shouldBe(YearMonth.parse("2022-04"))
+                    arbeidsInntektInformasjon.inntektListe.shouldHaveSize(1)
+                        .first().shouldBeInstanceOf<Naeringsinntekt>().run {
+                            tilleggsinformasjon.shouldBeNull()
+                        }
+                }
             }
-
     }
 
     @Test

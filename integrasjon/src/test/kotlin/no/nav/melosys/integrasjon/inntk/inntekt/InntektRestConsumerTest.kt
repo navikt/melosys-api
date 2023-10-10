@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -115,10 +116,10 @@ class InntektRestConsumerTest(
 
         inntektListe.arbeidsInntektMaaned
             .shouldNotBeNull()
-            .shouldHaveSize(3)
+            .shouldHaveSize(4)
             .map { it.arbeidsInntektInformasjon?.inntektListe }
             .run {
-                first().shouldNotBeNull().shouldHaveSize(1)
+                get(0).shouldNotBeNull().shouldHaveSize(1)
                     .first().run {
                         beloep.shouldBe(BigDecimal(50000))
                         tilleggsinformasjon.shouldNotBeNull()
@@ -134,7 +135,7 @@ class InntektRestConsumerTest(
 
                             }
                     }
-                last().shouldNotBeNull().shouldHaveSize(1)
+                get(2).shouldNotBeNull().shouldHaveSize(1)
                     .first().run {
                         beloep.shouldBe(BigDecimal(50000))
                         tilleggsinformasjon.shouldNotBeNull()
@@ -144,6 +145,10 @@ class InntektRestConsumerTest(
 
                             }
                     }
+                get(3).shouldNotBeNull()
+                    .shouldHaveSize(1)
+                    .first().tilleggsinformasjon.shouldBeNull()
+
             }
 
 

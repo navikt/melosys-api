@@ -59,13 +59,12 @@ class InntektKonverter {
                                     // https://nav-it.slack.com/archives/CLMJJ882W/p1689859452879089?thread_ts=1689168417.802869&cid=CLMJJ882W
                                     inntektsinnsenderID = null
                                     virksomhetID = it.virksomhet?.identifikator
-                                    tilleggsinformasjon = if (it.tilleggsinformasjon != null)
-                                        Tilleggsinformasjon().apply {
-                                            kategori = it.tilleggsinformasjon.kategori
-                                            tilleggsinformasjonDetaljer = mapTilleggsinformasjonDetaljer(
-                                                it.tilleggsinformasjon.tilleggsinformasjonDetaljer
-                                            )
-                                        } else null
+                                    tilleggsinformasjon = if (it.tilleggsinformasjon != null) Tilleggsinformasjon().apply {
+                                        kategori = it.tilleggsinformasjon.kategori
+                                        tilleggsinformasjonDetaljer = mapTilleggsinformasjonDetaljer(
+                                            it.tilleggsinformasjon.tilleggsinformasjonDetaljer
+                                        )
+                                    } else null
                                     inntektsmottakerID = it.inntektsmottaker?.identifikator
                                     inngaarIGrunnlagForTrekk = it.inngaarIGrunnlagForTrekk
                                     utloeserArbeidsgiveravgift = it.utloeserArbeidsgiveravgift
@@ -159,6 +158,7 @@ class InntektKonverter {
                     persontype = it.persontype
                 }
             }
+
             else -> null
         }
 

@@ -3,7 +3,9 @@ package no.nav.melosys.service.medlemskapsperiode
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser.*
 import no.nav.melosys.domain.kodeverk.Vilkaar
+import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.util.KodeverkUtils
 
 class UtledBestemmelserOgVilkår {
     val støttetBestemmelser = listOf(FTRL_KAP2_2_8_FØRSTE_LEDD_A, FTRL_KAP2_2_8_ANDRE_LEDD)
@@ -85,9 +87,15 @@ class UtledBestemmelserOgVilkår {
             else -> defaultBestemmelserOgVilkår
         }
 
-    fun hentStøttede(behandlingstema: Behandlingstema): Map<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> =
+    fun hentStøttedeBestemmelserOgVilkår(behandlingstema: Behandlingstema): Map<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> =
         bestemmelseOgVilkårFraBehandlingstema(behandlingstema).filter { støttetBestemmelser.contains(it.key) }
 
-    fun hentIkkeStøttede(behandlingstema: Behandlingstema): Map<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> =
+    fun hentIkkeStøttedeBestemmelserOgVilkår(behandlingstema: Behandlingstema): Map<Folketrygdloven_kap2_bestemmelser, Collection<Vilkaar>> =
         bestemmelseOgVilkårFraBehandlingstema(behandlingstema).filter { !støttetBestemmelser.contains(it.key) }
+
+    fun hentBegrunnelserForVilkår(vilkår: Vilkaar): Collection<String> =
+        if (vilkår == Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE) {
+            KodeverkUtils.tilStringCollection(*Ftrl_2_8_naer_tilknytning_norge_begrunnelser.values())
+        } else emptyList()
+
 }

@@ -8,6 +8,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.kotest.matchers.types.shouldBeTypeOf
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonResponse.*
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.context.annotation.Import
+import org.springframework.core.codec.DecodingException
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
@@ -281,6 +283,16 @@ class OrganisasjonRestConsumerTest(
         shouldThrow<IkkeFunnetException> {
             organisasjonRestConsumer.hentOrganisasjon(orgnummer)
         }
+    }
+
+    @Test
+    fun `organisasjonDetaljer mangler fører til DecodingException`() {
+        val orgnummer = "organisasjonDetaljer-mangler"
+        lagStub(orgnummer)
+
+        shouldThrow<DecodingException> {
+            organisasjonRestConsumer.hentOrganisasjon(orgnummer)
+        }.message.shouldContain("value failed for JSON property organisasjonDetaljer due to missing")
     }
 
 

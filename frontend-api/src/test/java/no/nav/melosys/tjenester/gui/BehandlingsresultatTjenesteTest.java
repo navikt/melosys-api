@@ -61,8 +61,8 @@ class BehandlingsresultatTjenesteTest {
 
     @Test
     void oppdaterFritekster() throws Exception {
-        var dto = new LagreFritekstDto("innledning", "begrunnelse");
-        when(behandlingsresultatService.oppdaterFritekster(anyLong(), anyString(), anyString())).thenReturn(behandlingsresultat);
+        var dto = new LagreFritekstDto("innledning", "begrunnelse", "trygdeavgift");
+        when(behandlingsresultatService.oppdaterFritekster(anyLong(), anyString(), anyString(), anyString())).thenReturn(behandlingsresultat);
 
         mockMvc.perform(post(BASE_URL + "/{behandlingID}/resultat/fritekst", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
