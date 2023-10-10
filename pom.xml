@@ -725,6 +725,7 @@
                     <version>${maven-surefire-plugin.version}</version>
                     <configuration>
                         <argLine>-Xms256m -Dfile.encoding=UTF-8</argLine>
+                        <trimStackTrace>false</trimStackTrace>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -744,6 +745,7 @@
                         </execution>
                     </executions>
                     <configuration>
+                        <trimStackTrace>false</trimStackTrace>
                         <failIfNoTests>true</failIfNoTests>
                     </configuration>
                 </plugin>
