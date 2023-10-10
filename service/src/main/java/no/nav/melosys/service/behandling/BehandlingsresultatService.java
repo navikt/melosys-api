@@ -153,10 +153,11 @@ public class BehandlingsresultatService {
         behandlingsresultatRepository.save(behandlingsresultat);
     }
 
-    public Behandlingsresultat oppdaterFritekster(long behandlingID, String begrunnelseFritekst, String innledningFritekst) {
+    public Behandlingsresultat oppdaterFritekster(long behandlingID, String begrunnelseFritekst, String innledningFritekst, String trygdeavgiftFritekst) {
         final Behandlingsresultat behandlingsresultat = hentBehandlingsresultat(behandlingID);
         behandlingsresultat.setBegrunnelseFritekst(begrunnelseFritekst);
         behandlingsresultat.setInnledningFritekst(innledningFritekst);
+        behandlingsresultat.setTrygdeavgiftFritekst(trygdeavgiftFritekst);
         return behandlingsresultatRepository.save(behandlingsresultat);
     }
 

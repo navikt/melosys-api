@@ -8,7 +8,9 @@ import java.util.Set;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.MedlemskapsperiodeRepository;
@@ -51,16 +53,12 @@ public class MedlemskapsperiodeService {
                                                         InnvilgelsesResultat innvilgelsesResultat,
                                                         Trygdedekninger trygdedekning) {
         final var medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID);
-        final var eksisterendeMedlemsperiode = medlemAvFolketrygden
-            .getMedlemskapsperioder()
-            .stream()
-            .findFirst()
-            .orElseThrow(() -> new FunksjonellException("Behandling " + behandlingsresultatID + " har ingen medlemskapsperiode"));
+        var søknad = (SøknadNorgeEllerUtenforEØS) medlemAvFolketrygden.getBehandlingsresultat().getBehandling().getMottatteOpplysninger().getMottatteOpplysningerData();
+        var nyMedlemskapsperiode = new Medlemskapsperiode();
 
-        final var nyMedlemskapsperiode = new Medlemskapsperiode();
         oppdaterMedlemskapsperiode(nyMedlemskapsperiode, fom, tom, innvilgelsesResultat, trygdedekning);
-        nyMedlemskapsperiode.setArbeidsland(eksisterendeMedlemsperiode.getArbeidsland());
-        nyMedlemskapsperiode.setMedlemskapstype(eksisterendeMedlemsperiode.getMedlemskapstype());
+        nyMedlemskapsperiode.setArbeidsland(søknad.hentArbeidsland());
+        nyMedlemskapsperiode.setMedlemskapstype(Medlemskapstyper.PLIKTIG);
         medlemAvFolketrygden.addMedlemskapsperiode(nyMedlemskapsperiode);
 
 
@@ -121,10 +119,6 @@ public class MedlemskapsperiodeService {
     public void slettMedlemskapsperiode(long behandlingsresultatID, long medlemskapsperiodeID) {
         MedlemAvFolketrygden medlemAvFolketrygden = medlemAvFolketrygdenService.hentMedlemAvFolketrygden(behandlingsresultatID);
         Collection<Medlemskapsperiode> medlemskapsperioder = medlemAvFolketrygden.getMedlemskapsperioder();
-
-        if (medlemskapsperioder.size() == 1) {
-            throw new FunksjonellException("Behandlingen må ha minst en medlemskapsperiode");
-        }
 
         var medlemskapsperiode = medlemskapsperioder.stream()
             .filter(m -> m.getId() == medlemskapsperiodeID)

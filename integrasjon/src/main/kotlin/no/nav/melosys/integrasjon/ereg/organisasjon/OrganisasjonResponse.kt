@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.ereg.organisasjon
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
@@ -25,7 +26,7 @@ class OrganisasjonResponse {
         JsonSubTypes.Type(value = Virksomhet::class, name = "Virksomhet")
     )
     open class Organisasjon(
-        val organisasjonDetaljer: OrganisasjonDetaljer? = null,
+        val organisasjonDetaljer: OrganisasjonDetaljer,
         organisasjonsnummer: String,
         navn: Navn? = null
     ) : OrganisasjonBase(organisasjonsnummer, navn) {
@@ -45,7 +46,7 @@ class OrganisasjonResponse {
         val inngaarIJuridiskEnheter: List<InngaarIJuridiskEnhet>? = null,
         val virksomhetDetaljer: VirksomhetDetaljer? = null,
         organisasjonsnummer: String,
-        organisasjonDetaljer: OrganisasjonDetaljer? = null,
+        organisasjonDetaljer: OrganisasjonDetaljer,
     ) : Organisasjon(organisasjonDetaljer, organisasjonsnummer)
 
     class VirksomhetDetaljer {
@@ -114,7 +115,7 @@ class OrganisasjonResponse {
         val knytninger: List<JuridiskEnhetKnytning> = listOf(),
         val juridiskEnhetDetaljer: JuridiskEnhetDetaljer? = null,
         organisasjonsnummer: String,
-        organisasjonDetaljer: OrganisasjonDetaljer? = null,
+        organisasjonDetaljer: OrganisasjonDetaljer,
     ) : Organisasjon(organisasjonDetaljer, organisasjonsnummer)
 
     data class BestaarAvOrganisasjonsledd(
@@ -150,7 +151,7 @@ class OrganisasjonResponse {
         val driverVirksomheter: List<DriverVirksomhet> = emptyList(),
         val inngaarIJuridiskEnheter: List<InngaarIJuridiskEnhet> = emptyList(),
         val organisasjonsleddDetaljer: OrganisasjonsleddDetaljer? = null,
-        organisasjonDetaljer: OrganisasjonDetaljer? = null,
+        organisasjonDetaljer: OrganisasjonDetaljer,
         organisasjonsnummer: String,
         navn: Navn? = null,
     ) : Organisasjon(organisasjonDetaljer, organisasjonsnummer, navn)
