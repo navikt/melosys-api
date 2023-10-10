@@ -133,3 +133,9 @@ jobs:
           list-suites: 'all'
           list-tests: 'failed'
           fail-on-error: 'false'
+
+      - name: Action-junit Integration Test Report
+        uses: mikepenz/action-junit-report@v4
+        if: success() || failure()
+        with:
+          report_paths: '**/target/failsafe-reports/TEST-*.xml'
