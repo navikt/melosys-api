@@ -53,7 +53,8 @@ public class BehandlingsresultatTjeneste {
             behandlingsresultatService.oppdaterFritekster(
                 behandlingID,
                 lagreFritekstDto.begrunnelseFritekst(),
-                lagreFritekstDto.innledningFritekst())
+                lagreFritekstDto.innledningFritekst(),
+                lagreFritekstDto.trygdeavgiftFritekst())
         ));
     }
 

@@ -111,7 +111,7 @@ class IkkeYrkesaktivVedtakIT(
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
 
         behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandling.id, Utfallregistreringunntak.GODKJENT)
-        behandlingsresultatService.oppdaterFritekster(behandling.id, "begrunnelse", "innledning")
+        behandlingsresultatService.oppdaterFritekster(behandling.id, "begrunnelse", "innledning", null)
 
         lovvalgsperiodeService.lagreLovvalgsperioder(behandling.id, listOf(Lovvalgsperiode().apply {
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
@@ -215,7 +215,7 @@ class IkkeYrkesaktivVedtakIT(
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
 
         behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandling.id, Utfallregistreringunntak.GODKJENT)
-        behandlingsresultatService.oppdaterFritekster(behandling.id, "begrunnelse", "innledning")
+        behandlingsresultatService.oppdaterFritekster(behandling.id, "begrunnelse", "innledning", null)
 
         lovvalgsperiodeService.lagreLovvalgsperioder(behandling.id, listOf(Lovvalgsperiode().apply {
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
@@ -318,7 +318,7 @@ class IkkeYrkesaktivVedtakIT(
         oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
 
         behandlingsresultatService.oppdaterUtfallRegistreringUnntak(behandling.id, Utfallregistreringunntak.GODKJENT)
-        behandlingsresultatService.oppdaterFritekster(behandling.id, "begrunnelse", "innledning")
+        behandlingsresultatService.oppdaterFritekster(behandling.id, "begrunnelse", "innledning", null)
 
         lovvalgsperiodeService.lagreLovvalgsperioder(behandling.id, listOf(Lovvalgsperiode().apply {
             innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
