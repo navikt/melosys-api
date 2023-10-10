@@ -191,6 +191,87 @@ class TrygdeavgiftsgrunnlagServiceTest {
     }
 
     @Test
+    fun oppdaterTrygdeavgiftsgrunnlag_inntektsperioderDekkerIkkeHelePerioden_kasterFeil() {
+        val fom = LocalDate.now().minusMonths(1);
+        val tom = LocalDate.now().plusMonths(3);
+        every { mockBehandlingsresultatService.lagre(any()) }.returns(Unit)
+        behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
+                this.fom = fom
+                this.tom = tom
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            })
+            fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
+                trygdeavgiftsperioder = mutableSetOf(Trygdeavgiftsperiode())
+            }
+        }
+        behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.shouldNotBeEmpty()
+
+
+        shouldThrow<FunksjonellException> {
+            trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
+                BEHANDLING_ID,
+                OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fom, tom)), listOf(lagInntektsperiode(fom, tom.minusDays(1))))
+            )
+        }.message.shouldContain("Inntektsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
+    }
+
+    @Test
+    fun oppdaterTrygdeavgiftsgrunnlag_skatteforholdDekkerIkkeHelePerioden_kasterFeil() {
+        val fom = LocalDate.now().minusMonths(1);
+        val tom = LocalDate.now().plusMonths(3);
+        every { mockBehandlingsresultatService.lagre(any()) }.returns(Unit)
+        behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
+                this.fom = fom
+                this.tom = tom
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            })
+            fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
+                trygdeavgiftsperioder = mutableSetOf(Trygdeavgiftsperiode())
+            }
+        }
+        behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.shouldNotBeEmpty()
+
+
+        shouldThrow<FunksjonellException> {
+            trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
+                BEHANDLING_ID,
+                OppdaterTrygdeavgiftsgrunnlagRequest(listOf(lagSkatteforholdTilNorge(fom, tom.minusDays(1))), listOf(lagInntektsperiode(fom, tom)))
+            )
+        }.message.shouldContain("Skatteforholdsperioden(e) du har lagt inn dekker ikke hele medlemskapsperioden(e)")
+    }
+
+    @Test
+    fun oppdaterTrygdeavgiftsgrunnlag_skatteforholdOverlapper_kasterFeil() {
+        val fom = LocalDate.now().minusMonths(1);
+        val tom = LocalDate.now().plusMonths(3);
+        every { mockBehandlingsresultatService.lagre(any()) }.returns(Unit)
+        behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            medlemskapsperioder = listOf(Medlemskapsperiode().apply {
+                this.fom = fom
+                this.tom = tom
+                innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            })
+            fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
+                trygdeavgiftsperioder = mutableSetOf(Trygdeavgiftsperiode())
+            }
+        }
+        behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.shouldNotBeEmpty()
+
+
+        shouldThrow<FunksjonellException> {
+            trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(
+                BEHANDLING_ID,
+                OppdaterTrygdeavgiftsgrunnlagRequest(
+                    listOf(lagSkatteforholdTilNorge(fom, tom), lagSkatteforholdTilNorge(fom, tom)),
+                    listOf(lagInntektsperiode(fom, tom))
+                )
+            )
+        }.message.shouldContain("Skatteforholdsperiodene kan ikke overlappe")
+    }
+
+    @Test
     fun oppdaterTrygdeavgiftsgrunnlag_requestMedSkattepliktOgInntektskilder_lagrerAltKorrekt() {
         val fom = LocalDate.now().minusMonths(1)
         val tom = LocalDate.now().plusMonths(3)
