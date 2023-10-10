@@ -39,12 +39,108 @@ jobs:
       - name: Build and test
         run: mvn clean verify --threads=8 -B -e -U --settings .github/settings.xml
 
-      - name: Unit Test Report
+      - name: Arkitektur Test Report
         uses: dorny/test-reporter@v1.7.0
         if: success() || failure()
         with:
-          name: Unit Tests
-          path: '**/target/surefire-reports/TEST-*.xml'
+          name: Arkitektur Tests
+          path: '**/arkitektur/target/surefire-reports/TEST-*.xml'
+          reporter: java-junit
+          list-suites: 'failed'
+          list-tests: 'failed'
+          only-summary: 'true'
+          fail-on-error: 'false'
+
+      - name: Saksflyt Test Report
+        uses: dorny/test-reporter@v1.7.0
+        if: success() || failure()
+        with:
+          name: Saksflyt Tests
+          path: '**/saksflyt/target/surefire-reports/TEST-*.xml'
+          reporter: java-junit
+          list-suites: 'failed'
+          list-tests: 'failed'
+          only-summary: 'true'
+          fail-on-error: 'false'
+
+      - name: Frontend-api Test Report
+        uses: dorny/test-reporter@v1.7.0
+        if: success() || failure()
+        with:
+          name: Frontend-api Tests
+          path: '**/frontend-api/target/surefire-reports/TEST-*.xml'
+          reporter: java-junit
+          list-suites: 'failed'
+          list-tests: 'failed'
+          only-summary: 'true'
+          fail-on-error: 'false'
+
+      - name: Service Test Report
+        uses: dorny/test-reporter@v1.7.0
+        if: success() || failure()
+        with:
+          name: Service Tests
+          path: '**/service/target/surefire-reports/TEST-*.xml'
+          reporter: java-junit
+          list-suites: 'failed'
+          list-tests: 'failed'
+          only-summary: 'true'
+          fail-on-error: 'false'
+
+      - name: API-Integrasjon Test Report
+        uses: dorny/test-reporter@v1.7.0
+        if: success() || failure()
+        with:
+          name: API-Integrasjon Tests
+          path: '**/integrasjon/target/surefire-reports/TEST-*.xml'
+          reporter: java-junit
+          list-suites: 'failed'
+          list-tests: 'failed'
+          only-summary: 'true'
+          fail-on-error: 'false'
+
+      - name: Repository Test Report
+        uses: dorny/test-reporter@v1.7.0
+        if: success() || failure()
+        with:
+          name: Repository Tests
+          path: '**/repository/target/surefire-reports/TEST-*.xml'
+          reporter: java-junit
+          list-suites: 'failed'
+          list-tests: 'failed'
+          only-summary: 'true'
+          fail-on-error: 'false'
+
+      - name: Domain Test Report
+        uses: dorny/test-reporter@v1.7.0
+        if: success() || failure()
+        with:
+          name: Domain Tests
+          path: '**/domain/target/surefire-reports/TEST-*.xml'
+          reporter: java-junit
+          list-suites: 'failed'
+          list-tests: 'failed'
+          only-summary: 'true'
+          fail-on-error: 'false'
+
+      - name: Config Test Report
+        uses: dorny/test-reporter@v1.7.0
+        if: success() || failure()
+        with:
+          name: Config Tests
+          path: '**/config/target/surefire-reports/TEST-*.xml'
+          reporter: java-junit
+          list-suites: 'failed'
+          list-tests: 'failed'
+          only-summary: 'true'
+          fail-on-error: 'false'
+
+      - name: Sikkerhet Test Report
+        uses: dorny/test-reporter@v1.7.0
+        if: success() || failure()
+        with:
+          name: Sikkerhet Tests
+          path: '**/sikkerhet/target/surefire-reports/TEST-*.xml'
           reporter: java-junit
           list-suites: 'failed'
           list-tests: 'failed'
