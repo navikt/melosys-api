@@ -29,7 +29,7 @@ data class InntektResponse(
     data class ArbeidsInntektMaaned(
         val aarMaaned: YearMonth? = null,
         val avvikListe: List<Avvik>? = null,
-        val arbeidsInntektInformasjon: ArbeidsInntektInformasjon? = null
+        val arbeidsInntektInformasjon: ArbeidsInntektInformasjon
     )
 
     data class ArbeidsInntektInformasjon(

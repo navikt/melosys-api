@@ -27,6 +27,7 @@ class InntektServiceTest {
                 InntektResponse.ArbeidsInntektMaaned(
                     aarMaaned = YearMonth.of(2022, 1),
                     avvikListe = listOf(InntektResponse.Avvik(ident = aktoer)),
+                    arbeidsInntektInformasjon = InntektResponse.ArbeidsInntektInformasjon()
                 )
             ),
             aktoer
