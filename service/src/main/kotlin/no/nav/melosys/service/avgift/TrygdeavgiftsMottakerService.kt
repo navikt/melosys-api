@@ -22,7 +22,8 @@ class TrygdeavgiftsMottakerService {
         if (trygdeavgiftBetalesTilNavOgSkatt(trygdeavgiftsgrunnlag)) {
             return Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT
         }
-        return if (trygdeavgiftBetalesTilSkatt(trygdeavgiftsgrunnlag)) Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT else Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
+        return if (trygdeavgiftBetalesTilSkatt(trygdeavgiftsgrunnlag)) Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
+        else Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
     }
 
     private fun trygdeavgiftBetalesTilNavOgSkatt(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag): Boolean {
@@ -30,7 +31,12 @@ class TrygdeavgiftsMottakerService {
     }
 
     private fun trygdeavgiftBetalesTilNav(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag): Boolean {
-        return betalerKunArbeidsGiveravgiftOgTrygdeavgiftTilNav(trygdeavgiftsgrunnlag) || erSpesielGruppeOgIkkeSkattepliktig(trygdeavgiftsgrunnlag)
+        return betalerKunArbeidsGiveravgiftOgTrygdeavgiftTilNav(trygdeavgiftsgrunnlag) || erSpesielGruppeOgIkkeSkattepliktig(trygdeavgiftsgrunnlag) || erFnAnsatt(trygdeavgiftsgrunnlag)
+    }
+
+    private fun erFnAnsatt(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag): Boolean {
+        return trygdeavgiftsgrunnlag.inntektsperioder.stream()
+            .anyMatch { inntektsperiode: Inntektsperiode -> inntektsperiode.type == Inntektskildetype.FN_SKATTEFRITAK }
     }
 
     private fun trygdeavgiftBetalesTilSkatt(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag): Boolean {
@@ -38,33 +44,31 @@ class TrygdeavgiftsMottakerService {
     }
 
     private fun betalerKunArbeidsGiveravgiftOgTrygdeavgiftTilSkatt(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag): Boolean {
-        return (trygdeavgiftsgrunnlag.getSkatteforholdTilNorge().stream().allMatch(
-            Predicate<SkatteforholdTilNorge> { skatteforholdTilNorge: SkatteforholdTilNorge -> skatteforholdTilNorge.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG })
-            && trygdeavgiftsgrunnlag.getInntektsperioder().stream()
-            .allMatch(Predicate<Inntektsperiode> { obj: Inntektsperiode -> obj.isArbeidsgiversavgiftBetalesTilSkatt }))
+        return (trygdeavgiftsgrunnlag.skatteforholdTilNorge.stream().allMatch { skatteforholdTilNorge: SkatteforholdTilNorge -> skatteforholdTilNorge.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }
+            && trygdeavgiftsgrunnlag.inntektsperioder.stream()
+            .allMatch { obj: Inntektsperiode -> obj.isArbeidsgiversavgiftBetalesTilSkatt })
     }
 
     private fun betalerKunArbeidsGiveravgiftOgTrygdeavgiftTilNav(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag): Boolean {
-        return (trygdeavgiftsgrunnlag.getSkatteforholdTilNorge().stream().allMatch(
-            Predicate<SkatteforholdTilNorge> { skatteforholdTilNorge: SkatteforholdTilNorge -> skatteforholdTilNorge.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG })
+        return (trygdeavgiftsgrunnlag.skatteforholdTilNorge.stream().allMatch { skatteforholdTilNorge: SkatteforholdTilNorge -> skatteforholdTilNorge.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG }
             && trygdeavgiftsgrunnlag.getInntektsperioder().stream()
-            .noneMatch(Predicate<Inntektsperiode> { obj: Inntektsperiode -> obj.isArbeidsgiversavgiftBetalesTilSkatt }))
+            .noneMatch { obj: Inntektsperiode -> obj.isArbeidsgiversavgiftBetalesTilSkatt })
     }
 
     private fun erSpesielGruppeOgSkattepliktig(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag): Boolean {
-        return trygdeavgiftsgrunnlag.getSkatteforholdTilNorge().stream()
-            .anyMatch(Predicate<SkatteforholdTilNorge> { skatteforholdTilNorge: SkatteforholdTilNorge -> skatteforholdTilNorge.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG }) && erMisjonær(trygdeavgiftsgrunnlag)
+        return trygdeavgiftsgrunnlag.skatteforholdTilNorge.stream()
+            .anyMatch { skatteforholdTilNorge: SkatteforholdTilNorge -> skatteforholdTilNorge.skatteplikttype == Skatteplikttype.SKATTEPLIKTIG } && erMisjonær(trygdeavgiftsgrunnlag)
     }
 
     private fun erSpesielGruppeOgIkkeSkattepliktig(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag): Boolean {
-        return (trygdeavgiftsgrunnlag.getSkatteforholdTilNorge().stream()
-            .anyMatch(Predicate<SkatteforholdTilNorge> { skatteforholdTilNorge: SkatteforholdTilNorge -> skatteforholdTilNorge.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG })
+        return (trygdeavgiftsgrunnlag.skatteforholdTilNorge.stream()
+            .anyMatch { skatteforholdTilNorge: SkatteforholdTilNorge -> skatteforholdTilNorge.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG }
             && erMisjonær(trygdeavgiftsgrunnlag))
     }
 
     private fun erMisjonær(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag): Boolean {
-        return trygdeavgiftsgrunnlag.getInntektsperioder().stream()
-            .anyMatch(Predicate<Inntektsperiode> { inntektsperiode: Inntektsperiode -> inntektsperiode.type == Inntektskildetype.MISJONÆR && !inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt })
+        return trygdeavgiftsgrunnlag.inntektsperioder.stream()
+            .anyMatch { inntektsperiode: Inntektsperiode -> inntektsperiode.type == Inntektskildetype.MISJONÆR && !inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt }
     }
 
 }
