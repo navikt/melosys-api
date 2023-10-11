@@ -8,7 +8,7 @@ import java.time.YearMonth
 object YtelseRegler {
     @JvmStatic
     fun utbetaltYtelserFraOffentligIPeriode(inntektDokument: InntektDokument?, fom: LocalDate?, tom: LocalDate?): Boolean {
-        if (inntektDokument == null || inntektDokument.arbeidsInntektMaanedListe?.isEmpty() == true) {
+        if (inntektDokument == null || inntektDokument.arbeidsInntektMaanedListe.isEmpty()) {
             return false
         }
         val fra = YearMonth.from(fom)
@@ -22,7 +22,7 @@ object YtelseRegler {
     }
 
     private fun erUtbetaltIPeriode(ytelseFraOffentlige: YtelseFraOffentlige, fom: YearMonth, tom: YearMonth?): Boolean {
-        val utbetaltIPeriode = ytelseFraOffentlige.utbetaltIPeriode ?: return false
+        val utbetaltIPeriode = ytelseFraOffentlige.utbetaltIPeriode
 
         val tomNotNull = tom ?: fom.plusYears(2)
         if (utbetaltIPeriode.isAfter(fom) && utbetaltIPeriode.isBefore(tomNotNull))

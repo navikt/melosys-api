@@ -76,7 +76,7 @@ class InntektServiceTest {
         saksopplysning.kilder.iterator().next().mottattDokument.shouldNotBeNull()
         saksopplysning.dokument
             .shouldBeInstanceOf<InntektDokument>()
-            .getArbeidsInntektMaanedListe()
+            .arbeidsInntektMaanedListe
             .shouldBeEmpty()
     }
 
