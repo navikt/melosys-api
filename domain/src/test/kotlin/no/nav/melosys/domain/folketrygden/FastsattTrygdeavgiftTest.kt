@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test
 internal class FastsattTrygdeavgiftTest {
 
     @Test
-    fun `trygdeavgiftsmottaker skal være NAV hvis ordinær trygdeavgift og aga er false`() {
+    fun `trygdeavgiftsmottaker skal være NAV hvis bruker ikke er skattepliktig og aga er false`() {
         FastsattTrygdeavgift().apply {
             trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
                 skatteforholdTilNorge = mutableListOf(lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG))
@@ -27,7 +27,7 @@ internal class FastsattTrygdeavgiftTest {
     }
 
     @Test
-    fun `trygdeavgiftsmottaker skal være SKATT hvis SKATTEPLIKTIG og aga er true`() {
+    fun `trygdeavgiftsmottaker skal være SKATT hvis bruker er skattepliktig og aga er true`() {
         FastsattTrygdeavgift().apply {
             trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
                 skatteforholdTilNorge = mutableListOf(lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG))
@@ -39,7 +39,7 @@ internal class FastsattTrygdeavgiftTest {
     }
 
     @Test
-    fun `trygdeavgiftsmottaker skal være SKATT hvis SKATTEPLIKTIG og aga er false, men type er MISJONÆR`() {
+    fun `trygdeavgiftsmottaker skal være SKATT hvis bruker er skattepliktig og aga er false, men type er MISJONÆR`() {
         FastsattTrygdeavgift().apply {
             trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
                 skatteforholdTilNorge = mutableListOf(lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG))
@@ -51,7 +51,7 @@ internal class FastsattTrygdeavgiftTest {
     }
 
     @Test
-    fun `trygdeavgiftsmottaker skal være NAV hvis IKKE_SKATTEPLIKTIG og aga er false, men type er MISJONÆR`() {
+    fun `trygdeavgiftsmottaker skal være NAV hvis bruker er ikke skattepliktig og aga er false, men type er MISJONÆR`() {
         FastsattTrygdeavgift().apply {
             trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
                 skatteforholdTilNorge = mutableListOf(lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG))
@@ -63,7 +63,7 @@ internal class FastsattTrygdeavgiftTest {
     }
 
     @Test
-    fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis ordinær trygdeavgift og aga er en kombinasjon v1`() {
+    fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis skatteplikt og aga er en kombinasjon v1`() {
         FastsattTrygdeavgift().apply {
             trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
                 skatteforholdTilNorge = mutableListOf(lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG))
@@ -75,7 +75,7 @@ internal class FastsattTrygdeavgiftTest {
     }
 
     @Test
-    fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis ordinær trygdeavgift og aga er en kombinasjon v2`() {
+    fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis skatteplikt og aga er en kombinasjon v2`() {
         FastsattTrygdeavgift().apply {
             trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
                 skatteforholdTilNorge = mutableListOf(lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG))
@@ -87,7 +87,7 @@ internal class FastsattTrygdeavgiftTest {
     }
 
     @Test
-    fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis ordinær trygdeavgift og aga er en kombinasjon v3`() {
+    fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis skatteplikt og aga er en kombinasjon v3`() {
         FastsattTrygdeavgift().apply {
             trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
                 skatteforholdTilNorge = mutableListOf(lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
@@ -95,6 +95,38 @@ internal class FastsattTrygdeavgiftTest {
                 inntektsperioder = mutableListOf(
                     lagInntektsperiode( true, ARBEIDSINNTEKT_FRA_NORGE),
                     lagInntektsperiode( true, ARBEIDSINNTEKT_FRA_NORGE)
+                )
+            }
+        }.run {
+            trygdeavgiftMottaker.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
+        }
+    }
+
+    @Test
+    fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis skatteplikt og aga er en kombinasjon v4`() {
+        FastsattTrygdeavgift().apply {
+            trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
+                skatteforholdTilNorge = mutableListOf(lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
+                    lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG))
+                inntektsperioder = mutableListOf(
+                    lagInntektsperiode( true, ARBEIDSINNTEKT_FRA_NORGE),
+                    lagInntektsperiode( false, ARBEIDSINNTEKT_FRA_NORGE)
+                )
+            }
+        }.run {
+            trygdeavgiftMottaker.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
+        }
+    }
+
+    @Test
+    fun `trygdeavgiftsmottaker skal være NAV og SKATT hvis skatteplikt og aga er en kombinasjon v5`() {
+        FastsattTrygdeavgift().apply {
+            trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
+                skatteforholdTilNorge = mutableListOf(lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG),
+                    lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG))
+                inntektsperioder = mutableListOf(
+                    lagInntektsperiode( false, ARBEIDSINNTEKT_FRA_NORGE),
+                    lagInntektsperiode( false, ARBEIDSINNTEKT_FRA_NORGE)
                 )
             }
         }.run {
