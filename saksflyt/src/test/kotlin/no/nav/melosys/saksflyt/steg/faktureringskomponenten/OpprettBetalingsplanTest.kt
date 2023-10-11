@@ -28,6 +28,7 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall
 import no.nav.melosys.saksflyt.faktureringskomponenten.OpprettBetalingsplan
 import no.nav.melosys.service.aktoer.KontaktopplysningService
+import no.nav.melosys.service.avgift.TrygdeavgiftsMottakerService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -58,6 +59,9 @@ class OpprettBetalingsplanTest {
     @RelaxedMockK
     lateinit var pdlService: PersondataService
 
+    @RelaxedMockK
+    lateinit var trygdeavgiftsMottakerService: TrygdeavgiftsMottakerService
+
     private val unleash = FakeUnleash()
     private val slotFakturaserieDto = slot<FakturaserieDto>()
 
@@ -80,6 +84,7 @@ class OpprettBetalingsplanTest {
             faktureringskomponentenConsumer,
             kontaktopplysningService,
             pdlService,
+            trygdeavgiftsMottakerService,
             unleash
         )
     }
@@ -153,7 +158,6 @@ class OpprettBetalingsplanTest {
         lagTestData(emptySet())
         behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.first()
             .apply {
-                isOrdinærTrygdeavgiftBetalesTilSkatt = true
                 isArbeidsgiversavgiftBetalesTilSkatt = true
             }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat

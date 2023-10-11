@@ -24,6 +24,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker
+import no.nav.melosys.service.avgift.TrygdeavgiftsMottakerService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.dokument.DokgenTestData
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
@@ -44,14 +45,18 @@ internal class InnvilgelseFtrlMapperTest {
     @MockK
     private lateinit var mockDokgenMapperDatahenter: DokgenMapperDatahenter
 
+    private lateinit var trygdeavgiftsMottakerService: TrygdeavgiftsMottakerService
+
     private lateinit var innvilgelseFtrlMapper: InnvilgelseFtrlMapper
 
     @BeforeEach
     fun setup() {
+        trygdeavgiftsMottakerService = TrygdeavgiftsMottakerService()
         innvilgelseFtrlMapper = InnvilgelseFtrlMapper(
             mockAvklarteVirksomheterService,
-            mockDokgenMapperDatahenter
-        )
+            mockDokgenMapperDatahenter,
+            trygdeavgiftsMottakerService,
+            )
     }
 
     @Test
@@ -210,7 +215,12 @@ internal class InnvilgelseFtrlMapperTest {
         medlemskapsperioder = lagMedlemskapsperioder(this)
         fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
             trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
-                inntektsperioder = listOf(Inntektsperiode().apply { isOrdinærTrygdeavgiftBetalesTilSkatt = true })
+                inntektsperioder = listOf(Inntektsperiode().apply {
+                    fomDato = LocalDate.EPOCH.plusMonths(1)
+                    tomDato = LocalDate.EPOCH.plusMonths(4)
+                    type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                    isArbeidsgiversavgiftBetalesTilSkatt = true
+                    avgiftspliktigInntektMnd = Penger(0.0) })
                 skatteforholdTilNorge =
                     listOf(SkatteforholdTilNorge().apply { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG })
             }

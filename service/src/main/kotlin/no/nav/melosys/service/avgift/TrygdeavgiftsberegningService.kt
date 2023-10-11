@@ -16,6 +16,7 @@ import java.util.*
 class TrygdeavgiftsberegningService
     (
     private val medlemAvFolketrygdenService: MedlemAvFolketrygdenService,
+    private val trygdeavgiftsMottakerService: TrygdeavgiftsMottakerService,
     private val trygdeavgiftConsumer: TrygdeavgiftConsumer
 ) {
 
@@ -27,7 +28,7 @@ class TrygdeavgiftsberegningService
         valider(medlemAvFolketrygden)
         fastsattTrygdeavgift.trygdeavgiftsperioder.clear()
 
-        if (!fastsattTrygdeavgift.skalBetalesTilNav()) {
+        if (!trygdeavgiftsMottakerService.skalBetalesTilNav(fastsattTrygdeavgift.trygdeavgiftsgrunnlag)) {
             return emptySet()
         }
 

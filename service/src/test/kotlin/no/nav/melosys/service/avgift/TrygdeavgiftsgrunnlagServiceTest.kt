@@ -45,6 +45,8 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
     @MockK
     private lateinit var mockBehandlingsresultatService: BehandlingsresultatService
+    @MockK
+    private lateinit var mockTrygdeavgiftsMottakerService: TrygdeavgiftsMottakerService
 
     private lateinit var trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService
 
@@ -57,7 +59,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
     @BeforeEach
     fun setup() {
-        trygdeavgiftsgrunnlagService = TrygdeavgiftsgrunnlagService(mockBehandlingsresultatService)
+        trygdeavgiftsgrunnlagService = TrygdeavgiftsgrunnlagService(mockBehandlingsresultatService, mockTrygdeavgiftsMottakerService)
         behandlingsresultat = Behandlingsresultat()
         forrigeBehandlingsresultat = Behandlingsresultat()
         every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
@@ -309,7 +311,6 @@ class TrygdeavgiftsgrunnlagServiceTest {
                     tomDato = tom
                     type = Inntektskildetype.INNTEKT_FRA_UTLANDET
                     isArbeidsgiversavgiftBetalesTilSkatt = false
-                    isOrdinærTrygdeavgiftBetalesTilSkatt = true
                     avgiftspliktigInntektMnd = Penger(BigDecimal.valueOf(30000))
                     trygdeavgiftsgrunnlag =
                         lagretBehandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag
@@ -319,7 +320,6 @@ class TrygdeavgiftsgrunnlagServiceTest {
                     tomDato = tom
                     type = Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE
                     isArbeidsgiversavgiftBetalesTilSkatt = false
-                    isOrdinærTrygdeavgiftBetalesTilSkatt = true
                     avgiftspliktigInntektMnd = Penger(BigDecimal.valueOf(10000))
                     trygdeavgiftsgrunnlag =
                         lagretBehandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag
@@ -329,7 +329,6 @@ class TrygdeavgiftsgrunnlagServiceTest {
                     tomDato = tom
                     type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
                     isArbeidsgiversavgiftBetalesTilSkatt = true
-                    isOrdinærTrygdeavgiftBetalesTilSkatt = true
                     avgiftspliktigInntektMnd = null
                     trygdeavgiftsgrunnlag =
                         lagretBehandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag

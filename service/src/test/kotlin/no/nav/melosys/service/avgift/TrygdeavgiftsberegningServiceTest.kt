@@ -36,6 +36,8 @@ internal class TrygdeavgiftsberegningServiceTest {
     @MockK
     private lateinit var mockTrygdeavgiftConsumer: TrygdeavgiftConsumer
 
+    private lateinit var trygdeavgiftsMottakerService: TrygdeavgiftsMottakerService
+
     private lateinit var trygdeavgiftsberegningService: TrygdeavgiftsberegningService
 
     private lateinit var medlemAvFolketrygden: MedlemAvFolketrygden
@@ -46,10 +48,12 @@ internal class TrygdeavgiftsberegningServiceTest {
 
     @BeforeEach
     fun setup() {
+        trygdeavgiftsMottakerService = TrygdeavgiftsMottakerService()
         trygdeavgiftsberegningService =
             TrygdeavgiftsberegningService(
                 mockMedlemAvFolketrygdenService,
-                mockTrygdeavgiftConsumer
+                trygdeavgiftsMottakerService,
+                mockTrygdeavgiftConsumer,
             )
         medlemAvFolketrygden = MedlemAvFolketrygden()
         every { mockMedlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID) }.returns(medlemAvFolketrygden)
@@ -111,7 +115,6 @@ internal class TrygdeavgiftsberegningServiceTest {
                     tomDato = TOM
                     type = Inntektskildetype.INNTEKT_FRA_UTLANDET
                     isArbeidsgiversavgiftBetalesTilSkatt = false
-                    isOrdinærTrygdeavgiftBetalesTilSkatt = false
                     avgiftspliktigInntektMnd = Penger(10000.0)
                 })
             }
@@ -173,7 +176,6 @@ internal class TrygdeavgiftsberegningServiceTest {
                     fomDato = FOM
                     tomDato = TOM
                     type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
-                    isOrdinærTrygdeavgiftBetalesTilSkatt = true
                     isArbeidsgiversavgiftBetalesTilSkatt = true
                     avgiftspliktigInntektMnd = null
                 })

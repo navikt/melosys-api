@@ -21,7 +21,7 @@ import org.threeten.extra.LocalDateRange
 import java.time.DateTimeException
 
 @Service
-class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: BehandlingsresultatService) {
+class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: BehandlingsresultatService, private val trygdeavgiftsMottakerService: TrygdeavgiftsMottakerService) {
 
     @Transactional
     fun oppdaterTrygdeavgiftsgrunnlag(
@@ -105,11 +105,10 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
                     if (inntektskildeRequest.avgiftspliktigInntektMnd == null) null
                     else Penger(inntektskildeRequest.avgiftspliktigInntektMnd)
                 this.isArbeidsgiversavgiftBetalesTilSkatt = inntektskildeRequest.arbeidsgiversavgiftBetales
-                this.isOrdinærTrygdeavgiftBetalesTilSkatt =
-                    !ordinærTrygdeavgiftBetalesTilNav(request, inntektskildeRequest)
             }
         })
 
+    //TODO legg til i logikk
     private fun ordinærTrygdeavgiftBetalesTilNav(
         request: OppdaterTrygdeavgiftsgrunnlagRequest, inntektskildeRequest: InntektskildeRequest
     ): Boolean {

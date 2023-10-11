@@ -11,6 +11,7 @@ import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrl
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
+import no.nav.melosys.service.avgift.TrygdeavgiftsMottakerService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import org.springframework.stereotype.Component
 import java.time.Instant
@@ -21,7 +22,8 @@ import javax.transaction.Transactional
 @Component
 class InnvilgelseFtrlMapper(
     private val avklarteVirksomheterService: AvklarteVirksomheterService,
-    private val dokgenMapperDatahenter: DokgenMapperDatahenter
+    private val dokgenMapperDatahenter: DokgenMapperDatahenter,
+    private val trygdeavgiftsMottakerService: TrygdeavgiftsMottakerService
 ) {
     @Transactional
     fun map(brevbestilling: InnvilgelseFtrlBrevbestilling): InnvilgelseFtrl {
@@ -41,7 +43,7 @@ class InnvilgelseFtrlMapper(
                     medlemAvFolketrygden
                 )
             )
-            .trygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftMottaker)
+            .trygdeavgiftMottaker(trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag))
             .skatteplikttype(medlemAvFolketrygden.utledSkatteplikttype())
             .ftrl_2_8_begrunnelse(hentFtrlNærTilknytningNorgeBegrunnelse(behandlingsresultat.vilkaarsresultater))
             .begrunnelseAnnenGrunnFritekst(hentSaerligBegrunnelseFritekst(behandlingsresultat.vilkaarsresultater))

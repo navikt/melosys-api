@@ -17,6 +17,7 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.Faktureringskomponente
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
 import no.nav.melosys.saksflyt.steg.StegBehandler
 import no.nav.melosys.service.aktoer.KontaktopplysningService
+import no.nav.melosys.service.avgift.TrygdeavgiftsMottakerService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -34,6 +35,7 @@ class OpprettBetalingsplan(
     private val faktureringskomponentenConsumer: FaktureringskomponentenConsumer,
     private val kontaktopplysningService: KontaktopplysningService,
     private val pdlService: PersondataService,
+    private val trygdeavgiftsMottakerService: TrygdeavgiftsMottakerService,
     private val unleash: Unleash
 ) : StegBehandler {
 
@@ -51,7 +53,7 @@ class OpprettBetalingsplan(
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsId)
         val fastsattTrygdeavgift = behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift
 
-        if (!fastsattTrygdeavgift.skalBetalesTilNav()) {
+        if (!trygdeavgiftsMottakerService.skalBetalesTilNav(fastsattTrygdeavgift.trygdeavgiftsgrunnlag)) {
             return
         }
 
