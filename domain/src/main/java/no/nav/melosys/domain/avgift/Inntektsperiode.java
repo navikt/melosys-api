@@ -41,9 +41,6 @@ public class Inntektsperiode {
     @Column(name = "aga_betales_til_skatt")
     private boolean arbeidsgiversavgiftBetalesTilSkatt;
 
-    @Column(name = "trygdeavgift_betales_til_skatt")
-    private boolean ordinærTrygdeavgiftBetalesTilSkatt;
-
     public Long getId() {
         return id;
     }
@@ -100,14 +97,6 @@ public class Inntektsperiode {
         this.arbeidsgiversavgiftBetalesTilSkatt = arbeidsgiversavgiftBetalesTilSkatt;
     }
 
-    public boolean isOrdinærTrygdeavgiftBetalesTilSkatt() {
-        return ordinærTrygdeavgiftBetalesTilSkatt;
-    }
-
-    public void setOrdinærTrygdeavgiftBetalesTilSkatt(boolean ordinærTrygdeavgiftBetalesTilSkatt) {
-        this.ordinærTrygdeavgiftBetalesTilSkatt = ordinærTrygdeavgiftBetalesTilSkatt;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -117,33 +106,20 @@ public class Inntektsperiode {
             && Objects.equals(fomDato, that.fomDato) && Objects.equals(tomDato, that.tomDato)
             && Objects.equals(type, that.type)
             && Objects.equals(avgiftspliktigInntektMnd, that.avgiftspliktigInntektMnd)
-            && arbeidsgiversavgiftBetalesTilSkatt == that.arbeidsgiversavgiftBetalesTilSkatt
-            && ordinærTrygdeavgiftBetalesTilSkatt == that.ordinærTrygdeavgiftBetalesTilSkatt;
+            && arbeidsgiversavgiftBetalesTilSkatt == that.arbeidsgiversavgiftBetalesTilSkatt;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(trygdeavgiftsgrunnlag, fomDato, tomDato, type, avgiftspliktigInntektMnd,
-            arbeidsgiversavgiftBetalesTilSkatt, ordinærTrygdeavgiftBetalesTilSkatt);
+            arbeidsgiversavgiftBetalesTilSkatt);
     }
 
     @Override
     public String toString() {
         return "Inntektsperiode{" + "id=" + id + ", fomDato=" + fomDato + ", tomDato=" + tomDato + ", type=" + type
             + ", avgiftspliktigInntektMnd=" + avgiftspliktigInntektMnd + ", arbeidsgiversavgiftBetalesTilSkatt="
-            + arbeidsgiversavgiftBetalesTilSkatt + ", ordinærTrygdeavgiftBetalesTilSkatt=" + ordinærTrygdeavgiftBetalesTilSkatt + '}';
-    }
-
-    public boolean isTrygdeavgiftBetalesBådeTilNavOgSkatt() {
-        return !isTrygdeavgiftBetalesKunTilSkatt() && !isTrygdeavgiftBetalesKunTilNav();
-    }
-
-    public boolean isTrygdeavgiftBetalesKunTilSkatt() {
-        return isOrdinærTrygdeavgiftBetalesTilSkatt() && (isArbeidsgiversavgiftBetalesTilSkatt() || Inntektskildetype.MISJONÆR.equals(type));
-    }
-
-    public boolean isTrygdeavgiftBetalesKunTilNav() {
-        return !isOrdinærTrygdeavgiftBetalesTilSkatt() && (!isArbeidsgiversavgiftBetalesTilSkatt() || Inntektskildetype.MISJONÆR.equals(type));
+            + arbeidsgiversavgiftBetalesTilSkatt + '}';
     }
 
 }
