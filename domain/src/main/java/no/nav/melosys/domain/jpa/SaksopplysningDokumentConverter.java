@@ -18,6 +18,7 @@ import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.serializer.LovvalgBestemmelseDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.fasterxml.jackson.module.kotlin.KotlinModule;
 
 public class SaksopplysningDokumentConverter implements AttributeConverter<SaksopplysningDokument, String> {
 
@@ -27,6 +28,7 @@ public class SaksopplysningDokumentConverter implements AttributeConverter<Sakso
         .registerModule(new JavaTimeModule())
         .registerModule(new SimpleModule()
             .addDeserializer(LovvalgBestemmelse.class, new LovvalgBestemmelseDeserializer()))
+        .registerModule(new KotlinModule.Builder().build())
         .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true)
         .addMixIn(GeografiskAdresse.class, GeografiskAdresseMixIn.class)
         .addMixIn(Inntekt.class, InntektMixin.class)
