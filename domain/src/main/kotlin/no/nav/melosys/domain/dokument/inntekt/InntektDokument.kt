@@ -1,9 +1,8 @@
 package no.nav.melosys.domain.dokument.inntekt
 
 import no.nav.melosys.domain.dokument.SaksopplysningDokument
-import javax.validation.constraints.NotNull
 
-class InntektDokument(var arbeidsInntektMaanedListe: MutableList<ArbeidsInntektMaaned> = mutableListOf()) :
+class InntektDokument(var arbeidsInntektMaanedListe: List<ArbeidsInntektMaaned> = emptyList()) :
     SaksopplysningDokument {
 
     fun hentOrgnumre(): Set<String> {

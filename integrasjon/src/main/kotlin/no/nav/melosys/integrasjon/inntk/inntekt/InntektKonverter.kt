@@ -83,7 +83,7 @@ class InntektKonverter {
                             } ?: emptyList()
                         }
                     }
-                }.toMutableList()
+                }
             }
         }
     }

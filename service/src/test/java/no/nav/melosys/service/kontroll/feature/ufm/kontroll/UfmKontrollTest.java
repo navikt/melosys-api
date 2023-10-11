@@ -2,6 +2,7 @@ package no.nav.melosys.service.kontroll.feature.ufm.kontroll;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -170,8 +171,10 @@ class UfmKontrollTest {
 
         ArbeidsInntektMaaned arbeidsInntektMaaned = new ArbeidsInntektMaaned();
         arbeidsInntektMaaned.arbeidsInntektInformasjon = new ArbeidsInntektInformasjon();
-        arbeidsInntektMaaned.getArbeidsInntektInformasjon().getInntektListe().add(inntekt);
-        inntektDokument.getArbeidsInntektMaanedListe().add(arbeidsInntektMaaned);
+        arbeidsInntektMaaned.arbeidsInntektInformasjon.getInntektListe().add(inntekt);
+        List<ArbeidsInntektMaaned> arbeidsInntektMaanedListe = new ArrayList<>();
+        arbeidsInntektMaanedListe.add(arbeidsInntektMaaned);
+        inntektDokument.setArbeidsInntektMaanedListe(arbeidsInntektMaanedListe);
 
         UtbetalingDokument utbetalingDokument = new UtbetalingDokument();
         utbetalingDokument.utbetalinger = Collections.singletonList(new Utbetaling());
