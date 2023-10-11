@@ -15,8 +15,8 @@ public class InntektDto {
     public InntektDto() {}
 
     public InntektDto(InntektDokument inntektDokument) {
-        if (inntektDokument != null && !inntektDokument.arbeidsInntektMaanedListe.isEmpty()) {
-            for (ArbeidsInntektMaaned arbeidsInntektMaaned : inntektDokument.arbeidsInntektMaanedListe) {
+        if (inntektDokument != null && !inntektDokument.getArbeidsInntektMaanedListe().isEmpty()) {
+            for (ArbeidsInntektMaaned arbeidsInntektMaaned : inntektDokument.getArbeidsInntektMaanedListe()) {
                 if (arbeidsInntektMaaned.arbeidsInntektInformasjon != null) {
                     if (!arbeidsInntektMaaned.arbeidsInntektInformasjon.inntektListe.isEmpty()) {
                         arbeidsInntektMaanedListe.add(new ArbeidsInntektMaanedDto(arbeidsInntektMaaned));
