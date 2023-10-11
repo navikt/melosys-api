@@ -35,7 +35,7 @@ class InntektKonverter {
                                 tekst = it.tekst
                             }
                         } ?: emptyList(),
-                        arbeidsInntektInformasjon = ArbeidsInntektInformasjon().apply {
+                        arbeidsInntektInformasjon = ArbeidsInntektInformasjon(
                             inntektListe = aim.arbeidsInntektInformasjon.inntektListe?.map {
                                 lagSubtypeAvInntekt(it).apply {
                                     opptjeningsperiode = Periode().apply {
@@ -71,7 +71,7 @@ class InntektKonverter {
                                     informasjonsstatus = it.informasjonsstatus
                                     beskrivelse = it.beskrivelse ?: throw TekniskException("Beskrivelse kan ikke være null")
                                 }
-                            } ?: emptyList()
+                            } ?: emptyList(),
                             arbeidsforholdListe = aim.arbeidsInntektInformasjon.arbeidsforholdListe?.map {
                                 ArbeidsforholdFrilanser().apply {
                                     frilansPeriode = Periode().apply {
@@ -81,7 +81,7 @@ class InntektKonverter {
                                     yrke = it.yrke
                                 }
                             } ?: emptyList()
-                        }
+                        )
                     )
                 }
             }

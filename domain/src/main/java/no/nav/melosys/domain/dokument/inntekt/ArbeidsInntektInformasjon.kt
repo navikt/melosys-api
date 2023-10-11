@@ -1,25 +1,15 @@
-package no.nav.melosys.domain.dokument.inntekt;
+package no.nav.melosys.domain.dokument.inntekt
 
-import java.util.ArrayList;
-import java.util.List;
-import javax.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonProperty
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-public class ArbeidsInntektInformasjon {
-
-    public List<Inntekt> inntektListe = new ArrayList<>();
-
-    @JsonProperty("arbeidsforholdFrilanserListe")
-    @NotNull
-    public List<ArbeidsforholdFrilanser> arbeidsforholdListe = new ArrayList<>();
-
-    public List<Inntekt> getInntektListe() {
-        return inntektListe;
+data class ArbeidsInntektInformasjon(
+    @JvmField var inntektListe: List<Inntekt> = listOf(),
+    @JvmField @JsonProperty("arbeidsforholdFrilanserListe") var arbeidsforholdListe: List<ArbeidsforholdFrilanser>? = emptyList()
+) {
+    fun getMutableInntektListe() : MutableList<Inntekt> {
+        return inntektListe.toMutableList()
     }
-
-    public List<ArbeidsforholdFrilanser> getArbeidsforholdListe() {
-        return arbeidsforholdListe;
+    fun getMutableArbeidsforholdListe() : MutableList<ArbeidsforholdFrilanser>? {
+        return arbeidsforholdListe?.toMutableList()
     }
-
 }

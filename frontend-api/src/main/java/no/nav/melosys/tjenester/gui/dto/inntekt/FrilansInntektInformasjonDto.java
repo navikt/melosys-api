@@ -9,6 +9,6 @@ public class FrilansInntektInformasjonDto {
     public List<ArbeidsforholdFrilanser> arbeidsforholdFrilanserListe;
 
     public FrilansInntektInformasjonDto(ArbeidsInntektInformasjon arbeidsInntektInformasjon) {
-        arbeidsforholdFrilanserListe = arbeidsInntektInformasjon.arbeidsforholdListe;
+        arbeidsforholdFrilanserListe = arbeidsInntektInformasjon.getMutableArbeidsforholdListe();
     }
 }

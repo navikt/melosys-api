@@ -9,6 +9,6 @@ public class ArbeidsInntektInformasjonDto {
     public List<Inntekt> inntektListe;
 
     public ArbeidsInntektInformasjonDto(ArbeidsInntektInformasjon arbeidsInntektInformasjon) {
-        inntektListe = arbeidsInntektInformasjon.inntektListe;
+        inntektListe = arbeidsInntektInformasjon.getMutableInntektListe();
     }
 }
