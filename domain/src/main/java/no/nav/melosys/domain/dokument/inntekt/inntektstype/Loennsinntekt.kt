@@ -1,35 +1,26 @@
-package no.nav.melosys.domain.dokument.inntekt.inntektstype;
+package no.nav.melosys.domain.dokument.inntekt.inntektstype
 
+import com.fasterxml.jackson.annotation.JsonView
+import no.nav.melosys.domain.dokument.DokumentView
+import no.nav.melosys.domain.dokument.inntekt.Inntekt
+import java.math.BigDecimal
+import java.time.YearMonth
 
-import com.fasterxml.jackson.annotation.JsonView;
-import no.nav.melosys.domain.dokument.DokumentView;
-import no.nav.melosys.domain.dokument.inntekt.Inntekt;
-import org.jetbrains.annotations.NotNull;
+class Loennsinntekt(
+    beloep: BigDecimal,
+    fordel: String,
+    inntektskilde: String,
+    inntektsperiodetype: String,
+    inntektsstatus: String,
+    utbetaltIPeriode: YearMonth,
 
-public class Loennsinntekt extends Inntekt {
-
-    protected String beskrivelse; //"http://nav.no/kodeverk/Kodeverk/Loennsbeskrivelse"s
-
-    @JsonView(DokumentView.Database.class)
-    protected Integer antall;
-
-    @Override
-    @NotNull
-    public String getBeskrivelse() {
-        return beskrivelse;
-    }
-
-    @Override
-    public void setBeskrivelse(@NotNull String value) {
-        this.beskrivelse = value;
-    }
-
-    public Integer getAntall() {
-        return antall;
-    }
-
-    public void setAntall(Integer value) {
-        this.antall = value;
-    }
-
-}
+    @JsonView(DokumentView.Database::class)
+    var antall: Int? = null
+) : Inntekt(
+    beloep = beloep,
+    fordel = fordel,
+    inntektskilde = inntektskilde,
+    inntektsperiodetype = inntektsperiodetype,
+    inntektsstatus = inntektsstatus,
+    utbetaltIPeriode = utbetaltIPeriode
+)

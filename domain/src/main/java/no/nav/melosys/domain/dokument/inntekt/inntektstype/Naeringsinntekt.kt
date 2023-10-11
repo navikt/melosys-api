@@ -1,19 +1,21 @@
-package no.nav.melosys.domain.dokument.inntekt.inntektstype;
+package no.nav.melosys.domain.dokument.inntekt.inntektstype
 
-import no.nav.melosys.domain.dokument.inntekt.Inntekt;
-import org.jetbrains.annotations.NotNull;
+import no.nav.melosys.domain.dokument.inntekt.Inntekt
+import java.math.BigDecimal
+import java.time.YearMonth
 
-public class Naeringsinntekt extends Inntekt {
-
-    protected String beskrivelse; // http://nav.no/kodeverk/Kodeverk/Naeringsinntektsbeskrivelse
-
-    @NotNull
-    @Override
-    public String getBeskrivelse() {
-        return beskrivelse;
-    }
-
-    public void setBeskrivelse(@NotNull String value) {
-        this.beskrivelse = value;
-    }
-}
+class Naeringsinntekt(
+    beloep: BigDecimal,
+    fordel: String,
+    inntektskilde: String,
+    inntektsperiodetype: String,
+    inntektsstatus: String,
+    utbetaltIPeriode: YearMonth
+) : Inntekt(
+    beloep = beloep,
+    fordel = fordel,
+    inntektskilde = inntektskilde,
+    inntektsperiodetype = inntektsperiodetype,
+    inntektsstatus = inntektsstatus,
+    utbetaltIPeriode = utbetaltIPeriode
+)

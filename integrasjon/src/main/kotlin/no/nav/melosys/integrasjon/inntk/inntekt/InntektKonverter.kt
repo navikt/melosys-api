@@ -43,17 +43,11 @@ class InntektKonverter {
                                         tom = it.opptjeningsperiodeTom
                                     }
                                     arbeidsforholdREF = it.arbeidsforholdREF
-                                    beloep = it.beloep
-                                    fordel = it.fordel
-                                    inntektskilde = it.inntektskilde
-                                    inntektsperiodetype = it.inntektsperiodetype
-                                    inntektsstatus = it.inntektsstatus
                                     levereringstidspunkt = LocalDateTime.of(
                                         it.leveringstidspunkt.year, it.leveringstidspunkt.month, 1, 0, 0
                                     )
                                     opptjeningsland = it.opptjeningsland
                                     skattemessigBosattLand = it.skattemessigBosattLand
-                                    utbetaltIPeriode = it.utbetaltIMaaned
                                     opplysningspliktigID = it.opplysningspliktig?.identifikator
                                     // Denne finnes ikke i restApi, og tror ikke den er i bruk
                                     // https://nav-it.slack.com/archives/CLMJJ882W/p1689859452879089?thread_ts=1689168417.802869&cid=CLMJJ882W
@@ -90,10 +84,39 @@ class InntektKonverter {
 
     private fun lagSubtypeAvInntekt(inntekt: InntektResponse.Inntekt): Inntekt {
         return when (inntekt.inntektType) {
-            InntektResponse.InntektType.LOENNSINNTEKT -> Loennsinntekt().apply { antall = inntekt.antall }
-            InntektResponse.InntektType.NAERINGSINNTEKT -> Naeringsinntekt()
-            InntektResponse.InntektType.PENSJON_ELLER_TRYGD -> PensjonEllerTrygd()
-            InntektResponse.InntektType.YTELSE_FRA_OFFENTLIGE -> YtelseFraOffentlige()
+            InntektResponse.InntektType.LOENNSINNTEKT -> Loennsinntekt(
+                beloep = inntekt.beloep,
+                fordel = inntekt.fordel,
+                inntektskilde = inntekt.inntektskilde,
+                inntektsperiodetype = inntekt.inntektsperiodetype,
+                inntektsstatus = inntekt.inntektsstatus,
+                utbetaltIPeriode = inntekt.utbetaltIMaaned,
+                antall = inntekt.antall
+            )
+            InntektResponse.InntektType.NAERINGSINNTEKT -> Naeringsinntekt(
+                beloep = inntekt.beloep,
+                fordel = inntekt.fordel,
+                inntektskilde = inntekt.inntektskilde,
+                inntektsperiodetype = inntekt.inntektsperiodetype,
+                inntektsstatus = inntekt.inntektsstatus,
+                utbetaltIPeriode = inntekt.utbetaltIMaaned,
+            )
+            InntektResponse.InntektType.PENSJON_ELLER_TRYGD -> PensjonEllerTrygd(
+                beloep = inntekt.beloep,
+                fordel = inntekt.fordel,
+                inntektskilde = inntekt.inntektskilde,
+                inntektsperiodetype = inntekt.inntektsperiodetype,
+                inntektsstatus = inntekt.inntektsstatus,
+                utbetaltIPeriode = inntekt.utbetaltIMaaned,
+            )
+            InntektResponse.InntektType.YTELSE_FRA_OFFENTLIGE -> YtelseFraOffentlige(
+                beloep = inntekt.beloep,
+                fordel = inntekt.fordel,
+                inntektskilde = inntekt.inntektskilde,
+                inntektsperiodetype = inntekt.inntektsperiodetype,
+                inntektsstatus = inntekt.inntektsstatus,
+                utbetaltIPeriode = inntekt.utbetaltIMaaned,
+            )
             null -> throw TekniskException("InntektType kan ikke være null")
         }
     }

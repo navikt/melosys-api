@@ -58,7 +58,7 @@ class InntekKonverterTest {
                                 }
                             antall.shouldBe(1)
                             tilleggsinformasjon
-                                .tilleggsinformasjonDetaljer
+                                ?.tilleggsinformasjonDetaljer
                                 .shouldBeTypeOf<BonusFraForsvaret>()
                                 .åretUtbetalingenGjelderFor.shouldBe(Year.of(1980))
                         }
@@ -70,7 +70,7 @@ class InntekKonverterTest {
                         .first().shouldBeInstanceOf<YtelseFraOffentlige>().run {
                             beloep.shouldBe(BigDecimal(50000))
                             tilleggsinformasjon
-                                .tilleggsinformasjonDetaljer
+                                ?.tilleggsinformasjonDetaljer
                                 .shouldBeTypeOf<ReiseKostOgLosji>()
                                 .persontype.shouldBe("norskPendler")
                         }
@@ -81,7 +81,7 @@ class InntekKonverterTest {
                         .first().shouldBeInstanceOf<Naeringsinntekt>().run {
                             beloep.shouldBe(BigDecimal(50000))
                             tilleggsinformasjon
-                                .tilleggsinformasjonDetaljer
+                                ?.tilleggsinformasjonDetaljer
                                 .shouldBeTypeOf<Svalbardinntekt>().run {
                                     antallDager.shouldBe(40)
                                     betaltTrygdeavgift.shouldBe(BigDecimal(50000))

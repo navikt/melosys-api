@@ -1,140 +1,40 @@
-package no.nav.melosys.domain.dokument.inntekt;
+package no.nav.melosys.domain.dokument.inntekt
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.YearMonth;
+import com.fasterxml.jackson.annotation.JsonView
+import no.nav.melosys.domain.dokument.DokumentView
+import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon
+import java.math.BigDecimal
+import java.time.LocalDateTime
+import java.time.YearMonth
 
-import com.fasterxml.jackson.annotation.JsonView;
-import no.nav.melosys.domain.dokument.DokumentView;
-import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
-import org.jetbrains.annotations.NotNull;
+abstract class Inntekt(
+    @JsonView(DokumentView.Database::class)
+    var arbeidsforholdREF: String? = null,
+    val beloep: BigDecimal,
+    val fordel: String, //Fordel http://nav.no/kodeverk/Kodeverk/Fordel
+    val inntektskilde: String, //"http://nav.no/kodeverk/Kodeverk/InntektsInformasjonsopphav"
+    val inntektsperiodetype: String, //http://nav.no/kodeverk/Kodeverk/Inntektsperiodetyper
+    val inntektsstatus: String, //"http://nav.no/kodeverk/Kodeverk/Inntektsstatuser"
+    var levereringstidspunkt: LocalDateTime? = null,
+    var opptjeningsland: String? = null,
+    var opptjeningsperiode:Periode = Periode(),
 
-public abstract class Inntekt {
+    @JsonView(DokumentView.Database::class)
+    var skattemessigBosattLand: String? = null,
 
-    @JsonView(DokumentView.Database.class)
-    public String arbeidsforholdREF;
+    val utbetaltIPeriode: YearMonth,
+    var opplysningspliktigID: String? = null,
 
-    @NotNull
-    public BigDecimal beloep;
+    @JsonView(DokumentView.Database::class)
+    var inntektsinnsenderID: String? = null,
+    var virksomhetID: String? = null,
 
-    @NotNull
-    public String fordel; //Fordel http://nav.no/kodeverk/Kodeverk/Fordel
+    @JsonView(DokumentView.Database::class)
+    var tilleggsinformasjon: Tilleggsinformasjon? = null,
+    var inntektsmottakerID: String? = null,
+    var inngaarIGrunnlagForTrekk: Boolean? = null,
+    var utloeserArbeidsgiveravgift: Boolean? = null,
+    var informasjonsstatus: String? = null, //"http://nav.no/kodeverk/Kodeverk/Informasjonsstatuser"
+    var beskrivelse: String? = null
 
-    @NotNull
-    public String inntektskilde; //"http://nav.no/kodeverk/Kodeverk/InntektsInformasjonsopphav"
-
-    @NotNull
-    public String inntektsperiodetype; //http://nav.no/kodeverk/Kodeverk/Inntektsperiodetyper
-
-    @NotNull
-    public String inntektsstatus; //"http://nav.no/kodeverk/Kodeverk/Inntektsstatuser"
-
-    public LocalDateTime levereringstidspunkt;
-
-    public String opptjeningsland;
-
-    public Periode opptjeningsperiode = new Periode();
-
-    @JsonView(DokumentView.Database.class)
-    public String skattemessigBosattLand;
-
-    @NotNull
-    public YearMonth utbetaltIPeriode;
-
-    public String opplysningspliktigID;
-
-    @JsonView(DokumentView.Database.class)
-    public String inntektsinnsenderID;
-
-    public String virksomhetID;
-
-    @JsonView(DokumentView.Database.class)
-    public Tilleggsinformasjon tilleggsinformasjon;
-
-    public String inntektsmottakerID;
-
-    public Boolean inngaarIGrunnlagForTrekk;
-
-    public Boolean utloeserArbeidsgiveravgift;
-
-    public String informasjonsstatus; //"http://nav.no/kodeverk/Kodeverk/Informasjonsstatuser"
-
-    public abstract void setBeskrivelse(@NotNull String beskrivelse);
-
-
-    public String getArbeidsforholdREF() {
-        return arbeidsforholdREF;
-    }
-
-    public BigDecimal getBeloep() {
-        return beloep;
-    }
-
-    @NotNull
-    public abstract String getBeskrivelse();
-
-    public String getFordel() {
-        return fordel;
-    }
-
-    public String getInntektskilde() {
-        return inntektskilde;
-    }
-
-    public String getInntektsperiodetype() {
-        return inntektsperiodetype;
-    }
-
-    public String getInntektsstatus() {
-        return inntektsstatus;
-    }
-
-    public LocalDateTime getLevereringstidspunkt() {
-        return levereringstidspunkt;
-    }
-
-    public String getOpptjeningsland() {
-        return opptjeningsland;
-    }
-
-    public Periode getOpptjeningsperiode() {
-        return opptjeningsperiode;
-    }
-
-    public String getSkattemessigBosattLand() {
-        return skattemessigBosattLand;
-    }
-
-    public YearMonth getUtbetaltIPeriode() {
-        return utbetaltIPeriode;
-    }
-
-    public String getOpplysningspliktigID() {
-        return opplysningspliktigID;
-    }
-
-    public String getInntektsinnsenderID() {
-        return inntektsinnsenderID;
-    }
-
-    public String getVirksomhetID() {
-        return virksomhetID;
-    }
-
-    public Tilleggsinformasjon getTilleggsinformasjon() {
-        return tilleggsinformasjon;
-    }
-
-    public String getInntektsmottakerID() {
-        return inntektsmottakerID;
-    }
-
-    public Boolean getInngaarIGrunnlagForTrekk() {
-        return inngaarIGrunnlagForTrekk;
-    }
-
-    public Boolean getUtloeserArbeidsgiveravgift() {
-        return utloeserArbeidsgiveravgift;
-    }
-
-}
+)
