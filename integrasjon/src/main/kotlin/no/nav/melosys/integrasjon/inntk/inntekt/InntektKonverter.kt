@@ -24,8 +24,8 @@ class InntektKonverter {
         return Saksopplysning().apply {
             dokument = InntektDokument().apply {
                 arbeidsInntektMaanedListe = inntektResponse.arbeidsInntektMaaned.map { aim ->
-                    ArbeidsInntektMaaned().apply {
-                        aarMaaned = aim.aarMaaned
+                    ArbeidsInntektMaaned(
+                        aarMaaned = aim.aarMaaned,
                         avvikListe = aim.avvikListe?.map {
                             Avvik().apply {
                                 ident = it.ident?.identifikator
@@ -34,7 +34,7 @@ class InntektKonverter {
                                 avvikPeriode = it.avvikPeriode
                                 tekst = it.tekst
                             }
-                        } ?: emptyList()
+                        } ?: emptyList(),
                         arbeidsInntektInformasjon = ArbeidsInntektInformasjon().apply {
                             inntektListe = aim.arbeidsInntektInformasjon?.inntektListe?.map {
                                 lagSubtypeAvInntekt(it).apply {
@@ -82,7 +82,7 @@ class InntektKonverter {
                                 }
                             } ?: emptyList()
                         }
-                    }
+                    )
                 }
             }
         }

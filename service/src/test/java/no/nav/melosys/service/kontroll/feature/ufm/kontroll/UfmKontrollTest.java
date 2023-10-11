@@ -169,8 +169,7 @@ class UfmKontrollTest {
         Inntekt inntekt = new YtelseFraOffentlige();
         inntekt.utbetaltIPeriode = YearMonth.now().plusYears(2);
 
-        ArbeidsInntektMaaned arbeidsInntektMaaned = new ArbeidsInntektMaaned();
-        arbeidsInntektMaaned.arbeidsInntektInformasjon = new ArbeidsInntektInformasjon();
+        ArbeidsInntektMaaned arbeidsInntektMaaned = new ArbeidsInntektMaaned(null, null, new ArbeidsInntektInformasjon());
         arbeidsInntektMaaned.arbeidsInntektInformasjon.getInntektListe().add(inntekt);
         List<ArbeidsInntektMaaned> arbeidsInntektMaanedListe = new ArrayList<>();
         arbeidsInntektMaanedListe.add(arbeidsInntektMaaned);

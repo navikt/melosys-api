@@ -33,7 +33,7 @@ object YtelseRegler {
 
 private fun hentYtelseFraOffentlige(inntektDokument: InntektDokument): Collection<YtelseFraOffentlige> =
     inntektDokument.arbeidsInntektMaanedListe
-        .mapNotNull { it.arbeidsInntektInformasjon?.inntektListe }
+        .mapNotNull { it.arbeidsInntektInformasjon.inntektListe }
         .flatten()
         .filterIsInstance<YtelseFraOffentlige>()
         .toList()

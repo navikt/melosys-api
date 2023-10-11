@@ -1,25 +1,12 @@
-package no.nav.melosys.domain.dokument.inntekt;
+package no.nav.melosys.domain.dokument.inntekt
 
-import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.List;
-import javax.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonView
+import no.nav.melosys.domain.dokument.DokumentView
+import java.time.YearMonth
+import javax.validation.constraints.NotNull
 
-import com.fasterxml.jackson.annotation.JsonView;
-import no.nav.melosys.domain.dokument.DokumentView;
-
-public class ArbeidsInntektMaaned {
-
-    public YearMonth aarMaaned;
-
-    @JsonView(DokumentView.Database.class)
-    @NotNull
-    public List<Avvik> avvikListe = new ArrayList<>();
-
-    public ArbeidsInntektInformasjon arbeidsInntektInformasjon;
-
-    public ArbeidsInntektInformasjon getArbeidsInntektInformasjon() {
-        return arbeidsInntektInformasjon;
-    }
-
-}
+ data class ArbeidsInntektMaaned(
+     @JvmField val aarMaaned: YearMonth? = null,
+     @JsonView(DokumentView.Database::class) val avvikListe: @NotNull List<Avvik>? = emptyList(),
+     @JvmField val arbeidsInntektInformasjon: ArbeidsInntektInformasjon
+)

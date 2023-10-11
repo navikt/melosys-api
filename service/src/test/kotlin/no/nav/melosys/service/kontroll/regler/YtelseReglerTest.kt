@@ -84,11 +84,7 @@ class YtelseReglerTest {
         val tom = LocalDate.now().plusYears(2)
         YtelseRegler.utbetaltYtelserFraOffentligIPeriode(
             InntektDokument().apply {
-                arbeidsInntektMaanedListe = listOf(ArbeidsInntektMaaned().apply {
-                    arbeidsInntektInformasjon = ArbeidsInntektInformasjon().apply {
-                        inntektListe = null
-                    }
-                })
+                arbeidsInntektMaanedListe = listOf(ArbeidsInntektMaaned(arbeidsInntektInformasjon = ArbeidsInntektInformasjon()))
             },
             fom,
             tom
@@ -100,8 +96,8 @@ class YtelseReglerTest {
 
     }
 
-    private fun hentArbeidsInntektMaaned(medYtelserFraOffentlig: Boolean, fom: LocalDate): ArbeidsInntektMaaned = ArbeidsInntektMaaned().apply {
-        arbeidsInntektInformasjon = ArbeidsInntektInformasjon()
+    private fun hentArbeidsInntektMaaned(medYtelserFraOffentlig: Boolean, fom: LocalDate): ArbeidsInntektMaaned = ArbeidsInntektMaaned(
+        arbeidsInntektInformasjon = ArbeidsInntektInformasjon()).apply {
         arbeidsInntektInformasjon.inntektListe = hentInntektsListe(medYtelserFraOffentlig, fom)
     }
 
