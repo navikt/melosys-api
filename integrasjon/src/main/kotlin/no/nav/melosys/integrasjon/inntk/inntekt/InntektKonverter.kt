@@ -27,13 +27,13 @@ class InntektKonverter {
                     ArbeidsInntektMaaned(
                         aarMaaned = aim.aarMaaned,
                         avvikListe = aim.avvikListe?.map {
-                            Avvik().apply {
-                                ident = it.ident?.identifikator
-                                opplysningspliktigID = it.opplysningspliktig?.identifikator
-                                virksomhetID = it.virksomhet?.identifikator
-                                avvikPeriode = it.avvikPeriode
+                            Avvik(
+                                ident = it.ident.identifikator,
+                                opplysningspliktigID = it.opplysningspliktig.identifikator,
+                                virksomhetID = it.virksomhet.identifikator,
+                                avvikPeriode = it.avvikPeriode,
                                 tekst = it.tekst
-                            }
+                            )
                         } ?: emptyList(),
                         arbeidsInntektInformasjon = ArbeidsInntektInformasjon(
                             inntektListe = aim.arbeidsInntektInformasjon.inntektListe?.map {
@@ -93,6 +93,7 @@ class InntektKonverter {
                 utbetaltIPeriode = inntekt.utbetaltIMaaned,
                 antall = inntekt.antall
             )
+
             InntektResponse.InntektType.NAERINGSINNTEKT -> Naeringsinntekt(
                 beloep = inntekt.beloep,
                 fordel = inntekt.fordel,
@@ -101,6 +102,7 @@ class InntektKonverter {
                 inntektsstatus = inntekt.inntektsstatus,
                 utbetaltIPeriode = inntekt.utbetaltIMaaned,
             )
+
             InntektResponse.InntektType.PENSJON_ELLER_TRYGD -> PensjonEllerTrygd(
                 beloep = inntekt.beloep,
                 fordel = inntekt.fordel,
@@ -109,6 +111,7 @@ class InntektKonverter {
                 inntektsstatus = inntekt.inntektsstatus,
                 utbetaltIPeriode = inntekt.utbetaltIMaaned,
             )
+
             InntektResponse.InntektType.YTELSE_FRA_OFFENTLIGE -> YtelseFraOffentlige(
                 beloep = inntekt.beloep,
                 fordel = inntekt.fordel,
@@ -117,6 +120,7 @@ class InntektKonverter {
                 inntektsstatus = inntekt.inntektsstatus,
                 utbetaltIPeriode = inntekt.utbetaltIMaaned,
             )
+
             null -> throw TekniskException("InntektType kan ikke være null")
         }
     }

@@ -94,11 +94,11 @@ data class InntektResponse(
     )
 
     data class Avvik(
-        val ident: Aktoer? = null,
-        val opplysningspliktig: Aktoer? = null,
-        val virksomhet: Aktoer? = null,
-        val avvikPeriode: YearMonth? = null,
-        val tekst: String? = null
+        val ident: Aktoer,
+        val opplysningspliktig: Aktoer,
+        val virksomhet: Aktoer,
+        val avvikPeriode: YearMonth,
+        val tekst: String
     )
 
     data class Forskuddstrekk(
