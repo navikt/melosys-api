@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.dokument.inntekt
 
+import com.fasterxml.jackson.annotation.JsonPropertyOrder
 import com.fasterxml.jackson.annotation.JsonView
 import no.nav.melosys.domain.dokument.DokumentView
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon
@@ -7,7 +8,28 @@ import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.YearMonth
 
-abstract class Inntekt(
+@JsonPropertyOrder(
+    "arbeidsforholdREF",
+    "beloep",
+    "fordel",
+    "inntektskilde",
+    "inntektsperiodetype",
+    "inntektsstatus",
+    "levereringstidspunkt",
+    "opptjeningsland",
+    "opptjeningsperiode",
+    "skattemessigBosattLand",
+    "utbetaltIPeriode",
+    "opplysningspliktigID",
+    "inntektsinnsenderID",
+    "virksomhetID",
+    "tilleggsinformasjon",
+    "inntektsmottakerID",
+    "inngaarIGrunnlagForTrekk",
+    "utloeserArbeidsgiveravgift",
+    "informasjonsstatus",
+    "beskrivelse"
+)abstract class Inntekt(
     @JsonView(DokumentView.Database::class)
     var arbeidsforholdREF: String? = null,
     val beloep: BigDecimal,
@@ -36,5 +58,4 @@ abstract class Inntekt(
     var utloeserArbeidsgiveravgift: Boolean? = null,
     var informasjonsstatus: String? = null, //"http://nav.no/kodeverk/Kodeverk/Informasjonsstatuser"
     var beskrivelse: String? = null
-
 )
