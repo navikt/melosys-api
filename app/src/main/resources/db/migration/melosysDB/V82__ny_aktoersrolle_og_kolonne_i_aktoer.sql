@@ -9,3 +9,4 @@ CREATE TABLE fullmakt
     CONSTRAINT pk_fullmakt PRIMARY KEY (id)
 );
 CREATE INDEX idx_fullmakt_aktoer ON fullmakt (aktoer_id);
+ALTER TABLE fullmakt ADD CONSTRAINT fk_fullmakt_fagsak FOREIGN KEY (aktoer_id) REFERENCES aktoer;
