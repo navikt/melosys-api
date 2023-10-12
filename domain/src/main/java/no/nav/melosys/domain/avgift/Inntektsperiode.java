@@ -30,6 +30,9 @@ public class Inntektsperiode {
     @Enumerated(EnumType.STRING)
     private Inntektskildetype type;
 
+    @Column(name = "trygdeavgift_betales_til_skatt")
+    private boolean ordinærTrygdeavgiftBetalesTilSkatt;
+
     @Columns(columns = {
         @Column(name = "avgiftspliktig_inntekt_mnd_verdi"),
         @Column(name = "avgiftspliktig_inntekt_mnd_valuta")})
@@ -97,6 +100,14 @@ public class Inntektsperiode {
         this.arbeidsgiversavgiftBetalesTilSkatt = arbeidsgiversavgiftBetalesTilSkatt;
     }
 
+    public boolean isOrdinærTrygdeavgiftBetalesTilSkatt() {
+        return ordinærTrygdeavgiftBetalesTilSkatt;
+    }
+
+    public void setOrdinærTrygdeavgiftBetalesTilSkatt(boolean ordinærTrygdeavgiftBetalesTilSkatt) {
+        this.ordinærTrygdeavgiftBetalesTilSkatt = ordinærTrygdeavgiftBetalesTilSkatt;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -106,6 +117,7 @@ public class Inntektsperiode {
             && Objects.equals(fomDato, that.fomDato) && Objects.equals(tomDato, that.tomDato)
             && Objects.equals(type, that.type)
             && Objects.equals(avgiftspliktigInntektMnd, that.avgiftspliktigInntektMnd)
+            && ordinærTrygdeavgiftBetalesTilSkatt == that.ordinærTrygdeavgiftBetalesTilSkatt
             && arbeidsgiversavgiftBetalesTilSkatt == that.arbeidsgiversavgiftBetalesTilSkatt;
     }
 
@@ -115,11 +127,23 @@ public class Inntektsperiode {
             arbeidsgiversavgiftBetalesTilSkatt);
     }
 
+    public boolean isTrygdeavgiftBetalesBådeTilNavOgSkatt() {
+        return !isTrygdeavgiftBetalesKunTilSkatt() && !isTrygdeavgiftBetalesKunTilNav();
+    }
+
+    public boolean isTrygdeavgiftBetalesKunTilSkatt() {
+        return isOrdinærTrygdeavgiftBetalesTilSkatt() && (isArbeidsgiversavgiftBetalesTilSkatt() || Inntektskildetype.MISJONÆR.equals(type));
+    }
+
+    public boolean isTrygdeavgiftBetalesKunTilNav() {
+        return !isOrdinærTrygdeavgiftBetalesTilSkatt() && (!isArbeidsgiversavgiftBetalesTilSkatt() || Inntektskildetype.MISJONÆR.equals(type));
+    }
+
     @Override
     public String toString() {
         return "Inntektsperiode{" + "id=" + id + ", fomDato=" + fomDato + ", tomDato=" + tomDato + ", type=" + type
             + ", avgiftspliktigInntektMnd=" + avgiftspliktigInntektMnd + ", arbeidsgiversavgiftBetalesTilSkatt="
-            + arbeidsgiversavgiftBetalesTilSkatt + '}';
+            + arbeidsgiversavgiftBetalesTilSkatt + ", ordinærTrygdeavgiftBetalesTilSkatt=" + ordinærTrygdeavgiftBetalesTilSkatt + '}';
     }
 
 }
