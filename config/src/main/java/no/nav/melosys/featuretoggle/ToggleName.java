@@ -5,5 +5,7 @@ public class ToggleName {
 
     public static final String FOLKETRYGDEN_MVP = "melosys.folketrygden.mvp";
 
+    public static final String REFAKTORERING_ORDINÆR_TRYGDEAVGIFT = "melosys.refaktorering.ordinær.trygdeavgift";
+
     public static final String MELOSYS_EREG_ORGANISASJON = "melosys.ereg.organisasjon";
 }
