@@ -124,7 +124,7 @@ public class Inntektsperiode {
     @Override
     public int hashCode() {
         return Objects.hash(trygdeavgiftsgrunnlag, fomDato, tomDato, type, avgiftspliktigInntektMnd,
-            arbeidsgiversavgiftBetalesTilSkatt);
+            arbeidsgiversavgiftBetalesTilSkatt, ordinærTrygdeavgiftBetalesTilSkatt);
     }
 
     @Override
