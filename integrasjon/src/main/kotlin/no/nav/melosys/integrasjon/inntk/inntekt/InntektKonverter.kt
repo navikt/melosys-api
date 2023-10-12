@@ -67,13 +67,13 @@ class InntektKonverter {
                                 }
                             } ?: emptyList(),
                             arbeidsforholdListe = aim.arbeidsInntektInformasjon.arbeidsforholdListe?.map {
-                                ArbeidsforholdFrilanser().apply {
+                                ArbeidsforholdFrilanser(
                                     frilansPeriode = Periode().apply {
                                         fom = it.frilansPeriodeFom
                                         tom = it.frilansPeriodeTom
-                                    }
+                                    },
                                     yrke = it.yrke
-                                }
+                                )
                             } ?: emptyList()
                         )
                     )
