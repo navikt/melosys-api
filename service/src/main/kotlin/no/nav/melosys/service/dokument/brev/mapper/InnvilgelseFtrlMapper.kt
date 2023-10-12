@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
+import io.getunleash.Unleash
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.Vilkaarsresultat
 import no.nav.melosys.domain.brev.InnvilgelseFtrlBrevbestilling
@@ -9,6 +10,7 @@ import no.nav.melosys.domain.kodeverk.Representerer
 import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrl
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
 import no.nav.melosys.service.avgift.TrygdeavgiftsMottakerService
@@ -24,6 +26,7 @@ class InnvilgelseFtrlMapper(
     private val avklarteVirksomheterService: AvklarteVirksomheterService,
     private val dokgenMapperDatahenter: DokgenMapperDatahenter,
     private val trygdeavgiftsMottakerService: TrygdeavgiftsMottakerService
+    private val unleash: Unleash
 ) {
     @Transactional
     fun map(brevbestilling: InnvilgelseFtrlBrevbestilling): InnvilgelseFtrl {
@@ -43,7 +46,9 @@ class InnvilgelseFtrlMapper(
                     medlemAvFolketrygden
                 )
             )
-            .trygdeavgiftMottaker(trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag))
+            .trygdeavgiftMottaker(
+                if (unleash.isEnabled(ToggleName.REFAKTORERING_ORDINÆR_TRYGDEAVGIFT)) trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag)
+                else medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftMottaker)
             .skatteplikttype(medlemAvFolketrygden.utledSkatteplikttype())
             .ftrl_2_8_begrunnelse(hentFtrlNærTilknytningNorgeBegrunnelse(behandlingsresultat.vilkaarsresultater))
             .begrunnelseAnnenGrunnFritekst(hentSaerligBegrunnelseFritekst(behandlingsresultat.vilkaarsresultater))

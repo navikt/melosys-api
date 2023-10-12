@@ -101,12 +101,12 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
                 this.fomDato = inntektskildeRequest.fomDato
                 this.tomDato = inntektskildeRequest.tomDato
                 this.type = inntektskildeRequest.type
+                this.isArbeidsgiversavgiftBetalesTilSkatt = inntektskildeRequest.arbeidsgiversavgiftBetales
                 this.avgiftspliktigInntektMnd =
                     if (inntektskildeRequest.avgiftspliktigInntektMnd == null) null
                     else Penger(inntektskildeRequest.avgiftspliktigInntektMnd)
                 this.isOrdinærTrygdeavgiftBetalesTilSkatt =
                     !ordinærTrygdeavgiftBetalesTilNav(request, inntektskildeRequest) //TODO fjern når REFAKTORERING_ORDINÆR_TRYGDEAVGIFT toggle er fjernet
-                this.isArbeidsgiversavgiftBetalesTilSkatt = inntektskildeRequest.arbeidsgiversavgiftBetales
             }
         })
 
