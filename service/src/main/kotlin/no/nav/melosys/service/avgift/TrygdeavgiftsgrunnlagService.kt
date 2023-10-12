@@ -104,11 +104,12 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
                 this.avgiftspliktigInntektMnd =
                     if (inntektskildeRequest.avgiftspliktigInntektMnd == null) null
                     else Penger(inntektskildeRequest.avgiftspliktigInntektMnd)
+                this.isOrdinærTrygdeavgiftBetalesTilSkatt =
+                    !ordinærTrygdeavgiftBetalesTilNav(request, inntektskildeRequest) //TODO fjern når REFAKTORERING_ORDINÆR_TRYGDEAVGIFT toggle er fjernet
                 this.isArbeidsgiversavgiftBetalesTilSkatt = inntektskildeRequest.arbeidsgiversavgiftBetales
             }
         })
 
-    //TODO legg til i logikk
     private fun ordinærTrygdeavgiftBetalesTilNav(
         request: OppdaterTrygdeavgiftsgrunnlagRequest, inntektskildeRequest: InntektskildeRequest
     ): Boolean {
