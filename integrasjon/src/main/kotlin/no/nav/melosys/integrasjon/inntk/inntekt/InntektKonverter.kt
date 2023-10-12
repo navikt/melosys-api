@@ -38,10 +38,10 @@ class InntektKonverter {
                         arbeidsInntektInformasjon = ArbeidsInntektInformasjon(
                             inntektListe = aim.arbeidsInntektInformasjon.inntektListe?.map {
                                 lagSubtypeAvInntekt(it).apply {
-                                    opptjeningsperiode = Periode().apply {
-                                        fom = it.opptjeningsperiodeFom
+                                    opptjeningsperiode = Periode(
+                                        fom = it.opptjeningsperiodeFom,
                                         tom = it.opptjeningsperiodeTom
-                                    }
+                                    )
                                     arbeidsforholdREF = it.arbeidsforholdREF
                                     levereringstidspunkt = LocalDateTime.of(
                                         it.leveringstidspunkt.year, it.leveringstidspunkt.month, 1, 0, 0
@@ -68,10 +68,10 @@ class InntektKonverter {
                             } ?: emptyList(),
                             arbeidsforholdListe = aim.arbeidsInntektInformasjon.arbeidsforholdListe?.map {
                                 ArbeidsforholdFrilanser(
-                                    frilansPeriode = Periode().apply {
-                                        fom = it.frilansPeriodeFom
+                                    frilansPeriode = Periode(
+                                        fom = it.frilansPeriodeFom,
                                         tom = it.frilansPeriodeTom
-                                    },
+                                    ),
                                     yrke = it.yrke
                                 )
                             } ?: emptyList()
@@ -134,10 +134,10 @@ class InntektKonverter {
                         grunnpensjonbeløp = it.grunnpensjonbeloep
                         heravEtterlattepensjon = it.heravEtterlattepensjon
                         pensjonsgrad = it.pensjonsgrad
-                        tidsrom = Periode().apply {
-                            fom = it.tidsromFom
+                        tidsrom = Periode(
+                            fom = it.tidsromFom,
                             tom = it.tidsromTom
-                        }
+                        )
                     }
                 }
 
@@ -145,10 +145,10 @@ class InntektKonverter {
                 BarnepensjonOgUnderholdsbidrag().apply {
                     (tilleggsinformasjonDetaljer as InntektResponse.BarnepensjonOgUnderholdsbidrag).let {
                         forsørgersFødselnummer = it.forsoergersFoedselnummer
-                        tidsrom = Periode().apply {
-                            fom = it.tidsromFom
+                        tidsrom = Periode(
+                            fom = it.tidsromFom,
                             tom = it.tidsromTom
-                        }
+                        )
                     }
                 }
 
@@ -160,10 +160,10 @@ class InntektKonverter {
 
             ETTERBETALINGSPERIODE -> Etterbetalingsperiode().apply {
                 (tilleggsinformasjonDetaljer as InntektResponse.Etterbetalingsperiode).let {
-                    etterbetalingsperiode = Periode().apply {
-                        fom = it.etterbetalingsperiodeFom
+                    etterbetalingsperiode = Periode(
+                        fom = it.etterbetalingsperiodeFom,
                         tom = it.etterbetalingsperiodeTom
-                    }
+                    )
                 }
             }
 
