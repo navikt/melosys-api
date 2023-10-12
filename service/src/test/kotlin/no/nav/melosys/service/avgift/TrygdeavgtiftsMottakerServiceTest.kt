@@ -5,8 +5,7 @@ import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
-import no.nav.melosys.domain.kodeverk.Inntektskildetype.MISJONÆR
-import no.nav.melosys.domain.kodeverk.Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+import no.nav.melosys.domain.kodeverk.Inntektskildetype.*
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker.*
@@ -44,6 +43,56 @@ internal class TrygdeavgtiftsMottakerServiceTest {
         }
         val result = trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
         result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_SKATT)
+    }
+
+    @Test
+    fun `trygdeavgiftsmottaker skal være SKATT og NAV type er MISJONÆR kun i en periode`() {
+        val trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
+            skatteforholdTilNorge = mutableListOf(lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG), lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG))
+            inntektsperioder = mutableListOf(lagInntektsperiode( false, MISJONÆR), lagInntektsperiode( false, ARBEIDSINNTEKT_FRA_NORGE))
+        }
+        val result = trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
+        result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
+    }
+
+    @Test
+    fun `trygdeavgiftsmottaker skal være NAV hvis bruker er ikke skattepliktig, men type er FN_SKATTEFRITAK`() {
+        val trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
+            skatteforholdTilNorge = mutableListOf(lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG))
+            inntektsperioder = mutableListOf(lagInntektsperiode( false, FN_SKATTEFRITAK))
+        }
+        val result = trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
+        result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV)
+    }
+
+    @Test
+    fun `trygdeavgiftsmottaker skal være NAV hvis bruker er skattepliktig, men type er FN_SKATTEFRITAK`() {
+        val trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
+            skatteforholdTilNorge = mutableListOf(lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG))
+            inntektsperioder = mutableListOf(lagInntektsperiode( false, FN_SKATTEFRITAK))
+        }
+        val result = trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
+        result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV)
+    }
+
+    @Test
+    fun `trygdeavgiftsmottaker skal være NAV hvis bruker er ikke_skattepliktig og aga er false, men type er FN_SKATTEFRITAK`() {
+        val trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
+            skatteforholdTilNorge = mutableListOf(lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG))
+            inntektsperioder = mutableListOf(lagInntektsperiode( false, FN_SKATTEFRITAK))
+        }
+        val result = trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
+        result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV)
+    }
+
+    @Test
+    fun `trygdeavgiftsmottaker skal være SKATT og NAV hvis bruker har flere inntektsperioder, men en type er FN_SKATTEFRITAK`() {
+        val trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
+            skatteforholdTilNorge = mutableListOf(lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG), lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG))
+            inntektsperioder = mutableListOf(lagInntektsperiode( false, FN_SKATTEFRITAK), lagInntektsperiode( true, ARBEIDSINNTEKT_FRA_NORGE))
+        }
+        val result = trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
+        result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
     }
 
     @Test
