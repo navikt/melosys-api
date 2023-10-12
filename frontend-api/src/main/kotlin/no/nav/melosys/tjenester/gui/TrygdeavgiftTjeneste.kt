@@ -1,6 +1,8 @@
 package no.nav.melosys.tjenester.gui
 
+import io.getunleash.Unleash
 import io.swagger.annotations.Api
+import no.nav.melosys.featuretoggle.ToggleName.REFAKTORERING_ORDINÆR_TRYGDEAVGIFT
 import no.nav.melosys.service.avgift.TrygdeavgiftsMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
@@ -20,7 +22,8 @@ class TrygdeavgiftTjeneste(
     private val trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService,
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     private val trygdeavgiftsMottakerService: TrygdeavgiftsMottakerService,
-    private val aksesskontroll: Aksesskontroll
+    private val aksesskontroll: Aksesskontroll,
+    private val unleash: Unleash
 ) {
 
     @GetMapping("/grunnlag")
@@ -36,7 +39,10 @@ class TrygdeavgiftTjeneste(
         aksesskontroll.autoriser(behandlingID)
 
         return trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlag(behandlingID)
-            ?.let { ResponseEntity.ok(TrygdeavgiftMottakerDto(trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(it))) } ?: ResponseEntity.noContent().build()
+            ?.let { ResponseEntity.ok(TrygdeavgiftMottakerDto(
+                if (unleash.isEnabled(REFAKTORERING_ORDINÆR_TRYGDEAVGIFT)) trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(it)
+                else it.fastsattTrygdeavgift.trygdeavgiftMottaker))
+            } ?: ResponseEntity.noContent().build()
     }
 
     @PutMapping("/grunnlag")
