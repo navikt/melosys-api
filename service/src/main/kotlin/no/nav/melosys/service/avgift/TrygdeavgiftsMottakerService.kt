@@ -31,10 +31,10 @@ class TrygdeavgiftsMottakerService {
     }
 
     private fun betalerKunTrygdeavgiftTilNav(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag): Boolean {
-        return (trygdeavgiftsgrunnlag.skatteforholdTilNorge.stream().allMatch { skatteforholdTilNorge: SkatteforholdTilNorge ->
+        return trygdeavgiftsgrunnlag.skatteforholdTilNorge.stream().allMatch { skatteforholdTilNorge: SkatteforholdTilNorge ->
             skatteforholdTilNorge.skatteplikttype == Skatteplikttype.IKKE_SKATTEPLIKTIG }
-            && trygdeavgiftsgrunnlag.inntektsperioder.stream().allMatch { inntektsperiode: Inntektsperiode ->
-                !inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt || erMisjonær(inntektsperiode.type) || erFnAnsatt(inntektsperiode.type) })
+            && trygdeavgiftsgrunnlag.inntektsperioder.stream().allMatch { inntektsperiode: Inntektsperiode -> !inntektsperiode.isArbeidsgiversavgiftBetalesTilSkatt || erMisjonær(inntektsperiode.type) }
+            || trygdeavgiftsgrunnlag.inntektsperioder.stream().allMatch { inntektsperiode: Inntektsperiode -> erFnAnsatt(inntektsperiode.type) }
     }
 
     private fun erFnAnsatt(inntektskildetype: Inntektskildetype): Boolean {
