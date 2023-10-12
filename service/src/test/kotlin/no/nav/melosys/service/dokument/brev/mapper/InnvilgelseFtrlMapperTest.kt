@@ -1,5 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
+import io.getunleash.FakeUnleash
+import io.getunleash.Unleash
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
@@ -45,7 +47,8 @@ internal class InnvilgelseFtrlMapperTest {
     @MockK
     private lateinit var mockDokgenMapperDatahenter: DokgenMapperDatahenter
 
-    private lateinit var trygdeavgiftsMottakerService: TrygdeavgiftsMottakerService
+    private var trygdeavgiftsMottakerService: TrygdeavgiftsMottakerService = TrygdeavgiftsMottakerService()
+    private var unleash: Unleash = FakeUnleash()
 
     private lateinit var innvilgelseFtrlMapper: InnvilgelseFtrlMapper
 
@@ -56,6 +59,7 @@ internal class InnvilgelseFtrlMapperTest {
             mockAvklarteVirksomheterService,
             mockDokgenMapperDatahenter,
             trygdeavgiftsMottakerService,
+            unleash,
             )
     }
 

@@ -25,7 +25,7 @@ import javax.transaction.Transactional
 class InnvilgelseFtrlMapper(
     private val avklarteVirksomheterService: AvklarteVirksomheterService,
     private val dokgenMapperDatahenter: DokgenMapperDatahenter,
-    private val trygdeavgiftsMottakerService: TrygdeavgiftsMottakerService
+    private val trygdeavgiftsMottakerService: TrygdeavgiftsMottakerService,
     private val unleash: Unleash
 ) {
     @Transactional
