@@ -1,17 +1,14 @@
-package no.nav.melosys.tjenester.gui.dto.inntekt;
+package no.nav.melosys.tjenester.gui.dto.inntekt
 
-import java.time.YearMonth;
+import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned
+import java.time.YearMonth
 
-import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned;
+class FrilansInntektMaanedDto(arbeidsInntektMaaned: ArbeidsInntektMaaned) {
+    var aarMaaned: YearMonth?
+    var frilansInntektInformasjon: FrilansInntektInformasjonDto
 
-public class FrilansInntektMaanedDto {
-
-    public YearMonth aarMaaned;
-
-    public FrilansInntektInformasjonDto frilansInntektInformasjon;
-
-    public FrilansInntektMaanedDto(ArbeidsInntektMaaned arbeidsInntektMaaned) {
-        aarMaaned = arbeidsInntektMaaned.aarMaaned;
-        frilansInntektInformasjon = new FrilansInntektInformasjonDto(arbeidsInntektMaaned.arbeidsInntektInformasjon);
+    init {
+        aarMaaned = arbeidsInntektMaaned.aarMaaned
+        frilansInntektInformasjon = FrilansInntektInformasjonDto(arbeidsInntektMaaned.arbeidsInntektInformasjon)
     }
 }

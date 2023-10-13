@@ -1,14 +1,12 @@
-package no.nav.melosys.tjenester.gui.dto.inntekt;
+package no.nav.melosys.tjenester.gui.dto.inntekt
 
-import java.util.List;
+import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon
+import no.nav.melosys.domain.dokument.inntekt.ArbeidsforholdFrilanser
 
-import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon;
-import no.nav.melosys.domain.dokument.inntekt.ArbeidsforholdFrilanser;
+class FrilansInntektInformasjonDto(arbeidsInntektInformasjon: ArbeidsInntektInformasjon) {
+    var arbeidsforholdFrilanserListe: List<ArbeidsforholdFrilanser>?
 
-public class FrilansInntektInformasjonDto {
-    public List<ArbeidsforholdFrilanser> arbeidsforholdFrilanserListe;
-
-    public FrilansInntektInformasjonDto(ArbeidsInntektInformasjon arbeidsInntektInformasjon) {
-        arbeidsforholdFrilanserListe = arbeidsInntektInformasjon.getMutableArbeidsforholdListe();
+    init {
+        arbeidsforholdFrilanserListe = arbeidsInntektInformasjon.getMutableArbeidsforholdListe()
     }
 }

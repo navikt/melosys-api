@@ -1,28 +1,21 @@
-package no.nav.melosys.tjenester.gui.dto.inntekt;
+package no.nav.melosys.tjenester.gui.dto.inntekt
 
-import java.util.ArrayList;
-import java.util.List;
+import no.nav.melosys.domain.dokument.inntekt.InntektDokument
 
-import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned;
-import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
+class InntektDto {
+    var arbeidsInntektMaanedListe: MutableList<ArbeidsInntektMaanedDto> = ArrayList()
+    var frilansInntektMaanedListe: MutableList<FrilansInntektMaanedDto> = ArrayList()
 
-public class InntektDto {
-
-    public List<ArbeidsInntektMaanedDto> arbeidsInntektMaanedListe = new ArrayList<>();
-
-    public List<FrilansInntektMaanedDto> frilansInntektMaanedListe = new ArrayList<>();
-
-    public InntektDto() {}
-
-    public InntektDto(InntektDokument inntektDokument) {
-        if (inntektDokument != null && !inntektDokument.getArbeidsInntektMaanedListe().isEmpty()) {
-            for (ArbeidsInntektMaaned arbeidsInntektMaaned : inntektDokument.getArbeidsInntektMaanedListe()) {
+    constructor()
+    constructor(inntektDokument: InntektDokument?) {
+        if (inntektDokument != null && !inntektDokument.arbeidsInntektMaanedListe.isEmpty()) {
+            for (arbeidsInntektMaaned in inntektDokument.arbeidsInntektMaanedListe) {
                 if (arbeidsInntektMaaned.arbeidsInntektInformasjon != null) {
                     if (!arbeidsInntektMaaned.arbeidsInntektInformasjon.inntektListe.isEmpty()) {
-                        arbeidsInntektMaanedListe.add(new ArbeidsInntektMaanedDto(arbeidsInntektMaaned));
+                        arbeidsInntektMaanedListe.add(ArbeidsInntektMaanedDto(arbeidsInntektMaaned))
                     }
-                    if (!arbeidsInntektMaaned.arbeidsInntektInformasjon.arbeidsforholdListe.isEmpty()) {
-                        frilansInntektMaanedListe.add(new FrilansInntektMaanedDto(arbeidsInntektMaaned));
+                    if (!arbeidsInntektMaaned.arbeidsInntektInformasjon.arbeidsforholdListe!!.isEmpty()) {
+                        frilansInntektMaanedListe.add(FrilansInntektMaanedDto(arbeidsInntektMaaned))
                     }
                 }
             }
