@@ -40,7 +40,7 @@ internal class TrygdeavgiftsberegningServiceTest {
     private lateinit var mockTrygdeavgiftConsumer: TrygdeavgiftConsumer
 
     private var trygdeavgiftsMottakerService: TrygdeavgiftsMottakerService = TrygdeavgiftsMottakerService()
-    private var unleash: Unleash = FakeUnleash()
+    private var unleash: FakeUnleash = FakeUnleash()
 
     private lateinit var trygdeavgiftsberegningService: TrygdeavgiftsberegningService
 
@@ -52,6 +52,7 @@ internal class TrygdeavgiftsberegningServiceTest {
 
     @BeforeEach
     fun setup() {
+        unleash.enableAll()
         trygdeavgiftsberegningService =
             TrygdeavgiftsberegningService(
                 mockMedlemAvFolketrygdenService,
