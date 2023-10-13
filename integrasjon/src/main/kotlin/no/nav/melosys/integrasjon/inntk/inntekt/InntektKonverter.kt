@@ -14,12 +14,9 @@ import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.*
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.inntk.inntekt.InntektResponse.TilleggsinformasjonDetaljerType.*
 import java.time.LocalDateTime
-import javax.validation.Validation
 import kotlin.reflect.full.primaryConstructor
 
 class InntektKonverter {
-
-    private val validator = Validation.buildDefaultValidatorFactory().validator
 
     fun lagSaksopplysning(inntektResponse: InntektResponse): Saksopplysning {
         return Saksopplysning().apply {
@@ -167,18 +164,4 @@ class InntektKonverter {
 
             else -> null
         }
-
-    private inline fun <T> T.apply(block: T.() -> Unit): T {
-        block()
-        return this.validate()
-    }
-
-    private fun <T> T.validate(): T {
-        validator.validate(this).run {
-            if (isNotEmpty()) throw TekniskException(
-                joinToString { "${it.rootBeanClass.simpleName}.${it.propertyPath} ${it.message}" }
-            )
-        }
-        return this
-    }
 }
