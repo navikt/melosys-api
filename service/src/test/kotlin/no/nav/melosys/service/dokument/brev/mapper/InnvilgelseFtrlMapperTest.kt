@@ -48,12 +48,13 @@ internal class InnvilgelseFtrlMapperTest {
     private lateinit var mockDokgenMapperDatahenter: DokgenMapperDatahenter
 
     private var trygdeavgiftsMottakerService: TrygdeavgiftsMottakerService = TrygdeavgiftsMottakerService()
-    private var unleash: Unleash = FakeUnleash()
+    private var unleash: FakeUnleash = FakeUnleash()
 
     private lateinit var innvilgelseFtrlMapper: InnvilgelseFtrlMapper
 
     @BeforeEach
     fun setup() {
+        unleash.enableAll();
         trygdeavgiftsMottakerService = TrygdeavgiftsMottakerService()
         innvilgelseFtrlMapper = InnvilgelseFtrlMapper(
             mockAvklarteVirksomheterService,
