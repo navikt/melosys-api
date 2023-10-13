@@ -4,9 +4,5 @@ import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsforholdFrilanser
 
 class FrilansInntektInformasjonDto(arbeidsInntektInformasjon: ArbeidsInntektInformasjon) {
-    var arbeidsforholdFrilanserListe: List<ArbeidsforholdFrilanser>?
-
-    init {
-        arbeidsforholdFrilanserListe = arbeidsInntektInformasjon.getMutableArbeidsforholdListe()
-    }
+    var arbeidsforholdFrilanserListe: List<ArbeidsforholdFrilanser>? = arbeidsInntektInformasjon.arbeidsforholdListe
 }

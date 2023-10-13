@@ -4,11 +4,6 @@ import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned
 import java.time.YearMonth
 
 class ArbeidsInntektMaanedDto(arbeidsInntektMaaned: ArbeidsInntektMaaned) {
-    var aarMaaned: YearMonth?
-    var arbeidsInntektInformasjon: ArbeidsInntektInformasjonDto
-
-    init {
-        aarMaaned = arbeidsInntektMaaned.aarMaaned
-        arbeidsInntektInformasjon = ArbeidsInntektInformasjonDto(arbeidsInntektMaaned.arbeidsInntektInformasjon)
-    }
+    var aarMaaned: YearMonth? = arbeidsInntektMaaned.aarMaaned
+    var arbeidsInntektInformasjon: ArbeidsInntektInformasjonDto = ArbeidsInntektInformasjonDto(arbeidsInntektMaaned.arbeidsInntektInformasjon)
 }
