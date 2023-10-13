@@ -71,7 +71,7 @@ class OpprettBetalingsplanTest {
 
     @BeforeEach
     internal fun setUp() {
-        unleash.enable("melosys.folketrygden.mvp")
+        unleash.enableAll()
         slotFakturaserieDto.clear()
         trygdeavgiftsMottakerService = TrygdeavgiftsMottakerService()
 
