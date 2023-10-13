@@ -15,6 +15,7 @@ import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.inntk.inntekt.InntektResponse.TilleggsinformasjonDetaljerType.*
 import java.time.LocalDateTime
 import javax.validation.Validation
+import kotlin.reflect.full.primaryConstructor
 
 class InntektKonverter {
 
@@ -83,48 +84,26 @@ class InntektKonverter {
     }
 
     private fun lagSubtypeAvInntekt(inntekt: InntektResponse.Inntekt): Inntekt {
-        return when (inntekt.inntektType) {
-            InntektResponse.InntektType.LOENNSINNTEKT -> Loennsinntekt(
-                beloep = inntekt.beloep,
-                fordel = inntekt.fordel,
-                inntektskilde = inntekt.inntektskilde,
-                inntektsperiodetype = inntekt.inntektsperiodetype,
-                inntektsstatus = inntekt.inntektsstatus,
-                utbetaltIPeriode = inntekt.utbetaltIMaaned,
-                antall = inntekt.antall
-            )
+        val args = listOf(
+            inntekt.beloep,
+            inntekt.fordel,
+            inntekt.inntektskilde,
+            inntekt.inntektsperiodetype,
+            inntekt.inntektsstatus,
+            inntekt.utbetaltIMaaned
+        ) + if (inntekt.inntektType == InntektResponse.InntektType.LOENNSINNTEKT) listOf(inntekt.antall) else emptyList()
 
-            InntektResponse.InntektType.NAERINGSINNTEKT -> Naeringsinntekt(
-                beloep = inntekt.beloep,
-                fordel = inntekt.fordel,
-                inntektskilde = inntekt.inntektskilde,
-                inntektsperiodetype = inntekt.inntektsperiodetype,
-                inntektsstatus = inntekt.inntektsstatus,
-                utbetaltIPeriode = inntekt.utbetaltIMaaned,
-            )
+        return mapOf(
+            InntektResponse.InntektType.LOENNSINNTEKT to Loennsinntekt::class,
+            InntektResponse.InntektType.NAERINGSINNTEKT to Naeringsinntekt::class,
+            InntektResponse.InntektType.PENSJON_ELLER_TRYGD to PensjonEllerTrygd::class,
+            InntektResponse.InntektType.YTELSE_FRA_OFFENTLIGE to YtelseFraOffentlige::class
+        )[inntekt.inntektType]?.primaryConstructor?.call(*args.toTypedArray()) ?: throw TekniskException(
+            "Could not call constructor for ${inntekt.inntektType}"
+        )
 
-            InntektResponse.InntektType.PENSJON_ELLER_TRYGD -> PensjonEllerTrygd(
-                beloep = inntekt.beloep,
-                fordel = inntekt.fordel,
-                inntektskilde = inntekt.inntektskilde,
-                inntektsperiodetype = inntekt.inntektsperiodetype,
-                inntektsstatus = inntekt.inntektsstatus,
-                utbetaltIPeriode = inntekt.utbetaltIMaaned,
-            )
 
-            InntektResponse.InntektType.YTELSE_FRA_OFFENTLIGE -> YtelseFraOffentlige(
-                beloep = inntekt.beloep,
-                fordel = inntekt.fordel,
-                inntektskilde = inntekt.inntektskilde,
-                inntektsperiodetype = inntekt.inntektsperiodetype,
-                inntektsstatus = inntekt.inntektsstatus,
-                utbetaltIPeriode = inntekt.utbetaltIMaaned,
-            )
-
-            null -> throw TekniskException("InntektType kan ikke være null")
-        }
     }
-
 
     private fun mapTilleggsinformasjonDetaljer(tilleggsinformasjonDetaljer: InntektResponse.TilleggsinformasjonDetaljer?): TilleggsinformasjonDetaljer? =
         when (tilleggsinformasjonDetaljer?.detaljerType) {
