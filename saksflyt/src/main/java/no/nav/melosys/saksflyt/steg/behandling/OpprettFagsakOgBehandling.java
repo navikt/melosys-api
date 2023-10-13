@@ -7,7 +7,7 @@ import java.util.Optional;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Fullmektig;
+import no.nav.melosys.domain.Representant;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
@@ -69,7 +69,7 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
             .medAktørID(aktørID)
             .medVirksomhetOrgnr(virksomhetOrgnr)
             .medArbeidsgiver(arbeidsgiver)
-            .medFullmektig(representant != null ? new Fullmektig(representant, representantRepresenterer) : null)
+            .medRepresentant(representant != null ? new Representant(representant, representantRepresenterer) : null)
             .medKontaktopplysninger(lagKontaktopplysningerForRepresentant(representant, representantKontakperson))
             .medSakstype(sakstype)
             .medSakstema(sakstema)

@@ -1,7 +1,6 @@
 package no.nav.melosys.service.sak;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,7 +29,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
 import static no.nav.melosys.domain.kodeverk.Sakstyper.EU_EOS;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.*;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.ARBEID_FLERE_LAND;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.UTSENDT_ARBEIDSTAKER;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
@@ -111,7 +109,7 @@ class FagsakServiceTest {
             .medInitierendeJournalpostId(initierendeJournalpostId)
             .medInitierendeDokumentId(initierendeDokumentId)
             .medArbeidsgiver("arbeidsgiver")
-            .medFullmektig(new Fullmektig("orgnr", Representerer.ARBEIDSGIVER))
+            .medRepresentant(new Representant("orgnr", Representerer.ARBEIDSGIVER))
             .medBehandlingsårsaktype(Behandlingsaarsaktyper.FRITEKST)
             .medBehandlingsårsakFritekst("Fritekst")
             .build();

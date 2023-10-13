@@ -139,8 +139,8 @@ class AltinnSoeknadServiceTest {
 
         OpprettSakRequest req = captor.getValue();
         String fullmektigVirksomhetsnummer = søknad.getInnhold().getFullmakt().getFullmektigVirksomhetsnummer();
-        assertThat(req.getFullmektig().getRepresentantID()).isEqualTo(fullmektigVirksomhetsnummer);
-        assertThat(req.getFullmektig().getRepresenterer()).isEqualTo(Representerer.BEGGE);
+        assertThat(req.getRepresentant().getRepresentantID()).isEqualTo(fullmektigVirksomhetsnummer);
+        assertThat(req.getRepresentant().getRepresenterer()).isEqualTo(Representerer.BEGGE);
     }
 
     @Test
@@ -161,8 +161,8 @@ class AltinnSoeknadServiceTest {
 
         OpprettSakRequest req = captor.getValue();
         String fullmektigVirksomhetsnummer = søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer();
-        assertThat(req.getFullmektig().getRepresentantID()).isEqualTo(fullmektigVirksomhetsnummer);
-        assertThat(req.getFullmektig().getRepresenterer()).isEqualTo(Representerer.BEGGE);
+        assertThat(req.getRepresentant().getRepresentantID()).isEqualTo(fullmektigVirksomhetsnummer);
+        assertThat(req.getRepresentant().getRepresenterer()).isEqualTo(Representerer.BEGGE);
     }
 
     @Test

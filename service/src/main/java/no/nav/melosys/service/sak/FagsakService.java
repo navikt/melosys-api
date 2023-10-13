@@ -182,12 +182,12 @@ public class FagsakService {
             aktører.add(aktørArbeidsgiver);
         }
 
-        Fullmektig fullmektig = opprettSakRequest.getFullmektig();
-        if (fullmektig != null) {
-            Aktoer aktørFullmektig = lagAktørFullmektigMedID(fullmektig.getRepresentantID());
+        Representant representant = opprettSakRequest.getRepresentant();
+        if (representant != null) {
+            Aktoer aktørFullmektig = lagAktørFullmektigMedID(representant.getRepresentantID());
             aktørFullmektig.setFagsak(fagsak);
             aktørFullmektig.setRolle(Aktoersroller.REPRESENTANT);
-            aktørFullmektig.setRepresenterer(fullmektig.getRepresenterer());
+            aktørFullmektig.setRepresenterer(representant.getRepresenterer());
             aktører.add(aktørFullmektig);
         }
 

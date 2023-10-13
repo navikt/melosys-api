@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.nav.melosys.domain.Fullmektig;
+import no.nav.melosys.domain.Representant;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -18,7 +18,7 @@ public class OpprettSakRequest {
     private final String virksomhetOrgnr;
     private final String utenlandskPersonId;
     private final String arbeidsgiver;
-    private final Fullmektig fullmektig;
+    private final Representant representant;
     private final List<Kontaktopplysning> kontaktopplysninger;
     private final Behandlingstyper behandlingstype;
     private final Behandlingstema behandlingstema;
@@ -35,7 +35,7 @@ public class OpprettSakRequest {
         this.virksomhetOrgnr = builder.virksomhetOrgnr;
         this.utenlandskPersonId = builder.utenlandskPersonId;
         this.arbeidsgiver = builder.arbeidsgiver;
-        this.fullmektig = builder.fullmektig;
+        this.representant = builder.representant;
         this.kontaktopplysninger = builder.kontaktopplysninger;
         this.behandlingstype = builder.behandlingstype;
         this.behandlingstema = builder.behandlingstema;
@@ -64,8 +64,8 @@ public class OpprettSakRequest {
         return arbeidsgiver;
     }
 
-    public Fullmektig getFullmektig() {
-        return fullmektig;
+    public Representant getRepresentant() {
+        return representant;
     }
 
     public List<Kontaktopplysning> getKontaktopplysninger() {
@@ -113,7 +113,7 @@ public class OpprettSakRequest {
         private String virksomhetOrgnr;
         private String utenlandskPersonId;
         private String arbeidsgiver;
-        private Fullmektig fullmektig;
+        private Representant representant;
         private List<Kontaktopplysning> kontaktopplysninger = new ArrayList<>();
         private Behandlingstyper behandlingstype;
         private Behandlingstema behandlingstema;
@@ -145,8 +145,8 @@ public class OpprettSakRequest {
             return this;
         }
 
-        public Builder medFullmektig(Fullmektig fullmektig) {
-            this.fullmektig = fullmektig;
+        public Builder medRepresentant(Representant representant) {
+            this.representant = representant;
             return this;
         }
 

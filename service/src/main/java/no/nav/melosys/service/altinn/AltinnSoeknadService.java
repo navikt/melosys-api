@@ -11,7 +11,7 @@ import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.google.common.collect.MoreCollectors;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Fullmektig;
+import no.nav.melosys.domain.Representant;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
@@ -78,7 +78,7 @@ public class AltinnSoeknadService {
             .medAktørID(hentAktørID(søknad))
             .medUtenlandskPersonId(hentUtenlandskPersonId(søknad))
             .medArbeidsgiver(hentArbeidsgiverID(søknad))
-            .medFullmektig(hentFullmektig(søknad))
+            .medRepresentant(hentRepresentant(søknad))
             .medKontaktopplysninger(hentKontaktopplysninger(søknad))
             .medBehandlingsårsaktype(Behandlingsaarsaktyper.SØKNAD)
             .medMottaksdato(mottaksdato)
@@ -132,13 +132,13 @@ public class AltinnSoeknadService {
         return søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer();
     }
 
-    private static Fullmektig hentFullmektig(MedlemskapArbeidEOSM søknad) {
+    private static Representant hentRepresentant(MedlemskapArbeidEOSM søknad) {
         if (rådgivningsfirmaErFullmektig(søknad)) {
             String fullmektigVirksomhetsnummer = søknad.getInnhold().getFullmakt().getFullmektigVirksomhetsnummer();
-            return new Fullmektig(fullmektigVirksomhetsnummer, hentRepresenterer(søknad));
+            return new Representant(fullmektigVirksomhetsnummer, hentRepresenterer(søknad));
         } else {
             return arbeidstakerHarGittFullmakt(søknad)
-                ? new Fullmektig(hentArbeidsgiverID(søknad), hentRepresenterer(søknad)) : null;
+                ? new Representant(hentArbeidsgiverID(søknad), hentRepresenterer(søknad)) : null;
         }
     }
 
