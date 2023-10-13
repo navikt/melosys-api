@@ -7,7 +7,7 @@ import no.nav.melosys.domain.HarPeriode
 import no.nav.melosys.domain.dokument.inntekt.Periode
 import java.math.BigDecimal
 
-class PensjonOgUfoere : TilleggsinformasjonDetaljer(), HarPeriode {
+class PensjonOgUfoere : TilleggsinformasjonDetaljer, HarPeriode {
     @JsonProperty("grunnpensjonbeloep")
     var grunnpensjonbeløp: BigDecimal? = null
     var heravEtterlattepensjon: BigDecimal? = null
@@ -19,6 +19,7 @@ class PensjonOgUfoere : TilleggsinformasjonDetaljer(), HarPeriode {
 
     @JsonProperty("ufoeregradpensjonsgrad")
     var uføreEllerPensjonsgrad: Int? = null
+
     @JsonIgnore
     override fun getPeriode(): ErPeriode? {
         return tidsrom
