@@ -18,6 +18,8 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.MedlemskapsperiodeRepository;
 import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,6 +43,10 @@ class MedlemskapsperiodeServiceTest {
     private MedlemAvFolketrygdenService medlemAvFolketrygdenServiceMock;
     @Mock
     private TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagServiceMock;
+    @Mock
+    private BehandlingsresultatService behandlingsresultatService;
+    @Mock
+    private MedlPeriodeService medlPeriodeService;
 
     private MedlemskapsperiodeService medlemskapsperiodeService;
 
@@ -52,7 +58,11 @@ class MedlemskapsperiodeServiceTest {
 
     @BeforeEach
     void setup() {
-        medlemskapsperiodeService = new MedlemskapsperiodeService(medlemskapsperiodeRepositoryMock, medlemAvFolketrygdenServiceMock, trygdeavgiftsgrunnlagServiceMock);
+        medlemskapsperiodeService = new MedlemskapsperiodeService(medlemskapsperiodeRepositoryMock,
+            medlemAvFolketrygdenServiceMock,
+            trygdeavgiftsgrunnlagServiceMock,
+            behandlingsresultatService,
+            medlPeriodeService);
     }
 
     @Test

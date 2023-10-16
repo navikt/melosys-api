@@ -1,10 +1,7 @@
 package no.nav.melosys.service.medlemskapsperiode;
 
 import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.avgift.Inntektsperiode;
@@ -19,6 +16,8 @@ import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest;
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest;
+import no.nav.melosys.service.behandling.BehandlingsresultatService;
+import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,12 +33,19 @@ public class MedlemskapsperiodeService {
     private final MedlemskapsperiodeRepository medlemskapsperiodeRepository;
     private final MedlemAvFolketrygdenService medlemAvFolketrygdenService;
     private final TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService;
+    private final BehandlingsresultatService behandlingsresultatService;
+    private final MedlPeriodeService medlPeriodeService;
 
     public MedlemskapsperiodeService(MedlemskapsperiodeRepository medlemskapsperiodeRepository,
-                                     MedlemAvFolketrygdenService medlemAvFolketrygdenService, TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService) {
+                                     MedlemAvFolketrygdenService medlemAvFolketrygdenService,
+                                     TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService,
+                                     BehandlingsresultatService behandlingsresultatService,
+                                     MedlPeriodeService medlPeriodeService) {
         this.medlemskapsperiodeRepository = medlemskapsperiodeRepository;
         this.medlemAvFolketrygdenService = medlemAvFolketrygdenService;
         this.trygdeavgiftsgrunnlagService = trygdeavgiftsgrunnlagService;
+        this.behandlingsresultatService = behandlingsresultatService;
+        this.medlPeriodeService = medlPeriodeService;
     }
 
     @Transactional(readOnly = true)
@@ -122,6 +128,36 @@ public class MedlemskapsperiodeService {
         medlemskapsperiode.setInnvilgelsesresultat(innvilgelsesResultat);
         medlemskapsperiode.setTrygdedekning(trygdedekning);
     }
+
+    @Transactional
+    public void erstattMedlemskapsperioder(List<Medlemskapsperiode> nyeMedlemskapsperioder,
+                                           long opprinneligBehandlingId,
+                                           long nyBehandlingId) {
+        var opprinneligeMedlemskapsperioder =
+            (List<Medlemskapsperiode>) behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId).finnMedlemskapsperioder();
+
+        for (Medlemskapsperiode medlemskapsperiode : opprinneligeMedlemskapsperioder) {
+            if (!eksistererMedlIdIMedlemskapsperioder(nyeMedlemskapsperioder, medlemskapsperiode)) {
+                 medlPeriodeService.avvisPeriodeOpphørt(medlemskapsperiode.getMedlPeriodeID());
+            }
+        }
+        for (Medlemskapsperiode medlemskapsperiode : nyeMedlemskapsperioder) {
+            if (!eksistererMedlIdIMedlemskapsperioder(opprinneligeMedlemskapsperioder, medlemskapsperiode)) {
+                medlPeriodeService.opprettPeriodeEndelig(nyBehandlingId, medlemskapsperiode);
+            } else {
+                medlPeriodeService.oppdaterPeriodeEndelig(nyBehandlingId, medlemskapsperiode);
+            }
+        }
+    }
+
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    private boolean eksistererMedlIdIMedlemskapsperioder(List<Medlemskapsperiode> medlemskapsperioder,
+                                                         Medlemskapsperiode medlemskapsperiode) {
+        return medlemskapsperioder.stream().anyMatch(periode ->
+            Objects.equals(periode.getMedlPeriodeID(), medlemskapsperiode.getMedlPeriodeID())
+        );
+    }
+
 
     @Transactional
     public void slettMedlemskapsperiode(long behandlingsresultatID, long medlemskapsperiodeID) {

@@ -6,17 +6,21 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
+import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
 import org.springframework.stereotype.Component;
 
 @Component
 public class LagreMedlemsperiodeMedl implements StegBehandler {
 
     private final MedlPeriodeService medlPeriodeService;
+    private final MedlemskapsperiodeService medlemskapsperiodeService;
     private final BehandlingsresultatService behandlingsresultatService;
 
     public LagreMedlemsperiodeMedl(MedlPeriodeService medlPeriodeService,
+                                   MedlemskapsperiodeService medlemskapsperiodeService,
                                    BehandlingsresultatService behandlingsresultatService) {
         this.medlPeriodeService = medlPeriodeService;
+        this.medlemskapsperiodeService = medlemskapsperiodeService;
         this.behandlingsresultatService = behandlingsresultatService;
     }
 
@@ -34,7 +38,7 @@ public class LagreMedlemsperiodeMedl implements StegBehandler {
         var innvilgedeMedlemskapsperioder = behandlingsresultat.finnMedlemskapsperioder()
             .stream().filter(Medlemskapsperiode::erInnvilget).toList();
         if (behandling.erNyVurdering()) {
-            medlPeriodeService.erstattMedlemskapsperioder(innvilgedeMedlemskapsperioder, behandling.getOpprinneligBehandling().getId(), behandlingId);
+            medlemskapsperiodeService.erstattMedlemskapsperioder(innvilgedeMedlemskapsperioder, behandling.getOpprinneligBehandling().getId(), behandlingId);
         } else {
             if (behandlingsresultat.erAvslag()) {
                 return;

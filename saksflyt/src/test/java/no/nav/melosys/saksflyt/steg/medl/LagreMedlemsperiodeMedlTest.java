@@ -13,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
+import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +35,9 @@ class LagreMedlemsperiodeMedlTest {
     private MedlPeriodeService medlPeriodeService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
+    @Mock
+    private MedlemskapsperiodeService medlemskapsperiodeService;
+
 
     private LagreMedlemsperiodeMedl lagreMedlemsperiodeMedl;
 
@@ -41,7 +45,7 @@ class LagreMedlemsperiodeMedlTest {
 
     @BeforeEach
     void init() {
-        lagreMedlemsperiodeMedl = new LagreMedlemsperiodeMedl(medlPeriodeService, behandlingsresultatService);
+        lagreMedlemsperiodeMedl = new LagreMedlemsperiodeMedl(medlPeriodeService, medlemskapsperiodeService, behandlingsresultatService);
         prosessinstans = lagProsessInstans();
     }
 
@@ -116,7 +120,7 @@ class LagreMedlemsperiodeMedlTest {
 
         lagreMedlemsperiodeMedl.utfør(prosessinstans);
 
-        verify(medlPeriodeService).erstattMedlemskapsperioder(eq(List.of(innvilgetMedlemskapsperiode)), eq(1L), eq(123L));
+        verify(medlemskapsperiodeService).erstattMedlemskapsperioder(eq(List.of(innvilgetMedlemskapsperiode)), eq(1L), eq(123L));
     }
 
     private Prosessinstans lagProsessInstans() {

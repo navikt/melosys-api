@@ -151,33 +151,6 @@ public class MedlPeriodeService {
         }
     }
 
-    @Transactional
-    public void erstattMedlemskapsperioder(List<Medlemskapsperiode> nyeMedlemskapsperioder,
-                                           long opprinneligBehandlingId,
-                                           long nyBehandlingId) {
-        var opprinneligeMedlemskapsperioder =
-            (List<Medlemskapsperiode>) behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId).finnMedlemskapsperioder();
-
-        for (Medlemskapsperiode medlemskapsperiode : opprinneligeMedlemskapsperioder) {
-            if (!eksistererMedlIdIMedlemskapsperioder(nyeMedlemskapsperioder, medlemskapsperiode)) {
-                avvisPeriodeOpphørt(medlemskapsperiode.getMedlPeriodeID());
-            }
-        }
-        for (Medlemskapsperiode medlemskapsperiode : nyeMedlemskapsperioder) {
-            if (!eksistererMedlIdIMedlemskapsperioder(opprinneligeMedlemskapsperioder, medlemskapsperiode)) {
-                opprettPeriodeEndelig(nyBehandlingId, medlemskapsperiode);
-            }
-        }
-    }
-
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    private boolean eksistererMedlIdIMedlemskapsperioder(List<Medlemskapsperiode> medlemskapsperioder,
-                                                         Medlemskapsperiode medlemskapsperiode) {
-        return medlemskapsperioder.stream().anyMatch(periode ->
-            Objects.equals(periode.getMedlPeriodeID(), medlemskapsperiode.getMedlPeriodeID())
-        );
-    }
-
     private void avvisPeriode(long medlPeriodeId, StatusaarsakMedl statusaarsakMedl) {
         medlService.avvisPeriode(medlPeriodeId, statusaarsakMedl);
     }
