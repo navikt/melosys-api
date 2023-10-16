@@ -37,7 +37,7 @@ public class LagreMedlemsperiodeMedl implements StegBehandler {
 
         var innvilgedeMedlemskapsperioder = behandlingsresultat.finnMedlemskapsperioder()
             .stream().filter(Medlemskapsperiode::erInnvilget).toList();
-        if (behandling.erNyVurdering()) {
+        if (behandling.erNyVurdering() && behandling.getOpprinneligBehandling() != null) {
             medlemskapsperiodeService.erstattMedlemskapsperioder(innvilgedeMedlemskapsperioder, behandling.getOpprinneligBehandling().getId(), behandlingId);
         } else {
             if (behandlingsresultat.erAvslag()) {
