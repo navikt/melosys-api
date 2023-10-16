@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
 
+import io.getunleash.Unleash;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
@@ -11,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -39,13 +41,14 @@ public class FagsakService {
     private final PersondataFasade persondataFasade;
     private final BehandlingsresultatService behandlingsresultatService;
     private final LovligeKombinasjonerService lovligeKombinasjonerService;
+    private final Unleash unleash;
 
     private final Counter sakerOpprettet = Metrics.counter(SAKER_OPPRETTET);
 
     public FagsakService(FagsakRepository fagsakRepository, BehandlingService behandlingService,
                          KontaktopplysningService kontaktopplysningService, @Lazy OppgaveService oppgaveService,
                          PersondataFasade persondataFasade, BehandlingsresultatService behandlingsresultatService,
-                         @Lazy LovligeKombinasjonerService lovligeKombinasjonerService) {
+                         @Lazy LovligeKombinasjonerService lovligeKombinasjonerService, Unleash unleash) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
         this.kontaktopplysningService = kontaktopplysningService;
@@ -53,6 +56,7 @@ public class FagsakService {
         this.persondataFasade = persondataFasade;
         this.behandlingsresultatService = behandlingsresultatService;
         this.lovligeKombinasjonerService = lovligeKombinasjonerService;
+        this.unleash = unleash;
     }
 
     public Fagsak hentFagsak(String saksnummer) {
@@ -182,14 +186,28 @@ public class FagsakService {
             aktører.add(aktørArbeidsgiver);
         }
 
-        Representant representant = opprettSakRequest.getRepresentant();
-        if (representant != null) {
-            Aktoer aktørFullmektig = lagAktørFullmektigMedID(representant.getRepresentantID());
-            aktørFullmektig.setFagsak(fagsak);
-            aktørFullmektig.setRolle(Aktoersroller.REPRESENTANT);
-            aktørFullmektig.setRepresenterer(representant.getRepresenterer());
-            aktører.add(aktørFullmektig);
+        if (unleash.isEnabled(ToggleName.MELOSYS_FULLMAKT_TRYGDEAVGIFT)) {
+            FullmektigDto fullmektig = opprettSakRequest.getFullmektig();
+            if (fullmektig != null) {
+                Aktoer aktørFullmektig = new Aktoer();
+                aktørFullmektig.setOrgnr(fullmektig.getOrgnr());
+                aktørFullmektig.setPersonIdent(fullmektig.getPersonident());
+                aktørFullmektig.setFullmaktstyper(fullmektig.getFullmakter());
+                aktørFullmektig.setRolle(Aktoersroller.FULLMEKTIG);
+                aktørFullmektig.setFagsak(fagsak);
+                aktører.add(aktørFullmektig);
+            }
+        } else {
+            Representant representant = opprettSakRequest.getRepresentant();
+            if (representant != null) {
+                Aktoer aktørFullmektig = lagAktørFullmektigMedID(representant.getRepresentantID());
+                aktørFullmektig.setFagsak(fagsak);
+                aktørFullmektig.setRolle(Aktoersroller.REPRESENTANT);
+                aktørFullmektig.setRepresenterer(representant.getRepresenterer());
+                aktører.add(aktørFullmektig);
+            }
         }
+
 
         Instant nå = Instant.now();
 

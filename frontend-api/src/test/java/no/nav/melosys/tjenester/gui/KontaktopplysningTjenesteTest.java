@@ -61,7 +61,7 @@ class KontaktopplysningTjenesteTest {
 
     @Test
     void lagKontaktopplysning_kallerPåService() throws Exception {
-        Kontaktopplysning kontaktopplysning = Kontaktopplysning.av(KONTAKT_INFO.kontaktorgnr(), KONTAKT_INFO.kontaktnavn(), KONTAKT_INFO.kontakttelefon());
+        Kontaktopplysning kontaktopplysning = Kontaktopplysning.av(KONTAKT_INFO.kontaktorgnr(), KONTAKT_INFO.kontaktnavn(), KONTAKT_INFO.kontakttelefon(), null);
         when(kontaktopplysningService.lagEllerOppdaterKontaktopplysning(SAK_NUMMER, ORG_NUMMER, KONTAKT_INFO.kontaktorgnr(), KONTAKT_INFO.kontaktnavn(), KONTAKT_INFO.kontakttelefon())).thenReturn(kontaktopplysning);
 
         mockMvc.perform(post(BASE_URL + "/{saksnummer}/kontaktopplysninger/{orgnr}", SAK_NUMMER, ORG_NUMMER)

@@ -1,11 +1,14 @@
 package no.nav.melosys.domain;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.TekniskException;
@@ -132,6 +135,15 @@ public class Aktoer extends RegistreringsInfo {
 
     public void setFullmakter(Set<Fullmakt> fullmakter) {
         this.fullmakter = fullmakter;
+    }
+
+    public void setFullmaktstyper(Collection<Fullmaktstype> fullmaktstyper) {
+        setFullmakter(fullmaktstyper.stream().map((fullmaktstype -> {
+            var fullmakt = new Fullmakt();
+            fullmakt.setType(fullmaktstype);
+            fullmakt.setAktoer(this);
+            return fullmakt;
+        })).collect(Collectors.toSet()));
     }
 
     public boolean erPerson() {

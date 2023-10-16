@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
@@ -55,6 +56,7 @@ class FagsakServiceTest {
     private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private LovligeKombinasjonerService lovligeKombinasjonerService;
+    private FakeUnleash unleash = new FakeUnleash();
 
     private FagsakService fagsakService;
 
@@ -67,7 +69,8 @@ class FagsakServiceTest {
             oppgaveService,
             persondataFasade,
             behandlingsresultatService,
-            lovligeKombinasjonerService);
+            lovligeKombinasjonerService,
+            unleash);
     }
 
     @Test
@@ -133,7 +136,7 @@ class FagsakServiceTest {
 
     @Test
     void nyFagsakOgBehandling_kontaktPersonFinnes_KontaktOpplysningOpprettes() {
-        Kontaktopplysning kontaktopplysning = Kontaktopplysning.av("RepresentantOrgnr", "Kontaktperson", "Telefon");
+        Kontaktopplysning kontaktopplysning = Kontaktopplysning.av("RepresentantOrgnr", "Kontaktperson", "Telefon", "Orgnr");
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder().medAktørID("123456789")
             .medBehandlingstype(FØRSTEGANG)
             .medKontaktopplysninger(List.of(kontaktopplysning)).build();
@@ -141,7 +144,7 @@ class FagsakServiceTest {
         fagsakService.nyFagsakOgBehandling(opprettSakRequest);
 
         verify(kontaktopplysningService).lagEllerOppdaterKontaktopplysning(
-            any(), eq("RepresentantOrgnr"), eq(null), eq("Kontaktperson"), eq("Telefon")
+            any(), eq("RepresentantOrgnr"), eq("Orgnr"), eq("Kontaktperson"), eq("Telefon")
         );
     }
 

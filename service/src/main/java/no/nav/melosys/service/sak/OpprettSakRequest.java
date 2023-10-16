@@ -17,8 +17,11 @@ public class OpprettSakRequest {
     private final String aktørID;
     private final String virksomhetOrgnr;
     private final String utenlandskPersonId;
+    @Deprecated(since = "melosys.fullmektig.trygdeavgift")
     private final String arbeidsgiver;
+    @Deprecated(since = "melosys.fullmektig.trygdeavgift")
     private final Representant representant;
+    private final FullmektigDto fullmektig;
     private final List<Kontaktopplysning> kontaktopplysninger;
     private final Behandlingstyper behandlingstype;
     private final Behandlingstema behandlingstema;
@@ -30,7 +33,7 @@ public class OpprettSakRequest {
     private final Sakstyper sakstype;
     private final Sakstemaer sakstema;
 
-    private OpprettSakRequest(OpprettSakRequest.Builder builder) {
+    private OpprettSakRequest(Builder builder) {
         this.aktørID = builder.aktørID;
         this.virksomhetOrgnr = builder.virksomhetOrgnr;
         this.utenlandskPersonId = builder.utenlandskPersonId;
@@ -46,6 +49,7 @@ public class OpprettSakRequest {
         this.initierendeDokumentId = builder.initierendeDokumentId;
         this.sakstype = builder.sakstype;
         this.sakstema = builder.sakstema;
+        this.fullmektig = builder.fullmektig;
     }
 
     public String getAktørID() {
@@ -66,6 +70,10 @@ public class OpprettSakRequest {
 
     public Representant getRepresentant() {
         return representant;
+    }
+
+    public FullmektigDto getFullmektig() {
+        return fullmektig;
     }
 
     public List<Kontaktopplysning> getKontaktopplysninger() {
@@ -114,6 +122,7 @@ public class OpprettSakRequest {
         private String utenlandskPersonId;
         private String arbeidsgiver;
         private Representant representant;
+        private FullmektigDto fullmektig;
         private List<Kontaktopplysning> kontaktopplysninger = new ArrayList<>();
         private Behandlingstyper behandlingstype;
         private Behandlingstema behandlingstema;
@@ -147,6 +156,11 @@ public class OpprettSakRequest {
 
         public Builder medRepresentant(Representant representant) {
             this.representant = representant;
+            return this;
+        }
+
+        public Builder medFullmektig(FullmektigDto fullmektig) {
+            this.fullmektig = fullmektig;
             return this;
         }
 

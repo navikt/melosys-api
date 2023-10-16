@@ -5,10 +5,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Representant;
 import no.nav.melosys.domain.Kontaktopplysning;
+import no.nav.melosys.domain.Representant;
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -20,6 +22,7 @@ import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.sak.FullmektigDto;
 import no.nav.melosys.service.sak.OpprettSakRequest;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -55,6 +58,11 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
         String representant = prosessinstans.getData(REPRESENTANT);
         String representantKontakperson = prosessinstans.getData(REPRESENTANT_KONTAKTPERSON);
         Representerer representantRepresenterer = prosessinstans.getData(REPRESENTANT_REPRESENTERER, Representerer.class);
+        var fullmektig = prosessinstans.getData(FULLMEKTIG);
+        List<Fullmaktstype> fullmakter = prosessinstans.getData(FULLMAKTER, new TypeReference<>() {
+        }, Collections.emptyList());
+        var fullmektigKontaktperson = prosessinstans.getData(FULLMEKTIG_KONTAKTPERSON);
+        var fullmektigKontaktOrgnr = prosessinstans.getData(FULLMEKTIG_KONTAKT_ORGNR);
         String initierendeJournalpostId = prosessinstans.getData(JOURNALPOST_ID);
         String initierendeDokumentId = prosessinstans.getData(DOKUMENT_ID);
         LocalDate mottaksdato = prosessinstans.getData(MOTTATT_DATO, LocalDate.class);
@@ -70,7 +78,8 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
             .medVirksomhetOrgnr(virksomhetOrgnr)
             .medArbeidsgiver(arbeidsgiver)
             .medRepresentant(representant != null ? new Representant(representant, representantRepresenterer) : null)
-            .medKontaktopplysninger(lagKontaktopplysningerForRepresentant(representant, representantKontakperson))
+            .medFullmektig(lagFullmektig(fullmektig, fullmakter))
+            .medKontaktopplysninger(lagKontaktopplysning(representant, representantKontakperson, fullmektig, fullmektigKontaktperson, fullmektigKontaktOrgnr))
             .medSakstype(sakstype)
             .medSakstema(sakstema)
             .medBehandlingsårsaktype(behandlingsårsaktype)
@@ -87,6 +96,17 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
         log.info("Opprettet fagsak {} med behandling {}", fagsak.getSaksnummer(), behandling.getId());
     }
 
+    private FullmektigDto lagFullmektig(String fullmektig, List<Fullmaktstype> fullmakter) {
+        if (fullmektig == null) {
+            return null;
+        }
+        if (fullmektig.length() == 11) {
+            return new FullmektigDto(null, fullmektig, fullmakter);
+        } else {
+            return new FullmektigDto(fullmektig, null, fullmakter);
+        }
+    }
+
     private Optional<String> finnAktørID(Prosessinstans prosessinstans) {
         String aktørID = prosessinstans.getData(AKTØR_ID);
         if (StringUtils.isNotEmpty(aktørID)) {
@@ -101,11 +121,17 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
         return Optional.empty();
     }
 
-    private List<Kontaktopplysning> lagKontaktopplysningerForRepresentant(String representant,
-                                                                          String kontaktperson) {
-        if (representant == null || kontaktperson == null) {
-            return Collections.emptyList();
+    private List<Kontaktopplysning> lagKontaktopplysning(String representant, String kontaktperson, String fullmektig, String fullmektigKontaktperson, String fullmektigKontaktOrgnr) {
+        if (representant != null) {
+            return kontaktperson != null
+                ? Collections.singletonList(Kontaktopplysning.av(representant, kontaktperson, null, null))
+                : Collections.emptyList();
         }
-        return Collections.singletonList(Kontaktopplysning.av(representant, kontaktperson, null));
+        if (fullmektig != null) {
+            return fullmektigKontaktperson != null || fullmektigKontaktOrgnr != null
+                ? Collections.singletonList(Kontaktopplysning.av(fullmektig, fullmektigKontaktperson, null, fullmektigKontaktOrgnr))
+                : Collections.emptyList();
+        }
+        return Collections.emptyList();
     }
 }

@@ -53,12 +53,13 @@ public class Kontaktopplysning {
         this.kontaktTelefon = kontaktTelefon;
     }
 
-    public static Kontaktopplysning av(String orgnr, String kontaktNavn, String kontaktpersonTelefon) {
+    public static Kontaktopplysning av(String orgnr, String kontaktNavn, String kontaktpersonTelefon, String kontaktpersonOrgnr) {
         Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
         KontaktopplysningID kontaktopplysningID = new KontaktopplysningID();
         kontaktopplysningID.setOrgnr(orgnr);
         kontaktopplysning.setKontaktopplysningID(kontaktopplysningID);
         kontaktopplysning.setKontaktNavn(kontaktNavn);
+        kontaktopplysning.setKontaktOrgnr(kontaktpersonOrgnr);
         kontaktopplysning.setKontaktTelefon(kontaktpersonTelefon);
         return kontaktopplysning;
     }
