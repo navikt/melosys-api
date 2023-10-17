@@ -2,10 +2,7 @@ package no.nav.melosys.service.kontroll.regler
 
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
-import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon
-import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned
-import no.nav.melosys.domain.dokument.inntekt.Inntekt
-import no.nav.melosys.domain.dokument.inntekt.InntektDokument
+import no.nav.melosys.domain.dokument.inntekt.*
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -104,7 +101,7 @@ class YtelseReglerTest {
     private fun hentInntektsListe(medYtelserFraOffentlig: Boolean, fom: LocalDate): List<Inntekt> =
         listOf(
             Inntekt(
-                type = "Loennsinntekt",
+                type = InntektType.Loennsinntekt,
                 beloep = BigDecimal(50000),
                 fordel = "fordel",
                 inntektskilde = "inntektskilde",
@@ -114,7 +111,7 @@ class YtelseReglerTest {
             )
         ) + if (medYtelserFraOffentlig) listOf(
             Inntekt(
-                type = "YtelseFraOffentlige",
+                type = InntektType.YtelseFraOffentlige,
                 beloep = BigDecimal(50000),
                 fordel = "fordel",
                 inntektskilde = "inntektskilde",

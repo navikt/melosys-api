@@ -2,6 +2,7 @@ package no.nav.melosys.service.kontroll.regler
 
 import no.nav.melosys.domain.dokument.inntekt.Inntekt
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument
+import no.nav.melosys.domain.dokument.inntekt.InntektType
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -35,6 +36,6 @@ object YtelseRegler {
         inntektDokument.arbeidsInntektMaanedListe
             .map { it.arbeidsInntektInformasjon.inntektListe }
             .flatten()
-            .filter { it.type == "YtelseFraOffentlige" } // TODO: lage enum
+            .filter { it.type == InntektType.YtelseFraOffentlige }
             .toList()
 }

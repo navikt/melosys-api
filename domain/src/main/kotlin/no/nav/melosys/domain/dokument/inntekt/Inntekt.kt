@@ -34,7 +34,7 @@ import java.time.YearMonth
     "antall"
 )
 class Inntekt(
-    var type: String,
+    var type: InntektType,
     @field:JsonView(DokumentView.Database::class)
     var arbeidsforholdREF: String? = null,
     val beloep: BigDecimal,
@@ -69,7 +69,7 @@ class Inntekt(
     var antall: Int? = null
 ) {
     constructor(
-        type: String,
+        type: InntektType,
         beloep: BigDecimal,
         fordel: String,
         inntektskilde: String,

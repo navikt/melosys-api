@@ -83,12 +83,12 @@ class InntektKonverter {
         }
     }
 
-    private fun mapInntektType(inntektType: InntektResponse.InntektType): String {
-        return mapOf( // TODO: lage enum
-            InntektResponse.InntektType.LOENNSINNTEKT to "Loennsinntekt",
-            InntektResponse.InntektType.NAERINGSINNTEKT to "Naeringsinntekt",
-            InntektResponse.InntektType.PENSJON_ELLER_TRYGD to "PensjonEllerTrygd",
-            InntektResponse.InntektType.YTELSE_FRA_OFFENTLIGE to "YtelseFraOffentlige"
+    private fun mapInntektType(inntektType: InntektResponse.InntektType): InntektType {
+        return mapOf( //
+            InntektResponse.InntektType.LOENNSINNTEKT to InntektType.Loennsinntekt,
+            InntektResponse.InntektType.NAERINGSINNTEKT to InntektType.Naeringsinntekt,
+            InntektResponse.InntektType.PENSJON_ELLER_TRYGD to InntektType.PensjonEllerTrygd,
+            InntektResponse.InntektType.YTELSE_FRA_OFFENTLIGE to InntektType.YtelseFraOffentlige
         )[inntektType] ?: throw TekniskException("Could not map inntektType:${inntektType}}")
     }
 
