@@ -126,17 +126,17 @@ public class MedlemskapsperiodeService {
     public void erstattMedlemskapsperioder(List<Medlemskapsperiode> nyeInnvilgedeMedlemskapsperioder,
                                            long opprinneligBehandlingId,
                                            long nyBehandlingId) {
-        var opprinneligeMedlemskapsperioder =
+        var opprinneligeInnvilgedeMedlemskapsperioder =
             behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId)
                 .finnMedlemskapsperioder().stream().filter(Medlemskapsperiode::erInnvilget).toList();
 
-        for (Medlemskapsperiode medlemskapsperiode : opprinneligeMedlemskapsperioder) {
+        for (Medlemskapsperiode medlemskapsperiode : opprinneligeInnvilgedeMedlemskapsperioder) {
             if (!finnesMedlIdIMedlemskapsperioder(nyeInnvilgedeMedlemskapsperioder, medlemskapsperiode.getMedlPeriodeID())) {
                 medlPeriodeService.avvisPeriodeOpphørt(medlemskapsperiode.getMedlPeriodeID());
             }
         }
         for (Medlemskapsperiode medlemskapsperiode : nyeInnvilgedeMedlemskapsperioder) {
-            if (!finnesMedlIdIMedlemskapsperioder(opprinneligeMedlemskapsperioder, medlemskapsperiode.getMedlPeriodeID())) {
+            if (!finnesMedlIdIMedlemskapsperioder(opprinneligeInnvilgedeMedlemskapsperioder, medlemskapsperiode.getMedlPeriodeID())) {
                 medlPeriodeService.opprettPeriodeEndelig(nyBehandlingId, medlemskapsperiode);
             } else {
                 medlPeriodeService.oppdaterPeriodeEndelig(nyBehandlingId, medlemskapsperiode);
