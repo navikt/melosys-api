@@ -142,6 +142,31 @@ class MedlemskapsperiodeServiceKotlinTest {
         verify(exactly = 1) { medlPeriodeService.opprettPeriodeEndelig(2L, nyMedlemskapsperiode) }
     }
 
+    @Test
+    fun `erstattMedlemskapsperioder skal kun avvise gamle perioder som er innvilget`() {
+        setupHappyPathBehandling()
+        val gammelMedlemskapsperiodeInnvilget = Medlemskapsperiode().apply {
+            medlPeriodeID = 1L
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        }
+        val gammelMedlemskapsperiodeAvslag = Medlemskapsperiode().apply {
+            medlPeriodeID = 2L
+            innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
+        }
+        val gammelListe = listOf(gammelMedlemskapsperiodeInnvilget, gammelMedlemskapsperiodeAvslag)
+        val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = gammelListe }
+
+        every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns Behandlingsresultat().apply {
+            this.medlemAvFolketrygden = medlemAvFolketrygden
+        }
+
+        medlemskapsperiodeService.erstattMedlemskapsperioder(emptyList(), 1L, 2L)
+
+        verify(exactly = 1) { medlPeriodeService.avvisPeriodeOpphørt(1L) }
+        verify(exactly = 0) { medlPeriodeService.avvisPeriodeOpphørt(2L) }
+        verify(exactly = 0) { medlPeriodeService.opprettPeriodeEndelig(any<Long>(), any()) }
+    }
+
     private fun setupHappyPathBehandling(
         sakstype: Sakstyper = Sakstyper.EU_EOS,
         behandlingstema: Behandlingstema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
