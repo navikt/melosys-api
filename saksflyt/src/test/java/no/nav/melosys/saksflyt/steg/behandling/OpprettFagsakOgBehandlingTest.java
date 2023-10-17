@@ -3,7 +3,6 @@ package no.nav.melosys.saksflyt.steg.behandling;
 import java.util.Collections;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Behandlingsaarsak;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -78,7 +77,7 @@ class OpprettFagsakOgBehandlingTest {
         assertThat(opprettSakRequest.getArbeidsgiver()).isEqualTo(arbeidsgiver);
         assertThat(opprettSakRequest.getInitierendeJournalpostId()).isEqualTo(journalpostId);
         assertThat(opprettSakRequest.getInitierendeDokumentId()).isEqualTo(dokumentId);
-        assertThat(opprettSakRequest.getFullmektig().getRepresentantID())
+        assertThat(opprettSakRequest.getRepresentant().getRepresentantID())
             .isEqualTo(representant);
         assertThat(opprettSakRequest.getKontaktopplysninger().get(0).getKontaktNavn())
             .isEqualTo(representantKontaktperson);

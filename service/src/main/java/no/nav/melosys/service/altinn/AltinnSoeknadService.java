@@ -1,18 +1,13 @@
 package no.nav.melosys.service.altinn;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.google.common.collect.MoreCollectors;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.Fullmektig;
 import no.nav.melosys.domain.Kontaktopplysning;
+import no.nav.melosys.domain.Representant;
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -27,11 +22,18 @@ import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
+import no.nav.melosys.service.sak.FullmektigDto;
 import no.nav.melosys.service.sak.OpprettSakRequest;
 import no.nav.melosys.soknad_altinn.Kontaktperson;
 import no.nav.melosys.soknad_altinn.MedlemskapArbeidEOSM;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 @Service
 public class AltinnSoeknadService {
@@ -78,6 +80,7 @@ public class AltinnSoeknadService {
             .medAktørID(hentAktørID(søknad))
             .medUtenlandskPersonId(hentUtenlandskPersonId(søknad))
             .medArbeidsgiver(hentArbeidsgiverID(søknad))
+            .medRepresentant(hentRepresentant(søknad))
             .medFullmektig(hentFullmektig(søknad))
             .medKontaktopplysninger(hentKontaktopplysninger(søknad))
             .medBehandlingsårsaktype(Behandlingsaarsaktyper.SØKNAD)
@@ -132,13 +135,24 @@ public class AltinnSoeknadService {
         return søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer();
     }
 
-    private static Fullmektig hentFullmektig(MedlemskapArbeidEOSM søknad) {
+    private static Representant hentRepresentant(MedlemskapArbeidEOSM søknad) {
         if (rådgivningsfirmaErFullmektig(søknad)) {
             String fullmektigVirksomhetsnummer = søknad.getInnhold().getFullmakt().getFullmektigVirksomhetsnummer();
-            return new Fullmektig(fullmektigVirksomhetsnummer, hentRepresenterer(søknad));
+            return new Representant(fullmektigVirksomhetsnummer, hentRepresenterer(søknad));
         } else {
             return arbeidstakerHarGittFullmakt(søknad)
-                ? new Fullmektig(hentArbeidsgiverID(søknad), hentRepresenterer(søknad)) : null;
+                ? new Representant(hentArbeidsgiverID(søknad), hentRepresenterer(søknad)) : null;
+        }
+    }
+
+    private FullmektigDto hentFullmektig(MedlemskapArbeidEOSM søknad) {
+        if (rådgivningsfirmaErFullmektig(søknad)) {
+            String fullmektigVirksomhetsnummer = søknad.getInnhold().getFullmakt().getFullmektigVirksomhetsnummer();
+            return new FullmektigDto(fullmektigVirksomhetsnummer, null, hentFullmakter(søknad));
+        } else if (arbeidstakerHarGittFullmakt(søknad)) {
+            return new FullmektigDto(hentArbeidsgiverID(søknad), null, hentFullmakter(søknad));
+        } else {
+            return null;
         }
     }
 
@@ -151,6 +165,14 @@ public class AltinnSoeknadService {
             return Representerer.BEGGE;
         } else {
             return Representerer.ARBEIDSGIVER;
+        }
+    }
+
+    private static List<Fullmaktstype> hentFullmakter(MedlemskapArbeidEOSM søknad) {
+        if (arbeidstakerHarGittFullmakt(søknad)) {
+            return List.of(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
+        } else {
+            return List.of(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
         }
     }
 
@@ -171,7 +193,7 @@ public class AltinnSoeknadService {
         String kontaktpersonNavn = kontaktperson.getKontaktpersonNavn();
         String kontaktpersonTelefon = kontaktperson.getKontaktpersonTelefon();
         return StringUtils.isNotBlank(kontaktpersonNavn) || StringUtils.isNotBlank(kontaktpersonTelefon)
-            ? Kontaktopplysning.av(hentKontaktVirksomhetsnummer(søknad), kontaktpersonNavn, kontaktpersonTelefon) : null;
+            ? Kontaktopplysning.av(hentKontaktVirksomhetsnummer(søknad), kontaktpersonNavn, kontaktpersonTelefon, null) : null;
     }
 
     private static String hentKontaktVirksomhetsnummer(MedlemskapArbeidEOSM søknad) {

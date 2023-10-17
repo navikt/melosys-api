@@ -8,4 +8,7 @@ public class ToggleName {
     public static final String REFAKTORERING_ORDINÆR_TRYGDEAVGIFT = "melosys.refaktorering.ordiner.trygdeavgift";
 
     public static final String MELOSYS_EREG_ORGANISASJON = "melosys.ereg.organisasjon";
+
+    public static final String MELOSYS_FULLMAKT_TRYGDEAVGIFT = "melosys.fullmakt.trygdeavgift";
+
 }

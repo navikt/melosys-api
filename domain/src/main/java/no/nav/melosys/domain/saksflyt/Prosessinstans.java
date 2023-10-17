@@ -15,6 +15,7 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.jpa.PropertiesConverter;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.serializer.LovvalgBestemmelseDeserializer;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -153,6 +154,11 @@ public class Prosessinstans {
         return Optional.ofNullable(getData(key, type)).orElse(defaultVerdi);
     }
 
+    public void setDataHvisIkkeTom(ProsessDataKey key, String value) {
+        if (StringUtils.isNotEmpty(value)) {
+            this.data.setProperty(key.getKode(), value);
+        }
+    }
     public void setData(ProsessDataKey key, String value) {
         if (value != null) {
             this.data.setProperty(key.getKode(), value);
