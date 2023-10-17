@@ -100,11 +100,15 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
         if (fullmektig == null) {
             return null;
         }
-        if (fullmektig.length() == 11) {
+        if (erIDPersonident(fullmektig)) {
             return new FullmektigDto(null, fullmektig, fullmakter);
         } else {
             return new FullmektigDto(fullmektig, null, fullmakter);
         }
+    }
+
+    private boolean erIDPersonident(String id) {
+        return id.length() == 11;
     }
 
     private Optional<String> finnAktørID(Prosessinstans prosessinstans) {
