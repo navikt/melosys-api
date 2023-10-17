@@ -53,7 +53,7 @@ class InntektDocumentConvertTest {
     }
 
 
-    fun hentRessurs(fil: String): String = InntekKonverterTest::class.java.classLoader.getResource(fil)
+    fun hentRessurs(fil: String): String = this::class.java.classLoader.getResource(fil)
         ?.readText(StandardCharsets.UTF_8) ?: throw IkkeFunnetException("Fant ikke $fil")
 
     class SaksopplysningDokumentConverterForTest : SaksopplysningDokumentConverter() {
