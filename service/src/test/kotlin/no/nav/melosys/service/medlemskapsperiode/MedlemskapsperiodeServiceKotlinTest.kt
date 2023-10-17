@@ -53,12 +53,6 @@ class MedlemskapsperiodeServiceKotlinTest {
         )
     }
 
-    @AfterEach
-    fun tearDown() {
-
-    }
-
-
     @Test
     fun `erstattMedlemskapsperioder skal kun opprette nye perioder når gammel liste er tom`() {
         setupHappyPathBehandling()
