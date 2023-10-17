@@ -29,8 +29,9 @@ import java.time.YearMonth
     "utloeserArbeidsgiveravgift",
     "informasjonsstatus",
     "beskrivelse"
-)abstract class Inntekt(
-    @JsonView(DokumentView.Database::class)
+)
+abstract class Inntekt(
+    @field:JsonView(DokumentView.Database::class)
     var arbeidsforholdREF: String? = null,
     val beloep: BigDecimal,
     val fordel: String, //Fordel http://nav.no/kodeverk/Kodeverk/Fordel
@@ -39,19 +40,19 @@ import java.time.YearMonth
     val inntektsstatus: String, //"http://nav.no/kodeverk/Kodeverk/Inntektsstatuser"
     var levereringstidspunkt: LocalDateTime? = null,
     var opptjeningsland: String? = null,
-    var opptjeningsperiode:Periode = Periode(),
+    var opptjeningsperiode: Periode = Periode(),
 
-    @JsonView(DokumentView.Database::class)
+    @field:JsonView(DokumentView.Database::class)
     var skattemessigBosattLand: String? = null,
 
     val utbetaltIPeriode: YearMonth,
     var opplysningspliktigID: String? = null,
 
-    @JsonView(DokumentView.Database::class)
+    @field:JsonView(DokumentView.Database::class)
     var inntektsinnsenderID: String? = null,
     var virksomhetID: String? = null,
 
-    @JsonView(DokumentView.Database::class)
+    @field:JsonView(DokumentView.Database::class)
     var tilleggsinformasjon: Tilleggsinformasjon? = null,
     var inntektsmottakerID: String? = null,
     var inngaarIGrunnlagForTrekk: Boolean? = null,
