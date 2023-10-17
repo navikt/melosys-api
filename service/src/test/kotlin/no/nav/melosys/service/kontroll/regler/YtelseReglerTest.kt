@@ -3,8 +3,8 @@ package no.nav.melosys.service.kontroll.regler
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import no.nav.melosys.domain.dokument.inntekt.*
+import no.nav.melosys.service.kontroll.feature.ufm.kontroll.InntektTestFactory
 import org.junit.jupiter.api.Test
-import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -100,24 +100,8 @@ class YtelseReglerTest {
 
     private fun hentInntektsListe(medYtelserFraOffentlig: Boolean, fom: LocalDate): List<Inntekt> =
         listOf(
-            Inntekt(
-                type = InntektType.Loennsinntekt,
-                beloep = BigDecimal(50000),
-                fordel = "fordel",
-                inntektskilde = "inntektskilde",
-                inntektsperiodetype = "inntektsperiodetype",
-                inntektsstatus = "inntektsstatus",
-                utbetaltIPeriode = YearMonth.now()
-            )
+            InntektTestFactory.createInntektForTest(InntektType.Loennsinntekt, YearMonth.now())
         ) + if (medYtelserFraOffentlig) listOf(
-            Inntekt(
-                type = InntektType.YtelseFraOffentlige,
-                beloep = BigDecimal(50000),
-                fordel = "fordel",
-                inntektskilde = "inntektskilde",
-                inntektsperiodetype = "inntektsperiodetype",
-                inntektsstatus = "inntektsstatus",
-                utbetaltIPeriode = YearMonth.from(fom).plusMonths(1)
-            )
+            InntektTestFactory.createInntektForTest(InntektType.YtelseFraOffentlige, YearMonth.from(fom).plusMonths(1))
         ) else emptyList()
 }

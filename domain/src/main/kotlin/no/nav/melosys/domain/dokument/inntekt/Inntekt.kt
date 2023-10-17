@@ -67,38 +67,4 @@ class Inntekt(
     @field:JsonView(DokumentView.Database::class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     var antall: Int? = null
-) {
-    constructor(
-        type: InntektType,
-        beloep: BigDecimal,
-        fordel: String,
-        inntektskilde: String,
-        inntektsperiodetype: String,
-        inntektsstatus: String,
-        utbetaltIPeriode: YearMonth,
-        antall: Int?
-    ) : this(
-        type = type,
-        beloep = beloep,
-        fordel = fordel,
-        inntektskilde = inntektskilde,
-        inntektsperiodetype = inntektsperiodetype,
-        inntektsstatus = inntektsstatus,
-        utbetaltIPeriode = utbetaltIPeriode,
-        antall = antall,
-        arbeidsforholdREF = null,
-        levereringstidspunkt = null,
-        opptjeningsland = null,
-        opptjeningsperiode = Periode(),
-        skattemessigBosattLand = null,
-        opplysningspliktigID = null,
-        inntektsinnsenderID = null,
-        virksomhetID = null,
-        tilleggsinformasjon = null,
-        inntektsmottakerID = null,
-        inngaarIGrunnlagForTrekk = null,
-        utloeserArbeidsgiveravgift = null,
-        informasjonsstatus = null,
-        beskrivelse = null
-    )
-}
+)
