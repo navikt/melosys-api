@@ -8,10 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon;
-import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned;
-import no.nav.melosys.domain.dokument.inntekt.Inntekt;
-import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
+import no.nav.melosys.domain.dokument.inntekt.*;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
@@ -167,7 +164,7 @@ class UfmKontrollTest {
 
         InntektDokument inntektDokument = new InntektDokument();
         Inntekt inntekt = new Inntekt(
-            "YtelseFraOffentlige", // TODO: lag enum
+            InntektType.YtelseFraOffentlige,
             new BigDecimal(50000),
             "fordel",
             "inntektskilde",
