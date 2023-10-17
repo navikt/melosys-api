@@ -13,7 +13,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrl
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
-import no.nav.melosys.service.avgift.TrygdeavgiftsMottakerService
+import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import org.springframework.stereotype.Component
 import java.time.Instant
@@ -25,7 +25,7 @@ import javax.transaction.Transactional
 class InnvilgelseFtrlMapper(
     private val avklarteVirksomheterService: AvklarteVirksomheterService,
     private val dokgenMapperDatahenter: DokgenMapperDatahenter,
-    private val trygdeavgiftsMottakerService: TrygdeavgiftsMottakerService,
+    private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val unleash: Unleash
 ) {
     @Transactional
@@ -47,7 +47,7 @@ class InnvilgelseFtrlMapper(
                 )
             )
             .trygdeavgiftMottaker(
-                if (unleash.isEnabled(ToggleName.REFAKTORERING_ORDINÆR_TRYGDEAVGIFT)) trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag)
+                if (unleash.isEnabled(ToggleName.REFAKTORERING_ORDINÆR_TRYGDEAVGIFT)) trygdeavgiftMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag)
                 else medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftMottaker)
             .skatteplikttype(medlemAvFolketrygden.utledSkatteplikttype())
             .ftrl_2_8_begrunnelse(hentFtrlNærTilknytningNorgeBegrunnelse(behandlingsresultat.vilkaarsresultater))

@@ -11,9 +11,9 @@ import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker.*
 import org.junit.jupiter.api.Test
 
-internal class TrygdeavgtiftsMottakerServiceTest {
+internal class TrygdeavgiftMottakerServiceTest {
 
-    val trygdeavgiftsMottakerService = TrygdeavgiftsMottakerService()
+    val trygdeavgiftMottakerService = TrygdeavgiftMottakerService()
 
     @Test
     fun `trygdeavgiftsmottaker skal være NAV hvis bruker ikke er skattepliktig og aga er false`() {
@@ -21,7 +21,7 @@ internal class TrygdeavgtiftsMottakerServiceTest {
             skatteforholdTilNorge = mutableListOf(lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG))
             inntektsperioder = mutableListOf(lagInntektsperiode(false, ARBEIDSINNTEKT_FRA_NORGE))
         }
-        val result = trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
         result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV)
     }
 
@@ -31,7 +31,7 @@ internal class TrygdeavgtiftsMottakerServiceTest {
             skatteforholdTilNorge = mutableListOf(lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG))
             inntektsperioder = mutableListOf(lagInntektsperiode(true, ARBEIDSINNTEKT_FRA_NORGE))
         }
-        val result = trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
         result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_SKATT)
     }
 
@@ -41,7 +41,7 @@ internal class TrygdeavgtiftsMottakerServiceTest {
             skatteforholdTilNorge = mutableListOf(lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG))
             inntektsperioder = mutableListOf(lagInntektsperiode( false, MISJONÆR))
         }
-        val result = trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
         result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_SKATT)
     }
 
@@ -51,7 +51,7 @@ internal class TrygdeavgtiftsMottakerServiceTest {
             skatteforholdTilNorge = mutableListOf(lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG), lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG))
             inntektsperioder = mutableListOf(lagInntektsperiode( false, MISJONÆR), lagInntektsperiode( false, ARBEIDSINNTEKT_FRA_NORGE))
         }
-        val result = trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
         result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
     }
 
@@ -61,7 +61,7 @@ internal class TrygdeavgtiftsMottakerServiceTest {
             skatteforholdTilNorge = mutableListOf(lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG))
             inntektsperioder = mutableListOf(lagInntektsperiode( false, FN_SKATTEFRITAK))
         }
-        val result = trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
         result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV)
     }
 
@@ -71,7 +71,7 @@ internal class TrygdeavgtiftsMottakerServiceTest {
             skatteforholdTilNorge = mutableListOf(lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG))
             inntektsperioder = mutableListOf(lagInntektsperiode( false, FN_SKATTEFRITAK))
         }
-        val result = trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
         result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV)
     }
 
@@ -81,7 +81,7 @@ internal class TrygdeavgtiftsMottakerServiceTest {
             skatteforholdTilNorge = mutableListOf(lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG))
             inntektsperioder = mutableListOf(lagInntektsperiode( false, FN_SKATTEFRITAK))
         }
-        val result = trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
         result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV)
     }
 
@@ -91,7 +91,7 @@ internal class TrygdeavgtiftsMottakerServiceTest {
             skatteforholdTilNorge = mutableListOf(lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG), lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG))
             inntektsperioder = mutableListOf(lagInntektsperiode( false, FN_SKATTEFRITAK), lagInntektsperiode( true, ARBEIDSINNTEKT_FRA_NORGE))
         }
-        val result = trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
         result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
     }
 
@@ -101,7 +101,7 @@ internal class TrygdeavgtiftsMottakerServiceTest {
             skatteforholdTilNorge = mutableListOf(lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG))
             inntektsperioder = mutableListOf(lagInntektsperiode( false, MISJONÆR))
         }
-        val result = trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
         result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV)
     }
 
@@ -111,7 +111,7 @@ internal class TrygdeavgtiftsMottakerServiceTest {
             skatteforholdTilNorge = mutableListOf(lagSkatteforholdsperiode(Skatteplikttype.SKATTEPLIKTIG))
             inntektsperioder = mutableListOf(lagInntektsperiode( false, ARBEIDSINNTEKT_FRA_NORGE))
         }
-        val result = trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
         result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
     }
 
@@ -120,7 +120,7 @@ internal class TrygdeavgtiftsMottakerServiceTest {
         val trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
             skatteforholdTilNorge = mutableListOf(lagSkatteforholdsperiode(Skatteplikttype.IKKE_SKATTEPLIKTIG))
             inntektsperioder = mutableListOf(lagInntektsperiode( true, ARBEIDSINNTEKT_FRA_NORGE)) }
-        val result = trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
         result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
     }
 
@@ -134,7 +134,7 @@ internal class TrygdeavgtiftsMottakerServiceTest {
                 lagInntektsperiode( true, ARBEIDSINNTEKT_FRA_NORGE)
             )
         }
-        val result = trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
         result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
     }
 
@@ -148,7 +148,7 @@ internal class TrygdeavgtiftsMottakerServiceTest {
                 lagInntektsperiode( false, ARBEIDSINNTEKT_FRA_NORGE)
             )
         }
-        val result = trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
         result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
     }
 
@@ -162,7 +162,7 @@ internal class TrygdeavgtiftsMottakerServiceTest {
                 lagInntektsperiode( false, ARBEIDSINNTEKT_FRA_NORGE)
             )
         }
-        val result = trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
         result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
     }
 
@@ -176,7 +176,7 @@ internal class TrygdeavgtiftsMottakerServiceTest {
                 lagInntektsperiode(false, ARBEIDSINNTEKT_FRA_NORGE)
             )
         }
-        val result = trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
+        val result = trygdeavgiftMottakerService.getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
         result.shouldBe(TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
     }
 

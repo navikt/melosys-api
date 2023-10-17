@@ -1,7 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
 import io.getunleash.FakeUnleash
-import io.getunleash.Unleash
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
@@ -26,7 +25,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker
-import no.nav.melosys.service.avgift.TrygdeavgiftsMottakerService
+import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.dokument.DokgenTestData
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
@@ -47,7 +46,7 @@ internal class InnvilgelseFtrlMapperTest {
     @MockK
     private lateinit var mockDokgenMapperDatahenter: DokgenMapperDatahenter
 
-    private var trygdeavgiftsMottakerService: TrygdeavgiftsMottakerService = TrygdeavgiftsMottakerService()
+    private var trygdeavgiftMottakerService: TrygdeavgiftMottakerService = TrygdeavgiftMottakerService()
     private var unleash: FakeUnleash = FakeUnleash()
 
     private lateinit var innvilgelseFtrlMapper: InnvilgelseFtrlMapper
@@ -55,11 +54,11 @@ internal class InnvilgelseFtrlMapperTest {
     @BeforeEach
     fun setup() {
         unleash.enableAll();
-        trygdeavgiftsMottakerService = TrygdeavgiftsMottakerService()
+        trygdeavgiftMottakerService = TrygdeavgiftMottakerService()
         innvilgelseFtrlMapper = InnvilgelseFtrlMapper(
             mockAvklarteVirksomheterService,
             mockDokgenMapperDatahenter,
-            trygdeavgiftsMottakerService,
+            trygdeavgiftMottakerService,
             unleash,
             )
     }

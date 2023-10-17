@@ -25,7 +25,7 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall
 import no.nav.melosys.saksflyt.faktureringskomponenten.OpprettBetalingsplan
 import no.nav.melosys.service.aktoer.KontaktopplysningService
-import no.nav.melosys.service.avgift.TrygdeavgiftsMottakerService
+import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -56,7 +56,7 @@ class OpprettBetalingsplanTest {
     @RelaxedMockK
     lateinit var pdlService: PersondataService
 
-    lateinit var trygdeavgiftsMottakerService: TrygdeavgiftsMottakerService
+    lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
     private val unleash = FakeUnleash()
     private val slotFakturaserieDto = slot<FakturaserieDto>()
@@ -73,7 +73,7 @@ class OpprettBetalingsplanTest {
     internal fun setUp() {
         unleash.enableAll()
         slotFakturaserieDto.clear()
-        trygdeavgiftsMottakerService = TrygdeavgiftsMottakerService()
+        trygdeavgiftMottakerService = TrygdeavgiftMottakerService()
 
         opprettBetalingsplan = OpprettBetalingsplan(
             behandlingService,
@@ -81,7 +81,7 @@ class OpprettBetalingsplanTest {
             faktureringskomponentenConsumer,
             kontaktopplysningService,
             pdlService,
-            trygdeavgiftsMottakerService,
+            trygdeavgiftMottakerService,
             unleash
         )
     }

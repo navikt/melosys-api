@@ -1,9 +1,6 @@
 package no.nav.melosys.service.avgift
 
 import io.getunleash.Unleash
-import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.SkatteforholdTilNorge
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
@@ -21,7 +18,7 @@ import java.util.*
 class TrygdeavgiftsberegningService
     (
     private val medlemAvFolketrygdenService: MedlemAvFolketrygdenService,
-    private val trygdeavgiftsMottakerService: TrygdeavgiftsMottakerService,
+    private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val trygdeavgiftConsumer: TrygdeavgiftConsumer,
     private val unleash: Unleash
 ) {
@@ -34,10 +31,10 @@ class TrygdeavgiftsberegningService
         valider(medlemAvFolketrygden)
         fastsattTrygdeavgift.trygdeavgiftsperioder.clear()
 
-        if (if (unleash.isEnabled(REFAKTORERING_ORDINÆR_TRYGDEAVGIFT)) !trygdeavgiftsMottakerService.skalBetalesTilNav(fastsattTrygdeavgift.trygdeavgiftsgrunnlag)
-            else !fastsattTrygdeavgift.skalBetalesTilNav()) {
-            return emptySet()
-        }
+        if (
+            if (unleash.isEnabled(REFAKTORERING_ORDINÆR_TRYGDEAVGIFT)) !trygdeavgiftMottakerService.skalBetalesTilNav(fastsattTrygdeavgift.trygdeavgiftsgrunnlag)
+            else !fastsattTrygdeavgift.skalBetalesTilNav()
+            ) { return emptySet() }
 
         val innvilgedeMedlemskapsperioder =
             medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }

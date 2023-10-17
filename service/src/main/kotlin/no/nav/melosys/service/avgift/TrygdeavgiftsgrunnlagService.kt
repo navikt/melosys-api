@@ -21,7 +21,7 @@ import org.threeten.extra.LocalDateRange
 import java.time.DateTimeException
 
 @Service
-class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: BehandlingsresultatService, private val trygdeavgiftsMottakerService: TrygdeavgiftsMottakerService) {
+class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: BehandlingsresultatService, private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService) {
 
     @Transactional
     fun oppdaterTrygdeavgiftsgrunnlag(

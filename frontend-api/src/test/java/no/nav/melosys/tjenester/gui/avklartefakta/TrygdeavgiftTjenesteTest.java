@@ -14,7 +14,7 @@ import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Inntektskildetype;
 import no.nav.melosys.domain.kodeverk.Skatteplikttype;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
-import no.nav.melosys.service.avgift.TrygdeavgiftsMottakerService;
+import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest;
@@ -48,7 +48,7 @@ class TrygdeavgiftTjenesteTest {
     @MockBean
     private TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService;
     @MockBean
-    private TrygdeavgiftsMottakerService trygdeavgiftsMottakerService;
+    private TrygdeavgiftMottakerService trygdeavgiftMottakerService;
     @MockBean
     private Unleash unleash;
 

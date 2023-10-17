@@ -3,7 +3,7 @@ package no.nav.melosys.tjenester.gui
 import io.getunleash.Unleash
 import io.swagger.annotations.Api
 import no.nav.melosys.featuretoggle.ToggleName.REFAKTORERING_ORDINÆR_TRYGDEAVGIFT
-import no.nav.melosys.service.avgift.TrygdeavgiftsMottakerService
+import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
 import no.nav.melosys.service.tilgang.Aksesskontroll
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*
 class TrygdeavgiftTjeneste(
     private val trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService,
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
-    private val trygdeavgiftsMottakerService: TrygdeavgiftsMottakerService,
+    private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val aksesskontroll: Aksesskontroll,
     private val unleash: Unleash
 ) {
@@ -40,7 +40,7 @@ class TrygdeavgiftTjeneste(
 
         return trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlag(behandlingID)
             ?.let { ResponseEntity.ok(TrygdeavgiftMottakerDto(
-                if (unleash.isEnabled(REFAKTORERING_ORDINÆR_TRYGDEAVGIFT)) trygdeavgiftsMottakerService.getTrygdeavgiftMottaker(it)
+                if (unleash.isEnabled(REFAKTORERING_ORDINÆR_TRYGDEAVGIFT)) trygdeavgiftMottakerService.getTrygdeavgiftMottaker(it)
                 else it.fastsattTrygdeavgift.trygdeavgiftMottaker))
             } ?: ResponseEntity.noContent().build()
     }

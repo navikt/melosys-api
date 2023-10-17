@@ -9,7 +9,7 @@ import no.nav.melosys.domain.kodeverk.Trygdeavgiftmottaker
 import org.springframework.stereotype.Service
 
 @Service
-class TrygdeavgiftsMottakerService {
+class TrygdeavgiftMottakerService {
 
     fun skalBetalesTilNav(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag): Boolean {
         val trygdeavgiftMottaker = getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag)
@@ -17,10 +17,10 @@ class TrygdeavgiftsMottakerService {
             || trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT)
     }
 
-    fun getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag): Trygdeavgiftmottaker {
-        return if (betalerKunTrygdeavgiftTilSkatt(trygdeavgiftsgrunnlag)) Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
-        else return if (betalerKunTrygdeavgiftTilNav(trygdeavgiftsgrunnlag)) Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
-        else return Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT
+    fun getTrygdeavgiftMottaker(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag) = when {
+        betalerKunTrygdeavgiftTilSkatt(trygdeavgiftsgrunnlag) -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_SKATT
+        betalerKunTrygdeavgiftTilNav(trygdeavgiftsgrunnlag) -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
+        else -> Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT
     }
 
     private fun betalerKunTrygdeavgiftTilSkatt(trygdeavgiftsgrunnlag: Trygdeavgiftsgrunnlag): Boolean {
