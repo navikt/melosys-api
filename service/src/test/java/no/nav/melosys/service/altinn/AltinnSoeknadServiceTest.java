@@ -13,6 +13,7 @@ import javax.xml.bind.JAXBException;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Kontaktopplysning;
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -141,6 +142,8 @@ class AltinnSoeknadServiceTest {
         String fullmektigVirksomhetsnummer = søknad.getInnhold().getFullmakt().getFullmektigVirksomhetsnummer();
         assertThat(req.getRepresentant().getRepresentantID()).isEqualTo(fullmektigVirksomhetsnummer);
         assertThat(req.getRepresentant().getRepresenterer()).isEqualTo(Representerer.BEGGE);
+        assertThat(req.getFullmektig().getOrgnr()).isEqualTo(fullmektigVirksomhetsnummer);
+        assertThat(req.getFullmektig().getFullmakter()).containsExactlyInAnyOrder(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
     }
 
     @Test
@@ -163,6 +166,8 @@ class AltinnSoeknadServiceTest {
         String fullmektigVirksomhetsnummer = søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer();
         assertThat(req.getRepresentant().getRepresentantID()).isEqualTo(fullmektigVirksomhetsnummer);
         assertThat(req.getRepresentant().getRepresenterer()).isEqualTo(Representerer.BEGGE);
+        assertThat(req.getFullmektig().getOrgnr()).isEqualTo(fullmektigVirksomhetsnummer);
+        assertThat(req.getFullmektig().getFullmakter()).containsExactlyInAnyOrder(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
     }
 
     @Test

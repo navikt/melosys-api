@@ -244,6 +244,13 @@ public class Fagsak extends RegistreringsInfo {
             .findFirst();
     }
 
+    public Optional<Aktoer> finnFullmektig(Fullmaktstype fullmaktstype) {
+        return aktører.stream()
+            .filter(a -> FULLMEKTIG.equals(a.getRolle()))
+            .filter(a -> a.getFullmakter().stream().anyMatch(fullmakt -> fullmakt.getType() == fullmaktstype))
+            .findFirst();
+    }
+
     public boolean kanEndreTypeOgTema() {
         return harAktivBehandling() && getBehandlinger().size() == 1;
     }

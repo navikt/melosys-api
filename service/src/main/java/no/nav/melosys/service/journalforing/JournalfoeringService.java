@@ -131,7 +131,7 @@ public class JournalfoeringService {
         if (journalfoeringDto.getAvsenderType() == Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET) {
             validerSakstypeForTrygdemyndighet(sakstype, journalfoeringDto.getAvsenderID());
         }
-        if (StringUtils.isNotEmpty(journalfoeringDto.getFullmektigID()) && journalfoeringDto.getFullmakter().isEmpty()) {
+        if (StringUtils.isNotEmpty(journalfoeringDto.getFullmektigID()) && CollectionUtils.isEmpty(journalfoeringDto.getFullmakter())) {
             throw new FunksjonellException("Fullmektig har ingen fullmakter");
         }
     }

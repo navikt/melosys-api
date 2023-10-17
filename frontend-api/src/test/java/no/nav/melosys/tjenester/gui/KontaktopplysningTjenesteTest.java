@@ -15,8 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -61,7 +60,7 @@ class KontaktopplysningTjenesteTest {
 
     @Test
     void lagKontaktopplysning_kallerPåService() throws Exception {
-        Kontaktopplysning kontaktopplysning = Kontaktopplysning.av(KONTAKT_INFO.kontaktorgnr(), KONTAKT_INFO.kontaktnavn(), KONTAKT_INFO.kontakttelefon(), null);
+        Kontaktopplysning kontaktopplysning = Kontaktopplysning.av(ORG_NUMMER, KONTAKT_INFO.kontaktnavn(), KONTAKT_INFO.kontakttelefon(), KONTAKT_INFO.kontaktorgnr());
         when(kontaktopplysningService.lagEllerOppdaterKontaktopplysning(SAK_NUMMER, ORG_NUMMER, KONTAKT_INFO.kontaktorgnr(), KONTAKT_INFO.kontaktnavn(), KONTAKT_INFO.kontakttelefon())).thenReturn(kontaktopplysning);
 
         mockMvc.perform(post(BASE_URL + "/{saksnummer}/kontaktopplysninger/{orgnr}", SAK_NUMMER, ORG_NUMMER)
@@ -70,6 +69,8 @@ class KontaktopplysningTjenesteTest {
             )
             .andExpect(status().isOk())
             .andExpect(responseBody(objectMapper).containsObjectAsJson(kontaktopplysning, Kontaktopplysning.class));
+        verify(kontaktopplysningService, times(1))
+            .lagEllerOppdaterKontaktopplysning(SAK_NUMMER, ORG_NUMMER, KONTAKT_INFO.kontaktorgnr(), KONTAKT_INFO.kontaktnavn(), KONTAKT_INFO.kontakttelefon());
     }
 
     @Test
