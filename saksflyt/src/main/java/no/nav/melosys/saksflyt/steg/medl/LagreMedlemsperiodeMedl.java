@@ -40,9 +40,6 @@ public class LagreMedlemsperiodeMedl implements StegBehandler {
         if (behandling.erNyVurdering() && behandling.getOpprinneligBehandling() != null) {
             medlemskapsperiodeService.erstattMedlemskapsperioder(innvilgedeMedlemskapsperioder, behandling.getOpprinneligBehandling().getId(), behandlingId);
         } else {
-            if (behandlingsresultat.erAvslag()) {
-                return;
-            }
             for (Medlemskapsperiode medlemskapsperiode : innvilgedeMedlemskapsperioder) {
                 opprettEllerOppdaterMedlPeriode(behandlingId, medlemskapsperiode);
             }
