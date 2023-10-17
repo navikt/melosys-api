@@ -1,0 +1,123 @@
+{
+    "organisasjonsnummer": "974774577",
+    "type": "Organisasjonsledd",
+    "navn": {
+        "sammensattnavn": "ASKØY KOMMUNE AVDELING FOR PLEIE OG OMSORG",
+        "navnelinje1": "ASKØY KOMMUNE AVDELING FOR",
+        "navnelinje2": "PLEIE OG OMSORG",
+        "bruksperiode": {
+            "fom": "2015-02-23T08:04:53.2"
+        },
+        "gyldighetsperiode": {
+            "fom": "2012-03-08"
+        }
+    },
+    "organisasjonDetaljer": {
+        "registreringsdato": "1996-09-01T00:00:00",
+        "stiftelsesdato": "1988-04-01",
+        "enhetstyper": [
+            {
+                "enhetstype": "ORGL",
+                "bruksperiode": {
+                    "fom": "2014-05-21T20:20:33.924"
+                },
+                "gyldighetsperiode": {
+                    "fom": "1996-09-01"
+                }
+            }
+        ],
+        "navn": [
+            {
+                "sammensattnavn": "ASKØY KOMMUNE AVDELING FOR PLEIE OG OMSORG",
+                "navnelinje1": "ASKØY KOMMUNE AVDELING FOR",
+                "navnelinje2": "PLEIE OG OMSORG",
+                "bruksperiode": {
+                    "fom": "2015-02-23T08:04:53.2"
+                },
+                "gyldighetsperiode": {
+                    "fom": "2012-03-08"
+                }
+            }
+        ],
+        "naeringer": [
+            {
+                "naeringskode": "84.120",
+                "hjelpeenhet": false,
+                "bruksperiode": {
+                    "fom": "2014-05-22T00:58:18.554"
+                },
+                "gyldighetsperiode": {
+                    "fom": "1989-01-01"
+                }
+            }
+        ],
+        "forretningsadresser": [
+            {
+                "type": "Forretningsadresse",
+                "adresselinje1": "Kleppevegen 23A",
+                "postnummer": "5300",
+                "landkode": "NO",
+                "kommunenummer": "1247",
+                "bruksperiode": {
+                    "fom": "2015-02-23T10:38:34.403"
+                },
+                "gyldighetsperiode": {
+                    "fom": "2013-08-02"
+                }
+            }
+        ],
+        "postadresser": [
+            {
+                "type": "Postadresse",
+                "adresselinje1": "Klampavikvegen 1",
+                "postnummer": "5300",
+                "landkode": "NO",
+                "kommunenummer": "1247",
+                "bruksperiode": {
+                    "fom": "2016-02-17T04:02:50.883"
+                },
+                "gyldighetsperiode": {
+                    "fom": "2016-02-16"
+                }
+            }
+        ],
+        "epostadresser": [
+            {
+                "adresse": "postmottak@askoy.kommune.no",
+                "bruksperiode": {
+                    "fom": "2014-05-21T20:20:33.92"
+                },
+                "gyldighetsperiode": {
+                    "fom": "2014-03-18"
+                }
+            }
+        ],
+        "telefonnummer": [
+            {
+                "nummer": "56158000",
+                "telefontype": "TFON",
+                "bruksperiode": {
+                    "fom": "2014-05-21T20:20:33.924"
+                },
+                "gyldighetsperiode": {
+                    "fom": "2014-03-18"
+                }
+            }
+        ],
+        "navSpesifikkInformasjon": {
+            "erIA": true,
+            "bruksperiode": {
+                "fom": "2015-03-30T13:07:30.7"
+            },
+            "gyldighetsperiode": {
+                "fom": "2015-03-30"
+            }
+        },
+        "maalform": "NB",
+        "sistEndret": "2016-02-16"
+    },
+    "organisasjonsleddDetaljer": {
+        "enhetstype": "ORGL",
+        "sektorkode": "6500"
+    }
+}

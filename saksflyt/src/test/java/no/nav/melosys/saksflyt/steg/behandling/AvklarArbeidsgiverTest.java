@@ -108,8 +108,8 @@ class AvklarArbeidsgiverTest {
     }
 
     @Test
-    void utfør_medTomFlyt_arbeidsgiverAvklaresIkke() {
-        when(saksbehandlingRegler.harTomFlyt(any())).thenReturn(true);
+    void utfør_medIngenFlyt_arbeidsgiverAvklaresIkke() {
+        when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(true);
         behandling.setType(Behandlingstyper.HENVENDELSE);
 
         avklarArbeidsgiver.utfør(prosessinstans);
@@ -146,18 +146,6 @@ class AvklarArbeidsgiverTest {
     @Test
     void utfør_iverksettVedtakArt13_arbeidsgiverAktoererSkalIkkeOpprettes() {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1A);
-
-
-        avklarArbeidsgiver.utfør(prosessinstans);
-
-
-        verify(aktoerService, never()).erstattEksisterendeArbeidsgiveraktører(any(), any());
-    }
-
-    @Test
-    void utfør_resultatAvslagManglendeOppl_arbeidsgiverAktoererSkalIkkeOpprettes() {
-        behandlingsresultat.setType(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL);
-        behandlingsresultat.setLovvalgsperioder(new HashSet<>());
 
 
         avklarArbeidsgiver.utfør(prosessinstans);

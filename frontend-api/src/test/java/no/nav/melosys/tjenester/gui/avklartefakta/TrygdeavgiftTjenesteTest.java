@@ -68,7 +68,7 @@ class TrygdeavgiftTjenesteTest {
 
     @Test
     void oppdaterTrygdeavgiftsgrunnlag() throws Exception {
-        var dto = new TrygdeavgiftsgrunnlagDto(Skatteplikttype.SKATTEPLIKTIG, Collections.emptyList());
+        var dto = new TrygdeavgiftsgrunnlagDto(Collections.emptyList(), Collections.emptyList());
         when(trygdeavgiftsgrunnlagService.oppdaterTrygdeavgiftsgrunnlag(eq(BEHANDLINGSRESULTAT_ID), any(OppdaterTrygdeavgiftsgrunnlagRequest.class)))
             .thenReturn(trygdeavgiftsgrunnlag);
 
@@ -107,9 +107,11 @@ class TrygdeavgiftTjenesteTest {
 
     private static Trygdeavgiftsgrunnlag lagTrygdeavgiftsgrunnlag() {
         var skatteForholdINorge = new SkatteforholdTilNorge();
+        skatteForholdINorge.setFomDato(LocalDate.now());
+        skatteForholdINorge.setTomDato(LocalDate.now());
         skatteForholdINorge.setSkatteplikttype(Skatteplikttype.SKATTEPLIKTIG);
         var trygdeavgiftsgrunnlag = new Trygdeavgiftsgrunnlag();
-        trygdeavgiftsgrunnlag.setSkatteforholdTilNorge(Set.of(skatteForholdINorge));
+        trygdeavgiftsgrunnlag.setSkatteforholdTilNorge(Collections.singletonList((skatteForholdINorge)));
         trygdeavgiftsgrunnlag.setInntektsperioder(Collections.emptyList());
 
         return trygdeavgiftsgrunnlag;

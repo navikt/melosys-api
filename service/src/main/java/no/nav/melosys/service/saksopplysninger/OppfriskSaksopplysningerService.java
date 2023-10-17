@@ -57,7 +57,7 @@ public class OppfriskSaksopplysningerService {
     }
 
     @Transactional
-    public void oppfriskSaksopplysning(long behandlingID, boolean medFamilierelasjoner) {
+    public void oppfriskSaksopplysning(long behandlingID, boolean periodeOver5aar) {
         Behandling behandling = behandlingService.hentBehandling(behandlingID);
 
         if (behandling.erUtsending() && anmodningsperiodeService.harSendtAnmodningsperiode(behandlingID)) {
@@ -82,9 +82,7 @@ public class OppfriskSaksopplysningerService {
             .fnr(brukerID)
             .fom(periode.getFom())
             .tom(periode.getTom())
-            .informasjonsbehov(medFamilierelasjoner
-                ? Informasjonsbehov.MED_FAMILIERELASJONER
-                : Informasjonsbehov.STANDARD)
+            .hentOpplysningerFor5aar(periodeOver5aar)
             .build();
 
         log.info("Starter oppfrisking av behandlingID: {} ", behandlingID);
@@ -98,7 +96,7 @@ public class OppfriskSaksopplysningerService {
 
         if (behandling.getFagsak().erSakstypeEøs()
             && behandling.harPeriodeOgLand()
-            && !saksbehandlingRegler.harTomFlyt(behandling)
+            && !saksbehandlingRegler.harIngenFlyt(behandling)
             && behandling.kanResultereIVedtak()
             && !inngangsvilkaarService.oppfyllervurderingEF_883_2004(behandlingID)) {
             inngangsvilkaarService.vurderOgLagreInngangsvilkår(

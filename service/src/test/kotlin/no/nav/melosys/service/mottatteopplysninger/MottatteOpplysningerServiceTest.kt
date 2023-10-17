@@ -67,7 +67,7 @@ internal class MottatteOpplysningerServiceTest {
                 saksbehandlingRegler
             )
         )
-        every { saksbehandlingRegler.harTomFlyt(any()) } returns false
+        every { saksbehandlingRegler.harIngenFlyt(any()) } returns false
         every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns false
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false
     }
@@ -96,8 +96,8 @@ internal class MottatteOpplysningerServiceTest {
     }
 
     @Test
-    fun hentEllerOpprettMottatteOpplysninger_finnesIkkeTomFlyt_kastException() {
-        every { saksbehandlingRegler.harTomFlyt(any()) } returns true
+    fun hentEllerOpprettMottatteOpplysninger_finnesIkkeIngenFlyt_kastException() {
+        every { saksbehandlingRegler.harIngenFlyt(any()) } returns true
         every { mottatteOpplysningerRepositoryMock.findByBehandling_Id(behandlingID) } returns Optional.empty()
         every { behandlingServiceMock.hentBehandling(behandlingID) } returns lagBehandling(
             Sakstyper.EU_EOS,
@@ -114,7 +114,7 @@ internal class MottatteOpplysningerServiceTest {
 
     @Test
     fun hentEllerOpprettMottatteOpplysninger_saksbehandlerKanIkkeRedigereBehandling_kastException() {
-        every { saksbehandlingRegler.harTomFlyt(any()) } returns false
+        every { saksbehandlingRegler.harIngenFlyt(any()) } returns false
         every { mottatteOpplysningerRepositoryMock.findByBehandling_Id(behandlingID) } returns Optional.empty()
         every { behandlingServiceMock.hentBehandling(behandlingID) } returns lagBehandling(
             Sakstyper.EU_EOS,
@@ -130,8 +130,8 @@ internal class MottatteOpplysningerServiceTest {
     }
 
     @Test
-    fun opprettSøknadEllerAnmodningEllerAttest_tomFlyt_lagerIkkeAnmodningEllerAttest() {
-        every { saksbehandlingRegler.harTomFlyt(any()) } returns true
+    fun opprettSøknadEllerAnmodningEllerAttest_ingenFlyt_lagerIkkeAnmodningEllerAttest() {
+        every { saksbehandlingRegler.harIngenFlyt(any()) } returns true
         val prosessinstans = Prosessinstans().apply {
             behandling = lagBehandling(
                 Sakstyper.EU_EOS,
@@ -399,8 +399,8 @@ internal class MottatteOpplysningerServiceTest {
     }
 
     @Test
-    fun opprettSøknad_tomFlyt_mottatteOpplysningerBlirIkkeOpprettet() {
-        every { saksbehandlingRegler.harTomFlyt(any()) } returns true
+    fun opprettSøknad_ingenFlyt_mottatteOpplysningerBlirIkkeOpprettet() {
+        every { saksbehandlingRegler.harIngenFlyt(any()) } returns true
         val behandling = lagBehandling(
             Sakstyper.TRYGDEAVTALE,
             Sakstemaer.MEDLEMSKAP_LOVVALG,

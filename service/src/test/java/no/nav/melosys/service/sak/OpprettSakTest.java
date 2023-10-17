@@ -242,6 +242,7 @@ class OpprettSakTest {
         final Journalpost journalpost = lagJournalpost(Journalposttype.INN, "EESSI");
         when(journalfoeringService.hentJournalpost(JP_ID)).thenReturn(journalpost);
         when(journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost)).thenReturn(Optional.of(new Fagsak()));
+        when(saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any())).thenReturn(true);
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto))
@@ -267,7 +268,7 @@ class OpprettSakTest {
     }
 
     @Test
-    void validerOpprettSakDto_søknadUtenLandOgPeriodeTomFlyt_oppretterProsess() {
+    void validerOpprettSakDto_søknadUtenLandOgPeriodeIngenFlyt_oppretterProsess() {
         OpprettSakDto opprettSakDto = random.nextObject(OpprettSakDto.class);
         opprettSakDto.setSakstype(Sakstyper.EU_EOS);
         opprettSakDto.setBehandlingstema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
@@ -280,7 +281,7 @@ class OpprettSakTest {
         final Journalpost journalpost = lagJournalpost(Journalposttype.INN, "EESSI");
         when(journalfoeringService.hentJournalpost(JP_ID)).thenReturn(journalpost);
         when(journalfoeringService.finnSakTilknyttetSedJournalpost(journalpost)).thenReturn(Optional.empty());
-        when(saksbehandlingRegler.harTomFlyt(any(), any(), any(), any())).thenReturn(true);
+        when(saksbehandlingRegler.harIngenFlyt(any(), any(), any(), any())).thenReturn(true);
 
 
         opprettSak.opprettNySakOgBehandlingFraOppgave(opprettSakDto);

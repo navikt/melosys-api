@@ -1,8 +1,5 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
@@ -15,7 +12,6 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Endretperiode;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.saksflyt.ProsessDataKey;
@@ -32,6 +28,9 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_4;
@@ -67,13 +66,12 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
         Behandlingsresultat resultat = behandlingsresultatService.hentBehandlingsresultat(behandling.getId());
-        Behandlingsresultattyper behandlingsresultatType = resultat.getType();
         String saksbehandler = hentSaksbehandler(prosessinstans, resultat);
         String begrunnelseKode = hentBegrunnelsekodeTilForkortetPeriode(resultat);
         String fritekst = hentBegrunnelseFritekst(prosessinstans);
 
         if (resultat.erAvslag()) {
-            sendAvslagsbrev(behandling, behandlingsresultatType, saksbehandler, fritekst);
+            sendAvslagsbrev(behandling, saksbehandler, fritekst);
             log.info("Sendt avslagsbrev for behandling {}", behandling.getId());
         } else if (resultat.erUtpeking()) {
             sendUtpekingsbrev(behandling, saksbehandler, fritekst);
@@ -90,29 +88,17 @@ public class SendVedtaksbrevInnland implements StegBehandler {
         }
     }
 
-    private void sendAvslagsbrev(Behandling behandling,
-                                 Behandlingsresultattyper behandlingsresultatType,
-                                 String saksbehandler,
-                                 String fritekst) {
-        Produserbaredokumenter avslagTypeBruker = (behandlingsresultatType != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL)
-            ? AVSLAG_YRKESAKTIV : AVSLAG_MANGLENDE_OPPLYSNINGER;
-
-        List<Mottaker> mottakerListe;
-        if (avslagTypeBruker == AVSLAG_YRKESAKTIV) {
-            mottakerListe = List.of(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.av(NorskMyndighet.HELFO), Mottaker.av(NorskMyndighet.SKATTEETATEN));
-        } else {
-            mottakerListe = List.of(Mottaker.medRolle(Mottakerroller.BRUKER));
-        }
+    private void sendAvslagsbrev(Behandling behandling, String saksbehandler, String fritekst) {
+        var mottakerListe = List.of(Mottaker.medRolle(Mottakerroller.BRUKER), Mottaker.av(NorskMyndighet.HELFO), Mottaker.av(NorskMyndighet.SKATTEETATEN));
 
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
-            .medProduserbartDokument(avslagTypeBruker)
+            .medProduserbartDokument(AVSLAG_YRKESAKTIV)
             .medAvsenderID(saksbehandler)
             .medFritekst(fritekst)
             .build();
         prosessinstansService.opprettProsessinstanserSendBrev(behandling, brevbestilling, mottakerListe);
 
-        if (behandling.getFagsak().harAktørMedRolleType(Aktoersroller.ARBEIDSGIVER)
-            && behandlingsresultatType != Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
+        if (behandling.getFagsak().harAktørMedRolleType(Aktoersroller.ARBEIDSGIVER)) {
 
             DoksysBrevbestilling brevbestillingArbeidsgiver = new DoksysBrevbestilling.Builder()
                 .medProduserbartDokument(AVSLAG_ARBEIDSGIVER)

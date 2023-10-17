@@ -1,0 +1,85 @@
+{
+    "organisasjonsnummer": "928497704",
+    "type": "JuridiskEnhet",
+    "navn": {
+        "sammensattnavn": "BESK KAFFE",
+        "navnelinje1": "BESK KAFFE",
+        "bruksperiode": {
+            "fom": "2021-06-02T09:23:59.799"
+        },
+        "gyldighetsperiode": {
+            "fom": "2021-06-02"
+        }
+    },
+    "organisasjonDetaljer": {
+        "registreringsdato": "2019-10-15T00:00:00",
+        "enhetstyper": [
+            {
+                "enhetstype": "AS",
+                "bruksperiode": {
+                    "fom": "2019-10-15T10:13:13.081"
+                },
+                "gyldighetsperiode": {
+                    "fom": "2019-10-15"
+                }
+            }
+        ],
+        "navn": [
+            {
+                "sammensattnavn": "BESK KAFFE",
+                "navnelinje1": "BESK KAFFE",
+                "bruksperiode": {
+                    "fom": "2021-06-02T09:23:59.799"
+                },
+                "gyldighetsperiode": {
+                    "fom": "2021-06-02"
+                }
+            }
+        ],
+        "forretningsadresser": [
+            {
+                "type": "Forretningsadresse",
+                "adresselinje1": "STENSLANDSFJELL 94",
+                "postnummer": "2408",
+                "poststed": "ELVERUM",
+                "landkode": "NO",
+                "kommunenummer": "3420",
+                "bruksperiode": {
+                    "fom": "2021-06-02T09:23:59.8"
+                },
+                "gyldighetsperiode": {
+                    "fom": "2021-06-02"
+                }
+            }
+        ],
+        "postadresser": [
+            {
+                "type": "Postadresse",
+                "adresselinje1": "STENSLANDSFJELL 94",
+                "postnummer": "2408",
+                "poststed": "ELVERUM",
+                "landkode": "NO",
+                "kommunenummer": "3420",
+                "bruksperiode": {
+                    "fom": "2021-06-02T09:23:59.801"
+                },
+                "gyldighetsperiode": {
+                    "fom": "2021-06-02"
+                }
+            }
+        ],
+        "navSpesifikkInformasjon": {
+            "erIA": false,
+            "bruksperiode": {
+                "fom": "1900-01-01T00:00:00"
+            },
+            "gyldighetsperiode": {
+                "fom": "1900-01-01"
+            }
+        },
+        "sistEndret": "2021-06-02"
+    },
+    "juridiskEnhetDetaljer": {
+        "enhetstype": "AS"
+    }
+}

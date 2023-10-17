@@ -85,20 +85,6 @@ class SendVedtaksbrevInnlandTest {
     }
 
     @Test
-    void utfør_avslagManglendeOppl_bestillerAvslagManglendeOppl() {
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
-            .thenReturn(lagBehandlingsresultatUtenPerioder(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL));
-
-
-        sendVedtaksbrevInnland.utfør(lagProsessinstans());
-
-
-        verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(List.of(Mottaker.medRolle(BRUKER))));
-        assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(AVSLAG_MANGLENDE_OPPLYSNINGER);
-        verify(prosessinstansService, never()).opprettProsessinstansSendBrev(eq(behandling), any(DoksysBrevbestilling.class), eq(Mottaker.medRolle(ARBEIDSGIVER)));
-    }
-
-    @Test
     void utfør_utenPeriode_feiler() {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
             .thenReturn(lagBehandlingsresultatUtenPerioder(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND));
@@ -168,22 +154,6 @@ class SendVedtaksbrevInnlandTest {
         verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(mottakere));
         assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(IKKE_YRKESAKTIV_VEDTAKSBREV);
     }
-
-    @Test
-    void utfør_avslagManglendeOppl_ikke_yrkesaktiv_bestillerAvslagManglendeOppl() {
-        behandling.setTema(Behandlingstema.IKKE_YRKESAKTIV);
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLINGID))
-            .thenReturn(lagBehandlingsresultatUtenPerioder(Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL));
-
-
-        sendVedtaksbrevInnland.utfør(lagProsessinstans());
-
-
-        verify(prosessinstansService).opprettProsessinstanserSendBrev(eq(behandling), doksysBrevbestillingArgumentCaptor.capture(), eq(List.of(Mottaker.medRolle(BRUKER))));
-        assertThat(doksysBrevbestillingArgumentCaptor.getValue().getProduserbartdokument()).isEqualTo(AVSLAG_MANGLENDE_OPPLYSNINGER);
-        verify(prosessinstansService, never()).opprettProsessinstansSendBrev(eq(behandling), any(DoksysBrevbestilling.class), eq(Mottaker.medRolle(ARBEIDSGIVER)));
-    }
-
 
     @Test
     void utfør_utpeking13_1B1_senderOrienteringsbrev() {

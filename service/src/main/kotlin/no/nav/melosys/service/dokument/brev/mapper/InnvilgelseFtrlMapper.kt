@@ -10,7 +10,7 @@ import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrl
-import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.Periode
+import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import org.springframework.stereotype.Component
 import java.time.Instant
@@ -32,7 +32,8 @@ class InnvilgelseFtrlMapper(
 
         return InnvilgelseFtrl.Builder(brevbestilling)
             .behandlingstype(behandlingsresultat.behandling.type)
-            .perioder(mapPerioder(medlemAvFolketrygden))
+            .avgiftsperioder(mapAvgiftsPerioder(medlemAvFolketrygden))
+            .medlemskapsperioder(mapMedlemskapsPerioder(medlemAvFolketrygden))
             .bestemmelse(medlemAvFolketrygden.bestemmelse)
             .avslåttHelsedelFørMottaksdato(
                 erAvslåttHelsedelFørMottaksdato(
@@ -62,8 +63,27 @@ class InnvilgelseFtrlMapper(
             .build()
     }
 
-    private fun mapPerioder(medlemAvFolketrygden: MedlemAvFolketrygden): List<Periode> =
-        medlemAvFolketrygden.medlemskapsperioder.flatMap { Periode.av(it) }
+    private fun mapAvgiftsPerioder(medlemAvFolketrygden: MedlemAvFolketrygden): List<AvgiftsperiodeDto> =
+        medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsperioder.map {
+            AvgiftsperiodeDto(
+                it.periodeFra,
+                it.periodeTil,
+                it.trygdesats,
+                it.trygdeavgiftsbeløpMd.verdi,
+                it.grunnlagInntekstperiode.type,
+                it.grunnlagInntekstperiode.avgiftspliktigInntektMnd?.verdi,
+            )
+        }.sortedByDescending { it.fom }
+
+    private fun mapMedlemskapsPerioder(medlemAvFolketrygden: MedlemAvFolketrygden): List<no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto> =
+        medlemAvFolketrygden.medlemskapsperioder.map {
+            no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto(
+                it.fom,
+                it.tom,
+                it.trygdedekning,
+                it.innvilgelsesresultat
+            )
+        }.sortedByDescending { it.fom }
 
     private fun erAvslåttHelsedelFørMottaksdato(
         mottaksdato: Instant,

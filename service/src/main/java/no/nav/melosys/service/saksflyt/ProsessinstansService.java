@@ -92,6 +92,7 @@ public class ProsessinstansService {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK);
 
+        prosessinstans.setData(FAKTURASERIE_REFERANSE, opprettSakDto.getFakturaserieReferanse());
         prosessinstans.setData(SAKSNUMMER, saksnummer);
         prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
         prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
@@ -107,6 +108,7 @@ public class ProsessinstansService {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK);
 
+        prosessinstans.setData(FAKTURASERIE_REFERANSE, opprettSakDto.getFakturaserieReferanse());
         prosessinstans.setData(SAKSNUMMER, saksnummer);
         prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
         prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
@@ -364,10 +366,9 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansIverksettIkkeYrkesaktiv(Behandling behandling, String fritekst) {
+    public void opprettProsessinstansIverksettIkkeYrkesaktiv(Behandling behandling) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medBehandling(behandling)
-            .medBegrunnelseFritekst(fritekst) // Trengs dersom avslag pga manglende opplysninger
             .medType(ProsessType.IVERKSETT_VEDTAK_IKKE_YRKESAKTIV)
             .build();
 

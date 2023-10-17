@@ -48,59 +48,82 @@ class OpprettMedlemskapsperiodeServiceTest {
     }
 
     @Test
-    void utledMedlemskapsperioderFraSøknad_dataFraSøknadSatt_lagrerMedlemskapsperioder() {
+    void opprettForslagPåMedlemskapsperioder_dataFraSøknadSatt_lagrerMedlemskapsperioder() {
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
-        behandlingsresultat.getVilkaarsresultater().add(lagOppfyltVilkår(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID));
+        behandlingsresultat.getVilkaarsresultater().add(lagOppfyltVilkår());
+        behandlingsresultat.getMedlemAvFolketrygden().setBestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A);
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
         when(medlemAvFolketrygdenRepository.save(any(MedlemAvFolketrygden.class))).thenAnswer(returnsFirstArg());
         when(utledMottaksdato.getMottaksdato(any())).thenReturn(LocalDate.now());
 
 
-        assertThat(
-            opprettMedlemskapsperiodeService.utledMedlemskapsperioderFraSøknad(behandlingsresultatID, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A)
-        ).isNotEmpty();
-        verify(medlemAvFolketrygdenRepository, times(2)).save(any());
+        assertThat(opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingsresultatID)).isNotEmpty();
+        verify(medlemAvFolketrygdenRepository, times(1)).save(any());
     }
 
     @Test
-    void utledMedlemskapsperioderFraSøknad_dataFraSøknadSatt_medlemskapsperioderEksisterer() {
+    void opprettForslagPåMedlemskapsperioder_dataFraSøknadSatt_medlemskapsperioderEksisterer() {
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
-        behandlingsresultat.getVilkaarsresultater().add(lagOppfyltVilkår(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID));
+        behandlingsresultat.getVilkaarsresultater().add(lagOppfyltVilkår());
         MedlemAvFolketrygden medlemAvFolketrygden = new MedlemAvFolketrygden();
         Medlemskapsperiode medlemskapsperiode = new Medlemskapsperiode();
         medlemAvFolketrygden.addMedlemskapsperiode(medlemskapsperiode);
+        medlemAvFolketrygden.setBestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A);
         behandlingsresultat.setMedlemAvFolketrygden(medlemAvFolketrygden);
 
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
         when(medlemAvFolketrygdenRepository.save(medlemAvFolketrygden)).thenReturn(medlemAvFolketrygden);
 
-        assertThat(
-            opprettMedlemskapsperiodeService.utledMedlemskapsperioderFraSøknad(behandlingsresultatID, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A)
-        ).isNotEmpty();
+
+        assertThat(opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingsresultatID)).isNotEmpty();
         verify(medlemAvFolketrygdenRepository, times(1)).save(medlemAvFolketrygden);
     }
 
     @Test
-    void utledMedlemskapsperioderFraSøknad_oppfyllerIkkeVilkår_kasterFeil() {
+    void opprettForslagPåMedlemskapsperioder_sakstypeEØS_kasterFeil() {
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
+        behandlingsresultat.getBehandling().getFagsak().setType(Sakstyper.EU_EOS);
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
 
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettMedlemskapsperiodeService.utledMedlemskapsperioderFraSøknad(
-                behandlingsresultatID, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A))
+            .isThrownBy(() -> opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingsresultatID))
+            .withMessageContaining("Kan ikke opprette medlemskapsperioder for sakstype");
+    }
+
+    @Test
+    void opprettForslagPåMedlemskapsperioder_oppfyllerIkkeVilkår_kasterFeil() {
+        Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
+        behandlingsresultat.getMedlemAvFolketrygden().setBestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
+
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingsresultatID))
             .withMessageContaining("er påkrevd for bestemmelse");
     }
 
     @Test
-    void utledMedlemskapsperioderFraSøknad_støtterIkkeBestemmelse_kasterFeil() {
+    void opprettForslagPåMedlemskapsperioder_støtterIkkeBestemmelse_kasterFeil() {
+        Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
+        behandlingsresultat.getMedlemAvFolketrygden().setBestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_D);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
+
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingsresultatID))
+            .withMessageContaining("Støtter ikke");
+    }
+
+    @Test
+    void opprettForslagPåMedlemskapsperioder_harIkkeBestemmelse_kasterFeil() {
         Behandlingsresultat behandlingsresultat = lagBehandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID)).thenReturn(behandlingsresultat);
 
+
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> opprettMedlemskapsperiodeService.utledMedlemskapsperioderFraSøknad(
-                behandlingsresultatID, Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_D))
-            .withMessageContaining("Støtter ikke");
+            .isThrownBy(() -> opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingsresultatID))
+            .withMessageContaining("Bestemmelse er ikke satt");
     }
 
     private Behandlingsresultat lagBehandlingsresultat() {
@@ -118,14 +141,15 @@ class OpprettMedlemskapsperiodeServiceTest {
         søknad.setTrygdedekning(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER);
         mottatteOpplysninger.setMottatteOpplysningerdata(søknad);
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
+        behandlingsresultat.setMedlemAvFolketrygden(new MedlemAvFolketrygden());
         behandlingsresultat.setBehandling(behandling);
 
         return behandlingsresultat;
     }
 
-    private Vilkaarsresultat lagOppfyltVilkår(Vilkaar vilkår) {
+    private Vilkaarsresultat lagOppfyltVilkår() {
         var vilkaarsresultat = new Vilkaarsresultat();
-        vilkaarsresultat.setVilkaar(vilkår);
+        vilkaarsresultat.setVilkaar(Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID);
         vilkaarsresultat.setOppfylt(true);
         return vilkaarsresultat;
     }

@@ -158,18 +158,19 @@ class ReplikerBehandlingsresultatServiceTest {
             .matches { it.id == null }
             .matches { it.bestemmelse == medlemAvFolketrygdenOrig.bestemmelse }
 
-        val medlemskapsperiodeOrig = medlemAvFolketrygdenOrig.medlemskapsperioder.first()
+        Assertions.assertThat(medlemAvFolketrygdenOrig.medlemskapsperioder).hasSize(2)
+        val innvilgetMedlemskapsperiodeOrig = medlemAvFolketrygdenOrig.medlemskapsperioder.filter { it.erInnvilget() }.first()
         Assertions.assertThat(behandlingsresultatReplika.medlemAvFolketrygden.medlemskapsperioder)
             .singleElement()
             .matches { it.medlemAvFolketrygden == behandlingsresultatReplika.medlemAvFolketrygden }
             .matches { it.id == null }
-            .matches { it.fom == medlemskapsperiodeOrig.fom }
-            .matches { it.tom == medlemskapsperiodeOrig.tom }
-            .matches { it.arbeidsland == medlemskapsperiodeOrig.arbeidsland }
-            .matches { it.medlemskapstype == medlemskapsperiodeOrig.medlemskapstype }
-            .matches { it.innvilgelsesresultat == medlemskapsperiodeOrig.innvilgelsesresultat }
-            .matches { it.trygdedekning == medlemskapsperiodeOrig.trygdedekning }
-            .matches { it.medlPeriodeID == medlemskapsperiodeOrig.medlPeriodeID }
+            .matches { it.fom == innvilgetMedlemskapsperiodeOrig.fom }
+            .matches { it.tom == innvilgetMedlemskapsperiodeOrig.tom }
+            .matches { it.arbeidsland == innvilgetMedlemskapsperiodeOrig.arbeidsland }
+            .matches { it.medlemskapstype == innvilgetMedlemskapsperiodeOrig.medlemskapstype }
+            .matches { it.innvilgelsesresultat == innvilgetMedlemskapsperiodeOrig.innvilgelsesresultat }
+            .matches { it.trygdedekning == innvilgetMedlemskapsperiodeOrig.trygdedekning }
+            .matches { it.medlPeriodeID == innvilgetMedlemskapsperiodeOrig.medlPeriodeID }
 
         Assertions.assertThat(behandlingsresultatReplika.medlemAvFolketrygden.fastsattTrygdeavgift)
             .matches { it.medlemAvFolketrygden == behandlingsresultatReplika.medlemAvFolketrygden }
@@ -213,7 +214,7 @@ class ReplikerBehandlingsresultatServiceTest {
             .matches { it.trygdeavgiftsbeløpMd == trygdeavgiftsperiodeOrig.trygdeavgiftsbeløpMd }
             .matches { it.trygdesats == trygdeavgiftsperiodeOrig.trygdesats }
             .matches { it.grunnlagMedlemskapsperiode.id == null }
-            .matches { it.grunnlagMedlemskapsperiode.trygdedekning == medlemskapsperiodeOrig.trygdedekning }
+            .matches { it.grunnlagMedlemskapsperiode.trygdedekning == innvilgetMedlemskapsperiodeOrig.trygdedekning }
             .matches { it.grunnlagInntekstperiode.id == null }
             .matches { it.grunnlagInntekstperiode.avgiftspliktigInntektMnd == inntektsperiodeOrig.avgiftspliktigInntektMnd }
             .matches { it.grunnlagSkatteforholdTilNorge.id == null }
@@ -225,7 +226,8 @@ class ReplikerBehandlingsresultatServiceTest {
         medlemAvFolketrygden.behandlingsresultat = behandlingsresultatOrig
         medlemAvFolketrygden.id = 30L
         medlemAvFolketrygden.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
-        medlemAvFolketrygden.addMedlemskapsperiode(opprettMedlemskapsperiode())
+        medlemAvFolketrygden.addMedlemskapsperiode(opprettMedlemskapsperiode(InnvilgelsesResultat.INNVILGET))
+        medlemAvFolketrygden.addMedlemskapsperiode(opprettMedlemskapsperiode(InnvilgelsesResultat.AVSLAATT))
         medlemAvFolketrygden.fastsattTrygdeavgift = opprettFastsattTrygdeavgift(medlemAvFolketrygden)
         return medlemAvFolketrygden
     }
@@ -270,7 +272,7 @@ class ReplikerBehandlingsresultatServiceTest {
                 isArbeidsgiversavgiftBetalesTilSkatt = false
                 isOrdinærTrygdeavgiftBetalesTilSkatt = false
             })
-        trygdeavgiftsgrunnlag.skatteforholdTilNorge = mutableSetOf(
+        trygdeavgiftsgrunnlag.skatteforholdTilNorge = mutableListOf(
             SkatteforholdTilNorge().apply {
                 id = 1L
                 fomDato = LocalDate.now()
@@ -280,10 +282,10 @@ class ReplikerBehandlingsresultatServiceTest {
         return trygdeavgiftsgrunnlag
     }
 
-    private fun opprettMedlemskapsperiode(): Medlemskapsperiode {
+    private fun opprettMedlemskapsperiode(innvilgelsesResultat: InnvilgelsesResultat): Medlemskapsperiode {
         val medlemskapsperiode = Medlemskapsperiode()
         medlemskapsperiode.id = 1L
-        medlemskapsperiode.innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        medlemskapsperiode.innvilgelsesresultat = innvilgelsesResultat
         medlemskapsperiode.medlPeriodeID = 77L
         medlemskapsperiode.fom = LocalDate.now()
         medlemskapsperiode.tom = LocalDate.now()

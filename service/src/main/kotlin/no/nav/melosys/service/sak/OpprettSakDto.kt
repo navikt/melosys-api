@@ -22,4 +22,5 @@ class OpprettSakDto {
     var soknadDto: SøknadDto? = null
     var mottaksdato: LocalDate? = null
     var skalTilordnes: Boolean = false
+    var fakturaserieReferanse: String? = null
 }

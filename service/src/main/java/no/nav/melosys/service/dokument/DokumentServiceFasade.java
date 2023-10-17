@@ -63,20 +63,11 @@ public class DokumentServiceFasade {
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(dokumentType);
         brevbestillingDto.setMottaker(mottaker.getRolle());
-        brevbestillingDto.setFritekst(hentFritekst(brevbestilling));
+        brevbestillingDto.setFritekst(brevbestilling.getFritekst());
         brevbestillingDto.setBegrunnelseKode(brevbestilling.getBegrunnelseKode());
         brevbestillingDto.setBestillersId(brevbestilling.getAvsenderID());
 
         produserDokument(behandlingId, brevbestilling, brevbestillingDto, mottaker);
-    }
-
-    private String hentFritekst(DoksysBrevbestilling brevbestilling) {
-        if (brevbestilling.getProduserbartdokument() == null) return null;
-
-        return switch (brevbestilling.getProduserbartdokument()) {
-            case AVSLAG_MANGLENDE_OPPLYSNINGER, MELDING_HENLAGT_SAK -> brevbestilling.getFritekst();
-            default -> null;
-        };
     }
 
     private void produserDokument(long behandlingID, DoksysBrevbestilling brevbestilling, BrevbestillingDto brevbestillingDto, Mottaker mottaker) {

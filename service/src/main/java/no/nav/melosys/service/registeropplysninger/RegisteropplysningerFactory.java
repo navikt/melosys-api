@@ -23,7 +23,7 @@ public class RegisteropplysningerFactory {
     public RegisteropplysningerRequest.SaksopplysningTyper utledSaksopplysningTyper(
         Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype) {
 
-        if (saksbehandlingRegler.harTomFlyt(sakstype, sakstema, behandlingstype, behandlingstema)) {
+        if (saksbehandlingRegler.harIngenFlyt(sakstype, sakstema, behandlingstype, behandlingstema)) {
             return ingenSaksopplysningTyper();
         }
         if (saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(sakstype, sakstema, behandlingstema)) {

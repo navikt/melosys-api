@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
-import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -35,8 +34,6 @@ class FerdigstillJournalpostSedTest {
     @Mock
     private EessiService eessiService;
 
-    private final FakeUnleash fakeUnleash = new FakeUnleash();
-
     private FerdigstillJournalpostSed ferdigstillJournalpostSed;
 
     private static final String JOURNALPOST_ID = "jp123";
@@ -49,7 +46,7 @@ class FerdigstillJournalpostSedTest {
 
     @BeforeEach
     public void setUp() {
-        ferdigstillJournalpostSed = new FerdigstillJournalpostSed(joarkFasade, persondataFasade, oppgaveFactory, fakeUnleash, eessiService);
+        ferdigstillJournalpostSed = new FerdigstillJournalpostSed(joarkFasade, persondataFasade, oppgaveFactory, eessiService);
     }
 
     @Test

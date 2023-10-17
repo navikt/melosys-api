@@ -43,7 +43,7 @@ public class LagreLovvalgsperiodeMedl implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
         final long behandlingID = prosessinstans.getBehandling().getId();
         final var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        if (behandlingsresultat.erAvslagManglendeOpplysninger() || erIkkeGodkjentRegistreringUnntakFraMedlemskap(prosessinstans.getBehandling(), behandlingsresultat.getUtfallRegistreringUnntak())) {
+        if (erIkkeGodkjentRegistreringUnntakFraMedlemskap(prosessinstans.getBehandling(), behandlingsresultat.getUtfallRegistreringUnntak())) {
             return;
         }
 

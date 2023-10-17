@@ -28,7 +28,6 @@ import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.oppgave.OppgaveService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
@@ -49,7 +48,7 @@ class JournalfoeringIT(
     @BeforeEach
     fun setup() {
         oAuthMockServer.start()
-        unleash.resetAll()
+        unleash.enableAll()
     }
 
     @AfterEach
@@ -155,7 +154,6 @@ class JournalfoeringIT(
     }
 
     @Test
-    @Disabled
     fun journalførOgOpprettAndregangsBehandling_fraAvslåttFlyt_flytMedPeriodeOgLand() {
         val journalfoeringOpprettDto = defaultJournalføringDto().apply {
             fagsak.sakstype = Sakstyper.EU_EOS.kode
@@ -211,7 +209,7 @@ class JournalfoeringIT(
     }
 
     @Test
-    fun journalførOgOpprettAndregangsBehandling_fraTomflyt_flytMedPeriodeOgLand() {
+    fun journalførOgOpprettAndregangsBehandling_fraIngenFlyt_flytMedPeriodeOgLand() {
         val journalfoeringOpprettDto = defaultJournalføringDto().apply {
             fagsak.sakstype = Sakstyper.EU_EOS.kode
             fagsak.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode

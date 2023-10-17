@@ -598,7 +598,8 @@ class DokgenMalMapperTest {
 
     private InnvilgelseFtrl lagInnvilgelseFtrl() {
         return new InnvilgelseFtrl.Builder(lagInnvilgelseFtrlBrevbestilling())
-            .perioder(emptyList())
+            .avgiftsperioder(emptyList())
+            .medlemskapsperioder(emptyList())
             .bestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8)
             .avslåttHelsedelFørMottaksdato(false)
             .trygdeavgiftMottaker(Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV)
@@ -687,6 +688,7 @@ class DokgenMalMapperTest {
         semistrukturertAdresse.setAdresselinje1(FORRETNINGSADRESSE_ORG);
         semistrukturertAdresse.setPostnr(POSTNR_ORG);
         semistrukturertAdresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(2), LocalDate.now().plusDays(2)));
+        semistrukturertAdresse.setLandkode("NO");
         return semistrukturertAdresse;
     }
 }

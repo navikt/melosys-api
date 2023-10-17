@@ -1,6 +1,8 @@
 package no.nav.melosys.domain;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -48,6 +50,9 @@ public class Aktoer extends RegistreringsInfo {
     @Enumerated(EnumType.STRING)
     @Column(name = "representerer")
     private Representerer representerer;
+
+    @OneToMany(mappedBy = "aktoer", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private Set<Fullmakt> fullmakter = new HashSet<>(1);
 
     public Long getId() {
         return id;
@@ -119,6 +124,14 @@ public class Aktoer extends RegistreringsInfo {
 
     public void setRepresenterer(Representerer representerer) {
         this.representerer = representerer;
+    }
+
+    public Set<Fullmakt> getFullmakter() {
+        return fullmakter;
+    }
+
+    public void setFullmakter(Set<Fullmakt> fullmakter) {
+        this.fullmakter = fullmakter;
     }
 
     public boolean erPerson() {
