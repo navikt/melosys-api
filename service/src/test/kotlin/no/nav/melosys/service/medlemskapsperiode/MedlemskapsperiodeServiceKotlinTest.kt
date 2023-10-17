@@ -178,7 +178,6 @@ class MedlemskapsperiodeServiceKotlinTest {
         verify(exactly = 1) { medlPeriodeService.oppdaterPeriodeEndelig(1L, medlemskapsperiodeMedMedlId) }
     }
 
-
     private fun setupHappyPathBehandling(
         sakstype: Sakstyper = Sakstyper.EU_EOS,
         behandlingstema: Behandlingstema = Behandlingstema.BESLUTNING_LOVVALG_NORGE
