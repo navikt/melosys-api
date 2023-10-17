@@ -8,6 +8,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Aktoersroller
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.repository.MedlemskapsperiodeRepository
@@ -77,7 +78,10 @@ class MedlemskapsperiodeServiceKotlinTest {
     @Test
     fun `erstattMedlemskapsperioder skal kun avvise gamle perioder når ny liste er tom`() {
         setupHappyPathBehandling()
-        val gammelMedlemskapsperiode = Medlemskapsperiode().apply { medlPeriodeID = 1L }
+        val gammelMedlemskapsperiode = Medlemskapsperiode().apply {
+            medlPeriodeID = 1L
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        }
         val gammelListe = listOf(gammelMedlemskapsperiode)
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = gammelListe }
 
@@ -95,7 +99,10 @@ class MedlemskapsperiodeServiceKotlinTest {
     fun `erstattMedlemskapsperioder skal opprette nye og avvise gamle når begge lister ikke er tomme og det er ingen felles elementer`() {
         setupHappyPathBehandling()
         every { medlemskapsperiodeRepository.save(any()) } returns Medlemskapsperiode()
-        val gammelMedlemskapsperiode = Medlemskapsperiode().apply { medlPeriodeID = 1L }
+        val gammelMedlemskapsperiode = Medlemskapsperiode().apply {
+            medlPeriodeID = 1L
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        }
         val medlemAvFolketrygden = MedlemAvFolketrygden().apply { medlemskapsperioder = listOf(gammelMedlemskapsperiode) }
         every { behandlingsresultatService.hentBehandlingsresultat(1L) } returns Behandlingsresultat().apply {
             this.medlemAvFolketrygden = medlemAvFolketrygden
@@ -105,15 +112,21 @@ class MedlemskapsperiodeServiceKotlinTest {
         medlemskapsperiodeService.erstattMedlemskapsperioder(listOf(nyMedlemskapsperiode), 1L, 2L)
 
         verify(exactly = 1) { medlPeriodeService.avvisPeriodeOpphørt(1L) }
-        verify(exactly = 1) { medlPeriodeService.opprettPeriodeEndelig(2L, nyMedlemskapsperiode ) }
+        verify(exactly = 1) { medlPeriodeService.opprettPeriodeEndelig(2L, nyMedlemskapsperiode) }
     }
 
     @Test
     fun `erstattMedlemskapsperioder skal oppdatere periode når begge lister har felles elementer`() {
         setupHappyPathBehandling()
         every { medlemskapsperiodeRepository.save(any()) } returns Medlemskapsperiode()
-        val fellesMedlemskapsperiode = Medlemskapsperiode().apply { medlPeriodeID = 1L }
-        val gammelMedlemskapsperiode = Medlemskapsperiode().apply  {medlPeriodeID = 2L }
+        val fellesMedlemskapsperiode = Medlemskapsperiode().apply {
+            medlPeriodeID = 1L
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        }
+        val gammelMedlemskapsperiode = Medlemskapsperiode().apply {
+            medlPeriodeID = 2L
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+        }
         val gammelListe = listOf(fellesMedlemskapsperiode, gammelMedlemskapsperiode)
         val nyMedlemskapsperiode = Medlemskapsperiode()
         val nyListe = listOf(fellesMedlemskapsperiode, nyMedlemskapsperiode)
