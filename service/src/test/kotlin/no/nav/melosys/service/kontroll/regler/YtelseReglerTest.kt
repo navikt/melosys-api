@@ -6,8 +6,6 @@ import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned
 import no.nav.melosys.domain.dokument.inntekt.Inntekt
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument
-import no.nav.melosys.domain.dokument.inntekt.inntektstype.Loennsinntekt
-import no.nav.melosys.domain.dokument.inntekt.inntektstype.YtelseFraOffentlige
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -105,7 +103,8 @@ class YtelseReglerTest {
 
     private fun hentInntektsListe(medYtelserFraOffentlig: Boolean, fom: LocalDate): List<Inntekt> =
         listOf(
-            Loennsinntekt(
+            Inntekt(
+                type = "Loennsinntekt",
                 beloep = BigDecimal(50000),
                 fordel = "fordel",
                 inntektskilde = "inntektskilde",
@@ -114,7 +113,8 @@ class YtelseReglerTest {
                 utbetaltIPeriode = YearMonth.now()
             )
         ) + if (medYtelserFraOffentlig) listOf(
-            YtelseFraOffentlige(
+            Inntekt(
+                type = "YtelseFraOffentlige",
                 beloep = BigDecimal(50000),
                 fordel = "fordel",
                 inntektskilde = "inntektskilde",

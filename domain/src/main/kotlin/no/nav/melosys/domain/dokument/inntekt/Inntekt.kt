@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.dokument.inntekt
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonPropertyOrder
 import com.fasterxml.jackson.annotation.JsonView
 import no.nav.melosys.domain.dokument.DokumentView
@@ -9,6 +10,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 
 @JsonPropertyOrder(
+    "type",
     "arbeidsforholdREF",
     "beloep",
     "fordel",
@@ -28,9 +30,11 @@ import java.time.YearMonth
     "inngaarIGrunnlagForTrekk",
     "utloeserArbeidsgiveravgift",
     "informasjonsstatus",
-    "beskrivelse"
+    "beskrivelse",
+    "antall"
 )
-abstract class Inntekt(
+class Inntekt(
+    var type: String,
     @field:JsonView(DokumentView.Database::class)
     var arbeidsforholdREF: String? = null,
     val beloep: BigDecimal,
@@ -58,5 +62,43 @@ abstract class Inntekt(
     var inngaarIGrunnlagForTrekk: Boolean? = null,
     var utloeserArbeidsgiveravgift: Boolean? = null,
     var informasjonsstatus: String? = null, //"http://nav.no/kodeverk/Kodeverk/Informasjonsstatuser"
-    var beskrivelse: String? = null
-)
+    var beskrivelse: String? = null,
+
+    @field:JsonView(DokumentView.Database::class)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    var antall: Int? = null
+) {
+    constructor(
+        type: String,
+        beloep: BigDecimal,
+        fordel: String,
+        inntektskilde: String,
+        inntektsperiodetype: String,
+        inntektsstatus: String,
+        utbetaltIPeriode: YearMonth,
+        antall: Int?
+    ) : this(
+        type = type,
+        beloep = beloep,
+        fordel = fordel,
+        inntektskilde = inntektskilde,
+        inntektsperiodetype = inntektsperiodetype,
+        inntektsstatus = inntektsstatus,
+        utbetaltIPeriode = utbetaltIPeriode,
+        antall = antall,
+        arbeidsforholdREF = null,
+        levereringstidspunkt = null,
+        opptjeningsland = null,
+        opptjeningsperiode = Periode(),
+        skattemessigBosattLand = null,
+        opplysningspliktigID = null,
+        inntektsinnsenderID = null,
+        virksomhetID = null,
+        tilleggsinformasjon = null,
+        inntektsmottakerID = null,
+        inngaarIGrunnlagForTrekk = null,
+        utloeserArbeidsgiveravgift = null,
+        informasjonsstatus = null,
+        beskrivelse = null
+    )
+}

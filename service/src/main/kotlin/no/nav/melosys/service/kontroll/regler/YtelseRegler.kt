@@ -1,7 +1,7 @@
 package no.nav.melosys.service.kontroll.regler
 
+import no.nav.melosys.domain.dokument.inntekt.Inntekt
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument
-import no.nav.melosys.domain.dokument.inntekt.inntektstype.YtelseFraOffentlige
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -21,7 +21,7 @@ object YtelseRegler {
         return false
     }
 
-    private fun erUtbetaltIPeriode(ytelseFraOffentlige: YtelseFraOffentlige, fom: YearMonth, tom: YearMonth?): Boolean {
+    private fun erUtbetaltIPeriode(ytelseFraOffentlige: Inntekt, fom: YearMonth, tom: YearMonth?): Boolean {
         val utbetaltIPeriode = ytelseFraOffentlige.utbetaltIPeriode
 
         val tomNotNull = tom ?: fom.plusYears(2)
@@ -31,10 +31,10 @@ object YtelseRegler {
         return utbetaltIPeriode == fom || utbetaltIPeriode == tom
     }
 
-private fun hentYtelseFraOffentlige(inntektDokument: InntektDokument): Collection<YtelseFraOffentlige> =
-    inntektDokument.arbeidsInntektMaanedListe
-        .mapNotNull { it.arbeidsInntektInformasjon.inntektListe }
-        .flatten()
-        .filterIsInstance<YtelseFraOffentlige>()
-        .toList()
+    private fun hentYtelseFraOffentlige(inntektDokument: InntektDokument): Collection<Inntekt> =
+        inntektDokument.arbeidsInntektMaanedListe
+            .map { it.arbeidsInntektInformasjon.inntektListe }
+            .flatten()
+            .filter { it.type == "YtelseFraOffentlige" } // TODO: lage enum
+            .toList()
 }

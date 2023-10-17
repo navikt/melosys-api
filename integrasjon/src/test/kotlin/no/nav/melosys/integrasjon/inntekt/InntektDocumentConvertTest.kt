@@ -8,10 +8,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.dokument.DokumentView
 import no.nav.melosys.domain.dokument.SaksopplysningDokument
-import no.nav.melosys.domain.dokument.inntekt.Inntekt
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer
 import no.nav.melosys.domain.jpa.SaksopplysningDokumentConverter
-import no.nav.melosys.domain.jpa.mixin.InntektMixin
 import no.nav.melosys.domain.jpa.mixin.SaksopplysningDokumentMixIn
 import no.nav.melosys.domain.jpa.mixin.TilleggsinformasjonDetaljerMixIn
 import no.nav.melosys.exception.IkkeFunnetException
@@ -42,7 +40,6 @@ class InntektDocumentConvertTest {
 
         val frontendExpectedDTOs = jacksonObjectMapper()
             .configure(SerializationFeature.INDENT_OUTPUT, true)
-            .addMixIn(Inntekt::class.java, InntektMixin::class.java)
             .addMixIn(SaksopplysningDokument::class.java, SaksopplysningDokumentMixIn::class.java)
             .addMixIn(TilleggsinformasjonDetaljer::class.java, TilleggsinformasjonDetaljerMixIn::class.java)
             .registerModule(JavaTimeModule())

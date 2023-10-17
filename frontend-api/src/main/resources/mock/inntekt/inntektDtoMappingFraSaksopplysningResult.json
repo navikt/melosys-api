@@ -3,6 +3,7 @@
     "aarMaaned" : "2022-01",
     "arbeidsInntektInformasjon" : {
       "inntektListe" : [ {
+        "type" : "Loennsinntekt",
         "arbeidsforholdREF" : null,
         "beloep" : 5E+4,
         "fordel" : "kontantytelse",
@@ -38,6 +39,7 @@
     "aarMaaned" : "2022-02",
     "arbeidsInntektInformasjon" : {
       "inntektListe" : [ {
+        "type" : "YtelseFraOffentlige",
         "arbeidsforholdREF" : null,
         "beloep" : 5E+4,
         "fordel" : "kontantytelse",
@@ -72,6 +74,7 @@
     "aarMaaned" : "2022-03",
     "arbeidsInntektInformasjon" : {
       "inntektListe" : [ {
+        "type" : "Naeringsinntekt",
         "arbeidsforholdREF" : null,
         "beloep" : 5E+4,
         "fordel" : "kontantytelse",
@@ -107,6 +110,7 @@
     "aarMaaned" : "2022-04",
     "arbeidsInntektInformasjon" : {
       "inntektListe" : [ {
+        "type" : "Naeringsinntekt",
         "arbeidsforholdREF" : null,
         "beloep" : 5E+4,
         "fordel" : "kontantytelse",
