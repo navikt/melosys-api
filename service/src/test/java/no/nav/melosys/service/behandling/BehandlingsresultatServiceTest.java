@@ -56,6 +56,7 @@ class BehandlingsresultatServiceTest {
         behandlingsresultat.setInnledningFritekst("Innledning fritekst");
         behandlingsresultat.setBegrunnelseFritekst("Begrunnelse fritekst");
         behandlingsresultat.setNyVurderingBakgrunn("ny vurdering bakgrunn");
+        behandlingsresultat.setTrygdeavgiftFritekst("trygdeavgift fritekst");
 
         when(behandlingsresultatRepo.findById(anyLong())).thenReturn(Optional.of(behandlingsresultat));
 
@@ -70,6 +71,7 @@ class BehandlingsresultatServiceTest {
         assertThat(behandlingsresultat.getInnledningFritekst()).isNull();
         assertThat(behandlingsresultat.getBegrunnelseFritekst()).isNull();
         assertThat(behandlingsresultat.getNyVurderingBakgrunn()).isNull();
+        assertThat(behandlingsresultat.getTrygdeavgiftFritekst()).isNull();
         verify(vilkaarsresultatService).tømVilkårForBehandlingsresultat(behandlingsresultat);
     }
 
