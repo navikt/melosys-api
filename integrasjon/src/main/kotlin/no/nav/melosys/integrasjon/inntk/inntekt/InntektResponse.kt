@@ -29,7 +29,7 @@ data class InntektResponse(
     data class ArbeidsInntektMaaned(
         val aarMaaned: YearMonth? = null,
         val avvikListe: List<Avvik>? = null,
-        val arbeidsInntektInformasjon: ArbeidsInntektInformasjon? = null
+        val arbeidsInntektInformasjon: ArbeidsInntektInformasjon
     )
 
     data class ArbeidsInntektInformasjon(
@@ -94,11 +94,11 @@ data class InntektResponse(
     )
 
     data class Avvik(
-        val ident: Aktoer? = null,
-        val opplysningspliktig: Aktoer? = null,
-        val virksomhet: Aktoer? = null,
-        val avvikPeriode: YearMonth? = null,
-        val tekst: String? = null
+        val ident: Aktoer,
+        val opplysningspliktig: Aktoer,
+        val virksomhet: Aktoer,
+        val avvikPeriode: YearMonth,
+        val tekst: String
     )
 
     data class Forskuddstrekk(

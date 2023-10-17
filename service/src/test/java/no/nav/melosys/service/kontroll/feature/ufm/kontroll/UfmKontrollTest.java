@@ -1,7 +1,9 @@
 package no.nav.melosys.service.kontroll.feature.ufm.kontroll;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -165,13 +167,21 @@ class UfmKontrollTest {
         medlemskapDokument.getMedlemsperiode().add(medlemsperiode);
 
         InntektDokument inntektDokument = new InntektDokument();
-        Inntekt inntekt = new YtelseFraOffentlige();
-        inntekt.utbetaltIPeriode = YearMonth.now().plusYears(2);
+        Inntekt inntekt = new YtelseFraOffentlige(
+            new BigDecimal(50000),
+            "fordel",
+            "inntektskilde",
+            "inntektsperiodetype",
+            "inntektsstatus",
+            YearMonth.now().plusYears(2)
+        );
 
-        ArbeidsInntektMaaned arbeidsInntektMaaned = new ArbeidsInntektMaaned();
-        arbeidsInntektMaaned.arbeidsInntektInformasjon = new ArbeidsInntektInformasjon();
-        arbeidsInntektMaaned.getArbeidsInntektInformasjon().getInntektListe().add(inntekt);
-        inntektDokument.getArbeidsInntektMaanedListe().add(arbeidsInntektMaaned);
+        ArbeidsInntektMaaned arbeidsInntektMaaned = new ArbeidsInntektMaaned(null, null,
+            new ArbeidsInntektInformasjon(List.of(inntekt), Collections.emptyList()));
+
+        List<ArbeidsInntektMaaned> arbeidsInntektMaanedListe = new ArrayList<>();
+        arbeidsInntektMaanedListe.add(arbeidsInntektMaaned);
+        inntektDokument.setArbeidsInntektMaanedListe(arbeidsInntektMaanedListe);
 
         UtbetalingDokument utbetalingDokument = new UtbetalingDokument();
         utbetalingDokument.utbetalinger = Collections.singletonList(new Utbetaling());

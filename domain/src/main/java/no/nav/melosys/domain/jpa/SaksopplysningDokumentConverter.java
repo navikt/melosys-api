@@ -1,12 +1,14 @@
 package no.nav.melosys.domain.jpa;
 
 import javax.persistence.AttributeConverter;
+import javax.persistence.Converter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.kotlin.KotlinModule;
 import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.inntekt.Inntekt;
@@ -19,6 +21,7 @@ import no.nav.melosys.domain.serializer.LovvalgBestemmelseDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Converter
 public class SaksopplysningDokumentConverter implements AttributeConverter<SaksopplysningDokument, String> {
 
     private static final Logger log = LoggerFactory.getLogger(SaksopplysningDokumentConverter.class);
@@ -27,6 +30,7 @@ public class SaksopplysningDokumentConverter implements AttributeConverter<Sakso
         .registerModule(new JavaTimeModule())
         .registerModule(new SimpleModule()
             .addDeserializer(LovvalgBestemmelse.class, new LovvalgBestemmelseDeserializer()))
+        .registerModule(new KotlinModule.Builder().build())
         .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true)
         .addMixIn(GeografiskAdresse.class, GeografiskAdresseMixIn.class)
         .addMixIn(Inntekt.class, InntektMixin.class)
@@ -40,13 +44,17 @@ public class SaksopplysningDokumentConverter implements AttributeConverter<Sakso
             return null;
         }
         try {
-            return objectMapper.writerWithView(DokumentView.Database.class)
+            return getObjectMapper().writerWithView(DokumentView.Database.class)
                 .writeValueAsString(saksopplysningDokument);
         } catch (JsonProcessingException e) {
             log.error("Kunne ikke skrive saksopplysning av type '{}' til database",
                 saksopplysningDokument.getClass());
             return null;
         }
+    }
+
+    protected ObjectMapper getObjectMapper() {
+        return objectMapper;
     }
 
     @Override

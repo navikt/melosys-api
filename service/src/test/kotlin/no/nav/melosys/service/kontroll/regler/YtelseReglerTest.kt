@@ -9,6 +9,7 @@ import no.nav.melosys.domain.dokument.inntekt.InntektDokument
 import no.nav.melosys.domain.dokument.inntekt.inntektstype.Loennsinntekt
 import no.nav.melosys.domain.dokument.inntekt.inntektstype.YtelseFraOffentlige
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -84,11 +85,7 @@ class YtelseReglerTest {
         val tom = LocalDate.now().plusYears(2)
         YtelseRegler.utbetaltYtelserFraOffentligIPeriode(
             InntektDokument().apply {
-                arbeidsInntektMaanedListe = listOf(ArbeidsInntektMaaned().apply {
-                    arbeidsInntektInformasjon = ArbeidsInntektInformasjon().apply {
-                        inntektListe = null
-                    }
-                })
+                arbeidsInntektMaanedListe = listOf(ArbeidsInntektMaaned(arbeidsInntektInformasjon = ArbeidsInntektInformasjon()))
             },
             fom,
             tom
@@ -100,13 +97,30 @@ class YtelseReglerTest {
 
     }
 
-    private fun hentArbeidsInntektMaaned(medYtelserFraOffentlig: Boolean, fom: LocalDate): ArbeidsInntektMaaned = ArbeidsInntektMaaned().apply {
+    private fun hentArbeidsInntektMaaned(medYtelserFraOffentlig: Boolean, fom: LocalDate): ArbeidsInntektMaaned = ArbeidsInntektMaaned(
         arbeidsInntektInformasjon = ArbeidsInntektInformasjon()
+    ).apply {
         arbeidsInntektInformasjon.inntektListe = hentInntektsListe(medYtelserFraOffentlig, fom)
     }
 
     private fun hentInntektsListe(medYtelserFraOffentlig: Boolean, fom: LocalDate): List<Inntekt> =
-        listOf(Loennsinntekt()) + if (medYtelserFraOffentlig) listOf(YtelseFraOffentlige().apply {
-            utbetaltIPeriode = YearMonth.from(fom).plusMonths(1)
-        }) else emptyList()
+        listOf(
+            Loennsinntekt(
+                beloep = BigDecimal(50000),
+                fordel = "fordel",
+                inntektskilde = "inntektskilde",
+                inntektsperiodetype = "inntektsperiodetype",
+                inntektsstatus = "inntektsstatus",
+                utbetaltIPeriode = YearMonth.now()
+            )
+        ) + if (medYtelserFraOffentlig) listOf(
+            YtelseFraOffentlige(
+                beloep = BigDecimal(50000),
+                fordel = "fordel",
+                inntektskilde = "inntektskilde",
+                inntektsperiodetype = "inntektsperiodetype",
+                inntektsstatus = "inntektsstatus",
+                utbetaltIPeriode = YearMonth.from(fom).plusMonths(1)
+            )
+        ) else emptyList()
 }

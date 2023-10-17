@@ -14,90 +14,93 @@ import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.*
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.inntk.inntekt.InntektResponse.TilleggsinformasjonDetaljerType.*
 import java.time.LocalDateTime
-import javax.validation.Validation
+import kotlin.reflect.full.primaryConstructor
 
 class InntektKonverter {
-
-    private val validator = Validation.buildDefaultValidatorFactory().validator
 
     fun lagSaksopplysning(inntektResponse: InntektResponse): Saksopplysning {
         return Saksopplysning().apply {
             dokument = InntektDokument().apply {
                 arbeidsInntektMaanedListe = inntektResponse.arbeidsInntektMaaned.map { aim ->
-                    ArbeidsInntektMaaned().apply {
-                        aarMaaned = aim.aarMaaned
+                    ArbeidsInntektMaaned(
+                        aarMaaned = aim.aarMaaned,
                         avvikListe = aim.avvikListe?.map {
-                            Avvik().apply {
-                                ident = it.ident?.identifikator
-                                opplysningspliktigID = it.opplysningspliktig?.identifikator
-                                virksomhetID = it.virksomhet?.identifikator
-                                avvikPeriode = it.avvikPeriode
+                            Avvik(
+                                ident = it.ident.identifikator,
+                                opplysningspliktigID = it.opplysningspliktig.identifikator,
+                                virksomhetID = it.virksomhet.identifikator,
+                                avvikPeriode = it.avvikPeriode,
                                 tekst = it.tekst
-                            }
-                        } ?: emptyList()
-                        arbeidsInntektInformasjon = ArbeidsInntektInformasjon().apply {
-                            inntektListe = aim.arbeidsInntektInformasjon?.inntektListe?.map {
+                            )
+                        } ?: emptyList(),
+                        arbeidsInntektInformasjon = ArbeidsInntektInformasjon(
+                            inntektListe = aim.arbeidsInntektInformasjon.inntektListe?.map {
                                 lagSubtypeAvInntekt(it).apply {
-                                    opptjeningsperiode = Periode().apply {
-                                        fom = it.opptjeningsperiodeFom
+                                    opptjeningsperiode = Periode(
+                                        fom = it.opptjeningsperiodeFom,
                                         tom = it.opptjeningsperiodeTom
-                                    }
+                                    )
                                     arbeidsforholdREF = it.arbeidsforholdREF
-                                    beloep = it.beloep
-                                    fordel = it.fordel
-                                    inntektskilde = it.inntektskilde
-                                    inntektsperiodetype = it.inntektsperiodetype
-                                    inntektsstatus = it.inntektsstatus
                                     levereringstidspunkt = LocalDateTime.of(
                                         it.leveringstidspunkt.year, it.leveringstidspunkt.month, 1, 0, 0
                                     )
                                     opptjeningsland = it.opptjeningsland
                                     skattemessigBosattLand = it.skattemessigBosattLand
-                                    utbetaltIPeriode = it.utbetaltIMaaned
                                     opplysningspliktigID = it.opplysningspliktig?.identifikator
                                     // Denne finnes ikke i restApi, og tror ikke den er i bruk
                                     // https://nav-it.slack.com/archives/CLMJJ882W/p1689859452879089?thread_ts=1689168417.802869&cid=CLMJJ882W
                                     inntektsinnsenderID = null
                                     virksomhetID = it.virksomhet?.identifikator
-                                    tilleggsinformasjon = if (it.tilleggsinformasjon != null) Tilleggsinformasjon().apply {
-                                        kategori = it.tilleggsinformasjon.kategori
+                                    tilleggsinformasjon = if (it.tilleggsinformasjon != null) Tilleggsinformasjon(
+                                        kategori = it.tilleggsinformasjon.kategori,
                                         tilleggsinformasjonDetaljer = mapTilleggsinformasjonDetaljer(
                                             it.tilleggsinformasjon.tilleggsinformasjonDetaljer
                                         )
-                                    } else null
+                                    ) else null
                                     inntektsmottakerID = it.inntektsmottaker?.identifikator
                                     inngaarIGrunnlagForTrekk = it.inngaarIGrunnlagForTrekk
                                     utloeserArbeidsgiveravgift = it.utloeserArbeidsgiveravgift
                                     informasjonsstatus = it.informasjonsstatus
                                     beskrivelse = it.beskrivelse ?: throw TekniskException("Beskrivelse kan ikke være null")
                                 }
-                            } ?: emptyList()
-                            arbeidsforholdListe = aim.arbeidsInntektInformasjon?.arbeidsforholdListe?.map {
-                                ArbeidsforholdFrilanser().apply {
-                                    frilansPeriode = Periode().apply {
-                                        fom = it.frilansPeriodeFom
+                            } ?: emptyList(),
+                            arbeidsforholdListe = aim.arbeidsInntektInformasjon.arbeidsforholdListe?.map {
+                                ArbeidsforholdFrilanser(
+                                    frilansPeriode = Periode(
+                                        fom = it.frilansPeriodeFom,
                                         tom = it.frilansPeriodeTom
-                                    }
+                                    ),
                                     yrke = it.yrke
-                                }
+                                )
                             } ?: emptyList()
-                        }
-                    }
+                        )
+                    )
                 }
             }
         }
     }
 
     private fun lagSubtypeAvInntekt(inntekt: InntektResponse.Inntekt): Inntekt {
-        return when (inntekt.inntektType) {
-            InntektResponse.InntektType.LOENNSINNTEKT -> Loennsinntekt().apply { antall = inntekt.antall }
-            InntektResponse.InntektType.NAERINGSINNTEKT -> Naeringsinntekt()
-            InntektResponse.InntektType.PENSJON_ELLER_TRYGD -> PensjonEllerTrygd()
-            InntektResponse.InntektType.YTELSE_FRA_OFFENTLIGE -> YtelseFraOffentlige()
-            null -> throw TekniskException("InntektType kan ikke være null")
-        }
-    }
+        val args = listOf(
+            inntekt.beloep,
+            inntekt.fordel,
+            inntekt.inntektskilde,
+            inntekt.inntektsperiodetype,
+            inntekt.inntektsstatus,
+            inntekt.utbetaltIMaaned
+        ) + if (inntekt.inntektType == InntektResponse.InntektType.LOENNSINNTEKT) listOf(inntekt.antall) else emptyList()
 
+        return mapOf(
+            InntektResponse.InntektType.LOENNSINNTEKT to Loennsinntekt::class,
+            InntektResponse.InntektType.NAERINGSINNTEKT to Naeringsinntekt::class,
+            InntektResponse.InntektType.PENSJON_ELLER_TRYGD to PensjonEllerTrygd::class,
+            InntektResponse.InntektType.YTELSE_FRA_OFFENTLIGE to YtelseFraOffentlige::class
+        )[inntekt.inntektType]?.primaryConstructor?.call(*args.toTypedArray()) ?: throw TekniskException(
+            "Could not call constructor for ${inntekt.inntektType}"
+        )
+
+
+    }
 
     private fun mapTilleggsinformasjonDetaljer(tilleggsinformasjonDetaljer: InntektResponse.TilleggsinformasjonDetaljer?): TilleggsinformasjonDetaljer? =
         when (tilleggsinformasjonDetaljer?.detaljerType) {
@@ -107,10 +110,10 @@ class InntektKonverter {
                         grunnpensjonbeløp = it.grunnpensjonbeloep
                         heravEtterlattepensjon = it.heravEtterlattepensjon
                         pensjonsgrad = it.pensjonsgrad
-                        tidsrom = Periode().apply {
-                            fom = it.tidsromFom
+                        tidsrom = Periode(
+                            fom = it.tidsromFom,
                             tom = it.tidsromTom
-                        }
+                        )
                     }
                 }
 
@@ -118,10 +121,10 @@ class InntektKonverter {
                 BarnepensjonOgUnderholdsbidrag().apply {
                     (tilleggsinformasjonDetaljer as InntektResponse.BarnepensjonOgUnderholdsbidrag).let {
                         forsørgersFødselnummer = it.forsoergersFoedselnummer
-                        tidsrom = Periode().apply {
-                            fom = it.tidsromFom
+                        tidsrom = Periode(
+                            fom = it.tidsromFom,
                             tom = it.tidsromTom
-                        }
+                        )
                     }
                 }
 
@@ -133,10 +136,10 @@ class InntektKonverter {
 
             ETTERBETALINGSPERIODE -> Etterbetalingsperiode().apply {
                 (tilleggsinformasjonDetaljer as InntektResponse.Etterbetalingsperiode).let {
-                    etterbetalingsperiode = Periode().apply {
-                        fom = it.etterbetalingsperiodeFom
+                    etterbetalingsperiode = Periode(
+                        fom = it.etterbetalingsperiodeFom,
                         tom = it.etterbetalingsperiodeTom
-                    }
+                    )
                 }
             }
 
@@ -161,18 +164,4 @@ class InntektKonverter {
 
             else -> null
         }
-
-    private inline fun <T> T.apply(block: T.() -> Unit): T {
-        block()
-        return this.validate()
-    }
-
-    private fun <T> T.validate(): T {
-        validator.validate(this).run {
-            if (isNotEmpty()) throw TekniskException(
-                joinToString { "${it.rootBeanClass.simpleName}.${it.propertyPath} ${it.message}" }
-            )
-        }
-        return this
-    }
 }

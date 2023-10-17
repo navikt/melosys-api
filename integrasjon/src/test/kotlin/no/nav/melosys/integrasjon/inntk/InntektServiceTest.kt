@@ -8,6 +8,7 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.*
 import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument
+import no.nav.melosys.integrasjon.inntk.TestData.avvik
 import no.nav.melosys.integrasjon.inntk.inntekt.*
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -26,7 +27,8 @@ class InntektServiceTest {
             listOf(
                 InntektResponse.ArbeidsInntektMaaned(
                     aarMaaned = YearMonth.of(2022, 1),
-                    avvikListe = listOf(InntektResponse.Avvik(ident = aktoer)),
+                    avvikListe = listOf(avvik.copy(ident = aktoer)),
+                    arbeidsInntektInformasjon = InntektResponse.ArbeidsInntektInformasjon()
                 )
             ),
             aktoer
@@ -76,7 +78,7 @@ class InntektServiceTest {
         saksopplysning.kilder.iterator().next().mottattDokument.shouldNotBeNull()
         saksopplysning.dokument
             .shouldBeInstanceOf<InntektDokument>()
-            .getArbeidsInntektMaanedListe()
+            .arbeidsInntektMaanedListe
             .shouldBeEmpty()
     }
 

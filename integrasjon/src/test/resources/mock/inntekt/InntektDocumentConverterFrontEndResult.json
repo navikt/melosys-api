@@ -1,0 +1,112 @@
+{
+  "type" : "InntektDokument",
+  "arbeidsInntektMaanedListe" : [ {
+    "aarMaaned" : [ 2022, 1 ],
+    "arbeidsInntektInformasjon" : {
+      "inntektListe" : [ {
+        "type" : "Loennsinntekt",
+        "beloep" : 50000,
+        "fordel" : "kontantytelse",
+        "inntektskilde" : "A-ordningen",
+        "inntektsperiodetype" : "Maaned",
+        "inntektsstatus" : "LoependeInnrapportert",
+        "levereringstidspunkt" : [ 2023, 7, 1, 0, 0 ],
+        "opptjeningsland" : null,
+        "opptjeningsperiode" : {
+          "fom" : [ 2022, 1, 1 ],
+          "tom" : [ 2022, 1, 10 ]
+        },
+        "utbetaltIPeriode" : [ 2022, 1 ],
+        "opplysningspliktigID" : "928497704",
+        "virksomhetID" : "907670201",
+        "inntektsmottakerID" : "2395801903843",
+        "inngaarIGrunnlagForTrekk" : true,
+        "utloeserArbeidsgiveravgift" : true,
+        "informasjonsstatus" : "InngaarAlltid",
+        "beskrivelse" : "fastloenn"
+      } ],
+      "arbeidsforholdFrilanserListe" : [ ]
+    }
+  }, {
+    "aarMaaned" : [ 2022, 2 ],
+    "arbeidsInntektInformasjon" : {
+      "inntektListe" : [ {
+        "type" : "YtelseFraOffentlige",
+        "beloep" : 50000,
+        "fordel" : "kontantytelse",
+        "inntektskilde" : "A-ordningen",
+        "inntektsperiodetype" : "Maaned",
+        "inntektsstatus" : "LoependeInnrapportert",
+        "levereringstidspunkt" : [ 2023, 7, 1, 0, 0 ],
+        "opptjeningsland" : null,
+        "opptjeningsperiode" : {
+          "fom" : null,
+          "tom" : null
+        },
+        "utbetaltIPeriode" : [ 2022, 2 ],
+        "opplysningspliktigID" : "928497704",
+        "virksomhetID" : "907670201",
+        "inntektsmottakerID" : "2395801903843",
+        "inngaarIGrunnlagForTrekk" : true,
+        "utloeserArbeidsgiveravgift" : true,
+        "informasjonsstatus" : "InngaarAlltid",
+        "beskrivelse" : "fastloenn"
+      } ],
+      "arbeidsforholdFrilanserListe" : [ ]
+    }
+  }, {
+    "aarMaaned" : [ 2022, 3 ],
+    "arbeidsInntektInformasjon" : {
+      "inntektListe" : [ {
+        "type" : "Naeringsinntekt",
+        "beloep" : 50000,
+        "fordel" : "kontantytelse",
+        "inntektskilde" : "A-ordningen",
+        "inntektsperiodetype" : "Maaned",
+        "inntektsstatus" : "LoependeInnrapportert",
+        "levereringstidspunkt" : [ 2023, 7, 1, 0, 0 ],
+        "opptjeningsland" : null,
+        "opptjeningsperiode" : {
+          "fom" : null,
+          "tom" : null
+        },
+        "utbetaltIPeriode" : [ 2022, 3 ],
+        "opplysningspliktigID" : "928497704",
+        "virksomhetID" : "907670201",
+        "inntektsmottakerID" : "2395801903843",
+        "inngaarIGrunnlagForTrekk" : true,
+        "utloeserArbeidsgiveravgift" : true,
+        "informasjonsstatus" : "InngaarAlltid",
+        "beskrivelse" : "fastloenn"
+      } ],
+      "arbeidsforholdFrilanserListe" : [ ]
+    }
+  }, {
+    "aarMaaned" : [ 2022, 4 ],
+    "arbeidsInntektInformasjon" : {
+      "inntektListe" : [ {
+        "type" : "Naeringsinntekt",
+        "beloep" : 50000,
+        "fordel" : "kontantytelse",
+        "inntektskilde" : "A-ordningen",
+        "inntektsperiodetype" : "Maaned",
+        "inntektsstatus" : "LoependeInnrapportert",
+        "levereringstidspunkt" : [ 2023, 7, 1, 0, 0 ],
+        "opptjeningsland" : null,
+        "opptjeningsperiode" : {
+          "fom" : null,
+          "tom" : null
+        },
+        "utbetaltIPeriode" : [ 2022, 1 ],
+        "opplysningspliktigID" : null,
+        "virksomhetID" : null,
+        "inntektsmottakerID" : null,
+        "inngaarIGrunnlagForTrekk" : null,
+        "utloeserArbeidsgiveravgift" : null,
+        "informasjonsstatus" : null,
+        "beskrivelse" : "fastloenn"
+      } ],
+      "arbeidsforholdFrilanserListe" : [ ]
+    }
+  } ]
+}
