@@ -169,7 +169,7 @@ public final class BrevbestillingDto {
         this.barnFritekst = barnFritekst;
     }
 
-    public void setTrygdeavtaleFritekst(String barnFritekst) {
+    public void setTrygdeavtaleFritekst(String trygdeavgiftFritekst) {
         this.trygdeavgiftFritekst = trygdeavgiftFritekst;
     }
 
