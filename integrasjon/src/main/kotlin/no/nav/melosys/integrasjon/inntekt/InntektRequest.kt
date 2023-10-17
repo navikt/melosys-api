@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.inntk.inntekt
+package no.nav.melosys.integrasjon.inntekt
 
 import java.time.YearMonth
 

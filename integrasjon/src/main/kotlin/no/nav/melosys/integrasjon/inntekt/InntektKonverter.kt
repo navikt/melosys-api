@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.inntk.inntekt
+package no.nav.melosys.integrasjon.inntekt
 
 import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.dokument.inntekt.*
@@ -12,7 +12,7 @@ import no.nav.melosys.domain.dokument.inntekt.inntektstype.PensjonEllerTrygd
 import no.nav.melosys.domain.dokument.inntekt.inntektstype.YtelseFraOffentlige
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.*
 import no.nav.melosys.exception.TekniskException
-import no.nav.melosys.integrasjon.inntk.inntekt.InntektResponse.TilleggsinformasjonDetaljerType.*
+import no.nav.melosys.integrasjon.inntekt.InntektResponse.TilleggsinformasjonDetaljerType.*
 import java.time.LocalDateTime
 import kotlin.reflect.full.primaryConstructor
 

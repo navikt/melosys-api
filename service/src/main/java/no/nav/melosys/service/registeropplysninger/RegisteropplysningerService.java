@@ -15,7 +15,7 @@ import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.aareg.AaregFasade;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.integrasjon.inntk.InntektService;
+import no.nav.melosys.integrasjon.inntekt.InntektService;
 import no.nav.melosys.integrasjon.utbetaling.UtbetaldataRestService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kontroll.regler.PeriodeRegler;

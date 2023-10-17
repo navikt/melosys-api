@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.inntk.inntekt
+package no.nav.melosys.integrasjon.inntekt
 
 import no.nav.melosys.exception.TekniskException
 import org.springframework.http.MediaType

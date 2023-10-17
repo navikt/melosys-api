@@ -1,9 +1,9 @@
 package no.nav.melosys.melosysmock.inntekt
 
-import no.nav.melosys.integrasjon.inntk.inntekt.Aktoer
-import no.nav.melosys.integrasjon.inntk.inntekt.AktoerType
-import no.nav.melosys.integrasjon.inntk.inntekt.InntektRequest
-import no.nav.melosys.integrasjon.inntk.inntekt.InntektResponse
+import no.nav.melosys.integrasjon.inntekt.Aktoer
+import no.nav.melosys.integrasjon.inntekt.AktoerType
+import no.nav.melosys.integrasjon.inntekt.InntektRequest
+import no.nav.melosys.integrasjon.inntekt.InntektResponse
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
