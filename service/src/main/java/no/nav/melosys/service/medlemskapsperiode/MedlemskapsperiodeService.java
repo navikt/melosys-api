@@ -136,11 +136,15 @@ public class MedlemskapsperiodeService {
             }
         }
         for (Medlemskapsperiode medlemskapsperiode : nyeInnvilgedeMedlemskapsperioder) {
-            if (!finnesMedlIdIMedlemskapsperioder(opprinneligeInnvilgedeMedlemskapsperioder, medlemskapsperiode.getMedlPeriodeID())) {
-                medlPeriodeService.opprettPeriodeEndelig(nyBehandlingId, medlemskapsperiode);
-            } else {
-                medlPeriodeService.oppdaterPeriodeEndelig(nyBehandlingId, medlemskapsperiode);
-            }
+            opprettEllerOppdaterMedlPeriode(opprinneligeInnvilgedeMedlemskapsperioder, medlemskapsperiode, nyBehandlingId);
+        }
+    }
+
+    private void opprettEllerOppdaterMedlPeriode(List<Medlemskapsperiode> opprinneligeInnvilgedeMedlemskapsperioder, Medlemskapsperiode medlemskapsperiode, long nyBehandlingId) {
+        if (!finnesMedlIdIMedlemskapsperioder(opprinneligeInnvilgedeMedlemskapsperioder, medlemskapsperiode.getMedlPeriodeID())) {
+            medlPeriodeService.opprettPeriodeEndelig(nyBehandlingId, medlemskapsperiode);
+        } else {
+            medlPeriodeService.oppdaterPeriodeEndelig(nyBehandlingId, medlemskapsperiode);
         }
     }
 
