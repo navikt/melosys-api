@@ -14,8 +14,6 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.repository.MedlemskapsperiodeRepository;
 import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
-import no.nav.melosys.service.avgift.dto.InntektskildeRequest;
-import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
 import org.springframework.stereotype.Service;
@@ -132,12 +130,12 @@ public class MedlemskapsperiodeService {
             (List<Medlemskapsperiode>) behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId).finnMedlemskapsperioder();
 
         for (Medlemskapsperiode medlemskapsperiode : opprinneligeMedlemskapsperioder) {
-            if (!eksistererMedlIdIMedlemskapsperioder(nyeMedlemskapsperioder, medlemskapsperiode)) {
+            if (!finnesMedlIdIMedlemskapsperioder(nyeMedlemskapsperioder, medlemskapsperiode)) {
                 medlPeriodeService.avvisPeriodeOpphørt(medlemskapsperiode.getMedlPeriodeID());
             }
         }
         for (Medlemskapsperiode medlemskapsperiode : nyeMedlemskapsperioder) {
-            if (!eksistererMedlIdIMedlemskapsperioder(opprinneligeMedlemskapsperioder, medlemskapsperiode)) {
+            if (!finnesMedlIdIMedlemskapsperioder(opprinneligeMedlemskapsperioder, medlemskapsperiode)) {
                 medlPeriodeService.opprettPeriodeEndelig(nyBehandlingId, medlemskapsperiode);
             } else {
                 medlPeriodeService.oppdaterPeriodeEndelig(nyBehandlingId, medlemskapsperiode);
@@ -146,8 +144,8 @@ public class MedlemskapsperiodeService {
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    private boolean eksistererMedlIdIMedlemskapsperioder(List<Medlemskapsperiode> medlemskapsperioder,
-                                                         Medlemskapsperiode medlemskapsperiode) {
+    private boolean finnesMedlIdIMedlemskapsperioder(List<Medlemskapsperiode> medlemskapsperioder,
+                                                     Medlemskapsperiode medlemskapsperiode) {
         return medlemskapsperioder.stream().anyMatch(periode ->
             Objects.equals(periode.getMedlPeriodeID(), medlemskapsperiode.getMedlPeriodeID())
         );
