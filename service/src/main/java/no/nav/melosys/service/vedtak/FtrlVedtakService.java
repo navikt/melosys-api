@@ -87,6 +87,8 @@ public class FtrlVedtakService {
         brevbestillingDto.setKopiMottakere(request.getKopiMottakere());
         brevbestillingDto.setInnledningFritekst(request.getInnledningFritekst());
         brevbestillingDto.setBegrunnelseFritekst(request.getBegrunnelseFritekst());
+        brevbestillingDto.setTrygdeavtaleFritekst(request.getTrygdeavgiftFritekst());
+        brevbestillingDto.setNyVurderingBakgrunn(request.getNyVurderingBakgrunn());
         brevbestillingDto.setEktefelleFritekst(request.getEktefelleFritekst());
         brevbestillingDto.setBarnFritekst(request.getBarnFritekst());
         brevbestillingDto.setBestillersId(request.getBestillersId());
