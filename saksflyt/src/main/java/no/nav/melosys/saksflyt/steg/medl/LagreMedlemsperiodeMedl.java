@@ -12,14 +12,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class LagreMedlemsperiodeMedl implements StegBehandler {
 
-    private final MedlPeriodeService medlPeriodeService;
     private final MedlemskapsperiodeService medlemskapsperiodeService;
     private final BehandlingsresultatService behandlingsresultatService;
 
-    public LagreMedlemsperiodeMedl(MedlPeriodeService medlPeriodeService,
-                                   MedlemskapsperiodeService medlemskapsperiodeService,
+    public LagreMedlemsperiodeMedl(MedlemskapsperiodeService medlemskapsperiodeService,
                                    BehandlingsresultatService behandlingsresultatService) {
-        this.medlPeriodeService = medlPeriodeService;
         this.medlemskapsperiodeService = medlemskapsperiodeService;
         this.behandlingsresultatService = behandlingsresultatService;
     }
@@ -41,16 +38,8 @@ public class LagreMedlemsperiodeMedl implements StegBehandler {
             medlemskapsperiodeService.erstattMedlemskapsperioder(innvilgedeMedlemskapsperioder, behandling.getOpprinneligBehandling().getId(), behandlingId);
         } else {
             for (Medlemskapsperiode medlemskapsperiode : innvilgedeMedlemskapsperioder) {
-                opprettEllerOppdaterMedlPeriode(behandlingId, medlemskapsperiode);
+                medlemskapsperiodeService.opprettEllerOppdaterMedlPeriode(behandlingId, medlemskapsperiode);
             }
-        }
-    }
-
-    private void opprettEllerOppdaterMedlPeriode(long behandlingId, Medlemskapsperiode medlemskapsperiode) {
-        if (medlemskapsperiode.getMedlPeriodeID() == null) {
-            medlPeriodeService.opprettPeriodeEndelig(behandlingId, medlemskapsperiode);
-        } else {
-            medlPeriodeService.oppdaterPeriodeEndelig(behandlingId, medlemskapsperiode);
         }
     }
 }

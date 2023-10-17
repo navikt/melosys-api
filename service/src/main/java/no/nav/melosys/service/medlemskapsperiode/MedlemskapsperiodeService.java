@@ -136,19 +136,18 @@ public class MedlemskapsperiodeService {
             }
         }
         for (Medlemskapsperiode medlemskapsperiode : nyeInnvilgedeMedlemskapsperioder) {
-            opprettEllerOppdaterMedlPeriode(opprinneligeInnvilgedeMedlemskapsperioder, medlemskapsperiode, nyBehandlingId);
+            opprettEllerOppdaterMedlPeriode(nyBehandlingId, medlemskapsperiode);
         }
     }
 
-    private void opprettEllerOppdaterMedlPeriode(List<Medlemskapsperiode> opprinneligeInnvilgedeMedlemskapsperioder, Medlemskapsperiode medlemskapsperiode, long nyBehandlingId) {
-        if (!finnesMedlIdIMedlemskapsperioder(opprinneligeInnvilgedeMedlemskapsperioder, medlemskapsperiode.getMedlPeriodeID())) {
-            medlPeriodeService.opprettPeriodeEndelig(nyBehandlingId, medlemskapsperiode);
+    public void opprettEllerOppdaterMedlPeriode(long behandlingId, Medlemskapsperiode medlemskapsperiode) {
+        if (medlemskapsperiode.getMedlPeriodeID() == null) {
+            medlPeriodeService.opprettPeriodeEndelig(behandlingId, medlemskapsperiode);
         } else {
-            medlPeriodeService.oppdaterPeriodeEndelig(nyBehandlingId, medlemskapsperiode);
+            medlPeriodeService.oppdaterPeriodeEndelig(behandlingId, medlemskapsperiode);
         }
     }
 
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private boolean finnesMedlIdIMedlemskapsperioder(List<Medlemskapsperiode> medlemskapsperioder,
                                                      Long medlPeriodeId) {
         return medlemskapsperioder.stream().anyMatch(periode ->

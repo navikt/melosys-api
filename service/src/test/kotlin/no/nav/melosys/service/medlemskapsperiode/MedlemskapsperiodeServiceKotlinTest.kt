@@ -16,7 +16,6 @@ import no.nav.melosys.service.MedlemAvFolketrygdenService
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.medl.MedlPeriodeService
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -160,6 +159,25 @@ class MedlemskapsperiodeServiceKotlinTest {
         verify(exactly = 0) { medlPeriodeService.avvisPeriodeOpphørt(2L) }
         verify(exactly = 0) { medlPeriodeService.opprettPeriodeEndelig(any<Long>(), any()) }
     }
+
+    @Test
+    fun `opprettEllerOppdaterMedlPeriode oppretter når medlId ikke finnes`() {
+        val medlemskapsperiodeUtenMedlId = Medlemskapsperiode()
+
+        medlemskapsperiodeService.opprettEllerOppdaterMedlPeriode(1L, medlemskapsperiodeUtenMedlId)
+
+        verify(exactly = 1) { medlPeriodeService.opprettPeriodeEndelig(1L, medlemskapsperiodeUtenMedlId) }
+    }
+
+    @Test
+    fun `opprettEllerOppdaterMedlPeriode oppdaterer når medlId finnes`() {
+        val medlemskapsperiodeMedMedlId = Medlemskapsperiode().apply { medlPeriodeID = 1L }
+
+        medlemskapsperiodeService.opprettEllerOppdaterMedlPeriode(1L, medlemskapsperiodeMedMedlId)
+
+        verify(exactly = 1) { medlPeriodeService.oppdaterPeriodeEndelig(1L, medlemskapsperiodeMedMedlId) }
+    }
+
 
     private fun setupHappyPathBehandling(
         sakstype: Sakstyper = Sakstyper.EU_EOS,

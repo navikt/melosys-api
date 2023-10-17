@@ -45,7 +45,7 @@ class LagreMedlemsperiodeMedlTest {
 
     @BeforeEach
     void init() {
-        lagreMedlemsperiodeMedl = new LagreMedlemsperiodeMedl(medlPeriodeService, medlemskapsperiodeService, behandlingsresultatService);
+        lagreMedlemsperiodeMedl = new LagreMedlemsperiodeMedl(medlemskapsperiodeService, behandlingsresultatService);
         prosessinstans = lagProsessInstans();
     }
 
@@ -75,7 +75,7 @@ class LagreMedlemsperiodeMedlTest {
     }
 
     @Test
-    void utfør_innvilgedeMedlemskapsperioder_oppretterMedlPerioder() {
+    void utfør_innvilgedeMedlemskapsperioder_oppretterEllerOppdatererMedlPerioder() {
         var medlemskapsperioder = List.of(lagMedlemskapsperiode(INNVILGET), lagMedlemskapsperiode(INNVILGET));
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID))
             .thenReturn(lagBehandlingsresulat(medlemskapsperioder));
@@ -84,21 +84,7 @@ class LagreMedlemsperiodeMedlTest {
         lagreMedlemsperiodeMedl.utfør(lagProsessInstans());
 
 
-        verify(medlPeriodeService, times(2)).opprettPeriodeEndelig(eq(BEHANDLING_ID), any(Medlemskapsperiode.class));
-    }
-
-    @Test
-    void utfør_innvilgedeMedlemskapsperioderMedMedlPeriodeID_oppdatererEksisterendeMedlPerioder() {
-        var medlemskapsperioder = List.of(lagMedlemskapsperiode(INNVILGET), lagMedlemskapsperiode(INNVILGET));
-        medlemskapsperioder.forEach(medlemskapsperiode -> medlemskapsperiode.setMedlPeriodeID(1L));
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID))
-            .thenReturn(lagBehandlingsresulat(medlemskapsperioder));
-
-
-        lagreMedlemsperiodeMedl.utfør(lagProsessInstans());
-
-
-        verify(medlPeriodeService, times(2)).oppdaterPeriodeEndelig(eq(BEHANDLING_ID), any(Medlemskapsperiode.class));
+        verify(medlemskapsperiodeService, times(2)).opprettEllerOppdaterMedlPeriode(eq(BEHANDLING_ID), any(Medlemskapsperiode.class));
     }
 
     @Test
