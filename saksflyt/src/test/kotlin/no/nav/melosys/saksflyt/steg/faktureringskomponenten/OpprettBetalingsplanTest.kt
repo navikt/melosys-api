@@ -10,10 +10,7 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.*
-import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.Penger
-import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
@@ -28,6 +25,7 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall
 import no.nav.melosys.saksflyt.faktureringskomponenten.OpprettBetalingsplan
 import no.nav.melosys.service.aktoer.KontaktopplysningService
+import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.persondata.PersondataService
@@ -58,6 +56,8 @@ class OpprettBetalingsplanTest {
     @RelaxedMockK
     lateinit var pdlService: PersondataService
 
+    lateinit var trygdeavgiftMottakerService: TrygdeavgiftMottakerService
+
     private val unleash = FakeUnleash()
     private val slotFakturaserieDto = slot<FakturaserieDto>()
 
@@ -71,8 +71,9 @@ class OpprettBetalingsplanTest {
 
     @BeforeEach
     internal fun setUp() {
-        unleash.enable("melosys.folketrygden.mvp")
+        unleash.enableAll()
         slotFakturaserieDto.clear()
+        trygdeavgiftMottakerService = TrygdeavgiftMottakerService()
 
         opprettBetalingsplan = OpprettBetalingsplan(
             behandlingService,
@@ -80,6 +81,7 @@ class OpprettBetalingsplanTest {
             faktureringskomponentenConsumer,
             kontaktopplysningService,
             pdlService,
+            trygdeavgiftMottakerService,
             unleash
         )
     }
@@ -153,8 +155,11 @@ class OpprettBetalingsplanTest {
         lagTestData(emptySet())
         behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.inntektsperioder.first()
             .apply {
-                isOrdinærTrygdeavgiftBetalesTilSkatt = true
                 isArbeidsgiversavgiftBetalesTilSkatt = true
+            }
+        behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge.first()
+            .apply {
+                skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
             }
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
@@ -269,6 +274,7 @@ class OpprettBetalingsplanTest {
             trygdeavgiftsperioder = mutableSetOf(lagTrygdeavgift(this))
             trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
                 inntektsperioder = listOf(lagInntektsperiode())
+                skatteforholdTilNorge = listOf(lagSkatteforholdTilNorge())
             }
         }
     }
@@ -288,6 +294,14 @@ class OpprettBetalingsplanTest {
             fomDato = LocalDate.of(2023, 1, 1)
             tomDato = LocalDate.of(2023, 5, 1)
             avgiftspliktigInntektMnd = Penger(5000.0)
+        }
+    }
+
+    private fun lagSkatteforholdTilNorge(): SkatteforholdTilNorge {
+        return SkatteforholdTilNorge().apply {
+            fomDato = LocalDate.of(2022, 1, 1)
+            tomDato = LocalDate.of(2023, 5, 31)
+            skatteplikttype = Skatteplikttype.IKKE_SKATTEPLIKTIG
         }
     }
 

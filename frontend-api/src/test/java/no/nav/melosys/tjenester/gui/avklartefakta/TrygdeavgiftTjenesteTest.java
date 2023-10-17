@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.getunleash.Unleash;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.avgift.*;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
@@ -13,6 +14,7 @@ import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Inntektskildetype;
 import no.nav.melosys.domain.kodeverk.Skatteplikttype;
 import no.nav.melosys.domain.kodeverk.Trygdedekninger;
+import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService;
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest;
@@ -45,6 +47,10 @@ class TrygdeavgiftTjenesteTest {
     private TrygdeavgiftsberegningService trygdeavgiftsberegningService;
     @MockBean
     private TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService;
+    @MockBean
+    private TrygdeavgiftMottakerService trygdeavgiftMottakerService;
+    @MockBean
+    private Unleash unleash;
 
     @Autowired
     private MockMvc mockMvc;

@@ -540,7 +540,6 @@ class BrevmottakerServiceTest {
     private void mockFastsattTrygdeavgift(Fagsak fagsak, long norskinntekt, boolean selvbetalende) {
         var inntektsperiode = new Inntektsperiode();
         inntektsperiode.setType(Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE);
-        inntektsperiode.setOrdinærTrygdeavgiftBetalesTilSkatt(norskinntekt == 0);
         var fastsattTrygdeavgift = behandlingsresultat.getMedlemAvFolketrygden().getFastsattTrygdeavgift();
         fastsattTrygdeavgift.setTrygdeavgiftsperioder(Set.of(new Trygdeavgiftsperiode()));
         fastsattTrygdeavgift.setTrygdeavgiftsgrunnlag(new Trygdeavgiftsgrunnlag());
