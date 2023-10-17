@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -24,6 +25,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.BrevmalListeService;
 import no.nav.melosys.service.brev.bestilling.HentBrevAdresseTilMottakereService;
 import no.nav.melosys.service.brev.bestilling.HentMuligeProduserbaredokumenterService;
+import no.nav.melosys.service.brev.brevmalliste.BrevAdresse;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.tjenester.gui.brev.BrevmalListeBygger;
 import no.nav.melosys.tjenester.gui.dto.brev.*;
@@ -511,6 +513,55 @@ class BrevmalListeByggerTest {
                 false,
                 ANNET.getKode(),
                 false);
+    }
+
+    @Test
+    void byggBrevmalDtoListe_registeOpplysningerNorskAdresseUtenAdresselinjer_returnererMalOK() {
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
+
+        BrevAdresse brevAdresse = new BrevAdresse.Builder()
+            .medPostnr("0010")
+            .medLand(Land_iso2.NO.name())
+            .build();
+        List<BrevAdresse> brevAdresseList = new ArrayList<>();
+        brevAdresseList.add(brevAdresse);
+        when(hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(anyLong(), any())).thenReturn(brevAdresseList);
+
+
+        List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
+
+        assertThat(tilgjengeligeMaler).hasSize(4);
+        assertThat(tilgjengeligeMaler.get(0).getMottaker().getFeilmelding()).isNull();
+    }
+
+    @Test
+    void byggBrevmalDtoListe_registeOpplysningerUtenlandskadresseAdresseUtenAdresselinjer_returnererFeilkode() {
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
+
+        BrevAdresse brevAdresse = new BrevAdresse.Builder()
+            .medPostnr("0010")
+            .medLand(Land_iso2.SE.name())
+            .build();
+        List<BrevAdresse> brevAdresseList = new ArrayList<>();
+        brevAdresseList.add(brevAdresse);
+        when(hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(anyLong(), any())).thenReturn(brevAdresseList);
+
+        when(hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(anyLong(), any())).thenReturn(brevAdresseList);
+
+        List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
+
+        assertThat(tilgjengeligeMaler).hasSize(4);
+        assertThat(tilgjengeligeMaler.get(0).getMottaker())
+            .extracting(
+                MottakerDto::getType,
+                mottaker -> mottaker.getFeilmelding().tittel())
+            .containsExactly(
+                MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.getBeskrivelse(),
+                Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse());
     }
 
     private Behandling lagBehandling(Behandlingstyper type) {
