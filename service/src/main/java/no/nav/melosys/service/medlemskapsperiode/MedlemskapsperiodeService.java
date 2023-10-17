@@ -127,7 +127,8 @@ public class MedlemskapsperiodeService {
                                            long opprinneligBehandlingId,
                                            long nyBehandlingId) {
         var opprinneligeMedlemskapsperioder =
-            (List<Medlemskapsperiode>) behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId).finnMedlemskapsperioder();
+            (List<Medlemskapsperiode>) behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId)
+                .finnMedlemskapsperioder().stream().filter(Medlemskapsperiode::erInnvilget).toList();
 
         for (Medlemskapsperiode medlemskapsperiode : opprinneligeMedlemskapsperioder) {
             if (!finnesMedlIdIMedlemskapsperioder(nyeMedlemskapsperioder, medlemskapsperiode.getMedlPeriodeID())) {
