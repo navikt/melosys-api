@@ -2,7 +2,6 @@ package no.nav.melosys.integrasjon.inntk.inntekt
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
@@ -50,18 +49,7 @@ class InntektDocumentConvertTest {
             .writerWithView(DokumentView.FrontendApi::class.java)
             .writeValueAsString(saksopplysning.dokument)
 
-        val frontendResultDTOs = jacksonObjectMapper()
-            .readTree(hentRessurs("mock/inntekt/InntektDocumentConverterResult.json")).let {
-                it["arbeidsInntektMaanedListe"].forEach { node ->
-                    (node as ObjectNode).remove("avvikListe")
-                    (node["arbeidsInntektInformasjon"]["inntektListe"]
-                        .first() as ObjectNode).remove("antall")
-                }
-                it.toPrettyString()
-            }
-
-
-        frontendResultDTOs.trim().shouldBe(frontendExpectedDTOs.trim())
+        frontendExpectedDTOs.trim().shouldBe(hentRessurs("mock/inntekt/InntektDocumentConverterFrontEndResult.json").trim())
     }
 
 
