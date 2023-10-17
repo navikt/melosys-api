@@ -8,10 +8,9 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
-import io.kotest.matchers.types.shouldBeInstanceOf
 import io.kotest.matchers.types.shouldBeTypeOf
-import no.nav.melosys.domain.dokument.inntekt.Inntekt
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument
+import no.nav.melosys.domain.dokument.inntekt.InntektType
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.BonusFraForsvaret
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.ReiseKostOgLosji
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Svalbardinntekt
@@ -47,7 +46,8 @@ class InntektKonverterTest {
                 get(0).run {
                     aarMaaned.shouldBe(YearMonth.parse("2022-01"))
                     arbeidsInntektInformasjon.inntektListe.shouldHaveSize(1)
-                        .first().shouldBeInstanceOf<Inntekt>().run {
+                        .first().run {
+                            type.shouldBe(InntektType.Loennsinntekt)
                             beloep.shouldBe(BigDecimal(50000))
                             opptjeningsperiode.shouldNotBeNull()
                                 .run {
@@ -65,7 +65,8 @@ class InntektKonverterTest {
                 get(1).run {
                     aarMaaned.shouldBe(YearMonth.parse("2022-02"))
                     arbeidsInntektInformasjon.inntektListe.shouldHaveSize(1)
-                        .first().shouldBeInstanceOf<Inntekt>().run {
+                        .first().run {
+                            type.shouldBe(InntektType.YtelseFraOffentlige)
                             beloep.shouldBe(BigDecimal(50000))
                             tilleggsinformasjon
                                 ?.tilleggsinformasjonDetaljer
@@ -76,7 +77,8 @@ class InntektKonverterTest {
                 get(2).run {
                     aarMaaned.shouldBe(YearMonth.parse("2022-03"))
                     arbeidsInntektInformasjon.inntektListe.shouldHaveSize(1)
-                        .first().shouldBeInstanceOf<Inntekt>().run {
+                        .first().run {
+                            type.shouldBe(InntektType.Naeringsinntekt)
                             beloep.shouldBe(BigDecimal(50000))
                             tilleggsinformasjon
                                 ?.tilleggsinformasjonDetaljer
@@ -91,7 +93,8 @@ class InntektKonverterTest {
                 get(3).run {
                     aarMaaned.shouldBe(YearMonth.parse("2022-04"))
                     arbeidsInntektInformasjon.inntektListe.shouldHaveSize(1)
-                        .first().shouldBeInstanceOf<Inntekt>().run {
+                        .first().run {
+                            type.shouldBe(InntektType.Naeringsinntekt)
                             tilleggsinformasjon.shouldBeNull()
                         }
                 }
