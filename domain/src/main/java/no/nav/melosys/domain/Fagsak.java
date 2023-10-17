@@ -237,6 +237,7 @@ public class Fagsak extends RegistreringsInfo {
     /**
      * Henter representanten som representerer angitt {@link Representerer} eller {@code null} hvis ingen finnes.
      */
+    @Deprecated(since = "Erstattes av funnFullmektig så fort man fjerner toggle melosys.fullmakt.trygdeavgift ")
     private Optional<Aktoer> finnRepresentant(Representerer representerer) {
         Assert.notNull(representerer, "Representerer trengs for å hente representant.");
         return aktører.stream().filter(a -> REPRESENTANT.equals(a.getRolle()))
@@ -244,17 +245,18 @@ public class Fagsak extends RegistreringsInfo {
             .findFirst();
     }
 
+    @Deprecated(since = "Erstattes av finnFullmektig så fort man fjerner toggle melosys.fullmakt.trygdeavgift ")
     public Optional<Aktoer> finnRepresentantEllerFullmektig(Representerer representerer) {
         if (representerer == Representerer.BRUKER) {
             return finnRepresentant(Representerer.BRUKER).or(() -> finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD));
         } else if (representerer == Representerer.ARBEIDSGIVER) {
             return finnRepresentant(Representerer.ARBEIDSGIVER).or(() -> finnFullmektig(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER));
         } else {
-            throw new FunksjonellException("Æææææh!");
+            throw new FunksjonellException("Noe gikk galt. Vi har ikke tatt hensyn til at vi vil finne representant eller fullmektig for representerer = " + representerer);
         }
     }
 
-    public Optional<Aktoer> finnFullmektig(Fullmaktstype fullmaktstype) {
+    private Optional<Aktoer> finnFullmektig(Fullmaktstype fullmaktstype) {
         return aktører.stream()
             .filter(a -> FULLMEKTIG.equals(a.getRolle()))
             .filter(a -> a.getFullmakter().stream().anyMatch(fullmakt -> fullmakt.getType() == fullmaktstype))
