@@ -87,7 +87,7 @@ public class BrevmottakerService {
 
     private void leggTilKopier(long behandlingId, Mottakerliste mottakerliste, Collection<BrevkopiRegel> brevkopiRegler) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
-        boolean brukerHarFullmektig = behandling.getFagsak().finnRepresentant(Representerer.BRUKER).isPresent();
+        boolean brukerHarFullmektig = behandling.getFagsak().finnRepresentantEllerFullmektig(Representerer.BRUKER).isPresent();
 
         if (brevkopiRegler.contains(BRUKER_FÅR_KOPI) ||
             (brevkopiRegler.contains(BRUKER_FÅR_KOPI_HVIS_FULLMEKTIG_FINNES) && brukerHarFullmektig)) {
@@ -169,7 +169,7 @@ public class BrevmottakerService {
         }
 
         List<Mottaker> mottakere = new ArrayList<>();
-        Optional<Aktoer> representant = fagsak.finnRepresentant(Representerer.BRUKER);
+        Optional<Aktoer> representant = fagsak.finnRepresentantEllerFullmektig(Representerer.BRUKER);
         if (representant.isPresent()) {
             mottakere.add(Mottaker.av(representant.get()));
             if (tilBegge) {
@@ -182,7 +182,7 @@ public class BrevmottakerService {
     }
 
     private List<Mottaker> avklarMottakereForFullmektig(Fagsak fagsak) {
-        Optional<Aktoer> representant = fagsak.finnRepresentant(Representerer.BRUKER);
+        Optional<Aktoer> representant = fagsak.finnRepresentantEllerFullmektig(Representerer.BRUKER);
         if (representant.isPresent()) {
             return List.of(Mottaker.av(representant.get()));
         } else {
@@ -200,7 +200,7 @@ public class BrevmottakerService {
 
     private List<Mottaker> avklarMottakereForArbeidsgiver(Behandling behandling, boolean kunAvklarteVirksomheter) {
         Fagsak fagsak = behandling.getFagsak();
-        Optional<Aktoer> representant = fagsak.finnRepresentant(Representerer.ARBEIDSGIVER);
+        Optional<Aktoer> representant = fagsak.finnRepresentantEllerFullmektig(Representerer.ARBEIDSGIVER);
         if (representant.isPresent()) {
             return Collections.singletonList(Mottaker.av(representant.get()));
         } else {

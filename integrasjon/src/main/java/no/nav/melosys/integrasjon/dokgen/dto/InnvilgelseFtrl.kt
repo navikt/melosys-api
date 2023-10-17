@@ -43,7 +43,7 @@ class InnvilgelseFtrl(
     class Builder(val brevbestilling: InnvilgelseFtrlBrevbestilling) {
         private val datoMottatt = instantTilLocalDate(brevbestilling.forsendelseMottatt)
         private val brukerHarFullmektig =
-            brevbestilling.behandling.fagsak.finnRepresentant(Representerer.BRUKER).isPresent
+            brevbestilling.behandling.fagsak.finnRepresentantEllerFullmektig(Representerer.BRUKER).isPresent
 
         private var behandlingstype: Behandlingstyper = Behandlingstyper.FØRSTEGANG
         private var avgiftsperioder: List<AvgiftsperiodeDto> = emptyList()

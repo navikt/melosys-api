@@ -116,7 +116,7 @@ class Kontroll {
 
     private FerdigbehandlingKontrollData hentKontrollDataForAvslagOgHenleggelse(Behandling behandling) {
         MottatteOpplysningerData mottatteOpplysningerData = null;
-        Aktoer representant = behandling.getFagsak().finnRepresentant(Representerer.BRUKER).orElse(null);
+        Aktoer representant = behandling.getFagsak().finnRepresentantEllerFullmektig(Representerer.BRUKER).orElse(null);
         Persondata persondata = hentPersondata(behandling);
         OrganisasjonDokument organisasjon = null;
         Persondata persondataRepresentant = null;
@@ -137,7 +137,7 @@ class Kontroll {
     }
 
     private FerdigbehandlingKontrollData hentVedtakKontrollData(Behandling behandling) {
-        Aktoer representant = behandling.getFagsak().finnRepresentant(Representerer.BRUKER).orElse(null);
+        Aktoer representant = behandling.getFagsak().finnRepresentantEllerFullmektig(Representerer.BRUKER).orElse(null);
         SaksopplysningerData saksopplysningerData = hentSaksopplysningerData(behandling);
         OrganisasjonDokument organisasjon = null;
         Persondata persondataRepresentant = null;
@@ -160,7 +160,7 @@ class Kontroll {
     }
 
     private FerdigbehandlingKontrollData hentVedtakKontrollDataFTRL(Behandling behandling) {
-        Aktoer representant = behandling.getFagsak().finnRepresentant(Representerer.BRUKER).orElse(null);
+        Aktoer representant = behandling.getFagsak().finnRepresentantEllerFullmektig(Representerer.BRUKER).orElse(null);
         MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();
         MottatteOpplysningerData mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         Persondata persondata = hentPersondata(behandling);

@@ -1,9 +1,6 @@
 package no.nav.melosys.domain;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.persistence.*;
 
@@ -133,6 +130,10 @@ public class Aktoer extends RegistreringsInfo {
         return fullmakter;
     }
 
+    public Set<Fullmaktstype> getFullmaktstyper() {
+        return fullmakter != null ? fullmakter.stream().map(Fullmakt::getType).collect(Collectors.toSet()) : Collections.emptySet();
+    }
+
     public void setFullmakter(Set<Fullmakt> fullmakter) {
         this.fullmakter = fullmakter;
     }
@@ -149,7 +150,7 @@ public class Aktoer extends RegistreringsInfo {
     public boolean erPerson() {
         return switch (rolle) {
             case BRUKER -> true;
-            case REPRESENTANT -> personIdent != null;
+            case REPRESENTANT, FULLMEKTIG -> personIdent != null;
             default -> false;
         };
     }
@@ -157,7 +158,7 @@ public class Aktoer extends RegistreringsInfo {
     public boolean erOrganisasjon() {
         return switch (rolle) {
             case BRUKER -> false;
-            case REPRESENTANT -> orgnr != null;
+            case REPRESENTANT, FULLMEKTIG -> orgnr != null;
             default -> true;
         };
     }

@@ -1,6 +1,12 @@
 package no.nav.melosys.service.aktoer;
 
 import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.Fullmakt;
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
+import org.springframework.util.CollectionUtils;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class AktoerDto {
 
@@ -11,6 +17,7 @@ public class AktoerDto {
     private String rolleKode;
     private String utenlandskPersonID;
     private String representererKode;
+    private Set<Fullmaktstype> fullmakter;
     private Long databaseID;
 
     public String getAktoerID() {
@@ -69,6 +76,14 @@ public class AktoerDto {
         this.representererKode = representererKode;
     }
 
+    public Set<Fullmaktstype> getFullmakter() {
+        return fullmakter;
+    }
+
+    public void setFullmakter(Set<Fullmaktstype> fullmakter) {
+        this.fullmakter = fullmakter;
+    }
+
     public Long getDatabaseID() {
         return databaseID;
     }
@@ -87,6 +102,7 @@ public class AktoerDto {
         if (aktoer.getRepresenterer() != null) {
             aktoerDto.setRepresentererKode(aktoer.getRepresenterer().getKode());
         }
+        aktoerDto.setFullmakter(aktoer.getFullmaktstyper());
         aktoerDto.setDatabaseID(aktoer.getId());
         aktoerDto.setPersonIdent(aktoer.getPersonIdent());
         return aktoerDto;

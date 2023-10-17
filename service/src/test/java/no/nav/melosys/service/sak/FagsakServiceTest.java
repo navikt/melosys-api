@@ -26,10 +26,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
 import static no.nav.melosys.domain.kodeverk.Sakstyper.EU_EOS;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.*;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.FERDIGBEHANDLET;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.ARBEID_FLERE_LAND;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.UTSENDT_ARBEIDSTAKER;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.*;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.groups.Tuple.tuple;
@@ -132,7 +133,7 @@ class FagsakServiceTest {
         forventetRepresentant.setRolle(Aktoersroller.REPRESENTANT);
         forventetRepresentant.setOrgnr("orgnr");
         forventetRepresentant.setRepresenterer(Representerer.ARBEIDSGIVER);
-        assertThat(fagsak.finnRepresentant(Representerer.ARBEIDSGIVER)).isPresent().get()
+        assertThat(fagsak.finnRepresentantEllerFullmektig(Representerer.ARBEIDSGIVER)).isPresent().get()
             .usingRecursiveComparison().isEqualTo(forventetRepresentant);
         assertThat(fagsak.harAktørMedRolleType(Aktoersroller.FULLMEKTIG)).isFalse();
     }
@@ -171,12 +172,12 @@ class FagsakServiceTest {
         assertThat(fagsak.getBehandlinger()).isNotEmpty();
         assertThat(fagsak.getType()).isEqualTo(EU_EOS);
         assertThat(fagsak.getTema()).isEqualTo(MEDLEMSKAP_LOVVALG);
-        assertThat(fagsak.harAktørMedRolleType(Aktoersroller.REPRESENTANT)).isFalse();
-        var lagretFullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
+        var lagretFullmektig = fagsak.finnRepresentantEllerFullmektig(Representerer.ARBEIDSGIVER);
         assertThat(lagretFullmektig).isPresent().get()
             .extracting(Aktoer::getFagsak, Aktoer::getRolle, Aktoer::getOrgnr)
             .containsExactly(fagsak, Aktoersroller.FULLMEKTIG, "orgnr");
         assertThat(lagretFullmektig.get().getFullmakter()).flatExtracting(Fullmakt::getType).containsExactly(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
+        assertThat(fagsak.harAktørMedRolleType(Aktoersroller.REPRESENTANT)).isFalse();
     }
 
     @Test

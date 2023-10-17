@@ -237,11 +237,21 @@ public class Fagsak extends RegistreringsInfo {
     /**
      * Henter representanten som representerer angitt {@link Representerer} eller {@code null} hvis ingen finnes.
      */
-    public Optional<Aktoer> finnRepresentant(Representerer representerer) {
+    private Optional<Aktoer> finnRepresentant(Representerer representerer) {
         Assert.notNull(representerer, "Representerer trengs for å hente representant.");
         return aktører.stream().filter(a -> REPRESENTANT.equals(a.getRolle()))
             .filter(a -> (representerer.equals(a.getRepresenterer()) || Representerer.BEGGE.equals(a.getRepresenterer())))
             .findFirst();
+    }
+
+    public Optional<Aktoer> finnRepresentantEllerFullmektig(Representerer representerer) {
+        if (representerer == Representerer.BRUKER) {
+            return finnRepresentant(Representerer.BRUKER).or(() -> finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD));
+        } else if (representerer == Representerer.ARBEIDSGIVER) {
+            return finnRepresentant(Representerer.ARBEIDSGIVER).or(() -> finnFullmektig(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER));
+        } else {
+            throw new FunksjonellException("Æææææh!");
+        }
     }
 
     public Optional<Aktoer> finnFullmektig(Fullmaktstype fullmaktstype) {
@@ -290,6 +300,7 @@ public class Fagsak extends RegistreringsInfo {
     }
 
     public Boolean harBrukerRepresentant() {
+
         return aktører
             .stream()
             .filter(a -> a.getRolle() == REPRESENTANT)
