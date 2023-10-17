@@ -549,7 +549,6 @@ class BrevmalListeByggerTest {
         brevAdresseList.add(brevAdresse);
         when(hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(anyLong(), any())).thenReturn(brevAdresseList);
 
-        when(hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(anyLong(), any())).thenReturn(brevAdresseList);
 
         List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
 
