@@ -46,6 +46,7 @@ public class BehandlingsresultatService {
             behandlingsresultat.setBegrunnelseFritekst(null);
             behandlingsresultat.setInnledningFritekst(null);
             behandlingsresultat.setNyVurderingBakgrunn(null);
+            behandlingsresultat.setTrygdeavgiftFritekst(null);
             vilkaarsresultatService.tømVilkårForBehandlingsresultat(behandlingsresultat);
             behandlingsresultatRepository.save(behandlingsresultat);
         }
