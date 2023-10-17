@@ -5,7 +5,6 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
-import no.nav.melosys.service.medl.MedlPeriodeService;
 import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
 import org.springframework.stereotype.Component;
 
