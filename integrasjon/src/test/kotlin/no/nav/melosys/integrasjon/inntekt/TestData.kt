@@ -1,8 +1,5 @@
-package no.nav.melosys.integrasjon.inntk
+package no.nav.melosys.integrasjon.inntekt
 
-import no.nav.melosys.integrasjon.inntk.inntekt.Aktoer
-import no.nav.melosys.integrasjon.inntk.inntekt.AktoerType
-import no.nav.melosys.integrasjon.inntk.inntekt.InntektResponse
 import java.time.YearMonth
 
 object TestData {

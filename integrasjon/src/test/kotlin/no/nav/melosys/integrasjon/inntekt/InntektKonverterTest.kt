@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.inntk.inntekt
+package no.nav.melosys.integrasjon.inntekt
 
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
@@ -29,7 +29,7 @@ import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class InntekKonverterTest {
+class InntektKonverterTest {
 
     @Test
     fun `skal kunne konverter valid inntekt response`() {
@@ -180,6 +180,6 @@ class InntekKonverterTest {
         )
     }
 
-    fun hentRessurs(fil: String): String = InntekKonverterTest::class.java.classLoader.getResource(fil)
+    fun hentRessurs(fil: String): String = InntektKonverterTest::class.java.classLoader.getResource(fil)
         ?.readText(StandardCharsets.UTF_8) ?: throw IkkeFunnetException("Fant ikke $fil")
 }

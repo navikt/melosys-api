@@ -1,10 +1,9 @@
-package no.nav.melosys.integrasjon.inntk
+package no.nav.melosys.integrasjon.inntekt
 
 import mu.KotlinLogging
 import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.SaksopplysningKildesystem
 import no.nav.melosys.domain.SaksopplysningType
-import no.nav.melosys.integrasjon.inntk.inntekt.*
 import org.springframework.stereotype.Service
 import java.time.YearMonth
 

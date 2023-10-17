@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.inntk
+package no.nav.melosys.integrasjon.inntekt
 
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
@@ -8,8 +8,7 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.*
 import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument
-import no.nav.melosys.integrasjon.inntk.TestData.avvik
-import no.nav.melosys.integrasjon.inntk.inntekt.*
+import no.nav.melosys.integrasjon.inntekt.TestData.avvik
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

@@ -1,4 +1,4 @@
-package no.nav.melosys.integrasjon.inntk.inntekt
+package no.nav.melosys.integrasjon.inntekt
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
@@ -180,7 +180,7 @@ class InntektRestConsumerTest(
                 )
             )
         }.message.shouldContain(
-            "JSON decoding error: Instantiation of [simple type, class no.nav.melosys.integrasjon.inntk.inntekt.InntektResponse\$Inntekt] " +
+            "JSON decoding error: Instantiation of [simple type, class no.nav.melosys.integrasjon.inntekt.InntektResponse\$Inntekt] " +
                 "value failed for JSON property fordel due to missing (therefore NULL) value for creator parameter fordel which is a non-nullable type"
         )
     }

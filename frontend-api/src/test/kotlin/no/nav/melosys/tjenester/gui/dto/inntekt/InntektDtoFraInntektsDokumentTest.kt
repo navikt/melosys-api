@@ -8,8 +8,8 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument
 import no.nav.melosys.exception.IkkeFunnetException
-import no.nav.melosys.integrasjon.inntk.inntekt.InntektKonverter
-import no.nav.melosys.integrasjon.inntk.inntekt.InntektResponse
+import no.nav.melosys.integrasjon.inntekt.InntektKonverter
+import no.nav.melosys.integrasjon.inntekt.InntektResponse
 import org.junit.jupiter.api.Test
 import java.nio.charset.StandardCharsets
 
