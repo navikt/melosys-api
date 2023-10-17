@@ -31,9 +31,9 @@ public class LagreMedlemsperiodeMedl implements StegBehandler {
 
     @Override
     public void utfør(Prosessinstans prosessinstans) {
+        var behandling = prosessinstans.getBehandling();
         long behandlingId = prosessinstans.getBehandling().getId();
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingId);
-        var behandling = behandlingsresultat.getBehandling();
 
         var innvilgedeMedlemskapsperioder = behandlingsresultat.finnMedlemskapsperioder()
             .stream().filter(Medlemskapsperiode::erInnvilget).toList();
