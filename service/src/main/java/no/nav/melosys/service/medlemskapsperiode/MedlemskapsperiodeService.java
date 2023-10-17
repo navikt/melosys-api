@@ -123,7 +123,7 @@ public class MedlemskapsperiodeService {
     }
 
     @Transactional
-    public void erstattMedlemskapsperioder(List<Medlemskapsperiode> nyeMedlemskapsperioder,
+    public void erstattMedlemskapsperioder(List<Medlemskapsperiode> nyeInnvilgedeMedlemskapsperioder,
                                            long opprinneligBehandlingId,
                                            long nyBehandlingId) {
         var opprinneligeMedlemskapsperioder =
@@ -131,11 +131,11 @@ public class MedlemskapsperiodeService {
                 .finnMedlemskapsperioder().stream().filter(Medlemskapsperiode::erInnvilget).toList();
 
         for (Medlemskapsperiode medlemskapsperiode : opprinneligeMedlemskapsperioder) {
-            if (!finnesMedlIdIMedlemskapsperioder(nyeMedlemskapsperioder, medlemskapsperiode.getMedlPeriodeID())) {
+            if (!finnesMedlIdIMedlemskapsperioder(nyeInnvilgedeMedlemskapsperioder, medlemskapsperiode.getMedlPeriodeID())) {
                 medlPeriodeService.avvisPeriodeOpphørt(medlemskapsperiode.getMedlPeriodeID());
             }
         }
-        for (Medlemskapsperiode medlemskapsperiode : nyeMedlemskapsperioder) {
+        for (Medlemskapsperiode medlemskapsperiode : nyeInnvilgedeMedlemskapsperioder) {
             if (!finnesMedlIdIMedlemskapsperioder(opprinneligeMedlemskapsperioder, medlemskapsperiode.getMedlPeriodeID())) {
                 medlPeriodeService.opprettPeriodeEndelig(nyBehandlingId, medlemskapsperiode);
             } else {
