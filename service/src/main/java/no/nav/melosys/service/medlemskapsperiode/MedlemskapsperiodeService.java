@@ -130,12 +130,12 @@ public class MedlemskapsperiodeService {
             (List<Medlemskapsperiode>) behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId).finnMedlemskapsperioder();
 
         for (Medlemskapsperiode medlemskapsperiode : opprinneligeMedlemskapsperioder) {
-            if (!finnesMedlIdIMedlemskapsperioder(nyeMedlemskapsperioder, medlemskapsperiode)) {
+            if (!finnesMedlIdIMedlemskapsperioder(nyeMedlemskapsperioder, medlemskapsperiode.getMedlPeriodeID())) {
                 medlPeriodeService.avvisPeriodeOpphørt(medlemskapsperiode.getMedlPeriodeID());
             }
         }
         for (Medlemskapsperiode medlemskapsperiode : nyeMedlemskapsperioder) {
-            if (!finnesMedlIdIMedlemskapsperioder(opprinneligeMedlemskapsperioder, medlemskapsperiode)) {
+            if (!finnesMedlIdIMedlemskapsperioder(opprinneligeMedlemskapsperioder, medlemskapsperiode.getMedlPeriodeID())) {
                 medlPeriodeService.opprettPeriodeEndelig(nyBehandlingId, medlemskapsperiode);
             } else {
                 medlPeriodeService.oppdaterPeriodeEndelig(nyBehandlingId, medlemskapsperiode);
@@ -145,9 +145,9 @@ public class MedlemskapsperiodeService {
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private boolean finnesMedlIdIMedlemskapsperioder(List<Medlemskapsperiode> medlemskapsperioder,
-                                                     Medlemskapsperiode medlemskapsperiode) {
+                                                     Long medlPeriodeId) {
         return medlemskapsperioder.stream().anyMatch(periode ->
-            Objects.equals(periode.getMedlPeriodeID(), medlemskapsperiode.getMedlPeriodeID())
+            Objects.equals(periode.getMedlPeriodeID(), medlPeriodeId)
         );
     }
 
