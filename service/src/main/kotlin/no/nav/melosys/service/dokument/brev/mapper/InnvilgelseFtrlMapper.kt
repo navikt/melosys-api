@@ -73,7 +73,7 @@ class InnvilgelseFtrlMapper(
                 it.grunnlagInntekstperiode.type,
                 it.grunnlagInntekstperiode.avgiftspliktigInntektMnd?.verdi,
             )
-        }
+        }.sortedByDescending { it.fom }
 
     private fun mapMedlemskapsPerioder(medlemAvFolketrygden: MedlemAvFolketrygden): List<no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.MedlemskapsperiodeDto> =
         medlemAvFolketrygden.medlemskapsperioder.map {
@@ -83,7 +83,7 @@ class InnvilgelseFtrlMapper(
                 it.trygdedekning,
                 it.innvilgelsesresultat
             )
-        };
+        }.sortedByDescending { it.fom }
 
     private fun erAvslåttHelsedelFørMottaksdato(
         mottaksdato: Instant,
