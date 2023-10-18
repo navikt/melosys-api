@@ -135,7 +135,8 @@ public class Aktoer extends RegistreringsInfo {
     }
 
     public void setFullmakter(Set<Fullmakt> fullmakter) {
-        this.fullmakter = fullmakter;
+        this.fullmakter.clear();
+        this.fullmakter.addAll(fullmakter);
     }
 
     public void setFullmaktstyper(Collection<Fullmaktstype> fullmaktstyper) {

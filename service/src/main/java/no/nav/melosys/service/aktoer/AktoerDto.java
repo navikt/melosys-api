@@ -1,12 +1,11 @@
 package no.nav.melosys.service.aktoer;
 
-import no.nav.melosys.domain.Aktoer;
-import no.nav.melosys.domain.Fullmakt;
-import no.nav.melosys.domain.kodeverk.Fullmaktstype;
-import org.springframework.util.CollectionUtils;
-
 import java.util.Set;
-import java.util.stream.Collectors;
+
+import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
+import no.nav.melosys.domain.kodeverk.Representerer;
 
 public class AktoerDto {
 
@@ -105,7 +104,31 @@ public class AktoerDto {
         aktoerDto.setFullmakter(aktoer.getFullmaktstyper());
         aktoerDto.setDatabaseID(aktoer.getId());
         aktoerDto.setPersonIdent(aktoer.getPersonIdent());
+        midlertidigStøtteForBådeRepresentantOgFullmektig(aktoer, aktoerDto);
         return aktoerDto;
+    }
+
+    @Deprecated(since = "trengs ikke etter MELOSYS_FULLMAKT_TRYGDEAVGIFT fjernes og kodene er migrert")
+    private static void midlertidigStøtteForBådeRepresentantOgFullmektig(Aktoer aktoer, AktoerDto aktoerDto) {
+        if (aktoer.getRolle() == Aktoersroller.REPRESENTANT && aktoer.getRepresenterer() != null) {
+            switch (aktoer.getRepresenterer()) {
+                case BRUKER -> aktoer.setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD);
+                case ARBEIDSGIVER -> aktoer.setFullmaktstype(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
+                case BEGGE -> aktoer.setFullmaktstyper(Set.of(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER));
+            }
+        }
+        if (aktoer.getFullmaktstyper().contains(Fullmaktstype.FULLMEKTIG_SØKNAD)) {
+            var erFullmektigSøknad = aktoer.getFullmaktstyper().contains(Fullmaktstype.FULLMEKTIG_SØKNAD);
+            var erFullmektigArbeidsgiver = aktoer.getFullmaktstyper().contains(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
+
+            if (erFullmektigSøknad && erFullmektigArbeidsgiver) {
+                aktoerDto.setRepresentererKode(Representerer.BEGGE.getKode());
+            } else if (erFullmektigSøknad) {
+                aktoerDto.setRepresentererKode(Representerer.BRUKER.getKode());
+            } else if (erFullmektigArbeidsgiver) {
+                aktoerDto.setRepresentererKode(Representerer.ARBEIDSGIVER.getKode());
+            }
+        }
     }
 
 }

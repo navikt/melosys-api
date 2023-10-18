@@ -54,6 +54,13 @@ public class AktoerTjeneste {
         var representantRepresenterer = StringUtils.isNotEmpty(representerer) ? Representerer.valueOf(representerer) : null;
 
         List<Aktoer> aktører = aktoerService.hentfagsakAktører(fagsak, rolle, representantRepresenterer);
+
+        if (rolle == Aktoersroller.REPRESENTANT) {
+            aktører.addAll(aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG, representantRepresenterer));
+        }
+        if (rolle == Aktoersroller.FULLMEKTIG) {
+            aktører.addAll(aktoerService.hentfagsakAktører(fagsak, Aktoersroller.REPRESENTANT, representantRepresenterer));
+        }
         return aktører.stream().map(AktoerDto::tilDto).toList();
     }
 
