@@ -88,7 +88,7 @@ class ExceptionMapper {
         return try {
             val jsonObject = JsonParser.parseString(jsonString).asJsonObject
             if (jsonObject.has("message")) jsonObject.get("message").asString else null
-        } catch (ex: JsonSyntaxException) {
+        } catch (ex: Exception) {
             null
         }
     }
