@@ -1,7 +1,6 @@
 package no.nav.melosys.tjenester.gui.unntakshandtering
 
 import com.google.gson.JsonParser
-import com.google.gson.JsonSyntaxException
 import mu.KotlinLogging
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
@@ -45,7 +44,7 @@ class ExceptionMapper {
 
     @ExceptionHandler(WebClientResponseException::class)
     fun håndter(e: WebClientResponseException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> {
-        val feilmeldingFraRespons = extractMessageFromJson(e.responseBodyAsString)
+        val feilmeldingFraRespons = hentMessageFraJsonStreng(e.responseBodyAsString)
         return håndter(e, request, HttpStatus.INTERNAL_SERVER_ERROR, Level.ERROR, listOfNotNull(feilmeldingFraRespons))
     }
 
@@ -84,7 +83,7 @@ class ExceptionMapper {
     }
 
 
-    private fun extractMessageFromJson(jsonString: String): String? {
+    private fun hentMessageFraJsonStreng(jsonString: String): String? {
         return try {
             val jsonObject = JsonParser.parseString(jsonString).asJsonObject
             if (jsonObject.has("message")) jsonObject.get("message").asString else null
