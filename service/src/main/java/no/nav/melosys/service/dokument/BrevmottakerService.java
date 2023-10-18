@@ -169,9 +169,9 @@ public class BrevmottakerService {
         }
 
         List<Mottaker> mottakere = new ArrayList<>();
-        Optional<Aktoer> representant = fagsak.finnRepresentantEllerFullmektig(Representerer.BRUKER);
-        if (representant.isPresent()) {
-            mottakere.add(Mottaker.av(representant.get()));
+        Optional<Aktoer> fullmektig = fagsak.finnRepresentantEllerFullmektig(Representerer.BRUKER);
+        if (fullmektig.isPresent()) {
+            mottakere.add(Mottaker.av(fullmektig.get()));
             if (tilBegge) {
                 mottakere.add(Mottaker.av(bruker));
             }
@@ -182,11 +182,11 @@ public class BrevmottakerService {
     }
 
     private List<Mottaker> avklarMottakereForFullmektig(Fagsak fagsak) {
-        Optional<Aktoer> representant = fagsak.finnRepresentantEllerFullmektig(Representerer.BRUKER);
-        if (representant.isPresent()) {
-            return List.of(Mottaker.av(representant.get()));
+        Optional<Aktoer> fullmektig = fagsak.finnRepresentantEllerFullmektig(Representerer.BRUKER);
+        if (fullmektig.isPresent()) {
+            return List.of(Mottaker.av(fullmektig.get()));
         } else {
-            throw new FunksjonellException("Finner ikke fullmektig som representerer bruker");
+            throw new FunksjonellException("Finner ikke fullmektig for bruker");
         }
     }
 

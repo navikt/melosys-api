@@ -147,6 +147,10 @@ public class Aktoer extends RegistreringsInfo {
         })).collect(Collectors.toSet()));
     }
 
+    public void setFullmaktstype(Fullmaktstype fullmaktstype) {
+        setFullmaktstyper(Set.of(fullmaktstype));
+    }
+
     public boolean erPerson() {
         return switch (rolle) {
             case BRUKER -> true;
@@ -165,14 +169,6 @@ public class Aktoer extends RegistreringsInfo {
 
     public boolean erUtenlandskMyndighet() {
         return rolle == Aktoersroller.TRYGDEMYNDIGHET && (institusjonId != null || trygdemyndighetLand != null);
-    }
-
-    public boolean erBruker() {
-        return Aktoersroller.BRUKER.equals(rolle);
-    }
-
-    public boolean erVirksomhet() {
-        return Aktoersroller.VIRKSOMHET.equals(rolle);
     }
 
     public Land_iso2 getTrygdemyndighetLand() {
