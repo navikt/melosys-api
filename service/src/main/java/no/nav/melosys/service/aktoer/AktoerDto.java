@@ -112,12 +112,12 @@ public class AktoerDto {
     private static void midlertidigStøtteForBådeRepresentantOgFullmektig(Aktoer aktoer, AktoerDto aktoerDto) {
         if (aktoer.getRolle() == Aktoersroller.REPRESENTANT && aktoer.getRepresenterer() != null) {
             switch (aktoer.getRepresenterer()) {
-                case BRUKER -> aktoer.setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD);
-                case ARBEIDSGIVER -> aktoer.setFullmaktstype(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
-                case BEGGE -> aktoer.setFullmaktstyper(Set.of(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER));
+                case BRUKER -> aktoerDto.setFullmakter(Set.of(Fullmaktstype.FULLMEKTIG_SØKNAD));
+                case ARBEIDSGIVER -> aktoerDto.setFullmakter(Set.of(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER));
+                case BEGGE -> aktoerDto.setFullmakter(Set.of(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER));
             }
         }
-        if (aktoer.getFullmaktstyper().contains(Fullmaktstype.FULLMEKTIG_SØKNAD)) {
+        if (aktoer.getRolle() == Aktoersroller.FULLMEKTIG) {
             var erFullmektigSøknad = aktoer.getFullmaktstyper().contains(Fullmaktstype.FULLMEKTIG_SØKNAD);
             var erFullmektigArbeidsgiver = aktoer.getFullmaktstyper().contains(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
 
