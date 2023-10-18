@@ -35,7 +35,6 @@ public class SaksopplysningDokumentConverter implements AttributeConverter<Sakso
         .registerModule(new KotlinModule.Builder().build())
         .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, true)
         .addMixIn(GeografiskAdresse.class, GeografiskAdresseMixIn.class)
-//        .addMixIn(Inntekt.class, InntektMixin.class)
         .addMixIn(MidlertidigPostadresse.class, MidlertidigPostadresseMixIn.class)
         .addMixIn(SaksopplysningDokument.class, SaksopplysningDokumentMixIn.class)
         .addMixIn(TilleggsinformasjonDetaljer.class, TilleggsinformasjonDetaljerMixIn.class);

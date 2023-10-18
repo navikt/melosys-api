@@ -50,9 +50,6 @@ class InntektKonverter {
                                     opptjeningsland = it.opptjeningsland,
                                     skattemessigBosattLand = it.skattemessigBosattLand,
                                     opplysningspliktigID = it.opplysningspliktig?.identifikator,
-                                    // Denne finnes ikke i restApi, og tror ikke den er i bruk
-                                    // https://nav-it.slack.com/archives/CLMJJ882W/p1689859452879089?thread_ts=1689168417.802869&cid=CLMJJ882W
-                                    inntektsinnsenderID = null,
                                     virksomhetID = it.virksomhet?.identifikator,
                                     tilleggsinformasjon = if (it.tilleggsinformasjon != null) Tilleggsinformasjon(
                                         kategori = it.tilleggsinformasjon.kategori,
@@ -84,7 +81,7 @@ class InntektKonverter {
     }
 
     private fun mapInntektType(inntektType: InntektResponse.InntektType): InntektType {
-        return mapOf( //
+        return mapOf(
             InntektResponse.InntektType.LOENNSINNTEKT to InntektType.Loennsinntekt,
             InntektResponse.InntektType.NAERINGSINNTEKT to InntektType.Naeringsinntekt,
             InntektResponse.InntektType.PENSJON_ELLER_TRYGD to InntektType.PensjonEllerTrygd,
