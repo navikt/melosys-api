@@ -200,9 +200,9 @@ public class BrevmottakerService {
 
     private List<Mottaker> avklarMottakereForArbeidsgiver(Behandling behandling, boolean kunAvklarteVirksomheter) {
         Fagsak fagsak = behandling.getFagsak();
-        Optional<Aktoer> representant = fagsak.finnRepresentantEllerFullmektig(Representerer.ARBEIDSGIVER);
-        if (representant.isPresent()) {
-            return Collections.singletonList(Mottaker.av(representant.get()));
+        Optional<Aktoer> fullmektig = fagsak.finnRepresentantEllerFullmektig(Representerer.ARBEIDSGIVER);
+        if (fullmektig.isPresent()) {
+            return Collections.singletonList(Mottaker.av(fullmektig.get()));
         } else {
             return kunAvklarteVirksomheter ? avklarArbeidsgiverFraAvklarteVirksomheter(behandling) : avklarArbeidsgiverFraAlleVirksomheter(behandling);
         }

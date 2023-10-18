@@ -2,7 +2,6 @@ package no.nav.melosys.service.kontroll.feature.postadresse
 
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.Aktoersroller
-import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Representerer
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.service.behandling.BehandlingService
@@ -44,9 +43,9 @@ class PostadresseKontrollService(
     }
 
     private fun oppdaterKontekstForBehandling(kontekst: PostadressesjekkKontekst, behandling: Behandling) {
-        val representantTilBruker = behandling.fagsak.finnRepresentantEllerFullmektig(Representerer.BRUKER)
-        if (representantTilBruker.isPresent) {
-            kontekst.oppdaterForRepresentantTilBruker(representantTilBruker.get())
+        val fullmektigForBruker = behandling.fagsak.finnRepresentantEllerFullmektig(Representerer.BRUKER)
+        if (fullmektigForBruker.isPresent) {
+            kontekst.oppdaterForFullmektigTilBruker(fullmektigForBruker.get())
         } else {
             kontekst.oppdaterForBruker(behandling.fagsak.hentBrukersAktørID())
         }

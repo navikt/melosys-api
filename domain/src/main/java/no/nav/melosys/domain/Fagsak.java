@@ -259,7 +259,7 @@ public class Fagsak extends RegistreringsInfo {
     private Optional<Aktoer> finnFullmektig(Fullmaktstype fullmaktstype) {
         return aktører.stream()
             .filter(a -> FULLMEKTIG.equals(a.getRolle()))
-            .filter(a -> a.getFullmakter().stream().anyMatch(fullmakt -> fullmakt.getType() == fullmaktstype))
+            .filter(a -> a.getFullmaktstyper().contains(fullmaktstype))
             .findFirst();
     }
 
@@ -301,12 +301,13 @@ public class Fagsak extends RegistreringsInfo {
         }
     }
 
-    public Boolean harBrukerRepresentant() {
-
-        return aktører
+    public Boolean harBrukerFullmektig() {
+        var harRepresentant = aktører
             .stream()
             .filter(a -> a.getRolle() == REPRESENTANT)
             .anyMatch(aktoer -> aktoer.getRepresenterer() == Representerer.BRUKER || aktoer.getRepresenterer() == Representerer.BEGGE);
+        var harFullmektig = finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD).isPresent();
+        return harRepresentant ||  harFullmektig;
     }
 
     @Override

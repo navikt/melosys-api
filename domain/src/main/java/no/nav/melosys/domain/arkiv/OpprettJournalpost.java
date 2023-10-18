@@ -2,14 +2,11 @@ package no.nav.melosys.domain.arkiv;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 import com.google.common.collect.MoreCollectors;
-import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.msm.AltinnDokument;
 
