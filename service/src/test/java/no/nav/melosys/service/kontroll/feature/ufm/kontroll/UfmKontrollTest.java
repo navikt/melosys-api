@@ -1,6 +1,5 @@
 package no.nav.melosys.service.kontroll.feature.ufm.kontroll;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
@@ -8,11 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.domain.dokument.felles.Land;
-import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon;
-import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned;
-import no.nav.melosys.domain.dokument.inntekt.Inntekt;
-import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
-import no.nav.melosys.domain.dokument.inntekt.inntektstype.YtelseFraOffentlige;
+import no.nav.melosys.domain.dokument.inntekt.*;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
@@ -167,14 +162,7 @@ class UfmKontrollTest {
         medlemskapDokument.getMedlemsperiode().add(medlemsperiode);
 
         InntektDokument inntektDokument = new InntektDokument();
-        Inntekt inntekt = new YtelseFraOffentlige(
-            new BigDecimal(50000),
-            "fordel",
-            "inntektskilde",
-            "inntektsperiodetype",
-            "inntektsstatus",
-            YearMonth.now().plusYears(2)
-        );
+        Inntekt inntekt = InntektTestFactory.createInntektForTest(InntektType.YtelseFraOffentlige, YearMonth.now().plusYears(2));
 
         ArbeidsInntektMaaned arbeidsInntektMaaned = new ArbeidsInntektMaaned(null, null,
             new ArbeidsInntektInformasjon(List.of(inntekt), Collections.emptyList()));

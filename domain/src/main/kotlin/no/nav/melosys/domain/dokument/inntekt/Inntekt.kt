@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.dokument.inntekt
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonPropertyOrder
 import com.fasterxml.jackson.annotation.JsonView
 import no.nav.melosys.domain.dokument.DokumentView
@@ -9,6 +10,7 @@ import java.time.LocalDateTime
 import java.time.YearMonth
 
 @JsonPropertyOrder(
+    "type",
     "arbeidsforholdREF",
     "beloep",
     "fordel",
@@ -28,10 +30,12 @@ import java.time.YearMonth
     "inngaarIGrunnlagForTrekk",
     "utloeserArbeidsgiveravgift",
     "informasjonsstatus",
-    "beskrivelse"
+    "beskrivelse",
+    "antall"
 )
-abstract class Inntekt(
-    @field:JsonView(DokumentView.Database::class)
+data class Inntekt(
+    var type: InntektType,
+    @JsonView(DokumentView.Database::class)
     var arbeidsforholdREF: String? = null,
     val beloep: BigDecimal,
     val fordel: String, //Fordel http://nav.no/kodeverk/Kodeverk/Fordel
@@ -42,21 +46,25 @@ abstract class Inntekt(
     var opptjeningsland: String? = null,
     var opptjeningsperiode: Periode = Periode(),
 
-    @field:JsonView(DokumentView.Database::class)
+    @JsonView(DokumentView.Database::class)
     var skattemessigBosattLand: String? = null,
 
     val utbetaltIPeriode: YearMonth,
     var opplysningspliktigID: String? = null,
 
-    @field:JsonView(DokumentView.Database::class)
+    @JsonView(DokumentView.Database::class)
     var inntektsinnsenderID: String? = null,
     var virksomhetID: String? = null,
 
-    @field:JsonView(DokumentView.Database::class)
+    @JsonView(DokumentView.Database::class)
     var tilleggsinformasjon: Tilleggsinformasjon? = null,
     var inntektsmottakerID: String? = null,
     var inngaarIGrunnlagForTrekk: Boolean? = null,
     var utloeserArbeidsgiveravgift: Boolean? = null,
     var informasjonsstatus: String? = null, //"http://nav.no/kodeverk/Kodeverk/Informasjonsstatuser"
-    var beskrivelse: String? = null
+    var beskrivelse: String? = null,
+
+    @JsonView(DokumentView.Database::class)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    var antall: Int? = null
 )

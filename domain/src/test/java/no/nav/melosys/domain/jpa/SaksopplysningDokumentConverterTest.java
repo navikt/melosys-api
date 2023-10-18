@@ -7,7 +7,6 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon;
 import no.nav.melosys.domain.dokument.inntekt.Inntekt;
 import no.nav.melosys.domain.dokument.inntekt.InntektDokument;
-import no.nav.melosys.domain.dokument.inntekt.inntektstype.Loennsinntekt;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
@@ -53,7 +52,7 @@ class SaksopplysningDokumentConverterTest {
             .randomize(inClass(PersonDokument.class).and(named("midlertidigPostadresse")),
                 () -> random.nextObject(MidlertidigPostadresseNorge.class))
             .randomize(inClass(ArbeidsInntektInformasjon.class).and(named("inntektListe")),
-                () -> List.of(random.nextObject(Inntekt.class), random.nextObject(Loennsinntekt.class))));
+                () -> List.of(random.nextObject(Inntekt.class), random.nextObject(Inntekt.class))));
     }
 
     @Test

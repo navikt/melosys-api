@@ -6,15 +6,10 @@ import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon
 import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned
 import no.nav.melosys.domain.dokument.inntekt.Avvik
 import no.nav.melosys.domain.dokument.inntekt.Inntekt
-import no.nav.melosys.domain.dokument.inntekt.inntektstype.Loennsinntekt
-import no.nav.melosys.domain.dokument.inntekt.inntektstype.Naeringsinntekt
-import no.nav.melosys.domain.dokument.inntekt.inntektstype.PensjonEllerTrygd
-import no.nav.melosys.domain.dokument.inntekt.inntektstype.YtelseFraOffentlige
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.*
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.inntekt.InntektResponse.TilleggsinformasjonDetaljerType.*
 import java.time.LocalDateTime
-import kotlin.reflect.full.primaryConstructor
 
 class InntektKonverter {
 
@@ -35,34 +30,39 @@ class InntektKonverter {
                         } ?: emptyList(),
                         arbeidsInntektInformasjon = ArbeidsInntektInformasjon(
                             inntektListe = aim.arbeidsInntektInformasjon.inntektListe?.map {
-                                lagSubtypeAvInntekt(it).apply {
+                                Inntekt(
+                                    type = mapInntektType(it.inntektType),
+                                    beloep = it.beloep,
+                                    fordel = it.fordel,
+                                    inntektskilde = it.inntektskilde,
+                                    inntektsperiodetype = it.inntektsperiodetype,
+                                    inntektsstatus = it.inntektsstatus,
+                                    utbetaltIPeriode = it.utbetaltIMaaned,
+                                    antall = it.antall,
                                     opptjeningsperiode = Periode(
                                         fom = it.opptjeningsperiodeFom,
                                         tom = it.opptjeningsperiodeTom
-                                    )
-                                    arbeidsforholdREF = it.arbeidsforholdREF
+                                    ),
+                                    arbeidsforholdREF = it.arbeidsforholdREF,
                                     levereringstidspunkt = LocalDateTime.of(
                                         it.leveringstidspunkt.year, it.leveringstidspunkt.month, 1, 0, 0
-                                    )
-                                    opptjeningsland = it.opptjeningsland
-                                    skattemessigBosattLand = it.skattemessigBosattLand
-                                    opplysningspliktigID = it.opplysningspliktig?.identifikator
-                                    // Denne finnes ikke i restApi, og tror ikke den er i bruk
-                                    // https://nav-it.slack.com/archives/CLMJJ882W/p1689859452879089?thread_ts=1689168417.802869&cid=CLMJJ882W
-                                    inntektsinnsenderID = null
-                                    virksomhetID = it.virksomhet?.identifikator
+                                    ),
+                                    opptjeningsland = it.opptjeningsland,
+                                    skattemessigBosattLand = it.skattemessigBosattLand,
+                                    opplysningspliktigID = it.opplysningspliktig?.identifikator,
+                                    virksomhetID = it.virksomhet?.identifikator,
                                     tilleggsinformasjon = if (it.tilleggsinformasjon != null) Tilleggsinformasjon(
                                         kategori = it.tilleggsinformasjon.kategori,
                                         tilleggsinformasjonDetaljer = mapTilleggsinformasjonDetaljer(
                                             it.tilleggsinformasjon.tilleggsinformasjonDetaljer
                                         )
-                                    ) else null
-                                    inntektsmottakerID = it.inntektsmottaker?.identifikator
-                                    inngaarIGrunnlagForTrekk = it.inngaarIGrunnlagForTrekk
-                                    utloeserArbeidsgiveravgift = it.utloeserArbeidsgiveravgift
-                                    informasjonsstatus = it.informasjonsstatus
+                                    ) else null,
+                                    inntektsmottakerID = it.inntektsmottaker?.identifikator,
+                                    inngaarIGrunnlagForTrekk = it.inngaarIGrunnlagForTrekk,
+                                    utloeserArbeidsgiveravgift = it.utloeserArbeidsgiveravgift,
+                                    informasjonsstatus = it.informasjonsstatus,
                                     beskrivelse = it.beskrivelse ?: throw TekniskException("Beskrivelse kan ikke være null")
-                                }
+                                )
                             } ?: emptyList(),
                             arbeidsforholdListe = aim.arbeidsInntektInformasjon.arbeidsforholdListe?.map {
                                 ArbeidsforholdFrilanser(
@@ -80,26 +80,13 @@ class InntektKonverter {
         }
     }
 
-    private fun lagSubtypeAvInntekt(inntekt: InntektResponse.Inntekt): Inntekt {
-        val args = listOf(
-            inntekt.beloep,
-            inntekt.fordel,
-            inntekt.inntektskilde,
-            inntekt.inntektsperiodetype,
-            inntekt.inntektsstatus,
-            inntekt.utbetaltIMaaned
-        ) + if (inntekt.inntektType == InntektResponse.InntektType.LOENNSINNTEKT) listOf(inntekt.antall) else emptyList()
-
+    private fun mapInntektType(inntektType: InntektResponse.InntektType): InntektType {
         return mapOf(
-            InntektResponse.InntektType.LOENNSINNTEKT to Loennsinntekt::class,
-            InntektResponse.InntektType.NAERINGSINNTEKT to Naeringsinntekt::class,
-            InntektResponse.InntektType.PENSJON_ELLER_TRYGD to PensjonEllerTrygd::class,
-            InntektResponse.InntektType.YTELSE_FRA_OFFENTLIGE to YtelseFraOffentlige::class
-        )[inntekt.inntektType]?.primaryConstructor?.call(*args.toTypedArray()) ?: throw TekniskException(
-            "Could not call constructor for ${inntekt.inntektType}"
-        )
-
-
+            InntektResponse.InntektType.LOENNSINNTEKT to InntektType.Loennsinntekt,
+            InntektResponse.InntektType.NAERINGSINNTEKT to InntektType.Naeringsinntekt,
+            InntektResponse.InntektType.PENSJON_ELLER_TRYGD to InntektType.PensjonEllerTrygd,
+            InntektResponse.InntektType.YTELSE_FRA_OFFENTLIGE to InntektType.YtelseFraOffentlige
+        )[inntektType] ?: throw TekniskException("Could not map inntektType:${inntektType}}")
     }
 
     private fun mapTilleggsinformasjonDetaljer(tilleggsinformasjonDetaljer: InntektResponse.TilleggsinformasjonDetaljer?): TilleggsinformasjonDetaljer? =

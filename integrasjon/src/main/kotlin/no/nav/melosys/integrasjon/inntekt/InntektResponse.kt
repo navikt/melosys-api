@@ -40,7 +40,7 @@ data class InntektResponse(
     )
 
     data class Inntekt(
-        val inntektType: InntektType? = null,
+        val inntektType: InntektType,
         val arbeidsforholdREF: String? = null,
         val beloep: BigDecimal,
         val fordel: String,
