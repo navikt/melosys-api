@@ -1,15 +1,13 @@
 package no.nav.melosys.service.journalforing;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
 import no.nav.melosys.domain.arkiv.BrukerIdType;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Avsendertyper;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -45,6 +43,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -209,6 +208,29 @@ class JournalfoeringServiceTest {
     }
 
     @Test
+    void journalførOgOpprettSak_medFullmektig_oppretterKorrektProsessinstans() {
+        FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS);
+        opprettDto.setFagsak(fagsakDto);
+        opprettDto.setFullmektigID("ID");
+        opprettDto.setFullmakter(List.of(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER));
+        opprettDto.setFullmektigKontaktperson("Ola Nordmann");
+        opprettDto.setFullmektigKontaktOrgnr("000000000");
+        when(prosessinstansService.lagJournalføringProsessinstans(any(), any())).thenReturn(new Prosessinstans());
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+
+
+        journalfoeringService.journalførOgOpprettSak(opprettDto);
+
+
+        verify(prosessinstansService).lagre(prosessinstansArgumentCaptor.capture());
+        var lagretProsessinstans = prosessinstansArgumentCaptor.getValue();
+        assertThat(lagretProsessinstans.getData(ProsessDataKey.FULLMEKTIG)).isEqualTo(opprettDto.getFullmektigID());
+        assertThat(lagretProsessinstans.getData(ProsessDataKey.FULLMAKTER, new TypeReference<List<Fullmaktstype>>() {})).isEqualTo(opprettDto.getFullmakter());
+        assertThat(lagretProsessinstans.getData(ProsessDataKey.FULLMEKTIG_KONTAKTPERSON)).isEqualTo(opprettDto.getFullmektigKontaktperson());
+        assertThat(lagretProsessinstans.getData(ProsessDataKey.FULLMEKTIG_KONTAKT_ORGNR)).isEqualTo(opprettDto.getFullmektigKontaktOrgnr());
+    }
+
+    @Test
     void journalførOgOpprettSak_ugyldigBehandlingstypeOgSakstema_nårSenderForvaltningsmelding_kasterException() {
         opprettDto.setBehandlingstypeKode(Behandlingstyper.NY_VURDERING.getKode());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
@@ -345,6 +367,19 @@ class JournalfoeringServiceTest {
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
         verify(prosessinstansService).lagre(any(Prosessinstans.class));
+    }
+
+    @Test
+    void journalførOgOpprettSak_fullmektigUtenFullmakt_feiler() {
+        FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS);
+        opprettDto.setFagsak(fagsakDto);
+        opprettDto.setFullmektigID("ID");
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
+            .withMessageContaining("Fullmektig har ingen fullmakter");
     }
 
     @Test

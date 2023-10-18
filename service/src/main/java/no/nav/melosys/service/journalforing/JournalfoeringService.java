@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
@@ -130,6 +131,9 @@ public class JournalfoeringService {
         if (journalfoeringDto.getAvsenderType() == Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET) {
             validerSakstypeForTrygdemyndighet(sakstype, journalfoeringDto.getAvsenderID());
         }
+        if (StringUtils.isNotEmpty(journalfoeringDto.getFullmektigID()) && CollectionUtils.isEmpty(journalfoeringDto.getFullmakter())) {
+            throw new FunksjonellException("Fullmektig har ingen fullmakter");
+        }
     }
 
     private static void validerSakstypeForTrygdemyndighet(Sakstyper sakstype,
@@ -214,21 +218,20 @@ public class JournalfoeringService {
             prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalfoeringDto.getFagsak().getSoknadsperiode());
         }
 
-        if (StringUtils.isNotEmpty(journalfoeringDto.getArbeidsgiverID())) {
-            prosessinstans.setData(ProsessDataKey.ARBEIDSGIVER, journalfoeringDto.getArbeidsgiverID());
-        }
+        prosessinstans.setDataHvisIkkeTom(ProsessDataKey.ARBEIDSGIVER, journalfoeringDto.getArbeidsgiverID());
 
-        if (StringUtils.isNotEmpty(journalfoeringDto.getRepresentantID())) {
-            prosessinstans.setData(ProsessDataKey.REPRESENTANT, journalfoeringDto.getRepresentantID());
-        }
-
-        if (StringUtils.isNotEmpty(journalfoeringDto.getRepresentantKontaktPerson())) {
-            prosessinstans.setData(ProsessDataKey.REPRESENTANT_KONTAKTPERSON, journalfoeringDto.getRepresentantKontaktPerson());
-        }
-
+        prosessinstans.setDataHvisIkkeTom(ProsessDataKey.REPRESENTANT, journalfoeringDto.getRepresentantID());
+        prosessinstans.setDataHvisIkkeTom(ProsessDataKey.REPRESENTANT_KONTAKTPERSON, journalfoeringDto.getRepresentantKontaktPerson());
         if (StringUtils.isNotEmpty(journalfoeringDto.getRepresentererKode())) {
             Representerer representantRepresenterer = Representerer.valueOf(journalfoeringDto.getRepresentererKode());
             prosessinstans.setData(ProsessDataKey.REPRESENTANT_REPRESENTERER, representantRepresenterer);
+        }
+
+        prosessinstans.setDataHvisIkkeTom(ProsessDataKey.FULLMEKTIG, journalfoeringDto.getFullmektigID());
+        prosessinstans.setDataHvisIkkeTom(ProsessDataKey.FULLMEKTIG_KONTAKTPERSON, journalfoeringDto.getFullmektigKontaktperson());
+        prosessinstans.setDataHvisIkkeTom(ProsessDataKey.FULLMEKTIG_KONTAKT_ORGNR, journalfoeringDto.getFullmektigKontaktOrgnr());
+        if (!CollectionUtils.isEmpty(journalfoeringDto.getFullmakter())) {
+            prosessinstans.setData(ProsessDataKey.FULLMAKTER, journalfoeringDto.getFullmakter());
         }
 
         prosessinstansService.lagre(prosessinstans);

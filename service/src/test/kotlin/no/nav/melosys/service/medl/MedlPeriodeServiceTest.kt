@@ -8,6 +8,7 @@ import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
+
 
 @ExtendWith(MockKExtension::class)
 class MedlPeriodeServiceTest {
@@ -75,7 +77,8 @@ class MedlPeriodeServiceTest {
             medlAnmodningsperiodeService,
             utpekingsperiodeRepository,
             medlemskapsperiodeRepository,
-            fagsakService)
+            fagsakService
+        )
     }
 
     @Test
