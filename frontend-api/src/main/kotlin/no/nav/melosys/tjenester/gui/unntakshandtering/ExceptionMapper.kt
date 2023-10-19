@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui.unntakshandtering
 
+import com.google.gson.JsonParser
 import mu.KotlinLogging
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
@@ -9,7 +10,6 @@ import no.nav.melosys.integrasjon.felles.mdc.MDCOperations
 import no.nav.security.token.support.spring.validation.interceptor.JwtTokenUnauthorizedException
 import org.slf4j.MDC
 import org.slf4j.event.Level
-import org.springframework.boot.configurationprocessor.json.JSONObject
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -44,7 +44,7 @@ class ExceptionMapper {
 
     @ExceptionHandler(WebClientResponseException::class)
     fun håndter(e: WebClientResponseException, request: HttpServletRequest): ResponseEntity<Map<String, Any>> {
-        val feilmeldingFraRespons = extractMessageFromJson(e.responseBodyAsString)
+        val feilmeldingFraRespons = hentMessageFraJsonStreng(e.responseBodyAsString)
         return håndter(e, request, HttpStatus.INTERNAL_SERVER_ERROR, Level.ERROR, listOfNotNull(feilmeldingFraRespons))
     }
 
@@ -83,10 +83,10 @@ class ExceptionMapper {
     }
 
 
-    private fun extractMessageFromJson(jsonString: String): String? {
+    private fun hentMessageFraJsonStreng(jsonString: String): String? {
         return try {
-            val jsonObj = JSONObject(jsonString)
-            jsonObj.optString("message", null)
+            val jsonObject = JsonParser.parseString(jsonString).asJsonObject
+            if (jsonObject.has("message")) jsonObject.get("message").asString else null
         } catch (ex: Exception) {
             null
         }
