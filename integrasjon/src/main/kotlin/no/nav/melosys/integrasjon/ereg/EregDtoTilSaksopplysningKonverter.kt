@@ -59,7 +59,7 @@ class EregDtoTilSaksopplysningKonverter {
             bruksperiode = it.bruksperiode.tilPeriode()
             gyldighetsperiode = it.gyldighetsperiode.tilPeriode()
             this.navn = listOf(it.sammensattnavn)
-            redigertNavn = it.sammensattnavn
+            redigertNavn = ""
         }
     } ?: emptyList()
 
