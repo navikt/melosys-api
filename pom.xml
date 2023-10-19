@@ -40,7 +40,7 @@
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <!-- Melosys -->
-        <melosys.internt.kodeverk.version>5.15.211</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.15.213</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.124</melosys.brev.version>
 
         <!-- NAV -->
@@ -725,6 +725,7 @@
                     <version>${maven-surefire-plugin.version}</version>
                     <configuration>
                         <argLine>-Xms256m -Dfile.encoding=UTF-8</argLine>
+                        <trimStackTrace>false</trimStackTrace>
                     </configuration>
                 </plugin>
                 <plugin>
@@ -744,6 +745,7 @@
                         </execution>
                     </executions>
                     <configuration>
+                        <trimStackTrace>false</trimStackTrace>
                         <failIfNoTests>true</failIfNoTests>
                     </configuration>
                 </plugin>

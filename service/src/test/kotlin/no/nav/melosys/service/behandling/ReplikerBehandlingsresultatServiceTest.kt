@@ -192,7 +192,6 @@ class ReplikerBehandlingsresultatServiceTest {
             .matches { it.type == inntektsperiodeOrig.type }
             .matches { it.avgiftspliktigInntektMnd == inntektsperiodeOrig.avgiftspliktigInntektMnd }
             .matches { it.isArbeidsgiversavgiftBetalesTilSkatt == inntektsperiodeOrig.isArbeidsgiversavgiftBetalesTilSkatt }
-            .matches { it.isOrdinærTrygdeavgiftBetalesTilSkatt == inntektsperiodeOrig.isOrdinærTrygdeavgiftBetalesTilSkatt }
 
         val skatteforholdTilNorgeOrig =
             medlemAvFolketrygdenOrig.fastsattTrygdeavgift.trygdeavgiftsgrunnlag.skatteforholdTilNorge.first()
@@ -270,7 +269,6 @@ class ReplikerBehandlingsresultatServiceTest {
                 type = Inntektskildetype.INNTEKT_FRA_UTLANDET
                 avgiftspliktigInntektMnd = Penger(1000.0)
                 isArbeidsgiversavgiftBetalesTilSkatt = false
-                isOrdinærTrygdeavgiftBetalesTilSkatt = false
             })
         trygdeavgiftsgrunnlag.skatteforholdTilNorge = mutableListOf(
             SkatteforholdTilNorge().apply {

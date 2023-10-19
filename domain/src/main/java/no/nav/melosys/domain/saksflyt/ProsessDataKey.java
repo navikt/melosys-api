@@ -6,6 +6,7 @@ package no.nav.melosys.domain.saksflyt;
 public enum ProsessDataKey {
 
     AKTØR_ID("aktoerID"),
+    @Deprecated(since = "melosys.fullmektig.trygdeavgift")
     ARBEIDSGIVER("arbeidsgiver"),
     ARBEIDSGIVER_SKAL_HA_KOPI("arbeidsgiverSkalHaKopi"),
     ARKIVSYSTEM("arkivsystem"),
@@ -34,6 +35,10 @@ public enum ProsessDataKey {
     EESSI_MOTTAKERE("eessiMottakere"),
     ER_OPPDATERT_SED("erOppdatertSed"),
     FYSISKE_VEDLEGG("fysiskeVedlegg"),
+    FULLMEKTIG("fullmektig"),
+    FULLMAKTER("fullmakter"),
+    FULLMEKTIG_KONTAKTPERSON("fullmektigKontaktperson"),
+    FULLMEKTIG_KONTAKT_ORGNR("fullmektigKontaktOrgnr"),
     GSAK_SAK_ID("gsakSakID"),
     HOVEDDOKUMENT_TITTEL("hoveddokumentTittel"),
     INSTITUSJON_ID("institusjonsID"),
@@ -50,8 +55,11 @@ public enum ProsessDataKey {
     ORGNR("orgnr"),
     PERSON_IDENT("personIdent"),
     PRODUSERBART_BREV("produserbartBrev"),
+    @Deprecated(since = "melosys.fullmektig.trygdeavgift")
     REPRESENTANT("representant"),
+    @Deprecated(since = "melosys.fullmektig.trygdeavgift")
     REPRESENTANT_KONTAKTPERSON("representantKontakperson"),
+    @Deprecated(since = "melosys.fullmektig.trygdeavgift")
     REPRESENTANT_REPRESENTERER("representantRepresenterer"),
     SAKSBEHANDLER("saksbehandler"),
     SAKSBEHANDLER_NAVN("saksbehandlerNavn"),

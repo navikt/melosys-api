@@ -4,13 +4,16 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.medl.MedlPeriodeService;
+import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,6 +35,9 @@ class LagreMedlemsperiodeMedlTest {
     private MedlPeriodeService medlPeriodeService;
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
+    @Mock
+    private MedlemskapsperiodeService medlemskapsperiodeService;
+
 
     private LagreMedlemsperiodeMedl lagreMedlemsperiodeMedl;
 
@@ -39,7 +45,7 @@ class LagreMedlemsperiodeMedlTest {
 
     @BeforeEach
     void init() {
-        lagreMedlemsperiodeMedl = new LagreMedlemsperiodeMedl(medlPeriodeService, behandlingsresultatService);
+        lagreMedlemsperiodeMedl = new LagreMedlemsperiodeMedl(medlemskapsperiodeService, behandlingsresultatService);
         prosessinstans = lagProsessInstans();
     }
 
@@ -69,7 +75,7 @@ class LagreMedlemsperiodeMedlTest {
     }
 
     @Test
-    void utfør_innvilgedeMedlemskapsperioder_oppretterMedlPerioder() {
+    void utfør_innvilgedeMedlemskapsperioder_oppretterEllerOppdatererMedlPerioder() {
         var medlemskapsperioder = List.of(lagMedlemskapsperiode(INNVILGET), lagMedlemskapsperiode(INNVILGET));
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID))
             .thenReturn(lagBehandlingsresulat(medlemskapsperioder));
@@ -78,21 +84,29 @@ class LagreMedlemsperiodeMedlTest {
         lagreMedlemsperiodeMedl.utfør(lagProsessInstans());
 
 
-        verify(medlPeriodeService, times(2)).opprettPeriodeEndelig(eq(BEHANDLING_ID), any(Medlemskapsperiode.class));
+        verify(medlemskapsperiodeService, times(2)).opprettEllerOppdaterMedlPeriode(eq(BEHANDLING_ID), any(Medlemskapsperiode.class));
     }
 
     @Test
-    void utfør_innvilgedeMedlemskapsperioderMedMedlPeriodeID_oppdatererEksisterendeMedlPerioder() {
-        var medlemskapsperioder = List.of(lagMedlemskapsperiode(INNVILGET), lagMedlemskapsperiode(INNVILGET));
-        medlemskapsperioder.forEach(medlemskapsperiode -> medlemskapsperiode.setMedlPeriodeID(1L));
-        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID))
-            .thenReturn(lagBehandlingsresulat(medlemskapsperioder));
+    void utfør_avslutterMedlemskapsperioder_nårDetErNyVurderingOgInnvilgelse() {
+        Medlemskapsperiode innvilgetMedlemskapsperiode = lagMedlemskapsperiode(INNVILGET);
+        var medlemskapsperioder = List.of(lagMedlemskapsperiode(AVSLAATT), innvilgetMedlemskapsperiode);
+        Behandlingsresultat behandlingsresultat = lagBehandlingsresulat(medlemskapsperioder);
+        Fagsak fagsak = new Fagsak();
+        fagsak.setSaksnummer("MEL-1");
+        Behandling opprinneligBehandling = new Behandling();
+        opprinneligBehandling.setId(1L);
+        opprinneligBehandling.setFagsak(fagsak);
+        Prosessinstans prosessinstans = lagProsessInstans();
+        prosessinstans.getBehandling().setType(Behandlingstyper.NY_VURDERING);
+        prosessinstans.getBehandling().setOpprinneligBehandling(opprinneligBehandling);
+        prosessinstans.getBehandling().setFagsak(fagsak);
+        behandlingsresultat.setBehandling(prosessinstans.getBehandling());
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
+        lagreMedlemsperiodeMedl.utfør(prosessinstans);
 
-        lagreMedlemsperiodeMedl.utfør(lagProsessInstans());
-
-
-        verify(medlPeriodeService, times(2)).oppdaterPeriodeEndelig(eq(BEHANDLING_ID), any(Medlemskapsperiode.class));
+        verify(medlemskapsperiodeService).erstattMedlemskapsperioder(eq(List.of(innvilgetMedlemskapsperiode)), eq(1L), eq(123L));
     }
 
     private Prosessinstans lagProsessInstans() {
@@ -108,10 +122,14 @@ class LagreMedlemsperiodeMedlTest {
     private Behandlingsresultat lagBehandlingsresulat(List<Medlemskapsperiode> medlemskapsperioder) {
         MedlemAvFolketrygden medlemAvFolketrygden = new MedlemAvFolketrygden();
         medlemAvFolketrygden.setMedlemskapsperioder(medlemskapsperioder);
+        Behandling behandling = new Behandling();
+        behandling.setType(Behandlingstyper.FØRSTEGANG);
 
         Behandlingsresultat behandlingsresultat = new Behandlingsresultat();
         behandlingsresultat.setType(Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
         behandlingsresultat.setMedlemAvFolketrygden(medlemAvFolketrygden);
+        behandlingsresultat.setBehandling(behandling);
+
         return behandlingsresultat;
     }
 

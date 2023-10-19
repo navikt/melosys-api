@@ -2,11 +2,11 @@ package no.nav.melosys.domain;
 
 import no.nav.melosys.domain.kodeverk.Representerer;
 
-public class Fullmektig {
+public class Representant {
     private final String representantID;
     private final Representerer representerer;
 
-    public Fullmektig(String representantID, Representerer representerer) {
+    public Representant(String representantID, Representerer representerer) {
         this.representantID = representantID;
         this.representerer = representerer;
     }

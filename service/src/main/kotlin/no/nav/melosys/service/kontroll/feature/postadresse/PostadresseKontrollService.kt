@@ -43,9 +43,9 @@ class PostadresseKontrollService(
     }
 
     private fun oppdaterKontekstForBehandling(kontekst: PostadressesjekkKontekst, behandling: Behandling) {
-        val representantTilBruker = behandling.fagsak.finnRepresentant(Representerer.BRUKER)
-        if (representantTilBruker.isPresent) {
-            kontekst.oppdaterForRepresentantTilBruker(representantTilBruker.get())
+        val fullmektigForBruker = behandling.fagsak.finnRepresentantEllerFullmektig(Representerer.BRUKER)
+        if (fullmektigForBruker.isPresent) {
+            kontekst.oppdaterForFullmektigTilBruker(fullmektigForBruker.get())
         } else {
             kontekst.oppdaterForBruker(behandling.fagsak.hentBrukersAktørID())
         }
@@ -53,7 +53,7 @@ class PostadresseKontrollService(
 
     private fun kontrollBegrunnelseFra(kontekst: PostadressesjekkKontekst): Kontroll_begrunnelser {
         return when (kontekst.rolle) {
-            Aktoersroller.REPRESENTANT -> {
+            Aktoersroller.REPRESENTANT, Aktoersroller.FULLMEKTIG -> {
                 Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT
             }
             else -> {

@@ -1,7 +1,6 @@
 package no.nav.melosys.domain.brev;
 
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
-import no.nav.melosys.domain.kodeverk.Representerer;
 
 public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
     private String fritekstTittel;
@@ -11,7 +10,6 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
     private String saksbehandlerNrToNavn;
     private boolean brukerSkalHaKopi;
     private Mottakerroller mottakerType;
-    private Representerer representerer;
     private String dokumentTittel;
 
     public FritekstbrevBrevbestilling() {
@@ -28,7 +26,6 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
         this.saksbehandlerNrToNavn = builder.saksbehandlerNrToNavn;
         this.brukerSkalHaKopi = builder.brukerSkalHaKopi;
         this.mottakerType = builder.mottakerType;
-        this.representerer = builder.representerer;
         this.dokumentTittel = builder.dokumentTittel;
     }
 
@@ -64,10 +61,6 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
         return mottakerType;
     }
 
-    public Representerer getRepresenterer() {
-        return representerer;
-    }
-
     public Builder toBuilder() {
         return new Builder(this);
     }
@@ -80,7 +73,6 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
         private String saksbehandlerNrToNavn;
         private boolean brukerSkalHaKopi;
         private Mottakerroller mottakerType;
-        private Representerer representerer;
         private String dokumentTittel;
 
         public Builder() {
@@ -95,7 +87,6 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
             this.saksbehandlerNrToNavn = fritekstbrevBrevbestilling.saksbehandlerNrToNavn;
             this.brukerSkalHaKopi = fritekstbrevBrevbestilling.brukerSkalHaKopi;
             this.mottakerType = fritekstbrevBrevbestilling.mottakerType;
-            this.representerer = fritekstbrevBrevbestilling.representerer;
             this.dokumentTittel = fritekstbrevBrevbestilling.dokumentTittel;
         }
 
@@ -136,11 +127,6 @@ public class FritekstbrevBrevbestilling extends DokgenBrevbestilling {
 
         public Builder medMottakerType(Mottakerroller mottakerType) {
             this.mottakerType = mottakerType;
-            return this;
-        }
-
-        public Builder medRepresenterer(Representerer representerer) {
-            this.representerer = representerer;
             return this;
         }
 

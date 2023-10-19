@@ -1,9 +1,11 @@
 package no.nav.melosys.domain;
 
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 import javax.persistence.*;
 
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.TekniskException;
@@ -48,6 +50,9 @@ public class Aktoer extends RegistreringsInfo {
     @Enumerated(EnumType.STRING)
     @Column(name = "representerer")
     private Representerer representerer;
+
+    @OneToMany(mappedBy = "aktoer", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private Set<Fullmakt> fullmakter = new HashSet<>(1);
 
     public Long getId() {
         return id;
@@ -121,10 +126,36 @@ public class Aktoer extends RegistreringsInfo {
         this.representerer = representerer;
     }
 
+    public Set<Fullmakt> getFullmakter() {
+        return fullmakter;
+    }
+
+    public Set<Fullmaktstype> getFullmaktstyper() {
+        return fullmakter != null ? fullmakter.stream().map(Fullmakt::getType).collect(Collectors.toSet()) : Collections.emptySet();
+    }
+
+    public void setFullmakter(Set<Fullmakt> fullmakter) {
+        this.fullmakter.clear();
+        this.fullmakter.addAll(fullmakter);
+    }
+
+    public void setFullmaktstyper(Collection<Fullmaktstype> fullmaktstyper) {
+        setFullmakter(fullmaktstyper.stream().map((fullmaktstype -> {
+            var fullmakt = new Fullmakt();
+            fullmakt.setType(fullmaktstype);
+            fullmakt.setAktoer(this);
+            return fullmakt;
+        })).collect(Collectors.toSet()));
+    }
+
+    public void setFullmaktstype(Fullmaktstype fullmaktstype) {
+        setFullmaktstyper(Set.of(fullmaktstype));
+    }
+
     public boolean erPerson() {
         return switch (rolle) {
             case BRUKER -> true;
-            case REPRESENTANT -> personIdent != null;
+            case REPRESENTANT, FULLMEKTIG -> personIdent != null;
             default -> false;
         };
     }
@@ -132,21 +163,13 @@ public class Aktoer extends RegistreringsInfo {
     public boolean erOrganisasjon() {
         return switch (rolle) {
             case BRUKER -> false;
-            case REPRESENTANT -> orgnr != null;
+            case REPRESENTANT, FULLMEKTIG -> orgnr != null;
             default -> true;
         };
     }
 
     public boolean erUtenlandskMyndighet() {
         return rolle == Aktoersroller.TRYGDEMYNDIGHET && (institusjonId != null || trygdemyndighetLand != null);
-    }
-
-    public boolean erBruker() {
-        return Aktoersroller.BRUKER.equals(rolle);
-    }
-
-    public boolean erVirksomhet() {
-        return Aktoersroller.VIRKSOMHET.equals(rolle);
     }
 
     public Land_iso2 getTrygdemyndighetLand() {

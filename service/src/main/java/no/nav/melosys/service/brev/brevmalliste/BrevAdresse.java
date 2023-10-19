@@ -55,7 +55,7 @@ public class BrevAdresse {
     }
 
     public boolean isAdresselinjerEmpty() {
-        return adresselinjer == null || adresselinjer.stream().allMatch(String::isBlank);
+        return !Land_iso2.NO.name().equals(land) && (adresselinjer == null || adresselinjer.stream().allMatch(String::isBlank));
     }
 
     public boolean isPostnrEmpty() {

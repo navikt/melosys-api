@@ -45,6 +45,8 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
     @MockK
     private lateinit var mockBehandlingsresultatService: BehandlingsresultatService
+    @MockK
+    private lateinit var mockTrygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
     private lateinit var trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService
 
@@ -57,7 +59,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
     @BeforeEach
     fun setup() {
-        trygdeavgiftsgrunnlagService = TrygdeavgiftsgrunnlagService(mockBehandlingsresultatService)
+        trygdeavgiftsgrunnlagService = TrygdeavgiftsgrunnlagService(mockBehandlingsresultatService, mockTrygdeavgiftMottakerService)
         behandlingsresultat = Behandlingsresultat()
         forrigeBehandlingsresultat = Behandlingsresultat()
         every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)

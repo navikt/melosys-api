@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
+import io.getunleash.FakeUnleash
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
@@ -24,6 +25,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker
+import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.dokument.DokgenTestData
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
@@ -44,14 +46,21 @@ internal class InnvilgelseFtrlMapperTest {
     @MockK
     private lateinit var mockDokgenMapperDatahenter: DokgenMapperDatahenter
 
+    private var trygdeavgiftMottakerService: TrygdeavgiftMottakerService = TrygdeavgiftMottakerService()
+    private var unleash: FakeUnleash = FakeUnleash()
+
     private lateinit var innvilgelseFtrlMapper: InnvilgelseFtrlMapper
 
     @BeforeEach
     fun setup() {
+        unleash.enableAll();
+        trygdeavgiftMottakerService = TrygdeavgiftMottakerService()
         innvilgelseFtrlMapper = InnvilgelseFtrlMapper(
             mockAvklarteVirksomheterService,
-            mockDokgenMapperDatahenter
-        )
+            mockDokgenMapperDatahenter,
+            trygdeavgiftMottakerService,
+            unleash,
+            )
     }
 
     @Test
@@ -210,7 +219,12 @@ internal class InnvilgelseFtrlMapperTest {
         medlemskapsperioder = lagMedlemskapsperioder(this)
         fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
             trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
-                inntektsperioder = listOf(Inntektsperiode().apply { isOrdinærTrygdeavgiftBetalesTilSkatt = true })
+                inntektsperioder = listOf(Inntektsperiode().apply {
+                    fomDato = LocalDate.EPOCH.plusMonths(1)
+                    tomDato = LocalDate.EPOCH.plusMonths(4)
+                    type = Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE
+                    isArbeidsgiversavgiftBetalesTilSkatt = true
+                    avgiftspliktigInntektMnd = Penger(0.0) })
                 skatteforholdTilNorge =
                     listOf(SkatteforholdTilNorge().apply { skatteplikttype = Skatteplikttype.SKATTEPLIKTIG })
             }
