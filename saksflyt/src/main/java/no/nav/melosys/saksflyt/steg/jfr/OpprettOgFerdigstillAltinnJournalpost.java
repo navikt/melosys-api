@@ -56,7 +56,7 @@ public class OpprettOgFerdigstillAltinnJournalpost implements StegBehandler {
         Collection<AltinnDokument> dokumenter = altinnSoeknadService
             .hentDokumenterTilknyttetSoknad(prosessinstans.getData(ProsessDataKey.MOTTATT_SOKNAD_ID));
 
-        Optional<Aktoer> representant = fagsak.finnRepresentant(Representerer.BRUKER);
+        Optional<Aktoer> representant = fagsak.finnRepresentantEllerFullmektig(Representerer.BRUKER);
         String avsenderNavn;
         if (representant.isPresent()) {
             avsenderNavn = eregFasade.hentOrganisasjonNavn(representant.get().getOrgnr());

@@ -54,7 +54,7 @@ public class DokgenMapperDatahenter {
     }
 
     String hentFullmektigNavn(Fagsak fagsak, Representerer representerer) {
-        return fagsak.finnRepresentant(representerer)
+        return fagsak.finnRepresentantEllerFullmektig(representerer)
             .map(aktoer -> {
                 if (StringUtils.hasText(aktoer.getOrgnr())) {
                     return eregFasade.hentOrganisasjonNavn(aktoer.getOrgnr());

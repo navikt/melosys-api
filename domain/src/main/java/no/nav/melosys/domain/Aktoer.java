@@ -1,9 +1,6 @@
 package no.nav.melosys.domain;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.persistence.*;
 
@@ -133,8 +130,13 @@ public class Aktoer extends RegistreringsInfo {
         return fullmakter;
     }
 
+    public Set<Fullmaktstype> getFullmaktstyper() {
+        return fullmakter != null ? fullmakter.stream().map(Fullmakt::getType).collect(Collectors.toSet()) : Collections.emptySet();
+    }
+
     public void setFullmakter(Set<Fullmakt> fullmakter) {
-        this.fullmakter = fullmakter;
+        this.fullmakter.clear();
+        this.fullmakter.addAll(fullmakter);
     }
 
     public void setFullmaktstyper(Collection<Fullmaktstype> fullmaktstyper) {
@@ -146,10 +148,14 @@ public class Aktoer extends RegistreringsInfo {
         })).collect(Collectors.toSet()));
     }
 
+    public void setFullmaktstype(Fullmaktstype fullmaktstype) {
+        setFullmaktstyper(Set.of(fullmaktstype));
+    }
+
     public boolean erPerson() {
         return switch (rolle) {
             case BRUKER -> true;
-            case REPRESENTANT -> personIdent != null;
+            case REPRESENTANT, FULLMEKTIG -> personIdent != null;
             default -> false;
         };
     }
@@ -157,21 +163,13 @@ public class Aktoer extends RegistreringsInfo {
     public boolean erOrganisasjon() {
         return switch (rolle) {
             case BRUKER -> false;
-            case REPRESENTANT -> orgnr != null;
+            case REPRESENTANT, FULLMEKTIG -> orgnr != null;
             default -> true;
         };
     }
 
     public boolean erUtenlandskMyndighet() {
         return rolle == Aktoersroller.TRYGDEMYNDIGHET && (institusjonId != null || trygdemyndighetLand != null);
-    }
-
-    public boolean erBruker() {
-        return Aktoersroller.BRUKER.equals(rolle);
-    }
-
-    public boolean erVirksomhet() {
-        return Aktoersroller.VIRKSOMHET.equals(rolle);
     }
 
     public Land_iso2 getTrygdemyndighetLand() {

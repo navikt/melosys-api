@@ -66,7 +66,7 @@ class OpprettBetalingsplan(
         }
 
         val vedtaksdato = behandlingsresultat.vedtakMetadata.vedtaksdato
-        val fullmektig = fagsak.finnRepresentant(Representerer.BRUKER).orElse(null)
+        val fullmektig = fagsak.finnRepresentantEllerFullmektig(Representerer.BRUKER).orElse(null)
         val kontaktopplysning = hentKontaktopplysning(fagsak, fullmektig)
         val foedselsNr = pdlService.finnFolkeregisterident(fagsak.hentBrukersAktørID())
             .orElseThrow { FunksjonellException("Kunne ikke finne fødselsnummer fra PDL") }
