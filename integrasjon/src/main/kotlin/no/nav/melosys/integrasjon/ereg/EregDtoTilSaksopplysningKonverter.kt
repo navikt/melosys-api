@@ -40,13 +40,13 @@ class EregDtoTilSaksopplysningKonverter {
         } ?: organisasjon.organisasjonDetaljer.enhetstyper?.first { it.enhetstype != null }?.enhetstype
     }
 
-    private fun finSektorkode(organisasjon: OrganisasjonResponse.Organisasjon): String? {
+    private fun finSektorkode(organisasjon: OrganisasjonResponse.Organisasjon): String {
         return when (organisasjon) {
             is OrganisasjonResponse.JuridiskEnhet -> organisasjon.juridiskEnhetDetaljer?.sektorkode
             is OrganisasjonResponse.Organisasjonsledd -> organisasjon.organisasjonsleddDetaljer?.sektorkode
             is OrganisasjonResponse.Virksomhet -> finnSektorkode(organisasjon)
             else -> null
-        }
+        } ?: ""
     }
 
     private fun finnSektorkode(organisasjon: OrganisasjonResponse.Virksomhet) =
