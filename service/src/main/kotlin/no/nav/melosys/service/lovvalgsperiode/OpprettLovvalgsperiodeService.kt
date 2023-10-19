@@ -90,52 +90,37 @@ class OpprettLovvalgsperiodeService(
     ): Lovvalgsperiode {
         val anmodningEllerAttest = behandling.mottatteOpplysninger.mottatteOpplysningerData as AnmodningEllerAttest
         val lovvalgsland = anmodningEllerAttest.lovvalgsland
-        val medlemskapstype = utledMedlemskapstype(behandling.fagsak.type, bestemmelse, trygdedekning)
+        val utledetTrygdedekning = trygdedekning ?: utledTrygdedekning(bestemmelse)
+        val medlemskapstype = utledMedlemskapstype(utledetTrygdedekning)
 
         val lovvalgsperiode = eksisterendeLovvalgsperiode ?: Lovvalgsperiode().apply {
             val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.id)
             this.behandlingsresultat = behandlingsresultat
             behandlingsresultat.lovvalgsperioder.add(this)
+        }.apply {
+            this.fom = fom
+            this.fom = fom
+            this.tom = tom
+            this.bestemmelse = bestemmelse
+            this.innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            this.lovvalgsland = if (lovvalgsland == Land_iso2.CA_QC) Land_iso2.CA else lovvalgsland
+            this.medlemskapstype = medlemskapstype
+            this.dekning = utledetTrygdedekning
         }
-        lovvalgsperiode.fom = fom
-        lovvalgsperiode.tom = tom
-        lovvalgsperiode.bestemmelse = bestemmelse
-        lovvalgsperiode.innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
-        lovvalgsperiode.lovvalgsland = if (lovvalgsland == Land_iso2.CA_QC) Land_iso2.CA else lovvalgsland
-        lovvalgsperiode.medlemskapstype = medlemskapstype
-        lovvalgsperiode.dekning = trygdedekning ?: utledDekning(medlemskapstype, bestemmelse)
+
         return lovvalgsperiodeRepository.save(lovvalgsperiode)
     }
 
-    private fun utledMedlemskapstype(sakstype: Sakstyper, bestemmelse: LovvalgBestemmelse, trygdedekning: Trygdedekninger?): Medlemskapstyper {
-        if (listOf(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART11,
-                Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_9).contains(bestemmelse)) {
-            return if (trygdedekning == Trygdedekninger.UTEN_DEKNING) {
-                Medlemskapstyper.UNNTATT
-            } else {
-                Medlemskapstyper.DELVIS_UNNTATT
-            }
-        }
-
-        return if (sakstype == Sakstyper.TRYGDEAVTALE && listOf(
-                Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART7,
-                Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_2
-            ).contains(bestemmelse)
-        ) {
-            Medlemskapstyper.DELVIS_UNNTATT
-        } else {
-            Medlemskapstyper.UNNTATT
-        }
-    }
-
-    private fun utledDekning(medlemskapstype: Medlemskapstyper, bestemmelse: LovvalgBestemmelse): Trygdedekninger {
-        if (medlemskapstype == Medlemskapstyper.UNNTATT) return Trygdedekninger.UTEN_DEKNING
-
+    private fun utledTrygdedekning(bestemmelse: LovvalgBestemmelse): Trygdedekninger {
         return when (bestemmelse) {
             Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART7 -> Trygdedekninger.UNNTATT_CAN_7_5_B
             Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_2 -> Trygdedekninger.UNNTATT_USA_5_2_G
-            else -> throw FunksjonellException("Finner ikke spesiell trygdedekning for bestemmelse $bestemmelse")
+            else -> Trygdedekninger.UTEN_DEKNING
         }
+    }
+    private fun utledMedlemskapstype(trygdedekning: Trygdedekninger): Medlemskapstyper {
+        return if (listOf(Trygdedekninger.UNNTATT_USA_5_2_G, Trygdedekninger.UNNTATT_CAN_7_5_B).contains(trygdedekning))
+            Medlemskapstyper.DELVIS_UNNTATT else Medlemskapstyper.UNNTATT
     }
 
     private fun oppdaterLovvalgsperiodeForIkkeYrkesaktiv(
