@@ -130,6 +130,23 @@ class OpprettLovvalgsperiodeServiceTest {
     }
 
     @Test
+    fun opprettLovvalgsperiode_unntaksregistreringsflytCAN_ART11_UNNTATT_CAN_7_5_B_lagrerKorrekt() {
+        val request = requestForUnntaksregistreringFlyt(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART11, Trygdedekninger.UNNTATT_CAN_7_5_B)
+        val behandling = lagBehandling(Land_iso2.US)
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) } returns true
+        mockHappyCase(behandling)
+
+
+        opprettLovvalgsperiodeService.opprettLovvalgsperiode(1L, request)
+
+
+        verify(exactly = 1) { lovvalgsperiodeRepository.save(capture(slotLovvalgsperiode)) }
+        slotLovvalgsperiode.captured.shouldNotBeNull()
+        slotLovvalgsperiode.captured.medlemskapstype.shouldBe(Medlemskapstyper.DELVIS_UNNTATT)
+        slotLovvalgsperiode.captured.dekning.shouldBe(Trygdedekninger.UNNTATT_CAN_7_5_B)
+    }
+
+    @Test
     fun opprettLovvalgsperiode_unntaksregistreringsflytCAN_ART11_uten_trygdedekning_kasterFeil() {
         val request = requestForUnntaksregistreringFlyt(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART11, null)
         val behandling = lagBehandling(Land_iso2.US)
