@@ -3,10 +3,12 @@ package no.nav.melosys.integrasjon.ereg
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import io.getunleash.Unleash
 import mu.KotlinLogging
 import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.dokument.SaksopplysningDokument
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
+import no.nav.melosys.featuretoggle.ToggleName
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Service
 import java.util.*
@@ -18,6 +20,7 @@ private val log = KotlinLogging.logger { }
 // @Primary Flyttet fra EregService - Vi burde se om vi kan fjerne den helt
 // når vi rydder bort toggle melosys.ereg.organisasjon
 class EregSoapRestCompareService(
+    private var unleash: Unleash,
     private val eregService: EregService,
     private val eregRestService: EregRestService
 ) : EregFasade {
@@ -30,6 +33,9 @@ class EregSoapRestCompareService(
         val organisasjonSoap = eregService.hentOrganisasjon(orgnr)
         compareAndLog(organisasjonSoap.dokument, organisasjonRest?.dokument)
 
+        if (unleash.isEnabled(ToggleName.MELOSYS_EREG_ORGANISASJON) && organisasjonRest != null) {
+            return organisasjonRest
+        }
         return organisasjonSoap
     }
 
@@ -47,6 +53,10 @@ class EregSoapRestCompareService(
 
         compareAndLog(organisasjonSoap.get().dokument, organisasjonRest?.dokument)
 
+        if (unleash.isEnabled(ToggleName.MELOSYS_EREG_ORGANISASJON)) {
+            return Optional.ofNullable(organisasjonRest)
+        }
+
         return organisasjonSoap
     }
 
@@ -57,6 +67,10 @@ class EregSoapRestCompareService(
         val organisasjonNavnSoap = eregService.hentOrganisasjonNavn(orgnummer)
         if (organisasjonNavnSoap != organisasjonNavnRest) {
             log.warn("Ereg hentOrganisasjonNavn: Organisasjonsnavn fra SOAP og REST er ikke like for orgnummer $orgnummer")
+        }
+
+        if (unleash.isEnabled(ToggleName.MELOSYS_EREG_ORGANISASJON) && organisasjonNavnRest != null) {
+            return organisasjonNavnRest
         }
 
         return organisasjonNavnSoap
