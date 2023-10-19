@@ -68,7 +68,7 @@ public class BrevmalListeBygger {
 
         switch (fagsak.getHovedpartRolle()) {
             case BRUKER -> {
-                mottakere.add(lagMottakerMedAdresseOgFeilmelding(behandlingId, Mottakerroller.BRUKER, fagsak.harBrukerRepresentant()));
+                mottakere.add(lagMottakerMedAdresseOgFeilmelding(behandlingId, Mottakerroller.BRUKER, fagsak.harBrukerFullmektig()));
                 if (!saksbehandlingRegler.harIngenFlyt(behandling)) {
                     mottakere.add(lagMottakerMedAdresseOgFeilmelding(behandlingId, Mottakerroller.ARBEIDSGIVER, false));
                 }

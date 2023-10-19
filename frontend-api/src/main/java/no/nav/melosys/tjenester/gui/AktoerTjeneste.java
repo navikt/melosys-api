@@ -10,7 +10,6 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.aktoer.AktoerService;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.security.token.support.core.api.Protected;
@@ -50,16 +49,18 @@ public class AktoerTjeneste {
         Fagsak fagsak = fagsakService.hentFagsak(saksnummer);
         aksesskontroll.autoriserSakstilgang(saksnummer);
 
-        Aktoersroller rolle = null;
-        Representerer representantRepresenterer = null;
-        if (StringUtils.isNotEmpty(rolleKode)) {
-            rolle = Aktoersroller.valueOf(rolleKode);
-        }
-        if (StringUtils.isNotEmpty(representerer)) {
-            representantRepresenterer = Representerer.valueOf(representerer);
-        }
+        var rolle = StringUtils.isNotEmpty(rolleKode) ? Aktoersroller.valueOf(rolleKode) : null;
+        // representerer kan fjernes når MELOSYS_FULLMAKT_TRYGDEAVGIFT fjernes
+        var representantRepresenterer = StringUtils.isNotEmpty(representerer) ? Representerer.valueOf(representerer) : null;
 
         List<Aktoer> aktører = aktoerService.hentfagsakAktører(fagsak, rolle, representantRepresenterer);
+
+        if (rolle == Aktoersroller.REPRESENTANT) {
+            aktører.addAll(aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG, representantRepresenterer));
+        }
+        if (rolle == Aktoersroller.FULLMEKTIG) {
+            aktører.addAll(aktoerService.hentfagsakAktører(fagsak, Aktoersroller.REPRESENTANT, representantRepresenterer));
+        }
         return aktører.stream().map(AktoerDto::tilDto).toList();
     }
 

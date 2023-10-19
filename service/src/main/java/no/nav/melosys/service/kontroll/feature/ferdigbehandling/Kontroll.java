@@ -116,37 +116,37 @@ class Kontroll {
 
     private FerdigbehandlingKontrollData hentKontrollDataForAvslagOgHenleggelse(Behandling behandling) {
         MottatteOpplysningerData mottatteOpplysningerData = null;
-        Aktoer representant = behandling.getFagsak().finnRepresentant(Representerer.BRUKER).orElse(null);
+        Aktoer fullmektig = behandling.getFagsak().finnRepresentantEllerFullmektig(Representerer.BRUKER).orElse(null);
         Persondata persondata = hentPersondata(behandling);
         OrganisasjonDokument organisasjon = null;
-        Persondata persondataRepresentant = null;
+        Persondata persondataFullmektig = null;
 
-        if (representant != null && representant.erOrganisasjon()) {
-            organisasjon = organisasjonOppslagService.hentOrganisasjon(representant.getOrgnr());
+        if (fullmektig != null && fullmektig.erOrganisasjon()) {
+            organisasjon = organisasjonOppslagService.hentOrganisasjon(fullmektig.getOrgnr());
         }
         if (!saksbehandlingRegler.harIngenFlyt(behandling)) {
             mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         }
-        if (representant != null && representant.erPerson()) {
-            persondataRepresentant = hentPersondata(representant.getPersonIdent());
+        if (fullmektig != null && fullmektig.erPerson()) {
+            persondataFullmektig = hentPersondata(fullmektig.getPersonIdent());
         }
 
         SaksopplysningerData saksopplysningerData = hentSaksopplysningerData(behandling);
 
-        return FerdigbehandlingKontrollData.lagKontrollDataForAvslag(persondata, mottatteOpplysningerData, saksopplysningerData, representant, organisasjon, persondataRepresentant);
+        return FerdigbehandlingKontrollData.lagKontrollDataForAvslag(persondata, mottatteOpplysningerData, saksopplysningerData, fullmektig, organisasjon, persondataFullmektig);
     }
 
     private FerdigbehandlingKontrollData hentVedtakKontrollData(Behandling behandling) {
-        Aktoer representant = behandling.getFagsak().finnRepresentant(Representerer.BRUKER).orElse(null);
+        Aktoer fullmektig = behandling.getFagsak().finnRepresentantEllerFullmektig(Representerer.BRUKER).orElse(null);
         SaksopplysningerData saksopplysningerData = hentSaksopplysningerData(behandling);
         OrganisasjonDokument organisasjon = null;
-        Persondata persondataRepresentant = null;
+        Persondata persondataFullmektig = null;
 
-        if (representant != null && representant.erOrganisasjon()) {
-            organisasjon = organisasjonOppslagService.hentOrganisasjon(representant.getOrgnr());
+        if (fullmektig != null && fullmektig.erOrganisasjon()) {
+            organisasjon = organisasjonOppslagService.hentOrganisasjon(fullmektig.getOrgnr());
         }
-        if (representant != null && representant.erPerson()) {
-            persondataRepresentant = hentPersondata(representant.getPersonIdent());
+        if (fullmektig != null && fullmektig.erPerson()) {
+            persondataFullmektig = hentPersondata(fullmektig.getPersonIdent());
         }
 
         Lovvalgsperiode lovvalgsperiode = lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId());
@@ -156,25 +156,25 @@ class Kontroll {
         Persondata persondata = hentPersondata(behandling);
 
         return new FerdigbehandlingKontrollData(medlemskapDokument, persondata, mottatteOpplysningerData,
-            lovvalgsperiode, opprinneligLovvalgsperiode, saksopplysningerData, behandling.getTema(), representant, organisasjon, persondataRepresentant);
+            lovvalgsperiode, opprinneligLovvalgsperiode, saksopplysningerData, behandling.getTema(), fullmektig, organisasjon, persondataFullmektig);
     }
 
     private FerdigbehandlingKontrollData hentVedtakKontrollDataFTRL(Behandling behandling) {
-        Aktoer representant = behandling.getFagsak().finnRepresentant(Representerer.BRUKER).orElse(null);
+        Aktoer fullmektig = behandling.getFagsak().finnRepresentantEllerFullmektig(Representerer.BRUKER).orElse(null);
         MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();
         MottatteOpplysningerData mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         Persondata persondata = hentPersondata(behandling);
         OrganisasjonDokument organisasjon = null;
-        Persondata persondataRepresentant = null;
+        Persondata persondataFullmektig = null;
 
-        if (representant != null && representant.erOrganisasjon()) {
-            organisasjon = organisasjonOppslagService.hentOrganisasjon(representant.getOrgnr());
+        if (fullmektig != null && fullmektig.erOrganisasjon()) {
+            organisasjon = organisasjonOppslagService.hentOrganisasjon(fullmektig.getOrgnr());
         }
-        if (representant != null && representant.erPerson()) {
-            persondataRepresentant = hentPersondata(representant.getPersonIdent());
+        if (fullmektig != null && fullmektig.erPerson()) {
+            persondataFullmektig = hentPersondata(fullmektig.getPersonIdent());
         }
 
-        return FerdigbehandlingKontrollData.lagKontrollDataForFTRL(persondata, mottatteOpplysningerData, medlemskapDokument, representant, organisasjon, persondataRepresentant);
+        return FerdigbehandlingKontrollData.lagKontrollDataForFTRL(persondata, mottatteOpplysningerData, medlemskapDokument, fullmektig, organisasjon, persondataFullmektig);
     }
 
     private Persondata hentPersondata(Behandling behandling) {

@@ -1,14 +1,14 @@
 package no.nav.melosys.domain.arkiv;
 
+import java.util.Collection;
+import java.util.List;
+
 import com.google.common.collect.MoreCollectors;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.msm.AltinnDokument;
-
-import java.util.Collection;
-import java.util.List;
 
 import static no.nav.melosys.domain.arkiv.FysiskDokument.*;
 
@@ -93,7 +93,7 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
         opprettJournalpost.setForsendelseMottatt(hovedDokument.getInnsendtTidspunkt());
 
-        fagsak.finnRepresentant(Representerer.BRUKER).ifPresentOrElse(
+        fagsak.finnRepresentantEllerFullmektig(Representerer.BRUKER).ifPresentOrElse(
             r -> {
                 opprettJournalpost.setKorrespondansepartId(r.getOrgnr());
                 opprettJournalpost.setKorrespondansepartNavn(avsenderNavn);

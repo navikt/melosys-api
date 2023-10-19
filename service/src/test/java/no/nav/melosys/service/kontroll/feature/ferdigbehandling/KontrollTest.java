@@ -5,13 +5,12 @@ import java.util.Collection;
 import java.util.List;
 
 import io.getunleash.FakeUnleash;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.Lovvalgsperiode;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -125,7 +124,22 @@ class KontrollTest {
         Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.FTRL, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
 
         assertThat(resultat).extracting(Kontrollfeil::getKode)
-                .contains(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER);
+            .contains(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER);
+    }
+
+    @Test
+    void utførKontroller_fullmektigFinner_adresse_mangler() {
+        when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser());
+        var fullmektig = new Aktoer();
+        fullmektig.setRolle(Aktoersroller.FULLMEKTIG);
+        fullmektig.setPersonIdent("fullmektig person");
+        fullmektig.setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD);
+        behandling.getFagsak().getAktører().add(fullmektig);
+
+        Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.FTRL, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
+
+        assertThat(resultat).extracting(Kontrollfeil::getKode)
+            .contains(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT);
     }
 
     @Test

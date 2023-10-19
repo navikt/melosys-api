@@ -1,5 +1,6 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -20,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -64,6 +66,44 @@ class AktoerTjenesteTest {
     }
 
     @Test
+    void hentAktoer_representantOgFullmektig_representant_tilAktoerDto() throws Exception {
+        Aktoer representant = new Aktoer();
+        representant.setRolle(Aktoersroller.REPRESENTANT);
+        Aktoer fullmektig = new Aktoer();
+        fullmektig.setRolle(Aktoersroller.FULLMEKTIG);
+        when(fagsakService.hentFagsak("MELTEST-1")).thenReturn(lagFagsak());
+        when(aktoerService.hentfagsakAktører(any(), eq(Aktoersroller.REPRESENTANT), any())).thenReturn(new ArrayList<>(List.of(representant)));
+        when(aktoerService.hentfagsakAktører(any(), eq(Aktoersroller.FULLMEKTIG), any())).thenReturn(new ArrayList<>(List.of(fullmektig)));
+
+
+        mockMvc.perform(get("/api/fagsaker/{saksnummer}/aktoerer", "MELTEST-1")
+                .param("rolleKode", Aktoersroller.REPRESENTANT.getKode())
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(List.of(AktoerDto.tilDto(representant), AktoerDto.tilDto(fullmektig)), new TypeReference<List<AktoerDto>>() {
+            }));
+    }
+
+    @Test
+    void hentAktoer_representantOgFullmektig_fullmektig_tilAktoerDto() throws Exception {
+        Aktoer representant = new Aktoer();
+        representant.setRolle(Aktoersroller.REPRESENTANT);
+        Aktoer fullmektig = new Aktoer();
+        fullmektig.setRolle(Aktoersroller.FULLMEKTIG);
+        when(fagsakService.hentFagsak("MELTEST-1")).thenReturn(lagFagsak());
+        when(aktoerService.hentfagsakAktører(any(), eq(Aktoersroller.REPRESENTANT), any())).thenReturn(new ArrayList<>(List.of(representant)));
+        when(aktoerService.hentfagsakAktører(any(), eq(Aktoersroller.FULLMEKTIG), any())).thenReturn(new ArrayList<>(List.of(fullmektig)));
+
+
+        mockMvc.perform(get("/api/fagsaker/{saksnummer}/aktoerer", "MELTEST-1")
+                .param("rolleKode", Aktoersroller.FULLMEKTIG.getKode())
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(List.of(AktoerDto.tilDto(fullmektig), AktoerDto.tilDto(representant)), new TypeReference<List<AktoerDto>>() {
+            }));
+    }
+
+    @Test
     void hentAktoer_tilAktoerDto() throws Exception {
         Aktoer aktoerMyndighet = new Aktoer();
         aktoerMyndighet.setId(39L);
@@ -87,7 +127,7 @@ class AktoerTjenesteTest {
     }
 
     @Test
-    void slettAktoer_ok() throws Exception{
+    void slettAktoer_ok() throws Exception {
         mockMvc.perform(delete("/api/fagsaker/aktoerer/{databaseID}", 123L))
             .andExpect(status().isNoContent());
     }

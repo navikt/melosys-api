@@ -22,13 +22,13 @@ data class PostadressesjekkKontekst(
         this.brukerID = brukerID
     }
 
-    fun oppdaterForRepresentantTilBruker(representant: Aktoer) {
-        this.rolle = Aktoersroller.REPRESENTANT
-        if (representant.erPerson()) {
-            this.brukerID = representant.personIdent
+    fun oppdaterForFullmektigTilBruker(fullmektig: Aktoer) {
+        this.rolle = fullmektig.rolle
+        if (fullmektig.erPerson()) {
+            this.brukerID = fullmektig.personIdent
         }
-        if (representant.erOrganisasjon()) {
-            this.orgnr = representant.orgnr
+        if (fullmektig.erOrganisasjon()) {
+            this.orgnr = fullmektig.orgnr
         }
     }
 }

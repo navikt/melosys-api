@@ -1,6 +1,11 @@
 package no.nav.melosys.service.aktoer;
 
+import java.util.Set;
+
 import no.nav.melosys.domain.Aktoer;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
+import no.nav.melosys.domain.kodeverk.Representerer;
 
 public class AktoerDto {
 
@@ -11,6 +16,7 @@ public class AktoerDto {
     private String rolleKode;
     private String utenlandskPersonID;
     private String representererKode;
+    private Set<Fullmaktstype> fullmakter;
     private Long databaseID;
 
     public String getAktoerID() {
@@ -69,6 +75,14 @@ public class AktoerDto {
         this.representererKode = representererKode;
     }
 
+    public Set<Fullmaktstype> getFullmakter() {
+        return fullmakter;
+    }
+
+    public void setFullmakter(Set<Fullmaktstype> fullmakter) {
+        this.fullmakter = fullmakter;
+    }
+
     public Long getDatabaseID() {
         return databaseID;
     }
@@ -87,9 +101,34 @@ public class AktoerDto {
         if (aktoer.getRepresenterer() != null) {
             aktoerDto.setRepresentererKode(aktoer.getRepresenterer().getKode());
         }
+        aktoerDto.setFullmakter(aktoer.getFullmaktstyper());
         aktoerDto.setDatabaseID(aktoer.getId());
         aktoerDto.setPersonIdent(aktoer.getPersonIdent());
+        midlertidigStøtteForBådeRepresentantOgFullmektig(aktoer, aktoerDto);
         return aktoerDto;
+    }
+
+    @Deprecated(since = "trengs ikke etter MELOSYS_FULLMAKT_TRYGDEAVGIFT fjernes og kodene er migrert")
+    private static void midlertidigStøtteForBådeRepresentantOgFullmektig(Aktoer aktoer, AktoerDto aktoerDto) {
+        if (aktoer.getRolle() == Aktoersroller.REPRESENTANT && aktoer.getRepresenterer() != null) {
+            switch (aktoer.getRepresenterer()) {
+                case BRUKER -> aktoerDto.setFullmakter(Set.of(Fullmaktstype.FULLMEKTIG_SØKNAD));
+                case ARBEIDSGIVER -> aktoerDto.setFullmakter(Set.of(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER));
+                case BEGGE -> aktoerDto.setFullmakter(Set.of(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER));
+            }
+        }
+        if (aktoer.getRolle() == Aktoersroller.FULLMEKTIG) {
+            var erFullmektigSøknad = aktoer.getFullmaktstyper().contains(Fullmaktstype.FULLMEKTIG_SØKNAD);
+            var erFullmektigArbeidsgiver = aktoer.getFullmaktstyper().contains(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
+
+            if (erFullmektigSøknad && erFullmektigArbeidsgiver) {
+                aktoerDto.setRepresentererKode(Representerer.BEGGE.getKode());
+            } else if (erFullmektigSøknad) {
+                aktoerDto.setRepresentererKode(Representerer.BRUKER.getKode());
+            } else if (erFullmektigArbeidsgiver) {
+                aktoerDto.setRepresentererKode(Representerer.ARBEIDSGIVER.getKode());
+            }
+        }
     }
 
 }
