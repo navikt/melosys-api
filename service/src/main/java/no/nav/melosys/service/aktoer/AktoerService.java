@@ -52,7 +52,9 @@ public class AktoerService {
         aktoer.setRolle(Aktoersroller.valueOf(aktoerDto.getRolleKode()));
         aktoer.setAktørId(aktoerDto.getAktoerID());
         aktoer.setPersonIdent(aktoerDto.getPersonIdent());
-        aktoer.setFullmaktstyper(aktoerDto.getFullmakter());
+        if (aktoerDto.getFullmakter() != null) {
+            aktoer.setFullmaktstyper(aktoerDto.getFullmakter());
+        }
 
         if (aktoerDto.getRepresentererKode() != null) {
             aktoer.setRepresenterer(Representerer.valueOf(aktoerDto.getRepresentererKode()));
