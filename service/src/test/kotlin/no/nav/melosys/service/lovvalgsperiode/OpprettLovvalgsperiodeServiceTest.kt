@@ -59,7 +59,7 @@ class OpprettLovvalgsperiodeServiceTest {
 
     @Test
     fun opprettLovvalgsperiode_unntaksregistreringsflyt_lagrerKorrekt() {
-        val request = requestForUnntaksregistreringFlyt(Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART9_3)
+        val request = requestForUnntaksregistreringFlyt(Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART9_3, null)
         val behandling = lagBehandling(Land_iso2.AU)
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) } returns true
         mockHappyCase(behandling)
@@ -81,7 +81,7 @@ class OpprettLovvalgsperiodeServiceTest {
 
     @Test
     fun opprettLovvalgsperiode_unntaksregistreringsflytQuebec_lagrerKorrekt() {
-        val request = requestForUnntaksregistreringFlyt(Lovvalgsbestemmelser_trygdeavtale_ca_qc.QUE)
+        val request = requestForUnntaksregistreringFlyt(Lovvalgsbestemmelser_trygdeavtale_ca_qc.QUE, null)
         val behandling = lagBehandling(Land_iso2.CA_QC)
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) } returns true
         mockHappyCase(behandling)
@@ -97,7 +97,7 @@ class OpprettLovvalgsperiodeServiceTest {
 
     @Test
     fun opprettLovvalgsperiode_unntaksregistreringsflytCAN_ART7_lagrerKorrekt() {
-        val request = requestForUnntaksregistreringFlyt(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART7)
+        val request = requestForUnntaksregistreringFlyt(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART7, null)
         val behandling = lagBehandling(Land_iso2.US)
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) } returns true
         mockHappyCase(behandling)
@@ -113,8 +113,25 @@ class OpprettLovvalgsperiodeServiceTest {
     }
 
     @Test
-    fun opprettLovvalgsperiode_unntaksregistreringsflytCAN_ART11_lagrerKorrekt() {
-        val request = requestForUnntaksregistreringFlyt(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART11)
+    fun opprettLovvalgsperiode_unntaksregistreringsflytCAN_ART11_UTEN_DEKNING_lagrerKorrekt() {
+        val request = requestForUnntaksregistreringFlyt(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART11, Trygdedekninger.UTEN_DEKNING)
+        val behandling = lagBehandling(Land_iso2.US)
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) } returns true
+        mockHappyCase(behandling)
+
+
+        opprettLovvalgsperiodeService.opprettLovvalgsperiode(1L, request)
+
+
+        verify(exactly = 1) { lovvalgsperiodeRepository.save(capture(slotLovvalgsperiode)) }
+        slotLovvalgsperiode.captured.shouldNotBeNull()
+        slotLovvalgsperiode.captured.medlemskapstype.shouldBe(Medlemskapstyper.UNNTATT)
+        slotLovvalgsperiode.captured.dekning.shouldBe(Trygdedekninger.UTEN_DEKNING)
+    }
+
+    @Test
+    fun opprettLovvalgsperiode_unntaksregistreringsflytCAN_ART11_UNNTATT_CAN_7_5_B_lagrerKorrekt() {
+        val request = requestForUnntaksregistreringFlyt(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART11, Trygdedekninger.UNNTATT_CAN_7_5_B)
         val behandling = lagBehandling(Land_iso2.US)
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) } returns true
         mockHappyCase(behandling)
@@ -127,11 +144,24 @@ class OpprettLovvalgsperiodeServiceTest {
         slotLovvalgsperiode.captured.shouldNotBeNull()
         slotLovvalgsperiode.captured.medlemskapstype.shouldBe(Medlemskapstyper.DELVIS_UNNTATT)
         slotLovvalgsperiode.captured.dekning.shouldBe(Trygdedekninger.UNNTATT_CAN_7_5_B)
+    }
+
+    @Test
+    fun opprettLovvalgsperiode_unntaksregistreringsflytCAN_ART11_uten_trygdedekning_kasterFeil() {
+        val request = requestForUnntaksregistreringFlyt(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART11, null)
+        val behandling = lagBehandling(Land_iso2.US)
+        every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) } returns true
+        mockHappyCase(behandling)
+
+
+        shouldThrow<FunksjonellException> { opprettLovvalgsperiodeService.opprettLovvalgsperiode(1L, request) }
+            .shouldHaveMessage("Kan ikke opprette lovvalgsperiode for unntaksregistrering med lovvalgsbestemmelse: " +
+                Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART11.kode + " uten manuelt registrert trygdedekning")
     }
 
     @Test
     fun opprettLovvalgsperiode_unntaksregistreringsflytUSA_ART5_2_lagrerKorrekt() {
-        val request = requestForUnntaksregistreringFlyt(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_2)
+        val request = requestForUnntaksregistreringFlyt(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_2, null)
         val behandling = lagBehandling(Land_iso2.US)
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) } returns true
         mockHappyCase(behandling)
@@ -147,8 +177,8 @@ class OpprettLovvalgsperiodeServiceTest {
     }
 
     @Test
-    fun opprettLovvalgsperiode_unntaksregistreringsflytUSA_ART5_9_lagrerKorrekt() {
-        val request = requestForUnntaksregistreringFlyt(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_9)
+    fun opprettLovvalgsperiode_unntaksregistreringsflytUSA_ART5_9_UNNTATT_USA_5_2_G_lagrerKorrekt() {
+        val request = requestForUnntaksregistreringFlyt(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_9, Trygdedekninger.UNNTATT_USA_5_2_G)
         val behandling = lagBehandling(Land_iso2.US)
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling) } returns true
         mockHappyCase(behandling)
@@ -168,7 +198,7 @@ class OpprettLovvalgsperiodeServiceTest {
         every { behandlingService.hentBehandling(any()) } returns Behandling()
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns true
         every { lovvalgsperiodeRepository.findByBehandlingsresultatId(any()) } returns emptyList()
-        val request = OpprettLovvalgsperiodeRequest(null, LocalDate.now(), null, null)
+        val request = OpprettLovvalgsperiodeRequest(null, LocalDate.now(), null, null, null)
 
 
         shouldThrow<FunksjonellException> { opprettLovvalgsperiodeService.opprettLovvalgsperiode(1L, request) }
@@ -180,7 +210,7 @@ class OpprettLovvalgsperiodeServiceTest {
         every { behandlingService.hentBehandling(any()) } returns Behandling()
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns true
         every { lovvalgsperiodeRepository.findByBehandlingsresultatId(any()) } returns emptyList()
-        val request = OpprettLovvalgsperiodeRequest(LocalDate.now(), LocalDate.now().minusMonths(2), null, null)
+        val request = OpprettLovvalgsperiodeRequest(LocalDate.now(), LocalDate.now().minusMonths(2), null, null, null)
 
 
         shouldThrow<FunksjonellException> { opprettLovvalgsperiodeService.opprettLovvalgsperiode(1L, request) }
@@ -192,19 +222,20 @@ class OpprettLovvalgsperiodeServiceTest {
         every { behandlingService.hentBehandling(any()) } returns Behandling()
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns true
         every { lovvalgsperiodeRepository.findByBehandlingsresultatId(any()) } returns emptyList()
-        val request = OpprettLovvalgsperiodeRequest(LocalDate.now(), null, null, null)
+        val request = OpprettLovvalgsperiodeRequest(LocalDate.now(), null, null, null, null)
 
 
         shouldThrow<FunksjonellException> { opprettLovvalgsperiodeService.opprettLovvalgsperiode(1L, request) }
             .shouldHaveMessage("Kan ikke opprette lovvalgsperiode for unntakregistrering uten bestemmelse")
     }
 
-    private fun requestForUnntaksregistreringFlyt(bestemmelse: LovvalgBestemmelse): OpprettLovvalgsperiodeRequest =
+    private fun requestForUnntaksregistreringFlyt(bestemmelse: LovvalgBestemmelse, trygdedekning: Trygdedekninger?): OpprettLovvalgsperiodeRequest =
         OpprettLovvalgsperiodeRequest(
             LocalDate.now(),
             LocalDate.now().plusMonths(6),
             bestemmelse,
-            null
+            null,
+            trygdedekning
         )
 
     @Test
@@ -255,7 +286,7 @@ class OpprettLovvalgsperiodeServiceTest {
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false
         every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns true
         every { lovvalgsperiodeRepository.findByBehandlingsresultatId(any()) } returns emptyList()
-        val request = OpprettLovvalgsperiodeRequest(null, null, null, null)
+        val request = OpprettLovvalgsperiodeRequest(null, null, null, null, null)
 
 
         shouldThrow<FunksjonellException> { opprettLovvalgsperiodeService.opprettLovvalgsperiode(1L, request) }
@@ -270,7 +301,8 @@ class OpprettLovvalgsperiodeServiceTest {
             null,
             null,
             bestemmelse,
-            innvilgelsesResultat
+            innvilgelsesResultat,
+            null
         )
 
     @Test
@@ -279,7 +311,7 @@ class OpprettLovvalgsperiodeServiceTest {
         every { lovvalgsperiodeRepository.findByBehandlingsresultatId(any()) } returns emptyList()
         every { saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any()) } returns false
         every { saksbehandlingRegler.harIkkeYrkesaktivFlyt(any()) } returns false
-        val request = OpprettLovvalgsperiodeRequest(null, null, null, null)
+        val request = OpprettLovvalgsperiodeRequest(null, null, null, null, null)
 
 
         shouldThrow<FunksjonellException> { opprettLovvalgsperiodeService.opprettLovvalgsperiode(1L, request) }
@@ -292,7 +324,7 @@ class OpprettLovvalgsperiodeServiceTest {
             Lovvalgsperiode(),
             Lovvalgsperiode()
         )
-        val request = OpprettLovvalgsperiodeRequest(null, null, null, null)
+        val request = OpprettLovvalgsperiodeRequest(null, null, null, null, null)
 
 
         shouldThrow<FunksjonellException> { opprettLovvalgsperiodeService.opprettLovvalgsperiode(1L, request) }
