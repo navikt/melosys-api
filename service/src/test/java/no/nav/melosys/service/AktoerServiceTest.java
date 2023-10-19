@@ -24,8 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Example;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -66,6 +65,17 @@ class AktoerServiceTest {
         assertAktoerData(aktoerDto, fagsak, aktoer);
         assertThat(aktoer.getId()).isNull();
         assertThat(databaseId).isEqualTo(aktoerId);
+    }
+
+    @Test
+    void lagEllerOppdater_tom_fullmakt_nyAktoer() {
+        AktoerDto aktoerDto = lagAktoerDto();
+        aktoerDto.setFullmakter(null);
+        Fagsak fagsak = lagFagsak();
+        doReturn(aktoer).when(aktoerRepository).save(any());
+
+
+        assertThatNoException().isThrownBy(() -> aktoerService.lagEllerOppdaterAktoer(fagsak, aktoerDto));
     }
 
     @Test
