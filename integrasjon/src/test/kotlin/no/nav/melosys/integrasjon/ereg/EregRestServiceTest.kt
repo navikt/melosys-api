@@ -26,7 +26,7 @@ class EregRestServiceTest {
     fun before() {
         every { organisasjonRestConsumer.hentOrganisasjon("873102322") } returns Organisasjon(
             organisasjonsnummer = "873102322",
-            organisasjonDetaljer =  OrganisasjonDetaljer(
+            organisasjonDetaljer = OrganisasjonDetaljer(
                 navn = listOf(
                     Navn(
                         bruksperiode = Bruksperiode(LocalDateTime.now()),
@@ -48,7 +48,10 @@ class EregRestServiceTest {
         organisasjonDokument.shouldNotBeNull()
             .organisasjonDetaljer.shouldNotBeNull()
             .navn.shouldNotBeNull().shouldHaveSize(1).first()
-            .redigertNavn.shouldBe("MULTICONSULT ASA")
+            .apply {
+                navn.shouldHaveSize(1).first().shouldBe("MULTICONSULT ASA")
+                redigertNavn.shouldBe("MULTICONSULT ASA")
+            }
     }
 
     @Test
