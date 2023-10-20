@@ -9,6 +9,7 @@ import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.dokument.SaksopplysningDokument
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.featuretoggle.ToggleName
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Service
 import java.util.*
@@ -22,9 +23,14 @@ private val log = KotlinLogging.logger { }
 class EregSoapRestCompareService(
     private var unleash: Unleash,
     private val eregService: EregService,
-    private val eregRestService: EregRestService
+    private val eregRestService: EregRestService,
+    @Value("\${ereg.soap.rest.compare.filter:}") private val ignoreCompare: List<String>
 ) : EregFasade {
     private val objectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
+
+    init {
+        log.info("ignore compare for $ignoreCompare")
+    }
 
     override fun hentOrganisasjon(orgnr: String): Saksopplysning {
         val organisasjonRest = runAndLogErrors(orgnr) {
@@ -87,26 +93,36 @@ class EregSoapRestCompareService(
 
     private fun compareAndLog(saksopplysningDokumentSoap: SaksopplysningDokument, saksopplysningDokumentRest: SaksopplysningDokument?) {
         val organisasjonDokumentSoap = saksopplysningDokumentSoap as OrganisasjonDokument
+        try {
 
-        if (saksopplysningDokumentRest == null) {
-            log.warn("Ereg: rest request er null for ${organisasjonDokumentSoap.orgnummer}")
-            return
-        }
+            if (saksopplysningDokumentRest == null) {
+                log.warn("Ereg: rest request er null for ${organisasjonDokumentSoap.orgnummer}")
+                return
+            }
 
-        val organisasjonDokumentRest = saksopplysningDokumentRest as OrganisasjonDokument
+            val organisasjonDokumentRest = saksopplysningDokumentRest as OrganisasjonDokument
 
-        val soapNode = objectMapper.valueToTree<JsonNode>(organisasjonDokumentSoap.apply { oppstartsdato = null })
-        val restNode = objectMapper.valueToTree<JsonNode>(organisasjonDokumentRest)
+            val soapNode = objectMapper.valueToTree<JsonNode>(organisasjonDokumentSoap.apply { oppstartsdato = null })
+            val restNode = objectMapper.valueToTree<JsonNode>(organisasjonDokumentRest)
 
-        if (soapNode != restNode) {
-            val differences = compareJsonNodes(soapNode, restNode)
-            log.warn("Differences found for ${organisasjonDokumentSoap.orgnummer}\n" +
-                "soap vs rest:\n" + differences.joinToString("\n") { it })
-            log.warn("soap: $soapNode")
-            log.warn("rest: $restNode")
+            if (soapNode != restNode) {
+                var removedCount = 0
+                val differences = compareJsonNodes(soapNode, restNode)
+                    .filterNot { difference ->
+                        ignoreCompare.any { ignore ->
+                            ignore.toRegex().containsMatchIn(difference).apply { if (this) removedCount++ }
+                        }
+                    }
+
+                if (differences.isNotEmpty()) {
+                    log.warn("Differences found for ${organisasjonDokumentSoap.orgnummer} $removedCount removed \n" +
+                        "soap vs rest:\n" + differences.joinToString("\n") { it })
+                }
+            }
+        } catch (e: Exception) {
+            log.warn("compareAndLog failed for ${organisasjonDokumentSoap.orgnummer}", e)
         }
     }
-
 
     // Laget av chat GPT-4
     private fun compareJsonNodes(node1: JsonNode, node2: JsonNode, path: String = ""): List<String> {
