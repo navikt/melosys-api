@@ -49,9 +49,9 @@ class EregSoapRestCompareService(
         if (organisasjonSoap.isEmpty && organisasjonRest != null) {
             log.warn("Ereg: organisasjonSoap er tom men rest gir svar for $orgnr")
             log.warn("rest:\n${objectMapper.writeValueAsString(organisasjonRest)}")
+        } else {
+            compareAndLog(organisasjonSoap.get().dokument, organisasjonRest?.dokument)
         }
-
-        compareAndLog(organisasjonSoap.get().dokument, organisasjonRest?.dokument)
 
         if (unleash.isEnabled(ToggleName.MELOSYS_EREG_ORGANISASJON)) {
             return Optional.ofNullable(organisasjonRest)
@@ -66,7 +66,7 @@ class EregSoapRestCompareService(
         }
         val organisasjonNavnSoap = eregService.hentOrganisasjonNavn(orgnummer)
         if (organisasjonNavnSoap != organisasjonNavnRest) {
-            log.warn("Ereg hentOrganisasjonNavn: Organisasjonsnavn fra SOAP og REST er ikke like for orgnummer $orgnummer")
+            log.warn("Ereg hentOrganisasjonNavn: SOAP($organisasjonNavnSoap) != REST($organisasjonNavnRest) for orgnummer $orgnummer")
         }
 
         if (unleash.isEnabled(ToggleName.MELOSYS_EREG_ORGANISASJON) && organisasjonNavnRest != null) {
