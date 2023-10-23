@@ -7,7 +7,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import mu.KotlinLogging
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.sed.SedDokument
-import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.kodeverk.Oppgavetyper
 import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.Sakstemaer
@@ -17,14 +16,12 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.oppgave.Oppgave
 import no.nav.melosys.domain.oppgave.PrioritetType
-import no.nav.melosys.domain.saksflyt.ProsessDataKey
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.Konstanter.MELOSYS_ENHET_ID
 import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
 import no.nav.melosys.repository.BehandlingRepositoryForOppgaveMigrering
 import no.nav.melosys.repository.FagsakRepository
-import no.nav.melosys.repository.ProsessinstansRepository
 import no.nav.melosys.service.lovligekombinasjoner.GyldigeKombinasjoner
 import no.nav.melosys.service.oppgave.*
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
@@ -40,7 +37,6 @@ class OppgaveMigrering(
     private val behandlingRepository: BehandlingRepositoryForOppgaveMigrering,
     private val oppgaveFasade: OppgaveFasade,
     private val migreringsRapport: MigreringsRapport,
-    private val prosessinstansRepository: ProsessinstansRepository,
     private val fagsakRepository: FagsakRepository
 ) {
     @Volatile
@@ -261,37 +257,6 @@ class OppgaveMigrering(
             migreringsRapport.mappingFeiler(mappingError)
             return OppgaveMigreringsOppdatering(mappingError)
         }
-    }
-
-    private fun finnSEDKobletTilBehandling(it: SakOgBehandlingDTO): MutableList<String> {
-        if (!relevanteBehandlinger(it)) {
-            return mutableListOf()
-        }
-
-        val prosessinstanserMedBehandling = prosessinstansRepository.findAllByBehandling_Id(it.behandlingID)
-        val prosessinstanserMedSedLåsReferanse = prosessinstanserMedBehandling.map { it.låsReferanse }.filterNotNull()
-            .map { prosessinstansRepository.findAllByLåsReferanseStartingWith(it) }.flatten()
-
-        return (prosessinstanserMedBehandling + prosessinstanserMedSedLåsReferanse)
-            .asSequence()
-            .sortedBy { it.registrertDato }
-            .map { it.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding::class.java, null) }
-            .filterNotNull()
-            .distinctBy { it.sedId }
-            .map { it.sedType }
-            .toMutableList()
-    }
-
-    private fun relevanteBehandlinger(it: SakOgBehandlingDTO): Boolean {
-        return it.sakstype == Sakstyper.EU_EOS
-            && it.sakstema == Sakstemaer.UNNTAK
-            && listOf(
-            Behandlingstema.BESLUTNING_LOVVALG_ANNET_LAND,
-            Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_UTSTASJONERING,
-            Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE
-        ).contains(it.behandlingstema)
-            && it.behandlingstype == Behandlingstyper.FØRSTEGANG
-            && it.behandlingstatus == Behandlingsstatus.VURDER_DOKUMENT
     }
 
     private fun SakOgBehandlingDTO.utledOppgaveBehandlingstema(): OppgaveBehandlingstema? =

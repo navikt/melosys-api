@@ -1,7 +1,6 @@
 package no.nav.melosys.service.oppgave;
 
 import no.nav.melosys.service.AdminTjeneste;
-import no.nav.melosys.service.eessi.jobb.FeilregistrerX100OppgaverJobb;
 import no.nav.security.token.support.core.api.Unprotected;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,15 +14,11 @@ import org.springframework.web.bind.annotation.*;
 public class OppgaveAdminTjeneste implements AdminTjeneste {
 
     private final OppgaveService oppgaveService;
-    private final FeilregistrerX100OppgaverJobb feilregistrerX100OppgaverJobb;
     private final String apiKey;
     private static final Logger log = LoggerFactory.getLogger(OppgaveAdminTjeneste.class);
 
-    public OppgaveAdminTjeneste(OppgaveService oppgaveService,
-                                FeilregistrerX100OppgaverJobb feilregistrerX100OppgaverJobb,
-                                @Value("${Melosys-admin.apikey}") String apiKey) {
+    public OppgaveAdminTjeneste(OppgaveService oppgaveService, @Value("${Melosys-admin.apikey}") String apiKey) {
         this.oppgaveService = oppgaveService;
-        this.feilregistrerX100OppgaverJobb = feilregistrerX100OppgaverJobb;
         this.apiKey = apiKey;
     }
 
@@ -34,24 +29,6 @@ public class OppgaveAdminTjeneste implements AdminTjeneste {
 
         log.info("Forsøker å opprette oppgave for sak {}", saksnummer);
         oppgaveService.opprettOppgaveForSak(saksnummer);
-
-        return ResponseEntity.noContent().build();
-    }
-
-    @PutMapping("/behandling/feilregistrer/x100")
-    public ResponseEntity<Void> feilregistrerX100Behandlingsoppgaver(@RequestHeader(API_KEY_HEADER) String apiKey) {
-        validerApikey(apiKey);
-
-        feilregistrerX100OppgaverJobb.feilregistrerX100Behandlingsoppgaver();
-
-        return ResponseEntity.noContent().build();
-    }
-
-    @PutMapping("/journalfoering/feilregistrer/x100")
-    public ResponseEntity<Void> feilregistrerX100Journalføringsoppgaver(@RequestHeader(API_KEY_HEADER) String apiKey) {
-        validerApikey(apiKey);
-
-        feilregistrerX100OppgaverJobb.feilregistrerX100Journalføringsoppgaver();
 
         return ResponseEntity.noContent().build();
     }

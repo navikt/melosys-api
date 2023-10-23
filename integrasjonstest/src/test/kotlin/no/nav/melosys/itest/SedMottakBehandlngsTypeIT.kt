@@ -8,7 +8,6 @@ import io.getunleash.FakeUnleash
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import no.nav.melosys.domain.arkiv.*
 import no.nav.melosys.domain.eessi.*
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.kodeverk.*
