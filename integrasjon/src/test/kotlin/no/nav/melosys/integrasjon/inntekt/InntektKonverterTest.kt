@@ -55,10 +55,10 @@ class InntektKonverterTest {
                                     tom.shouldBe(LocalDate.of(2022, 1, 10))
                                 }
                             antall.shouldBe(1)
-                            tilleggsinformasjon
-                                ?.tilleggsinformasjonDetaljer
-                                .shouldBeTypeOf<BonusFraForsvaret>()
-                                .åretUtbetalingenGjelderFor.shouldBe(Year.of(1980))
+                            tilleggsinformasjon.shouldNotBeNull().apply {
+                                kategori.shouldBe("bla")
+                                tilleggsinformasjonDetaljer.shouldBeNull()
+                            }
                         }
                 }
 
