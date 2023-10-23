@@ -4,6 +4,7 @@ import mu.KotlinLogging
 import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.SaksopplysningKildesystem
 import no.nav.melosys.domain.SaksopplysningType
+import no.nav.melosys.integrasjon.inntk.InntektFasade
 import org.springframework.stereotype.Service
 import java.time.YearMonth
 
@@ -12,10 +13,10 @@ private val log = KotlinLogging.logger { }
 @Service
 class InntektService(
     private val inntektRestConsumer: InntektRestConsumer
-) {
+) : InntektFasade {
     private val inntektKonverter = InntektKonverter()
 
-    fun hentInntektListe(personID: String, fom: YearMonth, tom: YearMonth): Saksopplysning {
+    override fun hentInntektListe(personID: String, fom: YearMonth, tom: YearMonth): Saksopplysning {
         val inntekt = hentInntekt(personID, fom, tom)
         return inntektKonverter.lagSaksopplysning(inntekt).apply {
             leggTilKildesystemOgMottattDokument(

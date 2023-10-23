@@ -7,7 +7,7 @@ import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkReque
 import no.nav.tjeneste.virksomhet.inntekt.v3.meldinger.HentInntektListeBolkResponse;
 import org.junit.jupiter.api.Test;
 
-import static no.nav.melosys.integrasjon.inntk.InntektService.*;
+import static no.nav.melosys.integrasjon.inntk.InntektSoapService.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class InntektMockTest {

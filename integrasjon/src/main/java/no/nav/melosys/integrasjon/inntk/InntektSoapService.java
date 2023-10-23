@@ -27,9 +27,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
-public class InntektService implements InntektFasade {
+public class InntektSoapService implements InntektFasade {
 
-    private static final Logger log = LoggerFactory.getLogger(InntektService.class);
+    private static final Logger log = LoggerFactory.getLogger(InntektSoapService.class);
 
     private static final String INNTEKT_VERSJON = "3.2";
 
@@ -45,7 +45,7 @@ public class InntektService implements InntektFasade {
 
     private static final YearMonth JANUAR_2015 = YearMonth.of(2015, 1);
 
-    public InntektService(InntektConsumer consumer, DokumentFactory dokumentFactory) {
+    public InntektSoapService(InntektConsumer consumer, DokumentFactory dokumentFactory) {
         this.inntektConsumer = consumer;
         this.dokumentFactory = dokumentFactory;
         this.objectFactory = new ObjectFactory();

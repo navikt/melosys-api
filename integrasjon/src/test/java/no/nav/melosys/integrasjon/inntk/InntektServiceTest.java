@@ -31,7 +31,7 @@ class InntektServiceTest {
     @Spy
     private InntektMock inntektMock = new InntektMock();
 
-    private InntektService inntektService;
+    private InntektSoapService inntektService;
 
     @Captor
     private ArgumentCaptor<HentInntektListeBolkRequest> captor;
@@ -39,7 +39,7 @@ class InntektServiceTest {
     @BeforeEach
     void setUp() {
         DokumentFactory dokumentFactory = new DokumentFactory(JaxbConfig.getJaxb2Marshaller(), new XsltTemplatesFactory());
-        inntektService = new InntektService(inntektMock, dokumentFactory);
+        inntektService = new InntektSoapService(inntektMock, dokumentFactory);
     }
 
     @Test
