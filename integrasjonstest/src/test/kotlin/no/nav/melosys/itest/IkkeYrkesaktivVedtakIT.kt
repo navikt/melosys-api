@@ -28,7 +28,7 @@ import no.nav.melosys.domain.saksflyt.ProsessType
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
-import no.nav.melosys.repository.ProsessinstansRepository
+import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.service.LovvalgsperiodeService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.journalforing.JournalfoeringService

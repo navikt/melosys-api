@@ -26,7 +26,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.saksflyt.*;
 import no.nav.melosys.metrics.MetrikkerNavn;
-import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.repository.ProsessinstansForServiceRepository;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
@@ -52,14 +52,14 @@ public class ProsessinstansService {
     private static final Logger logger = LoggerFactory.getLogger(ProsessinstansService.class);
 
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final ProsessinstansRepository prosessinstansRepo;
+    private final ProsessinstansForServiceRepository prosessinstansRepo;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final MottatteOpplysningerService mottatteOpplysningerService;
 
     private final Counter prosessinstanserOpprettet = Metrics.counter(MetrikkerNavn.PROSESSINSTANSER_OPPRETTET);
 
     public ProsessinstansService(ApplicationEventPublisher applicationEventPublisher,
-                                 ProsessinstansRepository prosessinstansRepo,
+                                 ProsessinstansForServiceRepository prosessinstansRepo,
                                  UtenlandskMyndighetService utenlandskMyndighetService,
                                  MottatteOpplysningerService mottatteOpplysningerService) {
         this.applicationEventPublisher = applicationEventPublisher;

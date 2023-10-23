@@ -24,7 +24,7 @@ import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.*
 import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
-import no.nav.melosys.repository.ProsessinstansRepository
+import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.assertj.core.api.Assertions.assertThat
