@@ -25,10 +25,7 @@
         "virksomhetID" : "907670201",
         "tilleggsinformasjon" : {
           "kategori" : "bla",
-          "tilleggsinformasjonDetaljer" : {
-            "type" : "BonusFraForsvaret",
-            "åretUtbetalingenGjelderFor" : 1980
-          }
+          "tilleggsinformasjonDetaljer" : null
         },
         "inntektsmottakerID" : "2395801903843",
         "inngaarIGrunnlagForTrekk" : true,
