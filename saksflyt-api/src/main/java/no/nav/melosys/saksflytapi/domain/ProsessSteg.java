@@ -1,8 +1,7 @@
-package no.nav.melosys.domain.saksflyt;
+package no.nav.melosys.saksflytapi.domain;
 
-import no.nav.melosys.domain.kodeverk.Kodeverk;
 
-public enum ProsessSteg implements Kodeverk {
+public enum ProsessSteg {
 
     AVKLAR_ARBEIDSGIVER("AVKLAR_ARBEIDSGIVER", "Avklaring av norsk arbeidsgiver"),
     AVKLAR_MYNDIGHET("AVKLAR_MYNDIGHET", "Avklaring av utenlandsk trygdemyndighet"),
@@ -75,12 +74,10 @@ public enum ProsessSteg implements Kodeverk {
         this.beskrivelse = beskrivelse;
     }
 
-    @Override
     public String getKode() {
         return kode;
     }
 
-    @Override
     public String getBeskrivelse() {
         return beskrivelse;
     }

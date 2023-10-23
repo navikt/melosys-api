@@ -5,13 +5,11 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
-import no.nav.melosys.domain.metrikker.ProsessinstansAntall;
-import no.nav.melosys.domain.metrikker.ProsessinstansStegAntall;
-import no.nav.melosys.domain.saksflyt.ProsessStatus;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.saksflyt.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessflytDefinisjon;
+import no.nav.melosys.saksflytapi.domain.ProsessStatus;
+import no.nav.melosys.saksflytapi.domain.ProsessSteg;
+import no.nav.melosys.saksflytapi.domain.ProsessType;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

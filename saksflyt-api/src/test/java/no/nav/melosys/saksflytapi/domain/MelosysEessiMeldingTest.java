@@ -1,21 +1,19 @@
-package no.nav.melosys.domain.eessi.melding;
+package no.nav.melosys.saksflytapi.domain;
 
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
+import org.assertj.core.api.Assertions;
 import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 public class MelosysEessiMeldingTest {
     @Test
     public void testSerialisering() {
-        EasyRandomParameters easyRandomParameters = new EasyRandomParameters().collectionSizeRange(1, 2).stringLengthRange(1,4);
+        EasyRandomParameters easyRandomParameters = new EasyRandomParameters().collectionSizeRange(1, 2).stringLengthRange(1, 4);
         MelosysEessiMelding eessiMelding = new EasyRandom(easyRandomParameters).nextObject(MelosysEessiMelding.class);
         Prosessinstans p = new Prosessinstans();
         p.setData(ProsessDataKey.EESSI_MELDING, eessiMelding);
         final MelosysEessiMelding deserialisering = p.getData(ProsessDataKey.EESSI_MELDING, MelosysEessiMelding.class);
-        assertThat(deserialisering).isEqualToComparingFieldByField(eessiMelding);
+        Assertions.assertThat(deserialisering).isEqualToComparingFieldByField(eessiMelding);
     }
 }

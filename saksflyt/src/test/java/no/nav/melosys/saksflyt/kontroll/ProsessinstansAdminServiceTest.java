@@ -5,11 +5,11 @@ import java.util.*;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.saksflyt.*;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.saksflyt.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.ProsessinstansBehandlerDelegate;
+import no.nav.melosys.saksflyt.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.kontroll.dto.HentProsessinstansDto;
+import no.nav.melosys.saksflytapi.domain.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

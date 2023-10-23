@@ -4,10 +4,10 @@ import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
 
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.ProsessType;
+import no.nav.melosys.saksflytapi.domain.ProsessSteg;
+import no.nav.melosys.saksflytapi.domain.ProsessType;
 
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.*;
+import static no.nav.melosys.saksflytapi.domain.ProsessSteg.*;
 
 public final class ProsessflytDefinisjon {
 

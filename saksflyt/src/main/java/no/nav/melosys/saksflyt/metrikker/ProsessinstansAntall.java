@@ -1,7 +1,8 @@
-package no.nav.melosys.domain.metrikker;
+package no.nav.melosys.saksflyt.metrikker;
 
-import no.nav.melosys.domain.saksflyt.ProsessStatus;
-import no.nav.melosys.domain.saksflyt.ProsessType;
+
+import no.nav.melosys.saksflytapi.domain.ProsessStatus;
+import no.nav.melosys.saksflytapi.domain.ProsessType;
 
 public class ProsessinstansAntall {
     private ProsessType prosessType;

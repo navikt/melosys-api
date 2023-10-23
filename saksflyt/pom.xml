@@ -24,13 +24,13 @@
             <groupId>no.nav.melosys</groupId>
             <artifactId>feil</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>no.nav.melosys</groupId>-->
-<!--            <artifactId>melosys-repository</artifactId>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>no.nav.melosys</groupId>
             <artifactId>melosys-service</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.melosys</groupId>
+            <artifactId>saksflyt-api</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

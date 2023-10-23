@@ -4,13 +4,13 @@ import java.time.LocalDateTime;
 import java.util.*;
 import javax.validation.constraints.NotNull;
 
-import no.nav.melosys.domain.saksflyt.ProsessDataKey;
-import no.nav.melosys.domain.saksflyt.ProsessStatus;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessFlyt;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessflytDefinisjon;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
+import no.nav.melosys.saksflytapi.domain.ProsessStatus;
+import no.nav.melosys.saksflytapi.domain.ProsessSteg;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.saksflyt.ProsessinstansFerdigEvent;
 import no.nav.melosys.service.saksflyt.ProsessinstansOpprettetEvent;
 import no.nav.melosys.sikkerhet.context.SaksflytSubjektHolder;
@@ -25,9 +25,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.domain.saksflyt.ProsessStatus.UNDER_BEHANDLING;
 import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.CORRELATION_ID;
 import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.putToMDC;
+import static no.nav.melosys.saksflytapi.domain.ProsessStatus.UNDER_BEHANDLING;
 
 @Component
 public class ProsessinstansBehandler {
