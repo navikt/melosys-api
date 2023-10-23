@@ -31,7 +31,6 @@ import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import java.math.BigDecimal
 import java.nio.charset.StandardCharsets
-import java.time.Year
 import java.time.YearMonth
 import java.util.*
 
@@ -117,14 +116,15 @@ class InntektRestConsumerTest(
         inntektListe.arbeidsInntektMaaned
             .shouldNotBeNull()
             .shouldHaveSize(4)
-            .map { it.arbeidsInntektInformasjon?.inntektListe }
+            .map { it.arbeidsInntektInformasjon.inntektListe }
             .run {
                 get(0).shouldNotBeNull().shouldHaveSize(1)
                     .first().run {
                         beloep.shouldBe(BigDecimal(50000))
-                        tilleggsinformasjon.shouldNotBeNull()
-                            .tilleggsinformasjonDetaljer.shouldBeInstanceOf<InntektResponse.BonusFraForsvaret>()
-                            .aaretUtbetalingenGjelderFor.shouldBe(Year.of(1980))
+                        tilleggsinformasjon.shouldNotBeNull().apply {
+                            kategori.shouldBe("bla")
+                            tilleggsinformasjonDetaljer.shouldBeNull()
+                        }
                     }
                 get(1).shouldNotBeNull().shouldHaveSize(1)
                     .first().run {

@@ -67,7 +67,7 @@ data class InntektResponse(
 
     data class Tilleggsinformasjon(
         val kategori: String,
-        val tilleggsinformasjonDetaljer: TilleggsinformasjonDetaljer
+        val tilleggsinformasjonDetaljer: TilleggsinformasjonDetaljer? = null
     )
     enum class InntektType {
         LOENNSINNTEKT,
