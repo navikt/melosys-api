@@ -1,0 +1,87 @@
+<ns2:hentInntektListeResponse xmlns:ns2="http://nav.no/tjeneste/virksomhet/inntekt/v3">
+    <response>
+        <arbeidsInntektIdent>
+            <arbeidsInntektMaaned>
+                <arbeidsInntektInformasjon>
+                    <inntektListe xsi:type="ns4:Loennsinntekt" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <tilleggsinformasjon>
+                            <kategori>AldersUfoereEtterlatteAvtalefestetOgKrigspensjon</kategori>
+                            <tilleggsinformasjonDetaljer xsi:type="ns4:AldersUfoereEtterlatteAvtalefestetOgKrigspensjon">
+                                <grunnpensjonbeloep>1300.65</grunnpensjonbeloep>
+                                <heravEtterlattepensjon>655.80</heravEtterlattepensjon>
+                                <pensjonsgrad>80</pensjonsgrad>
+                                <tidsrom>
+                                    <startDato>2017-04-01+02:00</startDato>
+                                    <sluttDato>2017-04-30+02:00</sluttDato>
+                                </tidsrom>
+                                <tillegspensjonbeloep>85.99</tillegspensjonbeloep>
+                                <ufoeregradpensjonsgrad>10</ufoeregradpensjonsgrad>
+                            </tilleggsinformasjonDetaljer>
+                        </tilleggsinformasjon>
+                    </inntektListe>
+                    <inntektListe xsi:type="ns4:Loennsinntekt" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <tilleggsinformasjon>
+                            <kategori>BarnepensjonOgUnderholdsbidrag</kategori>
+                            <tilleggsinformasjonDetaljer xsi:type="ns4:BarnepensjonOgUnderholdsbidrag">
+                                <forsoergersFoedselnummer>88888888881</forsoergersFoedselnummer>
+                                <tidsrom>
+                                    <startDato>2017-04-01+02:00</startDato>
+                                    <sluttDato>2017-04-30+02:00</sluttDato>
+                                </tidsrom>
+                            </tilleggsinformasjonDetaljer>
+                        </tilleggsinformasjon>
+                    </inntektListe>
+                    <inntektListe xsi:type="ns4:Loennsinntekt" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <tilleggsinformasjon>
+                            <kategori>BilOgBaat</kategori>
+                        </tilleggsinformasjon>
+                    </inntektListe>
+                    <inntektListe xsi:type="ns4:Loennsinntekt" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <tilleggsinformasjon>
+                            <kategori>BonusFraForsvaret</kategori>
+                            <tilleggsinformasjonDetaljer xsi:type="ns4:BonusFraForsvaret">
+                                <aaretUtbetalingenGjelderFor>2017</aaretUtbetalingenGjelderFor>
+                            </tilleggsinformasjonDetaljer>
+                        </tilleggsinformasjon>
+                    </inntektListe>
+                    <inntektListe xsi:type="ns4:Loennsinntekt" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <tilleggsinformasjon>
+                            <kategori>Periode</kategori>
+                            <tilleggsinformasjonDetaljer xsi:type="ns4:Etterbetalingsperiode">
+                                <etterbetalingsperiode>
+                                    <startDato>2017-03-01+01:00</startDato>
+                                    <sluttDato>2017-03-31+02:00</sluttDato>
+                                </etterbetalingsperiode>
+                            </tilleggsinformasjonDetaljer>
+                        </tilleggsinformasjon>
+                    </inntektListe>
+                    <inntektListe xsi:type="ns4:Loennsinntekt" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <tilleggsinformasjon>
+                            <kategori>SpesielleInntjeningsforhold</kategori>
+                            <tilleggsinformasjonDetaljer xsi:type="ns4:Inntjeningsforhold">
+                                <inntjeningsforhold kodeRef="skattefriArbeidsinntektBarnUnderTrettenAar">Skattefri arbeidsinntekt, barn under 13 år</inntjeningsforhold>
+                            </tilleggsinformasjonDetaljer>
+                        </tilleggsinformasjon>
+                    </inntektListe>
+                    <inntektListe xsi:type="ns4:Loennsinntekt" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <tilleggsinformasjon>
+                            <kategori>ReiseKostOgLosji</kategori>
+                            <tilleggsinformasjonDetaljer xsi:type="ns4:ReiseKostOgLosji">
+                                <persontype kodeRef="utlendingMedOppholdINorge">Utlending med opphold i Norge</persontype>
+                            </tilleggsinformasjonDetaljer>
+                        </tilleggsinformasjon>
+                    </inntektListe>
+                    <inntektListe xsi:type="ns4:Loennsinntekt" xmlns:ns4="http://nav.no/tjeneste/virksomhet/inntekt/v3/informasjon/inntekt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+                        <tilleggsinformasjon>
+                            <kategori>Svalbardinntekt</kategori>
+                            <tilleggsinformasjonDetaljer xsi:type="ns4:Svalbardinntekt">
+                                <antallDager>13</antallDager>
+                                <betaltTrygdeavgift>342</betaltTrygdeavgift>
+                            </tilleggsinformasjonDetaljer>
+                        </tilleggsinformasjon>
+                    </inntektListe>
+                </arbeidsInntektInformasjon>
+            </arbeidsInntektMaaned>
+        </arbeidsInntektIdent>
+    </response>
+</ns2:hentInntektListeResponse>

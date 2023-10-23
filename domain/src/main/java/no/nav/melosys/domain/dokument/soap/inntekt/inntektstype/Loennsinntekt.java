@@ -1,0 +1,40 @@
+package no.nav.melosys.domain.dokument.soap.inntekt.inntektstype;
+
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
+
+import com.fasterxml.jackson.annotation.JsonView;
+import no.nav.melosys.domain.dokument.DokumentView;
+import no.nav.melosys.domain.dokument.soap.inntekt.Inntekt;
+
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "Loennsinntekt")
+public class Loennsinntekt extends Inntekt {
+
+    @XmlElement(required = true)
+    protected String beskrivelse; //"http://nav.no/kodeverk/Kodeverk/Loennsbeskrivelse"s
+
+    @JsonView(DokumentView.Database.class)
+    protected Integer antall;
+
+    @Override
+    public String getBeskrivelse() {
+        return beskrivelse;
+    }
+
+    public void setBeskrivelse(String value) {
+        this.beskrivelse = value;
+    }
+
+    public Integer getAntall() {
+        return antall;
+    }
+
+    public void setAntall(Integer value) {
+        this.antall = value;
+    }
+
+}
