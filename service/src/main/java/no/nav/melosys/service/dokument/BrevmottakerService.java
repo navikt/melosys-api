@@ -8,7 +8,6 @@ import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
 import no.nav.melosys.domain.brev.NorskMyndighet;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -41,18 +40,15 @@ public class BrevmottakerService {
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
-    private final BehandlingService behandlingService;
 
     public BrevmottakerService(OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService,
                                UtenlandskMyndighetService utenlandskMyndighetService,
                                BehandlingsresultatService behandlingsresultatService,
-                               LovvalgsperiodeService lovvalgsperiodeService,
-                               BehandlingService behandlingService) {
+                               LovvalgsperiodeService lovvalgsperiodeService) {
         this.oppsummerteAvklarteFaktaService = oppsummerteAvklarteFaktaService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
-        this.behandlingService = behandlingService;
     }
 
     /**
@@ -86,11 +82,7 @@ public class BrevmottakerService {
     }
 
     private void leggTilKopier(long behandlingId, Mottakerliste mottakerliste, Collection<BrevkopiRegel> brevkopiRegler) {
-        Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingId);
-        boolean brukerHarFullmektig = behandling.getFagsak().finnRepresentantEllerFullmektig(Representerer.BRUKER).isPresent();
-
-        if (brevkopiRegler.contains(BRUKER_FÅR_KOPI) ||
-            (brevkopiRegler.contains(BRUKER_FÅR_KOPI_HVIS_FULLMEKTIG_FINNES) && brukerHarFullmektig)) {
+        if (brevkopiRegler.contains(BRUKER_FÅR_KOPI)) {
             mottakerliste.getKopiMottakere().add(Mottakerroller.BRUKER);
         }
         if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI)) {
@@ -104,20 +96,12 @@ public class BrevmottakerService {
         }
 
         if (brevkopiRegler.contains(UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI_HVIS_IKKE_ART_8_2)) {
-            Optional.ofNullable(lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId())).ifPresent(lovvalgsperiode -> {
+            Optional.ofNullable(lovvalgsperiodeService.hentLovvalgsperiode(behandlingId)).ifPresent(lovvalgsperiode -> {
                     if (lovvalgsperiode.getBestemmelse() != Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART8_2) {
                         mottakerliste.getKopiMottakere().add(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
                     }
                 }
             );
-        }
-        var fastsattTrygdeavgift = Optional.ofNullable(
-            behandlingsresultatService.hentBehandlingsresultat(behandlingId).getMedlemAvFolketrygden()).map(MedlemAvFolketrygden::getFastsattTrygdeavgift);
-
-        if (fastsattTrygdeavgift.isPresent() && !fastsattTrygdeavgift.get().getTrygdeavgiftsperioder().isEmpty()) {
-            if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI_HVIS_IKKE_SELVBETALENDE_BRUKER) && brukerHarFullmektig) { // TODO Bytt ut brukerHarFullmektig med bruker har fullmektig med den nye rollen (MELOSYS-5902)
-                mottakerliste.getKopiMottakere().add(Mottakerroller.ARBEIDSGIVER);
-            }
         }
     }
 
