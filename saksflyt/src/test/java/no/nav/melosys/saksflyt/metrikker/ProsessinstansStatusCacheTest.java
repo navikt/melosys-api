@@ -7,7 +7,7 @@ import java.util.Collections;
 
 import no.nav.melosys.domain.metrikker.ProsessinstansAntall;
 import no.nav.melosys.domain.saksflyt.ProsessType;
-import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.saksflyt.ProsessinstansRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;

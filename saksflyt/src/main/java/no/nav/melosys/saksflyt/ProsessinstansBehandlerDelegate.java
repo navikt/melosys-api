@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.domain.saksflyt.SedLåsReferanse;
-import no.nav.melosys.repository.ProsessinstansRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

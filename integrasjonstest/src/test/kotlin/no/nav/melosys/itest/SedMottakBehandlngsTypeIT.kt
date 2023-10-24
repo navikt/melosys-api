@@ -8,7 +8,6 @@ import io.getunleash.FakeUnleash
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import no.nav.melosys.domain.arkiv.*
 import no.nav.melosys.domain.eessi.*
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.kodeverk.*
@@ -19,7 +18,7 @@ import no.nav.melosys.melosysmock.oppgave.OppgaveRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
-import no.nav.melosys.repository.ProsessinstansRepository
+import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
 import no.nav.melosys.service.oppgave.OppgaveService

@@ -23,7 +23,7 @@ import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
 import no.nav.melosys.repository.FagsakRepository
-import no.nav.melosys.repository.ProsessinstansRepository
+import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.oppgave.OppgaveService
 import org.junit.jupiter.api.AfterEach

@@ -1,4 +1,4 @@
-package no.nav.melosys.repository;
+package no.nav.melosys.saksflyt;
 
 import java.time.LocalDateTime;
 import java.util.Collection;

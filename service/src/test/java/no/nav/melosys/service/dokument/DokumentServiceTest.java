@@ -247,8 +247,7 @@ final class DokumentServiceTest {
             avklarteVirksomheterService,
             mock(UtenlandskMyndighetService.class),
             behandlingsresultatService,
-            mock(LovvalgsperiodeService.class),
-            behandlingService);
+            mock(LovvalgsperiodeService.class));
         return new DokumentService(
             behandlingService,
             brevDataService,
