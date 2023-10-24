@@ -25,15 +25,15 @@ class AvklarteFaktaArbeidslandServiceTest {
     @Test
     fun `test lagreArbeidslandSomAvklartefakta med flere land`() {
         val behandlingID = 123L
-        val countries = listOf("NO", "SE")
+        val landListe = listOf("NO", "SE")
 
-        service.lagreArbeidslandSomAvklartefakta(behandlingID, countries)
+        service.lagreArbeidslandSomAvklartefakta(behandlingID, landListe)
 
         verify {
             avklartefaktaService.slettAvklarteFakta(behandlingID, Avklartefaktatyper.ARBEIDSLAND)
-            for (country in countries) {
+            for (land in landListe) {
                 avklartefaktaService.leggTilAvklarteFakta(behandlingID, Avklartefaktatyper.ARBEIDSLAND,
-                    Avklartefaktatyper.ARBEIDSLAND.kode, country, Avklartefakta.VALGT_FAKTA)
+                    Avklartefaktatyper.ARBEIDSLAND.kode, land, Avklartefakta.VALGT_FAKTA)
             }
         }
     }
@@ -41,13 +41,13 @@ class AvklarteFaktaArbeidslandServiceTest {
     @Test
     fun `test lagreArbeidslandSomAvklartefakta med ett land`() {
         val behandlingID = 123L
-        val country = "SE"
+        val land = "SE"
 
-        service.lagreArbeidslandSomAvklartfakta(country, behandlingID)
+        service.lagreArbeidslandSomAvklartfakta(land, behandlingID)
 
         verify {
             avklartefaktaService.leggTilAvklarteFakta(behandlingID, Avklartefaktatyper.ARBEIDSLAND,
-                Avklartefaktatyper.ARBEIDSLAND.kode, country, Avklartefakta.VALGT_FAKTA)
+                Avklartefaktatyper.ARBEIDSLAND.kode, land, Avklartefakta.VALGT_FAKTA)
         }
     }
 }
