@@ -189,7 +189,7 @@ public class AvklartefaktaService {
         Behandlingsresultat resultat = behandlingsresultatRepository.findById(behandlingID)
             .orElseThrow(() -> new IkkeFunnetException(FANT_IKKE_RESULTAT + behandlingID));
 
-        Avklartefakta avklartefakta = new Avklartefakta();
+        Avklartefakta avklartefakta = new  Avklartefakta();
         avklartefakta.setType(type);
         avklartefakta.setReferanse(referanse);
         avklartefakta.setSubjekt(subjekt);

@@ -9,13 +9,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
-import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.avklartefakta.*;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.AvklartefaktaOppsummeringDto;
-import no.nav.melosys.tjenester.gui.dto.VirksomheterDto;
+import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.VirksomheterDto;
+import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.ArbeidslandDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -39,6 +37,8 @@ class AvklartefaktaTjenesteTest {
     private AvklartefaktaService avklartefaktaService;
     @MockBean
     private AvklarteVirksomheterService avklarteVirksomheterService;
+    @MockBean
+    private AvklarteFaktaArbeidslandService avklarteFaktaArbeidslandService;
     @MockBean
     private AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
     @MockBean
@@ -97,6 +97,20 @@ class AvklartefaktaTjenesteTest {
         mockMvc.perform(post(BASE_URL + "/{behandlingID}/virksomheter", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(virksomheterDto)))
+            .andExpect(status().isOk())
+            .andExpect(responseBody(objectMapper).containsObjectAsJson(AvklartefaktaOppsummeringDto.av(dtos), AvklartefaktaOppsummeringDto.class));
+    }
+
+    @Test
+    void lagreArbeidslandSomAvklarteFaktaTest() throws Exception {
+        var arbeidslandDto = new ArbeidslandDto();
+        arbeidslandDto.setArbeidsland(Collections.singletonList("NO"));
+        Set<AvklartefaktaDto> dtos = lagAvklarteFaktaDtoSet();
+        when(avklartefaktaService.hentAlleAvklarteFakta(eq(1L))).thenReturn(dtos);
+
+        mockMvc.perform(post(BASE_URL + "/{behandlingID}/arbeidsland", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(arbeidslandDto)))
             .andExpect(status().isOk())
             .andExpect(responseBody(objectMapper).containsObjectAsJson(AvklartefaktaOppsummeringDto.av(dtos), AvklartefaktaOppsummeringDto.class));
     }
