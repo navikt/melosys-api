@@ -9,10 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
-import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.avklartefakta.*;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.AvklartefaktaOppsummeringDto;
 import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.VirksomheterDto;
@@ -40,6 +37,8 @@ class AvklartefaktaTjenesteTest {
     private AvklartefaktaService avklartefaktaService;
     @MockBean
     private AvklarteVirksomheterService avklarteVirksomheterService;
+    @MockBean
+    private AvklarteFaktaArbeidslandService avklarteFaktaArbeidslandService;
     @MockBean
     private AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
     @MockBean
