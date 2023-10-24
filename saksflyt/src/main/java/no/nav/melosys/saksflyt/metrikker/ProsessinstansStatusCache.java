@@ -10,7 +10,7 @@ import no.nav.melosys.domain.metrikker.ProsessinstansStegAntall;
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.ProsessType;
-import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.saksflyt.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessflytDefinisjon;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;

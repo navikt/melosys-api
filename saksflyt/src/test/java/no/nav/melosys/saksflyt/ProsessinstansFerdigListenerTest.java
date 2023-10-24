@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.repository.ProsessinstansRepository;
 import no.nav.melosys.service.saksflyt.ProsessinstansFerdigEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

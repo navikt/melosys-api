@@ -19,7 +19,6 @@ import no.nav.melosys.integrasjon.oppgave.OppgaveFasade
 import no.nav.melosys.integrasjon.oppgave.OppgaveOppdatering
 import no.nav.melosys.repository.BehandlingRepositoryForOppgaveMigrering
 import no.nav.melosys.repository.FagsakRepository
-import no.nav.melosys.repository.ProsessinstansRepository
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
@@ -62,9 +61,6 @@ class OppgaveMigreringTest {
         val behandlingRepository = mockk<BehandlingRepositoryForOppgaveMigrering>()
         every { behandlingRepository.finnSaksOgBehandlingTyperOgTema(any()) } returns migreringsListe.map { it.sak }
 
-        val prosessinstansRepository = mockk<ProsessinstansRepository>()
-        every { prosessinstansRepository.findAllByBehandling_Id(any()) }.returns(emptyList())
-
         val oppgaveFasade = mockk<OppgaveFasade>()
         val migreringsSak = migreringsListe.first()
         every { oppgaveFasade.finnÅpneBehandlingsoppgaverMedSaksnummer("MEL-1") } returns migreringsSak.oppgaver
@@ -79,7 +75,6 @@ class OppgaveMigreringTest {
             behandlingRepository,
             oppgaveFasade,
             migreringsRapport,
-            prosessinstansRepository,
             fagsakRepository
         ).migrering(null, null, false)
 
@@ -118,9 +113,6 @@ class OppgaveMigreringTest {
         val behandlingRepository = mockk<BehandlingRepositoryForOppgaveMigrering>()
         every { behandlingRepository.finnSaksOgBehandlingTyperOgTema(any()) } returns migreringsListe.map { it.sak }
 
-        val prosessinstansRepository = mockk<ProsessinstansRepository>()
-        every { prosessinstansRepository.findAllByBehandling_Id(any()) }.returns(emptyList())
-
         val oppgaveFasade = mockk<OppgaveFasade>()
         every { oppgaveFasade.oppdaterOppgave(any(), any()) } answers {
             val id = firstArg<String>()
@@ -148,7 +140,6 @@ class OppgaveMigreringTest {
             behandlingRepository,
             oppgaveFasade,
             migreringsRapport,
-            prosessinstansRepository,
             fagsakRepository
         ).migrering(null, null, false)
 

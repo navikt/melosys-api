@@ -26,7 +26,7 @@ import no.nav.melosys.domain.saksflyt.ProsessDataKey;
 import no.nav.melosys.domain.saksflyt.ProsessStatus;
 import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.repository.ProsessinstansRepository;
+import no.nav.melosys.repository.ProsessinstansForServiceRepository;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
@@ -59,7 +59,7 @@ class ProsessinstansServiceTest {
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
     @Mock
-    private ProsessinstansRepository prosessinstansRepo;
+    private ProsessinstansForServiceRepository prosessinstansRepo;
     @Mock
     private UtenlandskMyndighetService utenlandskMyndighetService;
     @Mock
