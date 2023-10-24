@@ -10,7 +10,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.LandvelgerService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevDataAvslagYrkesaktiv;
@@ -122,10 +122,10 @@ class BrevDataByggerAvslagYrkesaktivTest {
     }
 
     public BrevDataGrunnlag lagBrevressurser(Behandling behandling) {
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,
+        OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService = new OppsummerteAvklarteFaktaService(avklartefaktaService,
             organisasjonOppslagService, mock(BehandlingService.class), kodeverkService);
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
         Persondata persondata = PersonopplysningerObjectFactory.lagPersonopplysninger();
-        return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondata);
+        return new BrevDataGrunnlag(brevbestilling, kodeverkService, oppsummerteAvklarteFaktaService, avklartefaktaService, persondata);
     }
 }

@@ -8,7 +8,7 @@ import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.familie.AvklarteMedfolgendeFamilie;
 import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.service.SaksbehandlingDataFactory;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -29,7 +29,7 @@ class BrevdataGrunnlagFactoryTest {
     @Mock
     private AvklartefaktaService avklartefaktaService;
     @Mock
-    private AvklarteVirksomheterService avklarteVirksomheterService;
+    private OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService;
     @Mock
     private KodeverkService kodeverkService;
     @Mock
@@ -39,7 +39,7 @@ class BrevdataGrunnlagFactoryTest {
 
     @BeforeEach
     void setUp() {
-        brevdataGrunnlagFactory = new BrevdataGrunnlagFactory(avklartefaktaService, avklarteVirksomheterService, kodeverkService,
+        brevdataGrunnlagFactory = new BrevdataGrunnlagFactory(avklartefaktaService, oppsummerteAvklarteFaktaService, kodeverkService,
                                                               persondataFasade);
     }
 

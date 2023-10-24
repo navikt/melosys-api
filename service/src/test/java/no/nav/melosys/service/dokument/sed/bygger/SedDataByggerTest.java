@@ -28,7 +28,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -123,9 +123,9 @@ class SedDataByggerTest {
     }
 
     private SedDataGrunnlagMedSoknad lagGrunnlagMedSøknad(Persondata persondata) {
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,
+        OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService = new OppsummerteAvklarteFaktaService(avklartefaktaService,
             organisasjonOppslagService, mock(BehandlingService.class), kodeverkService);
-        return new SedDataGrunnlagMedSoknad(behandling, kodeverkService, avklarteVirksomheterService,
+        return new SedDataGrunnlagMedSoknad(behandling, kodeverkService, oppsummerteAvklarteFaktaService,
             avklartefaktaService, persondata);
     }
 
@@ -136,11 +136,11 @@ class SedDataByggerTest {
     private SedDataGrunnlagMedSoknad lagGrunnlagMedManglendeAdressefelter(boolean arbeidsstedManglerLandkode,
                                                                           boolean arbeidsgivendeForetakUtlandManglerLandkode,
                                                                           boolean selvstendigForetakUtlandManglerLandkode) {
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,
+        OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService = new OppsummerteAvklarteFaktaService(avklartefaktaService,
             organisasjonOppslagService, mock(BehandlingService.class), kodeverkService);
         return new SedDataGrunnlagMedSoknad(DataByggerStubs.hentBehandlingMedManglendeAdressefelterStub(
             arbeidsstedManglerLandkode, arbeidsgivendeForetakUtlandManglerLandkode, selvstendigForetakUtlandManglerLandkode),
-            kodeverkService, avklarteVirksomheterService, avklartefaktaService, behandling.hentPersonDokument());
+            kodeverkService, oppsummerteAvklarteFaktaService, avklartefaktaService, behandling.hentPersonDokument());
     }
 
     @Test

@@ -26,7 +26,7 @@ import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService
 import no.nav.melosys.service.dokument.DokgenTestData
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
 import org.junit.jupiter.api.BeforeEach
@@ -41,7 +41,7 @@ import java.time.temporal.ChronoUnit
 internal class InnvilgelseFtrlMapperTest {
 
     @MockK
-    private lateinit var mockAvklarteVirksomheterService: AvklarteVirksomheterService
+    private lateinit var mockOppsummerteAvklarteFaktaService: OppsummerteAvklarteFaktaService
 
     @MockK
     private lateinit var mockDokgenMapperDatahenter: DokgenMapperDatahenter
@@ -56,7 +56,7 @@ internal class InnvilgelseFtrlMapperTest {
         unleash.enableAll();
         trygdeavgiftMottakerService = TrygdeavgiftMottakerService()
         innvilgelseFtrlMapper = InnvilgelseFtrlMapper(
-            mockAvklarteVirksomheterService,
+            mockOppsummerteAvklarteFaktaService,
             mockDokgenMapperDatahenter,
             trygdeavgiftMottakerService,
             unleash,
@@ -268,7 +268,7 @@ internal class InnvilgelseFtrlMapperTest {
         }
 
     private fun mockHappyCase() {
-        every { mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(ofType()) } returns lagAvklarteVirksomheter()
+        every { mockOppsummerteAvklarteFaktaService.hentNorskeArbeidsgivere(ofType()) } returns lagAvklarteVirksomheter()
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat()
         every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.AT.kode) } returns Landkoder.AT.beskrivelse
         every { mockDokgenMapperDatahenter.hentFullmektigNavn(any(), any()) } returns null

@@ -19,7 +19,7 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.springframework.stereotype.Service;
 
@@ -32,17 +32,17 @@ public class TrygdeavtaleService {
 
     private final EregFasade eregFasade;
     private final AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
-    private final AvklarteVirksomheterService avklarteVirksomheterService;
+    private final OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final AvklartefaktaService avklartefaktaService;
 
     public TrygdeavtaleService(EregFasade eregFasade,
                                AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService,
-                               AvklarteVirksomheterService avklarteVirksomheterService,
+                               OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService,
                                LovvalgsperiodeService lovvalgsperiodeService, AvklartefaktaService avklartefaktaService) {
         this.eregFasade = eregFasade;
         this.avklarteMedfolgendeFamilieService = avklarteMedfolgendeFamilieService;
-        this.avklarteVirksomheterService = avklarteVirksomheterService;
+        this.oppsummerteAvklarteFaktaService = oppsummerteAvklarteFaktaService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.avklartefaktaService = avklartefaktaService;
     }
@@ -79,7 +79,7 @@ public class TrygdeavtaleService {
 
     public void overførResultat(long behandlingId, TrygdeavtaleResultat trygdeavtaleResultat) {
         avklarteMedfolgendeFamilieService.lagreMedfolgendeFamilieSomAvklartefakta(behandlingId, trygdeavtaleResultat.familie());
-        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(behandlingId, List.of(trygdeavtaleResultat.virksomhet()));
+        oppsummerteAvklarteFaktaService.lagreVirksomheterSomAvklartefakta(behandlingId, List.of(trygdeavtaleResultat.virksomhet()));
         lovvalgsperiodeService.lagreLovvalgsperioder(behandlingId, List.of(lagLovvalgsperiode(behandlingId, trygdeavtaleResultat)));
     }
 

@@ -45,7 +45,7 @@ import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDtoKonverterer;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -87,7 +87,7 @@ final class DokumentServiceTest {
     private static final String ORGNR = "123456789";
 
     private static long idTeller = 1L;
-    private final AvklarteVirksomheterService avklarteVirksomheterService;
+    private final OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService;
     private final DoksysFasade dokSysFasade;
     private final DokumentService dokumentService;
     private final BehandlingsresultatService behandlingsresultatService;
@@ -98,7 +98,7 @@ final class DokumentServiceTest {
     }
 
     public DokumentServiceTest() {
-        avklarteVirksomheterService = mock(AvklarteVirksomheterService.class);
+        oppsummerteAvklarteFaktaService = mock(OppsummerteAvklarteFaktaService.class);
         dokSysFasade = mock(DoksysFasade.class);
         behandlingsresultatService = mock(BehandlingsresultatService.class);
         dokumentService = lagDokumentService(null);
@@ -121,7 +121,7 @@ final class DokumentServiceTest {
     void produser_avslagArbeidsgiver_funker() {
         DoksysBrevbestilling brevbestilling = lagBrevbestillingAvslagArbeidsgiver();
         Set<String> arbeidsgivendeOrgnumre = Collections.singleton("987654321");
-        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any(Behandling.class))).thenReturn(arbeidsgivendeOrgnumre);
+        when(oppsummerteAvklarteFaktaService.hentNorskeArbeidsgivendeOrgnumre(any(Behandling.class))).thenReturn(arbeidsgivendeOrgnumre);
         DokumentService dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock());
         dokumentServiceMedMockVelger.produserDokument(AVSLAG_ARBEIDSGIVER, Mottaker.medRolle(ARBEIDSGIVER), BEHANDLINGSID, brevbestilling);
         verify(dokSysFasade).produserIkkeredigerbartDokument(any(Dokumentbestilling.class));
@@ -141,7 +141,7 @@ final class DokumentServiceTest {
     void produserUtkast_avslagArbeidsgiver_funker() {
         BrevbestillingDto brevbestilling = lagBrevBestillingDto(AVSLAG_ARBEIDSGIVER, ARBEIDSGIVER);
         Set<String> arbeidsgivendeOrgnumre = Collections.singleton("987654321");
-        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(any(Behandling.class))).thenReturn(arbeidsgivendeOrgnumre);
+        when(oppsummerteAvklarteFaktaService.hentNorskeArbeidsgivendeOrgnumre(any(Behandling.class))).thenReturn(arbeidsgivendeOrgnumre);
 
         DokumentService dokumentServiceMedMockVelger = lagDokumentService(lagBrevdatabyggerVelgerMock(brevbestilling));
         byte[] resultat = dokumentServiceMedMockVelger.produserUtkast(BEHANDLINGSID, brevbestilling);
@@ -244,7 +244,7 @@ final class DokumentServiceTest {
         UtenlandskMyndighetRepository utenlandskMyndighetRepository = mock(UtenlandskMyndighetRepository.class);
         BrevDataService brevDataService = new BrevDataService(behandlingsresultatRepository, persondataFasade, saksbehandlerService, utenlandskMyndighetRepository);
         BrevmottakerService brevmottakerService = new BrevmottakerService(
-            avklarteVirksomheterService,
+                oppsummerteAvklarteFaktaService,
             mock(UtenlandskMyndighetService.class),
             behandlingsresultatService,
             mock(LovvalgsperiodeService.class),
@@ -265,10 +265,10 @@ final class DokumentServiceTest {
         KodeverkService kodeverkService = new KodeverkService(kodeverkRegister, kodeOppslag);
         EregFasade eregFasade = mockEregFasade();
         OrganisasjonOppslagService registerOppslagService = new OrganisasjonOppslagService(eregFasade);
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), mock(KodeverkService.class));
+        OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService = new OppsummerteAvklarteFaktaService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), mock(KodeverkService.class));
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(lagBehandling()).build();
         Persondata persondata = PersonopplysningerObjectFactory.lagPersonopplysninger();
-        BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondata);
+        BrevDataGrunnlag dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, oppsummerteAvklarteFaktaService, avklartefaktaService, persondata);
         BrevdataGrunnlagFactory brevdataGrunnlagFactory = mock(BrevdataGrunnlagFactory.class);
         when(brevdataGrunnlagFactory.av(any())).thenReturn(dataGrunnlag);
         return brevdataGrunnlagFactory;

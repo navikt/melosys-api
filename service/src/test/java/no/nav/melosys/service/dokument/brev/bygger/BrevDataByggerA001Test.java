@@ -24,7 +24,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevDataA001;
@@ -175,8 +175,8 @@ class BrevDataByggerA001Test {
 
     private BrevDataGrunnlag lagBrevDataGrunnlag(DoksysBrevbestilling brevbestilling, Persondata persondata) {
         OrganisasjonOppslagService registerOppslagService = new OrganisasjonOppslagService(ereg);
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), mock(KodeverkService.class));
-        return new BrevDataGrunnlag(brevbestilling, mock(KodeverkService.class), avklarteVirksomheterService, avklartefaktaService, persondata);
+        OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService = new OppsummerteAvklarteFaktaService(avklartefaktaService, registerOppslagService, mock(BehandlingService.class), mock(KodeverkService.class));
+        return new BrevDataGrunnlag(brevbestilling, mock(KodeverkService.class), oppsummerteAvklarteFaktaService, avklartefaktaService, persondata);
     }
 
     private void leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) {

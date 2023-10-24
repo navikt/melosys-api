@@ -19,7 +19,7 @@ import no.nav.melosys.domain.saksflyt.ProsessType;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.repository.AktoerRepository;
 import no.nav.melosys.service.aktoer.AktoerService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
@@ -44,7 +44,7 @@ class AvklarArbeidsgiverTest {
 
     Behandling behandling = new Behandling();
     @Mock
-    AvklarteVirksomheterService avklarteVirksomheterService;
+    OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService;
 
     private AvklarArbeidsgiver avklarArbeidsgiver;
     private Prosessinstans prosessinstans;
@@ -56,7 +56,7 @@ class AvklarArbeidsgiverTest {
     @BeforeEach
     public void setUp() {
         aktoerService = mock(AktoerService.class);
-        avklarArbeidsgiver = new AvklarArbeidsgiver(aktoerService, avklarteVirksomheterService, behandlingService, behandlingsresultatService, saksbehandlingRegler);
+        avklarArbeidsgiver = new AvklarArbeidsgiver(aktoerService, oppsummerteAvklarteFaktaService, behandlingService, behandlingsresultatService, saksbehandlingRegler);
 
         prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
@@ -88,11 +88,11 @@ class AvklarArbeidsgiverTest {
     @Test
     void utfør_medAvklartNorskVirksomhet_arbeidsgiveraktørOpprettes() {
         AktoerRepository aktoerRepository = mock(AktoerRepository.class);
-        AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository), avklarteVirksomheterService,
+        AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository), oppsummerteAvklarteFaktaService,
             behandlingService, behandlingsresultatService, saksbehandlingRegler);
 
         List<AvklartVirksomhet> avklarteVirksomheter = Collections.singletonList(avklartVirksomhet);
-        when(avklarteVirksomheterService.hentNorskeArbeidsgivere(any(), any())).thenReturn(avklarteVirksomheter);
+        when(oppsummerteAvklarteFaktaService.hentNorskeArbeidsgivere(any(), any())).thenReturn(avklarteVirksomheter);
 
 
         steg.utfør(prosessinstans);
@@ -121,7 +121,7 @@ class AvklarArbeidsgiverTest {
     @Test
     void utfør_utenAvklartNorskVirksomhet_arbeidsgiveraktorerSlettes() {
         AktoerRepository aktoerRepository = mock(AktoerRepository.class);
-        AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository), avklarteVirksomheterService,
+        AvklarArbeidsgiver steg = new AvklarArbeidsgiver(new AktoerService(aktoerRepository), oppsummerteAvklarteFaktaService,
             behandlingService, behandlingsresultatService, saksbehandlingRegler);
 
 

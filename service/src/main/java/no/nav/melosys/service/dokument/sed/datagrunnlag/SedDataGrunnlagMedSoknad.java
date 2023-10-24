@@ -3,7 +3,7 @@ package no.nav.melosys.service.dokument.sed.datagrunnlag;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.person.Persondata;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.ArbeidsstedGrunnlag;
 import no.nav.melosys.service.dokument.BostedGrunnlag;
@@ -19,9 +19,9 @@ public class SedDataGrunnlagMedSoknad implements SedDataGrunnlag {
     private final Persondata persondata;
 
     public SedDataGrunnlagMedSoknad(Behandling behandling, KodeverkService kodeverkService,
-                                    AvklarteVirksomheterService avklarteVirksomheterService,
+                                    OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService,
                                     AvklartefaktaService avklartefaktaService, Persondata persondata) {
-        this.avklarteVirksomheterGrunnlag = new AvklarteVirksomheterGrunnlag(behandling, avklarteVirksomheterService);
+        this.avklarteVirksomheterGrunnlag = new AvklarteVirksomheterGrunnlag(behandling, oppsummerteAvklarteFaktaService);
         this.behandling = behandling;
         this.mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         this.persondata = persondata;

@@ -10,7 +10,7 @@ import no.nav.melosys.domain.avklartefakta.Avklartefakta;
 import no.nav.melosys.domain.avklartefakta.AvklartefaktaRegistrering;
 import no.nav.melosys.domain.kodeverk.Avklartefaktatyper;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
@@ -38,7 +38,7 @@ class AvklartefaktaTjenesteTest {
     @MockBean
     private AvklartefaktaService avklartefaktaService;
     @MockBean
-    private AvklarteVirksomheterService avklarteVirksomheterService;
+    private OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService;
     @MockBean
     private AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
     @MockBean

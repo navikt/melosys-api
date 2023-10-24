@@ -51,7 +51,7 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-class AvklarteVirksomheterServiceTest {
+class OppsummerteAvklarteFaktaServiceTest {
 
     @Mock
     private AvklartefaktaService avklartefaktaService;
@@ -67,7 +67,7 @@ class AvklarteVirksomheterServiceTest {
 
     private Behandling behandling;
 
-    private AvklarteVirksomheterService avklarteVirksomheterService;
+    private OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService;
 
     private final String orgnr1 = "111111111";
     private final String orgnr2 = "222222222";
@@ -86,7 +86,7 @@ class AvklarteVirksomheterServiceTest {
 
         when(mockKodeverkService.dekod(any(FellesKodeverk.class), anyString())).thenReturn("Poststed");
 
-        avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService, organisasjonOppslagService, behandlingService, mockKodeverkService);
+        oppsummerteAvklarteFaktaService = new OppsummerteAvklarteFaktaService(avklartefaktaService, organisasjonOppslagService, behandlingService, mockKodeverkService);
     }
 
     @Test
@@ -101,7 +101,7 @@ class AvklarteVirksomheterServiceTest {
         behandling.setSaksopplysninger(saksopplysninger);
         behandling.setMottatteOpplysninger(lagMottatteOpplysninger(selvstendigeForetak, foretakUtlandListe, arbeidgivendeEkstraOrgnumre));
 
-        int antallAvklarteForetak = avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling);
+        int antallAvklarteForetak = oppsummerteAvklarteFaktaService.hentAntallAvklarteVirksomheter(behandling);
 
         assertThat(antallAvklarteForetak).isEqualTo(6);
     }
@@ -112,7 +112,7 @@ class AvklarteVirksomheterServiceTest {
         ForetakUtland foretak2 = lagForetakUtland("Utland2", uuid2, "SE-123456789");
         behandling.setMottatteOpplysninger(lagMottatteOpplysninger(Collections.emptyList(), Arrays.asList(foretak1, foretak2), Collections.emptyList()));
 
-        List<AvklartVirksomhet> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling);
+        List<AvklartVirksomhet> avklarteSelvstendigeOrgnumre = oppsummerteAvklarteFaktaService.hentUtenlandskeVirksomheter(behandling);
         assertThat(avklarteSelvstendigeOrgnumre.stream().map(av -> av.navn)).containsOnly("Utland1");
     }
 
@@ -121,7 +121,7 @@ class AvklarteVirksomheterServiceTest {
         ForetakUtland foretak1 = lagForetakUtland("Utland1", uuid1, "SE-123456789");
         behandling.setMottatteOpplysninger(lagMottatteOpplysninger(Collections.emptyList(), Collections.singletonList(foretak1), Collections.emptyList()));
 
-        List<AvklartVirksomhet> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling);
+        List<AvklartVirksomhet> avklarteSelvstendigeOrgnumre = oppsummerteAvklarteFaktaService.hentUtenlandskeVirksomheter(behandling);
         assertThat(avklarteSelvstendigeOrgnumre.stream().map(av -> av.orgnr)).containsOnly("SE-123456789");
     }
 
@@ -138,7 +138,7 @@ class AvklarteVirksomheterServiceTest {
         List<String> selvstendigeForetak = Arrays.asList(orgnr1, orgnr2);
         behandling.setMottatteOpplysninger(lagMottatteOpplysninger(selvstendigeForetak, Collections.emptyList(), Collections.emptyList()));
 
-        Set<String> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentNorskeSelvstendigeForetakOrgnumre(behandling);
+        Set<String> avklarteSelvstendigeOrgnumre = oppsummerteAvklarteFaktaService.hentNorskeSelvstendigeForetakOrgnumre(behandling);
         assertThat(avklarteSelvstendigeOrgnumre).containsOnly(orgnr1);
     }
 
@@ -150,7 +150,7 @@ class AvklarteVirksomheterServiceTest {
         behandling.setSaksopplysninger(saksopplysninger);
         behandling.setMottatteOpplysninger(lagMottatteOpplysninger(Collections.emptyList(), Collections.emptyList(), arbeidgivendeEkstraOrgnumre));
 
-        Set<String> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling);
+        Set<String> avklarteSelvstendigeOrgnumre = oppsummerteAvklarteFaktaService.hentNorskeArbeidsgivendeOrgnumre(behandling);
         assertThat(avklarteSelvstendigeOrgnumre).containsOnly(orgnr1);
     }
 
@@ -162,7 +162,7 @@ class AvklarteVirksomheterServiceTest {
         behandling.setSaksopplysninger(saksopplysninger);
         behandling.setMottatteOpplysninger(lagMottatteOpplysninger(Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
 
-        Set<String> avklarteSelvstendigeOrgnumre = avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling);
+        Set<String> avklarteSelvstendigeOrgnumre = oppsummerteAvklarteFaktaService.hentNorskeArbeidsgivendeOrgnumre(behandling);
         assertThat(avklarteSelvstendigeOrgnumre).containsOnly(orgnr1);
     }
 
@@ -182,9 +182,9 @@ class AvklarteVirksomheterServiceTest {
 
         leggTilIRegisterOppslag(Arrays.asList(orgnr2, orgnr3));
 
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,
+        OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService = new OppsummerteAvklarteFaktaService(avklartefaktaService,
             organisasjonOppslagService, behandlingService, mockKodeverkService);
-        assertThat(avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, INGEN_ADRESSE).stream()
+        assertThat(oppsummerteAvklarteFaktaService.hentAlleNorskeVirksomheter(behandling, INGEN_ADRESSE).stream()
             .map(nv -> nv.orgnr)
             .collect(Collectors.toList())).contains(orgnr2, orgnr3);
     }
@@ -210,9 +210,9 @@ class AvklarteVirksomheterServiceTest {
 
         leggTilIRegisterOppslag(arbeidsgivereRegister);
 
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,
+        OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService = new OppsummerteAvklarteFaktaService(avklartefaktaService,
             organisasjonOppslagService, behandlingService, mockKodeverkService);
-        assertThat(avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, INGEN_ADRESSE))
+        assertThat(oppsummerteAvklarteFaktaService.hentAlleNorskeVirksomheter(behandling, INGEN_ADRESSE))
             .singleElement()
             .matches(avklartVirksomhet -> avklartVirksomhet.getOrgnr().equals(orgnr3));
 
@@ -237,9 +237,9 @@ class AvklarteVirksomheterServiceTest {
 
         leggTilIRegisterOppslag(selvstendigeForetak);
 
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,
+        OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService = new OppsummerteAvklarteFaktaService(avklartefaktaService,
             organisasjonOppslagService, behandlingService, mockKodeverkService);
-        assertThat(avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling, INGEN_ADRESSE).stream()
+        assertThat(oppsummerteAvklarteFaktaService.hentAlleNorskeVirksomheter(behandling, INGEN_ADRESSE).stream()
             .map(nv -> nv.orgnr)
             .collect(Collectors.toList())).contains(orgnr1);
     }
@@ -254,7 +254,7 @@ class AvklarteVirksomheterServiceTest {
         behandling.setMottatteOpplysninger(lagMottatteOpplysninger(Collections.emptyList(), Collections.emptyList(), Collections.emptyList()));
 
 
-        boolean harOpphørtAvklartVirksomhet = avklarteVirksomheterService.harOpphørtAvklartVirksomhet(behandling);
+        boolean harOpphørtAvklartVirksomhet = oppsummerteAvklarteFaktaService.harOpphørtAvklartVirksomhet(behandling);
 
 
         assertThat(harOpphørtAvklartVirksomhet).isTrue();
@@ -265,7 +265,7 @@ class AvklarteVirksomheterServiceTest {
         List<String> virksomhetIDer = List.of(uuid1);
         forberedValidering();
 
-        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(1L, virksomhetIDer);
+        oppsummerteAvklarteFaktaService.lagreVirksomheterSomAvklartefakta(1L, virksomhetIDer);
         verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), uuid1, Avklartefakta.VALGT_FAKTA);
     }
 
@@ -274,7 +274,7 @@ class AvklarteVirksomheterServiceTest {
         List<String> virksomhetIDer = List.of(orgnr1);
         forberedValidering();
 
-        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(1L, virksomhetIDer);
+        oppsummerteAvklarteFaktaService.lagreVirksomheterSomAvklartefakta(1L, virksomhetIDer);
         verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr1, Avklartefakta.VALGT_FAKTA);
     }
 
@@ -283,7 +283,7 @@ class AvklarteVirksomheterServiceTest {
         List<String> virksomhetIDer = List.of(orgnr2);
         forberedValidering();
 
-        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(1L, virksomhetIDer);
+        oppsummerteAvklarteFaktaService.lagreVirksomheterSomAvklartefakta(1L, virksomhetIDer);
         verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr2, Avklartefakta.VALGT_FAKTA);
     }
 
@@ -292,7 +292,7 @@ class AvklarteVirksomheterServiceTest {
         List<String> virksomhetIDer = List.of(orgnr3);
         forberedValidering();
 
-        avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(1L, virksomhetIDer);
+        oppsummerteAvklarteFaktaService.lagreVirksomheterSomAvklartefakta(1L, virksomhetIDer);
         verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(1L, VIRKSOMHET, VIRKSOMHET.getKode(), orgnr3, Avklartefakta.VALGT_FAKTA);
     }
 
@@ -302,14 +302,14 @@ class AvklarteVirksomheterServiceTest {
         forberedValidering();
 
         assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(1L, virksomhetIDer))
+            .isThrownBy(() -> oppsummerteAvklarteFaktaService.lagreVirksomheterSomAvklartefakta(1L, virksomhetIDer))
             .withMessage(String.format("VirksomhetID %s hører ikke til noen av arbeidsforholdene", orgnr4));
         verify(avklartefaktaService, never()).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatyper.class), anyString(), anyString(), eq(Avklartefakta.VALGT_FAKTA));
     }
 
     @Test
     void utfyllManglendeAdressefelter_gyldigForretningsadresse_girForretningsadresse() {
-        StrukturertAdresse adresse = avklarteVirksomheterService.utfyllManglendeAdressefelter(lagOrganisasjonDokument("2345", "Forretningsgatenavn"));
+        StrukturertAdresse adresse = oppsummerteAvklarteFaktaService.utfyllManglendeAdressefelter(lagOrganisasjonDokument("2345", "Forretningsgatenavn"));
 
         assertThat(adresse.getGatenavn()).isEqualTo("Forretningsgatenavn");
         assertThat(adresse.getPostnummer()).isEqualTo("2345");
@@ -321,7 +321,7 @@ class AvklarteVirksomheterServiceTest {
 
     @Test
     void utfyllManglendeAdressefelter_forretningsadresseManglerGatenavn_girForretningsadresseMedBlanktGatenavn() {
-        StrukturertAdresse adresse = avklarteVirksomheterService.utfyllManglendeAdressefelter(lagOrganisasjonDokument("2345", null));
+        StrukturertAdresse adresse = oppsummerteAvklarteFaktaService.utfyllManglendeAdressefelter(lagOrganisasjonDokument("2345", null));
 
         assertThat(adresse.getGatenavn()).isEqualTo(" ");
         assertThat(adresse.getPostnummer()).isEqualTo("2345");
@@ -336,7 +336,7 @@ class AvklarteVirksomheterServiceTest {
         var organisasjonDokument = lagOrganisasjonDokument(null, null, null, "DK");
         organisasjonDokument.organisasjonDetaljer.forretningsadresse = Collections.emptyList();
         organisasjonDokument.organisasjonDetaljer.postadresse.stream().findFirst().ifPresent(a -> ((SemistrukturertAdresse) a).setPostnr(null));
-        StrukturertAdresse adresse = avklarteVirksomheterService.utfyllManglendeAdressefelter(organisasjonDokument);
+        StrukturertAdresse adresse = oppsummerteAvklarteFaktaService.utfyllManglendeAdressefelter(organisasjonDokument);
 
         assertThat(adresse.getGatenavn()).isEqualTo("Postgatenavn");
         assertThat(adresse.getPostnummer()).isEqualTo(" ");
@@ -348,7 +348,7 @@ class AvklarteVirksomheterServiceTest {
 
     @Test
     void utfyllManglendeAdressefelter_forretningsadresseManglerPostnr_girPostadresse() {
-        StrukturertAdresse adresse = avklarteVirksomheterService.utfyllManglendeAdressefelter(lagOrganisasjonDokument(null, null));
+        StrukturertAdresse adresse = oppsummerteAvklarteFaktaService.utfyllManglendeAdressefelter(lagOrganisasjonDokument(null, null));
 
         assertThat(adresse.getGatenavn()).isEqualTo("Postgatenavn");
         assertThat(adresse.getPostnummer()).isEqualTo("6789");

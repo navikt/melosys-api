@@ -5,7 +5,7 @@ import java.util.Objects;
 
 import no.nav.melosys.domain.Anmodningsperiode;
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kontroll.feature.unntak.data.AnmodningUnntakKontrollData;
 import no.nav.melosys.service.kontroll.feature.unntak.kontroll.AnmodningUnntakKontrollsett;
@@ -18,15 +18,15 @@ import org.springframework.stereotype.Service;
 public class AnmodningUnntakKontrollService {
 
     private final AnmodningsperiodeService anmodningsperiodeService;
-    private final AvklarteVirksomheterService avklarteVirksomheterService;
+    private final OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService;
     private final BehandlingService behandlingService;
     private final PersondataFasade persondataFasade;
 
     public AnmodningUnntakKontrollService(AnmodningsperiodeService anmodningsperiodeService,
-                                          AvklarteVirksomheterService avklarteVirksomheterService, BehandlingService behandlingService,
+                                          OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService, BehandlingService behandlingService,
                                           PersondataFasade persondataFasade) {
         this.anmodningsperiodeService = anmodningsperiodeService;
-        this.avklarteVirksomheterService = avklarteVirksomheterService;
+        this.oppsummerteAvklarteFaktaService = oppsummerteAvklarteFaktaService;
         this.behandlingService = behandlingService;
         this.persondataFasade = persondataFasade;
     }
@@ -43,7 +43,7 @@ public class AnmodningUnntakKontrollService {
         Anmodningsperiode anmodningsperiode
     ) {
         final var persondata = persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
-        final int antallArbeidsgivere = avklarteVirksomheterService.hentAntallAvklarteVirksomheter(behandling);
+        final int antallArbeidsgivere = oppsummerteAvklarteFaktaService.hentAntallAvklarteVirksomheter(behandling);
         AnmodningUnntakKontrollData kontrollData = new AnmodningUnntakKontrollData(persondata,
             behandling.getMottatteOpplysninger().getMottatteOpplysningerData(),
             anmodningsperiode,

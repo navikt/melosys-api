@@ -23,7 +23,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
@@ -51,7 +51,7 @@ class KontrollTest {
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
-    private AvklarteVirksomheterService avklarteVirksomheterService;
+    private OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService;
     @Mock
     private PersondataFasade persondataFasade;
     @Mock
@@ -78,7 +78,7 @@ class KontrollTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
 
         unleash.enableAll();
-        kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, avklarteVirksomheterService, persondataFasade, organisasjonOppslagService, saksbehandlingRegler, unleash);
+        kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, oppsummerteAvklarteFaktaService, persondataFasade, organisasjonOppslagService, saksbehandlingRegler, unleash);
     }
 
     @Test
@@ -291,7 +291,7 @@ class KontrollTest {
     @Test
     void utførKontroller_avklartVirksomhetErOpphørt_returnererKode() {
         mockReturnertLovvalgsperiode();
-        when(avklarteVirksomheterService.harOpphørtAvklartVirksomhet(behandling)).thenReturn(true);
+        when(oppsummerteAvklarteFaktaService.harOpphørtAvklartVirksomhet(behandling)).thenReturn(true);
 
         Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
 

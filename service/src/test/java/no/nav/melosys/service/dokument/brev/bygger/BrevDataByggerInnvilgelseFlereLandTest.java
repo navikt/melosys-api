@@ -14,7 +14,7 @@ import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
@@ -40,7 +40,7 @@ class BrevDataByggerInnvilgelseFlereLandTest {
     @Mock
     AvklartefaktaService avklartefaktaService;
     @Mock
-    AvklarteVirksomheterService avklarteVirksomheterService;
+    OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService;
     @Mock
     LandvelgerService landvelgerService;
     @Mock
@@ -95,7 +95,7 @@ class BrevDataByggerInnvilgelseFlereLandTest {
     private BrevDataGrunnlag lagBrevressurser() {
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
         Persondata persondata = PersonopplysningerObjectFactory.lagPersonopplysninger();
-        return new BrevDataGrunnlag(brevbestilling, null, avklarteVirksomheterService, avklartefaktaService, persondata);
+        return new BrevDataGrunnlag(brevbestilling, null, oppsummerteAvklarteFaktaService, avklartefaktaService, persondata);
     }
 
     private static Saksopplysning lagPersonsopplysning() {

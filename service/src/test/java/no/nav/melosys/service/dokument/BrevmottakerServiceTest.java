@@ -29,7 +29,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,7 +50,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class BrevmottakerServiceTest {
     @Mock
-    private AvklarteVirksomheterService avklarteVirksomheterService;
+    private OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService;
     @Mock
     private UtenlandskMyndighetService utenlandskMyndighetService;
     @Mock
@@ -68,7 +68,7 @@ class BrevmottakerServiceTest {
     @BeforeEach
     void setup() {
         brevmottakerService = new BrevmottakerService(
-            avklarteVirksomheterService, utenlandskMyndighetService, behandlingsresultatService, lovvalgsperiodeService, behandlingService);
+                oppsummerteAvklarteFaktaService, utenlandskMyndighetService, behandlingsresultatService, lovvalgsperiodeService, behandlingService);
 
         behandlingsresultat = new Behandlingsresultat();
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
@@ -206,8 +206,8 @@ class BrevmottakerServiceTest {
     @Test
     void avklarMottakere_medArbeidsgiverRolleOgIngenArbeidsgivere_feiler() {
         when(behandling.getFagsak()).thenReturn(lagFagsak());
-        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling)).thenReturn(Collections.emptySet());
-        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling)).thenReturn(Collections.emptyList());
+        when(oppsummerteAvklarteFaktaService.hentNorskeArbeidsgivendeOrgnumre(behandling)).thenReturn(Collections.emptySet());
+        when(oppsummerteAvklarteFaktaService.hentUtenlandskeVirksomheter(behandling)).thenReturn(Collections.emptyList());
 
         assertThatThrownBy(() -> brevmottakerService.avklarMottakere(null, Mottaker.medRolle(ARBEIDSGIVER), behandling))
             .isInstanceOf(FunksjonellException.class)
@@ -216,7 +216,7 @@ class BrevmottakerServiceTest {
 
     @Test
     void avklarMottakere_medArbeidsgiverRolle_girArbeidsgiverMottakere() {
-        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling)).thenReturn(Sets.newHashSet("123456789", "987654321"));
+        when(oppsummerteAvklarteFaktaService.hentNorskeArbeidsgivendeOrgnumre(behandling)).thenReturn(Sets.newHashSet("123456789", "987654321"));
         when(behandling.getFagsak()).thenReturn(lagFagsak());
 
         List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(ARBEIDSGIVER), behandling);
@@ -229,8 +229,8 @@ class BrevmottakerServiceTest {
     @Test
     void avklarMottakere_medBareUtenlandskeArbeidsgivere_girIngenMottakere() {
         when(behandling.getFagsak()).thenReturn(lagFagsak());
-        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling)).thenReturn(Collections.emptySet());
-        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling))
+        when(oppsummerteAvklarteFaktaService.hentNorskeArbeidsgivendeOrgnumre(behandling)).thenReturn(Collections.emptySet());
+        when(oppsummerteAvklarteFaktaService.hentUtenlandskeVirksomheter(behandling))
             .thenReturn(Collections.singletonList(new AvklartVirksomhet(new ForetakUtland())));
 
         List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(ARBEIDSGIVER), behandling);
@@ -274,7 +274,7 @@ class BrevmottakerServiceTest {
     @Disabled("Etter fjerning av toggle melosys.fullmakt.trygdeavgift")
     @Test
     void avklarMottakere_medArbeidsgiverRolleOgRepresentantForBruker_girArbeidsgiverMottakere() {
-        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling)).thenReturn(Sets.newHashSet("123456789", "987654321"));
+        when(oppsummerteAvklarteFaktaService.hentNorskeArbeidsgivendeOrgnumre(behandling)).thenReturn(Sets.newHashSet("123456789", "987654321"));
         when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigOrg(Representerer.BRUKER));
 
         List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(ARBEIDSGIVER), behandling);
@@ -286,7 +286,7 @@ class BrevmottakerServiceTest {
 
     @Test
     void avklarMottakere_medArbeidsgiverRolleOgFullmektigForBruker_girArbeidsgiverMottakere() {
-        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling)).thenReturn(Sets.newHashSet("123456789", "987654321"));
+        when(oppsummerteAvklarteFaktaService.hentNorskeArbeidsgivendeOrgnumre(behandling)).thenReturn(Sets.newHashSet("123456789", "987654321"));
         when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigOrg(Fullmaktstype.FULLMEKTIG_SØKNAD));
 
         List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(ARBEIDSGIVER), behandling);

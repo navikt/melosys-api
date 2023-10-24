@@ -4,7 +4,7 @@ import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.Persondata;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.persondata.PersondataFasade;
@@ -15,15 +15,15 @@ import org.springframework.stereotype.Component;
 @Primary
 public class BrevdataGrunnlagFactory {
     private final AvklartefaktaService avklartefaktaService;
-    private final AvklarteVirksomheterService avklarteVirksomheterService;
+    private final OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService;
     private final KodeverkService kodeverkService;
     private final PersondataFasade persondataFasade;
 
     public BrevdataGrunnlagFactory(AvklartefaktaService avklartefaktaService,
-                                   AvklarteVirksomheterService avklarteVirksomheterService,
+                                   OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService,
                                    KodeverkService kodeverkService, PersondataFasade persondataFasade) {
         this.avklartefaktaService = avklartefaktaService;
-        this.avklarteVirksomheterService = avklarteVirksomheterService;
+        this.oppsummerteAvklarteFaktaService = oppsummerteAvklarteFaktaService;
         this.kodeverkService = kodeverkService;
         this.persondataFasade = persondataFasade;
     }
@@ -31,7 +31,7 @@ public class BrevdataGrunnlagFactory {
     public BrevDataGrunnlag av(DoksysBrevbestilling brevbestilling) {
         return new BrevDataGrunnlag(brevbestilling,
             kodeverkService,
-            avklarteVirksomheterService,
+                oppsummerteAvklarteFaktaService,
             avklartefaktaService,
             hentPersondata(brevbestilling.getBehandling())
         );

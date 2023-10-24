@@ -23,7 +23,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.msm.AltinnDokument;
 import no.nav.melosys.integrasjon.altinn.SoknadMottakConsumer;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
@@ -54,7 +54,7 @@ class AltinnSoeknadServiceTest {
     @Mock
     private PersondataFasade persondataFasade;
     @Mock
-    private AvklarteVirksomheterService avklarteVirksomheterService;
+    private OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService;
 
     private AltinnSoeknadService altinnSoeknadService;
 
@@ -70,7 +70,7 @@ class AltinnSoeknadServiceTest {
     @BeforeEach
     void setup() {
         altinnSoeknadService = new AltinnSoeknadService(soknadMottakConsumer, fagsakService,
-            mottatteOpplysningerService, persondataFasade, avklarteVirksomheterService);
+            mottatteOpplysningerService, persondataFasade, oppsummerteAvklarteFaktaService);
     }
 
     @Test
@@ -224,7 +224,7 @@ class AltinnSoeknadServiceTest {
         altinnSoeknadService.opprettFagsakOgBehandlingFraAltinnSøknad(søknadID);
 
 
-        verify(avklarteVirksomheterService).lagreVirksomhetSomAvklartfakta(
+        verify(oppsummerteAvklarteFaktaService).lagreVirksomhetSomAvklartfakta(
             søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer(), fagsak.hentAktivBehandling().getId());
     }
 

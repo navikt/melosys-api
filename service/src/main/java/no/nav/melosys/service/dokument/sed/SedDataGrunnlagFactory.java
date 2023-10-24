@@ -7,7 +7,7 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.person.Informasjonsbehov;
 import no.nav.melosys.domain.person.Persondata;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlag;
 import no.nav.melosys.service.dokument.sed.datagrunnlag.SedDataGrunnlagMedSoknad;
@@ -21,15 +21,15 @@ import org.springframework.stereotype.Component;
 @Primary
 public class SedDataGrunnlagFactory {
     private final AvklartefaktaService avklartefaktaService;
-    private final AvklarteVirksomheterService avklarteVirksomheterService;
+    private final OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService;
     private final KodeverkService kodeverkService;
     private final PersondataFasade persondataFasade;
 
     public SedDataGrunnlagFactory(AvklartefaktaService avklartefaktaService,
-                                  AvklarteVirksomheterService avklarteVirksomheterService,
+                                  OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService,
                                   KodeverkService kodeverkService, PersondataFasade persondataFasade) {
         this.avklartefaktaService = avklartefaktaService;
-        this.avklarteVirksomheterService = avklarteVirksomheterService;
+        this.oppsummerteAvklarteFaktaService = oppsummerteAvklarteFaktaService;
         this.kodeverkService = kodeverkService;
         this.persondataFasade = persondataFasade;
     }
@@ -37,7 +37,7 @@ public class SedDataGrunnlagFactory {
     public SedDataGrunnlag av(Behandling behandling) {
         MottatteOpplysninger mottatteOpplysninger = behandling.getMottatteOpplysninger();
         if (mottatteOpplysninger != null) {
-            return new SedDataGrunnlagMedSoknad(behandling, kodeverkService, avklarteVirksomheterService,
+            return new SedDataGrunnlagMedSoknad(behandling, kodeverkService, oppsummerteAvklarteFaktaService,
                 avklartefaktaService, hentPersondata(behandling));
         } else {
             return new SedDataGrunnlagUtenSoknad(behandling, kodeverkService, hentPersondata(behandling));

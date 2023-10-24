@@ -31,7 +31,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.attest.*;
 import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse.*;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.behandling.UtledMottaksdato;
 import org.springframework.stereotype.Component;
 
@@ -45,16 +45,16 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 @Component
 public class TrygdeavtaleMapper {
     private final AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService;
-    private final AvklarteVirksomheterService avklarteVirksomheterService;
+    private final OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final UtledMottaksdato utledMottaksdato;
 
     public TrygdeavtaleMapper(AvklarteMedfolgendeFamilieService avklarteMedfølgendeFamilieService,
-                              AvklarteVirksomheterService avklarteVirksomheterService,
+                              OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService,
                               LovvalgsperiodeService lovvalgsperiodeService,
                               UtledMottaksdato utledMottaksdato) {
         this.avklarteMedfølgendeFamilieService = avklarteMedfølgendeFamilieService;
-        this.avklarteVirksomheterService = avklarteVirksomheterService;
+        this.oppsummerteAvklarteFaktaService = oppsummerteAvklarteFaktaService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.utledMottaksdato = utledMottaksdato;
     }
@@ -216,7 +216,7 @@ public class TrygdeavtaleMapper {
 
 
     private AvklartVirksomhet hentAvklartVirksomhet(Behandling behandling) {
-        var avklarteVirksomheter = avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling);
+        var avklarteVirksomheter = oppsummerteAvklarteFaktaService.hentNorskeArbeidsgivere(behandling);
         if (avklarteVirksomheter.size() != 1) {
             throw new FunksjonellException("Fant " + avklarteVirksomheter.size() + " avklarte virksomheter for behandling: " + behandling + ". Må være 1 for trygdeavtale");
         }

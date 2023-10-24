@@ -19,7 +19,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.brev.mapper.BrevmottakerMapper;
@@ -37,18 +37,18 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 public class BrevmottakerService {
     private static final Logger log = LoggerFactory.getLogger(BrevmottakerService.class);
 
-    private final AvklarteVirksomheterService avklarteVirksomheterService;
+    private final OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService;
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
     private final BehandlingService behandlingService;
 
-    public BrevmottakerService(AvklarteVirksomheterService avklarteVirksomheterService,
+    public BrevmottakerService(OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService,
                                UtenlandskMyndighetService utenlandskMyndighetService,
                                BehandlingsresultatService behandlingsresultatService,
                                LovvalgsperiodeService lovvalgsperiodeService,
                                BehandlingService behandlingService) {
-        this.avklarteVirksomheterService = avklarteVirksomheterService;
+        this.oppsummerteAvklarteFaktaService = oppsummerteAvklarteFaktaService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
@@ -209,9 +209,9 @@ public class BrevmottakerService {
     }
 
     private List<Mottaker> avklarArbeidsgiverFraAvklarteVirksomheter(Behandling behandling) {
-        Set<String> arbeidsgivendeOrgnumre = avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling);
+        Set<String> arbeidsgivendeOrgnumre = oppsummerteAvklarteFaktaService.hentNorskeArbeidsgivendeOrgnumre(behandling);
         if (arbeidsgivendeOrgnumre.isEmpty()) {
-            if (avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling).isEmpty()) {
+            if (oppsummerteAvklarteFaktaService.hentUtenlandskeVirksomheter(behandling).isEmpty()) {
                 throw new FunksjonellException("Arbeidsgiver er ikke registrert.");
             } else {
                 log.debug("Melosys sender ikke brev til utenlandske arbeidsgivere uten orgnr.");

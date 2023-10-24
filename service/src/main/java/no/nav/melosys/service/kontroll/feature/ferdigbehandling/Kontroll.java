@@ -18,7 +18,7 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.SaksopplysningerData;
@@ -40,16 +40,16 @@ class Kontroll {
 
     private final BehandlingService behandlingService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
-    private final AvklarteVirksomheterService avklarteVirksomheterService;
+    private final OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService;
     private final PersondataFasade persondataFasade;
     private final OrganisasjonOppslagService organisasjonOppslagService;
     private final SaksbehandlingRegler saksbehandlingRegler;
     private final Unleash unleash;
 
-    public Kontroll(BehandlingService behandlingService, LovvalgsperiodeService lovvalgsperiodeService, AvklarteVirksomheterService avklarteVirksomheterService, PersondataFasade persondataFasade, OrganisasjonOppslagService organisasjonOppslagService, SaksbehandlingRegler saksbehandlingRegler, Unleash unleash) {
+    public Kontroll(BehandlingService behandlingService, LovvalgsperiodeService lovvalgsperiodeService, OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService, PersondataFasade persondataFasade, OrganisasjonOppslagService organisasjonOppslagService, SaksbehandlingRegler saksbehandlingRegler, Unleash unleash) {
         this.behandlingService = behandlingService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
-        this.avklarteVirksomheterService = avklarteVirksomheterService;
+        this.oppsummerteAvklarteFaktaService = oppsummerteAvklarteFaktaService;
         this.persondataFasade = persondataFasade;
         this.organisasjonOppslagService = organisasjonOppslagService;
         this.saksbehandlingRegler = saksbehandlingRegler;
@@ -186,6 +186,6 @@ class Kontroll {
     }
 
     private SaksopplysningerData hentSaksopplysningerData(Behandling behandling) {
-        return new SaksopplysningerData(avklarteVirksomheterService.harOpphørtAvklartVirksomhet(behandling));
+        return new SaksopplysningerData(oppsummerteAvklarteFaktaService.harOpphørtAvklartVirksomhet(behandling));
     }
 }

@@ -16,7 +16,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.LandvelgerService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevDataAnmodningUnntak;
@@ -101,7 +101,7 @@ class BrevDataByggerAnmodningUnntakTest {
     }
 
     public BrevDataGrunnlag lagBrevressurser(Behandling behandling) {
-        AvklarteVirksomheterService avklarteVirksomheterService = new AvklarteVirksomheterService(avklartefaktaService,
+        OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService = new OppsummerteAvklarteFaktaService(avklartefaktaService,
                                                                                                   organisasjonOppslagService, mock(BehandlingService.class), kodeverkService);
 
         Set<String> orgSet = new HashSet<>(Collections.singletonList("987654321"));
@@ -117,7 +117,7 @@ class BrevDataByggerAnmodningUnntakTest {
         when(organisasjonOppslagService.hentOrganisasjoner(orgSet)).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
         Persondata persondata = PersonopplysningerObjectFactory.lagPersonopplysninger();
-        return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondata);
+        return new BrevDataGrunnlag(brevbestilling, kodeverkService, oppsummerteAvklarteFaktaService, avklartefaktaService, persondata);
     }
 
     @Test

@@ -22,7 +22,7 @@ import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataA1;
@@ -54,7 +54,7 @@ class BrevDataByggerInnvilgelseTest {
     @Mock
     AvklartefaktaService avklartefaktaService;
     @Mock
-    AvklarteVirksomheterService avklarteVirksomheterService;
+    OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService;
     @Mock
     KodeverkService kodeverkService;
     @Mock
@@ -105,7 +105,7 @@ class BrevDataByggerInnvilgelseTest {
         when(brevDataByggerA1.lag(any(), any())).thenReturn(new BrevDataA1());
 
         AvklartVirksomhet virksomhet = new AvklartVirksomhet("Bedrift AS", "123456789", null, Yrkesaktivitetstyper.LOENNET_ARBEID);
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(virksomhet));
+        when(oppsummerteAvklarteFaktaService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(virksomhet));
 
         Lovvalgsperiode periode = new Lovvalgsperiode();
         when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(periode);
@@ -129,7 +129,7 @@ class BrevDataByggerInnvilgelseTest {
     BrevDataGrunnlag lagBrevdataGrunnlag() {
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
         Persondata persondata = PersonopplysningerObjectFactory.lagPersonopplysninger();
-        return new BrevDataGrunnlag(brevbestilling, kodeverkService, avklarteVirksomheterService, avklartefaktaService, persondata);
+        return new BrevDataGrunnlag(brevbestilling, kodeverkService, oppsummerteAvklarteFaktaService, avklartefaktaService, persondata);
     }
 
     @Test

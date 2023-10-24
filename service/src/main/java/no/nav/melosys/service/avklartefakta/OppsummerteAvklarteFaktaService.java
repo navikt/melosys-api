@@ -31,18 +31,18 @@ import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VIRKSOMHET;
 
 @Service
 @Primary
-public class AvklarteVirksomheterService {
-    private static final Logger log = LoggerFactory.getLogger(AvklarteVirksomheterService.class);
+public class OppsummerteAvklarteFaktaService {
+    private static final Logger log = LoggerFactory.getLogger(OppsummerteAvklarteFaktaService.class);
 
     protected final AvklartefaktaService avklartefaktaService;
     protected final OrganisasjonOppslagService organisasjonOppslagService;
     protected final BehandlingService behandlingService;
     protected final KodeverkService kodeverkService;
 
-    public AvklarteVirksomheterService(AvklartefaktaService avklartefaktaService,
-                                       OrganisasjonOppslagService organisasjonOppslagService,
-                                       BehandlingService behandlingService,
-                                       KodeverkService kodeverkService) {
+    public OppsummerteAvklarteFaktaService(AvklartefaktaService avklartefaktaService,
+                                           OrganisasjonOppslagService organisasjonOppslagService,
+                                           BehandlingService behandlingService,
+                                           KodeverkService kodeverkService) {
         this.avklartefaktaService = avklartefaktaService;
         this.organisasjonOppslagService = organisasjonOppslagService;
         this.behandlingService = behandlingService;

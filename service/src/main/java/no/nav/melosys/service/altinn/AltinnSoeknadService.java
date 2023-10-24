@@ -18,7 +18,7 @@ import no.nav.melosys.domain.msm.AltinnDokument;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.altinn.SoknadMottakConsumer;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
@@ -41,18 +41,18 @@ public class AltinnSoeknadService {
     private final FagsakService fagsakService;
     private final MottatteOpplysningerService mottatteOpplysningerService;
     private final PersondataFasade persondataFasade;
-    private final AvklarteVirksomheterService avklarteVirksomheterService;
+    private final OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService;
 
     public AltinnSoeknadService(SoknadMottakConsumer soknadMottakConsumer,
                                 FagsakService fagsakService,
                                 MottatteOpplysningerService mottatteOpplysningerService,
                                 PersondataFasade persondataFasade,
-                                AvklarteVirksomheterService avklarteVirksomheterService) {
+                                OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService) {
         this.soknadMottakConsumer = soknadMottakConsumer;
         this.fagsakService = fagsakService;
         this.mottatteOpplysningerService = mottatteOpplysningerService;
         this.persondataFasade = persondataFasade;
-        this.avklarteVirksomheterService = avklarteVirksomheterService;
+        this.oppsummerteAvklarteFaktaService = oppsummerteAvklarteFaktaService;
     }
 
     public Behandling opprettFagsakOgBehandlingFraAltinnSøknad(String søknadReferanse) {
@@ -68,7 +68,7 @@ public class AltinnSoeknadService {
             SoeknadMapper.lagSoeknad(søknad),
             søknadReferanse
         );
-        avklarteVirksomheterService.lagreVirksomhetSomAvklartfakta(hentArbeidsgiverID(søknad), behandling.getId());
+        oppsummerteAvklarteFaktaService.lagreVirksomhetSomAvklartfakta(hentArbeidsgiverID(søknad), behandling.getId());
 
         return behandling;
     }

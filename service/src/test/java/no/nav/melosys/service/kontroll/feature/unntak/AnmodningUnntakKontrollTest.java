@@ -9,7 +9,7 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
@@ -32,7 +32,7 @@ class AnmodningUnntakKontrollTest {
     @Mock
     private AnmodningsperiodeService anmodningsperiodeService;
     @Mock
-    private AvklarteVirksomheterService avklarteVirksomheterService;
+    private OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService;
     @Mock
     private BehandlingService behandlingService;
     @Mock
@@ -50,10 +50,10 @@ class AnmodningUnntakKontrollTest {
         when(anmodningsperiodeService.hentFørsteAnmodningsperiode(behandlingID)).thenReturn(anmodningsperiode);
 
         when(persondataFasade.hentPerson(anyString())).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
-        when(avklarteVirksomheterService.hentAntallAvklarteVirksomheter(any())).thenReturn(1);
+        when(oppsummerteAvklarteFaktaService.hentAntallAvklarteVirksomheter(any())).thenReturn(1);
 
         anmodningUnntakKontrollService = new AnmodningUnntakKontrollService(
-            anmodningsperiodeService, avklarteVirksomheterService, behandlingService, persondataFasade);
+            anmodningsperiodeService, oppsummerteAvklarteFaktaService, behandlingService, persondataFasade);
     }
 
     @Test
@@ -105,7 +105,7 @@ class AnmodningUnntakKontrollTest {
     @Test
     void utførKontroller_flereArbeidsgivere_returnererKode() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(lagBehandling());
-        when(avklarteVirksomheterService.hentAntallAvklarteVirksomheter(any())).thenReturn(2);
+        when(oppsummerteAvklarteFaktaService.hentAntallAvklarteVirksomheter(any())).thenReturn(2);
 
         Collection<Kontrollfeil> resultat = anmodningUnntakKontrollService.utførKontroller(behandlingID);
         assertThat(resultat).extracting(Kontrollfeil::getKode).contains(Kontroll_begrunnelser.IKKE_KUN_EN_VIRKSOMHET);

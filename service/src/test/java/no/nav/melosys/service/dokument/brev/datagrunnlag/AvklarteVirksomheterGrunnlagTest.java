@@ -7,7 +7,7 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
 class AvklarteVirksomheterGrunnlagTest {
 
     @Mock
-    private AvklarteVirksomheterService avklarteVirksomheterService;
+    private OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService;
 
     @Mock
     private KodeverkService kodeverkService;
@@ -34,16 +34,16 @@ class AvklarteVirksomheterGrunnlagTest {
 
     @BeforeEach
     public void setUp() {
-        dataGrunnlag = new AvklarteVirksomheterGrunnlag(mock(Behandling.class), avklarteVirksomheterService);
+        dataGrunnlag = new AvklarteVirksomheterGrunnlag(mock(Behandling.class), oppsummerteAvklarteFaktaService);
     }
 
     @Test
     void hentAlleNorskeVirksomheter_foreventerEnVirksomhet() {
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(lagNorskVirksomhet()));
+        when(oppsummerteAvklarteFaktaService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(lagNorskVirksomhet()));
         Collection<AvklartVirksomhet> norskeVirksomheter = dataGrunnlag.hentAlleNorskeVirksomheterMedAdresse();
         assertThat(norskeVirksomheter).hasSize(1);
         dataGrunnlag.hentAlleNorskeVirksomheterMedAdresse();
-        verify(avklarteVirksomheterService, times(1)).hentAlleNorskeVirksomheter(any());
+        verify(oppsummerteAvklarteFaktaService, times(1)).hentAlleNorskeVirksomheter(any());
     }
 
     @Test
@@ -52,7 +52,7 @@ class AvklarteVirksomheterGrunnlagTest {
         AvklartVirksomhet utenlandskArbeidsgiver = new AvklartVirksomhet(lagForetakUtland(false));
 
         List<AvklartVirksomhet> utenlandskeVirksomheter = Arrays.asList(utenlandskSelvstendigForetak, utenlandskArbeidsgiver);
-        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(utenlandskeVirksomheter);
+        when(oppsummerteAvklarteFaktaService.hentUtenlandskeVirksomheter(any())).thenReturn(utenlandskeVirksomheter);
 
         List<AvklartVirksomhet> utenlandskeArbeidsgivere = dataGrunnlag.hentUtenlandskeArbeidsgivere();
         assertThat(utenlandskeArbeidsgivere).containsExactly(utenlandskArbeidsgiver);
@@ -64,7 +64,7 @@ class AvklarteVirksomheterGrunnlagTest {
         AvklartVirksomhet utenlandskArbeidsgiver = new AvklartVirksomhet(lagForetakUtland(false));
 
         List<AvklartVirksomhet> utenlandskeVirksomheter = Arrays.asList(utenlandskSelvstendigForetak, utenlandskArbeidsgiver);
-        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(utenlandskeVirksomheter);
+        when(oppsummerteAvklarteFaktaService.hentUtenlandskeVirksomheter(any())).thenReturn(utenlandskeVirksomheter);
 
         List<AvklartVirksomhet> utenlandskeSelvstendige = dataGrunnlag.hentUtenlandskeSelvstendige();
         assertThat(utenlandskeSelvstendige).containsExactly(utenlandskSelvstendigForetak);
@@ -73,7 +73,7 @@ class AvklarteVirksomheterGrunnlagTest {
     @Test
     void hentHovedvirksomhet_medEnNorskVirksomhet_girNorskHovedvirksomhet() {
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(norskVirksomhet));
+        when(oppsummerteAvklarteFaktaService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(norskVirksomhet));
 
         AvklartVirksomhet avklartVirksomhet = dataGrunnlag.hentHovedvirksomhet();
         assertThat(avklartVirksomhet).isEqualTo(norskVirksomhet);
@@ -82,10 +82,10 @@ class AvklarteVirksomheterGrunnlagTest {
     @Test
     void hentHovedvirksomhet_medNorskOgUtenlandskVirksomhet_girNorskHovedvirksomhet() {
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(norskVirksomhet));
+        when(oppsummerteAvklarteFaktaService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(norskVirksomhet));
 
         AvklartVirksomhet utenlandskAvklartVirksomhet = new AvklartVirksomhet(lagForetakUtland(false));
-        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(utenlandskAvklartVirksomhet));
+        when(oppsummerteAvklarteFaktaService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(utenlandskAvklartVirksomhet));
 
         AvklartVirksomhet hovedvirksomhet = dataGrunnlag.hentHovedvirksomhet();
         dataGrunnlag.hentBivirksomheter();
@@ -95,9 +95,9 @@ class AvklarteVirksomheterGrunnlagTest {
     @Test
     void hentHovedvirksomhet_medKunUtenlandskVirksomhet_girUtenlandskVirksomhet() {
         AvklartVirksomhet forventetUtenlandskVirksomhet = new AvklartVirksomhet(lagForetakUtland(false));
-        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(forventetUtenlandskVirksomhet));
+        when(oppsummerteAvklarteFaktaService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(forventetUtenlandskVirksomhet));
 
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.emptyList());
+        when(oppsummerteAvklarteFaktaService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.emptyList());
 
         AvklartVirksomhet hovedvirksomhet = dataGrunnlag.hentHovedvirksomhet();
         assertThat(hovedvirksomhet).isEqualToComparingFieldByField(forventetUtenlandskVirksomhet);
@@ -106,7 +106,7 @@ class AvklarteVirksomheterGrunnlagTest {
     @Test
     void hentBivirksomheter_medEnNorskVirksomhet_girIngenBivirksomheter() {
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(norskVirksomhet));
+        when(oppsummerteAvklarteFaktaService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(norskVirksomhet));
 
         Collection<AvklartVirksomhet> bivirksomheter = dataGrunnlag.hentBivirksomheter();
         assertThat(bivirksomheter).isEmpty();
@@ -114,10 +114,10 @@ class AvklarteVirksomheterGrunnlagTest {
 
     @Test
     void hentBivirksomheter_medEnUtenlandskVirksomhet_girIngenBivirksomheter() {
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.emptyList());
+        when(oppsummerteAvklarteFaktaService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.emptyList());
 
         AvklartVirksomhet forventetUtenlandskVirksomhet = new AvklartVirksomhet(lagForetakUtland(false));
-        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(forventetUtenlandskVirksomhet));
+        when(oppsummerteAvklarteFaktaService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(forventetUtenlandskVirksomhet));
 
         Collection<AvklartVirksomhet> bivirksomheter = dataGrunnlag.hentBivirksomheter();
         assertThat(bivirksomheter).isEmpty();
@@ -126,7 +126,7 @@ class AvklarteVirksomheterGrunnlagTest {
     @Test
     void hentBivirksomheter_medToNorskeVirksomheter_girEnNorskBivirksomhet() {
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Arrays.asList(norskVirksomhet, norskVirksomhet));
+        when(oppsummerteAvklarteFaktaService.hentAlleNorskeVirksomheter(any())).thenReturn(Arrays.asList(norskVirksomhet, norskVirksomhet));
 
         Collection<AvklartVirksomhet> bivirksomheter = dataGrunnlag.hentBivirksomheter();
         assertThat(bivirksomheter).containsExactly(norskVirksomhet);
@@ -137,8 +137,8 @@ class AvklarteVirksomheterGrunnlagTest {
         AvklartVirksomhet forventetUtenlandskVirksomhet = new AvklartVirksomhet(lagForetakUtland(false));
 
         AvklartVirksomhet norskVirksomhet = lagNorskVirksomhet();
-        when(avklarteVirksomheterService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(norskVirksomhet));
-        when(avklarteVirksomheterService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(forventetUtenlandskVirksomhet));
+        when(oppsummerteAvklarteFaktaService.hentAlleNorskeVirksomheter(any())).thenReturn(Collections.singletonList(norskVirksomhet));
+        when(oppsummerteAvklarteFaktaService.hentUtenlandskeVirksomheter(any())).thenReturn(Collections.singletonList(forventetUtenlandskVirksomhet));
 
         Collection<AvklartVirksomhet> bivirksomheter = dataGrunnlag.hentBivirksomheter();
         assertThat(bivirksomheter).hasSize(1);

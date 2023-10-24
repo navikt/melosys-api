@@ -12,7 +12,6 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.data.*;
@@ -23,7 +22,7 @@ import no.nav.melosys.domain.util.LovvalgBestemmelseUtils;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -69,7 +68,7 @@ class TrygdeavtaleServiceTest {
     @Mock
     private AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
     @Mock
-    private AvklarteVirksomheterService avklarteVirksomheterService;
+    private OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService;
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
@@ -84,7 +83,7 @@ class TrygdeavtaleServiceTest {
 
     @BeforeEach
     void init() {
-        trygdeavtaleService = new TrygdeavtaleService(eregFasade, avklarteMedfolgendeFamilieService, avklarteVirksomheterService, lovvalgsperiodeService, avklartefaktaService);
+        trygdeavtaleService = new TrygdeavtaleService(eregFasade, avklarteMedfolgendeFamilieService, oppsummerteAvklarteFaktaService, lovvalgsperiodeService, avklartefaktaService);
     }
 
     @Test
@@ -95,7 +94,7 @@ class TrygdeavtaleServiceTest {
         trygdeavtaleService.overførResultat(1L, trygdeavtaleResultat);
 
         verify(avklarteMedfolgendeFamilieService).lagreMedfolgendeFamilieSomAvklartefakta(eq(1L), avklarteMedfolgendeFamilieArgumentCaptor.capture());
-        verify(avklarteVirksomheterService).lagreVirksomheterSomAvklartefakta(1L, List.of(ORGNR_1));
+        verify(oppsummerteAvklarteFaktaService).lagreVirksomheterSomAvklartefakta(1L, List.of(ORGNR_1));
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(1L), lovvalgsperioderArgumentCaptor.capture());
 
         assertThat(avklarteMedfolgendeFamilieArgumentCaptor.getValue().getFamilieIkkeOmfattetAvNorskTrygd())
@@ -184,7 +183,7 @@ class TrygdeavtaleServiceTest {
         trygdeavtaleService.overførResultat(1L, trygdeavtaleResultat);
 
         verify(avklarteMedfolgendeFamilieService).lagreMedfolgendeFamilieSomAvklartefakta(eq(1L), avklarteMedfolgendeFamilieArgumentCaptor.capture());
-        verify(avklarteVirksomheterService).lagreVirksomheterSomAvklartefakta(1L, List.of(ORGNR_1));
+        verify(oppsummerteAvklarteFaktaService).lagreVirksomheterSomAvklartefakta(1L, List.of(ORGNR_1));
         verify(lovvalgsperiodeService).lagreLovvalgsperioder(eq(1L), lovvalgsperioderArgumentCaptor.capture());
 
         assertThat(avklarteMedfolgendeFamilieArgumentCaptor.getValue().getFamilieIkkeOmfattetAvNorskTrygd())

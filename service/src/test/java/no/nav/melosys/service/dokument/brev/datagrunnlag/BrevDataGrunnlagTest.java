@@ -16,7 +16,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.yrker.Yrkesgrupper;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.avklartefakta.AvklartMaritimtArbeid;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.Arbeidssted;
 import no.nav.melosys.service.dokument.brev.mapper.arbeidssted.MaritimtArbeidssted;
@@ -51,7 +51,7 @@ class BrevDataGrunnlagTest {
 
         brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();
         Persondata persondata = PersonopplysningerObjectFactory.lagPersonopplysninger();
-        dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, mock(AvklarteVirksomheterService.class), avklartefaktaService, persondata);
+        dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, mock(OppsummerteAvklarteFaktaService.class), avklartefaktaService, persondata);
     }
 
     private Behandling lagBehandling(Soeknad søknad) {
@@ -78,7 +78,7 @@ class BrevDataGrunnlagTest {
         when(avklartefaktaService.hentMaritimeAvklartfaktaEtterSubjekt(anyLong()))
             .thenReturn(Collections.singletonMap("Dunfjæder", maritimtArbeid));
         Persondata persondata = PersonopplysningerObjectFactory.lagPersonopplysninger();
-        dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, mock(AvklarteVirksomheterService.class), avklartefaktaService, persondata);
+        dataGrunnlag = new BrevDataGrunnlag(brevbestilling, kodeverkService, mock(OppsummerteAvklarteFaktaService.class), avklartefaktaService, persondata);
 
         MaritimtArbeid maritimtArbeidISøknad = lagMaritimtArbeid();
         this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
@@ -103,7 +103,7 @@ class BrevDataGrunnlagTest {
         final BrevDataGrunnlag dataGrunnlagUtenAvklartMaritimtArbeid = new BrevDataGrunnlag(
             brevbestilling,
             kodeverkService,
-            mock(AvklarteVirksomheterService.class),
+            mock(OppsummerteAvklarteFaktaService.class),
             avklartefaktaService,
             persondata
         );

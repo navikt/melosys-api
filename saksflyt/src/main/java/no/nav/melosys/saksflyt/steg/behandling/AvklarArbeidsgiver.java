@@ -15,7 +15,7 @@ import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.service.aktoer.AktoerService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
@@ -31,18 +31,18 @@ public class AvklarArbeidsgiver implements StegBehandler {
     private static final Function<OrganisasjonDokument, Adresse> INGEN_ADRESSE = org -> null;
 
     private final AktoerService aktoerService;
-    private final AvklarteVirksomheterService avklarteVirksomheterService;
+    private final OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService;
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final SaksbehandlingRegler saksbehandlingRegler;
 
     public AvklarArbeidsgiver(AktoerService aktoerService,
-                              AvklarteVirksomheterService avklarteVirksomheterService,
+                              OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService,
                               BehandlingService behandlingService,
                               BehandlingsresultatService behandlingsresultatService,
                               SaksbehandlingRegler saksbehandlingRegler) {
         this.aktoerService = aktoerService;
-        this.avklarteVirksomheterService = avklarteVirksomheterService;
+        this.oppsummerteAvklarteFaktaService = oppsummerteAvklarteFaktaService;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.saksbehandlingRegler = saksbehandlingRegler;
@@ -65,7 +65,7 @@ public class AvklarArbeidsgiver implements StegBehandler {
         Fagsak fagsak = behandling.getFagsak();
         String saksnummer = fagsak.getSaksnummer();
 
-        List<AvklartVirksomhet> avklarteNorskeArbeidsgivere = avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling, INGEN_ADRESSE);
+        List<AvklartVirksomhet> avklarteNorskeArbeidsgivere = oppsummerteAvklarteFaktaService.hentNorskeArbeidsgivere(behandling, INGEN_ADRESSE);
         List<String> norskeOrgnumre = avklarteNorskeArbeidsgivere.stream()
             .map(avklartVirksomhet -> avklartVirksomhet.orgnr)
             .toList();

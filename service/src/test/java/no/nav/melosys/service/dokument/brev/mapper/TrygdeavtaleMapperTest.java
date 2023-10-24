@@ -33,7 +33,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse.Barn;
 import no.nav.melosys.integrasjon.dokgen.dto.trygdeavtale.innvilgelse.InnvilgelseTrygdeavtale;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.behandling.UtledMottaksdato;
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -79,7 +79,7 @@ class TrygdeavtaleMapperTest {
     @Mock
     private LovvalgsperiodeService mockLovvalgsperiodeService;
     @Mock
-    private AvklarteVirksomheterService mockAvklarteVirksomheterService;
+    private OppsummerteAvklarteFaktaService mockOppsummerteAvklarteFaktaService;
     @Mock
     private UtledMottaksdato utledMottaksdato;
 
@@ -89,7 +89,7 @@ class TrygdeavtaleMapperTest {
     void setup() {
         trygdeavtaleMapper = new TrygdeavtaleMapper(
             mockAvklarteMedfolgendeFamilieService,
-            mockAvklarteVirksomheterService,
+                mockOppsummerteAvklarteFaktaService,
             mockLovvalgsperiodeService,
             utledMottaksdato);
     }
@@ -166,7 +166,7 @@ class TrygdeavtaleMapperTest {
     void map_ingenNorskeVirksomheter_kastFunksjonellException() {
         mockLovvalgsperiode();
 
-        when(mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(any())).thenReturn(Collections.emptyList());
+        when(mockOppsummerteAvklarteFaktaService.hentNorskeArbeidsgivere(any())).thenReturn(Collections.emptyList());
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> trygdeavtaleMapper.map(lagStorbritanniaBrevbestilling(lagTrygdeavtaleBehandling()), Land_iso2.GB))
@@ -209,7 +209,7 @@ class TrygdeavtaleMapperTest {
         mockMedfølgendeFamilieDefaultCase();
         mockLovvalgsperiode();
         when(mockLovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(List.of(lagLovvalgsperiode()));
-        when(mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(any())).thenReturn(lagAvklarteVirksomheter());
+        when(mockOppsummerteAvklarteFaktaService.hentNorskeArbeidsgivere(any())).thenReturn(lagAvklarteVirksomheter());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklartMedfølgendeEktefelle(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagIkkeOmfattetMedfølgendeBarn());
 
@@ -339,7 +339,7 @@ class TrygdeavtaleMapperTest {
         when(mockAvklarteMedfolgendeFamilieService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(lagAvklartMedfølgendeBarn());
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendEktefelle(anyLong())).thenReturn(lagMedfølgendeEktefelle());
         when(mockAvklarteMedfolgendeFamilieService.hentMedfølgendeBarn(anyLong())).thenReturn(lagMedfølgendeBarn());
-        when(mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(any())).thenReturn(lagAvklarteVirksomheter());
+        when(mockOppsummerteAvklarteFaktaService.hentNorskeArbeidsgivere(any())).thenReturn(lagAvklarteVirksomheter());
         when(mockLovvalgsperiodeService.hentLovvalgsperioder(anyLong())).thenReturn(List.of(lagLovvalgsperiode()));
         when(mockLovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lagLovvalgsperiode());
     }

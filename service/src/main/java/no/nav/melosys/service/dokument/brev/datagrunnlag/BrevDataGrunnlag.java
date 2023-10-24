@@ -7,7 +7,7 @@ import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.person.Persondata;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.dokument.ArbeidsstedGrunnlag;
 import no.nav.melosys.service.dokument.BostedGrunnlag;
@@ -24,7 +24,7 @@ public class BrevDataGrunnlag implements DataGrunnlag {
 
     public BrevDataGrunnlag(DoksysBrevbestilling brevbestilling,
                             KodeverkService kodeverkService,
-                            AvklarteVirksomheterService avklarteVirksomheterService,
+                            OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService,
                             AvklartefaktaService avklartefaktaService,
                             Persondata persondata) {
         this.brevbestilling = brevbestilling;
@@ -33,7 +33,7 @@ public class BrevDataGrunnlag implements DataGrunnlag {
             .map(MottatteOpplysninger::getMottatteOpplysningerData)
             .orElse(null);
         this.person = persondata;
-        this.avklarteVirksomheterGrunnlag = new AvklarteVirksomheterGrunnlag(behandling, avklarteVirksomheterService);
+        this.avklarteVirksomheterGrunnlag = new AvklarteVirksomheterGrunnlag(behandling, oppsummerteAvklarteFaktaService);
         this.bostedGrunnlag = new BostedGrunnlag(
             mottatteOpplysningerData,
             person.finnBostedsadresse().orElse(null),

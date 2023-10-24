@@ -14,7 +14,7 @@ import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.dokgen.dto.InnvilgelseFtrl
 import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService
 import org.springframework.stereotype.Component
 import java.time.Instant
 import java.time.LocalDate
@@ -23,7 +23,7 @@ import javax.transaction.Transactional
 
 @Component
 class InnvilgelseFtrlMapper(
-    private val avklarteVirksomheterService: AvklarteVirksomheterService,
+    private val oppsummerteAvklarteFaktaService: OppsummerteAvklarteFaktaService,
     private val dokgenMapperDatahenter: DokgenMapperDatahenter,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val unleash: Unleash
@@ -57,7 +57,7 @@ class InnvilgelseFtrlMapper(
             .begrunnelseFritekst(brevbestilling.begrunnelseFritekst)
             .trygdeavgiftFritekst(brevbestilling.trygdeavgiftFritekst)
             .arbeidsgivere(
-                avklarteVirksomheterService.hentNorskeArbeidsgivere(brevbestilling.behandling).map { it.navn })
+                oppsummerteAvklarteFaktaService.hentNorskeArbeidsgivere(brevbestilling.behandling).map { it.navn })
             .arbeidsland(dokgenMapperDatahenter.hentLandnavnFraLandkode(arbeidsland))
             .trygdeavtaleMedArbeidsland(harTrygdeavtaleMedArbeidsland(arbeidsland))
             .arbeidsgiverFullmektigNavn(

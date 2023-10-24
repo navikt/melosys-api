@@ -8,11 +8,11 @@ import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
+import no.nav.melosys.service.avklartefakta.OppsummerteAvklarteFaktaService;
 
 public class AvklarteVirksomheterGrunnlag {
     private final Behandling behandling;
-    private final AvklarteVirksomheterService avklarteVirksomheterService;
+    private final OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService;
 
     // Microcachede verdier som kun eksisterer under brevbygging.
     // For å slippe å gjøre register- og kodeverksoppslag gjentatte ganger
@@ -22,35 +22,35 @@ public class AvklarteVirksomheterGrunnlag {
     private List<AvklartVirksomhet> utenlandskeVirksomheter;
 
     public AvklarteVirksomheterGrunnlag(Behandling behandling,
-                                        AvklarteVirksomheterService avklarteVirksomheterService) {
+                                        OppsummerteAvklarteFaktaService oppsummerteAvklarteFaktaService) {
         this.behandling = behandling;
-        this.avklarteVirksomheterService = avklarteVirksomheterService;
+        this.oppsummerteAvklarteFaktaService = oppsummerteAvklarteFaktaService;
     }
 
     public List<AvklartVirksomhet> hentAlleNorskeVirksomheterMedAdresse() {
         if (norskeVirksomheter == null) {
-            norskeVirksomheter = avklarteVirksomheterService.hentAlleNorskeVirksomheter(behandling);
+            norskeVirksomheter = oppsummerteAvklarteFaktaService.hentAlleNorskeVirksomheter(behandling);
         }
         return norskeVirksomheter;
     }
 
     public List<AvklartVirksomhet> hentNorskeArbeidsgivere() {
         if (norskeArbeidsgivere == null) {
-            norskeArbeidsgivere = avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling);
+            norskeArbeidsgivere = oppsummerteAvklarteFaktaService.hentNorskeArbeidsgivere(behandling);
         }
         return norskeArbeidsgivere;
     }
 
     public List<AvklartVirksomhet> hentNorskeSelvstendige() {
         if (norskeSelvstendige == null) {
-            norskeSelvstendige = avklarteVirksomheterService.hentNorskeSelvstendigeForetak(behandling);
+            norskeSelvstendige = oppsummerteAvklarteFaktaService.hentNorskeSelvstendigeForetak(behandling);
         }
         return norskeSelvstendige;
     }
 
     public List<AvklartVirksomhet> hentUtenlandskeVirksomheter() {
         if (utenlandskeVirksomheter == null) {
-            utenlandskeVirksomheter = avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling);
+            utenlandskeVirksomheter = oppsummerteAvklarteFaktaService.hentUtenlandskeVirksomheter(behandling);
         }
         return utenlandskeVirksomheter;
     }
@@ -68,7 +68,7 @@ public class AvklarteVirksomheterGrunnlag {
     }
 
     public Set<String> hentNorskeArbeidsgivendeOrgnumre() {
-        return avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling);
+        return oppsummerteAvklarteFaktaService.hentNorskeArbeidsgivendeOrgnumre(behandling);
     }
 
     public AvklartVirksomhet hentHovedvirksomhet() {
