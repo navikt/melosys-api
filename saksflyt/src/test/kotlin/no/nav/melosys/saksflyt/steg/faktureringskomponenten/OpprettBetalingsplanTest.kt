@@ -24,6 +24,7 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.saksflyt.faktureringskomponenten.OpprettBetalingsplan
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -298,7 +299,7 @@ class OpprettBetalingsplanTest {
         }
     }
 
-    private fun lagAktoerRepresentant(): Aktoer {
+    private fun lagFullmektig(): Aktoer {
         val aktoer = Aktoer()
         aktoer.rolle = Aktoersroller.FULLMEKTIG
         aktoer.setFullmaktstype(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
