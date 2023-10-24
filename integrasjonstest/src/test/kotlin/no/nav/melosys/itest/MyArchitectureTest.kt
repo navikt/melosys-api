@@ -2,11 +2,13 @@ package no.nav.melosys.itest
 
 import com.tngtech.archunit.core.importer.ClassFileImporter
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 
 class MyArchitectureTest {
 
+    @Disabled("WIP testen tester ikke det som skal testes")
     @Test
     fun architectureRuleSaksflyt() {
         val importedClasses = ClassFileImporter().importPackages(
