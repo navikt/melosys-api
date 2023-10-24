@@ -244,7 +244,7 @@ public class Fagsak extends RegistreringsInfo {
         }
     }
 
-    private Optional<Aktoer> finnFullmektig(Fullmaktstype fullmaktstype) {
+    public Optional<Aktoer> finnFullmektig(Fullmaktstype fullmaktstype) {
         return aktører.stream()
             .filter(a -> FULLMEKTIG.equals(a.getRolle()))
             .filter(a -> a.getFullmaktstyper().contains(fullmaktstype))

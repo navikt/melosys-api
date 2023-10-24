@@ -101,7 +101,7 @@ class FaktureringskomponentenConsumerTokenTest(
     private fun lagFakturaserieDto(
         fakturaserieReferanse: String? = null,
         fodselsnummer: String = "12345678911",
-        fullmektig: FullmektigDto = FullmektigDto("11987654321", "123456789", "Ole Brum"),
+        fullmektig: FullmektigDto = FullmektigDto("11987654321", "123456789"),
         referanseBruker: String = "Nasse Nøff",
         referanseNav: String = "NAV Medlemskap og avgift",
         fakturaGjelder: Innbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
