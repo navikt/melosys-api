@@ -1,12 +1,10 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.util.List;
 import java.util.Set;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -29,16 +27,13 @@ public class AvklartefaktaTjeneste {
 
     private final AvklartefaktaService avklartefaktaService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
-    private final AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
     private final Aksesskontroll aksesskontroll;
 
     public AvklartefaktaTjeneste(AvklartefaktaService avklartefaktaService,
                                  AvklarteVirksomheterService avklarteVirksomheterService,
-                                 AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService,
                                  Aksesskontroll aksesskontroll) {
         this.avklartefaktaService = avklartefaktaService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
-        this.avklarteMedfolgendeFamilieService = avklarteMedfolgendeFamilieService;
         this.aksesskontroll = aksesskontroll;
     }
 
