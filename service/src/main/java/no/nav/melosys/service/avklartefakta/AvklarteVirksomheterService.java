@@ -27,6 +27,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.ARBEIDSLAND;
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VIRKSOMHET;
 
 @Service
@@ -163,8 +164,21 @@ public class AvklarteVirksomheterService {
         }
     }
 
+    @Transactional
+    public void lagreArbeidslandSomAvklartefakta(Long behandlingID, List<String> arbeidsland) {
+        avklartefaktaService.slettAvklarteFakta(behandlingID, ARBEIDSLAND);
+
+        for (String land : arbeidsland) {
+            lagreArbeidslandSomAvklartfakta(land, behandlingID);
+        }
+    }
+
     public void lagreVirksomhetSomAvklartfakta(String virksomhetID, Long behandlingID) {
         avklartefaktaService.leggTilAvklarteFakta(behandlingID, VIRKSOMHET, VIRKSOMHET.getKode(), virksomhetID, Avklartefakta.VALGT_FAKTA);
+    }
+
+    public void lagreArbeidslandSomAvklartfakta(String arbeidsland, Long behandlingID) {
+        avklartefaktaService.leggTilAvklarteFakta(behandlingID, ARBEIDSLAND, ARBEIDSLAND.getKode(), arbeidsland, Avklartefakta.VALGT_FAKTA);
     }
 
     private void validerVirksomhetIDerGyldige(Long behandlingID, List<String> virksomhetIDer) {
