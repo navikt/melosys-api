@@ -15,7 +15,7 @@ import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.dto.AvklartefaktaOppsummeringDto;
-import no.nav.melosys.tjenester.gui.dto.VirksomheterDto;
+import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.VirksomheterDto;
 import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.ArbeidslandDto;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

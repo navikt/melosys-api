@@ -4,6 +4,7 @@ import java.util.Set;
 
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.ArbeidslandDto;
+import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.VirksomheterDto;
 
 public class AvklartefaktaOppsummeringDto {
 
