@@ -15,8 +15,6 @@ import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
-import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
-import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
@@ -30,7 +28,6 @@ import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -45,7 +42,8 @@ import static no.nav.melosys.domain.kodeverk.Mottakerroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class BrevmottakerServiceTest {
@@ -58,8 +56,6 @@ class BrevmottakerServiceTest {
     @Mock
     private LovvalgsperiodeService lovvalgsperiodeService;
     @Mock
-    private BehandlingService behandlingService;
-    @Mock
     private Behandling behandling;
 
     private Behandlingsresultat behandlingsresultat;
@@ -68,7 +64,7 @@ class BrevmottakerServiceTest {
     @BeforeEach
     void setup() {
         brevmottakerService = new BrevmottakerService(
-            avklarteVirksomheterService, utenlandskMyndighetService, behandlingsresultatService, lovvalgsperiodeService, behandlingService);
+            avklarteVirksomheterService, utenlandskMyndighetService, behandlingsresultatService, lovvalgsperiodeService);
 
         behandlingsresultat = new Behandlingsresultat();
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
@@ -403,10 +399,6 @@ class BrevmottakerServiceTest {
 
     @Test
     void gittMangelbrevArbeidsgiver_skalHovedmottakerVæreArbeidsgiverMedKopi() {
-        when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
-        when(behandling.getFagsak()).thenReturn(lagFagsak());
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
-
         assertThat(brevmottakerService.hentMottakerliste(MANGELBREV_ARBEIDSGIVER, 123))
             .extracting(
                 Mottakerliste::getHovedMottaker,
@@ -418,34 +410,10 @@ class BrevmottakerServiceTest {
                 List.of(BRUKER),
                 emptyList()
             );
-
-        verify(behandlingsresultatService).hentBehandlingsresultat(123L);
     }
 
     @Test
-    @Disabled("Vi har ikke mulighet å skille på har fullmektig og selvbetalende før den nye fullmektig-rollen kommer (MELOSYS-5902)")
-    void gittVedtakFtrl2_8UtenFullmektigIkkeSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() {
-        initMocksForFtrlVedtaksbrev(null, 10000, false);
-
-        assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN, 123L))
-            .extracting(
-                Mottakerliste::getHovedMottaker,
-                Mottakerliste::getKopiMottakere,
-                Mottakerliste::getFasteMottakere
-            )
-            .containsExactly(
-                BRUKER,
-                List.of(ARBEIDSGIVER),
-                List.of(SKATTEETATEN)
-            );
-
-        verify(behandlingsresultatService).hentBehandlingsresultat(123L);
-    }
-
-    @Test
-    void gittVedtakFtrl2_8UtenFullmektigSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() {
-        initMocksForFtrlVedtaksbrev(null, 10000, true);
-
+    void gittVedtakFtrl2_8_skalHovedmottakerVæreBrukerMedKopier() {
         assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN, 123L))
             .isNotNull()
             .extracting(
@@ -458,82 +426,12 @@ class BrevmottakerServiceTest {
                 emptyList(),
                 emptyList()
             );
-
-        verify(behandlingsresultatService).hentBehandlingsresultat(123L);
-    }
-
-    @Test
-    void gittVedtakFtrl2_8FullmektigIkkeSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() {
-        initMocksForFtrlVedtaksbrev(Fullmaktstype.FULLMEKTIG_SØKNAD, 10000, false);
-
-        assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN, 123))
-            .isNotNull()
-            .extracting(
-                Mottakerliste::getHovedMottaker,
-                Mottakerliste::getKopiMottakere,
-                Mottakerliste::getFasteMottakere
-            )
-            .containsExactly(
-                BRUKER,
-                List.of(BRUKER, ARBEIDSGIVER),
-                emptyList()
-            );
-
-        verify(behandlingsresultatService).hentBehandlingsresultat(123L);
-    }
-
-    @Test
-    //TODO
-    @Disabled("Vi har ikke mulighet å skille på har fullmektig og selvbetalende før den nye fullmektig-rollen kommer (MELOSYS-5902)")
-    void gittVedtakFtrl2_8FullmektigSelvbetalende_skalHovedmottakerVæreBrukerMedKopier() {
-        initMocksForFtrlVedtaksbrev(Fullmaktstype.FULLMEKTIG_SØKNAD, 10000, true);
-
-        Mottakerliste actual = brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN, 123);
-        assertThat(actual)
-            .isNotNull()
-            .extracting(
-                Mottakerliste::getHovedMottaker,
-                Mottakerliste::getKopiMottakere,
-                Mottakerliste::getFasteMottakere
-            )
-            .containsExactly(
-                BRUKER,
-                List.of(BRUKER),
-                List.of(SKATTEETATEN)
-            );
-
-        verify(behandlingsresultatService).hentBehandlingsresultat(123L);
-    }
-
-    @Test
-    //TODO
-    @Disabled("Vi har ikke mulighet å skille på har fullmektig og selvbetalende før den nye fullmektig-rollen kommer (MELOSYS-5902)")
-    void gittVedtakFtrl2_8FullmektigIkkeSelvbetalendeIkkeInntekt_skalHovedmottakerVæreBrukerMedKopier() {
-        initMocksForFtrlVedtaksbrev(Fullmaktstype.FULLMEKTIG_SØKNAD, 0, false);
-
-        assertThat(brevmottakerService.hentMottakerliste(INNVILGELSE_FOLKETRYGDLOVEN, 123))
-            .isNotNull()
-            .extracting(
-                Mottakerliste::getHovedMottaker,
-                Mottakerliste::getKopiMottakere,
-                Mottakerliste::getFasteMottakere
-            )
-            .containsExactly(
-                BRUKER,
-                List.of(BRUKER, ARBEIDSGIVER),
-                emptyList()
-            );
-
-        verify(behandlingsresultatService).hentBehandlingsresultat(123L);
     }
 
     @Test
     void gittInnvilgelsesbrevUK_skalHovedmottakerVæreBrukerMedKopier() {
         var lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1);
-        when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
-        when(behandling.getFagsak()).thenReturn(lagFagsak());
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
         when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
 
         assertThat(brevmottakerService.hentMottakerliste(TRYGDEAVTALE_GB, 123))
@@ -553,10 +451,7 @@ class BrevmottakerServiceTest {
     void gittInnvilgelsesbrevUKOgArt82_skalIkkeMyndighetFåKopi() {
         var lovvalgsperiode = new Lovvalgsperiode();
         lovvalgsperiode.setBestemmelse(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART8_2);
-        when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
-        when(behandling.getFagsak()).thenReturn(lagFagsak());
         when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
-        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         assertThat(brevmottakerService.hentMottakerliste(TRYGDEAVTALE_GB, 123))
             .extracting(
@@ -591,28 +486,6 @@ class BrevmottakerServiceTest {
         assertThatThrownBy(() -> brevmottakerService.avklarMottakerRolleFraDokument(ORIENTERING_UTPEKING_UTLAND))
             .isInstanceOf(TekniskException.class)
             .hasMessage("Valg av mottakerRolle støttes ikke for ORIENTERING_UTPEKING_UTLAND");
-    }
-
-    private void initMocksForFtrlVedtaksbrev(Fullmaktstype fullmaktstype, long norskinntekt, boolean selvbetalende) {
-        behandlingsresultat.setMedlemAvFolketrygden(new MedlemAvFolketrygden());
-        behandlingsresultat.getMedlemAvFolketrygden().setFastsattTrygdeavgift(new FastsattTrygdeavgift());
-
-        Fagsak fagsak = fullmaktstype == null ? lagFagsak() : lagFagsakMedFullmektigOrg(fullmaktstype);
-        fagsak.setType(Sakstyper.FTRL);
-        mockFastsattTrygdeavgift(fagsak, norskinntekt, selvbetalende);
-
-        when(behandlingsresultatService.hentBehandlingsresultat(123L)).thenReturn(behandlingsresultat);
-        when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);
-        when(behandling.getFagsak()).thenReturn(fagsak);
-    }
-
-    private void mockFastsattTrygdeavgift(Fagsak fagsak, long norskinntekt, boolean selvbetalende) {
-        var inntektsperiode = new Inntektsperiode();
-        inntektsperiode.setType(Inntektskildetype.ARBEIDSINNTEKT_FRA_NORGE);
-        var fastsattTrygdeavgift = behandlingsresultat.getMedlemAvFolketrygden().getFastsattTrygdeavgift();
-        fastsattTrygdeavgift.setTrygdeavgiftsperioder(Set.of(new Trygdeavgiftsperiode()));
-        fastsattTrygdeavgift.setTrygdeavgiftsgrunnlag(new Trygdeavgiftsgrunnlag());
-        fastsattTrygdeavgift.getTrygdeavgiftsgrunnlag().setInntektsperioder(List.of(inntektsperiode));
     }
 
     private Aktoer lagAktoer(Aktoersroller rolle) {

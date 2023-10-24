@@ -18,14 +18,12 @@ class MyArchitectureTest {
             "no.nav.melosys.repository",
             "no.nav.melosys.tjenester",
             "no.nav.melosys.saksflyt",
-            "no.nav.melosys.saksflytapi"
         )
-
 
         val rule = classes().that().resideInAPackage("no.nav.melosys.saksflyt..")
             .should()
-            .onlyDependOnClassesThat()
-            .resideInAnyPackage("no.nav.melosys.service..", "no.nav.melosys.domain..", "no.nav.melosys.saksflytapi")
+            .onlyHaveDependentClassesThat()
+            .resideInAnyPackage("no.nav.melosys.saksflyt..", "..service..", "..domain..")
 
         rule.check(importedClasses)
     }

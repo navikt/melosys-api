@@ -35,10 +35,7 @@ public class BrevmottakerMapper {
 
             Map.entry(INNVILGELSE_FOLKETRYGDLOVEN, new Mottakerliste.Builder()
                 .medHovedMottaker(BRUKER)
-                .medBrevkopiRegler(
-                    BRUKER_FÅR_KOPI_HVIS_FULLMEKTIG_FINNES,
-                    ARBEIDSGIVER_FÅR_KOPI_HVIS_IKKE_SELVBETALENDE_BRUKER
-                ).build()),
+                .build()),
 
             Map.entry(TRYGDEAVTALE_GB, new Mottakerliste.Builder()
                 .medHovedMottaker(BRUKER)
