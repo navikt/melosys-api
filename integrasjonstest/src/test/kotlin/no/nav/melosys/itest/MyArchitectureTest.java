@@ -30,7 +30,8 @@ public class MyArchitectureTest {
             .should()
             .onlyBeAccessed()
             .byClassesThat()
-            .resideInAnyPackage("no.nav.melosys.saksflyt..", "no.nav.melosys.saksflytapi..", "no.nav.melosys.itest..");
+            .resideInAnyPackage("no.nav.melosys.saksflyt..", "no.nav.melosys.itest..")
+            .as("Saksflyt skal ikke brukes av andre moduler");
 
     @ArchTest
     final ArchRule saksflytDependencies =
