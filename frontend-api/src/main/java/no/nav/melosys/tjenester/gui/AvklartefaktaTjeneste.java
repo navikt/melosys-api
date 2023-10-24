@@ -5,14 +5,15 @@ import java.util.Set;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
+import no.nav.melosys.service.avklartefakta.AvklarteFaktaArbeidslandService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Ressurs;
 import no.nav.melosys.tjenester.gui.dto.AvklartefaktaOppsummeringDto;
-import no.nav.melosys.tjenester.gui.dto.VirksomheterDto;
+import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.VirksomheterDto;
+import no.nav.melosys.tjenester.gui.dto.oppsummertefakta.ArbeidslandDto;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.*;
@@ -27,16 +28,16 @@ public class AvklartefaktaTjeneste {
 
     private final AvklartefaktaService avklartefaktaService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
-    private final AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
+    private final AvklarteFaktaArbeidslandService avklarteFaktaArbeidslandService;
     private final Aksesskontroll aksesskontroll;
 
     public AvklartefaktaTjeneste(AvklartefaktaService avklartefaktaService,
                                  AvklarteVirksomheterService avklarteVirksomheterService,
-                                 AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService,
+                                    AvklarteFaktaArbeidslandService avklarteFaktaArbeidslandService,
                                  Aksesskontroll aksesskontroll) {
         this.avklartefaktaService = avklartefaktaService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
-        this.avklarteMedfolgendeFamilieService = avklarteMedfolgendeFamilieService;
+        this.avklarteFaktaArbeidslandService = avklarteFaktaArbeidslandService;
         this.aksesskontroll = aksesskontroll;
     }
 
@@ -74,6 +75,17 @@ public class AvklartefaktaTjeneste {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(behandlingID, virksomheter.getVirksomhetIDer());
+
+        return AvklartefaktaOppsummeringDto.av(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
+    }
+
+    @PostMapping("{behandlingID}/arbeidsland")
+    @ApiOperation(value = "Lagre arbeidsland som avklartefakta", response = AvklartefaktaOppsummeringDto.class)
+    public AvklartefaktaOppsummeringDto lagreArbeidslandSomAvklarteFakta(@PathVariable("behandlingID") long behandlingID,
+                                                                         @RequestBody ArbeidslandDto arbeidsland) {
+        aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
+
+        avklarteFaktaArbeidslandService.lagreArbeidslandSomAvklartefakta(behandlingID, arbeidsland.getArbeidsland());
 
         return AvklartefaktaOppsummeringDto.av(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
