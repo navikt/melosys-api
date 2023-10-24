@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflyt.steg.faktureringskomponenten
 
 import io.getunleash.FakeUnleash
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
@@ -24,7 +25,6 @@ import no.nav.melosys.integrasjon.faktureringskomponenten.Faktureringskomponente
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall
 import no.nav.melosys.saksflyt.faktureringskomponenten.OpprettBetalingsplan
-import no.nav.melosys.service.aktoer.KontaktopplysningService
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -49,9 +49,6 @@ class OpprettBetalingsplanTest {
 
     @RelaxedMockK
     lateinit var faktureringskomponentenConsumer: FaktureringskomponentenConsumer
-
-    @RelaxedMockK
-    lateinit var kontaktopplysningService: KontaktopplysningService
 
     @RelaxedMockK
     lateinit var pdlService: PersondataService
@@ -79,7 +76,6 @@ class OpprettBetalingsplanTest {
             behandlingService,
             behandlingsresultatService,
             faktureringskomponentenConsumer,
-            kontaktopplysningService,
             pdlService,
             trygdeavgiftMottakerService,
             unleash
@@ -88,7 +84,7 @@ class OpprettBetalingsplanTest {
 
     @Test
     fun `Opprett betalingsplan med riktige verdier`() {
-        lagTestData(setOf(lagAktoerRepresentant(), lagAktoerBruker()))
+        lagTestData(setOf(lagAktoerBruker()))
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
         every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
@@ -172,30 +168,10 @@ class OpprettBetalingsplanTest {
     }
 
     @Test
-    fun `Opprett betalingsplan uten kontaktopplysning skal fungere`() {
-        lagTestData(setOf(lagAktoerRepresentant(), lagAktoerBruker()))
+    fun `Opprett betalingsplan med organisasjon-fullmektig sender fullmektig`() {
+        lagTestData(setOf(lagFullmektig().apply { orgnr = FULLMEKTIG_IDENT }, lagAktoerBruker()))
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
-        every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
-
-
-        opprettBetalingsplan.utfør(prosessinstans)
-
-
-        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaSerie(any()) }
-    }
-
-    @Test
-    fun `Opprett betalingsplan med fullmektig sender fullmektig`() {
-        lagTestData(setOf(lagAktoerRepresentant().apply { representerer = Representerer.BEGGE }, lagAktoerBruker()))
-        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
-        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
-        every {
-            kontaktopplysningService.hentKontaktopplysning(
-                fagsak.saksnummer,
-                REPRESENTANT_ORGNR
-            )
-        } returns Optional.empty()
         every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
 
 
@@ -204,7 +180,25 @@ class OpprettBetalingsplanTest {
 
         verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaSerie(capture(slotFakturaserieDto)) }
         slotFakturaserieDto.captured.shouldNotBeNull()
-        slotFakturaserieDto.captured.fullmektig?.organisasjonsnummer.shouldBe(REPRESENTANT_ORGNR)
+        slotFakturaserieDto.captured.fullmektig?.organisasjonsnummer.shouldBe(FULLMEKTIG_IDENT)
+        slotFakturaserieDto.captured.fullmektig?.fodselsnummer.shouldBeNull()
+    }
+
+    @Test
+    fun `Opprett betalingsplan med person-fullmektig sender fullmektig`() {
+        lagTestData(setOf(lagFullmektig().apply { personIdent = FULLMEKTIG_IDENT }, lagAktoerBruker()))
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
+
+
+        opprettBetalingsplan.utfør(prosessinstans)
+
+
+        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaSerie(capture(slotFakturaserieDto)) }
+        slotFakturaserieDto.captured.shouldNotBeNull()
+        slotFakturaserieDto.captured.fullmektig?.fodselsnummer.shouldBe(FULLMEKTIG_IDENT)
+        slotFakturaserieDto.captured.fullmektig?.organisasjonsnummer.shouldBeNull()
     }
 
     private fun lagTestData(aktører: Set<Aktoer>) {
@@ -305,10 +299,10 @@ class OpprettBetalingsplanTest {
         }
     }
 
-    private fun lagAktoerRepresentant(): Aktoer {
+    private fun lagFullmektig(): Aktoer {
         val aktoer = Aktoer()
-        aktoer.rolle = Aktoersroller.REPRESENTANT
-        aktoer.orgnr = REPRESENTANT_ORGNR
+        aktoer.rolle = Aktoersroller.FULLMEKTIG
+        aktoer.setFullmaktstype(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
         return aktoer
     }
 
@@ -323,6 +317,6 @@ class OpprettBetalingsplanTest {
         const val BEHANDLING_ID = 1L
         const val BRUKER_FNR = "11111111111"
         const val BRUKER_AKTØRID = "12345678911"
-        const val REPRESENTANT_ORGNR = "123456789"
+        const val FULLMEKTIG_IDENT = "123456789"
     }
 }
