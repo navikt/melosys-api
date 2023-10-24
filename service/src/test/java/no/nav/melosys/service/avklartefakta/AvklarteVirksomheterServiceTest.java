@@ -40,7 +40,6 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.slf4j.LoggerFactory;
 
-import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.ARBEIDSLAND;
 import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.VIRKSOMHET;
 import static no.nav.melosys.service.MottatteOpplysningerStub.lagMottatteOpplysninger;
 import static no.nav.melosys.service.SaksopplysningStubs.lagArbeidsforholdOpplysninger;
@@ -306,27 +305,6 @@ class AvklarteVirksomheterServiceTest {
             .isThrownBy(() -> avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(1L, virksomhetIDer))
             .withMessage(String.format("VirksomhetID %s hører ikke til noen av arbeidsforholdene", orgnr4));
         verify(avklartefaktaService, never()).leggTilAvklarteFakta(anyLong(), any(Avklartefaktatyper.class), anyString(), anyString(), eq(Avklartefakta.VALGT_FAKTA));
-    }
-
-    @Test
-    public void testLagreArbeidslandSomAvklartefaktaMedListeAvLand() {
-        long behandlingID = 1L;
-        List<String> arbeidslandList = Arrays.asList("USA", "UK");
-
-        avklarteVirksomheterService.lagreArbeidslandSomAvklartefakta(behandlingID, arbeidslandList);
-
-        verify(avklartefaktaService, times(1)).slettAvklarteFakta(behandlingID, ARBEIDSLAND);
-        verify(avklartefaktaService, times(2)).leggTilAvklarteFakta(anyLong(), any(), any(), anyString(), any());
-    }
-
-    @Test
-    public void testLagreArbeidslandSomAvklartfaktaMedKunEttLand() {
-        long behandlingID = 1L;
-        String arbeidsland = "USA";
-
-        avklarteVirksomheterService.lagreArbeidslandSomAvklartfakta(arbeidsland, behandlingID);
-
-        verify(avklartefaktaService, times(1)).leggTilAvklarteFakta(behandlingID, ARBEIDSLAND, ARBEIDSLAND.getKode(), arbeidsland, Avklartefakta.VALGT_FAKTA);
     }
 
     @Test

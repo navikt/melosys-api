@@ -5,6 +5,7 @@ import java.util.Set;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.service.avklartefakta.AvklarteFaktaArbeidslandService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -27,13 +28,16 @@ public class AvklartefaktaTjeneste {
 
     private final AvklartefaktaService avklartefaktaService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
+    private final AvklarteFaktaArbeidslandService avklarteFaktaArbeidslandService;
     private final Aksesskontroll aksesskontroll;
 
     public AvklartefaktaTjeneste(AvklartefaktaService avklartefaktaService,
                                  AvklarteVirksomheterService avklarteVirksomheterService,
+                                    AvklarteFaktaArbeidslandService avklarteFaktaArbeidslandService,
                                  Aksesskontroll aksesskontroll) {
         this.avklartefaktaService = avklartefaktaService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
+        this.avklarteFaktaArbeidslandService = avklarteFaktaArbeidslandService;
         this.aksesskontroll = aksesskontroll;
     }
 
@@ -81,7 +85,7 @@ public class AvklartefaktaTjeneste {
                                                                          @RequestBody ArbeidslandDto arbeidsland) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
-        avklarteVirksomheterService.lagreArbeidslandSomAvklartefakta(behandlingID, arbeidsland.getArbeidsland());
+        avklarteFaktaArbeidslandService.lagreArbeidslandSomAvklartefakta(behandlingID, arbeidsland.getArbeidsland());
 
         return AvklartefaktaOppsummeringDto.av(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
