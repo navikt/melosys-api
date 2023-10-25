@@ -25,7 +25,6 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.saksflytapi.ProsessinstansForServiceRepository;
 import no.nav.melosys.saksflytapi.domain.*;
@@ -33,10 +32,9 @@ import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
-import no.nav.melosys.service.journalforing.dto.PeriodeDto;
+import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.sak.OpprettSakDto;
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.soknad.SoknadMottatt;
 import no.nav.melosys.service.vedtak.FattVedtakRequest;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
@@ -49,10 +47,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
 import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.getCorrelationId;
 import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.*;
-import static no.nav.melosys.service.journalforing.JournalfoeringService.utledMottaksdato;
 import static no.nav.melosys.service.journalforing.UtledBehandlingsaarsak.utledÅrsaktype;
 import static org.springframework.util.StringUtils.hasText;
 
@@ -167,6 +163,9 @@ public class ProsessinstansService {
         return prosessinstans;
     }
 
+    //public void journalførOgKnyttTilEksisterendeSak(JournalfoeringTilordneDto journalfoeringDto){
+    //}
+
     private static LocalDate utledMottaksdato(LocalDate datoFraSaksbehandler, Journalpost journalpost) {
         return datoFraSaksbehandler != null ? datoFraSaksbehandler : LocalDate.ofInstant(journalpost.getForsendelseMottatt(), ZoneId.systemDefault());
     }
@@ -186,7 +185,6 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
 
         if (skalSetteSøknadslandOgPeriode) {
-            //validerSøknadFelter(journalfoeringDto);
             prosessinstans.setData(ProsessDataKey.SØKNADSLAND, journalfoeringDto.getFagsak().getLand());
             prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalfoeringDto.getFagsak().getSoknadsperiode());
         }
@@ -207,7 +205,7 @@ public class ProsessinstansService {
             prosessinstans.setData(ProsessDataKey.FULLMAKTER, journalfoeringDto.getFullmakter());
         }
 
-        prosessinstansService.lagre(prosessinstans);
+        lagre(prosessinstans);
     }
 
 

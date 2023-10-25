@@ -206,8 +206,12 @@ public class JournalfoeringService {
         }
 
 
+        boolean skalSetteSøknadslandOgPeriode = skalSetteSøknadslandOgPeriode(sakstype, sakstema, behandlingstema, behandlingstype);
+        if(skalSetteSøknadslandOgPeriode){
+            validerSøknadFelter(journalfoeringDto);
+        }
         prosessinstansService.opprettProsessinstansJournalføringNySak(journalpost, journalfoeringDto, sakstype, sakstema, behandlingstema, behandlingstype, prosessType,
-            skalSetteSøknadslandOgPeriode(sakstype, sakstema, behandlingstema, behandlingstype));
+            skalSetteSøknadslandOgPeriode);
 
         log.info("Ny sak bestilt etter journalføring av journalpost {}", journalfoeringDto.getJournalpostID());
     }
