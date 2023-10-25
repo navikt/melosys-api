@@ -1,6 +1,8 @@
 package no.nav.melosys.service.saksflyt;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -12,30 +14,34 @@ import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
+import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.brev.DokgenBrevbestilling;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
-import no.nav.melosys.domain.kodeverk.Avsendertyper;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
-import no.nav.melosys.domain.kodeverk.Sakstemaer;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.saksflytapi.ProsessinstansForServiceRepository;
 import no.nav.melosys.saksflytapi.domain.*;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
+import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
+import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.sak.OpprettSakDto;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.soknad.SoknadMottatt;
 import no.nav.melosys.service.vedtak.FattVedtakRequest;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -43,8 +49,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
+import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
 import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.getCorrelationId;
 import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.*;
+import static no.nav.melosys.service.journalforing.JournalfoeringService.utledMottaksdato;
+import static no.nav.melosys.service.journalforing.UtledBehandlingsaarsak.utledÅrsaktype;
 import static org.springframework.util.StringUtils.hasText;
 
 @Service
@@ -157,6 +166,50 @@ public class ProsessinstansService {
 
         return prosessinstans;
     }
+
+    private static LocalDate utledMottaksdato(LocalDate datoFraSaksbehandler, Journalpost journalpost) {
+        return datoFraSaksbehandler != null ? datoFraSaksbehandler : LocalDate.ofInstant(journalpost.getForsendelseMottatt(), ZoneId.systemDefault());
+    }
+
+
+
+    public void opprettProsessinstansJournalføringNySak(Journalpost journalpost, JournalfoeringOpprettDto journalfoeringDto, Sakstyper sakstype,
+                                                        Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype, ProsessType prosessType,
+                                                        boolean skalSetteSøknadslandOgPeriode) {
+
+        Prosessinstans prosessinstans = lagJournalføringProsessinstans(prosessType, journalfoeringDto);
+        prosessinstans.setData(ProsessDataKey.SAKSTYPE, sakstype);
+        prosessinstans.setData(ProsessDataKey.SAKSTEMA, sakstema);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, utledÅrsaktype(journalpost, sakstema, behandlingstema, behandlingstype));
+        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, utledMottaksdato(journalfoeringDto.getMottattDato(), journalpost));
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
+
+        if (skalSetteSøknadslandOgPeriode) {
+            //validerSøknadFelter(journalfoeringDto);
+            prosessinstans.setData(ProsessDataKey.SØKNADSLAND, journalfoeringDto.getFagsak().getLand());
+            prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalfoeringDto.getFagsak().getSoknadsperiode());
+        }
+
+        prosessinstans.setDataHvisIkkeTom(ProsessDataKey.ARBEIDSGIVER, journalfoeringDto.getArbeidsgiverID());
+
+        prosessinstans.setDataHvisIkkeTom(ProsessDataKey.REPRESENTANT, journalfoeringDto.getRepresentantID());
+        prosessinstans.setDataHvisIkkeTom(ProsessDataKey.REPRESENTANT_KONTAKTPERSON, journalfoeringDto.getRepresentantKontaktPerson());
+        if (StringUtils.isNotEmpty(journalfoeringDto.getRepresentererKode())) {
+            Representerer representantRepresenterer = Representerer.valueOf(journalfoeringDto.getRepresentererKode());
+            prosessinstans.setData(ProsessDataKey.REPRESENTANT_REPRESENTERER, representantRepresenterer);
+        }
+
+        prosessinstans.setDataHvisIkkeTom(ProsessDataKey.FULLMEKTIG, journalfoeringDto.getFullmektigID());
+        prosessinstans.setDataHvisIkkeTom(ProsessDataKey.FULLMEKTIG_KONTAKTPERSON, journalfoeringDto.getFullmektigKontaktperson());
+        prosessinstans.setDataHvisIkkeTom(ProsessDataKey.FULLMEKTIG_KONTAKT_ORGNR, journalfoeringDto.getFullmektigKontaktOrgnr());
+        if (!CollectionUtils.isEmpty(journalfoeringDto.getFullmakter())) {
+            prosessinstans.setData(ProsessDataKey.FULLMAKTER, journalfoeringDto.getFullmakter());
+        }
+
+        prosessinstansService.lagre(prosessinstans);
+    }
+
 
     private String finnInstitusjonIdEllerNull(String avsenderID) {
         return utenlandskMyndighetService.finnInstitusjonID(avsenderID).orElse(null);

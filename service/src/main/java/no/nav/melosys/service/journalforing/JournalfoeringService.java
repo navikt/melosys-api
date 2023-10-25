@@ -194,6 +194,7 @@ public class JournalfoeringService {
         }
     }
 
+
     private void opprettJournalføringNySakProsessinstans(Journalpost journalpost, JournalfoeringOpprettDto journalfoeringDto, Sakstyper sakstype,
                                                          Sakstemaer sakstema, Behandlingstema behandlingstema,
                                                          Behandlingstyper behandlingstype) {
@@ -204,39 +205,13 @@ public class JournalfoeringService {
             prosessType = ProsessType.JFR_NY_SAK_VIRKSOMHET;
         }
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(prosessType, journalfoeringDto);
-        prosessinstans.setData(ProsessDataKey.SAKSTYPE, sakstype);
-        prosessinstans.setData(ProsessDataKey.SAKSTEMA, sakstema);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, utledÅrsaktype(journalpost, sakstema, behandlingstema, behandlingstype));
-        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, utledMottaksdato(journalfoeringDto.getMottattDato(), journalpost));
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
 
-        if (skalSetteSøknadslandOgPeriode(sakstype, sakstema, behandlingstema, behandlingstype)) {
-            validerSøknadFelter(journalfoeringDto);
-            prosessinstans.setData(ProsessDataKey.SØKNADSLAND, journalfoeringDto.getFagsak().getLand());
-            prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, journalfoeringDto.getFagsak().getSoknadsperiode());
-        }
+        prosessinstansService.opprettProsessinstansJournalføringNySak(journalpost, journalfoeringDto, sakstype, sakstema, behandlingstema, behandlingstype, prosessType,
+            skalSetteSøknadslandOgPeriode(sakstype, sakstema, behandlingstema, behandlingstype));
 
-        prosessinstans.setDataHvisIkkeTom(ProsessDataKey.ARBEIDSGIVER, journalfoeringDto.getArbeidsgiverID());
-
-        prosessinstans.setDataHvisIkkeTom(ProsessDataKey.REPRESENTANT, journalfoeringDto.getRepresentantID());
-        prosessinstans.setDataHvisIkkeTom(ProsessDataKey.REPRESENTANT_KONTAKTPERSON, journalfoeringDto.getRepresentantKontaktPerson());
-        if (StringUtils.isNotEmpty(journalfoeringDto.getRepresentererKode())) {
-            Representerer representantRepresenterer = Representerer.valueOf(journalfoeringDto.getRepresentererKode());
-            prosessinstans.setData(ProsessDataKey.REPRESENTANT_REPRESENTERER, representantRepresenterer);
-        }
-
-        prosessinstans.setDataHvisIkkeTom(ProsessDataKey.FULLMEKTIG, journalfoeringDto.getFullmektigID());
-        prosessinstans.setDataHvisIkkeTom(ProsessDataKey.FULLMEKTIG_KONTAKTPERSON, journalfoeringDto.getFullmektigKontaktperson());
-        prosessinstans.setDataHvisIkkeTom(ProsessDataKey.FULLMEKTIG_KONTAKT_ORGNR, journalfoeringDto.getFullmektigKontaktOrgnr());
-        if (!CollectionUtils.isEmpty(journalfoeringDto.getFullmakter())) {
-            prosessinstans.setData(ProsessDataKey.FULLMAKTER, journalfoeringDto.getFullmakter());
-        }
-
-        prosessinstansService.lagre(prosessinstans);
         log.info("Ny sak bestilt etter journalføring av journalpost {}", journalfoeringDto.getJournalpostID());
     }
+
 
     @Transactional
     public void journalførOgKnyttTilEksisterendeSak(List<Pair<Behandling, Journalpost>> pairs) {
