@@ -184,8 +184,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansJournalføringNySak(JournalfoeringOpprettDto journalfoeringDto,
-                                                        ProsessType prosessType,
+    public void opprettProsessinstansJournalføringNySak(JournalfoeringOpprettDto journalfoeringDto, ProsessType prosessType,
                                                         boolean skalSetteSøknadslandOgPeriode, LocalDate mottaksdato, Behandlingsaarsaktyper behandlingsaarsaktyper) {
 
         Prosessinstans prosessinstans = lagJournalføringProsessinstans(prosessType, journalfoeringDto);
