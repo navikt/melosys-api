@@ -207,7 +207,7 @@ public class JournalfoeringService {
 
 
         boolean skalSetteSøknadslandOgPeriode = skalSetteSøknadslandOgPeriode(sakstype, sakstema, behandlingstema, behandlingstype);
-        if(skalSetteSøknadslandOgPeriode){
+        if (skalSetteSøknadslandOgPeriode) {
             validerSøknadFelter(journalfoeringDto);
         }
         prosessinstansService.opprettProsessinstansJournalføringNySak(journalpost, journalfoeringDto, sakstype, sakstema, behandlingstema, behandlingstype, prosessType,
@@ -240,17 +240,11 @@ public class JournalfoeringService {
             validerKanTilknytteJournalpostForSedTilSak(journalpost, saksnummer);
         }
 
-
         fellesValidering(journalfoeringDto);
 
         log.info("{} knytter journalpost {} til eksisterende sak {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_KNYTT, journalfoeringDto);
-        prosessinstans.setBehandling(fagsak.hentSistAktivBehandling());
-        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
-        prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringDto.isIngenVurdering());
-
-        prosessinstansService.lagre(prosessinstans);
+        prosessinstansService.opprettProsessinstansJournalføringKnyttTilEksisterende(journalfoeringDto, saksnummer, fagsak);
     }
 
     @Transactional

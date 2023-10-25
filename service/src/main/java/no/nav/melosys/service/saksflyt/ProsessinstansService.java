@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.arkiv.DokumentReferanse;
 import no.nav.melosys.domain.arkiv.Journalpost;
@@ -162,9 +163,14 @@ public class ProsessinstansService {
 
         return prosessinstans;
     }
+    public void opprettProsessinstansJournalføringKnyttTilEksisterende(JournalfoeringTilordneDto journalfoeringDto, String saksnummer, Fagsak fagsak){
+        Prosessinstans prosessinstans = lagJournalføringProsessinstans(ProsessType.JFR_KNYTT, journalfoeringDto);
+        prosessinstans.setBehandling(fagsak.hentSistAktivBehandling());
+        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
+        prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringDto.isIngenVurdering());
 
-    //public void journalførOgKnyttTilEksisterendeSak(JournalfoeringTilordneDto journalfoeringDto){
-    //}
+        lagre(prosessinstans);
+    }
 
     private static LocalDate utledMottaksdato(LocalDate datoFraSaksbehandler, Journalpost journalpost) {
         return datoFraSaksbehandler != null ? datoFraSaksbehandler : LocalDate.ofInstant(journalpost.getForsendelseMottatt(), ZoneId.systemDefault());
