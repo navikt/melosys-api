@@ -1,5 +1,6 @@
-package no.nav.melosys.itest
+package no.nav.melosys.saksflyt.steg.faktureringskomponenten
 
+import com.tngtech.archunit.core.importer.ImportOption
 import com.tngtech.archunit.junit.AnalyzeClasses
 import com.tngtech.archunit.junit.ArchTest
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.*
@@ -7,9 +8,9 @@ import com.tngtech.archunit.lang.syntax.elements.ClassesShouldConjunction
 import com.tngtech.archunit.lang.syntax.elements.ClassesThat
 import org.junit.jupiter.api.TestInstance
 
-@AnalyzeClasses(packages = ["no.nav.melosys.."])
+@AnalyzeClasses(packages = ["no.nav.melosys.saksflyt.."], importOptions = [ImportOption.DoNotIncludeTests::class])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class MyArchitectureTest {
+class SaksflytArchitectureTest {
 
     @ArchTest
     val `Saksflyt skal ikke brukes av andre moduler` =
@@ -56,16 +57,11 @@ class MyArchitectureTest {
         private val COMMON_PACKAGES = listOf(
             "java..",
             "javax..",
-            "com.google..",
-            "org.springframework..",
             "kotlin..",
-            "com.fasterxml..",
-            "io.getunleash..",
-            "org.slf4j..",
-            "org.jetbrains..",
-            "org.apache.commons..",
             "mu..",
-            "io.micrometer..",
+            "com..",
+            "org..",
+            "io..",
             "no.nav.security.."
         )
     }
