@@ -6,7 +6,6 @@ import no.nav.melosys.domain.Vilkaarsresultat
 import no.nav.melosys.domain.brev.InnvilgelseFtrlBrevbestilling
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
-import no.nav.melosys.domain.kodeverk.Representerer
 import no.nav.melosys.domain.kodeverk.Trygdeavtale_myndighetsland
 import no.nav.melosys.domain.kodeverk.Vilkaar
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser
@@ -60,12 +59,6 @@ class InnvilgelseFtrlMapper(
                 avklarteVirksomheterService.hentNorskeArbeidsgivere(brevbestilling.behandling).map { it.navn })
             .arbeidsland(dokgenMapperDatahenter.hentLandnavnFraLandkode(arbeidsland))
             .trygdeavtaleMedArbeidsland(harTrygdeavtaleMedArbeidsland(arbeidsland))
-            .arbeidsgiverFullmektigNavn(
-                dokgenMapperDatahenter.hentFullmektigNavn(
-                    brevbestilling.behandling.fagsak,
-                    Representerer.ARBEIDSGIVER
-                )
-            )
             .betalerArbeidsgiveravgift(erBetalerArbeidsgiveravgift(medlemAvFolketrygden.medlemskapsperioder))
             .build()
     }

@@ -609,7 +609,6 @@ class DokgenMalMapperTest {
             .arbeidsgivere(List.of("Egon Olsen AS"))
             .arbeidsland(Land_iso2.US.getKode())
             .trygdeavtaleMedArbeidsland(false)
-            .arbeidsgiverFullmektigNavn(null)
             .betalerArbeidsgiveravgift(true)
             .build();
     }
