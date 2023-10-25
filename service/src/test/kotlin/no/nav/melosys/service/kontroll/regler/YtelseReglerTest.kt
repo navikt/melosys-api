@@ -2,11 +2,8 @@ package no.nav.melosys.service.kontroll.regler
 
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
-import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektInformasjon
-import no.nav.melosys.domain.dokument.inntekt.ArbeidsInntektMaaned
-import no.nav.melosys.domain.dokument.inntekt.Inntekt
-import no.nav.melosys.domain.dokument.inntekt.InntektDokument
-import no.nav.melosys.domain.dokument.inntekt.inntektstype.YtelseFraOffentlige
+import no.nav.melosys.domain.dokument.inntekt.*
+import no.nav.melosys.service.kontroll.feature.ufm.kontroll.InntektTestFactory
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
@@ -83,11 +80,7 @@ class YtelseReglerTest {
         val tom = LocalDate.now().plusYears(2)
         YtelseRegler.utbetaltYtelserFraOffentligIPeriode(
             InntektDokument().apply {
-                arbeidsInntektMaanedListe = listOf(ArbeidsInntektMaaned().apply {
-                    arbeidsInntektInformasjon = ArbeidsInntektInformasjon().apply {
-                        inntektListe = null
-                    }
-                })
+                arbeidsInntektMaanedListe = listOf(ArbeidsInntektMaaned(arbeidsInntektInformasjon = ArbeidsInntektInformasjon()))
             },
             fom,
             tom
@@ -99,13 +92,16 @@ class YtelseReglerTest {
 
     }
 
-    private fun hentArbeidsInntektMaaned(medYtelserFraOffentlig: Boolean, fom: LocalDate): ArbeidsInntektMaaned = ArbeidsInntektMaaned().apply {
+    private fun hentArbeidsInntektMaaned(medYtelserFraOffentlig: Boolean, fom: LocalDate): ArbeidsInntektMaaned = ArbeidsInntektMaaned(
         arbeidsInntektInformasjon = ArbeidsInntektInformasjon()
+    ).apply {
         arbeidsInntektInformasjon.inntektListe = hentInntektsListe(medYtelserFraOffentlig, fom)
     }
 
     private fun hentInntektsListe(medYtelserFraOffentlig: Boolean, fom: LocalDate): List<Inntekt> =
-        listOf(Inntekt()) + if (medYtelserFraOffentlig) listOf(YtelseFraOffentlige().apply {
-            utbetaltIPeriode = YearMonth.from(fom).plusMonths(1)
-        }) else emptyList()
+        listOf(
+            InntektTestFactory.createInntektForTest(InntektType.Loennsinntekt, YearMonth.now())
+        ) + if (medYtelserFraOffentlig) listOf(
+            InntektTestFactory.createInntektForTest(InntektType.YtelseFraOffentlige, YearMonth.from(fom).plusMonths(1))
+        ) else emptyList()
 }

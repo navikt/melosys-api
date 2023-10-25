@@ -493,11 +493,6 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.tjenestespesifikasjoner</groupId>
-                <artifactId>nav-fim-inntekt-v3-tjenestespesifikasjon</artifactId>
-                <version>${nav.tjenestespesifikasjoner.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.tjenestespesifikasjoner</groupId>
                 <artifactId>nav-fim-organisasjon-v4-tjenestespesifikasjon</artifactId>
                 <version>${nav.tjenestespesifikasjoner.version}</version>
             </dependency>

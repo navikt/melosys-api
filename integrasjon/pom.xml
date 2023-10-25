@@ -151,12 +151,6 @@
             <artifactId>nav-fim-organisasjon-v4-tjenestespesifikasjon</artifactId>
         </dependency>
 
-        <!--Inntektskomponenten-->
-        <dependency>
-            <groupId>no.nav.tjenestespesifikasjoner</groupId>
-            <artifactId>nav-fim-inntekt-v3-tjenestespesifikasjon</artifactId>
-        </dependency>
-
         <!--TPS-->
         <dependency>
             <groupId>no.nav.tjenestespesifikasjoner</groupId>
