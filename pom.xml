@@ -31,6 +31,7 @@
         <module>statistikk</module>
         <module>arkitektur</module>
         <module>integrasjonstest</module>
+        <module>saksflyt-api</module>
     </modules>
 
     <properties>
@@ -165,6 +166,11 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>melosys-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>saksflyt-api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

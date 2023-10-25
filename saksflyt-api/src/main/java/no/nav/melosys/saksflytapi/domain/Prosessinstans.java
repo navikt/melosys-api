@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.saksflyt;
+package no.nav.melosys.saksflytapi.domain;
 
 import java.io.IOException;
 import java.time.LocalDateTime;

@@ -8,13 +8,13 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import no.nav.melosys.domain.arkiv.ArkivDokument
 import no.nav.melosys.domain.kodeverk.Avsendertyper
 import no.nav.melosys.domain.kodeverk.Landkoder
-import no.nav.melosys.domain.saksflyt.ProsessStatus
-import no.nav.melosys.domain.saksflyt.ProsessType
-import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.melosysmock.oppgave.Oppgave
 import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.saksflyt.ProsessinstansRepository
+import no.nav.melosys.saksflytapi.domain.ProsessStatus
+import no.nav.melosys.saksflytapi.domain.ProsessType
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.felles.dto.SoeknadslandDto
 import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.journalforing.dto.*

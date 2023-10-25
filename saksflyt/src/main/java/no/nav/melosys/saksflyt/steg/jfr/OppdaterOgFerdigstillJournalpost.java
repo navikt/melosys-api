@@ -1,24 +1,24 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Avsendertyper;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.saksflytapi.domain.ProsessSteg;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPDATER_OG_FERDIGSTILL_JOURNALPOST;
+import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.*;
+import static no.nav.melosys.saksflytapi.domain.ProsessSteg.OPPDATER_OG_FERDIGSTILL_JOURNALPOST;
 
 @Component
 public class OppdaterOgFerdigstillJournalpost implements StegBehandler {

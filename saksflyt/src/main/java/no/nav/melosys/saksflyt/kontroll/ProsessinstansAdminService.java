@@ -4,14 +4,14 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.saksflyt.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
-import no.nav.melosys.saksflyt.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.ProsessinstansBehandlerDelegate;
+import no.nav.melosys.saksflyt.ProsessinstansRepository;
 import no.nav.melosys.saksflyt.kontroll.dto.HentProsessinstansDto;
 import no.nav.melosys.saksflyt.prosessflyt.ProsessflytDefinisjon;
+import no.nav.melosys.saksflytapi.domain.*;
 import org.springframework.stereotype.Service;
 
 import static java.time.LocalDateTime.now;

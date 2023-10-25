@@ -25,10 +25,10 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.*
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
-import no.nav.melosys.domain.saksflyt.Prosessinstans
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.integrasjon.joark.JoarkFasade
 import no.nav.melosys.repository.MottatteOpplysningerRepository
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.UtledMottaksdato
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
@@ -480,9 +480,10 @@ internal class MottatteOpplysningerServiceTest {
         )
 
 
-        mottatteOpplysningerServiceSpy.opprettSøknadEllerAnmodningEllerAttest(Prosessinstans().apply {
-            this.behandling = behandling
-        })
+        mottatteOpplysningerServiceSpy.opprettSøknadEllerAnmodningEllerAttest(
+            Prosessinstans().apply {
+                this.behandling = behandling
+            })
 
 
         verify {

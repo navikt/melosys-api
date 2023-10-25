@@ -1,23 +1,23 @@
 package no.nav.melosys.saksflyt.steg.brev;
 
+import java.util.List;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.saksflytapi.domain.ProsessSteg;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD;
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SAKSBEHANDLER;
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING;
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.SEND_FORVALTNINGSMELDING;
+import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.SAKSBEHANDLER;
+import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING;
+import static no.nav.melosys.saksflytapi.domain.ProsessSteg.SEND_FORVALTNINGSMELDING;
 
 @Component
 public class SendForvaltningsmelding implements StegBehandler {

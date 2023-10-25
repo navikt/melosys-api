@@ -6,9 +6,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import no.nav.melosys.domain.saksflyt.ProsessStatus;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
-import no.nav.melosys.domain.saksflyt.SedLåsReferanse;
+import no.nav.melosys.saksflytapi.domain.ProsessStatus;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.SedLåsReferanse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

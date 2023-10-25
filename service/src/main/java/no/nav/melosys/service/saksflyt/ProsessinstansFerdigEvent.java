@@ -2,7 +2,7 @@ package no.nav.melosys.service.saksflyt;
 
 import java.util.UUID;
 
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import org.springframework.context.ApplicationEvent;
 
 public class ProsessinstansFerdigEvent extends ApplicationEvent {

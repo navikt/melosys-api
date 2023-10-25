@@ -24,9 +24,9 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.saksflyt.*;
 import no.nav.melosys.metrics.MetrikkerNavn;
-import no.nav.melosys.repository.ProsessinstansForServiceRepository;
+import no.nav.melosys.saksflytapi.ProsessinstansForServiceRepository;
+import no.nav.melosys.saksflytapi.domain.*;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
@@ -43,8 +43,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
 import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.getCorrelationId;
+import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.*;
 import static org.springframework.util.StringUtils.hasText;
 
 @Service

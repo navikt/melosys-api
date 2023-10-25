@@ -3,9 +3,9 @@ package no.nav.melosys.saksflyt.kontroll;
 import java.util.List;
 import java.util.UUID;
 
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
 import no.nav.melosys.exception.SikkerhetsbegrensningException;
 import no.nav.melosys.saksflyt.kontroll.dto.RestartProsessinstanserRequest;
+import no.nav.melosys.saksflytapi.domain.ProsessSteg;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

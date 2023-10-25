@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.saksflyt;
+package no.nav.melosys.saksflytapi.domain;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -11,7 +11,7 @@ import no.nav.melosys.domain.jpa.PropertiesConverter;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import org.junit.jupiter.api.Test;
 
-import static no.nav.melosys.domain.saksflyt.ProsessDataKey.*;
+import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ProsessinstansTest {

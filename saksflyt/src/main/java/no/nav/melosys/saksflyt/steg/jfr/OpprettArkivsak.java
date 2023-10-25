@@ -1,11 +1,13 @@
 package no.nav.melosys.saksflyt.steg.jfr;
 
+import java.util.Optional;
+
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.saksflytapi.domain.ProsessSteg;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.oppgave.OppgaveFactory;
 import no.nav.melosys.service.sak.ArkivsakService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -13,9 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
-import static no.nav.melosys.domain.saksflyt.ProsessSteg.OPPRETT_ARKIVSAK;
+import static no.nav.melosys.saksflytapi.domain.ProsessSteg.OPPRETT_ARKIVSAK;
 
 @Component
 public class OpprettArkivsak implements StegBehandler {

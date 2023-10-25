@@ -12,13 +12,13 @@ import no.nav.melosys.domain.eessi.*
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.*
-import no.nav.melosys.domain.saksflyt.ProsessType
 import no.nav.melosys.melosysmock.journalpost.JournalpostRepo
 import no.nav.melosys.melosysmock.oppgave.OppgaveRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
 import no.nav.melosys.saksflyt.ProsessinstansRepository
+import no.nav.melosys.saksflytapi.domain.ProsessType
 import no.nav.melosys.service.journalforing.JournalfoeringService
 import no.nav.melosys.service.oppgave.OppgaveBehandlingstema
 import no.nav.melosys.service.oppgave.OppgaveService
@@ -79,7 +79,11 @@ class SedMottakBehandlngsTypeIT(
         )
 
 
-        executeAndWait(ProsessType.MOTTAK_SED, listOf(ProsessType.ARBEID_FLERE_LAND_NY_SAK)) {
+        executeAndWait(
+            ProsessType.MOTTAK_SED, listOf(
+                ProsessType.ARBEID_FLERE_LAND_NY_SAK
+            )
+        ) {
             melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
         }
 

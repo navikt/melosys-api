@@ -1,8 +1,8 @@
 package no.nav.melosys.saksflyt.steg.register;
 
-import no.nav.melosys.domain.saksflyt.ProsessSteg;
-import no.nav.melosys.domain.saksflyt.Prosessinstans;
 import no.nav.melosys.saksflyt.steg.StegBehandler;
+import no.nav.melosys.saksflytapi.domain.ProsessSteg;
+import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.kontroll.feature.ufm.UfmKontrollService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

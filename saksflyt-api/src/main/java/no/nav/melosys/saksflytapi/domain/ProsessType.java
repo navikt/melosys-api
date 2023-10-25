@@ -1,8 +1,7 @@
-package no.nav.melosys.domain.saksflyt;
+package no.nav.melosys.saksflytapi.domain;
 
-import no.nav.melosys.domain.kodeverk.Kodeverk;
 
-public enum ProsessType implements Kodeverk {
+public enum ProsessType {
     //alfabetisk rekkefølge
     ANMODNING_OM_UNNTAK("ANMODNING_OM_UNNTAK", "Anmodning om unntak"),
     ANMODNING_OM_UNNTAK_MOTTAK_NY_SAK("ANMODNING_OM_UNNTAK_MOTTAK_NY_SAK", "Mottar anmodning om unntak - ny sak"),
@@ -39,7 +38,7 @@ public enum ProsessType implements Kodeverk {
     SEND_BREV("SEND_BREV", "Send brev til én mottaker via doksys"),
     UTPEKING_AVVIS("UTPEKING_AVVIS", "Avviser utpeking mottatt i en A003"),
     VIDERESEND_SOKNAD("VIDERESEND_SOKNAD", "Videresend søknad"),
-    IVERKSETT_VEDTAK_IKKE_YRKESAKTIV("IVERKSETT_VEDTAK_IKKE_YRKESAKTIV", "Iverksett vedtak Ikke yrkesaktiv" );
+    IVERKSETT_VEDTAK_IKKE_YRKESAKTIV("IVERKSETT_VEDTAK_IKKE_YRKESAKTIV", "Iverksett vedtak Ikke yrkesaktiv");
 
     private final String kode;
     private final String beskrivelse;
@@ -49,12 +48,10 @@ public enum ProsessType implements Kodeverk {
         this.beskrivelse = beskrivelse;
     }
 
-    @Override
     public String getKode() {
         return kode;
     }
 
-    @Override
     public String getBeskrivelse() {
         return beskrivelse;
     }

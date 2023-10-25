@@ -7,9 +7,9 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
-import no.nav.melosys.domain.saksflyt.ProsessDataKey
-import no.nav.melosys.domain.saksflyt.ProsessSteg
-import no.nav.melosys.domain.saksflyt.Prosessinstans
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey
+import no.nav.melosys.saksflytapi.domain.ProsessSteg
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName.FOLKETRYGDEN_MVP
 import no.nav.melosys.featuretoggle.ToggleName.REFAKTORERING_ORDINÆR_TRYGDEAVGIFT
