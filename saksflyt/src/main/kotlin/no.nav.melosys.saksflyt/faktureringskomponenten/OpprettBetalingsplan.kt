@@ -7,15 +7,15 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey
-import no.nav.melosys.saksflytapi.domain.ProsessSteg
-import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName.FOLKETRYGDEN_MVP
 import no.nav.melosys.featuretoggle.ToggleName.REFAKTORERING_ORDINÆR_TRYGDEAVGIFT
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
 import no.nav.melosys.saksflyt.steg.StegBehandler
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey
+import no.nav.melosys.saksflytapi.domain.ProsessSteg
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
@@ -118,7 +118,7 @@ class OpprettBetalingsplan(
                 it.trygdeavgiftsbeløpMd.verdi,
                 it.periodeFra,
                 it.periodeTil,
-                "Periode: ${it.periodeFra.format(FORMATTER)} - ${it.periodeTil.format(FORMATTER)}" +
+                "Periode: ${it.periodeFra.format(FORMATTER)} - ${it.periodeTil.format(FORMATTER)}, " +
                     "Inntekt: ${it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi}, " +
                     "Dekning: ${it.grunnlagMedlemskapsperiode.trygdedekning.beskrivelse}, " +
                     "Sats: ${it.trygdesats} %"
