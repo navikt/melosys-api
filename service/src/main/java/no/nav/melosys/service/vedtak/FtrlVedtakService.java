@@ -1,8 +1,11 @@
 package no.nav.melosys.service.vedtak;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -15,12 +18,14 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import static no.nav.melosys.domain.brev.NorskMyndighet.SKATTEETATEN;
 import static no.nav.melosys.service.vedtak.VedtaksfattingFasade.FRIST_KLAGE_UKER;
 
 @Service
@@ -84,7 +89,7 @@ public class FtrlVedtakService {
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN);
         brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
-        brevbestillingDto.setKopiMottakere(request.getKopiMottakere());
+        brevbestillingDto.setKopiMottakere(filtrerKopiMottakere(request.getKopiMottakere()));
         brevbestillingDto.setInnledningFritekst(request.getInnledningFritekst());
         brevbestillingDto.setBegrunnelseFritekst(request.getBegrunnelseFritekst());
         brevbestillingDto.setTrygdeavtaleFritekst(request.getTrygdeavgiftFritekst());
@@ -93,6 +98,12 @@ public class FtrlVedtakService {
         brevbestillingDto.setBarnFritekst(request.getBarnFritekst());
         brevbestillingDto.setBestillersId(request.getBestillersId());
         return brevbestillingDto;
+    }
+
+    private List<KopiMottakerDto> filtrerKopiMottakere(List<KopiMottakerDto> kopiMottakerDtoList) {
+        return kopiMottakerDtoList.stream()
+            .filter(dto -> !dto.orgnr().equals(SKATTEETATEN.getOrgnr()))
+            .collect(Collectors.toList());
     }
 
     private void oppdaterBehandlingsresultat(long behandlingID, FattVedtakRequest request) throws IkkeFunnetException {

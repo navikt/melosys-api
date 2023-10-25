@@ -2,8 +2,11 @@ package no.nav.melosys.service.vedtak;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import io.getunleash.Unleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
@@ -21,6 +24,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
+import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
@@ -30,6 +34,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import static no.nav.melosys.domain.brev.NorskMyndighet.SKATTEETATEN;
+import static no.nav.melosys.featuretoggle.ToggleName.FOLKETRYGDEN_MVP;
 import static no.nav.melosys.service.vedtak.VedtaksfattingFasade.FRIST_KLAGE_UKER;
 
 @Service
@@ -43,6 +49,7 @@ public class TrygdeavtaleVedtakService {
     private final DokgenService dokgenService;
     private final FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
     private final SaksbehandlingRegler saksbehandlingRegler;
+    private final Unleash unleash;
 
 
     public TrygdeavtaleVedtakService(BehandlingsresultatService behandlingsresultatService,
@@ -51,7 +58,8 @@ public class TrygdeavtaleVedtakService {
                                      OppgaveService oppgaveService,
                                      DokgenService dokgenService,
                                      FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade,
-                                     SaksbehandlingRegler saksbehandlingRegler) {
+                                     SaksbehandlingRegler saksbehandlingRegler,
+                                     Unleash unleash) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.behandlingService = behandlingService;
         this.prosessinstansService = prosessinstansService;
@@ -59,6 +67,7 @@ public class TrygdeavtaleVedtakService {
         this.dokgenService = dokgenService;
         this.ferdigbehandlingKontrollFacade = ferdigbehandlingKontrollFacade;
         this.saksbehandlingRegler = saksbehandlingRegler;
+        this.unleash = unleash;
     }
 
     public void fattVedtak(Behandling behandling, FattVedtakRequest request) throws ValideringException {
@@ -98,10 +107,17 @@ public class TrygdeavtaleVedtakService {
             oppdaterBehandlingsresultat(behandlingsresultat, request);
             prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling, request);
             BrevbestillingDto brevbestillingDto = lagBrevbestilling(behandling, request);
+            if (unleash.isEnabled(FOLKETRYGDEN_MVP)) brevbestillingDto.setKopiMottakere(filtrerKopiMottakere(behandlingsresultat, request));
             dokgenService.produserOgDistribuerBrev(behandlingID, brevbestillingDto);
         }
 
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
+    }
+
+    private List<KopiMottakerDto> filtrerKopiMottakere(Behandlingsresultat behandlingsresultat, FattVedtakRequest request) {
+        return request.getKopiMottakere().stream()
+            .filter(dto -> !dto.orgnr().equals(SKATTEETATEN.getOrgnr()) && behandlingsresultat.erInnvilgelse())
+            .collect(Collectors.toList());
     }
 
     private BrevbestillingDto lagBrevbestilling(Behandling behandling, FattVedtakRequest request) {
