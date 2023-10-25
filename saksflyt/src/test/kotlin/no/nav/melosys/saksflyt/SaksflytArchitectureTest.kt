@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.steg.faktureringskomponenten
+package no.nav.melosys.saksflyt
 
 import com.tngtech.archunit.core.importer.ImportOption
 import com.tngtech.archunit.junit.AnalyzeClasses
