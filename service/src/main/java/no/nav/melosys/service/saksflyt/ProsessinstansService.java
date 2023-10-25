@@ -266,7 +266,7 @@ public class ProsessinstansService {
             ProsessType.IVERKSETT_VEDTAK_EOS).isPresent();
     }
 
-    public void lagre(Prosessinstans prosessinstans) {
+    public void lagre(Prosessinstans prosessinstans) { // TODO: må være private
         lagre(prosessinstans, getSaksbehandlerIdent(), getSaksbehandlerNavn());
     }
 
