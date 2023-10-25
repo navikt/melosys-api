@@ -5,6 +5,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equality.FieldsEqualityCheckConfig
 import io.kotest.matchers.equality.shouldBeEqualToComparingFields
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.Fagsystem
@@ -18,6 +19,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
+import no.nav.melosys.melosysmock.journalpost.JournalpostRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.BehandlingsresultatRepository
@@ -42,7 +44,8 @@ class JournalfoeringIT(
     @Autowired private val behandlingsresultatRepository: BehandlingsresultatRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val unleash: FakeUnleash,
-    @Autowired private val oAuthMockServer: OAuthMockServer
+    @Autowired private val oAuthMockServer: OAuthMockServer,
+    @Autowired private val journalpostRepo: JournalpostRepo
 ) : JournalfoeringBase(testDataGenerator, journalføringService, oppgaveService, prosessinstansRepository) {
 
     @BeforeEach
@@ -117,7 +120,7 @@ class JournalfoeringIT(
         behandling.status = Behandlingsstatus.AVSLUTTET
         behandlingRepository.save(behandling)
 
-        val journalfoeringTilordneDto = lagJournalfoeringTilordneDto(
+        val journalfoeringTilordneDto = lagJournalfoeringOppgaveOgTilordneDto(
             saksnummer = behandling.fagsak.saksnummer,
             journalfoeringTilordneDto = defaultJournalfoeringTilordneDto().apply {
                 behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
@@ -154,6 +157,55 @@ class JournalfoeringIT(
     }
 
     @Test
+    fun journalførOgKnyttTilEksisterendeSak() {
+        val journalfoeringOpprettDto = defaultJournalføringDto().apply {
+            fagsak.sakstype = Sakstyper.EU_EOS.kode
+            fagsak.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode
+            behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
+            behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
+        }
+
+        val prosessinstans = journalførOgVentTilProsesserErFerdige(
+            journalfoeringOpprettDto,
+            waitFor = ProsessType.JFR_NY_SAK_BRUKER,
+            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+        )
+        val behandling = prosessinstans.behandling
+
+
+        val eksisterendeJournalpostIds = journalpostRepo.repo.values.map { it.journalpostId }
+
+        val journalfoeringTilordneDto = lagJournalfoeringOppgaveOgTilordneDto(
+            saksnummer = behandling.fagsak.saksnummer,
+            journalfoeringTilordneDto = defaultJournalfoeringTilordneDto().apply {
+                behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
+                behandlingstypeKode = Behandlingstyper.NY_VURDERING.kode
+            }
+        )
+
+
+        executeAndWait(ProsessType.JFR_KNYTT) {
+            journalføringService.journalførOgKnyttTilEksisterendeSak(journalfoeringTilordneDto)
+        }
+
+
+        val fagsak = fagsakRepository.findBySaksnummer(behandling.fagsak.saksnummer).get()
+        fagsak.behandlinger
+            .single()
+            .apply {
+                status.shouldBe(Behandlingsstatus.VURDER_DOKUMENT)
+                type.shouldBe(Behandlingstyper.FØRSTEGANG)
+            }
+
+        val tilKnyttetJournalpost = journalpostRepo.repo.values.filterNot { it.journalpostId in eksisterendeJournalpostIds }
+        tilKnyttetJournalpost
+            .single().run {
+                avsenderMottaker.navn.shouldNotBeNull()
+                sakId.shouldBe(fagsak.saksnummer)
+            }
+    }
+
+    @Test
     fun journalførOgOpprettAndregangsBehandling_fraAvslåttFlyt_flytMedPeriodeOgLand() {
         val journalfoeringOpprettDto = defaultJournalføringDto().apply {
             fagsak.sakstype = Sakstyper.EU_EOS.kode
@@ -175,7 +227,7 @@ class JournalfoeringIT(
         behandlingsresultat.type = Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL
         behandlingsresultatRepository.save(behandlingsresultat)
 
-        val journalfoeringTilordneDto = lagJournalfoeringTilordneDto(
+        val journalfoeringTilordneDto = lagJournalfoeringOppgaveOgTilordneDto(
             saksnummer = behandling.fagsak.saksnummer,
             journalfoeringTilordneDto = defaultJournalfoeringTilordneDto().apply {
                 behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
@@ -231,7 +283,7 @@ class JournalfoeringIT(
         behandlingsresultat.type = Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
         behandlingsresultatRepository.save(behandlingsresultat)
 
-        val journalfoeringTilordneDto = lagJournalfoeringTilordneDto(
+        val journalfoeringTilordneDto = lagJournalfoeringOppgaveOgTilordneDto(
             saksnummer = behandling.fagsak.saksnummer,
             journalfoeringTilordneDto = defaultJournalfoeringTilordneDto().apply {
                 behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode

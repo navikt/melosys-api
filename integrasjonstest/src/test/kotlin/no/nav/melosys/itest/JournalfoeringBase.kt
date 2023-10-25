@@ -169,34 +169,25 @@ class JournalfoeringBase(
             }
         }
 
-    protected fun lagJournalfoeringTilordneDto(
+    protected fun lagJournalfoeringOppgaveOgTilordneDto(
         saksnummer: String,
-        jfrOppgave: Oppgave = lagJfrOppgave(),
         journalfoeringTilordneDto: JournalfoeringTilordneDto = defaultJournalfoeringTilordneDto()
     ): JournalfoeringTilordneDto {
+        val jfrOppgave: Oppgave = lagJfrOppgave()
         val hentJournalpost = journalføringService.hentJournalpost(jfrOppgave.journalpostId)
-        return lagJournalfoeringTilordneDto(
-            jfrOppgave, hentJournalpost!!.hoveddokument, saksnummer, journalfoeringTilordneDto
-        )
-    }
-
-    private fun lagJournalfoeringTilordneDto(
-        oppgave: Oppgave,
-        dokument: ArkivDokument,
-        saksnummer: String,
-        journalfoeringTilordneDto: JournalfoeringTilordneDto
-    ) =
-        journalfoeringTilordneDto.apply {
-            this.saksnummer = saksnummer
-            this.journalpostID = oppgave.journalpostId
-            oppgaveID = oppgave.id.toString()
-            hoveddokument = DokumentDto(dokument.dokumentId, dokument.tittel).apply {
-                logiskeVedlegg = emptyList()
+        return journalfoeringTilordneDto
+            .apply {
+                this.saksnummer = saksnummer
+                journalpostID = jfrOppgave.journalpostId
+                oppgaveID = jfrOppgave.id.toString()
+                hoveddokument = DokumentDto(hentJournalpost!!.hoveddokument.dokumentId, hentJournalpost.hoveddokument.tittel).apply {
+                    logiskeVedlegg = emptyList()
+                }
+            }.apply {
+                behandlingstemaKode.shouldNotBeNull()
+                behandlingstypeKode.shouldNotBeNull()
             }
-        }.apply {
-            behandlingstemaKode.shouldNotBeNull()
-            behandlingstypeKode.shouldNotBeNull()
-        }
+    }
 
     protected fun defaultJournalfoeringTilordneDto() =
         JournalfoeringTilordneDto().apply {

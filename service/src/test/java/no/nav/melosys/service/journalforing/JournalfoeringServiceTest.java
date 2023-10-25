@@ -2,13 +2,11 @@ package no.nav.melosys.service.journalforing;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.arkiv.ArkivDokument;
@@ -16,15 +14,11 @@ import no.nav.melosys.domain.arkiv.BrukerIdType;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
-import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -48,7 +42,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper.ANNET;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper.SØKNAD;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
+import static no.nav.melosys.saksflytapi.domain.ProsessType.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
@@ -115,7 +114,7 @@ class JournalfoeringServiceTest {
         opprettDto.setBrukerID("setBrukerID");
         opprettDto.setHoveddokument(new DokumentDto("3333", "setDokumenttittel"));
         opprettDto.setArbeidsgiverID("123456789");
-        opprettDto.setBehandlingstemaKode(Behandlingstema.UTSENDT_ARBEIDSTAKER.getKode());
+        opprettDto.setBehandlingstemaKode(UTSENDT_ARBEIDSTAKER.getKode());
         opprettDto.setBehandlingstypeKode(Behandlingstyper.FØRSTEGANG.getKode());
 
         var fagsak = new FagsakDto();
@@ -125,7 +124,7 @@ class JournalfoeringServiceTest {
 
         tilordneDto = new JournalfoeringTilordneDto();
         tilordneDto.setBehandlingstypeKode(Behandlingstyper.ENDRET_PERIODE.getKode());
-        tilordneDto.setBehandlingstemaKode(Behandlingstema.UTSENDT_ARBEIDSTAKER.getKode());
+        tilordneDto.setBehandlingstemaKode(UTSENDT_ARBEIDSTAKER.getKode());
         tilordneDto.setJournalpostID("setJournalpostID");
         tilordneDto.setOppgaveID("setOppgaveID");
         tilordneDto.setAvsenderNavn("setAvsenderNavn");
@@ -172,16 +171,12 @@ class JournalfoeringServiceTest {
     void journalførOgOpprettSak_ikkeSed_prosessinstansBlirOpprettet() {
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS);
         opprettDto.setFagsak(fagsakDto);
-        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK_BRUKER), any()))
-            .thenReturn(new Prosessinstans());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
-        verify(prosessinstansService).lagre(prosessinstansArgumentCaptor.capture());
-        var lagretProsessinstans = prosessinstansArgumentCaptor.getValue();
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.SAKSTYPE, Sakstyper.class)).isEqualTo(Sakstyper.EU_EOS);
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class)).isEqualTo(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(opprettDto, JFR_NY_SAK_BRUKER,
+            true, LocalDate.EPOCH, SØKNAD);
     }
 
     @Test
@@ -193,18 +188,14 @@ class JournalfoeringServiceTest {
         opprettDto.setBehandlingstemaKode(Behandlingstema.VIRKSOMHET.getKode());
         opprettDto.setBehandlingstypeKode(Behandlingstyper.HENVENDELSE.getKode());
 
-        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK_VIRKSOMHET), any()))
-            .thenReturn(new Prosessinstans());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
 
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
 
-        verify(prosessinstansService).lagre(prosessinstansArgumentCaptor.capture());
-        var lagretProsessinstans = prosessinstansArgumentCaptor.getValue();
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.SAKSTYPE, Sakstyper.class)).isEqualTo(Sakstyper.EU_EOS);
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class)).isEqualTo(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(any(JournalfoeringOpprettDto.class), any(ProsessType.class),
+            eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class));
     }
 
     @Test
@@ -215,19 +206,14 @@ class JournalfoeringServiceTest {
         opprettDto.setFullmakter(List.of(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER));
         opprettDto.setFullmektigKontaktperson("Ola Nordmann");
         opprettDto.setFullmektigKontaktOrgnr("000000000");
-        when(prosessinstansService.lagJournalføringProsessinstans(any(), any())).thenReturn(new Prosessinstans());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
 
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
 
-        verify(prosessinstansService).lagre(prosessinstansArgumentCaptor.capture());
-        var lagretProsessinstans = prosessinstansArgumentCaptor.getValue();
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.FULLMEKTIG)).isEqualTo(opprettDto.getFullmektigID());
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.FULLMAKTER, new TypeReference<List<Fullmaktstype>>() {})).isEqualTo(opprettDto.getFullmakter());
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.FULLMEKTIG_KONTAKTPERSON)).isEqualTo(opprettDto.getFullmektigKontaktperson());
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.FULLMEKTIG_KONTAKT_ORGNR)).isEqualTo(opprettDto.getFullmektigKontaktOrgnr());
+        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(opprettDto, JFR_NY_SAK_BRUKER,
+            true, LocalDate.EPOCH, SØKNAD);
     }
 
     @Test
@@ -263,7 +249,6 @@ class JournalfoeringServiceTest {
 
     @Test
     void journalførOgOpprettSak_gyldigSkalSendeForvaltningsmeldingKasterIkkeFeilUnderValidering_ingenFeil() {
-        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK_BRUKER), any())).thenReturn(new Prosessinstans());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS);
@@ -277,10 +262,8 @@ class JournalfoeringServiceTest {
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
 
-        verify(prosessinstansService).lagre(prosessinstansArgumentCaptor.capture());
-        var processInstans = prosessinstansArgumentCaptor.getValue();
-        assertThat(processInstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class).getKode()).isEqualTo(fagsakDto.getSakstema());
-        assertThat(processInstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class).getKode()).isEqualTo(opprettDto.getBehandlingstypeKode());
+        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(opprettDto, JFR_NY_SAK_BRUKER,
+            true, LocalDate.EPOCH, SØKNAD);
     }
 
     @Test
@@ -289,19 +272,14 @@ class JournalfoeringServiceTest {
         fagsakDto.setSakstema(Sakstemaer.UNNTAK.getKode());
         opprettDto.setFagsak(fagsakDto);
         opprettDto.setBehandlingstypeKode(Behandlingstyper.HENVENDELSE.getKode());
-        opprettDto.setBehandlingstemaKode(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET.getKode());
+        opprettDto.setBehandlingstemaKode(FORESPØRSEL_TRYGDEMYNDIGHET.getKode());
         opprettDto.setBrukerID("1234");
-        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK_BRUKER), any())).thenReturn(new Prosessinstans());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
-        verify(prosessinstansService).lagre(prosessinstansArgumentCaptor.capture());
-        var lagretProsessinstans = prosessinstansArgumentCaptor.getValue();
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class).getKode()).isEqualTo(fagsakDto.getSakstema());
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class).getKode()).isEqualTo(opprettDto.getBehandlingstypeKode());
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingstyper.class)).isNotNull();
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.MOTTATT_DATO, LocalDate.class)).isEqualTo(LocalDate.ofInstant(journalpost.getForsendelseMottatt(), ZoneId.systemDefault()));
+        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(any(JournalfoeringOpprettDto.class), any(ProsessType.class),
+            eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class));
     }
 
     @Test
@@ -309,13 +287,12 @@ class JournalfoeringServiceTest {
         FagsakDto fagsakDto = lagFagsakDto(null, null, null, Sakstyper.EU_EOS);
         opprettDto.setFagsak(fagsakDto);
         opprettDto.setBehandlingstemaKode(Behandlingstema.IKKE_YRKESAKTIV.getKode());
-        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK_BRUKER), any()))
-            .thenReturn(new Prosessinstans());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
-        verify(prosessinstansService).lagre(any(Prosessinstans.class));
+        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(any(JournalfoeringOpprettDto.class), any(ProsessType.class),
+            eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class));
     }
 
     @Test
@@ -323,13 +300,12 @@ class JournalfoeringServiceTest {
         FagsakDto fagsakDto = lagFagsakDto(null, null, null, Sakstyper.FTRL);
         opprettDto.setFagsak(fagsakDto);
         opprettDto.setBehandlingstemaKode(Behandlingstema.YRKESAKTIV.getKode());
-        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK_BRUKER), any()))
-            .thenReturn(new Prosessinstans());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
-        verify(prosessinstansService).lagre(any(Prosessinstans.class));
+        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(any(JournalfoeringOpprettDto.class), any(ProsessType.class),
+            eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class));
     }
 
     @Test
@@ -348,8 +324,6 @@ class JournalfoeringServiceTest {
     void journalførOgOpprettSak_fomEtterTom_feiler() {
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MAX, LocalDate.MIN, "DK", Sakstyper.EU_EOS);
         opprettDto.setFagsak(fagsakDto);
-        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK_BRUKER), any()))
-            .thenReturn(new Prosessinstans());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
@@ -360,13 +334,12 @@ class JournalfoeringServiceTest {
     void journalførOgOpprettSak_utenTom_gyldig() {
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, null, "DK", Sakstyper.EU_EOS);
         opprettDto.setFagsak(fagsakDto);
-        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK_BRUKER), any()))
-            .thenReturn(new Prosessinstans());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
-        verify(prosessinstansService).lagre(any(Prosessinstans.class));
+        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(opprettDto, JFR_NY_SAK_BRUKER,
+            true, LocalDate.EPOCH, SØKNAD);
     }
 
     @Test
@@ -388,15 +361,14 @@ class JournalfoeringServiceTest {
         opprettDto.setFagsak(fagsakDto);
         opprettDto.setBehandlingstemaKode(Behandlingstema.YRKESAKTIV.getKode());
 
-        when(prosessinstansService.lagJournalføringProsessinstans(eq(ProsessType.JFR_NY_SAK_BRUKER), any()))
-            .thenReturn(new Prosessinstans());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
 
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
 
-        verify(prosessinstansService).lagre(any(Prosessinstans.class));
+        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(any(JournalfoeringOpprettDto.class), any(ProsessType.class),
+            eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class));
     }
 
     @Test
@@ -455,7 +427,7 @@ class JournalfoeringServiceTest {
         final Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer("MEL-22");
         fagsak.setSaksnummer(arkivsakID.toString());
-        opprettDto.setBehandlingstemaKode(Behandlingstema.UTSENDT_ARBEIDSTAKER.getKode());
+        opprettDto.setBehandlingstemaKode(UTSENDT_ARBEIDSTAKER.getKode());
         journalpost.setMottaksKanal("EESSI");
         when(eessiService.støtterAutomatiskBehandling(any(MelosysEessiMelding.class))).thenReturn(Boolean.FALSE);
         when(eessiService.finnSakForRinasaksnummer(RINA_SAKSNUMMER)).thenReturn(Optional.of(arkivsakID));
@@ -534,17 +506,10 @@ class JournalfoeringServiceTest {
 
         when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
         when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
-        when(prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_KNYTT, tilordneDto))
-            .thenReturn(new Prosessinstans());
 
         journalfoeringService.journalførOgKnyttTilEksisterendeSak(tilordneDto);
 
-        verify(prosessinstansService).lagre(prosessinstansArgumentCaptor.capture());
-        var lagretProsessinstans = prosessinstansArgumentCaptor.getValue();
-        assertThat(lagretProsessinstans.getBehandling()).isEqualTo(behandling);
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.SAKSNUMMER)).isEqualTo(MELOSYS_SAKSNUMMER);
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.JFR_INGEN_VURDERING, Boolean.class))
-            .isEqualTo(tilordneDto.isIngenVurdering());
+        verify(prosessinstansService).opprettProsessinstansJournalføringKnyttTilEksisterende(any(JournalfoeringTilordneDto.class), any(String.class), any(Fagsak.class));
     }
 
     @Test
@@ -559,17 +524,10 @@ class JournalfoeringServiceTest {
 
         when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
         when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
-        when(prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_KNYTT, tilordneDto))
-            .thenReturn(new Prosessinstans());
 
         journalfoeringService.journalførOgKnyttTilEksisterendeSak(tilordneDto);
 
-        verify(prosessinstansService).lagre(prosessinstansArgumentCaptor.capture());
-        var lagretProsessinstans = prosessinstansArgumentCaptor.getValue();
-        assertThat(lagretProsessinstans.getBehandling()).isEqualTo(behandling);
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.SAKSNUMMER)).isEqualTo(MELOSYS_SAKSNUMMER);
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.JFR_INGEN_VURDERING, Boolean.class))
-            .isEqualTo(tilordneDto.isIngenVurdering());
+        prosessinstansService.opprettProsessinstansJournalføringKnyttTilEksisterende(tilordneDto, MELOSYS_SAKSNUMMER, fagsak);
     }
 
     @Test
@@ -632,25 +590,16 @@ class JournalfoeringServiceTest {
 
         when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
         when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
-        when(prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_ANDREGANG_NY_BEHANDLING, tilordneDto))
-            .thenReturn(new Prosessinstans());
 
         journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto);
 
-        verify(prosessinstansService).lagre(prosessinstansArgumentCaptor.capture());
-        var lagretProsessinstans = prosessinstansArgumentCaptor.getValue();
-        assertThat(lagretProsessinstans.getBehandling()).isNull();
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class).getKode())
-            .isEqualTo(tilordneDto.getBehandlingstemaKode());
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class).getKode())
-            .isEqualTo(tilordneDto.getBehandlingstypeKode());
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.SAKSNUMMER)).isEqualTo(tilordneDto.getSaksnummer());
+        verify(prosessinstansService).journalførOgOpprettAndregangsBehandling(JFR_ANDREGANG_NY_BEHANDLING, BESLUTNING_LOVVALG_NORGE, NY_VURDERING, tilordneDto, ANNET, LocalDate.EPOCH);
     }
 
     @Test
     void journalførOgOpprettAndregangsBehandlingIkkeKopierBehandling_altOK_prosessinstansOpprettet() {
         tilordneDto.setSaksnummer(MELOSYS_SAKSNUMMER);
-        tilordneDto.setBehandlingstemaKode(Behandlingstema.FORESPØRSEL_TRYGDEMYNDIGHET.getKode());
+        tilordneDto.setBehandlingstemaKode(FORESPØRSEL_TRYGDEMYNDIGHET.getKode());
         tilordneDto.setBehandlingstypeKode(Behandlingstyper.HENVENDELSE.getKode());
 
         var behandling = lagBehandling();
@@ -664,31 +613,22 @@ class JournalfoeringServiceTest {
 
         when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
         when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
-        when(prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_ANDREGANG_NY_BEHANDLING, tilordneDto))
-            .thenReturn(new Prosessinstans());
 
         journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto);
 
-        verify(prosessinstansService).lagre(prosessinstansArgumentCaptor.capture());
-        var lagretProsessinstans = prosessinstansArgumentCaptor.getValue();
-        assertThat(lagretProsessinstans.getBehandling()).isNull();
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class).getKode())
-            .isEqualTo(tilordneDto.getBehandlingstemaKode());
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class).getKode())
-            .isEqualTo(tilordneDto.getBehandlingstypeKode());
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.SAKSNUMMER)).isEqualTo(tilordneDto.getSaksnummer());
+        verify(prosessinstansService).journalførOgOpprettAndregangsBehandling(JFR_ANDREGANG_NY_BEHANDLING, FORESPØRSEL_TRYGDEMYNDIGHET, Behandlingstyper.HENVENDELSE, tilordneDto, Behandlingsaarsaktyper.HENVENDELSE, LocalDate.EPOCH);
     }
 
     @Test
     void journalførOgOpprettAndregangsBehandlingKopierBehandling_altOK_prosessinstansOpprettet() {
         tilordneDto.setSaksnummer(MELOSYS_SAKSNUMMER);
-        tilordneDto.setBehandlingstemaKode(Behandlingstema.UTSENDT_ARBEIDSTAKER.getKode());
+        tilordneDto.setBehandlingstemaKode(UTSENDT_ARBEIDSTAKER.getKode());
         tilordneDto.setBehandlingstypeKode(Behandlingstyper.NY_VURDERING.getKode());
 
         var behandling = lagBehandling();
         behandling.setStatus(Behandlingsstatus.MIDLERTIDIG_LOVVALGSBESLUTNING);
         behandling.setType(Behandlingstyper.NY_VURDERING);
-        behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
+        behandling.setTema(UTSENDT_ARBEIDSTAKER);
         var fagsak = lagFagsak(behandling);
         fagsak.setType(Sakstyper.EU_EOS);
         fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
@@ -700,22 +640,13 @@ class JournalfoeringServiceTest {
 
         when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
         when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
-        when(prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_ANDREGANG_REPLIKER_BEHANDLING, tilordneDto))
-            .thenReturn(new Prosessinstans());
         when(behandlingsresultatRepository.findById(any())).thenReturn(Optional.of(behandlingsresultat));
 
 
         journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto);
 
 
-        verify(prosessinstansService).lagre(prosessinstansArgumentCaptor.capture());
-        var lagretProsessinstans = prosessinstansArgumentCaptor.getValue();
-        assertThat(lagretProsessinstans.getBehandling()).isNull();
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class).getKode())
-            .isEqualTo(tilordneDto.getBehandlingstemaKode());
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class).getKode())
-            .isEqualTo(tilordneDto.getBehandlingstypeKode());
-        assertThat(lagretProsessinstans.getData(ProsessDataKey.SAKSNUMMER)).isEqualTo(tilordneDto.getSaksnummer());
+        prosessinstansService.journalførOgOpprettAndregangsBehandling(JFR_ANDREGANG_REPLIKER_BEHANDLING, UTSENDT_ARBEIDSTAKER, NY_VURDERING, tilordneDto, SØKNAD, LocalDate.EPOCH);
     }
 
     @Test
