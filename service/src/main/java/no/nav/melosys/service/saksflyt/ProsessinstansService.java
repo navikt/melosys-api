@@ -51,7 +51,6 @@ import org.springframework.util.CollectionUtils;
 
 import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.getCorrelationId;
 import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.*;
-import static no.nav.melosys.service.journalforing.UtledBehandlingsaarsak.utledÅrsaktype;
 import static org.springframework.util.StringUtils.hasText;
 
 @Service
@@ -164,7 +163,8 @@ public class ProsessinstansService {
 
         return prosessinstans;
     }
-    public void opprettProsessinstansJournalføringKnyttTilEksisterende(JournalfoeringTilordneDto journalfoeringDto, String saksnummer, Fagsak fagsak){
+
+    public void opprettProsessinstansJournalføringKnyttTilEksisterende(JournalfoeringTilordneDto journalfoeringDto, String saksnummer, Fagsak fagsak) {
         Prosessinstans prosessinstans = lagJournalføringProsessinstans(ProsessType.JFR_KNYTT, journalfoeringDto);
         prosessinstans.setBehandling(fagsak.hentSistAktivBehandling());
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
@@ -191,18 +191,17 @@ public class ProsessinstansService {
     }
 
 
-
-    public void opprettProsessinstansJournalføringNySak(Journalpost journalpost, JournalfoeringOpprettDto journalfoeringDto, Sakstyper sakstype,
-                                                        Sakstemaer sakstema, Behandlingstema behandlingstema, Behandlingstyper behandlingstype, ProsessType prosessType,
-                                                        boolean skalSetteSøknadslandOgPeriode) {
+    public void opprettProsessinstansJournalføringNySak(JournalfoeringOpprettDto journalfoeringDto,
+                                                        ProsessType prosessType,
+                                                        boolean skalSetteSøknadslandOgPeriode, LocalDate mottaksdato, Behandlingsaarsaktyper behandlingsaarsaktyper) {
 
         Prosessinstans prosessinstans = lagJournalføringProsessinstans(prosessType, journalfoeringDto);
-        prosessinstans.setData(ProsessDataKey.SAKSTYPE, sakstype);
-        prosessinstans.setData(ProsessDataKey.SAKSTEMA, sakstema);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, utledÅrsaktype(journalpost, sakstema, behandlingstema, behandlingstype));
-        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, utledMottaksdato(journalfoeringDto.getMottattDato(), journalpost));
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
+        prosessinstans.setData(ProsessDataKey.SAKSTYPE, Sakstyper.valueOf(journalfoeringDto.getFagsak().getSakstype()));
+        prosessinstans.setData(ProsessDataKey.SAKSTEMA, Sakstemaer.valueOf(journalfoeringDto.getFagsak().getSakstema()));
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode()));
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, behandlingsaarsaktyper);
+        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, mottaksdato);
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode()));
 
         if (skalSetteSøknadslandOgPeriode) {
             prosessinstans.setData(ProsessDataKey.SØKNADSLAND, journalfoeringDto.getFagsak().getLand());

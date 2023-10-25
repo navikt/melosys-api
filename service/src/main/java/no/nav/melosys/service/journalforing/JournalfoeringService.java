@@ -2,7 +2,6 @@ package no.nav.melosys.service.journalforing;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.List;
 import java.util.Optional;
 
 import com.google.common.base.Enums;
@@ -31,7 +30,6 @@ import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -106,23 +104,39 @@ public class JournalfoeringService {
         }
 
         fellesValidering(journalfoeringDto);
+        validerOpprettelseSak(journalfoeringDto);
+
+        ProsessType prosessType;
+        if (StringUtils.isNotEmpty(journalfoeringDto.getBrukerID())) {
+            prosessType = ProsessType.JFR_NY_SAK_BRUKER;
+        } else {
+            prosessType = ProsessType.JFR_NY_SAK_VIRKSOMHET;
+        }
 
         final var sakstype = Sakstyper.valueOf(journalfoeringDto.getFagsak().getSakstype());
         final var sakstema = Sakstemaer.valueOf(journalfoeringDto.getFagsak().getSakstema());
         final var behandlingstema = Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode());
         final var behandlingstype = Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode());
 
-        validerOpprettelseSak(journalfoeringDto, sakstype, sakstema, behandlingstema,
-            behandlingstype);
+        boolean skalSetteSøknadslandOgPeriode = skalSetteSøknadslandOgPeriode(sakstype, sakstema, behandlingstema, behandlingstype);
+        if (skalSetteSøknadslandOgPeriode) {
+            validerSøknadFelter(journalfoeringDto);
+        }
+        LocalDate mottaksdato = utledMottaksdato(journalfoeringDto.getMottattDato(), journalpost);
+        Behandlingsaarsaktyper behandlingsaarsaktyper = utledÅrsaktype(journalpost, sakstema, behandlingstema, behandlingstype);
 
-        opprettJournalføringNySakProsessinstans(journalpost, journalfoeringDto, sakstype, sakstema, behandlingstema,
-            behandlingstype);
+        prosessinstansService.opprettProsessinstansJournalføringNySak(journalfoeringDto, prosessType,
+            skalSetteSøknadslandOgPeriode, mottaksdato, behandlingsaarsaktyper);
+
+        log.info("Ny sak bestilt etter journalføring av journalpost {}", journalfoeringDto.getJournalpostID());
     }
 
-    private void validerOpprettelseSak(JournalfoeringOpprettDto journalfoeringDto,
-                                       Sakstyper sakstype, Sakstemaer sakstema, Behandlingstema behandlingstema,
-                                       Behandlingstyper behandlingstype) {
+    private void validerOpprettelseSak(JournalfoeringOpprettDto journalfoeringDto) {
 
+        var sakstype = Sakstyper.valueOf(journalfoeringDto.getFagsak().getSakstype());
+        var sakstema = Sakstemaer.valueOf(journalfoeringDto.getFagsak().getSakstema());
+        var behandlingstema = Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode());
+        var behandlingstype = Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode());
         Aktoersroller hovedpart = journalføringGjelder(journalfoeringDto);
 
         lovligeKombinasjonerService.validerOpprettelseOgEndring(
@@ -191,35 +205,6 @@ public class JournalfoeringService {
         if (eessiService.støtterAutomatiskBehandling(melosysEessiMelding)) {
             throw new FunksjonellException("Journalpost med id " + melosysEessiMelding.getJournalpostId() + " skal ikke journalføres manuelt");
         }
-    }
-
-
-    private void opprettJournalføringNySakProsessinstans(Journalpost journalpost, JournalfoeringOpprettDto journalfoeringDto, Sakstyper sakstype,
-                                                         Sakstemaer sakstema, Behandlingstema behandlingstema,
-                                                         Behandlingstyper behandlingstype) {
-        ProsessType prosessType;
-        if (StringUtils.isNotEmpty(journalfoeringDto.getBrukerID())) {
-            prosessType = ProsessType.JFR_NY_SAK_BRUKER;
-        } else {
-            prosessType = ProsessType.JFR_NY_SAK_VIRKSOMHET;
-        }
-
-
-        boolean skalSetteSøknadslandOgPeriode = skalSetteSøknadslandOgPeriode(sakstype, sakstema, behandlingstema, behandlingstype);
-        if (skalSetteSøknadslandOgPeriode) {
-            validerSøknadFelter(journalfoeringDto);
-        }
-        prosessinstansService.opprettProsessinstansJournalføringNySak(journalpost, journalfoeringDto, sakstype, sakstema, behandlingstema, behandlingstype, prosessType,
-            skalSetteSøknadslandOgPeriode);
-
-        log.info("Ny sak bestilt etter journalføring av journalpost {}", journalfoeringDto.getJournalpostID());
-    }
-
-
-    @Transactional
-    public void journalførOgKnyttTilEksisterendeSak(List<Pair<Behandling, Journalpost>> pairs) {
-        pairs.forEach(
-            pair -> oppdaterOgFerdigstillJournalpost(pair.getFirst().getFagsak().getSaksnummer(), pair.getSecond()));
     }
 
     private void oppdaterOgFerdigstillJournalpost(String saksnummer, Journalpost journalpost) {
