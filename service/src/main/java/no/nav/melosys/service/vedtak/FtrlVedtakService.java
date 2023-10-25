@@ -101,9 +101,11 @@ public class FtrlVedtakService {
     }
 
     private List<KopiMottakerDto> filtrerKopiMottakere(List<KopiMottakerDto> kopiMottakerDtoList) {
-        return kopiMottakerDtoList.stream()
-            .filter(dto -> !dto.orgnr().equals(SKATTEETATEN.getOrgnr()))
-            .collect(Collectors.toList());
+        if (kopiMottakerDtoList != null) {
+            return kopiMottakerDtoList.stream()
+                .filter(dto -> dto.orgnr() == null || !dto.orgnr().equals(SKATTEETATEN.getOrgnr()))
+                .collect(Collectors.toList());
+        } else return null;
     }
 
     private void oppdaterBehandlingsresultat(long behandlingID, FattVedtakRequest request) throws IkkeFunnetException {

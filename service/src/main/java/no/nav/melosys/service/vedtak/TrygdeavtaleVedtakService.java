@@ -115,9 +115,11 @@ public class TrygdeavtaleVedtakService {
     }
 
     private List<KopiMottakerDto> filtrerKopiMottakere(Behandlingsresultat behandlingsresultat, FattVedtakRequest request) {
-        return request.getKopiMottakere().stream()
-            .filter(dto -> !dto.orgnr().equals(SKATTEETATEN.getOrgnr()) && behandlingsresultat.erInnvilgelse())
-            .collect(Collectors.toList());
+        if (request.getKopiMottakere() != null) {
+            return request.getKopiMottakere().stream()
+                .filter(dto -> dto.orgnr() == null || !dto.orgnr().equals(SKATTEETATEN.getOrgnr()) && behandlingsresultat.erInnvilgelse())
+                .collect(Collectors.toList());
+        } else return null;
     }
 
     private BrevbestillingDto lagBrevbestilling(Behandling behandling, FattVedtakRequest request) {

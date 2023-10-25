@@ -37,6 +37,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static no.nav.melosys.domain.brev.NorskMyndighet.SKATTEETATEN;
 import static no.nav.melosys.domain.kodeverk.Mottakerroller.*;
 import static no.nav.melosys.domain.kodeverk.Saksstatuser.MEDLEMSKAP_AVKLART;
 import static no.nav.melosys.domain.kodeverk.Vedtakstyper.*;
@@ -79,10 +80,13 @@ class TrygdeavtaleVedtakServiceTest {
 
     private TrygdeavtaleVedtakService trygdeavtaleVedtakService;
 
+    private FakeUnleash unleash = new FakeUnleash();
+
     @BeforeEach
     void setup() {
+        unleash.enableAll();
         trygdeavtaleVedtakService = new TrygdeavtaleVedtakService(behandlingsresultatService, behandlingService, prosessinstansService,
-            oppgaveService, dokgenService, ferdigbehandlingKontrollFacade, saksbehandlingRegler, new FakeUnleash());
+            oppgaveService, dokgenService, ferdigbehandlingKontrollFacade, saksbehandlingRegler, unleash);
 
         SpringSubjectHandler.set(new TestSubjectHandler());
     }
@@ -273,7 +277,8 @@ class TrygdeavtaleVedtakServiceTest {
             .medBarnFritekst("Barn omfattet")
             .medKopiMottakere(List.of(
                 new KopiMottakerDto(ARBEIDSGIVER, "987654321", null, null),
-                new KopiMottakerDto(UTENLANDSK_TRYGDEMYNDIGHET, null, null, "GB:UK010")
+                new KopiMottakerDto(UTENLANDSK_TRYGDEMYNDIGHET, null, null, "GB:UK010"),
+                new KopiMottakerDto(NORSK_MYNDIGHET, SKATTEETATEN.getOrgnr(), null, null)
             ))
             .medBestillersId(SubjectHandler.getInstance().getUserID())
             .medNyVurderingBakgrunn(nyVurderingBakgrunn)
