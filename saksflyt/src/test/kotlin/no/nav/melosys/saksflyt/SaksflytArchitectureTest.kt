@@ -38,7 +38,7 @@ class SaksflytArchitectureTest {
             )
 
     @ArchTest
-    val `Saksfly skal bruke COMMON_PACKAGES` =
+    val `Saksflyt skal bruke COMMON_PACKAGES` =
         classes().that()
             .resideInAPackage("no.nav.melosys.saksflyt..")
             .should()
