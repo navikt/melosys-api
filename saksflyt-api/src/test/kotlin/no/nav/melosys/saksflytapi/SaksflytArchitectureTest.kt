@@ -11,10 +11,10 @@ import org.junit.jupiter.api.TestInstance
 
 @AnalyzeClasses(packages = ["no.nav.melosys.saksflytapi.."], importOptions = [ImportOption.DoNotIncludeTests::class])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class SaksflytArchitectureTest {
+class SaksflytapiArchitectureTest {
 
     @ArchTest
-    val `Saksflyt skal ikke brukes av andre moduler` =
+    val `Saksflytapi skal ikke brukes av andre moduler` =
         classes().that()
             .resideInAPackage("no.nav.melosys.saksflytapi..")
             .should()
@@ -23,7 +23,7 @@ class SaksflytArchitectureTest {
             .resideInAnyPackage("no.nav.melosys.saksflyt..","no.nav.melosys.saksflytapi..", "no.nav.melosys.service..")
 
     @ArchTest
-    val `Saksflyt skal bare være avhgengig av` =
+    val `Saksflytapi skal bare være avhgengig av` =
         classes().that()
             .resideInAPackage("no.nav.melosys.saksflytapi..")
             .should()
