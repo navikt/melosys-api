@@ -49,7 +49,6 @@ public class TrygdeavtaleVedtakService {
     private final DokgenService dokgenService;
     private final FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade;
     private final SaksbehandlingRegler saksbehandlingRegler;
-    private final Unleash unleash;
 
 
     public TrygdeavtaleVedtakService(BehandlingsresultatService behandlingsresultatService,
@@ -58,8 +57,7 @@ public class TrygdeavtaleVedtakService {
                                      OppgaveService oppgaveService,
                                      DokgenService dokgenService,
                                      FerdigbehandlingKontrollFacade ferdigbehandlingKontrollFacade,
-                                     SaksbehandlingRegler saksbehandlingRegler,
-                                     Unleash unleash) {
+                                     SaksbehandlingRegler saksbehandlingRegler) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.behandlingService = behandlingService;
         this.prosessinstansService = prosessinstansService;
@@ -67,7 +65,6 @@ public class TrygdeavtaleVedtakService {
         this.dokgenService = dokgenService;
         this.ferdigbehandlingKontrollFacade = ferdigbehandlingKontrollFacade;
         this.saksbehandlingRegler = saksbehandlingRegler;
-        this.unleash = unleash;
     }
 
     public void fattVedtak(Behandling behandling, FattVedtakRequest request) throws ValideringException {
@@ -107,19 +104,10 @@ public class TrygdeavtaleVedtakService {
             oppdaterBehandlingsresultat(behandlingsresultat, request);
             prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling, request);
             BrevbestillingDto brevbestillingDto = lagBrevbestilling(behandling, request);
-            if (unleash.isEnabled(FOLKETRYGDEN_MVP)) brevbestillingDto.setKopiMottakere(filtrerKopiMottakere(behandlingsresultat, request));
             dokgenService.produserOgDistribuerBrev(behandlingID, brevbestillingDto);
         }
 
         oppgaveService.ferdigstillOppgaveMedSaksnummer(saksnummer);
-    }
-
-    private List<KopiMottakerDto> filtrerKopiMottakere(Behandlingsresultat behandlingsresultat, FattVedtakRequest request) {
-        if (request.getKopiMottakere() != null) {
-            return request.getKopiMottakere().stream()
-                .filter(dto -> dto.orgnr() == null || !dto.orgnr().equals(SKATTEETATEN.getOrgnr()) && behandlingsresultat.erInnvilgelse())
-                .collect(Collectors.toList());
-        } else return null;
     }
 
     private BrevbestillingDto lagBrevbestilling(Behandling behandling, FattVedtakRequest request) {

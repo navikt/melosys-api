@@ -89,7 +89,7 @@ public class FtrlVedtakService {
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN);
         brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
-        brevbestillingDto.setKopiMottakere(filtrerKopiMottakere(request.getKopiMottakere()));
+        brevbestillingDto.setKopiMottakere(request.getKopiMottakere());
         brevbestillingDto.setInnledningFritekst(request.getInnledningFritekst());
         brevbestillingDto.setBegrunnelseFritekst(request.getBegrunnelseFritekst());
         brevbestillingDto.setTrygdeavtaleFritekst(request.getTrygdeavgiftFritekst());
@@ -98,14 +98,6 @@ public class FtrlVedtakService {
         brevbestillingDto.setBarnFritekst(request.getBarnFritekst());
         brevbestillingDto.setBestillersId(request.getBestillersId());
         return brevbestillingDto;
-    }
-
-    private List<KopiMottakerDto> filtrerKopiMottakere(List<KopiMottakerDto> kopiMottakerDtoList) {
-        if (kopiMottakerDtoList != null) {
-            return kopiMottakerDtoList.stream()
-                .filter(dto -> dto.orgnr() == null || !dto.orgnr().equals(SKATTEETATEN.getOrgnr()))
-                .collect(Collectors.toList());
-        } else return null;
     }
 
     private void oppdaterBehandlingsresultat(long behandlingID, FattVedtakRequest request) throws IkkeFunnetException {

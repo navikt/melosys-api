@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avgift.Inntektsperiode;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
@@ -60,11 +61,13 @@ class BrevmottakerServiceTest {
 
     private Behandlingsresultat behandlingsresultat;
     private BrevmottakerService brevmottakerService;
+    private FakeUnleash fakeUnleash = new FakeUnleash();
 
     @BeforeEach
     void setup() {
+        fakeUnleash.enableAll();
         brevmottakerService = new BrevmottakerService(
-            avklarteVirksomheterService, utenlandskMyndighetService, behandlingsresultatService, lovvalgsperiodeService);
+            avklarteVirksomheterService, utenlandskMyndighetService, behandlingsresultatService, lovvalgsperiodeService, fakeUnleash);
 
         behandlingsresultat = new Behandlingsresultat();
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();

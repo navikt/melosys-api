@@ -80,13 +80,10 @@ class TrygdeavtaleVedtakServiceTest {
 
     private TrygdeavtaleVedtakService trygdeavtaleVedtakService;
 
-    private FakeUnleash unleash = new FakeUnleash();
-
     @BeforeEach
     void setup() {
-        unleash.enableAll();
         trygdeavtaleVedtakService = new TrygdeavtaleVedtakService(behandlingsresultatService, behandlingService, prosessinstansService,
-            oppgaveService, dokgenService, ferdigbehandlingKontrollFacade, saksbehandlingRegler, unleash);
+            oppgaveService, dokgenService, ferdigbehandlingKontrollFacade, saksbehandlingRegler);
 
         SpringSubjectHandler.set(new TestSubjectHandler());
     }
@@ -277,8 +274,7 @@ class TrygdeavtaleVedtakServiceTest {
             .medBarnFritekst("Barn omfattet")
             .medKopiMottakere(List.of(
                 new KopiMottakerDto(ARBEIDSGIVER, "987654321", null, null),
-                new KopiMottakerDto(UTENLANDSK_TRYGDEMYNDIGHET, null, null, "GB:UK010"),
-                new KopiMottakerDto(NORSK_MYNDIGHET, SKATTEETATEN.getOrgnr(), null, null)
+                new KopiMottakerDto(UTENLANDSK_TRYGDEMYNDIGHET, null, null, "GB:UK010")
             ))
             .medBestillersId(SubjectHandler.getInstance().getUserID())
             .medNyVurderingBakgrunn(nyVurderingBakgrunn)

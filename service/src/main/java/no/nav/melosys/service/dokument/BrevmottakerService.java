@@ -2,6 +2,7 @@ package no.nav.melosys.service.dokument;
 
 import java.util.*;
 
+import io.getunleash.Unleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.BrevkopiRegel;
 import no.nav.melosys.domain.brev.Mottaker;
@@ -31,6 +32,7 @@ import static java.util.Optional.ofNullable;
 import static no.nav.melosys.domain.Preferanse.PreferanseEnum.RESERVERT_FRA_A1;
 import static no.nav.melosys.domain.brev.BrevkopiRegel.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
+import static no.nav.melosys.featuretoggle.ToggleName.FOLKETRYGDEN_MVP;
 
 @Service
 public class BrevmottakerService {
@@ -40,15 +42,18 @@ public class BrevmottakerService {
     private final UtenlandskMyndighetService utenlandskMyndighetService;
     private final BehandlingsresultatService behandlingsresultatService;
     private final LovvalgsperiodeService lovvalgsperiodeService;
+    private final Unleash unleash;
 
     public BrevmottakerService(AvklarteVirksomheterService avklarteVirksomheterService,
                                UtenlandskMyndighetService utenlandskMyndighetService,
                                BehandlingsresultatService behandlingsresultatService,
-                               LovvalgsperiodeService lovvalgsperiodeService) {
+                               LovvalgsperiodeService lovvalgsperiodeService,
+                               Unleash unleash) {
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.utenlandskMyndighetService = utenlandskMyndighetService;
         this.behandlingsresultatService = behandlingsresultatService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
+        this.unleash = unleash;
     }
 
     /**
@@ -88,7 +93,7 @@ public class BrevmottakerService {
         if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI)) {
             mottakerliste.getKopiMottakere().add(Mottakerroller.ARBEIDSGIVER);
         }
-        if (brevkopiRegler.contains(SKATT_FÅR_KOPI)) {
+        if (!unleash.isEnabled(FOLKETRYGDEN_MVP) && brevkopiRegler.contains(SKATT_FÅR_KOPI)) {
             mottakerliste.getFasteMottakere().add(NorskMyndighet.SKATTEETATEN);
         }
         if (brevkopiRegler.contains(UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI)) {
