@@ -20,7 +20,7 @@ import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
-import no.nav.melosys.saksflytapi.domain.Prosessinstans;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -36,8 +36,6 @@ import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -80,11 +78,11 @@ class JournalfoeringServiceTest {
     @Mock
     private SaksbehandlingRegler saksbehandlingRegler;
 
+    @Mock
+    private UtenlandskMyndighetService utenlandskMyndighetService;
+
     private final FakeUnleash unleash = new FakeUnleash();
     private final LovligeKombinasjonerService lovligeKombinasjonerService = new LovligeKombinasjonerService(fagsakService, behandlingService, behandlingsresultatService, unleash);
-
-    @Captor
-    private ArgumentCaptor<Prosessinstans> prosessinstansArgumentCaptor;
 
     private JournalfoeringService journalfoeringService;
     private JournalfoeringOpprettDto opprettDto;
@@ -104,7 +102,7 @@ class JournalfoeringServiceTest {
         journalpost.setForsendelseMottatt(Instant.EPOCH);
 
         this.journalfoeringService = new JournalfoeringService(joarkFasade, prosessinstansService, eessiService, fagsakService,
-            persondataFasade, lovligeKombinasjonerService, saksbehandlingRegler, behandlingService, behandlingsresultatService);
+            persondataFasade, lovligeKombinasjonerService, saksbehandlingRegler, behandlingService, behandlingsresultatService, utenlandskMyndighetService);
         opprettDto = new JournalfoeringOpprettDto();
         opprettDto.setJournalpostID("setJournalpostID");
         opprettDto.setOppgaveID("setOppgaveID");
@@ -176,7 +174,7 @@ class JournalfoeringServiceTest {
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
         verify(prosessinstansService).opprettProsessinstansJournalføringNySak(opprettDto, JFR_NY_SAK_BRUKER,
-            true, LocalDate.EPOCH, SØKNAD);
+            true, LocalDate.EPOCH, SØKNAD, null);
     }
 
     @Test
@@ -189,13 +187,14 @@ class JournalfoeringServiceTest {
         opprettDto.setBehandlingstypeKode(Behandlingstyper.HENVENDELSE.getKode());
 
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+        when(utenlandskMyndighetService.finnInstitusjonID(anyString())).thenReturn(Optional.of("AB:123"));
 
 
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
 
         verify(prosessinstansService).opprettProsessinstansJournalføringNySak(any(JournalfoeringOpprettDto.class), any(ProsessType.class),
-            eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class));
+            eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class), eq("AB:123"));
     }
 
     @Test
@@ -213,7 +212,7 @@ class JournalfoeringServiceTest {
 
 
         verify(prosessinstansService).opprettProsessinstansJournalføringNySak(opprettDto, JFR_NY_SAK_BRUKER,
-            true, LocalDate.EPOCH, SØKNAD);
+            true, LocalDate.EPOCH, SØKNAD, null);
     }
 
     @Test
@@ -263,7 +262,7 @@ class JournalfoeringServiceTest {
 
 
         verify(prosessinstansService).opprettProsessinstansJournalføringNySak(opprettDto, JFR_NY_SAK_BRUKER,
-            true, LocalDate.EPOCH, SØKNAD);
+            true, LocalDate.EPOCH, SØKNAD, null);
     }
 
     @Test
@@ -275,11 +274,12 @@ class JournalfoeringServiceTest {
         opprettDto.setBehandlingstemaKode(FORESPØRSEL_TRYGDEMYNDIGHET.getKode());
         opprettDto.setBrukerID("1234");
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+        when(utenlandskMyndighetService.finnInstitusjonID(anyString())).thenReturn(Optional.of("AB:123"));
 
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
         verify(prosessinstansService).opprettProsessinstansJournalføringNySak(any(JournalfoeringOpprettDto.class), any(ProsessType.class),
-            eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class));
+            eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class), eq("AB:123"));
     }
 
     @Test
@@ -288,11 +288,12 @@ class JournalfoeringServiceTest {
         opprettDto.setFagsak(fagsakDto);
         opprettDto.setBehandlingstemaKode(Behandlingstema.IKKE_YRKESAKTIV.getKode());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+        when(utenlandskMyndighetService.finnInstitusjonID(anyString())).thenReturn(Optional.of("AB:123"));
 
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
         verify(prosessinstansService).opprettProsessinstansJournalføringNySak(any(JournalfoeringOpprettDto.class), any(ProsessType.class),
-            eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class));
+            eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class), eq("AB:123"));
     }
 
     @Test
@@ -301,11 +302,12 @@ class JournalfoeringServiceTest {
         opprettDto.setFagsak(fagsakDto);
         opprettDto.setBehandlingstemaKode(Behandlingstema.YRKESAKTIV.getKode());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+        when(utenlandskMyndighetService.finnInstitusjonID(anyString())).thenReturn(Optional.of("AB:123"));
 
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
         verify(prosessinstansService).opprettProsessinstansJournalføringNySak(any(JournalfoeringOpprettDto.class), any(ProsessType.class),
-            eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class));
+            eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class), eq("AB:123"));
     }
 
     @Test
@@ -335,11 +337,12 @@ class JournalfoeringServiceTest {
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, null, "DK", Sakstyper.EU_EOS);
         opprettDto.setFagsak(fagsakDto);
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+        when(utenlandskMyndighetService.finnInstitusjonID(anyString())).thenReturn(Optional.of("AB:123"));
 
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
         verify(prosessinstansService).opprettProsessinstansJournalføringNySak(opprettDto, JFR_NY_SAK_BRUKER,
-            true, LocalDate.EPOCH, SØKNAD);
+            true, LocalDate.EPOCH, SØKNAD, "AB:123");
     }
 
     @Test
@@ -362,13 +365,14 @@ class JournalfoeringServiceTest {
         opprettDto.setBehandlingstemaKode(Behandlingstema.YRKESAKTIV.getKode());
 
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+        when(utenlandskMyndighetService.finnInstitusjonID(anyString())).thenReturn(Optional.of("AB:123"));
 
 
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
 
         verify(prosessinstansService).opprettProsessinstansJournalføringNySak(any(JournalfoeringOpprettDto.class), any(ProsessType.class),
-            eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class));
+            eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class), eq("AB:123"));
     }
 
     @Test
@@ -506,10 +510,11 @@ class JournalfoeringServiceTest {
 
         when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
         when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
+        when(utenlandskMyndighetService.finnInstitusjonID(anyString())).thenReturn(Optional.of("AB:123"));
 
         journalfoeringService.journalførOgKnyttTilEksisterendeSak(tilordneDto);
 
-        verify(prosessinstansService).opprettProsessinstansJournalføringKnyttTilEksisterende(any(JournalfoeringTilordneDto.class), any(String.class), any(Fagsak.class));
+        verify(prosessinstansService).opprettProsessinstansJournalføringKnyttTilEksisterende(tilordneDto, tilordneDto.getSaksnummer(), fagsak, "AB:123");
     }
 
     @Test
@@ -527,7 +532,7 @@ class JournalfoeringServiceTest {
 
         journalfoeringService.journalførOgKnyttTilEksisterendeSak(tilordneDto);
 
-        prosessinstansService.opprettProsessinstansJournalføringKnyttTilEksisterende(tilordneDto, MELOSYS_SAKSNUMMER, fagsak);
+        prosessinstansService.opprettProsessinstansJournalføringKnyttTilEksisterende(tilordneDto, MELOSYS_SAKSNUMMER, fagsak, null);
     }
 
     @Test
@@ -593,7 +598,7 @@ class JournalfoeringServiceTest {
 
         journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto);
 
-        verify(prosessinstansService).journalførOgOpprettAndregangsBehandling(JFR_ANDREGANG_NY_BEHANDLING, BESLUTNING_LOVVALG_NORGE, NY_VURDERING, tilordneDto, ANNET, LocalDate.EPOCH);
+        verify(prosessinstansService).journalførOgOpprettAndregangsBehandling(JFR_ANDREGANG_NY_BEHANDLING, BESLUTNING_LOVVALG_NORGE, NY_VURDERING, tilordneDto, ANNET, LocalDate.EPOCH, null);
     }
 
     @Test
@@ -616,7 +621,7 @@ class JournalfoeringServiceTest {
 
         journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto);
 
-        verify(prosessinstansService).journalførOgOpprettAndregangsBehandling(JFR_ANDREGANG_NY_BEHANDLING, FORESPØRSEL_TRYGDEMYNDIGHET, Behandlingstyper.HENVENDELSE, tilordneDto, Behandlingsaarsaktyper.HENVENDELSE, LocalDate.EPOCH);
+        verify(prosessinstansService).journalførOgOpprettAndregangsBehandling(JFR_ANDREGANG_NY_BEHANDLING, FORESPØRSEL_TRYGDEMYNDIGHET, Behandlingstyper.HENVENDELSE, tilordneDto, Behandlingsaarsaktyper.HENVENDELSE, LocalDate.EPOCH, null);
     }
 
     @Test
@@ -646,7 +651,7 @@ class JournalfoeringServiceTest {
         journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto);
 
 
-        prosessinstansService.journalførOgOpprettAndregangsBehandling(JFR_ANDREGANG_REPLIKER_BEHANDLING, UTSENDT_ARBEIDSTAKER, NY_VURDERING, tilordneDto, SØKNAD, LocalDate.EPOCH);
+        prosessinstansService.journalførOgOpprettAndregangsBehandling(JFR_ANDREGANG_REPLIKER_BEHANDLING, UTSENDT_ARBEIDSTAKER, NY_VURDERING, tilordneDto, SØKNAD, LocalDate.EPOCH, null);
     }
 
     @Test
