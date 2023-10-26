@@ -1,9 +1,6 @@
 package no.nav.melosys.service.saksflyt;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.*;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -23,6 +20,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.saksflytapi.ProsessinstansForServiceRepository;
+import no.nav.melosys.saksflytapi.ProsessinstansOpprettetEvent;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.ProsessStatus;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
@@ -33,7 +32,6 @@ import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.sak.OpprettSakDto;
-import no.nav.melosys.service.soknad.SoknadMottatt;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.jeasy.random.EasyRandom;
@@ -686,36 +684,25 @@ class ProsessinstansServiceTest {
 
     @Test
     void opprettProsessinstansSøknadMottatt_finnesIkkeFraFør_oppretterProsessinstans() {
-        SoknadMottatt søknadMottatt = new SoknadMottatt("søknadID", ZonedDateTime.now());
-
-
-        prosessinstansService.opprettProsessinstansSøknadMottatt(søknadMottatt, false);
-
+        prosessinstansService.opprettProsessinstansSøknadMottatt("søknadID", false, false);
 
         verify(prosessinstansRepo).save(piCaptor.capture());
         Prosessinstans prosessinstans = piCaptor.getValue();
         assertThat(prosessinstans.getType()).isEqualTo(ProsessType.MOTTAK_SOKNAD_ALTINN);
-        assertThat(prosessinstans.getData(ProsessDataKey.MOTTATT_SOKNAD_ID)).isEqualTo(søknadMottatt.getSoknadID());
+        assertThat(prosessinstans.getData(ProsessDataKey.MOTTATT_SOKNAD_ID)).isEqualTo("søknadID");
         assertThat(prosessinstans.getData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class)).isTrue();
     }
 
     @Test
     void opprettProsessinstansSøknadMottatt_finnesFraFør_oppretterIkkeProsessinstans() {
-        SoknadMottatt søknadMottatt = new SoknadMottatt("søknadID", ZonedDateTime.now());
-
-
-        prosessinstansService.opprettProsessinstansSøknadMottatt(søknadMottatt, true);
-
+        prosessinstansService.opprettProsessinstansSøknadMottatt("søknadID", true, false);
 
         verify(prosessinstansRepo, never()).save(any(Prosessinstans.class));
     }
 
     @Test
     void opprettProsessinstansSøknadMottatt_mottakEldreEnnNoenDager_ikkeSendForvaltningsmelding() {
-        SoknadMottatt søknadMottatt = new SoknadMottatt("søknadID", ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()));
-
-
-        prosessinstansService.opprettProsessinstansSøknadMottatt(søknadMottatt, false);
+        prosessinstansService.opprettProsessinstansSøknadMottatt("søknadID", false, true);
 
 
         verify(prosessinstansRepo).save(piCaptor.capture());

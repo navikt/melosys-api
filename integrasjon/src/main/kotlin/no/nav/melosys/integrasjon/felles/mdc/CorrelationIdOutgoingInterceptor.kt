@@ -1,15 +1,12 @@
 package no.nav.melosys.integrasjon.felles.mdc
 
-import no.nav.melosys.integrasjon.felles.mdc.MDCOperations.Companion.CORRELATION_ID
-import no.nav.melosys.integrasjon.felles.mdc.MDCOperations.Companion.X_CORRELATION_ID
-import no.nav.melosys.integrasjon.felles.mdc.MDCOperations.Companion.getCorrelationId
-import org.slf4j.MDC
+import no.nav.melosys.MDCOperations.Companion.X_CORRELATION_ID
+import no.nav.melosys.MDCOperations.Companion.getCorrelationId
 import org.springframework.http.HttpRequest
 import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.http.client.ClientHttpResponse
 import org.springframework.stereotype.Component
-import java.util.*
 
 /*
 Interceptor for rest kall som bruker RestTemplate og legger på correlationId

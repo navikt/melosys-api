@@ -1,4 +1,4 @@
-package no.nav.melosys.service.saksflyt;
+package no.nav.melosys.saksflytapi;
 
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import org.springframework.context.ApplicationEvent;

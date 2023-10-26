@@ -25,8 +25,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Retryable;
 
-import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.X_CORRELATION_ID;
-import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.getCorrelationId;
+import static no.nav.melosys.MDCOperations.X_CORRELATION_ID;
+import static no.nav.melosys.MDCOperations.getCorrelationId;
 
 @Retryable
 public class SakConsumer implements FeilHandterer, BasicAuthAware {

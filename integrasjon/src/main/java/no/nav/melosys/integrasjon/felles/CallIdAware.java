@@ -1,6 +1,6 @@
 package no.nav.melosys.integrasjon.felles;
 
-import no.nav.melosys.integrasjon.felles.mdc.MDCOperations;
+import no.nav.melosys.MDCOperations;
 
 public interface CallIdAware {
     default String getCallID() {
