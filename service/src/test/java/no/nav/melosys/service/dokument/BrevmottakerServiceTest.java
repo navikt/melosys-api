@@ -38,7 +38,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Collections.emptyList;
-import static no.nav.melosys.domain.brev.NorskMyndighet.SKATTEETATEN;
 import static no.nav.melosys.domain.kodeverk.Mottakerroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.*;
@@ -440,11 +439,13 @@ class BrevmottakerServiceTest {
         assertThat(brevmottakerService.hentMottakerliste(TRYGDEAVTALE_GB, 123))
             .extracting(
                 Mottakerliste::getHovedMottaker,
-                Mottakerliste::getKopiMottakere
+                Mottakerliste::getKopiMottakere,
+                Mottakerliste::getFasteMottakere
             )
             .containsExactly(
                 BRUKER,
-                List.of(ARBEIDSGIVER, UTENLANDSK_TRYGDEMYNDIGHET)
+                List.of(ARBEIDSGIVER, UTENLANDSK_TRYGDEMYNDIGHET),
+                emptyList()
             );
     }
 
@@ -457,11 +458,13 @@ class BrevmottakerServiceTest {
         assertThat(brevmottakerService.hentMottakerliste(TRYGDEAVTALE_GB, 123))
             .extracting(
                 Mottakerliste::getHovedMottaker,
-                Mottakerliste::getKopiMottakere
+                Mottakerliste::getKopiMottakere,
+                Mottakerliste::getFasteMottakere
             )
             .containsExactly(
                 BRUKER,
-                List.of(ARBEIDSGIVER)
+                List.of(ARBEIDSGIVER),
+                emptyList()
             );
     }
 

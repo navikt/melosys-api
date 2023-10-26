@@ -26,9 +26,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.brev.NorskMyndighet.SKATTEETATEN;
 import static no.nav.melosys.domain.kodeverk.Mottakerroller.*;
-import static no.nav.melosys.domain.kodeverk.Mottakerroller.NORSK_MYNDIGHET;
 import static no.nav.melosys.domain.kodeverk.Saksstatuser.MEDLEMSKAP_AVKLART;
 import static no.nav.melosys.domain.kodeverk.Vedtakstyper.FØRSTEGANGSVEDTAK;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL;
