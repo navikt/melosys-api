@@ -15,8 +15,8 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
-import no.nav.melosys.integrasjon.joark.JournalpostOppdatering;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
+import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.sed.EessiService;
@@ -53,6 +53,8 @@ public class JournalfoeringService {
     private final BehandlingService behandlingService;
     private final BehandlingsresultatService behandlingsresultatService;
 
+    private final UtenlandskMyndighetService utenlandskMyndighetService;
+
     public JournalfoeringService(JoarkFasade joarkFasade,
                                  ProsessinstansService prosessinstansService,
                                  EessiService eessiService,
@@ -61,7 +63,7 @@ public class JournalfoeringService {
                                  LovligeKombinasjonerService lovligeKombinasjonerService,
                                  SaksbehandlingRegler saksbehandlingRegler,
                                  BehandlingService behandlingService,
-                                 BehandlingsresultatService behandlingsresultatService) {
+                                 BehandlingsresultatService behandlingsresultatService, UtenlandskMyndighetService utenlandskMyndighetService) {
         this.joarkFasade = joarkFasade;
         this.prosessinstansService = prosessinstansService;
         this.eessiService = eessiService;
@@ -71,6 +73,7 @@ public class JournalfoeringService {
         this.saksbehandlingRegler = saksbehandlingRegler;
         this.behandlingService = behandlingService;
         this.behandlingsresultatService = behandlingsresultatService;
+        this.utenlandskMyndighetService = utenlandskMyndighetService;
     }
 
     public Journalpost hentJournalpost(String journalpostID) {
@@ -126,7 +129,7 @@ public class JournalfoeringService {
         Behandlingsaarsaktyper behandlingsaarsaktyper = utledÅrsaktype(journalpost, sakstema, behandlingstema, behandlingstype);
 
         prosessinstansService.opprettProsessinstansJournalføringNySak(journalfoeringDto, prosessType,
-            skalSetteSøknadslandOgPeriode, mottaksdato, behandlingsaarsaktyper);
+            skalSetteSøknadslandOgPeriode, mottaksdato, behandlingsaarsaktyper, finnInstitusjonIdEllerNull(journalfoeringDto.getAvsenderID()));
 
         log.info("Ny sak bestilt etter journalføring av journalpost {}", journalfoeringDto.getJournalpostID());
     }
@@ -207,13 +210,6 @@ public class JournalfoeringService {
         }
     }
 
-    private void oppdaterOgFerdigstillJournalpost(String saksnummer, Journalpost journalpost) {
-        JournalpostOppdatering journalpostOppdatering = new JournalpostOppdatering.Builder()
-            .medSaksnummer(saksnummer)
-            .build();
-        joarkFasade.oppdaterOgFerdigstillJournalpost(journalpost.getJournalpostId(), journalpostOppdatering);
-    }
-
     @Transactional
     public void journalførOgKnyttTilEksisterendeSak(JournalfoeringTilordneDto journalfoeringDto) {
         var journalpost = joarkFasade.hentJournalpost(journalfoeringDto.getJournalpostID());
@@ -228,8 +224,13 @@ public class JournalfoeringService {
 
         log.info("{} knytter journalpost {} til eksisterende sak {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
 
-        prosessinstansService.opprettProsessinstansJournalføringKnyttTilEksisterende(journalfoeringDto, saksnummer, fagsak);
+        prosessinstansService.opprettProsessinstansJournalføringKnyttTilEksisterende(journalfoeringDto, saksnummer, fagsak, finnInstitusjonIdEllerNull(journalfoeringDto.getAvsenderID()));
     }
+
+    private String finnInstitusjonIdEllerNull(String avsenderID) {
+        return utenlandskMyndighetService.finnInstitusjonID(avsenderID).orElse(null);
+    }
+
 
     @Transactional
     public void journalførOgOpprettAndregangsBehandling(JournalfoeringTilordneDto journalfoeringDto) {
@@ -261,7 +262,9 @@ public class JournalfoeringService {
         ProsessType prosessTypeForAndregangsbehandling = finnProsessTypeForAndregangsbehandling(behandlingstype, behandlingstema, fagsak);
         Behandlingsaarsaktyper behandlingsaarsaktyper = utledÅrsaktype(journalpost, fagsak.getTema(), behandlingstema, behandlingstype);
         LocalDate mottaksdato = utledMottaksdato(journalfoeringDto.getMottattDato(), journalpost);
-        prosessinstansService.journalførOgOpprettAndregangsBehandling(prosessTypeForAndregangsbehandling, behandlingstema, behandlingstype, journalfoeringDto, behandlingsaarsaktyper, mottaksdato);
+
+        prosessinstansService.journalførOgOpprettAndregangsBehandling(prosessTypeForAndregangsbehandling, behandlingstema, behandlingstype, journalfoeringDto,
+            behandlingsaarsaktyper, mottaksdato, finnInstitusjonIdEllerNull(journalfoeringDto.getAvsenderID()));
     }
 
     private static LocalDate utledMottaksdato(LocalDate datoFraSaksbehandler, Journalpost journalpost) {

@@ -28,12 +28,10 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.saksflytapi.ProsessinstansForServiceRepository;
 import no.nav.melosys.saksflytapi.domain.*;
-import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
-import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.soknad.SoknadMottatt;
 import no.nav.melosys.service.vedtak.FattVedtakRequest;
@@ -57,19 +55,13 @@ public class ProsessinstansService {
 
     private final ApplicationEventPublisher applicationEventPublisher;
     private final ProsessinstansForServiceRepository prosessinstansRepo;
-    private final UtenlandskMyndighetService utenlandskMyndighetService;
-    private final MottatteOpplysningerService mottatteOpplysningerService;
 
     private final Counter prosessinstanserOpprettet = Metrics.counter(MetrikkerNavn.PROSESSINSTANSER_OPPRETTET);
 
     public ProsessinstansService(ApplicationEventPublisher applicationEventPublisher,
-                                 ProsessinstansForServiceRepository prosessinstansRepo,
-                                 UtenlandskMyndighetService utenlandskMyndighetService,
-                                 MottatteOpplysningerService mottatteOpplysningerService) {
+                                 ProsessinstansForServiceRepository prosessinstansRepo) {
         this.applicationEventPublisher = applicationEventPublisher;
         this.prosessinstansRepo = prosessinstansRepo;
-        this.utenlandskMyndighetService = utenlandskMyndighetService;
-        this.mottatteOpplysningerService = mottatteOpplysningerService;
     }
 
     public void opprettNySakOgBehandling(OpprettSakDto opprettSakDto) {
@@ -124,7 +116,7 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public Prosessinstans lagJournalføringProsessinstans(ProsessType type, JournalfoeringDto journalfoeringDto) {
+    Prosessinstans lagJournalføringProsessinstans(ProsessType type, JournalfoeringDto journalfoeringDto, String institusjonId) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(type);
 
@@ -136,7 +128,7 @@ public class ProsessinstansService {
 
         prosessinstans.setData(ProsessDataKey.AVSENDER_TYPE, journalfoeringDto.getAvsenderType());
         if (journalfoeringDto.getAvsenderType() == Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET) {
-            prosessinstans.setData(ProsessDataKey.AVSENDER_ID, finnInstitusjonIdEllerNull(journalfoeringDto.getAvsenderID()));
+            prosessinstans.setData(ProsessDataKey.AVSENDER_ID, institusjonId);
             prosessinstans.setData(ProsessDataKey.AVSENDER_LAND, journalfoeringDto.getAvsenderID());
         } else {
             prosessinstans.setData(ProsessDataKey.AVSENDER_ID, journalfoeringDto.getAvsenderID());
@@ -162,8 +154,8 @@ public class ProsessinstansService {
         return prosessinstans;
     }
 
-    public void opprettProsessinstansJournalføringKnyttTilEksisterende(JournalfoeringTilordneDto journalfoeringDto, String saksnummer, Fagsak fagsak) {
-        Prosessinstans prosessinstans = lagJournalføringProsessinstans(ProsessType.JFR_KNYTT, journalfoeringDto);
+    public void opprettProsessinstansJournalføringKnyttTilEksisterende(JournalfoeringTilordneDto journalfoeringDto, String saksnummer, Fagsak fagsak, String institusjonId) {
+        Prosessinstans prosessinstans = lagJournalføringProsessinstans(ProsessType.JFR_KNYTT, journalfoeringDto, institusjonId);
         prosessinstans.setBehandling(fagsak.hentSistAktivBehandling());
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, saksnummer);
         prosessinstans.setData(ProsessDataKey.JFR_INGEN_VURDERING, journalfoeringDto.isIngenVurdering());
@@ -172,9 +164,9 @@ public class ProsessinstansService {
     }
 
     public void journalførOgOpprettAndregangsBehandling(ProsessType prosessTypeForAndregangsbehandling, Behandlingstema behandlingstema, Behandlingstyper behandlingstype,
-                                                        JournalfoeringTilordneDto journalfoeringDto, Behandlingsaarsaktyper behandlingsaarsaktyper, LocalDate mottaksdato) {
+                                                        JournalfoeringTilordneDto journalfoeringDto, Behandlingsaarsaktyper behandlingsaarsaktyper, LocalDate mottaksdato, String institusjonId) {
 
-        Prosessinstans prosessinstans = lagJournalføringProsessinstans(prosessTypeForAndregangsbehandling, journalfoeringDto);
+        Prosessinstans prosessinstans = lagJournalføringProsessinstans(prosessTypeForAndregangsbehandling, journalfoeringDto, institusjonId);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, behandlingstema);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, behandlingstype);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, behandlingsaarsaktyper);
@@ -185,9 +177,9 @@ public class ProsessinstansService {
     }
 
     public void opprettProsessinstansJournalføringNySak(JournalfoeringOpprettDto journalfoeringDto, ProsessType prosessType,
-                                                        boolean skalSetteSøknadslandOgPeriode, LocalDate mottaksdato, Behandlingsaarsaktyper behandlingsaarsaktyper) {
+                                                        boolean skalSetteSøknadslandOgPeriode, LocalDate mottaksdato, Behandlingsaarsaktyper behandlingsaarsaktyper, String institusjonId) {
 
-        Prosessinstans prosessinstans = lagJournalføringProsessinstans(prosessType, journalfoeringDto);
+        Prosessinstans prosessinstans = lagJournalføringProsessinstans(prosessType, journalfoeringDto, institusjonId);
         prosessinstans.setData(ProsessDataKey.SAKSTYPE, Sakstyper.valueOf(journalfoeringDto.getFagsak().getSakstype()));
         prosessinstans.setData(ProsessDataKey.SAKSTEMA, Sakstemaer.valueOf(journalfoeringDto.getFagsak().getSakstema()));
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode()));
@@ -219,10 +211,6 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-
-    private String finnInstitusjonIdEllerNull(String avsenderID) {
-        return utenlandskMyndighetService.finnInstitusjonID(avsenderID).orElse(null);
-    }
 
     private static boolean skalSendesForvaltningsmelding(JournalfoeringDto journalfoeringDto) {
         return journalfoeringDto.isIkkeSendForvaltingsmelding() != null && !journalfoeringDto.isIkkeSendForvaltingsmelding();
@@ -547,8 +535,8 @@ public class ProsessinstansService {
     }
 
     @Transactional
-    public void opprettProsessinstansSøknadMottatt(SoknadMottatt søknadMottatt) {
-        if (mottatteOpplysningerService.harMottattSøknadMedEksternReferanseID(søknadMottatt.getSoknadID())) {
+    public void opprettProsessinstansSøknadMottatt(SoknadMottatt søknadMottatt, boolean erSøknadMottatTidligere) {
+        if (erSøknadMottatTidligere) {
             logger.warn("Søknad med søknadID {} har vært mottatt tidligere.", søknadMottatt.getSoknadID());
         } else {
             Prosessinstans prosessinstans = new ProsessinstansBuilder()

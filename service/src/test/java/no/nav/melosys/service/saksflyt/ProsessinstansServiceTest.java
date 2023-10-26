@@ -27,13 +27,11 @@ import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.ProsessStatus;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
-import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
-import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.soknad.SoknadMottatt;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
@@ -60,10 +58,6 @@ class ProsessinstansServiceTest {
     private ApplicationEventPublisher applicationEventPublisher;
     @Mock
     private ProsessinstansForServiceRepository prosessinstansRepo;
-    @Mock
-    private UtenlandskMyndighetService utenlandskMyndighetService;
-    @Mock
-    private MottatteOpplysningerService mottatteOpplysningerService;
 
     @Captor
     private ArgumentCaptor<Prosessinstans> piCaptor;
@@ -73,7 +67,7 @@ class ProsessinstansServiceTest {
     @BeforeEach
     public void setUp() {
         prosessinstansService = new ProsessinstansService(applicationEventPublisher,
-            prosessinstansRepo, utenlandskMyndighetService, mottatteOpplysningerService);
+            prosessinstansRepo);
     }
 
     @Test
@@ -343,10 +337,9 @@ class ProsessinstansServiceTest {
         journalfoeringDto.setAvsenderType(Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET);
         journalfoeringDto.setAvsenderID("DK");
         final String institusjonsIdForDk = "ID_FOR_DK";
-        when(utenlandskMyndighetService.finnInstitusjonID(journalfoeringDto.getAvsenderID())).thenReturn(Optional.of(institusjonsIdForDk));
 
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringDto);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringDto, institusjonsIdForDk);
 
 
         assertThat(prosessinstans.getData(ProsessDataKey.AVSENDER_ID)).isEqualTo(institusjonsIdForDk);
@@ -358,7 +351,7 @@ class ProsessinstansServiceTest {
 
         journalfoeringDto.setIkkeSendForvaltingsmelding(false);
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto, null);
 
         assertThat(prosessinstans.getData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class)).isTrue();
     }
@@ -370,7 +363,7 @@ class ProsessinstansServiceTest {
         journalfoeringDto.setIkkeSendForvaltingsmelding(true);
 
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto, null);
 
 
         assertThat(prosessinstans.getData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class)).isFalse();
@@ -383,7 +376,7 @@ class ProsessinstansServiceTest {
         journalfoeringDto.setBrukerID(null);
         journalfoeringDto.setVirksomhetOrgnr("orgnr");
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto, null);
 
         assertThat(prosessinstans.getData(ProsessDataKey.VIRKSOMHET_ORGNR)).isEqualTo("orgnr");
     }
@@ -396,7 +389,7 @@ class ProsessinstansServiceTest {
         journalfoeringDto.setSkalTilordnes(true);
 
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto, null);
 
 
         assertThat(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).isTrue();
@@ -408,7 +401,7 @@ class ProsessinstansServiceTest {
         journalfoeringDto.setSkalTilordnes(false);
 
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto, null);
 
 
         assertThat(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).isFalse();
@@ -427,7 +420,7 @@ class ProsessinstansServiceTest {
         journalfoeringDto.getHoveddokument().getLogiskeVedlegg().add("tittel");
 
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringDto);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringDto, null);
 
 
         var fysiskeVedleggTypeReference = new TypeReference<Map<String, String>>() {
@@ -453,7 +446,7 @@ class ProsessinstansServiceTest {
         journalfoeringDto.setVedlegg(vedlegg);
 
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringDto);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringDto, null);
 
 
         var fysiskeVedleggTypeReference = new TypeReference<Map<String, String>>() {
@@ -696,7 +689,7 @@ class ProsessinstansServiceTest {
         SoknadMottatt søknadMottatt = new SoknadMottatt("søknadID", ZonedDateTime.now());
 
 
-        prosessinstansService.opprettProsessinstansSøknadMottatt(søknadMottatt);
+        prosessinstansService.opprettProsessinstansSøknadMottatt(søknadMottatt, false);
 
 
         verify(prosessinstansRepo).save(piCaptor.capture());
@@ -709,10 +702,9 @@ class ProsessinstansServiceTest {
     @Test
     void opprettProsessinstansSøknadMottatt_finnesFraFør_oppretterIkkeProsessinstans() {
         SoknadMottatt søknadMottatt = new SoknadMottatt("søknadID", ZonedDateTime.now());
-        when(mottatteOpplysningerService.harMottattSøknadMedEksternReferanseID(søknadMottatt.getSoknadID())).thenReturn(true);
 
 
-        prosessinstansService.opprettProsessinstansSøknadMottatt(søknadMottatt);
+        prosessinstansService.opprettProsessinstansSøknadMottatt(søknadMottatt, true);
 
 
         verify(prosessinstansRepo, never()).save(any(Prosessinstans.class));
@@ -723,7 +715,7 @@ class ProsessinstansServiceTest {
         SoknadMottatt søknadMottatt = new SoknadMottatt("søknadID", ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()));
 
 
-        prosessinstansService.opprettProsessinstansSøknadMottatt(søknadMottatt);
+        prosessinstansService.opprettProsessinstansSøknadMottatt(søknadMottatt, false);
 
 
         verify(prosessinstansRepo).save(piCaptor.capture());

@@ -1,5 +1,6 @@
 package no.nav.melosys.service.soknad;
 
+import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
@@ -15,8 +16,11 @@ public class SoknadMottattConsumer {
 
     private final ProsessinstansService prosessinstansService;
 
-    public SoknadMottattConsumer(ProsessinstansService prosessinstansService) {
+    private final MottatteOpplysningerService mottatteOpplysningerService;
+
+    public SoknadMottattConsumer(ProsessinstansService prosessinstansService, MottatteOpplysningerService mottatteOpplysningerService) {
         this.prosessinstansService = prosessinstansService;
+        this.mottatteOpplysningerService = mottatteOpplysningerService;
     }
 
     @KafkaListener(clientIdPrefix = "melosys-soknad-mottak-consumer", topics = "${kafka.aiven.soknad-mottak.topic}",
@@ -25,8 +29,9 @@ public class SoknadMottattConsumer {
         SoknadMottatt melding = consumerRecord.value();
         log.info("Mottatt ny melding fra altinn via aiven: {}", melding);
 
+        boolean erMottattSøknadTidligere = mottatteOpplysningerService.harMottattSøknadMedEksternReferanseID(melding.getSoknadID());
         try {
-            prosessinstansService.opprettProsessinstansSøknadMottatt(melding);
+            prosessinstansService.opprettProsessinstansSøknadMottatt(melding, erMottattSøknadTidligere);
         } catch (Exception e) {
             log.error("Feil ved mottak av søknad fra altinn via aiven! SoknadID: {} ConsumerRecord.key: {}",
                 consumerRecord.value().getSoknadID(), consumerRecord.key(), e);
