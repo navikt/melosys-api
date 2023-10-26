@@ -35,16 +35,11 @@ class InnvilgelseFtrl(
     val arbeidsgivere: List<String>,
     val arbeidsland: String?,
     val trygdeavtaleMedArbeidsland: Boolean,
-    val arbeidsgiverFullmektigNavn: String?,
-    val brukerHarFullmektig: Boolean,
     val betalerArbeidsgiveravgift: Boolean
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     class Builder(val brevbestilling: InnvilgelseFtrlBrevbestilling) {
         private val datoMottatt = instantTilLocalDate(brevbestilling.forsendelseMottatt)
-        private val brukerHarFullmektig =
-            brevbestilling.behandling.fagsak.finnRepresentantEllerFullmektig(Representerer.BRUKER).isPresent
-
         private var behandlingstype: Behandlingstyper = Behandlingstyper.FØRSTEGANG
         private var avgiftsperioder: List<AvgiftsperiodeDto> = emptyList()
         private var medlemskapsperioder: List<MedlemskapsperiodeDto> = emptyList()
@@ -61,7 +56,6 @@ class InnvilgelseFtrl(
         private var arbeidsgivere: List<String> = emptyList()
         private var arbeidsland: String? = null
         private var trygdeavtaleMedArbeidsland = false
-        private var arbeidsgiverFullmektigNavn: String? = null
         private var betalerArbeidsgiveravgift = false
 
         fun behandlingstype(behandlingstype: Behandlingstyper): Builder {
@@ -144,11 +138,6 @@ class InnvilgelseFtrl(
             return this
         }
 
-        fun arbeidsgiverFullmektigNavn(arbeidsgiverFullmektigNavn: String?): Builder {
-            this.arbeidsgiverFullmektigNavn = arbeidsgiverFullmektigNavn
-            return this
-        }
-
         fun betalerArbeidsgiveravgift(betalerArbeidsgiveravgift: Boolean): Builder {
             this.betalerArbeidsgiveravgift = betalerArbeidsgiveravgift
             return this
@@ -174,8 +163,6 @@ class InnvilgelseFtrl(
                 arbeidsgivere,
                 arbeidsland,
                 trygdeavtaleMedArbeidsland,
-                arbeidsgiverFullmektigNavn,
-                brukerHarFullmektig,
                 betalerArbeidsgiveravgift,
             )
         }

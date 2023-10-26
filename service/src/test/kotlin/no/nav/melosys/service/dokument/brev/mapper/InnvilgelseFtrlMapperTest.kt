@@ -88,7 +88,6 @@ internal class InnvilgelseFtrlMapperTest {
                 innledningFritekst.shouldBeNull()
                 begrunnelseFritekst.shouldBe(BEGRUNNELSE_FRITEKST)
                 trygdeavgiftFritekst.shouldBe(TRYGDEAVGIFT_FRITEKST)
-                brukerHarFullmektig.shouldBeFalse()
                 avgiftsperioder.shouldHaveSize(2)
                 medlemskapsperioder.shouldHaveSize(1).first().apply {
                     innvilgelsesResultat.shouldBe(InnvilgelsesResultat.INNVILGET)
@@ -100,7 +99,6 @@ internal class InnvilgelseFtrlMapperTest {
                 arbeidsgivere.shouldHaveSize(1).first().shouldBe(ARBEIDSGIVER_NAVN)
                 arbeidsland.shouldBe(Landkoder.AT.beskrivelse)
                 trygdeavtaleMedArbeidsland.shouldBeFalse()
-                arbeidsgiverFullmektigNavn.shouldBeNull()
                 betalerArbeidsgiveravgift.shouldBeTrue()
             }
     }
