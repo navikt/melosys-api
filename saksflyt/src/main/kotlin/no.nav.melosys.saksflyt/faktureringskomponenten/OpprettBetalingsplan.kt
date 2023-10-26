@@ -111,15 +111,12 @@ class OpprettBetalingsplan(
         trygdeavgiftsperioder: List<Trygdeavgiftsperiode>,
         intervall: FaktureringsIntervall
     ): FakturaserieDto {
-        val FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
-
         val fakturaseriePeriodeDtoListe = trygdeavgiftsperioder.map {
             FakturaseriePeriodeDto(
                 it.trygdeavgiftsbeløpMd.verdi,
                 it.periodeFra,
                 it.periodeTil,
-                "Periode: ${it.periodeFra.format(FORMATTER)} - ${it.periodeTil.format(FORMATTER)}, " +
-                    "Inntekt: ${it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi}, " +
+                "Inntekt: ${it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi}, " +
                     "Dekning: ${it.grunnlagMedlemskapsperiode.trygdedekning.beskrivelse}, " +
                     "Sats: ${it.trygdesats} %"
             )

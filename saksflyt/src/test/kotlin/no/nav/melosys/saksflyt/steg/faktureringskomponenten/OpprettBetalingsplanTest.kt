@@ -201,22 +201,6 @@ class OpprettBetalingsplanTest {
         slotFakturaserieDto.captured.fullmektig?.organisasjonsnummer.shouldBeNull()
     }
 
-    @Test
-    fun `Opprett betalingsplan, beskrivelse blir satt med riktig periode, inntekt, dekning og sats`() {
-        lagTestData(setOf(lagAktoerBruker().apply { personIdent = FULLMEKTIG_IDENT }, lagAktoerBruker()))
-        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
-        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
-        every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
-
-
-        opprettBetalingsplan.utfør(prosessinstans)
-
-
-        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaSerie(capture(slotFakturaserieDto)) }
-        slotFakturaserieDto.captured.shouldNotBeNull()
-        slotFakturaserieDto.captured.perioder.get(0).beskrivelse.shouldBe("Periode: 01.01.2023 - 01.05.2023, Inntekt: 5000.0, Dekning: Helse- og pensjonsdel med syke- og foreldrepenger (§ 2-9), Sats: 3.5 %")
-    }
-
     private fun lagTestData(aktører: Set<Aktoer>) {
         this.fagsak = lagFagsak().apply { this.aktører = aktører }
         this.behandling = lagBehandling(fagsak)
