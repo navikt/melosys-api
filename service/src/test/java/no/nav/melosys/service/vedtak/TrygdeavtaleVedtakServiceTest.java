@@ -3,6 +3,7 @@ package no.nav.melosys.service.vedtak;
 import java.util.List;
 import java.util.Set;
 
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
@@ -80,7 +81,8 @@ class TrygdeavtaleVedtakServiceTest {
 
     @BeforeEach
     void setup() {
-        trygdeavtaleVedtakService = new TrygdeavtaleVedtakService(behandlingsresultatService, behandlingService, prosessinstansService, oppgaveService, dokgenService, ferdigbehandlingKontrollFacade, saksbehandlingRegler);
+        trygdeavtaleVedtakService = new TrygdeavtaleVedtakService(behandlingsresultatService, behandlingService, prosessinstansService,
+            oppgaveService, dokgenService, ferdigbehandlingKontrollFacade, saksbehandlingRegler);
 
         SpringSubjectHandler.set(new TestSubjectHandler());
     }

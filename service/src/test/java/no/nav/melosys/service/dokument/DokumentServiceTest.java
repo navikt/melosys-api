@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument;
 import java.time.LocalDate;
 import java.util.*;
 
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
@@ -91,6 +92,7 @@ final class DokumentServiceTest {
     private final DoksysFasade dokSysFasade;
     private final DokumentService dokumentService;
     private final BehandlingsresultatService behandlingsresultatService;
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     @BeforeEach
     void setUp() {
@@ -102,6 +104,7 @@ final class DokumentServiceTest {
         dokSysFasade = mock(DoksysFasade.class);
         behandlingsresultatService = mock(BehandlingsresultatService.class);
         dokumentService = lagDokumentService(null);
+        fakeUnleash.enableAll();
     }
 
     @BeforeEach
@@ -247,7 +250,8 @@ final class DokumentServiceTest {
             avklarteVirksomheterService,
             mock(UtenlandskMyndighetService.class),
             behandlingsresultatService,
-            mock(LovvalgsperiodeService.class));
+            mock(LovvalgsperiodeService.class),
+            fakeUnleash);
         return new DokumentService(
             behandlingService,
             brevDataService,

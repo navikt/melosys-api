@@ -26,8 +26,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.domain.kodeverk.Mottakerroller.ARBEIDSGIVER;
-import static no.nav.melosys.domain.kodeverk.Mottakerroller.BRUKER;
+import static no.nav.melosys.domain.kodeverk.Mottakerroller.*;
 import static no.nav.melosys.domain.kodeverk.Saksstatuser.MEDLEMSKAP_AVKLART;
 import static no.nav.melosys.domain.kodeverk.Vedtakstyper.FØRSTEGANGSVEDTAK;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL;
@@ -116,8 +115,9 @@ class FtrlVedtakServiceTest {
             )
             .containsExactly(INNVILGELSE_FOLKETRYGDLOVEN, "Z990007", BRUKER, "Innledning",
                 "Begrunnelse", "Ektefelle omfattet", "Barn omfattet");
-        assertThat(brevbestillingDto.getKopiMottakere()).hasSize(1);
+        assertThat(brevbestillingDto.getKopiMottakere()).hasSize(2);
         assertThat(brevbestillingDto.getKopiMottakere().get(0).rolle()).isEqualTo(ARBEIDSGIVER);
+        assertThat(brevbestillingDto.getKopiMottakere().get(1).rolle()).isEqualTo(UTENLANDSK_TRYGDEMYNDIGHET);
     }
 
     @Test
@@ -166,7 +166,10 @@ class FtrlVedtakServiceTest {
             .medBegrunnelseFritekst("Begrunnelse")
             .medEktefelleFritekst("Ektefelle omfattet")
             .medBarnFritekst("Barn omfattet")
-            .medKopiMottakere(List.of(new KopiMottakerDto(Mottakerroller.ARBEIDSGIVER, "987654321", null, null)))
+            .medKopiMottakere(List.of(
+                new KopiMottakerDto(ARBEIDSGIVER, "987654321", null, null),
+                new KopiMottakerDto(UTENLANDSK_TRYGDEMYNDIGHET, null, null, "GB:UK010")
+            ))
             .medBestillersId(SubjectHandler.getInstance().getUserID())
             .build();
     }
