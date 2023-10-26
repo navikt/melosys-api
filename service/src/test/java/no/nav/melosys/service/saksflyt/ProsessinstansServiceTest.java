@@ -32,7 +32,6 @@ import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
-import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.soknad.SoknadMottatt;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
@@ -59,8 +58,6 @@ class ProsessinstansServiceTest {
     private ApplicationEventPublisher applicationEventPublisher;
     @Mock
     private ProsessinstansForServiceRepository prosessinstansRepo;
-    @Mock
-    private MottatteOpplysningerService mottatteOpplysningerService;
 
     @Captor
     private ArgumentCaptor<Prosessinstans> piCaptor;
@@ -70,7 +67,7 @@ class ProsessinstansServiceTest {
     @BeforeEach
     public void setUp() {
         prosessinstansService = new ProsessinstansService(applicationEventPublisher,
-            prosessinstansRepo, mottatteOpplysningerService);
+            prosessinstansRepo);
     }
 
     @Test
@@ -692,7 +689,7 @@ class ProsessinstansServiceTest {
         SoknadMottatt søknadMottatt = new SoknadMottatt("søknadID", ZonedDateTime.now());
 
 
-        prosessinstansService.opprettProsessinstansSøknadMottatt(søknadMottatt);
+        prosessinstansService.opprettProsessinstansSøknadMottatt(søknadMottatt, false);
 
 
         verify(prosessinstansRepo).save(piCaptor.capture());
@@ -705,10 +702,9 @@ class ProsessinstansServiceTest {
     @Test
     void opprettProsessinstansSøknadMottatt_finnesFraFør_oppretterIkkeProsessinstans() {
         SoknadMottatt søknadMottatt = new SoknadMottatt("søknadID", ZonedDateTime.now());
-        when(mottatteOpplysningerService.harMottattSøknadMedEksternReferanseID(søknadMottatt.getSoknadID())).thenReturn(true);
 
 
-        prosessinstansService.opprettProsessinstansSøknadMottatt(søknadMottatt);
+        prosessinstansService.opprettProsessinstansSøknadMottatt(søknadMottatt, true);
 
 
         verify(prosessinstansRepo, never()).save(any(Prosessinstans.class));
@@ -719,7 +715,7 @@ class ProsessinstansServiceTest {
         SoknadMottatt søknadMottatt = new SoknadMottatt("søknadID", ZonedDateTime.of(LocalDateTime.MIN, ZoneId.systemDefault()));
 
 
-        prosessinstansService.opprettProsessinstansSøknadMottatt(søknadMottatt);
+        prosessinstansService.opprettProsessinstansSøknadMottatt(søknadMottatt, false);
 
 
         verify(prosessinstansRepo).save(piCaptor.capture());

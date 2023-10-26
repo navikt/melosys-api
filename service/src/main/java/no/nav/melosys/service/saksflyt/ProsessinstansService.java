@@ -32,7 +32,6 @@ import no.nav.melosys.service.journalforing.dto.DokumentDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
 import no.nav.melosys.service.journalforing.dto.JournalfoeringTilordneDto;
-import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
 import no.nav.melosys.service.sak.OpprettSakDto;
 import no.nav.melosys.service.soknad.SoknadMottatt;
 import no.nav.melosys.service.vedtak.FattVedtakRequest;
@@ -56,16 +55,13 @@ public class ProsessinstansService {
 
     private final ApplicationEventPublisher applicationEventPublisher;
     private final ProsessinstansForServiceRepository prosessinstansRepo;
-    private final MottatteOpplysningerService mottatteOpplysningerService;
 
     private final Counter prosessinstanserOpprettet = Metrics.counter(MetrikkerNavn.PROSESSINSTANSER_OPPRETTET);
 
     public ProsessinstansService(ApplicationEventPublisher applicationEventPublisher,
-                                 ProsessinstansForServiceRepository prosessinstansRepo,
-                                 MottatteOpplysningerService mottatteOpplysningerService) {
+                                 ProsessinstansForServiceRepository prosessinstansRepo) {
         this.applicationEventPublisher = applicationEventPublisher;
         this.prosessinstansRepo = prosessinstansRepo;
-        this.mottatteOpplysningerService = mottatteOpplysningerService;
     }
 
     public void opprettNySakOgBehandling(OpprettSakDto opprettSakDto) {
@@ -539,8 +535,8 @@ public class ProsessinstansService {
     }
 
     @Transactional
-    public void opprettProsessinstansSøknadMottatt(SoknadMottatt søknadMottatt) {
-        if (mottatteOpplysningerService.harMottattSøknadMedEksternReferanseID(søknadMottatt.getSoknadID())) {
+    public void opprettProsessinstansSøknadMottatt(SoknadMottatt søknadMottatt, boolean erSøknadMottatTidligere) {
+        if (erSøknadMottatTidligere) {
             logger.warn("Søknad med søknadID {} har vært mottatt tidligere.", søknadMottatt.getSoknadID());
         } else {
             Prosessinstans prosessinstans = new ProsessinstansBuilder()
