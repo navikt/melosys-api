@@ -6,6 +6,7 @@ import java.util.Set;
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall;
+import no.nav.melosys.saksflytapi.journalfoering.VedtakRequest;
 import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
 
 public class FattVedtakRequest {
@@ -101,6 +102,26 @@ public class FattVedtakRequest {
 
     public Vedtakstyper getVedtakstype() {
         return vedtakstype;
+    }
+
+    public VedtakRequest tilVedtakRequest() {
+        new VedtakRequest(
+            behandlingsresultatTypeKode,
+            vedtakstype,
+            fritekst,
+            fritekstSed,
+            mottakerinstitusjoner,
+            innledningFritekst,
+            begrunnelseFritekst,
+            ektefelleFritekst,
+            barnFritekst,
+            trygdeavgiftFritekst,
+            kopiMottakere, // TODO: lag mapper på kopiMottakere
+            kopiTilArbeidsgiver,
+            bestillersId,
+            nyVurderingBakgrunn,
+            betalingsintervall // TODO: lag mapper KopiMottaker
+        )
     }
 
     public static class Builder {

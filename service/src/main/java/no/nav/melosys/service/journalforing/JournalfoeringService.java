@@ -128,7 +128,7 @@ public class JournalfoeringService {
         LocalDate mottaksdato = utledMottaksdato(journalfoeringDto.getMottattDato(), journalpost);
         Behandlingsaarsaktyper behandlingsaarsaktyper = utledÅrsaktype(journalpost, sakstema, behandlingstema, behandlingstype);
 
-        prosessinstansService.opprettProsessinstansJournalføringNySak(journalfoeringDto, prosessType,
+        prosessinstansService.opprettProsessinstansJournalføringNySak(journalfoeringDto.tilJournalfoeringOpprettRequest(), prosessType,
             skalSetteSøknadslandOgPeriode, mottaksdato, behandlingsaarsaktyper, finnInstitusjonIdEllerNull(journalfoeringDto.getAvsenderID()));
 
         log.info("Ny sak bestilt etter journalføring av journalpost {}", journalfoeringDto.getJournalpostID());
@@ -224,7 +224,7 @@ public class JournalfoeringService {
 
         log.info("{} knytter journalpost {} til eksisterende sak {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
 
-        prosessinstansService.opprettProsessinstansJournalføringKnyttTilEksisterende(journalfoeringDto, saksnummer, fagsak, finnInstitusjonIdEllerNull(journalfoeringDto.getAvsenderID()));
+        prosessinstansService.opprettProsessinstansJournalføringKnyttTilEksisterende(journalfoeringDto.tilJournalfoeringTilordneRequest(), saksnummer, fagsak, finnInstitusjonIdEllerNull(journalfoeringDto.getAvsenderID()));
     }
 
     private String finnInstitusjonIdEllerNull(String avsenderID) {
@@ -263,7 +263,7 @@ public class JournalfoeringService {
         Behandlingsaarsaktyper behandlingsaarsaktyper = utledÅrsaktype(journalpost, fagsak.getTema(), behandlingstema, behandlingstype);
         LocalDate mottaksdato = utledMottaksdato(journalfoeringDto.getMottattDato(), journalpost);
 
-        prosessinstansService.journalførOgOpprettAndregangsBehandling(prosessTypeForAndregangsbehandling, behandlingstema, behandlingstype, journalfoeringDto,
+        prosessinstansService.journalførOgOpprettAndregangsBehandling(prosessTypeForAndregangsbehandling, behandlingstema, behandlingstype, journalfoeringDto.tilJournalfoeringTilordneRequest(),
             behandlingsaarsaktyper, mottaksdato, finnInstitusjonIdEllerNull(journalfoeringDto.getAvsenderID()));
     }
 

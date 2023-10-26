@@ -53,9 +53,9 @@ public class OpprettBehandlingForSak {
         }
 
         if (saksbehandlingRegler.skalTidligereBehandlingReplikeres(fagsak, behandlingstype, behandlingstema)) {
-            prosessinstansService.opprettOgReplikerBehandlingForSak(saksnummer, opprettSakDto);
+            prosessinstansService.opprettOgReplikerBehandlingForSak(saksnummer, opprettSakDto.tilOpprettSakRequest());
         } else {
-            prosessinstansService.opprettNyBehandlingForSak(saksnummer, opprettSakDto);
+            prosessinstansService.opprettNyBehandlingForSak(saksnummer, opprettSakDto.tilOpprettSakRequest());
         }
     }
 

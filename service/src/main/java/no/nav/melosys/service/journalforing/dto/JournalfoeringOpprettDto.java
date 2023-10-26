@@ -1,9 +1,14 @@
 package no.nav.melosys.service.journalforing.dto;
 
 
-import no.nav.melosys.domain.kodeverk.Fullmaktstype;
-
 import java.util.List;
+
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
+import no.nav.melosys.saksflytapi.journalfoering.Fagsak;
+import no.nav.melosys.saksflytapi.journalfoering.JournalfoeringOpprettRequest;
+import no.nav.melosys.saksflytapi.journalfoering.Periode;
+import no.nav.melosys.saksflytapi.journalfoering.Soeknadsland;
+import no.nav.melosys.service.felles.dto.SoeknadslandDto;
 
 public class JournalfoeringOpprettDto extends JournalfoeringDto {
     private FagsakDto fagsak;
@@ -90,5 +95,44 @@ public class JournalfoeringOpprettDto extends JournalfoeringDto {
 
     public void setFullmektigKontaktOrgnr(String fullmektigKontaktOrgnr) {
         this.fullmektigKontaktOrgnr = fullmektigKontaktOrgnr;
+    }
+
+    public JournalfoeringOpprettRequest tilJournalfoeringOpprettRequest() {
+        return new JournalfoeringOpprettRequest(
+            journalpostID,
+            oppgaveID,
+            brukerID,
+            virksomhetOrgnr,
+            avsenderID,
+            avsenderNavn,
+            avsenderType,
+            hoveddokument.tilDokumentRequest(),
+            vedlegg.stream().map(DokumentDto::tilDokumentRequest).toList(),
+            skalTilordnes,
+            mottattDato,
+            ikkeSendForvaltingsmelding,
+            behandlingstemaKode,
+            behandlingstypeKode,
+            new Fagsak(fagsak.getSakstema(), fagsak.getSakstype(),
+                getSoknadsperiode(), getLand()),
+            arbeidsgiverID,
+            representantID,
+            representantKontaktPerson,
+            representererKode,
+            fullmektigID,
+            fullmakter,
+            fullmektigKontaktperson,
+            fullmektigKontaktOrgnr
+        );
+    }
+
+    private Soeknadsland getLand() {
+        SoeknadslandDto land = fagsak.getLand();
+        return new Soeknadsland(land.getLandkoder(), land.erUkjenteEllerAlleEosLand());
+    }
+
+    private Periode getSoknadsperiode() {
+        PeriodeDto soknadsperiode = fagsak.getSoknadsperiode();
+        return new Periode(soknadsperiode.getFom(), soknadsperiode.getTom());
     }
 }

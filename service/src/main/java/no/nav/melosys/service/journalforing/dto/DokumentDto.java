@@ -3,6 +3,8 @@ package no.nav.melosys.service.journalforing.dto;
 import java.util.ArrayList;
 import java.util.List;
 
+import no.nav.melosys.saksflytapi.journalfoering.DokumentRequest;
+
 public class DokumentDto {
     private String dokumentID;
     private String tittel;
@@ -39,5 +41,9 @@ public class DokumentDto {
 
     public void setLogiskeVedlegg(List<String> logiskeVedlegg) {
         this.logiskeVedlegg = logiskeVedlegg;
+    }
+
+    public DokumentRequest tilDokumentRequest() {
+        return new DokumentRequest(dokumentID, tittel, logiskeVedlegg);
     }
 }

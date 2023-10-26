@@ -5,7 +5,7 @@ import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.Vedtakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 
-data class FattVedtakRequest(
+data class VedtakRequest(
     val behandlingsresultatTypeKode: Behandlingsresultattyper,
     val vedtakstype: Vedtakstyper,
     val fritekst: String,
