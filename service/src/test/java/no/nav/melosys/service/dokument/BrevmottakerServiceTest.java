@@ -440,13 +440,11 @@ class BrevmottakerServiceTest {
         assertThat(brevmottakerService.hentMottakerliste(TRYGDEAVTALE_GB, 123))
             .extracting(
                 Mottakerliste::getHovedMottaker,
-                Mottakerliste::getKopiMottakere,
-                Mottakerliste::getFasteMottakere
+                Mottakerliste::getKopiMottakere
             )
             .containsExactly(
                 BRUKER,
-                List.of(ARBEIDSGIVER, UTENLANDSK_TRYGDEMYNDIGHET),
-                List.of(SKATTEETATEN)
+                List.of(ARBEIDSGIVER, UTENLANDSK_TRYGDEMYNDIGHET)
             );
     }
 
@@ -459,13 +457,11 @@ class BrevmottakerServiceTest {
         assertThat(brevmottakerService.hentMottakerliste(TRYGDEAVTALE_GB, 123))
             .extracting(
                 Mottakerliste::getHovedMottaker,
-                Mottakerliste::getKopiMottakere,
-                Mottakerliste::getFasteMottakere
+                Mottakerliste::getKopiMottakere
             )
             .containsExactly(
                 BRUKER,
-                List.of(ARBEIDSGIVER),
-                List.of(SKATTEETATEN)
+                List.of(ARBEIDSGIVER)
             );
     }
 
