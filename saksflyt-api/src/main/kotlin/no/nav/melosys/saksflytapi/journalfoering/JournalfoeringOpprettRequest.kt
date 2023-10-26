@@ -38,18 +38,18 @@ class JournalfoeringOpprettRequest(
 
 data class Fagsak(
     var sakstema: String? = null,
-    var sakstype: String? = null ,
-    var soknadsperiode: PeriodeDto? = null,
-    var land: SoeknadslandDto? = null,
+    var sakstype: String? = null,
+    var soknadsperiode: Periode? = null,
+    var land: Soeknadsland? = null,
 )
 
 
-data class PeriodeDto(
+data class Periode(
     var fom: LocalDate? = null,
     var tom: LocalDate? = null,
 )
 
-data class SoeknadslandDto(
+data class Soeknadsland(
     var landkoder: List<String>? = null,
     var erUkjenteEllerAlleEosLand: Boolean = false,
 )

@@ -69,12 +69,12 @@ public class OpprettSak {
         if (sakstype == Sakstyper.EU_EOS) {
             prosessinstansService.opprettProsessinstansNySakEØS(
                 oppgave.getJournalpostId(),
-                opprettSakDto
+                opprettSakDto.tilOpprettSakRequest()
             );
         } else if (sakstype == Sakstyper.FTRL || sakstype == Sakstyper.TRYGDEAVTALE) {
             prosessinstansService.opprettProsessinstansNySakFTRLTrygdeavtale(
                 oppgave.getJournalpostId(),
-                opprettSakDto
+                opprettSakDto.tilOpprettSakRequest()
             );
         } else {
             throw new FunksjonellException("Sakstype %s støttes ikke".formatted(sakstype));
@@ -101,7 +101,7 @@ public class OpprettSak {
         }
 
         validerOpprettSakDto(opprettSakDto);
-        prosessinstansService.opprettNySakOgBehandling(opprettSakDto);
+        prosessinstansService.opprettNySakOgBehandling(opprettSakDto.tilOpprettSakRequest());
     }
 
     void validerOpprettSakDto(OpprettSakDto opprettSakDto) {
@@ -128,12 +128,12 @@ public class OpprettSak {
         if (soknadDto == null) {
             throw new FunksjonellException("SoknadDto må ikke være null for å opprette en søknadbehandling.");
         }
-        PeriodeDto periodeDto = soknadDto.getPeriode();
+        PeriodeDto periodeDto = soknadDto.periode;
         if (periodeDto.getFom() == null) {
             feilet = true;
             feilmeldingBuilder.append("søknadsperiodes fra og med dato, ");
         }
-        if (!soknadDto.getLand().erGyldig()) {
+        if (!soknadDto.land.erGyldig()) {
             feilet = true;
             feilmeldingBuilder.append("land, ");
         }

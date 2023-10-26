@@ -1,4 +1,4 @@
-package no.nav.melosys.service.saksflyt;
+package no.nav.melosys.saksflytapi;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -19,21 +19,17 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.saksflytapi.ProsessinstansForServiceRepository;
-import no.nav.melosys.saksflytapi.ProsessinstansOpprettetEvent;
-import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.ProsessStatus;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
-import no.nav.melosys.service.felles.dto.SoeknadslandDto;
-import no.nav.melosys.service.journalforing.dto.DokumentDto;
-import no.nav.melosys.service.journalforing.dto.JournalfoeringDto;
-import no.nav.melosys.service.journalforing.dto.JournalfoeringOpprettDto;
-import no.nav.melosys.service.journalforing.dto.PeriodeDto;
-import no.nav.melosys.service.sak.OpprettSakDto;
+import no.nav.melosys.saksflytapi.journalfoering.DokumentRequest;
+import no.nav.melosys.saksflytapi.journalfoering.JournalfoeringOpprettRequest;
+import no.nav.melosys.saksflytapi.journalfoering.OpprettSakRequest;
+import no.nav.melosys.saksflytapi.journalfoering.Soeknadsland;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import org.assertj.core.api.Assertions;
 import org.jeasy.random.EasyRandom;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -331,13 +327,13 @@ class ProsessinstansServiceTest {
 
     @Test
     void opprettProsessinstansJournalføring_utendlandskMyndighet_settesIProsessinstans() {
-        JournalfoeringOpprettDto journalfoeringDto = lagJournalfoeringOpprettDto();
-        journalfoeringDto.setAvsenderType(Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET);
-        journalfoeringDto.setAvsenderID("DK");
+        JournalfoeringOpprettRequest journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest();
+        journalfoeringOpprettRequest.setAvsenderType(Avsendertyper.UTENLANDSK_TRYGDEMYNDIGHET);
+        journalfoeringOpprettRequest.setAvsenderID("DK");
         final String institusjonsIdForDk = "ID_FOR_DK";
 
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringDto, institusjonsIdForDk);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringOpprettRequest, institusjonsIdForDk);
 
 
         assertThat(prosessinstans.getData(ProsessDataKey.AVSENDER_ID)).isEqualTo(institusjonsIdForDk);
@@ -345,23 +341,23 @@ class ProsessinstansServiceTest {
 
     @Test
     void opprettProsessinstansJournalføring_ikkeSendForvaltningsmeldingFalse_settesIProsessinstans() {
-        JournalfoeringOpprettDto journalfoeringDto = lagJournalfoeringOpprettDto();
+        JournalfoeringOpprettRequest journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest();
 
-        journalfoeringDto.setIkkeSendForvaltingsmelding(false);
+        journalfoeringOpprettRequest.setIkkeSendForvaltingsmelding(false);
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto, null);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringOpprettRequest, null);
 
         assertThat(prosessinstans.getData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class)).isTrue();
     }
 
     @Test
     void opprettProsessinstansJournalføring_ikkeSendForvaltningsmeldingTrue_settesIProsessinstans() {
-        JournalfoeringOpprettDto journalfoeringDto = lagJournalfoeringOpprettDto();
+        JournalfoeringOpprettRequest journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest();
 
-        journalfoeringDto.setIkkeSendForvaltingsmelding(true);
+        journalfoeringOpprettRequest.setIkkeSendForvaltingsmelding(true);
 
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto, null);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringOpprettRequest, null);
 
 
         assertThat(prosessinstans.getData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, Boolean.class)).isFalse();
@@ -369,12 +365,12 @@ class ProsessinstansServiceTest {
 
     @Test
     void opprettProsessinstansJournalføring_virksomhetOrgnr_settesIProsessinstans() {
-        JournalfoeringOpprettDto journalfoeringDto = lagJournalfoeringOpprettDto();
+        JournalfoeringOpprettRequest journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest();
 
-        journalfoeringDto.setBrukerID(null);
-        journalfoeringDto.setVirksomhetOrgnr("orgnr");
+        journalfoeringOpprettRequest.setBrukerID(null);
+        journalfoeringOpprettRequest.setVirksomhetOrgnr("orgnr");
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto, null);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringOpprettRequest, null);
 
         assertThat(prosessinstans.getData(ProsessDataKey.VIRKSOMHET_ORGNR)).isEqualTo("orgnr");
     }
@@ -382,12 +378,12 @@ class ProsessinstansServiceTest {
 
     @Test
     void opprettProsessinstansJournalføring_skalTilordnesTrue_settesIProsessinstans() {
-        JournalfoeringOpprettDto journalfoeringDto = lagJournalfoeringOpprettDto();
+        JournalfoeringOpprettRequest journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest();
 
-        journalfoeringDto.setSkalTilordnes(true);
+        journalfoeringOpprettRequest.setSkalTilordnes(true);
 
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto, null);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringOpprettRequest, null);
 
 
         assertThat(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).isTrue();
@@ -395,11 +391,11 @@ class ProsessinstansServiceTest {
 
     @Test
     void opprettProsessinstansJournalføring_skalTilordnesFalse_settesIProsessinstans() {
-        JournalfoeringOpprettDto journalfoeringDto = lagJournalfoeringOpprettDto();
-        journalfoeringDto.setSkalTilordnes(false);
+        JournalfoeringOpprettRequest journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest();
+        journalfoeringOpprettRequest.setSkalTilordnes(false);
 
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringDto, null);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringOpprettRequest, null);
 
 
         assertThat(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).isFalse();
@@ -407,18 +403,18 @@ class ProsessinstansServiceTest {
 
     @Test
     void opprettProsessinstansJournalføring_medVedlegg_setterVedleggOgTitler() {
-        JournalfoeringDto journalfoeringDto = lagJournalfoeringOpprettDto();
-        journalfoeringDto.getHoveddokument().setDokumentID("hovedDokumentID");
-        List<DokumentDto> vedlegg = new ArrayList<>();
-        DokumentDto fysiskVedlegg = new DokumentDto("dokID1", "tittel1");
+        JournalfoeringOpprettRequest journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest();
+        journalfoeringOpprettRequest.getHoveddokument().setDokumentID("hovedDokumentID");
+        List<DokumentRequest> vedlegg = new ArrayList<>();
+        DokumentRequest fysiskVedlegg = new DokumentRequest("dokID1", "tittel1", Collections.emptyList());
         vedlegg.add(fysiskVedlegg);
-        DokumentDto fysiskVedlegg2 = new DokumentDto("hovedDokumentID", "Logisk ??");
+        DokumentRequest fysiskVedlegg2 = new DokumentRequest("hovedDokumentID", "Logisk ??", Collections.emptyList());
         vedlegg.add(fysiskVedlegg2);
-        journalfoeringDto.setVedlegg(vedlegg);
-        journalfoeringDto.getHoveddokument().getLogiskeVedlegg().add("tittel");
+        journalfoeringOpprettRequest.setVedlegg(vedlegg);
+        journalfoeringOpprettRequest.getHoveddokument().getLogiskeVedlegg().add("tittel");
 
 
-        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringDto, null);
+        Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringOpprettRequest, null);
 
 
         var fysiskeVedleggTypeReference = new TypeReference<Map<String, String>>() {
@@ -434,14 +430,14 @@ class ProsessinstansServiceTest {
 
     @Test
     void opprettProsessinstansJournalføring_medFysiskeVedlegg_setterVedleggOgTitler() {
-        JournalfoeringDto journalfoeringDto = lagJournalfoeringOpprettDto();
-        journalfoeringDto.getHoveddokument().setDokumentID("hovedDokumentID");
-        List<DokumentDto> vedlegg = new ArrayList<>();
-        DokumentDto fysiskVedlegg = new DokumentDto("dokID1", "tittel1");
+        JournalfoeringOpprettRequest journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest();
+        journalfoeringOpprettRequest.getHoveddokument().setDokumentID("hovedDokumentID");
+        List<DokumentRequest> vedlegg = new ArrayList<>();
+        DokumentRequest fysiskVedlegg = new DokumentRequest("dokID1", "tittel1", Collections.emptyList());
         vedlegg.add(fysiskVedlegg);
-        DokumentDto fysiskVedlegg2 = new DokumentDto("hovedDokumentID", "Logisk ??");
+        DokumentRequest fysiskVedlegg2 = new DokumentRequest("hovedDokumentID", "Logisk ??", Collections.emptyList());
         vedlegg.add(fysiskVedlegg2);
-        journalfoeringDto.setVedlegg(vedlegg);
+        journalfoeringOpprettRequest.setVedlegg(vedlegg);
 
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringDto, null);
@@ -512,28 +508,28 @@ class ProsessinstansServiceTest {
 
     @Test
     void opprettProsessinstansNySak_behandlingstypeFørstegangTemaIkkeYrkesaktiv() {
-        OpprettSakDto opprettSakDto = new EasyRandom().nextObject(OpprettSakDto.class);
-        opprettSakDto.setSakstype(Sakstyper.EU_EOS);
-        opprettSakDto.setBehandlingstema(Behandlingstema.IKKE_YRKESAKTIV);
+        OpprettSakRequest opprettSakRequest = new EasyRandom().nextObject(OpprettSakRequest.class);
+        opprettSakRequest.setSakstype(Sakstyper.EU_EOS);
+        opprettSakRequest.setBehandlingstema(Behandlingstema.IKKE_YRKESAKTIV);
         String journalpostID = "journalpostID";
 
 
-        prosessinstansService.opprettProsessinstansNySakEØS(journalpostID, opprettSakDto);
+        prosessinstansService.opprettProsessinstansNySakEØS(journalpostID, opprettSakRequest);
 
 
         verify(prosessinstansRepo).save(piCaptor.capture());
         Prosessinstans prosessinstans = piCaptor.getValue();
         assertThat(prosessinstans.getType()).isEqualTo(ProsessType.OPPRETT_NY_SAK_EOS_FRA_OPPGAVE);
         assertThat(prosessinstans.getData(ProsessDataKey.SAKSTYPE, Sakstyper.class)).isEqualTo(Sakstyper.EU_EOS);
-        assertThat(prosessinstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class)).isEqualTo(opprettSakDto.getSakstema());
-        assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class)).isEqualTo(opprettSakDto.getBehandlingstype());
+        assertThat(prosessinstans.getData(ProsessDataKey.SAKSTEMA, Sakstemaer.class)).isEqualTo(opprettSakRequest.getSakstema());
+        assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTYPE, Behandlingstyper.class)).isEqualTo(opprettSakRequest.getBehandlingstype());
         assertThat(prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class)).isEqualTo(Behandlingstema.IKKE_YRKESAKTIV);
-        assertThat(prosessinstans.getData(ProsessDataKey.BRUKER_ID)).isEqualTo(opprettSakDto.getBrukerID());
-        assertThat(prosessinstans.getData(ProsessDataKey.OPPGAVE_ID)).isEqualTo(opprettSakDto.getOppgaveID());
+        assertThat(prosessinstans.getData(ProsessDataKey.BRUKER_ID)).isEqualTo(opprettSakRequest.getBrukerID());
+        assertThat(prosessinstans.getData(ProsessDataKey.OPPGAVE_ID)).isEqualTo(opprettSakRequest.getOppgaveID());
         assertThat(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID)).isEqualTo(journalpostID);
-        assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, PeriodeDto.class)).isEqualTo(opprettSakDto.getSoknadDto().getPeriode());
-        assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSLAND, SoeknadslandDto.class)).isEqualTo(opprettSakDto.getSoknadDto().getLand());
-        assertThat(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).isEqualTo(opprettSakDto.getSkalTilordnes());
+        Assertions.assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class)).isEqualTo(opprettSakRequest.getSoknad().getPeriode());
+        assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSLAND, Soeknadsland.class)).isEqualTo(opprettSakRequest.getSoknad().getLand());
+        assertThat(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).isEqualTo(opprettSakRequest.getSkalTilordnes());
     }
 
     @Test
@@ -544,7 +540,7 @@ class ProsessinstansServiceTest {
         String journalpostID = "journalpostID";
 
 
-        prosessinstansService.opprettProsessinstansNySakEØS(journalpostID, opprettSakDto);
+        prosessinstansService.opprettProsessinstansNySakEØS(journalpostID, opprettSakDto.tilOpprettSakRequest());
 
 
         verify(prosessinstansRepo).save(piCaptor.capture());
@@ -557,8 +553,8 @@ class ProsessinstansServiceTest {
         assertThat(prosessinstans.getData(ProsessDataKey.BRUKER_ID)).isEqualTo(opprettSakDto.getBrukerID());
         assertThat(prosessinstans.getData(ProsessDataKey.OPPGAVE_ID)).isEqualTo(opprettSakDto.getOppgaveID());
         assertThat(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID)).isEqualTo(journalpostID);
-        assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, PeriodeDto.class)).isEqualTo(opprettSakDto.getSoknadDto().getPeriode());
-        assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSLAND, SoeknadslandDto.class)).isEqualTo(opprettSakDto.getSoknadDto().getLand());
+        Assertions.assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, PeriodeDto.class)).isEqualTo(opprettSakDto.getSoknadDto().periode);
+        Assertions.assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSLAND, SoeknadslandDto.class)).isEqualTo(opprettSakDto.getSoknadDto().land);
         assertThat(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).isEqualTo(opprettSakDto.getSkalTilordnes());
     }
 
@@ -771,21 +767,18 @@ class ProsessinstansServiceTest {
         return melding;
     }
 
-    private static JournalfoeringOpprettDto lagJournalfoeringOpprettDto() {
-        JournalfoeringOpprettDto journalfoeringOpprettDto = new JournalfoeringOpprettDto();
-        journalfoeringOpprettDto.setBehandlingstemaKode(Behandlingstema.UTSENDT_ARBEIDSTAKER.getKode());
-        return lagJournalfoeringDto(journalfoeringOpprettDto);
+    private static JournalfoeringOpprettRequest lagJournalfoeringOpprettRequest() {
+        JournalfoeringOpprettRequest journalfoeringRequest = new JournalfoeringOpprettRequest();
+        journalfoeringRequest.setBehandlingstemaKode(Behandlingstema.UTSENDT_ARBEIDSTAKER.getKode());
+        journalfoeringRequest.setJournalpostID("journalpostid");
+        journalfoeringRequest.setOppgaveID("oppgaveid");
+        journalfoeringRequest.setBrukerID("brukerid");
+        journalfoeringRequest.setAvsenderID("avsenderid");
+        journalfoeringRequest.setAvsenderNavn("avsendernavn");
+        journalfoeringRequest.setHoveddokument(new DokumentRequest("dokumentid", "hovedkokumenttittel", Collections.emptyList()));
+        return journalfoeringRequest;
     }
 
-    private static <T extends JournalfoeringDto> T lagJournalfoeringDto(T journalfoeringDto) {
-        journalfoeringDto.setJournalpostID("journalpostid");
-        journalfoeringDto.setOppgaveID("oppgaveid");
-        journalfoeringDto.setBrukerID("brukerid");
-        journalfoeringDto.setAvsenderID("avsenderid");
-        journalfoeringDto.setAvsenderNavn("avsendernavn");
-        journalfoeringDto.setHoveddokument(new DokumentDto("dokumentid", "hovedkokumenttittel"));
-        return journalfoeringDto;
-    }
 
     private String settInnloggetSaksbehandler() {
         String saksbehandler = "Z123456";

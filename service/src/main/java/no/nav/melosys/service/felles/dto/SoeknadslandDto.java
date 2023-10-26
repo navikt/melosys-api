@@ -4,8 +4,8 @@ import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 
 public class SoeknadslandDto {
     @JsonProperty("landkoder")
@@ -50,6 +50,10 @@ public class SoeknadslandDto {
         SoeknadslandDto that = (SoeknadslandDto) o;
         return this.erUkjenteEllerAlleEosLand == that.erUkjenteEllerAlleEosLand &&
             this.getLandkoder().equals(that.getLandkoder());
+    }
+
+    public no.nav.melosys.saksflytapi.journalfoering.Soeknadsland tilSoknadsland() {
+        return new no.nav.melosys.saksflytapi.journalfoering.Soeknadsland(this.landkoder, erUkjenteEllerAlleEosLand);
     }
 
     public static SoeknadslandDto av(Soeknadsland søknadsland) {

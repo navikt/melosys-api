@@ -28,12 +28,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.saksflytapi.domain.*;
-import no.nav.melosys.saksflytapi.journalfoering.DokumentRequest;
-import no.nav.melosys.saksflytapi.journalfoering.JournalfoeringOpprettRequest;
-import no.nav.melosys.saksflytapi.journalfoering.JournalfoeringRequest;
-import no.nav.melosys.saksflytapi.journalfoering.JournalfoeringTilordneRequest;
-import no.nav.melosys.service.sak.OpprettSakDto;
-import no.nav.melosys.service.vedtak.FattVedtakRequest;
+import no.nav.melosys.saksflytapi.journalfoering.*;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.apache.commons.lang3.StringUtils;
@@ -62,54 +57,54 @@ public class ProsessinstansService {
         this.prosessinstansRepo = prosessinstansRepo;
     }
 
-    public void opprettNySakOgBehandling(OpprettSakDto opprettSakDto) {
+    public void opprettNySakOgBehandling(OpprettSakRequest opprettSakRequest) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_SAK);
 
-        prosessinstans.setData(SAKSTYPE, opprettSakDto.getSakstype());
-        prosessinstans.setData(SAKSTEMA, opprettSakDto.getSakstema());
-        prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
-        prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
-        prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakDto.getBehandlingsaarsakType());
-        prosessinstans.setData(BEHANDLINGSÅRSAK_FRITEKST, opprettSakDto.getBehandlingsaarsakFritekst());
-        prosessinstans.setData(BRUKER_ID, opprettSakDto.getBrukerID());
-        prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakDto.getVirksomhetOrgnr());
-        prosessinstans.setData(MOTTATT_DATO, opprettSakDto.getMottaksdato());
-        prosessinstans.setData(SØKNADSLAND, opprettSakDto.getSoknadDto().getLand());
-        prosessinstans.setData(SØKNADSPERIODE, opprettSakDto.getSoknadDto().getPeriode());
-        prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.getSkalTilordnes());
+        prosessinstans.setData(SAKSTYPE, opprettSakRequest.getSakstype());
+        prosessinstans.setData(SAKSTEMA, opprettSakRequest.getSakstema());
+        prosessinstans.setData(BEHANDLINGSTEMA, opprettSakRequest.getBehandlingstema());
+        prosessinstans.setData(BEHANDLINGSTYPE, opprettSakRequest.getBehandlingstype());
+        prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakRequest.getBehandlingsaarsakType());
+        prosessinstans.setData(BEHANDLINGSÅRSAK_FRITEKST, opprettSakRequest.getBehandlingsaarsakFritekst());
+        prosessinstans.setData(BRUKER_ID, opprettSakRequest.getBrukerID());
+        prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakRequest.getVirksomhetOrgnr());
+        prosessinstans.setData(MOTTATT_DATO, opprettSakRequest.getMottaksdato());
+        prosessinstans.setData(SØKNADSLAND, opprettSakRequest.getSoknad().getLand());
+        prosessinstans.setData(SØKNADSPERIODE, opprettSakRequest.getSoknad().getPeriode());
+        prosessinstans.setData(SKAL_TILORDNES, opprettSakRequest.getSkalTilordnes());
 
         lagre(prosessinstans);
     }
 
-    public void opprettOgReplikerBehandlingForSak(String saksnummer, OpprettSakDto opprettSakDto) {
+    public void opprettOgReplikerBehandlingForSak(String saksnummer, OpprettSakRequest opprettSakRequest) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK);
 
-        prosessinstans.setData(FAKTURASERIE_REFERANSE, opprettSakDto.getFakturaserieReferanse());
+        prosessinstans.setData(FAKTURASERIE_REFERANSE, opprettSakRequest.getFakturaserieReferanse());
         prosessinstans.setData(SAKSNUMMER, saksnummer);
-        prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
-        prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
-        prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakDto.getBehandlingsaarsakType());
-        prosessinstans.setData(BEHANDLINGSÅRSAK_FRITEKST, opprettSakDto.getBehandlingsaarsakFritekst());
-        prosessinstans.setData(MOTTATT_DATO, opprettSakDto.getMottaksdato());
-        prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.getSkalTilordnes());
+        prosessinstans.setData(BEHANDLINGSTEMA, opprettSakRequest.getBehandlingstema());
+        prosessinstans.setData(BEHANDLINGSTYPE, opprettSakRequest.getBehandlingstype());
+        prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakRequest.getBehandlingsaarsakType());
+        prosessinstans.setData(BEHANDLINGSÅRSAK_FRITEKST, opprettSakRequest.getBehandlingsaarsakFritekst());
+        prosessinstans.setData(MOTTATT_DATO, opprettSakRequest.getMottaksdato());
+        prosessinstans.setData(SKAL_TILORDNES, opprettSakRequest.getSkalTilordnes());
 
         lagre(prosessinstans);
     }
 
-    public void opprettNyBehandlingForSak(String saksnummer, OpprettSakDto opprettSakDto) {
+    public void opprettNyBehandlingForSak(String saksnummer, OpprettSakRequest opprettSakRequest) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setType(ProsessType.OPPRETT_NY_BEHANDLING_FOR_SAK);
 
-        prosessinstans.setData(FAKTURASERIE_REFERANSE, opprettSakDto.getFakturaserieReferanse());
+        prosessinstans.setData(FAKTURASERIE_REFERANSE, opprettSakRequest.getFakturaserieReferanse());
         prosessinstans.setData(SAKSNUMMER, saksnummer);
-        prosessinstans.setData(BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
-        prosessinstans.setData(BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
-        prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakDto.getBehandlingsaarsakType());
-        prosessinstans.setData(BEHANDLINGSÅRSAK_FRITEKST, opprettSakDto.getBehandlingsaarsakFritekst());
-        prosessinstans.setData(MOTTATT_DATO, opprettSakDto.getMottaksdato());
-        prosessinstans.setData(SKAL_TILORDNES, opprettSakDto.getSkalTilordnes());
+        prosessinstans.setData(BEHANDLINGSTEMA, opprettSakRequest.getBehandlingstema());
+        prosessinstans.setData(BEHANDLINGSTYPE, opprettSakRequest.getBehandlingstype());
+        prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakRequest.getBehandlingsaarsakType());
+        prosessinstans.setData(BEHANDLINGSÅRSAK_FRITEKST, opprettSakRequest.getBehandlingsaarsakFritekst());
+        prosessinstans.setData(MOTTATT_DATO, opprettSakRequest.getMottaksdato());
+        prosessinstans.setData(SKAL_TILORDNES, opprettSakRequest.getSkalTilordnes());
 
         lagre(prosessinstans);
     }
@@ -344,46 +339,46 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansNySakEØS(String journalpostID, OpprettSakDto opprettSakDto) {
+    public void opprettProsessinstansNySakEØS(String journalpostID, OpprettSakRequest opprettSakRequest) {
         Prosessinstans prosessinstans = new Prosessinstans();
 
         prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_EOS_FRA_OPPGAVE);
-        prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakDto.getVirksomhetOrgnr());
-        prosessinstans.setData(SAKSTEMA, opprettSakDto.getSakstema());
-        prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakDto.getBehandlingsaarsakType());
-        prosessinstans.setData(MOTTATT_DATO, opprettSakDto.getMottaksdato());
-        prosessinstans.setData(ProsessDataKey.SAKSTYPE, opprettSakDto.getSakstype());
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+        prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakRequest.getVirksomhetOrgnr());
+        prosessinstans.setData(SAKSTEMA, opprettSakRequest.getSakstema());
+        prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakRequest.getBehandlingsaarsakType());
+        prosessinstans.setData(MOTTATT_DATO, opprettSakRequest.getMottaksdato());
+        prosessinstans.setData(ProsessDataKey.SAKSTYPE, opprettSakRequest.getSakstype());
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, opprettSakRequest.getBehandlingstype());
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
-        prosessinstans.setData(ProsessDataKey.BRUKER_ID, opprettSakDto.getBrukerID());
-        prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, opprettSakDto.getOppgaveID());
-        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, opprettSakDto.getSkalTilordnes());
-        if (opprettSakDto.getSoknadDto().getPeriode() != null) {
-            prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, opprettSakDto.getSoknadDto().getPeriode());
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, opprettSakRequest.getBehandlingstema());
+        prosessinstans.setData(ProsessDataKey.BRUKER_ID, opprettSakRequest.getBrukerID());
+        prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, opprettSakRequest.getOppgaveID());
+        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, opprettSakRequest.getSkalTilordnes());
+        if (opprettSakRequest.getSoknad().getPeriode() != null) {
+            prosessinstans.setData(ProsessDataKey.SØKNADSPERIODE, opprettSakRequest.getSoknad().getPeriode());
         }
-        if (opprettSakDto.getSoknadDto().getLand() != null) {
-            prosessinstans.setData(ProsessDataKey.SØKNADSLAND, opprettSakDto.getSoknadDto().getLand());
+        if (opprettSakRequest.getSoknad().getLand() != null) {
+            prosessinstans.setData(ProsessDataKey.SØKNADSLAND, opprettSakRequest.getSoknad().getLand());
         }
 
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansNySakFTRLTrygdeavtale(String journalpostID, OpprettSakDto opprettSakDto) {
+    public void opprettProsessinstansNySakFTRLTrygdeavtale(String journalpostID, OpprettSakRequest opprettSakRequest) {
         Prosessinstans prosessinstans = new Prosessinstans();
 
         prosessinstans.setType(ProsessType.OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE_FRA_OPPGAVE);
-        prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakDto.getVirksomhetOrgnr());
-        prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakDto.getBehandlingsaarsakType());
-        prosessinstans.setData(MOTTATT_DATO, opprettSakDto.getMottaksdato());
-        prosessinstans.setData(ProsessDataKey.SAKSTYPE, opprettSakDto.getSakstype());
-        prosessinstans.setData(ProsessDataKey.SAKSTEMA, opprettSakDto.getSakstema());
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, opprettSakDto.getBehandlingstype());
+        prosessinstans.setData(VIRKSOMHET_ORGNR, opprettSakRequest.getVirksomhetOrgnr());
+        prosessinstans.setData(BEHANDLINGSÅRSAKTYPE, opprettSakRequest.getBehandlingsaarsakType());
+        prosessinstans.setData(MOTTATT_DATO, opprettSakRequest.getMottaksdato());
+        prosessinstans.setData(ProsessDataKey.SAKSTYPE, opprettSakRequest.getSakstype());
+        prosessinstans.setData(ProsessDataKey.SAKSTEMA, opprettSakRequest.getSakstema());
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTYPE, opprettSakRequest.getBehandlingstype());
         prosessinstans.setData(ProsessDataKey.JOURNALPOST_ID, journalpostID);
-        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, opprettSakDto.getBehandlingstema());
-        prosessinstans.setData(ProsessDataKey.BRUKER_ID, opprettSakDto.getBrukerID());
-        prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, opprettSakDto.getOppgaveID());
-        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, opprettSakDto.getSkalTilordnes());
+        prosessinstans.setData(ProsessDataKey.BEHANDLINGSTEMA, opprettSakRequest.getBehandlingstema());
+        prosessinstans.setData(ProsessDataKey.BRUKER_ID, opprettSakRequest.getBrukerID());
+        prosessinstans.setData(ProsessDataKey.OPPGAVE_ID, opprettSakRequest.getOppgaveID());
+        prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, opprettSakRequest.getSkalTilordnes());
 
         lagre(prosessinstans);
     }
