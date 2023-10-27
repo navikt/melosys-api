@@ -105,7 +105,7 @@ public class FattVedtakRequest {
     }
 
     public VedtakRequest tilVedtakRequest() {
-        new VedtakRequest(
+        return new VedtakRequest(
             behandlingsresultatTypeKode,
             vedtakstype,
             fritekst,
@@ -116,12 +116,12 @@ public class FattVedtakRequest {
             ektefelleFritekst,
             barnFritekst,
             trygdeavgiftFritekst,
-            kopiMottakere, // TODO: lag mapper på kopiMottakere
+            kopiMottakere.stream().map(KopiMottakerDto::tilKopiMottaker).toList(),
             kopiTilArbeidsgiver,
             bestillersId,
             nyVurderingBakgrunn,
-            betalingsintervall // TODO: lag mapper KopiMottaker
-        )
+            betalingsintervall.toString() // TODO: map enum?
+        );
     }
 
     public static class Builder {

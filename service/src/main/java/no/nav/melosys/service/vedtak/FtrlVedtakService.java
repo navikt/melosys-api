@@ -59,7 +59,7 @@ public class FtrlVedtakService {
         behandling.getFagsak().setStatus(Saksstatuser.MEDLEMSKAP_AVKLART);
         behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
 
-        prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(behandling, request);
+        prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(behandling, request.tilVedtakRequest());
         dokgenService.produserOgDistribuerBrev(behandlingID, lagBrevbestilling(request));
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
     }

@@ -26,9 +26,10 @@ data class OpprettSakRequest(
 )
 
 
-class Søknad {
-    var periode: Periode? = null
+data class Søknad(
+    var periode: Periode? = null,
     var land: Soeknadsland? = null
-}
+)
+
 
 

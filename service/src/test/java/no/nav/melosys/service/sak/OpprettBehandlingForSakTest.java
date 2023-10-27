@@ -177,7 +177,7 @@ class OpprettBehandlingForSakTest {
         opprettBehandlingForSak.opprettBehandling(SAKSNUMMER, opprettSakDto);
 
 
-        verify(prosessinstansService).opprettNyBehandlingForSak(SAKSNUMMER, opprettSakDto);
+        verify(prosessinstansService).opprettNyBehandlingForSak(SAKSNUMMER, opprettSakDto.tilOpprettSakRequest());
     }
 
     @Test
@@ -201,7 +201,7 @@ class OpprettBehandlingForSakTest {
         opprettBehandlingForSak.opprettBehandling(SAKSNUMMER, opprettSakDto);
 
 
-        verify(prosessinstansService).opprettOgReplikerBehandlingForSak(SAKSNUMMER, opprettSakDto);
+        verify(prosessinstansService).opprettOgReplikerBehandlingForSak(SAKSNUMMER, opprettSakDto.tilOpprettSakRequest());
     }
 
     private OpprettSakDto lagOpprettSakDto() {

@@ -2,6 +2,7 @@ package no.nav.melosys.service.dokument.brev;
 
 import no.nav.melosys.domain.brev.utkast.KopiMottakerUtkast;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
+import no.nav.melosys.saksflytapi.journalfoering.KopiMottaker;
 
 public record KopiMottakerDto(Mottakerroller rolle,
                               String orgnr,
@@ -13,5 +14,9 @@ public record KopiMottakerDto(Mottakerroller rolle,
 
     public KopiMottakerUtkast tilUtkast() {
         return new KopiMottakerUtkast(this.rolle(), this.orgnr(), this.aktørId(), this.institusjonId());
+    }
+
+    public KopiMottaker tilKopiMottaker() {
+        return new KopiMottaker(rolle, orgnr, aktørId, institusjonId);
     }
 }

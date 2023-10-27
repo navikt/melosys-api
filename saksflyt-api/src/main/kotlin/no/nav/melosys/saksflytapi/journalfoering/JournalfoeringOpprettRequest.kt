@@ -4,7 +4,7 @@ import no.nav.melosys.domain.kodeverk.Avsendertyper
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import java.time.LocalDate
 
-class JournalfoeringOpprettRequest(
+data class JournalfoeringOpprettRequest(
     override var journalpostID: String? = null,
     override var oppgaveID: String? = null,
     override var brukerID: String? = null,

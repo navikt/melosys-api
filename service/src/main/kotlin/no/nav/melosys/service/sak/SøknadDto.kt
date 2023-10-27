@@ -12,12 +12,7 @@ class SøknadDto {
     var land: SoeknadslandDto? = null
 
     fun tilSøknadRequest(): Søknad {
-        val tilPeriode = periode?.tilPeriode()
-        val tilSoknadsland = land?.tilSoknadsland()
-        return Søknad().apply {
-            this.periode = tilPeriode
-            this.land = tilSoknadsland
-        }
+        return Søknad(periode?.tilPeriode(), land?.tilSoknadsland())
     }
 }
 
