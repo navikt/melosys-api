@@ -25,8 +25,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import static no.nav.melosys.MDCOperations.CORRELATION_ID;
-import static no.nav.melosys.MDCOperations.putToMDC;
+import static no.nav.melosys.config.MDCOperations.CORRELATION_ID;
+import static no.nav.melosys.config.MDCOperations.putToMDC;
 import static no.nav.melosys.saksflytapi.domain.ProsessStatus.UNDER_BEHANDLING;
 
 @Component

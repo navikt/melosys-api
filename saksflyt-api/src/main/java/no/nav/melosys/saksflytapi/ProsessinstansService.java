@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
-import no.nav.melosys.MDCOperations;
+import no.nav.melosys.config.MDCOperations;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.Distribusjonstype;

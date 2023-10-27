@@ -1,4 +1,4 @@
-package no.nav.melosys
+package no.nav.melosys.config
 
 import org.slf4j.MDC
 import java.security.SecureRandom

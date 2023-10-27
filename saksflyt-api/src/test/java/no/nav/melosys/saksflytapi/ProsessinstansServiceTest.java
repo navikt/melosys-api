@@ -406,12 +406,13 @@ class ProsessinstansServiceTest {
         JournalfoeringOpprettRequest journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest();
         journalfoeringOpprettRequest.getHoveddokument().setDokumentID("hovedDokumentID");
         List<DokumentRequest> vedlegg = new ArrayList<>();
-        DokumentRequest fysiskVedlegg = new DokumentRequest("dokID1", "tittel1", Collections.emptyList());
+        DokumentRequest fysiskVedlegg = new DokumentRequest("dokID1", "tittel1", new ArrayList<>());
         vedlegg.add(fysiskVedlegg);
-        DokumentRequest fysiskVedlegg2 = new DokumentRequest("hovedDokumentID", "Logisk ??", Collections.emptyList());
+        DokumentRequest fysiskVedlegg2 = new DokumentRequest("hovedDokumentID", "Logisk ??", new ArrayList<>());
         vedlegg.add(fysiskVedlegg2);
         journalfoeringOpprettRequest.setVedlegg(vedlegg);
-        journalfoeringOpprettRequest.getHoveddokument().getLogiskeVedlegg().add("tittel");
+        List<String> logiskeVedlegg1 = journalfoeringOpprettRequest.getHoveddokument().getLogiskeVedlegg();
+        logiskeVedlegg1.add("tittel");
 
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.JFR_NY_SAK_BRUKER, journalfoeringOpprettRequest, null);
@@ -527,7 +528,7 @@ class ProsessinstansServiceTest {
         assertThat(prosessinstans.getData(ProsessDataKey.BRUKER_ID)).isEqualTo(opprettSakRequest.getBrukerID());
         assertThat(prosessinstans.getData(ProsessDataKey.OPPGAVE_ID)).isEqualTo(opprettSakRequest.getOppgaveID());
         assertThat(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID)).isEqualTo(journalpostID);
-        Assertions.assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class)).isEqualTo(opprettSakRequest.getSoknad().getPeriode());
+        Assertions.assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, no.nav.melosys.saksflytapi.journalfoering.Periode.class)).isEqualTo(opprettSakRequest.getSoknad().getPeriode());
         assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSLAND, Soeknadsland.class)).isEqualTo(opprettSakRequest.getSoknad().getLand());
         assertThat(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).isEqualTo(opprettSakRequest.getSkalTilordnes());
     }
@@ -553,7 +554,7 @@ class ProsessinstansServiceTest {
         assertThat(prosessinstans.getData(ProsessDataKey.BRUKER_ID)).isEqualTo(opprettSakRequest.getBrukerID());
         assertThat(prosessinstans.getData(ProsessDataKey.OPPGAVE_ID)).isEqualTo(opprettSakRequest.getOppgaveID());
         assertThat(prosessinstans.getData(ProsessDataKey.JOURNALPOST_ID)).isEqualTo(journalpostID);
-        Assertions.assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, Periode.class)).isEqualTo(opprettSakRequest.getSoknad().getPeriode());
+        Assertions.assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSPERIODE, no.nav.melosys.saksflytapi.journalfoering.Periode.class)).isEqualTo(opprettSakRequest.getSoknad().getPeriode());
         Assertions.assertThat(prosessinstans.getData(ProsessDataKey.SØKNADSLAND, Soeknadsland.class)).isEqualTo(opprettSakRequest.getSoknad().getLand());
         assertThat(prosessinstans.getData(ProsessDataKey.SKAL_TILORDNES, Boolean.class)).isEqualTo(opprettSakRequest.getSkalTilordnes());
     }
@@ -775,7 +776,7 @@ class ProsessinstansServiceTest {
         journalfoeringRequest.setBrukerID("brukerid");
         journalfoeringRequest.setAvsenderID("avsenderid");
         journalfoeringRequest.setAvsenderNavn("avsendernavn");
-        journalfoeringRequest.setHoveddokument(new DokumentRequest("dokumentid", "hovedkokumenttittel", Collections.emptyList()));
+        journalfoeringRequest.setHoveddokument(new DokumentRequest("dokumentid", "hovedkokumenttittel", new ArrayList<>()));
         return journalfoeringRequest;
     }
 

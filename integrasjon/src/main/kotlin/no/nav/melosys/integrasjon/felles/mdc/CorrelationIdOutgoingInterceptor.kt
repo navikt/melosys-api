@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.felles.mdc
 
-import no.nav.melosys.MDCOperations.Companion.X_CORRELATION_ID
-import no.nav.melosys.MDCOperations.Companion.getCorrelationId
+import no.nav.melosys.config.MDCOperations.Companion.X_CORRELATION_ID
+import no.nav.melosys.config.MDCOperations.Companion.getCorrelationId
 import org.springframework.http.HttpRequest
 import org.springframework.http.client.ClientHttpRequestExecution
 import org.springframework.http.client.ClientHttpRequestInterceptor

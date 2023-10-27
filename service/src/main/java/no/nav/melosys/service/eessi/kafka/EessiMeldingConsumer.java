@@ -14,8 +14,8 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.stereotype.Service;
 
-import static no.nav.melosys.MDCOperations.CORRELATION_ID;
-import static no.nav.melosys.MDCOperations.putToMDC;
+import static no.nav.melosys.config.MDCOperations.CORRELATION_ID;
+import static no.nav.melosys.config.MDCOperations.putToMDC;
 
 @Service
 @Profile("!local-q1 & !local-q2")

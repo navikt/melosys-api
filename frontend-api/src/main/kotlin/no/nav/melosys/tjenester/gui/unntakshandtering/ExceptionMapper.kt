@@ -2,7 +2,7 @@ package no.nav.melosys.tjenester.gui.unntakshandtering
 
 import com.google.gson.JsonParser
 import mu.KotlinLogging
-import no.nav.melosys.MDCOperations
+import no.nav.melosys.config.MDCOperations
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.exception.SikkerhetsbegrensningException
