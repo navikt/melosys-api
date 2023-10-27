@@ -1,4 +1,4 @@
-package no.nav.melosys.service.saksflyt;
+package no.nav.melosys.saksflyt;
 
 import java.util.UUID;
 

@@ -12,7 +12,6 @@ import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.ProsessStatus;
 import no.nav.melosys.saksflytapi.domain.ProsessSteg;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
-import no.nav.melosys.service.saksflyt.ProsessinstansFerdigEvent;
 import no.nav.melosys.sikkerhet.context.SaksflytSubjektHolder;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.slf4j.Logger;
