@@ -8,23 +8,28 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 data class VedtakRequest(
     val behandlingsresultatTypeKode: Behandlingsresultattyper,
     val vedtakstype: Vedtakstyper,
-    val fritekst: String,
-    val fritekstSed: String,
-    val mottakerinstitusjoner: Set<String>,
-    val innledningFritekst: String,
-    val begrunnelseFritekst: String,
-    val ektefelleFritekst: String,
-    val barnFritekst: String,
-    val trygdeavgiftFritekst: String,
-    val kopiMottakere: List<KopiMottaker>,
+    val fritekst: String?,
+    val fritekstSed: String?,
+    val mottakerinstitusjoner: Set<String>?,
+    val innledningFritekst: String?,
+    val begrunnelseFritekst: String?,
+    val ektefelleFritekst: String?,
+    val barnFritekst: String?,
+    val trygdeavgiftFritekst: String?,
+    val kopiMottakere: List<KopiMottaker>?,
     val kopiTilArbeidsgiver: Boolean?,
     val bestillersId: String,
-    val nyVurderingBakgrunn: String,
-    val betalingsintervall: String, //TODO Eksisterer som enum FaktureringsIntervall i integrasjons modul
+    val nyVurderingBakgrunn: String?,
+    val betalingsintervall: String? //TODO Eksisterer som enum FaktureringsIntervall i integrasjons modul
 )
 
 @JvmRecord
-data class KopiMottaker(val rolle: Mottakerroller, val orgnr: String, val aktørId: String, val institusjonId: String) {
+data class KopiMottaker(
+    val rolle: Mottakerroller,
+    val orgnr: String?,
+    val aktørId: String?,
+    val institusjonId: String?
+) {
     fun tilUtkast(): KopiMottakerUtkast {
         return KopiMottakerUtkast(rolle, orgnr, aktørId, institusjonId)
     }

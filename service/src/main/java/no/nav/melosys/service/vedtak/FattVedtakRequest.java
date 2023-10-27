@@ -1,5 +1,6 @@
 package no.nav.melosys.service.vedtak;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -116,11 +117,11 @@ public class FattVedtakRequest {
             ektefelleFritekst,
             barnFritekst,
             trygdeavgiftFritekst,
-            kopiMottakere.stream().map(KopiMottakerDto::tilKopiMottaker).toList(),
+            kopiMottakere != null ? kopiMottakere.stream().map(KopiMottakerDto::tilKopiMottaker).toList() : Collections.emptyList(),
             kopiTilArbeidsgiver,
             bestillersId,
             nyVurderingBakgrunn,
-            betalingsintervall.toString() // TODO: map enum?
+            betalingsintervall != null ? betalingsintervall.toString() : null // TODO: map enum?
         );
     }
 
