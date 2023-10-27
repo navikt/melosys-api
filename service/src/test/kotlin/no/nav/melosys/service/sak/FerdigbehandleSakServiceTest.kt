@@ -10,7 +10,7 @@ import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.oppgave.OppgaveService
-import no.nav.melosys.service.saksflyt.ProsessinstansService
+import no.nav.melosys.saksflytapi.ProsessinstansService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

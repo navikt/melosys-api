@@ -4,7 +4,7 @@ import no.nav.melosys.domain.kodeverk.Saksstatuser
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.oppgave.OppgaveService
-import no.nav.melosys.service.saksflyt.ProsessinstansService
+import no.nav.melosys.saksflytapi.ProsessinstansService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
