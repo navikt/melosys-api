@@ -21,6 +21,7 @@ public enum ProsessSteg {
     LAGRE_ANMODNINGSPERIODE_MEDL("LAGRE_ANMODNINGSPERIODE_MEDL", "Lagrer en anmodningsperiode som under avklaring i MEDL"),
     LAGRE_LOVVALGSPERIODE_MEDL("LAGRE_LOVVALGSPERIODE_MEDL", "Lagrer en lovvalgsperiode i MEDL som foreløpig eller endelig"),
     LAGRE_MEDLEMSKAPSPERIODE_MEDL("LAGRE_MEDLEMSKAPSPERIODE_MEDL", "Lagrer en medlemskapsperiode (Folketrygden) i MEDL som endelig"),
+    OPPDATER_FAKTURAMOTTAKER("OPPDATER_FAKTURAMOTTAKER", "Oppdaterer fakturamottaker på eventuell faktura til sak"),
     OPPDATER_OG_FERDIGSTILL_JOURNALPOST("OPPDATER_OG_FERDIGSTILL_JOURNALPOST", "Oppdaterer og ferdigstiller journalposten i Joark"),
     OPPDATER_OPPGAVE_ANMODNING_UNNTAK_SENDT("OPPDATER_OPPGAVE_ANMODNING_UNNTAK_SENDT", "Oppdaterer oppgave med frist og beskrivelse"),
     OPPDATER_SAKSRELASJON("OPPDATER_SAKSRELASJON", "Oppdaterer saksrelasjon mellom melosys-sak og rina-sak"),
