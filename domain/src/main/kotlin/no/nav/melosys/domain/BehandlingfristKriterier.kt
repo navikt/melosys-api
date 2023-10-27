@@ -19,12 +19,14 @@ class BehandlingfristKriterier : Behandling() {
             behandlingstype: Behandlingstyper,
             utgangspunktDato: LocalDate
         ): LocalDate {
+            val frist4Uker = utgangspunktDato.plusWeeks(4)
             val frist8Uker = utgangspunktDato.plusWeeks(8)
             val frist70Dager = utgangspunktDato.plusDays(70)
             val frist90Dager = utgangspunktDato.plusDays(90)
             val frist180Dager = utgangspunktDato.plusDays(180)
 
             val behandlingfrister = listOf(
+                Pair.of(harFrist4UkerManglendeInnbetaling(behandlingstype), frist4Uker),
                 Pair.of(harFrist8UkerLovvalg(behandlingstema, behandlingstype), frist8Uker),
                 Pair.of(harFrist70DagerKlager(behandlingstype), frist70Dager),
                 Pair.of(harFrist90DagerSøknadsbehandlinger(sakstema, behandlingstema, behandlingstype), frist90Dager),
@@ -51,6 +53,12 @@ class BehandlingfristKriterier : Behandling() {
                     )
 
             return behandlingsFrist.right
+        }
+
+
+        private fun harFrist4UkerManglendeInnbetaling(behandlingstype: Behandlingstyper): Boolean {
+            val behandlingstyper = setOf(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
+            return behandlingstyper.contains(behandlingstype)
         }
 
 

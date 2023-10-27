@@ -77,6 +77,22 @@ internal class BehandlingTest {
     }
 
     @Test
+    fun utledBehandlingsfrist_4Uker() {
+        val behandling = Behandling().apply {
+            fagsak = Fagsak().apply {
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            }
+            tema = Behandlingstema.YRKESAKTIV
+            type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+        }
+
+        val behandlingsfrist = Behandling.utledBehandlingsfrist(
+            behandling, utgangspunktDato
+        )
+        behandlingsfrist.shouldBe(utgangspunktDato.plusWeeks(4))
+    }
+
+    @Test
     fun utledBehandlingsfrist_8Uker() {
         val behandling = Behandling().apply {
             fagsak = Fagsak().apply {

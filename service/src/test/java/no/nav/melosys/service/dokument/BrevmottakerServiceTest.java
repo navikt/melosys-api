@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.google.common.collect.Sets;
+import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.avgift.Inntektsperiode;
 import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
@@ -37,7 +38,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static java.util.Collections.emptyList;
-import static no.nav.melosys.domain.brev.NorskMyndighet.SKATTEETATEN;
 import static no.nav.melosys.domain.kodeverk.Mottakerroller.*;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.*;
@@ -60,11 +60,13 @@ class BrevmottakerServiceTest {
 
     private Behandlingsresultat behandlingsresultat;
     private BrevmottakerService brevmottakerService;
+    private FakeUnleash fakeUnleash = new FakeUnleash();
 
     @BeforeEach
     void setup() {
+        fakeUnleash.enableAll();
         brevmottakerService = new BrevmottakerService(
-            avklarteVirksomheterService, utenlandskMyndighetService, behandlingsresultatService, lovvalgsperiodeService);
+            avklarteVirksomheterService, utenlandskMyndighetService, behandlingsresultatService, lovvalgsperiodeService, fakeUnleash);
 
         behandlingsresultat = new Behandlingsresultat();
         Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
@@ -443,7 +445,7 @@ class BrevmottakerServiceTest {
             .containsExactly(
                 BRUKER,
                 List.of(ARBEIDSGIVER, UTENLANDSK_TRYGDEMYNDIGHET),
-                List.of(SKATTEETATEN)
+                emptyList()
             );
     }
 
@@ -462,7 +464,7 @@ class BrevmottakerServiceTest {
             .containsExactly(
                 BRUKER,
                 List.of(ARBEIDSGIVER),
-                List.of(SKATTEETATEN)
+                emptyList()
             );
     }
 
