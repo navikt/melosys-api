@@ -373,6 +373,13 @@ public final class ProsessflytDefinisjon {
                 SEND_FORVALTNINGSMELDING
             )
         );
+
+        PROSESS_FLYT_MAP.put(
+            ProsessType.OPPDATER_FAKTURA,
+            new ProsessFlyt(ProsessType.OPPDATER_FAKTURA,
+                OPPDATER_FAKTURAMOTTAKER
+            )
+        );
     }
 
     public static Optional<ProsessFlyt> finnFlytForProsessType(ProsessType prosessType) {
