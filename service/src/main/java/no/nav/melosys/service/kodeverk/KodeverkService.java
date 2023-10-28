@@ -9,6 +9,7 @@ import no.nav.melosys.integrasjon.kodeverk.Kode;
 import no.nav.melosys.integrasjon.kodeverk.KodeOppslag;
 import no.nav.melosys.integrasjon.kodeverk.KodeOppslagFraKodeverk;
 import no.nav.melosys.integrasjon.kodeverk.KodeverkRegister;
+import no.nav.melosys.integrasjon.kodeverk.impl.KodeverkRegisterImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -30,6 +31,13 @@ public class KodeverkService {
     private KodeOppslag kodeOppslag;
 
     public KodeverkService(KodeverkRegister kodeverkRegister, KodeOppslag kodeOppslag) {
+        if(kodeverkRegister instanceof KodeverkRegisterImpl) {
+            log.info("KodeverkRegisterImpl blir brukt");
+        }
+        if(kodeOppslag instanceof KodeOppslagFraKodeverk) {
+            log.info("KodeverkRegisterImpl blir brukt");
+        }
+
         this.kodeverkRegister = kodeverkRegister;
         this.kodeOppslag = kodeOppslag;
         this.kodeverkCache = new HashMap<>();

@@ -1,5 +1,6 @@
 package no.nav.melosys.itest
 
+import mu.KotlinLogging
 import no.nav.melosys.domain.FellesKodeverk
 import no.nav.melosys.integrasjon.kodeverk.Kode
 import no.nav.melosys.integrasjon.kodeverk.KodeOppslag
@@ -10,6 +11,8 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
 import java.time.LocalDate
+
+private val log = KotlinLogging.logger { }
 
 @TestConfiguration
 class KodeverkStub {
@@ -49,6 +52,7 @@ class KodeverkStub {
     @Bean
     @Primary
     fun kodeverkServiceStub(kodeverkRegister: KodeverkRegister?, kodeOppslag: KodeOppslag?): KodeverkService? {
+        log.info("kodeverkServiceStub lastet")
         return KodeverkService(kodeverkRegister, kodeOppslag)
     }
 }
