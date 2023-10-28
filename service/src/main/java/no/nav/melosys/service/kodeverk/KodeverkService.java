@@ -32,10 +32,14 @@ public class KodeverkService {
 
     public KodeverkService(KodeverkRegister kodeverkRegister, KodeOppslag kodeOppslag) {
         if(kodeverkRegister instanceof KodeverkRegisterImpl) {
-            log.info("KodeverkRegisterImpl blir brukt");
+            log.info("KodeOppslagFraKodeverk blir brukt");
+        } else {
+            log.info("---KodeverkRegister {}", kodeverkRegister.getClass().getSimpleName());
         }
         if(kodeOppslag instanceof KodeOppslagFraKodeverk) {
-            log.info("KodeverkRegisterImpl blir brukt");
+            log.info("KodeOppslagFraKodeverk blir brukt");
+        } else {
+            log.info("---KodeverkRegister {}", kodeverkRegister.getClass().getSimpleName());
         }
 
         this.kodeverkRegister = kodeverkRegister;
