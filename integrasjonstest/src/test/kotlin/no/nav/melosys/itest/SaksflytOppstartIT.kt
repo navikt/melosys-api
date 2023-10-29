@@ -60,7 +60,7 @@ import java.util.*
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DirtiesContext
 @EnableMockOAuth2Server
-@Import(OAuthMockServer::class)
+@Import(OAuthMockServer::class, KodeverkStub::class)
 internal class SaksflytOppstartIT(
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingRepository: BehandlingRepository,
