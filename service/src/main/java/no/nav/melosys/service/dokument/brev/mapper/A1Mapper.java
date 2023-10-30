@@ -264,15 +264,21 @@ class A1Mapper {
             .build();
     }
 
+    // Noen felter settes til " " for at de skal gå gjennom XSD validering. Melosys er mindre streng enn
+    // XSD'en tilsier.
     private BostedsadresseType lagBostedsadresse(StrukturertAdresse strukturertAdresse) {
         return BostedsadresseType.builder()
             .withGatenavn(StringUtils.isEmpty(strukturertAdresse.getGatenavn()) ? " " : strukturertAdresse.getGatenavn())
             .withHusnummer(strukturertAdresse.getHusnummerEtasjeLeilighet())
-            .withPostnr(strukturertAdresse.getPostnummer())
-            .withPoststed(strukturertAdresse.getPoststed())
+            .withPostnr(strukturertAdresse.erNorsk() ? strukturertAdresse.getPostnummer() : lagXsdGyldigPostnrForUtenlandskAdresse(strukturertAdresse))
+            .withPoststed(StringUtils.isEmpty(strukturertAdresse.getPoststed()) ? " " : strukturertAdresse.getPoststed())
             .withRegion(strukturertAdresse.getRegion())
             .withLandkode(strukturertAdresse.getLandkode())
             .build();
+    }
+
+    private String lagXsdGyldigPostnrForUtenlandskAdresse(StrukturertAdresse strukturertAdresse) {
+        return StringUtils.isEmpty(strukturertAdresse.getPostnummer()) ? " " : strukturertAdresse.getPostnummer();
     }
 
 
