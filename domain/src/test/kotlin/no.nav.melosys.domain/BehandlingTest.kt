@@ -89,7 +89,7 @@ internal class BehandlingTest {
         val behandlingsfrist = Behandling.utledBehandlingsfrist(
             behandling, utgangspunktDato
         )
-        behandlingsfrist.shouldBe(utgangspunktDato.plusWeeks(4))
+        behandlingsfrist.shouldBe(utgangspunktDato.plusWeeks(6))
     }
 
     @Test
