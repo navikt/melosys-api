@@ -15,13 +15,13 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.oppgave.Oppgave;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.journalforing.JournalfoeringService;
 import no.nav.melosys.service.journalforing.UtledBehandlingsaarsak;
 import no.nav.melosys.service.journalforing.dto.PeriodeDto;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -69,12 +69,12 @@ public class OpprettSak {
         if (sakstype == Sakstyper.EU_EOS) {
             prosessinstansService.opprettProsessinstansNySakEØS(
                 oppgave.getJournalpostId(),
-                opprettSakDto
+                opprettSakDto.tilOpprettSakRequest()
             );
         } else if (sakstype == Sakstyper.FTRL || sakstype == Sakstyper.TRYGDEAVTALE) {
             prosessinstansService.opprettProsessinstansNySakFTRLTrygdeavtale(
                 oppgave.getJournalpostId(),
-                opprettSakDto
+                opprettSakDto.tilOpprettSakRequest()
             );
         } else {
             throw new FunksjonellException("Sakstype %s støttes ikke".formatted(sakstype));
@@ -101,7 +101,7 @@ public class OpprettSak {
         }
 
         validerOpprettSakDto(opprettSakDto);
-        prosessinstansService.opprettNySakOgBehandling(opprettSakDto);
+        prosessinstansService.opprettNySakOgBehandling(opprettSakDto.tilOpprettSakRequest());
     }
 
     void validerOpprettSakDto(OpprettSakDto opprettSakDto) {
@@ -128,12 +128,12 @@ public class OpprettSak {
         if (soknadDto == null) {
             throw new FunksjonellException("SoknadDto må ikke være null for å opprette en søknadbehandling.");
         }
-        PeriodeDto periodeDto = soknadDto.getPeriode();
+        PeriodeDto periodeDto = soknadDto.periode;
         if (periodeDto.getFom() == null) {
             feilet = true;
             feilmeldingBuilder.append("søknadsperiodes fra og med dato, ");
         }
-        if (!soknadDto.getLand().erGyldig()) {
+        if (!soknadDto.land.erGyldig()) {
             feilet = true;
             feilmeldingBuilder.append("land, ");
         }

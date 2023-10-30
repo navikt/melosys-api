@@ -11,8 +11,8 @@ import no.nav.melosys.integrasjon.felles.CallIdAware;
 import no.nav.melosys.integrasjon.felles.JacksonObjectMapperProvider;
 import no.nav.melosys.integrasjon.kodeverk.impl.dto.KodeDto;
 
-import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.X_CORRELATION_ID;
-import static no.nav.melosys.integrasjon.felles.mdc.MDCOperations.getCorrelationId;
+import static no.nav.melosys.config.MDCOperations.X_CORRELATION_ID;
+import static no.nav.melosys.config.MDCOperations.getCorrelationId;
 import static no.nav.melosys.integrasjon.kodeverk.impl.KodeverkRegisterImpl.BOKMÅL;
 
 

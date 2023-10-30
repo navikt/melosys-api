@@ -1,9 +1,9 @@
 package no.nav.melosys.service.tilgang;
 
+import no.nav.melosys.config.MDCOperations;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.integrasjon.felles.mdc.MDCOperations;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.sak.FagsakService;

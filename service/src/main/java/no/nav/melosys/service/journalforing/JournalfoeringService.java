@@ -15,6 +15,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -25,7 +26,6 @@ import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -128,7 +128,7 @@ public class JournalfoeringService {
         LocalDate mottaksdato = utledMottaksdato(journalfoeringDto.getMottattDato(), journalpost);
         Behandlingsaarsaktyper behandlingsaarsaktyper = utledÅrsaktype(journalpost, sakstema, behandlingstema, behandlingstype);
 
-        prosessinstansService.opprettProsessinstansJournalføringNySak(journalfoeringDto, prosessType,
+        prosessinstansService.opprettProsessinstansJournalføringNySak(journalfoeringDto.tilJournalfoeringOpprettRequest(), prosessType,
             skalSetteSøknadslandOgPeriode, mottaksdato, behandlingsaarsaktyper, finnInstitusjonIdEllerNull(journalfoeringDto.getAvsenderID()));
 
         log.info("Ny sak bestilt etter journalføring av journalpost {}", journalfoeringDto.getJournalpostID());
@@ -224,7 +224,7 @@ public class JournalfoeringService {
 
         log.info("{} knytter journalpost {} til eksisterende sak {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
 
-        prosessinstansService.opprettProsessinstansJournalføringKnyttTilEksisterende(journalfoeringDto, saksnummer, fagsak, finnInstitusjonIdEllerNull(journalfoeringDto.getAvsenderID()));
+        prosessinstansService.opprettProsessinstansJournalføringKnyttTilEksisterende(journalfoeringDto.tilJournalfoeringTilordneRequest(), saksnummer, fagsak, finnInstitusjonIdEllerNull(journalfoeringDto.getAvsenderID()));
     }
 
     private String finnInstitusjonIdEllerNull(String avsenderID) {
@@ -263,7 +263,7 @@ public class JournalfoeringService {
         Behandlingsaarsaktyper behandlingsaarsaktyper = utledÅrsaktype(journalpost, fagsak.getTema(), behandlingstema, behandlingstype);
         LocalDate mottaksdato = utledMottaksdato(journalfoeringDto.getMottattDato(), journalpost);
 
-        prosessinstansService.journalførOgOpprettAndregangsBehandling(prosessTypeForAndregangsbehandling, behandlingstema, behandlingstype, journalfoeringDto,
+        prosessinstansService.journalførOgOpprettAndregangsBehandling(prosessTypeForAndregangsbehandling, behandlingstema, behandlingstype, journalfoeringDto.tilJournalfoeringTilordneRequest(),
             behandlingsaarsaktyper, mottaksdato, finnInstitusjonIdEllerNull(journalfoeringDto.getAvsenderID()));
     }
 

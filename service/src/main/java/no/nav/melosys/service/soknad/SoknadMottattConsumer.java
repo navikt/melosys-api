@@ -1,7 +1,7 @@
 package no.nav.melosys.service.soknad;
 
+import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,12 +26,15 @@ public class SoknadMottattConsumer {
     @KafkaListener(clientIdPrefix = "melosys-soknad-mottak-consumer", topics = "${kafka.aiven.soknad-mottak.topic}",
         containerFactory = "aivenSoknadMottattContainerFactory")
     public void mottaAivenMelding(ConsumerRecord<String, SoknadMottatt> consumerRecord) {
-        SoknadMottatt melding = consumerRecord.value();
-        log.info("Mottatt ny melding fra altinn via aiven: {}", melding);
+        SoknadMottatt søknadMottatt = consumerRecord.value();
+        log.info("Mottatt ny søknadMottatt fra altinn via aiven: {}", søknadMottatt);
 
-        boolean erMottattSøknadTidligere = mottatteOpplysningerService.harMottattSøknadMedEksternReferanseID(melding.getSoknadID());
+        String soknadID = søknadMottatt.getSoknadID();
+        boolean forGammelTilForvaltningsmelding = søknadMottatt.erForGammelTilForvaltningsmelding();
+        boolean erMottattSøknadTidligere = mottatteOpplysningerService.harMottattSøknadMedEksternReferanseID(søknadMottatt.getSoknadID());
+
         try {
-            prosessinstansService.opprettProsessinstansSøknadMottatt(melding, erMottattSøknadTidligere);
+            prosessinstansService.opprettProsessinstansSøknadMottatt(soknadID, forGammelTilForvaltningsmelding, erMottattSøknadTidligere);
         } catch (Exception e) {
             log.error("Feil ved mottak av søknad fra altinn via aiven! SoknadID: {} ConsumerRecord.key: {}",
                 consumerRecord.value().getSoknadID(), consumerRecord.key(), e);

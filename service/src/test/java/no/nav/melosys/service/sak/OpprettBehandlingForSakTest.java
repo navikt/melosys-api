@@ -11,11 +11,11 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -177,7 +177,7 @@ class OpprettBehandlingForSakTest {
         opprettBehandlingForSak.opprettBehandling(SAKSNUMMER, opprettSakDto);
 
 
-        verify(prosessinstansService).opprettNyBehandlingForSak(SAKSNUMMER, opprettSakDto);
+        verify(prosessinstansService).opprettNyBehandlingForSak(SAKSNUMMER, opprettSakDto.tilOpprettSakRequest());
     }
 
     @Test
@@ -201,7 +201,7 @@ class OpprettBehandlingForSakTest {
         opprettBehandlingForSak.opprettBehandling(SAKSNUMMER, opprettSakDto);
 
 
-        verify(prosessinstansService).opprettOgReplikerBehandlingForSak(SAKSNUMMER, opprettSakDto);
+        verify(prosessinstansService).opprettOgReplikerBehandlingForSak(SAKSNUMMER, opprettSakDto.tilOpprettSakRequest());
     }
 
     private OpprettSakDto lagOpprettSakDto() {

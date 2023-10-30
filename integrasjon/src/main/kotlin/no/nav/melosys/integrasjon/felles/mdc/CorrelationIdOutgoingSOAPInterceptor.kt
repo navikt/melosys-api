@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.felles.mdc
 
+import no.nav.melosys.config.MDCOperations
 import org.apache.cxf.binding.soap.SoapHeader
 import org.apache.cxf.binding.soap.SoapMessage
 import org.apache.cxf.interceptor.Fault

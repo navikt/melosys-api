@@ -1,28 +1,28 @@
 package no.nav.melosys.service.journalforing.dto;
 
-import no.nav.melosys.domain.kodeverk.Avsendertyper;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import no.nav.melosys.domain.kodeverk.Avsendertyper;
+
 import static java.lang.Boolean.FALSE;
 
 public abstract class JournalfoeringDto {
-    private String journalpostID;
-    private String oppgaveID;
-    private String brukerID;
-    private String virksomhetOrgnr;
-    private String avsenderID;
-    private String avsenderNavn;
-    private Avsendertyper avsenderType;
-    private DokumentDto hoveddokument;
-    private List<DokumentDto> vedlegg = new ArrayList<>();
-    private boolean skalTilordnes;
-    private Boolean ikkeSendForvaltingsmelding;
-    private LocalDate mottattDato;
-    private String behandlingstemaKode;
-    private String behandlingstypeKode;
+    protected String journalpostID;
+    protected String oppgaveID;
+    protected String brukerID;
+    protected String virksomhetOrgnr;
+    protected String avsenderID;
+    protected String avsenderNavn;
+    protected Avsendertyper avsenderType;
+    protected DokumentDto hoveddokument;
+    protected List<DokumentDto> vedlegg = new ArrayList<>();
+    protected boolean skalTilordnes;
+    protected Boolean ikkeSendForvaltingsmelding;
+    protected LocalDate mottattDato;
+    protected String behandlingstemaKode;
+    protected String behandlingstypeKode;
 
     public String getJournalpostID() {
         return journalpostID;

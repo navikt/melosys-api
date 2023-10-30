@@ -6,6 +6,7 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.saksflytapi.journalfoering.OpprettSakRequest
 import java.time.LocalDate
 
 class OpprettSakDto {
@@ -23,4 +24,27 @@ class OpprettSakDto {
     var mottaksdato: LocalDate? = null
     var skalTilordnes: Boolean = false
     var fakturaserieReferanse: String? = null
+
+    fun tilOpprettSakRequest(): OpprettSakRequest {
+        return OpprettSakRequest(
+            hovedpart = hovedpart,
+            brukerID = brukerID,
+            virksomhetOrgnr = virksomhetOrgnr,
+            sakstype = sakstype,
+            sakstema = sakstema,
+            behandlingstema = behandlingstema,
+            behandlingstype = behandlingstype,
+            behandlingsaarsakType = behandlingsaarsakType,
+            behandlingsaarsakFritekst = behandlingsaarsakFritekst,
+            oppgaveID = oppgaveID,
+            soknad = soknadDto?.tilSøknadRequest(),
+            mottaksdato = mottaksdato,
+            skalTilordnes = skalTilordnes,
+            fakturaserieReferanse = fakturaserieReferanse
+        )
+
+    }
 }
+
+
+
