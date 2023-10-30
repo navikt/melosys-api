@@ -68,22 +68,14 @@ class YrkesaktivEosVedtakIT(
     @BeforeEach
     fun setup() {
         oAuthMockServer.start()
-
-/*        mockServer.stubFor(
-            WireMock.post("/api/v1/mal/ikke_yrkesaktiv_vedtaksbrev/lag-pdf?somKopi=false&utkast=false").willReturn(
-                WireMock.aResponse()
-                    .withStatus(200)
-                    .withHeader("Content-Type", "application/json")
-                    .withBody(ByteArray(0))
-            )
-        )*/
-        MedlRepo.repo.clear()
         unleash.enableAll()
+        MedlRepo.repo.clear()
     }
 
     @AfterEach
     fun afterEach() {
         oAuthMockServer.stop()
+        MedlRepo.repo.clear()
     }
 
     @Test
@@ -174,6 +166,7 @@ class YrkesaktivEosVedtakIT(
 
         executeAndWait(
             waitForprosessType = ProsessType.IVERKSETT_VEDTAK_EOS,
+            alsoWaitForprosessType = listOf(ProsessType.SEND_BREV)
         ) {
             vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
         }
