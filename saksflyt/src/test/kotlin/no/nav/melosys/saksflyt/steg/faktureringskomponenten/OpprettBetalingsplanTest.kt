@@ -96,6 +96,27 @@ class OpprettBetalingsplanTest {
         verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaSerie(capture(slotFakturaserieDto)) }
         slotFakturaserieDto.captured.shouldNotBeNull()
         slotFakturaserieDto.captured.referanseBruker.shouldContain("Vedtak om medlemskap datert ")
+        slotFakturaserieDto.captured.fakturaserieReferanse.shouldBeNull()
+    }
+
+    @Test
+    fun `Opprett betalingsplan for ny vurdering`() {
+        val OPPRINNELIG_BEHANDLING_ID = 2L
+        lagTestData(setOf(lagAktoerBruker()))
+        behandling.opprinneligBehandling = Behandling().apply { id = OPPRINNELIG_BEHANDLING_ID }
+        val opprinneligBehandlingsresultat = Behandlingsresultat().apply { fakturaserieReferanse = "3456"}
+        every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(OPPRINNELIG_BEHANDLING_ID) } returns opprinneligBehandlingsresultat
+        every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
+        every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
+
+
+        opprettBetalingsplan.utfør(prosessinstans)
+
+
+        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaSerie(capture(slotFakturaserieDto)) }
+        slotFakturaserieDto.captured.shouldNotBeNull()
+        slotFakturaserieDto.captured.fakturaserieReferanse.shouldBe(opprinneligBehandlingsresultat.fakturaserieReferanse)
     }
 
     @Test
