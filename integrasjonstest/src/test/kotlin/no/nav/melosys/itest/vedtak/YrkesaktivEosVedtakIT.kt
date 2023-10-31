@@ -41,6 +41,7 @@ import no.nav.melosys.service.vilkaar.VilkaarDto
 import no.nav.melosys.service.vilkaar.VilkaarsresultatService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
@@ -79,7 +80,7 @@ class YrkesaktivEosVedtakIT(
     }
 
     @Test
-    fun `yrkesaktiv vedtak - eøs - innvigelse med bestemmelse TODO`() {
+    fun `yrkesaktiv vedtak - eøs - innvigelse med bestemmelse FO_883_2004_ART12_1`() {
         val behandling = journalførOgVentTilProsesserErFerdige(
             defaultJournalføringDto().apply {
                 fagsak.sakstype = Sakstyper.EU_EOS.kode
@@ -210,6 +211,139 @@ class YrkesaktivEosVedtakIT(
                 lovvalgsland shouldBe "BEL"
                 lovvalg shouldBe "ENDL"
                 grunnlag shouldBe "FO_12_1"
+                sporingsinformasjon?.kildedokument shouldBe "Henv_Soknad"
+            }
+    }
+
+    @Test
+    @Disabled("40x mer art. 12_1 enn 12_2. Vi bør trolig få tester til å kjøre raskere før vi legger til ikke-kritiske tester")
+    fun `yrkesaktiv vedtak - eøs - innvigelse med bestemmelse FO_883_2004_ART12_2`() {
+        val behandling = journalførOgVentTilProsesserErFerdige(
+            defaultJournalføringDto().apply {
+                fagsak.sakstype = Sakstyper.EU_EOS.kode
+                fagsak.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode
+                behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
+                behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
+            },
+            waitFor = ProsessType.JFR_NY_SAK_BRUKER,
+            alsoWaitForprosessType = listOf(ProsessType.OPPRETT_OG_DISTRIBUER_BREV)
+        ).behandling
+
+        val mottatteOpplysninger =
+            mottatteOpplysningerService.hentEllerOpprettMottatteOpplysninger(behandling.id, true)
+                .shouldNotBeNull()
+                .mottatteOpplysningerData.apply {
+                    periode = Periode(
+                        LocalDate.of(2023, 1, 1),
+                        LocalDate.of(2023, 2, 1),
+                    )
+                    soeknadsland = Soeknadsland(listOf(Landkoder.BE.kode), false)
+                }
+        mottatteOpplysningerService.oppdaterMottatteOpplysninger(behandling.id, mottatteOpplysninger.toJsonNode)
+        oppfriskSaksopplysningerService.oppfriskSaksopplysning(behandling.id, false)
+
+        val yrkesgruppe = AvklartefaktaDto(
+            listOf("ORDINAER"), "YRKESGRUPPE"
+        ).apply {
+            avklartefaktaType = Avklartefaktatyper.YRKESGRUPPE
+            subjektID = null
+            begrunnelseKoder = emptyList()
+            begrunnelseFritekst = null
+        }
+        val virksomhet = AvklartefaktaDto(
+            listOf("TRUE"), "VIRKSOMHET"
+        ).apply {
+            avklartefaktaType = Avklartefaktatyper.VIRKSOMHET
+            subjektID = "999999999"
+            begrunnelseKoder = emptyList()
+            begrunnelseFritekst = null
+        }
+        val yrkesaktivitet = AvklartefaktaDto(
+            listOf("SELVSTENDIG_NAERINGSDRIVENDE"), "YRKESAKTIVITET"
+        ).apply {
+            avklartefaktaType = null
+            subjektID = null
+            begrunnelseKoder = emptyList()
+            begrunnelseFritekst = null
+        }
+        avklartefaktaService.lagreAvklarteFakta(behandling.id, setOf(yrkesgruppe, virksomhet, yrkesaktivitet))
+
+        val normaltDriverVirksomhet = VilkaarDto().apply {
+            vilkaar = "ART12_2_NORMALT_DRIVER_VIRKSOMHET"
+            isOppfylt = true
+        }
+        val art12_2 = VilkaarDto().apply {
+            vilkaar = "FO_883_2004_ART12_2"
+            isOppfylt = true
+        }
+        vilkaarsresultatService.registrerVilkår(behandling.id, listOf(normaltDriverVirksomhet, art12_2))
+
+        lovvalgsperiodeService.lagreLovvalgsperioder(behandling.id, listOf(Lovvalgsperiode().apply {
+            innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+            bestemmelse = Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2
+            lovvalgsland = Land_iso2.BE
+            medlemskapstype = Medlemskapstyper.PLIKTIG
+            dekning = Trygdedekninger.FULL_DEKNING
+
+            fom = LocalDate.of(2023, 1, 1)
+            tom = LocalDate.of(2023, 2, 1)
+        }))
+
+        ferdigbehandlingKontrollFacade.kontroller(behandling.id, false, null, setOf())
+
+        val vedtakRequest = FattVedtakRequest.Builder()
+            .medBehandlingsresultat(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND)
+            .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
+            .medBestillersId("komponent test")
+            .build()
+
+
+        executeAndWait(
+            waitForprosessType = ProsessType.IVERKSETT_VEDTAK_EOS,
+            alsoWaitForprosessType = listOf(ProsessType.SEND_BREV)
+        ) {
+            vedtaksfattingFasade.fattVedtak(behandling.id, vedtakRequest)
+        }
+
+
+        behandlingsresultatService.hentBehandlingsresultat(behandling.id).apply {
+            type shouldBe Behandlingsresultattyper.FASTSATT_LOVVALGSLAND
+            behandlingsmåte shouldBe Behandlingsmaate.MANUELT
+            fastsattAvLand shouldBe Land_iso2.NO
+        }
+        lovvalgsperiodeService.hentLovvalgsperiode(behandling.id).apply {
+            innvilgelsesresultat shouldBe InnvilgelsesResultat.INNVILGET
+            bestemmelse shouldBe Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_2
+            lovvalgsland shouldBe Land_iso2.BE
+            medlemskapstype shouldBe Medlemskapstyper.PLIKTIG
+            dekning shouldBe Trygdedekninger.FULL_DEKNING
+            fom shouldBe LocalDate.of(2023, 1, 1)
+            tom shouldBe LocalDate.of(2023, 2, 1)
+        }
+        behandlingRepository.findById(behandling.id).orElse(null)
+            .shouldNotBeNull().apply {
+                withClue("Behandlingsstatus skal være AVSLUTTET") {
+                    status shouldBe Behandlingsstatus.AVSLUTTET
+                }
+                fagsak.apply {
+                    withClue("Saksstatus skal være LOVVALG_AVKLART") {
+                        status shouldBe Saksstatuser.LOVVALG_AVKLART
+                    }
+                }
+            }
+
+        MedlRepo.repo.values
+            .shouldHaveSize(1)
+            .first()
+            .apply {
+                fraOgMed shouldBe LocalDate.of(2023, 1, 1)
+                tilOgMed shouldBe LocalDate.of(2023, 2, 1)
+                status shouldBe "GYLD"
+                dekning shouldBe "Full"
+                medlem shouldBe true
+                lovvalgsland shouldBe "BEL"
+                lovvalg shouldBe "ENDL"
+                grunnlag shouldBe "FO_12_2"
                 sporingsinformasjon?.kildedokument shouldBe "Henv_Soknad"
             }
     }
