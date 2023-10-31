@@ -7,6 +7,7 @@ import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.featuretoggle.ToggleName.REFAKTORERING_ORDINÆR_TRYGDEAVGIFT
+import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.pdl.PDLConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftsberegningsRequestMapper
@@ -14,6 +15,7 @@ import no.nav.melosys.integrasjon.trygdeavgift.dto.TrygdeavgiftsberegningRespons
 import no.nav.melosys.service.MedlemAvFolketrygdenService
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.persondata.PersondataService
+import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService
 import no.nav.melosys.service.sak.FagsakService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -23,6 +25,7 @@ import java.util.*
 class TrygdeavgiftsberegningService
     (
     private val behandlingService: BehandlingService,
+    private val eregFasade: EregFasade,
     private val medlemAvFolketrygdenService: MedlemAvFolketrygdenService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val persondataService: PersondataService,
@@ -41,7 +44,9 @@ class TrygdeavgiftsberegningService
         if (
             if (unleash.isEnabled(REFAKTORERING_ORDINÆR_TRYGDEAVGIFT)) !trygdeavgiftMottakerService.skalBetalesTilNav(fastsattTrygdeavgift.trygdeavgiftsgrunnlag)
             else !fastsattTrygdeavgift.skalBetalesTilNav()
-            ) { return emptySet() }
+        ) {
+            return emptySet()
+        }
 
         val innvilgedeMedlemskapsperioder =
             medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }
@@ -128,10 +133,15 @@ class TrygdeavgiftsberegningService
             ?: emptySet()
     }
 
-    fun finnFakturamottaker(behandlingID: Long) : String {
+    fun finnFakturamottaker(behandlingID: Long): String {
         val fagsak = behandlingService.hentBehandling(behandlingID).fagsak
         return fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
-            .map { persondataService.hentSammensattNavn(it.aktørId) }
+            .map {
+                if (it.erPerson())
+                    persondataService.hentSammensattNavn(it.aktørId)
+                else
+                    eregFasade.hentOrganisasjonNavn(it.orgnr)
+            }
             .orElse(persondataService.hentSammensattNavn(fagsak.hentBruker().aktørId))
     }
 }

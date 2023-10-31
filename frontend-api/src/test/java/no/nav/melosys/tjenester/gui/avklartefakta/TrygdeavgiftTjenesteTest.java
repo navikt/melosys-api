@@ -59,6 +59,7 @@ class TrygdeavgiftTjenesteTest {
 
     private static final String BASE_URL = "/api/behandlinger/{behandlingID}/trygdeavgift";
     private static final long BEHANDLINGSRESULTAT_ID = 1;
+    private static final String FAKTURAMOTTAKER = "Fornavn Etternavn";
     private static final Trygdeavgiftsgrunnlag trygdeavgiftsgrunnlag = lagTrygdeavgiftsgrunnlag();
     private static final Set<Trygdeavgiftsperiode> trygdeavgiftsperioder = lagTrygdeavgiftsperioder();
 
@@ -88,6 +89,7 @@ class TrygdeavgiftTjenesteTest {
     @Test
     void hentTrygdeavgiftsperioder() throws Exception {
         when(trygdeavgiftsberegningService.hentTrygdeavgiftsberegning(BEHANDLINGSRESULTAT_ID)).thenReturn(trygdeavgiftsperioder);
+        when(trygdeavgiftsberegningService.finnFakturamottaker(BEHANDLINGSRESULTAT_ID)).thenReturn(FAKTURAMOTTAKER);
 
         mockMvc.perform(get(BASE_URL + "/beregning", 1L)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -99,6 +101,7 @@ class TrygdeavgiftTjenesteTest {
     @Test
     void beregnTrygdeavgift() throws Exception {
         when(trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(BEHANDLINGSRESULTAT_ID)).thenReturn(trygdeavgiftsperioder);
+        when(trygdeavgiftsberegningService.finnFakturamottaker(BEHANDLINGSRESULTAT_ID)).thenReturn(FAKTURAMOTTAKER);
 
         mockMvc.perform(put(BASE_URL + "/beregning", 1L)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -108,7 +111,7 @@ class TrygdeavgiftTjenesteTest {
     }
 
     private BeregnetTrygdeavgiftDto forventetBeregnetTrygdeavgiftDto() {
-        return new BeregnetTrygdeavgiftDto(trygdeavgiftsperioder.stream().map(TrygdeavgiftsperiodeDto::new).toList());
+        return new BeregnetTrygdeavgiftDto(trygdeavgiftsperioder.stream().map(TrygdeavgiftsperiodeDto::new).toList(), FAKTURAMOTTAKER);
     }
 
     private static Trygdeavgiftsgrunnlag lagTrygdeavgiftsgrunnlag() {

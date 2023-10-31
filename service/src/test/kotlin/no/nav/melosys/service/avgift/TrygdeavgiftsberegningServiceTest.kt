@@ -17,6 +17,7 @@ import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.dto.*
 import no.nav.melosys.service.MedlemAvFolketrygdenService
@@ -33,6 +34,9 @@ import java.util.*
 internal class TrygdeavgiftsberegningServiceTest {
     @MockK
     private lateinit var mockBehandlingService: BehandlingService
+
+    @MockK
+    private lateinit var mockEregFasade: EregFasade
 
     @MockK
     private lateinit var mockMedlemAvFolketrygdenService: MedlemAvFolketrygdenService
@@ -56,6 +60,8 @@ internal class TrygdeavgiftsberegningServiceTest {
     private val BEHANDLING_ID: Long = 1291
     private val FULLMEKTIG_AKTØR_ID: String = "123456789"
     private val FULLMEKTIG_NAVN: String = "Herr Fullmektig"
+    private val FULLMEKTIG_ORGNR: String = "888888888"
+    private val FULLMEKTIG_ORG_NAVN: String = "Aksjeselskap AS"
     private val BRUKER_AKTØR_ID: String = "987654321"
     private val BRUKER_NAVN: String = "Bruker Etternavn"
 
@@ -66,6 +72,7 @@ internal class TrygdeavgiftsberegningServiceTest {
         trygdeavgiftsberegningService =
             TrygdeavgiftsberegningService(
                 mockBehandlingService,
+                mockEregFasade,
                 mockMedlemAvFolketrygdenService,
                 trygdeavgiftMottakerService,
                 mockPersondataService,
@@ -74,6 +81,7 @@ internal class TrygdeavgiftsberegningServiceTest {
             )
         medlemAvFolketrygden = MedlemAvFolketrygden()
         behandling = Behandling()
+        every { mockEregFasade.hentOrganisasjonNavn(FULLMEKTIG_ORGNR)}.returns(FULLMEKTIG_ORG_NAVN)
         every { mockMedlemAvFolketrygdenService.hentMedlemAvFolketrygden(BEHANDLING_ID) }.returns(medlemAvFolketrygden)
         every { mockBehandlingService.hentBehandling(BEHANDLING_ID) }.returns(behandling)
         every { mockPersondataService.hentSammensattNavn(FULLMEKTIG_AKTØR_ID) }.returns(FULLMEKTIG_NAVN)
@@ -281,7 +289,7 @@ internal class TrygdeavgiftsberegningServiceTest {
     }
 
     @Test
-    fun finnFakturamottaker_harFullmektigForTrygdeavgift_mottakerErFullmektig() {
+    fun finnFakturamottaker_harFullmektigPersonForTrygdeavgift_mottakerErFullmektigPerson() {
         behandling.apply {
             fagsak = Fagsak().apply {
                 aktører = setOf(
@@ -292,11 +300,31 @@ internal class TrygdeavgiftsberegningServiceTest {
                     Aktoer().apply {
                         aktørId = FULLMEKTIG_AKTØR_ID
                         rolle = Aktoersroller.FULLMEKTIG
+                        personIdent = FULLMEKTIG_AKTØR_ID
                         fullmakter = setOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT })
                     })
             }
         }
         trygdeavgiftsberegningService.finnFakturamottaker(BEHANDLING_ID).shouldBe(FULLMEKTIG_NAVN)
+    }
+
+    @Test
+    fun finnFakturamottaker_harFullmektigOrgForTrygdeavgift_mottakerErFullmektigOrg() {
+        behandling.apply {
+            fagsak = Fagsak().apply {
+                aktører = setOf(
+                    Aktoer().apply {
+                        aktørId = BRUKER_AKTØR_ID
+                        rolle = Aktoersroller.BRUKER
+                    },
+                    Aktoer().apply {
+                        orgnr = FULLMEKTIG_ORGNR
+                        rolle = Aktoersroller.FULLMEKTIG
+                        fullmakter = setOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT })
+                    })
+            }
+        }
+        trygdeavgiftsberegningService.finnFakturamottaker(BEHANDLING_ID).shouldBe(FULLMEKTIG_ORG_NAVN)
     }
 
     @Test
