@@ -1,15 +1,9 @@
 package no.nav.melosys.integrasjon.ereg
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.getunleash.Unleash
 import mu.KotlinLogging
 import no.nav.melosys.domain.Saksopplysning
-import no.nav.melosys.domain.dokument.SaksopplysningDokument
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.featuretoggle.ToggleName
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Service
 import java.util.*
@@ -24,20 +18,13 @@ class EregSoapRestCompareService(
     private var unleash: Unleash,
     private val eregService: EregService,
     private val eregRestService: EregRestService,
-    @Value("\${ereg.soap.rest.compare.filter:}") private val ignoreCompare: List<String>
 ) : EregFasade {
-    private val objectMapper = jacksonObjectMapper().registerModule(JavaTimeModule())
-
-    init {
-        log.info("ignore compare for $ignoreCompare")
-    }
 
     override fun hentOrganisasjon(orgnr: String): Saksopplysning {
         val organisasjonRest = runAndLogErrors(orgnr) {
             eregRestService.hentOrganisasjon(orgnr)
         }
         val organisasjonSoap = eregService.hentOrganisasjon(orgnr)
-        compareAndLog(organisasjonSoap.dokument, organisasjonRest?.dokument)
 
         if (unleash.isEnabled(ToggleName.MELOSYS_EREG_ORGANISASJON) && organisasjonRest != null) {
             return organisasjonRest
@@ -53,10 +40,7 @@ class EregSoapRestCompareService(
         val organisasjonSoap = eregService.finnOrganisasjon(orgnr)
 
         if (organisasjonSoap.isEmpty && organisasjonRest != null) {
-            log.warn("Ereg: organisasjonSoap er tom men rest gir svar for $orgnr")
-            log.warn("rest:\n${objectMapper.writeValueAsString(organisasjonRest)}")
-        } else {
-            compareAndLog(organisasjonSoap.get().dokument, organisasjonRest?.dokument)
+            log.warn("Ereg: organisasjonSoap er tom men rest gir svar for ${filterOrgnummerSomErFnr(orgnr)}")
         }
 
         if (unleash.isEnabled(ToggleName.MELOSYS_EREG_ORGANISASJON)) {
@@ -66,14 +50,14 @@ class EregSoapRestCompareService(
         return organisasjonSoap
     }
 
+    fun filterOrgnummerSomErFnr(orgnummer: String): String =
+        if (orgnummer.length == 11) "***********" else orgnummer
+
     override fun hentOrganisasjonNavn(orgnummer: String): String {
         val organisasjonNavnRest = runAndLogErrors(orgnummer) {
             eregRestService.hentOrganisasjonNavn(orgnummer)
         }
         val organisasjonNavnSoap = eregService.hentOrganisasjonNavn(orgnummer)
-        if (organisasjonNavnSoap != organisasjonNavnRest) {
-            log.warn("Ereg hentOrganisasjonNavn: SOAP($organisasjonNavnSoap) != REST($organisasjonNavnRest) for orgnummer $orgnummer")
-        }
 
         if (unleash.isEnabled(ToggleName.MELOSYS_EREG_ORGANISASJON) && organisasjonNavnRest != null) {
             return organisasjonNavnRest
@@ -86,101 +70,8 @@ class EregSoapRestCompareService(
         return try {
             action()
         } catch (e: Exception) {
-            log.warn("Ereg: Kall mot rest endepunkt feilet for $orgnr", e)
+            log.warn("Ereg: Kall mot rest endepunkt feilet for ${filterOrgnummerSomErFnr(orgnr)}", e)
             null
         }
-    }
-
-    private fun compareAndLog(saksopplysningDokumentSoap: SaksopplysningDokument, saksopplysningDokumentRest: SaksopplysningDokument?) {
-        val organisasjonDokumentSoap = saksopplysningDokumentSoap as OrganisasjonDokument
-        try {
-
-            if (saksopplysningDokumentRest == null) {
-                log.warn("Ereg: rest request er null for ${organisasjonDokumentSoap.orgnummer}")
-                return
-            }
-
-            val organisasjonDokumentRest = saksopplysningDokumentRest as OrganisasjonDokument
-
-            val soapNode = objectMapper.valueToTree<JsonNode>(organisasjonDokumentSoap.apply { oppstartsdato = null })
-            val restNode = objectMapper.valueToTree<JsonNode>(organisasjonDokumentRest)
-
-            if (soapNode != restNode) {
-                var removedCount = 0
-                val differences = compareJsonNodes(soapNode, restNode)
-                    .filterNot { difference ->
-                        ignoreCompare.any { ignore ->
-                            ignore.toRegex().containsMatchIn(difference).apply { if (this) removedCount++ }
-                        }
-                    }
-
-                if (differences.isNotEmpty()) {
-                    log.warn("Differences found for ${organisasjonDokumentSoap.orgnummer} $removedCount removed \n" +
-                        "soap vs rest:\n" + differences.joinToString("\n") { it })
-                }
-            }
-        } catch (e: Exception) {
-            log.warn("compareAndLog failed for ${organisasjonDokumentSoap.orgnummer}", e)
-        }
-    }
-
-    // Laget av chat GPT-4
-    private fun compareJsonNodes(node1: JsonNode, node2: JsonNode, path: String = ""): List<String> {
-        val differences = mutableListOf<String>()
-
-        if (nodesHaveDifferentTypes(node1, node2)) {
-            differences.add("Type mismatch at '$path': ${node1::class.simpleName}(${node1.textValue()}) vs. ${node2::class.simpleName}(${node2.textValue()})")
-            return differences
-        }
-
-        when {
-            node1.isObject -> differences.addAll(compareObjectNodes(node1, node2, path))
-            node1.isArray -> differences.addAll(compareArrayNodes(node1, node2, path))
-            else -> {
-                if (node1 != node2) {
-                    differences.add("Value mismatch at '$path': ${node1.asText()} vs. ${node2.asText()}")
-                }
-            }
-        }
-
-        return differences
-    }
-
-    private fun nodesHaveDifferentTypes(node1: JsonNode, node2: JsonNode): Boolean {
-        return node1::class != node2::class
-    }
-
-    private fun compareObjectNodes(node1: JsonNode, node2: JsonNode, path: String): List<String> {
-        val differences = mutableListOf<String>()
-        val node1Fields = node1.fieldNames().asSequence().toSet()
-        val node2Fields = node2.fieldNames().asSequence().toSet()
-
-        differences.addAll(checkForMissingFields(node1Fields, node2Fields, path, "second"))
-        differences.addAll(checkForMissingFields(node2Fields, node1Fields, path, "first"))
-
-        for (field in node1Fields.intersect(node2Fields)) {
-            differences.addAll(compareJsonNodes(node1[field], node2[field], "$path/$field"))
-        }
-
-        return differences
-    }
-
-    private fun checkForMissingFields(fieldsToCheck: Set<String>, otherFields: Set<String>, path: String, descriptor: String): List<String> {
-        return fieldsToCheck.filterNot { it in otherFields }.map { "Missing field in $descriptor JSON at path: '$path/$it'" }
-    }
-
-    private fun compareArrayNodes(node1: JsonNode, node2: JsonNode, path: String): List<String> {
-        val differences = mutableListOf<String>()
-
-        if (node1.size() != node2.size()) {
-            differences.add("Array size mismatch at '$path': ${node1.size()} vs. ${node2.size()}")
-            return differences
-        }
-
-        for (i in 0 until node1.size()) {
-            differences.addAll(compareJsonNodes(node1[i], node2[i], "$path[$i]"))
-        }
-
-        return differences
     }
 }
