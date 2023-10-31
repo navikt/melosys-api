@@ -79,11 +79,11 @@ public class FagsakService {
 
     public List<Fagsak> hentFagsakerMedAktør(Aktoersroller rolleType, String ident) {
         String aktørID = persondataFasade.hentAktørIdForIdent(ident);
-        return fagsakRepository.findByRolleAndAktør(rolleType, aktørID);
+        return sorterFagsaker(fagsakRepository.findByRolleAndAktør(rolleType, aktørID));
     }
 
     public List<Fagsak> hentFagsakerMedOrgnr(Aktoersroller rolleType, String orgnr) {
-        return fagsakRepository.findByRolleAndOrgnr(rolleType, orgnr);
+        return sorterFagsaker(fagsakRepository.findByRolleAndOrgnr(rolleType, orgnr));
     }
 
     @Transactional
@@ -321,5 +321,16 @@ public class FagsakService {
 
     public List<Fagsak> hentFagsaker(Collection<String> saksnumre) {
         return fagsakRepository.findAllBySaksnummerIn(saksnumre);
+    }
+
+    private List<Fagsak> sorterFagsaker(List<Fagsak> fagsaker) {
+        return fagsaker.stream()
+            .sorted((a, b) -> {
+                Instant registrertDatoA = a.hentSistRegistrertBehandling().getRegistrertDato();
+                Instant registrertDatoB = b.hentSistRegistrertBehandling().getRegistrertDato();
+                return registrertDatoB.compareTo(registrertDatoA);
+            })
+            .sorted((a, b) -> Boolean.compare(b.harAktivBehandling(), a.harAktivBehandling()))
+            .toList();
     }
 }

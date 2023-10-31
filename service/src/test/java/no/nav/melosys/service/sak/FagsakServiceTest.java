@@ -17,6 +17,7 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -350,6 +351,33 @@ class FagsakServiceTest {
         assertThat(fagsakArgumentCaptor.getValue().getStatus()).isEqualTo(fagsak.getStatus());
     }
 
+    @Test
+    void hentFagsakerMedOrgNr_riktigSortering() {
+        Behandling behandlingAktivRegistrertNaa = lagBehandling(1L, FØRSTEGANG, Behandlingsstatus.UNDER_BEHANDLING, Instant.now());
+        Behandling behandlingInaktivRegistretNaa = lagBehandling(2L, FØRSTEGANG, Behandlingsstatus.AVSLUTTET, Instant.now());
+        Behandling behandlingAktivRegistrertFoer = lagBehandling(3L, FØRSTEGANG, Behandlingsstatus.UNDER_BEHANDLING,
+            Instant.now().minusSeconds(3600));;
+        Behandling behandlingInaktivRegistrertFoer = lagBehandling(4L, FØRSTEGANG, Behandlingsstatus.AVSLUTTET, Instant.now().minusSeconds(3600));
+        Fagsak fagsak1 = lagFagsakMedAktørForVirksomhet();
+        Fagsak fagsak2 = lagFagsakMedAktørForVirksomhet();
+        Fagsak fagsak3 = lagFagsakMedAktørForVirksomhet();
+        Fagsak fagsak4 = lagFagsakMedAktørForVirksomhet();
+        fagsak1.setBehandlinger(Collections.singletonList(behandlingAktivRegistrertNaa));
+        fagsak2.setBehandlinger(Collections.singletonList(behandlingAktivRegistrertFoer));
+        fagsak3.setBehandlinger(Collections.singletonList(behandlingInaktivRegistretNaa));
+        fagsak4.setBehandlinger(Collections.singletonList(behandlingInaktivRegistrertFoer));
+
+        when(fagsakRepo.findByRolleAndOrgnr(Aktoersroller.VIRKSOMHET, "12345")).thenReturn(List.of(fagsak2, fagsak4, fagsak1, fagsak3));
+
+        List<Fagsak> fagsakList = fagsakService.hentFagsakerMedOrgnr(Aktoersroller.VIRKSOMHET, "12345");
+
+        assertThat(fagsakList).hasSize(4);
+        assertThat(fagsakList.get(0).hentSistRegistrertBehandling()).isEqualTo(behandlingAktivRegistrertNaa);
+        assertThat(fagsakList.get(1).hentSistRegistrertBehandling()).isEqualTo(behandlingAktivRegistrertFoer);
+        assertThat(fagsakList.get(2).hentSistRegistrertBehandling()).isEqualTo(behandlingInaktivRegistretNaa);
+        assertThat(fagsakList.get(3).hentSistRegistrertBehandling()).isEqualTo(behandlingInaktivRegistrertFoer);
+    }
+
     private Fagsak lagFagsakMedAktørforMyndighet() {
         Fagsak fagsak = lagFagsak();
 
@@ -357,6 +385,16 @@ class FagsakServiceTest {
         aktoer.setInstitusjonId("Gammel institusjonsid");
         aktoer.setFagsak(fagsak);
         aktoer.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
+        fagsak.setAktører(new HashSet<>(Collections.singleton(aktoer)));
+        return fagsak;
+    }
+
+    private Fagsak lagFagsakMedAktørForVirksomhet() {
+        Fagsak fagsak = lagFagsak();
+
+        Aktoer aktoer = new Aktoer();
+        aktoer.setOrgnr("12345");
+        aktoer.setRolle(Aktoersroller.VIRKSOMHET);
         fagsak.setAktører(new HashSet<>(Collections.singleton(aktoer)));
         return fagsak;
     }
