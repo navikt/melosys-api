@@ -66,7 +66,10 @@ class TrygdeavgiftTjeneste(
     fun hentTrygdeavgift(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<BeregnetTrygdeavgiftDto> {
         aksesskontroll.autoriser(behandlingID)
         return ResponseEntity.ok(
-            BeregnetTrygdeavgiftDto.av(trygdeavgiftsberegningService.hentTrygdeavgiftsberegning(behandlingID))
+            BeregnetTrygdeavgiftDto.av(
+                trygdeavgiftsberegningService.hentTrygdeavgiftsberegning(behandlingID),
+                trygdeavgiftsberegningService.finnFakturamottaker(behandlingID)
+            )
         )
     }
 
@@ -74,7 +77,10 @@ class TrygdeavgiftTjeneste(
     fun beregnTrygdeavgift(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<BeregnetTrygdeavgiftDto> {
         aksesskontroll.autoriserSkrivOgTilordnet(behandlingID)
         return ResponseEntity.ok(
-            BeregnetTrygdeavgiftDto.av(trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingID))
+            BeregnetTrygdeavgiftDto.av(
+                trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingID),
+                trygdeavgiftsberegningService.finnFakturamottaker(behandlingID)
+            )
         )
     }
 }
