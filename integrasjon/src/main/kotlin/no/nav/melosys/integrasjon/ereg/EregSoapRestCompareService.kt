@@ -22,7 +22,7 @@ class EregSoapRestCompareService(
 ) : EregFasade {
 
     override fun hentOrganisasjon(orgnr: String): Saksopplysning {
-        if (orgnr.length == 11) {
+        if (erGyldingOrgnummer(orgnr)) {
             throw TekniskException("orgnr er ikke gyldig")
         }
 
@@ -38,7 +38,7 @@ class EregSoapRestCompareService(
     }
 
     override fun finnOrganisasjon(orgnr: String): Optional<Saksopplysning> {
-        if (orgnr.length == 11) {
+        if (erGyldingOrgnummer(orgnr)) {
             log.warn("orgnr er ikke gyldig")
             return Optional.empty()
         }
@@ -61,7 +61,7 @@ class EregSoapRestCompareService(
     }
 
     override fun hentOrganisasjonNavn(orgnr: String): String {
-        if (orgnr.length == 11) {
+        if (erGyldingOrgnummer(orgnr)) {
             throw TekniskException("orgnr er ikke gyldig")
         }
 
@@ -76,6 +76,7 @@ class EregSoapRestCompareService(
 
         return organisasjonNavnSoap
     }
+    private fun erGyldingOrgnummer(orgnr: String) = orgnr.length == 11
 
     private fun <T> runAndLogErrors(orgnr: String, action: () -> T?): T? {
         return try {
