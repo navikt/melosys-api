@@ -138,7 +138,7 @@ class TrygdeavgiftsberegningService
         return fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
             .map {
                 if (it.erPerson())
-                    persondataService.hentSammensattNavn(it.aktørId)
+                    persondataService.hentSammensattNavn(it.personIdent)
                 else
                     eregFasade.hentOrganisasjonNavn(it.orgnr)
             }

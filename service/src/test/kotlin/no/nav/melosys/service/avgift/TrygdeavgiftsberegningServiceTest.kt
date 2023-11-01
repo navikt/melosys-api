@@ -298,7 +298,6 @@ internal class TrygdeavgiftsberegningServiceTest {
                         rolle = Aktoersroller.BRUKER
                     },
                     Aktoer().apply {
-                        aktørId = FULLMEKTIG_AKTØR_ID
                         rolle = Aktoersroller.FULLMEKTIG
                         personIdent = FULLMEKTIG_AKTØR_ID
                         fullmakter = setOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT })
