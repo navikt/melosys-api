@@ -21,6 +21,7 @@ import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.TrygdeavgiftTjeneste;
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.BeregnetTrygdeavgiftDto;
+import no.nav.melosys.tjenester.gui.dto.trygdeavgift.FakturamottakerDto;
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftsgrunnlagDto;
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftsperiodeDto;
 import org.junit.jupiter.api.Test;
@@ -113,10 +114,11 @@ class TrygdeavgiftTjenesteTest {
         var MOTTAKER_NAVN = "Fornavn Etternavn";
         when(trygdeavgiftsberegningService.finnFakturamottaker(BEHANDLINGSRESULTAT_ID)).thenReturn(MOTTAKER_NAVN);
 
-        var result = mockMvc.perform(get(BASE_URL + "/fakturamottaker", 1L)
+        mockMvc.perform(get(BASE_URL + "/fakturamottaker", 1L)
                 .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(content().string(MOTTAKER_NAVN));
+            .andExpect(responseBody(objectMapper)
+                .containsObjectAsJson(new FakturamottakerDto(MOTTAKER_NAVN), FakturamottakerDto.class));
     }
 
     private BeregnetTrygdeavgiftDto forventetBeregnetTrygdeavgiftDto() {
