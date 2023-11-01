@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.ereg
 import io.getunleash.Unleash
 import mu.KotlinLogging
 import no.nav.melosys.domain.Saksopplysning
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.featuretoggle.ToggleName
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Service
@@ -21,6 +22,10 @@ class EregSoapRestCompareService(
 ) : EregFasade {
 
     override fun hentOrganisasjon(orgnr: String): Saksopplysning {
+        if (orgnr.length == 11) {
+            throw TekniskException("orgnr er ikke gyldig")
+        }
+
         val organisasjonRest = runAndLogErrors(orgnr) {
             eregRestService.hentOrganisasjon(orgnr)
         }
@@ -33,6 +38,11 @@ class EregSoapRestCompareService(
     }
 
     override fun finnOrganisasjon(orgnr: String): Optional<Saksopplysning> {
+        if (orgnr.length == 11) {
+            log.warn("orgnr er ikke gyldig")
+            return Optional.empty()
+        }
+
         val organisasjonRest = runAndLogErrors(orgnr) {
             eregRestService.finnOrganisasjon(orgnr).orElse(null)
         }
@@ -40,7 +50,7 @@ class EregSoapRestCompareService(
         val organisasjonSoap = eregService.finnOrganisasjon(orgnr)
 
         if (organisasjonSoap.isEmpty && organisasjonRest != null) {
-            log.warn("Ereg: organisasjonSoap er tom men rest gir svar for ${filterOrgnummerSomErFnr(orgnr)}")
+            log.warn("Ereg: organisasjonSoap er tom men rest gir svar for $orgnr")
         }
 
         if (unleash.isEnabled(ToggleName.MELOSYS_EREG_ORGANISASJON)) {
@@ -50,14 +60,15 @@ class EregSoapRestCompareService(
         return organisasjonSoap
     }
 
-    fun filterOrgnummerSomErFnr(orgnummer: String): String =
-        if (orgnummer.length == 11) "***********" else orgnummer
-
-    override fun hentOrganisasjonNavn(orgnummer: String): String {
-        val organisasjonNavnRest = runAndLogErrors(orgnummer) {
-            eregRestService.hentOrganisasjonNavn(orgnummer)
+    override fun hentOrganisasjonNavn(orgnr: String): String {
+        if (orgnr.length == 11) {
+            throw TekniskException("orgnr er ikke gyldig")
         }
-        val organisasjonNavnSoap = eregService.hentOrganisasjonNavn(orgnummer)
+
+        val organisasjonNavnRest = runAndLogErrors(orgnr) {
+            eregRestService.hentOrganisasjonNavn(orgnr)
+        }
+        val organisasjonNavnSoap = eregService.hentOrganisasjonNavn(orgnr)
 
         if (unleash.isEnabled(ToggleName.MELOSYS_EREG_ORGANISASJON) && organisasjonNavnRest != null) {
             return organisasjonNavnRest
@@ -70,7 +81,7 @@ class EregSoapRestCompareService(
         return try {
             action()
         } catch (e: Exception) {
-            log.warn("Ereg: Kall mot rest endepunkt feilet for ${filterOrgnummerSomErFnr(orgnr)}", e)
+            log.warn("Ereg: Kall mot rest endepunkt feilet for $orgnr", e)
             null
         }
     }
