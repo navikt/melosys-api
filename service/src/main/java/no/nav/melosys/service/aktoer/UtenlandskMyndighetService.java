@@ -65,6 +65,9 @@ public class UtenlandskMyndighetService {
     }
 
     private Optional<UtenlandskMyndighet> finnUtenlandskMyndighet(String landkode) {
+        if (landkode == null) {
+            return Optional.empty();
+        }
         Optional<Land_iso2> eøsLandkodeOptional = Enums.getIfPresent(Land_iso2.class, landkode).toJavaUtil();
         return eøsLandkodeOptional.flatMap(utenlandskMyndighetRepository::findByLandkode);
     }
