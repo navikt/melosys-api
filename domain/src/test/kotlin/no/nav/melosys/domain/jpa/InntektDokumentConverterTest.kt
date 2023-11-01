@@ -20,6 +20,16 @@ class InntektDokumentConverterTest {
             .shouldBe(InntektType.Inntekt)
     }
 
+    @Test
+    fun `sjekk at vi kan lese inn inntektListe uten kategori i tilleggsinformasjon`() {
+        val saksopplysningDokument: SaksopplysningDokument = SaksopplysningDokumentConverter().convertToEntityAttribute(inntektDokumentUtenKategori)
+
+        saksopplysningDokument.shouldBeInstanceOf<InntektDokument>()
+            .arbeidsInntektMaanedListe.shouldHaveSize(1)
+            .first().arbeidsInntektInformasjon.inntektListe.first().type
+            .shouldBe(InntektType.Inntekt)
+    }
+
     private val inntektDokumentMedTypeInntekt = """{
           "type" : "InntektDokument",
           "arbeidsInntektMaanedListe" : [ {
@@ -32,6 +42,24 @@ class InntektDokumentConverterTest {
                 "inntektsperiodetype" : "Maaned",
                 "inntektsstatus" : "LoependeInnrapportert",
                 "utbetaltIPeriode" : [ 2022, 1 ]
+              } ]
+            }
+          } ]}""".trimIndent()
+
+    private val inntektDokumentUtenKategori = """{
+          "type" : "InntektDokument",
+          "arbeidsInntektMaanedListe" : [ {
+            "arbeidsInntektInformasjon" : {
+              "inntektListe" : [ {
+                "type" : "Inntekt",
+                "beloep" : 50000,
+                "fordel" : "kontantytelse",
+                "inntektskilde" : "A-ordningen",
+                "inntektsperiodetype" : "Maaned",
+                "inntektsstatus" : "LoependeInnrapportert",
+                "utbetaltIPeriode" : [ 2022, 1 ],
+                    "tilleggsinformasjon" : {
+                }
               } ]
             }
           } ]}""".trimIndent()
