@@ -13,11 +13,8 @@ import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.SaksbehandlingDataFactory;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
-import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.persondata.PersondataFasade;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,7 +24,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
 import static no.nav.melosys.domain.kodeverk.Sakstyper.EU_EOS;
-import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper.FERDIGBEHANDLET;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.ARBEID_FLERE_LAND;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.UTSENDT_ARBEIDSTAKER;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
@@ -48,11 +44,7 @@ class FagsakServiceTest {
     @Mock
     private KontaktopplysningService kontaktopplysningService;
     @Mock
-    private OppgaveService oppgaveService;
-    @Mock
     private PersondataFasade persondataFasade;
-    @Mock
-    private BehandlingsresultatService behandlingsresultatService;
     @Mock
     private LovligeKombinasjonerService lovligeKombinasjonerService;
     private final FakeUnleash unleash = new FakeUnleash();
@@ -65,9 +57,7 @@ class FagsakServiceTest {
             fagsakRepo,
             behandlingService,
             kontaktopplysningService,
-            oppgaveService,
             persondataFasade,
-            behandlingsresultatService,
             lovligeKombinasjonerService,
             unleash);
         unleash.reset();
@@ -307,51 +297,6 @@ class FagsakServiceTest {
     }
 
     @Test
-    void ferdigbehandleSak_saksstatusOPPRETTET_lagrerKorrekt() {
-        var fagsak = lagFagsak();
-        var behandling = lagBehandling(1L, null, null, null);
-        behandling.setFagsak(fagsak);
-        fagsak.getBehandlinger().add(behandling);
-        assertThat(fagsak.getStatus()).isEqualTo(Saksstatuser.OPPRETTET);
-
-        when(fagsakRepo.findBySaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
-        ArgumentCaptor<Fagsak> fagsakArgumentCaptor = ArgumentCaptor.forClass(Fagsak.class);
-
-
-        fagsakService.ferdigbehandleSak(SAKSNUMMER);
-
-
-        verify(behandlingService).avsluttBehandling(behandling.getId());
-        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(behandling.getId(), FERDIGBEHANDLET);
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
-        verify(fagsakRepo).save(fagsakArgumentCaptor.capture());
-        assertThat(fagsakArgumentCaptor.getValue().getStatus()).isEqualTo(Saksstatuser.AVSLUTTET);
-    }
-
-    @Test
-    void ferdigbehandleSak_saksstatusAnnetEnnOPPRETTET_lagrerKorrekt() {
-        var fagsak = lagFagsak();
-        fagsak.setStatus(Saksstatuser.LOVVALG_AVKLART);
-        var behandling = lagBehandling(1L, null, null, null);
-        behandling.setFagsak(fagsak);
-        fagsak.getBehandlinger().add(behandling);
-        assertThat(fagsak.getStatus()).isNotEqualTo(Saksstatuser.OPPRETTET);
-
-        when(fagsakRepo.findBySaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
-        ArgumentCaptor<Fagsak> fagsakArgumentCaptor = ArgumentCaptor.forClass(Fagsak.class);
-
-
-        fagsakService.ferdigbehandleSak(SAKSNUMMER);
-
-
-        verify(behandlingService).avsluttBehandling(behandling.getId());
-        verify(behandlingsresultatService).oppdaterBehandlingsresultattype(behandling.getId(), FERDIGBEHANDLET);
-        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
-        verify(fagsakRepo).save(fagsakArgumentCaptor.capture());
-        assertThat(fagsakArgumentCaptor.getValue().getStatus()).isEqualTo(fagsak.getStatus());
-    }
-
-    @Test
     void hentFagsakerMedOrgNr_riktigSortering() {
         Behandling behandlingAktivRegistrertNaa = lagBehandling(1L, FØRSTEGANG, Behandlingsstatus.UNDER_BEHANDLING, Instant.now());
         Behandling behandlingInaktivRegistretNaa = lagBehandling(2L, FØRSTEGANG, Behandlingsstatus.AVSLUTTET, Instant.now());
@@ -428,30 +373,5 @@ class FagsakServiceTest {
         behandling.setEndretDato(registrertDato);
         behandling.setRegistrertDato(registrertDato);
         return behandling;
-    }
-
-    private Behandlingsresultat lagBehandlingsresultat(Behandling behandling, Instant registrertDato, VedtakMetadata vedtakMetadata, Behandlingsresultattyper type) {
-        var behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setId(behandling.getId());
-        behandlingsresultat.setBehandling(behandling);
-        behandlingsresultat.setRegistrertDato(registrertDato);
-        behandlingsresultat.setVedtakMetadata(vedtakMetadata);
-        behandlingsresultat.setType(type);
-        return behandlingsresultat;
-    }
-
-    private Behandlingsresultat lagBehandlingsresultatMedAnmodningsperiode(Behandling behandling, boolean sendtTilUtlandet) {
-        var anmodningsperiode = new Anmodningsperiode();
-        anmodningsperiode.setSendtUtland(sendtTilUtlandet);
-        var behandlingsresultat = new Behandlingsresultat();
-        behandlingsresultat.setAnmodningsperioder(Set.of(anmodningsperiode));
-        behandlingsresultat.setBehandling(behandling);
-        return behandlingsresultat;
-    }
-
-    private VedtakMetadata lagVedtakMetadata(Instant registrertDato) {
-        var vedtakMetadata = new VedtakMetadata();
-        vedtakMetadata.setRegistrertDato(registrertDato);
-        return vedtakMetadata;
     }
 }

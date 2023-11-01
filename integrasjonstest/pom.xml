@@ -143,6 +143,13 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>no.nav.tjenester</groupId>
+            <artifactId>nav-dokumentproduksjon-v3-tjenestespesifikasjon</artifactId>
+            <version>${doksys.dokumentproduksjon.version}</version>
+            <classifier>jaxws</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>com.github.tomakehurst</groupId>
             <artifactId>wiremock-standalone</artifactId>
             <version>${wiremock-standalone.version}</version>

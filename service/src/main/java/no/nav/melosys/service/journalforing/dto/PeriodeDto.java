@@ -6,6 +6,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import no.nav.melosys.domain.ErPeriode;
+import no.nav.melosys.saksflytapi.journalfoering.Periode;
 
 @JsonPropertyOrder({
         "fom",
@@ -17,13 +18,17 @@ public class PeriodeDto implements ErPeriode {
     private LocalDate fom;
     @JsonProperty("tom")
     private LocalDate tom;
-    
+
     public PeriodeDto() {
     }
 
     public PeriodeDto(LocalDate fom, LocalDate tom) {
         this.fom = fom;
         this.tom = tom;
+    }
+
+    public Periode tilPeriode(){
+        return new Periode(this.fom, this.tom);
     }
 
     @Override

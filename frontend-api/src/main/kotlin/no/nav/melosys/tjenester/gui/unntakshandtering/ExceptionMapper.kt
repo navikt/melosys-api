@@ -2,11 +2,11 @@ package no.nav.melosys.tjenester.gui.unntakshandtering
 
 import com.google.gson.JsonParser
 import mu.KotlinLogging
+import no.nav.melosys.config.MDCOperations
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.exception.SikkerhetsbegrensningException
 import no.nav.melosys.exception.ValideringException
-import no.nav.melosys.integrasjon.felles.mdc.MDCOperations
 import no.nav.security.token.support.spring.validation.interceptor.JwtTokenUnauthorizedException
 import org.slf4j.MDC
 import org.slf4j.event.Level

@@ -1,4 +1,4 @@
-package no.nav.melosys.itest
+package no.nav.melosys.itest.vedtak
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -24,6 +24,8 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgs
 import no.nav.melosys.domain.mottatteopplysninger.SøknadIkkeYrkesaktiv
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.itest.JournalfoeringBase
+import no.nav.melosys.itest.OAuthMockServer
 import no.nav.melosys.melosysmock.medl.MedlRepo
 import no.nav.melosys.melosysmock.testdata.TestDataGenerator
 import no.nav.melosys.repository.BehandlingRepository

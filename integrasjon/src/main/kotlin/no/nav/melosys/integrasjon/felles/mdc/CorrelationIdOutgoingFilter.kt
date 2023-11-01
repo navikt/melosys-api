@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.felles.mdc
 
-import no.nav.melosys.integrasjon.felles.mdc.MDCOperations.Companion.X_CORRELATION_ID
-import no.nav.melosys.integrasjon.felles.mdc.MDCOperations.Companion.getCorrelationId
+import no.nav.melosys.config.MDCOperations.Companion.X_CORRELATION_ID
+import no.nav.melosys.config.MDCOperations.Companion.getCorrelationId
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.ClientRequest
 import org.springframework.web.reactive.function.client.ClientResponse

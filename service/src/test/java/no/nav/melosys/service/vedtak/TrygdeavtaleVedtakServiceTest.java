@@ -17,6 +17,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.exception.ValideringException;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
@@ -25,7 +26,6 @@ import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.FerdigbehandlingKontrollFacade;
 import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
@@ -97,7 +97,7 @@ class TrygdeavtaleVedtakServiceTest {
 
         verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
         verify(behandlingService).endreStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request.tilVedtakRequest()));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
         verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
         verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), eq(Sakstyper.TRYGDEAVTALE), any(Behandlingsresultattyper.class), eq(null));
@@ -143,7 +143,7 @@ class TrygdeavtaleVedtakServiceTest {
 
         verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
         verify(behandlingService).endreStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request.tilVedtakRequest()));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
         verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
         verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), eq(Sakstyper.TRYGDEAVTALE), any(Behandlingsresultattyper.class), eq(null));
@@ -189,7 +189,7 @@ class TrygdeavtaleVedtakServiceTest {
 
         verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
         verify(behandlingService).endreStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request.tilVedtakRequest()));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
         verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
         verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), eq(Sakstyper.TRYGDEAVTALE), any(Behandlingsresultattyper.class), eq(null));
@@ -241,7 +241,7 @@ class TrygdeavtaleVedtakServiceTest {
 
         verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
         verify(behandlingService).endreStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request));
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request.tilVedtakRequest()));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
         verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
 

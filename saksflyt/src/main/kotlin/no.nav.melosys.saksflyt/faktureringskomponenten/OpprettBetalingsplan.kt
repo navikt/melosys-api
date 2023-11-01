@@ -3,8 +3,8 @@ package no.nav.melosys.saksflyt.faktureringskomponenten
 import io.getunleash.Unleash
 import mu.KotlinLogging
 import no.nav.melosys.domain.Aktoer
+import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
-import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.exception.FunksjonellException
@@ -47,7 +47,8 @@ class OpprettBetalingsplan(
         }
 
         val behandlingsId = prosessinstans.behandling.id
-        val fagsak = behandlingService.hentBehandling(behandlingsId).fagsak
+        val behandling = behandlingService.hentBehandling(behandlingsId)
+        val fagsak = behandling.fagsak
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingsId)
         val fastsattTrygdeavgift = behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift
 
@@ -67,8 +68,7 @@ class OpprettBetalingsplan(
         val foedselsNr = pdlService.finnFolkeregisterident(fagsak.hentBrukersAktørID())
             .orElseThrow { FunksjonellException("Kunne ikke finne fødselsnummer fra PDL") }
         val intervall = hentBetalingsIntervall(prosessinstans, FaktureringsIntervall.KVARTAL)
-
-        val forrigeFakturaserieReferanse = hentForrigeFakturaserieReferanse(fagsak)
+        val forrigeFakturaserieReferanse = hentOpprinneligFakturaserieReferanse(behandling)
 
         val fakturaserieDto = opprettFakturaserieDto(
             foedselsNr,
@@ -95,10 +95,9 @@ class OpprettBetalingsplan(
         )
     }
 
-    private fun hentForrigeFakturaserieReferanse(fagsak: Fagsak): String? {
-        if (fagsak.behandlinger.isNotEmpty()) {
-            val forrigeAktivBehandling = fagsak.hentSistOppdatertBehandling()
-            return behandlingsresultatService.hentBehandlingsresultat(forrigeAktivBehandling.id).fakturaserieReferanse
+    private fun hentOpprinneligFakturaserieReferanse(behandling: Behandling): String? {
+        if (behandling.opprinneligBehandling != null) {
+            return behandlingsresultatService.hentBehandlingsresultat(behandling.opprinneligBehandling.id).fakturaserieReferanse
         }
         return null
     }

@@ -5,11 +5,11 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,9 +53,9 @@ public class OpprettBehandlingForSak {
         }
 
         if (saksbehandlingRegler.skalTidligereBehandlingReplikeres(fagsak, behandlingstype, behandlingstema)) {
-            prosessinstansService.opprettOgReplikerBehandlingForSak(saksnummer, opprettSakDto);
+            prosessinstansService.opprettOgReplikerBehandlingForSak(saksnummer, opprettSakDto.tilOpprettSakRequest());
         } else {
-            prosessinstansService.opprettNyBehandlingForSak(saksnummer, opprettSakDto);
+            prosessinstansService.opprettNyBehandlingForSak(saksnummer, opprettSakDto.tilOpprettSakRequest());
         }
     }
 

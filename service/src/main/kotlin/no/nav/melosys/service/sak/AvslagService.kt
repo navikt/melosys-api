@@ -1,4 +1,4 @@
-package no.nav.melosys.service.saksflyt
+package no.nav.melosys.service.sak
 
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Mottakerroller
@@ -10,7 +10,6 @@ import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.dokument.DokgenService
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto
 import no.nav.melosys.service.oppgave.OppgaveService
-import no.nav.melosys.service.sak.FagsakService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate

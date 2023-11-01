@@ -6,7 +6,6 @@ import com.tngtech.archunit.junit.ArchTest
 import com.tngtech.archunit.lang.syntax.ArchRuleDefinition.*
 import com.tngtech.archunit.lang.syntax.elements.ClassesShouldConjunction
 import com.tngtech.archunit.lang.syntax.elements.ClassesThat
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.TestInstance
 
 @AnalyzeClasses(packages = ["no.nav.melosys.saksflytapi.."], importOptions = [ImportOption.DoNotIncludeTests::class])
@@ -23,14 +22,16 @@ class SaksflytapiArchitectureTest {
             .resideInAnyPackage("no.nav.melosys.saksflyt..","no.nav.melosys.saksflytapi..", "no.nav.melosys.service..")
 
     @ArchTest
-    val `Saksflytapi skal bare være avhgengig av` =
+    val `Saksflytapi skal bare være avhengig av` =
         classes().that()
             .resideInAPackage("no.nav.melosys.saksflytapi..")
             .should()
             .onlyDependOnClassesThat()
             .resideInPackagesIncludingCommon(
                 "no.nav.melosys.domain..",
+                "no.nav.melosys.sikkerhet..",
                 "no.nav.melosys.saksflytapi..",
+                "no.nav.melosys.config..",
             )
 
     @ArchTest
@@ -59,6 +60,7 @@ class SaksflytapiArchitectureTest {
             "mu..",
             "com..",
             "org..",
+            "io..",
             "no.nav.security.."
         )
     }

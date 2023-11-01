@@ -1,11 +1,13 @@
 package no.nav.melosys.service.vedtak;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall;
+import no.nav.melosys.saksflytapi.journalfoering.VedtakRequest;
 import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
 
 public class FattVedtakRequest {
@@ -101,6 +103,26 @@ public class FattVedtakRequest {
 
     public Vedtakstyper getVedtakstype() {
         return vedtakstype;
+    }
+
+    public VedtakRequest tilVedtakRequest() {
+        return new VedtakRequest(
+            behandlingsresultatTypeKode,
+            vedtakstype,
+            fritekst,
+            fritekstSed,
+            mottakerinstitusjoner,
+            innledningFritekst,
+            begrunnelseFritekst,
+            ektefelleFritekst,
+            barnFritekst,
+            trygdeavgiftFritekst,
+            kopiMottakere != null ? kopiMottakere.stream().map(KopiMottakerDto::tilKopiMottaker).toList() : Collections.emptyList(),
+            kopiTilArbeidsgiver,
+            bestillersId,
+            nyVurderingBakgrunn,
+            betalingsintervall != null ? betalingsintervall.toString() : null // TODO: map enum?
+        );
     }
 
     public static class Builder {

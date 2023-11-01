@@ -1,24 +1,21 @@
 package no.nav.melosys.service.sak;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.*;
-
 import io.getunleash.Unleash;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.*;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
-import no.nav.melosys.service.oppgave.OppgaveService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
@@ -26,6 +23,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.*;
 
 import static no.nav.melosys.metrics.MetrikkerNavn.SAKER_OPPRETTET;
 
@@ -37,24 +38,22 @@ public class FagsakService {
     private final FagsakRepository fagsakRepository;
     private final BehandlingService behandlingService;
     private final KontaktopplysningService kontaktopplysningService;
-    private final OppgaveService oppgaveService;
     private final PersondataFasade persondataFasade;
-    private final BehandlingsresultatService behandlingsresultatService;
     private final LovligeKombinasjonerService lovligeKombinasjonerService;
     private final Unleash unleash;
 
     private final Counter sakerOpprettet = Metrics.counter(SAKER_OPPRETTET);
 
-    public FagsakService(FagsakRepository fagsakRepository, BehandlingService behandlingService,
-                         KontaktopplysningService kontaktopplysningService, @Lazy OppgaveService oppgaveService,
-                         PersondataFasade persondataFasade, BehandlingsresultatService behandlingsresultatService,
-                         @Lazy LovligeKombinasjonerService lovligeKombinasjonerService, Unleash unleash) {
+    public FagsakService(FagsakRepository fagsakRepository,
+                         BehandlingService behandlingService,
+                         KontaktopplysningService kontaktopplysningService,
+                         PersondataFasade persondataFasade,
+                         @Lazy LovligeKombinasjonerService lovligeKombinasjonerService,
+                         Unleash unleash) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingService = behandlingService;
         this.kontaktopplysningService = kontaktopplysningService;
-        this.oppgaveService = oppgaveService;
         this.persondataFasade = persondataFasade;
-        this.behandlingsresultatService = behandlingsresultatService;
         this.lovligeKombinasjonerService = lovligeKombinasjonerService;
         this.unleash = unleash;
     }
@@ -137,17 +136,6 @@ public class FagsakService {
         aktør.setRolle(Aktoersroller.TRYGDEMYNDIGHET);
         aktør.setTrygdemyndighetLand(landkode);
         return aktør;
-    }
-
-    @Transactional
-    public void ferdigbehandleSak(String saksnummer) {
-        var fagsak = hentFagsak(saksnummer);
-        var behandling = fagsak.hentAktivBehandling();
-        var nyStatus = fagsak.getStatus() == Saksstatuser.OPPRETTET ? Saksstatuser.AVSLUTTET : fagsak.getStatus();
-
-        avsluttFagsakOgBehandling(fagsak, behandling, nyStatus);
-        behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.getId(), Behandlingsresultattyper.FERDIGBEHANDLET);
-        oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.getSaksnummer());
     }
 
     @Transactional

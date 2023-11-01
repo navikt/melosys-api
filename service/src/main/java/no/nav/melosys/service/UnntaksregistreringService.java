@@ -7,10 +7,10 @@ import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.mottatteopplysninger.AnmodningEllerAttest;
 import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.oppgave.OppgaveService;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

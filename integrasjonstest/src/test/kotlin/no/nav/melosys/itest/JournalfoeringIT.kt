@@ -31,10 +31,12 @@ import no.nav.melosys.service.oppgave.OppgaveService
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Import
 
 @Import(OAuthMockServer::class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class JournalfoeringIT(
     @Autowired testDataGenerator: TestDataGenerator,
     @Autowired journalføringService: JournalfoeringService,

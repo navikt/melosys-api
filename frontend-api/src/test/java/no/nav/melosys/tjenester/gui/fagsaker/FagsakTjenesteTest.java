@@ -99,6 +99,8 @@ class FagsakTjenesteTest {
     private static OpprettBehandlingForSak opprettBehandlingForSak;
     @MockBean
     private static MedlemAvFolketrygdenService medlemAvFolketrygdenService;
+    @MockBean
+    private static FerdigbehandleSakService ferdigbehandleSakService;
 
     @Autowired
     private MockMvc mockMvc;
@@ -357,7 +359,7 @@ class FagsakTjenesteTest {
             .andExpect(status().isNoContent());
 
         verify(aksesskontroll).autoriserSakstilgang("123");
-        verify(fagsakService).ferdigbehandleSak("123");
+        verify(ferdigbehandleSakService).ferdigbehandleSak("123");
     }
 
     private void mockFagsakTjeneste(Fagsak fagsak, Behandlingsresultat eksisterendeBehres) {

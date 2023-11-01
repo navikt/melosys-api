@@ -11,4 +11,6 @@ public class ToggleName {
 
     public static final String MELOSYS_FULLMAKT_TRYGDEAVGIFT = "melosys.fullmakt.trygdeavgift";
 
+    public static final String MELOSYS_OPPDATER_FAKTURAMOTTAKER = "melosys.oppdater.fakturamottaker";
+
 }

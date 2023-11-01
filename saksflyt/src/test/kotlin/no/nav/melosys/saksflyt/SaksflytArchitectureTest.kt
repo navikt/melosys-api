@@ -34,7 +34,8 @@ class SaksflytArchitectureTest {
                 "no.nav.melosys.service..",
                 "no.nav.melosys.integrasjon..",
                 "no.nav.melosys.sikkerhet..",
-                "no.nav.melosys.exception.."
+                "no.nav.melosys.exception..",
+                "no.nav.melosys.config.."
             )
 
     @ArchTest

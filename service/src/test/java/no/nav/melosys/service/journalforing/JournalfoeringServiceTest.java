@@ -19,7 +19,9 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
+import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.saksflytapi.domain.ProsessType;
+import no.nav.melosys.saksflytapi.journalfoering.JournalfoeringOpprettRequest;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
@@ -30,12 +32,13 @@ import no.nav.melosys.service.lovligekombinasjoner.LovligeKombinasjonerService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.sak.FagsakService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
-import no.nav.melosys.service.saksflyt.ProsessinstansService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -90,6 +93,8 @@ class JournalfoeringServiceTest {
     private Journalpost journalpost;
     private JournalfoeringSedDto journalfoeringSedDto;
 
+    @Captor
+    private ArgumentCaptor<JournalfoeringOpprettRequest> journalfoeringOpprettRequestCaptor;
 
     @BeforeEach
     public void setup() {
@@ -173,7 +178,7 @@ class JournalfoeringServiceTest {
 
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
-        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(opprettDto, JFR_NY_SAK_BRUKER,
+        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(opprettDto.tilJournalfoeringOpprettRequest(), JFR_NY_SAK_BRUKER,
             true, LocalDate.EPOCH, SØKNAD, null);
     }
 
@@ -193,7 +198,7 @@ class JournalfoeringServiceTest {
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
 
-        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(any(JournalfoeringOpprettDto.class), any(ProsessType.class),
+        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(any(JournalfoeringOpprettRequest.class), any(ProsessType.class),
             eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class), eq("AB:123"));
     }
 
@@ -211,7 +216,7 @@ class JournalfoeringServiceTest {
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
 
-        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(opprettDto, JFR_NY_SAK_BRUKER,
+        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(opprettDto.tilJournalfoeringOpprettRequest(), JFR_NY_SAK_BRUKER,
             true, LocalDate.EPOCH, SØKNAD, null);
     }
 
@@ -261,8 +266,11 @@ class JournalfoeringServiceTest {
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
 
-        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(opprettDto, JFR_NY_SAK_BRUKER,
-            true, LocalDate.EPOCH, SØKNAD, null);
+        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(journalfoeringOpprettRequestCaptor.capture(), eq(JFR_NY_SAK_BRUKER), // TODO: JournalfoeringOpprettRequest()
+            eq(true), eq(LocalDate.EPOCH), eq(SØKNAD), eq(null));
+
+        JournalfoeringOpprettRequest value = journalfoeringOpprettRequestCaptor.getValue();
+        assertThat(value).isEqualTo(opprettDto.tilJournalfoeringOpprettRequest());
     }
 
     @Test
@@ -278,7 +286,7 @@ class JournalfoeringServiceTest {
 
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
-        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(any(JournalfoeringOpprettDto.class), any(ProsessType.class),
+        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(any(JournalfoeringOpprettRequest.class), any(ProsessType.class),
             eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class), eq("AB:123"));
     }
 
@@ -292,7 +300,7 @@ class JournalfoeringServiceTest {
 
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
-        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(any(JournalfoeringOpprettDto.class), any(ProsessType.class),
+        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(any(JournalfoeringOpprettRequest.class), any(ProsessType.class),
             eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class), eq("AB:123"));
     }
 
@@ -306,7 +314,7 @@ class JournalfoeringServiceTest {
 
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
-        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(any(JournalfoeringOpprettDto.class), any(ProsessType.class),
+        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(any(JournalfoeringOpprettRequest.class), any(ProsessType.class),
             eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class), eq("AB:123"));
     }
 
@@ -341,7 +349,7 @@ class JournalfoeringServiceTest {
 
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
-        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(opprettDto, JFR_NY_SAK_BRUKER,
+        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(opprettDto.tilJournalfoeringOpprettRequest(), JFR_NY_SAK_BRUKER,
             true, LocalDate.EPOCH, SØKNAD, "AB:123");
     }
 
@@ -371,7 +379,7 @@ class JournalfoeringServiceTest {
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
 
-        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(any(JournalfoeringOpprettDto.class), any(ProsessType.class),
+        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(any(JournalfoeringOpprettRequest.class), any(ProsessType.class),
             eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class), eq("AB:123"));
     }
 
@@ -514,7 +522,7 @@ class JournalfoeringServiceTest {
 
         journalfoeringService.journalførOgKnyttTilEksisterendeSak(tilordneDto);
 
-        verify(prosessinstansService).opprettProsessinstansJournalføringKnyttTilEksisterende(tilordneDto, tilordneDto.getSaksnummer(), fagsak, "AB:123");
+        verify(prosessinstansService).opprettProsessinstansJournalføringKnyttTilEksisterende(tilordneDto.tilJournalfoeringTilordneRequest(), tilordneDto.getSaksnummer(), fagsak, "AB:123");
     }
 
     @Test
@@ -532,7 +540,7 @@ class JournalfoeringServiceTest {
 
         journalfoeringService.journalførOgKnyttTilEksisterendeSak(tilordneDto);
 
-        prosessinstansService.opprettProsessinstansJournalføringKnyttTilEksisterende(tilordneDto, MELOSYS_SAKSNUMMER, fagsak, null);
+        prosessinstansService.opprettProsessinstansJournalføringKnyttTilEksisterende(tilordneDto.tilJournalfoeringTilordneRequest(), MELOSYS_SAKSNUMMER, fagsak, null);
     }
 
     @Test
@@ -598,7 +606,7 @@ class JournalfoeringServiceTest {
 
         journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto);
 
-        verify(prosessinstansService).journalførOgOpprettAndregangsBehandling(JFR_ANDREGANG_NY_BEHANDLING, BESLUTNING_LOVVALG_NORGE, NY_VURDERING, tilordneDto, ANNET, LocalDate.EPOCH, null);
+        verify(prosessinstansService).journalførOgOpprettAndregangsBehandling(JFR_ANDREGANG_NY_BEHANDLING, BESLUTNING_LOVVALG_NORGE, NY_VURDERING, tilordneDto.tilJournalfoeringTilordneRequest(), ANNET, LocalDate.EPOCH, null);
     }
 
     @Test
@@ -621,7 +629,7 @@ class JournalfoeringServiceTest {
 
         journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto);
 
-        verify(prosessinstansService).journalførOgOpprettAndregangsBehandling(JFR_ANDREGANG_NY_BEHANDLING, FORESPØRSEL_TRYGDEMYNDIGHET, Behandlingstyper.HENVENDELSE, tilordneDto, Behandlingsaarsaktyper.HENVENDELSE, LocalDate.EPOCH, null);
+        verify(prosessinstansService).journalførOgOpprettAndregangsBehandling(JFR_ANDREGANG_NY_BEHANDLING, FORESPØRSEL_TRYGDEMYNDIGHET, Behandlingstyper.HENVENDELSE, tilordneDto.tilJournalfoeringTilordneRequest(), Behandlingsaarsaktyper.HENVENDELSE, LocalDate.EPOCH, null);
     }
 
     @Test
@@ -651,7 +659,7 @@ class JournalfoeringServiceTest {
         journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto);
 
 
-        prosessinstansService.journalførOgOpprettAndregangsBehandling(JFR_ANDREGANG_REPLIKER_BEHANDLING, UTSENDT_ARBEIDSTAKER, NY_VURDERING, tilordneDto, SØKNAD, LocalDate.EPOCH, null);
+        prosessinstansService.journalførOgOpprettAndregangsBehandling(JFR_ANDREGANG_REPLIKER_BEHANDLING, UTSENDT_ARBEIDSTAKER, NY_VURDERING, tilordneDto.tilJournalfoeringTilordneRequest(), SØKNAD, LocalDate.EPOCH, null);
     }
 
     @Test
