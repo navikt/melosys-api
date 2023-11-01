@@ -314,11 +314,15 @@ public class FagsakService {
     private List<Fagsak> sorterFagsaker(List<Fagsak> fagsaker) {
         return fagsaker.stream()
             .sorted((a, b) -> {
+                int compareAktivBehandling = Boolean.compare(b.harAktivBehandling(), a.harAktivBehandling());
+                if (compareAktivBehandling != 0) {
+                    return compareAktivBehandling;
+                }
+
                 Instant registrertDatoA = a.hentSistRegistrertBehandling().getRegistrertDato();
                 Instant registrertDatoB = b.hentSistRegistrertBehandling().getRegistrertDato();
                 return registrertDatoB.compareTo(registrertDatoA);
             })
-            .sorted((a, b) -> Boolean.compare(b.harAktivBehandling(), a.harAktivBehandling()))
             .toList();
     }
 }
