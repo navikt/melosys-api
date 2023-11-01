@@ -77,4 +77,10 @@ class TrygdeavgiftTjeneste(
             BeregnetTrygdeavgiftDto.av(trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingID))
         )
     }
+
+    @GetMapping("fakturamottaker")
+    fun hentFakturamottaker(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<String> {
+        aksesskontroll.autoriser(behandlingID)
+        return ResponseEntity.ok(trygdeavgiftsberegningService.finnFakturamottaker(behandlingID))
+    }
 }

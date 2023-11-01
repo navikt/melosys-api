@@ -36,6 +36,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {TrygdeavgiftTjeneste.class})
@@ -105,6 +106,17 @@ class TrygdeavgiftTjenesteTest {
             .andExpect(status().isOk())
             .andExpect(responseBody(objectMapper)
                 .containsObjectAsJson(forventetBeregnetTrygdeavgiftDto(), BeregnetTrygdeavgiftDto.class));
+    }
+
+    @Test
+    void finnFakturamottaker() throws Exception {
+        var MOTTAKER_NAVN = "Fornavn Etternavn";
+        when(trygdeavgiftsberegningService.finnFakturamottaker(BEHANDLINGSRESULTAT_ID)).thenReturn(MOTTAKER_NAVN);
+
+        var result = mockMvc.perform(get(BASE_URL + "/fakturamottaker", 1L)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(content().string(MOTTAKER_NAVN));
     }
 
     private BeregnetTrygdeavgiftDto forventetBeregnetTrygdeavgiftDto() {
