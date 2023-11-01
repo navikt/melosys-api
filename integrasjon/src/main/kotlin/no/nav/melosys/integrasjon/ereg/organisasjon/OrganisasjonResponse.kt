@@ -1,6 +1,5 @@
 package no.nav.melosys.integrasjon.ereg.organisasjon
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
@@ -23,7 +22,8 @@ class OrganisasjonResponse {
     @JsonSubTypes(
         JsonSubTypes.Type(value = JuridiskEnhet::class, name = "JuridiskEnhet"),
         JsonSubTypes.Type(value = Organisasjonsledd::class, name = "Organisasjonsledd"),
-        JsonSubTypes.Type(value = Virksomhet::class, name = "Virksomhet")
+        JsonSubTypes.Type(value = Virksomhet::class, name = "Virksomhet"),
+        JsonSubTypes.Type(value = Organisasjon::class, name = "Organisasjon")
     )
     open class Organisasjon(
         val organisasjonDetaljer: OrganisasjonDetaljer,
