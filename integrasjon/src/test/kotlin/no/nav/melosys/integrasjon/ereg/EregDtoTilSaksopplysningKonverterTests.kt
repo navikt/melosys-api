@@ -14,7 +14,6 @@ import java.nio.charset.StandardCharsets
 
 class EregDtoTilSaksopplysningKonverterTests {
 
-
     @Test
     fun `finn enhetstype fra type detaljer før enhetstyper brukes `() {
         val organisasjon = hentOrganisasjon("enhetstype-1.json")
@@ -35,12 +34,8 @@ class EregDtoTilSaksopplysningKonverterTests {
             .enhetstype.shouldBe("FØRSTE")
     }
 
-
-
-
     fun hentOrganisasjon(file: String) = jacksonObjectMapper()
         .registerModule(JavaTimeModule())
-        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
         .readValue<OrganisasjonResponse.Organisasjon>(hentRessurs("mock/organisasjon/konverter/$file"))
 
     fun hentRessurs(fil: String): String = this::class.java.classLoader.getResource(fil)
