@@ -12,7 +12,6 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
-import java.time.LocalDate
 
 @Component
 class SendManglendeInnbetalingVarselBrev(
@@ -27,7 +26,7 @@ class SendManglendeInnbetalingVarselBrev(
     override fun utfør(prosessinstans: Prosessinstans?) {
         val fakturaserieReferanse = prosessinstans?.getData(ProsessDataKey.FAKTURASERIE_REFERANSE)
         val betalingsstatus = prosessinstans?.getData(ProsessDataKey.BETALINGSSTATUS)
-        val fakturanummer = prosessinstans?.getData(ProsessDataKey.DATO_FAKTURA_BESTILT)
+        val fakturanummer = prosessinstans?.getData(ProsessDataKey.FAKTURANUMMER)
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultatAvFakturaserieReferanse(fakturaserieReferanse)
         val mottakere = mutableListOf<Mottaker>()
         val fagsak = behandlingsresultat.behandling.fagsak
