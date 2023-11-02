@@ -28,6 +28,7 @@ public enum ProsessType {
     OPPRETT_NY_BEHANDLING_FOR_SAK("OPPRETT_NY_BEHANDLING_FOR_SAK", "Oppretter ny behandling og ny oppgave for eksisterende sak"),
     OPPRETT_NY_SAK_EOS_FRA_OPPGAVE("OPPRETT_NY_SAK_EOS_FRA_OPPGAVE", "Oppretter ny sak (fra journalført dokument) for EU/EØS"),
     OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE_FRA_OPPGAVE("OPPRETT_NY_SAK_FTRL_TRYGDEAVTALE_FRA_OPPGAVE", "Oppretter ny sak (fra journalført dokument) for FTRL og Trygdeavtale"),
+    OPPRETT_NY_BEHANDLING_FTRL_MANGLENDE_INNBETALING("OPPRETT_NY_BEHANDLING_FTRL_MANGLENDE_INNBETALING", "Oppretter ny behandling for FTRL grunnet manglende innbetaling"),
     OPPRETT_OG_DISTRIBUER_BREV("OPPRETT_OG_DISTRIBUER_BREV", "Opprett, journalfør og distribuer brev"),
     OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK("OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK", "Oppretter ny replikert behandling og ny oppgave for eksisterende sak"),
     OPPRETT_SAK("OPPRETT_SAK", "Oppretter ny sak og ny oppgave"),
