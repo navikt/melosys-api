@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
@@ -183,20 +184,16 @@ public class RegisteropplysningerService {
     }
 
     private List<Saksopplysning> hentOrganisasjonsopplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {
-        Set<String> orgnumre = new HashSet<>();
+        Set<String> orgnumreFraArbeidsforhold = saksopplysningerService.finnArbeidsforholdsopplysninger(behandling.getId())
+            .map(ArbeidsforholdDokument::hentOrgnumre).orElse(Collections.emptySet());
+        Set<String> orgnumreFraInntekt = saksopplysningerService.finnInntektsopplysninger(behandling.getId())
+            .map(InntektDokument::hentOrgnumre).orElse(Collections.emptySet());
 
-        Optional<ArbeidsforholdDokument> arbeidsforholdDokument = saksopplysningerService.finnArbeidsforholdsopplysninger(behandling.getId());
-        Optional<InntektDokument> inntektDokument = saksopplysningerService.finnInntektsopplysninger(behandling.getId());
+        return Sets.union(orgnumreFraArbeidsforhold, orgnumreFraInntekt).stream().filter(orgnr -> erGyldig(orgnr)).map(orgnr -> eregFasade.hentOrganisasjon(orgnr)).toList();
+    }
 
-        arbeidsforholdDokument.ifPresent(dokument -> orgnumre.addAll(dokument.hentOrgnumre()));
-        inntektDokument.ifPresent(dokument -> orgnumre.addAll(dokument.hentOrgnumre()));
-
-        List<Saksopplysning> saksopplysninger = new ArrayList<>();
-        for (String orgnr : orgnumre) {
-            saksopplysninger.add(eregFasade.hentOrganisasjon(orgnr));
-        }
-
-        return saksopplysninger;
+    private boolean erGyldig(String orgnr) {
+        return orgnr != null && orgnr.length() == 9;
     }
 
     @Transactional
