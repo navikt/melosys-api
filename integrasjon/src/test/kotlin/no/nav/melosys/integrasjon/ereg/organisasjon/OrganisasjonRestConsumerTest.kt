@@ -70,6 +70,20 @@ class OrganisasjonRestConsumerTest(
     }
 
     @Test
+    fun `hent organisasjon av type Organisasjon`() {
+        val orgnummer = "928497705"
+        lagStub(orgnummer)
+
+        val organisasjon = organisasjonRestConsumer.hentOrganisasjon(orgnummer)
+
+
+        organisasjon.shouldBeTypeOf<Organisasjon>().apply {
+            organisasjonDetaljer.navn
+                .single().sammensattnavn.shouldBe("BESK KAFFE")
+        }
+    }
+
+    @Test
     fun `hent organisasjon av type JuridiskEnhet`() {
         val orgnummer = "928497704"
         lagStub(orgnummer)
@@ -127,6 +141,9 @@ class OrganisasjonRestConsumerTest(
                     gyldighetsperiode.fom.shouldNotBeNull()
                 }
                 sistEndret.shouldBe(LocalDate.of(2021, 6, 2))
+                juridiskEnhetDetaljer
+                    .shouldNotBeNull()
+                    .enhetstype.shouldBe("AS")
             }
         }
     }
