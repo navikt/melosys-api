@@ -1,0 +1,65 @@
+{
+    "type" : "OrganisasjonDokument",
+    "orgnummer" : "928497704",
+    "oppstartsdato" : null,
+    "enhetstype" : "AS",
+    "organisasjonDetaljer" : {
+        "orgnummer" : "928497704",
+        "navn" : [ {
+            "bruksperiode" : {
+                "fom" : [ 2021, 6, 2 ],
+                "tom" : null
+            },
+            "gyldighetsperiode" : {
+                "fom" : [ 2021, 6, 2 ],
+                "tom" : null
+            },
+            "navn" : [ "BESK KAFFE" ],
+            "redigertNavn" : "BESK KAFFE"
+        } ],
+        "forretningsadresse" : [ {
+            "type" : "SemistrukturertAdresse",
+            "bruksperiode" : {
+                "fom" : [ 2021, 6, 2 ],
+                "tom" : null
+            },
+            "gyldighetsperiode" : {
+                "fom" : [ 2021, 6, 2 ],
+                "tom" : null
+            },
+            "landkode" : "NO",
+            "adresselinje1" : "STENSLANDSFJELL 94",
+            "adresselinje2" : null,
+            "adresselinje3" : null,
+            "postnr" : "2408",
+            "poststed" : "ELVERUM",
+            "kommunenr" : "3420",
+            "poststedUtland" : null
+        } ],
+        "postadresse" : [ {
+            "type" : "SemistrukturertAdresse",
+            "bruksperiode" : {
+                "fom" : [ 2021, 6, 2 ],
+                "tom" : null
+            },
+            "gyldighetsperiode" : {
+                "fom" : [ 2021, 6, 2 ],
+                "tom" : null
+            },
+            "landkode" : "NO",
+            "adresselinje1" : "STENSLANDSFJELL 94",
+            "adresselinje2" : null,
+            "adresselinje3" : null,
+            "postnr" : "2408",
+            "poststed" : "ELVERUM",
+            "kommunenr" : "3420",
+            "poststedUtland" : null
+        } ],
+        "telefon" : [ ],
+        "epostadresse" : [ ],
+        "naering" : [ ],
+        "opphoersdato" : null
+    },
+    "sektorkode" : "",
+    "navn" : "BESK KAFFE"
+}
