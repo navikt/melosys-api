@@ -37,7 +37,7 @@ public final class BrevbestillingDto {
     private String saksbehandlerNrToIdent;
     private String begrunnelseKode;
     private String ytterligereInformasjon;
-    private LocalDate fakturanummer;
+    private String fakturanummer;
     private Betalingsstatus betalingsstatus;
 
     public BrevbestillingDto() {
@@ -69,7 +69,7 @@ public final class BrevbestillingDto {
         String saksbehandlerNrToIdent,
         String begrunnelseKode,
         String ytterligereInformasjon,
-        LocalDate fakturanummer,
+        String fakturanummer,
         Betalingsstatus betalingsstatus) {
 
         this.produserbardokument = produserbardokument;
@@ -418,11 +418,11 @@ public final class BrevbestillingDto {
             "ytterligereInformasjon=" + ytterligereInformasjon + ']';
     }
 
-    public LocalDate getFakturanummer() {
+    public String getFakturanummer() {
         return fakturanummer;
     }
 
-    public void setFakturanummer(LocalDate fakturanummer) {
+    public void setFakturanummer(String fakturanummer) {
         this.fakturanummer = fakturanummer;
     }
 

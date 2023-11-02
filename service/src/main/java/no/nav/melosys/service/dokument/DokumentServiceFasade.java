@@ -62,7 +62,7 @@ public class DokumentServiceFasade {
     }
 
     @Transactional
-    public void produserOgDistribuerVarselbrevManglendeInnbetaling(Mottaker mottaker, LocalDate fakturanummer, Betalingsstatus betalingsstatus, long behandlingId) {
+    public void produserOgDistribuerVarselbrevManglendeInnbetaling(Mottaker mottaker, String fakturanummer, Betalingsstatus betalingsstatus, long behandlingId) {
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setBetalingsstatus(betalingsstatus);
         brevbestillingDto.setFakturanummer(fakturanummer);

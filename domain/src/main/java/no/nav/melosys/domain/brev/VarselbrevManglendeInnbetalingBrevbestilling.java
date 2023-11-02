@@ -5,7 +5,7 @@ import no.nav.melosys.domain.ftrl.Betalingsstatus;
 import java.time.LocalDate;
 
 public class VarselbrevManglendeInnbetalingBrevbestilling extends DokgenBrevbestilling {
-    private LocalDate fakturanummer;
+    private String fakturanummer;
     private Betalingsstatus betalingsstatus;
 
     public VarselbrevManglendeInnbetalingBrevbestilling() {
@@ -17,7 +17,7 @@ public class VarselbrevManglendeInnbetalingBrevbestilling extends DokgenBrevbest
         super(builder);
     }
 
-    public LocalDate getFakturanummer() {
+    public String getFakturanummer() {
         return fakturanummer;
     }
 
@@ -26,7 +26,7 @@ public class VarselbrevManglendeInnbetalingBrevbestilling extends DokgenBrevbest
     }
 
     public static final class Builder extends DokgenBrevbestilling.Builder<Builder> {
-        private LocalDate fakturanummer;
+        private String fakturanummer;
         private Betalingsstatus betalingsstatus;
 
         public Builder() {
@@ -38,7 +38,7 @@ public class VarselbrevManglendeInnbetalingBrevbestilling extends DokgenBrevbest
             this.fakturanummer = varselbrevManglendeInnbetalingBrevbestilling.getFakturanummer();
         }
 
-        public Builder medfakturanummer(LocalDate fakturanummer) {
+        public Builder medfakturanummer(String fakturanummer) {
             this.fakturanummer = fakturanummer;
             return this;
         }

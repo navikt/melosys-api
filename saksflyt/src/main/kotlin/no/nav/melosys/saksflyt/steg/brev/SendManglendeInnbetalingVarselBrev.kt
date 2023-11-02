@@ -40,7 +40,7 @@ class SendManglendeInnbetalingVarselBrev(
         }
         brevBestiller.bestillVarselbrevManglendeInnbetaling(
             mottakere,
-            LocalDate.parse(fakturanummer!!),
+            fakturanummer!!,
             Betalingsstatus.valueOf(betalingsstatus!!),
             behandlingsresultat.behandling.fagsak.saksnummer,
             behandlingsresultat.id

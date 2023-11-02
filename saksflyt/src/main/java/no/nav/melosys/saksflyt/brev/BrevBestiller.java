@@ -33,7 +33,7 @@ public class BrevBestiller {
         }
     }
 
-    public void bestillVarselbrevManglendeInnbetaling(Collection<Mottaker> mottakere, LocalDate fakturanummer, Betalingsstatus betalingsstatus, String saksnummer, Long behandlingID){
+    public void bestillVarselbrevManglendeInnbetaling(Collection<Mottaker> mottakere, String fakturanummer, Betalingsstatus betalingsstatus, String saksnummer, Long behandlingID){
         var dokumentType = Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING;
         for (Mottaker mottaker : mottakere) {
             dokumentServiceFasade.produserOgDistribuerVarselbrevManglendeInnbetaling(mottaker, fakturanummer, betalingsstatus, behandlingID);

@@ -16,8 +16,7 @@ public class VarselbrevManglendeInnbetaling extends DokgenDto {
     @JsonFormat(shape = STRING)
     private final LocalDate datoFrist;
 
-    @JsonFormat(shape = STRING)
-    private final LocalDate fakturanummer;
+    private final String fakturanummer;
 
     private final String betalingsstatus;
 
