@@ -30,7 +30,7 @@ class TrygdeavgiftTjeneste(
     fun hentTrygdeavgiftsgrunnlag(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<TrygdeavgiftsgrunnlagDto> {
         aksesskontroll.autoriser(behandlingID)
 
-        return trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlag(behandlingID)
+        return trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlagEllerOpprinneligTrygdeavgiftsgrunnlag(behandlingID)
             ?.let { ResponseEntity.ok(TrygdeavgiftsgrunnlagDto(it)) } ?: ResponseEntity.noContent().build()
     }
 
