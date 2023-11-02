@@ -64,7 +64,7 @@ class AvslagServiceTest {
         }
         every { behandlingService.hentBehandling(1L) }.returns(behandling)
         every { behandlingsresultatService.hentBehandlingsresultat(1L) }.returns(Behandlingsresultat())
-        every { behandlingsresultatService.lagre(any()) }.returns(Unit)
+        every { behandlingsresultatService.lagre(any()) } returnsArgument 0
         every { dokgenService.produserOgDistribuerBrev(any(), any()) }.returns(Unit)
         every { fagsakService.avsluttFagsakOgBehandling(any(), any()) }.returns(Unit)
         every { oppgaveService.ferdigstillOppgaveMedSaksnummer(any()) }.returns(Unit)

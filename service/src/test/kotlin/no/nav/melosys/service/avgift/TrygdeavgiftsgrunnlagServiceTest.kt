@@ -11,7 +11,6 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
-import io.mockk.Called
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -82,7 +81,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     @Test
     fun hentTrygdeavgiftsgrunnlagEllerOpprinneligTrygdeavgiftsgrunnlag_ingenGrunnlag_nyVurdering_lagrerOgReturnererGammeltGrunnlag() {
         val nå = LocalDate.now()
-        every { mockBehandlingsresultatService.lagre(any()) } returns Unit
+        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
         behandlingsresultat.apply {
             behandling = Behandling().apply {
                 id = BEHANDLING_ID
@@ -233,7 +232,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     fun oppdaterTrygdeavgiftsgrunnlag_eksistererBeregnetTrygdeavgift_sletterEksisterendeBeregning() {
         val fom = LocalDate.now().minusMonths(1);
         val tom = LocalDate.now().plusMonths(3);
-        every { mockBehandlingsresultatService.lagre(any()) }.returns(Unit)
+        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
         behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply {
                 this.fom = fom
@@ -261,7 +260,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     fun oppdaterTrygdeavgiftsgrunnlag_inntektsperioderDekkerIkkeHelePerioden_kasterFeil() {
         val fom = LocalDate.now().minusMonths(1);
         val tom = LocalDate.now().plusMonths(3);
-        every { mockBehandlingsresultatService.lagre(any()) }.returns(Unit)
+        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
         behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply {
                 this.fom = fom
@@ -287,7 +286,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     fun oppdaterTrygdeavgiftsgrunnlag_skatteforholdDekkerIkkeHelePerioden_kasterFeil() {
         val fom = LocalDate.now().minusMonths(1);
         val tom = LocalDate.now().plusMonths(3);
-        every { mockBehandlingsresultatService.lagre(any()) }.returns(Unit)
+        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
         behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply {
                 this.fom = fom
@@ -313,7 +312,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     fun oppdaterTrygdeavgiftsgrunnlag_skatteforholdOverlapper_kasterFeil() {
         val fom = LocalDate.now().minusMonths(1);
         val tom = LocalDate.now().plusMonths(3);
-        every { mockBehandlingsresultatService.lagre(any()) }.returns(Unit)
+        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
         behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply {
                 this.fom = fom
@@ -342,7 +341,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     fun oppdaterTrygdeavgiftsgrunnlag_requestMedSkattepliktOgInntektskilder_lagrerAltKorrekt() {
         val fom = LocalDate.now().minusMonths(1)
         val tom = LocalDate.now().plusMonths(3)
-        every { mockBehandlingsresultatService.lagre(any()) }.returns(Unit)
+        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
         behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply {
                 this.fom = fom

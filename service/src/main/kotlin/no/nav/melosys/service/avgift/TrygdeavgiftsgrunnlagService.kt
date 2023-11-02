@@ -13,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
 import no.nav.melosys.service.avgift.dto.SkatteforholdTilNorgeRequest
@@ -36,16 +37,14 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
         validerTrygdeavgiftsgrunnlag(request, medlemAvFolketrygden.medlemskapsperioder)
         fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden.fastsattTrygdeavgift)
 
-        lagreTrygdeavgiftsgrunnlag(behandlingsresultat, request)
-
-        return hentTrygdeavgiftsgrunnlag(behandlingID)
-            ?: throw FunksjonellException("Noe skjedde ved lagring av trygdeavgiftsgrunnlaget")
+        return lagreTrygdeavgiftsgrunnlag(behandlingsresultat, request).medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsgrunnlag
+            ?: throw TekniskException("Noe skjedde ved lagring av trygdeavgiftsgrunnlaget")
     }
 
     private fun lagreTrygdeavgiftsgrunnlag(
         behandlingsresultat: Behandlingsresultat,
         request: OppdaterTrygdeavgiftsgrunnlagRequest
-    ) {
+    ): Behandlingsresultat {
         val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
 
         medlemAvFolketrygden.fastsattTrygdeavgift = eksisterendeEllerNyFastsattTrygdeavgift(medlemAvFolketrygden)
@@ -55,7 +54,7 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
                 this.inntektsperioder = lagInntektsperioder(request)
             }
 
-        behandlingsresultatService.lagre(behandlingsresultat)
+        return behandlingsresultatService.lagre(behandlingsresultat)
     }
 
     fun fjernTrygdeavgiftsperioderOmDeFinnes(fastsattTrygdeavgift: FastsattTrygdeavgift?) {
@@ -157,8 +156,8 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
             val request = OppdaterTrygdeavgiftsgrunnlagRequest(
                 opprinneligTrygdeavgiftsgrunnlag.skatteforholdTilNorge.map { SkatteforholdTilNorgeRequest(it) },
                 opprinneligTrygdeavgiftsgrunnlag.inntektsperioder.map { InntektskildeRequest(it) })
-            lagreTrygdeavgiftsgrunnlag(behandlingsresultat, request)
-            return hentTrygdeavgiftsgrunnlag(behandling.id)
+            return lagreTrygdeavgiftsgrunnlag(behandlingsresultat, request).medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsgrunnlag
+                ?: throw TekniskException("Klarte ikke lagre opprinnelig behandlings trygdeavgiftsgrunnlag")
         }
 
         return opprinneligTrygdeavgiftsgrunnlag
