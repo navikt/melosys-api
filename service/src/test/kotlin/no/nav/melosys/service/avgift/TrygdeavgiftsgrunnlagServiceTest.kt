@@ -147,10 +147,12 @@ class TrygdeavgiftsgrunnlagServiceTest {
             }
         }
 
+
         val trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlagEllerOpprinneligTrygdeavgiftsgrunnlag(BEHANDLING_ID)
 
+
         assertEquals(10, trygdeavgiftsgrunnlag?.id)
-        verify { mockBehandlingsresultatService.lagre(any()) wasNot Called }
+        verify(exactly = 0) { mockBehandlingsresultatService.lagre(any()) }
     }
 
     @Test
@@ -174,9 +176,12 @@ class TrygdeavgiftsgrunnlagServiceTest {
             }
         }
 
+
         val trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlagEllerOpprinneligTrygdeavgiftsgrunnlag(BEHANDLING_ID)
 
+
         assertEquals(50, trygdeavgiftsgrunnlag?.id)
+        verify(exactly = 0) { mockBehandlingsresultatService.lagre(any()) }
     }
 
     @Test
