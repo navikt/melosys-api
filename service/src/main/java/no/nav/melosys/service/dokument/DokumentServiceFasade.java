@@ -3,6 +3,7 @@ package no.nav.melosys.service.dokument;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.dokument.DokumentBestiltEvent;
+import no.nav.melosys.domain.ftrl.Betalingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
@@ -10,6 +11,8 @@ import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
 
 @Service
 public class DokumentServiceFasade {
@@ -57,6 +60,18 @@ public class DokumentServiceFasade {
 
         dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto);
     }
+
+    @Transactional
+    public void produserOgDistribuerVarselbrevManglendeInnbetaling(Mottaker mottaker, LocalDate datoFakturaBestilt, Betalingsstatus betalingsstatus, long behandlingId) {
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setBetalingsstatus(betalingsstatus);
+        brevbestillingDto.setDatoFakturaBestilt(datoFakturaBestilt);
+        brevbestillingDto.setProduserbardokument(Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING);
+        brevbestillingDto.setMottaker(mottaker.getRolle());
+
+        dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto);
+    }
+
 
     @Transactional
     public void produserDokument(Produserbaredokumenter dokumentType, Mottaker mottaker, long behandlingId, DoksysBrevbestilling brevbestilling) {

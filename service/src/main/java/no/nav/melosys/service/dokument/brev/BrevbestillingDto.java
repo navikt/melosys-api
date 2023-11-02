@@ -1,11 +1,13 @@
 package no.nav.melosys.service.dokument.brev;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast;
+import no.nav.melosys.domain.ftrl.Betalingsstatus;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 
@@ -35,6 +37,8 @@ public final class BrevbestillingDto {
     private String saksbehandlerNrToIdent;
     private String begrunnelseKode;
     private String ytterligereInformasjon;
+    private LocalDate datoFakturaBestilt;
+    private Betalingsstatus betalingsstatus;
 
     public BrevbestillingDto() {
     }
@@ -64,7 +68,9 @@ public final class BrevbestillingDto {
         String dokumentTittel,
         String saksbehandlerNrToIdent,
         String begrunnelseKode,
-        String ytterligereInformasjon) {
+        String ytterligereInformasjon,
+        LocalDate datoFakturaBestilt,
+        Betalingsstatus betalingsstatus) {
 
         this.produserbardokument = produserbardokument;
         this.mottaker = mottaker;
@@ -91,6 +97,8 @@ public final class BrevbestillingDto {
         this.saksbehandlerNrToIdent = saksbehandlerNrToIdent;
         this.begrunnelseKode = begrunnelseKode;
         this.ytterligereInformasjon = ytterligereInformasjon;
+        this.datoFakturaBestilt = datoFakturaBestilt;
+        this.betalingsstatus = betalingsstatus;
     }
 
 
@@ -125,7 +133,9 @@ public final class BrevbestillingDto {
             brevbestillingUtkast.dokumentTittel(),
             brevbestillingUtkast.saksbehandlerNrToIdent(),
             deprecatedBegrunnelseKode,
-            deprecatedYtterligereInformasjon
+            deprecatedYtterligereInformasjon,
+            null,
+            null
         );
     }
 
@@ -408,4 +418,19 @@ public final class BrevbestillingDto {
             "ytterligereInformasjon=" + ytterligereInformasjon + ']';
     }
 
+    public LocalDate getDatoFakturaBestilt() {
+        return datoFakturaBestilt;
+    }
+
+    public void setDatoFakturaBestilt(LocalDate datoFakturaBestilt) {
+        this.datoFakturaBestilt = datoFakturaBestilt;
+    }
+
+    public Betalingsstatus getBetalingsstatus() {
+        return betalingsstatus;
+    }
+
+    public void setBetalingsstatus(Betalingsstatus betalingsstatus) {
+        this.betalingsstatus = betalingsstatus;
+    }
 }
