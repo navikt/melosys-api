@@ -185,14 +185,19 @@ public class RegisteropplysningerService {
 
     private List<Saksopplysning> hentOrganisasjonsopplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {
         Set<String> orgnumreFraArbeidsforhold = saksopplysningerService.finnArbeidsforholdsopplysninger(behandling.getId())
-            .map(ArbeidsforholdDokument::hentOrgnumre).orElse(Collections.emptySet());
+            .map(ArbeidsforholdDokument::hentOrgnumre)
+            .orElseGet(Collections::emptySet);
         Set<String> orgnumreFraInntekt = saksopplysningerService.finnInntektsopplysninger(behandling.getId())
-            .map(InntektDokument::hentOrgnumre).orElse(Collections.emptySet());
+            .map(InntektDokument::hentOrgnumre)
+            .orElseGet(Collections::emptySet);
 
-        return Sets.union(orgnumreFraArbeidsforhold, orgnumreFraInntekt).stream().filter(orgnr -> erGyldig(orgnr)).map(orgnr -> eregFasade.hentOrganisasjon(orgnr)).toList();
+        return Sets.union(orgnumreFraArbeidsforhold, orgnumreFraInntekt).stream()
+            .filter(RegisteropplysningerService::erGyldigOrgnr)
+            .map(orgnr -> eregFasade.hentOrganisasjon(orgnr))
+            .toList();
     }
 
-    private boolean erGyldig(String orgnr) {
+    private static boolean erGyldigOrgnr(String orgnr) {
         return orgnr != null && orgnr.length() == 9;
     }
 
