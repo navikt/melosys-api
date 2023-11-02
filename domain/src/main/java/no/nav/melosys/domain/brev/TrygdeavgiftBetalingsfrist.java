@@ -5,7 +5,7 @@ import java.time.Period;
 
 public class TrygdeavgiftBetalingsfrist {
 
-    public static final int TRYGDEAVGIFT_BETALINGSFRIST_UKER = 6;
+    public static final int TRYGDEAVGIFT_BETALINGSFRIST_UKER = 4;
 
     private TrygdeavgiftBetalingsfrist() {
     }
