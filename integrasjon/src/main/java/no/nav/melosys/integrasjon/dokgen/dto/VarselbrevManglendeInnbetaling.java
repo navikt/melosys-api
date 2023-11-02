@@ -17,7 +17,7 @@ public class VarselbrevManglendeInnbetaling extends DokgenDto {
     private final LocalDate datoFrist;
 
     @JsonFormat(shape = STRING)
-    private final LocalDate datoFakturaBestilt;
+    private final LocalDate fakturanummer;
 
     private final String betalingsstatus;
 
@@ -26,7 +26,7 @@ public class VarselbrevManglendeInnbetaling extends DokgenDto {
 
         this.datoMottatt = instantTilLocalDate(brevbestilling.getForsendelseMottatt());
         this.datoFrist = datoFrist;
-        this.datoFakturaBestilt = brevbestilling.getDatoFakturaBestilt();
+        this.fakturanummer = brevbestilling.getFakturanummer();
         this.betalingsstatus = brevbestilling.getBetalingsstatus().name();
 
     }

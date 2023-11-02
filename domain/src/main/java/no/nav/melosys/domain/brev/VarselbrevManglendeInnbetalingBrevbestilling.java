@@ -5,7 +5,7 @@ import no.nav.melosys.domain.ftrl.Betalingsstatus;
 import java.time.LocalDate;
 
 public class VarselbrevManglendeInnbetalingBrevbestilling extends DokgenBrevbestilling {
-    private LocalDate datoFakturaBestilt;
+    private LocalDate fakturanummer;
     private Betalingsstatus betalingsstatus;
 
     public VarselbrevManglendeInnbetalingBrevbestilling() {
@@ -17,8 +17,8 @@ public class VarselbrevManglendeInnbetalingBrevbestilling extends DokgenBrevbest
         super(builder);
     }
 
-    public LocalDate getDatoFakturaBestilt() {
-        return datoFakturaBestilt;
+    public LocalDate getFakturanummer() {
+        return fakturanummer;
     }
 
     public Betalingsstatus getBetalingsstatus() {
@@ -26,7 +26,7 @@ public class VarselbrevManglendeInnbetalingBrevbestilling extends DokgenBrevbest
     }
 
     public static final class Builder extends DokgenBrevbestilling.Builder<Builder> {
-        private LocalDate datoFakturaBestilt;
+        private LocalDate fakturanummer;
         private Betalingsstatus betalingsstatus;
 
         public Builder() {
@@ -35,11 +35,11 @@ public class VarselbrevManglendeInnbetalingBrevbestilling extends DokgenBrevbest
         public Builder(VarselbrevManglendeInnbetalingBrevbestilling varselbrevManglendeInnbetalingBrevbestilling) {
             super(varselbrevManglendeInnbetalingBrevbestilling);
             this.betalingsstatus = varselbrevManglendeInnbetalingBrevbestilling.getBetalingsstatus();
-            this.datoFakturaBestilt = varselbrevManglendeInnbetalingBrevbestilling.getDatoFakturaBestilt();
+            this.fakturanummer = varselbrevManglendeInnbetalingBrevbestilling.getFakturanummer();
         }
 
-        public Builder medDatoFakturaBestilt(LocalDate datoFakturaBestilt) {
-            this.datoFakturaBestilt = datoFakturaBestilt;
+        public Builder medfakturanummer(LocalDate fakturanummer) {
+            this.fakturanummer = fakturanummer;
             return this;
         }
 

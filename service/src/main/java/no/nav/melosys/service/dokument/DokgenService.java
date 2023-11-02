@@ -313,7 +313,7 @@ public class DokgenService {
                 .medMottakerType(brevbestillingDto.getMottaker());
             case IKKE_YRKESAKTIV_VEDTAKSBREV -> new IkkeYrkesaktivBrevbestilling.Builder().medDistribusjonstype(Distribusjonstype.VEDTAK);
             case VARSELBREV_MANGLENDE_INNBETALING ->
-                new VarselbrevManglendeInnbetalingBrevbestilling.Builder().medDatoFakturaBestilt(brevbestillingDto.getDatoFakturaBestilt()).medBetalingsstatus(brevbestillingDto.getBetalingsstatus());
+                new VarselbrevManglendeInnbetalingBrevbestilling.Builder().medfakturanummer(brevbestillingDto.getFakturanummer()).medBetalingsstatus(brevbestillingDto.getBetalingsstatus());
 
             default -> new DokgenBrevbestilling.Builder<>().medDistribusjonstype(Distribusjonstype.VIKTIG);
         };

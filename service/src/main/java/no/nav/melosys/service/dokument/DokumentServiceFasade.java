@@ -62,10 +62,10 @@ public class DokumentServiceFasade {
     }
 
     @Transactional
-    public void produserOgDistribuerVarselbrevManglendeInnbetaling(Mottaker mottaker, LocalDate datoFakturaBestilt, Betalingsstatus betalingsstatus, long behandlingId) {
+    public void produserOgDistribuerVarselbrevManglendeInnbetaling(Mottaker mottaker, LocalDate fakturanummer, Betalingsstatus betalingsstatus, long behandlingId) {
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setBetalingsstatus(betalingsstatus);
-        brevbestillingDto.setDatoFakturaBestilt(datoFakturaBestilt);
+        brevbestillingDto.setFakturanummer(fakturanummer);
         brevbestillingDto.setProduserbardokument(Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING);
         brevbestillingDto.setMottaker(mottaker.getRolle());
 

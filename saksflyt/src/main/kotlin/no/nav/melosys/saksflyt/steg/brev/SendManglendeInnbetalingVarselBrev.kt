@@ -27,7 +27,7 @@ class SendManglendeInnbetalingVarselBrev(
     override fun utfør(prosessinstans: Prosessinstans?) {
         val fakturaserieReferanse = prosessinstans?.getData(ProsessDataKey.FAKTURASERIE_REFERANSE)
         val betalingsstatus = prosessinstans?.getData(ProsessDataKey.BETALINGSSTATUS)
-        val datoFakturaBestilt = prosessinstans?.getData(ProsessDataKey.DATO_FAKTURA_BESTILT)
+        val fakturanummer = prosessinstans?.getData(ProsessDataKey.DATO_FAKTURA_BESTILT)
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultatAvFakturaserieReferanse(fakturaserieReferanse)
         val mottakere = mutableListOf<Mottaker>()
         val fagsak = behandlingsresultat.behandling.fagsak
@@ -40,7 +40,7 @@ class SendManglendeInnbetalingVarselBrev(
         }
         brevBestiller.bestillVarselbrevManglendeInnbetaling(
             mottakere,
-            LocalDate.parse(datoFakturaBestilt!!),
+            LocalDate.parse(fakturanummer!!),
             Betalingsstatus.valueOf(betalingsstatus!!),
             behandlingsresultat.behandling.fagsak.saksnummer,
             behandlingsresultat.id
