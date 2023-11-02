@@ -8,6 +8,7 @@ import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avgift.TrygdeavgiftsgrunnlagService
 import no.nav.melosys.service.tilgang.Aksesskontroll
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.BeregnetTrygdeavgiftDto
+import no.nav.melosys.tjenester.gui.dto.trygdeavgift.FakturamottakerDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftMottakerDto
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftsgrunnlagDto
 import no.nav.security.token.support.core.api.Protected
@@ -76,5 +77,11 @@ class TrygdeavgiftTjeneste(
         return ResponseEntity.ok(
             BeregnetTrygdeavgiftDto.av(trygdeavgiftsberegningService.beregnOgLagreTrygdeavgift(behandlingID))
         )
+    }
+
+    @GetMapping("/fakturamottaker")
+    fun hentFakturamottaker(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<FakturamottakerDto> {
+        aksesskontroll.autoriser(behandlingID)
+        return ResponseEntity.ok(FakturamottakerDto(trygdeavgiftsberegningService.finnFakturamottaker(behandlingID)))
     }
 }
