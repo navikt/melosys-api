@@ -224,6 +224,7 @@ class OrganisasjonResponse {
     )
 
     data class Adresse(
+        val type: String? = null,
         val bruksperiode: Bruksperiode,
         val gyldighetsperiode: Gyldighetsperiode,
         val adresselinje1: String? = null,

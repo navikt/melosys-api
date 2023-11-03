@@ -1,0 +1,47 @@
+{
+    "type" : "OrganisasjonDokument",
+    "orgnummer" : "901851573",
+    "oppstartsdato" : null,
+    "enhetstype" : "BEDR",
+    "organisasjonDetaljer" : {
+        "orgnummer" : "901851573",
+        "navn" : [ {
+            "bruksperiode" : {
+                "fom" : [ 2021, 3, 2 ],
+                "tom" : null
+            },
+            "gyldighetsperiode" : {
+                "fom" : [ 2021, 3, 2 ],
+                "tom" : null
+            },
+            "navn" : [ "ELASTISK FYRSTINNE" ],
+            "redigertNavn" : "ELASTISK FYRSTINNE"
+        } ],
+        "forretningsadresse" : [ {
+            "type" : "SemistrukturertAdresse",
+            "bruksperiode" : {
+                "fom" : [ 2021, 3, 2 ],
+                "tom" : null
+            },
+            "gyldighetsperiode" : {
+                "fom" : [ 2021, 3, 2 ],
+                "tom" : null
+            },
+            "landkode" : "NO",
+            "adresselinje1" : "HEIMLY 9",
+            "adresselinje2" : null,
+            "adresselinje3" : null,
+            "postnr" : "4836",
+            "poststed" : null,
+            "kommunenr" : "4203",
+            "poststedUtland" : null
+        } ],
+        "postadresse" : [ ],
+        "telefon" : [ ],
+        "epostadresse" : [ ],
+        "naering" : [ ],
+        "opphoersdato" : null
+    },
+    "sektorkode" : "",
+    "navn" : "ELASTISK FYRSTINNE"
+}
