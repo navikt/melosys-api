@@ -193,12 +193,13 @@ public class RegisteropplysningerService {
 
         return Sets.union(orgnumreFraArbeidsforhold, orgnumreFraInntekt).stream()
             .filter(RegisteropplysningerService::erGyldigOrgnr)
-            .map(orgnr -> eregFasade.hentOrganisasjon(orgnr))
+            .map(eregFasade::hentOrganisasjon)
             .toList();
     }
 
+    // Ereg har ikke data om personer, men arbeidsforhold og inntekt kan innneholde fnr registrert som orgnr
     private static boolean erGyldigOrgnr(String orgnr) {
-        return orgnr != null && orgnr.length() == 9;
+        return orgnr != null && orgnr.length() != 11;
     }
 
     @Transactional
