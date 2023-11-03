@@ -12,7 +12,7 @@ import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonResponse
 import org.junit.jupiter.api.Test
 import java.nio.charset.StandardCharsets
 
-class EregDocumentConvertTest {
+class EregDokumentConverterTest {
 
     private val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
 
@@ -20,10 +20,10 @@ class EregDocumentConvertTest {
     fun `Konvertering av virksomhet til json skal bli som forventet`() {
         val virksomhet = mapper.readValue<OrganisasjonResponse.Organisasjon>(hentRessurs("mock/organisasjon/901851573.json"))
         val forventetOrganisasjonDokumentJson = hentRessurs("mock/organisasjon/resultat/virksomhet-resultat.json")
-        val organisasjonDokument: OrganisasjonDokument = EregDtoTilSaksopplysningKonverter().lagSaksopplysning(virksomhet)
-            .dokument.shouldBeTypeOf<OrganisasjonDokument>()
 
 
+        val organisasjonDokument =
+            EregDtoTilSaksopplysningKonverter().lagSaksopplysning(virksomhet).dokument.shouldBeTypeOf<OrganisasjonDokument>()
         val organisasjonDokumentSomJson = SaksopplysningDokumentConverter().convertToDatabaseColumn(organisasjonDokument)
 
 
@@ -34,10 +34,10 @@ class EregDocumentConvertTest {
     fun `Konvertering av JuridiskEnhet til json skal bli som forventet`() {
         val juridiskEnhet = mapper.readValue<OrganisasjonResponse.Organisasjon>(hentRessurs("mock/organisasjon/928497704.json"))
         val forventetOrganisasjonDokumentJson = hentRessurs("mock/organisasjon/resultat/juridiskEnhet-resultat.json")
-        val organisasjonDokument: OrganisasjonDokument = EregDtoTilSaksopplysningKonverter().lagSaksopplysning(juridiskEnhet)
-            .dokument.shouldBeTypeOf<OrganisasjonDokument>()
 
 
+        val organisasjonDokument =
+            EregDtoTilSaksopplysningKonverter().lagSaksopplysning(juridiskEnhet).dokument.shouldBeTypeOf<OrganisasjonDokument>()
         val organisasjonDokumentSomJson = SaksopplysningDokumentConverter().convertToDatabaseColumn(organisasjonDokument)
 
 
@@ -48,10 +48,10 @@ class EregDocumentConvertTest {
     fun `Konvertering av Organisasjonsledd til json skal bli som forventet`() {
         val organisasjonsledd = mapper.readValue<OrganisasjonResponse.Organisasjon>(hentRessurs("mock/organisasjon/974774577.json"))
         val forventetOrganisasjonDokumentJson = hentRessurs("mock/organisasjon/resultat/organisasjonsledd-resultat.json")
-        val organisasjonDokument: OrganisasjonDokument = EregDtoTilSaksopplysningKonverter().lagSaksopplysning(organisasjonsledd)
-            .dokument.shouldBeTypeOf<OrganisasjonDokument>()
 
 
+        val organisasjonDokument =
+            EregDtoTilSaksopplysningKonverter().lagSaksopplysning(organisasjonsledd).dokument.shouldBeTypeOf<OrganisasjonDokument>()
         val organisasjonDokumentSomJson = SaksopplysningDokumentConverter().convertToDatabaseColumn(organisasjonDokument)
 
 
@@ -62,10 +62,10 @@ class EregDocumentConvertTest {
     fun `Konvertering av Organisasjons til json skal bli som forventet`() {
         val organisasjons = mapper.readValue<OrganisasjonResponse.Organisasjon>(hentRessurs("mock/organisasjon/928497705.json"))
         val forventetOrganisasjonDokumentJson = hentRessurs("mock/organisasjon/resultat/organisasjons-resultat.json")
-        val organisasjonDokument: OrganisasjonDokument = EregDtoTilSaksopplysningKonverter().lagSaksopplysning(organisasjons)
-            .dokument.shouldBeTypeOf<OrganisasjonDokument>()
 
 
+        val organisasjonDokument =
+            EregDtoTilSaksopplysningKonverter().lagSaksopplysning(organisasjons).dokument.shouldBeTypeOf<OrganisasjonDokument>()
         val organisasjonDokumentSomJson = SaksopplysningDokumentConverter().convertToDatabaseColumn(organisasjonDokument)
 
 
