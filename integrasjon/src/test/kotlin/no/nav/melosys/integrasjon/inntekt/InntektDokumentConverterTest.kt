@@ -21,7 +21,7 @@ import no.nav.melosys.exception.IkkeFunnetException
 import org.junit.jupiter.api.Test
 import java.nio.charset.StandardCharsets
 
-class InntektDocumentConvertTest {
+class InntektDokumentConverterTest {
 
     private val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
 
