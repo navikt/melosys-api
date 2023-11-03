@@ -27,8 +27,7 @@ class InntektDocumentConvertTest {
         val forventetInntektDokumentDatabaseJson = hentRessurs("mock/inntekt/InntektDocumentConverterResult.json")
 
 
-        val inntektDokument = InntektKonverter().lagSaksopplysning(inntektResponse)
-            .dokument.shouldBeTypeOf<InntektDokument>()
+        val inntektDokument = InntektKonverter().lagSaksopplysning(inntektResponse).dokument.shouldBeTypeOf<InntektDokument>()
         val convertToDatabaseColumn = SaksopplysningDokumentConverter().convertToDatabaseColumn(inntektDokument)
 
 
