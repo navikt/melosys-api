@@ -25,10 +25,10 @@ class InntektDocumentConvertTest {
     fun `sjekk json resulat fra konvertering for lagring i databaase mot fasit fra fil`() {
         val inntektResponse = mapper.readValue<InntektResponse>(hentRessurs("mock/inntekt/inntektConsumerResponse.json"))
         val forventetInntektDokumentDatabaseJson = hentRessurs("mock/inntekt/InntektDocumentConverterResult.json")
+
+
         val inntektDokument = InntektKonverter().lagSaksopplysning(inntektResponse)
             .dokument.shouldBeTypeOf<InntektDokument>()
-
-
         val convertToDatabaseColumn = SaksopplysningDokumentConverter().convertToDatabaseColumn(inntektDokument)
 
 
@@ -39,17 +39,15 @@ class InntektDocumentConvertTest {
     fun `sjekk json resulat fra konvertering for frontend mot fasit fra fil`() {
         val inntektResponse = mapper.readValue<InntektResponse>(hentRessurs("mock/inntekt/inntektConsumerResponse.json"))
         val forventetInntektDokumentrFrontEndJson = hentRessurs("mock/inntekt/InntektDocumentConverterFrontEndResult.json")
-        val inntektDokument = InntektKonverter().lagSaksopplysning(inntektResponse)
-            .dokument.shouldBeTypeOf<InntektDokument>()
-
-
-        val frontendExpectedDTOs = mapper
+        val mapperWithView = mapper
             .configure(SerializationFeature.INDENT_OUTPUT, true)
             .addMixIn(SaksopplysningDokument::class.java, SaksopplysningDokumentMixIn::class.java)
             .addMixIn(TilleggsinformasjonDetaljer::class.java, TilleggsinformasjonDetaljerMixIn::class.java)
             .writerWithView(DokumentView.FrontendApi::class.java)
-            .writeValueAsString(inntektDokument)
 
+
+        val inntektDokument = InntektKonverter().lagSaksopplysning(inntektResponse).dokument.shouldBeTypeOf<InntektDokument>()
+        val frontendExpectedDTOs = mapperWithView.writeValueAsString(inntektDokument)
 
 
         frontendExpectedDTOs.shouldEqualJson(forventetInntektDokumentrFrontEndJson)
