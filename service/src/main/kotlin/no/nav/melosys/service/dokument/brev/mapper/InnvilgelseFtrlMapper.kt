@@ -15,6 +15,7 @@ import no.nav.melosys.integrasjon.dokgen.dto.innvilgelseftrl.AvgiftsperiodeDto
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import org.springframework.stereotype.Component
+import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -71,7 +72,7 @@ class InnvilgelseFtrlMapper(
                 it.trygdesats,
                 it.trygdeavgiftsbeløpMd.verdi,
                 it.grunnlagInntekstperiode.type,
-                it.grunnlagInntekstperiode.avgiftspliktigInntektMnd?.verdi,
+                it.grunnlagInntekstperiode.avgiftspliktigInntektMnd?.verdi ?: BigDecimal.ZERO,
             )
         }.sortedByDescending { it.fom }
 
