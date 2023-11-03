@@ -1,10 +1,5 @@
 package no.nav.melosys.tjenester.gui.avklartefakta;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.Set;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.getunleash.Unleash;
 import no.nav.melosys.domain.Medlemskapsperiode;
@@ -30,6 +25,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.Set;
 
 import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
 import static org.mockito.ArgumentMatchers.any;
@@ -66,7 +66,7 @@ class TrygdeavgiftTjenesteTest {
 
     @Test
     void hentTrygdeavgiftsgrunnlag() throws Exception {
-        when(trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlag(BEHANDLINGSRESULTAT_ID)).thenReturn(trygdeavgiftsgrunnlag);
+        when(trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlagEllerOpprinneligTrygdeavgiftsgrunnlag(BEHANDLINGSRESULTAT_ID)).thenReturn(trygdeavgiftsgrunnlag);
 
         mockMvc.perform(get(BASE_URL + "/grunnlag", 1L)
                 .contentType(MediaType.APPLICATION_JSON))

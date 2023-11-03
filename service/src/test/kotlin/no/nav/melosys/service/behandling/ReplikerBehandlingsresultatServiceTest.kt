@@ -65,7 +65,7 @@ class ReplikerBehandlingsresultatServiceTest {
 
         every { behandlingsresultatService.hentBehandlingsresultat(tidligsteInaktiveBehandling.id) } returns behandlingsresultatOrig
         val slot = slot<Behandlingsresultat>()
-        every { behandlingsresultatService.lagre(capture(slot)) } returns Unit
+        every { behandlingsresultatService.lagre(capture(slot)) } returnsArgument 0
 
 
         replikerBehandlingsresultatService.replikerBehandlingsresultat(tidligsteInaktiveBehandling, behandlingReplika)

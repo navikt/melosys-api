@@ -1,5 +1,7 @@
 package no.nav.melosys.service.avgift
 
+import no.nav.melosys.domain.Behandling
+import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.avgift.Inntektsperiode
 import no.nav.melosys.domain.avgift.Penger
@@ -11,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.Inntektskildetype
 import no.nav.melosys.domain.kodeverk.Skatteplikttype
 import no.nav.melosys.domain.kodeverk.Trygdeavgift_typer
 import no.nav.melosys.exception.FunksjonellException
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.service.avgift.dto.InntektskildeRequest
 import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest
 import no.nav.melosys.service.avgift.dto.SkatteforholdTilNorgeRequest
@@ -21,7 +24,7 @@ import org.threeten.extra.LocalDateRange
 import java.time.DateTimeException
 
 @Service
-class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: BehandlingsresultatService, private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService) {
+class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: BehandlingsresultatService) {
 
     @Transactional
     fun oppdaterTrygdeavgiftsgrunnlag(
@@ -34,16 +37,24 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
         validerTrygdeavgiftsgrunnlag(request, medlemAvFolketrygden.medlemskapsperioder)
         fjernTrygdeavgiftsperioderOmDeFinnes(medlemAvFolketrygden.fastsattTrygdeavgift)
 
+        return lagreTrygdeavgiftsgrunnlag(behandlingsresultat, request).medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsgrunnlag
+            ?: throw TekniskException("Noe skjedde ved lagring av trygdeavgiftsgrunnlaget")
+    }
+
+    private fun lagreTrygdeavgiftsgrunnlag(
+        behandlingsresultat: Behandlingsresultat,
+        request: OppdaterTrygdeavgiftsgrunnlagRequest
+    ): Behandlingsresultat {
+        val medlemAvFolketrygden = behandlingsresultat.medlemAvFolketrygden
+
         medlemAvFolketrygden.fastsattTrygdeavgift = eksisterendeEllerNyFastsattTrygdeavgift(medlemAvFolketrygden)
         medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag =
             eksisterendeEllerNyttTrygdeavgiftsgrunnlag(medlemAvFolketrygden).apply {
                 this.skatteforholdTilNorge = lagSkatteforholdTilNorge(request)
                 this.inntektsperioder = lagInntektsperioder(request)
             }
-        behandlingsresultatService.lagre(behandlingsresultat)
 
-        return hentTrygdeavgiftsgrunnlag(behandlingID)
-            ?: throw FunksjonellException("Noe skjedde ved lagring av trygdeavgiftsgrunnlaget")
+        return behandlingsresultatService.lagre(behandlingsresultat)
     }
 
     fun fjernTrygdeavgiftsperioderOmDeFinnes(fastsattTrygdeavgift: FastsattTrygdeavgift?) {
@@ -119,15 +130,37 @@ class TrygdeavgiftsgrunnlagService(private val behandlingsresultatService: Behan
 
     @Transactional(readOnly = true)
     fun hentTrygdeavgiftsgrunnlag(behandlingID: Long): Trygdeavgiftsgrunnlag? {
+        return behandlingsresultatService.hentBehandlingsresultat(behandlingID).medlemAvFolketrygden?.fastsattTrygdeavgift?.trygdeavgiftsgrunnlag
+    }
+
+    @Transactional(readOnly = false)
+    fun hentTrygdeavgiftsgrunnlagEllerOpprinneligTrygdeavgiftsgrunnlag(behandlingID: Long): Trygdeavgiftsgrunnlag? {
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID)
         val behandling = behandlingsresultat.behandling
         val trygdeavgiftsgrunnlag = behandlingsresultat.medlemAvFolketrygden?.fastsattTrygdeavgift?.trygdeavgiftsgrunnlag
+
         if (trygdeavgiftsgrunnlag == null && behandling.erNyVurdering() && behandling.opprinneligBehandling != null) {
-            val forrigeBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandling.opprinneligBehandling.id)
-            return forrigeBehandlingsresultat.medlemAvFolketrygden?.fastsattTrygdeavgift?.trygdeavgiftsgrunnlag
+            return hentOgLagreOpprinneligBehandlingTrygdeavgiftsgrunnlag(behandling, behandlingsresultat)
         } else {
             return trygdeavgiftsgrunnlag
         }
+    }
+
+    private fun hentOgLagreOpprinneligBehandlingTrygdeavgiftsgrunnlag(
+        behandling: Behandling,
+        behandlingsresultat: Behandlingsresultat
+    ): Trygdeavgiftsgrunnlag? {
+        val opprinneligTrygdeavgiftsgrunnlag = hentTrygdeavgiftsgrunnlag(behandling.opprinneligBehandling.id)
+
+        if (opprinneligTrygdeavgiftsgrunnlag !== null && behandlingsresultat.medlemAvFolketrygden != null) {
+            val request = OppdaterTrygdeavgiftsgrunnlagRequest(
+                opprinneligTrygdeavgiftsgrunnlag.skatteforholdTilNorge.map { SkatteforholdTilNorgeRequest(it) },
+                opprinneligTrygdeavgiftsgrunnlag.inntektsperioder.map { InntektskildeRequest(it) })
+            return lagreTrygdeavgiftsgrunnlag(behandlingsresultat, request).medlemAvFolketrygden.fastsattTrygdeavgift?.trygdeavgiftsgrunnlag
+                ?: throw TekniskException("Klarte ikke lagre opprinnelig behandlings trygdeavgiftsgrunnlag")
+        }
+
+        return opprinneligTrygdeavgiftsgrunnlag
     }
 
     companion object {
