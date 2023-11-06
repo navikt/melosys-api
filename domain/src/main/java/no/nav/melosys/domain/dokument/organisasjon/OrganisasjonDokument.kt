@@ -1,13 +1,12 @@
 package no.nav.melosys.domain.dokument.organisasjon
 
-import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonView
 import no.nav.melosys.domain.AbstraktOrganisasjon
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.dokument.DokumentView.FrontendApi
 import no.nav.melosys.domain.dokument.SaksopplysningDokument
 import java.time.LocalDate
-import java.util.List
 import javax.xml.bind.annotation.*
 
 @XmlRootElement
@@ -15,13 +14,13 @@ import javax.xml.bind.annotation.*
 class OrganisasjonDokument : AbstraktOrganisasjon(), SaksopplysningDokument {
     @XmlElementWrapper(name = "navn")
     @XmlElement(name = "navnelinje")
-    var navn: MutableList<String?>? = null
+    var navn: List<String>? = null
 
-    @JvmField
     var organisasjonDetaljer: OrganisasjonsDetaljer? = null
     var sektorkode: String? = null //"http://nav.no/kodeverk/Kodeverk/Sektorkoder"
 
-    override fun getNavn(): String? {
+    @JsonIgnore
+    override fun getSammenslåttNavn(): String? {
         return lagSammenslåttNavn()
     }
 
@@ -38,15 +37,6 @@ class OrganisasjonDokument : AbstraktOrganisasjon(), SaksopplysningDokument {
     // Hvis man ikke har bruk for historikk på navn så er det best å bruke navn på nivå organisasjon.
     fun lagSammenslåttNavn(): String? {
         return if (navn == null) "UKJENT" else java.lang.String.join(" ", navn)
-    }
-
-
-    fun getOrganisasjonDetaljer(): OrganisasjonsDetaljer? {
-        return organisasjonDetaljer
-    }
-
-    fun setOrganisasjonDetaljer(organisasjonDetaljer: OrganisasjonsDetaljer?) {
-        this.organisasjonDetaljer = organisasjonDetaljer
     }
 
     fun setOppstartsdato(oppstartsdato: LocalDate?) {

@@ -27,13 +27,13 @@ internal class Ereg4KonverteringTest : KonverteringTest {
 
         // Test semistrukturert adresse...
         val dokument = test!!.dokument as OrganisasjonDokument
-        val postadresse = dokument.getOrganisasjonDetaljer()!!.postadresse[0] as SemistrukturertAdresse
+        val postadresse = dokument.organisasjonDetaljer!!.postadresse[0] as SemistrukturertAdresse
         Assertions.assertThat(postadresse.adresselinje1).isEqualTo("Skuteviksbodene 1")
         Assertions.assertThat(postadresse.postnr).isEqualTo("5035")
         Assertions.assertThat(postadresse.kommunenr).isEqualTo("1201")
 
         // Test strukturert adresse...
-        val forretningsadresse = dokument.getOrganisasjonDetaljer()!!.forretningsadresse[0] as Gateadresse
+        val forretningsadresse = dokument.organisasjonDetaljer!!.forretningsadresse[0] as Gateadresse
         Assertions.assertThat(forretningsadresse.gatenavn).isEqualTo("Gatenavn")
         Assertions.assertThat(forretningsadresse.landkode).isEqualTo("NO")
 
@@ -54,7 +54,7 @@ internal class Ereg4KonverteringTest : KonverteringTest {
         val saksopplysning = getSaksopplysning(EREG_4_0_MOCK)
         val dokument = saksopplysning!!.dokument as OrganisasjonDokument
         Assertions.assertThat(dokument.sektorkode).isNotBlank()
-        Assertions.assertThat(dokument.getOrganisasjonDetaljer()!!.naering).isNotEmpty()
+        Assertions.assertThat(dokument.organisasjonDetaljer!!.naering).isNotEmpty()
         Assertions.assertThat(dokument.oppstartsdato).isNull()
         Assertions.assertThat(dokument.enhetstype).isNotBlank()
     }
@@ -66,7 +66,7 @@ internal class Ereg4KonverteringTest : KonverteringTest {
         val saksopplysning = getSaksopplysning(ressurs)
         val dokument = saksopplysning!!.getDokument() as OrganisasjonDokument
         Assertions.assertThat(dokument.sektorkode).isNotBlank()
-        Assertions.assertThat(dokument.getOrganisasjonDetaljer()!!.naering).isNotEmpty()
+        Assertions.assertThat(dokument.organisasjonDetaljer!!.naering).isNotEmpty()
         Assertions.assertThat(dokument.oppstartsdato).isNull()
         Assertions.assertThat(dokument.enhetstype).isEmpty()
     }
@@ -78,7 +78,7 @@ internal class Ereg4KonverteringTest : KonverteringTest {
         val saksopplysning = getSaksopplysning(ressurs)
         val dokument = saksopplysning!!.dokument as OrganisasjonDokument
         Assertions.assertThat(dokument.sektorkode).isEmpty()
-        Assertions.assertThat(dokument.getOrganisasjonDetaljer()!!.naering).isNotEmpty()
+        Assertions.assertThat(dokument.organisasjonDetaljer!!.naering).isNotEmpty()
         Assertions.assertThat(dokument.oppstartsdato).isNotNull()
         Assertions.assertThat(dokument.enhetstype).isEmpty()
     }
