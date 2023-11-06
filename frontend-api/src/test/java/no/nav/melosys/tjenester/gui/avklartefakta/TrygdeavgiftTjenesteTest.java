@@ -1,10 +1,5 @@
 package no.nav.melosys.tjenester.gui.avklartefakta;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.Set;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.getunleash.Unleash;
 import no.nav.melosys.domain.Medlemskapsperiode;
@@ -21,6 +16,7 @@ import no.nav.melosys.service.avgift.dto.OppdaterTrygdeavgiftsgrunnlagRequest;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.tjenester.gui.TrygdeavgiftTjeneste;
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.BeregnetTrygdeavgiftDto;
+import no.nav.melosys.tjenester.gui.dto.trygdeavgift.FakturamottakerDto;
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftsgrunnlagDto;
 import no.nav.melosys.tjenester.gui.dto.trygdeavgift.TrygdeavgiftsperiodeDto;
 import org.junit.jupiter.api.Test;
@@ -30,12 +26,18 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.Set;
+
 import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {TrygdeavgiftTjeneste.class})
@@ -64,7 +66,7 @@ class TrygdeavgiftTjenesteTest {
 
     @Test
     void hentTrygdeavgiftsgrunnlag() throws Exception {
-        when(trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlag(BEHANDLINGSRESULTAT_ID)).thenReturn(trygdeavgiftsgrunnlag);
+        when(trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlagEllerOpprinneligTrygdeavgiftsgrunnlag(BEHANDLINGSRESULTAT_ID)).thenReturn(trygdeavgiftsgrunnlag);
 
         mockMvc.perform(get(BASE_URL + "/grunnlag", 1L)
                 .contentType(MediaType.APPLICATION_JSON))
@@ -105,6 +107,18 @@ class TrygdeavgiftTjenesteTest {
             .andExpect(status().isOk())
             .andExpect(responseBody(objectMapper)
                 .containsObjectAsJson(forventetBeregnetTrygdeavgiftDto(), BeregnetTrygdeavgiftDto.class));
+    }
+
+    @Test
+    void finnFakturamottaker() throws Exception {
+        var MOTTAKER_NAVN = "Fornavn Etternavn";
+        when(trygdeavgiftsberegningService.finnFakturamottaker(BEHANDLINGSRESULTAT_ID)).thenReturn(MOTTAKER_NAVN);
+
+        mockMvc.perform(get(BASE_URL + "/fakturamottaker", 1L)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(responseBody(objectMapper)
+                .containsObjectAsJson(new FakturamottakerDto(MOTTAKER_NAVN), FakturamottakerDto.class));
     }
 
     private BeregnetTrygdeavgiftDto forventetBeregnetTrygdeavgiftDto() {

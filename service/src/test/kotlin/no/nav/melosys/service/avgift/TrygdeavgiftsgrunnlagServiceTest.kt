@@ -9,6 +9,7 @@ import io.kotest.matchers.collections.shouldNotBeEmpty
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
 import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -18,10 +19,7 @@ import io.mockk.verify
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Medlemskapsperiode
-import no.nav.melosys.domain.avgift.Inntektsperiode
-import no.nav.melosys.domain.avgift.Penger
-import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
+import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Inntektskildetype
@@ -45,25 +43,23 @@ class TrygdeavgiftsgrunnlagServiceTest {
 
     @MockK
     private lateinit var mockBehandlingsresultatService: BehandlingsresultatService
-    @MockK
-    private lateinit var mockTrygdeavgiftMottakerService: TrygdeavgiftMottakerService
 
     private lateinit var trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService
 
     private lateinit var behandlingsresultat: Behandlingsresultat
-    private lateinit var forrigeBehandlingsresultat: Behandlingsresultat
+    private lateinit var opprinneligBehandlingsresultat: Behandlingsresultat
     private val slotBehandlingsresultat = slot<Behandlingsresultat>()
     private val BEHANDLING_ID: Long = 1291
-    private val FORRIGE_BEHANDLING_ID: Long = 1292
+    private val OPPRINNELIG_BEHANDLING_ID: Long = 1292
 
 
     @BeforeEach
     fun setup() {
-        trygdeavgiftsgrunnlagService = TrygdeavgiftsgrunnlagService(mockBehandlingsresultatService, mockTrygdeavgiftMottakerService)
+        trygdeavgiftsgrunnlagService = TrygdeavgiftsgrunnlagService(mockBehandlingsresultatService)
         behandlingsresultat = Behandlingsresultat()
-        forrigeBehandlingsresultat = Behandlingsresultat()
+        opprinneligBehandlingsresultat = Behandlingsresultat()
         every { mockBehandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) }.returns(behandlingsresultat)
-        every { mockBehandlingsresultatService.hentBehandlingsresultat(FORRIGE_BEHANDLING_ID) }.returns(forrigeBehandlingsresultat)
+        every { mockBehandlingsresultatService.hentBehandlingsresultat(OPPRINNELIG_BEHANDLING_ID) }.returns(opprinneligBehandlingsresultat)
     }
 
     @Test
@@ -75,12 +71,74 @@ class TrygdeavgiftsgrunnlagServiceTest {
     }
 
     @Test
-    fun hentTrygdeavgiftsgrunnlag_ingenGrunnlag_nyVurdering_returnererGammeltGrunnlag() {
+    fun hentTrygdeavgiftsgrunnlagEllerOpprinneligTrygdeavgiftsgrunnlag_ingenGrunnlag_returnerNull() {
+        behandlingsresultat.behandling = Behandling().apply {
+            type = Behandlingstyper.FØRSTEGANG
+        }
+        trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlagEllerOpprinneligTrygdeavgiftsgrunnlag(BEHANDLING_ID).shouldBeNull()
+    }
+
+    @Test
+    fun hentTrygdeavgiftsgrunnlagEllerOpprinneligTrygdeavgiftsgrunnlag_ingenGrunnlag_nyVurdering_lagrerOgReturnererGammeltGrunnlag() {
+        val nå = LocalDate.now()
+        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
+        behandlingsresultat.apply {
+            behandling = Behandling().apply {
+                id = BEHANDLING_ID
+                type = Behandlingstyper.NY_VURDERING
+                opprinneligBehandling = Behandling().apply { id = OPPRINNELIG_BEHANDLING_ID }
+            }
+            medlemAvFolketrygden = MedlemAvFolketrygden()
+        }
+        opprinneligBehandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+            fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
+                trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
+                    id = 10
+                    skatteforholdTilNorge = mutableListOf(SkatteforholdTilNorge().apply {
+                        id = 10
+                        fomDato = nå
+                        tomDato = nå
+                        skatteplikttype = Skatteplikttype.SKATTEPLIKTIG
+                    })
+                    inntektsperioder = mutableListOf(Inntektsperiode().apply {
+                        id = 10
+                        fomDato = nå
+                        tomDato = nå
+                        type = Inntektskildetype.INNTEKT_FRA_UTLANDET
+                    })
+                }
+            }
+        }
+
+
+        trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlagEllerOpprinneligTrygdeavgiftsgrunnlag(BEHANDLING_ID)
+
+
+        verify { mockBehandlingsresultatService.lagre(capture(slotBehandlingsresultat)) }
+        slotBehandlingsresultat.captured.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag?.run {
+            id.shouldNotBe(10)
+            skatteforholdTilNorge.shouldNotBeEmpty().first().run {
+                id.shouldNotBe(10)
+                fomDato.shouldBe(nå)
+                tomDato.shouldBe(nå)
+                skatteplikttype.shouldBe(Skatteplikttype.SKATTEPLIKTIG)
+            }
+            inntektsperioder.shouldNotBeEmpty().first().run {
+                id.shouldNotBe(10)
+                fomDato.shouldBe(nå)
+                tomDato.shouldBe(nå)
+                type.shouldBe(Inntektskildetype.INNTEKT_FRA_UTLANDET)
+            }
+        }
+    }
+
+    @Test
+    fun hentTrygdeavgiftsgrunnlagEllerOpprinneligTrygdeavgiftsgrunnlag_ingenGrunnlag_nyVurdering_harIkkeMedlemAvFolketrygdenEnda_returnererGammeltGrunnlag() {
         behandlingsresultat.behandling = Behandling().apply {
             type = Behandlingstyper.NY_VURDERING
-            opprinneligBehandling = Behandling().apply { id = FORRIGE_BEHANDLING_ID }
+            opprinneligBehandling = Behandling().apply { id = OPPRINNELIG_BEHANDLING_ID }
         }
-        forrigeBehandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+        opprinneligBehandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
                 trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
                     id = 10
@@ -88,16 +146,19 @@ class TrygdeavgiftsgrunnlagServiceTest {
             }
         }
 
-        val trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlag(BEHANDLING_ID)
+
+        val trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlagEllerOpprinneligTrygdeavgiftsgrunnlag(BEHANDLING_ID)
+
 
         assertEquals(10, trygdeavgiftsgrunnlag?.id)
+        verify(exactly = 0) { mockBehandlingsresultatService.lagre(any()) }
     }
 
     @Test
-    fun hentTrygdeavgiftsgrunnlag_grunnlagFinnes_nyVurdering_returnererNyttGrunnlag() {
+    fun hentTrygdeavgiftsgrunnlagEllerOpprinneligTrygdeavgiftsgrunnlag_grunnlagFinnes_nyVurdering_returnererNyttGrunnlag() {
         behandlingsresultat.behandling = Behandling().apply {
             type = Behandlingstyper.NY_VURDERING
-            opprinneligBehandling = Behandling().apply { id = FORRIGE_BEHANDLING_ID }
+            opprinneligBehandling = Behandling().apply { id = OPPRINNELIG_BEHANDLING_ID }
         }
         behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
@@ -106,7 +167,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
                 }
             }
         }
-        forrigeBehandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+        opprinneligBehandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             fastsattTrygdeavgift = FastsattTrygdeavgift().apply {
                 trygdeavgiftsgrunnlag = Trygdeavgiftsgrunnlag().apply {
                     id = 10
@@ -114,9 +175,12 @@ class TrygdeavgiftsgrunnlagServiceTest {
             }
         }
 
-        val trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlag(BEHANDLING_ID)
+
+        val trygdeavgiftsgrunnlag = trygdeavgiftsgrunnlagService.hentTrygdeavgiftsgrunnlagEllerOpprinneligTrygdeavgiftsgrunnlag(BEHANDLING_ID)
+
 
         assertEquals(50, trygdeavgiftsgrunnlag?.id)
+        verify(exactly = 0) { mockBehandlingsresultatService.lagre(any()) }
     }
 
     @Test
@@ -168,7 +232,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     fun oppdaterTrygdeavgiftsgrunnlag_eksistererBeregnetTrygdeavgift_sletterEksisterendeBeregning() {
         val fom = LocalDate.now().minusMonths(1);
         val tom = LocalDate.now().plusMonths(3);
-        every { mockBehandlingsresultatService.lagre(any()) }.returns(Unit)
+        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
         behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply {
                 this.fom = fom
@@ -196,7 +260,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     fun oppdaterTrygdeavgiftsgrunnlag_inntektsperioderDekkerIkkeHelePerioden_kasterFeil() {
         val fom = LocalDate.now().minusMonths(1);
         val tom = LocalDate.now().plusMonths(3);
-        every { mockBehandlingsresultatService.lagre(any()) }.returns(Unit)
+        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
         behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply {
                 this.fom = fom
@@ -222,7 +286,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     fun oppdaterTrygdeavgiftsgrunnlag_skatteforholdDekkerIkkeHelePerioden_kasterFeil() {
         val fom = LocalDate.now().minusMonths(1);
         val tom = LocalDate.now().plusMonths(3);
-        every { mockBehandlingsresultatService.lagre(any()) }.returns(Unit)
+        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
         behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply {
                 this.fom = fom
@@ -248,7 +312,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     fun oppdaterTrygdeavgiftsgrunnlag_skatteforholdOverlapper_kasterFeil() {
         val fom = LocalDate.now().minusMonths(1);
         val tom = LocalDate.now().plusMonths(3);
-        every { mockBehandlingsresultatService.lagre(any()) }.returns(Unit)
+        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
         behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply {
                 this.fom = fom
@@ -277,7 +341,7 @@ class TrygdeavgiftsgrunnlagServiceTest {
     fun oppdaterTrygdeavgiftsgrunnlag_requestMedSkattepliktOgInntektskilder_lagrerAltKorrekt() {
         val fom = LocalDate.now().minusMonths(1)
         val tom = LocalDate.now().plusMonths(3)
-        every { mockBehandlingsresultatService.lagre(any()) }.returns(Unit)
+        every { mockBehandlingsresultatService.lagre(any()) } returnsArgument 0
         behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden().apply {
             medlemskapsperioder = listOf(Medlemskapsperiode().apply {
                 this.fom = fom

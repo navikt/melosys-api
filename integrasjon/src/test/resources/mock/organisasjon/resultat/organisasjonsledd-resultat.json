@@ -1,0 +1,141 @@
+{
+    "type": "OrganisasjonDokument",
+    "orgnummer": "974774577",
+    "oppstartsdato": null,
+    "enhetstype": "ORGL",
+    "organisasjonDetaljer": {
+        "orgnummer": "974774577",
+        "navn": [
+            {
+                "bruksperiode": {
+                    "fom": [
+                        2015,
+                        2,
+                        23
+                    ],
+                    "tom": null
+                },
+                "gyldighetsperiode": {
+                    "fom": [
+                        2012,
+                        3,
+                        8
+                    ],
+                    "tom": null
+                },
+                "navn": [
+                    "ASKØY KOMMUNE AVDELING FOR PLEIE OG OMSORG"
+                ],
+                "redigertNavn": "ASKØY KOMMUNE AVDELING FOR PLEIE OG OMSORG"
+            }
+        ],
+        "forretningsadresse": [
+            {
+                "type": "SemistrukturertAdresse",
+                "bruksperiode": {
+                    "fom": [
+                        2015,
+                        2,
+                        23
+                    ],
+                    "tom": null
+                },
+                "gyldighetsperiode": {
+                    "fom": [
+                        2013,
+                        8,
+                        2
+                    ],
+                    "tom": null
+                },
+                "landkode": "NO",
+                "adresselinje1": "Kleppevegen 23A",
+                "adresselinje2": null,
+                "adresselinje3": null,
+                "postnr": "5300",
+                "poststed": null,
+                "kommunenr": "1247",
+                "poststedUtland": null
+            }
+        ],
+        "postadresse": [
+            {
+                "type": "SemistrukturertAdresse",
+                "bruksperiode": {
+                    "fom": [
+                        2016,
+                        2,
+                        17
+                    ],
+                    "tom": null
+                },
+                "gyldighetsperiode": {
+                    "fom": [
+                        2016,
+                        2,
+                        16
+                    ],
+                    "tom": null
+                },
+                "landkode": "NO",
+                "adresselinje1": "Klampavikvegen 1",
+                "adresselinje2": null,
+                "adresselinje3": null,
+                "postnr": "5300",
+                "poststed": null,
+                "kommunenr": "1247",
+                "poststedUtland": null
+            }
+        ],
+        "telefon": [
+            {
+                "bruksperiode": {
+                    "fom": [
+                        2014,
+                        5,
+                        21
+                    ],
+                    "tom": null
+                },
+                "gyldighetsperiode": {
+                    "fom": [
+                        2014,
+                        3,
+                        18
+                    ],
+                    "tom": null
+                },
+                "identifikator": "56158000",
+                "type": "TFON",
+                "retningsnummer": null
+            }
+        ],
+        "epostadresse": [
+            {
+                "bruksperiode": {
+                    "fom": [
+                        2014,
+                        5,
+                        21
+                    ],
+                    "tom": null
+                },
+                "gyldighetsperiode": {
+                    "fom": [
+                        2014,
+                        3,
+                        18
+                    ],
+                    "tom": null
+                },
+                "identifikator": "postmottak@askoy.kommune.no"
+            }
+        ],
+        "naering": [
+            "84.120"
+        ],
+        "opphoersdato": null
+    },
+    "sektorkode": "6500",
+    "navn": "ASKØY KOMMUNE AVDELING FOR PLEIE OG OMSORG"
+}

@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
@@ -183,20 +184,22 @@ public class RegisteropplysningerService {
     }
 
     private List<Saksopplysning> hentOrganisasjonsopplysninger(RegisteropplysningerRequest registeropplysningerRequest, Behandling behandling) {
-        Set<String> orgnumre = new HashSet<>();
+        Set<String> orgnumreFraArbeidsforhold = saksopplysningerService.finnArbeidsforholdsopplysninger(behandling.getId())
+            .map(ArbeidsforholdDokument::hentOrgnumre)
+            .orElseGet(Collections::emptySet);
+        Set<String> orgnumreFraInntekt = saksopplysningerService.finnInntektsopplysninger(behandling.getId())
+            .map(InntektDokument::hentOrgnumre)
+            .orElseGet(Collections::emptySet);
 
-        Optional<ArbeidsforholdDokument> arbeidsforholdDokument = saksopplysningerService.finnArbeidsforholdsopplysninger(behandling.getId());
-        Optional<InntektDokument> inntektDokument = saksopplysningerService.finnInntektsopplysninger(behandling.getId());
+        return Sets.union(orgnumreFraArbeidsforhold, orgnumreFraInntekt).stream()
+            .filter(RegisteropplysningerService::erGyldigOrgnr)
+            .map(eregFasade::hentOrganisasjon)
+            .toList();
+    }
 
-        arbeidsforholdDokument.ifPresent(dokument -> orgnumre.addAll(dokument.hentOrgnumre()));
-        inntektDokument.ifPresent(dokument -> orgnumre.addAll(dokument.hentOrgnumre()));
-
-        List<Saksopplysning> saksopplysninger = new ArrayList<>();
-        for (String orgnr : orgnumre) {
-            saksopplysninger.add(eregFasade.hentOrganisasjon(orgnr));
-        }
-
-        return saksopplysninger;
+    // Ereg har ikke data om personer, men arbeidsforhold og inntekt kan innneholde fnr registrert som orgnr
+    private static boolean erGyldigOrgnr(String orgnr) {
+        return orgnr != null && orgnr.length() != 11;
     }
 
     @Transactional
