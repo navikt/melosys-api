@@ -82,6 +82,6 @@ class TrygdeavgiftTjeneste(
     @GetMapping("/fakturamottaker")
     fun hentFakturamottaker(@PathVariable("behandlingID") behandlingID: Long): ResponseEntity<FakturamottakerDto> {
         aksesskontroll.autoriser(behandlingID)
-        return ResponseEntity.ok(FakturamottakerDto(trygdeavgiftsberegningService.finnFakturamottaker(behandlingID)))
+        return ResponseEntity.ok(FakturamottakerDto(trygdeavgiftsberegningService.finnFakturamottakerNavn(behandlingID)))
     }
 }

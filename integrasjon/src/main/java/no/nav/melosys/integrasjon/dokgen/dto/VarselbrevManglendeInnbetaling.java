@@ -10,27 +10,22 @@ import static com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING;
 
 public class VarselbrevManglendeInnbetaling extends DokgenDto {
 
-    @JsonFormat(shape = STRING)
-    private final LocalDate datoMottatt;
+    private final String fullmektigForBetaling;
 
     @JsonFormat(shape = STRING)
-    private final LocalDate datoFrist;
+    private final LocalDate betalingsfrist;
 
     private final String fakturanummer;
 
     private final String betalingsstatus;
 
-    protected VarselbrevManglendeInnbetaling(VarselbrevManglendeInnbetalingBrevbestilling brevbestilling, LocalDate datoFrist) {
-        super(brevbestilling, Mottakerroller.FULLMEKTIG); // TODO i MELOSYS-5738.
+    public VarselbrevManglendeInnbetaling(VarselbrevManglendeInnbetalingBrevbestilling brevbestilling) {
+        super(brevbestilling, Mottakerroller.BRUKER);
 
-        this.datoMottatt = instantTilLocalDate(brevbestilling.getForsendelseMottatt());
-        this.datoFrist = datoFrist;
+        this.fullmektigForBetaling = brevbestilling.getFullmektigForBetaling();
+        this.betalingsfrist = brevbestilling.getBetalingsfrist();
         this.fakturanummer = brevbestilling.getFakturanummer();
         this.betalingsstatus = brevbestilling.getBetalingsstatus().name();
 
-    }
-
-    public static VarselbrevManglendeInnbetaling av(VarselbrevManglendeInnbetalingBrevbestilling brevbestilling, LocalDate datoFrist) {
-        return new VarselbrevManglendeInnbetaling(brevbestilling, datoFrist);
     }
 }

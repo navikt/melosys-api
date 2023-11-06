@@ -13,8 +13,6 @@ import no.nav.melosys.integrasjon.dokgen.dto.*
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker
 import org.springframework.stereotype.Component
 import org.springframework.util.StringUtils
-import java.time.Instant
-import java.time.LocalDate
 
 @Component
 class DokgenMalMapper(
@@ -196,9 +194,8 @@ class DokgenMalMapper(
 
             Produserbaredokumenter.IKKE_YRKESAKTIV_VEDTAKSBREV -> lagIkkeYrkesaktivVedtaksbrev(brevbestilling as IkkeYrkesaktivBrevbestilling)
 
-            Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING -> VarselbrevManglendeInnbetaling.av(
-                brevbestilling as VarselbrevManglendeInnbetalingBrevbestilling,
-                TrygdeavgiftBetalingsfrist.beregnTrygdeavgiftBetalingsfrist(LocalDate.now()) //TODO: Hva skal vi kalkulere fristen ut ifra? Dagens dato?
+            Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING -> VarselbrevManglendeInnbetaling(
+                brevbestilling as VarselbrevManglendeInnbetalingBrevbestilling
             )
 
             else -> throw FunksjonellException("ProduserbartDokument ${brevbestilling.produserbartdokument} er ikke støttet av melosys-dokgen")

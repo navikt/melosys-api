@@ -9,6 +9,7 @@ import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.ftrl.Betalingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.dokument.DokumentServiceFasade;
+import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -32,15 +33,6 @@ public class BrevBestiller {
                 behandling.getFagsak().getSaksnummer(), behandling.getId());
         }
     }
-
-    public void bestillVarselbrevManglendeInnbetaling(Collection<Mottaker> mottakere, String fakturanummer, Betalingsstatus betalingsstatus, String saksnummer, Long behandlingID){
-        var dokumentType = Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING;
-        for (Mottaker mottaker : mottakere) {
-            dokumentServiceFasade.produserOgDistribuerVarselbrevManglendeInnbetaling(mottaker, fakturanummer, betalingsstatus, behandlingID);
-            log.info("Brevet '{}' er bestillt for sak {} og behandling {}", dokumentType, saksnummer, behandlingID);
-        }
-    }
-
 
     public void bestill(DoksysBrevbestilling brevbestilling) {
         Produserbaredokumenter dokumentType = brevbestilling.getProduserbartdokument();

@@ -1,12 +1,14 @@
 package no.nav.melosys.domain.brev;
 
-import no.nav.melosys.domain.ftrl.Betalingsstatus;
-
 import java.time.LocalDate;
+
+import no.nav.melosys.domain.ftrl.Betalingsstatus;
 
 public class VarselbrevManglendeInnbetalingBrevbestilling extends DokgenBrevbestilling {
     private String fakturanummer;
     private Betalingsstatus betalingsstatus;
+    private String fullmektigForBetaling;
+    private LocalDate betalingsfrist;
 
     public VarselbrevManglendeInnbetalingBrevbestilling() {
         super();
@@ -24,10 +26,19 @@ public class VarselbrevManglendeInnbetalingBrevbestilling extends DokgenBrevbest
     public Betalingsstatus getBetalingsstatus() {
         return betalingsstatus;
     }
+    public String getFullmektigForBetaling() {
+        return fullmektigForBetaling;
+    }
+
+    public LocalDate getBetalingsfrist() {
+        return betalingsfrist;
+    }
 
     public static final class Builder extends DokgenBrevbestilling.Builder<Builder> {
         private String fakturanummer;
         private Betalingsstatus betalingsstatus;
+        private String fullmektigForBetaling;
+        private LocalDate betalingsfrist;
 
         public Builder() {
         }
@@ -36,6 +47,8 @@ public class VarselbrevManglendeInnbetalingBrevbestilling extends DokgenBrevbest
             super(varselbrevManglendeInnbetalingBrevbestilling);
             this.betalingsstatus = varselbrevManglendeInnbetalingBrevbestilling.getBetalingsstatus();
             this.fakturanummer = varselbrevManglendeInnbetalingBrevbestilling.getFakturanummer();
+            this.fullmektigForBetaling = varselbrevManglendeInnbetalingBrevbestilling.getFullmektigForBetaling();
+            this.betalingsfrist = varselbrevManglendeInnbetalingBrevbestilling.getBetalingsfrist();
         }
 
         public Builder medfakturanummer(String fakturanummer) {
@@ -45,6 +58,16 @@ public class VarselbrevManglendeInnbetalingBrevbestilling extends DokgenBrevbest
 
         public Builder medBetalingsstatus(Betalingsstatus betalingsstatus) {
             this.betalingsstatus = betalingsstatus;
+            return this;
+        }
+
+        public Builder medFullmektigForBetaling(String fullmektigForBetaling) {
+            this.fullmektigForBetaling = fullmektigForBetaling;
+            return this;
+        }
+
+        public Builder medBetalingsfrist(LocalDate betalingsfrist) {
+            this.betalingsfrist = betalingsfrist;
             return this;
         }
 

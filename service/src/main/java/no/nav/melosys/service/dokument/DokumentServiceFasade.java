@@ -61,17 +61,6 @@ public class DokumentServiceFasade {
         dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto);
     }
 
-    @Transactional
-    public void produserOgDistribuerVarselbrevManglendeInnbetaling(Mottaker mottaker, String fakturanummer, Betalingsstatus betalingsstatus, long behandlingId) {
-        var brevbestillingDto = new BrevbestillingDto();
-        brevbestillingDto.setBetalingsstatus(betalingsstatus);
-        brevbestillingDto.setFakturanummer(fakturanummer);
-        brevbestillingDto.setProduserbardokument(Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING);
-        brevbestillingDto.setMottaker(mottaker.getRolle());
-
-        dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto);
-    }
-
 
     @Transactional
     public void produserDokument(Produserbaredokumenter dokumentType, Mottaker mottaker, long behandlingId, DoksysBrevbestilling brevbestilling) {

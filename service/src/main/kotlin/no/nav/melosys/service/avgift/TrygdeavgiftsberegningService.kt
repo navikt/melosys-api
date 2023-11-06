@@ -131,7 +131,7 @@ class TrygdeavgiftsberegningService
     }
 
     @Transactional(readOnly = true)
-    fun finnFakturamottaker(behandlingID: Long): String {
+    fun finnFakturamottakerNavn(behandlingID: Long): String {
         val fagsak = behandlingService.hentBehandling(behandlingID).fagsak
         return fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT)
             .map {

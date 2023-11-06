@@ -39,6 +39,8 @@ public final class BrevbestillingDto {
     private String ytterligereInformasjon;
     private String fakturanummer;
     private Betalingsstatus betalingsstatus;
+    private String fullmektigForBetaling;
+    private LocalDate betalingsfrist;
 
     public BrevbestillingDto() {
     }
@@ -70,7 +72,9 @@ public final class BrevbestillingDto {
         String begrunnelseKode,
         String ytterligereInformasjon,
         String fakturanummer,
-        Betalingsstatus betalingsstatus) {
+        Betalingsstatus betalingsstatus,
+        String fullmektigForBetaling,
+        LocalDate betalingsfrist) {
 
         this.produserbardokument = produserbardokument;
         this.mottaker = mottaker;
@@ -99,6 +103,8 @@ public final class BrevbestillingDto {
         this.ytterligereInformasjon = ytterligereInformasjon;
         this.fakturanummer = fakturanummer;
         this.betalingsstatus = betalingsstatus;
+        this.fullmektigForBetaling = fullmektigForBetaling;
+        this.betalingsfrist = betalingsfrist;
     }
 
 
@@ -134,6 +140,8 @@ public final class BrevbestillingDto {
             brevbestillingUtkast.saksbehandlerNrToIdent(),
             deprecatedBegrunnelseKode,
             deprecatedYtterligereInformasjon,
+            null,
+            null,
             null,
             null
         );
@@ -432,5 +440,21 @@ public final class BrevbestillingDto {
 
     public void setBetalingsstatus(Betalingsstatus betalingsstatus) {
         this.betalingsstatus = betalingsstatus;
+    }
+
+    public String getFullmektigForBetaling() {
+        return fullmektigForBetaling;
+    }
+
+    public void setFullmektigForBetaling(String fullmektigForBetaling) {
+        this.fullmektigForBetaling = fullmektigForBetaling;
+    }
+
+    public LocalDate getBetalingsfrist() {
+        return betalingsfrist;
+    }
+
+    public void setBetalingsfrist(LocalDate betalingsfrist) {
+        this.betalingsfrist = betalingsfrist;
     }
 }

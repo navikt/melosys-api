@@ -23,6 +23,7 @@ import no.nav.melosys.integrasjon.joark.JoarkFasade;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
+import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.UtledMottaksdato;
 import no.nav.melosys.service.bruker.SaksbehandlerService;
@@ -310,8 +311,11 @@ public class DokgenService {
                 .medFritekstvedleggTekst(brevbestillingDto.getFritekst())
                 .medMottakerType(brevbestillingDto.getMottaker());
             case IKKE_YRKESAKTIV_VEDTAKSBREV -> new IkkeYrkesaktivBrevbestilling.Builder().medDistribusjonstype(Distribusjonstype.VEDTAK);
-            case VARSELBREV_MANGLENDE_INNBETALING ->
-                new VarselbrevManglendeInnbetalingBrevbestilling.Builder().medfakturanummer(brevbestillingDto.getFakturanummer()).medBetalingsstatus(brevbestillingDto.getBetalingsstatus());
+            case VARSELBREV_MANGLENDE_INNBETALING -> new VarselbrevManglendeInnbetalingBrevbestilling.Builder()
+                .medfakturanummer(brevbestillingDto.getFakturanummer())
+                .medBetalingsstatus(brevbestillingDto.getBetalingsstatus())
+                .medFullmektigForBetaling(brevbestillingDto.getFullmektigForBetaling())
+                .medBetalingsfrist(brevbestillingDto.getBetalingsfrist());
 
             default -> new DokgenBrevbestilling.Builder<>().medDistribusjonstype(Distribusjonstype.VIKTIG);
         };

@@ -1,5 +1,10 @@
 package no.nav.melosys.tjenester.gui.avklartefakta;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.getunleash.Unleash;
 import no.nav.melosys.domain.Medlemskapsperiode;
@@ -26,18 +31,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.Set;
-
 import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {TrygdeavgiftTjeneste.class})
@@ -112,7 +111,7 @@ class TrygdeavgiftTjenesteTest {
     @Test
     void finnFakturamottaker() throws Exception {
         var MOTTAKER_NAVN = "Fornavn Etternavn";
-        when(trygdeavgiftsberegningService.finnFakturamottaker(BEHANDLINGSRESULTAT_ID)).thenReturn(MOTTAKER_NAVN);
+        when(trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLINGSRESULTAT_ID)).thenReturn(MOTTAKER_NAVN);
 
         mockMvc.perform(get(BASE_URL + "/fakturamottaker", 1L)
                 .contentType(MediaType.APPLICATION_JSON))
