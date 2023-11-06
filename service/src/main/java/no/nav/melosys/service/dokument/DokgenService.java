@@ -106,8 +106,6 @@ public class DokgenService {
 
     @Transactional
     public byte[] produserBrev(Mottaker mottaker, DokgenBrevbestilling brevbestilling) {
-
-        //Inn her
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(brevbestilling.getBehandlingId());
         String malnavn = dokumentproduksjonsInfoMapper.hentMalnavn(brevbestilling.getProduserbartdokument());
         String orgnr = mottaker != null ? mottaker.getOrgnr() : null;
