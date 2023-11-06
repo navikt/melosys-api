@@ -43,7 +43,7 @@ class Ereg4KonverteringTest implements KonverteringTest {
         assertThat(postadresse.getKommunenr()).isEqualTo("1201");
 
         // Test strukturert adresse...
-        Gateadresse forretningsadresse = (Gateadresse) dokument.getOrganisasjonDetaljer().getForretningsadresser().get(0);
+        Gateadresse forretningsadresse = (Gateadresse) dokument.getOrganisasjonDetaljer().getForretningsadresse().get(0);
         assertThat(forretningsadresse.getGatenavn()).isEqualTo("Gatenavn");
         assertThat(forretningsadresse.getLandkode()).isEqualTo("NO");
 

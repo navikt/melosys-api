@@ -12,7 +12,6 @@ import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.adresse.UstrukturertAdresse;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
-import no.nav.melosys.domain.dokument.jaxb.OffsetDateTimeToLocalDateXmlAdapter;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Epost;
@@ -48,7 +47,7 @@ public class OrganisasjonsDetaljer {
         return navn;
     }
 
-    List<GeografiskAdresse> getForretningsadresser() {
+    List<GeografiskAdresse> getForretningsadresse() {
         return forretningsadresse;
     }
 
