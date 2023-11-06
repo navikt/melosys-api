@@ -467,6 +467,8 @@ class BehandlingServiceTest {
         assertThat(replikertBehandling.getDokumentasjonSvarfristDato()).isEqualTo(tidligsteInaktiveBehandling.getDokumentasjonSvarfristDato());
         assertThat(replikertBehandling.getInitierendeJournalpostId()).isEqualTo(tidligsteInaktiveBehandling.getInitierendeJournalpostId());
         assertThat(replikertBehandling.getBehandlingsfrist()).isEqualTo(MOTTAKSDATO.plusDays(90));
+        assertThat(replikertBehandling.getBehandlingsårsak().getMottaksdato()).isEqualTo(tidligsteInaktiveBehandling.getBehandlingsårsak().getMottaksdato());
+        assertThat(replikertBehandling.getBehandlingsårsak().getId()).isNotEqualTo(tidligsteInaktiveBehandling.getBehandlingsårsak().getId());
         assertThat(replikertBehandling.getRegistrertDato()).isNotEqualTo(tidligsteInaktiveBehandling.getRegistrertDato());
         assertThat(replikertBehandling.getMottatteOpplysninger().getMottatteOpplysningerData()).isNotNull();
 
@@ -725,6 +727,7 @@ class BehandlingServiceTest {
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         behandling.setInitierendeJournalpostId("initierendeJournalpostId");
         behandling.setDokumentasjonSvarfristDato(Instant.parse("2017-12-11T09:37:30.00Z"));
+        behandling.setBehandlingsårsak(opprettBehandlingsårsak());
         behandling.setSaksopplysninger(new LinkedHashSet<>());
 
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
@@ -732,6 +735,13 @@ class BehandlingServiceTest {
         behandling.getSaksopplysninger().add(opprettSaksopplysning());
         behandling.setFagsak(opprettFagsak());
         return behandling;
+    }
+
+    private Behandlingsaarsak opprettBehandlingsårsak() {
+        Behandlingsaarsak behandlingsårsak = new Behandlingsaarsak();
+        behandlingsårsak.setId(23L);
+        behandlingsårsak.setMottaksdato(LocalDate.now());
+        return behandlingsårsak;
     }
 
     private Saksopplysning opprettSaksopplysning() {

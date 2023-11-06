@@ -301,6 +301,7 @@ public class BehandlingService {
         behandlingsreplika.setStatus(OPPRETTET);
         behandlingsreplika.setOpprinneligBehandling(tidligsteInaktiveBehandling);
         behandlingsreplika.setMottatteOpplysninger(replikerMottatteOpplysninger(behandlingsreplika, tidligsteInaktiveBehandling.getMottatteOpplysninger()));
+        behandlingsreplika.setBehandlingsårsak(replikerBehandlingsårsak(behandlingsreplika, tidligsteInaktiveBehandling.getBehandlingsårsak()));
         behandlingsreplika.setBehandlingsnotater(Collections.emptySet());
         behandlingsreplika.setBehandlingsfrist(Behandling.utledBehandlingsfrist(behandlingsreplika, utledMottaksdato.getMottaksdato(behandlingsreplika)));
 
@@ -314,6 +315,17 @@ public class BehandlingService {
         }
         behandlingRepository.save(behandlingsreplika);
         return behandlingsreplika;
+    }
+
+    private Behandlingsaarsak replikerBehandlingsårsak(Behandling behandlingsreplika, Behandlingsaarsak opprinneligBehandlingsårsak)
+        throws InvocationTargetException, IllegalAccessException, InstantiationException, NoSuchMethodException {
+        if (opprinneligBehandlingsårsak == null) {
+            return null;
+        }
+        Behandlingsaarsak replikertBehandlingsårsak = (Behandlingsaarsak) BeanUtils.cloneBean(opprinneligBehandlingsårsak);
+        replikertBehandlingsårsak.setId(null);
+        replikertBehandlingsårsak.setBehandling(behandlingsreplika);
+        return replikertBehandlingsårsak;
     }
 
     private Set<SaksopplysningKilde> replikerKilder(Saksopplysning saksopplysningreplika, Set<SaksopplysningKilde> kilder)
