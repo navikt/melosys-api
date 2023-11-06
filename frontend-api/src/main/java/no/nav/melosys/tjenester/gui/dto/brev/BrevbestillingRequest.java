@@ -70,6 +70,8 @@ public record BrevbestillingRequest(
             this.begrunnelseKode,
             this.ytterligereInformasjon,
             null,
+            null,
+            null,
             null
         );
     }
