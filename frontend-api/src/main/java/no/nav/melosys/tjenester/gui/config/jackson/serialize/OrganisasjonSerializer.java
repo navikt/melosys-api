@@ -37,8 +37,8 @@ public class OrganisasjonSerializer extends StdSerializer<AbstraktOrganisasjon> 
             organisasjonDto.setOrganisasjonsform(kodeverkService.dekod(FellesKodeverk.ENHETSTYPER_JURIDISK_ENHET, organisasjon.getEnhetstype()));
         }
 
-        organisasjonDto.setForretningsadresse(tilAdresseDto(organisasjon.getForretningsadresse()));
-        organisasjonDto.setPostadresse(tilAdresseDto(organisasjon.getPostadresse()));
+        organisasjonDto.setForretningsadresse(tilAdresseDto(organisasjon.forretningsadresse));
+        organisasjonDto.setPostadresse(tilAdresseDto(organisasjon.postadresse));
 
         generator.writeObject(organisasjonDto);
     }

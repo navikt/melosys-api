@@ -90,7 +90,7 @@ class DokumentFactoryTest {
 
         OrganisasjonDokument organisasjonDokument = (OrganisasjonDokument) dokument;
 
-        GeografiskAdresse geografiskAdresse = organisasjonDokument.getOrganisasjonDetaljer().getPostadresse().get(0);
+        GeografiskAdresse geografiskAdresse = organisasjonDokument.getOrganisasjonDetaljer().postadresse.get(0);
         assertThat(geografiskAdresse).isInstanceOf(SemistrukturertAdresse.class);
         assertThat(((SemistrukturertAdresse) geografiskAdresse).getAdresselinje1()).isEqualTo("Postboks 7030");
 
@@ -102,7 +102,7 @@ class DokumentFactoryTest {
         assertThat(telefon).isInstanceOf(Telefonnummer.class);
         assertThat(telefon.getIdentifikator()).isEqualTo("55 58 75 00");
 
-        LocalDate opphoersdato = organisasjonDokument.getOrganisasjonDetaljer().getOpphoersdato();
+        LocalDate opphoersdato = organisasjonDokument.getOrganisasjonDetaljer().opphoersdato;
         assertThat(opphoersdato).isInstanceOf(LocalDate.class);
         assertThat(opphoersdato).isEqualTo(LocalDate.of(2019, 12, 8));
     }
