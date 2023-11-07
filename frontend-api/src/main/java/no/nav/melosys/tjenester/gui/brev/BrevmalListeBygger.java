@@ -133,7 +133,7 @@ public class BrevmalListeBygger {
                 FeilmeldingDto feilmeldingDto = new FeilmeldingDto(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse(), List.of());
                 mottakerDto.setFeilmelding(feilmeldingDto);
             } else {
-                mottakerDto.setAdresser(brevAdresser.stream().map(MottakerAdresseDto::av).toList());
+                mottakerDto.setAdresser(brevAdresser);
             }
         } catch (TekniskException e) {
             if ("Finner ikke arbeidsforholddokument".equals(e.getMessage())) {

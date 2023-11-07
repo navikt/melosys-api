@@ -1,18 +1,16 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.util.List;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import no.nav.melosys.domain.UtenlandskMyndighet;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
+import no.nav.melosys.exception.FunksjonellException;
+import no.nav.melosys.service.brev.bestilling.TilBrevAdresseService;
+import no.nav.melosys.service.brev.brevmalliste.BrevAdresse;
 import no.nav.security.token.support.core.api.Protected;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -22,26 +20,21 @@ import org.springframework.web.context.WebApplicationContext;
 @Api(tags = {"adresser"})
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class AdresseTjeneste {
-    private final UtenlandskMyndighetService utenlandskMyndighetService;
+    private final TilBrevAdresseService tilBrevAdresseService;
 
-    public AdresseTjeneste(UtenlandskMyndighetService utenlandskMyndighetService) {
-        this.utenlandskMyndighetService = utenlandskMyndighetService;
+    public AdresseTjeneste(TilBrevAdresseService tilBrevAdresseService) {
+        this.tilBrevAdresseService = tilBrevAdresseService;
     }
 
-    @GetMapping("/myndigheter/{landkode}")
+    @GetMapping()
     @ApiOperation(
-        value = "Henter adressen til en gitt utenlandsk myndighet",
-        response = UtenlandskMyndighet.class)
-    public ResponseEntity<UtenlandskMyndighet> hentUtenlandskMyndighet(@PathVariable("landkode") Land_iso2 landkode) {
-        return ResponseEntity.ok(utenlandskMyndighetService.hentUtenlandskMyndighet(landkode));
-    }
-
-    @GetMapping("/myndigheter")
-    @ApiOperation(
-        value = "Henter adresser til alle utenlandske myndigheter",
-        response = UtenlandskMyndighet.class,
-        responseContainer = "List")
-    public ResponseEntity<List<UtenlandskMyndighet>> hentMyndigheter() {
-        return ResponseEntity.ok(utenlandskMyndighetService.hentAlleUtenlandskMyndigheter());
+        value = "Henter adresse til person eller adresse til organisasjon, men tar ikke hensyn til eventuelle kontaktopplysninger og fullmektige",
+        response = BrevAdresse.class)
+    public ResponseEntity<BrevAdresse> hentAdresseTilPersonEllerOrganisasjon(@RequestParam(name = "personIdent", required = false) String personIdent,
+                                                                             @RequestParam(name = "orgnr", required = false) String organisasjonsnummer) {
+        if (personIdent == null && organisasjonsnummer == null) {
+            throw new FunksjonellException("Send inn enten personIdent eller organisasjonsnummer til personen/organisasjonen du vil finne adresse til");
+        }
+        return ResponseEntity.ok(tilBrevAdresseService.tilBrevAdresse(personIdent, organisasjonsnummer));
     }
 }

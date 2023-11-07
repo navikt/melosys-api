@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import static no.nav.melosys.integrasjon.dokgen.DokgenAdresseMapper.*;
 
 @Component
-class TilBrevAdresseService {
+public class TilBrevAdresseService {
     private final PersondataFasade persondataFasade;
     private final KontaktopplysningService kontaktopplysningService;
     private final EregFasade eregFasade;
@@ -41,12 +41,12 @@ class TilBrevAdresseService {
                     persondata = persondataFasade.hentPerson(mottaker.getPersonIdent());
                 } else {
                     kontaktopplysning = hentKontaktopplysninger(behandling, mottaker);
-                    orgDokument = hentOrganisasjonsDokument(kontaktopplysning, mottaker);
+                    orgDokument = hentOrganisasjonsDokument(kontaktopplysning, mottaker.getOrgnr());
                 }
             }
             case VIRKSOMHET, ARBEIDSGIVER -> {
                 kontaktopplysning = hentKontaktopplysninger(behandling, mottaker);
-                orgDokument = hentOrganisasjonsDokument(kontaktopplysning, mottaker);
+                orgDokument = hentOrganisasjonsDokument(kontaktopplysning, mottaker.getOrgnr());
             }
             default -> throw new FunksjonellException("Mottakersrolle støttes ikke: " + mottaker.getRolle());
         }
@@ -66,13 +66,39 @@ class TilBrevAdresseService {
             .build();
     }
 
+    public BrevAdresse tilBrevAdresse(String personIdent, String organisasjonsnummer) {
+        Persondata persondata = null;
+        OrganisasjonDokument orgDokument = null;
+
+        if (personIdent != null) {
+            persondata = persondataFasade.hentPerson(personIdent);
+        } else if (organisasjonsnummer != null) {
+            orgDokument = hentOrganisasjonsDokument(null, organisasjonsnummer);
+        }
+
+        if (orgDokument == null && persondata == null) {
+            throw new FunksjonellException("Orgdata eller persondata forventes for å finne adresse.");
+        }
+
+
+        return new BrevAdresse.Builder()
+            .medMottakerNavn(mapNavn(orgDokument, persondata))
+            .medOrgnr(orgDokument != null ? orgDokument.getOrgnummer() : null)
+            .medAdresselinjer(mapAdresselinjer(orgDokument, null, null, persondata))
+            .medPostnr(mapPostnr(orgDokument, persondata))
+            .medPoststed(orgDokument != null ? DokgenAdresseMapper.mapPoststed(orgDokument) : mapPoststed(persondata))
+            .medRegion(mapRegionForAdresse(orgDokument, persondata))
+            .medLand(mapLandForAdresse(orgDokument, persondata))
+            .build();
+    }
+
     private Kontaktopplysning hentKontaktopplysninger(Behandling behandling, Mottaker mottaker) {
         return kontaktopplysningService.hentKontaktopplysning(behandling.getFagsak().getSaksnummer(), mottaker.getOrgnr()).orElse(null);
     }
 
-    private OrganisasjonDokument hentOrganisasjonsDokument(Kontaktopplysning kontaktopplysning, Mottaker mottaker) {
+    private OrganisasjonDokument hentOrganisasjonsDokument(Kontaktopplysning kontaktopplysning, String orgnr) {
         String mottakerOrgnr = kontaktopplysning != null && kontaktopplysning.getKontaktOrgnr() != null
-            ? kontaktopplysning.getKontaktOrgnr() : mottaker.getOrgnr();
+            ? kontaktopplysning.getKontaktOrgnr() : orgnr;
         return (OrganisasjonDokument) eregFasade.hentOrganisasjon(mottakerOrgnr).getDokument();
     }
 

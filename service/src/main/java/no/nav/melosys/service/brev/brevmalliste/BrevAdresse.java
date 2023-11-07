@@ -1,11 +1,10 @@
 package no.nav.melosys.service.brev.brevmalliste;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class BrevAdresse {
     private final String mottakerNavn;
