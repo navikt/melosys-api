@@ -30,24 +30,24 @@ public class OrganisasjonsDetaljerTest {
         when(periode.erGyldig()).thenReturn(true);
 
         adresse = new SemistrukturertAdresse();
-        adresse.setAdresselinje1(linje1);
-        adresse.setAdresselinje2(linje2);
-        adresse.setAdresselinje3(linje3);
-        adresse.setPostnr(postnr);
-        adresse.setPoststed(poststed);
-        adresse.setPoststedUtland(poststedUtland);
+        adresse.adresselinje1 = linje1;
+        adresse.adresselinje2 = linje2;
+        adresse.adresselinje3 = linje3;
+        adresse.postnr = postnr;
+        adresse.poststed = poststed;
+        adresse.poststedUtland = poststedUtland;
         String kommunenr = "kommunenr";
-        adresse.setKommunenr(kommunenr);
-        adresse.setGyldighetsperiode(periode);
+        adresse.kommunenr = kommunenr;
+        adresse.gyldighetsperiode = periode;
     }
 
     @Test
     public void testKonverterForretningsadresseTilUstrukturertAdresse() {
         String landkode = "NO";
-        adresse.setLandkode(landkode);
+        adresse.landkode = landkode;
 
         OrganisasjonsDetaljer orgDetaljer = new OrganisasjonsDetaljer();
-        orgDetaljer.forretningsadresse = Arrays.asList(adresse);
+        orgDetaljer.forretningsadresser = Arrays.asList(adresse);
 
         UstrukturertAdresse resultatAdresse = orgDetaljer.hentUstrukturertForretningsadresse();
         assertThat(resultatAdresse.getAdresselinje(1)).isEqualTo(linje1);
@@ -60,10 +60,10 @@ public class OrganisasjonsDetaljerTest {
     @Test
     public void testKonverterUtenlandskForretningsadresseTilUstrukturertAdresse() {
         String landkode = "DK";
-        adresse.setLandkode(landkode);
+        adresse.landkode = landkode;
 
         OrganisasjonsDetaljer orgDetaljer = new OrganisasjonsDetaljer();
-        orgDetaljer.forretningsadresse = Arrays.asList(adresse);
+        orgDetaljer.forretningsadresser = Arrays.asList(adresse);
 
         UstrukturertAdresse resultatAdresse = orgDetaljer.hentUstrukturertForretningsadresse();
         assertThat(resultatAdresse.getAdresselinje(1)).isEqualTo(linje1);
@@ -76,10 +76,10 @@ public class OrganisasjonsDetaljerTest {
     @Test
     public void testKonverterForretningsadresseTilStrukturertAdresse() {
         String landkode = "NO";
-        adresse.setLandkode(landkode);
+        adresse.landkode = landkode;
 
         OrganisasjonsDetaljer orgDetaljer = new OrganisasjonsDetaljer();
-        orgDetaljer.forretningsadresse = Arrays.asList(adresse);
+        orgDetaljer.forretningsadresser = Arrays.asList(adresse);
 
         StrukturertAdresse resultatAdresse = orgDetaljer.hentStrukturertForretningsadresse();
         assertThat(resultatAdresse.getGatenavn()).isEqualTo(linje1.trim() + " " + linje2 + " " + linje3);
@@ -93,10 +93,10 @@ public class OrganisasjonsDetaljerTest {
     @Test
     public void testKonverterUtenlandskForretningsadresseTilStrukturertAdresse() {
         String landkode = "DK";
-        adresse.setLandkode(landkode);
+        adresse.landkode = landkode;
 
         OrganisasjonsDetaljer orgDetaljer = new OrganisasjonsDetaljer();
-        orgDetaljer.forretningsadresse = Arrays.asList(adresse);
+        orgDetaljer.forretningsadresser = Arrays.asList(adresse);
 
         StrukturertAdresse resultatAdresse = orgDetaljer.hentStrukturertForretningsadresse();
         assertThat(resultatAdresse.getGatenavn()).isEqualTo(linje1.trim() + " " + linje2 + " " + linje3);

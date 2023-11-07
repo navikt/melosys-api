@@ -90,19 +90,19 @@ class DokumentFactoryTest {
 
         OrganisasjonDokument organisasjonDokument = (OrganisasjonDokument) dokument;
 
-        GeografiskAdresse geografiskAdresse = organisasjonDokument.getOrganisasjonDetaljer().getPostadresse().get(0);
+        GeografiskAdresse geografiskAdresse = organisasjonDokument.organisasjonDetaljer.postadresse.get(0);
         assertThat(geografiskAdresse).isInstanceOf(SemistrukturertAdresse.class);
-        assertThat(((SemistrukturertAdresse) geografiskAdresse).getAdresselinje1()).isEqualTo("Postboks 7030");
+        assertThat(((SemistrukturertAdresse) geografiskAdresse).adresselinje1).isEqualTo("Postboks 7030");
 
-        Epost epost = organisasjonDokument.getOrganisasjonDetaljer().getEpostadresse().get(0);
+        Epost epost = organisasjonDokument.organisasjonDetaljer.epostadresse.get(0);
         assertThat(epost).isInstanceOf(Epost.class);
-        assertThat(epost.getIdentifikator()).isEqualTo("post@hib.no");
+        assertThat(epost.identifikator).isEqualTo("post@hib.no");
 
-        Telefonnummer telefon = organisasjonDokument.getOrganisasjonDetaljer().getTelefon().get(0);
+        Telefonnummer telefon = organisasjonDokument.organisasjonDetaljer.telefon.get(0);
         assertThat(telefon).isInstanceOf(Telefonnummer.class);
-        assertThat(telefon.getIdentifikator()).isEqualTo("55 58 75 00");
+        assertThat(telefon.identifikator).isEqualTo("55 58 75 00");
 
-        LocalDate opphoersdato = organisasjonDokument.getOrganisasjonDetaljer().getOpphoersdato();
+        LocalDate opphoersdato = organisasjonDokument.organisasjonDetaljer.opphoersdato;
         assertThat(opphoersdato).isInstanceOf(LocalDate.class);
         assertThat(opphoersdato).isEqualTo(LocalDate.of(2019, 12, 8));
     }

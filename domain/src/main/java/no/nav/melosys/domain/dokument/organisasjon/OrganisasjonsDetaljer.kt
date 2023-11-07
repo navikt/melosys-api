@@ -1,169 +1,123 @@
-package no.nav.melosys.domain.dokument.organisasjon;
+package no.nav.melosys.domain.dokument.organisasjon
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.adresse.UstrukturertAdresse;
-import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter;
-import no.nav.melosys.domain.dokument.jaxb.OffsetDateTimeToLocalDateXmlAdapter;
-import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
-import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
-import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Epost;
-import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Telefonnummer;
-import org.springframework.util.StringUtils;
+import no.nav.melosys.domain.adresse.StrukturertAdresse
+import no.nav.melosys.domain.adresse.UstrukturertAdresse
+import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter
+import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse
+import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
+import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Epost
+import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Telefonnummer
+import org.springframework.util.StringUtils
+import java.time.LocalDate
+import javax.xml.bind.annotation.XmlAccessType
+import javax.xml.bind.annotation.XmlAccessorType
+import javax.xml.bind.annotation.XmlElement
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter
 
 @XmlAccessorType(XmlAccessType.FIELD)
-public class OrganisasjonsDetaljer {
+class OrganisasjonsDetaljer {
+    var orgnummer: String? = null
 
-    public String orgnummer;
+    @JvmField
+    @XmlElement(name = "organisasjonsnavn")
+    var navn: List<Organisasjonsnavn> = ArrayList()
+    var forretningsadresser: List<GeografiskAdresse> = ArrayList()
+    @JvmField
+    var postadresse: List<GeografiskAdresse> = ArrayList()
+    @JvmField
+    var telefon: List<Telefonnummer> = ArrayList()
+    @JvmField
+    var epostadresse: List<Epost> = ArrayList()
+    @JvmField
+    var naering: List<String> = ArrayList() //"http://nav.no/kodeverk/Kodeverk/Næringskoder"
 
-    @XmlElement(name="organisasjonsnavn")
-    public List<Organisasjonsnavn> navn = new ArrayList<>();
-
-    public List<GeografiskAdresse> forretningsadresse = new ArrayList<>();
-
-    public List<GeografiskAdresse> postadresse = new ArrayList<>();
-
-    public List<Telefonnummer> telefon = new ArrayList<>();
-
-    public List<Epost> epostadresse = new ArrayList<>();
-
-    public List<String> naering = new ArrayList<>(); //"http://nav.no/kodeverk/Kodeverk/Næringskoder"
-
-    @XmlJavaTypeAdapter(LocalDateXmlAdapter.class)
-    public LocalDate opphoersdato = null;
-
-    public String getOrgnummer() {
-        return orgnummer;
+    @JvmField
+    @XmlJavaTypeAdapter(LocalDateXmlAdapter::class)
+    var opphoersdato: LocalDate? = null
+    fun hentStrukturertPostadresse(): StrukturertAdresse? {
+        val adresse = hentFørsteGyldigePostadresse()
+        return konverterTilStrukturertAdresse(adresse)
     }
 
-    public List<Organisasjonsnavn> getNavn() {
-        return navn;
+    fun hentStrukturertForretningsadresse(): StrukturertAdresse? {
+        val adresse = hentFørsteGyldigeForretningsadresse()
+        return konverterTilStrukturertAdresse(adresse)
     }
 
-    List<GeografiskAdresse> getForretningsadresser() {
-        return forretningsadresse;
+    fun hentUstrukturertForretningsadresse(): UstrukturertAdresse? {
+        val adresse = hentFørsteGyldigeForretningsadresse()
+        return konverterTilUstrukturertAdresse(adresse)
     }
 
-    public StrukturertAdresse hentStrukturertPostadresse() {
-        GeografiskAdresse adresse = hentFørsteGyldigePostadresse();
-        return konverterTilStrukturertAdresse(adresse);
+    private fun hentFørsteGyldigeForretningsadresse(): GeografiskAdresse? {
+        return hentFørsteGyldigeAdresse(forretningsadresser)
     }
 
-    public StrukturertAdresse hentStrukturertForretningsadresse() {
-        GeografiskAdresse adresse = hentFørsteGyldigeForretningsadresse();
-        return konverterTilStrukturertAdresse(adresse);
+    private fun hentFørsteGyldigePostadresse(): GeografiskAdresse? {
+        return hentFørsteGyldigeAdresse(postadresse)
     }
 
-    UstrukturertAdresse hentUstrukturertForretningsadresse() {
-        GeografiskAdresse adresse = hentFørsteGyldigeForretningsadresse();
-        return konverterTilUstrukturertAdresse(adresse);
-    }
-
-    private GeografiskAdresse hentFørsteGyldigeForretningsadresse() {
-        return hentFørsteGyldigeAdresse(forretningsadresse);
-    }
-
-    private GeografiskAdresse hentFørsteGyldigePostadresse() {
-        return hentFørsteGyldigeAdresse(postadresse);
-    }
-
-    public List<GeografiskAdresse> getPostadresse() {
-        return postadresse;
-    }
-
-    public List<Telefonnummer> getTelefon() {
-        return telefon;
-    }
-
-    public List<Epost> getEpostadresse() {
-        return epostadresse;
-    }
-
-    public List<String> getNaering() {
-        return naering;
-    }
-
-    public LocalDate getOpphoersdato() {
-        return opphoersdato;
-    }
-
-    private GeografiskAdresse hentFørsteGyldigeAdresse(List<GeografiskAdresse> adresser) {
-        for (GeografiskAdresse adresse : adresser) {
-            Periode gyldighetsperiode = adresse.getGyldighetsperiode();
-            if (gyldighetsperiode.erGyldig()) {
-                return adresse;
+    private fun hentFørsteGyldigeAdresse(adresser: List<GeografiskAdresse>): GeografiskAdresse? {
+        for (adresse in adresser) {
+            val gyldighetsperiode = adresse.gyldighetsperiode
+            if (gyldighetsperiode!!.erGyldig()) {
+                return adresse
             }
         }
-        return null;
+        return null
     }
 
-    private UstrukturertAdresse konverterTilUstrukturertAdresse(GeografiskAdresse adresse) {
-        if(adresse == null) {
-            return null;
+    private fun konverterTilUstrukturertAdresse(adresse: GeografiskAdresse?): UstrukturertAdresse? {
+        if (adresse == null) {
+            return null
         }
-
-        UstrukturertAdresse ustrukturertAdresse;
-        if (adresse instanceof SemistrukturertAdresse) {
-            SemistrukturertAdresse sAdresse = (SemistrukturertAdresse) adresse;
-            ustrukturertAdresse = UstrukturertAdresse.av(sAdresse);
-        }
-        else {
+        val ustrukturertAdresse: UstrukturertAdresse
+        ustrukturertAdresse = if (adresse is SemistrukturertAdresse) {
+            UstrukturertAdresse.av(adresse)
+        } else {
             // Enhetsregistret har bare SemistrukturertAdresser
-            throw new IllegalArgumentException("Adresse ikke støttet " + adresse.getClass().getSimpleName());
+            throw IllegalArgumentException("Adresse ikke støttet " + adresse.javaClass.getSimpleName())
         }
-        return ustrukturertAdresse;
+        return ustrukturertAdresse
     }
 
-    private StrukturertAdresse konverterTilStrukturertAdresse(GeografiskAdresse adresse) {
-        if(adresse == null) {
-            return null;
+    private fun konverterTilStrukturertAdresse(adresse: GeografiskAdresse?): StrukturertAdresse? {
+        if (adresse == null) {
+            return null
         }
-
-        StrukturertAdresse strukturertAdresse = new StrukturertAdresse();
-        if (adresse instanceof SemistrukturertAdresse) {
-            SemistrukturertAdresse sAdresse = (SemistrukturertAdresse) adresse;
-
-            StringBuilder stringBuilder = new StringBuilder();
-            if (sAdresse.getAdresselinje1() != null) {
-                stringBuilder.append(sAdresse.getAdresselinje1());
+        val strukturertAdresse = StrukturertAdresse()
+        if (adresse is SemistrukturertAdresse) {
+            val sAdresse = adresse
+            val stringBuilder = StringBuilder()
+            if (sAdresse.adresselinje1 != null) {
+                stringBuilder.append(sAdresse.adresselinje1)
             }
-            if (sAdresse.getAdresselinje2() != null) {
-                stringBuilder.append(" ");
-                stringBuilder.append(sAdresse.getAdresselinje2());
+            if (sAdresse.adresselinje2 != null) {
+                stringBuilder.append(" ")
+                stringBuilder.append(sAdresse.adresselinje2)
             }
-            if (sAdresse.getAdresselinje3() != null) {
-                stringBuilder.append(" ");
-                stringBuilder.append(sAdresse.getAdresselinje3());
+            if (sAdresse.adresselinje3 != null) {
+                stringBuilder.append(" ")
+                stringBuilder.append(sAdresse.adresselinje3)
             }
-            String adresseLinje = stringBuilder.toString();
-
-            strukturertAdresse.setGatenavn(adresseLinje.replaceAll("\\s+", " "));
-            strukturertAdresse.setLandkode(sAdresse.getLandkode());
-            strukturertAdresse.setPostnummer(sAdresse.getPostnr());
-
+            val adresseLinje = stringBuilder.toString()
+            strukturertAdresse.gatenavn = adresseLinje.replace("\\s+".toRegex(), " ")
+            strukturertAdresse.landkode = sAdresse.landkode
+            strukturertAdresse.postnummer = sAdresse.postnr
             if (sAdresse.erUtenlandsk()) {
-                strukturertAdresse.setPoststed(
-                        StringUtils.isEmpty(sAdresse.getPoststedUtland()) ? sAdresse.getPoststed() : sAdresse.getPoststedUtland());
+                strukturertAdresse.poststed =
+                    if (StringUtils.isEmpty(sAdresse.poststedUtland)) sAdresse.poststed else sAdresse.poststedUtland
                 // Utenlandsk adresse kan ha postnummer som en del av poststed
-                if (strukturertAdresse.getPostnummer() == null) {
-                    strukturertAdresse.setPostnummer(" ");
+                if (strukturertAdresse.postnummer == null) {
+                    strukturertAdresse.postnummer = " "
                 }
             } else {
-                strukturertAdresse.setPoststed(sAdresse.getPoststed() == null ? "" : sAdresse.getPoststed());
+                strukturertAdresse.poststed = if (sAdresse.poststed == null) "" else sAdresse.poststed
             }
-        }
-        else {
+        } else {
             // Enhetsregistret har bare SemistrukturertAdresser
-            throw new IllegalArgumentException("GeografiskAdresse ikke støttet " + adresse.getClass().getSimpleName());
+            throw IllegalArgumentException("GeografiskAdresse ikke støttet " + adresse.javaClass.getSimpleName())
         }
-        return strukturertAdresse;
+        return strukturertAdresse
     }
 }

@@ -127,7 +127,7 @@ public final class DokgenTestData {
         OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
         organisasjonDokument.setNavn(NAVN_ORG);
         organisasjonDokument.setOrgnummer(ORGNR);
-        organisasjonDokument.setOrganisasjonDetaljer(lagOrgDetaljer());
+        organisasjonDokument.organisasjonDetaljer = lagOrgDetaljer();
         return organisasjonDokument;
     }
 
@@ -135,11 +135,11 @@ public final class DokgenTestData {
         OrganisasjonDokument organisasjonDokument = lagOrg();
         OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
         SemistrukturertAdresse semistrukturertAdresse = new SemistrukturertAdresse();
-        semistrukturertAdresse.setLandkode(landkoder.getKode());
-        semistrukturertAdresse.setGyldighetsperiode(new Periode(LocalDate.now(), LocalDate.now()));
-        semistrukturertAdresse.setPostnr(POSTNR_ORG);
-        organisasjonsDetaljer.forretningsadresse.add(semistrukturertAdresse);
-        organisasjonDokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
+        semistrukturertAdresse.landkode = landkoder.getKode();
+        semistrukturertAdresse.gyldighetsperiode = new Periode(LocalDate.now(), LocalDate.now());
+        semistrukturertAdresse.postnr = POSTNR_ORG;
+        organisasjonsDetaljer.forretningsadresser.add(semistrukturertAdresse);
+        organisasjonDokument.organisasjonDetaljer = organisasjonsDetaljer;
         return organisasjonDokument;
     }
 
@@ -171,10 +171,10 @@ public final class DokgenTestData {
 
     private static GeografiskAdresse lagOrgAdresse() {
         SemistrukturertAdresse semistrukturertAdresse = new SemistrukturertAdresse();
-        semistrukturertAdresse.setAdresselinje1(POSTBOKS_ORG);
-        semistrukturertAdresse.setPostnr(POSTNR_ORG);
-        semistrukturertAdresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(2), LocalDate.now().plusDays(2)));
-        semistrukturertAdresse.setLandkode("NO");
+        semistrukturertAdresse.adresselinje1 = POSTBOKS_ORG;
+        semistrukturertAdresse.postnr = POSTNR_ORG;
+        semistrukturertAdresse.gyldighetsperiode = new Periode(LocalDate.now().minusDays(2), LocalDate.now().plusDays(2));
+        semistrukturertAdresse.landkode = "NO";
         return semistrukturertAdresse;
     }
 

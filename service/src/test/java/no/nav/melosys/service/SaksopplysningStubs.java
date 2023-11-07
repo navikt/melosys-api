@@ -33,7 +33,7 @@ public class SaksopplysningStubs {
             OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
             organisasjonDokument.setOrgnummer(orgnummer);
             organisasjonDokument.setNavn(Arrays.asList("Test:", orgnummer));
-            organisasjonDokument.setOrganisasjonDetaljer(new OrganisasjonsDetaljer());
+            organisasjonDokument.organisasjonDetaljer = new OrganisasjonsDetaljer();
             organisasjonDokumenter.add(organisasjonDokument);
         }
         return organisasjonDokumenter;

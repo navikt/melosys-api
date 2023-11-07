@@ -334,8 +334,8 @@ class AvklarteVirksomheterServiceTest {
     @Test
     void utfyllManglendeAdressefelter_utenlandskIngenForretningsadressePostadresseUtenPostnummer_postnummerTomString() {
         var organisasjonDokument = lagOrganisasjonDokument(null, null, null, "DK");
-        organisasjonDokument.organisasjonDetaljer.forretningsadresse = Collections.emptyList();
-        organisasjonDokument.organisasjonDetaljer.postadresse.stream().findFirst().ifPresent(a -> ((SemistrukturertAdresse) a).setPostnr(null));
+        organisasjonDokument.organisasjonDetaljer.forretningsadresser = Collections.emptyList();
+        organisasjonDokument.organisasjonDetaljer.postadresse.stream().findFirst().ifPresent(a -> ((SemistrukturertAdresse) a).postnr = null);
         StrukturertAdresse adresse = avklarteVirksomheterService.utfyllManglendeAdressefelter(organisasjonDokument);
 
         assertThat(adresse.getGatenavn()).isEqualTo("Postgatenavn");
@@ -394,21 +394,21 @@ class AvklarteVirksomheterServiceTest {
     private OrganisasjonDokument lagOrganisasjonDokument(String forretningsPostnr, String forretningsGatenavn, String postadressePostnr, String postadresseLand) {
         OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
         OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
-        organisasjonDokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
+        organisasjonDokument.organisasjonDetaljer = organisasjonsDetaljer;
         SemistrukturertAdresse forretningsadresse = new SemistrukturertAdresse();
-        organisasjonsDetaljer.forretningsadresse.add(forretningsadresse);
-        forretningsadresse.setAdresselinje1(forretningsGatenavn);
-        forretningsadresse.setPostnr(forretningsPostnr);
-        forretningsadresse.setPoststed("Forretningspoststed");
-        forretningsadresse.setLandkode("NO");
-        forretningsadresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1)));
+        organisasjonsDetaljer.forretningsadresser.add(forretningsadresse);
+        forretningsadresse.adresselinje1 = forretningsGatenavn;
+        forretningsadresse.postnr = forretningsPostnr;
+        forretningsadresse.poststed = "Forretningspoststed";
+        forretningsadresse.landkode = "NO";
+        forretningsadresse.gyldighetsperiode = new Periode(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1));
         SemistrukturertAdresse postadresse = new SemistrukturertAdresse();
         organisasjonsDetaljer.postadresse.add(postadresse);
-        postadresse.setAdresselinje1("Postgatenavn");
-        postadresse.setPostnr(postadressePostnr);
-        postadresse.setPoststed("Postpoststed");
-        postadresse.setLandkode(postadresseLand);
-        postadresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1)));
+        postadresse.adresselinje1 = "Postgatenavn";
+        postadresse.postnr = postadressePostnr;
+        postadresse.poststed = "Postpoststed";
+        postadresse.landkode = postadresseLand;
+        postadresse.gyldighetsperiode = new Periode(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1));
 
         return organisasjonDokument;
     }

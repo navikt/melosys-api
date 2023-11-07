@@ -303,9 +303,9 @@ class FerdigbehandlingKontrollTest {
     ): OrganisasjonDokument {
         val organisasjonDokument = OrganisasjonDokument()
         val organisasjonsDetaljer = OrganisasjonsDetaljer()
-        organisasjonDokument.setOrganisasjonDetaljer(organisasjonsDetaljer)
+        organisasjonDokument.organisasjonDetaljer = organisasjonsDetaljer
         val forretningsadresse = SemistrukturertAdresse()
-        organisasjonsDetaljer.forretningsadresse.add(forretningsadresse)
+        organisasjonsDetaljer.forretningsadresser.add(forretningsadresse)
         forretningsadresse.adresselinje1 = forretningsGatenavn
         forretningsadresse.postnr = forretningsPostnr
         forretningsadresse.poststed = "Forretningspoststed"

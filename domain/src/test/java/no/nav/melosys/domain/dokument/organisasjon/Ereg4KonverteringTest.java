@@ -37,25 +37,25 @@ class Ereg4KonverteringTest implements KonverteringTest {
 
         // Test semistrukturert adresse...
         OrganisasjonDokument dokument = (OrganisasjonDokument) test.getDokument();
-        SemistrukturertAdresse postadresse = (SemistrukturertAdresse) dokument.getOrganisasjonDetaljer().getPostadresse().get(0);
-        assertThat(postadresse.getAdresselinje1()).isEqualTo("Skuteviksbodene 1");
-        assertThat(postadresse.getPostnr()).isEqualTo("5035");
-        assertThat(postadresse.getKommunenr()).isEqualTo("1201");
+        SemistrukturertAdresse postadresse = (SemistrukturertAdresse) dokument.organisasjonDetaljer.postadresse.get(0);
+        assertThat(postadresse.adresselinje1).isEqualTo("Skuteviksbodene 1");
+        assertThat(postadresse.postnr).isEqualTo("5035");
+        assertThat(postadresse.kommunenr).isEqualTo("1201");
 
         // Test strukturert adresse...
-        Gateadresse forretningsadresse = (Gateadresse) dokument.getOrganisasjonDetaljer().getForretningsadresser().get(0);
-        assertThat(forretningsadresse.getGatenavn()).isEqualTo("Gatenavn");
-        assertThat(forretningsadresse.getLandkode()).isEqualTo("NO");
+        Gateadresse forretningsadresse = (Gateadresse) dokument.organisasjonDetaljer.getForretningsadresser().get(0);
+        assertThat(forretningsadresse.gatenavn).isEqualTo("Gatenavn");
+        assertThat(forretningsadresse.landkode).isEqualTo("NO");
 
         // Test perioder:
         // Forretningsadresse har ingen perioder satt...
-        assertThat(forretningsadresse.getBruksperiode()).isNull();
-        assertThat(forretningsadresse.getGyldighetsperiode()).isNull();
+        assertThat(forretningsadresse.bruksperiode).isNull();
+        assertThat(forretningsadresse.gyldighetsperiode).isNull();
         // Postadresse har fom-dato på begge periodene, men ikke tom-dato...
-        assertThat(postadresse.getGyldighetsperiode().getFom()).isEqualTo(LocalDate.of(2011, 9, 14));
-        assertThat(postadresse.getGyldighetsperiode().getTom()).isNull();
-        assertThat(postadresse.getBruksperiode().getFom()).isEqualTo(LocalDate.of(2015, 2, 23));
-        assertThat(postadresse.getBruksperiode().getTom()).isNull();
+        assertThat(postadresse.gyldighetsperiode.getFom()).isEqualTo(LocalDate.of(2011, 9, 14));
+        assertThat(postadresse.gyldighetsperiode.getTom()).isNull();
+        assertThat(postadresse.bruksperiode.getFom()).isEqualTo(LocalDate.of(2015, 2, 23));
+        assertThat(postadresse.bruksperiode.getTom()).isNull();
     }
 
     @Test
@@ -63,8 +63,8 @@ class Ereg4KonverteringTest implements KonverteringTest {
         Saksopplysning saksopplysning = getSaksopplysning(EREG_4_0_MOCK);
         OrganisasjonDokument dokument = (OrganisasjonDokument) saksopplysning.getDokument();
 
-        assertThat(dokument.getSektorkode()).isNotBlank();
-        assertThat(dokument.getOrganisasjonDetaljer().getNaering()).isNotEmpty();
+        assertThat(dokument.sektorkode).isNotBlank();
+        assertThat(dokument.organisasjonDetaljer.naering).isNotEmpty();
         assertThat(dokument.getOppstartsdato()).isNull();
         assertThat(dokument.getEnhetstype()).isNotBlank();
     }
@@ -75,8 +75,8 @@ class Ereg4KonverteringTest implements KonverteringTest {
         Saksopplysning saksopplysning = getSaksopplysning(ressurs);
         OrganisasjonDokument dokument = (OrganisasjonDokument) saksopplysning.getDokument();
 
-        assertThat(dokument.getSektorkode()).isNotBlank();
-        assertThat(dokument.getOrganisasjonDetaljer().getNaering()).isNotEmpty();
+        assertThat(dokument.sektorkode).isNotBlank();
+        assertThat(dokument.organisasjonDetaljer.naering).isNotEmpty();
         assertThat(dokument.getOppstartsdato()).isNull();
         assertThat(dokument.getEnhetstype()).isEmpty();
     }
@@ -87,8 +87,8 @@ class Ereg4KonverteringTest implements KonverteringTest {
         Saksopplysning saksopplysning = getSaksopplysning(ressurs);
         OrganisasjonDokument dokument = (OrganisasjonDokument) saksopplysning.getDokument();
 
-        assertThat(dokument.getSektorkode()).isEmpty();
-        assertThat(dokument.getOrganisasjonDetaljer().getNaering()).isNotEmpty();
+        assertThat(dokument.sektorkode).isEmpty();
+        assertThat(dokument.organisasjonDetaljer.naering).isNotEmpty();
         assertThat(dokument.getOppstartsdato()).isNotNull();
         assertThat(dokument.getEnhetstype()).isEmpty();
     }

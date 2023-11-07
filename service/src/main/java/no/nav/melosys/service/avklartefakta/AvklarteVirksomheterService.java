@@ -116,7 +116,7 @@ public class AvklarteVirksomheterService {
     public List<AvklartVirksomhet> hentNorskeArbeidsgivere(Behandling behandling, Function<OrganisasjonDokument, Adresse> adressekonverterer) {
         Set<String> arbeidsgivendeOrgnumre = hentNorskeArbeidsgivendeOrgnumre(behandling);
         return organisasjonOppslagService.hentOrganisasjoner(arbeidsgivendeOrgnumre).stream()
-            .map(org -> new AvklartVirksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), adressekonverterer.apply(org), Yrkesaktivitetstyper.LOENNET_ARBEID, org.getOrganisasjonDetaljer().getOpphoersdato()))
+            .map(org -> new AvklartVirksomhet(org.lagSammenslåttNavn(), org.getOrgnummer(), adressekonverterer.apply(org), Yrkesaktivitetstyper.LOENNET_ARBEID, org.organisasjonDetaljer.opphoersdato))
             .toList();
     }
 
@@ -202,9 +202,9 @@ public class AvklarteVirksomheterService {
     }
 
     StrukturertAdresse utfyllManglendeAdressefelter(OrganisasjonDokument org) {
-        StrukturertAdresse adresse = org.getOrganisasjonDetaljer().hentStrukturertForretningsadresse();
+        StrukturertAdresse adresse = org.organisasjonDetaljer.hentStrukturertForretningsadresse();
         if (adresse == null || StringUtils.isEmpty(adresse.getPostnummer())) {
-            adresse = org.getOrganisasjonDetaljer().hentStrukturertPostadresse();
+            adresse = org.organisasjonDetaljer.hentStrukturertPostadresse();
         }
         if (StringUtils.isEmpty(adresse.getGatenavn())) {
             adresse.setGatenavn(" ");

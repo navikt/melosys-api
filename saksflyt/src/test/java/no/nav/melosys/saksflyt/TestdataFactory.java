@@ -42,14 +42,14 @@ public final class TestdataFactory {
     public static OrganisasjonDokument lagOrgMedPostadresse() {
         OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
         organisasjonDokument.setOrgnummer("122344");
-        organisasjonDokument.setOrganisasjonDetaljer(lagOrgDetaljerMedPostadresse());
+        organisasjonDokument.organisasjonDetaljer = lagOrgDetaljerMedPostadresse();
         return organisasjonDokument;
     }
 
     public static OrganisasjonDokument lagOrgMedForretningsadresse() {
         OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
         organisasjonDokument.setOrgnummer("122344");
-        organisasjonDokument.setOrganisasjonDetaljer(lagOrgDetaljerMedForretningsadresse());
+        organisasjonDokument.organisasjonDetaljer = lagOrgDetaljerMedForretningsadresse();
         return organisasjonDokument;
     }
 
@@ -102,16 +102,16 @@ public final class TestdataFactory {
 
     static OrganisasjonsDetaljer lagOrgDetaljerMedForretningsadresse() {
         OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
-        organisasjonsDetaljer.forretningsadresse = singletonList(lagOrgadresse("9876"));
+        organisasjonsDetaljer.forretningsadresser = singletonList(lagOrgadresse("9876"));
         return organisasjonsDetaljer;
     }
 
     static GeografiskAdresse lagOrgadresse(String postnummer) {
         SemistrukturertAdresse semistrukturertAdresse = new SemistrukturertAdresse();
-        semistrukturertAdresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(2), LocalDate.now().plusDays(2)));
-        semistrukturertAdresse.setAdresselinje1("Testgata 3");
-        semistrukturertAdresse.setPostnr(postnummer);
-        semistrukturertAdresse.setLandkode("NO");
+        semistrukturertAdresse.gyldighetsperiode = new Periode(LocalDate.now().minusDays(2), LocalDate.now().plusDays(2));
+        semistrukturertAdresse.adresselinje1 = "Testgata 3";
+        semistrukturertAdresse.postnr = postnummer;
+        semistrukturertAdresse.landkode = "NO";
         return semistrukturertAdresse;
     }
 }

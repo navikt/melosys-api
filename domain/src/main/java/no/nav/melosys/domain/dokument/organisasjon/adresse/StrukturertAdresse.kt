@@ -1,31 +1,12 @@
-package no.nav.melosys.domain.dokument.organisasjon.adresse;
+package no.nav.melosys.domain.dokument.organisasjon.adresse
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.XmlAccessType
+import javax.xml.bind.annotation.XmlAccessorType
+import javax.xml.bind.annotation.XmlType
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "StrukturertAdresse")
-public abstract class StrukturertAdresse extends GeografiskAdresse {
-
-    protected String tilleggsadresse;
-
-    protected String tilleggsadresseType;
-
-    public String getTilleggsadresse() {
-        return tilleggsadresse;
-    }
-
-    public void setTilleggsadresse(String value) {
-        this.tilleggsadresse = value;
-    }
-
-    public String getTilleggsadresseType() {
-        return tilleggsadresseType;
-    }
-
-    public void setTilleggsadresseType(String value) {
-        this.tilleggsadresseType = value;
-    }
-
+abstract class StrukturertAdresse : GeografiskAdresse() {
+    var tilleggsadresse: String? = null
+    var tilleggsadresseType: String? = null
 }

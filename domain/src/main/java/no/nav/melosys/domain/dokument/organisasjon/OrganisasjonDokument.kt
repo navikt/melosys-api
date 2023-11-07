@@ -1,105 +1,83 @@
-package no.nav.melosys.domain.dokument.organisasjon;
+package no.nav.melosys.domain.dokument.organisasjon
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonView;
-import no.nav.melosys.domain.AbstraktOrganisasjon;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.dokument.DokumentView;
-import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-
-import javax.xml.bind.annotation.*;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.fasterxml.jackson.annotation.JsonView
+import no.nav.melosys.domain.AbstraktOrganisasjon
+import no.nav.melosys.domain.adresse.StrukturertAdresse
+import no.nav.melosys.domain.dokument.DokumentView.FrontendApi
+import no.nav.melosys.domain.dokument.SaksopplysningDokument
+import java.time.LocalDate
+import javax.xml.bind.annotation.*
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-public class OrganisasjonDokument extends AbstraktOrganisasjon implements SaksopplysningDokument {
+class OrganisasjonDokument : AbstraktOrganisasjon(), SaksopplysningDokument {
     @XmlElementWrapper(name = "navn")
     @XmlElement(name = "navnelinje")
-    public List<String> navn;
+    var navn: List<String>? = null
+    @JvmField
+    var organisasjonDetaljer: OrganisasjonsDetaljer? = null
+    @JvmField
+    var sektorkode: String? = null //"http://nav.no/kodeverk/Kodeverk/Sektorkoder"
+    var orgnummer: String?
+        get() = super.orgnummer
+        set(orgnummer) {
+            this.orgnummer = orgnummer
+        }
 
-    public OrganisasjonsDetaljer organisasjonDetaljer;
-
-    public String sektorkode; //"http://nav.no/kodeverk/Kodeverk/Sektorkoder"
-
-    public void setOrgnummer(String orgnummer) {
-        this.orgnummer = orgnummer;
+    override fun getNavn(): String {
+        return lagSammenslåttNavn()
     }
 
-    @Override
-    public String getNavn() {
-        return lagSammenslåttNavn();
+    @JsonView(FrontendApi::class)
+    override fun getForretningsadresse(): StrukturertAdresse {
+        return if (organisasjonDetaljer == null) null else organisasjonDetaljer!!.hentStrukturertForretningsadresse()
     }
 
-    @Override
-    @JsonView(DokumentView.FrontendApi.class)
-    public StrukturertAdresse getForretningsadresse() {
-        if (organisasjonDetaljer == null) return null;
-
-        return organisasjonDetaljer.hentStrukturertForretningsadresse();
-    }
-
-    @Override
-    @JsonView(DokumentView.FrontendApi.class)
-    public StrukturertAdresse getPostadresse() {
-        if (organisasjonDetaljer == null) return null;
-
-        return organisasjonDetaljer.hentStrukturertPostadresse();
+    @JsonView(FrontendApi::class)
+    override fun getPostadresse(): StrukturertAdresse {
+        return if (organisasjonDetaljer == null) null else organisasjonDetaljer!!.hentStrukturertPostadresse()
     }
 
     // Hvis man ikke har bruk for historikk på navn så er det best å bruke navn på nivå organisasjon.
-    public String lagSammenslåttNavn() {
-        return navn == null ? "UKJENT" : String.join(" ", navn);
+    fun lagSammenslåttNavn(): String {
+        return if (navn == null) "UKJENT" else java.lang.String.join(" ", navn)
     }
 
-    public void setNavn(List<String> navn) {
-        this.navn = navn;
+    fun setNavn(navn: List<String>?) {
+        this.navn = navn
     }
 
     // Brukes til å deserialisere objektet fra databasen
     @JsonProperty("navn")
-    public void setNavn(String navn) {
-        this.navn = new ArrayList<>(List.of(navn));
+    fun setNavn(navn: String) {
+        this.navn = ArrayList(java.util.List.of(navn))
     }
 
-    public OrganisasjonsDetaljer getOrganisasjonDetaljer() {
-        return organisasjonDetaljer;
+    var oppstartsdato: LocalDate?
+        get() = super.oppstartsdato
+        set(oppstartsdato) {
+            this.oppstartsdato = oppstartsdato
+        }
+    var enhetstype: String?
+        get() = super.enhetstype
+        set(enhetstype) {
+            this.enhetstype = enhetstype
+        }
+
+    fun harRegistrertPostadresse(): Boolean {
+        return postadresse != null && postadresse.erGyldig()
     }
 
-    public void setOrganisasjonDetaljer(OrganisasjonsDetaljer organisasjonDetaljer) {
-        this.organisasjonDetaljer = organisasjonDetaljer;
+    fun harRegistrertForretningsadresse(): Boolean {
+        return forretningsadresse != null && forretningsadresse.erGyldig()
     }
 
-    public String getSektorkode() {
-        return sektorkode;
+    fun hentTilgjengeligAdresse(): StrukturertAdresse {
+        return if (harRegistrertPostadresse()) postadresse else forretningsadresse
     }
 
-    public void setSektorkode(String sektorkode) {
-        this.sektorkode = sektorkode;
-    }
-
-    public void setOppstartsdato(LocalDate oppstartsdato) {
-        this.oppstartsdato = oppstartsdato;
-    }
-
-    public void setEnhetstype(String enhetstype) {
-        this.enhetstype = enhetstype;
-    }
-
-    public boolean harRegistrertPostadresse() {
-        return getPostadresse() != null && getPostadresse().erGyldig();
-    }
-
-    public boolean harRegistrertForretningsadresse() {
-        return getForretningsadresse() != null && getForretningsadresse().erGyldig();
-    }
-
-    public StrukturertAdresse hentTilgjengeligAdresse() {
-        return harRegistrertPostadresse() ? getPostadresse() : getForretningsadresse();
-    }
-
-    public boolean harRegistrertAdresse() {
-        return (harRegistrertPostadresse() || harRegistrertForretningsadresse());
+    fun harRegistrertAdresse(): Boolean {
+        return harRegistrertPostadresse() || harRegistrertForretningsadresse()
     }
 }

@@ -1,53 +1,27 @@
-package no.nav.melosys.domain.dokument.organisasjon.adresse;
+package no.nav.melosys.domain.dokument.organisasjon.adresse
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlSeeAlso;
-
-import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.dokument.felles.Periode
+import no.nav.melosys.domain.kodeverk.Landkoder
+import javax.xml.bind.annotation.XmlAccessType
+import javax.xml.bind.annotation.XmlAccessorType
+import javax.xml.bind.annotation.XmlSeeAlso
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlSeeAlso({
-        SemistrukturertAdresse.class, Gateadresse.class
-})
-public class GeografiskAdresse {
-
-    protected Periode bruksperiode;
-
-    protected Periode gyldighetsperiode;
-
-    private String landkode;
-
-    public Periode getBruksperiode() {
-        return bruksperiode;
+@XmlSeeAlso(
+    SemistrukturertAdresse::class, Gateadresse::class
+)
+open class GeografiskAdresse {
+    @JvmField
+    var bruksperiode: Periode? = null
+    @JvmField
+    var gyldighetsperiode: Periode? = null
+    @JvmField
+    var landkode: String? = null
+    private fun erNorsk(): Boolean {
+        return Landkoder.NO.kode == landkode
     }
 
-    public void setBruksperiode(Periode bruksperiode) {
-        this.bruksperiode = bruksperiode;
-    }
-
-    public Periode getGyldighetsperiode() {
-        return gyldighetsperiode;
-    }
-
-    public void setGyldighetsperiode(Periode gyldighetsperiode) {
-        this.gyldighetsperiode = gyldighetsperiode;
-    }
-
-    public String getLandkode() {
-        return landkode;
-    }
-
-    public void setLandkode(String value) {
-        this.landkode = value;
-    }
-
-    private boolean erNorsk() {
-        return Landkoder.NO.getKode().equals(getLandkode());
-    }
-
-    public boolean erUtenlandsk() {
-        return !erNorsk();
+    fun erUtenlandsk(): Boolean {
+        return !erNorsk()
     }
 }

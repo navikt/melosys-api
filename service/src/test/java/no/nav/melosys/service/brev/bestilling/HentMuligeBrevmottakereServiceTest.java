@@ -501,15 +501,15 @@ class HentMuligeBrevmottakereServiceTest {
 
     private Saksopplysning lagOrgSaksopplysning(String orgNummer, String navn) {
         var geogragiskAdresse = new SemistrukturertAdresse();
-        geogragiskAdresse.setAdresselinje1("Gateadresse 43A");
-        geogragiskAdresse.setPostnr("0123");
-        geogragiskAdresse.setPoststed("Oslo");
-        geogragiskAdresse.setLandkode(Land.NORGE);
-        geogragiskAdresse.setGyldighetsperiode(new Periode(LocalDate.MIN, LocalDate.MAX));
+        geogragiskAdresse.adresselinje1 = "Gateadresse 43A";
+        geogragiskAdresse.postnr = "0123";
+        geogragiskAdresse.poststed = "Oslo";
+        geogragiskAdresse.landkode = Land.NORGE;
+        geogragiskAdresse.gyldighetsperiode = new Periode(LocalDate.MIN, LocalDate.MAX);
         var organisasjonsDetaljer = new OrganisasjonsDetaljer();
         organisasjonsDetaljer.postadresse.add(geogragiskAdresse);
         var dokument = new OrganisasjonDokument();
-        dokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
+        dokument.organisasjonDetaljer = organisasjonsDetaljer;
         dokument.setNavn(List.of(navn));
         dokument.setOrgnummer(orgNummer);
         var saksopplysning = new Saksopplysning();
