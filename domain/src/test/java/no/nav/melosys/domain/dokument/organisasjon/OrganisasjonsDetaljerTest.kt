@@ -1,115 +1,100 @@
-package no.nav.melosys.domain.dokument.organisasjon;
+package no.nav.melosys.domain.dokument.organisasjon
 
-import java.util.Arrays;
+import no.nav.melosys.domain.dokument.felles.Periode
+import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
+import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.mockito.Mockito
+import java.util.*
 
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.adresse.UstrukturertAdresse;
-import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-public class OrganisasjonsDetaljerTest {
-    private SemistrukturertAdresse adresse;
-
-    private String linje1 = "LINJE1  ";
-    private String linje2 = "LINJE2";
-    private String linje3 = "LINJE3";
-    private String postnr = "postnummer";
-    private String poststed = "poststed";
-    private String poststedUtland = "poststedUtland";
-
+class OrganisasjonsDetaljerTest {
+    private var adresse: SemistrukturertAdresse? = null
+    private val linje1 = "LINJE1  "
+    private val linje2 = "LINJE2"
+    private val linje3 = "LINJE3"
+    private val postnr = "postnummer"
+    private val poststed = "poststed"
+    private val poststedUtland = "poststedUtland"
     @BeforeEach
-    public void setUp() {
-
-        Periode periode = mock(Periode.class);
-        when(periode.erGyldig()).thenReturn(true);
-
-        adresse = new SemistrukturertAdresse();
-        adresse.adresselinje1 = linje1;
-        adresse.adresselinje2 = linje2;
-        adresse.adresselinje3 = linje3;
-        adresse.postnr = postnr;
-        adresse.poststed = poststed;
-        adresse.poststedUtland = poststedUtland;
-        String kommunenr = "kommunenr";
-        adresse.kommunenr = kommunenr;
-        adresse.gyldighetsperiode = periode;
+    fun setUp() {
+        val periode = Mockito.mock(
+            Periode::class.java
+        )
+        Mockito.`when`(periode.erGyldig()).thenReturn(true)
+        adresse = SemistrukturertAdresse()
+        adresse!!.adresselinje1 = linje1
+        adresse!!.adresselinje2 = linje2
+        adresse!!.adresselinje3 = linje3
+        adresse!!.postnr = postnr
+        adresse!!.poststed = poststed
+        adresse!!.poststedUtland = poststedUtland
+        val kommunenr = "kommunenr"
+        adresse!!.kommunenr = kommunenr
+        adresse!!.gyldighetsperiode = periode
     }
 
     @Test
-    public void testKonverterForretningsadresseTilUstrukturertAdresse() {
-        String landkode = "NO";
-        adresse.landkode = landkode;
-
-        OrganisasjonsDetaljer orgDetaljer = new OrganisasjonsDetaljer();
-        orgDetaljer.forretningsadresser = Arrays.asList(adresse);
-
-        UstrukturertAdresse resultatAdresse = orgDetaljer.hentUstrukturertForretningsadresse();
-        assertThat(resultatAdresse.getAdresselinje(1)).isEqualTo(linje1);
-        assertThat(resultatAdresse.getAdresselinje(2)).isEqualTo(linje2);
-        assertThat(resultatAdresse.getAdresselinje(3)).isEqualTo(linje3);
-        assertThat(resultatAdresse.getAdresselinje(4)).isEqualTo(postnr + " " + poststed);
-        assertThat(resultatAdresse.getLandkode()).isEqualTo(landkode);
+    fun testKonverterForretningsadresseTilUstrukturertAdresse() {
+        val landkode = "NO"
+        adresse!!.landkode = landkode
+        val orgDetaljer = OrganisasjonsDetaljer()
+        orgDetaljer.forretningsadresser = Arrays.asList(adresse)
+        val resultatAdresse = orgDetaljer.hentUstrukturertForretningsadresse()
+        Assertions.assertThat(resultatAdresse!!.getAdresselinje(1)).isEqualTo(linje1)
+        Assertions.assertThat(resultatAdresse.getAdresselinje(2)).isEqualTo(linje2)
+        Assertions.assertThat(resultatAdresse.getAdresselinje(3)).isEqualTo(linje3)
+        Assertions.assertThat(resultatAdresse.getAdresselinje(4)).isEqualTo("$postnr $poststed")
+        Assertions.assertThat(resultatAdresse.landkode).isEqualTo(landkode)
     }
 
     @Test
-    public void testKonverterUtenlandskForretningsadresseTilUstrukturertAdresse() {
-        String landkode = "DK";
-        adresse.landkode = landkode;
-
-        OrganisasjonsDetaljer orgDetaljer = new OrganisasjonsDetaljer();
-        orgDetaljer.forretningsadresser = Arrays.asList(adresse);
-
-        UstrukturertAdresse resultatAdresse = orgDetaljer.hentUstrukturertForretningsadresse();
-        assertThat(resultatAdresse.getAdresselinje(1)).isEqualTo(linje1);
-        assertThat(resultatAdresse.getAdresselinje(2)).isEqualTo(linje2);
-        assertThat(resultatAdresse.getAdresselinje(3)).isEqualTo(linje3);
-        assertThat(resultatAdresse.getAdresselinje(4)).isEqualTo(poststedUtland);
-        assertThat(resultatAdresse.getLandkode()).isEqualTo(landkode);
+    fun testKonverterUtenlandskForretningsadresseTilUstrukturertAdresse() {
+        val landkode = "DK"
+        adresse!!.landkode = landkode
+        val orgDetaljer = OrganisasjonsDetaljer()
+        orgDetaljer.forretningsadresser = Arrays.asList(adresse)
+        val resultatAdresse = orgDetaljer.hentUstrukturertForretningsadresse()
+        Assertions.assertThat(resultatAdresse!!.getAdresselinje(1)).isEqualTo(linje1)
+        Assertions.assertThat(resultatAdresse.getAdresselinje(2)).isEqualTo(linje2)
+        Assertions.assertThat(resultatAdresse.getAdresselinje(3)).isEqualTo(linje3)
+        Assertions.assertThat(resultatAdresse.getAdresselinje(4)).isEqualTo(poststedUtland)
+        Assertions.assertThat(resultatAdresse.landkode).isEqualTo(landkode)
     }
 
     @Test
-    public void testKonverterForretningsadresseTilStrukturertAdresse() {
-        String landkode = "NO";
-        adresse.landkode = landkode;
-
-        OrganisasjonsDetaljer orgDetaljer = new OrganisasjonsDetaljer();
-        orgDetaljer.forretningsadresser = Arrays.asList(adresse);
-
-        StrukturertAdresse resultatAdresse = orgDetaljer.hentStrukturertForretningsadresse();
-        assertThat(resultatAdresse.getGatenavn()).isEqualTo(linje1.trim() + " " + linje2 + " " + linje3);
-        assertThat(resultatAdresse.getLandkode()).isEqualTo(landkode);
-
-        assertThat(resultatAdresse.getPostnummer()).isEqualTo(postnr);
+    fun testKonverterForretningsadresseTilStrukturertAdresse() {
+        val landkode = "NO"
+        adresse!!.landkode = landkode
+        val orgDetaljer = OrganisasjonsDetaljer()
+        orgDetaljer.forretningsadresser = Arrays.asList(adresse)
+        val resultatAdresse = orgDetaljer.hentStrukturertForretningsadresse()
+        Assertions.assertThat(resultatAdresse!!.gatenavn)
+            .isEqualTo(linje1.trim { it <= ' ' } + " " + linje2 + " " + linje3)
+        Assertions.assertThat(resultatAdresse.landkode).isEqualTo(landkode)
+        Assertions.assertThat(resultatAdresse.postnummer).isEqualTo(postnr)
         // Ikke alltid poststed for norske registeradresser. Slåes opp med kodeverkservice ved behov
-        assertThat(resultatAdresse.getPoststed()).isEqualTo(poststed);
+        Assertions.assertThat(resultatAdresse.poststed).isEqualTo(poststed)
     }
 
     @Test
-    public void testKonverterUtenlandskForretningsadresseTilStrukturertAdresse() {
-        String landkode = "DK";
-        adresse.landkode = landkode;
-
-        OrganisasjonsDetaljer orgDetaljer = new OrganisasjonsDetaljer();
-        orgDetaljer.forretningsadresser = Arrays.asList(adresse);
-
-        StrukturertAdresse resultatAdresse = orgDetaljer.hentStrukturertForretningsadresse();
-        assertThat(resultatAdresse.getGatenavn()).isEqualTo(linje1.trim() + " " + linje2 + " " + linje3);
-        assertThat(resultatAdresse.getLandkode()).isEqualTo(landkode);
-        assertThat(resultatAdresse.getPostnummer()).isEqualTo(postnr);
-        assertThat(resultatAdresse.getPoststed()).isEqualTo(poststedUtland);
+    fun testKonverterUtenlandskForretningsadresseTilStrukturertAdresse() {
+        val landkode = "DK"
+        adresse!!.landkode = landkode
+        val orgDetaljer = OrganisasjonsDetaljer()
+        orgDetaljer.forretningsadresser = Arrays.asList(adresse)
+        val resultatAdresse = orgDetaljer.hentStrukturertForretningsadresse()
+        Assertions.assertThat(resultatAdresse!!.gatenavn)
+            .isEqualTo(linje1.trim { it <= ' ' } + " " + linje2 + " " + linje3)
+        Assertions.assertThat(resultatAdresse.landkode).isEqualTo(landkode)
+        Assertions.assertThat(resultatAdresse.postnummer).isEqualTo(postnr)
+        Assertions.assertThat(resultatAdresse.poststed).isEqualTo(poststedUtland)
     }
 
     @Test
-    public void testNullAdresse() {
-        OrganisasjonsDetaljer orgDetaljer = new OrganisasjonsDetaljer();
-        StrukturertAdresse resultatAdresse = orgDetaljer.hentStrukturertForretningsadresse();
-
-        assertThat(resultatAdresse).isNull();
+    fun testNullAdresse() {
+        val orgDetaljer = OrganisasjonsDetaljer()
+        val resultatAdresse = orgDetaljer.hentStrukturertForretningsadresse()
+        Assertions.assertThat(resultatAdresse).isNull()
     }
 }
