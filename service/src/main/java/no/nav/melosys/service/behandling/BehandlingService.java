@@ -1,10 +1,5 @@
 package no.nav.melosys.service.behandling;
 
-import java.lang.reflect.InvocationTargetException;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.*;
-
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
@@ -29,6 +24,11 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.*;
+
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.metrics.MetrikkerNavn.*;
 
@@ -39,10 +39,10 @@ public class BehandlingService {
 
     static {
         Arrays.stream(Behandlingstema.values()).forEach(
-            b -> Metrics.counter(BEHANDLINGSTEMAER_OPPRETTET, TAG_TEMA, b.getKode())
+                b -> Metrics.counter(BEHANDLINGSTEMAER_OPPRETTET, TAG_TEMA, b.getKode())
         );
         Arrays.stream(Behandlingstyper.values()).forEach(
-            b -> Metrics.counter(BEHANDLINGSTYPER_OPPRETTET, TAG_TYPE, b.getKode())
+                b -> Metrics.counter(BEHANDLINGSTYPER_OPPRETTET, TAG_TYPE, b.getKode())
         );
     }
 
@@ -79,12 +79,12 @@ public class BehandlingService {
 
     public Behandling hentBehandling(long behandlingId) {
         return behandlingRepository.findById(behandlingId)
-            .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
+                .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
     }
 
     public Behandling hentBehandlingMedSaksopplysninger(long behandlingId) {
         return Optional.ofNullable(behandlingRepository.findWithSaksopplysningerById(behandlingId))
-            .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
+                .orElseThrow(() -> new IkkeFunnetException(FINNER_IKKE_BEHANDLING + behandlingId));
     }
 
     @Transactional
@@ -109,7 +109,7 @@ public class BehandlingService {
         behandling.setStatus(behandlingsstatus);
         behandling.setType(behandlingstype);
         behandling.setTema(behandlingstema);
-        behandling.setBehandlingsårsak(new Behandlingsaarsak(årsaktype, årsakFritekst, mottaksdato));
+        behandling.settBehandlingsårsak(new Behandlingsaarsak(årsaktype, årsakFritekst, mottaksdato));
         behandling.setInitierendeJournalpostId(initierendeJournalpostId);
         behandling.setInitierendeDokumentId(initierendeDokumentId);
         behandling.setBehandlingsfrist(Behandling.utledBehandlingsfrist(behandling, utledMottaksdato.getMottaksdato(behandling)));
@@ -157,7 +157,7 @@ public class BehandlingService {
             throw new FunksjonellException("Medlemsperioder kan ikke lagres på behandling med status " + behandling.getStatus());
         }
         List<TidligereMedlemsperiode> tidligereMedlemsperioder = periodeIder.stream()
-            .map(pid -> new TidligereMedlemsperiode(behandlingID, pid)).toList();
+                .map(pid -> new TidligereMedlemsperiode(behandlingID, pid)).toList();
         tidligereMedlemsperiodeRepository.deleteById_BehandlingId(behandlingID);
         tidligereMedlemsperiodeRepository.saveAll(tidligereMedlemsperioder);
     }
@@ -184,14 +184,14 @@ public class BehandlingService {
         behandling.setStatus(status);
 
         behandling.setDokumentasjonSvarfristDato(behandling.erVenterForDokumentasjon() ?
-            DokumentasjonSvarfrist.beregnFristFraDagensDato() : null);
+                DokumentasjonSvarfrist.beregnFristFraDagensDato() : null);
 
         behandlingRepository.save(behandling);
 
         if (List.of(AVVENT_FAGLIG_AVKLARING, AVVENT_DOK_PART, AVVENT_DOK_UTL).contains(status)) {
             oppgaveService.oppdaterOppgaveMedSaksnummer(
-                behandling.getFagsak().getSaksnummer(),
-                OppgaveOppdatering.builder().beskrivelse(status.getBeskrivelse()).build()
+                    behandling.getFagsak().getSaksnummer(),
+                    OppgaveOppdatering.builder().beskrivelse(status.getBeskrivelse()).build()
             );
         } else if (status == Behandlingsstatus.AVSLUTTET) {
             oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
@@ -214,7 +214,7 @@ public class BehandlingService {
 
     public void endreMottaksdato(Behandling behandling, LocalDate mottaksdato) {
         log.info("Endrer mottaksdato for behandling {} fra {} til {}",
-            behandling.getId(), utledMottaksdato.getMottaksdato(behandling), mottaksdato);
+                behandling.getId(), utledMottaksdato.getMottaksdato(behandling), mottaksdato);
         if (behandling.getBehandlingsårsak() != null) {
             behandling.getBehandlingsårsak().setMottaksdato(mottaksdato);
         } else {
@@ -233,9 +233,9 @@ public class BehandlingService {
     public List<Long> hentMedlemsperioder(long behandlingID) {
         List<TidligereMedlemsperiode> tidligereMedlemsperioder = tidligereMedlemsperiodeRepository.findById_BehandlingId(behandlingID);
         return tidligereMedlemsperioder.stream()
-            .map(TidligereMedlemsperiode::getId)
-            .map(TidligereMedlemsperiodeId::getPeriodeId)
-            .toList();
+                .map(TidligereMedlemsperiode::getId)
+                .map(TidligereMedlemsperiodeId::getPeriodeId)
+                .toList();
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -247,13 +247,13 @@ public class BehandlingService {
         } catch (InvocationTargetException | NoSuchMethodException | InstantiationException |
                  IllegalAccessException e) {
             throw new TekniskException(String.format("Klarte ikke replikere behandling %s for fagsak %s",
-                tidligsteInaktiveBehandling.getId(), tidligsteInaktiveBehandling.getFagsak().getSaksnummer()), e);
+                    tidligsteInaktiveBehandling.getId(), tidligsteInaktiveBehandling.getFagsak().getSaksnummer()), e);
         }
         return behandlingsreplika;
     }
 
     Behandling replikerBehandlingUtenMottatteOpplysningerSaksopplysningerOgResultat(Behandling tidligsteInaktiveBehandling, Behandlingstyper behandlingstype)
-        throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+            throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         Behandling behandlingsreplika = (Behandling) BeanUtils.cloneBean(tidligsteInaktiveBehandling);
 
         Instant nå = Instant.now();
@@ -282,14 +282,14 @@ public class BehandlingService {
         } catch (InvocationTargetException | NoSuchMethodException | InstantiationException |
                  IllegalAccessException e) {
             throw new TekniskException(String.format("Klarte ikke replikere behandling %s for fagsak %s",
-                tidligsteInaktiveBehandling.getId(), tidligsteInaktiveBehandling.getFagsak().getSaksnummer()), e);
+                    tidligsteInaktiveBehandling.getId(), tidligsteInaktiveBehandling.getFagsak().getSaksnummer()), e);
         }
 
         return behandlingsreplika;
     }
 
     Behandling replikerBehandling(Behandling tidligsteInaktiveBehandling, Behandlingstyper behandlingstype)
-        throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+            throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
 
         Behandling behandlingsreplika = (Behandling) BeanUtils.cloneBean(tidligsteInaktiveBehandling);
 
@@ -301,6 +301,7 @@ public class BehandlingService {
         behandlingsreplika.setStatus(OPPRETTET);
         behandlingsreplika.setOpprinneligBehandling(tidligsteInaktiveBehandling);
         behandlingsreplika.setMottatteOpplysninger(replikerMottatteOpplysninger(behandlingsreplika, tidligsteInaktiveBehandling.getMottatteOpplysninger()));
+        behandlingsreplika.setBehandlingsårsak(null);
         behandlingsreplika.setBehandlingsnotater(Collections.emptySet());
         behandlingsreplika.setBehandlingsfrist(Behandling.utledBehandlingsfrist(behandlingsreplika, utledMottaksdato.getMottaksdato(behandlingsreplika)));
 
@@ -317,7 +318,7 @@ public class BehandlingService {
     }
 
     private Set<SaksopplysningKilde> replikerKilder(Saksopplysning saksopplysningreplika, Set<SaksopplysningKilde> kilder)
-        throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+            throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         Set<SaksopplysningKilde> kildereplikas = new HashSet<>();
         for (var kilde : kilder) {
             var kildereplika = (SaksopplysningKilde) BeanUtils.cloneBean(kilde);
@@ -330,7 +331,7 @@ public class BehandlingService {
     }
 
     private MottatteOpplysninger replikerMottatteOpplysninger(Behandling behandlingsreplika, MottatteOpplysninger opprinneligMottatteOpplysninger)
-        throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+            throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         if (opprinneligMottatteOpplysninger == null) {
             return null;
         }
@@ -397,8 +398,8 @@ public class BehandlingService {
 
     public Set<Behandlingsstatus> hentMuligeStatuser(long behandlingID) {
         return hentBehandling(behandlingID).erInaktiv()
-            ? Collections.emptySet()
-            : lovligeKombinasjonerService.hentMuligeBehandlingStatuser();
+                ? Collections.emptySet()
+                : lovligeKombinasjonerService.hentMuligeBehandlingStatuser();
     }
 
     private void avsluttNyVurdering(Behandling behandling, Behandlingsresultattyper nyBehandlingsResultatType) {

@@ -87,6 +87,6 @@ public class ReplikerBehandling implements StegBehandler {
         }
 
         var behandlingsårsak = new Behandlingsaarsak(behandlingsårsaktype, behandlingsårsakFritekst, mottaksdato);
-        nyBehandling.setBehandlingsårsak(behandlingsårsak);
+        nyBehandling.settBehandlingsårsak(behandlingsårsak);
     }
 }
