@@ -191,6 +191,10 @@ public class Behandling extends RegistreringsInfo {
     }
 
     public void setBehandlingsårsak(Behandlingsaarsak behandlingsårsak) {
+        this.behandlingsårsak = behandlingsårsak;
+    }
+
+    public void settBehandlingsårsak(Behandlingsaarsak behandlingsårsak) {
         if (behandlingsårsak == null) {
             if (this.behandlingsårsak != null) {
                 this.behandlingsårsak.setBehandling(null);

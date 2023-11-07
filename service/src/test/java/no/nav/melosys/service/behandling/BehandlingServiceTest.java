@@ -467,8 +467,7 @@ class BehandlingServiceTest {
         assertThat(replikertBehandling.getDokumentasjonSvarfristDato()).isEqualTo(tidligsteInaktiveBehandling.getDokumentasjonSvarfristDato());
         assertThat(replikertBehandling.getInitierendeJournalpostId()).isEqualTo(tidligsteInaktiveBehandling.getInitierendeJournalpostId());
         assertThat(replikertBehandling.getBehandlingsfrist()).isEqualTo(MOTTAKSDATO.plusDays(90));
-        assertThat(replikertBehandling.getBehandlingsårsak().getMottaksdato()).isEqualTo(tidligsteInaktiveBehandling.getBehandlingsårsak().getMottaksdato());
-        assertThat(replikertBehandling.getBehandlingsårsak().getId()).isNotEqualTo(tidligsteInaktiveBehandling.getBehandlingsårsak().getId());
+        assertThat(replikertBehandling.getBehandlingsårsak()).isNull();
         assertThat(replikertBehandling.getRegistrertDato()).isNotEqualTo(tidligsteInaktiveBehandling.getRegistrertDato());
         assertThat(replikertBehandling.getMottatteOpplysninger().getMottatteOpplysningerData()).isNotNull();
 
