@@ -1,6 +1,7 @@
 package no.nav.melosys.domain.dokument.organisasjon
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonView
 import no.nav.melosys.domain.AbstraktOrganisasjon
 import no.nav.melosys.domain.adresse.StrukturertAdresse
@@ -14,12 +15,13 @@ import javax.xml.bind.annotation.*
 class OrganisasjonDokument : AbstraktOrganisasjon(), SaksopplysningDokument {
     @XmlElementWrapper(name = "navn")
     @XmlElement(name = "navnelinje")
+    @JsonIgnore
     var navn: List<String>? = null
 
     var organisasjonDetaljer: OrganisasjonsDetaljer? = null
     var sektorkode: String? = null //"http://nav.no/kodeverk/Kodeverk/Sektorkoder"
 
-    @JsonIgnore
+    @JsonProperty("navn")
     override fun getSammenslåttNavn(): String? {
         return lagSammenslåttNavn()
     }
