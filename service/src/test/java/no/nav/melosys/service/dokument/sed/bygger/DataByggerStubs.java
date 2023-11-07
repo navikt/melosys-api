@@ -144,9 +144,9 @@ class DataByggerStubs {
     static Set hentOrganisasjonDokumentSetStub() {
         HashSet<OrganisasjonDokument> orgDokumentHashSet = new HashSet<>();
         OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
-        organisasjonDokument.organisasjonDetaljer = mock(OrganisasjonsDetaljer.class);
+        organisasjonDokument.setOrganisasjonDetaljer(mock(OrganisasjonsDetaljer.class));
         organisasjonDokument.setOrgnummer("orgnr");
-        when(organisasjonDokument.organisasjonDetaljer.hentStrukturertForretningsadresse()).thenReturn(hentStrukturertAddresseStub());
+        when(organisasjonDokument.getOrganisasjonDetaljer().hentStrukturertForretningsadresse()).thenReturn(hentStrukturertAddresseStub());
         orgDokumentHashSet.add(organisasjonDokument);
 
         return orgDokumentHashSet;

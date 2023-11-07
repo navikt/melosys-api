@@ -47,9 +47,9 @@ class EregRestServiceTest {
         val organisasjonDokument = saksopplysning.dokument as OrganisasjonDokument?
         organisasjonDokument.shouldNotBeNull()
             .organisasjonDetaljer.shouldNotBeNull()
-            .navn.shouldNotBeNull().shouldHaveSize(1).first()
+            .navn.shouldNotBeNull().shouldHaveSize(1).first().shouldNotBeNull()
             .apply {
-                navn.shouldHaveSize(1).first().shouldBe("MULTICONSULT ASA")
+                navn.shouldNotBeNull().shouldHaveSize(1).first().shouldBe("MULTICONSULT ASA")
                 redigertNavn.shouldBe("MULTICONSULT ASA")
             }
     }

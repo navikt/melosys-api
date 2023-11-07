@@ -13,6 +13,6 @@ class Organisasjonsnavn {
 
     @XmlElementWrapper(name = "navn")
     @XmlElement(name = "navnelinje")
-    var navn: MutableList<String?>? = ArrayList()
+    var navn: List<String?>? = ArrayList()
     var redigertNavn: String? = null
 }

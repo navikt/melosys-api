@@ -24,6 +24,10 @@ public abstract class AbstraktOrganisasjon {
         return orgnummer;
     }
 
+    public void setOrgnummer(String orgnummer) {
+        this.orgnummer = orgnummer;
+    }
+
     public LocalDate getOppstartsdato() {
         return oppstartsdato;
     }

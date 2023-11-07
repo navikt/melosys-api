@@ -6,7 +6,7 @@ public record SaksinfoVirksomhet(String saksnummer, String navnVirksomhet, Strin
     public static Saksinfo av(DokgenBrevbestilling brevbestilling) {
         return new SaksinfoVirksomhet(
             brevbestilling.getBehandling().getFagsak().getSaksnummer(),
-            brevbestilling.getOrg().getNavn(),
+            brevbestilling.getOrg().getSammenslåttNavn(),
             brevbestilling.getOrg().getOrgnummer()
         );
     }

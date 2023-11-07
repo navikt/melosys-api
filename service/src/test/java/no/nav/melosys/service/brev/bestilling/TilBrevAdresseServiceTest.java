@@ -314,7 +314,7 @@ class TilBrevAdresseServiceTest {
         geogragiskAdresse.setLandkode(Land.NORGE);
         geogragiskAdresse.setGyldighetsperiode(new Periode(LocalDate.MIN, LocalDate.MAX));
         var organisasjonsDetaljer = new OrganisasjonsDetaljer();
-        organisasjonsDetaljer.postadresse.add(geogragiskAdresse);
+        organisasjonsDetaljer.postadresse = List.of(geogragiskAdresse);
         var dokument = new OrganisasjonDokument();
         dokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
         dokument.setNavn(List.of(navn));

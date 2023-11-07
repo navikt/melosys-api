@@ -15,20 +15,19 @@ import javax.xml.bind.annotation.XmlElement
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter
 
 @XmlAccessorType(XmlAccessType.FIELD)
-class OrganisasjonsDetaljer {
+open class OrganisasjonsDetaljer { // Needs to be open because of mocking : TODO: rewrite tests to kotlin
     var orgnummer: String? = null
 
     @XmlElement(name = "organisasjonsnavn")
-    var navn: MutableList<Organisasjonsnavn?>? = ArrayList()
+    var navn: List<Organisasjonsnavn?>? = ArrayList() //TODO: use emptyList when we remove JAXB code
     @JvmField
-    var forretningsadresse: MutableList<GeografiskAdresse> = ArrayList()
+    var forretningsadresse: List<GeografiskAdresse> = ArrayList()
     @JvmField
-    var postadresse: MutableList<GeografiskAdresse> = ArrayList()
-    var telefon: MutableList<Telefonnummer?>? = ArrayList()
-    var epostadresse: MutableList<Epost?>? = ArrayList()
-    var naering: MutableList<String?>? = ArrayList() //"http://nav.no/kodeverk/Kodeverk/Næringskoder"
+    var postadresse: List<GeografiskAdresse> = ArrayList()
+    var telefon: List<Telefonnummer?>? = ArrayList()
+    var epostadresse: List<Epost?>? = ArrayList()
+    var naering: List<String?>? = ArrayList() //"http://nav.no/kodeverk/Kodeverk/Næringskoder"
 
-    @JvmField
     @XmlJavaTypeAdapter(LocalDateXmlAdapter::class)
     var opphoersdato: LocalDate? = null
 
@@ -38,7 +37,7 @@ class OrganisasjonsDetaljer {
         return konverterTilStrukturertAdresse(adresse)
     }
 
-    fun hentStrukturertForretningsadresse(): StrukturertAdresse? {
+    open fun hentStrukturertForretningsadresse(): StrukturertAdresse? { // Needs to be open because of mocking : TODO: rewrite tests to kotlin
         val adresse = hentFørsteGyldigeForretningsadresse()
         return konverterTilStrukturertAdresse(adresse)
     }
@@ -56,7 +55,7 @@ class OrganisasjonsDetaljer {
         return hentFørsteGyldigeAdresse(postadresse)
     }
 
-    private fun hentFørsteGyldigeAdresse(adresser: MutableList<GeografiskAdresse>): GeografiskAdresse? {
+    private fun hentFørsteGyldigeAdresse(adresser: List<GeografiskAdresse>): GeografiskAdresse? {
         for (adresse in adresser) {
             val gyldighetsperiode = adresse.gyldighetsperiode
             if (gyldighetsperiode!!.erGyldig()) {

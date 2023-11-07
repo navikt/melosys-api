@@ -125,7 +125,7 @@ public final class DokgenTestData {
 
     public static OrganisasjonDokument lagOrg() {
         OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
-        organisasjonDokument.setNavn(NAVN_ORG);
+        organisasjonDokument.setNavn(List.of(NAVN_ORG));
         organisasjonDokument.setOrgnummer(ORGNR);
         organisasjonDokument.setOrganisasjonDetaljer(lagOrgDetaljer());
         return organisasjonDokument;
@@ -138,7 +138,7 @@ public final class DokgenTestData {
         semistrukturertAdresse.setLandkode(landkoder.getKode());
         semistrukturertAdresse.setGyldighetsperiode(new Periode(LocalDate.now(), LocalDate.now()));
         semistrukturertAdresse.setPostnr(POSTNR_ORG);
-        organisasjonsDetaljer.forretningsadresse.add(semistrukturertAdresse);
+        organisasjonsDetaljer.forretningsadresse = List.of(semistrukturertAdresse);
         organisasjonDokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
         return organisasjonDokument;
     }

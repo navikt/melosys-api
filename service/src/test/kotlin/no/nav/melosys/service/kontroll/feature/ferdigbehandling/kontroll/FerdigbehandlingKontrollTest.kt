@@ -301,26 +301,30 @@ class FerdigbehandlingKontrollTest {
         postadressePostnr: String,
         postadresseLand: String
     ): OrganisasjonDokument {
-        val organisasjonDokument = OrganisasjonDokument()
-        val organisasjonsDetaljer = OrganisasjonsDetaljer()
-        organisasjonDokument.setOrganisasjonDetaljer(organisasjonsDetaljer)
-        val forretningsadresse = SemistrukturertAdresse()
-        organisasjonsDetaljer.forretningsadresse.add(forretningsadresse)
-        forretningsadresse.adresselinje1 = forretningsGatenavn
-        forretningsadresse.postnr = forretningsPostnr
-        forretningsadresse.poststed = "Forretningspoststed"
-        forretningsadresse.landkode = "NO"
-        forretningsadresse.gyldighetsperiode =
-            no.nav.melosys.domain.dokument.felles.Periode(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1))
-        val postadresse = SemistrukturertAdresse()
-        organisasjonsDetaljer.postadresse.add(postadresse)
-        postadresse.adresselinje1 = "Postgatenavn"
-        postadresse.postnr = postadressePostnr
-        postadresse.poststed = "Postpoststed"
-        postadresse.landkode = postadresseLand
-        postadresse.gyldighetsperiode =
-            no.nav.melosys.domain.dokument.felles.Periode(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1))
-        return organisasjonDokument
+        return OrganisasjonDokument().apply {
+            organisasjonDetaljer = OrganisasjonsDetaljer().apply {
+                forretningsadresse = listOf(SemistrukturertAdresse().apply {
+                    adresselinje1 = forretningsGatenavn
+                    postnr = forretningsPostnr
+                    poststed = "Forretningspoststed"
+                    landkode = "NO"
+                    gyldighetsperiode = no.nav.melosys.domain.dokument.felles.Periode(
+                        LocalDate.now().minusDays(1),
+                        LocalDate.now().plusDays(1)
+                    )
+                })
+                postadresse = listOf(SemistrukturertAdresse().apply {
+                    adresselinje1 = "Postgatenavn"
+                    postnr = postadressePostnr
+                    poststed = "Postpoststed"
+                    landkode = postadresseLand
+                    gyldighetsperiode = no.nav.melosys.domain.dokument.felles.Periode(
+                        LocalDate.now().minusDays(1),
+                        LocalDate.now().plusDays(1)
+                    )
+                })
+            }
+        }
     }
 
     private fun lagMottatteOpplysningerdata(): MottatteOpplysningerData? {

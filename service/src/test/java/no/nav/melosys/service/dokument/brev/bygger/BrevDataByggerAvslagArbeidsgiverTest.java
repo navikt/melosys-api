@@ -113,7 +113,7 @@ class BrevDataByggerAvslagArbeidsgiverTest {
         organisasjonDokument.setOrgnummer("987654321");
         OrganisasjonsDetaljer organisasjonsDetaljer = mock(OrganisasjonsDetaljer.class);
         when(organisasjonsDetaljer.hentStrukturertForretningsadresse()).thenReturn(lagStrukturertAdresse());
-        organisasjonDokument.organisasjonDetaljer = organisasjonsDetaljer;
+        organisasjonDokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
 
         when(organisasjonOppslagService.hentOrganisasjoner(orgSet)).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));
 
