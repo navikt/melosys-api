@@ -11,12 +11,10 @@ import javax.xml.bind.annotation.XmlSeeAlso
     SemistrukturertAdresse::class, Gateadresse::class
 )
 open class GeografiskAdresse {
-    @JvmField
     var bruksperiode: Periode? = null
-    @JvmField
     var gyldighetsperiode: Periode? = null
-    @JvmField
     var landkode: String? = null
+
     private fun erNorsk(): Boolean {
         return Landkoder.NO.kode == landkode
     }

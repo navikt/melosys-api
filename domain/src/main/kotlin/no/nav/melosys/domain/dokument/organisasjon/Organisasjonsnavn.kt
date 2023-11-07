@@ -13,7 +13,6 @@ class Organisasjonsnavn {
 
     @XmlElementWrapper(name = "navn")
     @XmlElement(name = "navnelinje")
-    var navn: List<String> = ArrayList()
-    @JvmField
+    var navn: List<String?>? = ArrayList()
     var redigertNavn: String? = null
 }

@@ -16,12 +16,16 @@ public abstract class AbstraktOrganisasjon {
     protected LocalDate oppstartsdato;
     protected String enhetstype; //"http://nav.no/kodeverk/Kodeverk/EnhetstyperJuridiskEnhet"
 
-    public abstract String getNavn();
+    public abstract String getSammenslåttNavn();
     public abstract StrukturertAdresse getForretningsadresse();
     public abstract StrukturertAdresse getPostadresse();
 
     public String getOrgnummer() {
         return orgnummer;
+    }
+
+    public void setOrgnummer(String orgnummer) {
+        this.orgnummer = orgnummer;
     }
 
     public LocalDate getOppstartsdato() {

@@ -7,6 +7,5 @@ import javax.xml.bind.annotation.XmlType
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "Epost")
 class Epost : ElektroniskAdresse() {
-    @JvmField
     var identifikator: String? = null
 }

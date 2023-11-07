@@ -72,7 +72,7 @@ public class EregService implements EregFasade {
     @Override
     public String hentOrganisasjonNavn(String orgnr) {
         OrganisasjonDokument organisasjonDokument = (OrganisasjonDokument) hentOrganisasjon(orgnr).getDokument();
-        return organisasjonDokument.getNavn();
+        return organisasjonDokument.getSammenslåttNavn();
     }
 
     private HentOrganisasjonResponse hentOrganisasjonResponse(String orgnr) {

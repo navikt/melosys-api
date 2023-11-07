@@ -15,31 +15,29 @@ import javax.xml.bind.annotation.XmlElement
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter
 
 @XmlAccessorType(XmlAccessType.FIELD)
-class OrganisasjonsDetaljer {
+open class OrganisasjonsDetaljer { // Needs to be open because of mocking : TODO: rewrite tests to kotlin
     var orgnummer: String? = null
 
-    @JvmField
     @XmlElement(name = "organisasjonsnavn")
-    var navn: List<Organisasjonsnavn> = ArrayList()
-    var forretningsadresser: List<GeografiskAdresse> = ArrayList()
+    var navn: List<Organisasjonsnavn?>? = ArrayList() //TODO: use emptyList when we remove JAXB code
+    @JvmField
+    var forretningsadresse: List<GeografiskAdresse> = ArrayList()
     @JvmField
     var postadresse: List<GeografiskAdresse> = ArrayList()
-    @JvmField
-    var telefon: List<Telefonnummer> = ArrayList()
-    @JvmField
-    var epostadresse: List<Epost> = ArrayList()
-    @JvmField
-    var naering: List<String> = ArrayList() //"http://nav.no/kodeverk/Kodeverk/Næringskoder"
+    var telefon: List<Telefonnummer?>? = ArrayList()
+    var epostadresse: List<Epost?>? = ArrayList()
+    var naering: List<String?>? = ArrayList() //"http://nav.no/kodeverk/Kodeverk/Næringskoder"
 
-    @JvmField
     @XmlJavaTypeAdapter(LocalDateXmlAdapter::class)
     var opphoersdato: LocalDate? = null
+
+
     fun hentStrukturertPostadresse(): StrukturertAdresse? {
         val adresse = hentFørsteGyldigePostadresse()
         return konverterTilStrukturertAdresse(adresse)
     }
 
-    fun hentStrukturertForretningsadresse(): StrukturertAdresse? {
+    open fun hentStrukturertForretningsadresse(): StrukturertAdresse? { // Needs to be open because of mocking : TODO: rewrite tests to kotlin
         val adresse = hentFørsteGyldigeForretningsadresse()
         return konverterTilStrukturertAdresse(adresse)
     }
@@ -50,7 +48,7 @@ class OrganisasjonsDetaljer {
     }
 
     private fun hentFørsteGyldigeForretningsadresse(): GeografiskAdresse? {
-        return hentFørsteGyldigeAdresse(forretningsadresser)
+        return hentFørsteGyldigeAdresse(forretningsadresse)
     }
 
     private fun hentFørsteGyldigePostadresse(): GeografiskAdresse? {
@@ -71,9 +69,10 @@ class OrganisasjonsDetaljer {
         if (adresse == null) {
             return null
         }
-        val ustrukturertAdresse: UstrukturertAdresse
+        val ustrukturertAdresse: UstrukturertAdresse?
         ustrukturertAdresse = if (adresse is SemistrukturertAdresse) {
-            UstrukturertAdresse.av(adresse)
+            val sAdresse = adresse as SemistrukturertAdresse?
+            UstrukturertAdresse.av(sAdresse)
         } else {
             // Enhetsregistret har bare SemistrukturertAdresser
             throw IllegalArgumentException("Adresse ikke støttet " + adresse.javaClass.getSimpleName())
@@ -87,14 +86,14 @@ class OrganisasjonsDetaljer {
         }
         val strukturertAdresse = StrukturertAdresse()
         if (adresse is SemistrukturertAdresse) {
-            val sAdresse = adresse
+            val sAdresse = adresse as SemistrukturertAdresse?
             val stringBuilder = StringBuilder()
-            if (sAdresse.adresselinje1 != null) {
+            if (sAdresse!!.adresselinje1 != null) {
                 stringBuilder.append(sAdresse.adresselinje1)
             }
             if (sAdresse.adresselinje2 != null) {
                 stringBuilder.append(" ")
-                stringBuilder.append(sAdresse.adresselinje2)
+                stringBuilder.append(adresse.adresselinje2)
             }
             if (sAdresse.adresselinje3 != null) {
                 stringBuilder.append(" ")

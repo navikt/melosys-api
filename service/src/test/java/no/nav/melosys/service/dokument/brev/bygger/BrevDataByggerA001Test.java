@@ -183,7 +183,7 @@ class BrevDataByggerA001Test {
         OrganisasjonDokument orgDok = new OrganisasjonDokument();
         orgDok.setNavn(Collections.singletonList(navn));
         orgDok.setOrgnummer(orgnummer);
-        orgDok.organisasjonDetaljer = detaljer;
+        orgDok.setOrganisasjonDetaljer(detaljer);
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.ORG);
         saksopplysning.setDokument(orgDok);

@@ -28,7 +28,7 @@ class EregServiceTest {
     void getOrganisasjon() {
         Saksopplysning saksopplysning = eregService.hentOrganisasjon("873102322");
         OrganisasjonDokument organisasjonDokument = (OrganisasjonDokument) saksopplysning.getDokument();
-        assertThat(organisasjonDokument.organisasjonDetaljer.navn.get(0).redigertNavn).isEqualTo("MULTICONSULT ASA");
+        assertThat(organisasjonDokument.getOrganisasjonDetaljer().getNavn().get(0).getRedigertNavn()).isEqualTo("MULTICONSULT ASA");
     }
 
     @Test

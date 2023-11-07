@@ -11,11 +11,14 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdress
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import java.io.IOException
 import java.time.LocalDate
 import java.util.*
 
 // Denne konverteringen testes også i DokumentFactoryTest, uten strukturert adresse
+
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class Ereg4KonverteringTest : KonverteringTest {
     @Test
     @Throws(Exception::class)
@@ -23,14 +26,14 @@ internal class Ereg4KonverteringTest : KonverteringTest {
         val test = getSaksopplysning(EREG_4_0_MOCK)
 
         // Test semistrukturert adresse...
-        val dokument = test.dokument as OrganisasjonDokument
+        val dokument = test!!.dokument as OrganisasjonDokument
         val postadresse = dokument.organisasjonDetaljer!!.postadresse[0] as SemistrukturertAdresse
         Assertions.assertThat(postadresse.adresselinje1).isEqualTo("Skuteviksbodene 1")
         Assertions.assertThat(postadresse.postnr).isEqualTo("5035")
         Assertions.assertThat(postadresse.kommunenr).isEqualTo("1201")
 
         // Test strukturert adresse...
-        val forretningsadresse = dokument.organisasjonDetaljer!!.forretningsadresser[0] as Gateadresse
+        val forretningsadresse = dokument.organisasjonDetaljer!!.forretningsadresse[0] as Gateadresse
         Assertions.assertThat(forretningsadresse.gatenavn).isEqualTo("Gatenavn")
         Assertions.assertThat(forretningsadresse.landkode).isEqualTo("NO")
 
@@ -49,7 +52,7 @@ internal class Ereg4KonverteringTest : KonverteringTest {
     @Throws(IOException::class)
     fun testJuridiskEnhet() {
         val saksopplysning = getSaksopplysning(EREG_4_0_MOCK)
-        val dokument = saksopplysning.dokument as OrganisasjonDokument
+        val dokument = saksopplysning!!.dokument as OrganisasjonDokument
         Assertions.assertThat(dokument.sektorkode).isNotBlank()
         Assertions.assertThat(dokument.organisasjonDetaljer!!.naering).isNotEmpty()
         Assertions.assertThat(dokument.oppstartsdato).isNull()
@@ -61,7 +64,7 @@ internal class Ereg4KonverteringTest : KonverteringTest {
     fun testOrgledd() {
         val ressurs = "organisasjon/974652366.xml"
         val saksopplysning = getSaksopplysning(ressurs)
-        val dokument = saksopplysning.dokument as OrganisasjonDokument
+        val dokument = saksopplysning!!.getDokument() as OrganisasjonDokument
         Assertions.assertThat(dokument.sektorkode).isNotBlank()
         Assertions.assertThat(dokument.organisasjonDetaljer!!.naering).isNotEmpty()
         Assertions.assertThat(dokument.oppstartsdato).isNull()
@@ -73,7 +76,7 @@ internal class Ereg4KonverteringTest : KonverteringTest {
     fun testVirksomhet() {
         val ressurs = "organisasjon/975270211.xml"
         val saksopplysning = getSaksopplysning(ressurs)
-        val dokument = saksopplysning.dokument as OrganisasjonDokument
+        val dokument = saksopplysning!!.dokument as OrganisasjonDokument
         Assertions.assertThat(dokument.sektorkode).isEmpty()
         Assertions.assertThat(dokument.organisasjonDetaljer!!.naering).isNotEmpty()
         Assertions.assertThat(dokument.oppstartsdato).isNotNull()
@@ -81,16 +84,17 @@ internal class Ereg4KonverteringTest : KonverteringTest {
     }
 
     @Throws(IOException::class)
-    override fun getSaksopplysning(ressurs: String): Saksopplysning {
+    override fun getSaksopplysning(ressurs: String?): Saksopplysning? {
         val kilde = javaClass.getClassLoader().getResourceAsStream(ressurs)
         Objects.requireNonNull(kilde)
         return konverter(kilde, factory, SaksopplysningType.ORG, "4.0")
     }
 
     companion object {
-        private const val EREG_4_0_MOCK = "organisasjon/org_med_strukturert_adresse.xml"
+        private const val EREG_4_0_MOCK: String = "organisasjon/org_med_strukturert_adresse.xml"
         private var factory: DokumentFactory? = null
         @BeforeAll
+        @JvmStatic
         fun setUp() {
             val marshaller = JaxbConfig.getJaxb2Marshaller()
             val xsltTemplatesFactory = XsltTemplatesFactory()

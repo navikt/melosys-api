@@ -16,7 +16,7 @@ public class SedOrganisasjon extends AbstraktOrganisasjon {
     }
 
     @Override
-    public String getNavn() {
+    public String getSammenslåttNavn() {
         return navn;
     }
 

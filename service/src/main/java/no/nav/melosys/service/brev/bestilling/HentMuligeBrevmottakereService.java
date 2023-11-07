@@ -81,10 +81,10 @@ public class HentMuligeBrevmottakereService {
             Mottaker avklartMottaker = brevmottakerService.avklarMottaker(produserbaredokumenter, Mottaker.av(fastMottaker), behandling);
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartMottaker.getOrgnr());
 
-            String fastTekst = "Kopi til " + orgDokument.getNavn();
+            String fastTekst = "Kopi til " + orgDokument.getSammenslåttNavn();
             brevmottakere.add(new Brevmottaker.Builder()
                 .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottaker(behandling, produserbaredokumenter, avklartMottaker, fastTekst))
-                .medMottakerNavn(orgDokument.getNavn())
+                .medMottakerNavn(orgDokument.getSammenslåttNavn())
                 .medRolle(avklartMottaker.getRolle())
                 .medOrgnr(orgDokument.getOrgnummer())
                 .build());
@@ -112,7 +112,7 @@ public class HentMuligeBrevmottakereService {
             var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartKopi.getOrgnr());
             return new Brevmottaker.Builder()
                 .medDokumentNavn("Kopi til brukers fullmektig")
-                .medMottakerNavn(orgDokument.getNavn())
+                .medMottakerNavn(orgDokument.getSammenslåttNavn())
                 .medRolle(avklartKopi.getRolle())
                 .medOrgnr(orgDokument.getOrgnummer())
                 .build();
@@ -129,14 +129,14 @@ public class HentMuligeBrevmottakereService {
                     return persondataFasade.hentSammensattNavn(avklartMottaker.getPersonIdent());
                 } else {
                     var orgDokument = hentRettOrganisasjonsdokument(behandling, avklartMottaker.getOrgnr());
-                    return orgDokument.getNavn();
+                    return orgDokument.getSammenslåttNavn();
                 }
             }
             case ARBEIDSGIVER, VIRKSOMHET -> {
                 var saksopplysning = eregFasade.finnOrganisasjon(orgnr);
                 if (saksopplysning.isPresent()) {
                     var orgDokument = (OrganisasjonDokument) saksopplysning.get().getDokument();
-                    return orgDokument.getNavn();
+                    return orgDokument.getSammenslåttNavn();
                 } else {
                     throw new IkkeFunnetException("Kan ikke hente mottakernavn, fant ikke orgnr %s".formatted(orgnr));
                 }
@@ -184,7 +184,7 @@ public class HentMuligeBrevmottakereService {
             String fastTekst = avklartKopi.getRolle() == Mottakerroller.ARBEIDSGIVER ? "Kopi til arbeidsgiver" : "Kopi til arbeidsgivers fullmektig";
             brevmottakere.add(new Brevmottaker.Builder()
                 .medDokumentNavn(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottaker(behandling, produserbaredokumenter, avklartKopi, fastTekst))
-                .medMottakerNavn(orgDokument.getNavn())
+                .medMottakerNavn(orgDokument.getSammenslåttNavn())
                 .medRolle(avklartKopi.getRolle())
                 .medOrgnr(orgDokument.getOrgnummer())
                 .build());

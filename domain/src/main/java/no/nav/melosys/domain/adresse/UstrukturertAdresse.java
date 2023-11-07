@@ -42,15 +42,15 @@ public class UstrukturertAdresse implements Adresse {
     public static UstrukturertAdresse av(SemistrukturertAdresse sAdresse) {
         String poststed;
         if (sAdresse.erUtenlandsk()) {
-            poststed = sAdresse.poststedUtland;
+            poststed = sAdresse.getPoststedUtland();
         } else {
-            String _poststed = sAdresse.poststed == null ? "" : " " + sAdresse.poststed;
-            poststed = sAdresse.postnr + _poststed;
+            String _poststed = sAdresse.getPoststed() == null ? "" : " " + sAdresse.getPoststed();
+            poststed = sAdresse.getPostnr() + _poststed;
         }
 
-        return new UstrukturertAdresse(sAdresse.adresselinje1, sAdresse.adresselinje2,
-            sAdresse.adresselinje3, poststed,
-                sAdresse.landkode);
+        return new UstrukturertAdresse(sAdresse.getAdresselinje1(), sAdresse.getAdresselinje2(),
+                                       sAdresse.getAdresselinje3(), poststed,
+                                       sAdresse.getLandkode());
     }
 
     public static UstrukturertAdresse av(no.nav.melosys.domain.dokument.person.adresse.UstrukturertAdresse adresse) {

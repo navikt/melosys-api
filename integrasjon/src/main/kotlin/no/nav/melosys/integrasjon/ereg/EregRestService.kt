@@ -39,8 +39,8 @@ class EregRestService(
         }
     }
 
-    override fun hentOrganisasjonNavn(orgnr: String): String =
-        (hentOrganisasjon(orgnr).dokument as OrganisasjonDokument).getNavn()
+    override fun hentOrganisasjonNavn(orgnr: String): String? =
+        (hentOrganisasjon(orgnr).dokument as OrganisasjonDokument).sammenslåttNavn
 
     companion object {
         const val EREG_REST_VERSJON = "REST 2.0"

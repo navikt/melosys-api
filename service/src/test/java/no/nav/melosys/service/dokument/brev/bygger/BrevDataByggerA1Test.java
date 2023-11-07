@@ -120,7 +120,7 @@ class BrevDataByggerA1Test {
     private OrganisasjonDokument leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) {
         OrganisasjonDokument org = new OrganisasjonDokument();
         org.setOrgnummer(orgnummer);
-        org.organisasjonDetaljer = detaljer;
+        org.setOrganisasjonDetaljer(detaljer);
         org.setNavn(Collections.singletonList(navn));
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.ORG);

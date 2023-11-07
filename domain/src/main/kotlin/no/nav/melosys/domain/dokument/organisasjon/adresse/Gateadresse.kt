@@ -17,9 +17,9 @@ class Gateadresse : StrukturertAdresse() {
     var kommunenummer: String? = null
     var gatenummer: Int? = null
 
-    @JvmField
     @XmlElement(required = true)
     var gatenavn: String? = null
     var husnummer: Int? = null
     var husbokstav: String? = null
+
 }

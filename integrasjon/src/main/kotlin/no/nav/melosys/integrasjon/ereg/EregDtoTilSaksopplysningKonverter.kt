@@ -21,7 +21,7 @@ class EregDtoTilSaksopplysningKonverter {
             organisasjonDetaljer = OrganisasjonsDetaljer().apply {
                 orgnummer = organisasjon.organisasjonsnummer
                 navn = tilNavn(organisasjon.organisasjonDetaljer.navn)
-                forretningsadresser = tilGeografiskAdresse(organisasjon.organisasjonDetaljer.forretningsadresser)
+                forretningsadresse = tilGeografiskAdresse(organisasjon.organisasjonDetaljer.forretningsadresser)
                 postadresse = tilGeografiskAdresse(organisasjon.organisasjonDetaljer.postadresser)
                 telefon = tilTelefon(organisasjon.organisasjonDetaljer.telefonnummer)
                 epostadresse = tilEpost(organisasjon.organisasjonDetaljer.epostadresser)

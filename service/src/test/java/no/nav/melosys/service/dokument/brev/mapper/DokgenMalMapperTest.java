@@ -242,8 +242,8 @@ class DokgenMalMapperTest {
         Behandling behandling = lagBehandling();
 
         OrganisasjonDokument org = lagOrg();
-        org.organisasjonDetaljer.forretningsadresser = singletonList(lagOrgForretningsadresse());
-        org.organisasjonDetaljer.postadresse = emptyList();
+        org.getOrganisasjonDetaljer().forretningsadresse = singletonList(lagOrgForretningsadresse());
+        org.getOrganisasjonDetaljer().postadresse = emptyList();
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
             .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
@@ -684,10 +684,10 @@ class DokgenMalMapperTest {
 
     private GeografiskAdresse lagOrgForretningsadresse() {
         SemistrukturertAdresse semistrukturertAdresse = new SemistrukturertAdresse();
-        semistrukturertAdresse.adresselinje1 = FORRETNINGSADRESSE_ORG;
-        semistrukturertAdresse.postnr = POSTNR_ORG;
-        semistrukturertAdresse.gyldighetsperiode = new Periode(LocalDate.now().minusDays(2), LocalDate.now().plusDays(2));
-        semistrukturertAdresse.landkode = "NO";
+        semistrukturertAdresse.setAdresselinje1(FORRETNINGSADRESSE_ORG);
+        semistrukturertAdresse.setPostnr(POSTNR_ORG);
+        semistrukturertAdresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(2), LocalDate.now().plusDays(2)));
+        semistrukturertAdresse.setLandkode("NO");
         return semistrukturertAdresse;
     }
 }
