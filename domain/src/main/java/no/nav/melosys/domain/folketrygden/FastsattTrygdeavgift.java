@@ -73,12 +73,6 @@ public class FastsattTrygdeavgift {
         this.trygdeavgiftsperioder = trygdeavgiftsperioder;
     }
 
-    public boolean skalBetalesTilNav() {
-        var trygdeavgiftMottaker = getTrygdeavgiftMottaker();
-        return trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV
-            || trygdeavgiftMottaker == Trygdeavgiftmottaker.TRYGDEAVGIFT_BETALES_TIL_NAV_OG_SKATT;
-    }
-
     public Trygdeavgiftmottaker getTrygdeavgiftMottaker() {
         var inntektsperioder = trygdeavgiftsgrunnlag.getInntektsperioder();
 
