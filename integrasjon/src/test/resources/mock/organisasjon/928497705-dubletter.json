@@ -1,0 +1,23 @@
+{
+    "organisasjonsnummer": "928497705",
+    "type": "Organisasjon",
+    "organisasjonDetaljer": {
+        "dubletter": [{
+            "type": "Organisasjon",
+            "organisasjonsnummer": "928497705"
+        }
+        ],
+        "navn": [
+            {
+                "sammensattnavn": "BESK KAFFE",
+                "navnelinje1": "BESK KAFFE",
+                "bruksperiode": {
+                    "fom": "2021-06-02T09:23:59.799"
+                },
+                "gyldighetsperiode": {
+                    "fom": "2021-06-02"
+                }
+            }
+        ]
+    }
+}
