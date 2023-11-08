@@ -26,7 +26,7 @@ class OrganisasjonResponse {
         JsonSubTypes.Type(value = Organisasjon::class, name = "Organisasjon")
     )
     open class Organisasjon(
-        val organisasjonDetaljer: OrganisasjonDetaljer,
+        val organisasjonDetaljer: OrganisasjonDetaljer? = null,
         organisasjonsnummer: String,
         navn: Navn? = null
     ) : OrganisasjonBase(organisasjonsnummer, navn) {

@@ -8,6 +8,7 @@ import no.nav.melosys.domain.dokument.organisasjon.Organisasjonsnavn
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
 import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Epost
 import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Telefonnummer
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonResponse
 
 class EregDtoTilSaksopplysningKonverter {
@@ -20,13 +21,14 @@ class EregDtoTilSaksopplysningKonverter {
             navn = listOf(organisasjon.navn?.sammensattnavn ?: "UKJENT")
             organisasjonDetaljer = OrganisasjonsDetaljer().apply {
                 orgnummer = organisasjon.organisasjonsnummer
-                navn = tilNavn(organisasjon.organisasjonDetaljer.navn)
-                forretningsadresse = tilGeografiskAdresse(organisasjon.organisasjonDetaljer.forretningsadresser)
-                postadresse = tilGeografiskAdresse(organisasjon.organisasjonDetaljer.postadresser)
-                telefon = tilTelefon(organisasjon.organisasjonDetaljer.telefonnummer)
-                epostadresse = tilEpost(organisasjon.organisasjonDetaljer.epostadresser)
-                naering = organisasjon.organisasjonDetaljer.naeringer?.map { it.naeringskode } ?: emptyList()
-                opphoersdato = organisasjon.organisasjonDetaljer.opphoersdato
+                val responseOrganisasjonDetaljer = organisasjon.organisasjonDetaljer ?: throw TekniskException("organisasjonDetaljer er null")
+                navn = tilNavn(responseOrganisasjonDetaljer.navn)
+                forretningsadresse = tilGeografiskAdresse(responseOrganisasjonDetaljer.forretningsadresser)
+                postadresse = tilGeografiskAdresse(responseOrganisasjonDetaljer.postadresser)
+                telefon = tilTelefon(responseOrganisasjonDetaljer.telefonnummer)
+                epostadresse = tilEpost(responseOrganisasjonDetaljer.epostadresser)
+                naering = responseOrganisasjonDetaljer.naeringer?.map { it.naeringskode } ?: emptyList()
+                opphoersdato = responseOrganisasjonDetaljer.opphoersdato
             }
         }
     }
@@ -37,7 +39,7 @@ class EregDtoTilSaksopplysningKonverter {
             is OrganisasjonResponse.Organisasjonsledd -> organisasjon.organisasjonsleddDetaljer?.enhetstype
             is OrganisasjonResponse.Virksomhet -> organisasjon.virksomhetDetaljer?.enhetstype
             else -> null
-        } ?: organisasjon.organisasjonDetaljer.enhetstyper?.first { it.enhetstype != null }?.enhetstype
+        } ?: organisasjon.organisasjonDetaljer?.enhetstyper?.first { it.enhetstype != null }?.enhetstype
     }
 
     private fun finSektorkode(organisasjon: OrganisasjonResponse.Organisasjon): String {

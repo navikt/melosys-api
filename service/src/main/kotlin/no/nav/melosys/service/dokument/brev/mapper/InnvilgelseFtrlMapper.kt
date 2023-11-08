@@ -1,6 +1,7 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
 import io.getunleash.Unleash
+import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.Vilkaarsresultat
 import no.nav.melosys.domain.brev.InnvilgelseFtrlBrevbestilling
@@ -47,8 +48,11 @@ class InnvilgelseFtrlMapper(
                 )
             )
             .trygdeavgiftMottaker(
-                if (unleash.isEnabled(ToggleName.REFAKTORERING_ORDINÆR_TRYGDEAVGIFT)) trygdeavgiftMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag)
-                else medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftMottaker)
+                if (unleash.isEnabled(ToggleName.REFAKTORERING_ORDINÆR_TRYGDEAVGIFT))
+                    trygdeavgiftMottakerService.getTrygdeavgiftMottaker(medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag)
+                else
+                    medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftMottaker
+            )
             .skatteplikttype(medlemAvFolketrygden.utledSkatteplikttype())
             .ftrl_2_8_begrunnelse(hentFtrlNærTilknytningNorgeBegrunnelse(behandlingsresultat.vilkaarsresultater))
             .begrunnelseAnnenGrunnFritekst(hentSaerligBegrunnelseFritekst(behandlingsresultat.vilkaarsresultater))
@@ -56,8 +60,7 @@ class InnvilgelseFtrlMapper(
             .innledningFritekst(brevbestilling.innledningFritekst)
             .begrunnelseFritekst(brevbestilling.begrunnelseFritekst)
             .trygdeavgiftFritekst(brevbestilling.trygdeavgiftFritekst)
-            .arbeidsgivere(
-                avklarteVirksomheterService.hentNorskeArbeidsgivere(brevbestilling.behandling).map { it.navn })
+            .arbeidsgivere(hentArbeidsgivere(brevbestilling.behandling))
             .arbeidsland(dokgenMapperDatahenter.hentLandnavnFraLandkode(arbeidsland))
             .trygdeavtaleMedArbeidsland(harTrygdeavtaleMedArbeidsland(arbeidsland))
             .betalerArbeidsgiveravgift(erBetalerArbeidsgiveravgift(medlemAvFolketrygden.medlemskapsperioder))
@@ -110,6 +113,12 @@ class InnvilgelseFtrlMapper(
             .filter { it.vilkaar == Vilkaar.FTRL_2_8_NÆR_TILKNYTNING_NORGE }
             .map { it.begrunnelser.iterator().next().vilkaarsresultat.begrunnelseFritekst }
             .firstOrNull()
+
+    private fun hentArbeidsgivere(behandling: Behandling): List<String> = (
+        avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling) +
+            avklarteVirksomheterService.hentUtenlandskeVirksomheter(behandling) +
+            avklarteVirksomheterService.hentNorskeSelvstendigeForetak(behandling)
+        ).map { it.navn }
 
     private fun harTrygdeavtaleMedArbeidsland(arbeidsland: String): Boolean =
         Trygdeavtale_myndighetsland.values().any() { it.name == arbeidsland }

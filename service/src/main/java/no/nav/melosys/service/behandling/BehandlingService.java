@@ -1,10 +1,5 @@
 package no.nav.melosys.service.behandling;
 
-import java.lang.reflect.InvocationTargetException;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.*;
-
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.*;
@@ -28,6 +23,11 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.lang.reflect.InvocationTargetException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.*;
 
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus.*;
 import static no.nav.melosys.metrics.MetrikkerNavn.*;
@@ -109,7 +109,7 @@ public class BehandlingService {
         behandling.setStatus(behandlingsstatus);
         behandling.setType(behandlingstype);
         behandling.setTema(behandlingstema);
-        behandling.setBehandlingsårsak(new Behandlingsaarsak(årsaktype, årsakFritekst, mottaksdato));
+        behandling.settBehandlingsårsak(new Behandlingsaarsak(årsaktype, årsakFritekst, mottaksdato));
         behandling.setInitierendeJournalpostId(initierendeJournalpostId);
         behandling.setInitierendeDokumentId(initierendeDokumentId);
         behandling.setBehandlingsfrist(Behandling.utledBehandlingsfrist(behandling, utledMottaksdato.getMottaksdato(behandling)));
@@ -301,8 +301,8 @@ public class BehandlingService {
         behandlingsreplika.setStatus(OPPRETTET);
         behandlingsreplika.setOpprinneligBehandling(tidligsteInaktiveBehandling);
         behandlingsreplika.setMottatteOpplysninger(replikerMottatteOpplysninger(behandlingsreplika, tidligsteInaktiveBehandling.getMottatteOpplysninger()));
+        behandlingsreplika.setBehandlingsårsak(null);
         behandlingsreplika.setBehandlingsnotater(Collections.emptySet());
-        behandlingsreplika.setBehandlingsfrist(Behandling.utledBehandlingsfrist(behandlingsreplika, utledMottaksdato.getMottaksdato(behandlingsreplika)));
 
         behandlingsreplika.setSaksopplysninger(new HashSet<>());
         for (Saksopplysning saksopplysning : tidligsteInaktiveBehandling.getSaksopplysninger()) {

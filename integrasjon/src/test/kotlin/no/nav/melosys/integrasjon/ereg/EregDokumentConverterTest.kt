@@ -72,6 +72,20 @@ class EregDokumentConverterTest {
         organisasjonDokumentSomJson.shouldEqualJson(forventetOrganisasjonDokumentJson)
     }
 
+    @Test
+    fun `organisasjonDetaljer i dubletter skal kunne være null`() {
+        val organisasjons = mapper.readValue<OrganisasjonResponse.Organisasjon>(hentRessurs("mock/organisasjon/928497705-dubletter.json"))
+        val forventetOrganisasjonDokumentJson = hentRessurs("mock/organisasjon/resultat/organisasjons-resultat.json")
+
+
+        val organisasjonDokument =
+            EregDtoTilSaksopplysningKonverter().lagSaksopplysning(organisasjons).dokument.shouldBeTypeOf<OrganisasjonDokument>()
+        val organisasjonDokumentSomJson = SaksopplysningDokumentConverter().convertToDatabaseColumn(organisasjonDokument)
+
+
+        organisasjonDokumentSomJson.shouldEqualJson(forventetOrganisasjonDokumentJson)
+    }
+
 
     private fun hentRessurs(fil: String): String = this::class.java.classLoader.getResource(fil)
         ?.readText(StandardCharsets.UTF_8) ?: throw IkkeFunnetException("Fant ikke $fil")
