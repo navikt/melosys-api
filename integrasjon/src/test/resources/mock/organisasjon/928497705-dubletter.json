@@ -2,10 +2,11 @@
     "organisasjonsnummer": "928497705",
     "type": "Organisasjon",
     "organisasjonDetaljer": {
-        "dubletter": [{
-            "type": "Organisasjon",
-            "organisasjonsnummer": "928497705"
-        }
+        "dubletter": [
+            {
+                "type": "Organisasjon",
+                "organisasjonsnummer": "928497705"
+            }
         ],
         "navn": [
             {
