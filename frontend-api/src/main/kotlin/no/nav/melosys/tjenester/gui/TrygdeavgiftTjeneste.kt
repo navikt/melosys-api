@@ -1,6 +1,5 @@
 package no.nav.melosys.tjenester.gui
 
-import io.getunleash.Unleash
 import io.swagger.annotations.Api
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
@@ -22,8 +21,7 @@ class TrygdeavgiftTjeneste(
     private val trygdeavgiftsgrunnlagService: TrygdeavgiftsgrunnlagService,
     private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
-    private val aksesskontroll: Aksesskontroll,
-    private val unleash: Unleash
+    private val aksesskontroll: Aksesskontroll
 ) {
 
     @GetMapping("/grunnlag")

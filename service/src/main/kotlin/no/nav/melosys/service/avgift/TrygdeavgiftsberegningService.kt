@@ -1,6 +1,5 @@
 package no.nav.melosys.service.avgift
 
-import io.getunleash.Unleash
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
@@ -25,8 +24,7 @@ class TrygdeavgiftsberegningService
     private val medlemAvFolketrygdenService: MedlemAvFolketrygdenService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val persondataService: PersondataService,
-    private val trygdeavgiftConsumer: TrygdeavgiftConsumer,
-    private val unleash: Unleash
+    private val trygdeavgiftConsumer: TrygdeavgiftConsumer
 ) {
 
     @Transactional
