@@ -1,7 +1,7 @@
 package no.nav.melosys.tjenester.gui.dto.brev;
 
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
-import no.nav.melosys.service.brev.brevmalliste.BrevAdresse;
+import no.nav.melosys.service.brev.BrevAdresse;
 
 import java.util.Collection;
 

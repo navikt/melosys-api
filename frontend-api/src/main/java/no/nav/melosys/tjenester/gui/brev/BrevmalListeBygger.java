@@ -15,7 +15,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.brev.BrevmalListeService;
-import no.nav.melosys.service.brev.brevmalliste.BrevAdresse;
+import no.nav.melosys.service.brev.BrevAdresse;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.tjenester.gui.dto.brev.*;
 import org.springframework.stereotype.Component;
@@ -126,7 +126,9 @@ public class BrevmalListeBygger {
             List<BrevAdresse> brevAdresser = brevmalListeService.hentBrevAdresseTilMottakere(behandlingId, rolle);
 
             if ((rolle == Mottakerroller.BRUKER || rolle == Mottakerroller.FULLMEKTIG) && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty) || brevAdresser.stream().allMatch(BrevAdresse::isPostnrEmpty)) {
-                String feilmelding = rolle == Mottakerroller.BRUKER ? Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER.getBeskrivelse().replace("Ingen gyldig adresse funnet. ", "") : Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT.getBeskrivelse().replace("\"Ingen gyldig adresse funnet. ", "");
+                String feilmelding = rolle == Mottakerroller.BRUKER
+                    ? Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER.getBeskrivelse().replace("Ingen gyldig adresse funnet. ", "")
+                    : Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT.getBeskrivelse().replace("\"Ingen gyldig adresse funnet. ", "");
                 FeilmeldingDto feilmeldingDto = new FeilmeldingDto(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse(), List.of(new FeilmeldingUnderpunkt(feilmelding)));
                 mottakerDto.setFeilmelding(feilmeldingDto);
             } else if (rolle == Mottakerroller.VIRKSOMHET && brevAdresser.stream().allMatch(BrevAdresse::isAdresselinjerEmpty) || brevAdresser.stream().allMatch(BrevAdresse::isPostnrEmpty)) {
