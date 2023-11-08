@@ -73,7 +73,7 @@ class EregDokumentConverterTest {
     }
 
     @Test
-    fun `Konvertering av Organisasjons til json skal bli som forventet - med dubletter som null`() {
+    fun `organisasjonDetaljer i dubletter skal kunne være null`() {
         val organisasjons = mapper.readValue<OrganisasjonResponse.Organisasjon>(hentRessurs("mock/organisasjon/928497705-dubletter.json"))
         val forventetOrganisasjonDokumentJson = hentRessurs("mock/organisasjon/resultat/organisasjons-resultat.json")
 
