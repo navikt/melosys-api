@@ -302,7 +302,6 @@ public class BehandlingService {
         behandlingsreplika.setOpprinneligBehandling(tidligsteInaktiveBehandling);
         behandlingsreplika.setMottatteOpplysninger(replikerMottatteOpplysninger(behandlingsreplika, tidligsteInaktiveBehandling.getMottatteOpplysninger()));
         behandlingsreplika.setBehandlingsårsak(null);
-        behandlingsreplika.setBehandlingsfrist(null);
         behandlingsreplika.setBehandlingsnotater(Collections.emptySet());
 
         behandlingsreplika.setSaksopplysninger(new HashSet<>());
