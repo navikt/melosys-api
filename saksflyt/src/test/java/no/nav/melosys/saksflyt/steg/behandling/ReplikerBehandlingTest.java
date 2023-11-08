@@ -5,8 +5,10 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
+import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
@@ -74,6 +76,10 @@ class ReplikerBehandlingTest {
         behandling.setStatus(Behandlingsstatus.AVSLUTTET);
         Behandling replikertBehandling = new Behandling();
         replikertBehandling.setId(2L);
+        replikertBehandling.setTema(Behandlingstema.ARBEID_NORGE_BOSATT_ANNET_LAND);
+        replikertBehandling.setType(Behandlingstyper.NY_VURDERING);
+        replikertBehandling.setFagsak(fagsak);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD);
         prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now());
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
@@ -94,6 +100,10 @@ class ReplikerBehandlingTest {
         fagsak.setBehandlinger(List.of(behandling));
         Behandling replikertBehandling = new Behandling();
         replikertBehandling.setId(2L);
+        replikertBehandling.setTema(Behandlingstema.ARBEID_NORGE_BOSATT_ANNET_LAND);
+        replikertBehandling.setType(Behandlingstyper.NY_VURDERING);
+        replikertBehandling.setFagsak(fagsak);
+        fagsak.setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
         prosessinstans.setData(ProsessDataKey.BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.SØKNAD);
         prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now());
         when(behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, Behandlingstyper.ENDRET_PERIODE)).thenReturn(replikertBehandling);
