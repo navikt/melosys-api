@@ -67,7 +67,7 @@ public class ReplikerBehandling implements StegBehandler {
             nyBehandling.setTema(behandlingstema);
         }
 
-        settBehandlingsårsak(nyBehandling, prosessinstans);
+        settBehandlingsårsakOgFrist(nyBehandling, prosessinstans);
 
         prosessinstans.setBehandling(nyBehandling);
 
@@ -77,7 +77,7 @@ public class ReplikerBehandling implements StegBehandler {
             behandlingBruktForReplikering.getId(), nyBehandling.getId(), saksnummer);
     }
 
-    private void settBehandlingsårsak(Behandling nyBehandling, Prosessinstans prosessinstans) {
+    private void settBehandlingsårsakOgFrist(Behandling nyBehandling, Prosessinstans prosessinstans) {
         var behandlingsårsaktype = prosessinstans.getData(BEHANDLINGSÅRSAKTYPE, Behandlingsaarsaktyper.class);
         var behandlingsårsakFritekst = prosessinstans.getData(BEHANDLINGSÅRSAK_FRITEKST);
         LocalDate mottaksdato = prosessinstans.getData(MOTTATT_DATO, LocalDate.class);
@@ -88,5 +88,6 @@ public class ReplikerBehandling implements StegBehandler {
 
         var behandlingsårsak = new Behandlingsaarsak(behandlingsårsaktype, behandlingsårsakFritekst, mottaksdato);
         nyBehandling.settBehandlingsårsak(behandlingsårsak);
+        nyBehandling.setBehandlingsfrist(Behandling.utledBehandlingsfrist(nyBehandling, mottaksdato));
     }
 }

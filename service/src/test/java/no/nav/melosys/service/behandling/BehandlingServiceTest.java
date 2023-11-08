@@ -455,7 +455,6 @@ class BehandlingServiceTest {
 
     @Test
     void replikerBehandling_replikererObjekterOgCollections() throws NoSuchMethodException, InstantiationException, IllegalAccessException, InvocationTargetException {
-        when(utledMottaksdato.getMottaksdato(any(Behandling.class))).thenReturn(MOTTAKSDATO);
         Behandling tidligsteInaktiveBehandling = opprettBehandlingMedData();
         Behandling replikertBehandling = behandlingService.replikerBehandling(tidligsteInaktiveBehandling, ENDRET_PERIODE);
         tidligsteInaktiveBehandling.setRegistrertDato(Instant.now().minus(2, ChronoUnit.DAYS));
@@ -466,7 +465,6 @@ class BehandlingServiceTest {
         assertThat(replikertBehandling.getStatus()).isEqualTo(OPPRETTET);
         assertThat(replikertBehandling.getDokumentasjonSvarfristDato()).isEqualTo(tidligsteInaktiveBehandling.getDokumentasjonSvarfristDato());
         assertThat(replikertBehandling.getInitierendeJournalpostId()).isEqualTo(tidligsteInaktiveBehandling.getInitierendeJournalpostId());
-        assertThat(replikertBehandling.getBehandlingsfrist()).isEqualTo(MOTTAKSDATO.plusDays(90));
         assertThat(replikertBehandling.getBehandlingsårsak()).isNull();
         assertThat(replikertBehandling.getRegistrertDato()).isNotEqualTo(tidligsteInaktiveBehandling.getRegistrertDato());
         assertThat(replikertBehandling.getMottatteOpplysninger().getMottatteOpplysningerData()).isNotNull();
@@ -482,7 +480,6 @@ class BehandlingServiceTest {
 
     @Test
     void replikerBehandling_utenMottatteOpplysninger_blirReplikert() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        when(utledMottaksdato.getMottaksdato(any(Behandling.class))).thenReturn(MOTTAKSDATO);
         Behandling tidligsteInaktiveBehandling = opprettBehandlingMedData();
         tidligsteInaktiveBehandling.setMottatteOpplysninger(null);
 
