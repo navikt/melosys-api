@@ -1,6 +1,5 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
-import io.getunleash.Unleash
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.Vilkaarsresultat
@@ -26,7 +25,6 @@ class InnvilgelseFtrlMapper(
     private val avklarteVirksomheterService: AvklarteVirksomheterService,
     private val dokgenMapperDatahenter: DokgenMapperDatahenter,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
-    private val unleash: Unleash
 ) {
     @Transactional
     fun map(brevbestilling: InnvilgelseFtrlBrevbestilling): InnvilgelseFtrl {
