@@ -41,7 +41,7 @@ public class FerdigbehandlingKontrollsett {
 
     private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_FTRL = Set.of(
             FerdigbehandlingKontroll::adresseRegistrert,
-            FerdigbehandlingKontroll::overlappendeMedlemskapsperioder
+            FerdigbehandlingKontroll::overlappendePeriode
     );
 
     private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_TRYGDEAVTALER = Set.of(
@@ -56,14 +56,14 @@ public class FerdigbehandlingKontrollsett {
     );
 
     private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_UNNTAKSREGISTRERING = Set.of(
-        FerdigbehandlingKontroll::overlappendeLovvalgsperiode,
+        FerdigbehandlingKontroll::overlappendeMedlemskapsperiode,
         FerdigbehandlingKontroll::periodeManglerSluttdato,
         FerdigbehandlingKontroll::overlappendeUnntaksperiode
     );
 
     private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_IKKE_YRKESAKTIV = Set.of(
         FerdigbehandlingKontroll::adresseRegistrert,
-        FerdigbehandlingKontroll::overlappendeLovvalgsperiode,
+        FerdigbehandlingKontroll::overlappendePeriode,
         FerdigbehandlingKontroll::periodeManglerSluttdato
     );
 

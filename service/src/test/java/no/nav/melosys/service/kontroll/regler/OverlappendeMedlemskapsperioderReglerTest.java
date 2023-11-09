@@ -269,57 +269,37 @@ class OverlappendeMedlemskapsperioderReglerTest {
         assertFalse(harFeil);
     }
 
-    private List<Medlemskapsperiode> lagMedlemskapsperiodeListe(Medlemskapsperiode... medlemskapsperioder) {
-        return Arrays.asList(medlemskapsperioder);
-    }
-
-    private Medlemskapsperiode lagMedlemskapsperiode(LocalDate fraOgMed, LocalDate tilOgMed) {
-        return lagMedlemskapsperiodeMedID(fraOgMed, tilOgMed, null);
-    }
-
-    private Medlemskapsperiode lagMedlemskapsperiodeMedID(LocalDate fraOgMed, LocalDate tilOgMed, Long medlId) {
-        Medlemskapsperiode medlemskapsperiode = new Medlemskapsperiode();
-        medlemskapsperiode.setId(1L);
-        medlemskapsperiode.setFom(fraOgMed);
-        medlemskapsperiode.setTom(tilOgMed);
-        medlemskapsperiode.setArbeidsland("BR");
-        medlemskapsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.DELVIS_INNVILGET);
-        medlemskapsperiode.setMedlemskapstype(Medlemskapstyper.FRIVILLIG);
-        medlemskapsperiode.setTrygdedekning(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON);
-        medlemskapsperiode.setMedlPeriodeID(medlId);
-        return medlemskapsperiode;
-    }
 
     @Test
-    void harOverlappendeMedlemskapsperiodeFtrl_kildeLånekassen_ingenTreff() {
+    void harOverlappendePeriode_kildeLånekassen_ingenTreff() {
         MedlemskapDokument medlemskapDokument = lagMedlemskapsDokument("NOR");
         Medlemsperiode medlemsperiode = medlemskapDokument.getMedlemsperiode().get(0);
         medlemsperiode.kilde = "LAANEKASSEN";
         List<Medlemskapsperiode> kontrollMedlemskapsperioder = lagMedlemskapsperiodeListe(
             lagMedlemskapsperiode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2))
         );
-        assertFalse(harOverlappendeMedlemskapsperiodeFtrl(
+        assertFalse(OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(
             medlemskapDokument,
             kontrollMedlemskapsperioder)
         );
     }
 
     @Test
-    void harOverlappendeMedlemskapsperiodeFtrl_overlappendePeriodeMedSammeMedlPeriodeID_ingenTreff() {
+    void harOverlappendePeriode_overlappendePeriodeMedSammeMedlPeriodeID_ingenTreff() {
         MedlemskapDokument medlemskapDokument = lagMedlemskapsDokument("NOR");
         Medlemsperiode medlemsperiode = medlemskapDokument.getMedlemsperiode().get(0);
         medlemsperiode.id = 123L;
         List<Medlemskapsperiode> kontrollMedlemskapsperioder = lagMedlemskapsperiodeListe(
             lagMedlemskapsperiodeMedID(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2), 123L)
         );
-        assertFalse(harOverlappendeMedlemskapsperiodeFtrl(
+        assertFalse(OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(
             medlemskapDokument,
             kontrollMedlemskapsperioder)
         );
     }
 
     @Test
-    void harOverlappendeMedlemskapsperiodeFtrl_flerePerioderIngenOverlapp_ingenTreff() {
+    void harOverlappendePeriode_flerePerioderIngenOverlapp_ingenTreff() {
         MedlemskapDokument medlemskapDokument = lagMedlemskapsDokument("NOR");
 
         List<Medlemskapsperiode> kontrollMedlemskapsperioder = lagMedlemskapsperiodeListe(
@@ -327,70 +307,70 @@ class OverlappendeMedlemskapsperioderReglerTest {
             lagMedlemskapsperiode(LocalDate.EPOCH.plusYears(6), LocalDate.EPOCH.plusYears(7))
         );
 
-        assertFalse(harOverlappendeMedlemskapsperiodeFtrl(
+        assertFalse(OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(
             medlemskapDokument,
             kontrollMedlemskapsperioder)
         );
     }
 
     @Test
-    void harOverlappendeMedlemskapsperiodeFtrl_flerePerioderMedOverlapp_treff() {
+    void harOverlappendePeriode_flerePerioderMedOverlapp_treff() {
         MedlemskapDokument medlemskapDokument = lagMedlemskapsDokument("NOR");
         List<Medlemskapsperiode> kontrollMedlemskapsperioder = lagMedlemskapsperiodeListe(
             lagMedlemskapsperiode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2)),
             lagMedlemskapsperiode(LocalDate.EPOCH.plusYears(1), LocalDate.EPOCH.plusYears(3))
         );
 
-        assertTrue(harOverlappendeMedlemskapsperiodeFtrl(
+        assertTrue(OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(
             medlemskapDokument,
             kontrollMedlemskapsperioder)
         );
     }
 
     @Test
-    void harOverlappendeMedlemskapsperiodeFtrl_periodeMedAvstStatus_ingenTreff() {
+    void harOverlappendePeriode_periodeMedAvstStatus_ingenTreff() {
         MedlemskapDokument medlemskapDokument = lagMedlemskapsDokument("NOR");
         medlemskapDokument.medlemsperiode.get(0).status = "AVST";
         Medlemskapsperiode medlemskapsperiode = lagMedlemskapsperiode(LocalDate.EPOCH, LocalDate.EPOCH.plusYears(2));
         List<Medlemskapsperiode> kontrollMedlemskapsperioder = lagMedlemskapsperiodeListe(medlemskapsperiode);
 
-        assertFalse(harOverlappendeMedlemskapsperiodeFtrl(
+        assertFalse(OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(
             medlemskapDokument,
             kontrollMedlemskapsperioder)
         );
     }
 
     @Test
-    void harOverlappendeMedlemskapsperiodeFtrl_overlappendePeriodeMedUlikMedlPeriodeID_treff() {
+    void harOverlappendePeriode_overlappendePeriodeMedUlikMedlPeriodeID_treff() {
         MedlemskapDokument medlemskapDokument = lagMedlemskapsDokument("NOR");
         List<Medlemskapsperiode> kontrollMedlemskapsperioder = lagMedlemskapsperiodeListe(
             lagMedlemskapsperiodeMedID(LocalDate.EPOCH.plusMonths(6), LocalDate.EPOCH.plusYears(3), 124L) // Different ID
         );
 
-        assertTrue(harOverlappendeMedlemskapsperiodeFtrl(
+        assertTrue(OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(
             medlemskapDokument,
             kontrollMedlemskapsperioder)
         );
     }
 
     @Test
-    void harOverlappendeMedlemskapsperiodeFtrl_nullKontrollListe_ingenTreff() {
+    void harOverlappendePeriode_nullKontrollListe_ingenTreff() {
         MedlemskapDokument medlemskapDokument = lagMedlemskapsDokument("NOR");
-        List<Medlemskapsperiode> kontrollMedlemskapsperioder = null;
 
+        //noinspection DataFlowIssue
         assertThrows(NullPointerException.class, () ->
-            harOverlappendeMedlemskapsperiodeFtrl(
+            OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(
                 medlemskapDokument,
-                kontrollMedlemskapsperioder)
+                null)
         );
     }
 
     @Test
-    void harOverlappendeMedlemskapsperiodeFtrl_tomKontrollListe_ingenTreff() {
+    void harOverlappendePeriode_tomKontrollListe_ingenTreff() {
         MedlemskapDokument medlemskapDokument = lagMedlemskapsDokument("NOR");
         List<Medlemskapsperiode> kontrollMedlemskapsperioder = Collections.emptyList();
 
-        assertFalse(harOverlappendeMedlemskapsperiodeFtrl(
+        assertFalse(OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(
             medlemskapDokument,
             kontrollMedlemskapsperioder)
         );
@@ -422,5 +402,26 @@ class OverlappendeMedlemskapsperioderReglerTest {
         lovvalgsperiode.setFom(fom);
         lovvalgsperiode.setTom(tom);
         return lovvalgsperiode;
+    }
+
+    private Medlemskapsperiode lagMedlemskapsperiode(LocalDate fraOgMed, LocalDate tilOgMed) {
+        return lagMedlemskapsperiodeMedID(fraOgMed, tilOgMed, null);
+    }
+
+    private Medlemskapsperiode lagMedlemskapsperiodeMedID(LocalDate fraOgMed, LocalDate tilOgMed, Long medlId) {
+        Medlemskapsperiode medlemskapsperiode = new Medlemskapsperiode();
+        medlemskapsperiode.setId(1L);
+        medlemskapsperiode.setFom(fraOgMed);
+        medlemskapsperiode.setTom(tilOgMed);
+        medlemskapsperiode.setArbeidsland("BR");
+        medlemskapsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.DELVIS_INNVILGET);
+        medlemskapsperiode.setMedlemskapstype(Medlemskapstyper.FRIVILLIG);
+        medlemskapsperiode.setTrygdedekning(Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON);
+        medlemskapsperiode.setMedlPeriodeID(medlId);
+        return medlemskapsperiode;
+    }
+
+    private List<Medlemskapsperiode> lagMedlemskapsperiodeListe(Medlemskapsperiode... medlemskapsperioder) {
+        return Arrays.asList(medlemskapsperioder);
     }
 }

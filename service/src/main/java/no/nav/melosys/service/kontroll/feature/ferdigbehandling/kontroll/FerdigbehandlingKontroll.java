@@ -36,11 +36,18 @@ final class FerdigbehandlingKontroll {
 
     static Kontrollfeil overlappendePeriode(FerdigbehandlingKontrollData kontrollData) {
         MedlemskapDokument medlemskapDokument = kontrollData.medlemskapDokument();
+        List<Medlemskapsperiode> medlemskapsperioder = kontrollData.medlemskapsperioder();
+        if (medlemskapsperioder != null) {
+            return OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument, medlemskapsperioder)
+                ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+                : null;
+        }
+
         PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();
         Lovvalgsperiode opprinneligLovvalgsperiode = kontrollData.opprinneligLovvalgsperiode();
-
-        return OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument,
-            lovvalgsperiode, opprinneligLovvalgsperiode) ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER) : null;
+        return OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument, lovvalgsperiode, opprinneligLovvalgsperiode)
+            ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+            : null;
     }
 
     static Kontrollfeil overlappendeUnntaksperiode(FerdigbehandlingKontrollData kontrollData) {
@@ -52,7 +59,7 @@ final class FerdigbehandlingKontroll {
             lovvalgsperiode, opprinneligLovvalgsperiode) ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_UNNTAK_PERIODER) : null;
     }
 
-    static Kontrollfeil overlappendeLovvalgsperiode(FerdigbehandlingKontrollData kontrollData) {
+    static Kontrollfeil overlappendeMedlemskapsperiode(FerdigbehandlingKontrollData kontrollData) {
         MedlemskapDokument medlemskapDokument = kontrollData.medlemskapDokument();
         PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();
         Lovvalgsperiode opprinneligLovvalgsperiode = kontrollData.opprinneligLovvalgsperiode();
@@ -62,16 +69,6 @@ final class FerdigbehandlingKontroll {
             opprinneligLovvalgsperiode)
             ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDLEMSKAPSPERIODER) : null;
     }
-
-    static Kontrollfeil overlappendeMedlemskapsperioder(FerdigbehandlingKontrollData kontrollData) {
-        MedlemskapDokument medlemskapDokument = kontrollData.medlemskapDokument();
-        List<Medlemskapsperiode> medlemskapsperioder = kontrollData.medlemskapsperioder();
-
-        return OverlappendeMedlemskapsperioderRegler.harOverlappendeMedlemskapsperiodeFtrl(medlemskapDokument,
-            medlemskapsperioder)
-            ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDLEMSKAPSPERIODER) : null;
-    }
-
 
     static Kontrollfeil periodeOver24Mnd(FerdigbehandlingKontrollData kontrollData) {
         PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();

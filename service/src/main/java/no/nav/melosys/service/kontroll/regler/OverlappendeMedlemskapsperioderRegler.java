@@ -31,12 +31,26 @@ public final class OverlappendeMedlemskapsperioderRegler {
     public static boolean harOverlappendePeriode(MedlemskapDokument medlemskapDokument,
                                                  PeriodeOmLovvalg kontrollperiode,
                                                  Lovvalgsperiode opprinneligPeriodeTilKontrollperiode) {
-        return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream().anyMatch(
-            medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status)
-                && PeriodeRegler.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode())
+        return medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen()
+            .stream()
+            .filter(medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status))
+            .anyMatch(medlemsperiode ->
+                PeriodeRegler.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode())
                 && (kontrollperiode.erNyPeriodeForMedl() || kontrollperiode.harForskjelligMedlID(medlemsperiode.id))
                 && (opprinneligPeriodeTilKontrollperiode == null || opprinneligPeriodeTilKontrollperiode.harForskjelligMedlID(medlemsperiode.id)
             ));
+    }
+
+    public static boolean harOverlappendePeriode(MedlemskapDokument medlemskapDokument,
+                                                 List<Medlemskapsperiode> kontrollMedlemskapsperioder) {
+        return kontrollMedlemskapsperioder.stream().anyMatch(kontrollperiode ->
+            medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream()
+                .filter(medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status))
+                .anyMatch(medlemsperiode ->
+                    PeriodeRegler.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode())
+                        && (kontrollperiode.getMedlPeriodeID() == null || !Objects.equals(kontrollperiode.getMedlPeriodeID(), medlemsperiode.id))
+                )
+        );
     }
 
     public static boolean harOverlappendeUnntaksperiode(MedlemskapDokument medlemskapDokument,
@@ -62,20 +76,6 @@ public final class OverlappendeMedlemskapsperioderRegler {
                 && (opprinneligPeriodeTilKontrollperiode == null || opprinneligPeriodeTilKontrollperiode.harForskjelligMedlID(medlemsperiode.id)
             ));
     }
-
-    public static boolean harOverlappendeMedlemskapsperiodeFtrl(MedlemskapDokument medlemskapDokument,
-                                                                List<Medlemskapsperiode> kontrollMedlemskapsperioder) {
-        return kontrollMedlemskapsperioder.stream().anyMatch(kontrollperiode ->
-            medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream()
-                .filter(Medlemsperiode::erMedlemskapsperiode)
-                .filter(medlemsperiode -> !PeriodestatusMedl.AVST.getKode().equals(medlemsperiode.status))
-                .anyMatch(medlemsperiode ->
-                    PeriodeRegler.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode())
-                        && (kontrollperiode.getMedlPeriodeID() == null || !Objects.equals(kontrollperiode.getMedlPeriodeID(), medlemsperiode.id))
-                )
-        );
-    }
-
 
     public static boolean harOverlappendePerioderMedUlikSedLovvalgslandOgMedlLovvalgsland(SedDokument sedDokument,
                                                                                           MedlemskapDokument medlemskapDokument) {

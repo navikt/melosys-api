@@ -147,7 +147,7 @@ class FerdigbehandlingKontrollTest {
             null,
             null
         )
-        val kontrollfeil = FerdigbehandlingKontroll.overlappendeLovvalgsperiode(kontrollData)
+        val kontrollfeil = FerdigbehandlingKontroll.overlappendeMedlemskapsperiode(kontrollData)
 
         kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDLEMSKAPSPERIODER)
     }
