@@ -300,8 +300,7 @@ class OverlappendeMedlemskapsperioderReglerTest {
         );
         assertFalse(harOverlappendeMedlemskapsperiodeFtrl(
             medlemskapDokument,
-            kontrollMedlemskapsperioder,
-            null)
+            kontrollMedlemskapsperioder)
         );
     }
 
@@ -315,24 +314,7 @@ class OverlappendeMedlemskapsperioderReglerTest {
         );
         assertFalse(harOverlappendeMedlemskapsperiodeFtrl(
             medlemskapDokument,
-            kontrollMedlemskapsperioder,
-            null)
-        );
-    }
-
-    @Test
-    void harOverlappendeMedlemskapsperiodeFtrl_opprinneligPeriodeMedSammeMedlPeriodeID_ingenTreff() {
-        MedlemskapDokument medlemskapDokument = lagMedlemskapsDokument("NOR");
-        Lovvalgsperiode opprinneligLovvalgsperiode = lagLovvalgsPeriode(LocalDate.EPOCH.plusYears(4), LocalDate.EPOCH.plusYears(6));
-        opprinneligLovvalgsperiode.setMedlPeriodeID(1L);
-        List<Medlemskapsperiode> kontrollMedlemskapsperioder = lagMedlemskapsperiodeListe(
-            lagMedlemskapsperiodeMedID(LocalDate.EPOCH.plusYears(4), LocalDate.EPOCH.plusYears(6), 1L)
-        );
-
-        assertFalse(harOverlappendeMedlemskapsperiodeFtrl(
-            medlemskapDokument,
-            kontrollMedlemskapsperioder,
-            opprinneligLovvalgsperiode)
+            kontrollMedlemskapsperioder)
         );
     }
 
@@ -347,8 +329,7 @@ class OverlappendeMedlemskapsperioderReglerTest {
 
         assertFalse(harOverlappendeMedlemskapsperiodeFtrl(
             medlemskapDokument,
-            kontrollMedlemskapsperioder,
-            null)
+            kontrollMedlemskapsperioder)
         );
     }
 
@@ -362,8 +343,7 @@ class OverlappendeMedlemskapsperioderReglerTest {
 
         assertTrue(harOverlappendeMedlemskapsperiodeFtrl(
             medlemskapDokument,
-            kontrollMedlemskapsperioder,
-            null)
+            kontrollMedlemskapsperioder)
         );
     }
 
@@ -376,8 +356,7 @@ class OverlappendeMedlemskapsperioderReglerTest {
 
         assertFalse(harOverlappendeMedlemskapsperiodeFtrl(
             medlemskapDokument,
-            kontrollMedlemskapsperioder,
-            null)
+            kontrollMedlemskapsperioder)
         );
     }
 
@@ -390,8 +369,7 @@ class OverlappendeMedlemskapsperioderReglerTest {
 
         assertTrue(harOverlappendeMedlemskapsperiodeFtrl(
             medlemskapDokument,
-            kontrollMedlemskapsperioder,
-            null)
+            kontrollMedlemskapsperioder)
         );
     }
 
@@ -403,8 +381,7 @@ class OverlappendeMedlemskapsperioderReglerTest {
         assertThrows(NullPointerException.class, () ->
             harOverlappendeMedlemskapsperiodeFtrl(
                 medlemskapDokument,
-                kontrollMedlemskapsperioder,
-                null)
+                kontrollMedlemskapsperioder)
         );
     }
 
@@ -415,8 +392,7 @@ class OverlappendeMedlemskapsperioderReglerTest {
 
         assertFalse(harOverlappendeMedlemskapsperiodeFtrl(
             medlemskapDokument,
-            kontrollMedlemskapsperioder,
-            null)
+            kontrollMedlemskapsperioder)
         );
     }
 
