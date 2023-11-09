@@ -23,7 +23,7 @@ public record FerdigbehandlingKontrollData(
     Aktoer representant,
     OrganisasjonDokument organisasjonDokument,
     Persondata persondataRepresentant,
-    List<Medlemskapsperiode> medlemskapsperiode
+    List<Medlemskapsperiode> medlemskapsperioder
     ) {
 
     public static FerdigbehandlingKontrollData lagKontrollDataForAvslag(Persondata persondata,

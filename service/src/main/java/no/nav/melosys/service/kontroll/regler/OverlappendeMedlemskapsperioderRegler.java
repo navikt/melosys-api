@@ -64,8 +64,7 @@ public final class OverlappendeMedlemskapsperioderRegler {
     }
 
     public static boolean harOverlappendeMedlemskapsperiodeFtrl(MedlemskapDokument medlemskapDokument,
-                                                                List<Medlemskapsperiode> kontrollMedlemskapsperioder,
-                                                                Lovvalgsperiode opprinneligPeriodeTilKontrollperiode) {
+                                                                List<Medlemskapsperiode> kontrollMedlemskapsperioder) {
         return kontrollMedlemskapsperioder.stream().anyMatch(kontrollperiode ->
             medlemskapDokument.hentMedlemsperioderHvorKildeIkkeLånekassen().stream()
                 .filter(Medlemsperiode::erMedlemskapsperiode)
@@ -73,8 +72,6 @@ public final class OverlappendeMedlemskapsperioderRegler {
                 .anyMatch(medlemsperiode ->
                     PeriodeRegler.periodeOverlapper(kontrollperiode, medlemsperiode.getPeriode())
                         && (kontrollperiode.getMedlPeriodeID() == null || !Objects.equals(kontrollperiode.getMedlPeriodeID(), medlemsperiode.id))
-                        && (opprinneligPeriodeTilKontrollperiode == null ||
-                        opprinneligPeriodeTilKontrollperiode.harForskjelligMedlID(medlemsperiode.id))
                 )
         );
     }
