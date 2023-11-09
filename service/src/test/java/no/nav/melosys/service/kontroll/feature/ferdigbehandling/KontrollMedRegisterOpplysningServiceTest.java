@@ -18,6 +18,7 @@ import no.nav.melosys.exception.ValideringException;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
@@ -54,6 +55,8 @@ class KontrollMedRegisterOpplysningServiceTest {
     private RegisteropplysningerService registeropplysningerService;
     @Mock
     private OrganisasjonOppslagService organisasjonOppslagService;
+    @Mock
+    private MedlemskapsperiodeService medlemskapsperiodeService;
     private KontrollMedRegisteropplysning kontrollMedRegisterOpplysning;
 
     private final long behandlingID = 1L;
@@ -75,7 +78,7 @@ class KontrollMedRegisterOpplysningServiceTest {
         behandling.getSaksopplysninger().add(medlSaksopplysning);
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
 
-        Kontroll kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, avklarteVirksomheterService, persondataFasade, organisasjonOppslagService, saksbehandlingRegler, unleash);
+        Kontroll kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, avklarteVirksomheterService, persondataFasade, organisasjonOppslagService, saksbehandlingRegler, medlemskapsperiodeService, unleash);
         kontrollMedRegisterOpplysning = new KontrollMedRegisteropplysning(behandlingService, persondataFasade, registeropplysningerService, kontroll);
 
         unleash.enableAll();

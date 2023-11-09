@@ -37,7 +37,7 @@ class FerdigbehandlingKontrollTest {
             tom = NOW.plusMonths(12)
         }
         val kontrollData =
-            FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null)
+            FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null, null)
 
 
         val kontrollfeil = FerdigbehandlingKontroll.periodeOver12Måneder(kontrollData)
@@ -54,7 +54,7 @@ class FerdigbehandlingKontrollTest {
             tom = NOW.plusYears(5)
         }
         val kontrollData =
-            FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null)
+            FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null,null)
 
 
         val kontrollfeil = FerdigbehandlingKontroll.periodeOverFemÅr(kontrollData)
@@ -71,7 +71,7 @@ class FerdigbehandlingKontrollTest {
             tom = NOW.plusYears(5)
         }
         val kontrollData =
-            FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null)
+            FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null,null)
 
 
         val kontrollfeil = FerdigbehandlingKontroll.periodeOverFemÅr(kontrollData)
@@ -103,6 +103,7 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             lovvalgsperiode,
+            null,
             null,
             null,
             null,
@@ -143,6 +144,7 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             null,
+            null,
             null
         )
         val kontrollfeil = FerdigbehandlingKontroll.overlappendeMedlemsperiode(kontrollData)
@@ -178,6 +180,7 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             null,
+            null,
             null
         )
         val kontrollfeil = FerdigbehandlingKontroll.overlappendeUnntaksperiode(kontrollData)
@@ -191,6 +194,7 @@ class FerdigbehandlingKontrollTest {
             null,
             PersonopplysningerObjectFactory.lagPersonopplysningerUtenAdresser(),
             lagMottatteOpplysningerdata(),
+            null,
             null,
             null,
             null,
@@ -216,6 +220,7 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             null,
+            null,
             null
         )
         val kontrollfeil = FerdigbehandlingKontroll.adresseRegistrert(kontrollData)
@@ -235,7 +240,8 @@ class FerdigbehandlingKontrollTest {
             null,
             lagAktoerRepresentantPerson(),
             null,
-            PersonopplysningerObjectFactory.lagPersonopplysninger()
+            PersonopplysningerObjectFactory.lagPersonopplysninger(),
+            null
         )
         val kontrollfeil = FerdigbehandlingKontroll.adresseRegistrert(kontrollData)
 
@@ -254,6 +260,7 @@ class FerdigbehandlingKontrollTest {
             null,
             lagAktoerRepresentantOrganisasjon(),
             lagOrganisasjonDokument("1111", "Testegate 4", "2222", "Testegate 5"),
+            null,
             null
         )
         val kontrollfeil = FerdigbehandlingKontroll.adresseRegistrert(kontrollData)
@@ -273,6 +280,7 @@ class FerdigbehandlingKontrollTest {
             null,
             lagAktoerRepresentantOrganisasjon(),
             lagOrganisasjonDokument("", "Testegate 4", "", "NO"),
+            null,
             null
         )
         val kontrollfeil = FerdigbehandlingKontroll.adresseRegistrert(kontrollData)

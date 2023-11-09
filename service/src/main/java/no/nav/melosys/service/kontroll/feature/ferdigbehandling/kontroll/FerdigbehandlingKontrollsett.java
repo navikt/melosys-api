@@ -40,7 +40,8 @@ public class FerdigbehandlingKontrollsett {
     );
 
     private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_FTRL = Set.of(
-            FerdigbehandlingKontroll::adresseRegistrert
+            FerdigbehandlingKontroll::adresseRegistrert,
+            FerdigbehandlingKontroll::overlappendeMedlemsperiodeFtrl
     );
 
     private static final Set<Function<FerdigbehandlingKontrollData, Kontrollfeil>> REGELSETT_TRYGDEAVTALER = Set.of(

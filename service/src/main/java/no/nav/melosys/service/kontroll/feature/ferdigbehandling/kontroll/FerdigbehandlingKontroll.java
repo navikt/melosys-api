@@ -1,8 +1,10 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll;
 
 import java.util.Arrays;
+import java.util.List;
 
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.PeriodeOmLovvalg;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -56,8 +58,22 @@ final class FerdigbehandlingKontroll {
         Lovvalgsperiode opprinneligLovvalgsperiode = kontrollData.opprinneligLovvalgsperiode();
 
         return OverlappendeMedlemskapsperioderRegler.harOverlappendeMedlemsperiode(medlemskapDokument,
-            lovvalgsperiode, opprinneligLovvalgsperiode) ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDLEMSKAPSPERIODER) : null;
+            lovvalgsperiode,
+            opprinneligLovvalgsperiode)
+            ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDLEMSKAPSPERIODER) : null;
     }
+
+    static Kontrollfeil overlappendeMedlemsperiodeFtrl(FerdigbehandlingKontrollData kontrollData) {
+        MedlemskapDokument medlemskapDokument = kontrollData.medlemskapDokument();
+        List<Medlemskapsperiode> medlemskapsperioder = kontrollData.medlemskapsperiode();
+        Lovvalgsperiode opprinneligLovvalgsperiode = kontrollData.opprinneligLovvalgsperiode();
+
+        return OverlappendeMedlemskapsperioderRegler.harOverlappendeMedlemskapsperiodeFtrl(medlemskapDokument,
+            medlemskapsperioder,
+            opprinneligLovvalgsperiode)
+            ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDLEMSKAPSPERIODER) : null;
+    }
+
 
     static Kontrollfeil periodeOver24Mnd(FerdigbehandlingKontrollData kontrollData) {
         PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();
