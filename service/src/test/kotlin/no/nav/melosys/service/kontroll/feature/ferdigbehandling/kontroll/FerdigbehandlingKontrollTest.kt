@@ -115,7 +115,10 @@ class FerdigbehandlingKontrollTest {
             null,
             null
         )
+
+
         val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
+
 
         kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
     }
@@ -153,7 +156,9 @@ class FerdigbehandlingKontrollTest {
             ikkeOverlappendeMedlemskapsperioder
         )
 
+
         val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
+
 
         kontrollfeil.shouldBeNull()
     }
@@ -191,7 +196,9 @@ class FerdigbehandlingKontrollTest {
             overlappendeMedlemskapsperioder
         )
 
+
         val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
+
 
         kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
     }
@@ -228,7 +235,10 @@ class FerdigbehandlingKontrollTest {
             null,
             null
         )
+
+
         val kontrollfeil = FerdigbehandlingKontroll.overlappendeMedlemskapsperiode(kontrollData)
+
 
         kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDLEMSKAPSPERIODER)
     }
@@ -264,7 +274,10 @@ class FerdigbehandlingKontrollTest {
             null,
             null
         )
+
+
         val kontrollfeil = FerdigbehandlingKontroll.overlappendeUnntaksperiode(kontrollData)
+
 
         kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_UNNTAK_PERIODER)
     }
@@ -284,7 +297,10 @@ class FerdigbehandlingKontrollTest {
             null,
             null
         )
+
+
         val kontrollfeil = FerdigbehandlingKontroll.adresseRegistrert(kontrollData)
+
 
         kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER)
     }
@@ -304,7 +320,10 @@ class FerdigbehandlingKontrollTest {
             null,
             null
         )
+
+
         val kontrollfeil = FerdigbehandlingKontroll.adresseRegistrert(kontrollData)
+
 
         kontrollfeil.shouldBeNull()
     }
@@ -324,7 +343,10 @@ class FerdigbehandlingKontrollTest {
             PersonopplysningerObjectFactory.lagPersonopplysninger(),
             null
         )
+
+
         val kontrollfeil = FerdigbehandlingKontroll.adresseRegistrert(kontrollData)
+
 
         kontrollfeil.shouldBeNull()
     }
@@ -344,7 +366,10 @@ class FerdigbehandlingKontrollTest {
             null,
             null
         )
+
+
         val kontrollfeil = FerdigbehandlingKontroll.adresseRegistrert(kontrollData)
+
 
         kontrollfeil.shouldBeNull()
     }
@@ -364,7 +389,10 @@ class FerdigbehandlingKontrollTest {
             null,
             null
         )
+
+
         val kontrollfeil = FerdigbehandlingKontroll.adresseRegistrert(kontrollData)
+
 
         kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT)
     }
