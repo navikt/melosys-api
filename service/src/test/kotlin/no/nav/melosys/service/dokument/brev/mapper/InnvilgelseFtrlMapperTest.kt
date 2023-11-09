@@ -28,6 +28,7 @@ import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
+import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.dokument.DokgenTestData
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
@@ -48,6 +49,9 @@ internal class InnvilgelseFtrlMapperTest {
     @MockK
     private lateinit var mockDokgenMapperDatahenter: DokgenMapperDatahenter
 
+    @MockK
+    private lateinit var trygdeavgiftsberegningService: TrygdeavgiftsberegningService
+
     private var trygdeavgiftMottakerService: TrygdeavgiftMottakerService = TrygdeavgiftMottakerService()
 
     private lateinit var innvilgelseFtrlMapper: InnvilgelseFtrlMapper
@@ -59,6 +63,7 @@ internal class InnvilgelseFtrlMapperTest {
             mockAvklarteVirksomheterService,
             mockDokgenMapperDatahenter,
             trygdeavgiftMottakerService,
+            trygdeavgiftsberegningService,
             )
     }
 
