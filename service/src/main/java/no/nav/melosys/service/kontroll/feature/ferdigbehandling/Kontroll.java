@@ -175,7 +175,7 @@ class Kontroll {
         Aktoer fullmektig = behandling.getFagsak().finnRepresentantEllerFullmektig(Representerer.BRUKER).orElse(null);
         MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();
 
-        List<Medlemskapsperiode> medlemskapsperioder = (List<Medlemskapsperiode>) medlemskapsperiodeService.hentMedlemskapsperioder(behandling.getId());
+        List<Medlemskapsperiode> medlemskapsperioder = medlemskapsperiodeService.hentMedlemskapsperioder(behandling.getId()).stream().toList();
         MottatteOpplysningerData mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         Persondata persondata = hentPersondata(behandling);
         OrganisasjonDokument organisasjon = null;
