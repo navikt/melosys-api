@@ -12,6 +12,8 @@ import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.integrasjon.dokgen.dto.felles.Mottaker;
 
+import javax.annotation.Nullable;
+
 import static org.springframework.util.StringUtils.hasText;
 
 public final class DokgenAdresseMapper {
@@ -23,6 +25,7 @@ public final class DokgenAdresseMapper {
         return org == null ? persondata.getSammensattNavn() : org.getNavn();
     }
 
+    @Nullable
     public static List<String> mapAdresselinjer(OrganisasjonDokument org, String kontaktperson,
                                                 Kontaktopplysning kontaktopplysning, Persondata persondata) {
         List<String> adresselinjer;
@@ -72,6 +75,7 @@ public final class DokgenAdresseMapper {
         return poststed;
     }
 
+    @Nullable
     public static String mapLandForAdresse(OrganisasjonDokument org, Persondata persondata) {
         String landkode;
         if (org == null) {

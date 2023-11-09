@@ -1,10 +1,5 @@
 package no.nav.melosys.tjenester.gui;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -22,10 +17,10 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.brev.BrevAdresse;
 import no.nav.melosys.service.brev.BrevmalListeService;
 import no.nav.melosys.service.brev.bestilling.HentBrevAdresseTilMottakereService;
 import no.nav.melosys.service.brev.bestilling.HentMuligeProduserbaredokumenterService;
-import no.nav.melosys.service.brev.brevmalliste.BrevAdresse;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.tjenester.gui.brev.BrevmalListeBygger;
 import no.nav.melosys.tjenester.gui.dto.brev.*;
@@ -34,6 +29,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 import static no.nav.melosys.domain.kodeverk.brev.Distribusjonstype.*;
 import static no.nav.melosys.tjenester.gui.dto.brev.FeltvalgAlternativKode.*;
@@ -520,10 +520,7 @@ class BrevmalListeByggerTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
 
-        BrevAdresse brevAdresse = new BrevAdresse.Builder()
-            .medPostnr("0010")
-            .medLand(Land_iso2.NO.name())
-            .build();
+        BrevAdresse brevAdresse = new BrevAdresse("Mottaker", null, null, "0010", null, null, Land_iso2.NO.name());
         List<BrevAdresse> brevAdresseList = new ArrayList<>();
         brevAdresseList.add(brevAdresse);
         when(hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(anyLong(), any())).thenReturn(brevAdresseList);
@@ -541,10 +538,7 @@ class BrevmalListeByggerTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
 
-        BrevAdresse brevAdresse = new BrevAdresse.Builder()
-            .medPostnr("0010")
-            .medLand(Land_iso2.SE.name())
-            .build();
+        BrevAdresse brevAdresse = new BrevAdresse("Mottaker", null, null, "0010", null, null, Land_iso2.SE.name());
         List<BrevAdresse> brevAdresseList = new ArrayList<>();
         brevAdresseList.add(brevAdresse);
         when(hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(anyLong(), any())).thenReturn(brevAdresseList);
