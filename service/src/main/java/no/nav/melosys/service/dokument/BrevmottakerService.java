@@ -13,7 +13,9 @@ import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -89,7 +91,8 @@ public class BrevmottakerService {
         if (brevkopiRegler.contains(BRUKER_FÅR_KOPI)) {
             mottakerliste.getKopiMottakere().add(Mottakerroller.BRUKER);
         }
-        if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI)) {
+        if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI) &&
+            !harSelvstendigNæringsdrivendeLovvalgsbestemmelse(behandlingsresultatService.hentBehandlingsresultat(behandlingId))) {
             mottakerliste.getKopiMottakere().add(Mottakerroller.ARBEIDSGIVER);
         }
         if (!unleash.isEnabled(FOLKETRYGDEN_MVP) && brevkopiRegler.contains(SKATT_FÅR_KOPI)) {
@@ -255,6 +258,11 @@ public class BrevmottakerService {
                 return new ArrayList<>(utenlandskMyndighetMottakerMap.values());
             }
         }
+    }
+
+    private boolean harSelvstendigNæringsdrivendeLovvalgsbestemmelse(Behandlingsresultat behandlingsresultat) {
+        return behandlingsresultat.harLovvalgsperiodeMedBestemmelse(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART6_2) ||
+            behandlingsresultat.harLovvalgsperiodeMedBestemmelse(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_4);
     }
 
     private boolean kanReservereMotA1(Behandling behandling) {

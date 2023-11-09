@@ -17,6 +17,8 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS;
 import no.nav.melosys.domain.mottatteopplysninger.data.IdentType;
@@ -216,11 +218,19 @@ public class TrygdeavtaleMapper {
 
 
     private AvklartVirksomhet hentAvklartVirksomhet(Behandling behandling) {
-        var avklarteVirksomheter = avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling);
+        boolean skalHenteSelvstendigeForetak =
+            harSelvstendigNæringsdrivendeLovvalgsbestemmelse(lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId()).getBestemmelse());
+        var avklarteVirksomheter = skalHenteSelvstendigeForetak ?
+            avklarteVirksomheterService.hentNorskeSelvstendigeForetak(behandling) : avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling);
         if (avklarteVirksomheter.size() != 1) {
             throw new FunksjonellException("Fant " + avklarteVirksomheter.size() + " avklarte virksomheter for behandling: " + behandling + ". Må være 1 for trygdeavtale");
         }
         return avklarteVirksomheter.get(0);
+    }
+
+    private boolean harSelvstendigNæringsdrivendeLovvalgsbestemmelse(LovvalgBestemmelse lovvalgBestemmelse) {
+        return lovvalgBestemmelse.equals(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART6_2) ||
+            lovvalgBestemmelse.equals(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_4);
     }
 
     private ArbeidsgiverNorge lagArbeidsgiverNorge(Behandling behandling) {

@@ -208,14 +208,14 @@ class OpprettOgJournalforBrevTest {
             .build();
         Prosessinstans prosessinstans = lagProsessinstansMedMottaker(behandling, mottaker, brevbestilling);
 
-        when(mockDokumentNavnService.utledDokumentNavn(behandling, dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(TRYGDEAVTALE_GB), mottaker)).thenReturn("Vedtak om medlemskap, Attest for utsendt arbeidstaker");
+        when(mockDokumentNavnService.utledDokumentNavn(behandling, dokumentproduksjonsInfoMapper.hentDokumentproduksjonsInfo(TRYGDEAVTALE_GB), mottaker)).thenReturn("Vedtak om medlemskap, Attest for medlemskap i folketrygden");
 
         opprettJournalforBrev.utfør(prosessinstans);
 
         verify(mockJoarkFasade).opprettJournalpost(opprettJournalpostCaptor.capture(), anyBoolean());
 
         OpprettJournalpost captured = opprettJournalpostCaptor.getValue();
-        assertThat(captured.getHoveddokument().getTittel()).isEqualTo("Vedtak om medlemskap, Attest for utsendt arbeidstaker");
+        assertThat(captured.getHoveddokument().getTittel()).isEqualTo("Vedtak om medlemskap, Attest for medlemskap i folketrygden");
     }
 
     @Test
