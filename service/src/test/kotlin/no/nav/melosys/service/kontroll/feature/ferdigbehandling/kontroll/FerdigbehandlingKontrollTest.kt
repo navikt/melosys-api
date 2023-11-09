@@ -4,6 +4,7 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.domain.Medlemskapsperiode
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
@@ -11,6 +12,9 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
 import no.nav.melosys.domain.kodeverk.Aktoersroller
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper
+import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
@@ -54,7 +58,7 @@ class FerdigbehandlingKontrollTest {
             tom = NOW.plusYears(5)
         }
         val kontrollData =
-            FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null,null)
+            FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null, null)
 
 
         val kontrollfeil = FerdigbehandlingKontroll.periodeOverFemÅr(kontrollData)
@@ -71,7 +75,7 @@ class FerdigbehandlingKontrollTest {
             tom = NOW.plusYears(5)
         }
         val kontrollData =
-            FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null,null)
+            FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null, null)
 
 
         val kontrollfeil = FerdigbehandlingKontroll.periodeOverFemÅr(kontrollData)
@@ -114,6 +118,44 @@ class FerdigbehandlingKontrollTest {
         val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
 
         kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+    }
+
+    @Test
+    fun `medlemskapsperioder uten overlapping skal ikke gi kontrollfeil`() {
+        val medlemskapsDokument = MedlemskapDokument().apply {
+            medlemsperiode = listOf(
+                Medlemsperiode().apply {
+                    id = 1
+                    land = "SWE"
+                    status = "GYLD"
+                    periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))
+                }
+            )
+        }
+
+        val ikkeOverlappendeMedlemskapsperioder = listOf(
+            lagMedlemskapsperiode(
+                LocalDate.now().plusDays(5), LocalDate.now().plusDays(10)
+            )
+        )
+
+        val kontrollData = FerdigbehandlingKontrollData(
+            medlemskapsDokument,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            ikkeOverlappendeMedlemskapsperioder
+        )
+
+        val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
+
+        kontrollfeil.shouldBeNull()
     }
 
     @Test
@@ -336,4 +378,18 @@ class FerdigbehandlingKontrollTest {
         mottatteOpplysningerData.soeknadsland = Soeknadsland(listOf("AT"), false)
         return mottatteOpplysningerData
     }
+
+    private fun lagMedlemskapsperiode(fraOgMed: LocalDate, tilOgMed: LocalDate): Medlemskapsperiode {
+        val medlemskapsperiode = Medlemskapsperiode().apply {
+            id = 1L
+            fom = fraOgMed
+            tom = tilOgMed
+            arbeidsland = "BR"
+            innvilgelsesresultat = InnvilgelsesResultat.DELVIS_INNVILGET
+            medlemskapstype = Medlemskapstyper.FRIVILLIG
+            trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
+        }
+        return medlemskapsperiode
+    }
+
 }
