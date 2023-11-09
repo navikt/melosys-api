@@ -29,38 +29,22 @@ class OrganisasjonDokument : SaksopplysningDokument {
     var sektorkode: String? = null //"http://nav.no/kodeverk/Kodeverk/Sektorkoder"
 
     @JsonProperty("navn")
-    fun getSammenslåttNavn(): String? {
-        return lagSammenslåttNavn()
-    }
+    fun getSammenslåttNavn(): String = lagSammenslåttNavn()
 
     @JsonView(FrontendApi::class)
-    fun getForretningsadresse(): StrukturertAdresse? {
-        return organisasjonDetaljer?.hentStrukturertForretningsadresse()
-    }
+    fun getForretningsadresse(): StrukturertAdresse? = organisasjonDetaljer?.hentStrukturertForretningsadresse()
 
     @JsonView(FrontendApi::class)
-    fun getPostadresse(): StrukturertAdresse? {
-        return organisasjonDetaljer?.hentStrukturertPostadresse()
-    }
+    fun getPostadresse(): StrukturertAdresse? = organisasjonDetaljer?.hentStrukturertPostadresse()
 
     // Hvis man ikke har bruk for historikk på navn så er det best å bruke navn på nivå organisasjon.
-    fun lagSammenslåttNavn(): String? {
-        return if (navn == null) "UKJENT" else java.lang.String.join(" ", navn)
-    }
+    fun lagSammenslåttNavn(): String = navn?.joinToString(" ") ?: "UKJENT"
 
-    fun harRegistrertPostadresse(): Boolean {
-        return getPostadresse() != null && getPostadresse()!!.erGyldig()
-    }
+    fun harRegistrertPostadresse(): Boolean = getPostadresse()?.erGyldig() ?: false
 
-    fun harRegistrertForretningsadresse(): Boolean {
-        return getForretningsadresse() != null && getForretningsadresse()!!.erGyldig()
-    }
+    fun harRegistrertForretningsadresse(): Boolean = getForretningsadresse()?.erGyldig() ?: false
 
-    fun hentTilgjengeligAdresse(): StrukturertAdresse? {
-        return if (harRegistrertPostadresse()) getPostadresse() else getForretningsadresse()
-    }
+    fun hentTilgjengeligAdresse(): StrukturertAdresse? = if (harRegistrertPostadresse()) getPostadresse() else getForretningsadresse()
 
-    fun harRegistrertAdresse(): Boolean {
-        return harRegistrertPostadresse() || harRegistrertForretningsadresse()
-    }
+    fun harRegistrertAdresse(): Boolean = harRegistrertPostadresse() || harRegistrertForretningsadresse()
 }
