@@ -67,7 +67,7 @@ class TilBrevAdresseService(
 
         if (personIdent != null) {
             persondata = persondataFasade.hentPerson(personIdent)
-                ?: throw FunksjonellException("Finner ikke persondata for personIdent.")
+                ?: throw FunksjonellException("Finner ikke persondata for personIdent")
         } else if (organisasjonsnummer != null) {
             orgDokument = hentOrganisasjonsDokument(null, organisasjonsnummer)
         } else {

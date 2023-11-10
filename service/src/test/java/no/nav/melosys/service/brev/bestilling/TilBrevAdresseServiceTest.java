@@ -1,8 +1,5 @@
 package no.nav.melosys.service.brev.bestilling;
 
-import java.time.LocalDate;
-import java.util.List;
-
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.brev.Mottaker;
@@ -32,12 +29,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
+import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger;
 import static no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysningerUtenOppholdsadresseOgKontaktadresse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -78,7 +80,8 @@ class TilBrevAdresseServiceTest {
                 BrevAdresse::getPostnr,
                 BrevAdresse::getPoststed,
                 BrevAdresse::getRegion,
-                BrevAdresse::getLand)
+                BrevAdresse::getLand,
+                BrevAdresse::getUgyldig)
             .containsExactly(
                 "Nordmann Ola",
                 null,
@@ -86,7 +89,8 @@ class TilBrevAdresseServiceTest {
                 "1234",
                 "Oslo",
                 "Norge",
-                "NO");
+                "NO",
+                false);
     }
 
     @Test
@@ -109,7 +113,8 @@ class TilBrevAdresseServiceTest {
                 BrevAdresse::getPostnr,
                 BrevAdresse::getPoststed,
                 BrevAdresse::getRegion,
-                BrevAdresse::getLand)
+                BrevAdresse::getLand,
+                BrevAdresse::getUgyldig)
             .containsExactly(
                 "Ola Nordmann Fullmektig",
                 "orgnr",
@@ -117,7 +122,8 @@ class TilBrevAdresseServiceTest {
                 "0123",
                 "Oslo",
                 null,
-                Land.NORGE);
+                Land.NORGE,
+                false);
     }
 
 
@@ -141,7 +147,8 @@ class TilBrevAdresseServiceTest {
                 BrevAdresse::getPostnr,
                 BrevAdresse::getPoststed,
                 BrevAdresse::getRegion,
-                BrevAdresse::getLand)
+                BrevAdresse::getLand,
+                BrevAdresse::getUgyldig)
             .containsExactly(
                 "Nordmann Ola",
                 null,
@@ -149,7 +156,8 @@ class TilBrevAdresseServiceTest {
                 "1234",
                 "Oslo",
                 "Norge",
-                "NO");
+                "NO",
+                false);
     }
 
 
@@ -173,7 +181,8 @@ class TilBrevAdresseServiceTest {
                 BrevAdresse::getPostnr,
                 BrevAdresse::getPoststed,
                 BrevAdresse::getRegion,
-                BrevAdresse::getLand)
+                BrevAdresse::getLand,
+                BrevAdresse::getUgyldig)
             .containsExactly(
                 "Ola Nordmann Rørleggerfirma",
                 "orgnr",
@@ -181,7 +190,8 @@ class TilBrevAdresseServiceTest {
                 "0123",
                 "Oslo",
                 null,
-                Land.NORGE);
+                Land.NORGE,
+                false);
     }
 
     @Test
@@ -204,7 +214,8 @@ class TilBrevAdresseServiceTest {
                 BrevAdresse::getPostnr,
                 BrevAdresse::getPoststed,
                 BrevAdresse::getRegion,
-                BrevAdresse::getLand)
+                BrevAdresse::getLand,
+                BrevAdresse::getUgyldig)
             .containsExactly(
                 "Ola Nordmann Rørleggerfirma",
                 "orgnr",
@@ -212,7 +223,8 @@ class TilBrevAdresseServiceTest {
                 "0123",
                 "Oslo",
                 null,
-                Land.NORGE);
+                Land.NORGE,
+                false);
     }
 
 
@@ -257,8 +269,17 @@ class TilBrevAdresseServiceTest {
                 BrevAdresse::getPostnr,
                 BrevAdresse::getPoststed,
                 BrevAdresse::getRegion,
-                BrevAdresse::getLand)
-            .containsExactly("Nordmann Ola", null, null, null, null, null, null);
+                BrevAdresse::getLand,
+                BrevAdresse::getUgyldig)
+            .containsExactly(
+                "Nordmann Ola",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                true);
     }
 
     @Test
@@ -276,6 +297,82 @@ class TilBrevAdresseServiceTest {
             .isNotNull()
             .extracting(BrevAdresse::getAdresselinjer)
             .isEqualTo(List.of("gatenavnFraBostedsadresse 3"));
+    }
+
+    @Test
+    void tilBrevAdresse_verkenPersonIdentEllerOrgnr_kasterFeil() {
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> tilBrevAdresseService.tilBrevAdresse((String) null, null))
+            .withMessageContaining("Kan ikke finne adresse uten personIdent og organisasjonsnummer");
+    }
+
+    @Test
+    void tilBrevAdresse_finnerIkkePersonDataFraPersonIdent_kasterFeil() {
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> tilBrevAdresseService.tilBrevAdresse("123", null))
+            .withMessageContaining("Finner ikke persondata for personIdent");
+    }
+
+    @Test
+    void tilBrevAdresse_personIdentSendesInn_returnererPersonAdresse() {
+        when(persondataFasade.hentPerson("123")).thenReturn(lagPersonopplysninger());
+
+
+        var brevAdresse = tilBrevAdresseService.tilBrevAdresse("123", null);
+
+
+        verifyNoInteractions(eregFasade);
+        assertThat(brevAdresse)
+            .isNotNull()
+            .extracting(
+                BrevAdresse::getMottakerNavn,
+                BrevAdresse::getOrgnr,
+                BrevAdresse::getAdresselinjer,
+                BrevAdresse::getPostnr,
+                BrevAdresse::getPoststed,
+                BrevAdresse::getRegion,
+                BrevAdresse::getLand,
+                BrevAdresse::getUgyldig)
+            .containsExactly(
+                "Nordmann Ola",
+                null,
+                List.of("gatenavnKontaktadressePDL"),
+                "0123",
+                "Poststed",
+                null,
+                "NO",
+                false);
+    }
+
+    @Test
+    void tilBrevAdresse_orgnrSendesInn_returnererOrganisasjonsAdresse() {
+        when(eregFasade.hentOrganisasjon("orgnr")).thenReturn(lagOrgSaksopplysning("orgnr", "Ola Nordmann Rørleggerfirma"));
+
+
+        var brevAdresse = tilBrevAdresseService.tilBrevAdresse(null, "orgnr");
+
+
+        verifyNoInteractions(persondataFasade);
+        assertThat(brevAdresse)
+            .isNotNull()
+            .extracting(
+                BrevAdresse::getMottakerNavn,
+                BrevAdresse::getOrgnr,
+                BrevAdresse::getAdresselinjer,
+                BrevAdresse::getPostnr,
+                BrevAdresse::getPoststed,
+                BrevAdresse::getRegion,
+                BrevAdresse::getLand,
+                BrevAdresse::getUgyldig)
+            .containsExactly(
+                "Ola Nordmann Rørleggerfirma",
+                "orgnr",
+                List.of("Gateadresse 43A"),
+                "0123",
+                "Oslo",
+                null,
+                Land.NORGE,
+                false);
     }
 
     private Behandling lagBehandling() {

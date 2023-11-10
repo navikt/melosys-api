@@ -9,17 +9,26 @@ data class BrevAdresse(
     val postnr: String?,
     val poststed: String?,
     val region: String?,
-    val land: String?
+    val land: String?,
+    var ugyldig: Boolean,
 ) {
-    fun erUgyldig(): Boolean {
-        return isPostnrEmpty() || isAdresselinjerEmpty()
+    constructor(
+        mottakerNavn: String,
+        orgnr: String?,
+        adresselinjer: List<String>?,
+        postnr: String?,
+        poststed: String?,
+        region: String?,
+        land: String?
+    ) : this(mottakerNavn, orgnr, adresselinjer, postnr, poststed, region, land, false) {
+        ugyldig = harIkkePostnr() || harIngenAdresselinjer()
     }
 
-    fun isAdresselinjerEmpty(): Boolean {
+    fun harIngenAdresselinjer(): Boolean {
         return Land_iso2.NO.name != land && (adresselinjer == null || adresselinjer.all { it.isBlank() })
     }
 
-    fun isPostnrEmpty(): Boolean {
+    fun harIkkePostnr(): Boolean {
         return Land_iso2.NO.name == land && postnr.isNullOrBlank()
     }
 }

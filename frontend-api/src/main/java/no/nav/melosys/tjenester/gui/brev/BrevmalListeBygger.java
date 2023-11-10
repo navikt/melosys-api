@@ -125,13 +125,13 @@ public class BrevmalListeBygger {
         try {
             List<BrevAdresse> brevAdresser = brevmalListeService.hentBrevAdresseTilMottakere(behandlingId, rolle);
 
-            if ((rolle == Mottakerroller.BRUKER || rolle == Mottakerroller.FULLMEKTIG) && brevAdresser.stream().allMatch(BrevAdresse::erUgyldig)) {
+            if ((rolle == Mottakerroller.BRUKER || rolle == Mottakerroller.FULLMEKTIG) && brevAdresser.stream().allMatch(BrevAdresse::getUgyldig)) {
                 String feilmelding = rolle == Mottakerroller.BRUKER
                     ? Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER.getBeskrivelse().replace("Ingen gyldig adresse funnet. ", "")
                     : Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT.getBeskrivelse().replace("\"Ingen gyldig adresse funnet. ", "");
                 FeilmeldingDto feilmeldingDto = new FeilmeldingDto(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse(), List.of(new FeilmeldingUnderpunkt(feilmelding)));
                 mottakerDto.setFeilmelding(feilmeldingDto);
-            } else if (rolle == Mottakerroller.VIRKSOMHET && brevAdresser.stream().allMatch(BrevAdresse::erUgyldig)) {
+            } else if (rolle == Mottakerroller.VIRKSOMHET && brevAdresser.stream().allMatch(BrevAdresse::getUgyldig)) {
                 FeilmeldingDto feilmeldingDto = new FeilmeldingDto(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse(), List.of());
                 mottakerDto.setFeilmelding(feilmeldingDto);
             } else {
