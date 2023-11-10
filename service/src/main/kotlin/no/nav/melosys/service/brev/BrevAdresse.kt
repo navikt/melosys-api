@@ -11,15 +11,15 @@ data class BrevAdresse(
     val region: String?,
     val land: String?
 ) {
-    fun erUgyldig(): Boolean {
-        return isPostnrEmpty() || isAdresselinjerEmpty()
+    fun isUgyldig(): Boolean {
+        return harIkkePostnr() || harIngenAdresselinjer()
     }
 
-    fun isAdresselinjerEmpty(): Boolean {
+    fun harIngenAdresselinjer(): Boolean {
         return Land_iso2.NO.name != land && (adresselinjer == null || adresselinjer.all { it.isBlank() })
     }
 
-    fun isPostnrEmpty(): Boolean {
+    fun harIkkePostnr(): Boolean {
         return Land_iso2.NO.name == land && postnr.isNullOrBlank()
     }
 }
