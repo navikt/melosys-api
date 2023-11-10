@@ -90,7 +90,7 @@ class DokumentFactoryTest {
 
         OrganisasjonDokument organisasjonDokument = (OrganisasjonDokument) dokument;
 
-        GeografiskAdresse geografiskAdresse = organisasjonDokument.getOrganisasjonDetaljer().postadresse.get(0);
+        GeografiskAdresse geografiskAdresse = organisasjonDokument.getOrganisasjonDetaljer().getPostadresse().get(0);
         assertThat(geografiskAdresse).isInstanceOf(SemistrukturertAdresse.class);
         assertThat(((SemistrukturertAdresse) geografiskAdresse).getAdresselinje1()).isEqualTo("Postboks 7030");
 

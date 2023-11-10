@@ -165,7 +165,7 @@ public final class DokgenTestData {
 
     private static OrganisasjonsDetaljer lagOrgDetaljer() {
         OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
-        organisasjonsDetaljer.postadresse = singletonList(lagOrgAdresse());
+        organisasjonsDetaljer.setPostadresse(singletonList(lagOrgAdresse()));
         return organisasjonsDetaljer;
     }
 

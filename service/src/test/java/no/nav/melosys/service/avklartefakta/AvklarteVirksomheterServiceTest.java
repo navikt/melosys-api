@@ -335,7 +335,7 @@ class AvklarteVirksomheterServiceTest {
     void utfyllManglendeAdressefelter_utenlandskIngenForretningsadressePostadresseUtenPostnummer_postnummerTomString() {
         var organisasjonDokument = lagOrganisasjonDokument(null, null, null, "DK");
         organisasjonDokument.getOrganisasjonDetaljer().setForretningsadresse(Collections.emptyList());
-        organisasjonDokument.getOrganisasjonDetaljer().postadresse.stream().findFirst().ifPresent(a -> ((SemistrukturertAdresse) a).setPostnr(null));
+        organisasjonDokument.getOrganisasjonDetaljer().getPostadresse().stream().findFirst().ifPresent(a -> ((SemistrukturertAdresse) a).setPostnr(null));
         StrukturertAdresse adresse = avklarteVirksomheterService.utfyllManglendeAdressefelter(organisasjonDokument);
 
         assertThat(adresse.getGatenavn()).isEqualTo("Postgatenavn");
@@ -403,7 +403,7 @@ class AvklarteVirksomheterServiceTest {
         forretningsadresse.setLandkode("NO");
         forretningsadresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1)));
         SemistrukturertAdresse postadresse = new SemistrukturertAdresse();
-        organisasjonsDetaljer.postadresse = List.of(postadresse);
+        organisasjonsDetaljer.setPostadresse(List.of(postadresse));
         postadresse.setAdresselinje1("Postgatenavn");
         postadresse.setPostnr(postadressePostnr);
         postadresse.setPoststed("Postpoststed");

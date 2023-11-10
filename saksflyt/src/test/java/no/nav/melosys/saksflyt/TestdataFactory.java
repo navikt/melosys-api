@@ -96,7 +96,7 @@ public final class TestdataFactory {
 
     static OrganisasjonsDetaljer lagOrgDetaljerMedPostadresse() {
         OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
-        organisasjonsDetaljer.postadresse = singletonList(lagOrgadresse("1234"));
+        organisasjonsDetaljer.setPostadresse(singletonList(lagOrgadresse("1234")));
         return organisasjonsDetaljer;
     }
 

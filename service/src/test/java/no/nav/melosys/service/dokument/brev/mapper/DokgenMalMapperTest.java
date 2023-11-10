@@ -243,7 +243,7 @@ class DokgenMalMapperTest {
 
         OrganisasjonDokument org = lagOrg();
         org.getOrganisasjonDetaljer().setForretningsadresse(singletonList(lagOrgForretningsadresse()));
-        org.getOrganisasjonDetaljer().postadresse = emptyList();
+        org.getOrganisasjonDetaljer().setPostadresse(emptyList());
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
             .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
