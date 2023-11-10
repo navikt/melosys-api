@@ -138,7 +138,7 @@ public class BrevmalListeBygger {
                         String feilmelding = MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT.getBeskrivelse().replace("\"Ingen gyldig adresse funnet. ", "");
                         mottakerDto.setFeilmelding(new FeilmeldingDto(MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse(), List.of(new FeilmeldingUnderpunkt(feilmelding))));
                     }
-                    case VIRKSOMHET -> {
+                    case VIRKSOMHET, ARBEIDSGIVER -> {
                         FeilmeldingDto feilmeldingDto = new FeilmeldingDto(MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse(), List.of());
                         mottakerDto.setFeilmelding(feilmeldingDto);
                     }
