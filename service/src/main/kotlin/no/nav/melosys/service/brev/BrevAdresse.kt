@@ -9,10 +9,19 @@ data class BrevAdresse(
     val postnr: String?,
     val poststed: String?,
     val region: String?,
-    val land: String?
+    val land: String?,
+    var ugyldig: Boolean,
 ) {
-    fun isUgyldig(): Boolean {
-        return harIkkePostnr() || harIngenAdresselinjer()
+    constructor(
+        mottakerNavn: String,
+        orgnr: String?,
+        adresselinjer: List<String>?,
+        postnr: String?,
+        poststed: String?,
+        region: String?,
+        land: String?
+    ) : this(mottakerNavn, orgnr, adresselinjer, postnr, poststed, region, land, false) {
+        ugyldig = harIkkePostnr() || harIngenAdresselinjer()
     }
 
     fun harIngenAdresselinjer(): Boolean {
