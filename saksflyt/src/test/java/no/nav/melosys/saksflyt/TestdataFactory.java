@@ -1,5 +1,7 @@
 package no.nav.melosys.saksflyt;
 
+import java.time.LocalDate;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
@@ -14,8 +16,6 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
-
-import java.time.LocalDate;
 
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
@@ -102,7 +102,7 @@ public final class TestdataFactory {
 
     static OrganisasjonsDetaljer lagOrgDetaljerMedForretningsadresse() {
         OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
-        organisasjonsDetaljer.forretningsadresse = singletonList(lagOrgadresse("9876"));
+        organisasjonsDetaljer.setForretningsadresse(singletonList(lagOrgadresse("9876")));
         return organisasjonsDetaljer;
     }
 

@@ -20,7 +20,6 @@ open class OrganisasjonsDetaljer { // Needs to be open because of mocking : TODO
 
     @XmlElement(name = "organisasjonsnavn")
     var navn: List<Organisasjonsnavn?>? = ArrayList() //TODO: use emptyList when we remove JAXB code
-    @JvmField
     var forretningsadresse: List<GeografiskAdresse> = ArrayList()
     @JvmField
     var postadresse: List<GeografiskAdresse> = ArrayList()

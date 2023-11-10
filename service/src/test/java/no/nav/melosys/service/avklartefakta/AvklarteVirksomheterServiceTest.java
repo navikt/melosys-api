@@ -334,7 +334,7 @@ class AvklarteVirksomheterServiceTest {
     @Test
     void utfyllManglendeAdressefelter_utenlandskIngenForretningsadressePostadresseUtenPostnummer_postnummerTomString() {
         var organisasjonDokument = lagOrganisasjonDokument(null, null, null, "DK");
-        organisasjonDokument.getOrganisasjonDetaljer().forretningsadresse = Collections.emptyList();
+        organisasjonDokument.getOrganisasjonDetaljer().setForretningsadresse(Collections.emptyList());
         organisasjonDokument.getOrganisasjonDetaljer().postadresse.stream().findFirst().ifPresent(a -> ((SemistrukturertAdresse) a).setPostnr(null));
         StrukturertAdresse adresse = avklarteVirksomheterService.utfyllManglendeAdressefelter(organisasjonDokument);
 
@@ -396,7 +396,7 @@ class AvklarteVirksomheterServiceTest {
         OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
         organisasjonDokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
         SemistrukturertAdresse forretningsadresse = new SemistrukturertAdresse();
-        organisasjonsDetaljer.forretningsadresse = List.of(forretningsadresse);
+        organisasjonsDetaljer.setForretningsadresse(List.of(forretningsadresse));
         forretningsadresse.setAdresselinje1(forretningsGatenavn);
         forretningsadresse.setPostnr(forretningsPostnr);
         forretningsadresse.setPoststed("Forretningspoststed");

@@ -242,7 +242,7 @@ class DokgenMalMapperTest {
         Behandling behandling = lagBehandling();
 
         OrganisasjonDokument org = lagOrg();
-        org.getOrganisasjonDetaljer().forretningsadresse = singletonList(lagOrgForretningsadresse());
+        org.getOrganisasjonDetaljer().setForretningsadresse(singletonList(lagOrgForretningsadresse()));
         org.getOrganisasjonDetaljer().postadresse = emptyList();
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
