@@ -218,19 +218,13 @@ public class TrygdeavtaleMapper {
 
 
     private AvklartVirksomhet hentAvklartVirksomhet(Behandling behandling) {
-        boolean skalHenteSelvstendigeForetak =
-            harSelvstendigNæringsdrivendeLovvalgsbestemmelse(lovvalgsperiodeService.hentLovvalgsperiode(behandling.getId()).getBestemmelse());
+        boolean skalHenteSelvstendigeForetak = lovvalgsperiodeService.harSelvstendigNæringsdrivendeLovvalgsbestemmelse(behandling.getId());
         var avklarteVirksomheter = skalHenteSelvstendigeForetak ?
             avklarteVirksomheterService.hentNorskeSelvstendigeForetak(behandling) : avklarteVirksomheterService.hentNorskeArbeidsgivere(behandling);
         if (avklarteVirksomheter.size() != 1) {
             throw new FunksjonellException("Fant " + avklarteVirksomheter.size() + " avklarte virksomheter for behandling: " + behandling + ". Må være 1 for trygdeavtale");
         }
         return avklarteVirksomheter.get(0);
-    }
-
-    private boolean harSelvstendigNæringsdrivendeLovvalgsbestemmelse(LovvalgBestemmelse lovvalgBestemmelse) {
-        return lovvalgBestemmelse.equals(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART6_2) ||
-            lovvalgBestemmelse.equals(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_4);
     }
 
     private ArbeidsgiverNorge lagArbeidsgiverNorge(Behandling behandling) {

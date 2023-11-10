@@ -16,6 +16,7 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
@@ -467,6 +468,26 @@ class BrevmottakerServiceTest {
             );
     }
 
+    @Test
+    void gittInnvilgelsesbrevCANogArt6_2_skalIkkeArbeidsgiverFåKopi() {
+        var lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setBestemmelse(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART6_2);
+        behandlingsresultat.setLovvalgsperioder(Set.of(lovvalgsperiode));
+        when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+
+        assertThat(brevmottakerService.hentMottakerliste(TRYGDEAVTALE_GB, 123))
+            .extracting(
+                Mottakerliste::getHovedMottaker,
+                Mottakerliste::getKopiMottakere,
+                Mottakerliste::getFasteMottakere
+            )
+            .containsExactly(
+                BRUKER,
+                List.of(UTENLANDSK_TRYGDEMYNDIGHET),
+                emptyList()
+            );
+    }
 
     @Test
     void avklarMottakerRolleFraDokument_tilArbeidsgiver_girRolleArbeidsgiver() {
