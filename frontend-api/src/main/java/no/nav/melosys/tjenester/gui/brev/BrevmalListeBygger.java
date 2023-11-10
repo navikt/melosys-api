@@ -9,19 +9,20 @@ import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.kodeverk.brev.Distribusjonstype;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.brev.BrevmalListeService;
 import no.nav.melosys.service.brev.BrevAdresse;
+import no.nav.melosys.service.brev.BrevmalListeService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.tjenester.gui.dto.brev.*;
 import org.springframework.stereotype.Component;
 
 import static java.util.Arrays.asList;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.VIRKSOMHET;
+import static no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser.*;
+import static no.nav.melosys.tjenester.gui.brev.BrevFelt.*;
 
 @Component
 public class BrevmalListeBygger {
@@ -46,13 +47,15 @@ public class BrevmalListeBygger {
 
         List<BrevmalTypeDto> typer = produserbareDokumenter.stream().map(dokument -> switch (dokument) {
                 case MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD, MELDING_FORVENTET_SAKSBEHANDLINGSTID_KLAGE ->
-                    lagBrevmalTypeDtoForForventetSaksbehandlingstid(dokument);
-                case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER -> lagBrevmalTypeDtoForMangelbrev(dokument, behandlingId);
+                    lagBrevmalForMELDING_FORVENTET_SAKSBEHANDLINGSTID(dokument);
+                case MANGELBREV_BRUKER, MANGELBREV_ARBEIDSGIVER ->
+                    lagBrevmalForMANGELBREV(dokument, behandlingId);
                 case GENERELT_FRITEKSTBREV_BRUKER, GENERELT_FRITEKSTBREV_ARBEIDSGIVER, GENERELT_FRITEKSTBREV_VIRKSOMHET ->
-                    lagBrevmalTypeDtoForGenereltFritekstbrev(dokument, behandlingId);
+                    lagBrevmalForGENERELT_FRITEKSTBREV(dokument, behandlingId);
                 case UTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV ->
-                    lagBrevmalTypeDtoForUtenlandskTrygdemyndighetFritekstbrev(dokument, behandlingId);
-                case FRITEKSTBREV -> lagBrevmalTypeDtoForFritekstbrev(dokument);
+                    lagBrevmalForUTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV(dokument, behandlingId);
+                case FRITEKSTBREV ->
+                    lagBrevmalForFRITEKSTBREV(dokument);
                 default -> null;
             })
             .filter(Objects::nonNull)
@@ -125,15 +128,23 @@ public class BrevmalListeBygger {
         try {
             List<BrevAdresse> brevAdresser = brevmalListeService.hentBrevAdresseTilMottakere(behandlingId, rolle);
 
-            if ((rolle == Mottakerroller.BRUKER || rolle == Mottakerroller.FULLMEKTIG) && brevAdresser.stream().allMatch(BrevAdresse::getUgyldig)) {
-                String feilmelding = rolle == Mottakerroller.BRUKER
-                    ? Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER.getBeskrivelse().replace("Ingen gyldig adresse funnet. ", "")
-                    : Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT.getBeskrivelse().replace("\"Ingen gyldig adresse funnet. ", "");
-                FeilmeldingDto feilmeldingDto = new FeilmeldingDto(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse(), List.of(new FeilmeldingUnderpunkt(feilmelding)));
-                mottakerDto.setFeilmelding(feilmeldingDto);
-            } else if (rolle == Mottakerroller.VIRKSOMHET && brevAdresser.stream().allMatch(BrevAdresse::getUgyldig)) {
-                FeilmeldingDto feilmeldingDto = new FeilmeldingDto(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse(), List.of());
-                mottakerDto.setFeilmelding(feilmeldingDto);
+            if (brevAdresser.stream().allMatch(BrevAdresse::getUgyldig)) {
+                switch (rolle) {
+                    case BRUKER -> {
+                        String feilmelding = MANGLENDE_REGISTRERTE_ADRESSE_BRUKER.getBeskrivelse().replace("Ingen gyldig adresse funnet. ", "");
+                        mottakerDto.setFeilmelding(new FeilmeldingDto(MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse(), List.of(new FeilmeldingUnderpunkt(feilmelding))));
+                    }
+                    case FULLMEKTIG -> {
+                        String feilmelding = MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT.getBeskrivelse().replace("\"Ingen gyldig adresse funnet. ", "");
+                        mottakerDto.setFeilmelding(new FeilmeldingDto(MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse(), List.of(new FeilmeldingUnderpunkt(feilmelding))));
+                    }
+                    case VIRKSOMHET -> {
+                        FeilmeldingDto feilmeldingDto = new FeilmeldingDto(MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse(), List.of());
+                        mottakerDto.setFeilmelding(feilmeldingDto);
+                    }
+                    default ->
+                        throw new FunksjonellException("Vi har ikke støtte for tom adresse for " + rolle); // Sjekk med Eirik/MELOSYS-6135 hva med arbeidsgiver
+                }
             } else {
                 mottakerDto.setAdresser(brevAdresser);
             }
@@ -147,15 +158,15 @@ public class BrevmalListeBygger {
         }
     }
 
-    private BrevmalTypeDto lagBrevmalTypeDtoForForventetSaksbehandlingstid(Produserbaredokumenter produserbartdokument) {
+    private BrevmalTypeDto lagBrevmalForMELDING_FORVENTET_SAKSBEHANDLINGSTID(Produserbaredokumenter produserbartdokument) {
         return new BrevmalTypeDto.Builder().medType(produserbartdokument).build();
     }
 
-    private BrevmalTypeDto lagBrevmalTypeDtoForMangelbrev(Produserbaredokumenter produserbartdokument, long behandlingId) {
+    private BrevmalTypeDto lagBrevmalForMANGELBREV(Produserbaredokumenter produserbartdokument, long behandlingId) {
         List<FeltvalgAlternativDto> feltvalgAlternativDtos = new ArrayList<>();
         Behandling behandling = behandlingService.hentBehandling(behandlingId);
 
-        if (harStandardTekstIMangelbrev(behandling.getFagsak().getTema(), behandling.getType())) {
+        if (harStandardTekstIMangelbrev(behandling)) {
             feltvalgAlternativDtos.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.STANDARD));
         }
         feltvalgAlternativDtos.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.FRITEKST.getKode(), "Fritekst (erstatter standardtekst)", true));
@@ -171,175 +182,76 @@ public class BrevmalListeBygger {
                     .erPåkrevd()
                     .medValg(feltValgDto)
                     .build(),
-                new BrevmalFeltDto.Builder()
-                    .medKodeOgBeskrivelse(BrevmalFeltKode.MANGLER_FRITEKST)
-                    .medFeltType(FeltType.FRITEKST)
-                    .erPåkrevd()
-                    .build()
+                FELT_MANGLER_FRITEKST
             ))
             .build();
     }
 
-    private boolean harStandardTekstIMangelbrev(Sakstemaer sakstema, Behandlingstyper behandlingstype) {
-        return sakstema == Sakstemaer.MEDLEMSKAP_LOVVALG && behandlingstype == Behandlingstyper.FØRSTEGANG;
+    private boolean harStandardTekstIMangelbrev(Behandling behandling) {
+        return behandling.getFagsak().getTema() == Sakstemaer.MEDLEMSKAP_LOVVALG && behandling.getType() == Behandlingstyper.FØRSTEGANG;
     }
 
-    private FeltValgDto hentDistribusjonstyper() {
-        List<FeltvalgAlternativDto> distribusjonstyper = List.of(
-            new FeltvalgAlternativDto(Distribusjonstype.VEDTAK.getKode(), Distribusjonstype.VEDTAK.getBeskrivelse(), false),
-            new FeltvalgAlternativDto(Distribusjonstype.VIKTIG.getKode(), Distribusjonstype.VIKTIG.getBeskrivelse(), false),
-            new FeltvalgAlternativDto(Distribusjonstype.ANNET.getKode(), Distribusjonstype.ANNET.getBeskrivelse(), false)
-        );
-        return new FeltValgDto(distribusjonstyper, FeltValgType.RADIO);
-    }
-
-    private BrevmalTypeDto lagBrevmalTypeDtoForGenereltFritekstbrev(Produserbaredokumenter produserbartdokument, long behandlingId) {
+    private BrevmalTypeDto lagBrevmalForGENERELT_FRITEKSTBREV(Produserbaredokumenter produserbartdokument, long behandlingId) {
         return new BrevmalTypeDto.Builder()
             .medType(produserbartdokument)
             .medFelter(asList(
-                new BrevmalFeltDto.Builder()
-                    .medKodeOgBeskrivelse(BrevmalFeltKode.DISTRIBUSJONSTYPE)
-                    .medHjelpetekst("Type brev må angis slik at bruker får riktig varseltekst om brevet som sendes. Gjelder det et vedtak eller en forespørsel, vil bruker få en påminnelse hvis brevet ikke har blitt lest innen 7 dager.")
-                    .medValg(hentDistribusjonstyper())
-                    .erPåkrevd()
-                    .build(),
-                new BrevmalFeltDto.Builder()
-                    .medKodeOgBeskrivelse(BrevmalFeltKode.BREV_TITTEL)
-                    .medFeltType(FeltType.TEKST)
-                    .medHjelpetekst("Tittelen du skriver inn her, vil bli tittelen på brevet når du sender det ut.")
-                    .medValg(hentFritekstTittelValg(behandlingId))
-                    .medTegnBegrensning(60)
-                    .erPåkrevd()
-                    .build(),
-                new BrevmalFeltDto.Builder()
-                    .medKodeOgBeskrivelse(BrevmalFeltKode.STANDARDTEKST_KONTAKTINFORMASJON)
-                    .medFeltType(FeltType.SJEKKBOKS)
-                    .build(),
-                new BrevmalFeltDto.Builder()
-                    .medKodeOgBeskrivelse(BrevmalFeltKode.FRITEKST)
-                    .medHjelpetekst("Teksten du skriver inn her vil være hovedteksten i brevet du lager.")
-                    .medFeltType(FeltType.FRITEKST)
-                    .erPåkrevd()
-                    .build(),
-                new BrevmalFeltDto.Builder()
-                    .medKodeOgBeskrivelse(BrevmalFeltKode.VEDLEGG)
-                    .medFeltType(FeltType.VEDLEGG)
-                    .build(),
-                new BrevmalFeltDto.Builder()
-                    .medKodeOgBeskrivelse(BrevmalFeltKode.FRITEKSTVEDLEGG)
-                    .medFeltType(FeltType.FRITEKSTVEDLEGG)
-                    .build()
+                FELT_DISTRIBUSJONSTYPE,
+                lagBrevTittelFelt(hentBrevTittelValg(behandlingId)),
+                FELT_DOKUMENT_TITTEL,
+                FELT_STANDARDTEKST_SJEKKBOKS,
+                FELT_FRITEKST,
+                FELT_VEDLEGG,
+                FELT_FRITEKSTVEDLEGG
             ))
             .build();
     }
 
-    @Deprecated(since = "Når dokumentTittel kan gå ut i prod for alle fritekstbrev kan denne slettes og man bruker heller lagBrevmalTypeDtoForGenereltFritekstbrev")
-    private BrevmalTypeDto lagBrevmalTypeDtoForFritekstbrev(Produserbaredokumenter produserbartdokument) {
+    private BrevmalTypeDto lagBrevmalForFRITEKSTBREV(Produserbaredokumenter produserbartdokument) {
         return new BrevmalTypeDto.Builder()
             .medType(produserbartdokument)
             .medFelter(asList(
-                new BrevmalFeltDto.Builder()
-                    .medKodeOgBeskrivelse(BrevmalFeltKode.DISTRIBUSJONSTYPE)
-                    .medHjelpetekst("Type brev må angis slik at bruker får riktig varseltekst om brevet som sendes. Gjelder det et vedtak eller en forespørsel, vil bruker få en påminnelse hvis brevet ikke har blitt lest innen 7 dager.")
-                    .medValg(hentDistribusjonstyper())
-                    .erPåkrevd()
-                    .build(),
-                new BrevmalFeltDto.Builder()
-                    .medKodeOgBeskrivelse(BrevmalFeltKode.BREV_TITTEL)
-                    .medFeltType(FeltType.TEKST)
-                    .medValg(hentFritekstFeltValg())
-                    .medTegnBegrensning(60)
-                    .erPåkrevd()
-                    .build(),
-                new BrevmalFeltDto.Builder()
-                    .medKodeOgBeskrivelse(BrevmalFeltKode.DOKUMENT_TITTEL)
-                    .medFeltType(FeltType.TEKST)
-                    .medTegnBegrensning(60)
-                    .build(),
-                new BrevmalFeltDto.Builder()
-                    .medKodeOgBeskrivelse(BrevmalFeltKode.STANDARDTEKST_KONTAKTINFORMASJON)
-                    .medFeltType(FeltType.SJEKKBOKS)
-                    .build(),
-                new BrevmalFeltDto.Builder()
-                    .medKodeOgBeskrivelse(BrevmalFeltKode.FRITEKST)
-                    .medHjelpetekst("Teksten du skriver inn her vil være hovedteksten i brevet du lager.")
-                    .medFeltType(FeltType.FRITEKST)
-                    .erPåkrevd()
-                    .build(),
-                new BrevmalFeltDto.Builder()
-                    .medKodeOgBeskrivelse(BrevmalFeltKode.VEDLEGG)
-                    .medFeltType(FeltType.VEDLEGG)
-                    .build(),
-                new BrevmalFeltDto.Builder()
-                    .medKodeOgBeskrivelse(BrevmalFeltKode.FRITEKSTVEDLEGG)
-                    .medFeltType(FeltType.FRITEKSTVEDLEGG)
-                    .build()
+                FELT_DISTRIBUSJONSTYPE,
+                lagBrevTittelFelt(hentBrevTittelValg()),
+                FELT_DOKUMENT_TITTEL,
+                FELT_FRITEKST,
+                FELT_VEDLEGG,
+                FELT_FRITEKSTVEDLEGG
             ))
             .build();
     }
 
-    private FeltValgDto hentFritekstFeltValg() {
-        var orienteringBeslutningFeltvalgAlternativDto = new FeltvalgAlternativDto(FeltvalgAlternativKode.ORIENTERING_BESLUTNING);
-        var fritekstFeltvalgAlternativDto = new FeltvalgAlternativDto(FeltvalgAlternativKode.FRITEKST, true);
+    private BrevmalTypeDto lagBrevmalForUTENLANDSK_TRYGDEMYNDIGHET_FRITEKSTBREV(Produserbaredokumenter produserbartdokument, long behandlingId) {
+        return new BrevmalTypeDto.Builder()
+            .medType(produserbartdokument)
+            .medFelter(asList(
+                FELT_DISTRIBUSJONSTYPE,
+                lagBrevTittelFelt(hentBrevTittelValg(behandlingId)),
+                FELT_DOKUMENT_TITTEL,
+                FELT_FRITEKST,
+                FELT_VEDLEGG,
+                FELT_FRITEKSTVEDLEGG
+            ))
+            .build();
+    }
 
-        return new FeltValgDto(List.of(orienteringBeslutningFeltvalgAlternativDto, fritekstFeltvalgAlternativDto),
+    private static FeltValgDto hentBrevTittelValg() {
+        return new FeltValgDto(
+            List.of(
+                new FeltvalgAlternativDto(FeltvalgAlternativKode.ORIENTERING_BESLUTNING),
+                new FeltvalgAlternativDto(FeltvalgAlternativKode.FRITEKST, true)),
             FeltValgType.SELECT);
     }
 
-    @Deprecated(since = "Når toggle melosys.trygdeavtale.fritekstbrev er enabled og dokumentTittel klart til å brukes i alle brev kan denne kombineres med lagBrevmalTypeDtoForGenereltFritekstbrev")
-    private BrevmalTypeDto lagBrevmalTypeDtoForUtenlandskTrygdemyndighetFritekstbrev(Produserbaredokumenter produserbartdokument, long behandlingId) {
-        return new BrevmalTypeDto.Builder()
-            .medType(produserbartdokument)
-            .medFelter(asList(
-                new BrevmalFeltDto.Builder()
-                    .medKodeOgBeskrivelse(BrevmalFeltKode.DISTRIBUSJONSTYPE)
-                    .medHjelpetekst("Type brev må angis slik at bruker får riktig varseltekst om brevet som sendes. Gjelder det et vedtak eller en forespørsel, vil bruker få en påminnelse hvis brevet ikke har blitt lest innen 7 dager.")
-                    .medValg(hentDistribusjonstyper())
-                    .erPåkrevd()
-                    .build(),
-                new BrevmalFeltDto.Builder()
-                    .medKodeOgBeskrivelse(BrevmalFeltKode.BREV_TITTEL)
-                    .medFeltType(FeltType.TEKST)
-                    .medHjelpetekst("Tittelen du skriver inn her, vil bli tittelen på brevet når du sender det ut.")
-                    .medValg(hentFritekstTittelValg(behandlingId))
-                    .medTegnBegrensning(60)
-                    .erPåkrevd()
-                    .build(),
-                new BrevmalFeltDto.Builder()
-                    .medKodeOgBeskrivelse(BrevmalFeltKode.DOKUMENT_TITTEL)
-                    .medFeltType(FeltType.TEKST)
-                    .medHjelpetekst("Tittelen du skriver inn her vil bli journalføringstittel.")
-                    .medTegnBegrensning(60)
-                    .build(),
-                new BrevmalFeltDto.Builder()
-                    .medKodeOgBeskrivelse(BrevmalFeltKode.FRITEKST)
-                    .medHjelpetekst("Teksten du skriver inn her vil være hovedteksten i brevet du lager.")
-                    .medFeltType(FeltType.FRITEKST)
-                    .erPåkrevd()
-                    .build(),
-                new BrevmalFeltDto.Builder()
-                    .medKodeOgBeskrivelse(BrevmalFeltKode.VEDLEGG)
-                    .medFeltType(FeltType.VEDLEGG)
-                    .build(),
-                new BrevmalFeltDto.Builder()
-                    .medKodeOgBeskrivelse(BrevmalFeltKode.FRITEKSTVEDLEGG)
-                    .medFeltType(FeltType.FRITEKSTVEDLEGG)
-                    .build()
-            ))
-            .build();
-    }
-
-    private FeltValgDto hentFritekstTittelValg(long behandlingId) {
-        var behandling = behandlingService.hentBehandling(behandlingId);
-        var fagsak = behandling.getFagsak();
-        var fritekstFeltvalgAlternativDto = new FeltvalgAlternativDto(FeltvalgAlternativKode.FRITEKST, true);
+    private FeltValgDto hentBrevTittelValg(long behandlingId) {
+        var fagsak = behandlingService.hentBehandling(behandlingId).getFagsak();
 
         if (fagsak.getHovedpartRolle() == VIRKSOMHET) {
-            return new FeltValgDto(List.of(fritekstFeltvalgAlternativDto), FeltValgType.SELECT);
+            return new FeltValgDto(
+                List.of(new FeltvalgAlternativDto(FeltvalgAlternativKode.FRITEKST, true)),
+                FeltValgType.SELECT);
         }
 
         final List<FeltvalgAlternativDto> valgAlternativer = new ArrayList<>();
-
         switch (fagsak.getType()) {
             case EU_EOS ->
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.HENVENDELSE_OM_TRYGDETILHØRLIGHET));
@@ -351,8 +263,7 @@ public class BrevmalListeBygger {
             case TRYGDEAVTALE ->
                 valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.ENGELSK_FRITEKSTBREV));
         }
-
-        valgAlternativer.add(fritekstFeltvalgAlternativDto);
+        valgAlternativer.add(new FeltvalgAlternativDto(FeltvalgAlternativKode.FRITEKST, true));
 
         return new FeltValgDto(valgAlternativer, FeltValgType.SELECT);
     }
