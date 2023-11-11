@@ -9,13 +9,6 @@ import java.time.LocalDate
 
 class OrganisasjonsDetaljerTest {
 
-    private val linje1 = "LINJE1  "
-    private val linje2 = "LINJE2"
-    private val linje3 = "LINJE3"
-    private val POSTNR = "postnummer"
-    private val POSTSTED = "poststed"
-    private val POSTSTED_UTLAND = "poststedUtland"
-
     @Test
     fun `Konverter forretningsadresse til ustrukturert adresse`() {
         val orgDetaljer = OrganisasjonsDetaljer().apply {
@@ -27,9 +20,9 @@ class OrganisasjonsDetaljerTest {
 
 
         resultatAdresse.run {
-            getAdresselinje(1).shouldBe(linje1)
-            getAdresselinje(2).shouldBe(linje2)
-            getAdresselinje(3).shouldBe(linje3)
+            getAdresselinje(1).shouldBe(LINJE1)
+            getAdresselinje(2).shouldBe(LINJE2)
+            getAdresselinje(3).shouldBe(LINJE3)
             getAdresselinje(4).shouldBe("$POSTNR $POSTSTED")
             landkode.shouldBe("NO")
         }
@@ -41,12 +34,14 @@ class OrganisasjonsDetaljerTest {
             forretningsadresse = listOf(lagAdresse(landkode = "DK"))
         }
 
+
         val resultatAdresse = orgDetaljer.hentUstrukturertForretningsadresse()!!
 
+
         resultatAdresse.run {
-            getAdresselinje(1).shouldBe(linje1)
-            getAdresselinje(2).shouldBe(linje2)
-            getAdresselinje(3).shouldBe(linje3)
+            getAdresselinje(1).shouldBe(LINJE1)
+            getAdresselinje(2).shouldBe(LINJE2)
+            getAdresselinje(3).shouldBe(LINJE3)
             getAdresselinje(4).shouldBe(POSTSTED_UTLAND)
             landkode.shouldBe("DK")
         }
@@ -58,10 +53,12 @@ class OrganisasjonsDetaljerTest {
             forretningsadresse = listOf(lagAdresse(landkode = "NO"))
         }
 
+
         val resultatAdresse = orgDetaljer.hentStrukturertForretningsadresse()!!
 
+
         resultatAdresse.run {
-            gatenavn.shouldBe(listOf(linje1.trim(), linje2, linje3).joinToString(" "))
+            gatenavn.shouldBe(listOf(LINJE1.trim(), LINJE2, LINJE3).joinToString(" "))
             landkode.shouldBe("NO")
             postnummer.shouldBe(POSTNR)
             poststed.shouldBe(POSTSTED)
@@ -74,10 +71,12 @@ class OrganisasjonsDetaljerTest {
             forretningsadresse = listOf(lagAdresse("DK"))
         }
 
+
         val resultatAdresse = orgDetaljer.hentStrukturertForretningsadresse()!!
 
+
         resultatAdresse.run {
-            gatenavn.shouldBe(listOf(linje1.trim(), linje2, linje3).joinToString(" "))
+            gatenavn.shouldBe(listOf(LINJE1.trim(), LINJE2, LINJE3).joinToString(" "))
             landkode.shouldBe("DK")
             postnummer.shouldBe(POSTNR)
             poststed.shouldBe(POSTSTED_UTLAND)
@@ -86,18 +85,19 @@ class OrganisasjonsDetaljerTest {
 
     @Test
     fun `Test null adresse`() {
-        val orgDetaljer = OrganisasjonsDetaljer().apply {
-            forretningsadresse = listOf()
-        }
+        val orgDetaljer = OrganisasjonsDetaljer()
+
 
         val resultatAdresse = orgDetaljer.hentStrukturertForretningsadresse()
+
+
         resultatAdresse.shouldBeNull()
     }
 
     private fun lagAdresse(landkode: String = "") = SemistrukturertAdresse().apply {
-        adresselinje1 = linje1
-        adresselinje2 = linje2
-        adresselinje3 = linje3
+        adresselinje1 = LINJE1
+        adresselinje2 = LINJE2
+        adresselinje3 = LINJE3
         postnr = POSTNR
         poststed = POSTSTED
         poststedUtland = POSTSTED_UTLAND
@@ -107,6 +107,16 @@ class OrganisasjonsDetaljerTest {
             LocalDate.now().plusDays(1)
         )
         this.landkode = landkode
+    }
+
+    companion object {
+        private const val LINJE1 = "LINJE1  "
+        private const val LINJE2 = "LINJE2"
+        private const val LINJE3 = "LINJE3"
+        private const val POSTNR = "postnummer"
+        private const val POSTSTED = "poststed"
+        private const val POSTSTED_UTLAND = "poststedUtland"
+
     }
 }
 
