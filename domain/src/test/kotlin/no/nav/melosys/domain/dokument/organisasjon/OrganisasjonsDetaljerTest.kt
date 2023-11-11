@@ -1,6 +1,7 @@
 package no.nav.melosys.domain.dokument.organisasjon
 
 import io.kotest.matchers.nulls.shouldBeNull
+import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
@@ -93,6 +94,47 @@ class OrganisasjonsDetaljerTest {
 
         resultatAdresse.shouldBeNull()
     }
+
+    @Test
+    fun `Konverter utenlandsk adresse med null postnummer til strukturert adresse postnummer som ett mellomrom`() {
+        val orgDetaljer = OrganisasjonsDetaljer()
+        val adresse = SemistrukturertAdresse().apply {
+            landkode = "US"
+            postnr = null
+            poststedUtland = "New York"
+        }
+
+
+        val resultatAdresse = orgDetaljer.konverterTilStrukturertAdresse(adresse).shouldNotBeNull()
+
+
+        resultatAdresse.run {
+            landkode.shouldBe("US")
+            postnummer.shouldBe(" ")
+            poststed.shouldBe("New York")
+        }
+    }
+
+    @Test
+    fun `Konverter norsk adresse med null postnummer til strukturert adresse med postnummer=null`() {
+        val orgDetaljer = OrganisasjonsDetaljer()
+        val adresse = SemistrukturertAdresse().apply {
+            landkode = "NO"
+            postnr = null
+            poststedUtland = null
+        }
+
+
+        val resultatAdresse = orgDetaljer.konverterTilStrukturertAdresse(adresse).shouldNotBeNull()
+
+
+        resultatAdresse.run {
+            landkode.shouldBe("NO")
+            postnummer.shouldBe(null)
+            poststed.shouldBe("")
+        }
+    }
+
 
     private fun lagAdresse(landkode: String = "") = SemistrukturertAdresse().apply {
         adresselinje1 = LINJE1

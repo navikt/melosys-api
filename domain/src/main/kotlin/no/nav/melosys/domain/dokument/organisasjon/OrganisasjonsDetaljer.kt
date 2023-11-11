@@ -57,20 +57,22 @@ open class OrganisasjonsDetaljer { // Needs to be open because of mocking : TODO
         return UstrukturertAdresse.av(adresse)
     }
 
-    private fun konverterTilStrukturertAdresse(adresse: GeografiskAdresse?): StrukturertAdresse? {
+    internal fun konverterTilStrukturertAdresse(adresse: GeografiskAdresse?): StrukturertAdresse? {
         if (adresse == null) return null
         require(adresse is SemistrukturertAdresse) { "Adresse ikke støttet ${adresse.javaClass.simpleName}" }
 
-        val adresseLinje = listOfNotNull(adresse.adresselinje1, adresse.adresselinje2, adresse.adresselinje3)
-            .joinToString(" ")
-            .replace("\\s+".toRegex(), " ")
-
         return StrukturertAdresse().apply {
-            gatenavn = adresseLinje
+            gatenavn = listOfNotNull(adresse.adresselinje1, adresse.adresselinje2, adresse.adresselinje3)
+                .joinToString(" ")
+                .replace("\\s+".toRegex(), " ")
+
             landkode = adresse.landkode
-            postnummer = adresse.postnr ?: " "
+
+            // Utenlandsk adresse kan ha postnummer som en del av poststed
+            postnummer = adresse.postnr ?: if (adresse.erUtenlandsk()) " " else null
+
             poststed = if (adresse.erUtenlandsk()) {
-                adresse.poststedUtland?.ifEmpty { adresse.poststed ?: "" }
+                adresse.poststedUtland ?: adresse.poststed ?: ""
             } else {
                 adresse.poststed ?: ""
             }
