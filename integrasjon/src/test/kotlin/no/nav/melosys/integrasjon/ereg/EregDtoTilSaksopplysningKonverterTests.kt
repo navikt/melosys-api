@@ -110,7 +110,7 @@ class EregDtoTilSaksopplysningKonverterTests {
     }
 
     @Test
-    fun `manger navn`() {
+    fun `mangler navn`() {
         val organisasjon: OrganisasjonResponse.Organisasjon = jacksonObjectMapper().createObjectNode().apply {
             put("organisasjonsnummer", "928497705")
             put("type", "Organisasjon")
