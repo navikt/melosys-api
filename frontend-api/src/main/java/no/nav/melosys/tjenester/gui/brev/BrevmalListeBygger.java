@@ -142,7 +142,7 @@ public class BrevmalListeBygger {
                         mottakerDto.setFeilmelding(feilmeldingDto);
                     }
                     default ->
-                        throw new FunksjonellException("Vi har ikke støtte for tom adresse for " + rolle); // Sjekk med Eirik/MELOSYS-6135 hva med arbeidsgiver
+                        throw new FunksjonellException("Vi har ikke støtte for tom adresse for " + rolle);
                 }
             } else {
                 mottakerDto.setAdresser(brevAdresser);
