@@ -1,5 +1,6 @@
 package no.nav.melosys.integrasjon.ereg
 
+import mu.KotlinLogging
 import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
@@ -11,6 +12,8 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Telefonnu
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonResponse
 
+private val log = KotlinLogging.logger { }
+
 class EregDtoTilSaksopplysningKonverter {
     fun lagSaksopplysning(organisasjon: OrganisasjonResponse.Organisasjon): Saksopplysning = Saksopplysning().apply {
         dokument = OrganisasjonDokument().apply {
@@ -18,7 +21,7 @@ class EregDtoTilSaksopplysningKonverter {
             sektorkode = finSektorkode(organisasjon)
             oppstartsdato = null // fjerns når vi ikke lengre bruker gammelt soap api - MELOSYS-6134
             enhetstype = finnEnhetstype(organisasjon)
-            navn = listOf(organisasjon.navn?.sammensattnavn ?: "UKJENT")
+            navn = listOf(finnNavn(organisasjon))
             organisasjonDetaljer = OrganisasjonsDetaljer().apply {
                 orgnummer = organisasjon.organisasjonsnummer
                 val responseOrganisasjonDetaljer = organisasjon.organisasjonDetaljer ?: throw TekniskException("organisasjonDetaljer er null")
@@ -31,6 +34,30 @@ class EregDtoTilSaksopplysningKonverter {
                 opphoersdato = responseOrganisasjonDetaljer.opphoersdato
             }
         }
+    }
+
+    private fun finnNavn(organisasjon: OrganisasjonResponse.Organisasjon): String {
+        fun sammensattNavnFraDetaljer(): String? {
+            // Vil få litt oversikt om dette skjer - fjernes senere
+            log.warn("Fant ikke sammensattnavn i organisasjon, prøver detaljer")
+            return organisasjon.organisasjonDetaljer?.navn?.firstOrNull { it.sammensattnavn != null }?.sammensattnavn
+        }
+
+        fun navnFraNavnelinjeer(): String? {
+            // Vil få litt oversikt om dette skjer - fjernes senere
+            log.warn("Fant ikke sammensattnavn i organisasjonDetaljer, prøver navnelinjer.")
+            return organisasjon.organisasjonDetaljer?.navn?.map {
+                listOfNotNull(it.navnelinje1, it.navnelinje2, it.navnelinje3, it.navnelinje4, it.navnelinje5).joinToString(" ")
+            }?.firstOrNull() { it.isNotEmpty() }
+        }
+
+        fun brukUkjentNanv(): String {
+            // Vil få litt oversikt om dette skjer - fjernes senere
+            log.warn("Fant ikke navn for organisasjon. Bruker UKJENT")
+            return "UKJENT"
+        }
+
+        return organisasjon.navn?.sammensattnavn ?: sammensattNavnFraDetaljer() ?: navnFraNavnelinjeer() ?: brukUkjentNanv()
     }
 
     private fun finnEnhetstype(organisasjon: OrganisasjonResponse.Organisasjon): String? {
