@@ -59,7 +59,7 @@ class EregDtoTilSaksopplysningKonverterTests {
 
 
         saksopplysning.dokument.shouldBeTypeOf<OrganisasjonDokument>()
-            .getNavn().shouldBe("Fra Organisasjon")
+            .getSammenslåttNavn().shouldBe("Fra Organisasjon")
     }
 
     @Test
@@ -82,7 +82,7 @@ class EregDtoTilSaksopplysningKonverterTests {
 
 
         saksopplysning.dokument.shouldBeTypeOf<OrganisasjonDokument>()
-            .getNavn().shouldBe("Fra Detaljer")
+            .getSammenslåttNavn().shouldBe("Fra Detaljer")
     }
 
     @Test
@@ -106,7 +106,7 @@ class EregDtoTilSaksopplysningKonverterTests {
 
 
         saksopplysning.dokument.shouldBeTypeOf<OrganisasjonDokument>()
-            .getNavn().shouldBe("navnelinje1 navnelinje2")
+            .getSammenslåttNavn().shouldBe("navnelinje1 navnelinje2")
     }
 
     @Test
@@ -123,7 +123,7 @@ class EregDtoTilSaksopplysningKonverterTests {
 
 
         saksopplysning.dokument.shouldBeTypeOf<OrganisasjonDokument>()
-            .getNavn().shouldBe("UKJENT")
+            .getSammenslåttNavn().shouldBe("UKJENT")
     }
 
     private fun hentOrganisasjon(file: String) = jacksonObjectMapper()
@@ -135,6 +135,6 @@ class EregDtoTilSaksopplysningKonverterTests {
         .readValue(this.toString())
 
 
-    fun hentRessurs(fil: String): String = this::class.java.classLoader.getResource(fil)
+    private fun hentRessurs(fil: String): String = this::class.java.classLoader.getResource(fil)
         ?.readText(StandardCharsets.UTF_8) ?: throw IkkeFunnetException("Fant ikke $fil")
 }
