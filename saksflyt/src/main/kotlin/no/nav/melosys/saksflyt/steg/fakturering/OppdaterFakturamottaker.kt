@@ -1,9 +1,8 @@
-package no.nav.melosys.saksflyt.faktureringskomponenten
+package no.nav.melosys.saksflyt.steg.fakturering
 
 import io.getunleash.Unleash
 import mu.KotlinLogging
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
-
 import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaMottakerDto

@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.faktureringskomponenten
+package no.nav.melosys.saksflyt.steg.fakturering
 
 import io.getunleash.Unleash
 import mu.KotlinLogging
@@ -8,7 +8,7 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.featuretoggle.ToggleName.FOLKETRYGDEN_MVP
+import no.nav.melosys.featuretoggle.ToggleName
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
 import no.nav.melosys.saksflyt.steg.StegBehandler
@@ -41,7 +41,7 @@ class OpprettBetalingsplan(
     }
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        if (!unleash.isEnabled(FOLKETRYGDEN_MVP)) {
+        if (!unleash.isEnabled(ToggleName.FOLKETRYGDEN_MVP)) {
             return
         }
 
@@ -112,8 +112,8 @@ class OpprettBetalingsplan(
                 it.periodeFra,
                 it.periodeTil,
                 "Inntekt: ${it.grunnlagInntekstperiode.avgiftspliktigInntektMnd.verdi}, " +
-                    "Dekning: ${it.grunnlagMedlemskapsperiode.trygdedekning.beskrivelse}, " +
-                    "Sats: ${it.trygdesats} %"
+                        "Dekning: ${it.grunnlagMedlemskapsperiode.trygdedekning.beskrivelse}, " +
+                        "Sats: ${it.trygdesats} %"
             )
         }
 
@@ -125,7 +125,7 @@ class OpprettBetalingsplan(
             fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
             intervall = intervall,
             referanseBruker = "Vedtak om medlemskap datert " +
-                DateTimeFormatter.ofPattern("dd.MM.yyyy").withZone(ZoneId.systemDefault()).format(vedtaksdato),
+                    DateTimeFormatter.ofPattern("dd.MM.yyyy").withZone(ZoneId.systemDefault()).format(vedtaksdato),
             perioder = fakturaseriePeriodeDtoListe
         )
     }

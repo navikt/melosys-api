@@ -15,7 +15,7 @@ import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaMottakerDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FullmektigDto
-import no.nav.melosys.saksflyt.faktureringskomponenten.OppdaterFakturamottaker
+import no.nav.melosys.saksflyt.steg.fakturering.OppdaterFakturamottaker
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.behandling.BehandlingsresultatService
