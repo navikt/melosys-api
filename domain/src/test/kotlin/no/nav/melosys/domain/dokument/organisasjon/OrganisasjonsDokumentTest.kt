@@ -12,34 +12,37 @@ class OrganisasjonsDokumentTest {
 
     @Test
     fun `harRegistrertPostadresse skal bli false`() {
-        val adresser = listOf(lagAddresse().apply {
-            landkode = null
-        })
-
         val dokument = OrganisasjonDokument().apply {
             organisasjonDetaljer = OrganisasjonsDetaljer().apply {
-                postadresse = adresser
+                postadresse = listOf(lagAddresse().apply {
+                    landkode = null
+                })
 
             }
         }
 
-        dokument.harRegistrertPostadresse().shouldBeFalse()
+
+        val harRegistrertPostadresse = dokument.harRegistrertPostadresse()
+
+
+        harRegistrertPostadresse.shouldBeFalse()
     }
 
     @Test
     fun `harRegistrertPostadresse skal bli true`() {
-        val adresser = listOf(lagAddresse().apply {
-            landkode = "NO"
-        })
-
         val dokument = OrganisasjonDokument().apply {
             organisasjonDetaljer = OrganisasjonsDetaljer().apply {
-                postadresse = adresser
-
+                postadresse = listOf(lagAddresse().apply {
+                    landkode = "NO"
+                })
             }
         }
 
-        dokument.harRegistrertPostadresse().shouldBeTrue()
+
+        val harRegistrertPostadresse = dokument.harRegistrertPostadresse()
+
+
+        harRegistrertPostadresse.shouldBeTrue()
     }
 
     @Test
@@ -48,7 +51,11 @@ class OrganisasjonsDokumentTest {
             navn = listOf("fornavn", "etternavn")
         }
 
-        dokument.lagSammenslåttNavn().shouldBe("fornavn etternavn")
+
+        val sammenslåttNavn = dokument.lagSammenslåttNavn()
+
+
+        sammenslåttNavn.shouldBe("fornavn etternavn")
     }
 
     @Test
@@ -57,7 +64,11 @@ class OrganisasjonsDokumentTest {
             navn = null
         }
 
-        dokument.lagSammenslåttNavn().shouldBe("UKJENT")
+
+        val sammenslåttNavn = dokument.lagSammenslåttNavn()
+
+
+        sammenslåttNavn.shouldBe("UKJENT")
     }
 
     @Test
@@ -66,7 +77,11 @@ class OrganisasjonsDokumentTest {
             navn = emptyList()
         }
 
-        dokument.lagSammenslåttNavn().shouldBe("") // Er dette ønsket?
+
+        val sammenslåttNavn = dokument.lagSammenslåttNavn()
+
+
+        sammenslåttNavn.shouldBe("") // Er dette ønsket?
     }
 
     private fun lagAddresse() = SemistrukturertAdresse().apply {
