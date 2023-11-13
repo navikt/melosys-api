@@ -17,10 +17,10 @@ class OrganisasjonsDetaljerTest {
         }
 
 
-        val resultatAdresse = orgDetaljer.hentUstrukturertForretningsadresse()!!
+        val resultatAdresse = orgDetaljer.hentUstrukturertForretningsadresse()
 
 
-        resultatAdresse.run {
+        resultatAdresse.shouldNotBeNull().run {
             getAdresselinje(1).shouldBe(LINJE1)
             getAdresselinje(2).shouldBe(LINJE2)
             getAdresselinje(3).shouldBe(LINJE3)
@@ -36,10 +36,10 @@ class OrganisasjonsDetaljerTest {
         }
 
 
-        val resultatAdresse = orgDetaljer.hentUstrukturertForretningsadresse()!!
+        val resultatAdresse = orgDetaljer.hentUstrukturertForretningsadresse()
 
 
-        resultatAdresse.run {
+        resultatAdresse.shouldNotBeNull().run {
             getAdresselinje(1).shouldBe(LINJE1)
             getAdresselinje(2).shouldBe(LINJE2)
             getAdresselinje(3).shouldBe(LINJE3)
@@ -55,10 +55,10 @@ class OrganisasjonsDetaljerTest {
         }
 
 
-        val resultatAdresse = orgDetaljer.hentStrukturertForretningsadresse()!!
+        val resultatAdresse = orgDetaljer.hentStrukturertForretningsadresse()
 
 
-        resultatAdresse.run {
+        resultatAdresse.shouldNotBeNull().run {
             gatenavn.shouldBe(listOf(LINJE1.trim(), LINJE2, LINJE3).joinToString(" "))
             landkode.shouldBe("NO")
             postnummer.shouldBe(POSTNR)
@@ -73,10 +73,10 @@ class OrganisasjonsDetaljerTest {
         }
 
 
-        val resultatAdresse = orgDetaljer.hentStrukturertForretningsadresse()!!
+        val resultatAdresse = orgDetaljer.hentStrukturertForretningsadresse()
 
 
-        resultatAdresse.run {
+        resultatAdresse.shouldNotBeNull().run {
             gatenavn.shouldBe(listOf(LINJE1.trim(), LINJE2, LINJE3).joinToString(" "))
             landkode.shouldBe("DK")
             postnummer.shouldBe(POSTNR)
@@ -105,10 +105,10 @@ class OrganisasjonsDetaljerTest {
         }
 
 
-        val resultatAdresse = orgDetaljer.konverterTilStrukturertAdresse(adresse).shouldNotBeNull()
+        val resultatAdresse = orgDetaljer.konverterTilStrukturertAdresse(adresse)
 
 
-        resultatAdresse.run {
+        resultatAdresse.shouldNotBeNull().run {
             landkode.shouldBe("US")
             postnummer.shouldBe(" ")
             poststed.shouldBe("New York")
@@ -125,10 +125,10 @@ class OrganisasjonsDetaljerTest {
         }
 
 
-        val resultatAdresse = orgDetaljer.konverterTilStrukturertAdresse(adresse).shouldNotBeNull()
+        val resultatAdresse = orgDetaljer.konverterTilStrukturertAdresse(adresse)
 
 
-        resultatAdresse.run {
+        resultatAdresse.shouldNotBeNull().run {
             landkode.shouldBe("NO")
             postnummer.shouldBe(null)
             poststed.shouldBe("")
