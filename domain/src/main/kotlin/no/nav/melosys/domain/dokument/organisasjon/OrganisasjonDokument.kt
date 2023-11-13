@@ -38,7 +38,7 @@ class OrganisasjonDokument : SaksopplysningDokument {
     fun getPostadresse(): StrukturertAdresse? = organisasjonDetaljer?.hentStrukturertPostadresse()
 
     // Hvis man ikke har bruk for historikk på navn så er det best å bruke navn på nivå organisasjon.
-    fun lagSammenslåttNavn(): String = navn?.joinToString(" ") ?: "UKJENT"
+     internal fun lagSammenslåttNavn(): String = navn?.joinToString(" ") ?: "UKJENT"
 
     fun harRegistrertPostadresse(): Boolean = getPostadresse()?.erGyldig() ?: false
 
