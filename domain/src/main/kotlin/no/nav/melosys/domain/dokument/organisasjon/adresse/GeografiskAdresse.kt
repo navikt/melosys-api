@@ -15,11 +15,7 @@ open class GeografiskAdresse {
     var gyldighetsperiode: Periode? = null
     var landkode: String? = null
 
-    private fun erNorsk(): Boolean {
-        return Landkoder.NO.kode == landkode
-    }
+    private fun erNorsk(): Boolean = Landkoder.NO.kode == landkode
 
-    fun erUtenlandsk(): Boolean {
-        return !erNorsk()
-    }
+    fun erUtenlandsk(): Boolean = !erNorsk()
 }

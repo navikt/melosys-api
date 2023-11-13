@@ -13,6 +13,6 @@ class Organisasjonsnavn {
 
     @XmlElementWrapper(name = "navn")
     @XmlElement(name = "navnelinje")
-    var navn: List<String?>? = ArrayList()
+    var navn: List<String?>? = mutableListOf() //TODO: use emptyList when we remove JAXB code
     var redigertNavn: String? = null
 }
