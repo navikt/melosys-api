@@ -1,7 +1,11 @@
 package no.nav.melosys.tjenester.gui.avklartefakta;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.getunleash.Unleash;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.avgift.*;
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift;
@@ -26,18 +30,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.Set;
-
 import static no.nav.melosys.tjenester.gui.util.ResponseBodyMatchers.responseBody;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {TrygdeavgiftTjeneste.class})
@@ -51,8 +49,6 @@ class TrygdeavgiftTjenesteTest {
     private TrygdeavgiftsgrunnlagService trygdeavgiftsgrunnlagService;
     @MockBean
     private TrygdeavgiftMottakerService trygdeavgiftMottakerService;
-    @MockBean
-    private Unleash unleash;
 
     @Autowired
     private MockMvc mockMvc;

@@ -8,9 +8,6 @@ import java.util.Set;
 import com.google.common.collect.Sets;
 import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.avgift.Inntektsperiode;
-import no.nav.melosys.domain.avgift.Trygdeavgiftsgrunnlag;
-import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
@@ -19,6 +16,7 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
@@ -468,6 +466,25 @@ class BrevmottakerServiceTest {
             );
     }
 
+    @Test
+    void gittInnvilgelsesbrevCANogArt6_2_skalIkkeArbeidsgiverFåKopi() {
+        var lovvalgsperiode = new Lovvalgsperiode();
+        lovvalgsperiode.setBestemmelse(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART6_2);
+        when(lovvalgsperiodeService.hentLovvalgsperiode(anyLong())).thenReturn(lovvalgsperiode);
+        when(lovvalgsperiodeService.harSelvstendigNæringsdrivendeLovvalgsbestemmelse(anyLong())).thenReturn(true);
+
+        assertThat(brevmottakerService.hentMottakerliste(TRYGDEAVTALE_GB, 123))
+            .extracting(
+                Mottakerliste::getHovedMottaker,
+                Mottakerliste::getKopiMottakere,
+                Mottakerliste::getFasteMottakere
+            )
+            .containsExactly(
+                BRUKER,
+                List.of(UTENLANDSK_TRYGDEMYNDIGHET),
+                emptyList()
+            );
+    }
 
     @Test
     void avklarMottakerRolleFraDokument_tilArbeidsgiver_girRolleArbeidsgiver() {

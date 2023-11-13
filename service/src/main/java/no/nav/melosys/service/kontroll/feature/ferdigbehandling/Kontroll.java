@@ -1,6 +1,7 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -8,6 +9,7 @@ import io.getunleash.Unleash;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Lovvalgsperiode;
+import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Representerer;
@@ -23,6 +25,7 @@ import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.SaksopplysningerData;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.FerdigbehandlingKontrollsett;
+import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
@@ -44,15 +47,24 @@ class Kontroll {
     private final PersondataFasade persondataFasade;
     private final OrganisasjonOppslagService organisasjonOppslagService;
     private final SaksbehandlingRegler saksbehandlingRegler;
+    private final MedlemskapsperiodeService medlemskapsperiodeService;
     private final Unleash unleash;
 
-    public Kontroll(BehandlingService behandlingService, LovvalgsperiodeService lovvalgsperiodeService, AvklarteVirksomheterService avklarteVirksomheterService, PersondataFasade persondataFasade, OrganisasjonOppslagService organisasjonOppslagService, SaksbehandlingRegler saksbehandlingRegler, Unleash unleash) {
+    public Kontroll(BehandlingService behandlingService,
+                    LovvalgsperiodeService lovvalgsperiodeService,
+                    AvklarteVirksomheterService avklarteVirksomheterService,
+                    PersondataFasade persondataFasade,
+                    OrganisasjonOppslagService organisasjonOppslagService,
+                    SaksbehandlingRegler saksbehandlingRegler,
+                    MedlemskapsperiodeService medlemskapsperiodeService,
+                    Unleash unleash) {
         this.behandlingService = behandlingService;
         this.lovvalgsperiodeService = lovvalgsperiodeService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.persondataFasade = persondataFasade;
         this.organisasjonOppslagService = organisasjonOppslagService;
         this.saksbehandlingRegler = saksbehandlingRegler;
+        this.medlemskapsperiodeService = medlemskapsperiodeService;
         this.unleash = unleash;
     }
 
@@ -156,12 +168,14 @@ class Kontroll {
         Persondata persondata = hentPersondata(behandling);
 
         return new FerdigbehandlingKontrollData(medlemskapDokument, persondata, mottatteOpplysningerData,
-            lovvalgsperiode, opprinneligLovvalgsperiode, saksopplysningerData, behandling.getTema(), fullmektig, organisasjon, persondataFullmektig);
+            lovvalgsperiode, opprinneligLovvalgsperiode, saksopplysningerData, behandling.getTema(), fullmektig, organisasjon, persondataFullmektig, null);
     }
 
     private FerdigbehandlingKontrollData hentVedtakKontrollDataFTRL(Behandling behandling) {
         Aktoer fullmektig = behandling.getFagsak().finnRepresentantEllerFullmektig(Representerer.BRUKER).orElse(null);
         MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();
+
+        List<Medlemskapsperiode> medlemskapsperioder = medlemskapsperiodeService.hentMedlemskapsperioder(behandling.getId()).stream().toList();
         MottatteOpplysningerData mottatteOpplysningerData = behandling.getMottatteOpplysninger().getMottatteOpplysningerData();
         Persondata persondata = hentPersondata(behandling);
         OrganisasjonDokument organisasjon = null;
@@ -174,7 +188,7 @@ class Kontroll {
             persondataFullmektig = hentPersondata(fullmektig.getPersonIdent());
         }
 
-        return FerdigbehandlingKontrollData.lagKontrollDataForFTRL(persondata, mottatteOpplysningerData, medlemskapDokument, fullmektig, organisasjon, persondataFullmektig);
+        return FerdigbehandlingKontrollData.lagKontrollDataForFTRL(persondata, mottatteOpplysningerData, medlemskapDokument, fullmektig, organisasjon, persondataFullmektig, medlemskapsperioder);
     }
 
     private Persondata hentPersondata(Behandling behandling) {

@@ -1,12 +1,10 @@
 package no.nav.melosys.service.avgift
 
-import io.getunleash.Unleash
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.domain.folketrygden.FastsattTrygdeavgift
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.exception.FunksjonellException
-import no.nav.melosys.featuretoggle.ToggleName.REFAKTORERING_ORDINÆR_TRYGDEAVGIFT
 import no.nav.melosys.integrasjon.ereg.EregFasade
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftConsumer
 import no.nav.melosys.integrasjon.trygdeavgift.TrygdeavgiftsberegningsRequestMapper
@@ -26,8 +24,7 @@ class TrygdeavgiftsberegningService
     private val medlemAvFolketrygdenService: MedlemAvFolketrygdenService,
     private val trygdeavgiftMottakerService: TrygdeavgiftMottakerService,
     private val persondataService: PersondataService,
-    private val trygdeavgiftConsumer: TrygdeavgiftConsumer,
-    private val unleash: Unleash
+    private val trygdeavgiftConsumer: TrygdeavgiftConsumer
 ) {
 
     @Transactional
@@ -38,12 +35,7 @@ class TrygdeavgiftsberegningService
         valider(medlemAvFolketrygden)
         fastsattTrygdeavgift.trygdeavgiftsperioder.clear()
 
-        if (
-            if (unleash.isEnabled(REFAKTORERING_ORDINÆR_TRYGDEAVGIFT)) !trygdeavgiftMottakerService.skalBetalesTilNav(fastsattTrygdeavgift.trygdeavgiftsgrunnlag)
-            else !fastsattTrygdeavgift.skalBetalesTilNav()
-        ) {
-            return emptySet()
-        }
+        if (!trygdeavgiftMottakerService.skalBetalesTilNav(fastsattTrygdeavgift.trygdeavgiftsgrunnlag)) { return emptySet() }
 
         val innvilgedeMedlemskapsperioder =
             medlemAvFolketrygden.medlemskapsperioder.filter { it.erInnvilget() }

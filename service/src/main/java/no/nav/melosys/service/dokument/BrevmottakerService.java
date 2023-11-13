@@ -89,7 +89,8 @@ public class BrevmottakerService {
         if (brevkopiRegler.contains(BRUKER_FÅR_KOPI)) {
             mottakerliste.getKopiMottakere().add(Mottakerroller.BRUKER);
         }
-        if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI)) {
+        if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI) &&
+            !lovvalgsperiodeService.harSelvstendigNæringsdrivendeLovvalgsbestemmelse(behandlingId)) {
             mottakerliste.getKopiMottakere().add(Mottakerroller.ARBEIDSGIVER);
         }
         if (!unleash.isEnabled(FOLKETRYGDEN_MVP) && brevkopiRegler.contains(SKATT_FÅR_KOPI)) {

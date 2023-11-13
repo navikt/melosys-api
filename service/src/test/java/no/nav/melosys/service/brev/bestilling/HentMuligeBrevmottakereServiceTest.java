@@ -420,9 +420,9 @@ class HentMuligeBrevmottakereServiceTest {
         when(persondataFasade.hentSammensattNavn(anyString())).thenReturn("Ola Nordmann");
         mockHentOrganisasjon("123", "Ståle Stål");
         mockHentOrganisasjon("974761076", "Skatt");
-        when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottakerrolle(behandling, TRYGDEAVTALE_GB, BRUKER)).thenReturn("Vedtak om medlemskap, Attest for utsendt arbeidstaker");
-        when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottaker(behandling, TRYGDEAVTALE_GB, arbeidsgiver, "Kopi til arbeidsgiver")).thenReturn("Kopi av vedtak om medlemskap, Attest for utsendt arbeidstaker");
-        when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottaker(behandling, TRYGDEAVTALE_GB, trygdemyndighet, "Kopi til utenlandsk trygdemyndighet")).thenReturn("Attest for utsendt arbeidstaker", "Utenlandsk trygdemyndighet");
+        when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottakerrolle(behandling, TRYGDEAVTALE_GB, BRUKER)).thenReturn("Vedtak om medlemskap, Attest for medlemskap i folketrygden");
+        when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottaker(behandling, TRYGDEAVTALE_GB, arbeidsgiver, "Kopi til arbeidsgiver")).thenReturn("Kopi av vedtak om medlemskap, Attest for medlemskap i folketrygden");
+        when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottaker(behandling, TRYGDEAVTALE_GB, trygdemyndighet, "Kopi til utenlandsk trygdemyndighet")).thenReturn("Attest for medlemskap i folketrygden", "Utenlandsk trygdemyndighet");
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottaker(behandling, TRYGDEAVTALE_GB, skatteetaten, "Kopi til Skatt")).thenReturn("Kopi av vedtak om medlemskap");
 
         var request = new HentMuligeBrevmottakereService.RequestDto(TRYGDEAVTALE_GB, 123L, null);
@@ -438,7 +438,7 @@ class HentMuligeBrevmottakereServiceTest {
                 Brevmottaker::getRolle,
                 Brevmottaker::getAktørId,
                 Brevmottaker::getOrgnr)
-            .containsExactly("Vedtak om medlemskap, Attest for utsendt arbeidstaker", "Ola Nordmann", BRUKER, null, null);
+            .containsExactly("Vedtak om medlemskap, Attest for medlemskap i folketrygden", "Ola Nordmann", BRUKER, null, null);
 
         assertThat(muligeMottakere.kopiMottakere())
             .hasSize(2)
@@ -447,8 +447,8 @@ class HentMuligeBrevmottakereServiceTest {
                 Brevmottaker::getMottakerNavn
             )
             .containsExactlyInAnyOrder(
-                tuple("Kopi av vedtak om medlemskap, Attest for utsendt arbeidstaker", "Ståle Stål"),
-                tuple("Attest for utsendt arbeidstaker", "Utenlandsk trygdemyndighet")
+                tuple("Kopi av vedtak om medlemskap, Attest for medlemskap i folketrygden", "Ståle Stål"),
+                tuple("Attest for medlemskap i folketrygden", "Utenlandsk trygdemyndighet")
             );
 
         assertThat(muligeMottakere.fasteMottakere())
