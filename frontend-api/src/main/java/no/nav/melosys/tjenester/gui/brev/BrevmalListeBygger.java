@@ -84,7 +84,6 @@ public class BrevmalListeBygger {
             case VIRKSOMHET -> {
                 mottakere.add(lagMottakerMedAdresseOgFeilmelding(behandlingId, Mottakerroller.VIRKSOMHET, false));
                 mottakere.add(lagMottakerMedRolle(Mottakerroller.ANNEN_ORGANISASJON));
-                mottakere.add(lagMottakerMedRolle(Mottakerroller.NORSK_MYNDIGHET));
             }
             default -> throw new FunksjonellException("Sak må ha hovedpart for å kunne sende brev");
 
