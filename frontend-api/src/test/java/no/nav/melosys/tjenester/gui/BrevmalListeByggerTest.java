@@ -233,6 +233,26 @@ class BrevmalListeByggerTest {
     }
 
     @Test
+    void byggBrevmalDtoListe_brevAdresseLagingKasterFeil_returnererMalMedFeilmelding() {
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
+        when(hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(anyLong(), any())).thenThrow(new TekniskException("En annen feil"));
+
+
+        List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
+
+        assertThat(tilgjengeligeMaler).hasSize(4);
+        assertThat(tilgjengeligeMaler.get(1).getMottaker())
+            .extracting(
+                MottakerDto::getType,
+                mottaker -> mottaker.getFeilmelding().tittel())
+            .containsExactly(
+                MottakerType.ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG.getBeskrivelse(),
+                "En annen feil");
+    }
+
+    @Test
     void byggBrevmalDtoListe_mangelbrev_lagerRiktigeValg() {
         var behandling = lagBehandling(Behandlingstyper.FØRSTEGANG);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
