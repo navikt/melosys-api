@@ -126,12 +126,11 @@ class BrevmalListeByggerTest {
 
 
         assertThat(tilgjengeligeMaler)
-            .hasSize(3)
+            .hasSize(2)
             .extracting(brevmalResponse -> brevmalResponse.getMottaker().getType())
             .contains(
                 MottakerType.VIRKSOMHET.getBeskrivelse(),
-                MottakerType.ANNEN_ORGANISASJON.getBeskrivelse(),
-                MottakerType.NORSK_MYNDIGHET.getBeskrivelse());
+                MottakerType.ANNEN_ORGANISASJON.getBeskrivelse());
 
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper())
             .hasSize(1)
@@ -144,12 +143,6 @@ class BrevmalListeByggerTest {
             .extracting(BrevmalTypeDto::getType)
             .contains(
                 Produserbaredokumenter.GENERELT_FRITEKSTBREV_VIRKSOMHET);
-
-        assertThat(tilgjengeligeMaler.get(2).getBrevTyper())
-            .hasSize(1)
-            .extracting(BrevmalTypeDto::getType)
-            .contains(
-                Produserbaredokumenter.FRITEKSTBREV);
     }
 
     @Test
