@@ -72,7 +72,8 @@ class SaksopplysningDokumentConverterTest {
     }
 
     @Test
-    @Disabled("Fungere ikke med random, pga gammel java klasse hadde brukt navn som både string og liste")
+    @Disabled("EasyRandom takler ikke den konverte kotlin klassen OrganisasjonDokument og navn som List<String>")
+    // Har laget en egen test som dekker dette i EregDokumentConverterTest
     void konverterTilOgFraDatabase_medOrganisasjonDokument_erUendret() {
         testKonvertering(OrganisasjonDokument.class);
     }

@@ -18,8 +18,7 @@ class OrganisasjonDokument : SaksopplysningDokument {
 
     @XmlElementWrapper(name = "navn")
     @XmlElement(name = "navnelinje")
-    @JsonIgnore
-    var navn: List<String>? = null
+    var navn: List<String>? = null // TODO: Dette kan være en string. Fiks når vi fjerner soap/jaxb integrasjon
 
     @XmlJavaTypeAdapter(LocalDateXmlAdapter::class)
     var oppstartsdato: LocalDate? = null
@@ -30,6 +29,11 @@ class OrganisasjonDokument : SaksopplysningDokument {
 
     @JsonProperty("navn")
     fun getSammenslåttNavn(): String = lagSammenslåttNavn()
+
+    @JsonProperty("navn")
+    fun setNavn(navn :String) {
+        this.navn = listOf(navn)
+    }
 
     @JsonView(FrontendApi::class)
     fun getForretningsadresse(): StrukturertAdresse? = organisasjonDetaljer?.hentStrukturertForretningsadresse()
