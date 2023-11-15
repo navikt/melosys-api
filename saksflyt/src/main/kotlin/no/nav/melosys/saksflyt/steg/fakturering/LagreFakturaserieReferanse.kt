@@ -1,4 +1,4 @@
-package no.nav.melosys.saksflyt.behandlingsresultat
+package no.nav.melosys.saksflyt.steg.fakturering
 
 import mu.KotlinLogging
 import no.nav.melosys.saksflyt.steg.StegBehandler
