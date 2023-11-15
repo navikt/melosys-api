@@ -25,6 +25,7 @@ import static no.nav.melosys.tjenester.gui.brev.BrevFelt.*;
 
 @Component
 public class BrevmalListeBygger {
+    private static final String ARBEIDSGIVER_MANGLER_ADRESSE = "Finner ikke gyldig adresse til arbeidsgiver(e). Kontroller at arbeidsgiver(e) er lagt inn korrekt i sidemenyen";
     private final BrevmalListeService brevmalListeService;
     private final BehandlingService behandlingService;
     private final SaksbehandlingRegler saksbehandlingRegler;
@@ -136,8 +137,8 @@ public class BrevmalListeBygger {
                         String feilmelding = MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT.getBeskrivelse().replace("\"Ingen gyldig adresse funnet. ", "");
                         mottakerDto.setFeilmelding(new FeilmeldingDto(MANGLENDE_REGISTRERTE_ADRESSE, feilmelding));
                     }
-                    case VIRKSOMHET, ARBEIDSGIVER -> mottakerDto.setFeilmelding(new FeilmeldingDto(MANGLENDE_REGISTRERTE_ADRESSE));
-
+                    case VIRKSOMHET -> mottakerDto.setFeilmelding(new FeilmeldingDto(MANGLENDE_REGISTRERTE_ADRESSE));
+                    case ARBEIDSGIVER -> mottakerDto.setFeilmelding(new FeilmeldingDto(ARBEIDSGIVER_MANGLER_ADRESSE));
                     default -> throw new FunksjonellException("Vi har ikke støtte for tom adresse for " + rolle);
                 }
             } else {
@@ -146,6 +147,8 @@ public class BrevmalListeBygger {
         } catch (TekniskException e) {
             if ("Finner ikke arbeidsforholddokument".equals(e.getMessage())) {
                 mottakerDto.setFeilmelding(new FeilmeldingDto(INGEN_ARBEIDSGIVERE));
+            } else if (rolle == Mottakerroller.ARBEIDSGIVER) {
+                mottakerDto.setFeilmelding(new FeilmeldingDto(ARBEIDSGIVER_MANGLER_ADRESSE));
             } else {
                 mottakerDto.setFeilmelding(new FeilmeldingDto(e.getMessage()));
             }
