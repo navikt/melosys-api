@@ -50,7 +50,8 @@ class OppdaterFakturamottaker(
 
         faktureringskomponentenConsumer.oppdaterFakturaMottaker(
             sisteFakturaserieReferanse,
-            FakturaMottakerDto(FullmektigDto(fullmektig))
+            FakturaMottakerDto(FullmektigDto(fullmektig)),
+            prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER)
         )
     }
 

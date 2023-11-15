@@ -77,7 +77,7 @@ class OpprettBetalingsplan(
 
         log.info("Oppretter betalingsplan for behandling: $behandlingsId")
 
-        oppdaterFakturaserieReferanseOgLagreReferanse(behandlingsresultat, fakturaserieDto)
+        oppdaterFakturaserieReferanseOgLagreReferanse(behandlingsresultat, fakturaserieDto, prosessinstans.getData(ProsessDataKey.SAKSBEHANDLER))
     }
 
     private fun hentBetalingsIntervall(
@@ -132,9 +132,10 @@ class OpprettBetalingsplan(
 
     private fun oppdaterFakturaserieReferanseOgLagreReferanse(
         behandlingsresultat: Behandlingsresultat,
-        fakturaserieDto: FakturaserieDto
+        fakturaserieDto: FakturaserieDto,
+        saksbehandlerIdent: String
     ) {
-        val fakturaserieResponse = faktureringskomponentenConsumer.lagFakturaSerie(fakturaserieDto)
+        val fakturaserieResponse = faktureringskomponentenConsumer.lagFakturaSerie(fakturaserieDto, saksbehandlerIdent)
         behandlingsresultat.apply {
             fakturaserieReferanse = fakturaserieResponse.fakturaserieReferanse
         }

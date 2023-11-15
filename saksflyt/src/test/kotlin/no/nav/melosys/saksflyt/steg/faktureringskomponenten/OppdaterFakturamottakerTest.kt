@@ -39,6 +39,7 @@ class OppdaterFakturamottakerTest {
     lateinit var faktureringskomponentenConsumer: FaktureringskomponentenConsumer
 
     private val unleash = FakeUnleash()
+    private val SAKSBEHANDLER_IDENT = "S123456"
     private val SAKSNUMMER = "MEL-1"
     private val BEHANDLING_ID = 1L
 
@@ -101,8 +102,13 @@ class OppdaterFakturamottakerTest {
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat1
         every { behandlingsresultatService.hentBehandlingsresultat(2L) } returns behandlingsresultat2
 
+        val prosessinstans = Prosessinstans().apply {
+            setData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
+            setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER)
+        }
 
-        oppdaterFakturamottaker.utfør(Prosessinstans().apply { setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER) })
+
+        oppdaterFakturamottaker.utfør(prosessinstans)
 
 
         verify { fagsakService.hentFagsak(SAKSNUMMER) }
@@ -110,7 +116,8 @@ class OppdaterFakturamottakerTest {
         verify {
             faktureringskomponentenConsumer.oppdaterFakturaMottaker(
                 behandlingsresultat2.fakturaserieReferanse,
-                FakturaMottakerDto(FullmektigDto(fullmektig))
+                FakturaMottakerDto(FullmektigDto(fullmektig)),
+                eq(SAKSBEHANDLER_IDENT)
             )
         }
     }
@@ -122,8 +129,13 @@ class OppdaterFakturamottakerTest {
         every { fagsakService.hentFagsak(SAKSNUMMER) } returns fagsak
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns behandlingsresultat
 
+        val prosessinstans = Prosessinstans().apply {
+            setData(ProsessDataKey.SAKSBEHANDLER, SAKSBEHANDLER_IDENT)
+            setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER)
+        }
 
-        oppdaterFakturamottaker.utfør(Prosessinstans().apply { setData(ProsessDataKey.SAKSNUMMER, SAKSNUMMER) })
+
+        oppdaterFakturamottaker.utfør(prosessinstans)
 
 
         verify { fagsakService.hentFagsak(SAKSNUMMER) }
@@ -131,7 +143,8 @@ class OppdaterFakturamottakerTest {
         verify {
             faktureringskomponentenConsumer.oppdaterFakturaMottaker(
                 behandlingsresultat.fakturaserieReferanse,
-                FakturaMottakerDto(FullmektigDto(null))
+                FakturaMottakerDto(FullmektigDto(null)),
+                eq(SAKSBEHANDLER_IDENT)
             )
         }
     }
