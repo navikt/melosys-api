@@ -22,7 +22,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall
-import no.nav.melosys.saksflyt.faktureringskomponenten.OpprettBetalingsplan
+import no.nav.melosys.saksflyt.steg.fakturering.OpprettBetalingsplan
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
@@ -93,7 +93,7 @@ class OpprettBetalingsplanTest {
         opprettBetalingsplan.utfør(prosessinstans)
 
 
-        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaSerie(capture(slotFakturaserieDto)) }
+        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaSerie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
         slotFakturaserieDto.captured.shouldNotBeNull()
         slotFakturaserieDto.captured.referanseBruker.shouldContain("Vedtak om medlemskap datert ")
         slotFakturaserieDto.captured.fakturaserieReferanse.shouldBeNull()
@@ -114,7 +114,7 @@ class OpprettBetalingsplanTest {
         opprettBetalingsplan.utfør(prosessinstans)
 
 
-        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaSerie(capture(slotFakturaserieDto)) }
+        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaSerie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
         slotFakturaserieDto.captured.shouldNotBeNull()
         slotFakturaserieDto.captured.fakturaserieReferanse.shouldBe(opprinneligBehandlingsresultat.fakturaserieReferanse)
     }
@@ -139,7 +139,7 @@ class OpprettBetalingsplanTest {
         opprettBetalingsplan.utfør(prosessinstans)
 
 
-        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaSerie(capture(slotFakturaserieDto)) }
+        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaSerie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
         slotFakturaserieDto.captured.shouldNotBeNull()
         slotFakturaserieDto.captured.perioder.size.shouldBe(1)
     }
@@ -164,7 +164,7 @@ class OpprettBetalingsplanTest {
         opprettBetalingsplan.utfør(prosessinstans)
 
 
-        verify(exactly = 0) { faktureringskomponentenConsumer.lagFakturaSerie(any()) }
+        verify(exactly = 0) { faktureringskomponentenConsumer.lagFakturaSerie(any(), eq(SAKSBEHANDLER_IDENT)) }
     }
 
     @Test
@@ -185,7 +185,7 @@ class OpprettBetalingsplanTest {
         opprettBetalingsplan.utfør(prosessinstans)
 
 
-        verify(exactly = 0) { faktureringskomponentenConsumer.lagFakturaSerie(any()) }
+        verify(exactly = 0) { faktureringskomponentenConsumer.lagFakturaSerie(any(), eq(SAKSBEHANDLER_IDENT)) }
     }
 
     @Test
@@ -199,7 +199,7 @@ class OpprettBetalingsplanTest {
         opprettBetalingsplan.utfør(prosessinstans)
 
 
-        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaSerie(capture(slotFakturaserieDto)) }
+        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaSerie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
         slotFakturaserieDto.captured.shouldNotBeNull()
         slotFakturaserieDto.captured.fullmektig?.organisasjonsnummer.shouldBe(FULLMEKTIG_IDENT)
         slotFakturaserieDto.captured.fullmektig?.fodselsnummer.shouldBeNull()
@@ -216,7 +216,7 @@ class OpprettBetalingsplanTest {
         opprettBetalingsplan.utfør(prosessinstans)
 
 
-        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaSerie(capture(slotFakturaserieDto)) }
+        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaSerie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
         slotFakturaserieDto.captured.shouldNotBeNull()
         slotFakturaserieDto.captured.fullmektig?.fodselsnummer.shouldBe(FULLMEKTIG_IDENT)
         slotFakturaserieDto.captured.fullmektig?.organisasjonsnummer.shouldBeNull()
@@ -226,6 +226,7 @@ class OpprettBetalingsplanTest {
         this.fagsak = lagFagsak().apply { this.aktører = aktører }
         this.behandling = lagBehandling(fagsak)
         prosessinstans = Prosessinstans().apply {
+            setData(ProsessDataKey.SAKSBEHANDLER, "S123456")
             setData(ProsessDataKey.BETALINGSINTERVALL, FaktureringsIntervall.KVARTAL)
             this.behandling = this@OpprettBetalingsplanTest.behandling
         }
@@ -335,6 +336,7 @@ class OpprettBetalingsplanTest {
     }
 
     companion object {
+        const val SAKSBEHANDLER_IDENT = "S123456"
         const val BEHANDLING_ID = 1L
         const val BRUKER_FNR = "11111111111"
         const val BRUKER_AKTØRID = "12345678911"
