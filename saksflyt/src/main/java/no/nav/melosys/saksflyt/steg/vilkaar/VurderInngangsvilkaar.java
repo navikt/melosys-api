@@ -51,6 +51,7 @@ public class VurderInngangsvilkaar implements StegBehandler {
         return behandling.getFagsak().erSakstypeEøs()
             && !saksbehandlingRegler.harIngenFlyt(behandling)
             && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)
+            && !saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)
             && behandling.kanResultereIVedtak()
             && behandling.harPeriodeOgLand();
     }

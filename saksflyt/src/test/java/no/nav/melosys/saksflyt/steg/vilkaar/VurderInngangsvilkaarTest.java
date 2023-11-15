@@ -55,6 +55,7 @@ class VurderInngangsvilkaarTest {
     void utfoerSteg_funker() {
         when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(false);
         when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any())).thenReturn(false);
+        when(saksbehandlingRegler.harIkkeYrkesaktivFlyt(any())).thenReturn(false);
         MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
         mottatteOpplysningerData.periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(1L));
         mottatteOpplysningerData.soeknadsland.landkoder = List.of(Landkoder.NO.getKode(), Landkoder.SE.getKode());
@@ -90,6 +91,7 @@ class VurderInngangsvilkaarTest {
     void utfoerSteg_finnerIkkeLandOgPeriode_vurdererIkkeInngangsvilkår() {
         when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(false);
         when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any())).thenReturn(false);
+        when(saksbehandlingRegler.harIkkeYrkesaktivFlyt(any())).thenReturn(false);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         var mottatteOpplysningerData = new MottatteOpplysningerData();
         mottatteOpplysningerData.periode = new Periode();
@@ -113,6 +115,8 @@ class VurderInngangsvilkaarTest {
     @Test
     void utfør_erBehandlingAvSed_vurdererIkkeInngangsvilkår() {
         when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(false);
+        when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any())).thenReturn(false);
+        when(saksbehandlingRegler.harIkkeYrkesaktivFlyt(any())).thenReturn(false);
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         behandling.setType(Behandlingstyper.NY_VURDERING);
@@ -142,6 +146,7 @@ class VurderInngangsvilkaarTest {
         verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any());
         verify(saksbehandlingRegler, never()).harIngenFlyt(any());
         verify(saksbehandlingRegler, never()).harRegistreringUnntakFraMedlemskapFlyt(any());
+        verify(saksbehandlingRegler, never()).harIkkeYrkesaktivFlyt(any());
     }
 
     @Test
@@ -158,6 +163,7 @@ class VurderInngangsvilkaarTest {
 
         verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any());
         verify(saksbehandlingRegler, never()).harRegistreringUnntakFraMedlemskapFlyt(any());
+        verify(saksbehandlingRegler, never()).harIkkeYrkesaktivFlyt(any());
     }
 
     @Test
@@ -174,12 +180,31 @@ class VurderInngangsvilkaarTest {
 
 
         verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any());
+        verify(saksbehandlingRegler, never()).harIkkeYrkesaktivFlyt(any());
+    }
+
+    @Test
+    void utfør_harIkkeYrkesaktivFlyt_vurdererIkkeInngangsvilkår() {
+        when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(false);
+        when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any())).thenReturn(false);
+        when(saksbehandlingRegler.harIkkeYrkesaktivFlyt(any())).thenReturn(true);
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+        behandling.setFagsak(new Fagsak());
+        behandling.getFagsak().setType(Sakstyper.EU_EOS);
+
+
+        vurderInngangsvilkaar.utfør(prosessinstans);
+
+
+        verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any());
     }
 
     @Test
     void utfør_kanIkkeResultereIVedtak_vurdererIkkeInngangsvilkår() {
         when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(false);
         when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any())).thenReturn(false);
+        when(saksbehandlingRegler.harIkkeYrkesaktivFlyt(any())).thenReturn(false);
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         behandling.setFagsak(new Fagsak());
