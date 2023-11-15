@@ -7,7 +7,6 @@ import java.util.Objects;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
@@ -26,6 +25,7 @@ import static no.nav.melosys.tjenester.gui.brev.BrevFelt.*;
 
 @Component
 public class BrevmalListeBygger {
+    private static final String ARBEIDSGIVER_MANGLER_ADRESSE = "Finner ikke gyldig adresse til arbeidsgiver(e). Kontroller at arbeidsgiver(e) er lagt inn korrekt i sidemenyen";
     private final BrevmalListeService brevmalListeService;
     private final BehandlingService behandlingService;
     private final SaksbehandlingRegler saksbehandlingRegler;
@@ -131,28 +131,26 @@ public class BrevmalListeBygger {
                 switch (rolle) {
                     case BRUKER -> {
                         String feilmelding = MANGLENDE_REGISTRERTE_ADRESSE_BRUKER.getBeskrivelse().replace("Ingen gyldig adresse funnet. ", "");
-                        mottakerDto.setFeilmelding(new FeilmeldingDto(MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse(), List.of(new FeilmeldingUnderpunkt(feilmelding))));
+                        mottakerDto.setFeilmelding(new FeilmeldingDto(MANGLENDE_REGISTRERTE_ADRESSE, feilmelding));
                     }
                     case FULLMEKTIG -> {
                         String feilmelding = MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT.getBeskrivelse().replace("\"Ingen gyldig adresse funnet. ", "");
-                        mottakerDto.setFeilmelding(new FeilmeldingDto(MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse(), List.of(new FeilmeldingUnderpunkt(feilmelding))));
+                        mottakerDto.setFeilmelding(new FeilmeldingDto(MANGLENDE_REGISTRERTE_ADRESSE, feilmelding));
                     }
-                    case VIRKSOMHET, ARBEIDSGIVER -> {
-                        FeilmeldingDto feilmeldingDto = new FeilmeldingDto(MANGLENDE_REGISTRERTE_ADRESSE.getBeskrivelse(), List.of());
-                        mottakerDto.setFeilmelding(feilmeldingDto);
-                    }
-                    default ->
-                        throw new FunksjonellException("Vi har ikke støtte for tom adresse for " + rolle);
+                    case VIRKSOMHET -> mottakerDto.setFeilmelding(new FeilmeldingDto(MANGLENDE_REGISTRERTE_ADRESSE));
+                    case ARBEIDSGIVER -> mottakerDto.setFeilmelding(new FeilmeldingDto(ARBEIDSGIVER_MANGLER_ADRESSE));
+                    default -> throw new FunksjonellException("Vi har ikke støtte for tom adresse for " + rolle);
                 }
             } else {
                 mottakerDto.setAdresser(brevAdresser);
             }
         } catch (TekniskException e) {
             if ("Finner ikke arbeidsforholddokument".equals(e.getMessage())) {
-                FeilmeldingDto feilmeldingDto = new FeilmeldingDto(Kontroll_begrunnelser.INGEN_ARBEIDSGIVERE.getBeskrivelse(), new ArrayList<>());
-                mottakerDto.setFeilmelding(feilmeldingDto);
+                mottakerDto.setFeilmelding(new FeilmeldingDto(INGEN_ARBEIDSGIVERE));
+            } else if (rolle == Mottakerroller.ARBEIDSGIVER) {
+                mottakerDto.setFeilmelding(new FeilmeldingDto(ARBEIDSGIVER_MANGLER_ADRESSE));
             } else {
-                throw new TekniskException(e);
+                mottakerDto.setFeilmelding(new FeilmeldingDto(e.getMessage()));
             }
         }
     }
