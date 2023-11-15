@@ -1,5 +1,10 @@
 package no.nav.melosys.tjenester.gui;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
@@ -29,11 +34,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
 
 import static no.nav.melosys.domain.kodeverk.brev.Distribusjonstype.*;
 import static no.nav.melosys.tjenester.gui.dto.brev.FeltvalgAlternativKode.*;
@@ -233,7 +233,7 @@ class BrevmalListeByggerTest {
     }
 
     @Test
-    void byggBrevmalDtoListe_brevAdresseLagingKasterFeil_returnererMalMedFeilmelding() {
+    void byggBrevmalDtoListe_brevAdresseLagingKasterFeil_returnererMalMedFeilmeldingMenArbeidsgiverHarFastFeilmelding() {
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
         when(hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(anyLong(), any())).thenThrow(new TekniskException("En annen feil"));
@@ -243,13 +243,20 @@ class BrevmalListeByggerTest {
 
 
         assertThat(tilgjengeligeMaler).hasSize(4);
+        assertThat(tilgjengeligeMaler.get(0).getMottaker())
+            .extracting(
+                MottakerDto::getType,
+                mottaker -> mottaker.getFeilmelding().tittel())
+            .containsExactly(
+                MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.getBeskrivelse(),
+                "En annen feil");
         assertThat(tilgjengeligeMaler.get(1).getMottaker())
             .extracting(
                 MottakerDto::getType,
                 mottaker -> mottaker.getFeilmelding().tittel())
             .containsExactly(
                 MottakerType.ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG.getBeskrivelse(),
-                "En annen feil");
+                "Finner ikke gyldig adresse til arbeidsgiver(e). Kontroller at arbeidsgiver(e) er lagt inn korrekt i sidemenyen");
     }
 
     @Test
