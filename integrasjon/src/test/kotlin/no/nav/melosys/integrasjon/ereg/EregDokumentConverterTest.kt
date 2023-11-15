@@ -4,6 +4,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.assertions.json.shouldEqualJson
+import io.kotest.assertions.withClue
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeTypeOf
@@ -99,7 +100,9 @@ class EregDokumentConverterTest {
             val convertToDatabaseColumn = saksopplysningDokumentConverter.convertToDatabaseColumn(saksopplysningDokument)
 
 
-            organisasjonDokumentJson.shouldEqualJson(convertToDatabaseColumn)
+            withClue("Feilet for ${it}-resultat.json") {
+                organisasjonDokumentJson.shouldEqualJson(convertToDatabaseColumn)
+            }
         }
     }
 
