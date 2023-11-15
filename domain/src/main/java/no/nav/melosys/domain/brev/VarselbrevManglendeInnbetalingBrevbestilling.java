@@ -2,7 +2,7 @@ package no.nav.melosys.domain.brev;
 
 import java.time.LocalDate;
 
-import no.nav.melosys.domain.ftrl.Betalingsstatus;
+import no.nav.melosys.domain.manglendebetaling.Betalingsstatus;
 
 public class VarselbrevManglendeInnbetalingBrevbestilling extends DokgenBrevbestilling {
     private String fakturanummer;

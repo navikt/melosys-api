@@ -154,8 +154,8 @@ public final class ProsessflytDefinisjon {
             )
         );
 
-        PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_NY_BEHANDLING_FTRL_MANGLENDE_INNBETALING,
-            new ProsessFlyt(ProsessType.OPPRETT_NY_BEHANDLING_FTRL_MANGLENDE_INNBETALING,
+        PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING,
+            new ProsessFlyt(ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING,
                 OPPRETT_MANGLENDE_INNBETALING_BEHANDLING,
                 SEND_MANGLENDE_INNBETALING_VARSELBREV
             )

@@ -1,4 +1,4 @@
-package no.nav.melosys.domain.ftrl
+package no.nav.melosys.domain.manglendebetaling
 
 enum class Betalingsstatus {
     IKKE_BETALT,

@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflyt.steg.brev
 
 import no.nav.melosys.domain.brev.TrygdeavgiftBetalingsfrist
-import no.nav.melosys.domain.ftrl.Betalingsstatus
+import no.nav.melosys.domain.manglendebetaling.Betalingsstatus
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.saksflyt.brev.BrevBestiller

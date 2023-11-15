@@ -20,7 +20,7 @@ import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
-import no.nav.melosys.domain.ftrl.ManglendeFakturabetalingMelding;
+import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
@@ -148,9 +148,9 @@ public class ProsessinstansService {
         return prosessinstans;
     }
 
-    public void opprettFtrlManglendeInnbetalingProsessflyt(ManglendeFakturabetalingMelding manglendeFakturabetalingMelding) {
+    public void opprettManglendeInnbetalingProsessflyt(ManglendeFakturabetalingMelding manglendeFakturabetalingMelding) {
         Prosessinstans prosessinstans = new Prosessinstans();
-        prosessinstans.setType(ProsessType.OPPRETT_NY_BEHANDLING_FTRL_MANGLENDE_INNBETALING);
+        prosessinstans.setType(ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING);
 
         prosessinstans.setData(MOTTATT_DATO, manglendeFakturabetalingMelding.getDatoMottatt());
         prosessinstans.setData(FAKTURASERIE_REFERANSE, manglendeFakturabetalingMelding.getFakturaserieReferanse());
