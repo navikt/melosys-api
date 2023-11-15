@@ -53,6 +53,8 @@ class VurderInngangsvilkaarTest {
 
     @Test
     void utfoerSteg_funker() {
+        when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(false);
+        when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any())).thenReturn(false);
         MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
         mottatteOpplysningerData.periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(1L));
         mottatteOpplysningerData.soeknadsland.landkoder = List.of(Landkoder.NO.getKode(), Landkoder.SE.getKode());
@@ -86,6 +88,8 @@ class VurderInngangsvilkaarTest {
 
     @Test
     void utfoerSteg_finnerIkkeLandOgPeriode_vurdererIkkeInngangsvilkår() {
+        when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(false);
+        when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any())).thenReturn(false);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         var mottatteOpplysningerData = new MottatteOpplysningerData();
         mottatteOpplysningerData.periode = new Periode();
@@ -107,7 +111,7 @@ class VurderInngangsvilkaarTest {
     }
 
     @Test
-    void utfør_behandlingstemaBeslutningLovvalgAnnetLandToggleAv_vurdererIkkeInngangsvilkår() {
+    void utfør_erBehandlingAvSed_vurdererIkkeInngangsvilkår() {
         when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(false);
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
@@ -117,7 +121,10 @@ class VurderInngangsvilkaarTest {
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
         behandling.getFagsak().setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
 
+
         vurderInngangsvilkaar.utfør(prosessinstans);
+
+
         verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any());
     }
 
@@ -128,25 +135,51 @@ class VurderInngangsvilkaarTest {
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
 
+
         vurderInngangsvilkaar.utfør(prosessinstans);
+
+
         verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any());
+        verify(saksbehandlingRegler, never()).harIngenFlyt(any());
+        verify(saksbehandlingRegler, never()).harRegistreringUnntakFraMedlemskapFlyt(any());
     }
 
     @Test
     void utfør_harIkkeFlyt_vurdererIkkeInngangsvilkår() {
+        when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(true);
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         behandling.setFagsak(new Fagsak());
         behandling.getFagsak().setType(Sakstyper.EU_EOS);
-        behandling.getFagsak().setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
-        behandling.setType(Behandlingstyper.HENVENDELSE);
+
 
         vurderInngangsvilkaar.utfør(prosessinstans);
+
+
+        verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any());
+        verify(saksbehandlingRegler, never()).harRegistreringUnntakFraMedlemskapFlyt(any());
+    }
+
+    @Test
+    void utfør_harUnntaksregistreringflyt_vurdererIkkeInngangsvilkår() {
+        when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(false);
+        when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any())).thenReturn(true);
+        Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setBehandling(behandling);
+        behandling.setFagsak(new Fagsak());
+        behandling.getFagsak().setType(Sakstyper.EU_EOS);
+
+
+        vurderInngangsvilkaar.utfør(prosessinstans);
+
+
         verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any());
     }
 
     @Test
     void utfør_kanIkkeResultereIVedtak_vurdererIkkeInngangsvilkår() {
+        when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(false);
+        when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any())).thenReturn(false);
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
         behandling.setFagsak(new Fagsak());
@@ -155,7 +188,10 @@ class VurderInngangsvilkaarTest {
         behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
 
+
         vurderInngangsvilkaar.utfør(prosessinstans);
+
+
         verify(inngangsvilkaarService, never()).vurderOgLagreInngangsvilkår(anyLong(), any(), anyBoolean(), any());
     }
 }

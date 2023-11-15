@@ -50,6 +50,7 @@ public class VurderInngangsvilkaar implements StegBehandler {
     private boolean skalVurdereInngangsvilkår(Behandling behandling) {
         return behandling.getFagsak().erSakstypeEøs()
             && !saksbehandlingRegler.harIngenFlyt(behandling)
+            && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)
             && behandling.kanResultereIVedtak()
             && behandling.harPeriodeOgLand();
     }
