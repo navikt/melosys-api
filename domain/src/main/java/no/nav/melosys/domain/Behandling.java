@@ -271,8 +271,8 @@ public class Behandling extends RegistreringsInfo {
         return Optional.ofNullable(mottatteOpplysninger).map(MottatteOpplysninger::getMottatteOpplysningerData);
     }
 
-    public boolean harPeriodeOgLand() {
-        return harPeriode() && harLand();
+    public boolean harPeriodeOgSøknadsland() {
+        return harPeriode() && harSøknadsland();
     }
 
     public boolean harPeriode() {
@@ -285,6 +285,13 @@ public class Behandling extends RegistreringsInfo {
             if (mottatteOpplysninger.getMottatteOpplysningerData() instanceof AnmodningEllerAttest anmodningEllerAttest) {
                 return anmodningEllerAttest.getLovvalgsland() != null;
             }
+            return mottatteOpplysninger.getMottatteOpplysningerData().soeknadsland.erGyldig();
+        }
+        return false;
+    }
+
+    public boolean harSøknadsland() {
+        if (mottatteOpplysninger != null && mottatteOpplysninger.getMottatteOpplysningerData() != null) {
             return mottatteOpplysninger.getMottatteOpplysningerData().soeknadsland.erGyldig();
         }
         return false;
@@ -407,10 +414,6 @@ public class Behandling extends RegistreringsInfo {
 
     public static boolean erBehandlingAvSøknadArbeidIFlereLand(String behandlingstemaKode) {
         return ARBEID_FLERE_LAND.getKode().equalsIgnoreCase(behandlingstemaKode);
-    }
-
-    public static boolean erAnmodningOmUnntak(Behandlingstema behandlingstema) {
-        return erAnmodningOmUnntak(behandlingstema.getKode());
     }
 
     private static boolean erAnmodningOmUnntak(String behandlingstemaKode) {

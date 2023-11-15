@@ -1,13 +1,6 @@
 package no.nav.melosys.service.vilkaar;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.dokument.felles.Land;
@@ -21,10 +14,19 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.inngangsvilkar.InngangsvilkaarConsumer;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static no.nav.melosys.domain.kodeverk.Vilkaar.FO_883_2004_INNGANGSVILKAAR;
 import static no.nav.melosys.domain.util.IsoLandkodeKonverterer.tilIso3;
@@ -38,19 +40,31 @@ public class InngangsvilkaarService {
     private final InngangsvilkaarConsumer inngangsvilkaarConsumer;
     private final PersondataFasade persondataFasade;
     private final VilkaarsresultatService vilkaarsresultatService;
+    private final SaksbehandlingRegler saksbehandlingRegler;
 
     public InngangsvilkaarService(BehandlingService behandlingService,
                                   InngangsvilkaarConsumer inngangsvilkaarConsumer,
                                   PersondataFasade persondataFasade,
-                                  VilkaarsresultatService vilkaarsresultatService) {
+                                  VilkaarsresultatService vilkaarsresultatService,
+                                  SaksbehandlingRegler saksbehandlingRegler) {
         this.behandlingService = behandlingService;
         this.inngangsvilkaarConsumer = inngangsvilkaarConsumer;
         this.persondataFasade = persondataFasade;
         this.vilkaarsresultatService = vilkaarsresultatService;
+        this.saksbehandlingRegler = saksbehandlingRegler;
     }
 
     public boolean oppfyllervurderingEF_883_2004(long behandlingID) {
         return vilkaarsresultatService.oppfyllerVilkaar(behandlingID, FO_883_2004_INNGANGSVILKAAR);
+    }
+
+    public boolean skalVurdereInngangsvilkår(Behandling behandling) {
+        return behandling.getFagsak().erSakstypeEøs()
+            && !saksbehandlingRegler.harIngenFlyt(behandling)
+            && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)
+            && !saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)
+            && behandling.kanResultereIVedtak()
+            && behandling.harPeriodeOgSøknadsland();
     }
 
     public boolean vurderOgLagreInngangsvilkår(long behandlingID,
@@ -120,7 +134,7 @@ public class InngangsvilkaarService {
             throw new FunksjonellException("Inngangsvilkår er ikke vurdert for behandling " + behandlingID);
         }
         var behandling = behandlingService.hentBehandling(behandlingID);
-        if (!behandling.harPeriodeOgLand()) {
+        if (!behandling.harPeriodeOgSøknadsland()) {
             throw new FunksjonellException("Mangler land eller periode for behandling " + behandlingID);
         }
         final var inngangsvilkaarBegrunnelseKoder = inngangsvilkaar.get().getBegrunnelser().stream()

@@ -1,6 +1,13 @@
 package no.nav.melosys.service.vilkaar;
 
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.VilkaarBegrunnelse;
 import no.nav.melosys.domain.Vilkaarsresultat;
 import no.nav.melosys.domain.dokument.felles.Land;
@@ -8,6 +15,7 @@ import no.nav.melosys.domain.inngangsvilkar.Feilmelding;
 import no.nav.melosys.domain.inngangsvilkar.InngangsvilkarResponse;
 import no.nav.melosys.domain.inngangsvilkar.Kategori;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.Vilkaar;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Inngangsvilkaar;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
@@ -19,6 +27,7 @@ import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.inngangsvilkar.InngangsvilkaarConsumerImpl;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.persondata.PersondataFasade;
+import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,21 +35,15 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import static no.nav.melosys.domain.dokument.felles.Land.FINLAND;
 import static no.nav.melosys.domain.dokument.felles.Land.SVERIGE;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE;
 import static no.nav.melosys.domain.util.IsoLandkodeKonverterer.tilIso3;
 import static no.nav.melosys.service.SaksbehandlingDataFactory.lagBehandling;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class InngangsvilkaarServiceTest {
@@ -51,6 +54,8 @@ class InngangsvilkaarServiceTest {
     @Mock
     private PersondataFasade persondataFasade;
     @Mock
+    private SaksbehandlingRegler saksbehandlingRegler;
+    @Mock
     private VilkaarsresultatService vilkaarsresultatService;
 
     private InngangsvilkaarService inngangsvilkaarService;
@@ -58,7 +63,7 @@ class InngangsvilkaarServiceTest {
     @BeforeEach
     void setUp() {
         inngangsvilkaarService = new InngangsvilkaarService(behandlingService, inngangsvilkaarConsumer,
-            persondataFasade, vilkaarsresultatService);
+            persondataFasade, vilkaarsresultatService, saksbehandlingRegler);
     }
 
     @Test
@@ -244,6 +249,120 @@ class InngangsvilkaarServiceTest {
         verify(vilkaarsresultatService).oppdaterVilkaarsresultat(eq(1L), eq(Vilkaar.FO_883_2004_INNGANGSVILKAAR), anyBoolean(), eq(Set.of(
             Inngangsvilkaar.OVERSTYRT_AV_SAKSBEHANDLER, Inngangsvilkaar.MANGLER_STATSBORGERSKAP
         )));
+    }
+
+    @Test
+    void skalVurdereInngangsvilkår_altStemmer_returnererTrue() {
+        var fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
+        var behandling = lagBehandlingMedPeriodeOgLand();
+        behandling.setFagsak(fagsak);
+
+
+        assertThat(inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)).isTrue();
+    }
+
+    @Test
+    void skalVurdereInngangsvilkår_sakstypeIkkeEøs_returnererFalse() {
+        var fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.FTRL);
+        var behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+
+
+        assertThat(inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)).isFalse();
+        verifyNoInteractions(saksbehandlingRegler);
+    }
+
+    @Test
+    void skalVurdereInngangsvilkår_harIngenFlyt_returnererFalse() {
+        when(saksbehandlingRegler.harIngenFlyt(any())).thenReturn(true);
+        var fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
+        var behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+
+
+        assertThat(inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)).isFalse();
+        verify(saksbehandlingRegler).harIngenFlyt(any());
+        verify(saksbehandlingRegler, never()).harRegistreringUnntakFraMedlemskapFlyt(any());
+        verify(saksbehandlingRegler, never()).harIkkeYrkesaktivFlyt(any());
+    }
+
+    @Test
+    void skalVurdereInngangsvilkår_harUnntaktsregistreringFlyt_returnererFalse() {
+        when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(any())).thenReturn(true);
+        var fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
+        var behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+
+
+        assertThat(inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)).isFalse();
+        verify(saksbehandlingRegler).harIngenFlyt(any());
+        verify(saksbehandlingRegler).harRegistreringUnntakFraMedlemskapFlyt(any());
+        verify(saksbehandlingRegler, never()).harIkkeYrkesaktivFlyt(any());
+    }
+
+    @Test
+    void skalVurdereInngangsvilkår_harIkkeYrkeskaktivFlyt_returnererFalse() {
+        when(saksbehandlingRegler.harIkkeYrkesaktivFlyt(any())).thenReturn(true);
+        var fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
+        var behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+
+
+        assertThat(inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)).isFalse();
+        verify(saksbehandlingRegler).harIngenFlyt(any());
+        verify(saksbehandlingRegler).harRegistreringUnntakFraMedlemskapFlyt(any());
+        verify(saksbehandlingRegler).harIkkeYrkesaktivFlyt(any());
+    }
+
+    @Test
+    void skalVurdereInngangsvilkår_erSed_returnererFalse() {
+        var fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
+        var behandling = new Behandling();
+        behandling.setFagsak(fagsak);
+        behandling.setTema(REGISTRERING_UNNTAK_NORSK_TRYGD_ØVRIGE);
+
+
+        assertThat(inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)).isFalse();
+        verify(saksbehandlingRegler).harIngenFlyt(any());
+        verify(saksbehandlingRegler).harRegistreringUnntakFraMedlemskapFlyt(any());
+        verify(saksbehandlingRegler).harIkkeYrkesaktivFlyt(any());
+    }
+
+    @Test
+    void skalVurdereInngangsvilkår_harIkkePeriode_returnererFalse() {
+        var fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
+        var behandling = lagBehandlingMedPeriodeOgLand();
+        behandling.setFagsak(fagsak);
+        behandling.getMottatteOpplysninger().getMottatteOpplysningerData().periode = new Periode(null, null);
+
+
+        assertThat(inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)).isFalse();
+        verify(saksbehandlingRegler).harIngenFlyt(any());
+        verify(saksbehandlingRegler).harRegistreringUnntakFraMedlemskapFlyt(any());
+        verify(saksbehandlingRegler).harIkkeYrkesaktivFlyt(any());
+
+    }
+
+    @Test
+    void skalVurdereInngangsvilkår_harIkkeLand_returnererFalse() {
+        var fagsak = new Fagsak();
+        fagsak.setType(Sakstyper.EU_EOS);
+        var behandling = lagBehandlingMedPeriodeOgLand();
+        behandling.setFagsak(fagsak);
+        behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.landkoder = Collections.emptyList();
+
+
+        assertThat(inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)).isFalse();
+        verify(saksbehandlingRegler).harIngenFlyt(any());
+        verify(saksbehandlingRegler).harRegistreringUnntakFraMedlemskapFlyt(any());
+        verify(saksbehandlingRegler).harIkkeYrkesaktivFlyt(any());
     }
 
     private Behandling lagBehandlingMedPeriodeOgLand() {
