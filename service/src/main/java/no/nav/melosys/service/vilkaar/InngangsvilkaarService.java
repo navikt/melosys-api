@@ -64,7 +64,7 @@ public class InngangsvilkaarService {
             && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)
             && !saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)
             && behandling.kanResultereIVedtak()
-            && behandling.harPeriodeOgLand();
+            && behandling.harPeriodeOgSøknadsland();
     }
 
     public boolean vurderOgLagreInngangsvilkår(long behandlingID,
@@ -134,7 +134,7 @@ public class InngangsvilkaarService {
             throw new FunksjonellException("Inngangsvilkår er ikke vurdert for behandling " + behandlingID);
         }
         var behandling = behandlingService.hentBehandling(behandlingID);
-        if (!behandling.harPeriodeOgLand()) {
+        if (!behandling.harPeriodeOgSøknadsland()) {
             throw new FunksjonellException("Mangler land eller periode for behandling " + behandlingID);
         }
         final var inngangsvilkaarBegrunnelseKoder = inngangsvilkaar.get().getBegrunnelser().stream()
