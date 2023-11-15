@@ -409,10 +409,6 @@ public class Behandling extends RegistreringsInfo {
         return ARBEID_FLERE_LAND.getKode().equalsIgnoreCase(behandlingstemaKode);
     }
 
-    public static boolean erAnmodningOmUnntak(Behandlingstema behandlingstema) {
-        return erAnmodningOmUnntak(behandlingstema.getKode());
-    }
-
     private static boolean erAnmodningOmUnntak(String behandlingstemaKode) {
         return ANMODNING_OM_UNNTAK_HOVEDREGEL.getKode().equalsIgnoreCase(behandlingstemaKode);
     }

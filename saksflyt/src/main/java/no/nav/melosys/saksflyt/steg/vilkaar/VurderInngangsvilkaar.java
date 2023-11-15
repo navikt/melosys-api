@@ -5,7 +5,6 @@ import no.nav.melosys.saksflyt.steg.StegBehandler;
 import no.nav.melosys.saksflytapi.domain.ProsessSteg;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.service.vilkaar.InngangsvilkaarService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,12 +16,10 @@ public class VurderInngangsvilkaar implements StegBehandler {
 
     private final InngangsvilkaarService inngangsvilkaarService;
     private final BehandlingService behandlingService;
-    private final SaksbehandlingRegler saksbehandlingRegler;
 
-    public VurderInngangsvilkaar(InngangsvilkaarService inngangsvilkaarService, BehandlingService behandlingService, SaksbehandlingRegler saksbehandlingRegler) {
+    public VurderInngangsvilkaar(InngangsvilkaarService inngangsvilkaarService, BehandlingService behandlingService) {
         this.inngangsvilkaarService = inngangsvilkaarService;
         this.behandlingService = behandlingService;
-        this.saksbehandlingRegler = saksbehandlingRegler;
     }
 
     @Override
@@ -35,7 +32,7 @@ public class VurderInngangsvilkaar implements StegBehandler {
         final long behandlingID = prosessinstans.getBehandling().getId();
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(behandlingID);
 
-        if (skalVurdereInngangsvilkår(behandling)) {
+        if (inngangsvilkaarService.skalVurdereInngangsvilkår(behandling)) {
             var søknadsland = behandling.hentSøknadsLand();
             var erUkjenteEllerAlleEosLand = behandling.getMottatteOpplysninger().getMottatteOpplysningerData().soeknadsland.erUkjenteEllerAlleEosLand;
             var periode = behandling.hentPeriode();
@@ -45,14 +42,5 @@ public class VurderInngangsvilkaar implements StegBehandler {
         } else {
             log.info("Inngangsvilkår ikke vurdert for sak {} og behandling {} med sakstype {} og sakstema {}", behandling.getFagsak().getSaksnummer(), behandlingID, behandling.getFagsak().getType(), behandling.getFagsak().getTema());
         }
-    }
-
-    private boolean skalVurdereInngangsvilkår(Behandling behandling) {
-        return behandling.getFagsak().erSakstypeEøs()
-            && !saksbehandlingRegler.harIngenFlyt(behandling)
-            && !saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)
-            && !saksbehandlingRegler.harIkkeYrkesaktivFlyt(behandling)
-            && behandling.kanResultereIVedtak()
-            && behandling.harPeriodeOgLand();
     }
 }
