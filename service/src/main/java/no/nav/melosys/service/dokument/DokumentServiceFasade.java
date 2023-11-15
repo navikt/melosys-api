@@ -3,7 +3,6 @@ package no.nav.melosys.service.dokument;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.dokument.DokumentBestiltEvent;
-import no.nav.melosys.domain.ftrl.Betalingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
@@ -11,8 +10,6 @@ import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
 
 @Service
 public class DokumentServiceFasade {

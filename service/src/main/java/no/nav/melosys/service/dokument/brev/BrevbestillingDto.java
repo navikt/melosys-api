@@ -7,9 +7,9 @@ import java.util.Objects;
 
 import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast;
-import no.nav.melosys.domain.ftrl.Betalingsstatus;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.manglendebetaling.Betalingsstatus;
 
 public final class BrevbestillingDto {
     private Produserbaredokumenter produserbardokument;

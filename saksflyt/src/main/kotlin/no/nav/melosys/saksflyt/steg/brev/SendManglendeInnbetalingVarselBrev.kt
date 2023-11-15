@@ -27,10 +27,10 @@ class SendManglendeInnbetalingVarselBrev(
         return ProsessSteg.SEND_MANGLENDE_INNBETALING_VARSELBREV
     }
 
-    override fun utfør(prosessinstans: Prosessinstans?) {
-        val fakturaserieReferanse = prosessinstans?.getData(ProsessDataKey.FAKTURASERIE_REFERANSE)
-        val betalingsstatus = prosessinstans?.getData(ProsessDataKey.BETALINGSSTATUS)
-        val fakturanummer = prosessinstans?.getData(ProsessDataKey.FAKTURANUMMER)
+    override fun utfør(prosessinstans: Prosessinstans) {
+        val fakturaserieReferanse = prosessinstans.getData(ProsessDataKey.FAKTURASERIE_REFERANSE)
+        val betalingsstatus = prosessinstans.getData(ProsessDataKey.BETALINGSSTATUS)
+        val fakturanummer = prosessinstans.getData(ProsessDataKey.FAKTURANUMMER)
         val behandlingsresultat = behandlingsresultatService.hentBehandlingsresultatAvFakturaserieReferanse(fakturaserieReferanse)
 
         val brevbestillingDto = BrevbestillingDto()

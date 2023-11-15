@@ -51,7 +51,7 @@ public class VarselbrevManglendeInnbetalingBrevbestilling extends DokgenBrevbest
             this.betalingsfrist = varselbrevManglendeInnbetalingBrevbestilling.getBetalingsfrist();
         }
 
-        public Builder medfakturanummer(String fakturanummer) {
+        public Builder medFakturanummer(String fakturanummer) {
             this.fakturanummer = fakturanummer;
             return this;
         }
