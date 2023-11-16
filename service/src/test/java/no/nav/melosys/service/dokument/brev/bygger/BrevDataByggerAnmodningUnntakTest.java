@@ -112,7 +112,7 @@ class BrevDataByggerAnmodningUnntakTest {
         organisasjonDokument.setOrgnummer("999");
         OrganisasjonsDetaljer organisasjonsDetaljer = mock(OrganisasjonsDetaljer.class);
         when(organisasjonsDetaljer.hentStrukturertForretningsadresse()).thenReturn(lagStrukturertAdresse());
-        organisasjonDokument.organisasjonDetaljer = organisasjonsDetaljer;
+        organisasjonDokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
 
         when(organisasjonOppslagService.hentOrganisasjoner(orgSet)).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder().medBehandling(behandling).build();

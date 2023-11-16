@@ -26,7 +26,7 @@ class EregToggletService(
         return eregService.finnOrganisasjon(orgnr)
     }
 
-    override fun hentOrganisasjonNavn(orgnummer: String): String {
+    override fun hentOrganisasjonNavn(orgnummer: String): String? {
         if (unleash.isEnabled(MELOSYS_EREG_ORGANISASJON)) {
             return eregRestService.hentOrganisasjonNavn(orgnummer)
         }

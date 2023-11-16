@@ -69,7 +69,7 @@ public class TrygdeavtaleService {
     private String finnNavnFraOrganisasjonsdokument(String orgnr, List<OrganisasjonDokument> organisasjonDokumenter) {
         return organisasjonDokumenter.stream()
             .filter(organisasjonDokument -> orgnr.equals(organisasjonDokument.getOrgnummer()))
-            .map(OrganisasjonDokument::getNavn)
+            .map(OrganisasjonDokument::getSammenslåttNavn)
             .findFirst().orElse(eregFasade.hentOrganisasjonNavn(orgnr));
     }
 

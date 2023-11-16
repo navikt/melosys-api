@@ -293,7 +293,7 @@ class FagsakTjenesteTest {
         fagsak.setAktører(Set.of(aktoer));
         mockFagsakTjeneste(fagsak, null);
         var organisajonsdokument = new OrganisasjonDokument();
-        organisajonsdokument.setNavn("Moe Organisasjon");
+        organisajonsdokument.setNavn(List.of("Moe Organisasjon"));
         when(organisasjonOppslagService.hentOrganisasjon(ORGNR)).thenReturn(organisajonsdokument);
         var fagsakSokDto = new FagsakSokDto(null, null, ORGNR);
 

@@ -4,6 +4,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.assertions.json.shouldEqualJson
+import io.kotest.assertions.withClue
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeTypeOf
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.domain.jpa.SaksopplysningDokumentConverter
@@ -84,6 +87,41 @@ class EregDokumentConverterTest {
 
 
         organisasjonDokumentSomJson.shouldEqualJson(forventetOrganisasjonDokumentJson)
+    }
+
+    @Test
+    fun `Konvertering frem og tilbake fra saksopplysningDokument til json skal bli det samme`() {
+        val saksopplysningDokumentConverter = SaksopplysningDokumentConverter()
+        listOf("virksomhet", "organisasjonsledd", "juridiskEnhet", "organisasjons").forEach {
+            val organisasjonDokumentJson = hentRessurs("mock/organisasjon/resultat/${it}-resultat.json")
+
+
+            val saksopplysningDokument = saksopplysningDokumentConverter.convertToEntityAttribute(organisasjonDokumentJson)
+            val convertToDatabaseColumn = saksopplysningDokumentConverter.convertToDatabaseColumn(saksopplysningDokument)
+
+
+            withClue("Feilet for ${it}-resultat.json") {
+                organisasjonDokumentJson.shouldEqualJson(convertToDatabaseColumn)
+            }
+        }
+    }
+
+    @Test // Denne testen fjernes når vi fjerner soap/jaxb integrasjon og kan fjerne bruk av List<String> for navn
+    fun `Liste av navn vil alltid bli en kun et element i en liste etter serialisering`() {
+        val saksopplysningDokumentConverter = SaksopplysningDokumentConverter()
+        val saksopplysningDokumentJson = saksopplysningDokumentConverter.convertToDatabaseColumn(
+            OrganisasjonDokument().apply { navn = listOf("1", "2", "3") })
+
+
+        val saksopplysningDokument = saksopplysningDokumentConverter.convertToEntityAttribute(saksopplysningDokumentJson)
+        val saksopplysningDokumentJsonNode = jacksonObjectMapper().readTree(saksopplysningDokumentJson)
+
+
+
+        saksopplysningDokument
+            .shouldBeTypeOf<OrganisasjonDokument>()
+            .navn.shouldNotBeNull().single().shouldBe("1 2 3")
+        saksopplysningDokumentJsonNode["navn"].textValue().shouldBe("1 2 3")
     }
 
 

@@ -12,7 +12,6 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.data.*;
@@ -480,7 +479,7 @@ class TrygdeavtaleServiceTest {
     private OrganisasjonDokument lagOrganisasjonsDokument(String orgnr, String navn) {
         var organisasjonsDokument = new OrganisasjonDokument();
         organisasjonsDokument.setOrgnummer(orgnr);
-        organisasjonsDokument.setNavn(navn);
+        organisasjonsDokument.setNavn(List.of(navn));
         return organisasjonsDokument;
     }
 

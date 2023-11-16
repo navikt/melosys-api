@@ -391,7 +391,7 @@ final class DokumentServiceTest {
         adresse.setPostnr("1234");
         Periode gyldighetsperiode = new Periode(LocalDate.now().minusYears(10), LocalDate.now().plusYears(10));
         adresse.setGyldighetsperiode(gyldighetsperiode);
-        organisasjonDetaljer.forretningsadresse = Collections.singletonList(adresse);
+        organisasjonDetaljer.setForretningsadresse(Collections.singletonList(adresse));
         orgDok.setOrganisasjonDetaljer(organisasjonDetaljer);
         orgDok.setOrgnummer(ORGNR);
         when(eregFasade.hentOrganisasjon(ORGNR)).thenReturn(lagSaksopplysning(SaksopplysningType.ORG, orgDok));
