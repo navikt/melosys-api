@@ -8,12 +8,12 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonRestConsumer
-import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import java.util.*
 
 private val log = KotlinLogging.logger { }
 
-@Component
+@Service
 class EregRestService(
     private val organisasjonRestConsumer: OrganisasjonRestConsumer
 ) : EregFasade {
