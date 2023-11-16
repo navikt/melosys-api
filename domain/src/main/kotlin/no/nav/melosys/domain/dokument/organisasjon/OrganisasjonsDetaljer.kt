@@ -2,22 +2,15 @@ package no.nav.melosys.domain.dokument.organisasjon
 
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.adresse.UstrukturertAdresse
-import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
 import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Epost
 import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Telefonnummer
 import java.time.LocalDate
-import javax.xml.bind.annotation.XmlAccessType
-import javax.xml.bind.annotation.XmlAccessorType
-import javax.xml.bind.annotation.XmlElement
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter
 
-@XmlAccessorType(XmlAccessType.FIELD)
 open class OrganisasjonsDetaljer { // Needs to be open because of mocking : TODO: rewrite tests to kotlin
     var orgnummer: String? = null
 
-    @XmlElement(name = "organisasjonsnavn")
     var navn: List<Organisasjonsnavn?>? = ArrayList() //TODO: use emptyList when we remove JAXB code
     var forretningsadresse: List<GeografiskAdresse> = ArrayList()
     var postadresse: List<GeografiskAdresse> = ArrayList()
@@ -25,7 +18,6 @@ open class OrganisasjonsDetaljer { // Needs to be open because of mocking : TODO
     var epostadresse: List<Epost?>? = ArrayList()
     var naering: List<String?>? = ArrayList() //"http://nav.no/kodeverk/Kodeverk/Næringskoder"
 
-    @XmlJavaTypeAdapter(LocalDateXmlAdapter::class)
     var opphoersdato: LocalDate? = null
 
 
