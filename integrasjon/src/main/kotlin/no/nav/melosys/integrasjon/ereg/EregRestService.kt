@@ -6,6 +6,7 @@ import no.nav.melosys.domain.SaksopplysningKildesystem
 import no.nav.melosys.domain.SaksopplysningType
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.exception.IkkeFunnetException
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonRestConsumer
 import org.springframework.stereotype.Component
 import java.util.*
@@ -19,6 +20,9 @@ class EregRestService(
     private val eregDtoTilSaksopplysningKonverter: EregDtoTilSaksopplysningKonverter = EregDtoTilSaksopplysningKonverter()
 
     override fun hentOrganisasjon(orgnr: String): Saksopplysning {
+        if (erUgyldigOrgnummer(orgnr)) {
+            throw TekniskException("orgnr er ikke gyldig")
+        }
         val organisasjon = organisasjonRestConsumer.hentOrganisasjon(orgnr)
         return eregDtoTilSaksopplysningKonverter.lagSaksopplysning(organisasjon).apply {
             leggTilKildesystemOgMottattDokument(
@@ -31,6 +35,9 @@ class EregRestService(
 
 
     override fun finnOrganisasjon(orgnr: String): Optional<Saksopplysning> {
+        if (erUgyldigOrgnummer(orgnr)) {
+            throw TekniskException("orgnr er ikke gyldig")
+        }
         return try {
             Optional.ofNullable(hentOrganisasjon(orgnr))
         } catch (ex: IkkeFunnetException) {
@@ -41,6 +48,8 @@ class EregRestService(
 
     override fun hentOrganisasjonNavn(orgnr: String): String? =
         (hentOrganisasjon(orgnr).dokument as OrganisasjonDokument).getSammenslåttNavn()
+
+    private fun erUgyldigOrgnummer(orgnr: String) = orgnr.length == 11
 
     companion object {
         const val EREG_REST_VERSJON = "REST 2.0"
