@@ -1,31 +1,22 @@
 package no.nav.melosys.domain.dokument.organisasjon
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonView
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.dokument.DokumentView.FrontendApi
 import no.nav.melosys.domain.dokument.SaksopplysningDokument
-import no.nav.melosys.domain.dokument.jaxb.LocalDateXmlAdapter
 import java.time.LocalDate
-import javax.xml.bind.annotation.*
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter
 
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.FIELD)
 class OrganisasjonDokument : SaksopplysningDokument {
     var orgnummer: String? = null
 
-    @XmlElementWrapper(name = "navn")
-    @XmlElement(name = "navnelinje")
     var navn: List<String>? = null // TODO: Dette kan være en string. Fiks når vi fjerner soap/jaxb integrasjon
 
-    @XmlJavaTypeAdapter(LocalDateXmlAdapter::class)
     var oppstartsdato: LocalDate? = null
 
-    var enhetstype: String? = null //"http://nav.no/kodeverk/Kodeverk/EnhetstyperJuridiskEnhet"
+    var enhetstype: String? = null
     var organisasjonDetaljer: OrganisasjonsDetaljer? = null
-    var sektorkode: String? = null //"http://nav.no/kodeverk/Kodeverk/Sektorkoder"
+    var sektorkode: String? = null
 
     @JsonProperty("navn")
     fun getSammenslåttNavn(): String = lagSammenslåttNavn()
