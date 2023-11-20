@@ -125,7 +125,7 @@ public final class DokgenTestData {
 
     public static OrganisasjonDokument lagOrg() {
         OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
-        organisasjonDokument.setNavn(List.of(NAVN_ORG));
+        organisasjonDokument.setNavn(NAVN_ORG);
         organisasjonDokument.setOrgnummer(ORGNR);
         organisasjonDokument.setOrganisasjonDetaljer(lagOrgDetaljer());
         return organisasjonDokument;

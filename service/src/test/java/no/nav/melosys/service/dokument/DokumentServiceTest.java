@@ -383,7 +383,7 @@ final class DokumentServiceTest {
     private static EregFasade mockEregFasade() {
         EregFasade eregFasade = mock(EregFasade.class);
         OrganisasjonDokument orgDok = new OrganisasjonDokument();
-        orgDok.setNavn(Collections.singletonList("Virker av og til"));
+        orgDok.setNavn("Virker av og til");
         OrganisasjonsDetaljer organisasjonDetaljer = new OrganisasjonsDetaljer();
         SemistrukturertAdresse adresse = new SemistrukturertAdresse();
         adresse.setLandkode("NO");

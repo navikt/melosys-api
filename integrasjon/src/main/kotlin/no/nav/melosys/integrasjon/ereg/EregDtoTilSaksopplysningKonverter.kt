@@ -21,7 +21,7 @@ class EregDtoTilSaksopplysningKonverter {
             sektorkode = finSektorkode(organisasjon)
             oppstartsdato = null // fjerns når vi ikke lengre bruker gammelt soap api - MELOSYS-6134
             enhetstype = finnEnhetstype(organisasjon)
-            navn = listOf(finnNavn(organisasjon))
+            navn = finnNavn(organisasjon)
             organisasjonDetaljer = OrganisasjonsDetaljer().apply {
                 orgnummer = organisasjon.organisasjonsnummer
                 val responseOrganisasjonDetaljer = organisasjon.organisasjonDetaljer ?: throw TekniskException("organisasjonDetaljer er null")
