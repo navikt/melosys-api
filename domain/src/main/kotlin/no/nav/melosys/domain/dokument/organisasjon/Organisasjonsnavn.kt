@@ -6,6 +6,6 @@ class Organisasjonsnavn {
     var bruksperiode: Periode? = null
     var gyldighetsperiode: Periode? = null
 
-    var navn: List<String?>? = mutableListOf() //TODO: use emptyList when we remove JAXB code
+    var navn: List<String?>? = emptyList()
     var redigertNavn: String? = null
 }
