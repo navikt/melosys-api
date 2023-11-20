@@ -16,7 +16,7 @@ open class OrganisasjonsDetaljer { // Needs to be open because of mocking : TODO
     var postadresse: List<GeografiskAdresse> = emptyList()
     var telefon: List<Telefonnummer?>? = emptyList()
     var epostadresse: List<Epost?>? = emptyList()
-    var naering: List<String?>? = emptyList() //"http://nav.no/kodeverk/Kodeverk/Næringskoder"
+    var naering: List<String?>? = emptyList()
 
     var opphoersdato: LocalDate? = null
 

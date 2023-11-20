@@ -14,9 +14,9 @@ class OrganisasjonDokument : SaksopplysningDokument {
 
     var oppstartsdato: LocalDate? = null
 
-    var enhetstype: String? = null //"http://nav.no/kodeverk/Kodeverk/EnhetstyperJuridiskEnhet"
+    var enhetstype: String? = null
     var organisasjonDetaljer: OrganisasjonsDetaljer? = null
-    var sektorkode: String? = null //"http://nav.no/kodeverk/Kodeverk/Sektorkoder"
+    var sektorkode: String? = null
 
     @JsonProperty("navn")
     fun getSammenslåttNavn(): String = lagSammenslåttNavn()
