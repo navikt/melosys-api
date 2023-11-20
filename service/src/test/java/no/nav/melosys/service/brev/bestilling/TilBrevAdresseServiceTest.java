@@ -1,11 +1,13 @@
 package no.nav.melosys.service.brev.bestilling;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
@@ -17,6 +19,7 @@ import no.nav.melosys.domain.person.Personopplysninger;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
+import no.nav.melosys.service.OrganisasjonDokumentTestFactory;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.brev.BrevAdresse;
@@ -28,9 +31,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.LocalDate;
-import java.util.List;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
@@ -413,7 +413,7 @@ class TilBrevAdresseServiceTest {
         geogragiskAdresse.setGyldighetsperiode(new Periode(LocalDate.MIN, LocalDate.MAX));
         var organisasjonsDetaljer = new OrganisasjonsDetaljer();
         organisasjonsDetaljer.setPostadresse(List.of(geogragiskAdresse));
-        var dokument = new OrganisasjonDokument();
+        var dokument = OrganisasjonDokumentTestFactory.createOrganisasjonDokumentForTest();
         dokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
         dokument.setNavn(navn);
         dokument.setOrgnummer(orgNummer);

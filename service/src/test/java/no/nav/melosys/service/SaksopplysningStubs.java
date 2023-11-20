@@ -30,7 +30,7 @@ public class SaksopplysningStubs {
     public static Set<OrganisasjonDokument> lagOrganisasjonDokumenter(Collection<String> organisasjonsnumre)  {
         Set<OrganisasjonDokument> organisasjonDokumenter = new HashSet<>();
         for (String orgnummer : organisasjonsnumre) {
-            OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
+            OrganisasjonDokument organisasjonDokument = OrganisasjonDokumentTestFactory.createOrganisasjonDokumentForTest();
             organisasjonDokument.setOrgnummer(orgnummer);
             organisasjonDokument.setNavn("Test:" + orgnummer);
             organisasjonDokument.setOrganisasjonDetaljer(new OrganisasjonsDetaljer());

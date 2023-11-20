@@ -8,18 +8,17 @@ import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Epost
 import no.nav.melosys.domain.dokument.organisasjon.adresse.elektronisk.Telefonnummer
 import java.time.LocalDate
 
-open class OrganisasjonsDetaljer { // Needs to be open because of mocking : TODO: rewrite tests to kotlin
-    var orgnummer: String? = null
-
-    var navn: List<Organisasjonsnavn?>? = emptyList()
-    var forretningsadresse: List<GeografiskAdresse> = emptyList()
-    var postadresse: List<GeografiskAdresse> = emptyList()
-    var telefon: List<Telefonnummer?>? = emptyList()
-    var epostadresse: List<Epost?>? = emptyList()
-    var naering: List<String?>? = emptyList()
-
-    var opphoersdato: LocalDate? = null
-
+// Needs to be open because of mocking : TODO: rewrite tests to kotlin
+open class OrganisasjonsDetaljer(
+    var orgnummer: String? = null,
+    var navn: List<Organisasjonsnavn> = emptyList(),
+    var forretningsadresse: List<GeografiskAdresse> = emptyList(),
+    var postadresse: List<GeografiskAdresse> = emptyList(),
+    var telefon: List<Telefonnummer?>? = emptyList(),
+    var epostadresse: List<Epost?>? = emptyList(),
+    var naering: List<String?>? = emptyList(),
+    var opphoersdato: LocalDate? = null,
+) {
 
     fun hentStrukturertPostadresse(): StrukturertAdresse? {
         val adresse = hentFørsteGyldigePostadresse()

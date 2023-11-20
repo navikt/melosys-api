@@ -21,6 +21,7 @@ import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.domain.util.LovvalgBestemmelseUtils;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.OrganisasjonDokumentTestFactory;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -477,7 +478,7 @@ class TrygdeavtaleServiceTest {
     }
 
     private OrganisasjonDokument lagOrganisasjonsDokument(String orgnr, String navn) {
-        var organisasjonsDokument = new OrganisasjonDokument();
+        var organisasjonsDokument = OrganisasjonDokumentTestFactory.createOrganisasjonDokumentForTest();
         organisasjonsDokument.setOrgnummer(orgnr);
         organisasjonsDokument.setNavn(navn);
         return organisasjonsDokument;

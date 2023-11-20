@@ -4,18 +4,19 @@ import java.util.*;
 
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
-import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
+import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.service.LandvelgerService;
+import no.nav.melosys.service.OrganisasjonDokumentTestFactory;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -118,7 +119,7 @@ class BrevDataByggerA1Test {
     }
 
     private OrganisasjonDokument leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) {
-        OrganisasjonDokument org = new OrganisasjonDokument();
+        OrganisasjonDokument org = OrganisasjonDokumentTestFactory.createOrganisasjonDokumentForTest();
         org.setOrgnummer(orgnummer);
         org.setOrganisasjonDetaljer(detaljer);
         org.setNavn(navn);

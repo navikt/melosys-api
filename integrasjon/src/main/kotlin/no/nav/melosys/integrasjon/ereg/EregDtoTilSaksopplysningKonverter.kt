@@ -16,24 +16,23 @@ private val log = KotlinLogging.logger { }
 
 class EregDtoTilSaksopplysningKonverter {
     fun lagSaksopplysning(organisasjon: OrganisasjonResponse.Organisasjon): Saksopplysning = Saksopplysning().apply {
-        dokument = OrganisasjonDokument().apply {
-            orgnummer = organisasjon.organisasjonsnummer
-            sektorkode = finSektorkode(organisasjon)
-            oppstartsdato = null // fjerns når vi ikke lengre bruker gammelt soap api - MELOSYS-6134
-            enhetstype = finnEnhetstype(organisasjon)
-            navn = finnNavn(organisasjon)
-            organisasjonDetaljer = OrganisasjonsDetaljer().apply {
-                orgnummer = organisasjon.organisasjonsnummer
-                val responseOrganisasjonDetaljer = organisasjon.organisasjonDetaljer ?: throw TekniskException("organisasjonDetaljer er null")
-                navn = tilNavn(responseOrganisasjonDetaljer.navn)
-                forretningsadresse = tilGeografiskAdresse(responseOrganisasjonDetaljer.forretningsadresser)
-                postadresse = tilGeografiskAdresse(responseOrganisasjonDetaljer.postadresser)
-                telefon = tilTelefon(responseOrganisasjonDetaljer.telefonnummer)
-                epostadresse = tilEpost(responseOrganisasjonDetaljer.epostadresser)
-                naering = responseOrganisasjonDetaljer.naeringer?.map { it.naeringskode } ?: emptyList()
+        val responseOrganisasjonDetaljer = organisasjon.organisasjonDetaljer ?: throw TekniskException("organisasjonDetaljer er null")
+        dokument = OrganisasjonDokument(
+            orgnummer = organisasjon.organisasjonsnummer,
+            navn = finnNavn(organisasjon),
+            sektorkode = finSektorkode(organisasjon),
+            enhetstype = finnEnhetstype(organisasjon),
+            organisasjonDetaljer = OrganisasjonsDetaljer(
+                orgnummer = organisasjon.organisasjonsnummer,
+                navn = tilNavn(responseOrganisasjonDetaljer.navn),
+                forretningsadresse = tilGeografiskAdresse(responseOrganisasjonDetaljer.forretningsadresser),
+                postadresse = tilGeografiskAdresse(responseOrganisasjonDetaljer.postadresser),
+                telefon = tilTelefon(responseOrganisasjonDetaljer.telefonnummer),
+                epostadresse = tilEpost(responseOrganisasjonDetaljer.epostadresser),
+                naering = responseOrganisasjonDetaljer.naeringer?.map { it.naeringskode } ?: emptyList(),
                 opphoersdato = responseOrganisasjonDetaljer.opphoersdato
-            }
-        }
+            )
+        )
     }
 
     private fun finnNavn(organisasjon: OrganisasjonResponse.Organisasjon): String {
@@ -88,7 +87,7 @@ class EregDtoTilSaksopplysningKonverter {
             bruksperiode = it.bruksperiode.tilPeriode()
             gyldighetsperiode = it.gyldighetsperiode.tilPeriode()
             this.navn = listOf(it.sammensattnavn)
-            redigertNavn = it.sammensattnavn // sjekke dette med fag
+            redigertNavn = it.sammensattnavn
         }
     } ?: emptyList()
 

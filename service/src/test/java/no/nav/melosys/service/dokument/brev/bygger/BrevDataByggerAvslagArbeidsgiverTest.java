@@ -20,6 +20,7 @@ import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.service.OrganisasjonDokumentTestFactory;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -109,7 +110,7 @@ class BrevDataByggerAvslagArbeidsgiverTest {
         Set<String> orgSet = new HashSet<>(Collections.singletonList("987654321"));
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId())).thenReturn(orgSet);
 
-        OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
+        OrganisasjonDokument organisasjonDokument = OrganisasjonDokumentTestFactory.createOrganisasjonDokumentForTest();
         organisasjonDokument.setOrgnummer("987654321");
         OrganisasjonsDetaljer organisasjonsDetaljer = mock(OrganisasjonsDetaljer.class);
         when(organisasjonsDetaljer.hentStrukturertForretningsadresse()).thenReturn(lagStrukturertAdresse());

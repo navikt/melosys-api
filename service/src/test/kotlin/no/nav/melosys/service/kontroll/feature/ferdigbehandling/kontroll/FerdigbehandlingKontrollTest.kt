@@ -418,7 +418,7 @@ class FerdigbehandlingKontrollTest {
         postadressePostnr: String,
         postadresseLand: String
     ): OrganisasjonDokument {
-        return OrganisasjonDokument().apply {
+        return OrganisasjonDokument(orgnummer = "123456789", navn = "Ola Norman").apply {
             organisasjonDetaljer = OrganisasjonsDetaljer().apply {
                 forretningsadresse = listOf(SemistrukturertAdresse().apply {
                     adresselinje1 = forretningsGatenavn

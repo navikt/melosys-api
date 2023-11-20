@@ -10,6 +10,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.LandvelgerService;
+import no.nav.melosys.service.OrganisasjonDokumentTestFactory;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -93,7 +94,7 @@ class BrevDataByggerAvslagYrkesaktivTest {
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId())).thenReturn(orgSet);
 
         when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Land_iso2.DE);
-        OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
+        OrganisasjonDokument organisasjonDokument = OrganisasjonDokumentTestFactory.createOrganisasjonDokumentForTest();
         organisasjonDokument.setOrgnummer("999");
         OrganisasjonsDetaljer organisasjonsDetaljer = mock(OrganisasjonsDetaljer.class);
         when(organisasjonsDetaljer.hentStrukturertForretningsadresse()).thenReturn(lagStrukturertAdresse());

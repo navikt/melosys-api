@@ -28,6 +28,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.Representan
 import no.nav.melosys.domain.person.*;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
+import no.nav.melosys.service.OrganisasjonDokumentTestFactory;
 
 import static java.util.Collections.singletonList;
 import static no.nav.melosys.domain.kodeverk.Mottakerroller.*;
@@ -124,7 +125,7 @@ public final class DokgenTestData {
     }
 
     public static OrganisasjonDokument lagOrg() {
-        OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
+        OrganisasjonDokument organisasjonDokument = OrganisasjonDokumentTestFactory.createOrganisasjonDokumentForTest();
         organisasjonDokument.setNavn(NAVN_ORG);
         organisasjonDokument.setOrgnummer(ORGNR);
         organisasjonDokument.setOrganisasjonDetaljer(lagOrgDetaljer());

@@ -6,13 +6,14 @@ import no.nav.melosys.domain.dokument.DokumentView.FrontendApi
 import no.nav.melosys.domain.dokument.SaksopplysningDokument
 import java.time.LocalDate
 
-class OrganisasjonDokument : SaksopplysningDokument {
-    var orgnummer: String? = null
-    var navn: String? = null
-    var oppstartsdato: LocalDate? = null
-    var enhetstype: String? = null
-    var organisasjonDetaljer: OrganisasjonsDetaljer? = null
+class OrganisasjonDokument(
+    var orgnummer: String,
+    var navn: String,
+    var oppstartsdato: LocalDate? = null,
+    var enhetstype: String? = null,
+    var organisasjonDetaljer: OrganisasjonsDetaljer? = null,
     var sektorkode: String? = null
+) : SaksopplysningDokument {
 
     @JsonView(FrontendApi::class)
     fun getForretningsadresse(): StrukturertAdresse? = organisasjonDetaljer?.hentStrukturertForretningsadresse()

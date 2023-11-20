@@ -40,14 +40,14 @@ public final class TestdataFactory {
     }
 
     public static OrganisasjonDokument lagOrgMedPostadresse() {
-        OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
+        OrganisasjonDokument organisasjonDokument = OrganisasjonDokumentTestFactory.createOrganisasjonDokumentForTest();
         organisasjonDokument.setOrgnummer("122344");
         organisasjonDokument.setOrganisasjonDetaljer(lagOrgDetaljerMedPostadresse());
         return organisasjonDokument;
     }
 
     public static OrganisasjonDokument lagOrgMedForretningsadresse() {
-        OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
+        OrganisasjonDokument organisasjonDokument = OrganisasjonDokumentTestFactory.createOrganisasjonDokumentForTest();
         organisasjonDokument.setOrgnummer("122344");
         organisasjonDokument.setOrganisasjonDetaljer(lagOrgDetaljerMedForretningsadresse());
         return organisasjonDokument;
