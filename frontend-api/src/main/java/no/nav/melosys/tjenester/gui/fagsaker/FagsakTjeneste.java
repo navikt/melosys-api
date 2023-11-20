@@ -277,7 +277,7 @@ public class FagsakTjeneste {
         }
         var orgnr = fagsak.finnVirksomhetsOrgnr();
         if (orgnr.isPresent()) {
-            return organisasjonOppslagService.hentOrganisasjon(orgnr.get()).getSammenslåttNavn();
+            return organisasjonOppslagService.hentOrganisasjon(orgnr.get()).getNavn();
         }
         return UKJENT_NAVN;
     }

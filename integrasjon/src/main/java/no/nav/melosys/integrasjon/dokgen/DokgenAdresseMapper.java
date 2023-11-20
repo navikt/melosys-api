@@ -22,7 +22,7 @@ public final class DokgenAdresseMapper {
     }
 
     public static String mapNavn(OrganisasjonDokument org, Persondata persondata) {
-        return org == null ? persondata.getSammensattNavn() : org.getSammenslåttNavn();
+        return org == null ? persondata.getSammensattNavn() : org.getNavn();
     }
 
     @Nullable

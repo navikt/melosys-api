@@ -60,7 +60,7 @@ class EregDtoTilSaksopplysningKonverterTests {
 
 
         saksopplysning.dokument.shouldBeTypeOf<OrganisasjonDokument>()
-            .getSammenslåttNavn().shouldBe("Fra Organisasjon")
+            .navn.shouldBe("Fra Organisasjon")
     }
 
     @Test
@@ -83,7 +83,7 @@ class EregDtoTilSaksopplysningKonverterTests {
 
 
         saksopplysning.dokument.shouldBeTypeOf<OrganisasjonDokument>()
-            .getSammenslåttNavn().shouldBe("Fra Detaljer")
+            .navn.shouldBe("Fra Detaljer")
     }
 
     @Test
@@ -107,7 +107,7 @@ class EregDtoTilSaksopplysningKonverterTests {
 
 
         saksopplysning.dokument.shouldBeTypeOf<OrganisasjonDokument>()
-            .getSammenslåttNavn().shouldBe("navnelinje1 navnelinje2")
+            .navn.shouldBe("navnelinje1 navnelinje2")
     }
 
     @Test
@@ -122,7 +122,7 @@ class EregDtoTilSaksopplysningKonverterTests {
 
 
         saksopplysning.dokument.shouldBeTypeOf<OrganisasjonDokument>()
-            .getSammenslåttNavn().shouldBe("UKJENT")
+            .navn.shouldBe("UKJENT")
     }
 
     private fun hentOrganisasjon(file: String) = jacksonObjectMapper()
