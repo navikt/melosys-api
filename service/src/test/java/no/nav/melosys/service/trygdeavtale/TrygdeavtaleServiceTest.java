@@ -479,7 +479,7 @@ class TrygdeavtaleServiceTest {
     private OrganisasjonDokument lagOrganisasjonsDokument(String orgnr, String navn) {
         var organisasjonsDokument = new OrganisasjonDokument();
         organisasjonsDokument.setOrgnummer(orgnr);
-        organisasjonsDokument.setNavn(List.of(navn));
+        organisasjonsDokument.setNavn(navn);
         return organisasjonsDokument;
     }
 

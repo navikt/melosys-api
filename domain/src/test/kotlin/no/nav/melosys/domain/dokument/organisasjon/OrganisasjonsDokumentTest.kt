@@ -45,45 +45,6 @@ class OrganisasjonsDokumentTest {
         harRegistrertPostadresse.shouldBeTrue()
     }
 
-    @Test
-    fun `lagSammenslåttNavn skal slå sammen navn`() {
-        val dokument = OrganisasjonDokument().apply {
-            navn = listOf("fornavn", "etternavn")
-        }
-
-
-        val sammenslåttNavn = dokument.lagSammenslåttNavn()
-
-
-        sammenslåttNavn.shouldBe("fornavn etternavn")
-    }
-
-    @Test
-    fun `lagSammenslåttNavn skal bli UKJENT når navn = null`() {
-        val dokument = OrganisasjonDokument().apply {
-            navn = null
-        }
-
-
-        val sammenslåttNavn = dokument.lagSammenslåttNavn()
-
-
-        sammenslåttNavn.shouldBe("UKJENT")
-    }
-
-    @Test
-    fun `lagSammenslåttNavn skal bli tom streng når navn er tom liste`() {
-        val dokument = OrganisasjonDokument().apply {
-            navn = emptyList()
-        }
-
-
-        val sammenslåttNavn = dokument.lagSammenslåttNavn()
-
-
-        sammenslåttNavn.shouldBe("") // Er dette ønsket?
-    }
-
     private fun lagAddresse() = SemistrukturertAdresse().apply {
         postnr = "postnummer"
         poststed = "poststed"

@@ -106,25 +106,6 @@ class EregDokumentConverterTest {
         }
     }
 
-    @Test // Denne testen fjernes når vi fjerner soap/jaxb integrasjon og kan fjerne bruk av List<String> for navn
-    fun `Liste av navn vil alltid bli en kun et element i en liste etter serialisering`() {
-        val saksopplysningDokumentConverter = SaksopplysningDokumentConverter()
-        val saksopplysningDokumentJson = saksopplysningDokumentConverter.convertToDatabaseColumn(
-            OrganisasjonDokument().apply { navn = listOf("1", "2", "3") })
-
-
-        val saksopplysningDokument = saksopplysningDokumentConverter.convertToEntityAttribute(saksopplysningDokumentJson)
-        val saksopplysningDokumentJsonNode = jacksonObjectMapper().readTree(saksopplysningDokumentJson)
-
-
-
-        saksopplysningDokument
-            .shouldBeTypeOf<OrganisasjonDokument>()
-            .navn.shouldNotBeNull().single().shouldBe("1 2 3")
-        saksopplysningDokumentJsonNode["navn"].textValue().shouldBe("1 2 3")
-    }
-
-
     private fun hentRessurs(fil: String): String = this::class.java.classLoader.getResource(fil)
         ?.readText(StandardCharsets.UTF_8) ?: throw IkkeFunnetException("Fant ikke $fil")
 

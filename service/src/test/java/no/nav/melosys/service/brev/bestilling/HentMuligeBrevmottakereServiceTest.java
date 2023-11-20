@@ -510,7 +510,7 @@ class HentMuligeBrevmottakereServiceTest {
         organisasjonsDetaljer.setPostadresse(List.of(geogragiskAdresse));
         var dokument = new OrganisasjonDokument();
         dokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
-        dokument.setNavn(List.of(navn));
+        dokument.setNavn(navn);
         dokument.setOrgnummer(orgNummer);
         var saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(dokument);
