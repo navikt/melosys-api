@@ -2,6 +2,7 @@ package no.nav.melosys.domain.dokument.organisasjon
 
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
+import no.nav.melosys.domain.OrganisasjonDokumentTestFactory
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
 import org.junit.jupiter.api.Test
@@ -11,7 +12,7 @@ class OrganisasjonsDokumentTest {
 
     @Test
     fun `harRegistrertPostadresse skal bli false`() {
-        val dokument = OrganisasjonDokument(orgnummer = "123456789", navn = "Ola Norman").apply {
+        val dokument = OrganisasjonDokumentTestFactory.createOrganisasjonDokumentForTest().apply {
             organisasjonDetaljer = OrganisasjonsDetaljer().apply {
                 postadresse = listOf(lagAddresse().apply {
                     landkode = null
@@ -29,7 +30,7 @@ class OrganisasjonsDokumentTest {
 
     @Test
     fun `harRegistrertPostadresse skal bli true`() {
-        val dokument = OrganisasjonDokument(orgnummer = "123456789", navn = "Ola Norman").apply {
+        val dokument = OrganisasjonDokumentTestFactory.createOrganisasjonDokumentForTest().apply {
             organisasjonDetaljer = OrganisasjonsDetaljer().apply {
                 postadresse = listOf(lagAddresse().apply {
                     landkode = "NO"

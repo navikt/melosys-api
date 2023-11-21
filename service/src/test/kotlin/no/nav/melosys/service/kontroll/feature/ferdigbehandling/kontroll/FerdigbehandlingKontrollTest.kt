@@ -19,6 +19,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.service.OrganisasjonDokumentTestFactory
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
 import org.junit.jupiter.api.Test
@@ -418,7 +419,7 @@ class FerdigbehandlingKontrollTest {
         postadressePostnr: String,
         postadresseLand: String
     ): OrganisasjonDokument {
-        return OrganisasjonDokument(orgnummer = "123456789", navn = "Ola Norman").apply {
+        return OrganisasjonDokumentTestFactory.createOrganisasjonDokumentForTest().apply {
             organisasjonDetaljer = OrganisasjonsDetaljer().apply {
                 forretningsadresse = listOf(SemistrukturertAdresse().apply {
                     adresselinje1 = forretningsGatenavn

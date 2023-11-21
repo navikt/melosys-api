@@ -1,4 +1,4 @@
-package no.nav.melosys.tjenester
+package no.nav.melosys.domain
 
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer
