@@ -10,13 +10,13 @@ import java.time.LocalDate
 
 // Needs to be open because of mocking : TODO: rewrite tests to kotlin
 open class OrganisasjonsDetaljer(
-    var orgnummer: String,
-    var navn: List<Organisasjonsnavn> = emptyList(),
+    val orgnummer: String,
+    val navn: List<Organisasjonsnavn> = emptyList(),
     var forretningsadresse: List<GeografiskAdresse> = emptyList(),
     var postadresse: List<GeografiskAdresse> = emptyList(),
-    var telefon: List<Telefonnummer> = emptyList(),
-    var epostadresse: List<Epost> = emptyList(),
-    var naering: List<String> = emptyList(),
+    val telefon: List<Telefonnummer> = emptyList(),
+    val epostadresse: List<Epost> = emptyList(),
+    val naering: List<String> = emptyList(),
     var opphoersdato: LocalDate? = null,
 ) {
 

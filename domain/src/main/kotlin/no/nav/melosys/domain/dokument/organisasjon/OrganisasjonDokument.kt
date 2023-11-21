@@ -7,12 +7,12 @@ import no.nav.melosys.domain.dokument.SaksopplysningDokument
 import java.time.LocalDate
 
 class OrganisasjonDokument(
-    var orgnummer: String,
-    var navn: String,
+    val orgnummer: String,
+    val navn: String,
     var oppstartsdato: LocalDate? = null,
-    var enhetstype: String? = null,
-    var organisasjonDetaljer: OrganisasjonsDetaljer,
-    var sektorkode: String
+    val enhetstype: String? = null,
+    val organisasjonDetaljer: OrganisasjonsDetaljer,
+    val sektorkode: String
 ) : SaksopplysningDokument {
 
     @JsonView(FrontendApi::class)

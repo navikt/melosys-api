@@ -415,30 +415,33 @@ class FerdigbehandlingKontrollTest {
         postadressePostnr: String,
         postadresseLand: String
     ): OrganisasjonDokument {
-        return OrganisasjonDokumentTestFactory.builder().build().apply {
-            organisasjonDetaljer.run {
-                forretningsadresse = listOf(SemistrukturertAdresse().apply {
-                    adresselinje1 = forretningsGatenavn
-                    postnr = forretningsPostnr
-                    poststed = "Forretningspoststed"
-                    landkode = "NO"
-                    gyldighetsperiode = no.nav.melosys.domain.dokument.felles.Periode(
-                        LocalDate.now().minusDays(1),
-                        LocalDate.now().plusDays(1)
-                    )
-                })
-                postadresse = listOf(SemistrukturertAdresse().apply {
-                    adresselinje1 = "Postgatenavn"
-                    postnr = postadressePostnr
-                    poststed = "Postpoststed"
-                    landkode = postadresseLand
-                    gyldighetsperiode = no.nav.melosys.domain.dokument.felles.Periode(
-                        LocalDate.now().minusDays(1),
-                        LocalDate.now().plusDays(1)
-                    )
-                })
-            }
+        val forretningsadresse = SemistrukturertAdresse().apply {
+            adresselinje1 = forretningsGatenavn
+            postnr = forretningsPostnr
+            poststed = "Forretningspoststed"
+            landkode = "NO"
+            gyldighetsperiode = no.nav.melosys.domain.dokument.felles.Periode(
+                LocalDate.now().minusDays(1),
+                LocalDate.now().plusDays(1)
+            )
         }
+        val postadresse = SemistrukturertAdresse().apply {
+            adresselinje1 = "Postgatenavn"
+            postnr = postadressePostnr
+            poststed = "Postpoststed"
+            landkode = postadresseLand
+            gyldighetsperiode = no.nav.melosys.domain.dokument.felles.Periode(
+                LocalDate.now().minusDays(1),
+                LocalDate.now().plusDays(1)
+            )
+        }
+        val organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.builder()
+            .forretningsadresse(forretningsadresse)
+            .postadresse(postadresse)
+            .build()
+        return OrganisasjonDokumentTestFactory.builder()
+            .organisasjonsDetaljer(organisasjonsDetaljer)
+            .build()
     }
 
     private fun lagMottatteOpplysningerdata(): MottatteOpplysningerData? {
