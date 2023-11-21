@@ -29,7 +29,7 @@ class EregDtoTilSaksopplysningKonverter {
                 postadresse = tilGeografiskAdresse(responseOrganisasjonDetaljer.postadresser),
                 telefon = tilTelefon(responseOrganisasjonDetaljer.telefonnummer),
                 epostadresse = tilEpost(responseOrganisasjonDetaljer.epostadresser),
-                naering = responseOrganisasjonDetaljer.naeringer?.map { it.naeringskode } ?: emptyList(),
+                naering = responseOrganisasjonDetaljer.naeringer?.mapNotNull { it.naeringskode } ?: emptyList(),
                 opphoersdato = responseOrganisasjonDetaljer.opphoersdato
             )
         )

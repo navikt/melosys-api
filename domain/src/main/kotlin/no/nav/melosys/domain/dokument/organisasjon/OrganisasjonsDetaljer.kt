@@ -14,9 +14,9 @@ open class OrganisasjonsDetaljer(
     var navn: List<Organisasjonsnavn> = emptyList(),
     var forretningsadresse: List<GeografiskAdresse> = emptyList(),
     var postadresse: List<GeografiskAdresse> = emptyList(),
-    var telefon: List<Telefonnummer?>? = emptyList(),
-    var epostadresse: List<Epost?>? = emptyList(),
-    var naering: List<String?>? = emptyList(),
+    var telefon: List<Telefonnummer> = emptyList(),
+    var epostadresse: List<Epost> = emptyList(),
+    var naering: List<String> = emptyList(),
     var opphoersdato: LocalDate? = null,
 ) {
 
