@@ -409,7 +409,9 @@ class TilBrevAdresseServiceTest {
         geogragiskAdresse.setPoststed("Oslo");
         geogragiskAdresse.setLandkode(Land.NORGE);
         geogragiskAdresse.setGyldighetsperiode(new Periode(LocalDate.MIN, LocalDate.MAX));
-        var organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.createOrganisasjonsDetaljerForTest();
+        var organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.builder()
+            .postadresse(geogragiskAdresse)
+            .build();
         organisasjonsDetaljer.setPostadresse(List.of(geogragiskAdresse));
         var dokument = OrganisasjonDokumentTestFactory.builder()
             .orgnummer(orgNummer)

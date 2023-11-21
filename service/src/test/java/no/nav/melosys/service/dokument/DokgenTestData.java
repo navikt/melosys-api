@@ -133,15 +133,18 @@ public final class DokgenTestData {
     }
 
     public static OrganisasjonDokument lagOrg(Landkoder landkoder) {
-        OrganisasjonDokument organisasjonDokument = lagOrg();
-        OrganisasjonsDetaljer organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.createOrganisasjonsDetaljerForTest();
         SemistrukturertAdresse semistrukturertAdresse = new SemistrukturertAdresse();
         semistrukturertAdresse.setLandkode(landkoder.getKode());
         semistrukturertAdresse.setGyldighetsperiode(new Periode(LocalDate.now(), LocalDate.now()));
         semistrukturertAdresse.setPostnr(POSTNR_ORG);
-        organisasjonsDetaljer.setForretningsadresse(List.of(semistrukturertAdresse));
-        organisasjonDokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
-        return organisasjonDokument;
+        OrganisasjonsDetaljer organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.builder()
+            .forretningsadresse(semistrukturertAdresse)
+            .build();
+        return OrganisasjonDokumentTestFactory.builder()
+            .orgnummer(ORGNR)
+            .navn(NAVN_ORG)
+            .organisasjonsDetaljer(organisasjonsDetaljer)
+            .build();
     }
 
     private static List<Behandling> lagBehandlinger() {
@@ -165,9 +168,9 @@ public final class DokgenTestData {
     }
 
     private static OrganisasjonsDetaljer lagOrgDetaljer() {
-        OrganisasjonsDetaljer organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.createOrganisasjonsDetaljerForTest();
-        organisasjonsDetaljer.setPostadresse(singletonList(lagOrgAdresse()));
-        return organisasjonsDetaljer;
+        return OrganisasjonsDetaljerTestFactory.builder()
+            .postadresse(lagOrgAdresse())
+            .build();
     }
 
     private static GeografiskAdresse lagOrgAdresse() {

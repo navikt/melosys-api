@@ -382,20 +382,21 @@ final class DokumentServiceTest {
     }
 
     private static EregFasade mockEregFasade() {
-        EregFasade eregFasade = mock(EregFasade.class);
-        OrganisasjonsDetaljer organisasjonDetaljer = OrganisasjonsDetaljerTestFactory.createOrganisasjonsDetaljerForTest();
         SemistrukturertAdresse adresse = new SemistrukturertAdresse();
         adresse.setLandkode("NO");
         adresse.setAdresselinje1("Gate 1");
         adresse.setPostnr("1234");
         Periode gyldighetsperiode = new Periode(LocalDate.now().minusYears(10), LocalDate.now().plusYears(10));
         adresse.setGyldighetsperiode(gyldighetsperiode);
-        organisasjonDetaljer.setForretningsadresse(Collections.singletonList(adresse));
+        OrganisasjonsDetaljer organisasjonDetaljer = OrganisasjonsDetaljerTestFactory.builder()
+            .forretningsadresse(adresse)
+            .build();
         OrganisasjonDokument orgDok = OrganisasjonDokumentTestFactory.builder()
             .orgnummer(ORGNR)
             .navn("Virker av og til")
             .organisasjonsDetaljer(organisasjonDetaljer)
             .build();
+        EregFasade eregFasade = mock(EregFasade.class);
         when(eregFasade.hentOrganisasjon(ORGNR)).thenReturn(lagSaksopplysning(SaksopplysningType.ORG, orgDok));
         return eregFasade;
     }

@@ -14,12 +14,10 @@ import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
-import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
 import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 
 import static java.util.Collections.singleton;
-import static java.util.Collections.singletonList;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 
 public final class TestdataFactory {
@@ -94,15 +92,15 @@ public final class TestdataFactory {
     }
 
     static OrganisasjonsDetaljer lagOrgDetaljerMedPostadresse() {
-        OrganisasjonsDetaljer organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.createOrganisasjonsDetaljerForTest();
-        organisasjonsDetaljer.setPostadresse(singletonList(lagOrgadresse("1234")));
-        return organisasjonsDetaljer;
+        return OrganisasjonsDetaljerTestFactory.builder()
+            .postadresse(lagOrgadresse("1234"))
+            .build();
     }
 
     static OrganisasjonsDetaljer lagOrgDetaljerMedForretningsadresse() {
-        OrganisasjonsDetaljer organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.createOrganisasjonsDetaljerForTest();
-        organisasjonsDetaljer.setForretningsadresse(singletonList(lagOrgadresse("9876")));
-        return organisasjonsDetaljer;
+        return OrganisasjonsDetaljerTestFactory.builder()
+            .forretningsadresse(lagOrgadresse("1234"))
+            .build();
     }
 
     static GeografiskAdresse lagOrgadresse(String postnummer) {
