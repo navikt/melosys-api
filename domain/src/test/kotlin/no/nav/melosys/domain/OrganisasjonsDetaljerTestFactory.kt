@@ -8,6 +8,7 @@ object OrganisasjonsDetaljerTestFactory {
 
     @JvmStatic
     fun builder() = Builder()
+
     class Builder(
         private var orgnummer: String? = null,
         private var forretningsadresse: List<GeografiskAdresse> = emptyList(),
