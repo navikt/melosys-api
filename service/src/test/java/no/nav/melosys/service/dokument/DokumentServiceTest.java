@@ -385,7 +385,7 @@ final class DokumentServiceTest {
         EregFasade eregFasade = mock(EregFasade.class);
         OrganisasjonDokument orgDok = OrganisasjonDokumentTestFactory.createOrganisasjonDokumentForTest();
         orgDok.setNavn("Virker av og til");
-        OrganisasjonsDetaljer organisasjonDetaljer = new OrganisasjonsDetaljer();
+        OrganisasjonsDetaljer organisasjonDetaljer = OrganisasjonsDetaljerTestFactory.createOrganisasjonsDetaljerForTest();
         SemistrukturertAdresse adresse = new SemistrukturertAdresse();
         adresse.setLandkode("NO");
         adresse.setAdresselinje1("Gate 1");

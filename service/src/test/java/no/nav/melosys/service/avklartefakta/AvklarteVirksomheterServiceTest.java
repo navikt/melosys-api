@@ -8,10 +8,7 @@ import java.util.stream.Collectors;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.FellesKodeverk;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.Adresse;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
@@ -28,7 +25,6 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
 import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak;
 import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
@@ -394,7 +390,7 @@ class AvklarteVirksomheterServiceTest {
 
     private OrganisasjonDokument lagOrganisasjonDokument(String forretningsPostnr, String forretningsGatenavn, String postadressePostnr, String postadresseLand) {
         OrganisasjonDokument organisasjonDokument = OrganisasjonDokumentTestFactory.createOrganisasjonDokumentForTest();
-        OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
+        OrganisasjonsDetaljer organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.createOrganisasjonsDetaljerForTest();
         organisasjonDokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
         SemistrukturertAdresse forretningsadresse = new SemistrukturertAdresse();
         organisasjonsDetaljer.setForretningsadresse(List.of(forretningsadresse));

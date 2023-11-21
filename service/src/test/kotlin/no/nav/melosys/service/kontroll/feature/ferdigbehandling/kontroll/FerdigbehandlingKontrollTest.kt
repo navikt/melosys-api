@@ -2,14 +2,11 @@ package no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll
 
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import no.nav.melosys.domain.Aktoer
-import no.nav.melosys.domain.Lovvalgsperiode
-import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
@@ -19,7 +16,6 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
-import no.nav.melosys.domain.OrganisasjonDokumentTestFactory
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
 import org.junit.jupiter.api.Test
@@ -420,7 +416,7 @@ class FerdigbehandlingKontrollTest {
         postadresseLand: String
     ): OrganisasjonDokument {
         return OrganisasjonDokumentTestFactory.createOrganisasjonDokumentForTest().apply {
-            organisasjonDetaljer = OrganisasjonsDetaljer().apply {
+            organisasjonDetaljer = OrganisasjonsDetaljerTestFactory.createOrganisasjonsDetaljerForTest().apply {
                 forretningsadresse = listOf(SemistrukturertAdresse().apply {
                     adresselinje1 = forretningsGatenavn
                     postnr = forretningsPostnr

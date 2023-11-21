@@ -134,7 +134,7 @@ public final class DokgenTestData {
 
     public static OrganisasjonDokument lagOrg(Landkoder landkoder) {
         OrganisasjonDokument organisasjonDokument = lagOrg();
-        OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
+        OrganisasjonsDetaljer organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.createOrganisasjonsDetaljerForTest();
         SemistrukturertAdresse semistrukturertAdresse = new SemistrukturertAdresse();
         semistrukturertAdresse.setLandkode(landkoder.getKode());
         semistrukturertAdresse.setGyldighetsperiode(new Periode(LocalDate.now(), LocalDate.now()));
@@ -165,7 +165,7 @@ public final class DokgenTestData {
     }
 
     private static OrganisasjonsDetaljer lagOrgDetaljer() {
-        OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
+        OrganisasjonsDetaljer organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.createOrganisasjonsDetaljerForTest();
         organisasjonsDetaljer.setPostadresse(singletonList(lagOrgAdresse()));
         return organisasjonsDetaljer;
     }

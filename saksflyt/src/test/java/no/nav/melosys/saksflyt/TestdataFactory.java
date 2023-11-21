@@ -96,13 +96,13 @@ public final class TestdataFactory {
     }
 
     static OrganisasjonsDetaljer lagOrgDetaljerMedPostadresse() {
-        OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
+        OrganisasjonsDetaljer organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.createOrganisasjonsDetaljerForTest();
         organisasjonsDetaljer.setPostadresse(singletonList(lagOrgadresse("1234")));
         return organisasjonsDetaljer;
     }
 
     static OrganisasjonsDetaljer lagOrgDetaljerMedForretningsadresse() {
-        OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
+        OrganisasjonsDetaljer organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.createOrganisasjonsDetaljerForTest();
         organisasjonsDetaljer.setForretningsadresse(singletonList(lagOrgadresse("9876")));
         return organisasjonsDetaljer;
     }
