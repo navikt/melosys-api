@@ -613,6 +613,12 @@
                 <type>test-jar</type>
             </dependency>
             <dependency>
+                <groupId>no.nav.melosys</groupId>
+                <artifactId>melosys-domain</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+            </dependency>
+            <dependency>
                 <groupId>no.nav.security</groupId>
                 <artifactId>token-validation-spring-test</artifactId>
                 <version>${token-support.version}</version>
