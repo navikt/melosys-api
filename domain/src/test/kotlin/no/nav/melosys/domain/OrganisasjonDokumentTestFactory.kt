@@ -4,19 +4,20 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer
 
 object OrganisasjonDokumentTestFactory {
+    const val ORGNUMMER = "123456789"
+    const val NAVN = "Ola Norman"
+    const val SEKTORKODE = "Ola Norman"
+
     @JvmStatic
-    fun createOrganisasjonDokumentForTest(
-    ): OrganisasjonDokument = createOrganisasjonDokumentForTest(
-        "123456789",
-        "Ola Norman",
-        ""
-    )
+    fun createOrganisasjonDokumentForTest(): OrganisasjonDokument {
+        return createOrganisasjonDokumentForTest(ORGNUMMER, NAVN, SEKTORKODE)
+    }
 
     @JvmStatic
     fun createOrganisasjonDokumentForTest(
-        orgnummer: String = "123456789",
-        navn: String = "Ola Norman",
-        sektorkode: String = "",
+        orgnummer: String = ORGNUMMER,
+        navn: String = NAVN,
+        sektorkode: String = SEKTORKODE,
     ): OrganisasjonDokument {
         return OrganisasjonDokument(
             orgnummer = orgnummer,
@@ -24,20 +25,5 @@ object OrganisasjonDokumentTestFactory {
             sektorkode = sektorkode,
             organisasjonDetaljer = OrganisasjonsDetaljer(orgnummer = orgnummer),
         )
-    }
-}
-
-object OrganisasjonsDetaljerTestFactory {
-    @JvmStatic
-    fun createOrganisasjonsDetaljerForTest(
-    ): OrganisasjonsDetaljer = createOrganisasjonsDetaljerForTest(
-        "123456789"
-    )
-
-    @JvmStatic
-    fun createOrganisasjonsDetaljerForTest(
-        orgnummer: String = "123456789"
-    ): OrganisasjonsDetaljer {
-        return OrganisasjonsDetaljer(orgnummer = orgnummer)
     }
 }
