@@ -125,11 +125,11 @@ public final class DokgenTestData {
     }
 
     public static OrganisasjonDokument lagOrg() {
-        OrganisasjonDokument organisasjonDokument = OrganisasjonDokumentTestFactory.createOrganisasjonDokumentForTest();
-        organisasjonDokument.setNavn(NAVN_ORG);
-        organisasjonDokument.setOrgnummer(ORGNR);
-        organisasjonDokument.setOrganisasjonDetaljer(lagOrgDetaljer());
-        return organisasjonDokument;
+        return OrganisasjonDokumentTestFactory.builder()
+            .orgnummer(ORGNR)
+            .navn(NAVN_ORG)
+            .organisasjonsDetaljer(lagOrgDetaljer())
+            .build();
     }
 
     public static OrganisasjonDokument lagOrg(Landkoder landkoder) {

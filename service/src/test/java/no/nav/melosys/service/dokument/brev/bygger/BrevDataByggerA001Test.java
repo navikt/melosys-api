@@ -181,10 +181,11 @@ class BrevDataByggerA001Test {
     }
 
     private void leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) {
-        OrganisasjonDokument orgDok = OrganisasjonDokumentTestFactory.createOrganisasjonDokumentForTest();
-        orgDok.setNavn(navn);
-        orgDok.setOrgnummer(orgnummer);
-        orgDok.setOrganisasjonDetaljer(detaljer);
+        OrganisasjonDokument orgDok = OrganisasjonDokumentTestFactory.builder()
+            .orgnummer(orgnummer)
+            .navn(navn)
+            .organisasjonsDetaljer(detaljer)
+            .build();
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.ORG);
         saksopplysning.setDokument(orgDok);

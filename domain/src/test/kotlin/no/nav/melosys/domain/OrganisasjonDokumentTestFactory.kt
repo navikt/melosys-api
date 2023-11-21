@@ -9,21 +9,23 @@ object OrganisasjonDokumentTestFactory {
     const val SEKTORKODE = "Ola Norman"
 
     @JvmStatic
-    fun createOrganisasjonDokumentForTest(): OrganisasjonDokument {
-        return createOrganisasjonDokumentForTest(ORGNUMMER, NAVN, SEKTORKODE)
-    }
+    fun builder() = Builder()
 
-    @JvmStatic
-    fun createOrganisasjonDokumentForTest(
-        orgnummer: String = ORGNUMMER,
-        navn: String = NAVN,
-        sektorkode: String = SEKTORKODE,
-    ): OrganisasjonDokument {
-        return OrganisasjonDokument(
-            orgnummer = orgnummer,
-            navn = navn,
-            sektorkode = sektorkode,
-            organisasjonDetaljer = OrganisasjonsDetaljer(orgnummer = orgnummer),
+    class Builder(
+        private var orgnummer: String? = null,
+        private var navn: String? = null,
+        private var sektorkode: String? = null,
+        private var organisasjonsDetaljer: OrganisasjonsDetaljer? = null
+    ) {
+        fun orgnummer(orgnummer: String) = apply { this.orgnummer = orgnummer }
+        fun navn(navn: String) = apply { this.navn = navn }
+        fun sektorkode(sektorkode: String) = apply { this.sektorkode = sektorkode }
+        fun organisasjonsDetaljer(organisasjonsDetaljer: OrganisasjonsDetaljer) = apply { this.organisasjonsDetaljer = organisasjonsDetaljer }
+        fun build() = OrganisasjonDokument(
+            orgnummer = orgnummer ?: ORGNUMMER,
+            navn = navn ?: NAVN,
+            sektorkode = sektorkode ?: SEKTORKODE,
+            organisasjonDetaljer = organisasjonsDetaljer ?: OrganisasjonsDetaljer(orgnummer = orgnummer ?: ORGNUMMER),
         )
     }
 }

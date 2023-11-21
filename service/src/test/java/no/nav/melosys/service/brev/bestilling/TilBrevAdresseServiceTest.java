@@ -411,10 +411,11 @@ class TilBrevAdresseServiceTest {
         geogragiskAdresse.setGyldighetsperiode(new Periode(LocalDate.MIN, LocalDate.MAX));
         var organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.createOrganisasjonsDetaljerForTest();
         organisasjonsDetaljer.setPostadresse(List.of(geogragiskAdresse));
-        var dokument = OrganisasjonDokumentTestFactory.createOrganisasjonDokumentForTest();
-        dokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
-        dokument.setNavn(navn);
-        dokument.setOrgnummer(orgNummer);
+        var dokument = OrganisasjonDokumentTestFactory.builder()
+            .orgnummer(orgNummer)
+            .navn(navn)
+            .organisasjonsDetaljer(organisasjonsDetaljer)
+            .build();
         var saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(dokument);
         saksopplysning.setType(SaksopplysningType.ORG);

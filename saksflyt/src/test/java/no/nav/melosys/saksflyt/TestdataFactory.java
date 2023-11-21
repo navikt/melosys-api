@@ -41,17 +41,15 @@ public final class TestdataFactory {
     }
 
     public static OrganisasjonDokument lagOrgMedPostadresse() {
-        OrganisasjonDokument organisasjonDokument = OrganisasjonDokumentTestFactory.createOrganisasjonDokumentForTest();
-        organisasjonDokument.setOrgnummer("122344");
-        organisasjonDokument.setOrganisasjonDetaljer(lagOrgDetaljerMedPostadresse());
-        return organisasjonDokument;
+        return OrganisasjonDokumentTestFactory.builder()
+            .orgnummer("122344")
+            .organisasjonsDetaljer(lagOrgDetaljerMedPostadresse()).build();
     }
 
     public static OrganisasjonDokument lagOrgMedForretningsadresse() {
-        OrganisasjonDokument organisasjonDokument = OrganisasjonDokumentTestFactory.createOrganisasjonDokumentForTest();
-        organisasjonDokument.setOrgnummer("122344");
-        organisasjonDokument.setOrganisasjonDetaljer(lagOrgDetaljerMedForretningsadresse());
-        return organisasjonDokument;
+        return OrganisasjonDokumentTestFactory.builder()
+            .orgnummer("122344")
+            .organisasjonsDetaljer(lagOrgDetaljerMedForretningsadresse()).build();
     }
 
     public static Kontaktopplysning lagKontaktOpplysning() {

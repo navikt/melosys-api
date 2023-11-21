@@ -3,7 +3,6 @@ package no.nav.melosys.service;
 import java.util.*;
 
 import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
-import no.nav.melosys.domain.OrganisasjonsDetaljerTestFactory;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
@@ -28,14 +27,12 @@ public class SaksopplysningStubs {
         return new HashSet<>(Collections.singletonList(arbeidsforhold));
     }
 
-    public static Set<OrganisasjonDokument> lagOrganisasjonDokumenter(Collection<String> organisasjonsnumre)  {
+    public static Set<OrganisasjonDokument> lagOrganisasjonDokumenter(Collection<String> organisasjonsnumre) {
         Set<OrganisasjonDokument> organisasjonDokumenter = new HashSet<>();
         for (String orgnummer : organisasjonsnumre) {
-            OrganisasjonDokument organisasjonDokument = OrganisasjonDokumentTestFactory.createOrganisasjonDokumentForTest();
-            organisasjonDokument.setOrgnummer(orgnummer);
-            organisasjonDokument.setNavn("Test:" + orgnummer);
-            organisasjonDokument.setOrganisasjonDetaljer(OrganisasjonsDetaljerTestFactory.createOrganisasjonsDetaljerForTest());
-            organisasjonDokumenter.add(organisasjonDokument);
+            organisasjonDokumenter.add(OrganisasjonDokumentTestFactory.builder()
+                .orgnummer(orgnummer)
+                .navn("Test:" + orgnummer).build());
         }
         return organisasjonDokumenter;
     }

@@ -415,8 +415,8 @@ class FerdigbehandlingKontrollTest {
         postadressePostnr: String,
         postadresseLand: String
     ): OrganisasjonDokument {
-        return OrganisasjonDokumentTestFactory.createOrganisasjonDokumentForTest().apply {
-            organisasjonDetaljer = OrganisasjonsDetaljerTestFactory.createOrganisasjonsDetaljerForTest().apply {
+        return OrganisasjonDokumentTestFactory.builder().build().apply {
+            organisasjonDetaljer.run {
                 forretningsadresse = listOf(SemistrukturertAdresse().apply {
                     adresselinje1 = forretningsGatenavn
                     postnr = forretningsPostnr

@@ -33,7 +33,7 @@ class OrganisasjonOppslagServiceTest {
         final var orgnrMedWhitespace = " 123456789 ";
 
         var saksopplysning = new Saksopplysning();
-        saksopplysning.setDokument(OrganisasjonDokumentTestFactory.createOrganisasjonDokumentForTest());
+        saksopplysning.setDokument(OrganisasjonDokumentTestFactory.builder().build());
         when(eregFasade.hentOrganisasjon(orgnrMedWhitespace.trim())).thenReturn(saksopplysning);
 
         assertThat(organisasjonOppslagService.hentOrganisasjon(orgnrMedWhitespace)).isInstanceOf(OrganisasjonDokument.class);

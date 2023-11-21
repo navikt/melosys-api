@@ -383,8 +383,6 @@ final class DokumentServiceTest {
 
     private static EregFasade mockEregFasade() {
         EregFasade eregFasade = mock(EregFasade.class);
-        OrganisasjonDokument orgDok = OrganisasjonDokumentTestFactory.createOrganisasjonDokumentForTest();
-        orgDok.setNavn("Virker av og til");
         OrganisasjonsDetaljer organisasjonDetaljer = OrganisasjonsDetaljerTestFactory.createOrganisasjonsDetaljerForTest();
         SemistrukturertAdresse adresse = new SemistrukturertAdresse();
         adresse.setLandkode("NO");
@@ -393,8 +391,11 @@ final class DokumentServiceTest {
         Periode gyldighetsperiode = new Periode(LocalDate.now().minusYears(10), LocalDate.now().plusYears(10));
         adresse.setGyldighetsperiode(gyldighetsperiode);
         organisasjonDetaljer.setForretningsadresse(Collections.singletonList(adresse));
-        orgDok.setOrganisasjonDetaljer(organisasjonDetaljer);
-        orgDok.setOrgnummer(ORGNR);
+        OrganisasjonDokument orgDok = OrganisasjonDokumentTestFactory.builder()
+            .orgnummer(ORGNR)
+            .navn("Virker av og til")
+            .organisasjonsDetaljer(organisasjonDetaljer)
+            .build();
         when(eregFasade.hentOrganisasjon(ORGNR)).thenReturn(lagSaksopplysning(SaksopplysningType.ORG, orgDok));
         return eregFasade;
     }

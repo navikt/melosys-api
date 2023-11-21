@@ -389,9 +389,7 @@ class AvklarteVirksomheterServiceTest {
     }
 
     private OrganisasjonDokument lagOrganisasjonDokument(String forretningsPostnr, String forretningsGatenavn, String postadressePostnr, String postadresseLand) {
-        OrganisasjonDokument organisasjonDokument = OrganisasjonDokumentTestFactory.createOrganisasjonDokumentForTest();
         OrganisasjonsDetaljer organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.createOrganisasjonsDetaljerForTest();
-        organisasjonDokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
         SemistrukturertAdresse forretningsadresse = new SemistrukturertAdresse();
         organisasjonsDetaljer.setForretningsadresse(List.of(forretningsadresse));
         forretningsadresse.setAdresselinje1(forretningsGatenavn);
@@ -407,6 +405,9 @@ class AvklarteVirksomheterServiceTest {
         postadresse.setLandkode(postadresseLand);
         postadresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1)));
 
-        return organisasjonDokument;
+        return OrganisasjonDokumentTestFactory.builder()
+            .organisasjonsDetaljer(organisasjonsDetaljer)
+            .build();
     }
+
 }

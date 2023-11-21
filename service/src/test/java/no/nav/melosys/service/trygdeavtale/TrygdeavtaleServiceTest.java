@@ -478,10 +478,11 @@ class TrygdeavtaleServiceTest {
     }
 
     private OrganisasjonDokument lagOrganisasjonsDokument(String orgnr, String navn) {
-        var organisasjonsDokument = OrganisasjonDokumentTestFactory.createOrganisasjonDokumentForTest();
-        organisasjonsDokument.setOrgnummer(orgnr);
-        organisasjonsDokument.setNavn(navn);
-        return organisasjonsDokument;
+        return OrganisasjonDokumentTestFactory
+            .builder()
+            .orgnummer(orgnr)
+            .navn(navn)
+            .build();
     }
 
     private Saksopplysning lagArbForhSaksopplysning(List<String> orgnumre) {
