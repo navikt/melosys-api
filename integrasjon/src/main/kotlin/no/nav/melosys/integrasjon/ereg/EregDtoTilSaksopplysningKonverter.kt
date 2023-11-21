@@ -83,12 +83,12 @@ class EregDtoTilSaksopplysningKonverter {
         }?.organisasjonsledd?.organisasjonsleddDetaljer?.sektorkode
 
     private fun tilNavn(navn: List<OrganisasjonResponse.Navn>?): List<Organisasjonsnavn> = navn?.map {
-        Organisasjonsnavn().apply {
-            bruksperiode = it.bruksperiode.tilPeriode()
-            gyldighetsperiode = it.gyldighetsperiode.tilPeriode()
-            this.navn = listOf(it.sammensattnavn)
+        Organisasjonsnavn(
+            bruksperiode = it.bruksperiode.tilPeriode(),
+            gyldighetsperiode = it.gyldighetsperiode.tilPeriode(),
+            navn = listOf(it.sammensattnavn),
             redigertNavn = it.sammensattnavn
-        }
+        )
     } ?: emptyList()
 
     private fun tilTelefon(telefonnummer: List<OrganisasjonResponse.Telefonnummer>?): List<Telefonnummer> = telefonnummer?.map {
