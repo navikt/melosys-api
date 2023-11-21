@@ -102,8 +102,7 @@ class EregDtoTilSaksopplysningKonverter {
     } ?: emptyList()
 
     private fun tilEpost(epost: List<OrganisasjonResponse.Epostadresse>?): List<Epost> = epost?.map {
-        Epost().apply {
-            identifikator = it.adresse
+        Epost(identifikator = it.adresse).apply {
             bruksperiode = it.bruksperiode.tilPeriode()
             gyldighetsperiode = it.gyldighetsperiode.tilPeriode()
         }
