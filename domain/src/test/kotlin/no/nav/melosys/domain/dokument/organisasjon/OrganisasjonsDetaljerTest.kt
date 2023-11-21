@@ -3,6 +3,7 @@ package no.nav.melosys.domain.dokument.organisasjon
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
+import no.nav.melosys.domain.OrganisasjonsDetaljerTestFactory.createOrganisasjonsDetaljerForTest
 import no.nav.melosys.domain.dokument.felles.Periode
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
 import org.junit.jupiter.api.Test
@@ -12,7 +13,7 @@ class OrganisasjonsDetaljerTest {
 
     @Test
     fun `Konverter forretningsadresse til ustrukturert adresse`() {
-        val orgDetaljer = OrganisasjonsDetaljer().apply {
+        val orgDetaljer = createOrganisasjonsDetaljerForTest().apply {
             forretningsadresse = listOf(lagAdresse(landkode = "NO"))
         }
 
@@ -31,7 +32,7 @@ class OrganisasjonsDetaljerTest {
 
     @Test
     fun `Konverter utenlandsk forretningsadresse til ustrukturert adresse`() {
-        val orgDetaljer = OrganisasjonsDetaljer().apply {
+        val orgDetaljer = createOrganisasjonsDetaljerForTest().apply {
             forretningsadresse = listOf(lagAdresse(landkode = "DK"))
         }
 
@@ -50,7 +51,7 @@ class OrganisasjonsDetaljerTest {
 
     @Test
     fun `Konverter forretningsadresse til strukturert adresse`() {
-        val orgDetaljer = OrganisasjonsDetaljer().apply {
+        val orgDetaljer = createOrganisasjonsDetaljerForTest().apply {
             forretningsadresse = listOf(lagAdresse(landkode = "NO"))
         }
 
@@ -68,7 +69,7 @@ class OrganisasjonsDetaljerTest {
 
     @Test
     fun `Konverter utenlandsk forretningsadresse til strukturert adresse`() {
-        val orgDetaljer = OrganisasjonsDetaljer().apply {
+        val orgDetaljer = createOrganisasjonsDetaljerForTest().apply {
             forretningsadresse = listOf(lagAdresse("DK"))
         }
 
@@ -86,7 +87,7 @@ class OrganisasjonsDetaljerTest {
 
     @Test
     fun `Test null adresse`() {
-        val orgDetaljer = OrganisasjonsDetaljer()
+        val orgDetaljer = createOrganisasjonsDetaljerForTest()
 
 
         val resultatAdresse = orgDetaljer.hentStrukturertForretningsadresse()
@@ -97,7 +98,7 @@ class OrganisasjonsDetaljerTest {
 
     @Test
     fun `Konverter utenlandsk adresse med null postnummer til strukturert adresse postnummer som ett mellomrom`() {
-        val orgDetaljer = OrganisasjonsDetaljer()
+        val orgDetaljer = createOrganisasjonsDetaljerForTest()
         val adresse = SemistrukturertAdresse().apply {
             landkode = "US"
             postnr = null
@@ -117,7 +118,7 @@ class OrganisasjonsDetaljerTest {
 
     @Test
     fun `Konverter norsk adresse med null postnummer til strukturert adresse med postnummer=null`() {
-        val orgDetaljer = OrganisasjonsDetaljer()
+        val orgDetaljer = createOrganisasjonsDetaljerForTest()
         val adresse = SemistrukturertAdresse().apply {
             landkode = "NO"
             postnr = null

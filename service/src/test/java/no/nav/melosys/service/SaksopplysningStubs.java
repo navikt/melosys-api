@@ -2,6 +2,7 @@ package no.nav.melosys.service;
 
 import java.util.*;
 
+import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
 import no.nav.melosys.domain.Saksopplysning;
 import no.nav.melosys.domain.SaksopplysningType;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;

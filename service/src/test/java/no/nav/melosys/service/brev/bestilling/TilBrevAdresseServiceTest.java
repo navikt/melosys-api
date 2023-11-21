@@ -19,7 +19,7 @@ import no.nav.melosys.domain.person.Personopplysninger;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
-import no.nav.melosys.service.OrganisasjonDokumentTestFactory;
+import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.brev.BrevAdresse;

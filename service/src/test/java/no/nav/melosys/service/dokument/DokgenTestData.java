@@ -28,7 +28,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.Representan
 import no.nav.melosys.domain.person.*;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
-import no.nav.melosys.service.OrganisasjonDokumentTestFactory;
+import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
 
 import static java.util.Collections.singletonList;
 import static no.nav.melosys.domain.kodeverk.Mottakerroller.*;

@@ -9,7 +9,8 @@ object OrganisasjonDokumentTestFactory {
     ): OrganisasjonDokument = createOrganisasjonDokumentForTest(
         "123456789",
         "Ola Norman",
-        "")
+        ""
+    )
 
     @JvmStatic
     fun createOrganisasjonDokumentForTest(
@@ -21,7 +22,22 @@ object OrganisasjonDokumentTestFactory {
             orgnummer = orgnummer,
             navn = navn,
             sektorkode = sektorkode,
-            organisasjonDetaljer = OrganisasjonsDetaljer(),
+            organisasjonDetaljer = OrganisasjonsDetaljer(orgnummer = orgnummer),
         )
+    }
+}
+
+object OrganisasjonsDetaljerTestFactory {
+    @JvmStatic
+    fun createOrganisasjonsDetaljerForTest(
+    ): OrganisasjonsDetaljer = createOrganisasjonsDetaljerForTest(
+        "123456789"
+    )
+
+    @JvmStatic
+    fun createOrganisasjonsDetaljerForTest(
+        orgnummer: String = "123456789"
+    ): OrganisasjonsDetaljer {
+        return OrganisasjonsDetaljer(orgnummer = orgnummer)
     }
 }
