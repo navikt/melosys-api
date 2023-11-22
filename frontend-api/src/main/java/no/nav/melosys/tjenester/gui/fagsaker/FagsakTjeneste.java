@@ -1,10 +1,5 @@
 package no.nav.melosys.tjenester.gui.fagsaker;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
@@ -32,6 +27,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentLand;
 import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentPeriode;
 
@@ -56,6 +56,7 @@ public class FagsakTjeneste {
     private final OpprettBehandlingForSak opprettBehandlingForSak;
     private final FerdigbehandleSakService ferdigbehandleSakService;
     private final MedlemAvFolketrygdenService medlemAvFolketrygdenService;
+    private final TrygdeavgiftService trygdeavgiftService;
 
     public FagsakTjeneste(FagsakService fagsakService,
                           Aksesskontroll aksesskontroll,
@@ -68,7 +69,8 @@ public class FagsakTjeneste {
                           OrganisasjonOppslagService organisasjonOppslagService,
                           OpprettBehandlingForSak opprettBehandlingForSak,
                           FerdigbehandleSakService ferdigbehandleSakService,
-                          MedlemAvFolketrygdenService medlemAvFolketrygdenService) {
+                          MedlemAvFolketrygdenService medlemAvFolketrygdenService,
+                          TrygdeavgiftService trygdeavgiftService) {
         this.fagsakService = fagsakService;
         this.aksesskontroll = aksesskontroll;
         this.mottatteOpplysningerService = mottatteOpplysningerService;
@@ -81,6 +83,7 @@ public class FagsakTjeneste {
         this.opprettBehandlingForSak = opprettBehandlingForSak;
         this.ferdigbehandleSakService = ferdigbehandleSakService;
         this.medlemAvFolketrygdenService = medlemAvFolketrygdenService;
+        this.trygdeavgiftService = trygdeavgiftService;
     }
 
     @GetMapping("/{saksnr}")
@@ -168,6 +171,14 @@ public class FagsakTjeneste {
         ferdigbehandleSakService.ferdigbehandleSak(saksnummer);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{saksnummer}/trygdeavgift/oppsummering")
+    @ApiOperation("Hent oppsummering på trygdeavgift på fagsaken")
+    public ResponseEntity<TrygdeavgiftOppsummering> hentTrygdeavgiftOppsummering(@PathVariable("saksnummer") String saksnummer) {
+        aksesskontroll.autoriserSakstilgang(saksnummer);
+
+        return ResponseEntity.ok(new TrygdeavgiftOppsummering(trygdeavgiftService.harFagsakBehandlingerMedTrygdeavgift(saksnummer)));
     }
 
     private FagsakDto tilFagsakDto(Fagsak fagsak) {
