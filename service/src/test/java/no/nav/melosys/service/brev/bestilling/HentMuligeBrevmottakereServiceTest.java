@@ -10,8 +10,6 @@ import no.nav.melosys.domain.brev.Mottakerliste;
 import no.nav.melosys.domain.brev.muligemottakere.Brevmottaker;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -506,12 +504,14 @@ class HentMuligeBrevmottakereServiceTest {
         geogragiskAdresse.setPoststed("Oslo");
         geogragiskAdresse.setLandkode(Land.NORGE);
         geogragiskAdresse.setGyldighetsperiode(new Periode(LocalDate.MIN, LocalDate.MAX));
-        var organisasjonsDetaljer = new OrganisasjonsDetaljer();
-        organisasjonsDetaljer.setPostadresse(List.of(geogragiskAdresse));
-        var dokument = new OrganisasjonDokument();
-        dokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
-        dokument.setNavn(navn);
-        dokument.setOrgnummer(orgNummer);
+        var organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.builder()
+            .postadresse(geogragiskAdresse)
+            .build();
+        var dokument = OrganisasjonDokumentTestFactory.builder()
+            .orgnummer(orgNummer)
+            .navn(navn)
+            .organisasjonsDetaljer(organisasjonsDetaljer)
+            .build();
         var saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(dokument);
         saksopplysning.setType(SaksopplysningType.ORG);

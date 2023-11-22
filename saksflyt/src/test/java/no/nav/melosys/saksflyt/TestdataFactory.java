@@ -18,7 +18,6 @@ import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 
 import static java.util.Collections.singleton;
-import static java.util.Collections.singletonList;
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.BRUKER;
 
 public final class TestdataFactory {
@@ -40,17 +39,15 @@ public final class TestdataFactory {
     }
 
     public static OrganisasjonDokument lagOrgMedPostadresse() {
-        OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
-        organisasjonDokument.setOrgnummer("122344");
-        organisasjonDokument.setOrganisasjonDetaljer(lagOrgDetaljerMedPostadresse());
-        return organisasjonDokument;
+        return OrganisasjonDokumentTestFactory.builder()
+            .orgnummer("122344")
+            .organisasjonsDetaljer(lagOrgDetaljerMedPostadresse()).build();
     }
 
     public static OrganisasjonDokument lagOrgMedForretningsadresse() {
-        OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
-        organisasjonDokument.setOrgnummer("122344");
-        organisasjonDokument.setOrganisasjonDetaljer(lagOrgDetaljerMedForretningsadresse());
-        return organisasjonDokument;
+        return OrganisasjonDokumentTestFactory.builder()
+            .orgnummer("122344")
+            .organisasjonsDetaljer(lagOrgDetaljerMedForretningsadresse()).build();
     }
 
     public static Kontaktopplysning lagKontaktOpplysning() {
@@ -95,15 +92,15 @@ public final class TestdataFactory {
     }
 
     static OrganisasjonsDetaljer lagOrgDetaljerMedPostadresse() {
-        OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
-        organisasjonsDetaljer.setPostadresse(singletonList(lagOrgadresse("1234")));
-        return organisasjonsDetaljer;
+        return OrganisasjonsDetaljerTestFactory.builder()
+            .postadresse(lagOrgadresse("1234"))
+            .build();
     }
 
     static OrganisasjonsDetaljer lagOrgDetaljerMedForretningsadresse() {
-        OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
-        organisasjonsDetaljer.setForretningsadresse(singletonList(lagOrgadresse("9876")));
-        return organisasjonsDetaljer;
+        return OrganisasjonsDetaljerTestFactory.builder()
+            .forretningsadresse(lagOrgadresse("1234"))
+            .build();
     }
 
     static GeografiskAdresse lagOrgadresse(String postnummer) {

@@ -2,14 +2,11 @@ package no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll
 
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import no.nav.melosys.domain.Aktoer
-import no.nav.melosys.domain.Lovvalgsperiode
-import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
@@ -418,30 +415,33 @@ class FerdigbehandlingKontrollTest {
         postadressePostnr: String,
         postadresseLand: String
     ): OrganisasjonDokument {
-        return OrganisasjonDokument().apply {
-            organisasjonDetaljer = OrganisasjonsDetaljer().apply {
-                forretningsadresse = listOf(SemistrukturertAdresse().apply {
-                    adresselinje1 = forretningsGatenavn
-                    postnr = forretningsPostnr
-                    poststed = "Forretningspoststed"
-                    landkode = "NO"
-                    gyldighetsperiode = no.nav.melosys.domain.dokument.felles.Periode(
-                        LocalDate.now().minusDays(1),
-                        LocalDate.now().plusDays(1)
-                    )
-                })
-                postadresse = listOf(SemistrukturertAdresse().apply {
-                    adresselinje1 = "Postgatenavn"
-                    postnr = postadressePostnr
-                    poststed = "Postpoststed"
-                    landkode = postadresseLand
-                    gyldighetsperiode = no.nav.melosys.domain.dokument.felles.Periode(
-                        LocalDate.now().minusDays(1),
-                        LocalDate.now().plusDays(1)
-                    )
-                })
-            }
+        val forretningsadresse = SemistrukturertAdresse().apply {
+            adresselinje1 = forretningsGatenavn
+            postnr = forretningsPostnr
+            poststed = "Forretningspoststed"
+            landkode = "NO"
+            gyldighetsperiode = no.nav.melosys.domain.dokument.felles.Periode(
+                LocalDate.now().minusDays(1),
+                LocalDate.now().plusDays(1)
+            )
         }
+        val postadresse = SemistrukturertAdresse().apply {
+            adresselinje1 = "Postgatenavn"
+            postnr = postadressePostnr
+            poststed = "Postpoststed"
+            landkode = postadresseLand
+            gyldighetsperiode = no.nav.melosys.domain.dokument.felles.Periode(
+                LocalDate.now().minusDays(1),
+                LocalDate.now().plusDays(1)
+            )
+        }
+        val organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.builder()
+            .forretningsadresse(forretningsadresse)
+            .postadresse(postadresse)
+            .build()
+        return OrganisasjonDokumentTestFactory.builder()
+            .organisasjonsDetaljer(organisasjonsDetaljer)
+            .build()
     }
 
     private fun lagMottatteOpplysningerdata(): MottatteOpplysningerData? {
