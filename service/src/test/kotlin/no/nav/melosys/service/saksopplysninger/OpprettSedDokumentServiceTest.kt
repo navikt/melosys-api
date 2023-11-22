@@ -1,11 +1,20 @@
 package no.nav.melosys.service.saksopplysninger
 
+import io.kotest.assertions.json.shouldEqualJson
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import no.nav.melosys.domain.Behandling
-import no.nav.melosys.domain.dokument.DokumentFactory
+import no.nav.melosys.domain.Saksopplysning
+import no.nav.melosys.domain.SaksopplysningKildesystem
+import no.nav.melosys.domain.SaksopplysningType
+import no.nav.melosys.domain.dokument.sed.SedDokument
+import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.Periode
+import no.nav.melosys.domain.eessi.SedType
 import no.nav.melosys.domain.eessi.melding.AnmodningUnntak
 import no.nav.melosys.domain.eessi.melding.Avsender
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
@@ -16,25 +25,35 @@ import java.time.LocalDate
 
 class OpprettSedDokumentServiceTest {
 
-    private val dokumentFactory: DokumentFactory = mockk()
     private val saksopplysningRepository: SaksopplysningRepository = mockk()
-
-    private val opprettSedDokumentService = OpprettSedDokumentService(dokumentFactory, saksopplysningRepository)
+    private val opprettSedDokumentService = OpprettSedDokumentService(saksopplysningRepository)
 
     @Test
     fun opprettSedSaksopplysning() {
+        val saksopplysningSlot = slot<Saksopplysning>()
         val behandling = Behandling()
         val melosysEessiMelding = hentMelosysEessiMelding()
-        every { dokumentFactory.lagForenkletXml(any()) } returns "<xml>"
-        every { saksopplysningRepository.save(any()) } returns mockk()
+        every { saksopplysningRepository.save(any<Saksopplysning>()) } returns mockk()
 
 
         opprettSedDokumentService.opprettSedSaksopplysning(melosysEessiMelding, behandling)
 
 
-        verify { dokumentFactory.lagForenkletXml(any()) }
-        verify { saksopplysningRepository.save(any()) }
+        verify { saksopplysningRepository.save(capture(saksopplysningSlot)) }
+        saksopplysningSlot.captured.let { saksopplysning ->
+            saksopplysning.type.shouldBe(SaksopplysningType.SEDOPPL)
+            saksopplysning.dokument.shouldBeInstanceOf<SedDokument>().run {
+                sedType.shouldBe(SedType.A009)
+                rinaDokumentID.shouldBe(melosysEessiMelding.sedId)
+                bucType.shouldBe(BucType.LA_BUC_04)
+            }
+            saksopplysning.kilder.single().run {
+                kilde.shouldBe(SaksopplysningKildesystem.EESSI)
+                mottattDokument.shouldEqualJson(SED_DOKUMENT_KILDE_SOM_JSON)
+            }
+        }
     }
+
 
     private fun hentMelosysEessiMelding(): MelosysEessiMelding {
         return MelosysEessiMelding().apply {
@@ -56,5 +75,39 @@ class OpprettSedDokumentServiceTest {
                 unntakFraLovvalgsbestemmelse = "16_1"
             }
         }
+    }
+
+    companion object {
+        const val SED_DOKUMENT_KILDE_SOM_JSON = """
+            {
+              "rinaSaksnummer": "r123",
+              "rinaDokumentID": "s123",
+              "avsenderLandkode": "GB",
+              "fnr": null,
+              "lovvalgsperiode": {
+                "fom": [
+                  2012,
+                  12,
+                  12
+                ],
+                "tom": [
+                  2012,
+                  12,
+                  13
+                ]
+              },
+              "lovvalgBestemmelse": "FO_883_2004_ART12_1",
+              "lovvalgslandKode": "SE",
+              "unntakFraLovvalgBestemmelse": "FO_883_2004_ART16_1",
+              "unntakFraLovvalgslandKode": "NO",
+              "erEndring": false,
+              "sedType": "A009",
+              "bucType": "LA_BUC_04",
+              "statsborgerskapKoder": [
+                "SE"
+              ],
+              "arbeidssteder": null
+            }
+        """
     }
 }

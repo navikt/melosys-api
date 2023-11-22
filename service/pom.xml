@@ -184,6 +184,10 @@
             <artifactId>mockito-kotlin</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.kotest</groupId>
+            <artifactId>kotest-assertions-json-jvm</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

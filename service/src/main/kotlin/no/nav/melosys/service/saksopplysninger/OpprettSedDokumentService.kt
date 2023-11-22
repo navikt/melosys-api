@@ -1,11 +1,12 @@
 package no.nav.melosys.service.saksopplysninger
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import mu.KotlinLogging
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Saksopplysning
 import no.nav.melosys.domain.SaksopplysningKildesystem
 import no.nav.melosys.domain.SaksopplysningType
-import no.nav.melosys.domain.dokument.DokumentFactory
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.eessi.BucType
 import no.nav.melosys.domain.eessi.Periode
@@ -22,9 +23,10 @@ private val log = KotlinLogging.logger { }
 
 @Component
 class OpprettSedDokumentService(
-    private val dokumentFactory: DokumentFactory,
     private val saksopplysningRepository: SaksopplysningRepository
 ) {
+    private val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
+
     fun opprettSedSaksopplysning(melosysEessiMelding: MelosysEessiMelding, behandling: Behandling): Saksopplysning {
         val now = Instant.now()
         val saksopplysning = Saksopplysning().apply {
@@ -36,8 +38,9 @@ class OpprettSedDokumentService(
             registrertDato = now
         }
 
-        val xml = dokumentFactory.lagForenkletXml(saksopplysning)
-        saksopplysning.leggTilKildesystemOgMottattDokument(SaksopplysningKildesystem.EESSI, xml)
+        val json = mapper.writeValueAsString(saksopplysning.dokument)
+        saksopplysning.leggTilKildesystemOgMottattDokument(SaksopplysningKildesystem.EESSI, json)
+
         saksopplysningRepository.save(saksopplysning)
         log.info("Saksopplysning: SedDokument opprettet for behandling {}", behandling.id)
         return saksopplysning
