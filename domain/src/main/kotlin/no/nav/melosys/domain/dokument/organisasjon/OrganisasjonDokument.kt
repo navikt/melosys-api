@@ -9,10 +9,12 @@ import java.time.LocalDate
 class OrganisasjonDokument(
     val orgnummer: String,
     val navn: String,
-    var oppstartsdato: LocalDate? = null,
     val enhetstype: String? = null,
     val organisasjonDetaljer: OrganisasjonsDetaljer,
-    val sektorkode: String
+    val sektorkode: String,
+
+    // Faglig avklart at vi kan fjerne denne, men det må sjekkes om det bryter de-serialsering av eksisterende dokumenter
+    val oppstartsdato: LocalDate? = null,
 ) : SaksopplysningDokument {
 
     @JsonView(FrontendApi::class)
