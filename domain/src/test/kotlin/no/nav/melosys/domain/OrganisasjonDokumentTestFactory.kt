@@ -6,15 +6,15 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer
 object OrganisasjonDokumentTestFactory {
     const val ORGNUMMER = "123456789"
     const val NAVN = "Ola Norman"
-    const val SEKTORKODE = "Ola Norman"
+    const val SEKTORKODE = "6500"
 
     @JvmStatic
     fun builder() = Builder()
 
     class Builder(
-        private var orgnummer: String? = null,
-        private var navn: String? = null,
-        private var sektorkode: String? = null,
+        private var orgnummer: String = ORGNUMMER,
+        private var navn: String = NAVN,
+        private var sektorkode: String = SEKTORKODE,
         private var organisasjonsDetaljer: OrganisasjonsDetaljer? = null
     ) {
         fun orgnummer(orgnummer: String) = apply { this.orgnummer = orgnummer }
@@ -22,10 +22,10 @@ object OrganisasjonDokumentTestFactory {
         fun sektorkode(sektorkode: String) = apply { this.sektorkode = sektorkode }
         fun organisasjonsDetaljer(organisasjonsDetaljer: OrganisasjonsDetaljer) = apply { this.organisasjonsDetaljer = organisasjonsDetaljer }
         fun build() = OrganisasjonDokument(
-            orgnummer = orgnummer ?: ORGNUMMER,
-            navn = navn ?: NAVN,
-            sektorkode = sektorkode ?: SEKTORKODE,
-            organisasjonDetaljer = organisasjonsDetaljer ?: OrganisasjonsDetaljer(orgnummer = orgnummer ?: ORGNUMMER),
+            orgnummer = orgnummer,
+            navn = navn,
+            sektorkode = sektorkode,
+            organisasjonDetaljer = organisasjonsDetaljer ?: OrganisasjonsDetaljer(orgnummer = orgnummer)
         )
     }
 }

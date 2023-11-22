@@ -10,7 +10,7 @@ object OrganisasjonsDetaljerTestFactory {
     fun builder() = Builder()
 
     class Builder(
-        private var orgnummer: String? = null,
+        private var orgnummer: String = ORGNUMMER,
         private var forretningsadresse: List<GeografiskAdresse> = emptyList(),
         private var postadresse: List<GeografiskAdresse> = emptyList(),
     ) {
@@ -21,7 +21,7 @@ object OrganisasjonsDetaljerTestFactory {
         fun postadresse(postadresse: GeografiskAdresse) = postadresser(listOf(postadresse))
 
         fun build() = OrganisasjonsDetaljer(
-            orgnummer = orgnummer ?: ORGNUMMER,
+            orgnummer = orgnummer,
             forretningsadresse = forretningsadresse,
             postadresse = postadresse,
         )
