@@ -43,8 +43,8 @@ class OpprettSedDokumentService(
         return saksopplysning
     }
 
-    private fun opprettSedDokument(melosysEessiMelding: MelosysEessiMelding): SedDokument {
-        return SedDokument().apply {
+    private fun opprettSedDokument(melosysEessiMelding: MelosysEessiMelding): SedDokument =
+        SedDokument().apply {
             avsenderLandkode = Landkoder.valueOf(melosysEessiMelding.avsender.landkode)
             lovvalgslandKode = Landkoder.valueOf(melosysEessiMelding.lovvalgsland)
             lovvalgBestemmelse = Bestemmelse.fraBestemmelseString(melosysEessiMelding.artikkel).tilMelosysBestemmelse()
@@ -59,7 +59,6 @@ class OpprettSedDokumentService(
             sedType = SedType.valueOf(melosysEessiMelding.sedType)
             bucType = BucType.valueOf(melosysEessiMelding.bucType)
         }
-    }
 
     private fun hentUnntakFraLovvalgBestemmelse(melosysEessiMelding: MelosysEessiMelding): LovvalgBestemmelse? =
         melosysEessiMelding.anmodningUnntak?.unntakFraLovvalgsbestemmelse
