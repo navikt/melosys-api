@@ -19,7 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 
 @ExtendWith(MockKExtension::class)
-class TrygdeavgiftServiceTest {
+class TrygdeavgiftOppsummeringServiceTest {
 
     private val SAKSNUMMER = "MEL-123"
     private val BEHANDLING_ID = 123L
@@ -30,14 +30,14 @@ class TrygdeavgiftServiceTest {
     @MockK
     private lateinit var behandlingsresultatService: BehandlingsresultatService
 
-    private lateinit var trygdeavgfitsService: TrygdeavgiftService
+    private lateinit var trygdeavgiftOppsummeringService: TrygdeavgiftOppsummeringService
 
     private lateinit var fagsak: Fagsak
     private lateinit var behandlingsresultat: Behandlingsresultat
 
     @BeforeEach
     fun setup() {
-        trygdeavgfitsService = TrygdeavgiftService(fagsakService, behandlingsresultatService)
+        trygdeavgiftOppsummeringService = TrygdeavgiftOppsummeringService(fagsakService, behandlingsresultatService)
         fagsak = Fagsak().apply { behandlinger.add(Behandling().apply { id = BEHANDLING_ID }) }
         behandlingsresultat = Behandlingsresultat()
         every { fagsakService.hentFagsak(SAKSNUMMER) }.returns(fagsak)
@@ -49,7 +49,7 @@ class TrygdeavgiftServiceTest {
         behandlingsresultat.apply { medlemAvFolketrygden = null }
 
 
-        trygdeavgfitsService.harFagsakBehandlingerMedTrygdeavgift(SAKSNUMMER).shouldBeFalse()
+        trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(SAKSNUMMER).shouldBeFalse()
     }
 
     @Test
@@ -62,7 +62,7 @@ class TrygdeavgiftServiceTest {
         }
 
 
-        trygdeavgfitsService.harFagsakBehandlingerMedTrygdeavgift(SAKSNUMMER).shouldBeFalse()
+        trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(SAKSNUMMER).shouldBeFalse()
     }
 
     @Test
@@ -78,7 +78,7 @@ class TrygdeavgiftServiceTest {
         }
 
 
-        trygdeavgfitsService.harFagsakBehandlingerMedTrygdeavgift(SAKSNUMMER).shouldBeFalse()
+        trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(SAKSNUMMER).shouldBeFalse()
     }
 
     @Test
@@ -101,6 +101,6 @@ class TrygdeavgiftServiceTest {
         }
 
 
-        trygdeavgfitsService.harFagsakBehandlingerMedTrygdeavgift(SAKSNUMMER).shouldBeTrue()
+        trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(SAKSNUMMER).shouldBeTrue()
     }
 }

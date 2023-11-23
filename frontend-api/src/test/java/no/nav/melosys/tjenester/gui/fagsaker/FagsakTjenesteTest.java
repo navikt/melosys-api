@@ -101,8 +101,6 @@ class FagsakTjenesteTest {
     private static MedlemAvFolketrygdenService medlemAvFolketrygdenService;
     @MockBean
     private static FerdigbehandleSakService ferdigbehandleSakService;
-    @MockBean
-    private static TrygdeavgiftService trygdeavgiftService;
 
     @Autowired
     private MockMvc mockMvc;
@@ -362,16 +360,6 @@ class FagsakTjenesteTest {
 
         verify(aksesskontroll).autoriserSakstilgang("123");
         verify(ferdigbehandleSakService).ferdigbehandleSak("123");
-    }
-
-    @Test
-    void hentTrygdeavgiftOppsummering() throws Exception {
-        mockMvc.perform(get(BASE_URL + "/{saksnr}/trygdeavgift/oppsummering", "123")
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk());
-
-        verify(aksesskontroll).autoriserSakstilgang("123");
-        verify(trygdeavgiftService).harFagsakBehandlingerMedTrygdeavgift("123");
     }
 
     private void mockFagsakTjeneste(Fagsak fagsak, Behandlingsresultat eksisterendeBehres) {
