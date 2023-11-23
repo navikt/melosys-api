@@ -312,6 +312,8 @@ public class DokgenService {
                 .medMottakerType(brevbestillingDto.getMottaker());
             case IKKE_YRKESAKTIV_VEDTAKSBREV ->
                 new IkkeYrkesaktivBrevbestilling.Builder().medDistribusjonstype(Distribusjonstype.VEDTAK);
+            case OPPHOERT_MEDLEMSKAP ->
+                new OpphoertMedlemskapBrevbestilling.Builder().medFritekst(brevbestillingDto.getFritekst());
 
             default -> new DokgenBrevbestilling.Builder<>().medDistribusjonstype(Distribusjonstype.VIKTIG);
         };
