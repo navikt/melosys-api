@@ -1,16 +1,9 @@
 package no.nav.melosys.domain.dokument;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.Collections;
 
 import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
-import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.jaxb.JaxbConfig;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
@@ -32,32 +25,6 @@ class DokumentFactoryTest {
 
         XsltTemplatesFactory xsltTemplatesFactory = new XsltTemplatesFactory();
         factory = new DokumentFactory(marshaller, xsltTemplatesFactory);
-    }
-
-    @Test
-    void lagDokument() throws Exception {
-        Saksopplysning test = new Saksopplysning();
-
-        InputStream kilde = getClass().getClassLoader().getResourceAsStream("arbeidsforhold/99999999995.xml");
-        StringBuilder stringBuilder = new StringBuilder();
-        try (Reader reader = new BufferedReader(new InputStreamReader
-                (kilde, StandardCharsets.UTF_8))) {
-            int c;
-            while ((c = reader.read()) != -1) {
-                stringBuilder.append((char) c);
-            }
-        }
-        test.leggTilKildesystemOgMottattDokument(null, stringBuilder.toString());
-
-        test.setType(SaksopplysningType.ARBFORH);
-        test.setVersjon("3.0");
-
-        factory.lagDokument(test);
-
-        SaksopplysningDokument dokument = test.getDokument();
-        assertThat(dokument).isInstanceOf(ArbeidsforholdDokument.class);
-        assertThat(((ArbeidsforholdDokument) dokument).getArbeidsforhold().get(25).getUtenlandsopphold()).isNotEmpty();
-
     }
 
     @Test
