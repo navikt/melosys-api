@@ -25,6 +25,8 @@ class OpprettManglendeInntbetalingBehandling(
     }
 
     override fun utfør(prosessinstans: Prosessinstans) {
+        //TODO: Ta hensyn til at det kan eksistere en åpen behadnling fra før. Gjøres på egen oppgave. MELOSYS-6187. Husk tester!
+
         val fakturaserieReferanse = prosessinstans.getData(ProsessDataKey.FAKTURASERIE_REFERANSE)
         val mottaksDato = LocalDate.parse(prosessinstans.getData(ProsessDataKey.MOTTATT_DATO))
         val behandlingsresultat =
@@ -33,7 +35,11 @@ class OpprettManglendeInntbetalingBehandling(
         val fagsak = behandling.fagsak
         val sistBehandling = fagsak.hentSistRegistrertBehandling()
 
-        //TODO: Ta hensyn til at det kan eksistere en åpen behadnling fra før. Gjøres på egen oppgave. MELOSYS-6187. Husk tester!
+        //TODO: Det som er her nå er FEIL. For MELOSYS-6187, så er det viktig at vi setter korrekt behandlingid i prosessinstansen
+        // og ikke saksnummer. I SendManglendeInnbetalingVarselBrev.kt er det ønskelig å bruke behandlingId istf. saksnummer.
+        // Husk! Siste registrerte behandling er ikke nødvendigvis den som skal brukes.
+        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, fagsak.saksnummer)
+
         opprettBehandlingForSak.opprettBehandling(fagsak.saksnummer, lagOpprettSakDto(sistBehandling, mottaksDato, fakturaserieReferanse))
     }
 
