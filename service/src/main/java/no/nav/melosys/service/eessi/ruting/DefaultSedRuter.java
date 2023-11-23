@@ -76,7 +76,7 @@ public class DefaultSedRuter implements SedRuter {
     }
 
     private boolean sedTypeSkalHaOppgave(SedType sedType) {
-        return !Set.of(SedType.X001, SedType.X007, SedType.A012).contains(sedType);
+        return !Set.of(SedType.X001, SedType.X007, SedType.A012, SedType.X005).contains(sedType);
     }
 
     private void oppdaterEllerOpprettOppgave(Behandling behandling, Prosessinstans prosessinstans, SedType sedType) {
