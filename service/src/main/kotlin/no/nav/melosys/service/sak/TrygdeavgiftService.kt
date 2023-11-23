@@ -1,9 +1,9 @@
 package no.nav.melosys.service.sak
 
+import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.math.BigDecimal
 
 @Service
 class TrygdeavgiftService(
@@ -16,8 +16,12 @@ class TrygdeavgiftService(
             .behandlinger
             .map { behandling -> behandlingsresultatService.hentBehandlingsresultat(behandling.id) }
             .any {
-                it.medlemAvFolketrygden?.fastsattTrygdeavgift?.trygdeavgiftsperioder?.filter { it.trygdeavgiftsbeløpMd != null && it.trygdeavgiftsbeløpMd?.verdi != BigDecimal.ZERO }
+                it.medlemAvFolketrygden?.fastsattTrygdeavgift?.trygdeavgiftsperioder?.filter { trygdeavgiftsperiodeHarAvgift(it) }
                     ?.isNotEmpty() ?: false
             }
+    }
+
+    private fun trygdeavgiftsperiodeHarAvgift(trygdeavgiftsperiode: Trygdeavgiftsperiode?): Boolean {
+        return (trygdeavgiftsperiode != null) && (trygdeavgiftsperiode.trygdeavgiftsbeløpMd != null) && trygdeavgiftsperiode.harAvgift()
     }
 }
