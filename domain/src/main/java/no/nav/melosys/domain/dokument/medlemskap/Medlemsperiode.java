@@ -1,12 +1,9 @@
 package no.nav.melosys.domain.dokument.medlemskap;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-
 import no.nav.melosys.domain.HarPeriode;
 import no.nav.melosys.domain.util.IsoLandkodeKonverterer;
 
-@XmlAccessorType(XmlAccessType.FIELD)
+
 public class Medlemsperiode implements HarPeriode {
 
     private static final String KILDE_LÅNEKASSEN = "LAANEKASSEN";
