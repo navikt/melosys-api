@@ -33,7 +33,7 @@ public class RestTokenServiceClient extends RestTokenServiceClientBase implement
     }
 
     private String createUriString() {
-        return UriComponentsBuilder.fromPath("/")
+        return UriComponentsBuilder.fromPath("")
             .queryParam("grant_type", "client_credentials")
             .queryParam("scope", "openid").toUriString();
     }
