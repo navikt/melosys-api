@@ -1,5 +1,6 @@
 package no.nav.melosys.domain.dokument.organisasjon
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import no.nav.melosys.domain.adresse.StrukturertAdresse
 import no.nav.melosys.domain.adresse.UstrukturertAdresse
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse
@@ -10,7 +11,8 @@ import java.time.LocalDate
 
 // Needs to be open because of mocking : TODO: rewrite tests to kotlin
 open class OrganisasjonsDetaljer(
-    val orgnummer: String,
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    val orgnummer: String? = null,
     val navn: List<Organisasjonsnavn> = emptyList(),
     var forretningsadresse: List<GeografiskAdresse> = emptyList(),
     var postadresse: List<GeografiskAdresse> = emptyList(),

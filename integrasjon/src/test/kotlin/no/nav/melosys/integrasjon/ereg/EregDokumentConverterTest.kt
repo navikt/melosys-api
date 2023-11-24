@@ -106,6 +106,19 @@ class EregDokumentConverterTest {
         }
     }
 
+    @Test
+    fun `Konvertering frem og tilbake fra saksopplysningDokument til json skal takle manglende orgnummer i org detaljer`() {
+        val saksopplysningDokumentConverter = SaksopplysningDokumentConverter()
+        val organisasjonDokumentJson = hentRessurs("mock/organisasjon/resultat/orgnummer-i-detaljer-null-resultat.json")
+
+
+        val saksopplysningDokument = saksopplysningDokumentConverter.convertToEntityAttribute(organisasjonDokumentJson)
+        val convertToDatabaseColumn = saksopplysningDokumentConverter.convertToDatabaseColumn(saksopplysningDokument)
+
+
+        organisasjonDokumentJson.shouldEqualJson(convertToDatabaseColumn)
+    }
+
     private fun hentRessurs(fil: String): String = this::class.java.classLoader.getResource(fil)
         ?.readText(StandardCharsets.UTF_8) ?: throw IkkeFunnetException("Fant ikke $fil")
 
