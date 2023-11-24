@@ -1,0 +1,41 @@
+{
+    "type": "OrganisasjonDokument",
+    "orgnummer": "928497705",
+    "oppstartsdato": null,
+    "enhetstype": null,
+    "organisasjonDetaljer": {
+        "orgnummer": null,
+        "navn": [
+            {
+                "bruksperiode": {
+                    "fom": [
+                        2021,
+                        6,
+                        2
+                    ],
+                    "tom": null
+                },
+                "gyldighetsperiode": {
+                    "fom": [
+                        2021,
+                        6,
+                        2
+                    ],
+                    "tom": null
+                },
+                "navn": [
+                    "BESK KAFFE"
+                ],
+                "redigertNavn": "BESK KAFFE"
+            }
+        ],
+        "forretningsadresse": [],
+        "postadresse": [],
+        "telefon": [],
+        "epostadresse": [],
+        "naering": [],
+        "opphoersdato": null
+    },
+    "sektorkode": "",
+    "navn": "BESK KAFFE"
+}
