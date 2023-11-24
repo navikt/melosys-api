@@ -1,12 +1,10 @@
 package no.nav.melosys.domain.dokument.felles;
 
 import java.time.LocalDate;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 
 import no.nav.melosys.domain.ErPeriode;
 
-@XmlAccessorType(XmlAccessType.FIELD)
+
 public class Periode implements ErPeriode {
 
     private LocalDate fom;

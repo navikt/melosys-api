@@ -1,11 +1,10 @@
 package no.nav.melosys.domain.mottatteopplysninger.data;
 
 import java.time.LocalDate;
-import javax.xml.bind.annotation.XmlType;
 
 import no.nav.melosys.domain.ErPeriode;
 
-@XmlType(name = "Periode", namespace = "soeknad") // Løser navnekonflikt med no.nav.melosys.domain.dokument.felles.Periode
+
 public class Periode implements ErPeriode {
 
     private LocalDate fom;
