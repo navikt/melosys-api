@@ -11,7 +11,6 @@ import java.time.LocalDate
 
 // Needs to be open because of mocking : TODO: rewrite tests to kotlin
 open class OrganisasjonsDetaljer(
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     val orgnummer: String? = null,
     val navn: List<Organisasjonsnavn> = emptyList(),
     var forretningsadresse: List<GeografiskAdresse> = emptyList(),

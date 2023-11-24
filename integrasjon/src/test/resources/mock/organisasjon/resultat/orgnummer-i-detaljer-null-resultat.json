@@ -4,6 +4,7 @@
     "oppstartsdato": null,
     "enhetstype": null,
     "organisasjonDetaljer": {
+        "orgnummer": null,
         "navn": [
             {
                 "bruksperiode": {
