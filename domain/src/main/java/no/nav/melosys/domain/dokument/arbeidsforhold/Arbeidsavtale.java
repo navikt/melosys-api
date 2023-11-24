@@ -2,8 +2,6 @@ package no.nav.melosys.domain.dokument.arbeidsforhold;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -13,7 +11,7 @@ import no.nav.melosys.domain.HarPeriode;
 import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.dokument.felles.Periode;
 
-@XmlAccessorType(XmlAccessType.FIELD)
+
 public class Arbeidsavtale implements HarPeriode {
 
     public Arbeidstidsordning arbeidstidsordning; //"http://nav.no/kodeverk/Kodeverk/Arbeidstidsordninger"
