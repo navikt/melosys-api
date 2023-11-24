@@ -13,7 +13,7 @@ import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.Arbeidssted;
 import no.nav.melosys.domain.kodeverk.*;
 
-@XmlRootElement
+@XmlRootElement  // feiler i InnvilgelsesbrevMapperTest hvis vi fjerne dette
 public class SedDokument implements SaksopplysningDokument {
     private String rinaSaksnummer;
     private String rinaDokumentID;
@@ -70,7 +70,7 @@ public class SedDokument implements SaksopplysningDokument {
         this.lovvalgsperiode = lovvalgsperiode;
     }
 
-    @XmlTransient
+    @XmlTransient // feiler i InnvilgelsesbrevMapperTest hvis vi fjerne dette
     public LovvalgBestemmelse getLovvalgBestemmelse() {
         return lovvalgBestemmelse;
     }
@@ -87,7 +87,7 @@ public class SedDokument implements SaksopplysningDokument {
         this.lovvalgslandKode = lovvalgslandKode;
     }
 
-    @XmlTransient
+    @XmlTransient // feiler i InnvilgelsesbrevMapperTest hvis vi fjerne dette
     public LovvalgBestemmelse getUnntakFraLovvalgBestemmelse() {
         return unntakFraLovvalgBestemmelse;
     }
