@@ -22,10 +22,10 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.brev.BrevAdresse;
 import no.nav.melosys.service.brev.BrevmalListeService;
 import no.nav.melosys.service.brev.bestilling.HentBrevAdresseTilMottakereService;
 import no.nav.melosys.service.brev.bestilling.HentMuligeProduserbaredokumenterService;
-import no.nav.melosys.service.brev.brevmalliste.BrevAdresse;
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler;
 import no.nav.melosys.tjenester.gui.brev.BrevmalListeBygger;
 import no.nav.melosys.tjenester.gui.dto.brev.*;
@@ -126,12 +126,11 @@ class BrevmalListeByggerTest {
 
 
         assertThat(tilgjengeligeMaler)
-            .hasSize(3)
+            .hasSize(2)
             .extracting(brevmalResponse -> brevmalResponse.getMottaker().getType())
             .contains(
                 MottakerType.VIRKSOMHET.getBeskrivelse(),
-                MottakerType.ANNEN_ORGANISASJON.getBeskrivelse(),
-                MottakerType.NORSK_MYNDIGHET.getBeskrivelse());
+                MottakerType.ANNEN_ORGANISASJON.getBeskrivelse());
 
         assertThat(tilgjengeligeMaler.get(0).getBrevTyper())
             .hasSize(1)
@@ -144,12 +143,6 @@ class BrevmalListeByggerTest {
             .extracting(BrevmalTypeDto::getType)
             .contains(
                 Produserbaredokumenter.GENERELT_FRITEKSTBREV_VIRKSOMHET);
-
-        assertThat(tilgjengeligeMaler.get(2).getBrevTyper())
-            .hasSize(1)
-            .extracting(BrevmalTypeDto::getType)
-            .contains(
-                Produserbaredokumenter.FRITEKSTBREV);
     }
 
     @Test
@@ -237,6 +230,33 @@ class BrevmalListeByggerTest {
             .containsExactly(
                 MottakerType.ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG.getBeskrivelse(),
                 Kontroll_begrunnelser.INGEN_ARBEIDSGIVERE.getBeskrivelse());
+    }
+
+    @Test
+    void byggBrevmalDtoListe_brevAdresseLagingKasterFeil_returnererMalMedFeilmeldingMenArbeidsgiverHarFastFeilmelding() {
+        when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
+        when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
+        when(hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(anyLong(), any())).thenThrow(new TekniskException("En annen feil"));
+
+
+        List<BrevmalResponse> tilgjengeligeMaler = brevmalListeBygger.byggBrevmalDtoListe(123L);
+
+
+        assertThat(tilgjengeligeMaler).hasSize(4);
+        assertThat(tilgjengeligeMaler.get(0).getMottaker())
+            .extracting(
+                MottakerDto::getType,
+                mottaker -> mottaker.getFeilmelding().tittel())
+            .containsExactly(
+                MottakerType.BRUKER_ELLER_BRUKERS_FULLMEKTIG.getBeskrivelse(),
+                "En annen feil");
+        assertThat(tilgjengeligeMaler.get(1).getMottaker())
+            .extracting(
+                MottakerDto::getType,
+                mottaker -> mottaker.getFeilmelding().tittel())
+            .containsExactly(
+                MottakerType.ARBEIDSGIVER_ELLER_ARBEIDSGIVERS_FULLMEKTIG.getBeskrivelse(),
+                "Finner ikke gyldig adresse til arbeidsgiver(e). Kontroller at arbeidsgiver(e) er lagt inn korrekt i sidemenyen");
     }
 
     @Test
@@ -520,10 +540,7 @@ class BrevmalListeByggerTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
 
-        BrevAdresse brevAdresse = new BrevAdresse.Builder()
-            .medPostnr("0010")
-            .medLand(Land_iso2.NO.name())
-            .build();
+        BrevAdresse brevAdresse = new BrevAdresse("Mottaker", null, null, "0010", null, null, Land_iso2.NO.name());
         List<BrevAdresse> brevAdresseList = new ArrayList<>();
         brevAdresseList.add(brevAdresse);
         when(hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(anyLong(), any())).thenReturn(brevAdresseList);
@@ -541,10 +558,7 @@ class BrevmalListeByggerTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(lagBehandling(Behandlingstyper.FØRSTEGANG));
 
-        BrevAdresse brevAdresse = new BrevAdresse.Builder()
-            .medPostnr("0010")
-            .medLand(Land_iso2.SE.name())
-            .build();
+        BrevAdresse brevAdresse = new BrevAdresse("Mottaker", null, null, "0010", null, null, Land_iso2.SE.name());
         List<BrevAdresse> brevAdresseList = new ArrayList<>();
         brevAdresseList.add(brevAdresse);
         when(hentBrevAdresseTilMottakereService.hentBrevAdresseTilMottakere(anyLong(), any())).thenReturn(brevAdresseList);

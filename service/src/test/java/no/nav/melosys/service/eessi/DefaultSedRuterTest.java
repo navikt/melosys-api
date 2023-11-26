@@ -97,7 +97,7 @@ class DefaultSedRuterTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = SedType.class, names = {"A012", "X001", "X007"})
+    @EnumSource(value = SedType.class, names = {"A012", "X001", "X007", "X005"})
     void rutSedTilBehandling_SedTyperSaksnummerOgFagsakEksistererStatusMidlertidigLovvalgsbeslutning_ikkeOppdaterStatusEllerOppgave(SedType sedType) {
         Prosessinstans prosessinstans = new Prosessinstans();
         prosessinstans.setData(ProsessDataKey.GSAK_SAK_ID, GSAK_SAKSNUMMER);

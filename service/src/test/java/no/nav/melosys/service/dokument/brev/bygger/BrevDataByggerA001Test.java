@@ -23,6 +23,7 @@ import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -180,10 +181,11 @@ class BrevDataByggerA001Test {
     }
 
     private void leggTilTestorganisasjon(String navn, String orgnummer, OrganisasjonsDetaljer detaljer) {
-        OrganisasjonDokument orgDok = new OrganisasjonDokument();
-        orgDok.setNavn(Collections.singletonList(navn));
-        orgDok.setOrgnummer(orgnummer);
-        orgDok.setOrganisasjonDetaljer(detaljer);
+        OrganisasjonDokument orgDok = OrganisasjonDokumentTestFactory.builder()
+            .orgnummer(orgnummer)
+            .navn(navn)
+            .organisasjonsDetaljer(detaljer)
+            .build();
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.ORG);
         saksopplysning.setDokument(orgDok);

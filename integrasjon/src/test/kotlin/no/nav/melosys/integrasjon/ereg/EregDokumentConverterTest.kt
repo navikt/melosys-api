@@ -4,6 +4,9 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.assertions.json.shouldEqualJson
+import io.kotest.assertions.withClue
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeTypeOf
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
 import no.nav.melosys.domain.jpa.SaksopplysningDokumentConverter
@@ -72,6 +75,49 @@ class EregDokumentConverterTest {
         organisasjonDokumentSomJson.shouldEqualJson(forventetOrganisasjonDokumentJson)
     }
 
+    @Test
+    fun `organisasjonDetaljer i dubletter skal kunne være null`() {
+        val organisasjons = mapper.readValue<OrganisasjonResponse.Organisasjon>(hentRessurs("mock/organisasjon/928497705-dubletter.json"))
+        val forventetOrganisasjonDokumentJson = hentRessurs("mock/organisasjon/resultat/organisasjons-resultat.json")
+
+
+        val organisasjonDokument =
+            EregDtoTilSaksopplysningKonverter().lagSaksopplysning(organisasjons).dokument.shouldBeTypeOf<OrganisasjonDokument>()
+        val organisasjonDokumentSomJson = SaksopplysningDokumentConverter().convertToDatabaseColumn(organisasjonDokument)
+
+
+        organisasjonDokumentSomJson.shouldEqualJson(forventetOrganisasjonDokumentJson)
+    }
+
+    @Test
+    fun `Konvertering frem og tilbake fra saksopplysningDokument til json skal bli det samme`() {
+        val saksopplysningDokumentConverter = SaksopplysningDokumentConverter()
+        listOf("virksomhet", "organisasjonsledd", "juridiskEnhet", "organisasjons").forEach {
+            val organisasjonDokumentJson = hentRessurs("mock/organisasjon/resultat/${it}-resultat.json")
+
+
+            val saksopplysningDokument = saksopplysningDokumentConverter.convertToEntityAttribute(organisasjonDokumentJson)
+            val convertToDatabaseColumn = saksopplysningDokumentConverter.convertToDatabaseColumn(saksopplysningDokument)
+
+
+            withClue("Feilet for ${it}-resultat.json") {
+                organisasjonDokumentJson.shouldEqualJson(convertToDatabaseColumn)
+            }
+        }
+    }
+
+    @Test
+    fun `Konvertering frem og tilbake fra saksopplysningDokument til json skal takle manglende orgnummer i org detaljer`() {
+        val saksopplysningDokumentConverter = SaksopplysningDokumentConverter()
+        val organisasjonDokumentJson = hentRessurs("mock/organisasjon/resultat/orgnummer-i-detaljer-null-resultat.json")
+
+
+        val saksopplysningDokument = saksopplysningDokumentConverter.convertToEntityAttribute(organisasjonDokumentJson)
+        val convertToDatabaseColumn = saksopplysningDokumentConverter.convertToDatabaseColumn(saksopplysningDokument)
+
+
+        organisasjonDokumentJson.shouldEqualJson(convertToDatabaseColumn)
+    }
 
     private fun hentRessurs(fil: String): String = this::class.java.classLoader.getResource(fil)
         ?.readText(StandardCharsets.UTF_8) ?: throw IkkeFunnetException("Fant ikke $fil")

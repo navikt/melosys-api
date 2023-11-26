@@ -78,7 +78,7 @@ class OrganisasjonRestConsumerTest(
 
 
         organisasjon.shouldBeTypeOf<Organisasjon>().apply {
-            organisasjonDetaljer.navn
+            organisasjonDetaljer.shouldNotBeNull().navn
                 .single().sammensattnavn.shouldBe("BESK KAFFE")
         }
     }

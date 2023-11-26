@@ -2,8 +2,6 @@ package no.nav.melosys.domain.brev;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Stream;
 
 import no.nav.melosys.domain.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
@@ -34,12 +32,6 @@ public record Postadresse(
             adresselinje4
         ));
         return adresselinjer;
-    }
-
-    public List<String> lagPostadresseListe() {
-        return Stream.of(coAdressenavn, adresselinje1, adresselinje2, adresselinje3, adresselinje4, postnr, poststed)
-            .filter(Objects::nonNull)
-            .toList();
     }
 
     public static Postadresse lagPostadresse(String coAdressenavn, StrukturertAdresse strukturertAdresse) {

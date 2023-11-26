@@ -1,6 +1,5 @@
 package no.nav.melosys.service.avgift
 
-import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldNotBeEmpty
@@ -48,7 +47,6 @@ internal class TrygdeavgiftsberegningServiceTest {
     private lateinit var mockPersondataService: PersondataService
 
     private var trygdeavgiftMottakerService: TrygdeavgiftMottakerService = TrygdeavgiftMottakerService()
-    private var unleash: FakeUnleash = FakeUnleash()
 
     private lateinit var trygdeavgiftsberegningService: TrygdeavgiftsberegningService
 
@@ -68,7 +66,6 @@ internal class TrygdeavgiftsberegningServiceTest {
 
     @BeforeEach
     fun setup() {
-        unleash.enableAll()
         trygdeavgiftsberegningService =
             TrygdeavgiftsberegningService(
                 mockBehandlingService,
@@ -77,7 +74,6 @@ internal class TrygdeavgiftsberegningServiceTest {
                 trygdeavgiftMottakerService,
                 mockPersondataService,
                 mockTrygdeavgiftConsumer,
-                unleash
             )
         medlemAvFolketrygden = MedlemAvFolketrygden()
         behandling = Behandling()

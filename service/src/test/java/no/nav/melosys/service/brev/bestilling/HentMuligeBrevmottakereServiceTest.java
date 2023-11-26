@@ -10,8 +10,6 @@ import no.nav.melosys.domain.brev.Mottakerliste;
 import no.nav.melosys.domain.brev.muligemottakere.Brevmottaker;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
@@ -420,9 +418,9 @@ class HentMuligeBrevmottakereServiceTest {
         when(persondataFasade.hentSammensattNavn(anyString())).thenReturn("Ola Nordmann");
         mockHentOrganisasjon("123", "Ståle Stål");
         mockHentOrganisasjon("974761076", "Skatt");
-        when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottakerrolle(behandling, TRYGDEAVTALE_GB, BRUKER)).thenReturn("Vedtak om medlemskap, Attest for utsendt arbeidstaker");
-        when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottaker(behandling, TRYGDEAVTALE_GB, arbeidsgiver, "Kopi til arbeidsgiver")).thenReturn("Kopi av vedtak om medlemskap, Attest for utsendt arbeidstaker");
-        when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottaker(behandling, TRYGDEAVTALE_GB, trygdemyndighet, "Kopi til utenlandsk trygdemyndighet")).thenReturn("Attest for utsendt arbeidstaker", "Utenlandsk trygdemyndighet");
+        when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottakerrolle(behandling, TRYGDEAVTALE_GB, BRUKER)).thenReturn("Vedtak om medlemskap, Attest for medlemskap i folketrygden");
+        when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottaker(behandling, TRYGDEAVTALE_GB, arbeidsgiver, "Kopi til arbeidsgiver")).thenReturn("Kopi av vedtak om medlemskap, Attest for medlemskap i folketrygden");
+        when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottaker(behandling, TRYGDEAVTALE_GB, trygdemyndighet, "Kopi til utenlandsk trygdemyndighet")).thenReturn("Attest for medlemskap i folketrygden", "Utenlandsk trygdemyndighet");
         when(dokumentNavnService.utledDokumentNavnForProduserbaredokumenterOgMottaker(behandling, TRYGDEAVTALE_GB, skatteetaten, "Kopi til Skatt")).thenReturn("Kopi av vedtak om medlemskap");
 
         var request = new HentMuligeBrevmottakereService.RequestDto(TRYGDEAVTALE_GB, 123L, null);
@@ -438,7 +436,7 @@ class HentMuligeBrevmottakereServiceTest {
                 Brevmottaker::getRolle,
                 Brevmottaker::getAktørId,
                 Brevmottaker::getOrgnr)
-            .containsExactly("Vedtak om medlemskap, Attest for utsendt arbeidstaker", "Ola Nordmann", BRUKER, null, null);
+            .containsExactly("Vedtak om medlemskap, Attest for medlemskap i folketrygden", "Ola Nordmann", BRUKER, null, null);
 
         assertThat(muligeMottakere.kopiMottakere())
             .hasSize(2)
@@ -447,8 +445,8 @@ class HentMuligeBrevmottakereServiceTest {
                 Brevmottaker::getMottakerNavn
             )
             .containsExactlyInAnyOrder(
-                tuple("Kopi av vedtak om medlemskap, Attest for utsendt arbeidstaker", "Ståle Stål"),
-                tuple("Attest for utsendt arbeidstaker", "Utenlandsk trygdemyndighet")
+                tuple("Kopi av vedtak om medlemskap, Attest for medlemskap i folketrygden", "Ståle Stål"),
+                tuple("Attest for medlemskap i folketrygden", "Utenlandsk trygdemyndighet")
             );
 
         assertThat(muligeMottakere.fasteMottakere())
@@ -506,12 +504,14 @@ class HentMuligeBrevmottakereServiceTest {
         geogragiskAdresse.setPoststed("Oslo");
         geogragiskAdresse.setLandkode(Land.NORGE);
         geogragiskAdresse.setGyldighetsperiode(new Periode(LocalDate.MIN, LocalDate.MAX));
-        var organisasjonsDetaljer = new OrganisasjonsDetaljer();
-        organisasjonsDetaljer.postadresse.add(geogragiskAdresse);
-        var dokument = new OrganisasjonDokument();
-        dokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
-        dokument.setNavn(List.of(navn));
-        dokument.setOrgnummer(orgNummer);
+        var organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.builder()
+            .postadresse(geogragiskAdresse)
+            .build();
+        var dokument = OrganisasjonDokumentTestFactory.builder()
+            .orgnummer(orgNummer)
+            .navn(navn)
+            .organisasjonsDetaljer(organisasjonsDetaljer)
+            .build();
         var saksopplysning = new Saksopplysning();
         saksopplysning.setDokument(dokument);
         saksopplysning.setType(SaksopplysningType.ORG);

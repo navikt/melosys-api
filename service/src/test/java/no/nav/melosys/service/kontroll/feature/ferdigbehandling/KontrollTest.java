@@ -25,6 +25,7 @@ import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
+import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService;
@@ -58,6 +59,8 @@ class KontrollTest {
     private SaksbehandlingRegler saksbehandlingRegler;
     @Mock
     private OrganisasjonOppslagService organisasjonOppslagService;
+    @Mock
+    private MedlemskapsperiodeService medlemskapsperiodeService;
 
     private final long behandlingID = 1L;
     private final Lovvalgsperiode lovvalgsperiode = new Lovvalgsperiode();
@@ -78,7 +81,7 @@ class KontrollTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
 
         unleash.enableAll();
-        kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, avklarteVirksomheterService, persondataFasade, organisasjonOppslagService, saksbehandlingRegler, unleash);
+        kontroll = new Kontroll(behandlingService, lovvalgsperiodeService, avklarteVirksomheterService, persondataFasade, organisasjonOppslagService, saksbehandlingRegler, medlemskapsperiodeService, unleash);
     }
 
     @Test

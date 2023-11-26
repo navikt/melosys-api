@@ -28,7 +28,7 @@ public class RestTokenServiceClientMockClient extends RestTokenServiceClientBase
         params.add("scope", "openid");
 
         return webClient.post()
-            .uri("token")
+            .uri("/token")
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
             .header(HttpHeaders.AUTHORIZATION, basicAuth())
             .bodyValue(params)

@@ -10,7 +10,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.Tilleggsinformasjon;
 import no.nav.melosys.domain.dokument.inntekt.tillegsinfo.TilleggsinformasjonDetaljer;
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresse;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseNorge;
 import no.nav.melosys.domain.dokument.person.adresse.MidlertidigPostadresseUtland;
@@ -24,6 +23,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
+import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
 import no.nav.melosys.service.MedlemAvFolketrygdenService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
@@ -292,8 +292,10 @@ class FagsakTjenesteTest {
         aktoer.setRolle(Aktoersroller.VIRKSOMHET);
         fagsak.setAktører(Set.of(aktoer));
         mockFagsakTjeneste(fagsak, null);
-        var organisajonsdokument = new OrganisasjonDokument();
-        organisajonsdokument.setNavn("Moe Organisasjon");
+
+        var organisajonsdokument = OrganisasjonDokumentTestFactory.builder()
+            .navn("Moe Organisasjon")
+            .build();
         when(organisasjonOppslagService.hentOrganisasjon(ORGNR)).thenReturn(organisajonsdokument);
         var fagsakSokDto = new FagsakSokDto(null, null, ORGNR);
 

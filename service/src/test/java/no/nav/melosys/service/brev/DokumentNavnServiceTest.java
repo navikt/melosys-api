@@ -138,19 +138,19 @@ class DokumentNavnServiceTest {
 
     private static Stream<Arguments> testparametre() {
         return Stream.of(
-            Arguments.of(true, false, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap, Attest for utsendt arbeidstaker"),
+            Arguments.of(true, false, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap, Attest for medlemskap i folketrygden"),
             Arguments.of(false, false, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap"),
-            Arguments.of(true, false, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap, Attest for utsendt arbeidstaker"),
+            Arguments.of(true, false, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap, Attest for medlemskap i folketrygden"),
             Arguments.of(false, false, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap"),
             Arguments.of(false, false, lagMottaker(UTENLANDSK_TRYGDEMYNDIGHET, null, NorskMyndighet.SKATTEETATEN.getOrgnr(), null), "Kopi av vedtak om medlemskap"),
-            Arguments.of(true, false, lagMottaker(UTENLANDSK_TRYGDEMYNDIGHET, null, null, "1234"), "Attest for utsendt arbeidstaker"),
+            Arguments.of(true, false, lagMottaker(UTENLANDSK_TRYGDEMYNDIGHET, null, null, "1234"), "Attest for medlemskap i folketrygden"),
 
-            Arguments.of(true, true, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap, Attest for utsendt arbeidstaker - endring"),
+            Arguments.of(true, true, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap, Attest for medlemskap i folketrygden - endring"),
             Arguments.of(false, true, lagMottaker(BRUKER, "1234", null, null), "Vedtak om medlemskap - endring"),
-            Arguments.of(true, true, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap, Attest for utsendt arbeidstaker - endring"),
+            Arguments.of(true, true, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap, Attest for medlemskap i folketrygden - endring"),
             Arguments.of(false, true, lagMottaker(ARBEIDSGIVER, null, "1234", null), "Kopi av vedtak om medlemskap - endring"),
             Arguments.of(false, true, lagMottaker(UTENLANDSK_TRYGDEMYNDIGHET, null, NorskMyndighet.SKATTEETATEN.getOrgnr(), null), "Kopi av vedtak om medlemskap - endring"),
-            Arguments.of(true, true, lagMottaker(UTENLANDSK_TRYGDEMYNDIGHET, null, null, "1234"), "Attest for utsendt arbeidstaker - endring")
+            Arguments.of(true, true, lagMottaker(UTENLANDSK_TRYGDEMYNDIGHET, null, null, "1234"), "Attest for medlemskap i folketrygden - endring")
         );
     }
 

@@ -1,5 +1,10 @@
 package no.nav.melosys.tjenester.gui.fagsaker;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.Behandling;
@@ -26,11 +31,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.WebApplicationContext;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 
 import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentLand;
 import static no.nav.melosys.domain.util.MottatteOpplysningerUtils.hentPeriode;

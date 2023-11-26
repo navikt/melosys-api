@@ -1,6 +1,5 @@
 package no.nav.melosys.service.dokument.brev.mapper
 
-import io.getunleash.FakeUnleash
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
@@ -13,7 +12,10 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import no.nav.melosys.domain.*
+import no.nav.melosys.domain.Behandlingsresultat
+import no.nav.melosys.domain.Medlemskapsperiode
+import no.nav.melosys.domain.VilkaarBegrunnelse
+import no.nav.melosys.domain.Vilkaarsresultat
 import no.nav.melosys.domain.avgift.*
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet
 import no.nav.melosys.domain.brev.InnvilgelseFtrlBrevbestilling
@@ -26,6 +28,7 @@ import no.nav.melosys.domain.kodeverk.yrker.Yrkesaktivitetstyper
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
 import no.nav.melosys.integrasjon.dokgen.dto.felles.SaksinfoBruker
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
+import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService
 import no.nav.melosys.service.dokument.DokgenTestData
 import no.nav.melosys.service.dokument.brev.BrevDataTestUtils
@@ -46,20 +49,21 @@ internal class InnvilgelseFtrlMapperTest {
     @MockK
     private lateinit var mockDokgenMapperDatahenter: DokgenMapperDatahenter
 
+    @MockK
+    private lateinit var trygdeavgiftsberegningService: TrygdeavgiftsberegningService
+
     private var trygdeavgiftMottakerService: TrygdeavgiftMottakerService = TrygdeavgiftMottakerService()
-    private var unleash: FakeUnleash = FakeUnleash()
 
     private lateinit var innvilgelseFtrlMapper: InnvilgelseFtrlMapper
 
     @BeforeEach
     fun setup() {
-        unleash.enableAll();
         trygdeavgiftMottakerService = TrygdeavgiftMottakerService()
         innvilgelseFtrlMapper = InnvilgelseFtrlMapper(
             mockAvklarteVirksomheterService,
             mockDokgenMapperDatahenter,
             trygdeavgiftMottakerService,
-            unleash,
+            trygdeavgiftsberegningService,
             )
     }
 
@@ -267,6 +271,8 @@ internal class InnvilgelseFtrlMapperTest {
 
     private fun mockHappyCase() {
         every { mockAvklarteVirksomheterService.hentNorskeArbeidsgivere(ofType()) } returns lagAvklarteVirksomheter()
+        every { mockAvklarteVirksomheterService.hentUtenlandskeVirksomheter(ofType()) } returns emptyList()
+        every { mockAvklarteVirksomheterService.hentNorskeSelvstendigeForetak(ofType()) } returns emptyList()
         every { mockDokgenMapperDatahenter.hentBehandlingsresultat(ofType()) } returns lagBehandlingsResultat()
         every { mockDokgenMapperDatahenter.hentLandnavnFraLandkode(Landkoder.AT.kode) } returns Landkoder.AT.beskrivelse
         every { mockDokgenMapperDatahenter.hentFullmektigNavn(any(), any()) } returns null

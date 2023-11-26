@@ -44,6 +44,7 @@ import no.nav.melosys.repository.UtenlandskMyndighetRepository;
 import no.nav.melosys.repository.VilkaarsresultatRepository;
 import no.nav.melosys.service.LandvelgerService;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
 import no.nav.melosys.service.aktoer.KontaktopplysningService;
 import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
@@ -381,19 +382,21 @@ final class DokumentServiceTest {
     }
 
     private static EregFasade mockEregFasade() {
-        EregFasade eregFasade = mock(EregFasade.class);
-        OrganisasjonDokument orgDok = new OrganisasjonDokument();
-        orgDok.setNavn(Collections.singletonList("Virker av og til"));
-        OrganisasjonsDetaljer organisasjonDetaljer = new OrganisasjonsDetaljer();
         SemistrukturertAdresse adresse = new SemistrukturertAdresse();
         adresse.setLandkode("NO");
         adresse.setAdresselinje1("Gate 1");
         adresse.setPostnr("1234");
         Periode gyldighetsperiode = new Periode(LocalDate.now().minusYears(10), LocalDate.now().plusYears(10));
         adresse.setGyldighetsperiode(gyldighetsperiode);
-        organisasjonDetaljer.forretningsadresse = Collections.singletonList(adresse);
-        orgDok.setOrganisasjonDetaljer(organisasjonDetaljer);
-        orgDok.setOrgnummer(ORGNR);
+        OrganisasjonsDetaljer organisasjonDetaljer = OrganisasjonsDetaljerTestFactory.builder()
+            .forretningsadresse(adresse)
+            .build();
+        OrganisasjonDokument orgDok = OrganisasjonDokumentTestFactory.builder()
+            .orgnummer(ORGNR)
+            .navn("Virker av og til")
+            .organisasjonsDetaljer(organisasjonDetaljer)
+            .build();
+        EregFasade eregFasade = mock(EregFasade.class);
         when(eregFasade.hentOrganisasjon(ORGNR)).thenReturn(lagSaksopplysning(SaksopplysningType.ORG, orgDok));
         return eregFasade;
     }

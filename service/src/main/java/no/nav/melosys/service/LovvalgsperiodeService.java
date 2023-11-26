@@ -9,7 +9,10 @@ import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
+import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca;
+import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.integrasjon.medl.GrunnlagMedl;
@@ -157,5 +160,11 @@ public class LovvalgsperiodeService {
     public Optional<Lovvalgsperiode> finnOpprinneligLovvalgsperiode(long behandlingId) {
         return behandlingRepository.findById(behandlingId).map(Behandling::getOpprinneligBehandling)
             .flatMap(behandling -> lovvalgsperiodeRepo.findByBehandlingsresultatId(behandling.getId()).stream().findFirst());
+    }
+
+    public boolean harSelvstendigNæringsdrivendeLovvalgsbestemmelse(long behandlingId) {
+        var lovvalgBestemmelse = hentLovvalgsperiode(behandlingId).getBestemmelse();
+        return lovvalgBestemmelse.equals(Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART6_2) ||
+            lovvalgBestemmelse.equals(Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_4);
     }
 }

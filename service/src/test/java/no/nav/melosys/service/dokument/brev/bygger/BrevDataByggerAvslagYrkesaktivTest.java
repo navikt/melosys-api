@@ -10,6 +10,7 @@ import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.service.LandvelgerService;
+import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingService;
@@ -93,11 +94,12 @@ class BrevDataByggerAvslagYrkesaktivTest {
         when(avklartefaktaService.hentAvklarteOrgnrOgUuid(behandling.getId())).thenReturn(orgSet);
 
         when(landvelgerService.hentArbeidsland(anyLong())).thenReturn(Land_iso2.DE);
-        OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
-        organisasjonDokument.setOrgnummer("999");
         OrganisasjonsDetaljer organisasjonsDetaljer = mock(OrganisasjonsDetaljer.class);
         when(organisasjonsDetaljer.hentStrukturertForretningsadresse()).thenReturn(lagStrukturertAdresse());
-        organisasjonDokument.organisasjonDetaljer = organisasjonsDetaljer;
+        OrganisasjonDokument organisasjonDokument = OrganisasjonDokumentTestFactory.builder()
+            .orgnummer("999")
+            .organisasjonsDetaljer(organisasjonsDetaljer)
+            .build();
 
         lenient().when(
             organisasjonOppslagService.hentOrganisasjoner(orgSet)).thenReturn(new HashSet<>(Collections.singletonList(organisasjonDokument)));

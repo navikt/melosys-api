@@ -2,15 +2,16 @@ package no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll
 
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
-import no.nav.melosys.domain.Aktoer
-import no.nav.melosys.domain.Lovvalgsperiode
+import no.nav.melosys.domain.*
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument
-import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse
 import no.nav.melosys.domain.kodeverk.Aktoersroller
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
+import no.nav.melosys.domain.kodeverk.Medlemskapstyper
+import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
@@ -37,7 +38,7 @@ class FerdigbehandlingKontrollTest {
             tom = NOW.plusMonths(12)
         }
         val kontrollData =
-            FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null)
+            FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null, null)
 
 
         val kontrollfeil = FerdigbehandlingKontroll.periodeOver12Måneder(kontrollData)
@@ -54,7 +55,7 @@ class FerdigbehandlingKontrollTest {
             tom = NOW.plusYears(5)
         }
         val kontrollData =
-            FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null)
+            FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null, null)
 
 
         val kontrollfeil = FerdigbehandlingKontroll.periodeOverFemÅr(kontrollData)
@@ -71,7 +72,7 @@ class FerdigbehandlingKontrollTest {
             tom = NOW.plusYears(5)
         }
         val kontrollData =
-            FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null)
+            FerdigbehandlingKontrollData(null, null, null, lovvalgsperiode, null, null, null, null, null, null, null)
 
 
         val kontrollfeil = FerdigbehandlingKontroll.periodeOverFemÅr(kontrollData)
@@ -108,12 +109,97 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             null,
+            null,
             null
         )
+
+
         val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
+
 
         kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
     }
+
+    @Test
+    fun `medlemskapsperioder uten overlapping skal ikke gi kontrollfeil`() {
+        val medlemskapsDokument = MedlemskapDokument().apply {
+            medlemsperiode = listOf(
+                Medlemsperiode().apply {
+                    id = 1
+                    land = "SWE"
+                    status = "GYLD"
+                    periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))
+                }
+            )
+        }
+
+        val ikkeOverlappendeMedlemskapsperioder = listOf(
+            lagMedlemskapsperiode(
+                LocalDate.now().plusDays(5), LocalDate.now().plusDays(10)
+            )
+        )
+
+        val kontrollData = FerdigbehandlingKontrollData(
+            medlemskapsDokument,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            ikkeOverlappendeMedlemskapsperioder
+        )
+
+
+        val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
+
+
+        kontrollfeil.shouldBeNull()
+    }
+
+    @Test
+    fun `medlemskapsperioder med overlapping skal gi kontrollfeil`() {
+        val medlemskapsDokument = MedlemskapDokument().apply {
+            medlemsperiode = listOf(
+                Medlemsperiode().apply {
+                    id = 1
+                    land = "SWE"
+                    status = "GYLD"
+                    periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))
+                }
+            )
+        }
+
+        val overlappendeMedlemskapsperioder = listOf(
+            lagMedlemskapsperiode(
+                LocalDate.now().plusDays(1), LocalDate.now().plusDays(10)
+            )
+        )
+
+        val kontrollData = FerdigbehandlingKontrollData(
+            medlemskapsDokument,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            overlappendeMedlemskapsperioder
+        )
+
+
+        val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
+
+
+        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+    }
+
 
     @Test
     fun `overlappende medlemskapsperiode skal gi kontrollfeil`() {
@@ -143,9 +229,13 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             null,
+            null,
             null
         )
-        val kontrollfeil = FerdigbehandlingKontroll.overlappendeMedlemsperiode(kontrollData)
+
+
+        val kontrollfeil = FerdigbehandlingKontroll.overlappendeMedlemskapsperiode(kontrollData)
+
 
         kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDLEMSKAPSPERIODER)
     }
@@ -178,9 +268,13 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             null,
+            null,
             null
         )
+
+
         val kontrollfeil = FerdigbehandlingKontroll.overlappendeUnntaksperiode(kontrollData)
+
 
         kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_UNNTAK_PERIODER)
     }
@@ -197,9 +291,13 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             null,
+            null,
             null
         )
+
+
         val kontrollfeil = FerdigbehandlingKontroll.adresseRegistrert(kontrollData)
+
 
         kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER)
     }
@@ -216,9 +314,13 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             null,
+            null,
             null
         )
+
+
         val kontrollfeil = FerdigbehandlingKontroll.adresseRegistrert(kontrollData)
+
 
         kontrollfeil.shouldBeNull()
     }
@@ -235,9 +337,13 @@ class FerdigbehandlingKontrollTest {
             null,
             lagAktoerRepresentantPerson(),
             null,
-            PersonopplysningerObjectFactory.lagPersonopplysninger()
+            PersonopplysningerObjectFactory.lagPersonopplysninger(),
+            null
         )
+
+
         val kontrollfeil = FerdigbehandlingKontroll.adresseRegistrert(kontrollData)
+
 
         kontrollfeil.shouldBeNull()
     }
@@ -254,9 +360,13 @@ class FerdigbehandlingKontrollTest {
             null,
             lagAktoerRepresentantOrganisasjon(),
             lagOrganisasjonDokument("1111", "Testegate 4", "2222", "Testegate 5"),
+            null,
             null
         )
+
+
         val kontrollfeil = FerdigbehandlingKontroll.adresseRegistrert(kontrollData)
+
 
         kontrollfeil.shouldBeNull()
     }
@@ -273,9 +383,13 @@ class FerdigbehandlingKontrollTest {
             null,
             lagAktoerRepresentantOrganisasjon(),
             lagOrganisasjonDokument("", "Testegate 4", "", "NO"),
+            null,
             null
         )
+
+
         val kontrollfeil = FerdigbehandlingKontroll.adresseRegistrert(kontrollData)
+
 
         kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT)
     }
@@ -301,26 +415,33 @@ class FerdigbehandlingKontrollTest {
         postadressePostnr: String,
         postadresseLand: String
     ): OrganisasjonDokument {
-        val organisasjonDokument = OrganisasjonDokument()
-        val organisasjonsDetaljer = OrganisasjonsDetaljer()
-        organisasjonDokument.setOrganisasjonDetaljer(organisasjonsDetaljer)
-        val forretningsadresse = SemistrukturertAdresse()
-        organisasjonsDetaljer.forretningsadresse.add(forretningsadresse)
-        forretningsadresse.adresselinje1 = forretningsGatenavn
-        forretningsadresse.postnr = forretningsPostnr
-        forretningsadresse.poststed = "Forretningspoststed"
-        forretningsadresse.landkode = "NO"
-        forretningsadresse.gyldighetsperiode =
-            no.nav.melosys.domain.dokument.felles.Periode(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1))
-        val postadresse = SemistrukturertAdresse()
-        organisasjonsDetaljer.postadresse.add(postadresse)
-        postadresse.adresselinje1 = "Postgatenavn"
-        postadresse.postnr = postadressePostnr
-        postadresse.poststed = "Postpoststed"
-        postadresse.landkode = postadresseLand
-        postadresse.gyldighetsperiode =
-            no.nav.melosys.domain.dokument.felles.Periode(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1))
-        return organisasjonDokument
+        val forretningsadresse = SemistrukturertAdresse().apply {
+            adresselinje1 = forretningsGatenavn
+            postnr = forretningsPostnr
+            poststed = "Forretningspoststed"
+            landkode = "NO"
+            gyldighetsperiode = no.nav.melosys.domain.dokument.felles.Periode(
+                LocalDate.now().minusDays(1),
+                LocalDate.now().plusDays(1)
+            )
+        }
+        val postadresse = SemistrukturertAdresse().apply {
+            adresselinje1 = "Postgatenavn"
+            postnr = postadressePostnr
+            poststed = "Postpoststed"
+            landkode = postadresseLand
+            gyldighetsperiode = no.nav.melosys.domain.dokument.felles.Periode(
+                LocalDate.now().minusDays(1),
+                LocalDate.now().plusDays(1)
+            )
+        }
+        val organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.builder()
+            .forretningsadresse(forretningsadresse)
+            .postadresse(postadresse)
+            .build()
+        return OrganisasjonDokumentTestFactory.builder()
+            .organisasjonsDetaljer(organisasjonsDetaljer)
+            .build()
     }
 
     private fun lagMottatteOpplysningerdata(): MottatteOpplysningerData? {
@@ -328,4 +449,18 @@ class FerdigbehandlingKontrollTest {
         mottatteOpplysningerData.soeknadsland = Soeknadsland(listOf("AT"), false)
         return mottatteOpplysningerData
     }
+
+    private fun lagMedlemskapsperiode(fraOgMed: LocalDate, tilOgMed: LocalDate): Medlemskapsperiode {
+        val medlemskapsperiode = Medlemskapsperiode().apply {
+            id = 1L
+            fom = fraOgMed
+            tom = tilOgMed
+            arbeidsland = "BR"
+            innvilgelsesresultat = InnvilgelsesResultat.DELVIS_INNVILGET
+            medlemskapstype = Medlemskapstyper.FRIVILLIG
+            trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_C_HELSE_PENSJON
+        }
+        return medlemskapsperiode
+    }
+
 }

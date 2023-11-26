@@ -12,7 +12,6 @@ import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Landkoder;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.data.*;
@@ -22,6 +21,7 @@ import no.nav.melosys.domain.person.familie.OmfattetFamilie;
 import no.nav.melosys.domain.util.LovvalgBestemmelseUtils;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.LovvalgsperiodeService;
+import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
 import no.nav.melosys.service.avklartefakta.AvklarteMedfolgendeFamilieService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
@@ -478,10 +478,11 @@ class TrygdeavtaleServiceTest {
     }
 
     private OrganisasjonDokument lagOrganisasjonsDokument(String orgnr, String navn) {
-        var organisasjonsDokument = new OrganisasjonDokument();
-        organisasjonsDokument.setOrgnummer(orgnr);
-        organisasjonsDokument.setNavn(navn);
-        return organisasjonsDokument;
+        return OrganisasjonDokumentTestFactory
+            .builder()
+            .orgnummer(orgnr)
+            .navn(navn)
+            .build();
     }
 
     private Saksopplysning lagArbForhSaksopplysning(List<String> orgnumre) {

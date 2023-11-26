@@ -7,22 +7,29 @@ import java.util.Set;
 
 import com.google.common.collect.Lists;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonsDetaljer;
-import no.nav.melosys.domain.dokument.person.*;
-import no.nav.melosys.domain.mottatteopplysninger.data.*;
+import no.nav.melosys.domain.dokument.person.Familiemedlem;
+import no.nav.melosys.domain.dokument.person.Familierelasjon;
+import no.nav.melosys.domain.dokument.person.KjoennsType;
+import no.nav.melosys.domain.dokument.person.PersonDokument;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.dokument.person.adresse.Gateadresse;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Landkoder;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
+import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigArbeid;
+import no.nav.melosys.domain.mottatteopplysninger.data.SelvstendigForetak;
+import no.nav.melosys.domain.mottatteopplysninger.data.UtenlandskIdent;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid;
+import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -143,10 +150,11 @@ class DataByggerStubs {
 
     static Set hentOrganisasjonDokumentSetStub() {
         HashSet<OrganisasjonDokument> orgDokumentHashSet = new HashSet<>();
-        OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
-        organisasjonDokument.organisasjonDetaljer = mock(OrganisasjonsDetaljer.class);
-        organisasjonDokument.setOrgnummer("orgnr");
-        when(organisasjonDokument.organisasjonDetaljer.hentStrukturertForretningsadresse()).thenReturn(hentStrukturertAddresseStub());
+        OrganisasjonDokument organisasjonDokument = OrganisasjonDokumentTestFactory.builder()
+            .organisasjonsDetaljer(mock(OrganisasjonsDetaljer.class))
+            .orgnummer("orgnr")
+            .build();
+        when(organisasjonDokument.getOrganisasjonDetaljer().hentStrukturertForretningsadresse()).thenReturn(hentStrukturertAddresseStub());
         orgDokumentHashSet.add(organisasjonDokument);
 
         return orgDokumentHashSet;
