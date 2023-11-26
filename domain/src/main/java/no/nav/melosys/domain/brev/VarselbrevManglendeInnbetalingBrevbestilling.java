@@ -17,6 +17,10 @@ public class VarselbrevManglendeInnbetalingBrevbestilling extends DokgenBrevbest
 
     private VarselbrevManglendeInnbetalingBrevbestilling(VarselbrevManglendeInnbetalingBrevbestilling.Builder builder) {
         super(builder);
+        this.fakturanummer = builder.fakturanummer;
+        this.betalingsstatus = builder.betalingsstatus;
+        this.fullmektigForBetaling = builder.fullmektigForBetaling;
+        this.betalingsfrist = builder.betalingsfrist;
     }
 
     public String getFakturanummer() {
@@ -28,6 +32,10 @@ public class VarselbrevManglendeInnbetalingBrevbestilling extends DokgenBrevbest
     }
     public String getFullmektigForBetaling() {
         return fullmektigForBetaling;
+    }
+
+    public VarselbrevManglendeInnbetalingBrevbestilling.Builder toBuilder() {
+        return new VarselbrevManglendeInnbetalingBrevbestilling.Builder(this);
     }
 
     public LocalDate getBetalingsfrist() {

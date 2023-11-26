@@ -102,7 +102,7 @@ public class DokumentproduksjonsInfoMapper {
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.IKKE_YRKESAKTIV_VEDTAKSBREV.getTittel()))
             .put(VARSELBREV_MANGLENDE_INNBETALING,
-                new DokumentproduksjonsInfo("varsel_opphormedlemskap",
+                new DokumentproduksjonsInfo("varsel_opphor_medlemskap",
                     DokumentKategoriKode.IB.getKode(),
                     JournalforingsTittel.VARSELBREV_MANGLENDE_INNBETALING.getTittel()))
             .build());

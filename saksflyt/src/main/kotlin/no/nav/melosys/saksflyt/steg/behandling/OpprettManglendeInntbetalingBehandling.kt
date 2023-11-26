@@ -28,7 +28,7 @@ class OpprettManglendeInntbetalingBehandling(
         //TODO: Ta hensyn til at det kan eksistere en åpen behadnling fra før. Gjøres på egen oppgave. MELOSYS-6187. Husk tester!
 
         val fakturaserieReferanse = prosessinstans.getData(ProsessDataKey.FAKTURASERIE_REFERANSE)
-        val mottaksDato = LocalDate.parse(prosessinstans.getData(ProsessDataKey.MOTTATT_DATO))
+        val mottaksDato = prosessinstans.getData(ProsessDataKey.MOTTATT_DATO, LocalDate::class.java)
         val behandlingsresultat =
             behandlingsresultatService.hentBehandlingsresultatAvFakturaserieReferanse(fakturaserieReferanse)
         val behandling = behandlingService.hentBehandling(behandlingsresultat.behandling.id)
