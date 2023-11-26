@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.brev
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.manglendebetaling.Betalingsstatus
@@ -14,6 +15,9 @@ import no.nav.melosys.service.sak.FagsakService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import io.mockk.verify
+import no.nav.melosys.domain.kodeverk.Mottakerroller
+import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
+import org.assertj.core.api.Assertions.assertThat
 import kotlin.test.Test
 
 class SendManglendeInnbetalingVarselBrevTest {
@@ -50,9 +54,19 @@ class SendManglendeInnbetalingVarselBrevTest {
 
         every { fagsakService.hentFagsak("Saksnummer") } returns fagsak
 
+
         sendManglendeInnbetalingVarselBrev.utfør(prosessinstans)
 
-        verify { dokumentServiceFasade.produserDokument(123, any<BrevbestillingDto>()) }
+
+        val capturedBrevbestillingDto = slot<BrevbestillingDto>()
+        verify { dokumentServiceFasade.produserDokument(123, capture(capturedBrevbestillingDto)) }
+
+        val brevbestillingDto = capturedBrevbestillingDto.captured
+        assertThat(brevbestillingDto.produserbardokument).isEqualTo(Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING)
+        assertThat(brevbestillingDto.mottaker).isEqualTo(Mottakerroller.BRUKER)
+        assertThat(brevbestillingDto.betalingsfrist).isEqualTo("2023-12-24")
+        assertThat(brevbestillingDto.fakturanummer).isEqualTo("Fakturanummer")
+        assertThat(brevbestillingDto.betalingsstatus).isEqualTo(Betalingsstatus.DELVIS_BETALT)
     }
 
 }
