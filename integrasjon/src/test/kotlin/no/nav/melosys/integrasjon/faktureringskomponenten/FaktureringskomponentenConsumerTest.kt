@@ -6,6 +6,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import io.getunleash.FakeUnleash
 import no.nav.melosys.integrasjon.MetricsTestConfig
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.StsMockServer
@@ -37,6 +38,7 @@ import java.util.*
     StsMockServer::class,
     GenericAuthFilterFactory::class,
     FaktureringskomponentenConsumerProducer::class,
+    FakeUnleash::class
 )
 @WebMvcTest
 @AutoConfigureWebClient
