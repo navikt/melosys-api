@@ -1,5 +1,6 @@
 package no.nav.melosys.saksflyt.steg.brev
 
+import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -51,24 +52,25 @@ class SendManglendeInnbetalingVarselBrevTest {
         }
 
         prosessinstans.setData(ProsessDataKey.SAKSNUMMER, "Saksnummer")
-        prosessinstans.setData(ProsessDataKey.BETALINGSSTATUS, Betalingsstatus.DELVIS_BETALT.name)
+        prosessinstans.setData(ProsessDataKey.BETALINGSSTATUS, Betalingsstatus.DELVIS_BETALT)
         prosessinstans.setData(ProsessDataKey.FAKTURANUMMER, "Fakturanummer")
 
         every { fagsakService.hentFagsak("Saksnummer") } returns fagsak
+        val capturedBrevbestillingDto = slot<BrevbestillingDto>()
 
 
         sendManglendeInnbetalingVarselBrev.utfør(prosessinstans)
 
 
-        val capturedBrevbestillingDto = slot<BrevbestillingDto>()
         verify { dokumentServiceFasade.produserDokument(123, capture(capturedBrevbestillingDto)) }
 
-        val brevbestillingDto = capturedBrevbestillingDto.captured
-        assertThat(brevbestillingDto.produserbardokument).isEqualTo(Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING)
-        assertThat(brevbestillingDto.mottaker).isEqualTo(Mottakerroller.BRUKER)
-        assertThat(brevbestillingDto.betalingsfrist).isEqualTo(TrygdeavgiftBetalingsfrist.beregnTrygdeavgiftBetalingsfrist(LocalDate.now()))
-        assertThat(brevbestillingDto.fakturanummer).isEqualTo("Fakturanummer")
-        assertThat(brevbestillingDto.betalingsstatus).isEqualTo(Betalingsstatus.DELVIS_BETALT)
+        capturedBrevbestillingDto.captured.run {
+            produserbardokument shouldBe Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING
+            mottaker shouldBe Mottakerroller.BRUKER
+            betalingsfrist shouldBe TrygdeavgiftBetalingsfrist.beregnTrygdeavgiftBetalingsfrist(LocalDate.now())
+            fakturanummer shouldBe "Fakturanummer"
+            betalingsstatus shouldBe Betalingsstatus.DELVIS_BETALT
+        }
     }
 
 }
