@@ -7,6 +7,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import com.github.tomakehurst.wiremock.matching.UrlPattern
+import io.getunleash.FakeUnleash
 import io.mockk.spyk
 import no.nav.melosys.integrasjon.felles.EnvironmentHandler
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
@@ -21,7 +22,8 @@ import java.util.*
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Import(
     CorrelationIdOutgoingInterceptor::class,
-    CorrelationIdOutgoingFilter::class
+    CorrelationIdOutgoingFilter::class,
+    FakeUnleash::class
 )
 abstract class ConsumerWireMockTestBase<T, R>(
     mockPort: Int,
