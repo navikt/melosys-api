@@ -15,9 +15,11 @@ import no.nav.melosys.service.sak.FagsakService
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import io.mockk.verify
+import no.nav.melosys.domain.brev.TrygdeavgiftBetalingsfrist
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import org.assertj.core.api.Assertions.assertThat
+import java.time.LocalDate
 import kotlin.test.Test
 
 class SendManglendeInnbetalingVarselBrevTest {
@@ -64,7 +66,7 @@ class SendManglendeInnbetalingVarselBrevTest {
         val brevbestillingDto = capturedBrevbestillingDto.captured
         assertThat(brevbestillingDto.produserbardokument).isEqualTo(Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING)
         assertThat(brevbestillingDto.mottaker).isEqualTo(Mottakerroller.BRUKER)
-        assertThat(brevbestillingDto.betalingsfrist).isEqualTo("2023-12-24")
+        assertThat(brevbestillingDto.betalingsfrist).isEqualTo(TrygdeavgiftBetalingsfrist.beregnTrygdeavgiftBetalingsfrist(LocalDate.now()))
         assertThat(brevbestillingDto.fakturanummer).isEqualTo("Fakturanummer")
         assertThat(brevbestillingDto.betalingsstatus).isEqualTo(Betalingsstatus.DELVIS_BETALT)
     }
