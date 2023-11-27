@@ -2,6 +2,8 @@ package no.nav.melosys.integrasjon.reststs;
 
 import java.util.Map;
 
+import io.getunleash.Unleash;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.integrasjon.felles.BasicAuthAware;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.ParameterizedTypeReference;
@@ -15,9 +17,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Profile("!local-mock")
 public class RestTokenServiceClient extends RestTokenServiceClientBase implements BasicAuthAware {
     private final WebClient webClient;
+    private final Unleash unleash;
 
-    public RestTokenServiceClient(WebClient webClient) {
+    public RestTokenServiceClient(WebClient webClient, Unleash unleash) {
         this.webClient = webClient;
+        this.unleash = unleash;
     }
 
     @Override
@@ -33,7 +37,8 @@ public class RestTokenServiceClient extends RestTokenServiceClientBase implement
     }
 
     private String createUriString() {
-        return UriComponentsBuilder.fromPath("")
+        var path = unleash.isEnabled(ToggleName.MELOSYS_STS_NY_PATH) ? "" : "/";
+        return UriComponentsBuilder.fromPath(path)
             .queryParam("grant_type", "client_credentials")
             .queryParam("scope", "openid").toUriString();
     }
