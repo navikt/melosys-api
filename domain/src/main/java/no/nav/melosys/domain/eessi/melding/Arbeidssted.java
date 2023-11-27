@@ -1,19 +1,15 @@
 package no.nav.melosys.domain.eessi.melding;
 
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.Objects;
 
 public class Arbeidssted {
     public String navn;
     public Adresse adresse;
     public String hjemmebase;
     public boolean erIkkeFastAdresse;
-
-    private Arbeidssted() {
-        // til JAXB
-    }
 
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public Arbeidssted(@JsonProperty("navn") String navn,
