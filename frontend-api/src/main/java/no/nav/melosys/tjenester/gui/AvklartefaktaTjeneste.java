@@ -5,10 +5,7 @@ import java.util.Set;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import no.nav.melosys.domain.avklartefakta.Avklartefakta;
-import no.nav.melosys.service.avklartefakta.AvklarteFaktaArbeidslandService;
-import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaDto;
-import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
+import no.nav.melosys.service.avklartefakta.*;
 import no.nav.melosys.service.tilgang.Aksesskontroll;
 import no.nav.melosys.service.tilgang.Ressurs;
 import no.nav.melosys.tjenester.gui.dto.AvklartefaktaOppsummeringDto;
@@ -29,16 +26,19 @@ public class AvklartefaktaTjeneste {
     private final AvklartefaktaService avklartefaktaService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final AvklarteFaktaArbeidslandService avklarteFaktaArbeidslandService;
+    private final AvklartFullstendigManglendeInnbetalingService avklartFullstendigManglendeInnbetalingService;
     private final Aksesskontroll aksesskontroll;
 
     public AvklartefaktaTjeneste(AvklartefaktaService avklartefaktaService,
                                  AvklarteVirksomheterService avklarteVirksomheterService,
-                                    AvklarteFaktaArbeidslandService avklarteFaktaArbeidslandService,
-                                 Aksesskontroll aksesskontroll) {
+                                 AvklarteFaktaArbeidslandService avklarteFaktaArbeidslandService,
+                                 Aksesskontroll aksesskontroll,
+                                 AvklartFullstendigManglendeInnbetalingService avklartFullstendigManglendeInnbetalingService) {
         this.avklartefaktaService = avklartefaktaService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.avklarteFaktaArbeidslandService = avklarteFaktaArbeidslandService;
         this.aksesskontroll = aksesskontroll;
+        this.avklartFullstendigManglendeInnbetalingService = avklartFullstendigManglendeInnbetalingService;
     }
 
     @GetMapping("{behandlingID}")
@@ -75,6 +75,18 @@ public class AvklartefaktaTjeneste {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
         avklarteVirksomheterService.lagreVirksomheterSomAvklartefakta(behandlingID, virksomheter.getVirksomhetIDer());
+
+        return AvklartefaktaOppsummeringDto.av(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
+    }
+
+    @PostMapping("{behandlingID}/innbetalingsstatus")
+    @ApiOperation(value = "Lagre manglende innbetalingsstatus som avklartfakta", response = AvklartefaktaOppsummeringDto.class)
+    public AvklartefaktaOppsummeringDto lagreFullstendigManglendeInnbetalingSomAvklartFakta(@PathVariable("behandlingID") long behandlingID,
+                                                                          @RequestBody Boolean fullstendigManglendeInnbetaling) {
+        aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
+
+        avklartFullstendigManglendeInnbetalingService.lagreFullstendigManglendeInnbetalingSomAvklartFakta(behandlingID,
+            fullstendigManglendeInnbetaling);
 
         return AvklartefaktaOppsummeringDto.av(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
     }
