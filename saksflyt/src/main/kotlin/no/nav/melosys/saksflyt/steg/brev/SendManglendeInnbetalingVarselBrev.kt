@@ -29,13 +29,13 @@ class SendManglendeInnbetalingVarselBrev(
         val saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER)
         val fagsak = fagsakService.hentFagsak(saksnummer!!)
 
-        val betalingsstatus = prosessinstans.getData(ProsessDataKey.BETALINGSSTATUS)
+        val betalingsstatus = prosessinstans.getData(ProsessDataKey.BETALINGSSTATUS, Betalingsstatus::class.java)
         val fakturanummer = prosessinstans.getData(ProsessDataKey.FAKTURANUMMER)
         val behandlingID = fagsak.hentSistRegistrertBehandling().id
 
         val brevbestillingDto = BrevbestillingDto()
             .apply {
-                this.betalingsstatus = Betalingsstatus.valueOf(betalingsstatus!!)
+                this.betalingsstatus = betalingsstatus
                 this.fakturanummer = fakturanummer
                 this.produserbardokument = Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING
                 this.mottaker = Mottakerroller.BRUKER

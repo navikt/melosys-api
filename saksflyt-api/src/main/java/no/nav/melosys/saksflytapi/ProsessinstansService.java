@@ -155,7 +155,7 @@ public class ProsessinstansService {
 
         prosessinstans.setData(MOTTATT_DATO, manglendeFakturabetalingMelding.getDatoMottatt());
         prosessinstans.setData(FAKTURASERIE_REFERANSE, manglendeFakturabetalingMelding.getFakturaserieReferanse());
-        prosessinstans.setData(BETALINGSSTATUS, manglendeFakturabetalingMelding.getBetalingsstatus().toString());
+        prosessinstans.setData(BETALINGSSTATUS, manglendeFakturabetalingMelding.getBetalingsstatus());
         prosessinstans.setData(FAKTURANUMMER, manglendeFakturabetalingMelding.getFakturanummer());
 
         lagre(prosessinstans);
