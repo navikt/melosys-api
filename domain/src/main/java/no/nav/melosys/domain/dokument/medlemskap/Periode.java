@@ -5,7 +5,6 @@ import java.util.Objects;
 
 import no.nav.melosys.domain.ErPeriode;
 
-
 public class Periode implements ErPeriode {
 
     private LocalDate fom;

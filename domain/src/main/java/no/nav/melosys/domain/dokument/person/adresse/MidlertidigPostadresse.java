@@ -5,9 +5,6 @@ import java.time.LocalDateTime;
 import no.nav.melosys.domain.dokument.felles.Land;
 import no.nav.melosys.domain.dokument.felles.Periode;
 
-
-
-
 public class MidlertidigPostadresse {
 
     public LocalDateTime endringstidspunkt;

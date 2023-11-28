@@ -3,7 +3,6 @@ package no.nav.melosys.domain.dokument.medlemskap;
 import no.nav.melosys.domain.HarPeriode;
 import no.nav.melosys.domain.util.IsoLandkodeKonverterer;
 
-
 public class Medlemsperiode implements HarPeriode {
 
     private static final String KILDE_LÅNEKASSEN = "LAANEKASSEN";

@@ -9,11 +9,7 @@ import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import org.apache.commons.lang3.StringUtils;
 
-
-
 public class ArbeidsforholdDokument implements SaksopplysningDokument {
-
-
 
     public List<Arbeidsforhold> arbeidsforhold = new ArrayList<>();
 

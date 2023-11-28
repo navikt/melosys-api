@@ -8,8 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import static java.util.Arrays.asList;
 
-
-
 public class UstrukturertAdresse {
 
     public String adresselinje1;

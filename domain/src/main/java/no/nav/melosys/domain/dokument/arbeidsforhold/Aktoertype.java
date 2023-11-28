@@ -1,9 +1,6 @@
 package no.nav.melosys.domain.dokument.arbeidsforhold;
 
-import javax.xml.bind.annotation.XmlEnumValue;
-
 public enum Aktoertype {
-
 
     ORGANISASJON("Organisasjonsnummer i Brønnøysundregistrene."),
 

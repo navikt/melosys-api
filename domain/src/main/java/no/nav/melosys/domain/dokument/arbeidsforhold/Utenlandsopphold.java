@@ -5,7 +5,6 @@ import java.time.YearMonth;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.melosys.domain.dokument.felles.Periode;
 
-
 public class Utenlandsopphold {
 
     private Periode periode;

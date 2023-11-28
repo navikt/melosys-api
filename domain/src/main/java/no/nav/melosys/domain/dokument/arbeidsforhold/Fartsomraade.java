@@ -4,7 +4,6 @@ import no.nav.melosys.domain.kodeverk.Kodeverk;
 
 public enum Fartsomraade implements Kodeverk {
 
-
     INNENRIKS("innenriks", "Innenriks"),
 
     UTENRIKS("utenriks", "Utenriks");

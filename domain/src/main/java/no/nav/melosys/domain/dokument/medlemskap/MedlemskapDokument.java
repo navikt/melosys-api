@@ -7,11 +7,7 @@ import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 
 import static java.util.function.Predicate.not;
 
-
-
 public class MedlemskapDokument implements SaksopplysningDokument {
-
-
 
     public List<Medlemsperiode> medlemsperiode = new ArrayList<>();
 

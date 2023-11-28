@@ -11,7 +11,6 @@ import no.nav.melosys.domain.HarPeriode;
 import no.nav.melosys.domain.dokument.DokumentView;
 import no.nav.melosys.domain.dokument.felles.Periode;
 
-
 public class Arbeidsavtale implements HarPeriode {
 
     public Arbeidstidsordning arbeidstidsordning; //"http://nav.no/kodeverk/Kodeverk/Arbeidstidsordninger"

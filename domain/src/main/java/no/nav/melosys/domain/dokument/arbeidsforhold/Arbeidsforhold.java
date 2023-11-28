@@ -10,7 +10,6 @@ import no.nav.melosys.domain.ErPeriode;
 import no.nav.melosys.domain.HarPeriode;
 import no.nav.melosys.domain.dokument.felles.Periode;
 
-
 public class Arbeidsforhold implements HarPeriode {
 
     public String arbeidsforholdID;
@@ -21,11 +20,7 @@ public class Arbeidsforhold implements HarPeriode {
 
     public String arbeidsforholdstype; //"http://nav.no/kodeverk/Kodeverk/Arbeidsforholdstyper"
 
-
-
     public List<Arbeidsavtale> arbeidsavtaler = new ArrayList<>();
-
-
 
     public List<PermisjonOgPermittering> permisjonOgPermittering = new ArrayList<>();
 
