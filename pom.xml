@@ -497,27 +497,11 @@
                 <version>${doksys.dokumentproduksjon.version}</version>
                 <classifier>jaxws</classifier>
             </dependency>
-            <dependency>
-                <groupId>no.nav.tjenestespesifikasjoner</groupId>
-                <artifactId>nav-fim-organisasjon-v4-tjenestespesifikasjon</artifactId>
-                <version>${nav.tjenestespesifikasjoner.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.tjenestespesifikasjoner</groupId>
-                <artifactId>person-v3-tjenestespesifikasjon</artifactId>
-                <version>${nav.tjenestespesifikasjoner.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>nav-foedselsnummer</groupId>
                 <artifactId>core</artifactId>
                 <version>${nav-foedselsnummer.core.version}</version>
-            </dependency>
-            <!-- SOB -->
-            <dependency>
-                <groupId>no.nav.tjenestespesifikasjoner</groupId>
-                <artifactId>nav-virksomhet-hendelsehandterer-behandlingstatus-v1-meldingsdefinisjon</artifactId>
-                <version>${nav.tjenestespesifikasjoner.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.tjenestespesifikasjoner</groupId>
@@ -547,12 +531,6 @@
                 <artifactId>melosysbrev</artifactId>
                 <classifier>jaxb-sources</classifier>
                 <version>${melosys.brev.version}</version>
-            </dependency>
-            <!-- Utbetaldata -->
-            <dependency>
-                <groupId>no.nav.tjenestespesifikasjoner</groupId>
-                <artifactId>utbetaling-tjenestespesifikasjon</artifactId>
-                <version>${nav.tjenestespesifikasjoner.version}</version>
             </dependency>
 
             <!-- Test -->

@@ -2,7 +2,6 @@ package no.nav.melosys.domain.dokument.arbeidsforhold;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import javax.xml.bind.annotation.*;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -10,12 +9,8 @@ import no.nav.melosys.domain.dokument.SaksopplysningDokument;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import org.apache.commons.lang3.StringUtils;
 
-@XmlRootElement
-@XmlAccessorType(XmlAccessType.FIELD)
 public class ArbeidsforholdDokument implements SaksopplysningDokument {
 
-    @XmlElementWrapper(name="arbeidsforhold")
-    @XmlElement(name="arbeidsforhold")
     public List<Arbeidsforhold> arbeidsforhold = new ArrayList<>();
 
     public ArbeidsforholdDokument() {}

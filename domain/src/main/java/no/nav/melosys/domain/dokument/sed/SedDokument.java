@@ -2,30 +2,23 @@ package no.nav.melosys.domain.dokument.sed;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.dokument.SaksopplysningDokument;
-import no.nav.melosys.domain.dokument.jaxb.LovvalgBestemmelseXmlAdapter;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.eessi.BucType;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.eessi.melding.Arbeidssted;
 import no.nav.melosys.domain.kodeverk.*;
 
-@XmlRootElement
 public class SedDokument implements SaksopplysningDokument {
     private String rinaSaksnummer;
     private String rinaDokumentID;
     private Landkoder avsenderLandkode;
     private String fnr;
     private Periode lovvalgsperiode;
-    @XmlJavaTypeAdapter(LovvalgBestemmelseXmlAdapter.class)
     private LovvalgBestemmelse lovvalgBestemmelse;
     private Landkoder lovvalgslandKode;
-    @XmlJavaTypeAdapter(LovvalgBestemmelseXmlAdapter.class)
     private LovvalgBestemmelse unntakFraLovvalgBestemmelse;
     private Landkoder unntakFraLovvalgslandKode;
     private boolean erEndring;
@@ -74,7 +67,6 @@ public class SedDokument implements SaksopplysningDokument {
         this.lovvalgsperiode = lovvalgsperiode;
     }
 
-    @XmlTransient
     public LovvalgBestemmelse getLovvalgBestemmelse() {
         return lovvalgBestemmelse;
     }
@@ -91,7 +83,6 @@ public class SedDokument implements SaksopplysningDokument {
         this.lovvalgslandKode = lovvalgslandKode;
     }
 
-    @XmlTransient
     public LovvalgBestemmelse getUnntakFraLovvalgBestemmelse() {
         return unntakFraLovvalgBestemmelse;
     }
