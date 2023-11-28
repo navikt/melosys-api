@@ -25,7 +25,6 @@ import org.jeasy.random.EasyRandom;
 import org.jeasy.random.EasyRandomParameters;
 import org.jeasy.random.randomizers.misc.EnumRandomizer;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -72,8 +71,6 @@ class SaksopplysningDokumentConverterTest {
     }
 
     @Test
-    @Disabled("EasyRandom takler ikke den konverte kotlin klassen OrganisasjonDokument og navn som List<String>")
-    // Har laget en egen test som dekker dette i EregDokumentConverterTest
     void konverterTilOgFraDatabase_medOrganisasjonDokument_erUendret() {
         testKonvertering(OrganisasjonDokument.class);
     }
