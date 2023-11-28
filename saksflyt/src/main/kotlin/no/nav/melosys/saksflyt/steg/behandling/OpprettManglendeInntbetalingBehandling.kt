@@ -1,11 +1,16 @@
-package no.nav.melosys.service.behandling
+package no.nav.melosys.saksflyt.steg.behandling
 
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.saksflyt.steg.StegBehandler
+import no.nav.melosys.saksflytapi.domain.ProsessDataKey
+import no.nav.melosys.saksflytapi.domain.ProsessSteg
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.service.behandling.BehandlingService
+import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.sak.OpprettBehandlingForSak
 import no.nav.melosys.service.sak.OpprettSakDto
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 
 @Component
@@ -13,15 +18,27 @@ class OpprettManglendeInntbetalingBehandling(
     private val behandlingService: BehandlingService,
     private val behandlingsresultatService: BehandlingsresultatService,
     private val opprettBehandlingForSak: OpprettBehandlingForSak
-) {
+) : StegBehandler {
 
-    @Transactional
-    fun opprettBehandlingManglendeInnbetaling(fakturaserieReferanse: String, mottaksDato: LocalDate) {
+    override fun inngangsSteg(): ProsessSteg {
+        return ProsessSteg.OPPRETT_MANGLENDE_INNBETALING_BEHANDLING
+    }
+
+    override fun utfør(prosessinstans: Prosessinstans) {
+        //TODO: Ta hensyn til at det kan eksistere en åpen behadnling fra før. Gjøres på egen oppgave. MELOSYS-6187. Husk tester!
+
+        val fakturaserieReferanse = prosessinstans.getData(ProsessDataKey.FAKTURASERIE_REFERANSE)
+        val mottaksDato = prosessinstans.getData(ProsessDataKey.MOTTATT_DATO, LocalDate::class.java)
         val behandlingsresultat =
             behandlingsresultatService.hentBehandlingsresultatAvFakturaserieReferanse(fakturaserieReferanse)
         val behandling = behandlingService.hentBehandling(behandlingsresultat.behandling.id)
         val fagsak = behandling.fagsak
         val sistBehandling = fagsak.hentSistRegistrertBehandling()
+
+        //TODO: Det som er her nå er FEIL. For MELOSYS-6187, så er det viktig at vi setter korrekt behandlingid i prosessinstansen
+        // og ikke saksnummer. I SendManglendeInnbetalingVarselBrev.kt er det ønskelig å bruke behandlingId istf. saksnummer.
+        // Husk! Siste registrerte behandling er ikke nødvendigvis den som skal brukes.
+        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, fagsak.saksnummer)
 
         opprettBehandlingForSak.opprettBehandling(fagsak.saksnummer, lagOpprettSakDto(sistBehandling, mottaksDato, fakturaserieReferanse))
     }

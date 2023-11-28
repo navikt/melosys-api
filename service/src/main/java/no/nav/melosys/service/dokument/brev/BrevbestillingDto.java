@@ -1,5 +1,6 @@
 package no.nav.melosys.service.dokument.brev;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -8,6 +9,7 @@ import no.nav.melosys.domain.arkiv.Distribusjonstype;
 import no.nav.melosys.domain.brev.utkast.BrevbestillingUtkast;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
+import no.nav.melosys.domain.manglendebetaling.Betalingsstatus;
 
 public final class BrevbestillingDto {
     private Produserbaredokumenter produserbardokument;
@@ -35,6 +37,10 @@ public final class BrevbestillingDto {
     private String saksbehandlerNrToIdent;
     private String begrunnelseKode;
     private String ytterligereInformasjon;
+    private String fakturanummer;
+    private Betalingsstatus betalingsstatus;
+    private String fullmektigForBetaling;
+    private LocalDate betalingsfrist;
 
     public BrevbestillingDto() {
     }
@@ -64,7 +70,11 @@ public final class BrevbestillingDto {
         String dokumentTittel,
         String saksbehandlerNrToIdent,
         String begrunnelseKode,
-        String ytterligereInformasjon) {
+        String ytterligereInformasjon,
+        String fakturanummer,
+        Betalingsstatus betalingsstatus,
+        String fullmektigForBetaling,
+        LocalDate betalingsfrist) {
 
         this.produserbardokument = produserbardokument;
         this.mottaker = mottaker;
@@ -91,6 +101,10 @@ public final class BrevbestillingDto {
         this.saksbehandlerNrToIdent = saksbehandlerNrToIdent;
         this.begrunnelseKode = begrunnelseKode;
         this.ytterligereInformasjon = ytterligereInformasjon;
+        this.fakturanummer = fakturanummer;
+        this.betalingsstatus = betalingsstatus;
+        this.fullmektigForBetaling = fullmektigForBetaling;
+        this.betalingsfrist = betalingsfrist;
     }
 
 
@@ -125,7 +139,11 @@ public final class BrevbestillingDto {
             brevbestillingUtkast.dokumentTittel(),
             brevbestillingUtkast.saksbehandlerNrToIdent(),
             deprecatedBegrunnelseKode,
-            deprecatedYtterligereInformasjon
+            deprecatedYtterligereInformasjon,
+            null,
+            null,
+            null,
+            null
         );
     }
 
@@ -408,4 +426,35 @@ public final class BrevbestillingDto {
             "ytterligereInformasjon=" + ytterligereInformasjon + ']';
     }
 
+    public String getFakturanummer() {
+        return fakturanummer;
+    }
+
+    public void setFakturanummer(String fakturanummer) {
+        this.fakturanummer = fakturanummer;
+    }
+
+    public Betalingsstatus getBetalingsstatus() {
+        return betalingsstatus;
+    }
+
+    public void setBetalingsstatus(Betalingsstatus betalingsstatus) {
+        this.betalingsstatus = betalingsstatus;
+    }
+
+    public String getFullmektigForBetaling() {
+        return fullmektigForBetaling;
+    }
+
+    public void setFullmektigForBetaling(String fullmektigForBetaling) {
+        this.fullmektigForBetaling = fullmektigForBetaling;
+    }
+
+    public LocalDate getBetalingsfrist() {
+        return betalingsfrist;
+    }
+
+    public void setBetalingsfrist(LocalDate betalingsfrist) {
+        this.betalingsfrist = betalingsfrist;
+    }
 }

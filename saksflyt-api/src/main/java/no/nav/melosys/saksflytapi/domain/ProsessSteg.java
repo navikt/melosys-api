@@ -64,7 +64,9 @@ public enum ProsessSteg {
     UKJENT("UKJENT", "Ukjent steg"),
     UTPEKING_SEND_AVSLAG("UTPEKING_SEND_AVSLAG", "Send SED A004 til alle arbeidsland"),
     VIDERESEND_SØKNAD("VIDERESEND_SØKNAD", "Oppretter journalpost eller sender SED med søknad som vedlegg"),
-    VURDER_INNGANGSVILKÅR("VURDER_INNGANGSVILKÅR", "Vurderer inngangsvilkår");
+    VURDER_INNGANGSVILKÅR("VURDER_INNGANGSVILKÅR", "Vurderer inngangsvilkår"),
+    SEND_MANGLENDE_INNBETALING_VARSELBREV("SEND_MANGLENDE_INNBETALING_VARSELBREV", "Sender varselbrev om manglende innbetaling"),
+    OPPRETT_MANGLENDE_INNBETALING_BEHANDLING("OPPRETT_MANGLENDE_INNBETALING_BEHANDLING", "Oppretter ny behandling for manglende innbetaling");
 
 
     private final String kode;

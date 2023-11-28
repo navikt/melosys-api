@@ -178,6 +178,7 @@ class DokgenMalMapper(
             Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER -> Avslagbrev.av(
                 (brevbestilling as AvslagBrevbestilling).toBuilder().build()
             )
+
             Produserbaredokumenter.MELDING_HENLAGT_SAK -> Henleggelsesbrev.av(
                 (brevbestilling as HenleggelseBrevbestilling).toBuilder().build()
             )
@@ -192,6 +193,10 @@ class DokgenMalMapper(
             )
 
             Produserbaredokumenter.IKKE_YRKESAKTIV_VEDTAKSBREV -> lagIkkeYrkesaktivVedtaksbrev(brevbestilling as IkkeYrkesaktivBrevbestilling)
+
+            Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING -> VarselbrevManglendeInnbetaling(
+                brevbestilling as VarselbrevManglendeInnbetalingBrevbestilling
+            )
 
             else -> throw FunksjonellException("ProduserbartDokument ${brevbestilling.produserbartdokument} er ikke støttet av melosys-dokgen")
         }

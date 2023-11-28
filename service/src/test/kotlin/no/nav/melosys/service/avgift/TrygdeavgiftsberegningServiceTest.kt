@@ -281,7 +281,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                 )
             }
         }
-        trygdeavgiftsberegningService.finnFakturamottaker(BEHANDLING_ID).shouldBe(BRUKER_NAVN)
+        trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(BRUKER_NAVN)
     }
 
     @Test
@@ -300,7 +300,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                     })
             }
         }
-        trygdeavgiftsberegningService.finnFakturamottaker(BEHANDLING_ID).shouldBe(FULLMEKTIG_NAVN)
+        trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(FULLMEKTIG_NAVN)
     }
 
     @Test
@@ -319,7 +319,7 @@ internal class TrygdeavgiftsberegningServiceTest {
                     })
             }
         }
-        trygdeavgiftsberegningService.finnFakturamottaker(BEHANDLING_ID).shouldBe(FULLMEKTIG_ORG_NAVN)
+        trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(FULLMEKTIG_ORG_NAVN)
     }
 
     @Test
@@ -339,6 +339,6 @@ internal class TrygdeavgiftsberegningServiceTest {
                     })
             }
         }
-        trygdeavgiftsberegningService.finnFakturamottaker(BEHANDLING_ID).shouldBe(BRUKER_NAVN)
+        trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLING_ID).shouldBe(BRUKER_NAVN)
     }
 }
