@@ -85,12 +85,12 @@ public class BrevmottakerService {
         return mottakerListeKopi;
     }
 
-    private void leggTilKopier(long behandlingId, Mottakerliste mottakerliste, Collection<BrevkopiRegel> brevkopiRegler) {
+    private void leggTilKopier(long behandlingID, Mottakerliste mottakerliste, Collection<BrevkopiRegel> brevkopiRegler) {
         if (brevkopiRegler.contains(BRUKER_FÅR_KOPI)) {
             mottakerliste.getKopiMottakere().add(Mottakerroller.BRUKER);
         }
         if (brevkopiRegler.contains(ARBEIDSGIVER_FÅR_KOPI) &&
-            !lovvalgsperiodeService.harSelvstendigNæringsdrivendeLovvalgsbestemmelse(behandlingId)) {
+            !lovvalgsperiodeService.harSelvstendigNæringsdrivendeLovvalgsbestemmelse(behandlingID)) {
             mottakerliste.getKopiMottakere().add(Mottakerroller.ARBEIDSGIVER);
         }
         if (!unleash.isEnabled(FOLKETRYGDEN_MVP) && brevkopiRegler.contains(SKATT_FÅR_KOPI)) {
@@ -101,7 +101,7 @@ public class BrevmottakerService {
         }
 
         if (brevkopiRegler.contains(UTENLANDSK_TRYGDEMYNDIGHET_FÅR_KOPI_HVIS_IKKE_ART_8_2)) {
-            Optional.ofNullable(lovvalgsperiodeService.hentLovvalgsperiode(behandlingId)).ifPresent(lovvalgsperiode -> {
+            Optional.ofNullable(lovvalgsperiodeService.hentLovvalgsperiode(behandlingID)).ifPresent(lovvalgsperiode -> {
                     if (lovvalgsperiode.getBestemmelse() != Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART8_2) {
                         mottakerliste.getKopiMottakere().add(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
                     }
@@ -148,26 +148,31 @@ public class BrevmottakerService {
             throw new FunksjonellException("Bruker er ikke registrert.");
         }
 
-        // Dokumenter til bruker sendes i utgangspunkt bare til fullmektig dersom fullmektig finnes.
-        // Vedtaksbrevene er imidlertid sendt til både bruker og fullmektig (gjelder ikke forhåndsvisning).
-        boolean tilBegge = false;
-        if (produserbartDokument == INNVILGELSE_YRKESAKTIV ||
-            produserbartDokument == INNVILGELSE_YRKESAKTIV_FLERE_LAND ||
-            produserbartDokument == AVSLAG_YRKESAKTIV) {
-            tilBegge = !forhåndsvisning;
-        }
-
         List<Mottaker> mottakere = new ArrayList<>();
         Optional<Aktoer> fullmektig = fagsak.finnRepresentantEllerFullmektig(Representerer.BRUKER);
         if (fullmektig.isPresent()) {
+            boolean erTilBådeBrukerOgFullmektig = erTilBådeBrukerOgFullmektig(produserbartDokument, forhåndsvisning);
             mottakere.add(Mottaker.av(fullmektig.get()));
-            if (tilBegge) {
+            if (erTilBådeBrukerOgFullmektig) {
                 mottakere.add(Mottaker.av(bruker));
             }
         } else {
             mottakere.add(Mottaker.av(bruker));
         }
         return mottakere;
+    }
+
+    private static boolean erTilBådeBrukerOgFullmektig(Produserbaredokumenter produserbartDokument, boolean forhåndsvisning) {
+        // Dokumenter til bruker sendes i utgangspunkt bare til fullmektig dersom fullmektig finnes.
+        // Vedtaksbrevene er imidlertid sendt til både bruker og fullmektig (gjelder ikke forhåndsvisning).
+        boolean tilBegge = false;
+        if (produserbartDokument == INNVILGELSE_YRKESAKTIV ||
+            produserbartDokument == INNVILGELSE_YRKESAKTIV_FLERE_LAND ||
+            produserbartDokument == AVSLAG_YRKESAKTIV ||
+            produserbartDokument == VARSELBREV_MANGLENDE_INNBETALING) {
+            tilBegge = !forhåndsvisning;
+        }
+        return tilBegge;
     }
 
     private List<Mottaker> avklarMottakereForFullmektig(Fagsak fagsak) {

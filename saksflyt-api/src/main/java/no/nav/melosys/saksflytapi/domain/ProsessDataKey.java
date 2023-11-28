@@ -65,6 +65,8 @@ public enum ProsessDataKey {
     SAKSBEHANDLER_NAVN("saksbehandlerNavn"),
     SAKSNUMMER("saksnummer"),
     FAKTURASERIE_REFERANSE("fakturaserieReferanse"),
+    BETALINGSSTATUS("betalingsstatus"),
+    FAKTURANUMMER("fakturanummer"),
     SAKSSTATUS("saksstatus"),
     SAKSTYPE("sakstype"),
     SAKSTEMA("sakstema"),
