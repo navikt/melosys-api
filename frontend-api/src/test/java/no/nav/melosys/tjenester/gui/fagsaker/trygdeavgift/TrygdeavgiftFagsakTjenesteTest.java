@@ -13,8 +13,8 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = {TrygdeavgiftTjeneste.class})
-class TrygdeavgiftTjenesteTest {
+@WebMvcTest(controllers = {TrygdeavgiftFagsakTjeneste.class})
+class TrygdeavgiftFagsakTjenesteTest {
     @MockBean
     private static Aksesskontroll aksesskontroll;
     @MockBean
