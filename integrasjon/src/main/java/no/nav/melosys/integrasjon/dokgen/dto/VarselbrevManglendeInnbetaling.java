@@ -28,4 +28,20 @@ public class VarselbrevManglendeInnbetaling extends DokgenDto {
         this.betalingsstatus = brevbestilling.getBetalingsstatus().name();
 
     }
+
+    public String getFullmektigForBetaling() {
+        return fullmektigForBetaling;
+    }
+
+    public String getFakturanummer() {
+        return fakturanummer;
+    }
+
+    public String getBetalingsstatus() {
+        return betalingsstatus;
+    }
+
+    public LocalDate getBetalingsfrist() {
+        return betalingsfrist;
+    }
 }
