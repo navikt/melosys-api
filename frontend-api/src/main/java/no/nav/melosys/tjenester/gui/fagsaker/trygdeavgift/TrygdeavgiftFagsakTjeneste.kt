@@ -16,21 +16,21 @@ import org.springframework.web.context.WebApplicationContext
 
 @Protected
 @RestController
-@RequestMapping("/fagsaker/{saksnummer}/trygdeavgift")
-@Api(tags = ["fagsaker", "trygdeavgift"])
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
+@Api(tags = ["fagsaker", "trygdeavgift"])
+@RequestMapping("/fagsaker/{saksnummer}/trygdeavgift")
 class TrygdeavgiftFagsakTjeneste(
     private val aksesskontroll: Aksesskontroll,
     private val trygdeavgiftOppsummeringService: TrygdeavgiftOppsummeringService
 ) {
     @GetMapping("/oppsummering")
     @ApiOperation("Hent oppsummering på trygdeavgift på fagsaken")
-    fun hentTrygdeavgiftOppsummering(@PathVariable("saksnummer") saksnummer: String?): ResponseEntity<TrygdeavgiftOppsummering> {
+    fun hentTrygdeavgiftOppsummering(@PathVariable("saksnummer") saksnummer: String): ResponseEntity<TrygdeavgiftOppsummering> {
         aksesskontroll.autoriserSakstilgang(saksnummer)
         return ResponseEntity.ok(
             TrygdeavgiftOppsummering(
                 trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(
-                    saksnummer!!
+                    saksnummer
                 )
             )
         )
