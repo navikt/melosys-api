@@ -273,15 +273,14 @@ public class DokgenService {
                 .medManglerInfoFritekst(brevbestillingDto.getManglerFritekst())
                 .medKontaktpersonNavn(brevbestillingDto.getKontaktpersonNavn())
                 .medBrukerSkalHaKopi(inneholderBrukerSomKopimottaker(brevbestillingDto.getKopiMottakere()));
-            case TRYGDEAVTALE_GB, TRYGDEAVTALE_US, TRYGDEAVTALE_CAN, TRYGDEAVTALE_AU ->
-                new InnvilgelseBrevbestilling.Builder()
-                    .medDistribusjonstype(Distribusjonstype.VEDTAK)
-                    .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
-                    .medBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst())
-                    .medEktefelleFritekst(brevbestillingDto.getEktefelleFritekst())
-                    .medBarnFritekst(brevbestillingDto.getBarnFritekst())
-                    .medVirksomhetArbeidsgiverSkalHaKopi(inneholderArbeidsgiverSomKopimottaker(brevbestillingDto.getKopiMottakere()))
-                    .medNyVurderingBakgrunn(brevbestillingDto.getNyVurderingBakgrunn());
+            case TRYGDEAVTALE_GB, TRYGDEAVTALE_US, TRYGDEAVTALE_CAN, TRYGDEAVTALE_AU -> new InnvilgelseBrevbestilling.Builder()
+                .medDistribusjonstype(Distribusjonstype.VEDTAK)
+                .medInnledningFritekst(brevbestillingDto.getInnledningFritekst())
+                .medBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst())
+                .medEktefelleFritekst(brevbestillingDto.getEktefelleFritekst())
+                .medBarnFritekst(brevbestillingDto.getBarnFritekst())
+                .medVirksomhetArbeidsgiverSkalHaKopi(inneholderArbeidsgiverSomKopimottaker(brevbestillingDto.getKopiMottakere()))
+                .medNyVurderingBakgrunn(brevbestillingDto.getNyVurderingBakgrunn());
             case INNVILGELSE_FOLKETRYGDLOVEN -> new InnvilgelseFtrlBrevbestilling.Builder()
                 .medDistribusjonstype(Distribusjonstype.VEDTAK)
                 .medNyVurderingBakgrunn(brevbestillingDto.getNyVurderingBakgrunn())
@@ -310,8 +309,12 @@ public class DokgenService {
                 .medFritekstvedleggTittel(brevbestillingDto.getFritekstTittel())
                 .medFritekstvedleggTekst(brevbestillingDto.getFritekst())
                 .medMottakerType(brevbestillingDto.getMottaker());
-            case IKKE_YRKESAKTIV_VEDTAKSBREV ->
-                new IkkeYrkesaktivBrevbestilling.Builder().medDistribusjonstype(Distribusjonstype.VEDTAK);
+            case IKKE_YRKESAKTIV_VEDTAKSBREV -> new IkkeYrkesaktivBrevbestilling.Builder().medDistribusjonstype(Distribusjonstype.VEDTAK);
+            case VARSELBREV_MANGLENDE_INNBETALING -> new VarselbrevManglendeInnbetalingBrevbestilling.Builder()
+                .medFakturanummer(brevbestillingDto.getFakturanummer())
+                .medBetalingsstatus(brevbestillingDto.getBetalingsstatus())
+                .medFullmektigForBetaling(brevbestillingDto.getFullmektigForBetaling())
+                .medBetalingsfrist(brevbestillingDto.getBetalingsfrist());
 
             default -> new DokgenBrevbestilling.Builder<>().medDistribusjonstype(Distribusjonstype.VIKTIG);
         };

@@ -68,7 +68,11 @@ public record BrevbestillingRequest(
             this.dokumentTittel,
             this.saksbehandlerNrToIdent,
             this.begrunnelseKode,
-            this.ytterligereInformasjon
+            this.ytterligereInformasjon,
+            null,
+            null,
+            null,
+            null
         );
     }
 

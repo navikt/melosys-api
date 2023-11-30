@@ -8,10 +8,7 @@ import java.util.stream.Collectors;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.FellesKodeverk;
-import no.nav.melosys.domain.Saksopplysning;
-import no.nav.melosys.domain.SaksopplysningType;
+import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.Adresse;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.avklartefakta.AvklartVirksomhet;
@@ -392,24 +389,27 @@ class AvklarteVirksomheterServiceTest {
     }
 
     private OrganisasjonDokument lagOrganisasjonDokument(String forretningsPostnr, String forretningsGatenavn, String postadressePostnr, String postadresseLand) {
-        OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
-        OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
-        organisasjonDokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
         SemistrukturertAdresse forretningsadresse = new SemistrukturertAdresse();
-        organisasjonsDetaljer.setForretningsadresse(List.of(forretningsadresse));
         forretningsadresse.setAdresselinje1(forretningsGatenavn);
         forretningsadresse.setPostnr(forretningsPostnr);
         forretningsadresse.setPoststed("Forretningspoststed");
         forretningsadresse.setLandkode("NO");
         forretningsadresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1)));
         SemistrukturertAdresse postadresse = new SemistrukturertAdresse();
-        organisasjonsDetaljer.setPostadresse(List.of(postadresse));
         postadresse.setAdresselinje1("Postgatenavn");
         postadresse.setPostnr(postadressePostnr);
         postadresse.setPoststed("Postpoststed");
         postadresse.setLandkode(postadresseLand);
         postadresse.setGyldighetsperiode(new Periode(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1)));
 
-        return organisasjonDokument;
+        OrganisasjonsDetaljer organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.builder()
+            .forretningsadresse(forretningsadresse)
+            .postadresse(postadresse)
+            .build();
+
+        return OrganisasjonDokumentTestFactory.builder()
+            .organisasjonsDetaljer(organisasjonsDetaljer)
+            .build();
     }
+
 }

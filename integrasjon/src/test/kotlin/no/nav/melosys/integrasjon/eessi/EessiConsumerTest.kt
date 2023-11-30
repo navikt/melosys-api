@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeSingleton
 import io.kotest.matchers.collections.shouldHaveSize
@@ -50,7 +51,8 @@ import java.util.*
     GenericAuthFilterFactory::class,
     EessiConsumerProducerConfig::class,
     StsMockServer::class,
-    MetricsTestConfig::class
+    MetricsTestConfig::class,
+    FakeUnleash::class
 )
 @WebMvcTest
 @AutoConfigureWebClient

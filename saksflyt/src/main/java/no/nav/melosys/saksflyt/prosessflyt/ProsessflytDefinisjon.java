@@ -154,6 +154,13 @@ public final class ProsessflytDefinisjon {
             )
         );
 
+        PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING,
+            new ProsessFlyt(ProsessType.OPPRETT_NY_BEHANDLING_MANGLENDE_INNBETALING,
+                OPPRETT_MANGLENDE_INNBETALING_BEHANDLING,
+                SEND_MANGLENDE_INNBETALING_VARSELBREV
+            )
+        );
+
         PROSESS_FLYT_MAP.put(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK,
             new ProsessFlyt(ProsessType.OPPRETT_REPLIKERT_BEHANDLING_FOR_SAK,
                 REPLIKER_BEHANDLING,

@@ -58,6 +58,7 @@ public class DokumentServiceFasade {
         dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto);
     }
 
+
     @Transactional
     public void produserDokument(Produserbaredokumenter dokumentType, Mottaker mottaker, long behandlingId, DoksysBrevbestilling brevbestilling) {
         var brevbestillingDto = new BrevbestillingDto();

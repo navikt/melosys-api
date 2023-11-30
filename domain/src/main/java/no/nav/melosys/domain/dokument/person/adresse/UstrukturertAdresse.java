@@ -1,9 +1,6 @@
 package no.nav.melosys.domain.dokument.person.adresse;
 
 import java.util.List;
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlType;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import no.nav.melosys.domain.dokument.felles.Land;
@@ -11,8 +8,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import static java.util.Arrays.asList;
 
-@XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "UstrukturertAdresse")
 public class UstrukturertAdresse {
 
     public String adresselinje1;

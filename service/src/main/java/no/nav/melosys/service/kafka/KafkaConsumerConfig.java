@@ -6,7 +6,7 @@ import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
-import no.nav.melosys.domain.ftrl.ManglendeFakturabetalingMelding;
+import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding;
 import no.nav.melosys.service.soknad.SoknadMottatt;
 import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
