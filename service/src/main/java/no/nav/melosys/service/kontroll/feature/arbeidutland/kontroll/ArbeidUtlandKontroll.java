@@ -7,6 +7,7 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
+import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.KontrolldataFeilType;
 import no.nav.melosys.service.kontroll.regler.AdresseRegler;
 import no.nav.melosys.service.validering.Kontrollfeil;
 
@@ -30,7 +31,7 @@ public class ArbeidUtlandKontroll {
             }
         }
         return felterMedFeil.isEmpty() ? null
-            : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSSTED, felterMedFeil);
+            : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_ARBEIDSSTED, felterMedFeil, KontrolldataFeilType.FEIL);
     }
 
     public static Kontrollfeil foretakUtlandManglerFelter(MottatteOpplysningerData mottatteOpplysningerData) {
@@ -47,6 +48,6 @@ public class ArbeidUtlandKontroll {
             }
         }
         return felterMedFeil.isEmpty() ? null
-            : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_ANDRE_ARBEIDSFORHOLD_UTL, felterMedFeil);
+            : new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_OPPL_ANDRE_ARBEIDSFORHOLD_UTL, felterMedFeil, KontrolldataFeilType.FEIL);
     }
 }

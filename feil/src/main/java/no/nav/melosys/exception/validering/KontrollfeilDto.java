@@ -5,6 +5,7 @@ import java.util.List;
 public class KontrollfeilDto {
     private String kode;
     private List<String> felter;
+    private String type;
 
     public String getKode() {
         return kode;
@@ -20,5 +21,13 @@ public class KontrollfeilDto {
 
     public void setFelter(List<String> felter) {
         this.felter = felter;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }
