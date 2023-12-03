@@ -5,15 +5,20 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
+import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
+import no.nav.melosys.domain.Fullmakt
 import no.nav.melosys.domain.brev.TrygdeavgiftBetalingsfrist
+import no.nav.melosys.domain.kodeverk.Aktoersroller
+import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.domain.manglendebetaling.Betalingsstatus
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
+import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.dokument.DokumentServiceFasade
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto
 import no.nav.melosys.service.sak.FagsakService
@@ -26,13 +31,15 @@ class SendManglendeInnbetalingVarselBrevTest {
 
     private lateinit var dokumentServiceFasade: DokumentServiceFasade
     private lateinit var fagsakService: FagsakService
+    private lateinit var trygdeavgiftsberegningService: TrygdeavgiftsberegningService
     private lateinit var sendManglendeInnbetalingVarselBrev: SendManglendeInnbetalingVarselBrev
 
     @BeforeEach
     fun setUp() {
         dokumentServiceFasade = mockk(relaxed = true)
         fagsakService = mockk(relaxed = true)
-        sendManglendeInnbetalingVarselBrev = SendManglendeInnbetalingVarselBrev(dokumentServiceFasade, fagsakService)
+        trygdeavgiftsberegningService = mockk(relaxed = true)
+        sendManglendeInnbetalingVarselBrev = SendManglendeInnbetalingVarselBrev(dokumentServiceFasade, fagsakService, trygdeavgiftsberegningService)
     }
 
     @Test
@@ -69,6 +76,39 @@ class SendManglendeInnbetalingVarselBrevTest {
             betalingsfrist shouldBe TrygdeavgiftBetalingsfrist.beregnTrygdeavgiftBetalingsfrist(LocalDate.now())
             fakturanummer shouldBe "Fakturanummer"
             betalingsstatus shouldBe Betalingsstatus.DELVIS_BETALT
+            fullmektigForBetaling shouldBe null
+        }
+    }
+
+    @Test
+    fun `utfør skal produsere dokument med riktig fullmektigForBetaling`() {
+        val prosessinstans = Prosessinstans()
+        val behandling = Behandling().apply { id = 123 }
+        val fagsak = Fagsak().apply {
+            saksnummer = "Saksnummer"
+            behandlinger = mutableListOf(behandling)
+            aktører = mutableSetOf(Aktoer().apply {
+                aktørId = "123"
+                rolle = Aktoersroller.FULLMEKTIG
+                fullmakter = mutableSetOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT })
+            })
+        }
+        every { (trygdeavgiftsberegningService.finnFakturamottakerNavn(123)) } returns "Isa Testesen"
+
+        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, "Saksnummer")
+        prosessinstans.setData(ProsessDataKey.BETALINGSSTATUS, Betalingsstatus.DELVIS_BETALT)
+
+        every { fagsakService.hentFagsak("Saksnummer") } returns fagsak
+        val capturedBrevbestillingDto = slot<BrevbestillingDto>()
+
+
+        sendManglendeInnbetalingVarselBrev.utfør(prosessinstans)
+
+
+        verify { dokumentServiceFasade.produserDokument(123, capture(capturedBrevbestillingDto)) }
+
+        capturedBrevbestillingDto.captured.run {
+            fullmektigForBetaling shouldBe "Isa Testesen"
         }
     }
 
