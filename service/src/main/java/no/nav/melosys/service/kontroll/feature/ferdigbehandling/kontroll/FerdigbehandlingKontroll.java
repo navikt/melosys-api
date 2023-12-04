@@ -41,7 +41,6 @@ final class FerdigbehandlingKontroll {
         List<Medlemskapsperiode> medlemskapsperioder = kontrollData.medlemskapsperioder();
         InnvilgelsesResultat innvilgelsesResultat = kontrollData.opprinneligLovvalgsperiode().getInnvilgelsesresultat();
 
-        // Returner warning dersom behandlingstema er UTSENDT_ARBEIDSTAKER eller UTSENDT_SELVSTENDIG
         if ((kontrollData.behandlingstema() == Behandlingstema.UTSENDT_ARBEIDSTAKER
             || kontrollData.behandlingstema() == Behandlingstema.UTSENDT_SELVSTENDIG)
             && OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument, medlemskapsperioder)
