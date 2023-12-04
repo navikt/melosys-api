@@ -51,10 +51,8 @@ public class SecurityTokenServiceSTSClient extends STSClient {
 
             builder = factory.newDocumentBuilder();
             document = builder.parse(new InputSource(new StringReader(getDecodedSamlToken())));
-        } catch (ParserConfigurationException e) {
-            throw new IllegalStateException("Exception while getting builder, aborting", e);
-        } catch (SAXException e) {
-            throw new IllegalStateException("Exception while getting OnBehalfOf element, aborting", e);
+        } catch (ParserConfigurationException | SAXException e) {
+            throw new IllegalStateException("Kunne ikke parse SAML-token", e);
         }
 
         return document.getDocumentElement();
