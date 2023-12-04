@@ -40,9 +40,29 @@ public class RestTokenServiceClient extends RestTokenServiceClientBase implement
 
     @Override
     Map<String, Object> getResponseForSamlToken() {
+        if (ThreadLocalAccessInfo.shouldUseSystemToken()) {
+            return getResponseForSamlSystemToken();
+        }
+
+        return getResponseForSamlOnBehalfOfToken();
+    }
+
+    private Map<String, Object> getResponseForSamlSystemToken() {
         return webClient.get()
-            .uri(createUriStringForSamlToken())
+            .uri(UriComponentsBuilder.fromPath("/samltoken").toUriString())
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+            .header(HttpHeaders.AUTHORIZATION, basicAuth())
+            .retrieve()
+            .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+            })
+            .block();
+    }
+
+    private Map<String, Object> getResponseForSamlOnBehalfOfToken() {
+        return webClient.post()
+            .uri(createUriStringForOnBehalfOfTokenSaml())
+            .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
             .header(HttpHeaders.AUTHORIZATION, basicAuth())
             .retrieve()
             .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
@@ -57,14 +77,9 @@ public class RestTokenServiceClient extends RestTokenServiceClientBase implement
             .queryParam("scope", "openid").toUriString();
     }
 
-    private String createUriStringForSamlToken() {
-        if (ThreadLocalAccessInfo.shouldUseSystemToken()) {
-            return createUriStringForOnBehalfOfTokenSaml(SubjectHandler.getInstance().getOidcTokenString());
-        }
-        return UriComponentsBuilder.fromPath("/samltoken").toUriString();
-    }
+    private String createUriStringForOnBehalfOfTokenSaml() {
+        String userToken = SubjectHandler.getInstance().getOidcTokenString();
 
-    private String createUriStringForOnBehalfOfTokenSaml(String userToken) {
         return UriComponentsBuilder.fromPath("/token/exchange")
             .queryParam("grant_type", "urn:ietf:params:oauth:grant-type:token-exchange")
             .queryParam("requested_token_type", "urn:ietf:params:oauth:token-type:saml2")
