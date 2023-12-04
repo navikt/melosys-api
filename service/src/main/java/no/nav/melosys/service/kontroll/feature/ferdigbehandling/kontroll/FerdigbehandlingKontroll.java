@@ -8,6 +8,7 @@ import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.PeriodeOmLovvalg;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
+import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -21,6 +22,7 @@ import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 import no.nav.melosys.service.kontroll.regler.PersonRegler;
 import no.nav.melosys.service.validering.Kontrollfeil;
 
+import static no.nav.melosys.domain.kodeverk.InnvilgelsesResultat.AVSLAATT;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART9_2;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART9_3;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART6_2;
@@ -37,13 +39,13 @@ final class FerdigbehandlingKontroll {
     static Kontrollfeil overlappendePeriode(FerdigbehandlingKontrollData kontrollData) {
         MedlemskapDokument medlemskapDokument = kontrollData.medlemskapDokument();
         List<Medlemskapsperiode> medlemskapsperioder = kontrollData.medlemskapsperioder();
-
-        if (true) return new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.FEIL);
+        InnvilgelsesResultat innvilgelsesResultat = kontrollData.opprinneligLovvalgsperiode().getInnvilgelsesresultat();
 
         // Returner warning dersom behandlingstema er UTSENDT_ARBEIDSTAKER eller UTSENDT_SELVSTENDIG
         if ((kontrollData.behandlingstema() == Behandlingstema.UTSENDT_ARBEIDSTAKER
             || kontrollData.behandlingstema() == Behandlingstema.UTSENDT_SELVSTENDIG)
-            && OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument, medlemskapsperioder))
+            && OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument, medlemskapsperioder)
+            && innvilgelsesResultat == AVSLAATT)
             return OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument, medlemskapsperioder)
                 ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.ADVARSEL)
                 : null;
