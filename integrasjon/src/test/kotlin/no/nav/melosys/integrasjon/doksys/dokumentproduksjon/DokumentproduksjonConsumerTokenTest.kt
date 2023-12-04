@@ -7,7 +7,6 @@ import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
-import no.nav.melosys.sikkerhet.sts.*
 import no.nav.security.token.support.spring.SpringTokenValidationContextHolder
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentRequest
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkeredigerbartDokumentResponse
@@ -22,9 +21,6 @@ import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 
 @Import(
-    StsLoginConfig::class,
-    StsProdWrapper::class,
-    StsTestWrapper::class,
     OAuthMockServer::class,
 
     DokumentproduksjonConsumerConfig::class,
