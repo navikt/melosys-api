@@ -5,6 +5,8 @@ import java.util.Map;
 import io.getunleash.Unleash;
 import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.integrasjon.felles.BasicAuthAware;
+import no.nav.melosys.sikkerhet.context.SubjectHandler;
+import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import org.springframework.context.annotation.Profile;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
@@ -25,9 +27,9 @@ public class RestTokenServiceClient extends RestTokenServiceClientBase implement
     }
 
     @Override
-    Map<String, Object> getResponse() {
+    Map<String, Object> getResponseForOidcToken() {
         return webClient.get()
-            .uri(createUriString())
+            .uri(createUriStringForOidcToken())
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
             .header(HttpHeaders.AUTHORIZATION, basicAuth())
             .retrieve()
@@ -36,10 +38,38 @@ public class RestTokenServiceClient extends RestTokenServiceClientBase implement
             .block();
     }
 
-    private String createUriString() {
-        var path = unleash.isEnabled(ToggleName.MELOSYS_STS_NY_PATH) ? "" : "/";
+    @Override
+    Map<String, Object> getResponseForSamlToken() {
+        return webClient.get()
+            .uri(createUriStringForSamlToken())
+            .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+            .header(HttpHeaders.AUTHORIZATION, basicAuth())
+            .retrieve()
+            .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+            })
+            .block();
+    }
+
+    private String createUriStringForOidcToken() {
+        var path = unleash.isEnabled(ToggleName.MELOSYS_STS_NY_PATH) ? "/token" : "/token/";
         return UriComponentsBuilder.fromPath(path)
             .queryParam("grant_type", "client_credentials")
             .queryParam("scope", "openid").toUriString();
+    }
+
+    private String createUriStringForSamlToken() {
+        if (ThreadLocalAccessInfo.shouldUseSystemToken()) {
+            return createUriStringForOnBehalfOfTokenSaml(SubjectHandler.getInstance().getOidcTokenString());
+        }
+        return UriComponentsBuilder.fromPath("/samltoken").toUriString();
+    }
+
+    private String createUriStringForOnBehalfOfTokenSaml(String userToken) {
+        return UriComponentsBuilder.fromPath("/token/exchange")
+            .queryParam("grant_type", "urn:ietf:params:oauth:grant-type:token-exchange")
+            .queryParam("requested_token_type", "urn:ietf:params:oauth:token-type:saml2")
+            .queryParam("subject_token_type", "urn:ietf:params:oauth:token-type:access_token")
+            .queryParam("subject_token", userToken)
+            .toUriString();
     }
 }

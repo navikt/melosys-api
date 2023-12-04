@@ -14,6 +14,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
 @Profile("local-mock")
+//TODO: Trenger vi denne?
 public class RestTokenServiceClientMockClient extends RestTokenServiceClientBase implements BasicAuthAware {
     private final WebClient webClient;
 
@@ -22,7 +23,24 @@ public class RestTokenServiceClientMockClient extends RestTokenServiceClientBase
     }
 
     @Override
-    Map<String, Object> getResponse() {
+    Map<String, Object> getResponseForOidcToken() {
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("grant_type", "client_credentials");
+        params.add("scope", "openid");
+
+        return webClient.post()
+            .uri("/token")
+            .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+            .header(HttpHeaders.AUTHORIZATION, basicAuth())
+            .bodyValue(params)
+            .retrieve()
+            .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
+            })
+            .block();
+    }
+
+    @Override
+    Map<String, Object> getResponseForSamlToken() {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "client_credentials");
         params.add("scope", "openid");
