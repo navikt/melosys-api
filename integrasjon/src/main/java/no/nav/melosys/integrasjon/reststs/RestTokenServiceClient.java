@@ -71,8 +71,7 @@ public class RestTokenServiceClient extends RestTokenServiceClientBase implement
     }
 
     private String createUriStringForOidcToken() {
-        var path = unleash.isEnabled(ToggleName.MELOSYS_STS_NY_PATH) ? "/token" : "/token/";
-        return UriComponentsBuilder.fromPath(path)
+        return UriComponentsBuilder.fromPath("/token")
             .queryParam("grant_type", "client_credentials")
             .queryParam("scope", "openid").toUriString();
     }

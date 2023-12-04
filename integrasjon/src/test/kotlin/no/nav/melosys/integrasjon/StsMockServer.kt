@@ -21,7 +21,7 @@ class StsMockServer(
         stsMockServer.start()
 
         stsMockServer.stubFor(
-            WireMock.get("/?grant_type=client_credentials&scope=openid").willReturn(
+            WireMock.get("/token?grant_type=client_credentials&scope=openid").willReturn(
                 WireMock.aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
