@@ -21,7 +21,6 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.dokument.DokumentServiceFasade
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto
-import no.nav.melosys.service.sak.FagsakService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import java.time.LocalDate
@@ -30,16 +29,14 @@ import kotlin.test.Test
 class SendManglendeInnbetalingVarselBrevTest {
 
     private lateinit var dokumentServiceFasade: DokumentServiceFasade
-    private lateinit var fagsakService: FagsakService
     private lateinit var trygdeavgiftsberegningService: TrygdeavgiftsberegningService
     private lateinit var sendManglendeInnbetalingVarselBrev: SendManglendeInnbetalingVarselBrev
 
     @BeforeEach
     fun setUp() {
         dokumentServiceFasade = mockk(relaxed = true)
-        fagsakService = mockk(relaxed = true)
         trygdeavgiftsberegningService = mockk(relaxed = true)
-        sendManglendeInnbetalingVarselBrev = SendManglendeInnbetalingVarselBrev(dokumentServiceFasade, fagsakService, trygdeavgiftsberegningService)
+        sendManglendeInnbetalingVarselBrev = SendManglendeInnbetalingVarselBrev(dokumentServiceFasade, trygdeavgiftsberegningService)
     }
 
     @Test
@@ -51,17 +48,14 @@ class SendManglendeInnbetalingVarselBrevTest {
     @Test
     fun `utfør skal produsere dokument med korrekt data`() {
         val prosessinstans = Prosessinstans()
-        val behandling = Behandling().apply { id = 123 }
-        val fagsak = Fagsak().apply {
-            saksnummer = "Saksnummer"
-            behandlinger = mutableListOf(behandling)
+        val behandling = Behandling().apply {
+            id = 123
+            fagsak = Fagsak()
         }
-
-        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, "Saksnummer")
+        prosessinstans.behandling = behandling
         prosessinstans.setData(ProsessDataKey.BETALINGSSTATUS, Betalingsstatus.DELVIS_BETALT)
         prosessinstans.setData(ProsessDataKey.FAKTURANUMMER, "Fakturanummer")
 
-        every { fagsakService.hentFagsak("Saksnummer") } returns fagsak
         val capturedBrevbestillingDto = slot<BrevbestillingDto>()
 
 
@@ -83,22 +77,20 @@ class SendManglendeInnbetalingVarselBrevTest {
     @Test
     fun `utfør skal produsere dokument med riktig fullmektigForBetaling`() {
         val prosessinstans = Prosessinstans()
-        val behandling = Behandling().apply { id = 123 }
-        val fagsak = Fagsak().apply {
-            saksnummer = "Saksnummer"
-            behandlinger = mutableListOf(behandling)
-            aktører = mutableSetOf(Aktoer().apply {
-                aktørId = "123"
-                rolle = Aktoersroller.FULLMEKTIG
-                fullmakter = mutableSetOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT })
-            })
+        val behandling = Behandling().apply {
+            id = 123
+            fagsak = Fagsak().apply {
+                aktører = mutableSetOf(Aktoer().apply {
+                    aktørId = "123"
+                    rolle = Aktoersroller.FULLMEKTIG
+                    fullmakter = mutableSetOf(Fullmakt().apply { type = Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT })
+                })
+            }
         }
+        prosessinstans.behandling = behandling
+        prosessinstans.setData(ProsessDataKey.BETALINGSSTATUS, Betalingsstatus.DELVIS_BETALT)
         every { (trygdeavgiftsberegningService.finnFakturamottakerNavn(123)) } returns "Isa Testesen"
 
-        prosessinstans.setData(ProsessDataKey.SAKSNUMMER, "Saksnummer")
-        prosessinstans.setData(ProsessDataKey.BETALINGSSTATUS, Betalingsstatus.DELVIS_BETALT)
-
-        every { fagsakService.hentFagsak("Saksnummer") } returns fagsak
         val capturedBrevbestillingDto = slot<BrevbestillingDto>()
 
 
