@@ -82,7 +82,23 @@ class TrygdeavgiftOppsummeringServiceTest {
     }
 
     @Test
-    fun harFagsakBehandlingerMedTrygdeavgift_harTrygedavgiftsperioderBådeMedOgUtenAvgift_returnererTrue() {
+    fun harFagsakBehandlingerMedTrygdeavgift_harTrygedavgiftsperiodeMenDenHarIkkeBestiltFaktura_returnererFalse() {
+        val trygdeavgiftsperiode = Trygdeavgiftsperiode().apply {
+            trygdeavgiftsbeløpMd = Penger(2345.56)
+            trygdesats = BigDecimal(3.56)
+        }
+        behandlingsresultat.apply {
+            medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+                fastsattTrygdeavgift = FastsattTrygdeavgift().apply { trygdeavgiftsperioder.add(trygdeavgiftsperiode) }
+            }
+        }
+
+
+        trygdeavgiftOppsummeringService.harFagsakBehandlingerMedTrygdeavgift(SAKSNUMMER).shouldBeFalse()
+    }
+
+    @Test
+    fun harFagsakBehandlingerMedTrygdeavgift_harTrygedavgiftsperioderBådeMedOgUtenAvgiftOgFakturaErBestilt_returnererTrue() {
         val trygdeavgiftsperiode1 = Trygdeavgiftsperiode().apply {
             trygdeavgiftsbeløpMd = Penger(0.0)
             trygdesats = BigDecimal.ZERO
@@ -97,6 +113,7 @@ class TrygdeavgiftOppsummeringServiceTest {
                     trygdeavgiftsperioder.add(trygdeavgiftsperiode1)
                     trygdeavgiftsperioder.add(trygdeavgiftsperiode2)
                 }
+                fakturaserieReferanse = "FakturaserieReferanse"
             }
         }
 

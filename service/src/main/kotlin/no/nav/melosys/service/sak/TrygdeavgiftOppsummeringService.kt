@@ -1,5 +1,6 @@
 package no.nav.melosys.service.sak
 
+import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.avgift.Trygdeavgiftsperiode
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import org.springframework.stereotype.Service
@@ -15,10 +16,15 @@ class TrygdeavgiftOppsummeringService(
         return fagsakService.hentFagsak(saksnummer)
             .behandlinger
             .map { behandling -> behandlingsresultatService.hentBehandlingsresultat(behandling.id) }
-            .any {
-                it.medlemAvFolketrygden?.fastsattTrygdeavgift?.trygdeavgiftsperioder?.filter { trygdeavgiftsperiodeHarAvgift(it) }
-                    ?.isNotEmpty() ?: false
-            }
+            .any { harTrygdeavgiftOgBestiltFaktura(it) }
+    }
+
+    private fun harTrygdeavgiftOgBestiltFaktura(behandlingsresultat: Behandlingsresultat): Boolean {
+        val harTrygdeavgift =
+            behandlingsresultat.medlemAvFolketrygden?.fastsattTrygdeavgift?.trygdeavgiftsperioder?.filter { trygdeavgiftsperiodeHarAvgift(it) }
+                ?.isNotEmpty() ?: false
+        val bestiltFaktura = behandlingsresultat.fakturaserieReferanse?.isNotBlank() ?: false
+        return harTrygdeavgift && bestiltFaktura
     }
 
     private fun trygdeavgiftsperiodeHarAvgift(trygdeavgiftsperiode: Trygdeavgiftsperiode?): Boolean {
