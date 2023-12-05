@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
+import no.nav.melosys.integrasjon.reststs.RestSTSService
 import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
@@ -21,6 +22,7 @@ import java.time.LocalDate
 @Import(
     StsWebClientProducer::class,
     SecurityTokenServiceConsumer::class,
+    RestSTSService::class,
     OAuthMockServer::class,
 
     GenericAuthFilterFactory::class,
