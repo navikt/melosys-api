@@ -2,8 +2,6 @@ package no.nav.melosys.integrasjon.reststs;
 
 import java.util.Map;
 
-import io.getunleash.Unleash;
-import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.integrasjon.felles.BasicAuthAware;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
@@ -19,11 +17,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 @Profile("!local-mock")
 public class RestTokenServiceClient extends RestTokenServiceClientBase implements BasicAuthAware {
     private final WebClient webClient;
-    private final Unleash unleash;
 
-    public RestTokenServiceClient(WebClient webClient, Unleash unleash) {
+    public RestTokenServiceClient(WebClient webClient) {
         this.webClient = webClient;
-        this.unleash = unleash;
     }
 
     @Override
