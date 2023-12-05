@@ -26,19 +26,19 @@ public class AvklartefaktaTjeneste {
     private final AvklartefaktaService avklartefaktaService;
     private final AvklarteVirksomheterService avklarteVirksomheterService;
     private final AvklarteFaktaArbeidslandService avklarteFaktaArbeidslandService;
-    private final AvklartFullstendigManglendeInnbetalingService avklartFullstendigManglendeInnbetalingService;
+    private final AvklartManglendeInnbetalingService avklartManglendeInnbetalingService;
     private final Aksesskontroll aksesskontroll;
 
     public AvklartefaktaTjeneste(AvklartefaktaService avklartefaktaService,
                                  AvklarteVirksomheterService avklarteVirksomheterService,
                                  AvklarteFaktaArbeidslandService avklarteFaktaArbeidslandService,
                                  Aksesskontroll aksesskontroll,
-                                 AvklartFullstendigManglendeInnbetalingService avklartFullstendigManglendeInnbetalingService) {
+                                 AvklartManglendeInnbetalingService avklartManglendeInnbetalingService) {
         this.avklartefaktaService = avklartefaktaService;
         this.avklarteVirksomheterService = avklarteVirksomheterService;
         this.avklarteFaktaArbeidslandService = avklarteFaktaArbeidslandService;
         this.aksesskontroll = aksesskontroll;
-        this.avklartFullstendigManglendeInnbetalingService = avklartFullstendigManglendeInnbetalingService;
+        this.avklartManglendeInnbetalingService = avklartManglendeInnbetalingService;
     }
 
     @GetMapping("{behandlingID}")
@@ -85,7 +85,7 @@ public class AvklartefaktaTjeneste {
                                                                           @RequestBody Boolean fullstendigManglendeInnbetaling) {
         aksesskontroll.autoriserSkrivTilRessurs(behandlingID, Ressurs.AVKLARTE_FAKTA);
 
-        avklartFullstendigManglendeInnbetalingService.lagreFullstendigManglendeInnbetalingSomAvklartFakta(behandlingID,
+        avklartManglendeInnbetalingService.lagreFullstendigManglendeInnbetalingSomAvklartFakta(behandlingID,
             fullstendigManglendeInnbetaling);
 
         return AvklartefaktaOppsummeringDto.av(avklartefaktaService.hentAlleAvklarteFakta(behandlingID));
