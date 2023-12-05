@@ -18,9 +18,9 @@ import org.apache.cxf.ws.policy.attachment.reference.RemoteReferenceResolver;
 import org.apache.cxf.ws.security.trust.STSClient;
 import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 
 @Configuration
 public class DokumentproduksjonConsumerProducer {
@@ -37,7 +37,7 @@ public class DokumentproduksjonConsumerProducer {
     }
 
     @Bean
-    @Profile("!test")
+    @ConditionalOnProperty(name="dokumentproduksjon.uten.token", havingValue = "false", matchIfMissing = true)
     public DokumentproduksjonConsumer dokumentproduksjonConsumer() {
         DokumentproduksjonV3 port = config.getPort();
         Client client = ClientProxy.getClient(port);
@@ -47,10 +47,9 @@ public class DokumentproduksjonConsumerProducer {
         return new DokumentproduksjonConsumerImpl(port);
     }
 
-
     @Bean
-    @Profile("test")
-    public DokumentproduksjonConsumer dokumentproduksjonConsumerForTesting() {
+    @ConditionalOnProperty(name="dokumentproduksjon.uten.token", havingValue="true")
+    public DokumentproduksjonConsumer dokumentproduksjonConsumerForLocalAndTesting() {
         DokumentproduksjonV3 port = config.getPort();
 
         return new DokumentproduksjonConsumerImpl(port);
