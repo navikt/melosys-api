@@ -3,22 +3,30 @@ package no.nav.melosys.integrasjon.reststs;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.Objects;
 
 import no.nav.melosys.integrasjon.felles.ExceptionMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 
-public abstract class RestTokenServiceClientBase implements RestStsClient {
-    private static final Logger log = LoggerFactory.getLogger(RestTokenServiceClientBase.class);
-    protected static final Long EXPIRE_TIME_TO_REFRESH = 60L;
-    protected static final String ACCESS_TOKEN_KEY = "access_token";
-    protected static final String EXPIRES_IN_KEY = "expires_in";
-    protected volatile LocalDateTime expiryTimeForOidcToken = LocalDateTime.now();
-    protected volatile LocalDateTime expiryTimeForSamlToken = LocalDateTime.now();
+@Component
+public class RestSTSService {
+
+    private static final Logger log = LoggerFactory.getLogger(RestSTSService.class);
+    private static final Long EXPIRE_TIME_TO_REFRESH = 60L;
+    private static final String ACCESS_TOKEN_KEY = "access_token";
+    private static final String EXPIRES_IN_KEY = "expires_in";
+    private volatile LocalDateTime expiryTimeForOidcToken = LocalDateTime.now();
+    private volatile LocalDateTime expiryTimeForSamlToken = LocalDateTime.now();
     private String oidcToken;
     private String samlToken;
+
+    private final SecurityTokenServiceConsumer securityTokenServiceConsumer;
+
+    public RestSTSService(SecurityTokenServiceConsumer securityTokenServiceConsumer) {
+        this.securityTokenServiceConsumer = securityTokenServiceConsumer;
+    }
 
     public String samlToken() {
         return collectSamlToken();
@@ -44,13 +52,11 @@ public abstract class RestTokenServiceClientBase implements RestStsClient {
         return samlToken;
     }
 
-    abstract Map<String, Object> getResponseForOidcToken();
-    abstract Map<String, Object> getResponseForSamlToken();
 
     private String generateToken() {
         log.info("Henter oidc-token fra security-token-service");
         try {
-            Map<String, Object> responseBody = Objects.requireNonNull(getResponseForOidcToken());
+            Map<String, Object> responseBody = securityTokenServiceConsumer.getResponseForOidcToken();
 
             expiryTimeForOidcToken = calculateExpiryTime(responseBody);
 
@@ -66,7 +72,7 @@ public abstract class RestTokenServiceClientBase implements RestStsClient {
     private String generateSamlToken() {
         log.info("Henter saml-token fra security-token-service");
         try {
-            Map<String, Object> responseBody = Objects.requireNonNull(getResponseForSamlToken());
+            Map<String, Object> responseBody = securityTokenServiceConsumer.getResponseForSamlToken();
 
             expiryTimeForSamlToken = calculateExpiryTime(responseBody);
 

@@ -1,7 +1,7 @@
 package no.nav.melosys.integrasjon.pdl;
 
 import no.nav.melosys.integrasjon.felles.StsAzureContextExchangeFilter;
-import no.nav.melosys.integrasjon.reststs.RestStsClient;
+import no.nav.melosys.integrasjon.reststs.RestSTSService;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenService;
 import no.nav.security.token.support.client.spring.ClientConfigurationProperties;
@@ -14,10 +14,10 @@ public class PDLAuthFilterAzure extends StsAzureContextExchangeFilter {
 
     private static final String CLIENT_NAME = "pdl";
 
-    public PDLAuthFilterAzure(RestStsClient restStsClient,
+    public PDLAuthFilterAzure(RestSTSService restSTSService,
                               ClientConfigurationProperties clientConfigurationProperties,
                               OAuth2AccessTokenService oAuth2AccessTokenService) {
-        super(restStsClient, clientConfigurationProperties, oAuth2AccessTokenService, CLIENT_NAME);
+        super(restSTSService, clientConfigurationProperties, oAuth2AccessTokenService, CLIENT_NAME);
     }
 
     @Override

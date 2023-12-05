@@ -5,7 +5,7 @@ import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.aareg.arbeidsforhold.*
-import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
+import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -18,7 +18,7 @@ import org.springframework.test.context.ActiveProfiles
 
 @Import(
     StsWebClientProducer::class,
-    RestTokenServiceClient::class,
+    SecurityTokenServiceConsumer::class,
     OAuthMockServer::class,
 
     ArbeidsforholdRestConsumerConfig::class,

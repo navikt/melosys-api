@@ -1,6 +1,6 @@
 package no.nav.melosys.integrasjon.doksys.dokumentproduksjon;
 
-import no.nav.melosys.integrasjon.reststs.RestStsClient;
+import no.nav.melosys.integrasjon.reststs.RestSTSService;
 import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceSTSClient;
 import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.DokumentproduksjonV3;
 import org.apache.cxf.binding.soap.Soap12;
@@ -26,13 +26,13 @@ import org.springframework.context.annotation.Configuration;
 public class DokumentproduksjonConsumerProducer {
 
     private final DokumentproduksjonConsumerConfig config;
-    private final RestStsClient restStsClient;
+    private final RestSTSService restSTSService;
     private final String stsPolicy;
 
 
-    public DokumentproduksjonConsumerProducer(DokumentproduksjonConsumerConfig config, RestStsClient restStsClient, @Value("${stsPolicy.url}") String stsPolicy) {
+    public DokumentproduksjonConsumerProducer(DokumentproduksjonConsumerConfig config, RestSTSService restSTSService, @Value("${stsPolicy.url}") String stsPolicy) {
         this.config = config;
-        this.restStsClient = restStsClient;
+        this.restSTSService = restSTSService;
         this.stsPolicy = stsPolicy;
     }
 
@@ -57,7 +57,7 @@ public class DokumentproduksjonConsumerProducer {
 
     private void configureClient(Client client) {
 
-        STSClient stsClient = new SecurityTokenServiceSTSClient(client.getBus(), restStsClient);
+        STSClient stsClient = new SecurityTokenServiceSTSClient(client.getBus(), restSTSService);
         client.getRequestContext().put(SecurityConstants.STS_CLIENT, stsClient);
         client.getRequestContext().put(SecurityConstants.CACHE_ISSUED_TOKEN_IN_ENDPOINT, false);
         setEndpointPolicyReference(client, stsPolicy);

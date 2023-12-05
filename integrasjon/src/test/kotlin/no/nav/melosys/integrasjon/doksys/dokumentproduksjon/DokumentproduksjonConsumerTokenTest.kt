@@ -6,7 +6,8 @@ import com.github.tomakehurst.wiremock.matching.EqualToPattern
 import com.github.tomakehurst.wiremock.matching.StringValuePattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
-import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
+import no.nav.melosys.integrasjon.reststs.RestSTSService
+import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler
 import no.nav.melosys.sikkerhet.context.SubjectHandler
@@ -26,8 +27,8 @@ import org.springframework.test.context.ActiveProfiles
     OAuthMockServer::class,
 
     StsWebClientProducer::class,
-    RestTokenServiceClient::class,
-    RestTokenServiceClient::class,
+    SecurityTokenServiceConsumer::class,
+    RestSTSService::class,
 
     DokumentproduksjonConsumerConfig::class,
     DokumentproduksjonConsumerProducer::class

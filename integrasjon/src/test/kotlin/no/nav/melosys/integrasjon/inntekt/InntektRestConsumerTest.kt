@@ -16,7 +16,7 @@ import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonRestConsumerTest
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
-import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
+import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.*
@@ -39,9 +39,8 @@ import java.util.*
     CorrelationIdOutgoingFilter::class,
 
     StsWebClientProducer::class,
-    RestTokenServiceClient::class,
+    SecurityTokenServiceConsumer::class,
     FakeUnleash::class,
-    RestTokenServiceClient::class,
     GenericAuthFilterFactory::class,
     InntektRestConsumerConfig::class,
 )

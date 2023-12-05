@@ -22,11 +22,11 @@ import org.xml.sax.SAXException;
  */
 public class SecurityTokenServiceSTSClient extends STSClient {
 
-    private final RestStsClient restStsClient;
+    private final RestSTSService restSTSService;
 
-    public SecurityTokenServiceSTSClient(Bus bus, RestStsClient restStsClient) {
+    public SecurityTokenServiceSTSClient(Bus bus, RestSTSService restSTSService) {
         super(bus);
-        this.restStsClient = restStsClient;
+        this.restSTSService = restSTSService;
     }
 
     @Override
@@ -59,7 +59,7 @@ public class SecurityTokenServiceSTSClient extends STSClient {
     }
 
     private String getDecodedSamlToken() {
-        String encodedSamlToken = restStsClient.samlToken();
+        String encodedSamlToken = restSTSService.samlToken();
 
         return new String(Base64.decodeBase64(encodedSamlToken), StandardCharsets.UTF_8);
     }

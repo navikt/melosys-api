@@ -5,7 +5,6 @@ import java.util.Map;
 import no.nav.melosys.integrasjon.felles.BasicAuthAware;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -14,16 +13,14 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
-@Profile("!local-mock")
-public class RestTokenServiceClient extends RestTokenServiceClientBase implements BasicAuthAware {
+public class SecurityTokenServiceConsumer implements BasicAuthAware {
     private final WebClient webClient;
 
-    public RestTokenServiceClient(WebClient webClient) {
+    public SecurityTokenServiceConsumer(WebClient webClient) {
         this.webClient = webClient;
     }
 
-    @Override
-    Map<String, Object> getResponseForOidcToken() {
+    public Map<String, Object> getResponseForOidcToken() {
         return webClient.get()
             .uri(createUriStringForOidcToken())
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
@@ -34,8 +31,7 @@ public class RestTokenServiceClient extends RestTokenServiceClientBase implement
             .block();
     }
 
-    @Override
-    Map<String, Object> getResponseForSamlToken() {
+    public Map<String, Object> getResponseForSamlToken() {
         if (ThreadLocalAccessInfo.shouldUseSystemToken()) {
             return getResponseForSamlSystemToken();
         }
