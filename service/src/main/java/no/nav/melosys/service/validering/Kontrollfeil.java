@@ -28,6 +28,10 @@ public class Kontrollfeil {
         return kode;
     }
 
+    public KontrolldataFeilType getType() {
+        return type;
+    }
+
     public List<String> getFelter() {
         return felter;
     }
