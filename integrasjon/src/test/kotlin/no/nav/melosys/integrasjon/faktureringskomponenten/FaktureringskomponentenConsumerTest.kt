@@ -13,7 +13,8 @@ import no.nav.melosys.integrasjon.StsMockServer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.*
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
-import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
+import no.nav.melosys.integrasjon.reststs.RestSTSService
+import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
@@ -32,7 +33,8 @@ import java.util.*
 
 @Import(
     StsWebClientProducer::class,
-    RestTokenServiceClient::class,
+    SecurityTokenServiceConsumer::class,
+    RestSTSService::class,
     OAuthMockServer::class,
     CorrelationIdOutgoingFilter::class,
     StsMockServer::class,

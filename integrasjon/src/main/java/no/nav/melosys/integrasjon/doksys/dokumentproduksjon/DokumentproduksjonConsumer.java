@@ -8,9 +8,19 @@ import no.nav.tjeneste.virksomhet.dokumentproduksjon.v3.meldinger.ProduserIkkere
 import org.springframework.retry.annotation.Retryable;
 
 @Retryable
-public interface DokumentproduksjonConsumer {
+public class DokumentproduksjonConsumer {
 
-    ProduserDokumentutkastResponse produserDokumentutkast(ProduserDokumentutkastRequest request) throws ProduserDokumentutkastBrevdataValideringFeilet, ProduserDokumentutkastInputValideringFeilet;
+    private final DokumentproduksjonV3 dokumentProduksjonV3Port;
 
-    ProduserIkkeredigerbartDokumentResponse produserIkkeredigerbartDokument(ProduserIkkeredigerbartDokumentRequest request) throws ProduserIkkeredigerbartDokumentDokumentErRedigerbart, ProduserIkkeRedigerbartDokumentJoarkForretningsmessigUnntak, ProduserIkkeredigerbartDokumentSikkerhetsbegrensning, ProduserIkkeredigerbartDokumentBrevdataValideringFeilet, ProduserIkkeredigerbartDokumentDokumentErVedlegg, ProduserIkkeRedigerbartDokumentInputValideringFeilet;
+    public DokumentproduksjonConsumer(DokumentproduksjonV3 dokumentProduksjonV3Port) {
+        this.dokumentProduksjonV3Port = dokumentProduksjonV3Port;
+    }
+
+    public ProduserDokumentutkastResponse produserDokumentutkast(ProduserDokumentutkastRequest request) throws ProduserDokumentutkastBrevdataValideringFeilet, ProduserDokumentutkastInputValideringFeilet {
+        return dokumentProduksjonV3Port.produserDokumentutkast(request);
+    }
+
+    public ProduserIkkeredigerbartDokumentResponse produserIkkeredigerbartDokument(ProduserIkkeredigerbartDokumentRequest request) throws ProduserIkkeredigerbartDokumentDokumentErRedigerbart, ProduserIkkeRedigerbartDokumentJoarkForretningsmessigUnntak, ProduserIkkeredigerbartDokumentSikkerhetsbegrensning, ProduserIkkeredigerbartDokumentBrevdataValideringFeilet, ProduserIkkeredigerbartDokumentDokumentErVedlegg, ProduserIkkeRedigerbartDokumentInputValideringFeilet {
+        return dokumentProduksjonV3Port.produserIkkeredigerbartDokument(request);
+    }
 }

@@ -3,6 +3,7 @@ package no.nav.melosys.integrasjon.inntekt
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldBeNull
@@ -15,15 +16,15 @@ import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.ereg.organisasjon.OrganisasjonRestConsumerTest
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
-import no.nav.melosys.integrasjon.reststs.RestStsClient
+import no.nav.melosys.integrasjon.reststs.RestSTSService
+import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
+import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.test.autoconfigure.web.client.AutoConfigureWebClient
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
-import org.springframework.boot.test.context.TestConfiguration
-import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Import
 import org.springframework.core.codec.DecodingException
 import org.springframework.http.HttpHeaders
@@ -38,6 +39,10 @@ import java.util.*
     OAuthMockServer::class,
     CorrelationIdOutgoingFilter::class,
 
+    StsWebClientProducer::class,
+    SecurityTokenServiceConsumer::class,
+    RestSTSService::class,
+    FakeUnleash::class,
     GenericAuthFilterFactory::class,
     InntektRestConsumerConfig::class,
 )
@@ -50,14 +55,6 @@ class InntektRestConsumerTest(
     @Autowired private val oAuthMockServer: OAuthMockServer,
     @Value("\${mockserver.port}") mockServiceUnderTestPort: Int
 ) {
-
-    @TestConfiguration
-    class TestConfig {
-        @Bean
-        fun testRestStsClient(): RestStsClient =
-            // Må ha det så lenge GenericAuthFilterFactory bruker RestStsClient
-            RestStsClient { -> throw IllegalStateException("Should not be called") }
-    }
 
     private val processUUID = UUID.randomUUID()
     private val serviceUnderTestMockServer: WireMockServer =
