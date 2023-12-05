@@ -51,7 +51,7 @@ class OpprettManglendeInnbetalingBehandling(
             behandlingBruktForReplikering,
             Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
         )
-        nyBehandling.behandlingsårsak = Behandlingsaarsak(Behandlingsaarsaktyper.SØKNAD, null, mottaksDato)
+        nyBehandling.settBehandlingsårsak(Behandlingsaarsak(Behandlingsaarsaktyper.SØKNAD, null, mottaksDato))
         nyBehandling.behandlingsfrist = Behandling.utledBehandlingsfrist(nyBehandling, mottaksDato)
 
 
