@@ -20,6 +20,7 @@ import org.apache.neethi.Policy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 @Configuration
 public class DokumentproduksjonConsumerProducer {
@@ -36,11 +37,21 @@ public class DokumentproduksjonConsumerProducer {
     }
 
     @Bean
+    @Profile("!test")
     public DokumentproduksjonConsumer dokumentproduksjonConsumer() {
         DokumentproduksjonV3 port = config.getPort();
         Client client = ClientProxy.getClient(port);
 
         configureClient(client);
+
+        return new DokumentproduksjonConsumerImpl(port);
+    }
+
+
+    @Bean
+    @Profile("test")
+    public DokumentproduksjonConsumer dokumentproduksjonConsumerForTesting() {
+        DokumentproduksjonV3 port = config.getPort();
 
         return new DokumentproduksjonConsumerImpl(port);
     }
