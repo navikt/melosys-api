@@ -11,6 +11,6 @@ class AvklartManglendeInnbetalingService(@Autowired private val avklartefaktaSer
         avklartefaktaService.slettAvklarteFakta(behandlingID, FULLSTENDIG_MANGLENDE_INNBETALING)
 
         avklartefaktaService.leggTilAvklarteFakta(behandlingID, FULLSTENDIG_MANGLENDE_INNBETALING, FULLSTENDIG_MANGLENDE_INNBETALING.kode,
-            null, fullstendigManglendeInnbetaling.toString())
+            null, fullstendigManglendeInnbetaling.toString().uppercase())
     }
 }
