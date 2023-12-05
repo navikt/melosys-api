@@ -44,7 +44,7 @@ public class DokumentproduksjonConsumerProducer {
 
         configureClient(client);
 
-        return new DokumentproduksjonConsumerImpl(port);
+        return new DokumentproduksjonConsumer(port);
     }
 
     @Bean
@@ -52,7 +52,7 @@ public class DokumentproduksjonConsumerProducer {
     public DokumentproduksjonConsumer dokumentproduksjonConsumerForLocalAndTesting() {
         DokumentproduksjonV3 port = config.getPort();
 
-        return new DokumentproduksjonConsumerImpl(port);
+        return new DokumentproduksjonConsumer(port);
     }
 
     private void configureClient(Client client) {
