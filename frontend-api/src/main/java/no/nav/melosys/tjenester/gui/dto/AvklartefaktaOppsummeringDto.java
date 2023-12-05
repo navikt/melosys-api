@@ -39,7 +39,7 @@ public class AvklartefaktaOppsummeringDto {
             .findFirst();
         Boolean fullstendigManglendeInnbetaling = null;
         if (avklartefaktaDto.isPresent()) {
-            fullstendigManglendeInnbetaling = Boolean.parseBoolean(avklartefaktaDto.get().getSubjektID());
+            fullstendigManglendeInnbetaling = Boolean.parseBoolean(avklartefaktaDto.get().getFakta().get(0));
         }
         return fullstendigManglendeInnbetaling;
     }
