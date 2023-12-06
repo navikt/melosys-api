@@ -46,6 +46,10 @@ class OpprettManglendeInnbetalingBehandling(
         }
 
         val behandlingBruktForReplikering = saksbehandlingRegler.finnBehandlingSomKanReplikeres(fagsak)
+            ?: throw FunksjonellException(
+                "Finner ikke behandling som skal brukes til replikering. " +
+                    "Forventer at behandling som bestilte fakturering kan bli replikert fra."
+            )
 
         val nyBehandling = behandlingService.replikerBehandlingOgBehandlingsresultat(
             behandlingBruktForReplikering,
