@@ -23,14 +23,7 @@ class StsMockServer(
 
         stsMockServer.stubFor(
             WireMock.post("/token").withRequestBody(
-                WireMock.equalToJson(
-                    """
-                    {
-                      "grant_type": ["client_credentials"],
-                      "scope": ["openid"]
-                    }
-                """.trimIndent()
-                )
+                WireMock.equalTo("grant_type=client_credentials&scope=openid")
             )
                 .willReturn(
                     WireMock.aResponse()

@@ -30,7 +30,7 @@ public class SecurityTokenServiceConsumer implements BasicAuthAware {
         return webClient.post()
             .uri("/token")
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
-            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
             .header(HttpHeaders.AUTHORIZATION, basicAuth())
             .bodyValue(params)
             .retrieve()
