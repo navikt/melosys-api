@@ -5,12 +5,12 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import io.mockk.spyk
 import no.nav.melosys.integrasjon.felles.EnvironmentHandler
-import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
+import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Import
 import org.springframework.mock.env.MockEnvironment
 
-@Import(RestTokenServiceClient::class)
+@Import(SecurityTokenServiceConsumer::class)
 class StsMockServer(
     @Value("\${mockserver.security.port}") mockSecurityPort: Int
 ) {
@@ -21,7 +21,7 @@ class StsMockServer(
         stsMockServer.start()
 
         stsMockServer.stubFor(
-            WireMock.get("/?grant_type=client_credentials&scope=openid").willReturn(
+            WireMock.get("/token?grant_type=client_credentials&scope=openid").willReturn(
                 WireMock.aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")

@@ -43,6 +43,8 @@ class AvklartefaktaTjenesteTest {
     private AvklarteMedfolgendeFamilieService avklarteMedfolgendeFamilieService;
     @MockBean
     private Aksesskontroll aksesskontroll;
+    @MockBean
+    private AvklartManglendeInnbetalingService avklartManglendeInnbetalingService;
 
     @Autowired
     private MockMvc mockMvc;
