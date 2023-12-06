@@ -23,7 +23,6 @@ class OpprettSakDto {
     var soknadDto: SøknadDto? = null
     var mottaksdato: LocalDate? = null
     var skalTilordnes: Boolean = false
-    var fakturaserieReferanse: String? = null
 
     fun tilOpprettSakRequest(): OpprettSakRequest {
         return OpprettSakRequest(
@@ -40,9 +39,7 @@ class OpprettSakDto {
             soknad = soknadDto?.tilSøknadRequest(),
             mottaksdato = mottaksdato,
             skalTilordnes = skalTilordnes,
-            fakturaserieReferanse = fakturaserieReferanse
         )
-
     }
 }
 

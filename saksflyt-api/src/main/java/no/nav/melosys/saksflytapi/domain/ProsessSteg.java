@@ -35,7 +35,6 @@ public enum ProsessSteg {
     OPPRETT_TIDLIGERE_JOURNALPOSTER_FOR_SAK("OPPRETT_TIDLIGERE_JOURNALPOSTER_FOR_SAK", "Oppretter journalposter tilbake i tid dersom de har tidligere har blitt markert som uidentifiserbare"),
     OPPRETT_OG_FERDIGSTILL_JOURNALPOST_FRA_ALTINN("OPPRETT_OG_FERDIGSTILL_JOURNALPOST_FRA_ALTINN", "Oppretter og ferdigstiller journalpost fra Altinn"),
     OPPRETT_OPPGAVE("OPPRETT_OPPGAVE", "Oppretter behandlingsoppgave"),
-    LAGRE_FAKTURASERIE_REFERANSE("LAGRE_FAKTURASERIE_REFERANSE", "Lagrer fakturaserie referanse"),
     OPPRETT_SAK_OG_BEH("OPPRETT_SAK_OG_BEH", "Oppretter ny sak og behandling i Melosys"),
     OPPRETT_NY_BEHANDLING("OPPRETT_NY_BEHANDLING", "Oppretter ny behandling i Melosys"),
     OPPRETT_SAK_OG_BEHANDLING_FRA_ALTINN_SØKNAD("OPPRETT_SAK_OG_BEHANDLING_FRA_ALTINN_SØKNAD", "Oppretter fagsak og behandling fra mottatt Altinn-søknad"),
