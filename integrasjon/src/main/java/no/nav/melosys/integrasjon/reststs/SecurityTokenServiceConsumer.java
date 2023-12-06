@@ -9,6 +9,8 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -21,10 +23,15 @@ public class SecurityTokenServiceConsumer implements BasicAuthAware {
     }
 
     public Map<String, Object> getResponseForOidcToken() {
-        return webClient.get()
-            .uri(createUriStringForOidcToken())
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("grant_type", "client_credentials");
+        params.add("scope", "openid");
+
+        return webClient.post()
+            .uri("/token")
             .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
             .header(HttpHeaders.AUTHORIZATION, basicAuth())
+            .bodyValue(params)
             .retrieve()
             .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
             })
@@ -60,12 +67,6 @@ public class SecurityTokenServiceConsumer implements BasicAuthAware {
             .bodyToMono(new ParameterizedTypeReference<Map<String, Object>>() {
             })
             .block();
-    }
-
-    private String createUriStringForOidcToken() {
-        return UriComponentsBuilder.fromPath("/token")
-            .queryParam("grant_type", "client_credentials")
-            .queryParam("scope", "openid").toUriString();
     }
 
     private String createUriStringForOnBehalfOfTokenSaml() {
