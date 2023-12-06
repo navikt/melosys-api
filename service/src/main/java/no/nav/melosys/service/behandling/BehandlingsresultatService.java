@@ -1,5 +1,6 @@
 package no.nav.melosys.service.behandling;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -23,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class BehandlingsresultatService {
     private static final Logger log = LoggerFactory.getLogger(BehandlingsresultatService.class);
     private static final String KAN_IKKE_FINNE_BEHANDLINGSRESULTAT = "Kan ikke finne behandlingsresultat for behandling: ";
-    private static final String KAN_IKKE_FINNE_BEHANDLINGSRESULTAT_FAKTURASERIE_REFERANSE = "Kan ikke finne behandlingsresultat med fakturaserie referanse: ";
 
     private final BehandlingsresultatRepository behandlingsresultatRepository;
     private final VilkaarsresultatService vilkaarsresultatService;
@@ -57,9 +57,8 @@ public class BehandlingsresultatService {
             .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT + behandlingsid));
     }
 
-    public Behandlingsresultat hentBehandlingsresultatAvFakturaserieReferanse(String fakturaserieReferanse) {
-        return behandlingsresultatRepository.findByFakturaserieReferanse(fakturaserieReferanse)
-            .orElseThrow(() -> new IkkeFunnetException(KAN_IKKE_FINNE_BEHANDLINGSRESULTAT_FAKTURASERIE_REFERANSE + fakturaserieReferanse));
+    public List<Behandlingsresultat> finnAlleBehandlingsresultatMedFakturaserieReferanse(String fakturaserieReferanse) {
+        return behandlingsresultatRepository.findAllByFakturaserieReferanse(fakturaserieReferanse);
     }
 
     public Behandlingsresultat hentBehandlingsresultatMedAnmodningsperioder(long behandlingsid) {

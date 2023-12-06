@@ -1,6 +1,5 @@
 package no.nav.melosys.saksflyt.steg.brev
 
-import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.brev.TrygdeavgiftBetalingsfrist
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
@@ -14,7 +13,6 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.TrygdeavgiftsberegningService
 import no.nav.melosys.service.dokument.DokumentServiceFasade
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto
-import no.nav.melosys.service.sak.FagsakService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -22,7 +20,6 @@ import java.time.LocalDate
 @Component
 class SendManglendeInnbetalingVarselBrev(
     @Autowired private val dokumentServiceFasade: DokumentServiceFasade,
-    @Autowired private val fagsakService: FagsakService,
     @Autowired private val trygdeavgiftsberegningService: TrygdeavgiftsberegningService
 ) : StegBehandler {
 
@@ -31,13 +28,10 @@ class SendManglendeInnbetalingVarselBrev(
     }
 
     override fun utfør(prosessinstans: Prosessinstans) {
-        val saksnummer = prosessinstans.getData(ProsessDataKey.SAKSNUMMER)
-        val fagsak = fagsakService.hentFagsak(saksnummer!!)
-
+        val behandling = prosessinstans.behandling
         val betalingsstatus = prosessinstans.getData(ProsessDataKey.BETALINGSSTATUS, Betalingsstatus::class.java)
         val fakturanummer = prosessinstans.getData(ProsessDataKey.FAKTURANUMMER)
-        val behandlingID = fagsak.hentSistRegistrertBehandling().id
-        val fullmektigForBetaling = finnFullmektigTrygdeavgift(fagsak, behandlingID)
+        val fullmektigForBetaling = finnFullmektigTrygdeavgift(behandling.fagsak, behandling.id)
 
         val brevbestillingDto = BrevbestillingDto()
             .apply {
@@ -49,7 +43,7 @@ class SendManglendeInnbetalingVarselBrev(
                 this.fullmektigForBetaling = fullmektigForBetaling
             }
 
-        dokumentServiceFasade.produserDokument(behandlingID, brevbestillingDto)
+        dokumentServiceFasade.produserDokument(behandling.id, brevbestillingDto)
     }
 
     private fun finnFullmektigTrygdeavgift(fagsak: Fagsak, behandlingID: Long): String? {

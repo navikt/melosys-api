@@ -22,7 +22,6 @@ data class OpprettSakRequest(
     var soknad: Søknad? = null,
     var mottaksdato: LocalDate? = null,
     var skalTilordnes: Boolean = false,
-    var fakturaserieReferanse: String? = null,
 )
 
 
