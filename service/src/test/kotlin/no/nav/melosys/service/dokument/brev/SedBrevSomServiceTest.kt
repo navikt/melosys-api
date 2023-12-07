@@ -80,8 +80,6 @@ class SedSomBrevServiceTest {
 
 
         verify {
-            // Test at riktig tema blir satt, og eksternReferanseId blir satt til 123456789
-            // Første parameter er opprettJournalpost, den må vi verifisere at det blir kalt med riktig data
             joarkFasadeMock.opprettJournalpost(
                 withArg {
                     it.tema shouldBe Tema.MED.name
