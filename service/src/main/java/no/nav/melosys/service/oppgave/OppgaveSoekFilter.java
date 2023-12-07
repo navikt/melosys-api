@@ -23,7 +23,8 @@ public class OppgaveSoekFilter {
         BEH_SAK.getKode(),
         BEH_SED.getKode(),
         VUR.getKode(),
-        VURD_HENV.getKode()
+        VURD_HENV.getKode(),
+        VURD_MAN_INNB.getKode()
     };
 
     public OppgaveSoekFilter(OppgaveFasade oppgaveFasade,
