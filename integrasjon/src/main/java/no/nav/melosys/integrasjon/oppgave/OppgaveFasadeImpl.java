@@ -43,7 +43,8 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     private static final String SORTERINGSREKKEFOLGE_DESC = "DESC";
     private static final String OPPGAVE_STATUSKATEGORI_AAPEN = "AAPEN";
     private static final String OPPGAVE_STATUSKATEGORI_AVSLUTTET = "AVSLUTTET";
-    private static final String[] OPPGAVETYPER_BEHANDLINGSOPPGAVE = new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode(), Oppgavetyper.BEH_SED.getKode(), Oppgavetyper.VURD_HENV.getKode()};
+    private static final String[] OPPGAVETYPER_BEHANDLINGSOPPGAVE = new String[]{Oppgavetyper.BEH_SAK_MK.getKode(), Oppgavetyper.VUR.getKode(),
+        Oppgavetyper.BEH_SED.getKode(), Oppgavetyper.VURD_HENV.getKode(), Oppgavetyper.VURD_MAN_INNB.getKode()};
     private static final String[] OPPGAVE_TEMA = new String[]{Tema.MED.getKode(), Tema.UFM.getKode(), Tema.TRY.getKode()};
 
     private final OppgaveConsumer oppgaveConsumer;

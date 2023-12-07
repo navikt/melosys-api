@@ -241,7 +241,7 @@ public class OppgaveService {
 
         if (oppgave.erJournalFøring()) {
             resultat = lagJournalføringsoppgaveDto(oppgave);
-        } else if (oppgave.erBehandling() || oppgave.erVurderDokument() || oppgave.erSedBehandling() || oppgave.erVurderHenvendelse()) {
+        } else if (oppgave.erBehandling() || oppgave.erVurderDokument() || oppgave.erSedBehandling() || oppgave.erVurderHenvendelse() || oppgave.erManglendeInnbetalingBehandling()) {
             resultat = lagBehandlingsoppgaveDto(oppgave);
         } else {
             throw new TekniskException("Oppgavetype " + oppgave.getOppgavetype() + " støttes ikke");
