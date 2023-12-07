@@ -56,13 +56,6 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
     }
 
     @Override
-    public void feilregistrerOppgaver(Set<Oppgave> oppgaveSet) {
-        for (var oppgave : oppgaveSet) {
-            feilregistrerOppgave(oppgave);
-        }
-    }
-
-    @Override
     public void ferdigstillOppgave(String oppgaveID) {
         OppgaveDto oppgave = hentOppgaveDto(oppgaveID);
         oppgave.setStatus(OPPGAVE_STATUS_FERDIGSTILT);
@@ -273,20 +266,6 @@ public class OppgaveFasadeImpl implements OppgaveFasade {
             .medTema(OPPGAVE_TEMA)
             .medOppgaveTyper(oppgavetyper != null ? oppgavetyper : hentGyldigeOppgavetyper())
             .medSorteringsfelt(SORTERINGSFELT_FRIST)
-            .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
-            .build();
-
-        return oppgaveConsumer.hentOppgaveListe(oppgaveSearchRequest).stream()
-            .map(OppgaveFasadeImpl::oppgaveMappingDtoTilDomain)
-            .toList();
-    }
-
-    @Override
-    public List<Oppgave> finnÅpneBehandlingsoppgaverMedJournalpostID(String journalpostID) {
-        OppgaveSearchRequest oppgaveSearchRequest = new OppgaveSearchRequest.Builder(String.valueOf(MELOSYS_ENHET_ID))
-            .medJournalpostID(new String[]{journalpostID})
-            .medTema(OPPGAVE_TEMA)
-            .medOppgaveTyper(OPPGAVETYPER_BEHANDLINGSOPPGAVE)
             .medStatusKategori(OPPGAVE_STATUSKATEGORI_AAPEN)
             .build();
 

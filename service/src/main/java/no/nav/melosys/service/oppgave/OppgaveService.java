@@ -76,20 +76,6 @@ public class OppgaveService {
         return oppgaverTilDtoer(oppgaverFraDomain);
     }
 
-    public List<Oppgave> finnÅpneBehandlingsoppgaverMedJournalpostID(String journalpostID) {
-        return oppgaveFasade.finnÅpneBehandlingsoppgaverMedJournalpostID(journalpostID)
-            .stream().filter(this::filtrerUtAvgiftsoppgaver).toList();
-    }
-
-    public void feilregistrerOppgaver(Set<Oppgave> oppgaveSet) {
-        if (oppgaveSet.isEmpty()) {
-            log.debug("Ingen oppgaver skal feilregistreres.");
-            return;
-        }
-        log.info("Feilregistrer oppgave(r) {}", oppgaveSet.stream().map(Oppgave::getOppgaveId));
-        oppgaveFasade.feilregistrerOppgaver(oppgaveSet);
-    }
-
     public void ferdigstillOppgave(String oppgaveID) {
         log.info("Ferdigstiller oppgave {}", oppgaveID);
         oppgaveFasade.ferdigstillOppgave(oppgaveID);
