@@ -76,20 +76,26 @@ class SedSomBrevServiceTest {
         every { fagsak.type } returns Sakstyper.EU_EOS
 
 
-        sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(SedType.A002, Land_iso2.SE, behandling, null)
+        sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(SedType.A002, Land_iso2.SE, behandling, null, "123456789")
 
 
         verify {
-            joarkFasadeMock.opprettJournalpost(withArg {opprettJournalpost ->
-                opprettJournalpost.tema.shouldBe(Tema.MED.name)
-            }, true)
+            // Test at riktig tema blir satt, og eksternReferanseId blir satt til 123456789
+            // Første parameter er opprettJournalpost, den må vi verifisere at det blir kalt med riktig data
+            joarkFasadeMock.opprettJournalpost(
+                withArg {
+                    it.tema shouldBe Tema.MED.name
+                    it.eksternReferanseId shouldBe "123456789"
+                },
+                any()
+            )
         }
     }
 
     companion object {
         val BRUKER_FNR = "12345678922"
         val AKTØR_ID = "551122"
-        val SAKSNUMMER= "789456"
+        val SAKSNUMMER = "789456"
     }
 
 }

@@ -103,6 +103,7 @@ public class OpprettOgJournalforBrev implements StegBehandler {
             .medMottakerId(mottakerType == MottakerType.PERSON_MED_AKTØR_ID ? persondataFasade.hentFolkeregisterident(mottakerID) : mottakerID)
             .medMottakerIdType(utledMottakerIdType(mottakerType))
             .medSaksnummer(fagsak.getSaksnummer())
+            .medEksternReferanseId(prosessinstans.getId().toString())
             .medPdf(pdf)
             .medVedlegg(vedlegg);
 

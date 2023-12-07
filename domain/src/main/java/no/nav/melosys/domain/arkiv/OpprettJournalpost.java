@@ -47,7 +47,7 @@ public class OpprettJournalpost extends Journalpost {
 
     public static OpprettJournalpost lagJournalpostForSendingAvSedSomBrev(
         String saksnummer, String brukerFnr, SedType sedType, byte[] sedPdf, String institusjonID,
-        String institusjonNavn, String institusjonLand, List<FysiskDokument> vedlegg, Tema tema) {
+        String institusjonNavn, String institusjonLand, List<FysiskDokument> vedlegg, Tema tema, String eksternReferanseIdForJournalpost) {
 
         var opprettJournalpost = new OpprettJournalpost();
         opprettJournalpost.setHoveddokument(lagFysiskDokumentSed(sedType, sedPdf));
@@ -64,6 +64,7 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setKorrespondansepartIdType(KorrespondansepartIdType.UTENLANDSK_ORGANISASJON);
         opprettJournalpost.setBrukerId(brukerFnr);
         opprettJournalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
+        opprettJournalpost.setEksternReferanseId(eksternReferanseIdForJournalpost);
 
         opprettJournalpost.setInnhold(opprettJournalpost.getHoveddokument().getTittel());
 
@@ -117,6 +118,7 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setTema(tema.getKode());
         opprettJournalpost.setSaksnummer(bestilling.getSaksnummer());
         opprettJournalpost.setBrukerId(bestilling.getHovedpartId());
+        opprettJournalpost.setEksternReferanseId(bestilling.getEksternReferanseId());
         opprettJournalpost.setBrukerIdType(bestilling.getHovedpartIdType());
         opprettJournalpost.setKorrespondansepartId(bestilling.getMottakerId());
         opprettJournalpost.setKorrespondansepartNavn(bestilling.getMottakerNavn());

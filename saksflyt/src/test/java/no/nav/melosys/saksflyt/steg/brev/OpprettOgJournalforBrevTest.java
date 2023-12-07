@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.brev;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
@@ -73,6 +74,8 @@ class OpprettOgJournalforBrevTest {
     private OpprettOgJournalforBrev opprettJournalforBrev;
 
     private final OppgaveFactory oppgaveFactory = new OppgaveFactory();
+
+    UUID prosessinstansUuid = UUID.randomUUID();
 
     @BeforeEach
     void init() {
@@ -159,13 +162,15 @@ class OpprettOgJournalforBrevTest {
                 Journalpost::getBrukerIdType,
                 Journalpost::getKorrespondansepartId,
                 Journalpost::getKorrespondansepartNavn,
-                OpprettJournalpost::getKorrespondansepartIdType
+                OpprettJournalpost::getKorrespondansepartIdType,
+                OpprettJournalpost::getEksternReferanseId
             ).containsExactly(
                 virksomhet.getOrgnr(),
                 BrukerIdType.ORGNR,
                 virksomhet.getOrgnr(),
                 "organisasjonsnavn",
-                OpprettJournalpost.KorrespondansepartIdType.ORGNR.getKode()
+                OpprettJournalpost.KorrespondansepartIdType.ORGNR.getKode(),
+                prosessinstansUuid.toString()
             );
     }
 
@@ -354,6 +359,7 @@ class OpprettOgJournalforBrevTest {
         verify(mockJoarkFasade).opprettJournalpost(opprettJournalpostCaptor.capture(), anyBoolean());
 
         OpprettJournalpost captured = opprettJournalpostCaptor.getValue();
+        assertThat(captured.getEksternReferanseId()).isEqualTo(prosessinstansUuid.toString());
         assertThat(captured.getHoveddokument().getTittel()).isEqualTo("Tittel");
         assertThat(captured.getVedlegg())
             .extracting(fysiskDokument -> fysiskDokument.getDokumentVarianter()
@@ -510,6 +516,7 @@ class OpprettOgJournalforBrevTest {
         Mottaker mottaker = lagMottaker("1234");
 
         Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setId(prosessinstansUuid);
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.BREVBESTILLING, brevbestilling);
         prosessinstans.setData(ProsessDataKey.MOTTAKER, mottaker.getRolle());
@@ -519,6 +526,7 @@ class OpprettOgJournalforBrevTest {
 
     private Prosessinstans lagProsessinstansMedMottaker(Behandling behandling, Mottaker mottaker, DokgenBrevbestilling brevbestilling) {
         Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setId(prosessinstansUuid);
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.BREVBESTILLING, brevbestilling);
         prosessinstans.setData(ProsessDataKey.MOTTAKER, mottaker.getRolle());
@@ -531,6 +539,7 @@ class OpprettOgJournalforBrevTest {
 
     private Prosessinstans lagProsessinstansMedOrgnr(Behandling behandling, Mottaker mottaker, DokgenBrevbestilling brevbestilling) {
         Prosessinstans prosessinstans = new Prosessinstans();
+        prosessinstans.setId(prosessinstansUuid);
         prosessinstans.setBehandling(behandling);
         prosessinstans.setData(ProsessDataKey.BREVBESTILLING, brevbestilling);
         prosessinstans.setData(ProsessDataKey.MOTTAKER, mottaker.getRolle());
