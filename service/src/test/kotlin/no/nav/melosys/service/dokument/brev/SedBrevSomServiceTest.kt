@@ -85,7 +85,7 @@ class SedSomBrevServiceTest {
                     it.tema shouldBe Tema.MED.name
                     it.eksternReferanseId shouldBe "123456789"
                 },
-                any()
+                true
             )
         }
     }
