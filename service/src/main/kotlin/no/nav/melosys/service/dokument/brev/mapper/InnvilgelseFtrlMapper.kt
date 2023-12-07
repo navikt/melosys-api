@@ -100,7 +100,7 @@ class InnvilgelseFtrlMapper(
     private fun finnFullmektigTrygdeavgift(behandling: Behandling): String? {
         if (behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_TRYGDEAVGIFT).isEmpty) return null
 
-        return trygdeavgiftsberegningService.finnFakturamottaker(behandling.id)
+        return trygdeavgiftsberegningService.finnFakturamottakerNavn(behandling.id)
     }
 
     private fun hentFtrlNærTilknytningNorgeBegrunnelse(vilkaarsresultater: Set<Vilkaarsresultat>): Ftrl_2_8_naer_tilknytning_norge_begrunnelser? =

@@ -41,7 +41,7 @@
         <kotlin.compiler.jvmTarget>${java.version}</kotlin.compiler.jvmTarget>
 
         <!-- Melosys -->
-        <melosys.internt.kodeverk.version>5.15.217</melosys.internt.kodeverk.version>
+        <melosys.internt.kodeverk.version>5.15.218</melosys.internt.kodeverk.version>
         <melosys.brev.version>1.2.124</melosys.brev.version>
 
         <!-- NAV -->
@@ -497,27 +497,11 @@
                 <version>${doksys.dokumentproduksjon.version}</version>
                 <classifier>jaxws</classifier>
             </dependency>
-            <dependency>
-                <groupId>no.nav.tjenestespesifikasjoner</groupId>
-                <artifactId>nav-fim-organisasjon-v4-tjenestespesifikasjon</artifactId>
-                <version>${nav.tjenestespesifikasjoner.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.tjenestespesifikasjoner</groupId>
-                <artifactId>person-v3-tjenestespesifikasjon</artifactId>
-                <version>${nav.tjenestespesifikasjoner.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>nav-foedselsnummer</groupId>
                 <artifactId>core</artifactId>
                 <version>${nav-foedselsnummer.core.version}</version>
-            </dependency>
-            <!-- SOB -->
-            <dependency>
-                <groupId>no.nav.tjenestespesifikasjoner</groupId>
-                <artifactId>nav-virksomhet-hendelsehandterer-behandlingstatus-v1-meldingsdefinisjon</artifactId>
-                <version>${nav.tjenestespesifikasjoner.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.tjenestespesifikasjoner</groupId>
@@ -547,12 +531,6 @@
                 <artifactId>melosysbrev</artifactId>
                 <classifier>jaxb-sources</classifier>
                 <version>${melosys.brev.version}</version>
-            </dependency>
-            <!-- Utbetaldata -->
-            <dependency>
-                <groupId>no.nav.tjenestespesifikasjoner</groupId>
-                <artifactId>utbetaling-tjenestespesifikasjon</artifactId>
-                <version>${nav.tjenestespesifikasjoner.version}</version>
             </dependency>
 
             <!-- Test -->
@@ -609,6 +587,12 @@
             <dependency>
                 <groupId>no.nav.melosys</groupId>
                 <artifactId>sikkerhet</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.melosys</groupId>
+                <artifactId>melosys-domain</artifactId>
                 <version>${project.version}</version>
                 <type>test-jar</type>
             </dependency>

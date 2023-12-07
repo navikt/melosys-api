@@ -108,7 +108,7 @@ class TrygdeavgiftTjenesteTest {
     @Test
     void finnFakturamottaker() throws Exception {
         var MOTTAKER_NAVN = "Fornavn Etternavn";
-        when(trygdeavgiftsberegningService.finnFakturamottaker(BEHANDLINGSRESULTAT_ID)).thenReturn(MOTTAKER_NAVN);
+        when(trygdeavgiftsberegningService.finnFakturamottakerNavn(BEHANDLINGSRESULTAT_ID)).thenReturn(MOTTAKER_NAVN);
 
         mockMvc.perform(get(BASE_URL + "/fakturamottaker", 1L)
                 .contentType(MediaType.APPLICATION_JSON))

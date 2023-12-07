@@ -6,19 +6,22 @@ import no.nav.melosys.domain.dokument.DokumentView.FrontendApi
 import no.nav.melosys.domain.dokument.SaksopplysningDokument
 import java.time.LocalDate
 
-class OrganisasjonDokument : SaksopplysningDokument {
-    var orgnummer: String? = null
-    var navn: String? = null
-    var oppstartsdato: LocalDate? = null
-    var enhetstype: String? = null
-    var organisasjonDetaljer: OrganisasjonsDetaljer? = null
-    var sektorkode: String? = null
+class OrganisasjonDokument(
+    val orgnummer: String,
+    val navn: String,
+    val enhetstype: String? = null,
+    val organisasjonDetaljer: OrganisasjonsDetaljer,
+    val sektorkode: String,
+
+    // Faglig avklart at vi kan fjerne denne, men det må sjekkes om det bryter de-serialsering av eksisterende dokumenter
+    val oppstartsdato: LocalDate? = null,
+) : SaksopplysningDokument {
 
     @JsonView(FrontendApi::class)
-    fun getForretningsadresse(): StrukturertAdresse? = organisasjonDetaljer?.hentStrukturertForretningsadresse()
+    fun getForretningsadresse(): StrukturertAdresse? = organisasjonDetaljer.hentStrukturertForretningsadresse()
 
     @JsonView(FrontendApi::class)
-    fun getPostadresse(): StrukturertAdresse? = organisasjonDetaljer?.hentStrukturertPostadresse()
+    fun getPostadresse(): StrukturertAdresse? = organisasjonDetaljer.hentStrukturertPostadresse()
 
     // Hvis man ikke har bruk for historikk på navn så er det best å bruke navn på nivå organisasjon.
     fun harRegistrertPostadresse(): Boolean = getPostadresse()?.erGyldig() ?: false

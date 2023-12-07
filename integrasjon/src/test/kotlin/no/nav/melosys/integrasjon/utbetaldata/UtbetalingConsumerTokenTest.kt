@@ -6,7 +6,8 @@ import com.github.tomakehurst.wiremock.matching.UrlPattern
 import no.nav.melosys.integrasjon.ConsumerWireMockTestBase
 import no.nav.melosys.integrasjon.OAuthMockServer
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
-import no.nav.melosys.integrasjon.reststs.RestTokenServiceClient
+import no.nav.melosys.integrasjon.reststs.RestSTSService
+import no.nav.melosys.integrasjon.reststs.SecurityTokenServiceConsumer
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.melosys.integrasjon.utbetaling.Periode
 import no.nav.melosys.integrasjon.utbetaling.UtbetaldataRestConsumer
@@ -27,7 +28,8 @@ import java.time.LocalDate
 
 @Import(
     StsWebClientProducer::class,
-    RestTokenServiceClient::class,
+    SecurityTokenServiceConsumer::class,
+    RestSTSService::class,
     OAuthMockServer::class,
 
     GenericAuthFilterFactory::class,

@@ -28,6 +28,7 @@ import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.Representan
 import no.nav.melosys.domain.person.*;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.person.adresse.Kontaktadresse;
+import no.nav.melosys.domain.OrganisasjonDokumentTestFactory;
 
 import static java.util.Collections.singletonList;
 import static no.nav.melosys.domain.kodeverk.Mottakerroller.*;
@@ -124,23 +125,26 @@ public final class DokgenTestData {
     }
 
     public static OrganisasjonDokument lagOrg() {
-        OrganisasjonDokument organisasjonDokument = new OrganisasjonDokument();
-        organisasjonDokument.setNavn(NAVN_ORG);
-        organisasjonDokument.setOrgnummer(ORGNR);
-        organisasjonDokument.setOrganisasjonDetaljer(lagOrgDetaljer());
-        return organisasjonDokument;
+        return OrganisasjonDokumentTestFactory.builder()
+            .orgnummer(ORGNR)
+            .navn(NAVN_ORG)
+            .organisasjonsDetaljer(lagOrgDetaljer())
+            .build();
     }
 
     public static OrganisasjonDokument lagOrg(Landkoder landkoder) {
-        OrganisasjonDokument organisasjonDokument = lagOrg();
-        OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
         SemistrukturertAdresse semistrukturertAdresse = new SemistrukturertAdresse();
         semistrukturertAdresse.setLandkode(landkoder.getKode());
         semistrukturertAdresse.setGyldighetsperiode(new Periode(LocalDate.now(), LocalDate.now()));
         semistrukturertAdresse.setPostnr(POSTNR_ORG);
-        organisasjonsDetaljer.setForretningsadresse(List.of(semistrukturertAdresse));
-        organisasjonDokument.setOrganisasjonDetaljer(organisasjonsDetaljer);
-        return organisasjonDokument;
+        OrganisasjonsDetaljer organisasjonsDetaljer = OrganisasjonsDetaljerTestFactory.builder()
+            .forretningsadresse(semistrukturertAdresse)
+            .build();
+        return OrganisasjonDokumentTestFactory.builder()
+            .orgnummer(ORGNR)
+            .navn(NAVN_ORG)
+            .organisasjonsDetaljer(organisasjonsDetaljer)
+            .build();
     }
 
     private static List<Behandling> lagBehandlinger() {
@@ -164,9 +168,9 @@ public final class DokgenTestData {
     }
 
     private static OrganisasjonsDetaljer lagOrgDetaljer() {
-        OrganisasjonsDetaljer organisasjonsDetaljer = new OrganisasjonsDetaljer();
-        organisasjonsDetaljer.setPostadresse(singletonList(lagOrgAdresse()));
-        return organisasjonsDetaljer;
+        return OrganisasjonsDetaljerTestFactory.builder()
+            .postadresse(lagOrgAdresse())
+            .build();
     }
 
     private static GeografiskAdresse lagOrgAdresse() {

@@ -56,7 +56,7 @@ class InnvilgelsesbrevMapperTest {
             Collections.singleton(lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, "123456789"))), false);
 
         Diff diff = DiffBuilder.compare(xmlFraFil).withTest(testMapTilBrevXml)
-            .withNodeFilter(node -> !"ns7:opprettelsesDato".equals(node.getNodeName()))
+            .withNodeFilter(node -> !"ns6:opprettelsesDato".equals(node.getNodeName()))
             .build();
         assertFalse(diff.toString(), diff.hasDifferences());
     }
@@ -68,7 +68,7 @@ class InnvilgelsesbrevMapperTest {
             Collections.singleton(lagAvklarteFakta(Avklartefaktatyper.VIRKSOMHET, "123456789"))), true);
 
         Diff diff = DiffBuilder.compare(xmlFraFil).withTest(testMapTilBrevXml)
-            .withNodeFilter(node -> !"ns7:opprettelsesDato".equals(node.getNodeName()))
+            .withNodeFilter(node -> !"ns6:opprettelsesDato".equals(node.getNodeName()))
             .build();
         assertFalse(diff.toString(), diff.hasDifferences());
     }

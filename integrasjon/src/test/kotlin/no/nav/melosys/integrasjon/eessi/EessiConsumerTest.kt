@@ -5,6 +5,7 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
+import io.getunleash.FakeUnleash
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldBeSingleton
 import io.kotest.matchers.collections.shouldHaveSize
@@ -27,6 +28,7 @@ import no.nav.melosys.integrasjon.StsMockServer
 import no.nav.melosys.integrasjon.eessi.dto.SaksrelasjonDto
 import no.nav.melosys.integrasjon.felles.GenericAuthFilterFactory
 import no.nav.melosys.integrasjon.felles.mdc.CorrelationIdOutgoingFilter
+import no.nav.melosys.integrasjon.reststs.RestSTSService
 import no.nav.melosys.integrasjon.reststs.StsWebClientProducer
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import org.junit.jupiter.api.*
@@ -46,11 +48,13 @@ import java.util.*
     StsMockServer::class,
     OAuthMockServer::class,
     CorrelationIdOutgoingFilter::class,
+    RestSTSService::class,
 
     GenericAuthFilterFactory::class,
     EessiConsumerProducerConfig::class,
     StsMockServer::class,
-    MetricsTestConfig::class
+    MetricsTestConfig::class,
+    FakeUnleash::class
 )
 @WebMvcTest
 @AutoConfigureWebClient

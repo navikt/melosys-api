@@ -101,6 +101,10 @@ public class DokumentproduksjonsInfoMapper {
                 new DokumentproduksjonsInfo("ikke_yrkesaktiv_vedtaksbrev",
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.IKKE_YRKESAKTIV_VEDTAKSBREV.getTittel()))
+            .put(VARSELBREV_MANGLENDE_INNBETALING,
+                new DokumentproduksjonsInfo("varsel_opphor_medlemskap",
+                    DokumentKategoriKode.IB.getKode(),
+                    JournalforingsTittel.VARSELBREV_MANGLENDE_INNBETALING.getTittel()))
             .build());
     }
 
@@ -136,7 +140,8 @@ public class DokumentproduksjonsInfoMapper {
         TRYGDEAVTALE_ATTEST("Attest for medlemskap i folketrygden"),
         AVSLAG_MANGLENDE_OPPLYSNINGER("Avslag pga manglende opplysninger"),
         MELDING_HENLAGT_SAK("Henleggelse av søknad"),
-        IKKE_YRKESAKTIV_VEDTAKSBREV("Vedtak om medlemskap");
+        IKKE_YRKESAKTIV_VEDTAKSBREV("Vedtak om medlemskap"),
+        VARSELBREV_MANGLENDE_INNBETALING("Varsel om opphør av frivillig medlemskap");
 
         private final String tittel;
 

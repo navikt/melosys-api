@@ -32,12 +32,12 @@ public class ReplikerBehandling implements StegBehandler {
 
     private final FagsakService fagsakService;
     private final BehandlingService behandlingService;
-    private final SaksbehandlingRegler behandlingReplikeringsRegler;
+    private final SaksbehandlingRegler saksbehandlingRegler;
 
-    public ReplikerBehandling(FagsakService fagsakService, BehandlingService behandlingService, SaksbehandlingRegler behandlingReplikeringsRegler) {
+    public ReplikerBehandling(FagsakService fagsakService, BehandlingService behandlingService, SaksbehandlingRegler saksbehandlingRegler) {
         this.fagsakService = fagsakService;
         this.behandlingService = behandlingService;
-        this.behandlingReplikeringsRegler = behandlingReplikeringsRegler;
+        this.saksbehandlingRegler = saksbehandlingRegler;
     }
 
     @Override
@@ -53,7 +53,7 @@ public class ReplikerBehandling implements StegBehandler {
         var behandlingstema = prosessinstans.getData(ProsessDataKey.BEHANDLINGSTEMA, Behandlingstema.class);
 
         Behandling behandlingBruktForReplikering = Optional.ofNullable(
-            behandlingReplikeringsRegler.finnBehandlingSomKanReplikeres(fagsak)
+            saksbehandlingRegler.finnBehandlingSomKanReplikeres(fagsak)
         ).orElseThrow(() ->
             new FunksjonellException("Finner ikke behandling som kan replikeres. Denne fantes ved opprettelse av prosessen")
         );
