@@ -222,7 +222,7 @@ class JournalfoeringServiceTest {
 
     @Test
     void journalførOgOpprettSak_ugyldigBehandlingstypeOgSakstema_nårSenderForvaltningsmelding_kasterException() {
-        opprettDto.setBehandlingstypeKode(Behandlingstyper.NY_VURDERING.getKode());
+        opprettDto.setBehandlingstypeKode(Behandlingstyper.KLAGE.getKode());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
         opprettDto.setIkkeSendForvaltingsmelding(false);
@@ -230,8 +230,8 @@ class JournalfoeringServiceTest {
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
-            .withMessageContaining("Kan kun sende forvaltningsmelding for behandlingtype: " +
-                "FØRSTEGANG og sakstema: MEDLEMSKAP_LOVVALG");
+            .withMessageContaining("Kan kun sende forvaltningsmelding for behandlingtyper: " +
+                "FØRSTEGANG og NY_VURDERING og sakstema: MEDLEMSKAP_LOVVALG");
     }
 
     @Test
@@ -252,13 +252,35 @@ class JournalfoeringServiceTest {
     }
 
     @Test
-    void journalførOgOpprettSak_gyldigSkalSendeForvaltningsmeldingKasterIkkeFeilUnderValidering_ingenFeil() {
+    void journalførOgOpprettSak_gyldigSkalSendeForvaltningsmeldingKasterIkkeFeilUnderValidering() {
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS);
         fagsakDto.setSakstema(MEDLEMSKAP_LOVVALG.getKode());
         opprettDto.setFagsak(fagsakDto);
         opprettDto.setBehandlingstypeKode(FØRSTEGANG.getKode());
+        opprettDto.setBehandlingstemaKode(Behandlingstema.UTSENDT_SELVSTENDIG.getKode());
+        opprettDto.setIkkeSendForvaltingsmelding(false);
+
+
+        journalfoeringService.journalførOgOpprettSak(opprettDto);
+
+
+        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(journalfoeringOpprettRequestCaptor.capture(), eq(JFR_NY_SAK_BRUKER), // TODO: JournalfoeringOpprettRequest()
+            eq(true), eq(LocalDate.EPOCH), eq(SØKNAD), eq(null));
+
+        JournalfoeringOpprettRequest value = journalfoeringOpprettRequestCaptor.getValue();
+        assertThat(value).isEqualTo(opprettDto.tilJournalfoeringOpprettRequest());
+    }
+
+    @Test
+    void journalførOgOpprettSakNyVurdering_gyldigSkalSendeForvaltningsmeldingKasterIkkeFeilUnderValidering() {
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+
+        FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS);
+        fagsakDto.setSakstema(MEDLEMSKAP_LOVVALG.getKode());
+        opprettDto.setFagsak(fagsakDto);
+        opprettDto.setBehandlingstypeKode(NY_VURDERING.getKode());
         opprettDto.setBehandlingstemaKode(Behandlingstema.UTSENDT_SELVSTENDIG.getKode());
         opprettDto.setIkkeSendForvaltingsmelding(false);
 

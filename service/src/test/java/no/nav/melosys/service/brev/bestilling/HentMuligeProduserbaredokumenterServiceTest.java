@@ -106,6 +106,25 @@ class HentMuligeProduserbaredokumenterServiceTest {
     }
 
     @Test
+    void hentBrevMaler_behandlingErNyVurderingMedSakstemaMedlemskapLovvalg_returnererForventetSaksbehandlingstidMalITillegg() {
+        behandling.setType(Behandlingstyper.NY_VURDERING);
+        behandling.getFagsak().setTema(Sakstemaer.MEDLEMSKAP_LOVVALG);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(321L)).thenReturn(behandling);
+
+
+        List<Produserbaredokumenter> brevMaler = hentMuligeProduserbaredokumenterService.hentMuligeProduserbaredokumenter(321L, BRUKER);
+
+
+        assertThat(brevMaler)
+            .hasSize(3)
+            .containsExactlyInAnyOrder(
+                MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD,
+                MANGELBREV_BRUKER,
+                GENERELT_FRITEKSTBREV_BRUKER
+            );
+    }
+
+    @Test
     void hentBrevMaler_behandlingErKlage_returnererKorrekt() {
         behandling.setType(Behandlingstyper.KLAGE);
         when(behandlingService.hentBehandlingMedSaksopplysninger(123L)).thenReturn(behandling);

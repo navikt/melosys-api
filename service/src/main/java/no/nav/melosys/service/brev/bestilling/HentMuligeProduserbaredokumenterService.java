@@ -39,7 +39,8 @@ public class HentMuligeProduserbaredokumenterService {
         return switch (mottakerroller) {
             case BRUKER -> {
                 List<Produserbaredokumenter> brevmaler = new ArrayList<>();
-                if (behandling.getFagsak().getTema() == Sakstemaer.MEDLEMSKAP_LOVVALG && behandling.getType() == Behandlingstyper.FØRSTEGANG) {
+                if (behandling.getFagsak().getTema() == Sakstemaer.MEDLEMSKAP_LOVVALG && (behandling.getType() == Behandlingstyper.FØRSTEGANG ||
+                    behandling.getType() == Behandlingstyper.NY_VURDERING)) {
                     brevmaler.add(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
                 }
                 brevmaler.addAll(asList(MANGELBREV_BRUKER, GENERELT_FRITEKSTBREV_BRUKER));
