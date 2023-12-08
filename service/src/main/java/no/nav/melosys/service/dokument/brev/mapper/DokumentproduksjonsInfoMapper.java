@@ -47,6 +47,11 @@ public class DokumentproduksjonsInfoMapper {
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.INNVILGELSE_FTRL.getTittel())
             )
+            .put(OPPHOERT_MEDLEMSKAP,
+                new DokumentproduksjonsInfo("opphoert_medlemskap",
+                    DokumentKategoriKode.VB.getKode(),
+                    JournalforingsTittel.OPPHOERT_MEDLEMSKAP.getTittel())
+            )
             .put(TRYGDEAVTALE_GB,
                 new DokumentproduksjonsInfo("trygdeavtale_gb",
                     DokumentKategoriKode.VB.getKode(),
@@ -135,6 +140,7 @@ public class DokumentproduksjonsInfoMapper {
         FORVALTNINGSMELDING("Melding om forventet saksbehandlingstid"),
         MANGELBREV("Melding om manglende opplysninger"),
         INNVILGELSE_FTRL("Vedtak om frivillig medlemskap"),
+        OPPHOERT_MEDLEMSKAP("Vedtak om opphør av frivillig medlemskap"),
         TRYGDEAVTALE("Vedtak om medlemskap, Attest for medlemskap i folketrygden"),
         TRYGDEAVTALE_VEDTAKSBREV("Vedtak om medlemskap"),
         TRYGDEAVTALE_ATTEST("Attest for medlemskap i folketrygden"),

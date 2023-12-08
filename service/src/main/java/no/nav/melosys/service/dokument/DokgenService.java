@@ -317,7 +317,7 @@ public class DokgenService {
                 .medFullmektigForBetaling(brevbestillingDto.getFullmektigForBetaling())
                 .medBetalingsfrist(brevbestillingDto.getBetalingsfrist());
             case OPPHOERT_MEDLEMSKAP ->
-                new OpphoertMedlemskapBrevbestilling.Builder().medFritekst(brevbestillingDto.getFritekst());
+                new OpphoertMedlemskapBrevbestilling.Builder().medFritekst(brevbestillingDto.getBegrunnelseFritekst());
 
             default -> new DokgenBrevbestilling.Builder<>().medDistribusjonstype(Distribusjonstype.VIKTIG);
         };
