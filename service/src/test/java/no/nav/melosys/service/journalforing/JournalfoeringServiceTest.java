@@ -288,7 +288,7 @@ class JournalfoeringServiceTest {
         journalfoeringService.journalførOgOpprettSak(opprettDto);
 
 
-        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(journalfoeringOpprettRequestCaptor.capture(), eq(JFR_NY_SAK_BRUKER), // TODO: JournalfoeringOpprettRequest()
+        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(journalfoeringOpprettRequestCaptor.capture(), eq(JFR_NY_SAK_BRUKER),
             eq(true), eq(LocalDate.EPOCH), eq(SØKNAD), eq(null));
 
         JournalfoeringOpprettRequest value = journalfoeringOpprettRequestCaptor.getValue();
