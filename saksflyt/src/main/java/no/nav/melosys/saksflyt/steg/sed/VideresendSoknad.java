@@ -100,7 +100,7 @@ public class VideresendSoknad extends AbstraktSendUtland {
 
         Land_iso2 mottakerLandkode = fagsak.hentMyndighetLandkode();
         String journalpostID = sedSomBrevService
-            .lagJournalpostForSendingAvSedSomBrev(SedType.A008, mottakerLandkode, behandling, lagSøknadVedlegg(behandling));
+            .lagJournalpostForSendingAvSedSomBrev(SedType.A008, mottakerLandkode, behandling, lagSøknadVedlegg(behandling), prosessinstans.getId().toString());
 
         prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, journalpostID);
         prosessinstans.setData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, mottakerLandkode);

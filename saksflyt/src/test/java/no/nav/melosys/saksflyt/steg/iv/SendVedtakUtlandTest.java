@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import com.google.common.collect.Sets;
 import io.getunleash.FakeUnleash;
@@ -143,13 +144,15 @@ class SendVedtakUtlandTest {
         behandlingsresultat.setId(BEHANDLING_ID);
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART13_1B2);
         lovvalgsperiode.setLovvalgsland(Land_iso2.AT);
+        UUID prosessinstansUuid = UUID.randomUUID();
+        prosessinstans.setId(prosessinstansUuid);
 
         prosessinstans.setData(ProsessDataKey.UTPEKT_LAND, Landkoder.AT);
-        when(sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(eq(SedType.A003), any(), any()))
+        when(sedSomBrevService.lagJournalpostForSendingAvSedSomBrev(eq(SedType.A003), any(), any(), eq(prosessinstansUuid.toString())))
             .thenReturn("journalpostID");
         sendVedtakUtland.utfør(prosessinstans);
         verify(sedSomBrevService)
-            .lagJournalpostForSendingAvSedSomBrev(SedType.A003, Land_iso2.AT, behandling);
+            .lagJournalpostForSendingAvSedSomBrev(SedType.A003, Land_iso2.AT, behandling, prosessinstansUuid.toString());
     }
 
     @Test

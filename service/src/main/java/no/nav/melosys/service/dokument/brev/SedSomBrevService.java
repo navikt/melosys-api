@@ -37,14 +37,16 @@ public class SedSomBrevService {
 
     public String lagJournalpostForSendingAvSedSomBrev(SedType sedType,
                                                        Land_iso2 mottakerland,
-                                                       Behandling behandling) {
-        return lagJournalpostForSendingAvSedSomBrev(sedType, mottakerland, behandling, Collections.emptyList());
+                                                       Behandling behandling,
+                                                       String eksternReferanseIdForJournalpost) {
+        return lagJournalpostForSendingAvSedSomBrev(sedType, mottakerland, behandling, Collections.emptyList(), eksternReferanseIdForJournalpost);
     }
 
     public String lagJournalpostForSendingAvSedSomBrev(SedType sedType,
                                                        Land_iso2 mottakerland,
                                                        Behandling behandling,
-                                                       List<FysiskDokument> vedlegg) {
+                                                       List<FysiskDokument> vedlegg,
+                                                       String eksternReferanseIdForJournalpost) {
         var fagsak = behandling.getFagsak();
         var utenlandskMyndighet = utenlandskMyndighetService.hentUtenlandskMyndighet(mottakerland);
         String institusjonID = utenlandskMyndighet.hentInstitusjonID();
@@ -53,8 +55,16 @@ public class SedSomBrevService {
         var tema = oppgaveFactory.utledTema(fagsak.getType(), fagsak.getTema(), behandling.getTema());
 
         OpprettJournalpost opprettJournalpost = OpprettJournalpost.lagJournalpostForSendingAvSedSomBrev(
-                fagsak.getSaksnummer(), brukerFnr, sedType, sedPdf, institusjonID,
-                utenlandskMyndighet.navn, mottakerland.getKode(), vedlegg, tema
+            fagsak.getSaksnummer(),
+            brukerFnr,
+            sedType,
+            sedPdf,
+            institusjonID,
+            utenlandskMyndighet.navn,
+            mottakerland.getKode(),
+            vedlegg,
+            tema,
+            eksternReferanseIdForJournalpost
         );
         return joarkFasade.opprettJournalpost(opprettJournalpost, true);
     }
