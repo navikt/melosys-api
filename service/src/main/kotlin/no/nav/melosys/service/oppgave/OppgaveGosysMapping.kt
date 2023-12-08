@@ -216,12 +216,24 @@ internal open class OppgaveGosysMapping {
             TableRow(
                 Sakstyper.FTRL,
                 Sakstemaer.MEDLEMSKAP_LOVVALG,
-                setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE, Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT),
+                setOf(Behandlingstyper.FØRSTEGANG, Behandlingstyper.NY_VURDERING, Behandlingstyper.KLAGE),
                 setOf(Behandlingstema.YRKESAKTIV),
                 Oppgave(
                     OppgaveBehandlingstema.UTENFOR_AVTALAND_YRKESAKTIV, // ab0484
                     Tema.MED,
                     Oppgavetyper.BEH_SAK_MK,
+                    Beskrivelsefelt.TOMT
+                )
+            ),
+            TableRow(
+                Sakstyper.FTRL,
+                Sakstemaer.MEDLEMSKAP_LOVVALG,
+                setOf(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT),
+                setOf(Behandlingstema.YRKESAKTIV),
+                Oppgave(
+                    OppgaveBehandlingstema.UTENFOR_AVTALAND_YRKESAKTIV, // ab0484
+                    Tema.MED,
+                    Oppgavetyper.VURD_MAN_INNB,
                     Beskrivelsefelt.TOMT
                 )
             ),
