@@ -3,6 +3,7 @@ package no.nav.melosys.saksflyt.steg.behandling
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Behandlingsaarsak
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflyt.steg.StegBehandler
@@ -11,6 +12,7 @@ import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import org.springframework.stereotype.Component
 import java.time.LocalDate
@@ -19,7 +21,8 @@ import java.time.LocalDate
 class OpprettManglendeInnbetalingBehandling(
     private val behandlingService: BehandlingService,
     private val behandlingsresultatService: BehandlingsresultatService,
-    private val saksbehandlingRegler: SaksbehandlingRegler
+    private val saksbehandlingRegler: SaksbehandlingRegler,
+    private val oppgaveService: OppgaveService
 ) : StegBehandler {
 
     override fun inngangsSteg(): ProsessSteg {
@@ -40,9 +43,29 @@ class OpprettManglendeInnbetalingBehandling(
         val fagsak = behandlingService.hentBehandling(behandlingsresultater.first().id).fagsak
 
         if (fagsak.harAktivBehandling()) {
-            // TODO: Ta hensyn til at det kan eksistere en åpen behadnling fra før. Gjøres på egen oppgave.
-            // MELOSYS-6187. Husk tester!
-            throw FunksjonellException("Her kommer Rune å fikser stuff")
+            val aktivBehandling = fagsak.hentAktivBehandling()
+            if (aktivBehandling.type == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT) {
+                prosessinstans.behandling = aktivBehandling
+                return
+            }
+
+            if (aktivBehandling.type == Behandlingstyper.NY_VURDERING && aktivBehandling.opprinneligBehandling != null) {
+                aktivBehandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+                val manglendeInnbetalingFrist = Behandling.utledBehandlingsfrist(aktivBehandling, mottaksDato)
+                if (manglendeInnbetalingFrist.isBefore(aktivBehandling.behandlingsfrist)) {
+                    aktivBehandling.behandlingsfrist = manglendeInnbetalingFrist
+                }
+                prosessinstans.behandling = aktivBehandling
+                return
+            }
+
+            if (aktivBehandling.type in listOf(Behandlingstyper.HENVENDELSE, Behandlingstyper.NY_VURDERING) && aktivBehandling.opprinneligBehandling == null) {
+                behandlingService.avsluttBehandling(aktivBehandling.id)
+                behandlingsresultatService.oppdaterBehandlingsresultattype(aktivBehandling.id, Behandlingsresultattyper.AVBRUTT)
+                oppgaveService.ferdigstillOppgaveMedSaksnummer(aktivBehandling.fagsak.saksnummer)
+            } else {
+                throw FunksjonellException("Har ikke støtte for aktiv behandling: ${aktivBehandling.id}")
+            }
         }
 
         val behandlingBruktForReplikering = saksbehandlingRegler.finnBehandlingSomKanReplikeres(fagsak)
