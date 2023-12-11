@@ -37,6 +37,7 @@ import org.springframework.util.CollectionUtils;
 import static no.nav.melosys.domain.Fagsak.erSakstypeEøs;
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.FØRSTEGANG;
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper.NY_VURDERING;
 import static no.nav.melosys.service.journalforing.UtledBehandlingsaarsak.utledÅrsaktype;
 
 @Service
@@ -168,12 +169,14 @@ public class JournalfoeringService {
     }
 
     private void validerKanSendeForvaltningsmelding(JournalfoeringOpprettDto journalfoeringDto) {
-        boolean manglerForventetTypeEllerTema = !FØRSTEGANG.name().equals(journalfoeringDto.getBehandlingstypeKode())
-            || !MEDLEMSKAP_LOVVALG.name().equals(journalfoeringDto.getFagsak().getSakstema());
+        String behandlingstype = journalfoeringDto.getBehandlingstypeKode();
+        String sakstema = journalfoeringDto.getFagsak().getSakstema();
+        boolean manglerForventetTypeEllerTema =
+            !((behandlingstype.equals(FØRSTEGANG.name()) || behandlingstype.equals(NY_VURDERING.name())) && sakstema.equals(MEDLEMSKAP_LOVVALG.name()));
 
         if (manglerForventetTypeEllerTema) {
-            throw new FunksjonellException("Kan kun sende forvaltningsmelding for behandlingtype: " +
-                "FØRSTEGANG og sakstema: MEDLEMSKAP_LOVVALG");
+            throw new FunksjonellException("Kan kun sende forvaltningsmelding for behandlingtyper: " +
+                "FØRSTEGANG og NY_VURDERING og sakstema: MEDLEMSKAP_LOVVALG");
         }
 
         if (!journalføringGjelderBruker(journalfoeringDto)) {

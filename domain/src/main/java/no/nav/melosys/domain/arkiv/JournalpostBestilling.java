@@ -14,6 +14,7 @@ public final class JournalpostBestilling {
     private final String saksnummer;
     private final byte[] pdf;
     private final List<Vedlegg> vedlegg;
+    private final String eksternReferanseId;
 
     private JournalpostBestilling(Builder builder) {
         this.tittel = builder.tittel;
@@ -27,6 +28,7 @@ public final class JournalpostBestilling {
         this.saksnummer = builder.saksnummer;
         this.pdf = builder.pdf;
         this.vedlegg = builder.vedlegg;
+        this.eksternReferanseId = builder.eksternReferanseId;
     }
 
     public String getTittel() {
@@ -73,6 +75,10 @@ public final class JournalpostBestilling {
         return vedlegg;
     }
 
+    public String getEksternReferanseId() {
+        return eksternReferanseId;
+    }
+
     public static class Builder {
         private String tittel;
         private String brevkode;
@@ -85,6 +91,7 @@ public final class JournalpostBestilling {
         private String saksnummer;
         private byte[] pdf;
         private List<Vedlegg> vedlegg;
+        private String eksternReferanseId;
 
         public Builder medTittel(String tittel) {
             this.tittel = tittel;
@@ -138,6 +145,11 @@ public final class JournalpostBestilling {
 
         public Builder medVedlegg(List<Vedlegg> vedlegg) {
             this.vedlegg = vedlegg;
+            return this;
+        }
+
+        public Builder medEksternReferanseId(String eksternReferanseId) {
+            this.eksternReferanseId = eksternReferanseId;
             return this;
         }
 

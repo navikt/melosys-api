@@ -160,7 +160,8 @@ public class OpprettSak {
             || oppgavetype == Oppgavetyper.BEH_SAK
             || oppgavetype == Oppgavetyper.BEH_SED
             || oppgavetype == Oppgavetyper.VUR
-            || oppgavetype == Oppgavetyper.VURD_HENV;
+            || oppgavetype == Oppgavetyper.VURD_HENV
+            || oppgavetype == Oppgavetyper.VURD_MAN_INNB;
     }
 
     private void validerJournalpost(Journalpost journalpost) {
