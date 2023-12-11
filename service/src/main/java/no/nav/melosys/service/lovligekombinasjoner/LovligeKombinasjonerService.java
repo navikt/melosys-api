@@ -232,6 +232,9 @@ public class LovligeKombinasjonerService {
         if (!unleash.isEnabled(ToggleName.BEHANDLINGSTYPE_KLAGE)) {
             behandlingstyper.remove(KLAGE);
         }
+        if (!unleash.isEnabled(ToggleName.SAKSBEHANDLING_MANGLENDE_INNBETALING)) {
+            behandlingstyper.remove(MANGLENDE_INNBETALING_TRYGDEAVGIFT);
+        }
         return behandlingstyper;
     }
 
