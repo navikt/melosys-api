@@ -18,10 +18,12 @@ class OpphoertMedlemskap(
     @JsonSerialize(using = LocalDateSerializer::class)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
     val opphoertDato: LocalDate?,
+    val fritekst: String?,
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
     class Builder(val brevbestilling: OpphoertMedlemskapBrevbestilling) {
         private val datoMottatt = instantTilLocalDate(brevbestilling.forsendelseMottatt)
+        private var fritekst: String? = brevbestilling.fritekst
         private var fristDato: LocalDate? = null
         private var opphoertDato: LocalDate? = null
 
@@ -40,7 +42,8 @@ class OpphoertMedlemskap(
                 brevbestilling,
                 datoMottatt,
                 fristDato,
-                opphoertDato
+                opphoertDato,
+                fritekst
             )
         }
     }

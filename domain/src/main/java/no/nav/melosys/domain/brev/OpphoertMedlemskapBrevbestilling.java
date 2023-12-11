@@ -29,7 +29,7 @@ public class OpphoertMedlemskapBrevbestilling extends DokgenBrevbestilling {
 
         public Builder(OpphoertMedlemskapBrevbestilling opphoertMedlemskapBrevbestilling) {
             super(opphoertMedlemskapBrevbestilling);
-            this.fritekst = opphoertMedlemskapBrevbestilling.getFritekst();
+            this.fritekst = opphoertMedlemskapBrevbestilling.fritekst;
         }
 
         public Builder medFritekst(String fritekst) {
