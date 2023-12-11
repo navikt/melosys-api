@@ -21,6 +21,7 @@ import no.nav.melosys.service.kontroll.regler.PeriodeRegler;
 import no.nav.melosys.service.kontroll.regler.PersonRegler;
 import no.nav.melosys.service.validering.Kontrollfeil;
 
+import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.REGISTRERING_UNNTAK;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART9_2;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_au.AUS_ART9_3;
 import static no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART6_2;
@@ -71,7 +72,7 @@ final class FerdigbehandlingKontroll {
         Lovvalgsperiode opprinneligLovvalgsperiode = kontrollData.opprinneligLovvalgsperiode();
 
         return OverlappendeMedlemskapsperioderRegler.harOverlappendeUnntaksperiode(medlemskapDokument,
-            lovvalgsperiode, opprinneligLovvalgsperiode) ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_UNNTAK_PERIODER, KontrolldataFeilType.FEIL) : null;
+            lovvalgsperiode, opprinneligLovvalgsperiode) ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_UNNTAK_PERIODER, KontrolldataFeilType.ADVARSEL) : null;
     }
 
     static Kontrollfeil overlappendeMedlemskapsperiode(FerdigbehandlingKontrollData kontrollData) {
@@ -95,8 +96,11 @@ final class FerdigbehandlingKontroll {
 
     static Kontrollfeil periodeManglerSluttdato(FerdigbehandlingKontrollData kontrollData) {
         PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();
-
-        return lovvalgsperiode.getTom() == null ? new Kontrollfeil(Kontroll_begrunnelser.INGEN_SLUTTDATO, KontrolldataFeilType.FEIL) : null;
+        if (kontrollData.behandlingstema().equals(REGISTRERING_UNNTAK)) {
+            return lovvalgsperiode.getTom() == null ? new Kontrollfeil(Kontroll_begrunnelser.INGEN_SLUTTDATO, KontrolldataFeilType.ADVARSEL) : null;
+        } else {
+            return lovvalgsperiode.getTom() == null ? new Kontrollfeil(Kontroll_begrunnelser.INGEN_SLUTTDATO, KontrolldataFeilType.FEIL) : null;
+        }
     }
 
     static Kontrollfeil periodeOverTreÅr(FerdigbehandlingKontrollData kontrollData) {

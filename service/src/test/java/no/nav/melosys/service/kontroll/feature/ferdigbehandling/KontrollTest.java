@@ -15,6 +15,7 @@ import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
@@ -270,6 +271,27 @@ class KontrollTest {
 
 
         assertThat(resultat).extracting(Kontrollfeil::getKode).contains(Kontroll_begrunnelser.INGEN_SLUTTDATO);
+        assertThat(resultat)
+            .extracting(Kontrollfeil::getType)
+            .contains(KontrolldataFeilType.FEIL);
+    }
+
+    @Test
+    void utførKontroller_periodeManglerSluttdatoOgErUnntak_returnererKode() {
+        mockReturnertLovvalgsperiode();
+
+        lovvalgsperiode.setFom(LocalDate.now());
+        lovvalgsperiode.setTom(null);
+        lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART12_1);
+        behandling.setTema(Behandlingstema.REGISTRERING_UNNTAK);
+        when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
+
+        Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.EU_EOS, Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND);
+
+        assertThat(resultat).extracting(Kontrollfeil::getKode).contains(Kontroll_begrunnelser.INGEN_SLUTTDATO);
+        assertThat(resultat)
+            .extracting(Kontrollfeil::getType)
+            .contains(KontrolldataFeilType.ADVARSEL);
     }
 
     @Test
