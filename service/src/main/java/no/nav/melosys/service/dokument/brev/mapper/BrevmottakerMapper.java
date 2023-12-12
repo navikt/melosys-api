@@ -37,7 +37,7 @@ public class BrevmottakerMapper {
                 .medHovedMottaker(BRUKER)
                 .build()),
 
-            Map.entry(OPPHOERT_MEDLEMSKAP, new Mottakerliste.Builder()
+            Map.entry(VEDTAK_OPPHOERT_MEDLEMSKAP, new Mottakerliste.Builder()
                 .medHovedMottaker(BRUKER)
                 .build()),
 

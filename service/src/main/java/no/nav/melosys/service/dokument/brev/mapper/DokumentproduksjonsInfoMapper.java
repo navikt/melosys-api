@@ -1,5 +1,9 @@
 package no.nav.melosys.service.dokument.brev.mapper;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -8,10 +12,6 @@ import no.nav.melosys.integrasjon.joark.DokumentKategoriKode;
 import no.nav.melosys.service.dokument.DokumentproduksjonsInfo;
 import no.nav.melosys.service.dokument.VedleggTyper;
 import org.springframework.stereotype.Component;
-
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 import static java.lang.String.format;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
@@ -47,10 +47,10 @@ public class DokumentproduksjonsInfoMapper {
                     DokumentKategoriKode.VB.getKode(),
                     JournalforingsTittel.INNVILGELSE_FTRL.getTittel())
             )
-            .put(OPPHOERT_MEDLEMSKAP,
-                new DokumentproduksjonsInfo("opphoert_medlemskap",
+            .put(VEDTAK_OPPHOERT_MEDLEMSKAP,
+                new DokumentproduksjonsInfo("vedtak_opphoert_medlemskap",
                     DokumentKategoriKode.VB.getKode(),
-                    JournalforingsTittel.OPPHOERT_MEDLEMSKAP.getTittel())
+                    JournalforingsTittel.VEDTAK_OPPHOERT_MEDLEMSKAP.getTittel())
             )
             .put(TRYGDEAVTALE_GB,
                 new DokumentproduksjonsInfo("trygdeavtale_gb",
@@ -140,7 +140,7 @@ public class DokumentproduksjonsInfoMapper {
         FORVALTNINGSMELDING("Melding om forventet saksbehandlingstid"),
         MANGELBREV("Melding om manglende opplysninger"),
         INNVILGELSE_FTRL("Vedtak om frivillig medlemskap"),
-        OPPHOERT_MEDLEMSKAP("Vedtak om opphør av frivillig medlemskap"),
+        VEDTAK_OPPHOERT_MEDLEMSKAP("Vedtak om opphør av frivillig medlemskap"),
         TRYGDEAVTALE("Vedtak om medlemskap, Attest for medlemskap i folketrygden"),
         TRYGDEAVTALE_VEDTAKSBREV("Vedtak om medlemskap"),
         TRYGDEAVTALE_ATTEST("Attest for medlemskap i folketrygden"),

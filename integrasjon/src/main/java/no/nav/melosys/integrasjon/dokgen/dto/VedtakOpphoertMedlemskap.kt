@@ -3,12 +3,12 @@ package no.nav.melosys.integrasjon.dokgen.dto
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer
-import no.nav.melosys.domain.brev.OpphoertMedlemskapBrevbestilling
+import no.nav.melosys.domain.brev.VedtakOpphoertMedlemskapBrevbestilling
 import no.nav.melosys.domain.kodeverk.Mottakerroller
 import java.time.LocalDate
 
-class OpphoertMedlemskap(
-    brevbestilling: OpphoertMedlemskapBrevbestilling,
+class VedtakOpphoertMedlemskap(
+    brevbestilling: VedtakOpphoertMedlemskapBrevbestilling,
 
     @JsonSerialize(using = LocalDateSerializer::class)
     @JsonFormat(shape = JsonFormat.Shape.STRING)
@@ -21,7 +21,7 @@ class OpphoertMedlemskap(
     val fritekst: String?,
 ) : DokgenDto(brevbestilling, Mottakerroller.BRUKER) {
 
-    class Builder(val brevbestilling: OpphoertMedlemskapBrevbestilling) {
+    class Builder(val brevbestilling: VedtakOpphoertMedlemskapBrevbestilling) {
         private val datoMottatt = instantTilLocalDate(brevbestilling.forsendelseMottatt)
         private var fritekst: String? = brevbestilling.opphoertBegrunnelseFritekst
         private var opphoertDato: LocalDate? = null
@@ -31,8 +31,8 @@ class OpphoertMedlemskap(
             return this
         }
 
-        fun build(): OpphoertMedlemskap {
-            return OpphoertMedlemskap(
+        fun build(): VedtakOpphoertMedlemskap {
+            return VedtakOpphoertMedlemskap(
                 brevbestilling,
                 datoMottatt,
                 opphoertDato,

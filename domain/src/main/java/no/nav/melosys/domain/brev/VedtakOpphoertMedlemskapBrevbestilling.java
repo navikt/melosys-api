@@ -1,14 +1,14 @@
 package no.nav.melosys.domain.brev;
 
-public class OpphoertMedlemskapBrevbestilling extends DokgenBrevbestilling {
+public class VedtakOpphoertMedlemskapBrevbestilling extends DokgenBrevbestilling {
     private String opphoertBegrunnelseFritekst;
 
-    public OpphoertMedlemskapBrevbestilling() {
+    public VedtakOpphoertMedlemskapBrevbestilling() {
         super();
         //Tom constructor på grunn av deserialsering i prosessinstans
     }
 
-    private OpphoertMedlemskapBrevbestilling(Builder builder) {
+    private VedtakOpphoertMedlemskapBrevbestilling(Builder builder) {
         super(builder);
         this.opphoertBegrunnelseFritekst = builder.opphoertBegrunnelseFritekst;
     }
@@ -27,9 +27,9 @@ public class OpphoertMedlemskapBrevbestilling extends DokgenBrevbestilling {
         public Builder() {
         }
 
-        public Builder(OpphoertMedlemskapBrevbestilling opphoertMedlemskapBrevbestilling) {
-            super(opphoertMedlemskapBrevbestilling);
-            this.opphoertBegrunnelseFritekst = opphoertMedlemskapBrevbestilling.opphoertBegrunnelseFritekst;
+        public Builder(VedtakOpphoertMedlemskapBrevbestilling vedtakOpphoertMedlemskapBrevbestilling) {
+            super(vedtakOpphoertMedlemskapBrevbestilling);
+            this.opphoertBegrunnelseFritekst = vedtakOpphoertMedlemskapBrevbestilling.opphoertBegrunnelseFritekst;
         }
 
         public Builder medOpphoertBegrunnelseFritekst(String opphoertBegrunnelseFritekst) {
@@ -37,8 +37,8 @@ public class OpphoertMedlemskapBrevbestilling extends DokgenBrevbestilling {
             return this;
         }
 
-        public OpphoertMedlemskapBrevbestilling build() {
-            return new OpphoertMedlemskapBrevbestilling(this);
+        public VedtakOpphoertMedlemskapBrevbestilling build() {
+            return new VedtakOpphoertMedlemskapBrevbestilling(this);
         }
     }
 }

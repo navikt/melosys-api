@@ -199,7 +199,7 @@ class DokgenMalMapper(
                 brevbestilling as VarselbrevManglendeInnbetalingBrevbestilling
             )
 
-            Produserbaredokumenter.OPPHOERT_MEDLEMSKAP -> OpphoertMedlemskap.Builder(brevbestilling as OpphoertMedlemskapBrevbestilling).opphoertDato(
+            Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP -> VedtakOpphoertMedlemskap.Builder(brevbestilling as VedtakOpphoertMedlemskapBrevbestilling).opphoertDato(
                 dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
                     .medlemAvFolketrygden.utledMedlemskapsperiodeTom().plusDays(1)
             ).build()
