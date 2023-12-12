@@ -1,0 +1,27 @@
+{
+  "statsborgerskapListe": [],
+  "bostedsadressePeriodeListe": [
+    {
+      "periode": {
+        "fom": "1900-01-01",
+        "tom": "2050-01-01"
+      },
+      "endringstidspunkt": "2022-01-01T12:00:00",
+      "bostedsadresse": {
+        "gateadresse": {
+          "gatenavn": "gatenavn",
+          "gatenummer": 123,
+          "husnummer": 456,
+          "husbokstav": "A"
+        },
+        "tilleggsadresse": "tilleggsadresse",
+        "tilleggsadresseType": "tilleggsadresseType",
+        "postnr": "postnr",
+        "poststed": "poststed",
+        "land": "NOR"
+      }
+    }
+  ],
+  "postadressePeriodeListe": [],
+  "midlertidigAdressePeriodeListe": []
+}

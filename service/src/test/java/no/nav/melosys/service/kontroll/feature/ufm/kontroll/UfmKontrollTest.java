@@ -12,6 +12,7 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.person.PersonDokument;
+import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.person.adresse.Bostedsadresse;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.dokument.utbetaling.Utbetaling;
@@ -155,6 +156,12 @@ class UfmKontrollTest {
         personDokument.setBostedsadresse(new Bostedsadresse());
         personDokument.getBostedsadresse().setLand(new Land("NOR"));
 
+        PersonhistorikkDokument personhistorikkDokument = new PersonhistorikkDokument();
+        personhistorikkDokument.bostedsadressePeriodeListe = List.of();
+
+        List<PersonhistorikkDokument> personhistorikkDokumenter = List.of();
+        personhistorikkDokumenter.add(personhistorikkDokument);
+
         MedlemskapDokument medlemskapDokument = new MedlemskapDokument();
         Medlemsperiode medlemsperiode = new Medlemsperiode();
         medlemsperiode.periode = new Periode(DATE, DATE.plusYears(2));
@@ -175,6 +182,6 @@ class UfmKontrollTest {
         utbetalingDokument.utbetalinger = Collections.singletonList(new Utbetaling());
 
         return new UfmKontrollData(sedDokument, personDokument, medlemskapDokument, inntektDokument,
-            utbetalingDokument, null);
+            utbetalingDokument, null, personhistorikkDokumenter);
     }
 }

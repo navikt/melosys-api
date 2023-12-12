@@ -2,6 +2,7 @@ package no.nav.melosys.service.kontroll.feature.ufm.kontroll;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
@@ -125,6 +126,19 @@ final class UfmKontroll {
 
     static Kontroll_begrunnelser personBosattINorge(UfmKontrollData kontrollData) {
         return PersonRegler.personBosattINorge(kontrollData.persondata()) ?
+            Kontroll_begrunnelser.BOSATT_I_NORGE : null;
+    }
+
+    static Kontroll_begrunnelser personBosattINorgeIPerioden(UfmKontrollData kontrollData) {
+        LocalDate sedFra = kontrollData.sedDokument().getLovvalgsperiode().getFom();
+        LocalDate sedTil = kontrollData.sedDokument().getLovvalgsperiode().getTom();
+
+        var bostedAdressePeriode = kontrollData.personhistorikkDokumenter()
+            .stream()
+            .flatMap(a -> a.bostedsadressePeriodeListe.stream())
+            .collect(Collectors.toList());
+
+        return PersonRegler.personBosattINorgeIPeriode(bostedAdressePeriode, sedFra, sedTil) ?
             Kontroll_begrunnelser.BOSATT_I_NORGE : null;
     }
 

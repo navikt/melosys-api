@@ -9,6 +9,7 @@ import io.micrometer.core.instrument.Metrics;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Kontrollresultat;
+import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.SedType;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
@@ -68,24 +69,32 @@ public class UfmKontrollService {
 
     List<Kontroll_begrunnelser> utførKontroller(Behandling behandling) {
         var sedDokument = behandling.hentSedDokument();
+
         if (harFeilIPeriode(sedDokument)) {
             return Collections.singletonList(Kontroll_begrunnelser.FEIL_I_PERIODEN);
         }
-        var ufmKontrollData = lagUfmKontrollData(behandling, sedDokument);
         var sedType = sedDokument.getSedType();
+        var saksopplysninger = behandling.getSaksopplysninger();
+        var personhistorikkDokumenter =
+            saksopplysninger.stream()
+                .filter(a -> a.getDokument() instanceof PersonhistorikkDokument)
+                .map(a -> (PersonhistorikkDokument) a.getDokument())
+                .toList();
+        var ufmKontrollData = lagUfmKontrollData(behandling, personhistorikkDokumenter, sedDokument);
         return utførKontroller(ufmKontrollData, sedType);
     }
 
-    private UfmKontrollData lagUfmKontrollData(Behandling behandling, SedDokument sedDokument) {
+    private UfmKontrollData lagUfmKontrollData(Behandling behandling, List<PersonhistorikkDokument> personhistorikkDokumenter, SedDokument sedDokument) {
         var persondata = persondataFasade.hentPerson(behandling.getFagsak().hentBrukersAktørID());
         var medlemskapDokument = behandling.hentMedlemskapDokument();
         var inntektDokument = behandling.hentInntektDokument();
         var utbetalingDokument = behandling.finnUtbetalingDokument().orElse(null);
         var optionalMottatteOpplysningerData = mottatteOpplysningerService.finnMottatteOpplysningerData(behandling.getId());
-        return new UfmKontrollData(sedDokument, persondata, medlemskapDokument, inntektDokument, utbetalingDokument, optionalMottatteOpplysningerData);
+        return new UfmKontrollData(sedDokument, persondata, medlemskapDokument, inntektDokument, utbetalingDokument, optionalMottatteOpplysningerData, personhistorikkDokumenter);
     }
 
     private List<Kontroll_begrunnelser> utførKontroller(UfmKontrollData kontrollData, SedType sedType) {
+
         return UfmKontrollsett.hentRegelsettForSedType(sedType).stream()
             .map(f -> f.apply(kontrollData))
             .filter(Objects::nonNull)
