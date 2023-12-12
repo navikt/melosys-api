@@ -55,8 +55,9 @@ class OpprettManglendeInnbetalingBehandlingTest {
 
     @Test
     fun `utfør skal kaste feil dersom man ikke har behandlingsresultat med gitt fakturaserieReferanse`() {
-        val prosessinstans = Prosessinstans()
-        prosessinstans.setData(ProsessDataKey.FAKTURASERIE_REFERANSE, "referanse")
+        val prosessinstans = Prosessinstans().apply {
+            setData(ProsessDataKey.FAKTURASERIE_REFERANSE, "referanse")
+        }
         every { behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse("referanse") } returns emptyList()
 
 
@@ -71,8 +72,9 @@ class OpprettManglendeInnbetalingBehandlingTest {
             fakturaserieReferanse = "referanse"
         }
         val behandling = Behandling().apply { fagsak = Fagsak() }
-        val prosessinstans = Prosessinstans()
-        prosessinstans.setData(ProsessDataKey.FAKTURASERIE_REFERANSE, behandlingsresultat.fakturaserieReferanse)
+        val prosessinstans = Prosessinstans().apply {
+            setData(ProsessDataKey.FAKTURASERIE_REFERANSE, behandlingsresultat.fakturaserieReferanse)
+        }
         every { behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse) } returns listOf(
             behandlingsresultat
         )
