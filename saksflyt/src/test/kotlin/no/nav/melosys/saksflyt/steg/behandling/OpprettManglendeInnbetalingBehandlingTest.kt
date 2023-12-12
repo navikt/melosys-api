@@ -14,6 +14,7 @@ import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.exception.FunksjonellException
@@ -90,7 +91,6 @@ class OpprettManglendeInnbetalingBehandlingTest {
             .message.shouldContain("Finner ikke behandling som skal brukes til replikering")
     }
 
-
     @Test
     fun `utfør skal replikere behandling og sette rette verdier`() {
         val mottaksdato = LocalDate.now()
@@ -106,9 +106,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
             tema = Behandlingstema.YRKESAKTIV
             type = Behandlingstyper.FØRSTEGANG
         }
-        val prosessinstans = Prosessinstans()
-        prosessinstans.setData(ProsessDataKey.FAKTURASERIE_REFERANSE, behandlingsresultat.fakturaserieReferanse)
-        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, mottaksdato)
+        val prosessinstans = lagProsessinstans(behandlingsresultat, mottaksdato)
 
         every { behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse) } returns listOf(
             behandlingsresultat
@@ -134,4 +132,155 @@ class OpprettManglendeInnbetalingBehandlingTest {
         }
     }
 
+    @Test
+    fun `aktiv behandling med type MANGLENDE_INNBETALING_TRYGDEAVGIFT - utfør skal sette prosessinstans behandling til aktivBehandling og avslutte`() {
+        val mottaksdato = LocalDate.now()
+        val behandlingsresultat = Behandlingsresultat().apply {
+            id = 1L
+            fakturaserieReferanse = "referanse"
+        }
+        val behandling = Behandling().apply behandling@{
+            fagsak = Fagsak().apply {
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                type = Sakstyper.FTRL
+                behandlinger.add(this@behandling)
+            }
+            tema = Behandlingstema.YRKESAKTIV
+            type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+            status = Behandlingsstatus.UNDER_BEHANDLING
+        }
+        val prosessinstans = lagProsessinstans(behandlingsresultat, mottaksdato)
+
+
+        every {
+            behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse)
+        } returns listOf(behandlingsresultat)
+        every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandling
+        every { saksbehandlingRegler.finnBehandlingSomKanReplikeres(behandling.fagsak) } returns behandling
+        every {
+            behandlingService.replikerBehandlingOgBehandlingsresultat(
+                behandling,
+                Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+            )
+        } returns behandling
+
+
+        opprettManglendeInnbetalingBehandling.utfør(prosessinstans)
+
+
+        verify(exactly = 0) { behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, any()) }
+        verify(exactly = 0) { saksbehandlingRegler.finnBehandlingSomKanReplikeres(any()) }
+
+        prosessinstans.behandling.shouldNotBeNull().run {
+            behandling.shouldBe(behandling)
+            type.shouldBe(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
+            status.shouldBe(Behandlingsstatus.UNDER_BEHANDLING)
+        }
+    }
+
+    @Test
+    fun `aktiv behandling med type NY_VURDERING og en opprinneligBehandling - sett riktig type og ikke oppdater frist når mindre en 6 uker`() {
+        val mottaksdato = LocalDate.now()
+        val behandlingsresultat = Behandlingsresultat().apply {
+            id = 1L
+            fakturaserieReferanse = "referanse"
+        }
+        val behandling = Behandling().apply behandling@{
+            fagsak = Fagsak().apply {
+                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                type = Sakstyper.FTRL
+                opprinneligBehandling = Behandling()
+                behandlingsfrist = LocalDate.now().plusWeeks(5)
+                behandlinger.add(this@behandling)
+            }
+            tema = Behandlingstema.YRKESAKTIV
+            type = Behandlingstyper.NY_VURDERING
+            status = Behandlingsstatus.UNDER_BEHANDLING
+        }
+        val prosessinstans = lagProsessinstans(behandlingsresultat, mottaksdato)
+
+        every {
+            behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse)
+        } returns listOf(behandlingsresultat)
+        every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandling
+        every { saksbehandlingRegler.finnBehandlingSomKanReplikeres(behandling.fagsak) } returns behandling
+        every {
+            behandlingService.replikerBehandlingOgBehandlingsresultat(
+                behandling,
+                Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+            )
+        } returns behandling
+
+
+        opprettManglendeInnbetalingBehandling.utfør(prosessinstans)
+
+
+        verify(exactly = 0) { behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, any()) }
+        verify(exactly = 0) { saksbehandlingRegler.finnBehandlingSomKanReplikeres(any()) }
+
+        prosessinstans.behandling.shouldNotBeNull().run {
+            behandling.shouldBe(behandling)
+            behandlingsfrist.shouldBe(LocalDate.now().plusWeeks(5))
+            type.shouldBe(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
+            status.shouldBe(Behandlingsstatus.UNDER_BEHANDLING)
+        }
+    }
+
+    @Test
+    fun `aktiv behandling med type NY_VURDERING og en opprinneligBehandling - set riktig type og oppdater frist når mer en 6 uker`() {
+        val mottaksdato = LocalDate.now()
+        val behandlingsresultat = Behandlingsresultat().apply {
+            id = 1L
+            fakturaserieReferanse = "referanse"
+        }
+        val behandling = lagBehandling(frist = LocalDate.now().plusWeeks(7))
+        val prosessinstans = lagProsessinstans(behandlingsresultat, mottaksdato)
+
+        every {
+            behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse)
+        } returns listOf(behandlingsresultat)
+        every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandling
+        every { saksbehandlingRegler.finnBehandlingSomKanReplikeres(behandling.fagsak) } returns behandling
+        every {
+            behandlingService.replikerBehandlingOgBehandlingsresultat(
+                behandling,
+                Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+            )
+        } returns behandling
+
+
+        opprettManglendeInnbetalingBehandling.utfør(prosessinstans)
+
+
+        verify(exactly = 0) { behandlingService.replikerBehandlingOgBehandlingsresultat(behandling, any()) }
+        verify(exactly = 0) { saksbehandlingRegler.finnBehandlingSomKanReplikeres(any()) }
+
+        prosessinstans.behandling.shouldNotBeNull().run {
+            behandling.shouldBe(behandling)
+            behandlingsfrist.shouldBe(LocalDate.now().plusWeeks(6))
+            type.shouldBe(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
+            status.shouldBe(Behandlingsstatus.UNDER_BEHANDLING)
+        }
+    }
+
+    private fun lagProsessinstans(
+        behandlingsresultat: Behandlingsresultat,
+        mottaksdato: LocalDate?
+    ) = Prosessinstans().apply {
+        setData(ProsessDataKey.FAKTURASERIE_REFERANSE, behandlingsresultat.fakturaserieReferanse)
+        setData(ProsessDataKey.MOTTATT_DATO, mottaksdato)
+    }
+
+    private fun lagBehandling(frist: LocalDate): Behandling = Behandling().apply behandling@{
+        fagsak = Fagsak().apply {
+            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+            type = Sakstyper.FTRL
+            opprinneligBehandling = Behandling()
+            behandlingsfrist = frist
+            behandlinger.add(this@behandling)
+        }
+        tema = Behandlingstema.YRKESAKTIV
+        type = Behandlingstyper.NY_VURDERING
+        status = Behandlingsstatus.UNDER_BEHANDLING
+    }
 }
