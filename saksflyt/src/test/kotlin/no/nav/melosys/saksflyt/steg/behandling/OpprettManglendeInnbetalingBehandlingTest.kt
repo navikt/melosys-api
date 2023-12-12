@@ -1,9 +1,11 @@
 package no.nav.melosys.saksflyt.steg.behandling
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.withClue
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
+import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
@@ -13,10 +15,7 @@ import no.nav.melosys.domain.Behandlingsresultat
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Sakstemaer
 import no.nav.melosys.domain.kodeverk.Sakstyper
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
-import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.domain.kodeverk.behandlinger.*
 import no.nav.melosys.exception.FunksjonellException
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
@@ -202,7 +201,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
     }
 
     @Test
-    fun `aktiv behandling med type NY_VURDERING og en opprinneligBehandling - set riktig type og oppdater frist når mer en 6 uker`() {
+    fun `aktiv behandling med type NY_VURDERING og en opprinneligBehandling - sett riktig type og oppdater frist når mer en 6 uker`() {
         val mottaksdato = LocalDate.now()
         val behandlingsresultat = lagBehandlingsresultat()
         val behandling = lagBehandling {
@@ -237,6 +236,67 @@ class OpprettManglendeInnbetalingBehandlingTest {
             behandlingsfrist.shouldBe(LocalDate.now().plusWeeks(6))
             type.shouldBe(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
             status.shouldBe(Behandlingsstatus.UNDER_BEHANDLING)
+        }
+    }
+
+    @Test
+    fun `aktiv behandling med type HENVENDELSE og NY_VURDERING og ikke replikert behandling`() {
+        mapOf(
+            "HENVENDELSE" to Behandlingstyper.HENVENDELSE,
+            "NY_VURDERING" to Behandlingstyper.NY_VURDERING
+        ).forEach { (beskrivelse, behandlingstype) ->
+            clearMocks(behandlingService, saksbehandlingRegler, behandlingsresultatService, oppgaveService)
+            withClue(beskrivelse) {
+
+                val mottaksdato = LocalDate.now()
+                val behandlingsresultat = lagBehandlingsresultat()
+                val behandling = lagBehandling {
+                    type = behandlingstype
+                    status = Behandlingsstatus.UNDER_BEHANDLING
+                }
+                val prosessinstans = lagProsessinstans(behandlingsresultat, mottaksdato)
+
+                every {
+                    behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse)
+                } returns listOf(behandlingsresultat)
+                every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandling
+                every { saksbehandlingRegler.finnBehandlingSomKanReplikeres(behandling.fagsak) } returns behandling
+                every {
+                    behandlingService.replikerBehandlingOgBehandlingsresultat(
+                        behandling,
+                        Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+                    )
+                } returns behandling
+                every { behandlingService.avsluttBehandling(any()) } returns Unit
+                every { behandlingsresultatService.oppdaterBehandlingsresultattype(any(), any()) } returns Unit
+                every { oppgaveService.ferdigstillOppgaveMedSaksnummer(any()) } returns Unit
+
+
+                opprettManglendeInnbetalingBehandling.utfør(prosessinstans)
+
+
+                verify(exactly = 1) {
+                    behandlingService.replikerBehandlingOgBehandlingsresultat(
+                        behandling,
+                        Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+                    )
+                }
+                verify(exactly = 1) { saksbehandlingRegler.finnBehandlingSomKanReplikeres(behandling.fagsak) }
+                verify(exactly = 1) { behandlingService.avsluttBehandling(1L) }
+                verify(exactly = 1) { behandlingsresultatService.oppdaterBehandlingsresultattype(1L, Behandlingsresultattyper.AVBRUTT) }
+                verify(exactly = 1) { oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.fagsak.saksnummer) }
+
+                prosessinstans.behandling.shouldNotBeNull().run {
+                    behandling.shouldBe(behandling)
+                    type.shouldBe(behandlingstype)
+                    status.shouldBe(Behandlingsstatus.UNDER_BEHANDLING)
+                    mottaksdato.shouldBe(mottaksdato)
+                    behandlingsfrist.shouldBe(Behandling.utledBehandlingsfrist(behandling, mottaksdato))
+                    //https://jira.adeo.no/browse/MELOSYS-6187 så står det
+                    // Behandlingsfrist skal oppdateres slik at fristen blir 6 uker fra dagens dato (samme som varselbrev)
+                    // Men blir satt mye lengre frem en 6 uker ved bruke av Behandling.utledBehandlingsfrist - er det riktig?
+                }
+            }
         }
     }
 
