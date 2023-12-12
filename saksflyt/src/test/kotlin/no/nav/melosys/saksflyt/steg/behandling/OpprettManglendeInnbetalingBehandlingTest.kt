@@ -292,6 +292,8 @@ class OpprettManglendeInnbetalingBehandlingTest {
                     status.shouldBe(Behandlingsstatus.UNDER_BEHANDLING)
                     mottaksdato.shouldBe(mottaksdato)
                     behandlingsfrist.shouldBe(Behandling.utledBehandlingsfrist(behandling, mottaksdato))
+//                    behandlingsfrist.shouldBe(LocalDate.now().plusWeeks(8))
+                    behandlingsfrist.shouldBe(LocalDate.now().plusDays(90))
                     //https://jira.adeo.no/browse/MELOSYS-6187 så står det
                     // Behandlingsfrist skal oppdateres slik at fristen blir 6 uker fra dagens dato (samme som varselbrev)
                     // Men blir satt mye lengre frem en 6 uker ved bruke av Behandling.utledBehandlingsfrist - er det riktig?
@@ -336,16 +338,12 @@ class OpprettManglendeInnbetalingBehandlingTest {
 
     private fun lagBehandling(block: Behandling.() -> Unit = {}): Behandling = Behandling().apply behandling@{
         block()
-        id = this@behandling.id ?: 1L
-        fagsak = Fagsak().apply {
+        id = id ?: 1L
+        fagsak = fagsak ?: Fagsak().apply {
             tema = Sakstemaer.MEDLEMSKAP_LOVVALG
             type = Sakstyper.FTRL
             behandlinger.add(this@behandling)
         }
-        opprinneligBehandling = this@behandling.opprinneligBehandling
-        behandlingsfrist = this@behandling.behandlingsfrist
-        tema = this@behandling.tema ?: Behandlingstema.YRKESAKTIV
-        type = this@behandling.type
-        status = this@behandling.status
+        tema = tema ?: Behandlingstema.YRKESAKTIV
     }
 }
