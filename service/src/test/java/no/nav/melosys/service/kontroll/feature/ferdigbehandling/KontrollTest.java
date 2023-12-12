@@ -27,7 +27,7 @@ import no.nav.melosys.integrasjon.medl.PeriodestatusMedl;
 import no.nav.melosys.service.LovvalgsperiodeService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingService;
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.KontrolldataFeilType;
+import exception.KontrolldataFeilType;
 import no.nav.melosys.service.medlemskapsperiode.MedlemskapsperiodeService;
 import no.nav.melosys.service.persondata.PersondataFasade;
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory;

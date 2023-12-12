@@ -5,7 +5,7 @@ import java.util.List;
 
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.exception.validering.KontrollfeilDto;
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.KontrolldataFeilType;
+import exception.KontrolldataFeilType;
 
 public class Kontrollfeil {
     private final Kontroll_begrunnelser kode;
@@ -40,7 +40,7 @@ public class Kontrollfeil {
         KontrollfeilDto dto = new KontrollfeilDto();
         dto.setKode(kode.getKode());
         dto.setFelter(felter);
-        dto.setType(String.valueOf(type));
+        dto.setType(type);
         return dto;
     }
 

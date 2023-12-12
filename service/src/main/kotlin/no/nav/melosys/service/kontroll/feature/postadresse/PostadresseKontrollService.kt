@@ -1,11 +1,11 @@
 package no.nav.melosys.service.kontroll.feature.postadresse
 
+import exception.KontrolldataFeilType
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Representerer
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.service.behandling.BehandlingService
-import no.nav.melosys.service.kontroll.feature.ferdigbehandling.kontroll.KontrolldataFeilType
 import no.nav.melosys.service.kontroll.regler.PersonRegler
 import no.nav.melosys.service.persondata.PersondataService
 import no.nav.melosys.service.registeropplysninger.OrganisasjonOppslagService

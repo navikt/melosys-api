@@ -2,10 +2,12 @@ package no.nav.melosys.exception.validering;
 
 import java.util.List;
 
+import exception.KontrolldataFeilType;
+
 public class KontrollfeilDto {
     private String kode;
     private List<String> felter;
-    private String type;
+    private KontrolldataFeilType type;
 
     public String getKode() {
         return kode;
@@ -23,11 +25,11 @@ public class KontrollfeilDto {
         this.felter = felter;
     }
 
-    public String getType() {
+    public KontrolldataFeilType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(KontrolldataFeilType type) {
         this.type = type;
     }
 }

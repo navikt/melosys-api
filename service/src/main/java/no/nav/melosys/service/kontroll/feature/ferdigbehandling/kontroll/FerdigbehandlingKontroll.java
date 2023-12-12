@@ -13,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca;
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS;
+import exception.KontrolldataFeilType;
 import no.nav.melosys.service.kontroll.feature.arbeidutland.kontroll.ArbeidUtlandKontroll;
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData;
 import no.nav.melosys.service.kontroll.regler.ArbeidsstedRegler;
@@ -39,7 +40,7 @@ final class FerdigbehandlingKontroll {
         List<Medlemskapsperiode> medlemskapsperioder = kontrollData.medlemskapsperioder();
         PeriodeOmLovvalg periodeOmLovvalg = kontrollData.lovvalgsperiode();
 
-        if (harBehandlingstemaMedUnntakForOverlappendePeriode(periodeOmLovvalg, kontrollData.behandlingstema())) {
+        if (harBehandlingstemaMedUnntakForOverlappendePeriode((Lovvalgsperiode) periodeOmLovvalg, kontrollData.behandlingstema())) {
             return OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument, medlemskapsperioder)
                 ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.ADVARSEL)
                 : null;
@@ -57,23 +58,20 @@ final class FerdigbehandlingKontroll {
             : null;
     }
 
-    static boolean harBehandlingstemaMedUnntakForOverlappendePeriode(PeriodeOmLovvalg periodeOmLovvalg, Behandlingstema behandlingstema) {
-        if (periodeOmLovvalg instanceof Lovvalgsperiode lovvalgsperiode) {
+    static boolean harBehandlingstemaMedUnntakForOverlappendePeriode(Lovvalgsperiode lovvalgsperiode, Behandlingstema behandlingstema) {
             return (behandlingstema == Behandlingstema.UTSENDT_ARBEIDSTAKER || behandlingstema == Behandlingstema.UTSENDT_SELVSTENDIG)
                 && lovvalgsperiode.erAvslått();
-        }
-        return false;
     }
 
     static Kontrollfeil overlappendeUnntaksperiode(FerdigbehandlingKontrollData kontrollData) {
         MedlemskapDokument medlemskapDokument = kontrollData.medlemskapDokument();
-        PeriodeOmLovvalg kontrollPeriode = kontrollData.lovvalgsperiode();
+        Lovvalgsperiode kontrollPeriode = (Lovvalgsperiode) kontrollData.lovvalgsperiode();
         Lovvalgsperiode opprinneligLovvalgsperiode = kontrollData.opprinneligLovvalgsperiode();
 
         boolean harOverlapp = OverlappendeMedlemskapsperioderRegler.harOverlappendeUnntaksperiode(
             medlemskapDokument, kontrollPeriode, opprinneligLovvalgsperiode);
 
-        if (kontrollPeriode instanceof Lovvalgsperiode lovvalgsperiode && lovvalgsperiode.erAvslått()) {
+        if (kontrollPeriode.erAvslått()) {
             return harOverlapp ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_UNNTAK_PERIODER, KontrolldataFeilType.ADVARSEL) : null;
         }
 
