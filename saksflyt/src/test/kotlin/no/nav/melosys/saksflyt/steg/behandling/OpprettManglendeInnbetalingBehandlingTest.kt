@@ -170,6 +170,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
             type = Behandlingstyper.NY_VURDERING
             status = Behandlingsstatus.UNDER_BEHANDLING
             behandlingsfrist = LocalDate.now().plusWeeks(5)
+            opprinneligBehandling = Behandling()
         }
         val prosessinstans = lagProsessinstans(behandlingsresultat, mottaksdato)
 
@@ -208,6 +209,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
             type = Behandlingstyper.NY_VURDERING
             status = Behandlingsstatus.UNDER_BEHANDLING
             behandlingsfrist = LocalDate.now().plusWeeks(7)
+            opprinneligBehandling = Behandling()
         }
         val prosessinstans = lagProsessinstans(behandlingsresultat, mottaksdato)
 
@@ -258,7 +260,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
             type = Sakstyper.FTRL
             behandlinger.add(this@behandling)
         }
-        opprinneligBehandling = Behandling()
+        opprinneligBehandling = this@behandling.opprinneligBehandling
         behandlingsfrist = this@behandling.behandlingsfrist
         tema = this@behandling.tema ?: Behandlingstema.YRKESAKTIV
         type = this@behandling.type
