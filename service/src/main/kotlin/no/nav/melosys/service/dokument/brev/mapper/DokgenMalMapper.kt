@@ -86,13 +86,6 @@ class DokgenMalMapper(
         )
     }
 
-    internal fun lagOpphørtMedlemskapsbrev(brevbestilling: OpphoertMedlemskapBrevbestilling): OpphoertMedlemskap {
-        val behandlingsresultat = dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandling.id)
-        val opphørtDato = behandlingsresultat.medlemAvFolketrygden.utledMedlemskapsperiodeTom().plusDays(1)
-        val varselbrevFrist = TrygdeavgiftBetalingsfrist.beregnTrygdeavgiftBetalingsfrist(behandlingsresultat.behandling.behandlingsårsak.mottaksdato)
-        return OpphoertMedlemskap.Builder(brevbestilling).opphoertDato(opphørtDato).fristDato(varselbrevFrist).build()
-    }
-
     private fun lagDokgenDtoFraBestilling(brevbestilling: DokgenBrevbestilling): DokgenDto {
         return when (brevbestilling.produserbartdokument) {
             Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD -> SaksbehandlingstidSoknad.av(
@@ -206,7 +199,10 @@ class DokgenMalMapper(
                 brevbestilling as VarselbrevManglendeInnbetalingBrevbestilling
             )
 
-            Produserbaredokumenter.OPPHOERT_MEDLEMSKAP -> lagOpphørtMedlemskapsbrev(brevbestilling as OpphoertMedlemskapBrevbestilling)
+            Produserbaredokumenter.OPPHOERT_MEDLEMSKAP -> OpphoertMedlemskap.Builder(brevbestilling as OpphoertMedlemskapBrevbestilling).opphoertDato(
+                dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
+                    .medlemAvFolketrygden.utledMedlemskapsperiodeTom().plusDays(1)
+            ).build()
 
             else -> throw FunksjonellException("ProduserbartDokument ${brevbestilling.produserbartdokument} er ikke støttet av melosys-dokgen")
         }
