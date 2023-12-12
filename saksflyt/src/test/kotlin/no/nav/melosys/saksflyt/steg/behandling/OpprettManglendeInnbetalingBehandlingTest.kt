@@ -72,10 +72,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
 
     @Test
     fun `utfør skal kaste feil dersom man ikke har behandling som kan brukes til replikering`() {
-        val behandlingsresultat = Behandlingsresultat().apply {
-            id = 1L
-            fakturaserieReferanse = "referanse"
-        }
+        val behandlingsresultat = lagBehandlingsresultat()
         val behandling = Behandling().apply { fagsak = Fagsak() }
         val prosessinstans = Prosessinstans().apply {
             setData(ProsessDataKey.FAKTURASERIE_REFERANSE, behandlingsresultat.fakturaserieReferanse)
@@ -94,18 +91,13 @@ class OpprettManglendeInnbetalingBehandlingTest {
     @Test
     fun `utfør skal replikere behandling og sette rette verdier`() {
         val mottaksdato = LocalDate.now()
-        val behandlingsresultat = Behandlingsresultat().apply {
-            id = 1L
-            fakturaserieReferanse = "referanse"
-        }
-        val behandling = Behandling().apply {
-            fagsak = Fagsak().apply {
-                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                type = Sakstyper.FTRL
-            }
-            tema = Behandlingstema.YRKESAKTIV
+        val behandlingsresultat = lagBehandlingsresultat()
+
+        val behandling = lagBehandling {
             type = Behandlingstyper.FØRSTEGANG
+            status = Behandlingsstatus.AVSLUTTET
         }
+
         val prosessinstans = lagProsessinstans(behandlingsresultat, mottaksdato)
 
         every { behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse) } returns listOf(
@@ -135,20 +127,12 @@ class OpprettManglendeInnbetalingBehandlingTest {
     @Test
     fun `aktiv behandling med type MANGLENDE_INNBETALING_TRYGDEAVGIFT - utfør skal sette prosessinstans behandling til aktivBehandling og avslutte`() {
         val mottaksdato = LocalDate.now()
-        val behandlingsresultat = Behandlingsresultat().apply {
-            id = 1L
-            fakturaserieReferanse = "referanse"
-        }
-        val behandling = Behandling().apply behandling@{
-            fagsak = Fagsak().apply {
-                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                type = Sakstyper.FTRL
-                behandlinger.add(this@behandling)
-            }
-            tema = Behandlingstema.YRKESAKTIV
+        val behandlingsresultat = lagBehandlingsresultat()
+        val behandling = lagBehandling {
             type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
             status = Behandlingsstatus.UNDER_BEHANDLING
         }
+
         val prosessinstans = lagProsessinstans(behandlingsresultat, mottaksdato)
 
 
@@ -181,21 +165,11 @@ class OpprettManglendeInnbetalingBehandlingTest {
     @Test
     fun `aktiv behandling med type NY_VURDERING og en opprinneligBehandling - sett riktig type og ikke oppdater frist når mindre en 6 uker`() {
         val mottaksdato = LocalDate.now()
-        val behandlingsresultat = Behandlingsresultat().apply {
-            id = 1L
-            fakturaserieReferanse = "referanse"
-        }
-        val behandling = Behandling().apply behandling@{
-            fagsak = Fagsak().apply {
-                tema = Sakstemaer.MEDLEMSKAP_LOVVALG
-                type = Sakstyper.FTRL
-                opprinneligBehandling = Behandling()
-                behandlingsfrist = LocalDate.now().plusWeeks(5)
-                behandlinger.add(this@behandling)
-            }
-            tema = Behandlingstema.YRKESAKTIV
+        val behandlingsresultat = lagBehandlingsresultat()
+        val behandling = lagBehandling {
             type = Behandlingstyper.NY_VURDERING
             status = Behandlingsstatus.UNDER_BEHANDLING
+            behandlingsfrist = LocalDate.now().plusWeeks(5)
         }
         val prosessinstans = lagProsessinstans(behandlingsresultat, mottaksdato)
 
@@ -229,11 +203,12 @@ class OpprettManglendeInnbetalingBehandlingTest {
     @Test
     fun `aktiv behandling med type NY_VURDERING og en opprinneligBehandling - set riktig type og oppdater frist når mer en 6 uker`() {
         val mottaksdato = LocalDate.now()
-        val behandlingsresultat = Behandlingsresultat().apply {
-            id = 1L
-            fakturaserieReferanse = "referanse"
+        val behandlingsresultat = lagBehandlingsresultat()
+        val behandling = lagBehandling {
+            type = Behandlingstyper.NY_VURDERING
+            status = Behandlingsstatus.UNDER_BEHANDLING
+            behandlingsfrist = LocalDate.now().plusWeeks(7)
         }
-        val behandling = lagBehandling(frist = LocalDate.now().plusWeeks(7))
         val prosessinstans = lagProsessinstans(behandlingsresultat, mottaksdato)
 
         every {
@@ -263,6 +238,11 @@ class OpprettManglendeInnbetalingBehandlingTest {
         }
     }
 
+    private fun lagBehandlingsresultat() = Behandlingsresultat().apply {
+        id = 1L
+        fakturaserieReferanse = "referanse"
+    }
+
     private fun lagProsessinstans(
         behandlingsresultat: Behandlingsresultat,
         mottaksdato: LocalDate?
@@ -271,16 +251,17 @@ class OpprettManglendeInnbetalingBehandlingTest {
         setData(ProsessDataKey.MOTTATT_DATO, mottaksdato)
     }
 
-    private fun lagBehandling(frist: LocalDate): Behandling = Behandling().apply behandling@{
+    private fun lagBehandling(block: Behandling.() -> Unit = {}): Behandling = Behandling().apply behandling@{
+        block()
         fagsak = Fagsak().apply {
             tema = Sakstemaer.MEDLEMSKAP_LOVVALG
             type = Sakstyper.FTRL
-            opprinneligBehandling = Behandling()
-            behandlingsfrist = frist
             behandlinger.add(this@behandling)
         }
-        tema = Behandlingstema.YRKESAKTIV
-        type = Behandlingstyper.NY_VURDERING
-        status = Behandlingsstatus.UNDER_BEHANDLING
+        opprinneligBehandling = Behandling()
+        behandlingsfrist = this@behandling.behandlingsfrist
+        tema = this@behandling.tema ?: Behandlingstema.YRKESAKTIV
+        type = this@behandling.type
+        status = this@behandling.status
     }
 }
