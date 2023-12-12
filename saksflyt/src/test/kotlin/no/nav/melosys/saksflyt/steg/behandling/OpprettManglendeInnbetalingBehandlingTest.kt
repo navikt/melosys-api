@@ -22,6 +22,7 @@ import no.nav.melosys.saksflytapi.domain.ProsessSteg
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
+import no.nav.melosys.service.oppgave.OppgaveService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -39,12 +40,15 @@ class OpprettManglendeInnbetalingBehandlingTest {
     @MockK
     private lateinit var saksbehandlingRegler: SaksbehandlingRegler
 
+    @MockK
+    private lateinit var oppgaveService: OppgaveService
+
     private lateinit var opprettManglendeInnbetalingBehandling: OpprettManglendeInnbetalingBehandling
 
     @BeforeEach
     fun setUp() {
         opprettManglendeInnbetalingBehandling =
-            OpprettManglendeInnbetalingBehandling(behandlingService, behandlingsresultatService, saksbehandlingRegler)
+            OpprettManglendeInnbetalingBehandling(behandlingService, behandlingsresultatService, saksbehandlingRegler, oppgaveService)
     }
 
     @Test
