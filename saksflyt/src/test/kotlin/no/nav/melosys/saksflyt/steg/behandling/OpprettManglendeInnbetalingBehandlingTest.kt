@@ -23,7 +23,6 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.saksbehandling.SaksbehandlingRegler
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -50,8 +49,8 @@ class OpprettManglendeInnbetalingBehandlingTest {
 
     @Test
     fun `inngangsSteg skal returnere OPPRETT_MANGLENDE_INNBETALING_BEHANDLING`() {
-        val steg = opprettManglendeInnbetalingBehandling.inngangsSteg()
-        Assertions.assertEquals(ProsessSteg.OPPRETT_MANGLENDE_INNBETALING_BEHANDLING, steg)
+        opprettManglendeInnbetalingBehandling.inngangsSteg()
+            .shouldBe(ProsessSteg.OPPRETT_MANGLENDE_INNBETALING_BEHANDLING)
     }
 
     @Test
