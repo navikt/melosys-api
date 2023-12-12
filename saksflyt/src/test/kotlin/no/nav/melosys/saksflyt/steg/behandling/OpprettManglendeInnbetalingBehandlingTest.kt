@@ -300,6 +300,27 @@ class OpprettManglendeInnbetalingBehandlingTest {
         }
     }
 
+    @Test
+    fun `kaster feil dersom man har aktiv behandling men ikke har støtte`() {
+        val mottaksdato = LocalDate.now()
+        val behandlingsresultat = lagBehandlingsresultat()
+        val behandling = lagBehandling {
+            type = Behandlingstyper.FØRSTEGANG
+            status = Behandlingsstatus.UNDER_BEHANDLING
+        }
+        val prosessinstans = lagProsessinstans(behandlingsresultat, mottaksdato)
+
+        every {
+            behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse)
+        } returns listOf(behandlingsresultat)
+        every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandling
+
+
+        shouldThrow<FunksjonellException> {
+            opprettManglendeInnbetalingBehandling.utfør(prosessinstans)
+        }.message.shouldBe("Har ikke støtte for aktiv behandling: 1")
+    }
+
     private fun lagBehandlingsresultat() = Behandlingsresultat().apply {
         id = 1L
         fakturaserieReferanse = "referanse"
