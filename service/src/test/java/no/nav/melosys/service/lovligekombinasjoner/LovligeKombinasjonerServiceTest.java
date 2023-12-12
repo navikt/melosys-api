@@ -12,6 +12,7 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.featuretoggle.ToggleName;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.sak.FagsakService;
@@ -39,11 +40,11 @@ class LovligeKombinasjonerServiceTest {
     @Mock
     private BehandlingsresultatService behandlingsresultatService;
 
+    private final FakeUnleash unleash = new FakeUnleash();
     private LovligeKombinasjonerService lovligeKombinasjonerService;
 
     @BeforeEach
     void setup() {
-        var unleash = new FakeUnleash();
         unleash.enableAll();
         lovligeKombinasjonerService = new LovligeKombinasjonerService(fagsakService, behandlingService, behandlingsresultatService, unleash);
     }
@@ -53,7 +54,7 @@ class LovligeKombinasjonerServiceTest {
         var muligeSakstyper = lovligeKombinasjonerService.hentMuligeSakstyper(null);
 
 
-        assertThat(muligeSakstyper).hasSize(3).contains(EU_EOS, FTRL, TRYGDEAVTALE);
+        assertThat(muligeSakstyper).hasSize(3).containsExactlyInAnyOrder(EU_EOS, FTRL, TRYGDEAVTALE);
     }
 
     @Test
@@ -66,7 +67,7 @@ class LovligeKombinasjonerServiceTest {
         var muligeSakstyper = lovligeKombinasjonerService.hentMuligeSakstyper("saksnummer");
 
 
-        assertThat(muligeSakstyper).hasSize(3).contains(EU_EOS, FTRL, TRYGDEAVTALE);
+        assertThat(muligeSakstyper).hasSize(3).containsExactlyInAnyOrder(EU_EOS, FTRL, TRYGDEAVTALE);
     }
 
     @Test
@@ -127,7 +128,7 @@ class LovligeKombinasjonerServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, ARBEID_TJENESTEPERSON_ELLER_FLY, null, null);
 
 
-        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
     @Test
@@ -136,7 +137,7 @@ class LovligeKombinasjonerServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, IKKE_YRKESAKTIV, null, null);
 
 
-        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
     @Test
@@ -145,7 +146,7 @@ class LovligeKombinasjonerServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, UNNTAK, FORESPØRSEL_TRYGDEMYNDIGHET, null, null);
 
 
-        assertThat(muligeTyper).contains(HENVENDELSE);
+        assertThat(muligeTyper).containsExactlyInAnyOrder(HENVENDELSE);
     }
 
     @Test
@@ -154,7 +155,7 @@ class LovligeKombinasjonerServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, TRYGDEAVGIFT, YRKESAKTIV, null, null);
 
 
-        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
     @Test
@@ -163,7 +164,7 @@ class LovligeKombinasjonerServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, MEDLEMSKAP_LOVVALG, YRKESAKTIV, null, null);
 
 
-        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE, MANGLENDE_INNBETALING_TRYGDEAVGIFT);
     }
 
     @Test
@@ -171,8 +172,28 @@ class LovligeKombinasjonerServiceTest {
         var muligeTyper = lovligeKombinasjonerService
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, MEDLEMSKAP_LOVVALG, PENSJONIST, null, null);
 
+        // TODO: Gir det mening at pensjonist/ingenflyt får velge alle disse typene?
+        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE, MANGLENDE_INNBETALING_TRYGDEAVGIFT);
+    }
 
-        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+    @Test
+    void hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_toggleDisabled_returnererLovligKombinasjon() {
+        unleash.enableAllExcept(ToggleName.SAKSBEHANDLING_MANGLENDE_INNBETALING);
+        var muligeTyper = lovligeKombinasjonerService
+            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, MEDLEMSKAP_LOVVALG, YRKESAKTIV, null, null);
+
+
+        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+    }
+
+    @Test
+    void hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaPensjonist_toggleDisabled_returnererLovligKombinasjon() {
+        unleash.enableAllExcept(ToggleName.SAKSBEHANDLING_MANGLENDE_INNBETALING);
+        var muligeTyper = lovligeKombinasjonerService
+            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, MEDLEMSKAP_LOVVALG, PENSJONIST, null, null);
+
+
+        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
     @Test
@@ -181,7 +202,7 @@ class LovligeKombinasjonerServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, TRYGDEAVGIFT, PENSJONIST, null, null);
 
 
-        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
     @Test
@@ -190,7 +211,7 @@ class LovligeKombinasjonerServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, TRYGDEAVGIFT, YRKESAKTIV, null, null);
 
 
-        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
     @Test
@@ -199,7 +220,7 @@ class LovligeKombinasjonerServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, YRKESAKTIV, null, null);
 
 
-        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
     @Test
@@ -208,7 +229,7 @@ class LovligeKombinasjonerServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, PENSJONIST, null, null);
 
 
-        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
     @Test
@@ -217,7 +238,7 @@ class LovligeKombinasjonerServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, TRYGDEAVTALE, UNNTAK, FORESPØRSEL_TRYGDEMYNDIGHET, null, null);
 
 
-        assertThat(muligeTyper).contains(HENVENDELSE);
+        assertThat(muligeTyper).containsExactlyInAnyOrder(HENVENDELSE);
     }
 
     @Test
@@ -226,7 +247,7 @@ class LovligeKombinasjonerServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, TRYGDEAVTALE, TRYGDEAVGIFT, YRKESAKTIV, null, null);
 
 
-        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
     @Test
@@ -235,7 +256,7 @@ class LovligeKombinasjonerServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, TRYGDEAVTALE, TRYGDEAVGIFT, PENSJONIST, null, null);
 
 
-        assertThat(muligeTyper).contains(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
     @Test
@@ -248,7 +269,7 @@ class LovligeKombinasjonerServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, null, sisteBehandling, null);
 
 
-        assertThat(muligeTyper).contains(NY_VURDERING, HENVENDELSE, KLAGE).doesNotContain(FØRSTEGANG);
+        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, HENVENDELSE, KLAGE).doesNotContain(FØRSTEGANG);
     }
 
     @Test
@@ -261,7 +282,7 @@ class LovligeKombinasjonerServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, EU_EOS, MEDLEMSKAP_LOVVALG, UTSENDT_ARBEIDSTAKER, null, sisteBehandling, null);
 
 
-        assertThat(muligeTyper).contains(NY_VURDERING, HENVENDELSE, KLAGE).doesNotContain(FØRSTEGANG);
+        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, HENVENDELSE, KLAGE).doesNotContain(FØRSTEGANG);
     }
 
     @Test
@@ -269,7 +290,7 @@ class LovligeKombinasjonerServiceTest {
         Set<Behandlingstema> behandlingstemas = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, MEDLEMSKAP_LOVVALG, null);
         assertThat(behandlingstemas)
             .hasSize(1)
-            .contains(VIRKSOMHET);
+            .containsExactlyInAnyOrder(VIRKSOMHET);
     }
 
     @Test
@@ -277,7 +298,7 @@ class LovligeKombinasjonerServiceTest {
         Set<Behandlingstema> behandlingstemas = lovligeKombinasjonerService.hentMuligeBehandlingstemaer(Aktoersroller.VIRKSOMHET, TRYGDEAVTALE, TRYGDEAVGIFT, null);
         assertThat(behandlingstemas)
             .hasSize(1)
-            .contains(YRKESAKTIV);
+            .containsExactlyInAnyOrder(YRKESAKTIV);
     }
 
     @Test

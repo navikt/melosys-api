@@ -121,6 +121,7 @@ class DokgenMalMapper(
             )
 
             Produserbaredokumenter.INNVILGELSE_FOLKETRYGDLOVEN -> innvilgelseFtrlMapper.map((brevbestilling as InnvilgelseFtrlBrevbestilling))
+
             Produserbaredokumenter.TRYGDEAVTALE_GB -> trygdeavtaleMapper.map(
                 brevbestilling.toBuilder()
                     .medVedtaksdato(dokgenMapperDatahenter.hentVedtaksdato(brevbestilling.behandling.id))
@@ -197,6 +198,11 @@ class DokgenMalMapper(
             Produserbaredokumenter.VARSELBREV_MANGLENDE_INNBETALING -> VarselbrevManglendeInnbetaling(
                 brevbestilling as VarselbrevManglendeInnbetalingBrevbestilling
             )
+
+            Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP -> VedtakOpphoertMedlemskap.Builder(brevbestilling as VedtakOpphoertMedlemskapBrevbestilling).opphoertDato(
+                dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
+                    .medlemAvFolketrygden.utledMedlemskapsperiodeTom().plusDays(1)
+            ).build()
 
             else -> throw FunksjonellException("ProduserbartDokument ${brevbestilling.produserbartdokument} er ikke støttet av melosys-dokgen")
         }
