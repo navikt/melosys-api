@@ -55,6 +55,7 @@ class SendManglendeInnbetalingVarselBrevTest {
         prosessinstans.behandling = behandling
         prosessinstans.setData(ProsessDataKey.BETALINGSSTATUS, Betalingsstatus.DELVIS_BETALT)
         prosessinstans.setData(ProsessDataKey.FAKTURANUMMER, "Fakturanummer")
+        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now())
 
         val capturedBrevbestillingDto = slot<BrevbestillingDto>()
 
@@ -89,6 +90,7 @@ class SendManglendeInnbetalingVarselBrevTest {
         }
         prosessinstans.behandling = behandling
         prosessinstans.setData(ProsessDataKey.BETALINGSSTATUS, Betalingsstatus.DELVIS_BETALT)
+        prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, LocalDate.now())
         every { (trygdeavgiftsberegningService.finnFakturamottakerNavn(123)) } returns "Isa Testesen"
 
         val capturedBrevbestillingDto = slot<BrevbestillingDto>()
