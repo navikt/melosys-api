@@ -1,7 +1,7 @@
 package no.nav.melosys.domain.brev;
 
 public class OpphoertMedlemskapBrevbestilling extends DokgenBrevbestilling {
-    private String fritekst;
+    private String opphoertBegrunnelseFritekst;
 
     public OpphoertMedlemskapBrevbestilling() {
         super();
@@ -10,11 +10,11 @@ public class OpphoertMedlemskapBrevbestilling extends DokgenBrevbestilling {
 
     private OpphoertMedlemskapBrevbestilling(Builder builder) {
         super(builder);
-        this.fritekst = builder.fritekst;
+        this.opphoertBegrunnelseFritekst = builder.opphoertBegrunnelseFritekst;
     }
 
-    public String getFritekst() {
-        return fritekst;
+    public String getOpphoertBegrunnelseFritekst() {
+        return opphoertBegrunnelseFritekst;
     }
 
     public Builder toBuilder() {
@@ -22,18 +22,18 @@ public class OpphoertMedlemskapBrevbestilling extends DokgenBrevbestilling {
     }
 
     public static final class Builder extends DokgenBrevbestilling.Builder<Builder> {
-        private String fritekst;
+        private String opphoertBegrunnelseFritekst;
 
         public Builder() {
         }
 
         public Builder(OpphoertMedlemskapBrevbestilling opphoertMedlemskapBrevbestilling) {
             super(opphoertMedlemskapBrevbestilling);
-            this.fritekst = opphoertMedlemskapBrevbestilling.fritekst;
+            this.opphoertBegrunnelseFritekst = opphoertMedlemskapBrevbestilling.opphoertBegrunnelseFritekst;
         }
 
-        public Builder medFritekst(String fritekst) {
-            this.fritekst = fritekst;
+        public Builder medOpphoertBegrunnelseFritekst(String opphoertBegrunnelseFritekst) {
+            this.opphoertBegrunnelseFritekst = opphoertBegrunnelseFritekst;
             return this;
         }
 

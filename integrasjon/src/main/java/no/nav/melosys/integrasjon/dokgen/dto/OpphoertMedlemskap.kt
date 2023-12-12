@@ -23,7 +23,7 @@ class OpphoertMedlemskap(
 
     class Builder(val brevbestilling: OpphoertMedlemskapBrevbestilling) {
         private val datoMottatt = instantTilLocalDate(brevbestilling.forsendelseMottatt)
-        private var fritekst: String? = brevbestilling.fritekst
+        private var fritekst: String? = brevbestilling.opphoertBegrunnelseFritekst
         private var fristDato: LocalDate? = null
         private var opphoertDato: LocalDate? = null
 
