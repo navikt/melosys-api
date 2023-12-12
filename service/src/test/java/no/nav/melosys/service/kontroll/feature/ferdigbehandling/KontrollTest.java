@@ -291,7 +291,7 @@ class KontrollTest {
         assertThat(resultat).extracting(Kontrollfeil::getKode).contains(Kontroll_begrunnelser.INGEN_SLUTTDATO);
         assertThat(resultat)
             .extracting(Kontrollfeil::getType)
-            .contains(KontrolldataFeilType.ADVARSEL);
+            .contains(KontrolldataFeilType.FEIL);
     }
 
     @Test
