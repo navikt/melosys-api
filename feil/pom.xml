@@ -31,20 +31,6 @@
                             </sourceDirs>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>test-compile</id>
-                        <phase>test-compile</phase>
-                        <goals>
-                            <goal>test-compile</goal>
-                        </goals>
-                        <configuration>
-                            <sourceDirs>
-                                <source>${project.basedir}/src/test/kotlin</source>
-                                <source>${project.basedir}/src/test/java</source>
-                                <source>src/test/resources</source>
-                            </sourceDirs>
-                        </configuration>
-                    </execution>
                 </executions>
                 <configuration>
                     <args>

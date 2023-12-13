@@ -68,14 +68,14 @@ final class FerdigbehandlingKontroll {
         Lovvalgsperiode kontrollPeriode = (Lovvalgsperiode) kontrollData.lovvalgsperiode();
         Lovvalgsperiode opprinneligLovvalgsperiode = kontrollData.opprinneligLovvalgsperiode();
 
-        boolean harOverlapp = OverlappendeMedlemskapsperioderRegler.harOverlappendeUnntaksperiode(
-            medlemskapDokument, kontrollPeriode, opprinneligLovvalgsperiode);
-
-        if (kontrollPeriode.erAvslått()) {
-            return harOverlapp ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_UNNTAK_PERIODER, KontrolldataFeilType.ADVARSEL) : null;
+        if (!OverlappendeMedlemskapsperioderRegler.harOverlappendeUnntaksperiode(medlemskapDokument, kontrollPeriode, opprinneligLovvalgsperiode)) {
+            return null;
         }
 
-        return harOverlapp ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_UNNTAK_PERIODER, KontrolldataFeilType.FEIL) : null;
+        KontrolldataFeilType feilType = kontrollPeriode.erAvslått()
+            ? KontrolldataFeilType.ADVARSEL
+            : KontrolldataFeilType.FEIL;
+        return new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_UNNTAK_PERIODER, feilType);
     }
 
 
