@@ -176,7 +176,7 @@ class UnntaksperiodeServiceTest {
         Set<String> begrunnelser = new HashSet<>();
         begrunnelser.add(Ikke_godkjent_begrunnelser.TREDJELANDSBORGER_IKKE_AVTALELAND.getKode());
         unntaksperiodeService.ikkeGodkjennPeriode(1L, begrunnelser, null);
-        verify(prosessinstansService).opprettProsessinstansUnntaksperiodeAvvist(any(), anySet(), any());
+        verify(prosessinstansService).opprettProsessinstansUnntaksperiodeAvvist(any(), any());
     }
 
     @Test
