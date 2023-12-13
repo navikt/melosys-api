@@ -97,7 +97,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
             status = Behandlingsstatus.AVSLUTTET
         }
 
-        val prosessinstans = lagProsessinstans(behandlingsresultat, mottaksdato)
+        val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse, mottaksdato)
 
         every { behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse) } returns listOf(
             behandlingsresultat
@@ -132,7 +132,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
             status = Behandlingsstatus.UNDER_BEHANDLING
         }
 
-        val prosessinstans = lagProsessinstans(behandlingsresultat, mottaksdato)
+        val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse, mottaksdato)
 
 
         every {
@@ -171,7 +171,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
             behandlingsfrist = LocalDate.now().plusWeeks(5)
             opprinneligBehandling = Behandling()
         }
-        val prosessinstans = lagProsessinstans(behandlingsresultat, mottaksdato)
+        val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse, mottaksdato)
 
         every {
             behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse)
@@ -210,7 +210,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
             behandlingsfrist = LocalDate.now().plusWeeks(7)
             opprinneligBehandling = Behandling()
         }
-        val prosessinstans = lagProsessinstans(behandlingsresultat, mottaksdato)
+        val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse, mottaksdato)
 
         every {
             behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse)
@@ -254,7 +254,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
                     type = behandlingstype
                     status = Behandlingsstatus.UNDER_BEHANDLING
                 }
-                val prosessinstans = lagProsessinstans(behandlingsresultat, mottaksdato)
+                val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse, mottaksdato)
 
                 every {
                     behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse)
@@ -308,7 +308,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
             type = Behandlingstyper.FØRSTEGANG
             status = Behandlingsstatus.UNDER_BEHANDLING
         }
-        val prosessinstans = lagProsessinstans(behandlingsresultat, mottaksdato)
+        val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse, mottaksdato)
 
         every {
             behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse)
