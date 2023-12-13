@@ -313,13 +313,13 @@ class OpprettManglendeInnbetalingBehandlingTest {
     }
 
     private fun lagBehandling(block: Behandling.() -> Unit = {}): Behandling = Behandling().apply behandling@{
-        block()
-        id = id ?: 1L
-        fagsak = fagsak ?: Fagsak().apply {
+        id = 1L
+        fagsak = Fagsak().apply {
             tema = Sakstemaer.MEDLEMSKAP_LOVVALG
             type = Sakstyper.FTRL
             behandlinger.add(this@behandling)
         }
-        tema = tema ?: Behandlingstema.YRKESAKTIV
+        tema = Behandlingstema.YRKESAKTIV
+        block()
     }
 }
