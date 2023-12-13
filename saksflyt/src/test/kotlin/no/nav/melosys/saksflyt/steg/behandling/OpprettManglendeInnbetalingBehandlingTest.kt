@@ -219,17 +219,17 @@ class OpprettManglendeInnbetalingBehandlingTest {
 
     @Test
     fun `aktiv behandling med type HENVENDELSE og NY_VURDERING og ikke replikert behandling`() {
-        mapOf(
-            "HENVENDELSE" to Behandlingstyper.HENVENDELSE,
-            "NY_VURDERING" to Behandlingstyper.NY_VURDERING
-        ).forEach { (beskrivelse, behandlingstype) ->
+        listOf(
+            Behandlingstyper.HENVENDELSE,
+            Behandlingstyper.NY_VURDERING
+        ).forEach {
             clearMocks(behandlingService, saksbehandlingRegler, behandlingsresultatService, oppgaveService)
-            withClue(beskrivelse) {
+            withClue(it.kode) {
 
                 val mottaksdato = LocalDate.now()
                 val behandlingsresultat = lagBehandlingsresultat()
                 val behandling = lagBehandling {
-                    type = behandlingstype
+                    type = it
                     status = Behandlingsstatus.UNDER_BEHANDLING
                 }
                 val prosessinstans = lagProsessinstans(behandlingsresultat.fakturaserieReferanse, mottaksdato)
