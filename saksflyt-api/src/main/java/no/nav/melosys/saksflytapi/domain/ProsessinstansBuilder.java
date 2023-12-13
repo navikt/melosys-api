@@ -11,7 +11,6 @@ import org.springframework.util.CollectionUtils;
 public class ProsessinstansBuilder {
     private ProsessType type;
     private Behandling behandling;
-    private Object begrunnelser;
     private String begrunnelseFritekst;
     private Set<DokumentReferanse> vedleggTilSed;
     private String ytterligereInformasjonTilSed;
@@ -25,11 +24,6 @@ public class ProsessinstansBuilder {
 
     public ProsessinstansBuilder medBehandling(Behandling behandling) {
         this.behandling = behandling;
-        return this;
-    }
-
-    public ProsessinstansBuilder medBegrunnelser(Object begrunnelser) {
-        this.begrunnelser = begrunnelser;
         return this;
     }
 
@@ -63,11 +57,8 @@ public class ProsessinstansBuilder {
         prosessinstans.setBehandling(behandling);
         prosessinstans.setType(type);
 
-        if (begrunnelser != null) {
-            prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSER, begrunnelser);
-        }
         if (StringUtils.isNotEmpty(begrunnelseFritekst)) {
-            prosessinstans.setData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST, begrunnelseFritekst);
+            prosessinstans.setData(ProsessDataKey.BEGRUNNELSE_FRITEKST, begrunnelseFritekst);
         }
         if (!CollectionUtils.isEmpty(vedleggTilSed)) {
             prosessinstans.setData(ProsessDataKey.VEDLEGG_SED, vedleggTilSed);

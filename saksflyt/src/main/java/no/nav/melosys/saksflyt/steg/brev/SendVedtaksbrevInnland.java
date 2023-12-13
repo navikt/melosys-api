@@ -207,7 +207,7 @@ public class SendVedtaksbrevInnland implements StegBehandler {
     }
 
     private String hentBegrunnelseFritekst(Prosessinstans prosessinstans) {
-        return prosessinstans.getData(ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST);
+        return prosessinstans.getData(ProsessDataKey.BEGRUNNELSE_FRITEKST);
     }
 
     private String hentSaksbehandler(Prosessinstans prosessinstans, Behandlingsresultat behandlingsresultat) {
