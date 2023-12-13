@@ -1,6 +1,7 @@
 package no.nav.melosys.service.vedtak;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
@@ -68,15 +69,29 @@ public class FtrlVedtakService {
         if (request.getBehandlingsresultatTypeKode() == Behandlingsresultattyper.AVSLAG_MANGLENDE_OPPL) {
             return lagAvslagMangledeOpplysningerBrevbestilling(request);
         }
+        if (List.of(Behandlingsresultattyper.OPPHØRT, Behandlingsresultattyper.DELVIS_OPPHØRT).contains(request.getBehandlingsresultatTypeKode())) {
+            return lagVedtakOpphørtMedlemskapBrevbestilling(request);
+        }
         return lagInnvilgelseFolketrygdloven(request);
+    }
+
+
+    private BrevbestillingDto lagVedtakOpphørtMedlemskapBrevbestilling(FattVedtakRequest request) {
+        var brevbestillingDto = new BrevbestillingDto();
+        brevbestillingDto.setProduserbardokument(Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP);
+        brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
+        brevbestillingDto.setKopiMottakere(request.getKopiMottakere());
+        brevbestillingDto.setBegrunnelseFritekst(request.getBegrunnelseFritekst());
+        brevbestillingDto.setBestillersId(request.getBestillersId());
+        return brevbestillingDto;
     }
 
     private BrevbestillingDto lagAvslagMangledeOpplysningerBrevbestilling(FattVedtakRequest request) {
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(Produserbaredokumenter.AVSLAG_MANGLENDE_OPPLYSNINGER);
         brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
-        brevbestillingDto.setBestillersId(request.getBestillersId());
         brevbestillingDto.setFritekst(request.getFritekst());
+        brevbestillingDto.setBestillersId(request.getBestillersId());
         return brevbestillingDto;
     }
 

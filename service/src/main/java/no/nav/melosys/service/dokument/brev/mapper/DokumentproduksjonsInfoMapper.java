@@ -147,7 +147,7 @@ public class DokumentproduksjonsInfoMapper {
         AVSLAG_MANGLENDE_OPPLYSNINGER("Avslag pga manglende opplysninger"),
         MELDING_HENLAGT_SAK("Henleggelse av søknad"),
         IKKE_YRKESAKTIV_VEDTAKSBREV("Vedtak om medlemskap"),
-        VARSELBREV_MANGLENDE_INNBETALING("Varsel om opphør av frivillig medlemskap");
+        VARSELBREV_MANGLENDE_INNBETALING("Varsel om manglende innbetaling av trygdeavgift");
 
         private final String tittel;
 
