@@ -305,10 +305,10 @@ class OpprettManglendeInnbetalingBehandlingTest {
     }
 
     private fun lagProsessinstans(
-        behandlingsresultat: Behandlingsresultat,
+        fakturaserieReferanse: String,
         mottaksdato: LocalDate?
     ) = Prosessinstans().apply {
-        setData(ProsessDataKey.FAKTURASERIE_REFERANSE, behandlingsresultat.fakturaserieReferanse)
+        setData(ProsessDataKey.FAKTURASERIE_REFERANSE, fakturaserieReferanse)
         setData(ProsessDataKey.MOTTATT_DATO, mottaksdato)
     }
 
