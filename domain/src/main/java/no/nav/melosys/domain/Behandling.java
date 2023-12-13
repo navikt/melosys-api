@@ -380,6 +380,10 @@ public class Behandling extends RegistreringsInfo {
         return type == Behandlingstyper.NY_VURDERING;
     }
 
+    public boolean erManglendeInnbetalingTrygdeavgift() {
+        return type == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT;
+    }
+
     public boolean erNorgeUtpekt() {
         return tema == BESLUTNING_LOVVALG_NORGE;
     }
