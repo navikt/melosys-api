@@ -204,6 +204,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
         } returns listOf(behandlingsresultat)
         every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandling
 
+
         opprettManglendeInnbetalingBehandling.utfør(prosessinstans)
 
 
