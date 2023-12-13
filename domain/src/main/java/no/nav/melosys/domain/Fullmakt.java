@@ -1,11 +1,14 @@
 package no.nav.melosys.domain;
 
-import no.nav.melosys.domain.kodeverk.Fullmaktstype;
-
 import javax.persistence.*;
+
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 
 @Entity
 @Table(name = "fullmakt")
+@Audited
 public class Fullmakt {
 
     @Id
@@ -14,6 +17,7 @@ public class Fullmakt {
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "aktoer_id", updatable = false)
+    @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
     private Aktoer aktoer;
 
     @Enumerated(EnumType.STRING)
