@@ -179,6 +179,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
         verify(exactly = 0) { saksbehandlingRegler.finnBehandlingSomKanReplikeres(any()) }
 
         prosessinstans.behandling.shouldNotBeNull().run {
+            this.shouldBe(behandling)
             behandling.shouldBe(behandling)
             behandlingsfrist.shouldBe(LocalDate.now().plusWeeks(5))
             type.shouldBe(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
@@ -210,7 +211,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
         verify(exactly = 0) { saksbehandlingRegler.finnBehandlingSomKanReplikeres(any()) }
 
         prosessinstans.behandling.shouldNotBeNull().run {
-            behandling.shouldBe(behandling)
+            this.shouldBe(behandling)
             behandlingsfrist.shouldBe(LocalDate.now().plusWeeks(6))
             type.shouldBe(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
             status.shouldBe(Behandlingsstatus.UNDER_BEHANDLING)
@@ -225,7 +226,6 @@ class OpprettManglendeInnbetalingBehandlingTest {
         ).forEach {
             clearMocks(behandlingService, saksbehandlingRegler, behandlingsresultatService, oppgaveService)
             withClue(it.kode) {
-
                 val mottaksdato = LocalDate.now()
                 val behandlingsresultat = lagBehandlingsresultat()
                 val behandling = lagBehandling {
@@ -268,7 +268,7 @@ class OpprettManglendeInnbetalingBehandlingTest {
                 verify(exactly = 1) { oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.fagsak.saksnummer) }
 
                 prosessinstans.behandling.shouldNotBeNull().run {
-                    behandling.shouldBe(behandling)
+                    this.shouldBe(behandling)
                     type.shouldBe(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
                     status.shouldBe(Behandlingsstatus.UNDER_BEHANDLING)
                     mottaksdato.shouldBe(mottaksdato)
