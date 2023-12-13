@@ -139,13 +139,6 @@ class OpprettManglendeInnbetalingBehandlingTest {
             behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse)
         } returns listOf(behandlingsresultat)
         every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandling
-        every { saksbehandlingRegler.finnBehandlingSomKanReplikeres(behandling.fagsak) } returns behandling
-        every {
-            behandlingService.replikerBehandlingOgBehandlingsresultat(
-                behandling,
-                Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-            )
-        } returns behandling
 
 
         opprettManglendeInnbetalingBehandling.utfør(prosessinstans)
@@ -177,13 +170,6 @@ class OpprettManglendeInnbetalingBehandlingTest {
             behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse)
         } returns listOf(behandlingsresultat)
         every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandling
-        every { saksbehandlingRegler.finnBehandlingSomKanReplikeres(behandling.fagsak) } returns behandling
-        every {
-            behandlingService.replikerBehandlingOgBehandlingsresultat(
-                behandling,
-                Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-            )
-        } returns behandling
 
 
         opprettManglendeInnbetalingBehandling.utfør(prosessinstans)
@@ -216,14 +202,6 @@ class OpprettManglendeInnbetalingBehandlingTest {
             behandlingsresultatService.finnAlleBehandlingsresultatMedFakturaserieReferanse(behandlingsresultat.fakturaserieReferanse)
         } returns listOf(behandlingsresultat)
         every { behandlingService.hentBehandling(behandlingsresultat.id) } returns behandling
-        every { saksbehandlingRegler.finnBehandlingSomKanReplikeres(behandling.fagsak) } returns behandling
-        every {
-            behandlingService.replikerBehandlingOgBehandlingsresultat(
-                behandling,
-                Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
-            )
-        } returns behandling
-
 
         opprettManglendeInnbetalingBehandling.utfør(prosessinstans)
 
