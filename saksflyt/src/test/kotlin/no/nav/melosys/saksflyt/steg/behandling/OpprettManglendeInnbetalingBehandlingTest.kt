@@ -266,7 +266,10 @@ class OpprettManglendeInnbetalingBehandlingTest {
                         behandling,
                         Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
                     )
-                } returns behandling
+                } returns lagBehandling {
+                    type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+                    status = Behandlingsstatus.UNDER_BEHANDLING
+                }
                 every { behandlingService.avsluttBehandling(any()) } returns Unit
                 every { behandlingsresultatService.oppdaterBehandlingsresultattype(any(), any()) } returns Unit
                 every { oppgaveService.ferdigstillOppgaveMedSaksnummer(any()) } returns Unit
@@ -288,15 +291,10 @@ class OpprettManglendeInnbetalingBehandlingTest {
 
                 prosessinstans.behandling.shouldNotBeNull().run {
                     behandling.shouldBe(behandling)
-                    type.shouldBe(behandlingstype)
+                    type.shouldBe(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT)
                     status.shouldBe(Behandlingsstatus.UNDER_BEHANDLING)
                     mottaksdato.shouldBe(mottaksdato)
-                    behandlingsfrist.shouldBe(Behandling.utledBehandlingsfrist(behandling, mottaksdato))
-//                    behandlingsfrist.shouldBe(LocalDate.now().plusWeeks(8))
-                    behandlingsfrist.shouldBe(LocalDate.now().plusDays(90))
-                    //https://jira.adeo.no/browse/MELOSYS-6187 så står det
-                    // Behandlingsfrist skal oppdateres slik at fristen blir 6 uker fra dagens dato (samme som varselbrev)
-                    // Men blir satt mye lengre frem en 6 uker ved bruke av Behandling.utledBehandlingsfrist - er det riktig?
+                    behandlingsfrist.shouldBe(LocalDate.now().plusWeeks(6))
                 }
             }
         }
