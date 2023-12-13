@@ -97,7 +97,7 @@ class FaktureringskomponentenConsumerTokenTest(
         "}"
 
     override fun executeRequest() =
-        faktureringskomponentenConsumer.lagFakturaSerie(lagFakturaserieDto(), "N123456")
+        faktureringskomponentenConsumer.lagFakturaserie(lagFakturaserieDto(), "N123456")
 
 
     private fun lagFakturaserieDto(
