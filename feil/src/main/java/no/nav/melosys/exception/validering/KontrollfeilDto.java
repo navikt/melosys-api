@@ -2,7 +2,7 @@ package no.nav.melosys.exception.validering;
 
 import java.util.List;
 
-import exception.KontrolldataFeilType;
+import no.nav.melosys.exception.KontrolldataFeilType;
 
 public class KontrollfeilDto {
     private String kode;

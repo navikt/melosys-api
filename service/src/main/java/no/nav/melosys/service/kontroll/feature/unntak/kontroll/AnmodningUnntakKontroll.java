@@ -1,7 +1,7 @@
 package no.nav.melosys.service.kontroll.feature.unntak.kontroll;
 
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import exception.KontrolldataFeilType;
+import no.nav.melosys.exception.KontrolldataFeilType;
 import no.nav.melosys.service.kontroll.feature.unntak.data.AnmodningUnntakKontrollData;
 import no.nav.melosys.service.kontroll.regler.PersonRegler;
 import no.nav.melosys.service.validering.Kontrollfeil;

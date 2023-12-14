@@ -1,4 +1,4 @@
-package exception
+package no.nav.melosys.exception
 
 enum class KontrolldataFeilType {
     ADVARSEL,

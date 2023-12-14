@@ -7,7 +7,7 @@ import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
 import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import exception.KontrolldataFeilType;
+import no.nav.melosys.exception.KontrolldataFeilType;
 import no.nav.melosys.service.kontroll.regler.AdresseRegler;
 import no.nav.melosys.service.validering.Kontrollfeil;
 

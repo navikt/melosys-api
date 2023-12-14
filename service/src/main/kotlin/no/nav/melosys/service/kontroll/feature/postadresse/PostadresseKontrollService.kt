@@ -1,6 +1,6 @@
 package no.nav.melosys.service.kontroll.feature.postadresse
 
-import exception.KontrolldataFeilType
+import no.nav.melosys.exception.KontrolldataFeilType
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Representerer
