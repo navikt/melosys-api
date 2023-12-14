@@ -3,7 +3,6 @@ package no.nav.melosys.service.vedtak;
 import java.util.List;
 import java.util.Set;
 
-import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
@@ -231,7 +230,7 @@ class TrygdeavtaleVedtakServiceTest {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
         FattVedtakRequest request = new FattVedtakRequest.Builder()
-            .medBehandlingsresultat(AVSLAG_MANGLENDE_OPPL)
+            .medBehandlingsresultatType(AVSLAG_MANGLENDE_OPPL)
             .medVedtakstype(FØRSTEGANGSVEDTAK)
             .medFritekst("fritekst for beskrivelse avslag")
             .medBestillersId(SubjectHandler.getInstance().getUserID())
@@ -265,7 +264,7 @@ class TrygdeavtaleVedtakServiceTest {
 
     private FattVedtakRequest lagFattVedtakRequest(Vedtakstyper vedtakstype, String nyVurderingBakgrunn) {
         return new FattVedtakRequest.Builder()
-            .medBehandlingsresultat(FASTSATT_LOVVALGSLAND)
+            .medBehandlingsresultatType(FASTSATT_LOVVALGSLAND)
             .medVedtakstype(vedtakstype)
             .medInnledningFritekst("Innledning")
             .medBegrunnelseFritekst("Begrunnelse")

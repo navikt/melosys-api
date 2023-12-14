@@ -13,6 +13,7 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
+import no.nav.melosys.service.avklartefakta.AvklartManglendeInnbetalingService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
@@ -33,17 +34,20 @@ public class FtrlVedtakService {
     private final ProsessinstansService prosessinstansService;
     private final OppgaveService oppgaveService;
     private final DokgenService dokgenService;
+    private final AvklartManglendeInnbetalingService avklartManglendeInnbetalingService;
 
     public FtrlVedtakService(BehandlingsresultatService behandlingsresultatService,
                              BehandlingService behandlingService,
                              ProsessinstansService prosessinstansService,
                              OppgaveService oppgaveService,
-                             DokgenService dokgenService) {
+                             DokgenService dokgenService,
+                             AvklartManglendeInnbetalingService avklartManglendeInnbetalingService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.behandlingService = behandlingService;
         this.prosessinstansService = prosessinstansService;
         this.oppgaveService = oppgaveService;
         this.dokgenService = dokgenService;
+        this.avklartManglendeInnbetalingService = avklartManglendeInnbetalingService;
     }
 
     public void fattVedtak(Behandling behandling, FattVedtakRequest request) {
@@ -111,6 +115,14 @@ public class FtrlVedtakService {
     }
 
     private void oppdaterBehandlingsresultat(long behandlingID, FattVedtakRequest request) throws IkkeFunnetException {
+        if (request.getBehandlingsresultatTypeKode() == Behandlingsresultattyper.OPPHØRT) {
+            var fullstendigManglendeInnbetaling = avklartManglendeInnbetalingService.hentFullstendigMandlendeInnbetaling(behandlingID);
+            if (fullstendigManglendeInnbetaling == null) {
+                throw new FunksjonellException("Forventer at fullstendigManglendeInnbetaling er satt ved fatting av vedtak for behandlingstype OPPHØRT");
+            }
+            behandlingsresultatService.tømBehandlingsresultat(behandlingID);
+            avklartManglendeInnbetalingService.lagreFullstendigManglendeInnbetalingSomAvklartFakta(behandlingID, fullstendigManglendeInnbetaling);
+        }
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
         behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
         behandlingsresultat.settVedtakMetadata(request.getVedtakstype(), LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));

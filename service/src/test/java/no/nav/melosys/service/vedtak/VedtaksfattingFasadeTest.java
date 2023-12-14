@@ -181,7 +181,7 @@ class VedtaksfattingFasadeTest {
 
     private FattVedtakRequest lagFattEosVedtakRequest() {
         return new FattVedtakRequest.Builder()
-            .medBehandlingsresultat(FASTSATT_LOVVALGSLAND)
+            .medBehandlingsresultatType(FASTSATT_LOVVALGSLAND)
             .medVedtakstype(FØRSTEGANGSVEDTAK)
             .medFritekst("Fritekst")
             .build();
@@ -189,7 +189,7 @@ class VedtaksfattingFasadeTest {
 
     private FattVedtakRequest lagFattFtrlVedtakRequest() {
         return new FattVedtakRequest.Builder()
-            .medBehandlingsresultat(FASTSATT_LOVVALGSLAND)
+            .medBehandlingsresultatType(FASTSATT_LOVVALGSLAND)
             .medVedtakstype(FØRSTEGANGSVEDTAK)
             .medBegrunnelseFritekst("Begrunnelse")
             .medBestillersId(SubjectHandler.getInstance().getUserID())
@@ -198,7 +198,7 @@ class VedtaksfattingFasadeTest {
 
     private FattVedtakRequest lagFattTrygdeavtaleVedtakRequest() {
         return new FattVedtakRequest.Builder()
-            .medBehandlingsresultat(FASTSATT_LOVVALGSLAND)
+            .medBehandlingsresultatType(FASTSATT_LOVVALGSLAND)
             .medVedtakstype(FØRSTEGANGSVEDTAK)
             .medBegrunnelseFritekst("Begrunnelse")
             .build();

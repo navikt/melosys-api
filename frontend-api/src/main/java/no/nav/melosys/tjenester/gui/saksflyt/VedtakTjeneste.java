@@ -67,7 +67,7 @@ public class VedtakTjeneste {
             .medBarnFritekst(fattVedtakDto.getBarnFritekst())
             .medTrygdeavgiftFritekst(fattVedtakDto.getTrygdeavgiftFritekst())
             .medKopiMottakere(fattVedtakDto.getKopiMottakere())
-            .medBehandlingsresultat(fattVedtakDto.getBehandlingsresultatTypeKode())
+            .medBehandlingsresultatType(fattVedtakDto.getBehandlingsresultatTypeKode())
             .medVedtakstype(fattVedtakDto.getVedtakstype())
             .medBestillersId(bestillersId)
             .medBetalingsIntervall(fattVedtakDto.getBetalingsintervall())
