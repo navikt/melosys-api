@@ -10,7 +10,7 @@ class AvklartManglendeInnbetalingService(@Autowired private val avklartefaktaSer
     fun hentFullstendigMandlendeInnbetaling(behandlingID: Long): Boolean? {
         return avklartefaktaService.hentAlleAvklarteFakta(behandlingID)
             .filter { FULLSTENDIG_MANGLENDE_INNBETALING.kode == it.referanse && FULLSTENDIG_MANGLENDE_INNBETALING == it.avklartefaktaType }
-            .map { it.fakta[0].toBoolean() }
+            .map { it.fakta.single().toBoolean() }
             .firstOrNull()
     }
 
