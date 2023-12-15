@@ -191,7 +191,7 @@ class FtrlVedtakServiceTest {
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakFTRL(any(Behandling.class), eq(request.tilVedtakRequest()));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
         verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
-        verify(avklartManglendeInnbetalingService).hentFullstendigMandlendeInnbetaling(anyLong());
+        verify(avklartManglendeInnbetalingService).hentFullstendigManglendeInnbetaling(anyLong());
         verify(behandlingsresultatService).tømBehandlingsresultat(anyLong());
         verify(avklartManglendeInnbetalingService).lagreFullstendigManglendeInnbetalingSomAvklartFakta(anyLong(), anyBoolean());
 
@@ -215,7 +215,7 @@ class FtrlVedtakServiceTest {
 
     @Test
     void fattVedtak_opphørt_manglerAvklartFakta_kasterFeil() {
-        when(avklartManglendeInnbetalingService.hentFullstendigMandlendeInnbetaling(anyLong())).thenReturn(null);
+        when(avklartManglendeInnbetalingService.hentFullstendigManglendeInnbetaling(anyLong())).thenReturn(null);
         var fattVedtakRequest = new FattVedtakRequest.Builder().medBehandlingsresultatType(OPPHØRT).build();
         var behandling = lagBehandling();
 

@@ -44,7 +44,7 @@ class AvklartManglendeInnbetalingServiceTest {
 
     @Test
     fun hentFullstendigMandlendeInnbetaling_avklartFaktaFinnesIkke_returnererNull() {
-        avklartManglendeInnbetalingService.hentFullstendigMandlendeInnbetaling(1L).shouldBeNull()
+        avklartManglendeInnbetalingService.hentFullstendigManglendeInnbetaling(1L).shouldBeNull()
     }
 
     @Test
@@ -53,11 +53,11 @@ class AvklartManglendeInnbetalingServiceTest {
         every { avklarteFaktaRepository.save(capture(slotAvklartefakta)) } returnsArgument 0
 
 
-        avklartManglendeInnbetalingService.hentFullstendigMandlendeInnbetaling(1L).shouldBeNull()
+        avklartManglendeInnbetalingService.hentFullstendigManglendeInnbetaling(1L).shouldBeNull()
 
         avklartManglendeInnbetalingService.lagreFullstendigManglendeInnbetalingSomAvklartFakta(1L, true)
 
-        avklartManglendeInnbetalingService.hentFullstendigMandlendeInnbetaling(1L)?.shouldBeTrue()
+        avklartManglendeInnbetalingService.hentFullstendigManglendeInnbetaling(1L)?.shouldBeTrue()
         slotAvklartefakta.captured.shouldNotBeNull().run {
             type.shouldBe(Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING)
             referanse.shouldBe(Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode)
@@ -72,11 +72,11 @@ class AvklartManglendeInnbetalingServiceTest {
         every { avklarteFaktaRepository.save(capture(slotAvklartefakta)) } returnsArgument 0
 
 
-        avklartManglendeInnbetalingService.hentFullstendigMandlendeInnbetaling(1L).shouldBeNull()
+        avklartManglendeInnbetalingService.hentFullstendigManglendeInnbetaling(1L).shouldBeNull()
 
         avklartManglendeInnbetalingService.lagreFullstendigManglendeInnbetalingSomAvklartFakta(1L, false)
 
-        avklartManglendeInnbetalingService.hentFullstendigMandlendeInnbetaling(1L)?.shouldBeFalse()
+        avklartManglendeInnbetalingService.hentFullstendigManglendeInnbetaling(1L)?.shouldBeFalse()
         slotAvklartefakta.captured.shouldNotBeNull().run {
             type.shouldBe(Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING)
             referanse.shouldBe(Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.kode)

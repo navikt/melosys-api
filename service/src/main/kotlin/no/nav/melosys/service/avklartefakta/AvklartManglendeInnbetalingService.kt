@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 @Service
 class AvklartManglendeInnbetalingService(@Autowired private val avklartefaktaService: AvklartefaktaService) {
 
-    fun hentFullstendigMandlendeInnbetaling(behandlingID: Long): Boolean? {
+    fun hentFullstendigManglendeInnbetaling(behandlingID: Long): Boolean? {
         return avklartefaktaService.hentAlleAvklarteFakta(behandlingID)
             .filter { FULLSTENDIG_MANGLENDE_INNBETALING.kode == it.referanse && FULLSTENDIG_MANGLENDE_INNBETALING == it.avklartefaktaType }
             .map { it.fakta.single().toBoolean() }

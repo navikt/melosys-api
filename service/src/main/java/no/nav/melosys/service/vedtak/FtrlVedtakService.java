@@ -116,7 +116,7 @@ public class FtrlVedtakService {
 
     private void oppdaterBehandlingsresultat(long behandlingID, FattVedtakRequest request) throws IkkeFunnetException {
         if (request.getBehandlingsresultatTypeKode() == Behandlingsresultattyper.OPPHØRT) {
-            var fullstendigManglendeInnbetaling = avklartManglendeInnbetalingService.hentFullstendigMandlendeInnbetaling(behandlingID);
+            var fullstendigManglendeInnbetaling = avklartManglendeInnbetalingService.hentFullstendigManglendeInnbetaling(behandlingID);
             if (fullstendigManglendeInnbetaling == null) {
                 throw new FunksjonellException("Forventer at fullstendigManglendeInnbetaling er satt ved fatting av vedtak for behandlingstype OPPHØRT");
             }
