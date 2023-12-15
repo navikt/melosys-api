@@ -1,7 +1,9 @@
 package no.nav.melosys.service.medlemskapsperiode
 
 import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotBeEmpty
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -9,11 +11,9 @@ import io.mockk.junit5.MockKExtension
 import io.mockk.verify
 import no.nav.melosys.domain.*
 import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser
-import no.nav.melosys.domain.kodeverk.Sakstyper
-import no.nav.melosys.domain.kodeverk.Trygdedekninger
-import no.nav.melosys.domain.kodeverk.Vilkaar
+import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS
 import no.nav.melosys.domain.mottatteopplysninger.data.Periode
@@ -82,6 +82,74 @@ class OpprettMedlemskapsperiodeServiceTest {
 
         verify(exactly = 1) { medlemAvFolketrygdenRepository.save(any()) }
 
+    }
+
+    @Test
+    fun opprettForslagPåMedlemskapsperioder_nyVurdering_kopiererTidligereInnvilgedePerioder() {
+        val opprinneligBehandlingId = 2L
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            vilkaarsresultater.add(lagOppfyltVilkår())
+            medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
+            }
+            behandling.type = Behandlingstyper.NY_VURDERING
+            behandling.opprinneligBehandling = Behandling().apply { id = opprinneligBehandlingId }
+        }
+        val opprinneligBehandlingsresultat = lagBehandlingsresultat().apply {
+            medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+                addMedlemskapsperiode(Medlemskapsperiode().apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    tom = LocalDate.now().plusMonths(4)
+                })
+                addMedlemskapsperiode(Medlemskapsperiode().apply { innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT })
+            }
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId) } returns opprinneligBehandlingsresultat
+        every { medlemAvFolketrygdenRepository.save(behandlingsresultat.medlemAvFolketrygden) } returns behandlingsresultat.medlemAvFolketrygden
+
+
+        opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingsresultatID)
+            .shouldHaveSize(1)
+            .first().run {
+                tom.shouldBe(LocalDate.now().plusMonths(4))
+            }
+        verify(exactly = 1) { medlemAvFolketrygdenRepository.save(any()) }
+        verify(exactly = 0) { utledMottaksdato.getMottaksdato(any()) }
+    }
+
+    @Test
+    fun opprettForslagPåMedlemskapsperioder_manglendeInnbetalingTrygdeavgift_kopiererTidligereInnvilgedePerioder() {
+        val opprinneligBehandlingId = 2L
+        val behandlingsresultat = lagBehandlingsresultat().apply {
+            vilkaarsresultater.add(lagOppfyltVilkår())
+            medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+                bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
+            }
+            behandling.type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+            behandling.opprinneligBehandling = Behandling().apply { id = opprinneligBehandlingId }
+        }
+        val opprinneligBehandlingsresultat = lagBehandlingsresultat().apply {
+            medlemAvFolketrygden = MedlemAvFolketrygden().apply {
+                addMedlemskapsperiode(Medlemskapsperiode().apply {
+                    innvilgelsesresultat = InnvilgelsesResultat.INNVILGET
+                    tom = LocalDate.now().plusMonths(4)
+                })
+                addMedlemskapsperiode(Medlemskapsperiode().apply { innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT })
+            }
+        }
+        every { behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID) } returns behandlingsresultat
+        every { behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandlingId) } returns opprinneligBehandlingsresultat
+        every { medlemAvFolketrygdenRepository.save(behandlingsresultat.medlemAvFolketrygden) } returns behandlingsresultat.medlemAvFolketrygden
+
+
+        opprettMedlemskapsperiodeService.opprettForslagPåMedlemskapsperioder(behandlingsresultatID)
+            .shouldHaveSize(1)
+            .first().run {
+                tom.shouldBe(LocalDate.now().plusMonths(4))
+            }
+        verify(exactly = 1) { medlemAvFolketrygdenRepository.save(any()) }
+        verify(exactly = 0) { utledMottaksdato.getMottaksdato(any()) }
     }
 
     @Test
