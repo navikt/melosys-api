@@ -377,7 +377,7 @@ class EosVedtakServiceTest {
     private FattVedtakRequest lagRequest(Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype,
                                          String behandlingsresultatFritekst, String fritekstSed, Set<String> mottakerinstitusjoner) {
         return new FattVedtakRequest.Builder()
-            .medBehandlingsresultat(behandlingsresultattype)
+            .medBehandlingsresultatType(behandlingsresultattype)
             .medVedtakstype(vedtakstype)
             .medFritekst(behandlingsresultatFritekst)
             .medFritekstSed(fritekstSed)
