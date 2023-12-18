@@ -3,37 +3,37 @@ package no.nav.melosys.saksflytapi.domain
 import java.util.*
 import java.util.regex.Pattern
 
-class SedLåsReferanse(referanse: String) {
-    val referanse: String
-    private val sedID: String
-    private val sedVersjon: String
+class SedLåsReferanse(låsReferanse: String) {
+    val rinaSaksnummer: String
+    val sedID: String
+    val sedVersjon: String
 
     init {
-        require(erGyldigReferanse(referanse)) { "$referanse er ikke gyldig SED-referanse" }
-
-        val ref = referanse.split("_".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-        this.referanse = ref[0]
-        this.sedID = ref[1]
-        this.sedVersjon = ref[2]
+        require(erGyldigReferanse(låsReferanse)) { "$låsReferanse er ikke gyldig SED-referanse" }
+        låsReferanse.split("_").let {
+            this.rinaSaksnummer = it[0]
+            this.sedID = it[1]
+            this.sedVersjon = it[2]
+        }
     }
 
-    val identifikator: String
-        get() = String.format("%s_%s", sedID, sedVersjon)
+    val referanse: String
+        get() = rinaSaksnummer
 
-    override fun equals(o: Any?): Boolean {
-        if (this === o) return true
-        if (o == null || javaClass != o.javaClass) return false
-        val that = o as SedLåsReferanse
-        return referanse == that.referanse && sedID == that.sedID && sedVersjon == that.sedVersjon
+    fun getIdentifikator(): String {
+        return String.format("%s_%s", sedID, sedVersjon)
     }
 
-    override fun hashCode(): Int {
-        return Objects.hash(referanse, sedID, sedVersjon)
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || javaClass != other.javaClass) return false
+        val that = other as SedLåsReferanse
+        return rinaSaksnummer == that.rinaSaksnummer && sedID == that.sedID && sedVersjon == that.sedVersjon
     }
 
-    override fun toString(): String {
-        return String.format("%s_%s_%s", referanse, sedID, sedVersjon)
-    }
+    override fun hashCode(): Int = Objects.hash(rinaSaksnummer, sedID, sedVersjon)
+
+    override fun toString(): String = String.format("%s_%s_%s", rinaSaksnummer, sedID, sedVersjon)
 
     companion object {
         private val pattern: Pattern = Pattern.compile("[^_]*_[^_]*_\\d+$")
