@@ -1,7 +1,7 @@
 package no.nav.melosys.saksflytapi.domain
 
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
-import org.assertj.core.api.AssertionsForClassTypes
 import org.junit.jupiter.api.Test
 
 internal class SedLåsReferanseTest {
@@ -17,8 +17,9 @@ internal class SedLåsReferanseTest {
 
     @Test
     fun initierSedLåsReferanse_ugyldigReferanseString_kasterException() {
-        AssertionsForClassTypes.assertThatExceptionOfType(IllegalArgumentException::class.java)
-            .isThrownBy { SedLåsReferanse(RINASAKS_NUMMER + SED_ID + VERSJON) }
+        shouldThrow<IllegalArgumentException> {
+            SedLåsReferanse(RINASAKS_NUMMER + SED_ID + VERSJON)
+        }.message.shouldBe("$RINASAKS_NUMMER$SED_ID$VERSJON er ikke gyldig SED-referanse")
     }
 
     companion object {
