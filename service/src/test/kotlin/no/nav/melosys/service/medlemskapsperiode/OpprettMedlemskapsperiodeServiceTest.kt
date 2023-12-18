@@ -50,7 +50,7 @@ class OpprettMedlemskapsperiodeServiceTest {
     @Test
     fun opprettForslagPåMedlemskapsperioder_dataFraSøknadSatt_lagrerMedlemskapsperioder() {
         val behandlingsresultat = lagBehandlingsresultat().apply {
-            vilkaarsresultater.add(lagOppfyltVilkår())
+            vilkaarsresultater.add(lagVilkår())
             medlemAvFolketrygden.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
         }
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID) } returns behandlingsresultat
@@ -67,7 +67,7 @@ class OpprettMedlemskapsperiodeServiceTest {
     @Test
     fun opprettForslagPåMedlemskapsperioder_dataFraSøknadSatt_medlemskapsperioderEksisterer() {
         val behandlingsresultat = lagBehandlingsresultat().apply {
-            vilkaarsresultater.add(lagOppfyltVilkår())
+            vilkaarsresultater.add(lagVilkår())
             medlemAvFolketrygden = MedlemAvFolketrygden().apply {
                 addMedlemskapsperiode(Medlemskapsperiode())
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
@@ -88,7 +88,7 @@ class OpprettMedlemskapsperiodeServiceTest {
     fun opprettForslagPåMedlemskapsperioder_nyVurdering_kopiererTidligereInnvilgedePerioder() {
         val opprinneligBehandlingId = 2L
         val behandlingsresultat = lagBehandlingsresultat().apply {
-            vilkaarsresultater.add(lagOppfyltVilkår())
+            vilkaarsresultater.add(lagVilkår())
             medlemAvFolketrygden = MedlemAvFolketrygden().apply {
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
             }
@@ -122,7 +122,7 @@ class OpprettMedlemskapsperiodeServiceTest {
     fun opprettForslagPåMedlemskapsperioder_manglendeInnbetalingTrygdeavgift_kopiererTidligereInnvilgedePerioder() {
         val opprinneligBehandlingId = 2L
         val behandlingsresultat = lagBehandlingsresultat().apply {
-            vilkaarsresultater.add(lagOppfyltVilkår())
+            vilkaarsresultater.add(lagVilkår())
             medlemAvFolketrygden = MedlemAvFolketrygden().apply {
                 bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
             }
@@ -168,7 +168,7 @@ class OpprettMedlemskapsperiodeServiceTest {
     fun opprettForslagPåMedlemskapsperioder_oppfyllerIkkeVilkår_kasterFeil() {
         every { behandlingsresultatService.hentBehandlingsresultat(behandlingsresultatID) } returns lagBehandlingsresultat().apply {
             medlemAvFolketrygden.bestemmelse = Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8_FØRSTE_LEDD_A
-            vilkaarsresultater.add(lagOppfyltVilkår().apply { isOppfylt = false })
+            vilkaarsresultater.add(lagVilkår(false))
         }
 
 
@@ -199,29 +199,26 @@ class OpprettMedlemskapsperiodeServiceTest {
         }.message.shouldContain("Bestemmelse er ikke satt")
     }
 
-    private fun lagBehandlingsresultat(): Behandlingsresultat {
-        val behandlingsresultat = Behandlingsresultat()
-        val behandling = Behandling()
-        val fagsak = Fagsak()
-        fagsak.type = Sakstyper.FTRL
-        behandling.fagsak = fagsak
-        behandling.tema = Behandlingstema.YRKESAKTIV
-        val mottatteOpplysninger = MottatteOpplysninger()
-        val søknad = SøknadNorgeEllerUtenforEØS()
-        søknad.periode = Periode(LocalDate.now(), null)
-        søknad.soeknadsland.landkoder.add("BR")
-        søknad.trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER
-        mottatteOpplysninger.setMottatteOpplysningerdata(søknad)
-        behandling.mottatteOpplysninger = mottatteOpplysninger
-        behandlingsresultat.medlemAvFolketrygden = MedlemAvFolketrygden()
-        behandlingsresultat.behandling = behandling
-        return behandlingsresultat
-    }
+    private fun lagBehandlingsresultat(): Behandlingsresultat =
+        Behandlingsresultat().apply {
+            medlemAvFolketrygden = MedlemAvFolketrygden()
+            behandling = Behandling().apply {
+                fagsak = Fagsak().apply { type = Sakstyper.FTRL }
+                tema = Behandlingstema.YRKESAKTIV
+                mottatteOpplysninger = MottatteOpplysninger().apply {
+                    mottatteOpplysningerData = SøknadNorgeEllerUtenforEØS().apply {
+                        periode = Periode(LocalDate.now(), null)
+                        soeknadsland.landkoder.add("BR")
+                        trygdedekning = Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_ANDRE_LEDD_HELSE_SYKE_FORELDREPENGER
+                    }
+                }
+            }
+        }
 
-    private fun lagOppfyltVilkår(): Vilkaarsresultat {
-        val vilkaarsresultat = Vilkaarsresultat()
-        vilkaarsresultat.vilkaar = Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID
-        vilkaarsresultat.isOppfylt = true
-        return vilkaarsresultat
-    }
+
+    private fun lagVilkår(oppfylt: Boolean = true): Vilkaarsresultat =
+        Vilkaarsresultat().apply {
+            vilkaar = Vilkaar.FTRL_2_8_FORUTGÅENDE_TRYGDETID
+            isOppfylt = oppfylt
+        }
 }
