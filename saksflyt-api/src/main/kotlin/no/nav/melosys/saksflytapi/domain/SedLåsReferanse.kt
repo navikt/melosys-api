@@ -20,10 +20,6 @@ class SedLåsReferanse(låsReferanse: String) {
     val referanse: String
         get() = rinaSaksnummer
 
-    fun getIdentifikator(): String {
-        return String.format("%s_%s", sedID, sedVersjon)
-    }
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || javaClass != other.javaClass) return false
@@ -33,13 +29,12 @@ class SedLåsReferanse(låsReferanse: String) {
 
     override fun hashCode(): Int = Objects.hash(rinaSaksnummer, sedID, sedVersjon)
 
-    override fun toString(): String = String.format("%s_%s_%s", rinaSaksnummer, sedID, sedVersjon)
+    override fun toString(): String = "${rinaSaksnummer}_${sedID}_${sedVersjon}"
+
+    private fun erGyldigReferanse(referanse: String?): Boolean =
+        referanse != null && pattern.matcher(referanse).find()
 
     companion object {
         private val pattern: Pattern = Pattern.compile("[^_]*_[^_]*_\\d+$")
-
-        fun erGyldigReferanse(referanse: String?): Boolean {
-            return referanse != null && pattern.matcher(referanse).find()
-        }
     }
 }
