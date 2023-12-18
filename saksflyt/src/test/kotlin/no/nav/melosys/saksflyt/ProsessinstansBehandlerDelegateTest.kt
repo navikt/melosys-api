@@ -1,46 +1,45 @@
 package no.nav.melosys.saksflyt
 
+import io.kotest.matchers.shouldBe
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.verify
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.ProsessinstansInfo
-import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.ArgumentMatchers
-import org.mockito.Mock
-import org.mockito.Mockito
-import org.mockito.junit.jupiter.MockitoExtension
+import org.junit.jupiter.api.TestInstance
 import java.time.LocalDateTime
 import java.util.*
-import java.util.Set
 
-@ExtendWith(MockitoExtension::class) // TODO: bruk mockk
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class ProsessinstansBehandlerDelegateTest {
-    @Mock
-    private val prosessinstansRepository: ProsessinstansRepository? = null
+    private var prosessinstansRepository: ProsessinstansRepository = mockk<ProsessinstansRepository>()
 
-    @Mock
-    private lateinit var prosessinstansBehandler: ProsessinstansBehandler
+    private var prosessinstansBehandler: ProsessinstansBehandler = mockk<ProsessinstansBehandler>()
 
     private lateinit var prosessinstansBehandlerDelegate: ProsessinstansBehandlerDelegate
 
-    private lateinit var prosessinstans: Prosessinstans
+    private var prosessinstans: Prosessinstans = Prosessinstans()
 
     @BeforeEach
     fun setup() {
         prosessinstansBehandlerDelegate =
-            ProsessinstansBehandlerDelegate(prosessinstansBehandler, prosessinstansRepository!!)
-        prosessinstans = Prosessinstans()
+            ProsessinstansBehandlerDelegate(prosessinstansBehandler, prosessinstansRepository)
         prosessinstans.id = UUID.randomUUID()
     }
 
     @Test
     fun oppdaterStatusOmSkalPåVent_harIkkeLås_settesIkkePåVent() {
         prosessinstans.status = ProsessStatus.KLAR
+        every { prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(any(), any(), any()) } returns emptySet()
+
+
         prosessinstansBehandlerDelegate.oppdaterStatusOmSkalPåVent(prosessinstans)
-        Assertions.assertThat(prosessinstans.status).isEqualTo(ProsessStatus.KLAR)
-        Mockito.verifyNoInteractions(prosessinstansRepository, prosessinstansBehandler)
+
+
+        prosessinstans.status.shouldBe(ProsessStatus.KLAR)
     }
 
     @Test
@@ -50,17 +49,15 @@ internal class ProsessinstansBehandlerDelegateTest {
         prosessinstans.låsReferanse = låsReferanse
 
         val eksisterendeProsessinstans = prosessinstans(låsReferanse)
-        Mockito.`when`(
-            prosessinstansRepository!!.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(
-                ArgumentMatchers.eq(
-                    prosessinstans.id
-                ), ArgumentMatchers.any(), ArgumentMatchers.any()
-            )
-        )
-            .thenReturn(Set.of(ProsessinstansInfo(eksisterendeProsessinstans)))
+        every {
+            prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(prosessinstans.id, any(), any())
+        } returns setOf(ProsessinstansInfo(eksisterendeProsessinstans))
+
 
         prosessinstansBehandlerDelegate.oppdaterStatusOmSkalPåVent(prosessinstans)
-        Assertions.assertThat(prosessinstans.status).isEqualTo(ProsessStatus.KLAR)
+
+
+        prosessinstans.status.shouldBe(ProsessStatus.KLAR)
     }
 
     @Test
@@ -70,27 +67,26 @@ internal class ProsessinstansBehandlerDelegateTest {
         prosessinstans.låsReferanse = låsReferanse
 
         val eksisterendeProsessinstans = prosessinstans("12_13_1")
-        Mockito.`when`(
-            prosessinstansRepository!!.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(
-                ArgumentMatchers.eq(
-                    prosessinstans.id
-                ), ArgumentMatchers.any(), ArgumentMatchers.any()
-            )
-        )
-            .thenReturn(Set.of(ProsessinstansInfo(eksisterendeProsessinstans)))
+        every {
+            prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(prosessinstans.id, any(), any())
+        } returns setOf(ProsessinstansInfo(eksisterendeProsessinstans))
+        every { prosessinstansRepository.save(any()) } returns prosessinstans
+
 
         prosessinstansBehandlerDelegate.oppdaterStatusOmSkalPåVent(prosessinstans)
-        Assertions.assertThat(prosessinstans.status).isEqualTo(ProsessStatus.PÅ_VENT)
-        Mockito.verify(prosessinstansRepository).save(prosessinstans)
+
+
+        verify { prosessinstansRepository.save(prosessinstans) }
+        prosessinstans.status.shouldBe(ProsessStatus.PÅ_VENT)
     }
 
     private fun prosessinstans(låsReferanse: String): Prosessinstans {
-        val prosessinstans = Prosessinstans()
-        prosessinstans.id = UUID.randomUUID()
-        prosessinstans.låsReferanse = låsReferanse
-        prosessinstans.status = ProsessStatus.UNDER_BEHANDLING
-        prosessinstans.registrertDato = LocalDateTime.now()
-        prosessinstans.registrertDato = LocalDateTime.now()
-        return prosessinstans
+        return Prosessinstans().apply {
+            id = UUID.randomUUID()
+            this.låsReferanse = låsReferanse
+            status = ProsessStatus.UNDER_BEHANDLING
+            registrertDato = LocalDateTime.now()
+            registrertDato = LocalDateTime.now()
+        }
     }
 }

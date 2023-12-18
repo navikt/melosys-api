@@ -7,9 +7,7 @@ import no.nav.melosys.saksflytapi.domain.ProsessinstansInfo
 import no.nav.melosys.saksflytapi.domain.SedLåsReferanse
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
-import java.util.*
-import java.util.Set
-import java.util.stream.Collectors
+import java.util.UUID
 
 private val log = KotlinLogging.logger { }
 
@@ -49,25 +47,24 @@ class ProsessinstansBehandlerDelegate(
             return false
         }
 
+        // TODO: finn riktig type fra prosessinstans.låsReferanse
         val låsReferanse = SedLåsReferanse(prosessinstans.låsReferanse)
         val aktiveLåsReferanser = finnAndreAktiveLåsMedSammeReferanse(prosessinstans.id, låsReferanse)
 
         if (aktiveLåsReferanser.contains(låsReferanse)) {
             return false
         }
-        return aktiveLåsReferanser.stream()
-            .anyMatch { sedLåsReferanse: SedLåsReferanse -> sedLåsReferanse.referanse == låsReferanse.referanse }
+        // Dette bør ikke være nødvending da equals brukes ved contains over?
+        // Lager flere tester og fjerne det i egen pr.
+        return aktiveLåsReferanser.any { it.referanse == låsReferanse.referanse }
     }
 
-    private fun finnAndreAktiveLåsMedSammeReferanse(
+    internal fun finnAndreAktiveLåsMedSammeReferanse(
         id: UUID,
         låsReferanse: SedLåsReferanse
     ): Collection<SedLåsReferanse> {
         return prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(
-            id, Set.of(ProsessStatus.PÅ_VENT, ProsessStatus.FERDIG), låsReferanse.referanse
-        )
-            .stream()
-            .map { p: ProsessinstansInfo -> SedLåsReferanse(p.låsReferanse) }
-            .collect(Collectors.toSet())
+            id, setOf(ProsessStatus.PÅ_VENT, ProsessStatus.FERDIG), låsReferanse.referanse
+        ).map { p: ProsessinstansInfo -> SedLåsReferanse(p.låsReferanse) }.toSet()
     }
 }
