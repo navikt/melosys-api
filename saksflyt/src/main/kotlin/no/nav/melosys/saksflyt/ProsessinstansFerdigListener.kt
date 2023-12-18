@@ -9,12 +9,12 @@ import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.util.Set
 
-private val log = KotlinLogging.logger { }
 @Component
 class ProsessinstansFerdigListener(
     private val prosessinstansRepository: ProsessinstansRepository,
     private val prosessinstansBehandler: ProsessinstansBehandler
 ) {
+    private val log = KotlinLogging.logger { }
     @EventListener
     fun prosessinstansFerdig(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
         log.info("Prosessinstans {} ferdig", prosessinstansFerdigEvent.uuid)

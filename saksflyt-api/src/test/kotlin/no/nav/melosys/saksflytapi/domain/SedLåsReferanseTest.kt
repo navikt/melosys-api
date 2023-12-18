@@ -1,9 +1,7 @@
 package no.nav.melosys.saksflytapi.domain
 
-import no.nav.melosys.saksflytapi.domain.SedLåsReferanse
 import org.assertj.core.api.AssertionsForClassTypes
 import org.junit.jupiter.api.Test
-
 
 internal class SedLåsReferanseTest {
     private val rinaSaksnummer = "123"

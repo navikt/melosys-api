@@ -18,6 +18,7 @@ class ProsessinstansBehandlerDelegate(
     private val prosessinstansBehandler: ProsessinstansBehandler,
     private val prosessinstansRepository: ProsessinstansRepository
 ) {
+
     fun behandleProsessinstans(prosessinstans: Prosessinstans) {
         oppdaterStatusOmSkalPåVent(prosessinstans)
         if (!prosessinstans.erPåVent()) {
