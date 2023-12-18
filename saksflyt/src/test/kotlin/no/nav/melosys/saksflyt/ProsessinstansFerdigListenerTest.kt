@@ -7,7 +7,6 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.mockito.kotlin.any
 import java.time.LocalDateTime
 import java.util.*
 
@@ -58,8 +57,8 @@ internal class ProsessinstansFerdigListenerTest {
         val tidligstOpprettetProsessinstans = lagProsessinstans(LocalDateTime.now().minusDays(1), "12_13_1")
         val senestOpprettetProsessinstans = lagProsessinstans(LocalDateTime.now(), "12_14_1")
 
-        every { prosessinstansBehandler.behandleProsessinstans(any()) } returns any()
-        every { prosessinstansRepository.save(any()) } returns any()
+        every { prosessinstansBehandler.behandleProsessinstans(any()) } returns mockk()
+        every { prosessinstansRepository.save(any()) } returns mockk()
         every { prosessinstansRepository.existsByStatusNotInAndLåsReferanse(any(), any()) } returns false
         every { prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT) } returns setOf(
             prosessinstansUlikReferanse,
