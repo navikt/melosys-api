@@ -1,45 +1,21 @@
-package no.nav.melosys.saksflytapi.domain;
+package no.nav.melosys.saksflytapi.domain
 
-import java.time.LocalDateTime;
-import java.util.UUID;
+import java.time.LocalDateTime
+import java.util.*
 
-public final class ProsessinstansInfo {
-    private final UUID uuid;
-    private final ProsessStatus prosessStatus;
-    private final LocalDateTime registrertDato;
-    private final String låsReferanse;
-    private final SedLåsReferanse sedLåsReferanse;
+class ProsessinstansInfo(
+    val uuid: UUID,
+    val prosessStatus: ProsessStatus,
+    val registrertDato: LocalDateTime,
+    val låsReferanse: String
+) {
+    val sedLåsReferanse: SedLåsReferanse? = if (SedLåsReferanse.erGyldigReferanse(låsReferanse)) SedLåsReferanse(
+        låsReferanse
+    ) else null
 
-    public ProsessinstansInfo(Prosessinstans prosessinstans) {
-        this(prosessinstans.getId(), prosessinstans.getStatus(),
-            prosessinstans.getRegistrertDato(), prosessinstans.getLåsReferanse());
-    }
-
-    public ProsessinstansInfo(UUID uuid, ProsessStatus prosessStatus, LocalDateTime registrertDato, String låsReferanse) {
-        this.uuid = uuid;
-        this.prosessStatus = prosessStatus;
-        this.registrertDato = registrertDato;
-        this.låsReferanse = låsReferanse;
-        this.sedLåsReferanse = SedLåsReferanse.erGyldigReferanse(låsReferanse) ? new SedLåsReferanse(låsReferanse) : null;
-    }
-
-    public UUID getUuid() {
-        return uuid;
-    }
-
-    public ProsessStatus getProsessStatus() {
-        return prosessStatus;
-    }
-
-    public LocalDateTime getRegistrertDato() {
-        return registrertDato;
-    }
-
-    public String getLåsReferanse() {
-        return låsReferanse;
-    }
-
-    public SedLåsReferanse getSedLåsReferanse() {
-        return sedLåsReferanse;
-    }
+    // Kun brukt fra test TODO: flytt denne koden til test
+    constructor(prosessinstans: Prosessinstans) : this(
+        prosessinstans.id!!, prosessinstans.status!!,
+        prosessinstans.registrertDato!!, prosessinstans.låsReferanse!!
+    )
 }
