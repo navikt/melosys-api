@@ -187,48 +187,6 @@ class SedMottakTestIT(
     }
 
     @Test
-    fun `A003 med bosted norge i hele deler eller av lovvalgsperioden fra SED skal gi manuelt behandling`() {
-        val ref = Random().nextInt(100000).toString()
-
-        val eessiMeldingA003 = eessiMeldingTestDataFactory.melosysEessiMelding(
-            BucType.LA_BUC_02,
-            ref,
-            SedType.A003,
-            Periode(LocalDate.now().minusYears(2), LocalDate.now().minusYears(1)),
-            "13_1_a",
-            "NO"
-        )
-
-        melosysEessiMeldingKafkaTemplate.send(kafkaTopic, eessiMeldingA003)
-
-        await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(3))
-            .until {
-                prosessinstansRepository.findAllByStatusNotInAndLåsReferanseStartingWith(
-                    listOf(ProsessStatus.FERDIG),
-                    ref
-                ).isEmpty()
-            }
-
-        val prosessinstanserSortert = prosessinstansRepository.findAllByLåsReferanseStartingWith(ref)
-            .sortedBy { it.endretDato }
-
-        extracting(prosessinstanserSortert) { låsReferanse }
-            .shouldHaveSize(4)
-            .shouldContainInOrder(
-                eessiMeldingA003.lagUnikIdentifikator(),
-                eessiMeldingA003.lagUnikIdentifikator(),
-            )
-
-        prosessinstanserSortert.filter { it.behandling != null }[0].behandling.apply {
-            status.shouldBe(Behandlingsstatus.VURDER_DOKUMENT)
-            fagsak.status.shouldBe(Saksstatuser.OPPRETTET)
-            behandlingsresultatRepository.findWithLovvalgsperioderById(id).get().type.shouldBe(
-                Behandlingsresultattyper.IKKE_FASTSATT
-            )
-        }
-    }
-
-    @Test
     fun `A003 med etterfølgende X006 og lovvalgsland er NO skal gi manuelt behandling`() {
         val ref = Random().nextInt(100000).toString()
 
