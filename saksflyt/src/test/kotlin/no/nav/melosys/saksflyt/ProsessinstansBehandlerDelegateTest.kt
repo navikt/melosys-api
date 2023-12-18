@@ -1,9 +1,7 @@
 package no.nav.melosys.saksflyt
 
 import io.kotest.matchers.shouldBe
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
+import io.mockk.*
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.saksflytapi.domain.ProsessinstansInfo
@@ -15,19 +13,17 @@ import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class ProsessinstansBehandlerDelegateTest {
-    private var prosessinstansRepository: ProsessinstansRepository = mockk<ProsessinstansRepository>()
-
-    private var prosessinstansBehandler: ProsessinstansBehandler = mockk<ProsessinstansBehandler>()
-
+    private lateinit var prosessinstansRepository: ProsessinstansRepository
+    private lateinit var prosessinstansBehandler: ProsessinstansBehandler
     private lateinit var prosessinstansBehandlerDelegate: ProsessinstansBehandlerDelegate
-
-    private var prosessinstans: Prosessinstans = Prosessinstans()
+    private lateinit var prosessinstans: Prosessinstans
 
     @BeforeEach
     fun setup() {
-        prosessinstansBehandlerDelegate =
-            ProsessinstansBehandlerDelegate(prosessinstansBehandler, prosessinstansRepository)
-        prosessinstans.id = UUID.randomUUID()
+        prosessinstansRepository = mockk<ProsessinstansRepository>()
+        prosessinstansBehandler = mockk<ProsessinstansBehandler>()
+        prosessinstansBehandlerDelegate = ProsessinstansBehandlerDelegate(prosessinstansBehandler, prosessinstansRepository)
+        prosessinstans = Prosessinstans().apply { id = UUID.randomUUID() }
     }
 
     @Test
@@ -39,6 +35,10 @@ internal class ProsessinstansBehandlerDelegateTest {
         prosessinstansBehandlerDelegate.oppdaterStatusOmSkalPåVent(prosessinstans)
 
 
+        verify {
+            prosessinstansRepository wasNot Called
+            prosessinstansBehandler wasNot Called
+        }
         prosessinstans.status.shouldBe(ProsessStatus.KLAR)
     }
 
@@ -48,7 +48,7 @@ internal class ProsessinstansBehandlerDelegateTest {
         val låsReferanse = "12_12_1"
         prosessinstans.låsReferanse = låsReferanse
 
-        val eksisterendeProsessinstans = prosessinstans(låsReferanse)
+        val eksisterendeProsessinstans = lagProsessinstans(låsReferanse)
         every {
             prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(prosessinstans.id, any(), any())
         } returns setOf(ProsessinstansInfo(eksisterendeProsessinstans))
@@ -66,7 +66,7 @@ internal class ProsessinstansBehandlerDelegateTest {
         val låsReferanse = "12_12_1"
         prosessinstans.låsReferanse = låsReferanse
 
-        val eksisterendeProsessinstans = prosessinstans("12_13_1")
+        val eksisterendeProsessinstans = lagProsessinstans("12_13_1")
         every {
             prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(prosessinstans.id, any(), any())
         } returns setOf(ProsessinstansInfo(eksisterendeProsessinstans))
@@ -80,7 +80,7 @@ internal class ProsessinstansBehandlerDelegateTest {
         prosessinstans.status.shouldBe(ProsessStatus.PÅ_VENT)
     }
 
-    private fun prosessinstans(låsReferanse: String): Prosessinstans {
+    private fun lagProsessinstans(låsReferanse: String): Prosessinstans {
         return Prosessinstans().apply {
             id = UUID.randomUUID()
             this.låsReferanse = låsReferanse
