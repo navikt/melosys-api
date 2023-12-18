@@ -8,14 +8,4 @@ class ProsessinstansInfo(
     val prosessStatus: ProsessStatus,
     val registrertDato: LocalDateTime,
     val låsReferanse: String
-) {
-    val sedLåsReferanse: SedLåsReferanse? = if (SedLåsReferanse.erGyldigReferanse(låsReferanse)) SedLåsReferanse(
-        låsReferanse
-    ) else null
-
-    // Kun brukt fra test TODO: flytt denne koden til test
-    constructor(prosessinstans: Prosessinstans) : this(
-        prosessinstans.id!!, prosessinstans.status!!,
-        prosessinstans.registrertDato!!, prosessinstans.låsReferanse!!
-    )
-}
+)

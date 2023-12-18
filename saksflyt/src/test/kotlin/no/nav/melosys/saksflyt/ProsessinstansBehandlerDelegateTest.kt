@@ -51,7 +51,7 @@ internal class ProsessinstansBehandlerDelegateTest {
         val eksisterendeProsessinstans = lagProsessinstans(låsReferanse)
         every {
             prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(prosessinstans.id, any(), any())
-        } returns setOf(ProsessinstansInfo(eksisterendeProsessinstans))
+        } returns setOf(eksisterendeProsessinstans.tilProsessinstansInfo())
 
 
         prosessinstansBehandlerDelegate.oppdaterStatusOmSkalPåVent(prosessinstans)
@@ -69,7 +69,7 @@ internal class ProsessinstansBehandlerDelegateTest {
         val eksisterendeProsessinstans = lagProsessinstans("12_13_1")
         every {
             prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(prosessinstans.id, any(), any())
-        } returns setOf(ProsessinstansInfo(eksisterendeProsessinstans))
+        } returns setOf(eksisterendeProsessinstans.tilProsessinstansInfo())
         every { prosessinstansRepository.save(any()) } returns prosessinstans
 
 
@@ -89,4 +89,7 @@ internal class ProsessinstansBehandlerDelegateTest {
             registrertDato = LocalDateTime.now()
         }
     }
+
+    private fun Prosessinstans.tilProsessinstansInfo(): ProsessinstansInfo = ProsessinstansInfo(id, status, registrertDato, låsReferanse)
+
 }
