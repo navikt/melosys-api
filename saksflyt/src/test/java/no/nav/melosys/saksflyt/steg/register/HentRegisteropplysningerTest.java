@@ -122,7 +122,7 @@ class HentRegisteropplysningerTest {
 
         Periode periode = new Periode(LocalDate.now(), LocalDate.now().plusYears(2));
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(new Soeknad());
+        mottatteOpplysninger.setMottatteOpplysningerData(new Soeknad());
         mottatteOpplysninger.getMottatteOpplysningerData().periode = periode;
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
@@ -146,7 +146,7 @@ class HentRegisteropplysningerTest {
         behandling.getFagsak().setType(Sakstyper.FTRL);
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(new SøknadNorgeEllerUtenforEØS());
+        mottatteOpplysninger.setMottatteOpplysningerData(new SøknadNorgeEllerUtenforEØS());
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
         Prosessinstans prosessinstans = new Prosessinstans();
@@ -163,7 +163,7 @@ class HentRegisteropplysningerTest {
         behandling.getFagsak().setType(Sakstyper.TRYGDEAVTALE);
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(new SøknadNorgeEllerUtenforEØS());
+        mottatteOpplysninger.setMottatteOpplysningerData(new SøknadNorgeEllerUtenforEØS());
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
         Prosessinstans prosessinstans = new Prosessinstans();
@@ -182,7 +182,7 @@ class HentRegisteropplysningerTest {
         when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)).thenReturn(true);
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(new SøknadNorgeEllerUtenforEØS());
+        mottatteOpplysninger.setMottatteOpplysningerData(new SøknadNorgeEllerUtenforEØS());
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
         Prosessinstans prosessinstans = new Prosessinstans();
@@ -201,7 +201,7 @@ class HentRegisteropplysningerTest {
         when(saksbehandlingRegler.harRegistreringUnntakFraMedlemskapFlyt(behandling)).thenReturn(true);
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(new SøknadNorgeEllerUtenforEØS());
+        mottatteOpplysninger.setMottatteOpplysningerData(new SøknadNorgeEllerUtenforEØS());
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
         Prosessinstans prosessinstans = new Prosessinstans();

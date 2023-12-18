@@ -433,7 +433,7 @@ class TrygdeavtaleServiceTest {
         mottatteOpplysningerData.personOpplysninger = personOpplysninger;
 
         var mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
+        mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
 
         var behandling = new Behandling();
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
@@ -450,7 +450,7 @@ class TrygdeavtaleServiceTest {
         mottatteOpplysningerData.foretakUtland = foretakUtland;
 
         var mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
+        mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
 
         var behandling = new Behandling();
         behandling.setSaksopplysninger(saksopplysninger);

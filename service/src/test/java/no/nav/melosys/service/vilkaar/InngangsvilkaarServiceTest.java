@@ -371,7 +371,7 @@ class InngangsvilkaarServiceTest {
         mottatteOpplysningerData.soeknadsland = new Soeknadsland(List.of(Landkoder.BE.getKode()), false);
         var behandling = new Behandling();
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(mottatteOpplysningerData);
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(mottatteOpplysningerData);
         return behandling;
     }
 }

@@ -69,7 +69,7 @@ class BrevDataByggerInnvilgelseFlereLandTest {
         behandling.setFagsak(fagsak);
         behandling.getSaksopplysninger().add(lagPersonsopplysning());
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new Soeknad());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(new Soeknad());
 
         brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
