@@ -127,7 +127,7 @@ class UtledMedlemskapsperioder {
             this.tom = søknadsperiode.tom
             this.arbeidsland = arbeidsland
             this.innvilgelsesresultat = innvilgelsesResultat
-            this.medlemskapstype = Medlemskapstyper.PLIKTIG
+            this.medlemskapstype = Medlemskapstyper.FRIVILLIG
             this.trygdedekning = trygdedekning
         }
 

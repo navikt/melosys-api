@@ -99,7 +99,7 @@ class MedlemskapsperiodeServiceTest {
                 Land_iso2.AU.getKode(),
                 InnvilgelsesResultat.AVSLAATT,
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
-                Medlemskapstyper.PLIKTIG);
+                Medlemskapstyper.FRIVILLIG);
     }
 
     @Test
