@@ -185,7 +185,7 @@ class MottatteOpplysningerService(
             this.mottaksdato = utledMottaksdato.getMottaksdato(behandling)
             this.originalData = originalData
             this.eksternReferanseID = eksternReferanseID
-            this.setMottatteOpplysningerdata(mottatteOpplysningerData)
+            this.mottatteOpplysningerData = mottatteOpplysningerData
         }
 
         behandling.mottatteOpplysninger = mottatteOpplysninger

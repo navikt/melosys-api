@@ -62,11 +62,11 @@ class DokgenMalMapperIkkeYrkesaktivTest {
             type = Behandlingstyper.FØRSTEGANG
             status = Behandlingsstatus.UNDER_BEHANDLING
             mottatteOpplysninger = MottatteOpplysninger().apply {
-                setMottatteOpplysningerdata(
+                mottatteOpplysningerData =
                     SøknadIkkeYrkesaktiv().apply {
-                    ikkeYrkesaktivSituasjontype = Ikkeyrkesaktivsituasjontype.STUDENT
-                    soeknadsland = Soeknadsland(listOf(Land_iso2.CA.kode), false)
-                })
+                        ikkeYrkesaktivSituasjontype = Ikkeyrkesaktivsituasjontype.STUDENT
+                        soeknadsland = Soeknadsland(listOf(Land_iso2.CA.kode), false)
+                    }
             }
             fagsak = Fagsak().apply {
                 saksnummer = "MEL-1"
@@ -128,10 +128,10 @@ class DokgenMalMapperIkkeYrkesaktivTest {
             tema = Behandlingstema.IKKE_YRKESAKTIV
             type = Behandlingstyper.FØRSTEGANG
             mottatteOpplysninger = MottatteOpplysninger().apply {
-                setMottatteOpplysningerdata(
+                mottatteOpplysningerData =
                     SøknadIkkeYrkesaktiv().apply {
-                    soeknadsland = Soeknadsland(listOf(Land_iso2.CA_QC.kode), false)
-                })
+                        soeknadsland = Soeknadsland(listOf(Land_iso2.CA_QC.kode), false)
+                    }
             }
             fagsak = Fagsak().apply {
                 saksnummer = "MEL-2"

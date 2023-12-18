@@ -158,7 +158,7 @@ class AnmodningUnntakMapperTest {
         soeknad.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(soeknad);
+        mottatteOpplysninger.setMottatteOpplysningerData(soeknad);
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
         return behandling;

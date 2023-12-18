@@ -9,21 +9,17 @@ import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType;
 import no.nav.dok.brevdata.felles.v1.simpletypes.Spraakkode;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.brev.NorskMyndighet;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Representerer;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.exception.FunksjonellException;
-import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
 import no.nav.melosys.repository.BehandlingsresultatRepository;
 import no.nav.melosys.repository.UtenlandskMyndighetRepository;
@@ -43,7 +39,6 @@ import static java.util.Arrays.asList;
 import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.service.dokument.brev.BrevDataTestUtils.lagStrukturertAdresse;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -296,8 +291,6 @@ class BrevDataServiceTest {
         mottaker.setRolle(Mottakerroller.BRUKER);
         mottaker.setAktørId(AKTØRID);
 
-        var behandling = lagBehandling(new MottatteOpplysningerData());
-
         var brevMottaker = service.lagMottaker(mottaker, null);
 
         Mottaker expectedBrevMottaker = new Person();
@@ -318,8 +311,6 @@ class BrevDataServiceTest {
         mottaker.setRolle(Mottakerroller.ARBEIDSGIVER);
         mottaker.setOrgnr(ORGNR);
 
-        var behandling = lagBehandling(new MottatteOpplysningerData());
-
         var brevMottaker = service.lagMottaker(mottaker, null);
 
         Mottaker expectedBrevMottaker = new Organisasjon();
@@ -336,7 +327,6 @@ class BrevDataServiceTest {
     @Test
     void lagMottaker_trygdemyndighetUtenlandsk_riktigeVerdier() {
         var mottaker = lagMottakerMyndighet();
-        var behandling = lagBehandling(new MottatteOpplysningerData());
 
         var brevMottaker = service.lagMottaker(mottaker, null);
 
@@ -364,8 +354,6 @@ class BrevDataServiceTest {
         mottaker.setRolle(Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET);
         mottaker.setOrgnr(ORGNR);
 
-        var behandling = lagBehandling(new MottatteOpplysningerData());
-
         var brevMottaker = service.lagMottaker(mottaker, null);
 
         Mottaker expectedBrevMottaker = new Organisasjon();
@@ -386,8 +374,6 @@ class BrevDataServiceTest {
         mottaker.setRolle(Mottakerroller.FULLMEKTIG);
         mottaker.setPersonIdent(REP_FNR);
 
-        var behandling = lagBehandling(new MottatteOpplysningerData());
-
         var brevMottaker = service.lagMottaker(mottaker, null);
 
         Mottaker expectedBrevMottaker = new Person();
@@ -407,8 +393,6 @@ class BrevDataServiceTest {
         var mottaker = new no.nav.melosys.domain.brev.Mottaker();
         mottaker.setRolle(Mottakerroller.FULLMEKTIG);
         mottaker.setOrgnr(REP_ORGNR);
-
-        var behandling = lagBehandling(new MottatteOpplysningerData());
 
         var brevMottaker = service.lagMottaker(mottaker, null);
 
@@ -484,7 +468,7 @@ class BrevDataServiceTest {
         behandling.setFagsak(fagsak);
 
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(mottatteOpplysningerData);
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(mottatteOpplysningerData);
 
         return behandling;
     }

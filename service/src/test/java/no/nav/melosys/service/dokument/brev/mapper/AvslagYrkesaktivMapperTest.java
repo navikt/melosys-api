@@ -67,7 +67,7 @@ class AvslagYrkesaktivMapperTest {
         soeknad.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(soeknad);
+        mottatteOpplysninger.setMottatteOpplysningerData(soeknad);
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
         Behandlingsresultat resultat = new Behandlingsresultat();
@@ -77,9 +77,6 @@ class AvslagYrkesaktivMapperTest {
         lovvalgsperiode.setFom(LocalDate.now());
         lovvalgsperiode.setTom(LocalDate.now());
         resultat.setLovvalgsperioder(Collections.singleton(lovvalgsperiode));
-
-        Anmodningsperiode anmodningsperiode = new Anmodningsperiode();
-        anmodningsperiode.setUnntakFraLovvalgsland(Land_iso2.DE);
 
         resultat.setVilkaarsresultater(new HashSet<>());
 

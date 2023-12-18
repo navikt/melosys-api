@@ -372,7 +372,7 @@ class AvklarteVirksomheterServiceTest {
         mottatteOpplysningerData.selvstendigArbeid.selvstendigForetak.add(selvstendigForetak);
         mottatteOpplysningerData.juridiskArbeidsgiverNorge.ekstraArbeidsgivere.add(orgnr2);
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
+        mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
         Behandling behandling = new Behandling();
         behandling.setSaksopplysninger(Set.of(saksopplysning));
         behandling.setMottatteOpplysninger(mottatteOpplysninger);

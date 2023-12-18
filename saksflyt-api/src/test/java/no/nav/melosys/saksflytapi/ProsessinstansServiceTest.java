@@ -188,7 +188,7 @@ class ProsessinstansServiceTest {
         Behandling behandling = new Behandling();
         behandling.setFagsak(fagsak);
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new MottatteOpplysningerData());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(new MottatteOpplysningerData());
         return behandling;
     }
 

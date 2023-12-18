@@ -300,7 +300,7 @@ final class DokumentServiceTest {
         søknad.oppholdUtland.oppholdslandkoder.add("DK");
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(søknad);
+        mottatteOpplysninger.setMottatteOpplysningerData(søknad);
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
         Saksopplysning personopplysninger = lagSaksopplysning(SaksopplysningType.PERSOPL, lagPersonDokument());

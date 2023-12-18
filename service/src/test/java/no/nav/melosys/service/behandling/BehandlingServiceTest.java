@@ -162,7 +162,7 @@ class BehandlingServiceTest {
     @Test
     void endreBehandlingstema_gyldigEndringForSøknad_behandlingLagresOgOppgaveOppdateres() {
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(new MottatteOpplysningerData());
+        mottatteOpplysninger.setMottatteOpplysningerData(new MottatteOpplysningerData());
         behandling.setTema(ARBEID_FLERE_LAND);
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
@@ -177,7 +177,7 @@ class BehandlingServiceTest {
     @Test
     void endreBehandlingstema_gyldigEndringForSED_behandlingLagresOgOppgaveOppdateres() {
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(new MottatteOpplysningerData());
+        mottatteOpplysninger.setMottatteOpplysningerData(new MottatteOpplysningerData());
         behandling.setTema(TRYGDETID);
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
@@ -727,7 +727,7 @@ class BehandlingServiceTest {
         behandling.setSaksopplysninger(new LinkedHashSet<>());
 
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new MottatteOpplysningerData());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(new MottatteOpplysningerData());
         behandling.getSaksopplysninger().add(opprettSaksopplysning());
         behandling.setFagsak(opprettFagsak());
         return behandling;
@@ -774,7 +774,7 @@ class BehandlingServiceTest {
         var mottatteOpplysningerData = new MottatteOpplysningerData();
         mottatteOpplysningerData.soeknadsland.landkoder.add(Landkoder.SE.getKode());
         mottatteOpplysningerData.periode = new Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2021, 1, 1));
-        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
+        mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
         return mottatteOpplysninger;
     }
 

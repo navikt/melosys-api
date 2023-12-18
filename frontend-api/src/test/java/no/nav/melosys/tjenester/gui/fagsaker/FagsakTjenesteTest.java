@@ -367,7 +367,7 @@ class FagsakTjenesteTest {
     private void mockFagsakTjeneste(Fagsak fagsak, Behandlingsresultat eksisterendeBehres) {
         Soeknad søknadDokument = SaksbehandlingDataFactory.lagSøknadDokument();
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(søknadDokument);
+        mottatteOpplysninger.setMottatteOpplysningerData(søknadDokument);
         Behandlingsresultat nyttBehres = new Behandlingsresultat();
         nyttBehres.setType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND);
         nyttBehres.getLovvalgsperioder().add(lagLovvalgsPeriode());

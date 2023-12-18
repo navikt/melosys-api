@@ -17,7 +17,7 @@ public final class MottatteOpplysningerStub {
     public static MottatteOpplysninger lagMottatteOpplysninger(List<String> selvstendigeForetak, List<ForetakUtland> foretakUtland, List<String> ekstraArbeidsgivere) {
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         mottatteOpplysninger.setType(Mottatteopplysningertyper.SØKNAD_A1_YRKESAKTIVE_EØS);
-        mottatteOpplysninger.setMottatteOpplysningerdata(lagMottatteOpplysningerdata(selvstendigeForetak, foretakUtland, ekstraArbeidsgivere));
+        mottatteOpplysninger.setMottatteOpplysningerData(lagMottatteOpplysningerdata(selvstendigeForetak, foretakUtland, ekstraArbeidsgivere));
         return mottatteOpplysninger;
     }
 

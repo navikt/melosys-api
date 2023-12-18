@@ -482,7 +482,7 @@ class BrevmalListeByggerTest {
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
         mottatteOpplysningerData.soeknadsland = new Soeknadsland(Collections.singletonList("GB"), false);
-        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
+        mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
         behandlingTrygdeavtale.setMottatteOpplysninger(mottatteOpplysninger);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
@@ -511,7 +511,7 @@ class BrevmalListeByggerTest {
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
         AnmodningEllerAttest anmodningEllerAttest = new AnmodningEllerAttest();
         anmodningEllerAttest.setLovvalgsland(Land_iso2.GB);
-        mottatteOpplysninger.setMottatteOpplysningerdata(anmodningEllerAttest);
+        mottatteOpplysninger.setMottatteOpplysningerData(anmodningEllerAttest);
         behandlingTrygdeavtale.setMottatteOpplysninger(mottatteOpplysninger);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandlingTrygdeavtale);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandlingTrygdeavtale);
