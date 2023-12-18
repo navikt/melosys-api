@@ -29,7 +29,7 @@ class ProsessinstansBuilder(
         behandling = this@ProsessinstansBuilder.behandling
         type = this@ProsessinstansBuilder.type
 
-        if (begrunnelseFritekst.isNullOrEmpty()) {
+        if (StringUtils.isNotEmpty(begrunnelseFritekst))  {
             setData(ProsessDataKey.BEGRUNNELSE_FRITEKST, begrunnelseFritekst)
         }
         if (!CollectionUtils.isEmpty(vedleggTilSed)) {
