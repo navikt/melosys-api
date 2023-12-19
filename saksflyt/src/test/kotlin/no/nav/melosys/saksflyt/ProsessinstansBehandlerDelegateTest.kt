@@ -86,7 +86,6 @@ internal class ProsessinstansBehandlerDelegateTest {
             this.låsReferanse = låsReferanse
             status = ProsessStatus.UNDER_BEHANDLING
             registrertDato = LocalDateTime.now()
-            registrertDato = LocalDateTime.now()
         }
     }
 
