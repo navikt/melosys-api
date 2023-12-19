@@ -61,7 +61,7 @@ class OpprettFakturaserie(
     private fun kansellerFakturaserieOgLagreReferanse(behandlingsresultat: Behandlingsresultat, saksbehandlerIdent: String) {
         val fakturaserieResponse =
             faktureringskomponentenConsumer.kansellerFakturaserie(behandlingsresultat.fakturaserieReferanse, saksbehandlerIdent)
-        behandlingsresultat.apply { fakturaserieReferanse = fakturaserieResponse.fakturaserieReferanse }
+        behandlingsresultat.fakturaserieReferanse = fakturaserieResponse.fakturaserieReferanse
         behandlingsresultatService.lagre(behandlingsresultat)
     }
 
@@ -71,17 +71,17 @@ class OpprettFakturaserie(
         saksbehandlerIdent: String
     ) {
         val fakturaserieResponse = faktureringskomponentenConsumer.lagFakturaserie(fakturaserieDto, saksbehandlerIdent)
-        behandlingsresultat.apply { fakturaserieReferanse = fakturaserieResponse.fakturaserieReferanse }
+        behandlingsresultat.fakturaserieReferanse = fakturaserieResponse.fakturaserieReferanse
         behandlingsresultatService.lagre(behandlingsresultat)
     }
 
     private fun skalOppretteFakturaserie(behandlingsresultat: Behandlingsresultat): Boolean {
-        return (trygdeavgiftsperioderMedAvgift(behandlingsresultat)?.isNotEmpty() ?: false)
+        return trygdeavgiftsperioderMedAvgift(behandlingsresultat).isNotEmpty()
             && trygdeavgiftMottakerService.skalBetalesTilNav(behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift.trygdeavgiftsgrunnlag)
     }
 
-    private fun trygdeavgiftsperioderMedAvgift(behandlingsresultat: Behandlingsresultat): List<Trygdeavgiftsperiode>? {
-        return behandlingsresultat.medlemAvFolketrygden?.fastsattTrygdeavgift?.trygdeavgiftsperioder?.filter { it.harAvgift() }
+    private fun trygdeavgiftsperioderMedAvgift(behandlingsresultat: Behandlingsresultat): List<Trygdeavgiftsperiode> {
+        return behandlingsresultat.medlemAvFolketrygden?.fastsattTrygdeavgift?.trygdeavgiftsperioder?.filter { it.harAvgift() } ?: emptyList()
     }
 
     private fun mapFakturaserieDto(behandlingsresultat: Behandlingsresultat, prosessinstans: Prosessinstans): FakturaserieDto {
@@ -101,7 +101,7 @@ class OpprettFakturaserie(
             fakturaGjelderInnbetalingstype = Innbetalingstype.TRYGDEAVGIFT,
             intervall = hentBetalingsIntervall(prosessinstans),
             referanseBruker = "Vedtak om medlemskap datert $vedtaksdato",
-            perioder = mapFakturaseriePeriodeDto(trygdeavgiftsperioderMedAvgift(behandlingsresultat)!!)
+            perioder = mapFakturaseriePeriodeDto(trygdeavgiftsperioderMedAvgift(behandlingsresultat))
         )
     }
 
