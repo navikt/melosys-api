@@ -377,7 +377,7 @@ internal class MedlServiceTest {
                 type = Behandlingstyper.FØRSTEGANG
                 status = Behandlingsstatus.VURDER_DOKUMENT
                 mottatteOpplysninger = MottatteOpplysninger().apply {
-                    setMottatteOpplysningerdata(SedGrunnlag().apply {
+                    setMottatteOpplysningerData(SedGrunnlag().apply {
                         overgangsregelbestemmelser = listOf(Overgangsregelbestemmelser.FO_1408_1971_ART14_2_A)
                     })
                 }

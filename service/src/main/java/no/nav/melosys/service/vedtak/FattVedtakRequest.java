@@ -142,7 +142,7 @@ public class FattVedtakRequest {
         private String bestillersId;
         private FaktureringsIntervall betalingsintervall;
 
-        public Builder medBehandlingsresultat(Behandlingsresultattyper behandlingsresultatTypeKode) {
+        public Builder medBehandlingsresultatType(Behandlingsresultattyper behandlingsresultatTypeKode) {
             this.behandlingsresultatTypeKode = behandlingsresultatTypeKode;
             return this;
         }

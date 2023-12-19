@@ -58,7 +58,7 @@ class BrevmottakerServiceTest {
 
     private Behandlingsresultat behandlingsresultat;
     private BrevmottakerService brevmottakerService;
-    private FakeUnleash fakeUnleash = new FakeUnleash();
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     @BeforeEach
     void setup() {
@@ -562,7 +562,7 @@ class BrevmottakerServiceTest {
         foretakUtland.uuid = foretakUtlandUuid;
         mottatteOpplysningerData.foretakUtland.add(foretakUtland);
         var mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
+        mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
         return mottatteOpplysninger;
     }
 

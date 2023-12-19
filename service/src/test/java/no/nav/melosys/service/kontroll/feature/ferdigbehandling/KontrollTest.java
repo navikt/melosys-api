@@ -215,7 +215,7 @@ class KontrollTest {
         lovvalgsperiode.setTom(LocalDate.now().plusYears(3).plusDays(1));
         lovvalgsperiode.setBestemmelse(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1);
 
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new SøknadNorgeEllerUtenforEØS());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(new SøknadNorgeEllerUtenforEØS());
 
 
         Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.TRYGDEAVTALE, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);
@@ -309,7 +309,7 @@ class KontrollTest {
 
         lovvalgsperiode.setBestemmelse(Lovvalgsbestemmelser_trygdeavtale_gb.UK_ART6_1);
 
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new SøknadNorgeEllerUtenforEØS());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(new SøknadNorgeEllerUtenforEØS());
 
 
         Collection<Kontrollfeil> resultat = kontroll.utførKontroller(behandlingID, Sakstyper.TRYGDEAVTALE, Behandlingsresultattyper.MEDLEM_I_FOLKETRYGDEN);

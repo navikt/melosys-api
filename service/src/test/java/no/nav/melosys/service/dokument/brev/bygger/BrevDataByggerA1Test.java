@@ -82,7 +82,7 @@ class BrevDataByggerA1Test {
         søknad.foretakUtland.add(foretakUtland);
 
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(søknad);
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(søknad);
 
         Saksopplysning person = new Saksopplysning();
         PersonDokument personDok = new PersonDokument();

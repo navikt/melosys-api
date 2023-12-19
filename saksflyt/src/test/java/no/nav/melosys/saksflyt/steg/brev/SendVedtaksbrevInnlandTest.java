@@ -63,7 +63,7 @@ class SendVedtaksbrevInnlandTest {
 
     private SendVedtaksbrevInnland sendVedtaksbrevInnland;
 
-    private FakeUnleash fakeUnleash = new FakeUnleash();
+    private final FakeUnleash fakeUnleash = new FakeUnleash();
 
     @BeforeEach
     public void setUp() {
@@ -361,7 +361,7 @@ class SendVedtaksbrevInnlandTest {
         behandling.setId(BEHANDLINGID);
         behandling.setType(Behandlingstyper.FØRSTEGANG);
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new Soeknad());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(new Soeknad());
         behandling.setFagsak(lagFagsak());
         return behandling;
     }

@@ -73,7 +73,7 @@ class DataByggerStubs {
         utenlandskIdent.ident = "439205843";
         utenlandskIdent.landkode = "SE";
         søknadDokument.personOpplysninger.utenlandskIdent.add(utenlandskIdent);
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(søknadDokument);
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(søknadDokument);
 
         Saksopplysning saksopplysning = new Saksopplysning();
         saksopplysning.setType(SaksopplysningType.ARBFORH);

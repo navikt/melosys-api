@@ -72,7 +72,7 @@ public class EosVedtakService {
 
     public void fattVedtak(Behandling behandling, Behandlingsresultattyper behandlingsresultattype, Vedtakstyper vedtakstype) throws ValideringException {
         FattVedtakRequest request = new FattVedtakRequest.Builder()
-            .medBehandlingsresultat(behandlingsresultattype)
+            .medBehandlingsresultatType(behandlingsresultattype)
             .medVedtakstype(vedtakstype)
             .build();
         fattVedtak(behandling, request);

@@ -309,12 +309,15 @@ public class DokgenService {
                 .medFritekstvedleggTittel(brevbestillingDto.getFritekstTittel())
                 .medFritekstvedleggTekst(brevbestillingDto.getFritekst())
                 .medMottakerType(brevbestillingDto.getMottaker());
-            case IKKE_YRKESAKTIV_VEDTAKSBREV -> new IkkeYrkesaktivBrevbestilling.Builder().medDistribusjonstype(Distribusjonstype.VEDTAK);
+            case IKKE_YRKESAKTIV_VEDTAKSBREV ->
+                new IkkeYrkesaktivBrevbestilling.Builder().medDistribusjonstype(Distribusjonstype.VEDTAK);
             case VARSELBREV_MANGLENDE_INNBETALING -> new VarselbrevManglendeInnbetalingBrevbestilling.Builder()
                 .medFakturanummer(brevbestillingDto.getFakturanummer())
                 .medBetalingsstatus(brevbestillingDto.getBetalingsstatus())
                 .medFullmektigForBetaling(brevbestillingDto.getFullmektigForBetaling())
                 .medBetalingsfrist(brevbestillingDto.getBetalingsfrist());
+            case VEDTAK_OPPHOERT_MEDLEMSKAP ->
+                new VedtakOpphoertMedlemskapBrevbestilling.Builder().medOpphoertBegrunnelseFritekst(brevbestillingDto.getBegrunnelseFritekst());
 
             default -> new DokgenBrevbestilling.Builder<>().medDistribusjonstype(Distribusjonstype.VIKTIG);
         };

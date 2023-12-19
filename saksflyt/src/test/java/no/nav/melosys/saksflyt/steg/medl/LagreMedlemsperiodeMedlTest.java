@@ -91,22 +91,54 @@ class LagreMedlemsperiodeMedlTest {
     void utfør_avslutterMedlemskapsperioder_nårDetErNyVurderingOgInnvilgelse() {
         Medlemskapsperiode innvilgetMedlemskapsperiode = lagMedlemskapsperiode(INNVILGET);
         var medlemskapsperioder = List.of(lagMedlemskapsperiode(AVSLAATT), innvilgetMedlemskapsperiode);
-        Behandlingsresultat behandlingsresultat = lagBehandlingsresulat(medlemskapsperioder);
-        Fagsak fagsak = new Fagsak();
-        fagsak.setSaksnummer("MEL-1");
         Behandling opprinneligBehandling = new Behandling();
         opprinneligBehandling.setId(1L);
-        opprinneligBehandling.setFagsak(fagsak);
         Prosessinstans prosessinstans = lagProsessInstans();
         prosessinstans.getBehandling().setType(Behandlingstyper.NY_VURDERING);
         prosessinstans.getBehandling().setOpprinneligBehandling(opprinneligBehandling);
-        prosessinstans.getBehandling().setFagsak(fagsak);
+        Behandlingsresultat behandlingsresultat = lagBehandlingsresulat(medlemskapsperioder);
         behandlingsresultat.setBehandling(prosessinstans.getBehandling());
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
         lagreMedlemsperiodeMedl.utfør(prosessinstans);
 
-        verify(medlemskapsperiodeService).erstattMedlemskapsperioder(eq(List.of(innvilgetMedlemskapsperiode)), eq(1L), eq(123L));
+        verify(medlemskapsperiodeService).erstattMedlemskapsperioder(List.of(innvilgetMedlemskapsperiode), 1L, BEHANDLING_ID);
+    }
+
+    @Test
+    void utfør_avslutterMedlemskapsperioder_nårDetErManglendeInnbetalingTrygdeavgiftOgViSkalIkkeOpphøre() {
+        Medlemskapsperiode innvilgetMedlemskapsperiode = lagMedlemskapsperiode(INNVILGET);
+        var medlemskapsperioder = List.of(innvilgetMedlemskapsperiode);
+        Behandling opprinneligBehandling = new Behandling();
+        opprinneligBehandling.setId(1L);
+        Prosessinstans prosessinstans = lagProsessInstans();
+        prosessinstans.getBehandling().setType(Behandlingstyper.NY_VURDERING);
+        prosessinstans.getBehandling().setOpprinneligBehandling(opprinneligBehandling);
+        Behandlingsresultat behandlingsresultat = lagBehandlingsresulat(medlemskapsperioder);
+        behandlingsresultat.setBehandling(prosessinstans.getBehandling());
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+        lagreMedlemsperiodeMedl.utfør(prosessinstans);
+
+        verify(medlemskapsperiodeService).erstattMedlemskapsperioder(List.of(innvilgetMedlemskapsperiode), 1L, BEHANDLING_ID);
+    }
+
+    @Test
+    void utfør_avslutterMedlemskapsperioder_nårDetErManglendeInnbetalingTrygdeavgiftOgViSkalOpphøre() {
+        Behandling opprinneligBehandling = new Behandling();
+        opprinneligBehandling.setId(1L);
+        Prosessinstans prosessinstans = lagProsessInstans();
+        prosessinstans.getBehandling().setType(Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT);
+        prosessinstans.getBehandling().setOpprinneligBehandling(opprinneligBehandling);
+        Behandlingsresultat behandlingsresultat = lagBehandlingsresulat(emptyList());
+        behandlingsresultat.setBehandling(prosessinstans.getBehandling());
+        when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
+
+
+        lagreMedlemsperiodeMedl.utfør(prosessinstans);
+
+
+        verify(medlemskapsperiodeService).erstattMedlemskapsperioder(emptyList(), 1L, BEHANDLING_ID);
     }
 
     private Prosessinstans lagProsessInstans() {

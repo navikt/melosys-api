@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST;
+import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.BEGRUNNELSE_FRITEKST;
 import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.SAKSBEHANDLER;
 
 @Component
@@ -39,7 +39,7 @@ public class SendOrienteringsbrevVideresendSøknad implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
         Behandling behandling = behandlingService.hentBehandlingMedSaksopplysninger(prosessinstans.getBehandling().getId());
         String saksbehandler = prosessinstans.getData(SAKSBEHANDLER);
-        String fritekst = prosessinstans.getData(BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST);
+        String fritekst = prosessinstans.getData(BEGRUNNELSE_FRITEKST);
 
         DoksysBrevbestilling brevbestilling = new DoksysBrevbestilling.Builder()
             .medAvsenderID(saksbehandler)

@@ -47,7 +47,7 @@ class VurderInngangsvilkaarTest {
         mottatteOpplysningerData.soeknadsland.landkoder = List.of(Landkoder.NO.getKode(), Landkoder.SE.getKode());
 
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(mottatteOpplysningerData);
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(mottatteOpplysningerData);
         behandling.setFagsak(new Fagsak());
 
         Prosessinstans prosessinstans = new Prosessinstans();

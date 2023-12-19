@@ -21,7 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST;
+import static no.nav.melosys.saksflytapi.domain.ProsessDataKey.BEGRUNNELSE_FRITEKST;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -59,7 +59,7 @@ class SendHenleggelsesbrevTest {
 
         behandlingsresultat.setBegrunnelseFritekst("fritekst");
         behandlingsresultat.getBehandlingsresultatBegrunnelser().add(begrunnelse);
-        prosessinstans.setData(BEHANDLINGSRESULTAT_BEGRUNNELSE_FRITEKST, "fritekst");
+        prosessinstans.setData(BEGRUNNELSE_FRITEKST, "fritekst");
         Behandling behandling = new Behandling();
         behandling.setId(behandlingID);
         behandling.setFagsak(fagsak);

@@ -251,12 +251,12 @@ internal class MottatteOpplysningerServiceTest {
     @Test
     fun oppdaterMottatteOpplysninger_mottatteopplysningerJsonDataIkkeSatt_setterJsonDataOgLagrerMottatteOpplysninger() {
         val mottatteOpplysninger = MottatteOpplysninger().apply {
-            setMottatteOpplysningerdata(MottatteOpplysningerData().apply {
+            mottatteOpplysningerData = MottatteOpplysningerData().apply {
                 periode = Periode(
                     LocalDate.of(2000, 1, 1),
                     LocalDate.of(2010, 1, 1)
                 )
-            })
+            }
         }
         every { mottatteOpplysningerRepositoryMock.saveAndFlush(any()) } returns mockk()
 
@@ -279,7 +279,7 @@ internal class MottatteOpplysningerServiceTest {
     @Test
     fun oppdaterMottatteOpplysningerPeriodeOgLand_eksisterer_oppdatererPeriodeOgLand() {
         val mottatteOpplysninger = MottatteOpplysninger().apply {
-            setMottatteOpplysningerdata(MottatteOpplysningerData())
+            mottatteOpplysningerData = MottatteOpplysningerData()
         }
         val periode = Periode(
             LocalDate.of(2021, 1, 1),

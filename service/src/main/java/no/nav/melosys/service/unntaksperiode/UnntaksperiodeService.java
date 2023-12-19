@@ -107,23 +107,14 @@ public class UnntaksperiodeService {
     @Transactional
     public void ikkeGodkjennPeriode(long behandlingID, Set<String> begrunnelser, String fritekst) {
         Behandling behandling = hentOgValiderBehandling(behandlingID);
-        Set<Ikke_godkjent_begrunnelser> ikkeGodkjentBegrunnelser = tilIkkeGodkjentBegrunnelser(begrunnelser);
-        validerBegrunnelser(ikkeGodkjentBegrunnelser, fritekst);
+        validerBegrunnelser(begrunnelser, fritekst);
         behandlingsresultatService.settUtfallRegistreringUnntakOgType(behandlingID, Utfallregistreringunntak.IKKE_GODKJENT);
         behandlingsresultatService.oppdaterBegrunnelser(
             behandlingID, begrunnelser.stream().map(BehandlingsresultatBegrunnelse::lag).collect(Collectors.toSet()), fritekst
         );
 
-        prosessinstansService.opprettProsessinstansUnntaksperiodeAvvist(behandling, ikkeGodkjentBegrunnelser, fritekst);
+        prosessinstansService.opprettProsessinstansUnntaksperiodeAvvist(behandling, fritekst);
         oppgaveService.ferdigstillOppgaveMedSaksnummer(behandling.getFagsak().getSaksnummer());
-    }
-
-    private Set<Ikke_godkjent_begrunnelser> tilIkkeGodkjentBegrunnelser(Set<String> begrunnelser) {
-        Set<Ikke_godkjent_begrunnelser> ikkeGodkjentBegrunnelser = new HashSet<>();
-        for (String b : begrunnelser) {
-            ikkeGodkjentBegrunnelser.add(Ikke_godkjent_begrunnelser.valueOf(b));
-        }
-        return ikkeGodkjentBegrunnelser;
     }
 
     private Behandling hentOgValiderBehandling(long behandlingID) {
@@ -141,10 +132,15 @@ public class UnntaksperiodeService {
         }
     }
 
-    private void validerBegrunnelser(Set<Ikke_godkjent_begrunnelser> begrunnelser, String fritekst) {
-        if (begrunnelser.isEmpty()) {
+    private void validerBegrunnelser(Set<String> begrunnelser, String fritekst) {
+        Set<Ikke_godkjent_begrunnelser> ikkeGodkjentBegrunnelser = new HashSet<>();
+        for (String b : begrunnelser) {
+            ikkeGodkjentBegrunnelser.add(Ikke_godkjent_begrunnelser.valueOf(b));
+        }
+
+        if (ikkeGodkjentBegrunnelser.isEmpty()) {
             throw new FunksjonellException("Ingen begrunnelser for avlag av periode");
-        } else if (begrunnelser.contains(Ikke_godkjent_begrunnelser.ANNET) && StringUtils.isEmpty(fritekst)) {
+        } else if (ikkeGodkjentBegrunnelser.contains(Ikke_godkjent_begrunnelser.ANNET) && StringUtils.isEmpty(fritekst)) {
             throw new FunksjonellException("Begrunnelse " + Ikke_godkjent_begrunnelser.ANNET + " krever fritekst!");
         }
     }

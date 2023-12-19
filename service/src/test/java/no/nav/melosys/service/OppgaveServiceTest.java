@@ -180,7 +180,7 @@ class OppgaveServiceTest {
         var behandling = lagBehandling();
         var fagsak = lagFagsak(behandling);
         var mottatteOpplysninger = lagMottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(new AnmodningEllerAttest());
+        mottatteOpplysninger.setMottatteOpplysningerData(new AnmodningEllerAttest());
 
         when(oppgaveFasade.finnOppgaverMedAnsvarlig(TILORDNET_RESSURS)).thenReturn(Set.of(oppgave));
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
@@ -358,7 +358,7 @@ class OppgaveServiceTest {
     void opprettEllerGjenbrukBehandlingsoppgave_oppgaveOpprettElektroniskSøknad_oppgaveBlirOpprettetMedBeskrivelse() {
         Behandling behandling = lagBehandling();
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new MottatteOpplysningerData());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(new MottatteOpplysningerData());
         behandling.getMottatteOpplysninger().setType(Mottatteopplysningertyper.SØKNAD_A1_UTSENDTE_ARBEIDSTAKERE_EØS);
         when(behandlingService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(behandling);
         when(behandlingService.hentBehandling(anyLong())).thenReturn(behandling);
@@ -437,7 +437,7 @@ class OppgaveServiceTest {
     void opprettEllerGjenbrukBehandlingsoppgave_barnHarBeskyttelsesbehov_sensitivOppgaveBlirOpprettet() {
         Behandling behandling = lagBehandling();
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new MottatteOpplysningerData());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(new MottatteOpplysningerData());
         behandling.getMottatteOpplysninger().getMottatteOpplysningerData().personOpplysninger.medfolgendeFamilie
             = List.of(MedfolgendeFamilie.tilBarnFraFnrOgNavn("fnrBarn", null));
         when(persondataFasade.harStrengtFortroligAdresse("aktørID")).thenReturn(false);
@@ -557,7 +557,7 @@ class OppgaveServiceTest {
 
     private static MottatteOpplysninger lagMottatteOpplysninger() {
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(lagSoeknadDokument());
+        mottatteOpplysninger.setMottatteOpplysningerData(lagSoeknadDokument());
         return mottatteOpplysninger;
     }
 

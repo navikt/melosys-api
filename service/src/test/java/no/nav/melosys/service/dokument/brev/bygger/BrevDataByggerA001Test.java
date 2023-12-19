@@ -144,7 +144,7 @@ class BrevDataByggerA001Test {
         behandling.setSaksopplysninger(new HashSet<>(List.of(medl, aareg)));
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(søknad);
+        mottatteOpplysninger.setMottatteOpplysningerData(søknad);
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
         OrganisasjonsDetaljer detaljer = mock(OrganisasjonsDetaljer.class);

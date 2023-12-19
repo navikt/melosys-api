@@ -298,7 +298,7 @@ class TrygdeavtaleTjenesteTest {
         mottatteOpplysningerData.soeknadsland.landkoder.add(Landkoder.GB.getKode());
         mottatteOpplysningerData.periode = new Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2021, 1, 1));
         var mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
+        mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
         return mottatteOpplysninger;
     }
 

@@ -376,8 +376,15 @@ public class Behandling extends RegistreringsInfo {
             || status == Behandlingsstatus.ANMODNING_UNNTAK_SENDT;
     }
 
+    public boolean erFørstegangsvurdering() {
+        return type == Behandlingstyper.FØRSTEGANG;
+    }
     public boolean erNyVurdering() {
         return type == Behandlingstyper.NY_VURDERING;
+    }
+
+    public boolean erManglendeInnbetalingTrygdeavgift() {
+        return type == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT;
     }
 
     public boolean erNorgeUtpekt() {

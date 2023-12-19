@@ -3,7 +3,6 @@ package no.nav.melosys.service.vedtak;
 import java.util.List;
 import java.util.Set;
 
-import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
@@ -97,7 +96,7 @@ class TrygdeavtaleVedtakServiceTest {
 
         verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
         verify(behandlingService).endreStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request.tilVedtakRequest()));
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
         verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
         verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), eq(Sakstyper.TRYGDEAVTALE), any(Behandlingsresultattyper.class), eq(null));
@@ -143,7 +142,7 @@ class TrygdeavtaleVedtakServiceTest {
 
         verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
         verify(behandlingService).endreStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request.tilVedtakRequest()));
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
         verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
         verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), eq(Sakstyper.TRYGDEAVTALE), any(Behandlingsresultattyper.class), eq(null));
@@ -189,7 +188,7 @@ class TrygdeavtaleVedtakServiceTest {
 
         verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
         verify(behandlingService).endreStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request.tilVedtakRequest()));
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
         verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
         verify(ferdigbehandlingKontrollFacade).kontrollerVedtakMedRegisteropplysninger(any(Behandling.class), eq(Sakstyper.TRYGDEAVTALE), any(Behandlingsresultattyper.class), eq(null));
@@ -231,7 +230,7 @@ class TrygdeavtaleVedtakServiceTest {
         when(behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID)).thenReturn(behandlingsresultat);
 
         FattVedtakRequest request = new FattVedtakRequest.Builder()
-            .medBehandlingsresultat(AVSLAG_MANGLENDE_OPPL)
+            .medBehandlingsresultatType(AVSLAG_MANGLENDE_OPPL)
             .medVedtakstype(FØRSTEGANGSVEDTAK)
             .medFritekst("fritekst for beskrivelse avslag")
             .medBestillersId(SubjectHandler.getInstance().getUserID())
@@ -241,7 +240,7 @@ class TrygdeavtaleVedtakServiceTest {
 
         verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
         verify(behandlingService).endreStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
-        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class), eq(request.tilVedtakRequest()));
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakTrygdeavtale(any(Behandling.class));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
         verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
 
@@ -265,7 +264,7 @@ class TrygdeavtaleVedtakServiceTest {
 
     private FattVedtakRequest lagFattVedtakRequest(Vedtakstyper vedtakstype, String nyVurderingBakgrunn) {
         return new FattVedtakRequest.Builder()
-            .medBehandlingsresultat(FASTSATT_LOVVALGSLAND)
+            .medBehandlingsresultatType(FASTSATT_LOVVALGSLAND)
             .medVedtakstype(vedtakstype)
             .medInnledningFritekst("Innledning")
             .medBegrunnelseFritekst("Begrunnelse")
@@ -292,7 +291,7 @@ class TrygdeavtaleVedtakServiceTest {
         MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
         mottatteOpplysningerData.soeknadsland.landkoder = List.of(Land_iso2.GB.getKode());
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
+        mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
         return mottatteOpplysninger;
     }
 

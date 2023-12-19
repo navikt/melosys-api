@@ -157,7 +157,7 @@ public final class DokgenTestData {
 
     private static MottatteOpplysninger lagMottatteOpplysninger() {
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(lagMottatteOpplysningerdata());
+        mottatteOpplysninger.setMottatteOpplysningerData(lagMottatteOpplysningerdata());
         return mottatteOpplysninger;
     }
 
@@ -191,7 +191,7 @@ public final class DokgenTestData {
         Behandling behandling = lagBehandling(lagFagsak());
         var mottatteOpplysningerData = new SøknadNorgeEllerUtenforEØS();
         mottatteOpplysningerData.setRepresentantIUtlandet(representantIUtlandet);
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(mottatteOpplysningerData);
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(mottatteOpplysningerData);
         return behandling;
     }
 

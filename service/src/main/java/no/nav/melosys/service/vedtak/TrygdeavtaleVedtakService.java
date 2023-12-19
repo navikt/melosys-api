@@ -96,7 +96,7 @@ public class TrygdeavtaleVedtakService {
         } else {
             behandling.getFagsak().setStatus(Saksstatuser.MEDLEMSKAP_AVKLART); // TODO: Egen oppgave for fjerne denne som ikke brukes
             oppdaterBehandlingsresultat(behandlingsresultat, request);
-            prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling, request.tilVedtakRequest());
+            prosessinstansService.opprettProsessinstansIverksettVedtakTrygdeavtale(behandling);
             BrevbestillingDto brevbestillingDto = lagBrevbestilling(behandling, request);
             dokgenService.produserOgDistribuerBrev(behandlingID, brevbestillingDto);
         }

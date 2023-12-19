@@ -8,12 +8,15 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.Behandlingsresultat;
+import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.brev.*;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.dokument.felles.Periode;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.GeografiskAdresse;
 import no.nav.melosys.domain.dokument.organisasjon.adresse.SemistrukturertAdresse;
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser;
@@ -41,8 +44,7 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static no.nav.melosys.service.dokument.DokgenTestData.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -389,6 +391,35 @@ class DokgenMalMapperTest {
 
         assertThat(dokgenMalMapper.mapBehandling(brevbestilling, lagMottaker(BRUKER)))
             .isInstanceOf(InnvilgelseFtrl.class);
+    }
+
+    @Test
+    void skalMappevEdtakOpphørtMedlemskapTilBruker() {
+        var behandlingsResultat = new Behandlingsresultat();
+        behandlingsResultat.setMedlemAvFolketrygden(new MedlemAvFolketrygden());
+        var medlemskapsperiode = new Medlemskapsperiode();
+        medlemskapsperiode.setFom(LocalDate.now().minusMonths(1));
+        medlemskapsperiode.setTom(LocalDate.now());
+        medlemskapsperiode.setInnvilgelsesresultat(InnvilgelsesResultat.INNVILGET);
+        behandlingsResultat.getMedlemAvFolketrygden().setMedlemskapsperioder(List.of(medlemskapsperiode));
+        when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
+        when(mockDokgenMapperDatahenter.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsResultat);
+
+        Behandling behandling = lagBehandling(lagFagsak(true));
+
+        DokgenBrevbestilling brevbestilling = new VedtakOpphoertMedlemskapBrevbestilling.Builder()
+            .medProduserbartdokument(VEDTAK_OPPHOERT_MEDLEMSKAP)
+            .medBehandling(behandling)
+            .medOrg(lagOrg())
+            .medKontaktopplysning(lagKontaktOpplysning())
+            .medForsendelseMottatt(Instant.now())
+            .medOpphoertBegrunnelseFritekst("Dummy")
+            .build();
+
+
+        assertThat(dokgenMalMapper.mapBehandling(brevbestilling, lagMottaker(BRUKER)))
+            .isInstanceOf(VedtakOpphoertMedlemskap.class);
     }
 
     @Test
