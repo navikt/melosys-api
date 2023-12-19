@@ -65,7 +65,7 @@ public class MedlemskapsperiodeService {
 
         oppdaterMedlemskapsperiode(nyMedlemskapsperiode, fom, tom, innvilgelsesResultat, trygdedekning);
         nyMedlemskapsperiode.setArbeidsland(søknad.hentArbeidsland());
-        nyMedlemskapsperiode.setMedlemskapstype(Medlemskapstyper.PLIKTIG);
+        nyMedlemskapsperiode.setMedlemskapstype(Medlemskapstyper.FRIVILLIG);
         medlemAvFolketrygden.addMedlemskapsperiode(nyMedlemskapsperiode);
 
 
