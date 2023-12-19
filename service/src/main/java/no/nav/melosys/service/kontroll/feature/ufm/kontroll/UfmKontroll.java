@@ -9,14 +9,12 @@ import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
-import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.service.kontroll.feature.ufm.data.UfmKontrollData;
 import no.nav.melosys.service.kontroll.regler.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.text.html.Option;
 
 import static no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderRegler.*;
 import static org.apache.cxf.common.util.StringUtils.isEmpty;
@@ -145,7 +143,7 @@ final class UfmKontroll {
         Optional<Bostedsadresse> personBostedsadresse = kontrollData.persondata().finnBostedsadresse();
 
         return PersonRegler.personBosattINorgeIPeriode(bostedAdressePeriode, personBostedsadresse, sedFra, sedTil) ?
-            Kontroll_begrunnelser.BOSATT_I_NORGE : null;
+            Kontroll_begrunnelser.BOSATT_I_NORGE_I_PERIODEN : null;
     }
 
     static Kontroll_begrunnelser arbeidssted(UfmKontrollData kontrollData) {
