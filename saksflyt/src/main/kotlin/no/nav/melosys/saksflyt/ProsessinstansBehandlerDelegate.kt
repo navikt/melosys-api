@@ -1,10 +1,7 @@
 package no.nav.melosys.saksflyt
 
 import mu.KotlinLogging
-import no.nav.melosys.saksflytapi.domain.ProsessStatus
-import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.saksflytapi.domain.ProsessinstansInfo
-import no.nav.melosys.saksflytapi.domain.SedLåsReferanse
+import no.nav.melosys.saksflytapi.domain.*
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 import java.util.UUID
@@ -47,24 +44,17 @@ class ProsessinstansBehandlerDelegate(
             return false
         }
 
-        // TODO: finn riktig type fra prosessinstans.låsReferanse
-        val låsReferanse = SedLåsReferanse(prosessinstans.låsReferanse)
-        val aktiveLåsReferanser = finnAndreAktiveLåsMedSammeReferanse(prosessinstans.id, låsReferanse)
-
-        if (aktiveLåsReferanser.contains(låsReferanse)) {
-            return false
-        }
-        // Dette bør ikke være nødvending da equals brukes ved contains over?
-        // Lager flere tester og fjerne det i egen pr.
-        return aktiveLåsReferanser.any { it.referanse == låsReferanse.referanse }
+        val låsReferanse: LåsReferanse = LåsReferanseFactory.låsReferanseFraString(prosessinstans.låsReferanse)
+        val andreAktiveLåsMedSammeReferanse = finnAndreAktiveLåsMedSammeReferanse(prosessinstans.id, låsReferanse.referanse)
+        return låsReferanse.skalSettesPåVent(andreAktiveLåsMedSammeReferanse)
     }
 
     internal fun finnAndreAktiveLåsMedSammeReferanse(
         id: UUID,
-        låsReferanse: SedLåsReferanse
-    ): Collection<SedLåsReferanse> {
+        låsReferansePrefix: String
+    ): Collection<String> {
         return prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(
-            id, setOf(ProsessStatus.PÅ_VENT, ProsessStatus.FERDIG), låsReferanse.referanse
-        ).map { p: ProsessinstansInfo -> SedLåsReferanse(p.låsReferanse) }.toSet()
+            id, setOf(ProsessStatus.PÅ_VENT, ProsessStatus.FERDIG), låsReferansePrefix
+        ).map { it.låsReferanse }.toSet()
     }
 }

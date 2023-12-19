@@ -1,9 +1,7 @@
 package no.nav.melosys.saksflyt
 
 import mu.KotlinLogging
-import no.nav.melosys.saksflytapi.domain.ProsessStatus
-import no.nav.melosys.saksflytapi.domain.Prosessinstans
-import no.nav.melosys.saksflytapi.domain.SedLåsReferanse
+import no.nav.melosys.saksflytapi.domain.*
 import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
@@ -28,7 +26,7 @@ class ProsessinstansFerdigListener(
 
     private fun startNesteProsessinstans(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
         log.info("Forsøker å starte neste prosessinstans, låsreferanse {}", prosessinstansFerdigEvent.låsReferanse)
-        val ferdigReferanse = SedLåsReferanse(prosessinstansFerdigEvent.låsReferanse)
+        val ferdigReferanse = LåsReferanseFactory.låsReferanseFraString(prosessinstansFerdigEvent.låsReferanse)
 
         prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
             .filter { harSammeReferanse(it, ferdigReferanse) }
@@ -45,9 +43,8 @@ class ProsessinstansFerdigListener(
         prosessinstansBehandler.behandleProsessinstans(prosessinstans)
     }
 
-    private fun harSammeReferanse(prosessinstans: Prosessinstans, ferdigLåsreferanse: SedLåsReferanse): Boolean {
+    private fun harSammeReferanse(prosessinstans: Prosessinstans, ferdigLåsreferanse: LåsReferanse): Boolean {
         val låsReferanse = SedLåsReferanse(prosessinstans.låsReferanse)
-        // referanse er her rina saksnummer så må støtte dette når vi lager felles interface
         return låsReferanse.referanse == ferdigLåsreferanse.referanse
     }
 }
