@@ -12,11 +12,19 @@ data class NyFakturaserieResponseDto(
 
 open class FaktureringskomponentenConsumer(private val webClient: WebClient) : JsonRestIntegrasjon {
 
-    fun lagFakturaSerie(fakturaserieDto: FakturaserieDto, saksbehandlerIdent: String) =
+    fun lagFakturaserie(fakturaserieDto: FakturaserieDto, saksbehandlerIdent: String) =
         webClient.post()
             .uri("/fakturaserier")
             .header("Nav-User-Id", saksbehandlerIdent)
             .bodyValue(fakturaserieDto)
+            .retrieve()
+            .bodyToMono<NyFakturaserieResponseDto>()
+            .block()!!
+
+    fun kansellerFakturaserie(referanse: String, saksbehandlerIdent: String) =
+        webClient.delete()
+            .uri("/fakturaserier/{referanse}", referanse)
+            .header("Nav-User-Id", saksbehandlerIdent)
             .retrieve()
             .bodyToMono<NyFakturaserieResponseDto>()
             .block()!!
