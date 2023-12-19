@@ -16,6 +16,7 @@ class AktoerHistorikkService(
     fun hentAktørHistorikk(fagsak: Fagsak, rolle: Aktoersroller): List<AktoerHistorikk> {
         val revisions = auditRepository.getRevisions(Aktoer::class.java, mapOf("fagsak_saksnummer" to fagsak.saksnummer, "rolle" to rolle))
 
+        // TODO må tilpasses for MELOSYS-6240 og MELOSYS-6244
         return revisions.map {
             AktoerHistorikk(
                 registrertFra = LocalDate.now(),
