@@ -6,9 +6,7 @@ import com.google.common.collect.MoreCollectors;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Kontaktopplysning;
-import no.nav.melosys.domain.Representant;
 import no.nav.melosys.domain.kodeverk.Fullmaktstype;
-import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
@@ -80,7 +78,6 @@ public class AltinnSoeknadService {
             .medAktørID(hentAktørID(søknad))
             .medUtenlandskPersonId(hentUtenlandskPersonId(søknad))
             .medArbeidsgiver(hentArbeidsgiverID(søknad))
-            .medRepresentant(hentRepresentant(søknad))
             .medFullmektig(hentFullmektig(søknad))
             .medKontaktopplysninger(hentKontaktopplysninger(søknad))
             .medBehandlingsårsaktype(Behandlingsaarsaktyper.SØKNAD)
@@ -135,16 +132,6 @@ public class AltinnSoeknadService {
         return søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer();
     }
 
-    private static Representant hentRepresentant(MedlemskapArbeidEOSM søknad) {
-        if (rådgivningsfirmaErFullmektig(søknad)) {
-            String fullmektigVirksomhetsnummer = søknad.getInnhold().getFullmakt().getFullmektigVirksomhetsnummer();
-            return new Representant(fullmektigVirksomhetsnummer, hentRepresenterer(søknad));
-        } else {
-            return arbeidstakerHarGittFullmakt(søknad)
-                ? new Representant(hentArbeidsgiverID(søknad), hentRepresenterer(søknad)) : null;
-        }
-    }
-
     private FullmektigDto hentFullmektig(MedlemskapArbeidEOSM søknad) {
         if (rådgivningsfirmaErFullmektig(søknad)) {
             String fullmektigVirksomhetsnummer = søknad.getInnhold().getFullmakt().getFullmektigVirksomhetsnummer();
@@ -158,14 +145,6 @@ public class AltinnSoeknadService {
 
     private static boolean rådgivningsfirmaErFullmektig(MedlemskapArbeidEOSM søknad) {
         return StringUtils.isNotBlank(søknad.getInnhold().getFullmakt().getFullmektigVirksomhetsnummer());
-    }
-
-    private static Representerer hentRepresenterer(MedlemskapArbeidEOSM søknad) {
-        if (arbeidstakerHarGittFullmakt(søknad)) {
-            return Representerer.BEGGE;
-        } else {
-            return Representerer.ARBEIDSGIVER;
-        }
     }
 
     private static List<Fullmaktstype> hentFullmakter(MedlemskapArbeidEOSM søknad) {

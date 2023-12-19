@@ -118,14 +118,6 @@ public class Aktoer extends RegistreringsInfo {
         this.utenlandskPersonId = utenlandskPersonId;
     }
 
-    public Representerer getRepresenterer() {
-        return representerer;
-    }
-
-    public void setRepresenterer(Representerer representerer) {
-        this.representerer = representerer;
-    }
-
     public Set<Fullmakt> getFullmakter() {
         return fullmakter;
     }

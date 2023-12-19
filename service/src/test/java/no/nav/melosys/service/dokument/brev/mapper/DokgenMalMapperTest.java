@@ -254,7 +254,7 @@ class DokgenMalMapperTest {
             .medForsendelseMottatt(Instant.now())
             .build();
 
-        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerRepresentant(Aktoertype.ORGANISASJON));
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerFullmektig(Aktoertype.ORGANISASJON));
 
         assertThat((SaksbehandlingstidSoknad) dokgenDto)
             .extracting(
@@ -284,7 +284,7 @@ class DokgenMalMapperTest {
             .medForsendelseMottatt(Instant.now())
             .build();
 
-        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerRepresentant(Aktoertype.ORGANISASJON));
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerFullmektig(Aktoertype.ORGANISASJON));
 
         assertThat((SaksbehandlingstidSoknad) dokgenDto)
             .extracting(
@@ -339,7 +339,7 @@ class DokgenMalMapperTest {
         when(mockDokgenMapperDatahenter.hentNorskPoststed(any())).thenReturn("Andeby");
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
         when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
-        when(mockDokgenMapperDatahenter.hentFullmektigNavn(any(), eq(Representerer.BRUKER))).thenReturn("Fullmektig AS");
+        when(mockDokgenMapperDatahenter.hentFullmektigNavn(any(), eq(Fullmaktstype.FULLMEKTIG_SØKNAD))).thenReturn("Fullmektig AS");
 
         Behandling behandling = lagBehandling(lagFagsak(true));
 
@@ -488,7 +488,7 @@ class DokgenMalMapperTest {
     void skalMappeFritekstbrevTilBruker() {
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
         when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
-        when(mockDokgenMapperDatahenter.hentFullmektigNavn(any(), eq(Representerer.BRUKER))).thenReturn("Fullmektig AS");
+        when(mockDokgenMapperDatahenter.hentFullmektigNavn(any(), eq(Fullmaktstype.FULLMEKTIG_SØKNAD))).thenReturn("Fullmektig AS");
 
         Behandling behandling = lagBehandling(lagFagsak(true));
 
@@ -571,7 +571,7 @@ class DokgenMalMapperTest {
     @Test
     void skalMappeFritekstbrevTilArbeidsgiver() {
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
-        when(mockDokgenMapperDatahenter.hentFullmektigNavn(any(), eq(Representerer.ARBEIDSGIVER))).thenReturn(null);
+        when(mockDokgenMapperDatahenter.hentFullmektigNavn(any(), eq(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER))).thenReturn(null);
 
         Behandling behandling = lagBehandling(lagFagsak(true));
 

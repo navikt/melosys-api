@@ -11,10 +11,7 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.brev.NorskMyndighet;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
-import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Mottakerroller;
-import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
@@ -183,9 +180,9 @@ class BrevDataServiceTest {
     }
 
     @Test
-    void avklarMottakerId_representantOgKontaktOpplysningFinnes_kontaktOpplysningForRepresentantBrukes() {
+    void avklarMottakerId_fullmektigOgKontaktOpplysningFinnes_kontaktOpplysningForFullmektigBrukes() {
         Behandling behandling = lagBehandling(lagSøknadDokument());
-        behandling.getFagsak().getAktører().add(hentRepresentantOrgAktør());
+        behandling.getFagsak().getAktører().add(hentFullmektigOrgAktør());
 
         Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
         kontaktopplysning.setKontaktopplysningID(new KontaktopplysningID("MELTEST-1", "999"));
@@ -264,7 +261,7 @@ class BrevDataServiceTest {
     }
 
     @Test
-    void avklarMottakerId_ingenRepresentantForArbeidsgiverOgKontaktOpplysningFinnes_kontaktOpplysningBrukes() {
+    void avklarMottakerId_ingenFullmektigForArbeidsgiverOgKontaktOpplysningFinnes_kontaktOpplysningBrukes() {
         Kontaktopplysning kontaktopplysning = new Kontaktopplysning();
         kontaktopplysning.setKontaktopplysningID(new KontaktopplysningID("MELTEST-1", "999"));
         kontaktopplysning.setKontaktNavn("brev motakker");
@@ -368,7 +365,7 @@ class BrevDataServiceTest {
     }
 
     @Test
-    void lagMottaker_representantPerson_riktigeVerdier() {
+    void lagMottaker_fullmektigPerson_riktigeVerdier() {
         when(persondataFasade.hentPerson(REP_FNR)).thenReturn(PersonopplysningerObjectFactory.lagPersonopplysninger());
         var mottaker = new no.nav.melosys.domain.brev.Mottaker();
         mottaker.setRolle(Mottakerroller.FULLMEKTIG);
@@ -389,7 +386,7 @@ class BrevDataServiceTest {
     }
 
     @Test
-    void lagMottaker_representantOrganisasjon_riktigeVerdier() {
+    void lagMottaker_fullmektigOrganisasjon_riktigeVerdier() {
         var mottaker = new no.nav.melosys.domain.brev.Mottaker();
         mottaker.setRolle(Mottakerroller.FULLMEKTIG);
         mottaker.setOrgnr(REP_ORGNR);
@@ -473,12 +470,12 @@ class BrevDataServiceTest {
         return behandling;
     }
 
-    private static Aktoer hentRepresentantOrgAktør() {
-        Aktoer aktørArbRep = new Aktoer();
-        aktørArbRep.setRolle(Aktoersroller.REPRESENTANT);
-        aktørArbRep.setOrgnr(REP_ORGNR);
-        aktørArbRep.setRepresenterer(Representerer.ARBEIDSGIVER);
-        return aktørArbRep;
+    private static Aktoer hentFullmektigOrgAktør() {
+        Aktoer aktørArbFullmektig = new Aktoer();
+        aktørArbFullmektig.setRolle(Aktoersroller.FULLMEKTIG);
+        aktørArbFullmektig.setOrgnr(REP_ORGNR);
+        aktørArbFullmektig.setFullmaktstype(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
+        return aktørArbFullmektig;
     }
 
     private Soeknad lagSøknadDokument() {

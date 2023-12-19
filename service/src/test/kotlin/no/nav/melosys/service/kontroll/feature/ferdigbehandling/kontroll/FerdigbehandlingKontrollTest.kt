@@ -25,9 +25,8 @@ class FerdigbehandlingKontrollTest {
 
     companion object {
         val NOW = LocalDate.now()
-        const val BRUKER_FNR = "11111111111"
         const val BRUKER_AKTØRID = "12345678911"
-        const val REPRESENTANT_ORGNR = "123456789"
+        const val FULLMEKTIG_ORGNR = "123456789"
     }
 
     @Test
@@ -335,7 +334,7 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             null,
-            lagAktoerRepresentantPerson(),
+            lagAktoerFullmektigPerson(),
             null,
             PersonopplysningerObjectFactory.lagPersonopplysninger(),
             null
@@ -358,7 +357,7 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             null,
-            lagAktoerRepresentantOrganisasjon(),
+            lagAktoerFullmektigOrganisasjon(),
             lagOrganisasjonDokument("1111", "Testegate 4", "2222", "Testegate 5"),
             null,
             null
@@ -381,7 +380,7 @@ class FerdigbehandlingKontrollTest {
             null,
             null,
             null,
-            lagAktoerRepresentantOrganisasjon(),
+            lagAktoerFullmektigOrganisasjon(),
             lagOrganisasjonDokument("", "Testegate 4", "", "NO"),
             null,
             null
@@ -394,17 +393,17 @@ class FerdigbehandlingKontrollTest {
         kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT)
     }
 
-    private fun lagAktoerRepresentantOrganisasjon(): Aktoer {
+    private fun lagAktoerFullmektigOrganisasjon(): Aktoer {
         val aktoer = Aktoer()
-        aktoer.rolle = Aktoersroller.REPRESENTANT
-        aktoer.orgnr = REPRESENTANT_ORGNR
+        aktoer.rolle = Aktoersroller.FULLMEKTIG
+        aktoer.orgnr = FULLMEKTIG_ORGNR
         return aktoer
     }
 
 
-    private fun lagAktoerRepresentantPerson(): Aktoer {
+    private fun lagAktoerFullmektigPerson(): Aktoer {
         val aktoer = Aktoer()
-        aktoer.rolle = Aktoersroller.REPRESENTANT
+        aktoer.rolle = Aktoersroller.FULLMEKTIG
         aktoer.personIdent = BRUKER_AKTØRID
         return aktoer
     }

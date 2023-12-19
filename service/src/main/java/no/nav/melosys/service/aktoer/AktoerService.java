@@ -5,7 +5,6 @@ import java.util.List;
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
@@ -22,11 +21,10 @@ public class AktoerService {
         this.aktørRepository = aktørRepository;
     }
 
-    public List<Aktoer> hentfagsakAktører(Fagsak fagsak, Aktoersroller aktoersrolle, Representerer representerer) {
+    public List<Aktoer> hentfagsakAktører(Fagsak fagsak, Aktoersroller aktoersrolle) {
         Aktoer aktør = new Aktoer();
         aktør.setFagsak(fagsak);
         aktør.setRolle(aktoersrolle);
-        aktør.setRepresenterer(representerer);
 
         return aktørRepository.findAll(Example.of(aktør));
     }
@@ -54,10 +52,6 @@ public class AktoerService {
         aktoer.setPersonIdent(aktoerDto.getPersonIdent());
         if (aktoerDto.getFullmakter() != null) {
             aktoer.setFullmaktstyper(aktoerDto.getFullmakter());
-        }
-
-        if (aktoerDto.getRepresentererKode() != null) {
-            aktoer.setRepresenterer(Representerer.valueOf(aktoerDto.getRepresentererKode()));
         }
 
         return aktørRepository.save(aktoer).getId();

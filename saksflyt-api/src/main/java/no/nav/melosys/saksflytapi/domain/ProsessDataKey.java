@@ -54,12 +54,6 @@ public enum ProsessDataKey {
     ORGNR("orgnr"),
     PERSON_IDENT("personIdent"),
     PRODUSERBART_BREV("produserbartBrev"),
-    @Deprecated(since = "melosys.fullmektig.trygdeavgift")
-    REPRESENTANT("representant"),
-    @Deprecated(since = "melosys.fullmektig.trygdeavgift")
-    REPRESENTANT_KONTAKTPERSON("representantKontakperson"),
-    @Deprecated(since = "melosys.fullmektig.trygdeavgift")
-    REPRESENTANT_REPRESENTERER("representantRepresenterer"),
     SAKSBEHANDLER("saksbehandler"),
     SAKSBEHANDLER_NAVN("saksbehandlerNavn"),
     SAKSNUMMER("saksnummer"),

@@ -45,7 +45,7 @@ public final class Mottaker {
             case BRUKER -> Mottakerroller.BRUKER;
             case VIRKSOMHET -> Mottakerroller.VIRKSOMHET;
             case ARBEIDSGIVER -> Mottakerroller.ARBEIDSGIVER;
-            case REPRESENTANT, FULLMEKTIG -> Mottakerroller.FULLMEKTIG;
+            case FULLMEKTIG -> Mottakerroller.FULLMEKTIG;
             case TRYGDEMYNDIGHET -> Mottakerroller.UTENLANDSK_TRYGDEMYNDIGHET;
             default -> throw new FunksjonellException("Støtter ikke mapping av aktoersrolle" + aktoersrolle);
         };

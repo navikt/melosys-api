@@ -17,8 +17,6 @@ import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca;
-import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.mottatteopplysninger.SøknadNorgeEllerUtenforEØS;
 import no.nav.melosys.domain.mottatteopplysninger.data.IdentType;
@@ -106,7 +104,7 @@ public class TrygdeavtaleMapper {
                 persondokument.getFødselsdato(),
                 persondokument.hentFolkeregisterident(),
                 adresseSjekker.finnGyldigNorskAdresse(soknadsland)))
-            .representant(lagRepresentant(behandling.getMottatteOpplysninger()))
+            .representant(lagRepresentantIUtlandet(behandling.getMottatteOpplysninger()))
             .utsendelse(lagUtsendelse(lovvalgsperioder, persondokument, soknadsland))
             .build();
     }
@@ -232,7 +230,7 @@ public class TrygdeavtaleMapper {
         return new ArbeidsgiverNorge(norskArbeidsgiver.navn, norskArbeidsgiver.adresse.toList());
     }
 
-    private RepresentantTrygdeavtale lagRepresentant(MottatteOpplysninger mottatteOpplysninger) {
+    private RepresentantTrygdeavtale lagRepresentantIUtlandet(MottatteOpplysninger mottatteOpplysninger) {
         var søknad = (SøknadNorgeEllerUtenforEØS) mottatteOpplysninger.getMottatteOpplysningerData();
         var representantIUtlandet = søknad.getRepresentantIUtlandet();
         if (representantIUtlandet == null) {

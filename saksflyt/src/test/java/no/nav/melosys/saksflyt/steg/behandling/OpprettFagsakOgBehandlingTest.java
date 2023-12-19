@@ -50,14 +50,14 @@ class OpprettFagsakOgBehandlingTest {
         String journalpostId = "44553";
         String dokumentId = "222221";
         String arbeidsgiver = "104568393";
-        String representant = "rep";
-        String representantKontaktperson = "kontaktperson";
+        String fullmektig = "18881045683";
+        String fullmektigKontaktperson = "kontaktperson";
         prosessinstans.setData(AKTØR_ID, aktørId);
         prosessinstans.setData(ARBEIDSGIVER, arbeidsgiver);
         prosessinstans.setData(JOURNALPOST_ID, journalpostId);
         prosessinstans.setData(DOKUMENT_ID, dokumentId);
-        prosessinstans.setData(REPRESENTANT, representant);
-        prosessinstans.setData(REPRESENTANT_KONTAKTPERSON, representantKontaktperson);
+        prosessinstans.setData(FULLMEKTIG, fullmektig);
+        prosessinstans.setData(FULLMEKTIG_KONTAKTPERSON, fullmektigKontaktperson);
         prosessinstans.setData(BEHANDLINGSTEMA, Behandlingstema.UTSENDT_ARBEIDSTAKER);
         prosessinstans.setData(SAKSTYPE, Sakstyper.EU_EOS);
         prosessinstans.setData(SAKSTEMA, Sakstemaer.MEDLEMSKAP_LOVVALG);
@@ -77,10 +77,9 @@ class OpprettFagsakOgBehandlingTest {
         assertThat(opprettSakRequest.getArbeidsgiver()).isEqualTo(arbeidsgiver);
         assertThat(opprettSakRequest.getInitierendeJournalpostId()).isEqualTo(journalpostId);
         assertThat(opprettSakRequest.getInitierendeDokumentId()).isEqualTo(dokumentId);
-        assertThat(opprettSakRequest.getRepresentant().getRepresentantID())
-            .isEqualTo(representant);
+        assertThat(opprettSakRequest.getFullmektig().getPersonident()).isEqualTo(fullmektig);
         assertThat(opprettSakRequest.getKontaktopplysninger().get(0).getKontaktNavn())
-            .isEqualTo(representantKontaktperson);
+            .isEqualTo(fullmektigKontaktperson);
         assertThat(opprettSakRequest.getSakstype()).isEqualTo(Sakstyper.EU_EOS);
         assertThat(opprettSakRequest.getSakstema()).isEqualTo(Sakstemaer.MEDLEMSKAP_LOVVALG);
         assertThat(opprettSakRequest.getBehandlingsårsaktype()).isEqualTo(Behandlingsaarsaktyper.FRITEKST);

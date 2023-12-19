@@ -14,12 +14,6 @@ public class JournalfoeringOpprettDto extends JournalfoeringDto {
     private FagsakDto fagsak;
     @Deprecated(since = "Fjernes snarest med tilfølgende kode. Sendes aldri fra frontend")
     private String arbeidsgiverID;
-    @Deprecated(since = "melosys.fullmektig.trygdeavgift")
-    private String representantID;
-    @Deprecated(since = "melosys.fullmektig.trygdeavgift")
-    private String representantKontaktPerson;
-    @Deprecated(since = "melosys.fullmektig.trygdeavgift")
-    private String representererKode;
     private String fullmektigID;
     private List<Fullmaktstype> fullmakter;
     private String fullmektigKontaktperson;
@@ -39,30 +33,6 @@ public class JournalfoeringOpprettDto extends JournalfoeringDto {
 
     public void setArbeidsgiverID(String arbeidsgiverID) {
         this.arbeidsgiverID = arbeidsgiverID;
-    }
-
-    public String getRepresentantID() {
-        return representantID;
-    }
-
-    public void setRepresentantID(String representantID) {
-        this.representantID = representantID;
-    }
-
-    public String getRepresentantKontaktPerson() {
-        return representantKontaktPerson;
-    }
-
-    public void setRepresentantKontaktPerson(String representantKontaktPerson) {
-        this.representantKontaktPerson = representantKontaktPerson;
-    }
-
-    public String getRepresentererKode() {
-        return representererKode;
-    }
-
-    public void setRepresentererKode(String representererKode) {
-        this.representererKode = representererKode;
     }
 
     public String getFullmektigID() {
@@ -116,9 +86,6 @@ public class JournalfoeringOpprettDto extends JournalfoeringDto {
             new Fagsak(fagsak.getSakstema(), fagsak.getSakstype(),
                 getSoknadsperiode(), getLand()),
             arbeidsgiverID,
-            representantID,
-            representantKontaktPerson,
-            representererKode,
             fullmektigID,
             fullmakter,
             fullmektigKontaktperson,

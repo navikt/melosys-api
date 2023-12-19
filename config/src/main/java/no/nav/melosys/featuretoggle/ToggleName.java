@@ -7,12 +7,6 @@ public class ToggleName {
 
     public static final String SAKSBEHANDLING_MANGLENDE_INNBETALING = "melosys.saksbehandling.manglende_innbetaling";
 
-    public static final String MELOSYS_EREG_ORGANISASJON = "melosys.ereg.organisasjon";
-
-    public static final String MELOSYS_FULLMAKT_TRYGDEAVGIFT = "melosys.fullmakt.trygdeavgift";
-
     public static final String MELOSYS_OPPDATER_FAKTURAMOTTAKER = "melosys.oppdater.fakturamottaker";
-
-    public static final String MELOSYS_STS_NY_PATH = "melosys.sts.ny.path";
 
 }

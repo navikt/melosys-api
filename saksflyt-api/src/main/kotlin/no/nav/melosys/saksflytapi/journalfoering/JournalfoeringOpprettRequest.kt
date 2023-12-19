@@ -21,19 +21,11 @@ data class JournalfoeringOpprettRequest(
     var behandlingstypeKode: String? = null,
     val fagsak: Fagsak? = null,
     val arbeidsgiverID: String? = null,
-    val representantID: String? = null,
-    val representantKontaktPerson: String? = null,
-    val representererKode: String? = null,
     val fullmektigID: String? = null,
     val fullmakter: List<Fullmaktstype>? = null,
     val fullmektigKontaktperson: String? = null,
     val fullmektigKontaktOrgnr: String? = null,
 ) : JournalfoeringRequest {
-
-
-    fun skalSendeForvaltningsmelding(): Boolean {
-        return java.lang.Boolean.FALSE == ikkeSendForvaltingsmelding
-    }
 }
 
 data class Fagsak(
