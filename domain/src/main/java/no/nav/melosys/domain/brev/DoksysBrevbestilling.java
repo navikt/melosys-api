@@ -14,7 +14,6 @@ public class DoksysBrevbestilling extends Brevbestilling {
     private Collection<Mottaker> mottakere;
     private String begrunnelseKode;
     private String fritekst;
-
     private Distribusjonstype distribusjonstype;
     private String ytterligereInformasjon;
 

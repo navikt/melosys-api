@@ -147,7 +147,7 @@ public class MottatteOpplysninger {
         return mottatteOpplysningerData;
     }
 
-    public void setMottatteOpplysningerdata(MottatteOpplysningerData mottatteOpplysningerData) {
+    public void setMottatteOpplysningerData(MottatteOpplysningerData mottatteOpplysningerData) {
         this.mottatteOpplysningerData = mottatteOpplysningerData;
     }
 }

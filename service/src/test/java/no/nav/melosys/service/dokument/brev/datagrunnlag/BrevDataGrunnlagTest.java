@@ -67,7 +67,7 @@ class BrevDataGrunnlagTest {
         behandling.setFagsak(fagsak);
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(søknad);
+        mottatteOpplysninger.setMottatteOpplysningerData(søknad);
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
         return behandling;
     }
@@ -84,7 +84,7 @@ class BrevDataGrunnlagTest {
         this.søknad.maritimtArbeid.add(maritimtArbeidISøknad);
 
         List<Arbeidssted> arbeidssteder = dataGrunnlag.getArbeidsstedGrunnlag().hentArbeidssteder();
-        assertThat(arbeidssteder.size()).isEqualTo(1);
+        assertThat(arbeidssteder).hasSize(1);
 
         MaritimtArbeidssted arbeidssted = (MaritimtArbeidssted) arbeidssteder.get(0);
         assertThat(arbeidssted.getEnhetNavn()).isEqualTo(maritimtArbeidISøknad.enhetNavn);

@@ -56,7 +56,7 @@ class AvklarMyndighetTest {
     void utfør_utenMyndighet_myndighetOpprettes() {
 
         Behandlingsresultat behandlingsresultat = lagBehandlingResultat();
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(1L))).thenReturn(behandlingsresultat);
+        when(behandlingsresultatService.hentBehandlingsresultat(1L)).thenReturn(behandlingsresultat);
 
         avklarMyndighet.utfør(prosessinstans);
 
@@ -75,7 +75,7 @@ class AvklarMyndighetTest {
         søknadDokument.arbeidPaaLand.fysiskeArbeidssteder.add(fysiskArbeidssted);
         søknadDokument.bosted.oppgittAdresse.setLandkode("IT");
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(søknadDokument);
+        mottatteOpplysninger.setMottatteOpplysningerData(søknadDokument);
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
         return behandling;
     }

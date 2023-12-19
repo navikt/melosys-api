@@ -124,7 +124,7 @@ class UnntaksregistreringServiceTest {
     @Test
     void registrerUnntakFraMedlemskap_mottatteOpplysningerDataIkkeAnmodningEllerAttest_kasterFeil() {
         var behandling = lagBehandling(null, null, null);
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new SøknadNorgeEllerUtenforEØS());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(new SøknadNorgeEllerUtenforEØS());
         var behandlingsresultat = new Behandlingsresultat();
 
         when(behandlingService.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
@@ -148,7 +148,7 @@ class UnntaksregistreringServiceTest {
         var behandling = new Behandling();
         behandling.setFagsak(fagsak);
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(anmodningEllerAttest);
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(anmodningEllerAttest);
         return behandling;
     }
 }

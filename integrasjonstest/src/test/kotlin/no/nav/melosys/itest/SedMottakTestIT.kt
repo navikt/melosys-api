@@ -380,7 +380,7 @@ class SedMottakTestIT(
         val vedtaksProsessInstans = executeAndWait(ProsessType.IVERKSETT_VEDTAK_EOS) {
             vedtaksfattingFasade.fattVedtak(
                 prosessinstanserSortert.get(1).behandling.id, FattVedtakRequest.Builder()
-                    .medBehandlingsresultat(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND)
+                    .medBehandlingsresultatType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND)
                     .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
                     .build()
             )
@@ -492,7 +492,7 @@ class SedMottakTestIT(
         val vedtaksProsessInstans = executeAndWait(ProsessType.IVERKSETT_VEDTAK_EOS) {
             vedtaksfattingFasade.fattVedtak(
                 opprettNyVurderingProsessinstans.behandling.id, FattVedtakRequest.Builder()
-                    .medBehandlingsresultat(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND)
+                    .medBehandlingsresultatType(Behandlingsresultattyper.FORELOEPIG_FASTSATT_LOVVALGSLAND)
                     .medVedtakstype(Vedtakstyper.KORRIGERT_VEDTAK)
                     .build()
             )

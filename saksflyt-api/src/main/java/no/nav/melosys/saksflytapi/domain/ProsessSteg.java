@@ -29,7 +29,7 @@ public enum ProsessSteg {
     OPPRETT_ANMODNINGSPERIODE_FRA_SED("OPPRETT_ANMODNINGSPERIODE_FRA_SED", "Oppretter anmodningsperiode fra SED"),
     OPPRETT_ARKIVSAK("OPPRETT_ARKIVSAK", "Oppretter arkivsak"),
     OPPRETT_AVGIFTSOPPGAVE("OPPRETT_AVGIFTSOPPGAVE", "Oppretter en vurderingsoppgave for innregistrering i avgiftsystemet"),
-    OPPRETT_BETALINGSPLAN("OPPRETT_BETALINGSPLAN", "Oppretter betalingsplan i faktureringskomponenten"),
+    OPPRETT_FAKTURASERIE("OPPRETT_FAKTURASERIE", "Oppretter fakturaserie i faktureringskomponenten"),
     OPPRETT_MOTTATTEOPPLYSNINGER("OPPRETT_MOTTATTEOPPLYSNINGER", "Oppretter mottatteopplysninger"),
     OPPRETT_OG_JOURNALFØR_BREV("OPPRETT_BREV", "Opprett nytt brev"),
     OPPRETT_TIDLIGERE_JOURNALPOSTER_FOR_SAK("OPPRETT_TIDLIGERE_JOURNALPOSTER_FOR_SAK", "Oppretter journalposter tilbake i tid dersom de har tidligere har blitt markert som uidentifiserbare"),

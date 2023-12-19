@@ -56,7 +56,7 @@ public class OppgaveTjeneste {
             Oppgave oppgave = plukket.get();
 
             dto.setOppgaveID(oppgave.getOppgaveId());
-            if (oppgave.erBehandling() || oppgave.erVurderDokument() || oppgave.erSedBehandling() || oppgave.erVurderHenvendelse()) {
+            if (oppgave.erBehandling() || oppgave.erVurderDokument() || oppgave.erSedBehandling() || oppgave.erVurderHenvendelse() || oppgave.erManglendeInnbetalingBehandling()) {
                 dto.setSaksnummer(oppgave.getSaksnummer());
             }
 

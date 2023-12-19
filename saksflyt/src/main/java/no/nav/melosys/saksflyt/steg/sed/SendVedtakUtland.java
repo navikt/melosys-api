@@ -90,7 +90,7 @@ public class SendVedtakUtland extends AbstraktSendUtland {
         if (prosessinstans.getData(ProsessDataKey.UTPEKT_LAND) != null) {
             Land_iso2 utpektLand = prosessinstans.getData(ProsessDataKey.UTPEKT_LAND, Land_iso2.class);
             String journalpostID = sedSomBrevService
-                .lagJournalpostForSendingAvSedSomBrev(SedType.A003, utpektLand, behandling);
+                .lagJournalpostForSendingAvSedSomBrev(SedType.A003, utpektLand, behandling, prosessinstans.getId().toString());
             prosessinstans.setData(ProsessDataKey.DISTRIBUERBAR_JOURNALPOST_ID, journalpostID);
             prosessinstans.setData(ProsessDataKey.DISTRIBUER_MOTTAKER_LAND, utpektLand);
         } else {

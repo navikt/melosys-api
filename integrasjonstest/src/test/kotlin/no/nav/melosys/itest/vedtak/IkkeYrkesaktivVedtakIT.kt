@@ -129,7 +129,7 @@ class IkkeYrkesaktivVedtakIT(
         ferdigbehandlingKontrollFacade.kontroller(behandling.id, false, null, setOf())
 
         val vedtakRequest = FattVedtakRequest.Builder()
-            .medBehandlingsresultat(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND)
+            .medBehandlingsresultatType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND)
             .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
             .medBestillersId("komponent test")
             .build()
@@ -233,7 +233,7 @@ class IkkeYrkesaktivVedtakIT(
         ferdigbehandlingKontrollFacade.kontroller(behandling.id, false, null, setOf())
 
         val vedtakRequest = FattVedtakRequest.Builder()
-            .medBehandlingsresultat(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND)
+            .medBehandlingsresultatType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND)
             .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
             .medBestillersId("komponent test")
             .build()
@@ -336,7 +336,7 @@ class IkkeYrkesaktivVedtakIT(
         ferdigbehandlingKontrollFacade.kontroller(behandling.id, false, null, setOf())
 
         val vedtakRequest = FattVedtakRequest.Builder()
-            .medBehandlingsresultat(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND)
+            .medBehandlingsresultatType(Behandlingsresultattyper.FASTSATT_LOVVALGSLAND)
             .medVedtakstype(Vedtakstyper.FØRSTEGANGSVEDTAK)
             .medBestillersId("komponent test")
             .build()

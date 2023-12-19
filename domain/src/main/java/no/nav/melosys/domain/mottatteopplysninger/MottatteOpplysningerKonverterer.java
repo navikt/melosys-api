@@ -38,7 +38,7 @@ public final class MottatteOpplysningerKonverterer {
 
     public static void lastMottatteOpplysninger(MottatteOpplysninger mottatteOpplysninger) {
         try {
-            mottatteOpplysninger.setMottatteOpplysningerdata(
+            mottatteOpplysninger.setMottatteOpplysningerData(
                 lagDatagrunnlagFraType(mottatteOpplysninger.getJsonData(), klasseForType(mottatteOpplysninger.getType()))
             );
         } catch (JsonProcessingException e) {

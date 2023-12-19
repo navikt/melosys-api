@@ -91,7 +91,7 @@ class BrevDataByggerInnvilgelseTest {
         behandling.setId(1L);
         behandling.setFagsak(fagsak);
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(new Soeknad());
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(new Soeknad());
 
         brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setMottaker(Mottakerroller.BRUKER);
@@ -211,7 +211,7 @@ class BrevDataByggerInnvilgelseTest {
         MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
         mottatteOpplysningerData.personOpplysninger.medfolgendeFamilie.addAll(List.of(barn1, barn2));
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
+        mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
 
         when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeFamilie(
             Set.of(new OmfattetFamilie(barn1.getUuid())),
@@ -238,7 +238,7 @@ class BrevDataByggerInnvilgelseTest {
         MottatteOpplysningerData mottatteOpplysningerData = new MottatteOpplysningerData();
         mottatteOpplysningerData.personOpplysninger.medfolgendeFamilie.addAll(List.of(barn1, barn2));
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(mottatteOpplysningerData);
+        mottatteOpplysninger.setMottatteOpplysningerData(mottatteOpplysningerData);
 
         when(avklartefaktaService.hentAvklarteMedfølgendeBarn(anyLong())).thenReturn(new AvklarteMedfolgendeFamilie(
             Set.of(new OmfattetFamilie(barn1.getUuid())),

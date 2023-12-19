@@ -1,15 +1,7 @@
 package no.nav.melosys.service;
 
-import java.time.LocalDate;
-import java.util.*;
-
 import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
-import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
-import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
-import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
-import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid;
 import no.nav.melosys.domain.dokument.medlemskap.Periode;
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.eessi.SedType;
@@ -21,6 +13,11 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
+import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
+import no.nav.melosys.domain.mottatteopplysninger.Soeknad;
+import no.nav.melosys.domain.mottatteopplysninger.data.ForetakUtland;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.FysiskArbeidssted;
+import no.nav.melosys.domain.mottatteopplysninger.data.arbeidssteder.MaritimtArbeid;
 import no.nav.melosys.service.avklartefakta.AvklartefaktaService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService;
@@ -30,9 +27,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
+import java.util.*;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -95,7 +94,7 @@ class LandvelgerServiceTest {
             behandlingsresultat.setAnmodningsperioder(Collections.singleton((Anmodningsperiode) periode));
         }
 
-        when(behandlingsresultatService.hentBehandlingsresultat(eq(behandlingID))).thenReturn(behandlingsresultat);
+        when(behandlingsresultatService.hentBehandlingsresultat(behandlingID)).thenReturn(behandlingsresultat);
         return behandlingsresultat;
     }
 
@@ -332,8 +331,8 @@ class LandvelgerServiceTest {
             .isNotEmpty()
             .doesNotContain(Land_iso2.NO)
             .contains(Land_iso2.SE, Land_iso2.DK);
-        verify(behandlingsresultatService).hentBehandlingsresultat(eq(behandlingID));
-        verify(mottatteOpplysningerService, times(3)).hentMottatteOpplysninger(eq(behandlingID));
+        verify(behandlingsresultatService).hentBehandlingsresultat(behandlingID);
+        verify(mottatteOpplysningerService, times(3)).hentMottatteOpplysninger(behandlingID);
     }
 
     @Test
@@ -353,8 +352,8 @@ class LandvelgerServiceTest {
             .doesNotContain(Land_iso2.NO, Land_iso2.DE, Land_iso2.ES)
             .containsExactlyInAnyOrder(Land_iso2.SE, Land_iso2.DK);
 
-        verify(behandlingsresultatService).hentBehandlingsresultat(eq(behandlingID));
-        verify(mottatteOpplysningerService, times(3)).hentMottatteOpplysninger(eq(behandlingID));
+        verify(behandlingsresultatService).hentBehandlingsresultat(behandlingID);
+        verify(mottatteOpplysningerService, times(3)).hentMottatteOpplysninger(behandlingID);
     }
 
     @Test
@@ -367,7 +366,7 @@ class LandvelgerServiceTest {
         søknad.foretakUtland = List.of(lagForetakUtland(Landkoder.ES));
         søknad.soeknadsland.landkoder = List.of(Landkoder.SE.toString(), Landkoder.DK.toString(), Landkoder.NO.toString());
 
-        when(avklartefaktaService.hentLandkoderMedMarginaltArbeid(eq(behandlingID)))
+        when(avklartefaktaService.hentLandkoderMedMarginaltArbeid(behandlingID))
             .thenReturn(Set.of(Land_iso2.DK, Land_iso2.ES));
 
         Collection<Land_iso2> utenlandskeTrygdemyndighetsland = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
@@ -377,8 +376,8 @@ class LandvelgerServiceTest {
             .doesNotContain(Land_iso2.NO, Land_iso2.DK, Land_iso2.DE)
             .containsExactlyInAnyOrder(Land_iso2.SE, Land_iso2.ES);
 
-        verify(behandlingsresultatService).hentBehandlingsresultat(eq(behandlingID));
-        verify(mottatteOpplysningerService, times(3)).hentMottatteOpplysninger(eq(behandlingID));
+        verify(behandlingsresultatService).hentBehandlingsresultat(behandlingID);
+        verify(mottatteOpplysningerService, times(3)).hentMottatteOpplysninger(behandlingID);
     }
 
     @Test
@@ -387,7 +386,7 @@ class LandvelgerServiceTest {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A);
         lovvalgsperiode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5);
 
-        when(avklartefaktaService.hentInformertMyndighet(eq(behandlingID))).thenReturn(Optional.of(Land_iso2.DK));
+        when(avklartefaktaService.hentInformertMyndighet(behandlingID)).thenReturn(Optional.of(Land_iso2.DK));
 
         Collection<Land_iso2> utenlandskeTrygdemyndighetsland = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
 
@@ -400,7 +399,7 @@ class LandvelgerServiceTest {
         lovvalgsperiode.setBestemmelse(Lovvalgbestemmelser_883_2004.FO_883_2004_ART11_3A);
         lovvalgsperiode.setTilleggsbestemmelse(Tilleggsbestemmelser_883_2004.FO_883_2004_ART11_5);
 
-        when(avklartefaktaService.hentInformertMyndighet(eq(behandlingID))).thenReturn(Optional.empty());
+        when(avklartefaktaService.hentInformertMyndighet(behandlingID)).thenReturn(Optional.empty());
 
         Collection<Land_iso2> utenlandskeTrygdemyndighetsland = landvelgerService.hentUtenlandskTrygdemyndighetsland(behandlingID);
 
@@ -427,9 +426,9 @@ class LandvelgerServiceTest {
 
     private void mockMottatteOpplysninger() {
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(søknad);
+        mottatteOpplysninger.setMottatteOpplysningerData(søknad);
         mottatteOpplysninger.setBehandling(behandling);
-        when(mottatteOpplysningerService.hentMottatteOpplysninger(eq(behandlingID))).thenReturn(mottatteOpplysninger);
+        when(mottatteOpplysningerService.hentMottatteOpplysninger(behandlingID)).thenReturn(mottatteOpplysninger);
     }
 
     private Behandling lagBehandlingMedSedDokument() {

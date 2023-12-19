@@ -155,8 +155,10 @@ class OpprettLovvalgsperiodeServiceTest {
 
 
         shouldThrow<FunksjonellException> { opprettLovvalgsperiodeService.opprettLovvalgsperiode(1L, request) }
-            .shouldHaveMessage("Kan ikke opprette lovvalgsperiode for unntaksregistrering med lovvalgsbestemmelse: " +
-                Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART11.kode + " uten manuelt registrert trygdedekning")
+            .shouldHaveMessage(
+                "Kan ikke opprette lovvalgsperiode for unntaksregistrering med lovvalgsbestemmelse: " +
+                    Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART11.kode + " uten manuelt registrert trygdedekning"
+            )
     }
 
     @Test
@@ -343,10 +345,10 @@ class OpprettLovvalgsperiodeServiceTest {
             id = 1L
             fagsak = Fagsak().apply { type = Sakstyper.TRYGDEAVTALE }
             mottatteOpplysninger = MottatteOpplysninger().apply {
-                setMottatteOpplysningerdata(AnmodningEllerAttest().apply {
+                mottatteOpplysningerData = AnmodningEllerAttest().apply {
                     lovvalgsland = land
                     periode = Periode(LocalDate.now(), LocalDate.now().plusMonths(6))
-                })
+                }
             }
         }
 }

@@ -99,7 +99,7 @@ class MedlemskapsperiodeServiceTest {
                 Land_iso2.AU.getKode(),
                 InnvilgelsesResultat.AVSLAATT,
                 Trygdedekninger.FTRL_2_9_FØRSTE_LEDD_A_HELSE,
-                Medlemskapstyper.PLIKTIG);
+                Medlemskapstyper.FRIVILLIG);
     }
 
     @Test
@@ -155,13 +155,13 @@ class MedlemskapsperiodeServiceTest {
         inntektsperiode.setTomDato(LocalDate.of(2023, 12, 1));
         inntektsperiode.setType(Inntektskildetype.NÆRINGSINNTEKT_FRA_NORGE);
         inntektsperiode.setAvgiftspliktigInntektMnd(new Penger(100.00));
-        List<Inntektsperiode> inntektsperiodeList = Arrays.asList(inntektsperiode);
+        List<Inntektsperiode> inntektsperiodeList = List.of(inntektsperiode);
 
         SkatteforholdTilNorge skatteforholdTilNorge = new SkatteforholdTilNorge();
         skatteforholdTilNorge.setFomDato(LocalDate.of(2023, 1, 1));
         skatteforholdTilNorge.setTomDato(LocalDate.of(2023, 12, 1));
         skatteforholdTilNorge.setSkatteplikttype(Skatteplikttype.SKATTEPLIKTIG);
-        List<SkatteforholdTilNorge> skatteforholdTilNorgeList = Arrays.asList(skatteforholdTilNorge);
+        List<SkatteforholdTilNorge> skatteforholdTilNorgeList = List.of(skatteforholdTilNorge);
 
         trygdeavgiftsgrunnlag.setInntektsperioder(inntektsperiodeList);
         trygdeavgiftsgrunnlag.setSkatteforholdTilNorge(skatteforholdTilNorgeList);
@@ -266,7 +266,7 @@ class MedlemskapsperiodeServiceTest {
         behandlingsresultat.getBehandling().setMottatteOpplysninger(new MottatteOpplysninger());
         var søknad = new SøknadNorgeEllerUtenforEØS();
         søknad.soeknadsland = new Soeknadsland(List.of(Land_iso2.AU.getKode()), false);
-        behandlingsresultat.getBehandling().getMottatteOpplysninger().setMottatteOpplysningerdata(søknad);
+        behandlingsresultat.getBehandling().getMottatteOpplysninger().setMottatteOpplysningerData(søknad);
         return behandlingsresultat;
     }
 

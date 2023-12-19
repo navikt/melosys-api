@@ -2,7 +2,6 @@ package no.nav.melosys.saksflytapi;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,7 +21,6 @@ import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding;
 import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Ikke_godkjent_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
@@ -330,23 +328,18 @@ public class ProsessinstansService {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK_FTRL)
             .medBehandling(behandling)
-            .medBegrunnelseFritekst(request.getBegrunnelseFritekst())
             .build();
 
         prosessinstans.setData(BETALINGSINTERVALL, request.getBetalingsintervall());
-        prosessinstans.setData(DISTRIBUSJONSTYPE, Distribusjonstype.VEDTAK);
 
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansIverksettVedtakTrygdeavtale(Behandling behandling, VedtakRequest request) {
+    public void opprettProsessinstansIverksettVedtakTrygdeavtale(Behandling behandling) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.IVERKSETT_VEDTAK_TRYGDEAVTALE)
             .medBehandling(behandling)
-            .medBegrunnelseFritekst(request.getBegrunnelseFritekst())
             .build();
-        prosessinstans.setData(BETALINGSINTERVALL, request.getBetalingsintervall());
-        prosessinstans.setData(ProsessDataKey.DISTRIBUSJONSTYPE, Distribusjonstype.VEDTAK);
 
         lagre(prosessinstans);
     }
@@ -444,11 +437,10 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansUnntaksperiodeAvvist(Behandling behandling, Collection<Ikke_godkjent_begrunnelser> begrunnelser, String begrunnelseFritekst) {
+    public void opprettProsessinstansUnntaksperiodeAvvist(Behandling behandling, String begrunnelseFritekst) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.REGISTRERING_UNNTAK_AVVIS)
             .medBehandling(behandling)
-            .medBegrunnelser(begrunnelser)
             .medBegrunnelseFritekst(begrunnelseFritekst)
             .build();
 

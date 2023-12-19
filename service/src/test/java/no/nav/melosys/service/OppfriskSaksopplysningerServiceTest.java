@@ -221,7 +221,7 @@ class OppfriskSaksopplysningerServiceTest {
         soeknad.soeknadsland = new Soeknadsland(List.of("SE"), false);
 
         MottatteOpplysninger mottatteOpplysninger = new MottatteOpplysninger();
-        mottatteOpplysninger.setMottatteOpplysningerdata(soeknad);
+        mottatteOpplysninger.setMottatteOpplysningerData(soeknad);
         behandling.setMottatteOpplysninger(mottatteOpplysninger);
 
         behandling.setSaksopplysninger(saksopplysninger);

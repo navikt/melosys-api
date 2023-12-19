@@ -18,7 +18,6 @@ import no.nav.melosys.service.behandling.UtledMottaksdato;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.google.common.collect.MoreCollectors.onlyElement;
 import static java.lang.String.format;
 
 @Service
@@ -50,7 +49,7 @@ public class OpprettMedlemskapsperiodeService {
             Collection<Medlemskapsperiode> medlemskapsperioder;
             var opprinneligBehandling = behandling.getOpprinneligBehandling();
 
-            if (behandling.erNyVurdering() && opprinneligBehandling != null) {
+            if ((behandling.erNyVurdering() || behandling.erManglendeInnbetalingTrygdeavgift()) && opprinneligBehandling != null) {
                 var opprinneligBehandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(opprinneligBehandling.getId());
                 medlemskapsperioder = new UtledMedlemskapsperioder().lagMedlemskapsperioderForNyVurdering(opprinneligBehandlingsresultat);
             } else {

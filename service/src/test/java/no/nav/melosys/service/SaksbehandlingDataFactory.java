@@ -38,7 +38,7 @@ public final class SaksbehandlingDataFactory {
         behandling.setTema(Behandlingstema.UTSENDT_ARBEIDSTAKER);
         behandling.setFagsak(fagsak);
         behandling.setMottatteOpplysninger(new MottatteOpplysninger());
-        behandling.getMottatteOpplysninger().setMottatteOpplysningerdata(mottatteOpplysningerData);
+        behandling.getMottatteOpplysninger().setMottatteOpplysningerData(mottatteOpplysningerData);
         final Instant nå = Instant.now();
         behandling.setRegistrertDato(nå.minus(30, ChronoUnit.DAYS));
         behandling.setEndretDato(nå);

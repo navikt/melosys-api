@@ -25,6 +25,7 @@ import no.nav.melosys.domain.kodeverk.Vedtakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Fartsomrader;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Medfolgende_barn_begrunnelser;
 import no.nav.melosys.domain.person.familie.*;
+import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.service.dokument.brev.BrevData;
 import no.nav.melosys.service.dokument.brev.BrevDataInnvilgelse;
@@ -166,6 +167,7 @@ public final class InnvilgelsesbrevMapper implements BrevDataMapper {
             case FØRSTEGANGSVEDTAK -> VedtaksTypeKode.FOERSTEGANGSVEDTAK;
             case KORRIGERT_VEDTAK -> VedtaksTypeKode.KORRIGERT_VEDTAK;
             case OMGJØRINGSVEDTAK -> VedtaksTypeKode.OMGJOERINGSVEDTAK;
+            case OPPHØRSVEDTAK -> throw new FunksjonellException("Vi støtter ikke OPPHØRSVEDTAK enda");
             case ENDRINGSVEDTAK -> null; //Brev har ikke koder for ENDRINGSVEDTAK
         };
     }
