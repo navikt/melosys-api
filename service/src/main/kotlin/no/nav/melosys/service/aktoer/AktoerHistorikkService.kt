@@ -4,7 +4,6 @@ import no.nav.melosys.domain.Aktoer
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
-import no.nav.melosys.domain.kodeverk.Representerer
 import no.nav.melosys.repository.AuditRepository
 import org.joda.time.LocalDate
 import org.springframework.stereotype.Service
@@ -26,7 +25,6 @@ class AktoerHistorikkService(
                 institusjonID = it.entity.institusjonId,
                 orgnr = it.entity.orgnr,
                 rolle = it.entity.rolle,
-                representerer = it.entity.representerer,
                 fullmakter = emptySet()
             )
         }
@@ -41,6 +39,5 @@ data class AktoerHistorikk(
     val institusjonID: String? = null,
     val orgnr: String? = null,
     val rolle: Aktoersroller,
-    val representerer: Representerer? = null,
     val fullmakter: Set<Fullmaktstype> = emptySet(),
 )
