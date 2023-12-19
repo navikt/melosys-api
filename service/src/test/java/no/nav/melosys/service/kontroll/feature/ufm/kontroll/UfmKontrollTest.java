@@ -159,7 +159,7 @@ class UfmKontrollTest {
         PersonhistorikkDokument personhistorikkDokument = new PersonhistorikkDokument();
         personhistorikkDokument.bostedsadressePeriodeListe = List.of();
 
-        List<PersonhistorikkDokument> personhistorikkDokumenter = List.of();
+        List<PersonhistorikkDokument> personhistorikkDokumenter = new ArrayList<>(List.of());
         personhistorikkDokumenter.add(personhistorikkDokument);
 
         MedlemskapDokument medlemskapDokument = new MedlemskapDokument();

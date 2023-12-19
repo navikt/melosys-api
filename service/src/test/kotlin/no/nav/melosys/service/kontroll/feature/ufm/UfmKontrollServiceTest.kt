@@ -462,7 +462,7 @@ class UfmKontrollServiceTest {
                             behandlingsresultat.id.shouldBe(BEHANDLINGSRESULTAT_ID)
                         }
                         last().apply {
-                            begrunnelse.shouldBe(Kontroll_begrunnelser.BOSATT_I_NORGE)
+                            begrunnelse.shouldBe(Kontroll_begrunnelser.BOSATT_I_NORGE_I_PERIODEN)
                             behandlingsresultat.id.shouldBe(BEHANDLINGSRESULTAT_ID)
                         }
                     }
