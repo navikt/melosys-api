@@ -12,6 +12,5 @@ data class AktoerHistorikkDto(
     val institusjonsID: String? = null,
     val orgnr: String? = null,
     val rolle: Aktoersroller,
-    val representererKode: String? = null,
     val fullmakter: Set<Fullmaktstype> = emptySet(),
 )
