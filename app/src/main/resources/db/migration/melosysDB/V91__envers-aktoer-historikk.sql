@@ -22,7 +22,6 @@ create table aktoer_aud
     eu_eos_institusjon_id varchar2(255 char),
     orgnr                 varchar2(255 char),
     person_ident          varchar2(255 char),
-    representerer         varchar2(255 char),
     rolle                 varchar2(255 char),
     trygdemyndighet_land  varchar2(255 char),
     utenlandsk_person_id  varchar2(255 char),
