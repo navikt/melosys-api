@@ -22,7 +22,7 @@ import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
 import no.nav.melosys.integrasjon.faktureringskomponenten.FaktureringskomponentenConsumer
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FakturaserieDto
 import no.nav.melosys.integrasjon.faktureringskomponenten.dto.FaktureringsIntervall
-import no.nav.melosys.saksflyt.steg.fakturering.OpprettBetalingsplan
+import no.nav.melosys.saksflyt.steg.fakturering.OpprettFakturaserie
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.service.avgift.TrygdeavgiftMottakerService
@@ -39,7 +39,7 @@ import java.time.temporal.ChronoUnit
 import java.util.*
 
 @ExtendWith(MockKExtension::class)
-class OpprettBetalingsplanTest {
+class OpprettFakturaserieTest {
 
     @RelaxedMockK
     lateinit var behandlingService: BehandlingService
@@ -58,7 +58,7 @@ class OpprettBetalingsplanTest {
     private val unleash = FakeUnleash()
     private val slotFakturaserieDto = slot<FakturaserieDto>()
 
-    lateinit var opprettBetalingsplan: OpprettBetalingsplan
+    lateinit var opprettFakturaserie: OpprettFakturaserie
 
     private lateinit var behandling: Behandling
     private lateinit var fagsak: Fagsak
@@ -72,7 +72,7 @@ class OpprettBetalingsplanTest {
         slotFakturaserieDto.clear()
         trygdeavgiftMottakerService = TrygdeavgiftMottakerService()
 
-        opprettBetalingsplan = OpprettBetalingsplan(
+        opprettFakturaserie = OpprettFakturaserie(
             behandlingService,
             behandlingsresultatService,
             faktureringskomponentenConsumer,
@@ -90,10 +90,10 @@ class OpprettBetalingsplanTest {
         every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
 
 
-        opprettBetalingsplan.utfør(prosessinstans)
+        opprettFakturaserie.utfør(prosessinstans)
 
 
-        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaSerie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
         slotFakturaserieDto.captured.shouldNotBeNull()
         slotFakturaserieDto.captured.referanseBruker.shouldContain("Vedtak om medlemskap datert ")
         slotFakturaserieDto.captured.fakturaserieReferanse.shouldBeNull()
@@ -111,10 +111,10 @@ class OpprettBetalingsplanTest {
         every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
 
 
-        opprettBetalingsplan.utfør(prosessinstans)
+        opprettFakturaserie.utfør(prosessinstans)
 
 
-        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaSerie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
         slotFakturaserieDto.captured.shouldNotBeNull()
         slotFakturaserieDto.captured.fakturaserieReferanse.shouldBe(opprinneligBehandlingsresultat.fakturaserieReferanse)
     }
@@ -136,10 +136,10 @@ class OpprettBetalingsplanTest {
         every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
 
 
-        opprettBetalingsplan.utfør(prosessinstans)
+        opprettFakturaserie.utfør(prosessinstans)
 
 
-        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaSerie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
         slotFakturaserieDto.captured.shouldNotBeNull()
         slotFakturaserieDto.captured.perioder.size.shouldBe(1)
     }
@@ -161,10 +161,10 @@ class OpprettBetalingsplanTest {
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
 
 
-        opprettBetalingsplan.utfør(prosessinstans)
+        opprettFakturaserie.utfør(prosessinstans)
 
 
-        verify(exactly = 0) { faktureringskomponentenConsumer.lagFakturaSerie(any(), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 0) { faktureringskomponentenConsumer.lagFakturaserie(any(), eq(SAKSBEHANDLER_IDENT)) }
     }
 
     @Test
@@ -182,10 +182,10 @@ class OpprettBetalingsplanTest {
         every { behandlingService.hentBehandling(BEHANDLING_ID) } returns behandling
 
 
-        opprettBetalingsplan.utfør(prosessinstans)
+        opprettFakturaserie.utfør(prosessinstans)
 
 
-        verify(exactly = 0) { faktureringskomponentenConsumer.lagFakturaSerie(any(), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 0) { faktureringskomponentenConsumer.lagFakturaserie(any(), eq(SAKSBEHANDLER_IDENT)) }
     }
 
     @Test
@@ -196,10 +196,10 @@ class OpprettBetalingsplanTest {
         every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
 
 
-        opprettBetalingsplan.utfør(prosessinstans)
+        opprettFakturaserie.utfør(prosessinstans)
 
 
-        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaSerie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
         slotFakturaserieDto.captured.shouldNotBeNull()
         slotFakturaserieDto.captured.fullmektig?.organisasjonsnummer.shouldBe(FULLMEKTIG_IDENT)
         slotFakturaserieDto.captured.fullmektig?.fodselsnummer.shouldBeNull()
@@ -213,10 +213,10 @@ class OpprettBetalingsplanTest {
         every { pdlService.finnFolkeregisterident(BRUKER_FNR) } returns Optional.of(BRUKER_AKTØRID)
 
 
-        opprettBetalingsplan.utfør(prosessinstans)
+        opprettFakturaserie.utfør(prosessinstans)
 
 
-        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaSerie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
+        verify(exactly = 1) { faktureringskomponentenConsumer.lagFakturaserie(capture(slotFakturaserieDto), eq(SAKSBEHANDLER_IDENT)) }
         slotFakturaserieDto.captured.shouldNotBeNull()
         slotFakturaserieDto.captured.fullmektig?.fodselsnummer.shouldBe(FULLMEKTIG_IDENT)
         slotFakturaserieDto.captured.fullmektig?.organisasjonsnummer.shouldBeNull()
@@ -228,7 +228,7 @@ class OpprettBetalingsplanTest {
         prosessinstans = Prosessinstans().apply {
             setData(ProsessDataKey.SAKSBEHANDLER, "S123456")
             setData(ProsessDataKey.BETALINGSINTERVALL, FaktureringsIntervall.KVARTAL)
-            this.behandling = this@OpprettBetalingsplanTest.behandling
+            this.behandling = this@OpprettFakturaserieTest.behandling
         }
         behandlingsresultat = lagBehandlingsresultat()
         fastsattTrygdeavgift = behandlingsresultat.medlemAvFolketrygden.fastsattTrygdeavgift
