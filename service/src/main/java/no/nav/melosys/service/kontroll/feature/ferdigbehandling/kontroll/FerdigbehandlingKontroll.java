@@ -38,7 +38,7 @@ final class FerdigbehandlingKontroll {
     static Kontrollfeil overlappendePeriode(FerdigbehandlingKontrollData kontrollData) {
         MedlemskapDokument medlemskapDokument = kontrollData.medlemskapDokument();
         List<Medlemskapsperiode> medlemskapsperioder = kontrollData.medlemskapsperioder();
-        Lovvalgsperiode kontrollPeriode = (Lovvalgsperiode) kontrollData.lovvalgsperiode();
+        Lovvalgsperiode kontrollPeriode = kontrollData.lovvalgsperiode();
 
         if (harBehandlingstemaMedUnntakForOverlappendePeriode(kontrollPeriode, kontrollData.behandlingstema())) {
             return OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument, medlemskapsperioder)

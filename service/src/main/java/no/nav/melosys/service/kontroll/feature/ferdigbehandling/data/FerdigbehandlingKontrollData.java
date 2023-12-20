@@ -1,22 +1,21 @@
 package no.nav.melosys.service.kontroll.feature.ferdigbehandling.data;
 
+import java.util.List;
+
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Medlemskapsperiode;
-import no.nav.melosys.domain.PeriodeOmLovvalg;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.person.Persondata;
 
-import java.util.List;
-
 public record FerdigbehandlingKontrollData(
     MedlemskapDokument medlemskapDokument,
     Persondata persondata,
     MottatteOpplysningerData mottatteOpplysningerData,
-    PeriodeOmLovvalg lovvalgsperiode,
+    Lovvalgsperiode lovvalgsperiode,
     Lovvalgsperiode opprinneligLovvalgsperiode,
     SaksopplysningerData saksopplysningerData,
     Behandlingstema behandlingstema,
