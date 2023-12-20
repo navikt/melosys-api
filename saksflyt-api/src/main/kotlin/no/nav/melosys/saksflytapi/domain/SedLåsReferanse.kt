@@ -11,9 +11,9 @@ class SedLåsReferanse(val låsReferanse: String) : LåsReferanse {
     init {
         require(erGyldigReferanse(låsReferanse)) { "$låsReferanse er ikke gyldig SED-referanse" }
         låsReferanse.split("_").let {
-            this.rinaSaksnummer = it[0]
-            this.sedID = it[1]
-            this.sedVersjon = it[2]
+            rinaSaksnummer = it[0]
+            sedID = it[1]
+            sedVersjon = it[2]
         }
     }
 
@@ -21,11 +21,15 @@ class SedLåsReferanse(val låsReferanse: String) : LåsReferanse {
         get() = rinaSaksnummer
 
     override fun skalSettesPåVent(aktiveLåsReferanser: Collection<String>): Boolean {
-        if (aktiveLåsReferanser.contains(låsReferanse)) {
-            return false
+        // Sjekk at aktiveLåsReferanser er hentet med forventet prefix som er rinaSaksnummer
+        aktiveLåsReferanser.find { SedLåsReferanse(it).referanse != referanse }?.let {
+            throw IllegalStateException("Fant aktiv låsreferanse($it) med en forsjellig rinaSaksnummer: $referanse")
         }
-        // Eksisterende tester kjører uten denne, så lag tester som treffer når kode under returnerer false
-        return aktiveLåsReferanser.any { SedLåsReferanse(it).referanse == referanse }
+
+        // er ikke logisk at vi ikke setter en SED på vent om det finnes en annen samme referanse
+        // Men dette må sees på i en egen oppgave
+
+        return !aktiveLåsReferanser.contains(låsReferanse)
     }
 
     override fun equals(other: Any?): Boolean {
