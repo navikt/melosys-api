@@ -20,6 +20,7 @@ import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
@@ -254,7 +255,7 @@ class DokgenMalMapperTest {
             .medForsendelseMottatt(Instant.now())
             .build();
 
-        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerRepresentant(Aktoertype.ORGANISASJON));
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerFullmektig(Aktoertype.ORGANISASJON));
 
         assertThat((SaksbehandlingstidSoknad) dokgenDto)
             .extracting(
@@ -284,7 +285,7 @@ class DokgenMalMapperTest {
             .medForsendelseMottatt(Instant.now())
             .build();
 
-        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerRepresentant(Aktoertype.ORGANISASJON));
+        DokgenDto dokgenDto = dokgenMalMapper.mapBehandling(brevbestilling, lagMottakerFullmektig(Aktoertype.ORGANISASJON));
 
         assertThat((SaksbehandlingstidSoknad) dokgenDto)
             .extracting(
@@ -339,7 +340,7 @@ class DokgenMalMapperTest {
         when(mockDokgenMapperDatahenter.hentNorskPoststed(any())).thenReturn("Andeby");
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
         when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
-        when(mockDokgenMapperDatahenter.hentFullmektigNavn(any(), eq(Representerer.BRUKER))).thenReturn("Fullmektig AS");
+        when(mockDokgenMapperDatahenter.hentFullmektigNavn(any(), eq(Fullmaktstype.FULLMEKTIG_SØKNAD))).thenReturn("Fullmektig AS");
 
         Behandling behandling = lagBehandling(lagFagsak(true));
 
@@ -488,7 +489,7 @@ class DokgenMalMapperTest {
     void skalMappeFritekstbrevTilBruker() {
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
         when(mockDokgenMapperDatahenter.hentPersonMottaker(any())).thenReturn(lagPersondata());
-        when(mockDokgenMapperDatahenter.hentFullmektigNavn(any(), eq(Representerer.BRUKER))).thenReturn("Fullmektig AS");
+        when(mockDokgenMapperDatahenter.hentFullmektigNavn(any(), eq(Fullmaktstype.FULLMEKTIG_SØKNAD))).thenReturn("Fullmektig AS");
 
         Behandling behandling = lagBehandling(lagFagsak(true));
 
@@ -571,7 +572,7 @@ class DokgenMalMapperTest {
     @Test
     void skalMappeFritekstbrevTilArbeidsgiver() {
         when(mockDokgenMapperDatahenter.hentPersondata(any())).thenReturn(lagPersondata());
-        when(mockDokgenMapperDatahenter.hentFullmektigNavn(any(), eq(Representerer.ARBEIDSGIVER))).thenReturn(null);
+        when(mockDokgenMapperDatahenter.hentFullmektigNavn(any(), eq(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER))).thenReturn(null);
 
         Behandling behandling = lagBehandling(lagFagsak(true));
 
@@ -629,6 +630,7 @@ class DokgenMalMapperTest {
 
     private InnvilgelseFtrl lagInnvilgelseFtrl() {
         return new InnvilgelseFtrl.Builder(lagInnvilgelseFtrlBrevbestilling())
+            .behandlingstype(Behandlingstyper.FØRSTEGANG)
             .avgiftsperioder(emptyList())
             .medlemskapsperioder(emptyList())
             .bestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8)

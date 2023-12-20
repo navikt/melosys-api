@@ -7,7 +7,6 @@ import javax.persistence.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.TekniskException;
 import org.hibernate.envers.AuditOverride;
 import org.hibernate.envers.Audited;
@@ -53,10 +52,6 @@ public class Aktoer extends RegistreringsInfo {
 
     @Column(name = "utenlandsk_person_id")
     private String utenlandskPersonId;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "representerer")
-    private Representerer representerer;
 
     @OneToMany(mappedBy = "aktoer", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<Fullmakt> fullmakter = new HashSet<>(1);
@@ -123,14 +118,6 @@ public class Aktoer extends RegistreringsInfo {
 
     public void setUtenlandskPersonId(String utenlandskPersonId) {
         this.utenlandskPersonId = utenlandskPersonId;
-    }
-
-    public Representerer getRepresenterer() {
-        return representerer;
-    }
-
-    public void setRepresenterer(Representerer representerer) {
-        this.representerer = representerer;
     }
 
     public Set<Fullmakt> getFullmakter() {

@@ -137,8 +137,8 @@ class DokSysServiceTest {
     }
 
     @Test
-    void produserIkkeredigerbartDokument_tilRepresentantPerson() throws Exception {
-        DokumentbestillingMetadata metadata = lagMetadataMedRepresentant(Aktoertype.PERSON);
+    void produserIkkeredigerbartDokument_tilFullmektigPerson() throws Exception {
+        DokumentbestillingMetadata metadata = lagMetadataMedFullmektig(Aktoertype.PERSON);
         when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
 
         dokSysService.produserIkkeredigerbartDokument(new Dokumentbestilling(metadata, lagBrevData()));
@@ -153,8 +153,8 @@ class DokSysServiceTest {
     }
 
     @Test
-    void produserIkkeredigerbartDokument_tilRepresentantOrganisasjon() throws Exception {
-        DokumentbestillingMetadata metadata = lagMetadataMedRepresentant(Aktoertype.ORGANISASJON);
+    void produserIkkeredigerbartDokument_tilFullmektigOrganisasjon() throws Exception {
+        DokumentbestillingMetadata metadata = lagMetadataMedFullmektig(Aktoertype.ORGANISASJON);
         when(dokumentproduksjonConsumer.produserIkkeredigerbartDokument(any())).thenReturn(new ProduserIkkeredigerbartDokumentResponse());
 
         dokSysService.produserIkkeredigerbartDokument(new Dokumentbestilling(metadata, lagBrevData()));
@@ -418,10 +418,10 @@ class DokSysServiceTest {
         return metadata;
     }
 
-    private DokumentbestillingMetadata lagMetadataMedRepresentant(Aktoertype representantType) {
+    private DokumentbestillingMetadata lagMetadataMedFullmektig(Aktoertype fullmektigType) {
         DokumentbestillingMetadata metadata = new DokumentbestillingMetadata();
-        metadata.mottaker = lagMottakerFullmektig(representantType);
-        metadata.mottakerID = switch (representantType) {
+        metadata.mottaker = lagMottakerFullmektig(fullmektigType);
+        metadata.mottakerID = switch (fullmektigType) {
             case PERSON -> REP_FNR;
             case ORGANISASJON -> REP_ORGNR;
             default -> throw new IllegalArgumentException("Mottakertype må være person eller organisasjon");

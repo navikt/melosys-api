@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.nav.melosys.domain.Representant;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
@@ -19,8 +18,6 @@ public class OpprettSakRequest {
     private final String utenlandskPersonId;
     @Deprecated(since = "melosys.fullmektig.trygdeavgift")
     private final String arbeidsgiver;
-    @Deprecated(since = "melosys.fullmektig.trygdeavgift")
-    private final Representant representant;
     private final FullmektigDto fullmektig;
     private final List<Kontaktopplysning> kontaktopplysninger;
     private final Behandlingstyper behandlingstype;
@@ -38,7 +35,6 @@ public class OpprettSakRequest {
         this.virksomhetOrgnr = builder.virksomhetOrgnr;
         this.utenlandskPersonId = builder.utenlandskPersonId;
         this.arbeidsgiver = builder.arbeidsgiver;
-        this.representant = builder.representant;
         this.kontaktopplysninger = builder.kontaktopplysninger;
         this.behandlingstype = builder.behandlingstype;
         this.behandlingstema = builder.behandlingstema;
@@ -66,10 +62,6 @@ public class OpprettSakRequest {
 
     public String getArbeidsgiver() {
         return arbeidsgiver;
-    }
-
-    public Representant getRepresentant() {
-        return representant;
     }
 
     public FullmektigDto getFullmektig() {
@@ -121,7 +113,6 @@ public class OpprettSakRequest {
         private String virksomhetOrgnr;
         private String utenlandskPersonId;
         private String arbeidsgiver;
-        private Representant representant;
         private FullmektigDto fullmektig;
         private List<Kontaktopplysning> kontaktopplysninger = new ArrayList<>();
         private Behandlingstyper behandlingstype;
@@ -151,11 +142,6 @@ public class OpprettSakRequest {
 
         public Builder medArbeidsgiver(String arbeidsgiver) {
             this.arbeidsgiver = arbeidsgiver;
-            return this;
-        }
-
-        public Builder medRepresentant(Representant representant) {
-            this.representant = representant;
             return this;
         }
 

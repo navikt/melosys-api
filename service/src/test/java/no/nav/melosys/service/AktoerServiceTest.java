@@ -1,20 +1,13 @@
 package no.nav.melosys.service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Fullmaktstype;
-import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.AktoerRepository;
 import no.nav.melosys.service.aktoer.AktoerDto;
 import no.nav.melosys.service.aktoer.AktoerService;
-import no.nav.melosys.service.persondata.PersondataFasade;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +16,11 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Example;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -105,7 +103,7 @@ class AktoerServiceTest {
         Fagsak fagsak = lagFagsak();
 
 
-        aktoerService.hentfagsakAktører(fagsak, Aktoersroller.REPRESENTANT, Representerer.BRUKER);
+        aktoerService.hentfagsakAktører(fagsak, Aktoersroller.FULLMEKTIG);
 
 
         verify(aktoerRepository).findAll(exampleCaptor.capture());
@@ -113,8 +111,7 @@ class AktoerServiceTest {
 
         Aktoer aktoerProbe = aktoerExample.getProbe();
         assertThat(aktoerProbe.getFagsak()).isEqualTo(lagFagsak());
-        assertThat(aktoerProbe.getRolle()).isEqualTo(Aktoersroller.REPRESENTANT);
-        assertThat(aktoerProbe.getRepresenterer()).isEqualTo(Representerer.BRUKER);
+        assertThat(aktoerProbe.getRolle()).isEqualTo(Aktoersroller.FULLMEKTIG);
     }
 
     @Test
@@ -150,10 +147,10 @@ class AktoerServiceTest {
     }
 
     @Test
-    void slettAktør_sletteRepresentant_fungerer() {
+    void slettAktør_sletteFullmektig_fungerer() {
         Aktoer aktoer = new Aktoer();
         aktoer.setId(10L);
-        aktoer.setRolle(Aktoersroller.REPRESENTANT);
+        aktoer.setRolle(Aktoersroller.FULLMEKTIG);
         aktoer.setFagsak(new Fagsak());
         Optional<Aktoer> optionalAktoer = Optional.of(aktoer);
         doReturn(optionalAktoer).when(aktoerRepository).findById(10L);
@@ -189,7 +186,6 @@ class AktoerServiceTest {
         assertThat(aktoer.getUtenlandskPersonId()).isEqualTo(aktoerDto.getUtenlandskPersonID());
         assertThat(aktoer.getOrgnr()).isEqualTo(aktoerDto.getOrgnr());
         assertThat(aktoer.getRolle()).hasToString(aktoerDto.getRolleKode());
-        assertThat(aktoer.getRepresenterer()).hasToString(aktoerDto.getRepresentererKode());
         assertThat(aktoer.getFullmaktstyper()).isEqualTo(aktoerDto.getFullmakter());
         assertThat(aktoer.getPersonIdent()).isEqualTo(aktoerDto.getPersonIdent());
     }
@@ -200,7 +196,6 @@ class AktoerServiceTest {
         aktoerDto.setInstitusjonsID("institusjonsID");
         aktoerDto.setUtenlandskPersonID("utenlandskPersonID");
         aktoerDto.setOrgnr("orgnr");
-        aktoerDto.setRepresentererKode("BRUKER");
         aktoerDto.setPersonIdent("21075114491");
         aktoerDto.setFullmakter(Set.of(Fullmaktstype.FULLMEKTIG_SØKNAD));
         return aktoerDto;

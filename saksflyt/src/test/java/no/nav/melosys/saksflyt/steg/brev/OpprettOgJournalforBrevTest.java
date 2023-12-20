@@ -175,7 +175,7 @@ class OpprettOgJournalforBrevTest {
     }
 
     @Test
-    void utførOpprettJournalforBrevTilRepresentant() {
+    void utførOpprettJournalforBrevTilFullmektig() {
         Behandling behandling = TestdataFactory.lagBehandling();
         when(mockBehandlingService.hentBehandling(anyLong())).thenReturn(behandling);
         when(mockDokgenService.hentDokumentInfo(any())).thenReturn(TestdataFactory.lagDokumentInfo());

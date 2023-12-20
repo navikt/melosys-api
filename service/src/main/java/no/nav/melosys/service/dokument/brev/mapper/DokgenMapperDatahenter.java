@@ -8,7 +8,7 @@ import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.FellesKodeverk;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.person.Persondata;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
@@ -53,8 +53,8 @@ public class DokgenMapperDatahenter {
         return landnavn.equals("UKJENT") ? "" : landnavn;
     }
 
-    String hentFullmektigNavn(Fagsak fagsak, Representerer representerer) {
-        return fagsak.finnRepresentantEllerFullmektig(representerer)
+    String hentFullmektigNavn(Fagsak fagsak, Fullmaktstype fullmaktstype) {
+        return fagsak.finnFullmektig(fullmaktstype)
             .map(aktoer -> {
                 if (StringUtils.hasText(aktoer.getOrgnr())) {
                     return eregFasade.hentOrganisasjonNavn(aktoer.getOrgnr());
