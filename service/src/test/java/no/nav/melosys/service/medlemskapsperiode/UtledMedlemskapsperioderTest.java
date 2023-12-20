@@ -292,7 +292,7 @@ class UtledMedlemskapsperioderTest {
         forventetMedlemskapsperiode.setTom(tom);
         forventetMedlemskapsperiode.setArbeidsland(arbeidsland);
         forventetMedlemskapsperiode.setInnvilgelsesresultat(innvilgelsesResultat);
-        forventetMedlemskapsperiode.setMedlemskapstype(Medlemskapstyper.PLIKTIG);
+        forventetMedlemskapsperiode.setMedlemskapstype(Medlemskapstyper.FRIVILLIG);
         forventetMedlemskapsperiode.setTrygdedekning(trygdedekning);
         return forventetMedlemskapsperiode;
     }
