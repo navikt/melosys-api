@@ -32,14 +32,6 @@ class SedLåsReferanse(val låsReferanse: String) : LåsReferanse {
         return !aktiveLåsReferanser.contains(låsReferanse)
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other == null || javaClass != other.javaClass) return false
-        val that = other as SedLåsReferanse
-        return rinaSaksnummer == that.rinaSaksnummer && sedID == that.sedID && sedVersjon == that.sedVersjon
-    }
-    override fun hashCode(): Int = Objects.hash(rinaSaksnummer, sedID, sedVersjon)
-
     override fun toString(): String = låsReferanse
 
     private fun erGyldigReferanse(referanse: String?): Boolean =
