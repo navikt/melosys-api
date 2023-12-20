@@ -39,7 +39,7 @@ final class FerdigbehandlingKontroll {
         List<Medlemskapsperiode> medlemskapsperioder = kontrollData.medlemskapsperioder();
         Lovvalgsperiode kontrollPeriode = kontrollData.lovvalgsperiode();
 
-        if (harBehandlingstemaMedUnntakForOverlappendePeriode(kontrollPeriode, kontrollData.behandlingstema())) {
+        if ((medlemskapsperioder != null) && harBehandlingstemaMedUnntakForOverlappendePeriode(kontrollPeriode, kontrollData.behandlingstema())) {
             return OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument, medlemskapsperioder)
                 ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.ADVARSEL)
                 : null;
