@@ -5,40 +5,57 @@ import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.repository.AuditRepository
-import org.joda.time.LocalDate
+import no.nav.melosys.repository.EntityRevision
+import org.hibernate.envers.RevisionType
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
+
+internal const val EUROPE_OSLO = "Europe/Oslo"
 
 @Service
 class AktoerHistorikkService(
     private val auditRepository: AuditRepository
 ) {
 
+    @Transactional(readOnly = true)
     fun hentAktørHistorikk(fagsak: Fagsak, rolle: Aktoersroller): List<AktoerHistorikk> {
-        val revisions = auditRepository.getRevisions(Aktoer::class.java, mapOf("fagsak_saksnummer" to fagsak.saksnummer, "rolle" to rolle))
+        val revisions: List<EntityRevision<Aktoer>> =
+            auditRepository.getRevisions(Aktoer::class.java, mapOf("fagsak_saksnummer" to fagsak.saksnummer, "rolle" to rolle))
 
-        // TODO må tilpasses for MELOSYS-6240 og MELOSYS-6244
-        return revisions.map {
-            AktoerHistorikk(
-                registrertFra = LocalDate.now(),
-                registretTil = null,
-                aktørId = it.entity.aktørId,
-                personIdent = it.entity.personIdent,
-                institusjonID = it.entity.institusjonId,
-                orgnr = it.entity.orgnr,
-                rolle = it.entity.rolle,
-                fullmakter = emptySet()
-            )
+        return lagHistorikk(revisions)
+    }
+
+    fun lagHistorikk(revisions: List<EntityRevision<Aktoer>>): List<AktoerHistorikk> {
+        val sortedRevisions = revisions.sortedBy { it.revisionInfo.timestamp }
+        val revisionAndNextPairs = sortedRevisions.mapIndexed { index, revision ->
+            val nextRevision = sortedRevisions.drop(index + 1).firstOrNull { it.entity.id == revision.entity.id }
+            revision to nextRevision
+        }
+
+        return revisionAndNextPairs.filter { (revision, _) -> revision.revisionType != RevisionType.DEL }
+            .map { (revision, next) ->
+                AktoerHistorikk(
+                    registrertFra = revision.revisionLocalDateTime,
+                    registretTil = next?.revisionLocalDateTime,
+                    aktørId = revision.entity.aktørId,
+                    personIdent = revision.entity.personIdent,
+                    institusjonID = revision.entity.institusjonId,
+                    orgnr = revision.entity.orgnr,
+                    rolle = revision.entity.rolle,
+                    fullmakter = revision.entity.fullmakter.map { it.type }.toSet()
+                )
         }
     }
 }
 
 data class AktoerHistorikk(
-    val registrertFra: LocalDate,
-    val registretTil: LocalDate? = null,
+    val registrertFra: LocalDateTime,
+    val registretTil: LocalDateTime?,
     val aktørId: String? = null,
     val personIdent: String? = null,
     val institusjonID: String? = null,
     val orgnr: String? = null,
     val rolle: Aktoersroller,
-    val fullmakter: Set<Fullmaktstype> = emptySet(),
+    val fullmakter: Set<Fullmaktstype>,
 )

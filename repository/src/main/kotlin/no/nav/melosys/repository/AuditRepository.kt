@@ -8,9 +8,14 @@ import org.hibernate.envers.query.AuditEntity
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.StringUtils
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.*
 import javax.persistence.EntityManager
 import javax.persistence.PersistenceContext
+
+internal const val EUROPE_OSLO = "Europe/Oslo"
 
 @Repository
 class AuditRepository {
@@ -43,4 +48,7 @@ data class EntityRevision<T>(
     val entity: T,
     val revisionInfo: DefaultRevisionEntity,
     val revisionType: RevisionType
-)
+) {
+    val revisionLocalDateTime : LocalDateTime
+        get() = Instant.ofEpochMilli(this.revisionInfo.timestamp).atZone(ZoneId.of(EUROPE_OSLO)).toLocalDateTime()
+}
