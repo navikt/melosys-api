@@ -1,7 +1,11 @@
 package no.nav.melosys.saksflytapi.domain
 
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
+import no.nav.melosys.domain.manglendebetaling.Betalingsstatus
+import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 class LåsReferanseFactoryTest {
 
@@ -15,9 +19,18 @@ class LåsReferanseFactoryTest {
 
     @Test
     fun `lag låseReferanse for OpprettManglendeInnbetalingBehandling`() {
-        val sedLåsReferanseString = "OMIB_to_be_decided"
+        val sedLåsReferanseString = LåsReferanseFactory.lagLåsReferanseString(
+            ManglendeFakturabetalingMelding(
+                fakturaserieReferanse = "01HHFM03YMHHQAVZ4SQF9Y29E4",
+                betalingsstatus = Betalingsstatus.IKKE_BETALT,
+                datoMottatt = LocalDate.of(2023, 12, 13),
+                fakturanummer = "123456789"
+            )
+        )
         val låsReferanse = LåsReferanseFactory.låsReferanseFraString(sedLåsReferanseString)
+        println(sedLåsReferanseString)
 
         låsReferanse.shouldBeInstanceOf<OpprettManglendeInnbetalingBehandlingLåsReferanse>()
+            .låsReferanse.shouldBe("OMIB_01HHFM03YMHHQAVZ4SQF9Y29E4_123456789")
     }
 }
