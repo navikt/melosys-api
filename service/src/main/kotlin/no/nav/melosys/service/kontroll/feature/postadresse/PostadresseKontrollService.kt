@@ -1,5 +1,6 @@
 package no.nav.melosys.service.kontroll.feature.postadresse
 
+import no.nav.melosys.exception.KontrolldataFeilType
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.Aktoersroller
 import no.nav.melosys.domain.kodeverk.Fullmaktstype
@@ -38,7 +39,7 @@ class PostadresseKontrollService(
         return if (harRegistrertAdresse) {
             emptyList()
         } else {
-            listOf(Kontrollfeil(kontrollBegrunnelseFra(kontekst)))
+            listOf(Kontrollfeil(kontrollBegrunnelseFra(kontekst), KontrolldataFeilType.FEIL))
         }
     }
 

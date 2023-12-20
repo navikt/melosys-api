@@ -13,9 +13,11 @@ import no.nav.melosys.domain.kodeverk.InnvilgelsesResultat
 import no.nav.melosys.domain.kodeverk.Medlemskapstyper
 import no.nav.melosys.domain.kodeverk.Trygdedekninger
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_us
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData
 import no.nav.melosys.domain.mottatteopplysninger.data.Soeknadsland
+import no.nav.melosys.exception.KontrolldataFeilType
 import no.nav.melosys.service.kontroll.feature.ferdigbehandling.data.FerdigbehandlingKontrollData
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory
 import org.junit.jupiter.api.Test
@@ -197,6 +199,55 @@ class FerdigbehandlingKontrollTest {
 
 
         kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+        kontrollfeil.type.shouldBe(KontrolldataFeilType.FEIL)
+    }
+
+    @Test
+    fun `medlemskapsperioder med overlapping skal gi kontrollfeil med adversel for visse behandlingstema`() {
+        val medlemskapsDokument = MedlemskapDokument().apply {
+            medlemsperiode = listOf(
+                Medlemsperiode().apply {
+                    id = 1
+                    land = "SWE"
+                    status = "GYLD"
+                    periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))
+                }
+            )
+        }
+
+        val overlappendeMedlemskapsperioder = listOf(
+            lagMedlemskapsperiode(
+                LocalDate.now().plusDays(1), LocalDate.now().plusDays(10)
+            )
+        )
+
+        val lovvalgsperiode = Lovvalgsperiode().apply {
+            id = 1
+            fom = LocalDate.now()
+            tom = LocalDate.now().plusDays(4)
+            innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
+        }
+
+        val kontrollData = FerdigbehandlingKontrollData(
+            medlemskapsDokument,
+            null,
+            null,
+            lovvalgsperiode,
+            null,
+            null,
+            Behandlingstema.UTSENDT_ARBEIDSTAKER,
+            null,
+            null,
+            null,
+            overlappendeMedlemskapsperioder
+        )
+
+
+        val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
+
+
+        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+        kontrollfeil.type.shouldBe(KontrolldataFeilType.ADVARSEL)
     }
 
 
