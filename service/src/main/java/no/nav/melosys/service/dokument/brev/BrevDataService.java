@@ -1,5 +1,13 @@
 package no.nav.melosys.service.dokument.brev;
 
+import java.io.IOException;
+import java.io.StringReader;
+import javax.xml.XMLConstants;
+import javax.xml.bind.JAXBException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
 import no.nav.dok.brevdata.felles.v1.navfelles.Saksbehandler;
 import no.nav.dok.brevdata.felles.v1.navfelles.*;
 import no.nav.dok.brevdata.felles.v1.simpletypes.AktoerType;
@@ -11,10 +19,8 @@ import no.nav.melosys.domain.*;
 import no.nav.melosys.domain.adresse.StrukturertAdresse;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
-import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
-import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import no.nav.melosys.integrasjon.doksys.DokumentbestillingMetadata;
@@ -29,14 +35,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
-import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBException;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.io.StringReader;
 
 import static no.nav.melosys.service.dokument.brev.BrevDataUtils.*;
 
@@ -99,8 +97,7 @@ public class BrevDataService {
             case ARBEIDSGIVER -> avklarMottakerIDForOrg(mottaker, kontaktopplysning);
             case FULLMEKTIG -> mottaker.erOrganisasjon() ? avklarMottakerIDForOrg(mottaker, kontaktopplysning) : mottaker.getPersonIdent();
             case BRUKER -> persondataFasade.hentFolkeregisterident(mottaker.getAktørId());
-            case UTENLANDSK_TRYGDEMYNDIGHET ->
-                mottaker.erUtenlandskMyndighet() ? mottaker.getInstitusjonID() : mottaker.getOrgnr();
+            case UTENLANDSK_TRYGDEMYNDIGHET -> mottaker.erUtenlandskMyndighet() ? mottaker.getInstitusjonID() : mottaker.getOrgnr();
             case NORSK_MYNDIGHET -> mottaker.getOrgnr();
             default -> throw new TekniskException(mottaker.getRolle() + " støttes ikke.");
         };
@@ -176,17 +173,16 @@ public class BrevDataService {
         String mottakerID = avklarMottakerId(mottaker, kontaktopplysning);
 
         return switch (mottaker.getRolle()) {
-            case BRUKER -> lagMottakerForBruker(mottakerID);
+            case BRUKER -> lagMottakerForPerson(mottakerID);
             case ARBEIDSGIVER, NORSK_MYNDIGHET -> lagMottakerForOrganisasjon(mottakerID);
             case UTENLANDSK_TRYGDEMYNDIGHET ->
                 mottaker.erUtenlandskMyndighet() ? lagMottakerForUtenlandskTrygdemyndighet(mottaker) : lagMottakerForOrganisasjon(mottakerID);
-            case FULLMEKTIG ->
-                mottaker.erOrganisasjon() ? lagMottakerForOrganisasjon(mottakerID) : lagMottakerForRepresentantPerson(mottakerID);
+            case FULLMEKTIG -> mottaker.erOrganisasjon() ? lagMottakerForOrganisasjon(mottakerID) : lagMottakerForPerson(mottakerID);
             default -> throw new TekniskException(mottaker.getRolle() + " støttes ikke.");
         };
     }
 
-    private Mottaker lagMottakerForBruker(String mottakerID) {
+    private Mottaker lagMottakerForPerson(String mottakerID) {
         Mottaker mottaker = new Person();
         mottaker.setTypeKode(AktoerType.PERSON);
         mottaker.setSpraakkode(Spraakkode.NB);
@@ -208,19 +204,6 @@ public class BrevDataService {
         mottaker.setKortNavn(PLASSHOLDER_TEKST);
         mottaker.setMottakeradresse(lagNorskPostadresse());
         mottaker.setSpraakkode(Spraakkode.NB);
-        return mottaker;
-    }
-
-    private Mottaker lagMottakerForRepresentantPerson(String mottakerID) {
-        Mottaker mottaker = new Person();
-        mottaker.setTypeKode(AktoerType.PERSON);
-        mottaker.setSpraakkode(Spraakkode.NB);
-        mottaker.setId(mottakerID);
-
-        mottaker.setMottakeradresse(lagNorskPostadresse());
-        mottaker.setBerik(true);
-        mottaker.setNavn(PLASSHOLDER_TEKST);
-        mottaker.setKortNavn(PLASSHOLDER_TEKST);
         return mottaker;
     }
 

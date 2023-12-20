@@ -2,10 +2,10 @@ package no.nav.melosys.service.dokument.brev.mapper
 
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.brev.*
+import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.Land_iso2
 import no.nav.melosys.domain.kodeverk.Landkoder
 import no.nav.melosys.domain.kodeverk.Mottakerroller
-import no.nav.melosys.domain.kodeverk.Representerer
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter
 import no.nav.melosys.domain.mottatteopplysninger.SøknadIkkeYrkesaktiv
 import no.nav.melosys.exception.FunksjonellException
@@ -113,7 +113,7 @@ class DokgenMalMapper(
                     .medFullmektigNavn(
                         dokgenMapperDatahenter.hentFullmektigNavn(
                             brevbestilling.getBehandling().fagsak,
-                            Representerer.BRUKER
+                            Fullmaktstype.FULLMEKTIG_SØKNAD
                         )
                     )
                     .build(),
@@ -151,7 +151,7 @@ class DokgenMalMapper(
                     .medNavnFullmektig(
                         dokgenMapperDatahenter.hentFullmektigNavn(
                             brevbestilling.getBehandling().fagsak,
-                            Representerer.BRUKER
+                            Fullmaktstype.FULLMEKTIG_SØKNAD
                         )
                     ).build(),
                 Mottakerroller.BRUKER
@@ -166,7 +166,7 @@ class DokgenMalMapper(
                     .medNavnFullmektig(
                         dokgenMapperDatahenter.hentFullmektigNavn(
                             brevbestilling.getBehandling().fagsak,
-                            Representerer.ARBEIDSGIVER
+                            Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER
                         )
                     ).build(),
                 Mottakerroller.ARBEIDSGIVER
@@ -199,10 +199,11 @@ class DokgenMalMapper(
                 brevbestilling as VarselbrevManglendeInnbetalingBrevbestilling
             )
 
-            Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP -> VedtakOpphoertMedlemskap.Builder(brevbestilling as VedtakOpphoertMedlemskapBrevbestilling).opphoertDato(
-                dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
-                    .medlemAvFolketrygden.utledMedlemskapsperiodeTom().plusDays(1)
-            ).build()
+            Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP -> VedtakOpphoertMedlemskap.Builder(brevbestilling as VedtakOpphoertMedlemskapBrevbestilling)
+                .opphoertDato(
+                    dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)
+                        .medlemAvFolketrygden.utledMedlemskapsperiodeTom().plusDays(1)
+                ).build()
 
             else -> throw FunksjonellException("ProduserbartDokument ${brevbestilling.produserbartdokument} er ikke støttet av melosys-dokgen")
         }

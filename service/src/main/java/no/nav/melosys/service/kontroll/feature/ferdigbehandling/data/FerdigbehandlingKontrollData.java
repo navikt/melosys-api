@@ -20,25 +20,25 @@ public record FerdigbehandlingKontrollData(
     Lovvalgsperiode opprinneligLovvalgsperiode,
     SaksopplysningerData saksopplysningerData,
     Behandlingstema behandlingstema,
-    Aktoer representant,
+    Aktoer fullmektig,
     OrganisasjonDokument organisasjonDokument,
-    Persondata persondataRepresentant,
+    Persondata persondataTilFullmektig,
     List<Medlemskapsperiode> medlemskapsperioder
     ) {
 
     public static FerdigbehandlingKontrollData lagKontrollDataForAvslag(Persondata persondata,
                                                                         MottatteOpplysningerData mottatteOpplysningerData,
-                                                                        SaksopplysningerData saksopplysningerData, Aktoer representant, OrganisasjonDokument organisasjonDokument, Persondata persondataRepresentant) {
-        return new FerdigbehandlingKontrollData(null, persondata, mottatteOpplysningerData, null, null, saksopplysningerData, null, representant, organisasjonDokument, persondataRepresentant, null);
+                                                                        SaksopplysningerData saksopplysningerData, Aktoer fullmektig, OrganisasjonDokument organisasjonDokument, Persondata persondataTilFullmektig) {
+        return new FerdigbehandlingKontrollData(null, persondata, mottatteOpplysningerData, null, null, saksopplysningerData, null, fullmektig, organisasjonDokument, persondataTilFullmektig, null);
     }
 
     public static FerdigbehandlingKontrollData lagKontrollDataForFTRL(Persondata persondata,
                                                                       MottatteOpplysningerData mottatteOpplysningerData,
                                                                       MedlemskapDokument medlemskapDokument,
-                                                                      Aktoer representant,
+                                                                      Aktoer fullmektig,
                                                                       OrganisasjonDokument organisasjonDokument,
-                                                                      Persondata persondataRepresentant,
+                                                                      Persondata persondataTilFullmektig,
                                                                       List<Medlemskapsperiode> medlemskapsperioder) {
-        return new FerdigbehandlingKontrollData(medlemskapDokument, persondata, mottatteOpplysningerData, null, null, null, null, representant, organisasjonDokument, persondataRepresentant, medlemskapsperioder);
+        return new FerdigbehandlingKontrollData(medlemskapDokument, persondata, mottatteOpplysningerData, null, null, null, null, fullmektig, organisasjonDokument, persondataTilFullmektig, medlemskapsperioder);
     }
 }

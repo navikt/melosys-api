@@ -4,10 +4,15 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import io.getunleash.FakeUnleash;
 import no.nav.melosys.domain.*;
-import no.nav.melosys.domain.kodeverk.*;
-import no.nav.melosys.domain.kodeverk.behandlinger.*;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
+import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.Sakstyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.repository.FagsakRepository;
 import no.nav.melosys.service.SaksbehandlingDataFactory;
@@ -47,8 +52,6 @@ class FagsakServiceTest {
     private PersondataFasade persondataFasade;
     @Mock
     private LovligeKombinasjonerService lovligeKombinasjonerService;
-    private final FakeUnleash unleash = new FakeUnleash();
-
     private FagsakService fagsakService;
 
     @BeforeEach
@@ -58,9 +61,7 @@ class FagsakServiceTest {
             behandlingService,
             kontaktopplysningService,
             persondataFasade,
-            lovligeKombinasjonerService,
-            unleash);
-        unleash.reset();
+            lovligeKombinasjonerService);
     }
 
     @Test
@@ -87,7 +88,7 @@ class FagsakServiceTest {
     }
 
     @Test
-    void nyFagsakOgBehandling_toggleDisabled() {
+    void nyFagsakOgBehandling() {
         Behandling behandling = mock(Behandling.class);
         String initierendeJournalpostId = "234";
         String initierendeDokumentId = "221234";
@@ -102,7 +103,6 @@ class FagsakServiceTest {
             .medInitierendeJournalpostId(initierendeJournalpostId)
             .medInitierendeDokumentId(initierendeDokumentId)
             .medArbeidsgiver("arbeidsgiver")
-            .medRepresentant(new Representant("orgnr", Representerer.ARBEIDSGIVER))
             .medFullmektig(new FullmektigDto("orgnr", null, List.of(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)))
             .medBehandlingsårsaktype(Behandlingsaarsaktyper.FRITEKST)
             .medBehandlingsårsakFritekst("Fritekst")
@@ -119,61 +119,16 @@ class FagsakServiceTest {
         assertThat(fagsak.getBehandlinger()).isNotEmpty();
         assertThat(fagsak.getType()).isEqualTo(EU_EOS);
         assertThat(fagsak.getTema()).isEqualTo(MEDLEMSKAP_LOVVALG);
-        Aktoer forventetRepresentant = new Aktoer();
-        forventetRepresentant.setFagsak(fagsak);
-        forventetRepresentant.setRolle(Aktoersroller.REPRESENTANT);
-        forventetRepresentant.setOrgnr("orgnr");
-        forventetRepresentant.setRepresenterer(Representerer.ARBEIDSGIVER);
-        assertThat(fagsak.finnRepresentantEllerFullmektig(Representerer.ARBEIDSGIVER)).isPresent().get()
-            .usingRecursiveComparison().isEqualTo(forventetRepresentant);
-        assertThat(fagsak.harAktørMedRolleType(Aktoersroller.FULLMEKTIG)).isFalse();
-    }
-
-    @Test
-    void nyFagsakOgBehandling_toggleEnabled() {
-        unleash.enableAll();
-        Behandling behandling = mock(Behandling.class);
-        String initierendeJournalpostId = "234";
-        String initierendeDokumentId = "221234";
-        doReturn(behandling).when(behandlingService).nyBehandling(any(), any(), any(), any(), anyString(), anyString(), any(), any(), anyString());
-
-        OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
-            .medAktørID("123456789")
-            .medSakstype(EU_EOS)
-            .medSakstema(MEDLEMSKAP_LOVVALG)
-            .medBehandlingstype(FØRSTEGANG)
-            .medBehandlingstema(UTSENDT_ARBEIDSTAKER)
-            .medInitierendeJournalpostId(initierendeJournalpostId)
-            .medInitierendeDokumentId(initierendeDokumentId)
-            .medArbeidsgiver("arbeidsgiver")
-            .medRepresentant(new Representant("orgnr", Representerer.ARBEIDSGIVER))
-            .medFullmektig(new FullmektigDto("orgnr", null, List.of(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)))
-            .medBehandlingsårsaktype(Behandlingsaarsaktyper.FRITEKST)
-            .medBehandlingsårsakFritekst("Fritekst")
-            .build();
-
-
-        Fagsak fagsak = fagsakService.nyFagsakOgBehandling(opprettSakRequest);
-
-
-        verify(fagsakRepo).save(any(Fagsak.class));
-        verify(behandlingService).nyBehandling(any(), eq(Behandlingsstatus.OPPRETTET), eq(FØRSTEGANG),
-            eq(UTSENDT_ARBEIDSTAKER), eq(initierendeJournalpostId), eq(initierendeDokumentId), any(),
-            eq(Behandlingsaarsaktyper.FRITEKST), eq("Fritekst"));
-        assertThat(fagsak.getBehandlinger()).isNotEmpty();
-        assertThat(fagsak.getType()).isEqualTo(EU_EOS);
-        assertThat(fagsak.getTema()).isEqualTo(MEDLEMSKAP_LOVVALG);
-        var lagretFullmektig = fagsak.finnRepresentantEllerFullmektig(Representerer.ARBEIDSGIVER);
+        var lagretFullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
         assertThat(lagretFullmektig).isPresent().get()
             .extracting(Aktoer::getFagsak, Aktoer::getRolle, Aktoer::getOrgnr)
             .containsExactly(fagsak, Aktoersroller.FULLMEKTIG, "orgnr");
         assertThat(lagretFullmektig.get().getFullmakter()).flatExtracting(Fullmakt::getType).containsExactly(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
-        assertThat(fagsak.harAktørMedRolleType(Aktoersroller.REPRESENTANT)).isFalse();
     }
 
     @Test
     void nyFagsakOgBehandling_kontaktPersonFinnes_KontaktOpplysningOpprettes() {
-        Kontaktopplysning kontaktopplysning = Kontaktopplysning.av("RepresentantOrgnr", "Kontaktperson", "Telefon", "Orgnr");
+        Kontaktopplysning kontaktopplysning = Kontaktopplysning.av("FullmektigOrgnr", "Kontaktperson", "Telefon", "Orgnr");
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder().medAktørID("123456789")
             .medBehandlingstype(FØRSTEGANG)
             .medKontaktopplysninger(List.of(kontaktopplysning)).build();
@@ -181,7 +136,7 @@ class FagsakServiceTest {
         fagsakService.nyFagsakOgBehandling(opprettSakRequest);
 
         verify(kontaktopplysningService).lagEllerOppdaterKontaktopplysning(
-            any(), eq("RepresentantOrgnr"), eq("Orgnr"), eq("Kontaktperson"), eq("Telefon")
+            any(), eq("FullmektigOrgnr"), eq("Orgnr"), eq("Kontaktperson"), eq("Telefon")
         );
     }
 
@@ -301,7 +256,7 @@ class FagsakServiceTest {
         Behandling behandlingAktivRegistrertNaa = lagBehandling(1L, FØRSTEGANG, Behandlingsstatus.UNDER_BEHANDLING, Instant.now());
         Behandling behandlingInaktivRegistretNaa = lagBehandling(2L, FØRSTEGANG, Behandlingsstatus.AVSLUTTET, Instant.now());
         Behandling behandlingAktivRegistrertFoer = lagBehandling(3L, FØRSTEGANG, Behandlingsstatus.UNDER_BEHANDLING,
-            Instant.now().minusSeconds(3600));;
+            Instant.now().minusSeconds(3600));
         Behandling behandlingInaktivRegistrertFoer = lagBehandling(4L, FØRSTEGANG, Behandlingsstatus.AVSLUTTET, Instant.now().minusSeconds(3600));
         Fagsak fagsak1 = lagFagsakMedAktørForVirksomhet();
         Fagsak fagsak2 = lagFagsakMedAktørForVirksomhet();

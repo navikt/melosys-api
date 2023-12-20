@@ -13,7 +13,10 @@ import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Arbeidsforhold;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
-import no.nav.melosys.domain.kodeverk.*;
+import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
+import no.nav.melosys.domain.kodeverk.Land_iso2;
+import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_ca;
@@ -29,7 +32,6 @@ import no.nav.melosys.service.aktoer.UtenlandskMyndighetService;
 import no.nav.melosys.service.avklartefakta.AvklarteVirksomheterService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -72,16 +74,6 @@ class BrevmottakerServiceTest {
         behandlingsresultat.getLovvalgsperioder().add(lovvalgsperiode);
     }
 
-    @Disabled("Etter fjerning av toggle melosys.fullmakt.trygdeavgift")
-    @Test
-    void avklarMottakere_medFullmektigRepresentererOrg_feiler() {
-        when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigPerson(Representerer.ARBEIDSGIVER));
-
-        assertThatThrownBy(() -> brevmottakerService.avklarMottakere(null, Mottaker.medRolle(FULLMEKTIG), behandling))
-            .isInstanceOf(FunksjonellException.class)
-            .hasMessage("Finner ikke fullmektig for bruker");
-    }
-
     @Test
     void avklarMottakere_medFullmektigForArbeidsgiver_feiler() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigPerson(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER));
@@ -89,17 +81,6 @@ class BrevmottakerServiceTest {
         assertThatThrownBy(() -> brevmottakerService.avklarMottakere(null, Mottaker.medRolle(FULLMEKTIG), behandling))
             .isInstanceOf(FunksjonellException.class)
             .hasMessage("Finner ikke fullmektig for bruker");
-    }
-
-    @Disabled("Etter fjerning av toggle melosys.fullmakt.trygdeavgift")
-    @Test
-    void avklarMottakere_medFullmektigRepresentererBruker_girFullmektigMottaker() {
-        when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigPerson(Representerer.BRUKER));
-
-        List<Mottaker> mottakere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(BRUKER), behandling);
-
-        assertThat(mottakere).hasSize(1);
-        assertThat(mottakere.get(0).getRolle()).isEqualTo(FULLMEKTIG);
     }
 
     @Test
@@ -131,31 +112,9 @@ class BrevmottakerServiceTest {
         assertThat(mottakere.get(0).getRolle()).isEqualTo(BRUKER);
     }
 
-    @Disabled("Etter fjerning av toggle melosys.fullmakt.trygdeavgift")
-    @Test
-    void avklarMottakere_medBrukerRolleMedRepresentantOrg_girFullmektigMottaker() {
-        when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigOrg(Representerer.BRUKER));
-
-        List<Mottaker> mottakere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(BRUKER), behandling);
-
-        assertThat(mottakere).hasSize(1);
-        assertThat(mottakere.get(0).getRolle()).isEqualTo(FULLMEKTIG);
-    }
-
     @Test
     void avklarMottakere_medBrukerRolleMedFullmektigOrg_girFullmektigMottaker() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigOrg(Fullmaktstype.FULLMEKTIG_SØKNAD));
-
-        List<Mottaker> mottakere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(BRUKER), behandling);
-
-        assertThat(mottakere).hasSize(1);
-        assertThat(mottakere.get(0).getRolle()).isEqualTo(FULLMEKTIG);
-    }
-
-    @Disabled("Etter fjerning av toggle melosys.fullmakt.trygdeavgift")
-    @Test
-    void avklarMottakere_medBrukerRolleMedPersonRepresentant_girFullmektigMottaker() {
-        when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigPerson(Representerer.BRUKER));
 
         List<Mottaker> mottakere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(BRUKER), behandling);
 
@@ -267,19 +226,6 @@ class BrevmottakerServiceTest {
         assertThat(arbeidsgivere).isEmpty();
     }
 
-    @Disabled("Etter fjerning av toggle melosys.fullmakt.trygdeavgift")
-    @Test
-    void avklarMottakere_medArbeidsgiverRolleOgRepresentantForBruker_girArbeidsgiverMottakere() {
-        when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling)).thenReturn(Sets.newHashSet("123456789", "987654321"));
-        when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigOrg(Representerer.BRUKER));
-
-        List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(ARBEIDSGIVER), behandling);
-
-        assertThat(arbeidsgivere)
-            .flatExtracting(Mottaker::getOrgnr)
-            .containsExactlyInAnyOrder("123456789", "987654321");
-    }
-
     @Test
     void avklarMottakere_medArbeidsgiverRolleOgFullmektigForBruker_girArbeidsgiverMottakere() {
         when(avklarteVirksomheterService.hentNorskeArbeidsgivendeOrgnumre(behandling)).thenReturn(Sets.newHashSet("123456789", "987654321"));
@@ -292,18 +238,6 @@ class BrevmottakerServiceTest {
             .containsExactlyInAnyOrder("123456789", "987654321");
     }
 
-    @Disabled("Etter fjerning av toggle melosys.fullmakt.trygdeavgift")
-    @Test
-    void avklarMottakere_medArbeidsgiverRolleOgRepresentantForArbeidsgiver_girFullmektigMottakere() {
-        when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigOrg(Representerer.ARBEIDSGIVER));
-
-        List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(ARBEIDSGIVER), behandling);
-
-        assertThat(arbeidsgivere)
-            .flatExtracting(Mottaker::getAktørId, Mottaker::getPersonIdent, Mottaker::getOrgnr)
-            .containsExactly(null, null, "REP-ORGNR");
-    }
-
     @Test
     void avklarMottakere_medArbeidsgiverRolleOgFullmektigForArbeidsgiver_girFullmektigMottakere() {
         when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigOrg(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER));
@@ -313,18 +247,6 @@ class BrevmottakerServiceTest {
         assertThat(arbeidsgivere)
             .flatExtracting(Mottaker::getAktørId, Mottaker::getPersonIdent, Mottaker::getOrgnr)
             .containsExactly(null, null, "REP-ORGNR");
-    }
-
-    @Disabled("Etter fjerning av toggle melosys.fullmakt.trygdeavgift")
-    @Test
-    void avklarMottakere_medArbeidsgiverRolleOgRepresentantForBegge_girFullmektigMottakere() {
-        when(behandling.getFagsak()).thenReturn(lagFagsakMedFullmektigPerson(Representerer.BEGGE));
-
-        List<Mottaker> arbeidsgivere = brevmottakerService.avklarMottakere(null, Mottaker.medRolle(ARBEIDSGIVER), behandling);
-
-        assertThat(arbeidsgivere)
-            .flatExtracting(Mottaker::getAktørId, Mottaker::getPersonIdent, Mottaker::getOrgnr)
-            .containsExactly(null, "REP-FNR", null);
     }
 
     @Test
@@ -516,24 +438,6 @@ class BrevmottakerServiceTest {
     private Fagsak lagFagsak() {
         Fagsak fagsak = new Fagsak();
         fagsak.getAktører().add(lagAktoer(Aktoersroller.BRUKER));
-        return fagsak;
-    }
-
-    private Fagsak lagFagsakMedFullmektigOrg(Representerer representerer) {
-        Fagsak fagsak = lagFagsak();
-        Aktoer aktoer = lagAktoer(Aktoersroller.REPRESENTANT);
-        aktoer.setRepresenterer(representerer);
-        aktoer.setOrgnr("REP-ORGNR");
-        fagsak.getAktører().add(aktoer);
-        return fagsak;
-    }
-
-    private Fagsak lagFagsakMedFullmektigPerson(Representerer representerer) {
-        var fagsak = lagFagsak();
-        Aktoer aktoer = lagAktoer(Aktoersroller.REPRESENTANT);
-        aktoer.setRepresenterer(representerer);
-        aktoer.setPersonIdent("REP-FNR");
-        fagsak.getAktører().add(aktoer);
         return fagsak;
     }
 

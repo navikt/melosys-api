@@ -134,7 +134,7 @@ final class FerdigbehandlingKontroll {
     }
 
     static Kontrollfeil adresseRegistrert(FerdigbehandlingKontrollData kontrollData) {
-        var representant = kontrollData.representant();
+        var representant = kontrollData.fullmektig();
         boolean harRepresentant = representant != null;
 
         var brukerKontrollfeil = new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER);
@@ -155,7 +155,7 @@ final class FerdigbehandlingKontroll {
     private static Kontrollfeil erPersonAdresseRegistrert(FerdigbehandlingKontrollData kontrollData) {
         Kontrollfeil representantKontrollfeil = new Kontrollfeil(Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT);
 
-        return PersonRegler.harRegistrertAdresse(kontrollData.persondataRepresentant(), kontrollData.mottatteOpplysningerData()) ? null : representantKontrollfeil;
+        return PersonRegler.harRegistrertAdresse(kontrollData.persondataTilFullmektig(), kontrollData.mottatteOpplysningerData()) ? null : representantKontrollfeil;
     }
 
     private static Kontrollfeil erOrganisasjonAdresseRegistrert(FerdigbehandlingKontrollData kontrollData) {

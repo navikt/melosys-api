@@ -7,7 +7,7 @@ import com.google.common.collect.MoreCollectors;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Tema;
 import no.nav.melosys.domain.eessi.SedType;
-import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.msm.AltinnDokument;
 
 import static no.nav.melosys.domain.arkiv.FysiskDokument.*;
@@ -94,7 +94,7 @@ public class OpprettJournalpost extends Journalpost {
         opprettJournalpost.setBrukerIdType(BrukerIdType.FOLKEREGISTERIDENT);
         opprettJournalpost.setForsendelseMottatt(hovedDokument.getInnsendtTidspunkt());
 
-        fagsak.finnRepresentantEllerFullmektig(Representerer.BRUKER).ifPresentOrElse(
+        fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD).ifPresentOrElse(
             r -> {
                 opprettJournalpost.setKorrespondansepartId(r.getOrgnr());
                 opprettJournalpost.setKorrespondansepartNavn(avsenderNavn);

@@ -91,11 +91,11 @@ public class BrevmalListeBygger {
         return mottakere;
     }
 
-    private MottakerDto lagMottakerMedAdresseOgFeilmelding(long behandlingId, Mottakerroller rolle, boolean harBrukerRepresentant) {
+    private MottakerDto lagMottakerMedAdresseOgFeilmelding(long behandlingId, Mottakerroller rolle, boolean harBrukerFullmektig) {
         var mottakerDto = new MottakerDto();
         mottakerDto.setType(hentTypeFraRolle(rolle));
         mottakerDto.setRolle(rolle);
-        if (harBrukerRepresentant) {
+        if (harBrukerFullmektig) {
             leggTilAdresseOgFeilmelding(mottakerDto, Mottakerroller.FULLMEKTIG, behandlingId);
         } else {
             leggTilAdresseOgFeilmelding(mottakerDto, rolle, behandlingId);
