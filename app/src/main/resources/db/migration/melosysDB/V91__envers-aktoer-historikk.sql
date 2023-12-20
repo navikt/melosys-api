@@ -1,3 +1,4 @@
+-- autogenerert med hbm2ddl
 create sequence hibernate_sequence;
 
 create table revinfo
