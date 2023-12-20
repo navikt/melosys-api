@@ -20,6 +20,7 @@ import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Nyvurderingbakgrunner;
 import no.nav.melosys.domain.kodeverk.begrunnelser.folketrygdloven.Ftrl_2_8_naer_tilknytning_norge_begrunnelser;
+import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.integrasjon.dokgen.dto.*;
@@ -629,6 +630,7 @@ class DokgenMalMapperTest {
 
     private InnvilgelseFtrl lagInnvilgelseFtrl() {
         return new InnvilgelseFtrl.Builder(lagInnvilgelseFtrlBrevbestilling())
+            .behandlingstype(Behandlingstyper.FØRSTEGANG)
             .avgiftsperioder(emptyList())
             .medlemskapsperioder(emptyList())
             .bestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_8)

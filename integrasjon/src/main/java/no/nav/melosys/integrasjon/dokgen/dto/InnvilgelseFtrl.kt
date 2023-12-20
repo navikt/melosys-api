@@ -41,7 +41,7 @@ class InnvilgelseFtrl(
 
     class Builder(val brevbestilling: InnvilgelseFtrlBrevbestilling) {
         private val datoMottatt = instantTilLocalDate(brevbestilling.forsendelseMottatt)
-        private var behandlingstype: Behandlingstyper = Behandlingstyper.FØRSTEGANG
+        private lateinit var behandlingstype: Behandlingstyper
         private var avgiftsperioder: List<AvgiftsperiodeDto> = emptyList()
         private var medlemskapsperioder: List<MedlemskapsperiodeDto> = emptyList()
         private var bestemmelse: Folketrygdloven_kap2_bestemmelser? = null
