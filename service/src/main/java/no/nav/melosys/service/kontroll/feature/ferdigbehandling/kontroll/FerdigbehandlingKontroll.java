@@ -5,7 +5,6 @@ import java.util.List;
 
 import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Medlemskapsperiode;
-import no.nav.melosys.domain.PeriodeOmLovvalg;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
@@ -65,7 +64,7 @@ final class FerdigbehandlingKontroll {
 
     static Kontrollfeil overlappendeUnntaksperiode(FerdigbehandlingKontrollData kontrollData) {
         MedlemskapDokument medlemskapDokument = kontrollData.medlemskapDokument();
-        Lovvalgsperiode kontrollPeriode = (Lovvalgsperiode) kontrollData.lovvalgsperiode();
+        Lovvalgsperiode kontrollPeriode = kontrollData.lovvalgsperiode();
         Lovvalgsperiode opprinneligLovvalgsperiode = kontrollData.opprinneligLovvalgsperiode();
 
         if (!OverlappendeMedlemskapsperioderRegler.harOverlappendeUnntaksperiode(medlemskapDokument, kontrollPeriode, opprinneligLovvalgsperiode)) {
@@ -81,7 +80,7 @@ final class FerdigbehandlingKontroll {
 
     static Kontrollfeil overlappendeMedlemskapsperiode(FerdigbehandlingKontrollData kontrollData) {
         MedlemskapDokument medlemskapDokument = kontrollData.medlemskapDokument();
-        PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();
+        Lovvalgsperiode lovvalgsperiode = kontrollData.lovvalgsperiode();
         Lovvalgsperiode opprinneligLovvalgsperiode = kontrollData.opprinneligLovvalgsperiode();
 
         return OverlappendeMedlemskapsperioderRegler.harOverlappendeMedlemsperiode(medlemskapDokument,
@@ -91,7 +90,7 @@ final class FerdigbehandlingKontroll {
     }
 
     static Kontrollfeil periodeOver24Mnd(FerdigbehandlingKontrollData kontrollData) {
-        PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();
+        Lovvalgsperiode lovvalgsperiode = kontrollData.lovvalgsperiode();
 
         return lovvalgsperiode.erArtikkel12()
             && PeriodeRegler.periodeOver24Måneder(lovvalgsperiode.getFom(), lovvalgsperiode.getTom())
@@ -99,12 +98,12 @@ final class FerdigbehandlingKontroll {
     }
 
     static Kontrollfeil periodeManglerSluttdato(FerdigbehandlingKontrollData kontrollData) {
-        PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();
+        Lovvalgsperiode lovvalgsperiode = kontrollData.lovvalgsperiode();
         return lovvalgsperiode.getTom() == null ? new Kontrollfeil(Kontroll_begrunnelser.INGEN_SLUTTDATO, KontrolldataFeilType.FEIL) : null;
     }
 
     static Kontrollfeil periodeOverTreÅr(FerdigbehandlingKontrollData kontrollData) {
-        PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();
+        Lovvalgsperiode lovvalgsperiode = kontrollData.lovvalgsperiode();
 
         return (lovvalgsperiode.getBestemmelse() == UK_ART6_1 || lovvalgsperiode.getBestemmelse() == AUS_ART9_3)
             && PeriodeRegler.periodeOver3År(lovvalgsperiode.getFom(), lovvalgsperiode.getTom())
@@ -112,7 +111,7 @@ final class FerdigbehandlingKontroll {
     }
 
     static Kontrollfeil periodeOverFemÅr(FerdigbehandlingKontrollData kontrollData) {
-        PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();
+        Lovvalgsperiode lovvalgsperiode = kontrollData.lovvalgsperiode();
 
         return (lovvalgsperiode.getBestemmelse() == USA_ART5_2 || lovvalgsperiode.getBestemmelse() == CAN_ART7)
             && PeriodeRegler.periodeOver5År(lovvalgsperiode.getFom(), lovvalgsperiode.getTom())
@@ -120,7 +119,7 @@ final class FerdigbehandlingKontroll {
     }
 
     static Kontrollfeil periodeOver12Måneder(FerdigbehandlingKontrollData kontrollData) {
-        PeriodeOmLovvalg lovvalgsperiode = kontrollData.lovvalgsperiode();
+        Lovvalgsperiode lovvalgsperiode = kontrollData.lovvalgsperiode();
 
         return (lovvalgsperiode.getBestemmelse() == USA_ART5_4 || lovvalgsperiode.getBestemmelse() == CAN_ART6_2)
             && PeriodeRegler.periodeOver12Måneder(lovvalgsperiode.getFom(), lovvalgsperiode.getTom())
