@@ -18,13 +18,9 @@ class SedLåsReferanse(val låsReferanse: String) : LåsReferanse {
         get() = rinaSaksnummer
 
     override fun skalSettesPåVent(aktiveLåsReferanser: Collection<String>): Boolean {
-        if (aktiveLåsReferanser.contains(låsReferanse)) {
-            return false
-        }
-        // SedMottakTestIT og SaksflytOppstartIT feiler uten denne sjekken
-        // Burde ikke være mulig da finnAndreAktiveLåsMedSammeReferanse bare skal retunere
-        // liste filtrer på referanse
-        return aktiveLåsReferanser.any { SedLåsReferanse(it).referanse == referanse }
+        if (aktiveLåsReferanser.isEmpty()) return false
+
+        return !aktiveLåsReferanser.contains(låsReferanse)
     }
 
     override fun toString(): String = låsReferanse
