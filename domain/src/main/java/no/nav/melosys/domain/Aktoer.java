@@ -8,10 +8,16 @@ import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.exception.TekniskException;
+import org.hibernate.envers.AuditOverride;
+import org.hibernate.envers.Audited;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
 @Entity
 @Table(name = "aktoer")
+@Audited
+@AuditOverride(forClass = RegistreringsInfo.class)
 @EntityListeners(AuditingEntityListener.class)
 public class Aktoer extends RegistreringsInfo {
 
@@ -21,6 +27,7 @@ public class Aktoer extends RegistreringsInfo {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "saksnummer", updatable = false)
+    @Audited(targetAuditMode = NOT_AUDITED)
     private Fagsak fagsak;
 
     @Column(name = "person_ident")
