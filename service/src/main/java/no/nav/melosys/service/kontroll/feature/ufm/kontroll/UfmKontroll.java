@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 import static no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderRegler.*;
 import static org.apache.cxf.common.util.StringUtils.isEmpty;
 
-final class UfmKontroll {
+class UfmKontroll {
 
     private static final Logger log = LoggerFactory.getLogger(UfmKontroll.class);
 
