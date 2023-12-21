@@ -1,7 +1,5 @@
 package no.nav.melosys.saksflytapi.domain
 
-import java.util.regex.Pattern
-
 class SedLåsReferanse(val låsReferanse: String) : LåsReferanse {
     val rinaSaksnummer: String
     val sedID: String
@@ -20,9 +18,13 @@ class SedLåsReferanse(val låsReferanse: String) : LåsReferanse {
         get() = rinaSaksnummer
 
     override fun skalSettesPåVent(aktiveLåsReferanser: Collection<String>): Boolean {
-        // er ikke logisk at vi ikke setter en SED på vent om det finnes en annen samme referanse
-        // Men dette må sees på i en egen oppgave
-        return !aktiveLåsReferanser.contains(låsReferanse)
+        if (aktiveLåsReferanser.contains(låsReferanse)) {
+            return false
+        }
+        // SedMottakTestIT og SaksflytOppstartIT feiler uten denne sjekken
+        // Burde ikke være mulig da finnAndreAktiveLåsMedSammeReferanse bare skal retunere
+        // liste filtrer på referanse
+        return aktiveLåsReferanser.any { SedLåsReferanse(it).referanse == referanse }
     }
 
     override fun toString(): String = låsReferanse
