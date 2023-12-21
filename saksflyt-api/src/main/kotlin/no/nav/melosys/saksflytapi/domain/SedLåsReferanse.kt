@@ -27,6 +27,6 @@ class SedLåsReferanse(val låsReferanse: String) : LåsReferanse {
 
     override fun toString(): String = låsReferanse
 
-    private fun erGyldigReferanse(referanse: String?): Boolean =
+    private fun erGyldigReferanse(referanse: String): Boolean =
         LåsReferanseType.SED.erGyldigReferanse(referanse)
 }

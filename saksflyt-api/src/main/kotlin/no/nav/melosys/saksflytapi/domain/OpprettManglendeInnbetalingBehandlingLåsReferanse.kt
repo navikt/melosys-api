@@ -21,6 +21,6 @@ class OpprettManglendeInnbetalingBehandlingLåsReferanse(val låsReferanse: Stri
 
     override fun toString(): String = referanse
 
-    private fun erGyldigReferanse(referanse: String?): Boolean =
+    private fun erGyldigReferanse(referanse: String): Boolean =
         LåsReferanseType.OMIB.erGyldigReferanse(referanse)
 }
