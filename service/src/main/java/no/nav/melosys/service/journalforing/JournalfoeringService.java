@@ -185,6 +185,21 @@ public class JournalfoeringService {
         }
     }
 
+    private void validerKanSendeForvaltningsmelding(JournalfoeringTilordneDto journalfoeringDto, Sakstemaer sakstema) {
+        String behandlingstype = journalfoeringDto.getBehandlingstypeKode();
+        boolean manglerForventetTypeEllerTema =
+            !((behandlingstype.equals(FØRSTEGANG.name()) || behandlingstype.equals(NY_VURDERING.name())) && sakstema.equals(MEDLEMSKAP_LOVVALG));
+
+        if (manglerForventetTypeEllerTema) {
+            throw new FunksjonellException("Kan kun sende forvaltningsmelding for behandlingtyper: " +
+                "FØRSTEGANG og NY_VURDERING og sakstema: MEDLEMSKAP_LOVVALG");
+        }
+        if (!journalføringGjelderBruker(journalfoeringDto)) {
+            throw new FunksjonellException("Kan kun sende forvaltningsmelding for Aktoersroller: " +
+                "BRUKER");
+        }
+    }
+
     private void validerKanOppretteSakFraSed(Journalpost journalpost) {
         final MelosysEessiMelding melosysEessiMelding = eessiService.hentSedTilknyttetJournalpost(journalpost.getJournalpostId());
         validerSkalIkkeBehandlesAutomatisk(melosysEessiMelding);
@@ -223,6 +238,10 @@ public class JournalfoeringService {
             validerKanTilknytteJournalpostForSedTilSak(journalpost, saksnummer);
         }
 
+        if(journalfoeringDto.skalSendeForvaltningsmelding()) {
+            validerKanSendeForvaltningsmelding(journalfoeringDto, fagsak.getTema());
+        }
+
         fellesValidering(journalfoeringDto);
 
         log.info("{} knytter journalpost {} til eksisterende sak {}", SubjectHandler.getInstance().getUserID(), journalfoeringDto.getJournalpostID(), saksnummer);
@@ -250,6 +269,9 @@ public class JournalfoeringService {
         }
         if (journalpost.mottaksKanalErEessi()) {
             validerKanTilknytteJournalpostForSedTilSak(journalpost, saksnummer);
+        }
+        if(journalfoeringDto.skalSendeForvaltningsmelding()) {
+            validerKanSendeForvaltningsmelding(journalfoeringDto, fagsak.getTema());
         }
 
         fellesValidering(journalfoeringDto);
@@ -406,6 +428,14 @@ public class JournalfoeringService {
     }
 
     private Aktoersroller journalføringGjelder(JournalfoeringOpprettDto journalfoeringDto) {
+        return journalfoeringDto.getBrukerID() != null ? Aktoersroller.BRUKER : Aktoersroller.VIRKSOMHET;
+    }
+
+    private boolean journalføringGjelderBruker(JournalfoeringTilordneDto journalfoeringDto) {
+        return Aktoersroller.BRUKER.equals(journalføringGjelder(journalfoeringDto));
+    }
+
+    private Aktoersroller journalføringGjelder(JournalfoeringTilordneDto journalfoeringDto) {
         return journalfoeringDto.getBrukerID() != null ? Aktoersroller.BRUKER : Aktoersroller.VIRKSOMHET;
     }
 }
