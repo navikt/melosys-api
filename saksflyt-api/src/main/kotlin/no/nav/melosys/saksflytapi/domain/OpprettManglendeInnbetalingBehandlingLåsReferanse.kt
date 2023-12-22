@@ -13,7 +13,7 @@ class OpprettManglendeInnbetalingBehandlingLåsReferanse(val låsReferanse: Stri
     }
 
     override val referanse: String
-        get() = fakturaserieReferanse
+        get() = "${LåsReferanseType.OMIB}_${fakturaserieReferanse}"
 
     override fun skalSettesPåVent(aktiveLåsReferanser: Collection<String>): Boolean {
         return aktiveLåsReferanser.isNotEmpty()
