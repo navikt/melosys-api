@@ -57,11 +57,11 @@ object PersonRegler {
         }
 
         val fomErFørEllerLikPeriodeFra = fom.isBefore(periodeFra) || fom.isEqual(periodeFra)
-        val tomErEtterEllerLikPeriodeFil = tom.isAfter(periodeFra) || tom.isEqual(periodeFra)
+        val tomErEtterEllerLikPeriodeFra = tom.isAfter(periodeFra) || tom.isEqual(periodeFra)
         val fomErFørEllerLikPeriodeTil = fom.isBefore(periodeTil) || fom.isEqual(periodeTil)
         val tomErEtterEllerLikPeriodeTil = tom.isAfter(periodeTil) || tom.isEqual(periodeTil)
 
-        return (fomErFørEllerLikPeriodeFra && tomErEtterEllerLikPeriodeFil) ||
+        return (fomErFørEllerLikPeriodeFra && tomErEtterEllerLikPeriodeFra) ||
             (fomErFørEllerLikPeriodeTil && tomErEtterEllerLikPeriodeTil)
     }
 
