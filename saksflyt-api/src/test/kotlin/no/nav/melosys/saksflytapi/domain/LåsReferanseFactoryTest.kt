@@ -19,7 +19,7 @@ class LåsReferanseFactoryTest {
 
     @Test
     fun `lag låseReferanse for OpprettManglendeInnbetalingBehandling`() {
-        val sedLåsReferanseString = LåsReferanseFactory.lagLåsReferanseString(
+        val sedLåsReferanseString = LåsReferanseFactory.lagStringFraManglendeFakturabetalingMelding(
             ManglendeFakturabetalingMelding(
                 fakturaserieReferanse = "01HHFM03YMHHQAVZ4SQF9Y29E4",
                 betalingsstatus = Betalingsstatus.IKKE_BETALT,

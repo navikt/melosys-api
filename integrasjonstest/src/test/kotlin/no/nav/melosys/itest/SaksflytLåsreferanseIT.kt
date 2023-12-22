@@ -126,7 +126,7 @@ internal class SaksflytLåsreferanseIT(
                 fakturanummer = it
             )
             prosessinstansService.opprettManglendeInnbetalingProsessflyt(manglendeFakturabetalingMelding)
-            LåsReferanseFactory.lagLåsReferanseString(manglendeFakturabetalingMelding)
+            LåsReferanseFactory.lagStringFraManglendeFakturabetalingMelding(manglendeFakturabetalingMelding)
         }
     }
 }

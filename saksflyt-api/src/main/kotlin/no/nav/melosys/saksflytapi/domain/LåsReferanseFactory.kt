@@ -16,7 +16,7 @@ object LåsReferanseFactory {
     }
 
     @JvmStatic
-    fun lagLåsReferanseString(manglendeFakturabetalingMelding: ManglendeFakturabetalingMelding): String =
+    fun lagStringFraManglendeFakturabetalingMelding(manglendeFakturabetalingMelding: ManglendeFakturabetalingMelding): String =
         manglendeFakturabetalingMelding.let {
             "${LåsReferanseType.OMIB}_${it.fakturaserieReferanse}_${it.fakturanummer}"
         }
