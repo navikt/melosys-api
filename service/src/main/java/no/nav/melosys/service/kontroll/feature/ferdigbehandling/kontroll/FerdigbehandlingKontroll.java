@@ -40,15 +40,11 @@ final class FerdigbehandlingKontroll {
         Lovvalgsperiode kontrollPeriode = kontrollData.lovvalgsperiode();
 
         if (medlemskapsperioder != null) {
-            if (harBehandlingstemaMedUnntakForOverlappendePeriode(kontrollPeriode, kontrollData.behandlingstema())) {
-                return OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument, medlemskapsperioder)
-                    ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.ADVARSEL)
-                    : null;
-            }
-
             return OverlappendeMedlemskapsperioderRegler.harOverlappendePeriode(medlemskapDokument, medlemskapsperioder)
                 ? new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.FEIL)
                 : null;
+        } else if (harBehandlingstemaMedUnntakForOverlappendePeriode(kontrollPeriode, kontrollData.behandlingstema())) {
+            return new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER, KontrolldataFeilType.ADVARSEL);
         }
 
         Lovvalgsperiode opprinneligLovvalgsperiode = kontrollData.opprinneligLovvalgsperiode();
