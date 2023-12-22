@@ -56,10 +56,13 @@ object PersonRegler {
             return false
         }
 
-        return ((fom.isBefore(periodeFra) || fom.isEqual(periodeFra)) &&
-            (tom.isAfter(periodeFra) || tom.isEqual(periodeFra))) ||
-            ((fom.isBefore(periodeTil) || fom.isEqual(periodeTil)) &&
-                (tom.isAfter(periodeTil) || tom.isEqual(periodeTil)))
+        val fomErFørEllerLikPeriodeFra = fom.isBefore(periodeFra) || fom.isEqual(periodeFra)
+        val tomErEtterEllerLikPeriodeFil = tom.isAfter(periodeFra) || tom.isEqual(periodeFra)
+        val fomErFørEllerLikPeriodeTil = fom.isBefore(periodeTil) || fom.isEqual(periodeTil)
+        val tomErEtterEllerLikPeriodeTil = tom.isAfter(periodeTil) || tom.isEqual(periodeTil)
+
+        return (fomErFørEllerLikPeriodeFra && tomErEtterEllerLikPeriodeFil) ||
+            (fomErFørEllerLikPeriodeTil && tomErEtterEllerLikPeriodeTil)
     }
 
     @JvmStatic
