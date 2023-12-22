@@ -247,6 +247,46 @@ class FerdigbehandlingKontrollTest {
 
 
         kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_MEDL_PERIODER)
+        kontrollfeil.type.shouldBe(KontrolldataFeilType.FEIL)
+    }
+
+    @Test
+    fun `avslag skal gi kontrollfeil med adversel for visse behandlingstema, dersom overlapper med unntaksperiode`() {
+        val medlemskapsDokument = MedlemskapDokument().apply {
+            medlemsperiode = listOf(
+                Medlemsperiode().apply {
+                    id = 1
+                    land = "SWE"
+                    status = "GYLD"
+                    periode = Periode(LocalDate.now(), LocalDate.now().plusDays(4))
+                }
+            )
+        }
+
+        val lovvalgsperiode = Lovvalgsperiode().apply {
+            id = 1
+            fom = LocalDate.now()
+            tom = LocalDate.now().plusDays(4)
+            innvilgelsesresultat = InnvilgelsesResultat.AVSLAATT
+        }
+
+        val kontrollData = FerdigbehandlingKontrollData(
+            medlemskapsDokument,
+            null,
+            null,
+            lovvalgsperiode,
+            null,
+            null,
+            Behandlingstema.UTSENDT_ARBEIDSTAKER,
+            null,
+            null,
+            null,
+            null
+        )
+
+        val kontrollfeil = FerdigbehandlingKontroll.overlappendePeriode(kontrollData)
+
+        kontrollfeil.kode.shouldBe(Kontroll_begrunnelser.OVERLAPPENDE_UNNTAK_PERIODER)
         kontrollfeil.type.shouldBe(KontrolldataFeilType.ADVARSEL)
     }
 
