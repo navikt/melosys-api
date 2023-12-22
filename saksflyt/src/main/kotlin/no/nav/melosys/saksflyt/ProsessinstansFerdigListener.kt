@@ -44,7 +44,7 @@ class ProsessinstansFerdigListener(
     }
 
     private fun harSammeReferanse(prosessinstans: Prosessinstans, ferdigLåsreferanse: LåsReferanse): Boolean {
-        val låsReferanse = SedLåsReferanse(prosessinstans.låsReferanse)
+        val låsReferanse = LåsReferanseFactory.låsReferanseFraString(prosessinstans.låsReferanse)
         return låsReferanse.referanse == ferdigLåsreferanse.referanse
     }
 }
