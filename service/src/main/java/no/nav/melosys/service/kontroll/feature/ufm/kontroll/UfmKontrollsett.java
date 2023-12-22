@@ -42,7 +42,7 @@ public class UfmKontrollsett {
         UfmKontroll::overlappendeMedlemsperiodeForA003,
         UfmKontroll::statsborgerskapIkkeMedlemsland,
         UfmKontroll::personDød,
-        UfmKontroll::personBosattINorge,
+        UfmKontroll::personBosattINorgeIPerioden,
         UfmKontroll::utbetaltYtelserFraOffentligIPeriode,
         UfmKontroll::arbeidssted,
         UfmKontroll::unntakForA003
