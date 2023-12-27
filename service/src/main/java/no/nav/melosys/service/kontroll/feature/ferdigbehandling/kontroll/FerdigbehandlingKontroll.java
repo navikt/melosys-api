@@ -97,7 +97,14 @@ final class FerdigbehandlingKontroll {
 
     static Kontrollfeil periodeManglerSluttdato(FerdigbehandlingKontrollData kontrollData) {
         Lovvalgsperiode lovvalgsperiode = kontrollData.lovvalgsperiode();
-        return lovvalgsperiode.getTom() == null ? new Kontrollfeil(Kontroll_begrunnelser.INGEN_SLUTTDATO, KontrolldataFeilType.FEIL) : null;
+        boolean manglerSluttdato = lovvalgsperiode.getTom() == null;
+        if (!manglerSluttdato) {
+            return null;
+        } else {
+            return lovvalgsperiode.erAvslått()
+                ? new Kontrollfeil(Kontroll_begrunnelser.INGEN_SLUTTDATO, KontrolldataFeilType.ADVARSEL)
+                : new Kontrollfeil(Kontroll_begrunnelser.INGEN_SLUTTDATO, KontrolldataFeilType.FEIL);
+        }
     }
 
     static Kontrollfeil periodeOverTreÅr(FerdigbehandlingKontrollData kontrollData) {
