@@ -97,8 +97,7 @@ final class FerdigbehandlingKontroll {
 
     static Kontrollfeil periodeManglerSluttdato(FerdigbehandlingKontrollData kontrollData) {
         Lovvalgsperiode lovvalgsperiode = kontrollData.lovvalgsperiode();
-        boolean manglerSluttdato = lovvalgsperiode.getTom() == null;
-        if (!manglerSluttdato) {
+        if (lovvalgsperiode.getTom() != null) {
             return null;
         } else {
             return lovvalgsperiode.erAvslått()
