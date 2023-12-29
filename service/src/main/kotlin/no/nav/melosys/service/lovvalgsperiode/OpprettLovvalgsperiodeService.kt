@@ -48,7 +48,7 @@ class OpprettLovvalgsperiodeService(
                 eksisterendeLovvalgsperiode,
                 request.fomDato!!,
                 request.tomDato,
-                request.lovvalgsbestemmelse!!,
+                request.lovvalgsbestemmelse,
                 request.trygdedekning,
             )
         }
@@ -84,7 +84,7 @@ class OpprettLovvalgsperiodeService(
         eksisterendeLovvalgsperiode: Lovvalgsperiode?,
         fom: LocalDate,
         tom: LocalDate?,
-        bestemmelse: LovvalgBestemmelse,
+        bestemmelse: LovvalgBestemmelse?,
         trygdedekning: Trygdedekninger?
     ): Lovvalgsperiode {
         val anmodningEllerAttest = behandling.mottatteOpplysninger.mottatteOpplysningerData as AnmodningEllerAttest
@@ -110,7 +110,7 @@ class OpprettLovvalgsperiodeService(
         return lovvalgsperiodeRepository.save(lovvalgsperiode)
     }
 
-    private fun utledTrygdedekning(bestemmelse: LovvalgBestemmelse): Trygdedekninger {
+    private fun utledTrygdedekning(bestemmelse: LovvalgBestemmelse?): Trygdedekninger {
         return when (bestemmelse) {
             Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART7 -> Trygdedekninger.UNNTATT_CAN_7_5_B
             Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_2 -> Trygdedekninger.UNNTATT_USA_5_2_G
