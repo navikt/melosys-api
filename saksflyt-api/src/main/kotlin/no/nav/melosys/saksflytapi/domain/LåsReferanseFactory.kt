@@ -4,7 +4,7 @@ import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
 
 object LåsReferanseFactory {
 
-    fun låsReferanseFraString(referanse: String): LåsReferanse {
+    fun lagLåsReferanse(referanse: String): LåsReferanse {
         val låsReferanseType: LåsReferanseType = LåsReferanseType.values().find {
             referanse.matches(Regex(it.prefixRegexString))
         } ?: throw IllegalArgumentException("$referanse er ikke gyldig låsreferanse")

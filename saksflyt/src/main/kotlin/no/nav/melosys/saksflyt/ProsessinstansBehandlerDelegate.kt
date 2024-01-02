@@ -46,7 +46,7 @@ class ProsessinstansBehandlerDelegate(
             return false
         }
 
-        val låsReferanse: LåsReferanse = LåsReferanseFactory.låsReferanseFraString(prosessinstans.låsReferanse)
+        val låsReferanse: LåsReferanse = LåsReferanseFactory.lagLåsReferanse(prosessinstans.låsReferanse)
         val andreAktiveLåsMedSammeReferanse = finnAndreAktiveLåsMedSammeReferanse(prosessinstans.id, låsReferanse.referanse)
         return låsReferanse.skalSettesPåVent(andreAktiveLåsMedSammeReferanse)
     }

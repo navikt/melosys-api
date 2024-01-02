@@ -12,7 +12,7 @@ class LåsReferanseFactoryTest {
     @Test
     fun `lag låseReferanse for SED`() {
         val sedLåsReferanseString = "1335016_c207c1d6761f467e8bdaadd0eb7e1ed0_4"
-        val låsReferanse = LåsReferanseFactory.låsReferanseFraString(sedLåsReferanseString)
+        val låsReferanse = LåsReferanseFactory.lagLåsReferanse(sedLåsReferanseString)
 
         låsReferanse.shouldBeInstanceOf<SedLåsReferanse>()
     }
@@ -27,8 +27,7 @@ class LåsReferanseFactoryTest {
                 fakturanummer = "123456789"
             )
         )
-        val låsReferanse = LåsReferanseFactory.låsReferanseFraString(sedLåsReferanseString)
-        println(sedLåsReferanseString)
+        val låsReferanse = LåsReferanseFactory.lagLåsReferanse(sedLåsReferanseString)
 
         låsReferanse.shouldBeInstanceOf<OpprettManglendeInnbetalingBehandlingLåsReferanse>()
             .låsReferanse.shouldBe("OMIB_01HHFM03YMHHQAVZ4SQF9Y29E4_123456789")

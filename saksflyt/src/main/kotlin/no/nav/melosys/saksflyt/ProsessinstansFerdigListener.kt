@@ -26,7 +26,7 @@ class ProsessinstansFerdigListener(
 
     private fun startNesteProsessinstans(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
         log.info("Forsøker å starte neste prosessinstans, låsreferanse {}", prosessinstansFerdigEvent.låsReferanse)
-        val ferdigReferanse = LåsReferanseFactory.låsReferanseFraString(prosessinstansFerdigEvent.låsReferanse)
+        val ferdigReferanse = LåsReferanseFactory.lagLåsReferanse(prosessinstansFerdigEvent.låsReferanse)
 
         prosessinstansRepository.findAllByStatus(ProsessStatus.PÅ_VENT)
             .filter { harSammeReferanse(it, ferdigReferanse) }
@@ -44,7 +44,7 @@ class ProsessinstansFerdigListener(
     }
 
     private fun harSammeReferanse(prosessinstans: Prosessinstans, ferdigLåsreferanse: LåsReferanse): Boolean {
-        val låsReferanse = LåsReferanseFactory.låsReferanseFraString(prosessinstans.låsReferanse)
+        val låsReferanse = LåsReferanseFactory.lagLåsReferanse(prosessinstans.låsReferanse)
         return låsReferanse.referanse == ferdigLåsreferanse.referanse
     }
 }
