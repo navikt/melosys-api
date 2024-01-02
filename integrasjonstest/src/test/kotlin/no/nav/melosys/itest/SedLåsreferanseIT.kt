@@ -68,7 +68,7 @@ internal class SedLåsreferanseIT(
 
     @Test
     fun `ikke kjør samtidig når sed har samme rinaSaksnummer men forsjellig sedId, sedVersjon`() {
-        val logItems = withLogAppender {
+        val logItems: List<ILoggingEvent> = withLogAppender {
             val låsReferanser = lagProsesser(
                 listOf(
                     MelosysEessiMelding().apply {
@@ -93,10 +93,7 @@ internal class SedLåsreferanseIT(
 
         }
 
-        logItems.shouldHaveSize(12).toList().run {
-            var i = 0
-            fun formattedMessage() = get(i++).formattedMessage
-            fun message() = get(i++).message
+        logItems.shouldHaveSize(12).toList().check { formattedMessage, message ->
             formattedMessage() shouldMatch Regex("Starter behandling av prosessinstans [a-fA-F0-9\\\\-]+ med lås 111_222_1")
             formattedMessage() shouldMatch Regex("Prosessinstans [a-fA-F0-9\\\\-]+ med låsreferanse 111_222_2 satt på vent")
             formattedMessage() shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
@@ -138,15 +135,7 @@ internal class SedLåsreferanseIT(
                 }
         }
 
-        logItems.forEach {
-            println(it.formattedMessage)
-        }
-
-        logItems.shouldHaveSize(10).toList().run {
-            var i = 0
-            fun formattedMessage() = get(i++).formattedMessage
-            fun message() = get(i++).message
-
+        logItems.shouldHaveSize(10).toList().check { formattedMessage, message ->
             formattedMessage() shouldMatch Regex("Starter behandling av prosessinstans [a-fA-F0-9\\\\-]+ med lås 111_222_1")
             formattedMessage() shouldMatch Regex("Starter behandling av prosessinstans [a-fA-F0-9\\\\-]+ med lås 111_222_1")
             formattedMessage() shouldStartWith "Utfører steg SED_MOTTAK_RUTING for prosessinstans"
@@ -171,6 +160,13 @@ internal class SedLåsreferanseIT(
         ProsessinstansFerdigListener::class
     ) {
         block()
+    }
+
+    private fun <R> List<ILoggingEvent>.check(block: (formattedMessage: () -> String, message: () -> String) -> R): R {
+        var i = 0
+        val formattedMessage = { this[i++].formattedMessage }
+        val message = { this[i++].message }
+        return block(formattedMessage, message)
     }
 
     @TestConfiguration
