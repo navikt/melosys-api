@@ -36,7 +36,7 @@ class ProsessinstansFerdigListener(
     }
 
     private fun oppdaterStatusOgBehandleProsessinstans(prosessinstans: Prosessinstans) {
-        log.info("Prosessinstans {} startes opp etter å ha vært på vent", prosessinstans.id)
+        log.info("Prosessinstans {} med låsreferanse {} startes opp etter å ha vært på vent", prosessinstans.id, prosessinstans.låsReferanse)
         prosessinstans.status = ProsessStatus.KLAR
         prosessinstans.endretDato = LocalDateTime.now()
         prosessinstansRepository.save(prosessinstans)

@@ -26,7 +26,7 @@ class ProsessinstansBehandlerDelegate(
             prosessinstans.status = ProsessStatus.PÅ_VENT
             prosessinstans.endretDato = LocalDateTime.now()
             prosessinstansRepository.save(prosessinstans)
-            log.info("Prosessinstans {} satt på vent", prosessinstans.id)
+            log.info("Prosessinstans {} med låsreferanse {} satt på vent", prosessinstans.id, prosessinstans.låsReferanse)
         }
     }
 
