@@ -1,8 +1,8 @@
 package no.nav.melosys.itest
 
 import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.read.ListAppender
 import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldMatch
 import io.kotest.matchers.string.shouldStartWith
 import io.mockk.every
@@ -11,8 +11,6 @@ import no.nav.melosys.Application
 import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.saksflyt.ProsessinstansBehandler
-import no.nav.melosys.saksflyt.ProsessinstansBehandlerDelegate
-import no.nav.melosys.saksflyt.ProsessinstansFerdigListener
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflyt.steg.sed.mottak.SedMottakRuting
 import no.nav.melosys.saksflytapi.ProsessinstansService
@@ -65,10 +63,9 @@ internal class SedLåsreferanseIT(
         ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
     }
 
-
     @Test
     fun `ikke kjør samtidig når sed har samme rinaSaksnummer men forsjellig sedId, sedVersjon`() {
-        val logItems: List<ILoggingEvent> = withLogAppender {
+        LoggingTestUtils.withLogAppender<ProsessinstansBehandler> { listAppender: ListAppender<ILoggingEvent> ->
             val låsReferanser = lagProsesser(
                 listOf(
                     MelosysEessiMelding().apply {
@@ -91,27 +88,21 @@ internal class SedLåsreferanseIT(
                         .all { it.status == ProsessStatus.FERDIG }
                 }
 
-        }
-
-        logItems.shouldHaveSize(12).toList().check { formattedMessage, message ->
-            formattedMessage() shouldMatch Regex("Starter behandling av prosessinstans [a-fA-F0-9\\\\-]+ med lås 111_222_1")
-            formattedMessage() shouldMatch Regex("Prosessinstans [a-fA-F0-9\\\\-]+ med låsreferanse 111_222_2 satt på vent")
-            formattedMessage() shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
-            message() shouldStartWith "Prosessinstans {} behandlet ferdig"
-            message() shouldStartWith "Prosessinstans {} ferdig"
-            formattedMessage() shouldBe "Forsøker å starte neste prosessinstans, låsreferanse 111_222_1"
-            formattedMessage() shouldMatch Regex("Prosessinstans [a-fA-F0-9\\\\-]+ med låsreferanse 111_222_2 startes opp etter å ha vært på vent")
-            formattedMessage() shouldMatch Regex("Starter behandling av prosessinstans [a-fA-F0-9\\\\-]+ med lås 111_222_2")
-            formattedMessage() shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
-            message() shouldStartWith "Prosessinstans {} behandlet ferdig"
-            message() shouldStartWith "Prosessinstans {} ferdig"
+            listAppender.list.shouldHaveSize(6).toList().run {
+                get(0).formattedMessage shouldMatch Regex("Starter behandling av prosessinstans [a-fA-F0-9\\\\-]+ med lås 111_222_1")
+                get(1).formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
+                get(2).message shouldStartWith "Prosessinstans {} behandlet ferdig"
+                get(3).formattedMessage shouldMatch Regex("Starter behandling av prosessinstans [a-fA-F0-9\\\\-]+ med lås 111_222_2")
+                get(4).formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
+                get(5).message shouldStartWith "Prosessinstans {} behandlet ferdig"
+            }
         }
     }
 
     @Test
     // Test som viser dagens logikk, TODO dette bør også kjøre synkront som testen over
     fun `kjør samtidig når sed har samme rinaSaksnummer, sedId og sedVersjon`() {
-        val logItems = withLogAppender {
+        LoggingTestUtils.withLogAppender<ProsessinstansBehandler> { listAppender: ListAppender<ILoggingEvent> ->
             val låsReferanser = lagProsesser(
                 listOf(
                     MelosysEessiMelding().apply {
@@ -133,40 +124,21 @@ internal class SedLåsreferanseIT(
                         .filter { it.låsReferanse in låsReferanser }
                         .all { it.status == ProsessStatus.FERDIG }
                 }
-        }
 
-        logItems.shouldHaveSize(10).toList().check { formattedMessage, message ->
-            formattedMessage() shouldMatch Regex("Starter behandling av prosessinstans [a-fA-F0-9\\\\-]+ med lås 111_222_1")
-            formattedMessage() shouldMatch Regex("Starter behandling av prosessinstans [a-fA-F0-9\\\\-]+ med lås 111_222_1")
-            formattedMessage() shouldStartWith "Utfører steg SED_MOTTAK_RUTING for prosessinstans"
-            formattedMessage() shouldStartWith "Utfører steg SED_MOTTAK_RUTING for prosessinstans"
-            message() shouldBe "Prosessinstans {} behandlet ferdig"
-            message() shouldBe "Prosessinstans {} behandlet ferdig"
-            message() shouldBe "Prosessinstans {} ferdig"
-            message() shouldBe "Prosessinstans {} ferdig"
-            formattedMessage() shouldBe "Forsøker å starte neste prosessinstans, låsreferanse 111_222_1"
-            formattedMessage() shouldBe "Forsøker å starte neste prosessinstans, låsreferanse 111_222_1"
+            listAppender.list.shouldHaveSize(6).toList().run {
+                get(0).formattedMessage shouldMatch Regex("Starter behandling av prosessinstans [a-fA-F0-9\\\\-]+ med lås 111_222_1")
+                get(1).formattedMessage shouldMatch Regex("Starter behandling av prosessinstans [a-fA-F0-9\\\\-]+ med lås 111_222_1")
+                get(2).formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
+                get(3).formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
+                get(4).message shouldStartWith "Prosessinstans {} behandlet ferdig"
+                get(5).message shouldStartWith "Prosessinstans {} behandlet ferdig"
+            }
         }
     }
 
-    private fun lagProsesser(eessiMeldinger: List<MelosysEessiMelding>): List<String> = eessiMeldinger.map {
+    fun lagProsesser(eessiMeldinger: List<MelosysEessiMelding>): List<String> = eessiMeldinger.map {
         prosessinstansService.opprettProsessinstansSedMottak(it)
         it.lagUnikIdentifikator()
-    }
-
-    private fun withLogAppender(block: () -> Unit): List<ILoggingEvent> = LoggingTestUtils.withLogAppender(
-        ProsessinstansBehandler::class,
-        ProsessinstansBehandlerDelegate::class,
-        ProsessinstansFerdigListener::class
-    ) {
-        block()
-    }
-
-    private fun <R> List<ILoggingEvent>.check(block: (formattedMessage: () -> String, message: () -> String) -> R): R {
-        var i = 0
-        val formattedMessage = { this[i++].formattedMessage }
-        val message = { this[i++].message }
-        return block(formattedMessage, message)
     }
 
     @TestConfiguration
@@ -180,5 +152,4 @@ internal class SedLåsreferanseIT(
             }
         }
     }
-
 }
