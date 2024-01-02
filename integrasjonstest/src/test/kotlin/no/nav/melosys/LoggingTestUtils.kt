@@ -23,23 +23,16 @@ object LoggingTestUtils {
     }
 
     inline fun withLogAppender(vararg classes: KClass<*>, block: () -> Unit): List<ILoggingEvent> {
-        val listAppenders = classes.map {
-            ListAppender<ILoggingEvent>().apply {
-                context = (LoggerFactory.getLogger(it.java) as Logger).loggerContext
-                start()
-                (LoggerFactory.getLogger(it.java) as Logger).addAppender(this)
-            }
-        }
-
+        val sharedListAppender = ListAppender<ILoggingEvent>().apply { start() }
+        val loggers = classes.map { LoggerFactory.getLogger(it.java) as Logger }
         try {
+            loggers.forEach { it.addAppender(sharedListAppender) }
             block()
         } finally {
-            listAppenders.forEach { appender ->
-                (LoggerFactory.getLogger(appender.context.name) as Logger).detachAppender(appender)
-                appender.stop()
-            }
+            loggers.forEach { it.detachAppender(sharedListAppender) }
+            sharedListAppender.stop()
         }
 
-        return listAppenders.flatMap { it.list }.sortedBy { it.timeStamp }
+        return sharedListAppender.list
     }
 }
