@@ -2,20 +2,23 @@ package no.nav.melosys.service.vedtak;
 
 import java.util.List;
 
+import com.google.common.collect.Sets;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Fagsak;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Vedtakstyper;
+import no.nav.melosys.domain.Medlemskapsperiode;
+import no.nav.melosys.domain.avklartefakta.Avklartefakta;
+import no.nav.melosys.domain.folketrygden.MedlemAvFolketrygden;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
-import no.nav.melosys.service.avklartefakta.AvklartManglendeInnbetalingService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.dokument.brev.KopiMottakerDto;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import no.nav.melosys.sikkerhet.context.SpringSubjectHandler;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.TestSubjectHandler;
@@ -27,6 +30,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD;
 import static no.nav.melosys.domain.kodeverk.Mottakerroller.*;
 import static no.nav.melosys.domain.kodeverk.Saksstatuser.MEDLEMSKAP_AVKLART;
 import static no.nav.melosys.domain.kodeverk.Vedtakstyper.FØRSTEGANGSVEDTAK;
@@ -36,8 +40,7 @@ import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class FtrlVedtakServiceTest {
@@ -59,7 +62,7 @@ class FtrlVedtakServiceTest {
     private DokgenService dokgenService;
 
     @Mock
-    private AvklartManglendeInnbetalingService avklartManglendeInnbetalingService;
+    private VilkaarsresultatService vilkaarsresultatService;
 
     @Captor
     private ArgumentCaptor<Behandlingsresultat> behandlingsresultatCaptor;
@@ -74,7 +77,7 @@ class FtrlVedtakServiceTest {
 
     @BeforeEach
     void setup() {
-        ftrlVedtakService = new FtrlVedtakService(behandlingsresultatService, behandlingService, prosessinstansService, oppgaveService, dokgenService, avklartManglendeInnbetalingService);
+        ftrlVedtakService = new FtrlVedtakService(behandlingsresultatService, behandlingService, prosessinstansService, oppgaveService, dokgenService, vilkaarsresultatService);
 
         SpringSubjectHandler.set(new TestSubjectHandler());
     }
@@ -171,12 +174,12 @@ class FtrlVedtakServiceTest {
     }
 
     @Test
-    void fattVedtak_opphørt_fatterVedtak() {
+    void fattVedtak_delvis_opphørt_fatterVedtak() {
         var behandlingsresultat = new Behandlingsresultat();
         when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
 
         FattVedtakRequest request = new FattVedtakRequest.Builder()
-            .medBehandlingsresultatType(OPPHØRT)
+            .medBehandlingsresultatType(DELVIS_OPPHØRT)
             .medVedtakstype(FØRSTEGANGSVEDTAK)
             .medBegrunnelseFritekst("fritekst for begrunnelse")
             .medBestillersId(SubjectHandler.getInstance().getUserID())
@@ -191,11 +194,9 @@ class FtrlVedtakServiceTest {
         verify(prosessinstansService).opprettProsessinstansIverksettVedtakFTRL(any(Behandling.class), eq(request.tilVedtakRequest()));
         verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
         verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
-        verify(avklartManglendeInnbetalingService).hentFullstendigManglendeInnbetaling(anyLong());
-        verify(behandlingsresultatService).tømBehandlingsresultat(anyLong());
-        verify(avklartManglendeInnbetalingService).lagreFullstendigManglendeInnbetalingSomAvklartFakta(anyLong(), anyBoolean());
+        verify(vilkaarsresultatService, never()).tømVilkårForBehandlingsresultat(any());
 
-        assertThat(behandlingsresultatCaptor.getValue().getType()).isEqualTo(OPPHØRT);
+        assertThat(behandlingsresultatCaptor.getValue().getType()).isEqualTo(DELVIS_OPPHØRT);
         assertThat(behandlingCaptor.getValue().getFagsak().getStatus()).isEqualTo(MEDLEMSKAP_AVKLART);
         assertThat(brevbestillingRequestCaptor.getValue())
             .extracting(
@@ -214,8 +215,72 @@ class FtrlVedtakServiceTest {
     }
 
     @Test
+    void fattVedtak_opphørt_fatterVedtak() {
+        var avklartFakta = new Avklartefakta();
+        avklartFakta.setType(Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING);
+        avklartFakta.setReferanse(Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING.getKode());
+        var behandlingsresultat = new Behandlingsresultat();
+        behandlingsresultat.setAvklartefakta(Sets.newHashSet(avklartFakta, new Avklartefakta()));
+        behandlingsresultat.setMedlemAvFolketrygden(new MedlemAvFolketrygden());
+        behandlingsresultat.getMedlemAvFolketrygden().setMedlemskapsperioder(Sets.newHashSet(new Medlemskapsperiode()));
+        behandlingsresultat.setUtfallRegistreringUnntak(Utfallregistreringunntak.GODKJENT);
+        behandlingsresultat.setNyVurderingBakgrunn("blah");
+        behandlingsresultat.setInnledningFritekst("blah");
+        behandlingsresultat.setBegrunnelseFritekst("blah");
+        behandlingsresultat.setTrygdeavgiftFritekst("blah");
+
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(behandlingsresultat);
+
+        FattVedtakRequest request = new FattVedtakRequest.Builder()
+            .medBehandlingsresultatType(OPPHØRT)
+            .medVedtakstype(FØRSTEGANGSVEDTAK)
+            .medBegrunnelseFritekst("fritekst for begrunnelse")
+            .medBestillersId(SubjectHandler.getInstance().getUserID())
+            .build();
+
+
+        ftrlVedtakService.fattVedtak(lagBehandling(), request);
+
+
+        verify(behandlingsresultatService).lagre(behandlingsresultatCaptor.capture());
+        verify(behandlingService).endreStatus(behandlingCaptor.capture(), eq(IVERKSETTER_VEDTAK));
+        verify(prosessinstansService).opprettProsessinstansIverksettVedtakFTRL(any(Behandling.class), eq(request.tilVedtakRequest()));
+        verify(oppgaveService).ferdigstillOppgaveMedSaksnummer(SAKSNUMMER);
+        verify(dokgenService).produserOgDistribuerBrev(anyLong(), brevbestillingRequestCaptor.capture());
+        verify(vilkaarsresultatService).tømVilkårForBehandlingsresultat(any());
+
+        var capturedBehandlingsresultat = behandlingsresultatCaptor.getValue();
+        assertThat(capturedBehandlingsresultat.getType()).isEqualTo(OPPHØRT);
+        assertThat(capturedBehandlingsresultat.getMedlemAvFolketrygden().getBestemmelse()).isEqualTo(FTRL_KAP2_2_15_ANDRE_LEDD);
+        assertThat(capturedBehandlingsresultat.getMedlemAvFolketrygden().getMedlemskapsperioder()).isEmpty();
+        assertThat(capturedBehandlingsresultat.getAvklartefakta()).hasSize(1);
+        assertThat(capturedBehandlingsresultat.getUtfallRegistreringUnntak()).isNull();
+        assertThat(capturedBehandlingsresultat.getNyVurderingBakgrunn()).isNull();
+        assertThat(capturedBehandlingsresultat.getInnledningFritekst()).isNull();
+        assertThat(capturedBehandlingsresultat.getTrygdeavgiftFritekst()).isNull();
+        assertThat(capturedBehandlingsresultat.getBegrunnelseFritekst()).isEqualTo(request.getBegrunnelseFritekst());
+        assertThat(capturedBehandlingsresultat.getFastsattAvLand()).isEqualTo(Land_iso2.NO);
+        assertThat(capturedBehandlingsresultat.getVedtakMetadata().getVedtakstype()).isEqualTo(request.getVedtakstype());
+        assertThat(behandlingCaptor.getValue().getFagsak().getStatus()).isEqualTo(Saksstatuser.OPPHØRT);
+        assertThat(brevbestillingRequestCaptor.getValue())
+            .extracting(
+                BrevbestillingDto::getProduserbardokument,
+                BrevbestillingDto::getBestillersId,
+                BrevbestillingDto::getMottaker,
+                BrevbestillingDto::getBegrunnelseFritekst,
+                BrevbestillingDto::getKopiMottakere
+            )
+            .containsExactly(
+                VEDTAK_OPPHOERT_MEDLEMSKAP,
+                "Z990007",
+                BRUKER,
+                "fritekst for begrunnelse",
+                List.of());
+    }
+
+    @Test
     void fattVedtak_opphørt_manglerAvklartFakta_kasterFeil() {
-        when(avklartManglendeInnbetalingService.hentFullstendigManglendeInnbetaling(anyLong())).thenReturn(null);
+        when(behandlingsresultatService.hentBehandlingsresultat(anyLong())).thenReturn(new Behandlingsresultat());
         var fattVedtakRequest = new FattVedtakRequest.Builder().medBehandlingsresultatType(OPPHØRT).build();
         var behandling = lagBehandling();
 
