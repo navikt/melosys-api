@@ -31,15 +31,11 @@ class ProsessinstansBehandlerDelegate(
     }
 
     /*
-    Settes på vent om det finnes en prosessinstans med samme referanse,
-     men ikke lik identifikator i prosess (ikke på vent/ferdig).
+    Settes på vent om det finnes en prosessinstans med samme referanse, som ikke er på vent/ferdig.
 
     Settes ikke på vent om
         1. Prosessinstansen ikke har en låsreferanse
         2. Det finnes ingen prosessinstans med samme referanse
-        3. Det finnes en prosessinstans med lik referanse og identifikator.
-        Rune:   Kommentar til 3. Dvs at låsreferanse er lik, og hvorfor skal vi ikke sette på vent da?
-                Regner med det skapte problemer så gjør ikke noe med dette nå
      */
     private fun skalSettesPåVent(prosessinstans: Prosessinstans): Boolean {
         if (prosessinstans.låsReferanse == null) {
