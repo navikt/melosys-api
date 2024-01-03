@@ -54,7 +54,6 @@ class JournalfoeringIT(
     fun setup() {
         oAuthMockServer.start()
         unleash.enableAll()
-        journalpostRepo.repo.clear()
     }
 
     @AfterEach
@@ -202,10 +201,12 @@ class JournalfoeringIT(
             }
 
         val tilKnyttetJournalpost = journalpostRepo.repo.values.filterNot { it.journalpostId in eksisterendeJournalpostIds }
+
         tilKnyttetJournalpost
-            .single().run {
-                avsenderMottaker.navn.shouldNotBeNull()
-                sakId.shouldBe(fagsak.saksnummer)
+            .shouldHaveSize(2)
+            .onEach {
+                it.avsenderMottaker.navn.shouldNotBeNull()
+                it.sakId.shouldBe(fagsak.saksnummer)
             }
     }
 
