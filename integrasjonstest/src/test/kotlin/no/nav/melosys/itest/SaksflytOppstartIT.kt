@@ -1,9 +1,16 @@
 package no.nav.melosys.itest
 
+import ch.qos.logback.classic.Level
 import com.ninjasquad.springmockk.MockkBean
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldMatch
+import io.kotest.matchers.string.shouldStartWith
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.Application
+import no.nav.melosys.LoggingTestUtils
+import no.nav.melosys.LoggingTestUtils.check
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.Fagsak
 import no.nav.melosys.domain.RegistreringsInfo
@@ -15,11 +22,13 @@ import no.nav.melosys.domain.kodeverk.Sakstyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper
+import no.nav.melosys.exception.TekniskException
 import no.nav.melosys.integrasjon.joark.saf.SafConsumer
 import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.*
 import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
+import no.nav.melosys.saksflyt.ProsessinstansBehandler
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
@@ -112,11 +121,27 @@ internal class SaksflytOppstartIT(
         every { safConsumer.hentJournalpost(eessiMelding().journalpostId) } returns journalpost()
 
 
-        applicationEventPublisher.publishEvent(applicationReadyEvent())
-        await.timeout(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(2)).until {
-            prosessinstansRepository.findAllByStatusIn(
-                ProsessStatus.hentAktiveStatuser(),
-            ).isEmpty()
+        LoggingTestUtils.withLogAppender<ProsessinstansBehandler> { list ->
+            applicationEventPublisher.publishEvent(applicationReadyEvent())
+            await.timeout(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(2)).until {
+                prosessinstansRepository.findAllByStatusIn(
+                    ProsessStatus.hentAktiveStatuser(),
+                ).isEmpty() || list.none { it.level != Level.ERROR }
+            }
+            list.firstOrNull { it.level == Level.ERROR }?.let {
+                throw TekniskException("ProsessinstansBehandler feilet med melding: ${it.formattedMessage}")
+            }
+
+            list.shouldHaveSize(8).check { next ->
+                next().formattedMessage shouldBe "Funnet 1 prosessinstanse(r) som har hengt"
+                next().formattedMessage shouldMatch Regex("Prosessinstans .*? gjenopprettet etter 24 timer")
+                next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 123_dummy_1")
+                next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
+                next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+                next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 123_dummy_1")
+                next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
+                next().message shouldBe "Prosessinstans {} behandlet ferdig"
+            }
         }
 
 
