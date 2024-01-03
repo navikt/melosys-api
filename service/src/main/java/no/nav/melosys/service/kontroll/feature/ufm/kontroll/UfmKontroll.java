@@ -132,6 +132,7 @@ class UfmKontroll {
     }
 
     static Kontroll_begrunnelser personBosattINorgeIPerioden(UfmKontrollData kontrollData) {
+        log.info("personBosattINorgeIPerioden: Skal sjekke nå");
         LocalDate sedFra = kontrollData.sedDokument().getLovvalgsperiode().getFom();
         LocalDate sedTil = kontrollData.sedDokument().getLovvalgsperiode().getTom();
 
@@ -141,7 +142,7 @@ class UfmKontroll {
             .collect(Collectors.toList());
 
         Optional<Bostedsadresse> personBostedsadresse = kontrollData.persondata().finnBostedsadresse();
-
+        log.info("personBosattINorgeIPerioden: Sjekker at personen har bodd i norge under perioden. sedFra: {}, sedTil: {}, boFra: {}, boTil: {}", sedFra, sedTil, bostedAdressePeriode.get(0).periode.getFom(), bostedAdressePeriode.get(0).periode.getTom());
         return PersonRegler.personBosattINorgeIPeriode(bostedAdressePeriode, personBostedsadresse, sedFra, sedTil) ?
             Kontroll_begrunnelser.BOSATT_I_NORGE_I_PERIODEN : null;
     }

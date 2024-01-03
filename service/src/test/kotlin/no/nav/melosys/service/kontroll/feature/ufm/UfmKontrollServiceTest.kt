@@ -175,13 +175,13 @@ class UfmKontrollServiceTest {
             sedType = SedType.A003
             lovvalgslandKode = Landkoder.SE
             avsenderLandkode = Landkoder.SE
-            lovvalgsperiode = Periode(LocalDate.of(2022, 1,1), LocalDate.of(2023,12,31))
+            lovvalgsperiode = Periode(LocalDate.of(2023, 3,23), LocalDate.of(2023,3,25))
             setErEndring(false)
         }
 
         personopplysninger.apply {
             bostedsadresse = Bostedsadresse(
-                StrukturertAdresse().apply { landkode = "NO" }, null, LocalDate.of(2021, 1,1), LocalDate.of(2023,1,1), null,
+                StrukturertAdresse().apply { landkode = "NO" }, null, LocalDate.of(2023, 1,2), LocalDate.of(2023,12,20), null,
                 null,
                 false
             )

@@ -28,7 +28,7 @@ class PersonReglerTest {
     @Test
     fun personBosattINorge_bosattINorgeIPerioden_true() {
         val bostedsadressePeriode = BostedsadressePeriode()
-        bostedsadressePeriode.periode = Periode(LocalDate.of(2021, 1, 2), LocalDate.of(2022, 2, 1))
+        bostedsadressePeriode.periode = Periode(LocalDate.of(2023, 1, 2), LocalDate.of(2023, 12, 20))
         bostedsadressePeriode.bostedsadresse = Bostedsadresse()
         bostedsadressePeriode.bostedsadresse.land = Land(Land.NORGE)
 
@@ -37,8 +37,8 @@ class PersonReglerTest {
         val bostedsadresse = no.nav.melosys.domain.person.adresse.Bostedsadresse(
             StrukturertAdresse(),
             null,
-            LocalDate.of(2022, 2, 2),
-            LocalDate.of(2023, 12, 20),
+            LocalDate.of(2024, 1, 2),
+            LocalDate.of(2024, 12, 20),
             "",
             "",
             false
@@ -46,8 +46,8 @@ class PersonReglerTest {
         bostedsadresse.strukturertAdresse.landkode = "NO"
 
 
-        val periodeFra = LocalDate.of(2023, 5, 20)
-        val periodeTil = LocalDate.of(2024, 12, 1)
+        val periodeFra = LocalDate.of(2023, 3, 23)
+        val periodeTil = LocalDate.of(2023, 3, 25)
 
         val personenHarBostedINorgeIPerioden =
             personBosattINorgeIPeriode(bostedsadressePeriodeList, Optional.of(bostedsadresse), periodeFra, periodeTil)
