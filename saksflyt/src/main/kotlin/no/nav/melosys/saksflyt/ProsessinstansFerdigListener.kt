@@ -16,13 +16,29 @@ class ProsessinstansFerdigListener(
     @EventListener
     fun prosessinstansFerdig(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
         log.info("Prosessinstans {} ferdig", prosessinstansFerdigEvent.uuid)
-        if (prosessinstansFerdigEvent.låsReferanse != null && !finnesAktivReferanse(prosessinstansFerdigEvent.låsReferanse)) {
+        if (prosessinstansFerdigEvent.låsReferanse != null && !finnesAktivReferanse(prosessinstansFerdigEvent)) {
             startNesteProsessinstans(prosessinstansFerdigEvent)
         }
     }
 
-    private fun finnesAktivReferanse(referanse: String): Boolean =
-        prosessinstansRepository.existsByStatusNotInAndLåsReferanse(setOf(ProsessStatus.FERDIG), referanse)
+    private fun finnesAktivReferanse(prosessinstansFerdigEvent: ProsessinstansFerdigEvent): Boolean {
+        if (prosessinstansRepository.existsByStatusNotInAndLåsReferanse(setOf(ProsessStatus.FERDIG), prosessinstansFerdigEvent.låsReferanse)) {
+            log.info("Det finnes en aktiv prosessinstans med låsreferanse {}", prosessinstansFerdigEvent.låsReferanse)
+            return finnesIkkeProssesserMedSammeReferanseOgForsjelligIdpåVent(prosessinstansFerdigEvent)
+        }
+        log.info("Det finnes ingen aktiv prosessinstans med låsreferanse {}", prosessinstansFerdigEvent.låsReferanse)
+        return false
+    }
+
+    private fun finnesIkkeProssesserMedSammeReferanseOgForsjelligIdpåVent(prosessinstansFerdigEvent: ProsessinstansFerdigEvent): Boolean =
+        // Mulig vi kan lage en egen spørring for dette
+        prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(
+            prosessinstansFerdigEvent.uuid,
+            setOf(ProsessStatus.FERDIG),
+            prosessinstansFerdigEvent.låsReferanse
+        ).filter { it.prosessStatus == ProsessStatus.PÅ_VENT && it.låsReferanse == prosessinstansFerdigEvent.låsReferanse }.apply {
+            log.info("$size prosessinstanser med låsreferanse ${prosessinstansFerdigEvent.låsReferanse} er på vent")
+        }.isEmpty()
 
     private fun startNesteProsessinstans(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
         log.info("Forsøker å starte neste prosessinstans, låsreferanse {}", prosessinstansFerdigEvent.låsReferanse)
