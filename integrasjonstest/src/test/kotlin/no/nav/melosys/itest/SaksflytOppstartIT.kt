@@ -28,7 +28,7 @@ import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.assertj.core.api.Assertions.assertThat
-import org.awaitility.Awaitility
+import org.awaitility.kotlin.await
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -101,7 +101,9 @@ internal class SaksflytOppstartIT(
 
         lagProsessinstans(
             ProsessType.MOTTAK_SED, ProsessStatus.PÅ_VENT, behandling, LocalDateTime.now().minusHours(3)
-        ).also { prosessinstansRepository.save(it) }
+        ).apply {
+            this.setData(ProsessDataKey.EESSI_MELDING, eessiMelding())
+        }.also { prosessinstansRepository.save(it) }
 
         lagProsessinstans(
             ProsessType.UTPEKING_AVVIS, ProsessStatus.FERDIG, behandling, LocalDateTime.now().minusDays(4)
@@ -111,10 +113,10 @@ internal class SaksflytOppstartIT(
 
 
         applicationEventPublisher.publishEvent(applicationReadyEvent())
-        Awaitility.await().timeout(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(2)).until {
+        await.timeout(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(2)).until {
             prosessinstansRepository.findAllByStatusIn(
                 ProsessStatus.hentAktiveStatuser(),
-            ).size == 1
+            ).isEmpty()
         }
 
 
