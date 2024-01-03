@@ -1,11 +1,16 @@
 package no.nav.melosys.itest
 
+import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.string.shouldMatch
+import io.kotest.matchers.string.shouldStartWith
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verifyOrder
 import no.nav.melosys.Application
+import no.nav.melosys.LoggingTestUtils
+import no.nav.melosys.LoggingTestUtils.check
 import no.nav.melosys.domain.manglendebetaling.Betalingsstatus
 import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding
+import no.nav.melosys.saksflyt.ProsessinstansBehandler
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflyt.steg.behandling.OpprettManglendeInnbetalingBehandling
 import no.nav.melosys.saksflyt.steg.brev.SendManglendeInnbetalingVarselBrev
@@ -49,9 +54,6 @@ import java.util.*
 internal class SaksflytLåsreferanseIT(
     @Autowired private val prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val prosessinstansService: ProsessinstansService,
-    @Autowired private val opprettManglendeInnbetalingBehandling: OpprettManglendeInnbetalingBehandling,
-    @Autowired private val opprettOppgave: OpprettOppgave,
-    @Autowired private val sendManglendeInnbetalingVarselBrev: SendManglendeInnbetalingVarselBrev
 ) : OracleTestContainerBase() {
     private val processUUID = UUID.randomUUID()
 
@@ -67,25 +69,60 @@ internal class SaksflytLåsreferanseIT(
 
     @Test
     fun `ikke kjør OpprettManglendeInnbetalingBehandling samtidig`() {
-        val låsReferanser = lagProsesser(listOf("23004119", "23004118"))
+        val logItems = LoggingTestUtils.captureLog<ProsessinstansBehandler> {
 
-        await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
-            .until {
-                prosessinstansRepository.findAll()
-                    .filter { it.låsReferanse in låsReferanser }
-                    .all { it.status == ProsessStatus.FERDIG }
-            }
+            val låsReferanser = lagProsesser(listOf("23004119", "23004118"))
 
-        verifyOrder {
-            opprettManglendeInnbetalingBehandling.utfør(any())
-            opprettOppgave.utfør(any())
-            sendManglendeInnbetalingVarselBrev.utfør(any())
+            await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
+                .until {
+                    prosessinstansRepository.findAll()
+                        .filter { it.låsReferanse in låsReferanser }
+                        .all { it.status == ProsessStatus.FERDIG }
+                }
+        }
 
-            opprettManglendeInnbetalingBehandling.utfør(any())
-            opprettOppgave.utfør(any())
-            sendManglendeInnbetalingVarselBrev.utfør(any())
+        logItems.shouldHaveSize(10).check { next ->
+            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås OMIB_01HHFM03YMHHQAVZ4SQF9Y29E4_23004119")
+            next().formattedMessage shouldStartWith "Utfører steg OPPRETT_MANGLENDE_INNBETALING_BEHANDLING"
+            next().formattedMessage shouldStartWith "Utfører steg OPPRETT_OPPGAVE"
+            next().formattedMessage shouldStartWith "Utfører steg SEND_MANGLENDE_INNBETALING_VARSELBREV"
+            next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås OMIB_01HHFM03YMHHQAVZ4SQF9Y29E4_23004118")
+            next().formattedMessage shouldStartWith "Utfører steg OPPRETT_MANGLENDE_INNBETALING_BEHANDLING"
+            next().formattedMessage shouldStartWith "Utfører steg OPPRETT_OPPGAVE"
+            next().formattedMessage shouldStartWith "Utfører steg SEND_MANGLENDE_INNBETALING_VARSELBREV"
+            next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
         }
     }
+
+    @Test
+    fun `ikke kjør OpprettManglendeInnbetalingBehandling samtidig med samme låsreferanse`() {
+        val logItems = LoggingTestUtils.captureLog<ProsessinstansBehandler> {
+
+            val låsReferanser = lagProsesser(listOf("23004119", "23004119"))
+
+            await.timeout(Duration.ofSeconds(30)).pollInterval(Duration.ofSeconds(1))
+                .until {
+                    prosessinstansRepository.findAll()
+                        .filter { it.låsReferanse in låsReferanser }
+                        .all { it.status == ProsessStatus.FERDIG }
+                }
+        }
+
+        logItems.shouldHaveSize(10).check { next ->
+            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås OMIB_01HHFM03YMHHQAVZ4SQF9Y29E4_23004119")
+            next().formattedMessage shouldStartWith "Utfører steg OPPRETT_MANGLENDE_INNBETALING_BEHANDLING"
+            next().formattedMessage shouldStartWith "Utfører steg OPPRETT_OPPGAVE"
+            next().formattedMessage shouldStartWith "Utfører steg SEND_MANGLENDE_INNBETALING_VARSELBREV"
+            next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås OMIB_01HHFM03YMHHQAVZ4SQF9Y29E4_23004119")
+            next().formattedMessage shouldStartWith "Utfører steg OPPRETT_MANGLENDE_INNBETALING_BEHANDLING"
+            next().formattedMessage shouldStartWith "Utfører steg OPPRETT_OPPGAVE"
+            next().formattedMessage shouldStartWith "Utfører steg SEND_MANGLENDE_INNBETALING_VARSELBREV"
+            next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+        }
+    }
+
 
     @TestConfiguration
     class TestConfig {
