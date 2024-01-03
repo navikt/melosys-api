@@ -52,7 +52,7 @@ class FerdigbehandleSakServiceTest {
         verify { fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.AVSLUTTET) }
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.id, Behandlingsresultattyper.FERDIGBEHANDLET) }
         verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.saksnummer) }
-        verify { prosessinstansService.opprettProsessinstansOppdaterFaktura(fagsak.saksnummer) }
+        verify { prosessinstansService.opprettProsessinstansOppdaterFaktura(behandling) }
     }
 
     @Test
@@ -69,6 +69,6 @@ class FerdigbehandleSakServiceTest {
         verify { fagsakService.avsluttFagsakOgBehandling(fagsak, behandling, Saksstatuser.LOVVALG_AVKLART) }
         verify { behandlingsresultatService.oppdaterBehandlingsresultattype(behandling.id, Behandlingsresultattyper.FERDIGBEHANDLET) }
         verify { oppgaveService.ferdigstillOppgaveMedSaksnummer(fagsak.saksnummer) }
-        verify { prosessinstansService.opprettProsessinstansOppdaterFaktura(fagsak.saksnummer) }
+        verify { prosessinstansService.opprettProsessinstansOppdaterFaktura(behandling) }
     }
 }
