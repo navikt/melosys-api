@@ -144,9 +144,10 @@ class UfmKontroll {
         Optional<Bostedsadresse> personBostedsadresse = kontrollData.persondata().finnBostedsadresse();
         if(!bostedAdressePeriode.isEmpty()) {
             log.info("personBosattINorgeIPerioden: Sjekker at personen har bodd i norge under perioden. sedFra: {}, sedTil: {}, boFra: {}, boTil: {}", sedFra, sedTil, bostedAdressePeriode.get(0).periode.getFom(), bostedAdressePeriode.get(0).periode.getTom());
-        } else
-            personBostedsadresse.ifPresent(bostedsadresse -> log.info("personBosattINorgeIPerioden: Sjekker at personen har bodd i norge under perioden. sedFra: {}, sedTil: {}, boFra: {}, boTil: {}", sedFra, sedTil, bostedsadresse.gyldigFraOgMed(), bostedsadresse.gyldigTilOgMed()));
-        
+        }
+
+        personBostedsadresse.ifPresent(bostedsadresse -> log.info("personBosattINorgeIPerioden: Sjekker at personen har bodd i norge under perioden. sedFra: {}, sedTil: {}, boFra: {}, boTil: {}", sedFra, sedTil, bostedsadresse.gyldigFraOgMed(), bostedsadresse.gyldigTilOgMed()));
+
         return PersonRegler.personBosattINorgeIPeriode(bostedAdressePeriode, personBostedsadresse, sedFra, sedTil) ?
             Kontroll_begrunnelser.BOSATT_I_NORGE_I_PERIODEN : null;
     }
