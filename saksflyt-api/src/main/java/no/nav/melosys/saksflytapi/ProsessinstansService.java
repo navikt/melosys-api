@@ -656,11 +656,12 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansOppdaterFaktura(String saksnummer) {
+    public void opprettProsessinstansOppdaterFaktura(Behandling behandling) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.OPPDATER_FAKTURA)
+            .medBehandling(behandling)
             .build();
-        prosessinstans.setData(SAKSNUMMER, saksnummer);
+        prosessinstans.setData(SAKSNUMMER, behandling.getFagsak().getSaksnummer());
 
         lagre(prosessinstans);
     }
