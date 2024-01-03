@@ -99,8 +99,7 @@ internal class SedLåsreferanseIT(
     }
 
     @Test
-    // Test som viser dagens logikk, TODO dette bør også kjøre synkront som testen over
-    fun `kjør samtidig når sed har samme rinaSaksnummer, sedId og sedVersjon`() {
+    fun `ikke kjør samtidig når sed har samme rinaSaksnummer, sedId og sedVersjon`() {
         val logItems = LoggingTestUtils.captureLog<ProsessinstansBehandler> {
             val låsReferanser = lagProsesser(
                 listOf(
@@ -127,10 +126,10 @@ internal class SedLåsreferanseIT(
 
         logItems.shouldHaveSize(6).check { next ->
             next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
-            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
-            next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
             next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
             next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
+            next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
             next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
         }
     }
