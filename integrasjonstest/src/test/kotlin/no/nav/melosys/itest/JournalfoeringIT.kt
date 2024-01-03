@@ -54,11 +54,13 @@ class JournalfoeringIT(
     fun setup() {
         oAuthMockServer.start()
         unleash.enableAll()
+        journalpostRepo.repo.clear()
     }
 
     @AfterEach
     fun afterEach() {
         oAuthMockServer.stop()
+        journalpostRepo.repo.clear()
     }
 
     @Test
