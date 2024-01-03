@@ -1,7 +1,5 @@
 package no.nav.melosys.itest
 
-import ch.qos.logback.classic.spi.ILoggingEvent
-import ch.qos.logback.core.read.ListAppender
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.string.shouldMatch
 import io.kotest.matchers.string.shouldStartWith
@@ -9,6 +7,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.melosys.Application
 import no.nav.melosys.LoggingTestUtils
+import no.nav.melosys.LoggingTestUtils.check
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding
 import no.nav.melosys.saksflyt.ProsessinstansBehandler
 import no.nav.melosys.saksflyt.ProsessinstansRepository
@@ -65,7 +64,7 @@ internal class SedLåsreferanseIT(
 
     @Test
     fun `ikke kjør samtidig når sed har samme rinaSaksnummer men forsjellig sedId, sedVersjon`() {
-        LoggingTestUtils.withLogAppender<ProsessinstansBehandler> { listAppender: ListAppender<ILoggingEvent> ->
+        val logItems = LoggingTestUtils.captureLog<ProsessinstansBehandler> {
             val låsReferanser = lagProsesser(
                 listOf(
                     MelosysEessiMelding().apply {
@@ -87,22 +86,22 @@ internal class SedLåsreferanseIT(
                         .filter { it.låsReferanse in låsReferanser }
                         .all { it.status == ProsessStatus.FERDIG }
                 }
+        }
 
-            listAppender.list.shouldHaveSize(6).toList().run {
-                get(0).formattedMessage shouldMatch Regex("Starter behandling av prosessinstans [a-fA-F0-9\\\\-]+ med lås 111_222_1")
-                get(1).formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
-                get(2).message shouldStartWith "Prosessinstans {} behandlet ferdig"
-                get(3).formattedMessage shouldMatch Regex("Starter behandling av prosessinstans [a-fA-F0-9\\\\-]+ med lås 111_222_2")
-                get(4).formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
-                get(5).message shouldStartWith "Prosessinstans {} behandlet ferdig"
-            }
+        logItems.shouldHaveSize(6).check { next ->
+            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans [a-fA-F0-9\\\\-]+ med lås 111_222_1")
+            next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
+            next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans [a-fA-F0-9\\\\-]+ med lås 111_222_2")
+            next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
+            next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
         }
     }
 
     @Test
     // Test som viser dagens logikk, TODO dette bør også kjøre synkront som testen over
     fun `kjør samtidig når sed har samme rinaSaksnummer, sedId og sedVersjon`() {
-        LoggingTestUtils.withLogAppender<ProsessinstansBehandler> { listAppender: ListAppender<ILoggingEvent> ->
+        val logItems = LoggingTestUtils.captureLog<ProsessinstansBehandler> {
             val låsReferanser = lagProsesser(
                 listOf(
                     MelosysEessiMelding().apply {
@@ -124,15 +123,15 @@ internal class SedLåsreferanseIT(
                         .filter { it.låsReferanse in låsReferanser }
                         .all { it.status == ProsessStatus.FERDIG }
                 }
+        }
 
-            listAppender.list.shouldHaveSize(6).toList().run {
-                get(0).formattedMessage shouldMatch Regex("Starter behandling av prosessinstans [a-fA-F0-9\\\\-]+ med lås 111_222_1")
-                get(1).formattedMessage shouldMatch Regex("Starter behandling av prosessinstans [a-fA-F0-9\\\\-]+ med lås 111_222_1")
-                get(2).formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
-                get(3).formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
-                get(4).message shouldStartWith "Prosessinstans {} behandlet ferdig"
-                get(5).message shouldStartWith "Prosessinstans {} behandlet ferdig"
-            }
+        logItems.shouldHaveSize(6).check { next ->
+            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans [a-fA-F0-9\\\\-]+ med lås 111_222_1")
+            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans [a-fA-F0-9\\\\-]+ med lås 111_222_1")
+            next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
+            next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
+            next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
+            next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
         }
     }
 
