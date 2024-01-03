@@ -18,7 +18,9 @@ class SedLåsReferanse(val låsReferanse: String) : LåsReferanse {
         get() = rinaSaksnummer
 
     override fun skalSettesPåVent(aktiveLåsReferanser: Collection<String>): Boolean {
-        return aktiveLåsReferanser.isNotEmpty()
+        if (aktiveLåsReferanser.isEmpty()) return false
+
+        return !aktiveLåsReferanser.contains(låsReferanse)
     }
 
     override fun toString(): String = låsReferanse
