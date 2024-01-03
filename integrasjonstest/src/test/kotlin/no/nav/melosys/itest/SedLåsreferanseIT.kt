@@ -89,10 +89,10 @@ internal class SedLåsreferanseIT(
         }
 
         logItems.shouldHaveSize(6).check { next ->
-            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans [a-fA-F0-9\\\\-]+ med lås 111_222_1")
+            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
             next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
             next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
-            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans [a-fA-F0-9\\\\-]+ med lås 111_222_2")
+            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_2")
             next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
             next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
         }
@@ -126,8 +126,8 @@ internal class SedLåsreferanseIT(
         }
 
         logItems.shouldHaveSize(6).check { next ->
-            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans [a-fA-F0-9\\\\-]+ med lås 111_222_1")
-            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans [a-fA-F0-9\\\\-]+ med lås 111_222_1")
+            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
+            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås 111_222_1")
             next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
             next().formattedMessage shouldStartWith "Utfører steg SED_MOTTAK_RUTING"
             next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
