@@ -30,6 +30,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_8
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Overgangsregelbestemmelser
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004
 import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag
+import no.nav.melosys.domain.person.PersonMedHistorikk
 import no.nav.melosys.domain.person.Personopplysninger
 import no.nav.melosys.domain.person.adresse.Bostedsadresse
 import no.nav.melosys.exception.IkkeFunnetException
@@ -39,6 +40,7 @@ import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.behandling.BehandlingsresultatService
 import no.nav.melosys.service.mottatteopplysninger.MottatteOpplysningerService
 import no.nav.melosys.service.persondata.PersondataFasade
+import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonMedHistorikk
 import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPersonopplysninger
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -75,6 +77,7 @@ class UfmKontrollServiceTest {
     private var sedDokument: SedDokument = SedDokument()
     private var medlemskapDokument = MedlemskapDokument()
     private var personopplysninger: Personopplysninger = lagPersonopplysninger()
+    private var personopplysningerMedHistorikk: PersonMedHistorikk = lagPersonMedHistorikk()
     private var mottatteOpplysningerData: SedGrunnlag = SedGrunnlag()
     private val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
 
@@ -633,6 +636,8 @@ class UfmKontrollServiceTest {
         }
 
         every { persondataFasade.hentPerson(any()) } returns personopplysninger
+        every { persondataFasade.hentPersonMedHistorikk(any<String>()) } returns personopplysningerMedHistorikk
+        every { persondataFasade.hentPersonMedHistorikk(any<Long>()) } returns personopplysningerMedHistorikk
         every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
         every { behandlingsresultatService.hentBehandlingsresultat(BEHANDLING_ID) } returns Behandlingsresultat()
             .apply {
