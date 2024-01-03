@@ -25,8 +25,10 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.Arguments.arguments
 import org.junit.jupiter.params.provider.MethodSource
+import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 @ExtendWith(MockKExtension::class)
@@ -360,6 +362,19 @@ class SaksbehandlingReglerTest {
                 )
             }
         ),
+        arguments(
+            Sakstyper.FTRL,
+            Sakstemaer.MEDLEMSKAP_LOVVALG,
+            Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT,
+            Behandlingstema.YRKESAKTIV,
+            BehandlingHolder().apply {
+                add(
+                    Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT,
+                    Behandlingstema.YRKESAKTIV,
+                    Behandlingsresultattyper.DELVIS_OPPHØRT
+                )
+            }
+        ),
     )
 
     @ParameterizedTest(name = "behandlingsresultatType:{0} - FunnetBehandlingID:{2}")
@@ -369,6 +384,7 @@ class SaksbehandlingReglerTest {
         behandlinger: List<Behandling>,
         expectedBehandlingID: Long?
     ) {
+        unleash.enableAll()
         every { behandlingsresultatRepository.findById(any()) } returns lagBehandlingsresultat(resultatTypeFraRepo)
         val saksbehandlingRegler = SaksbehandlingRegler(behandlingsresultatRepository, unleash)
 
@@ -497,6 +513,45 @@ class SaksbehandlingReglerTest {
                     }
                 }),
                 null
+            ),
+            arguments(
+                Behandlingsresultattyper.IKKE_FASTSATT,
+                listOf(
+                    Behandling().apply {
+                        id = 0
+                        type = Behandlingstyper.FØRSTEGANG
+                        tema = Behandlingstema.YRKESAKTIV
+                        status = Behandlingsstatus.AVSLUTTET
+                        registrertDato = Instant.now().minus(90, ChronoUnit.DAYS)
+                        fagsak = Fagsak().apply {
+                            type = Sakstyper.FTRL
+                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                        }
+                    },
+                    Behandling().apply {
+                        id = 1
+                        type = Behandlingstyper.NY_VURDERING
+                        tema = Behandlingstema.YRKESAKTIV
+                        status = Behandlingsstatus.AVSLUTTET
+                        registrertDato = Instant.now().minus(60, ChronoUnit.DAYS)
+                        fagsak = Fagsak().apply {
+                            type = Sakstyper.FTRL
+                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                        }
+                    },
+                    Behandling().apply {
+                        id = 2
+                        type = Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+                        tema = Behandlingstema.YRKESAKTIV
+                        status = Behandlingsstatus.AVSLUTTET
+                        registrertDato = Instant.now().minus(30, ChronoUnit.DAYS)
+                        fagsak = Fagsak().apply {
+                            type = Sakstyper.FTRL
+                            tema = Sakstemaer.MEDLEMSKAP_LOVVALG
+                        }
+                    }
+                ).sortedByDescending { it.registrertDato },
+                2L
             ),
         )
     }
