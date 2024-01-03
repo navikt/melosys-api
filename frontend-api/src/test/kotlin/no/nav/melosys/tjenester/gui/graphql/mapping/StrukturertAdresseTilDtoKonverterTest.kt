@@ -35,7 +35,7 @@ class StrukturertAdresseTilDtoKonverterTest {
     }
 
     @Test
-    fun `mapper postboks korrekt`() {
+    fun `mapper postboks korrekt når den ikke er satt`() {
         val strukturertAdresse = StrukturertAdresse("test", "test", "test", null, "test", "test", "test", "NO")
         val kodeverkService = Mockito.mock(KodeverkService::class.java)
 
