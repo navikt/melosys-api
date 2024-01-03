@@ -50,7 +50,7 @@ class PersonReglerTest {
         val periodeTil = LocalDate.of(2023, 3, 25)
 
         val personenHarBostedINorgeIPerioden =
-            personBosattINorgeIPeriode(bostedsadressePeriodeList, Optional.of(bostedsadresse), periodeFra, periodeTil)
+            personBosattINorgeIPeriode(bostedsadressePeriodeList, Optional.of(bostedsadresse), Collections.emptyList(), Collections.emptyList(), periodeFra, periodeTil)
 
         Assertions.assertThat(personenHarBostedINorgeIPerioden).isTrue()
     }
@@ -69,7 +69,7 @@ class PersonReglerTest {
         val periodeFra = LocalDate.of(2022, 2, 1)
         val periodeTil = LocalDate.of(2023, 12, 1)
 
-        val personenHarBostedINorgeIPerioden = personBosattINorgeIPeriode(bostedsadressePeriodeList, Optional.empty(), periodeFra, periodeTil)
+        val personenHarBostedINorgeIPerioden = personBosattINorgeIPeriode(bostedsadressePeriodeList, Optional.empty(), Collections.emptyList(), Collections.emptyList(), periodeFra, periodeTil)
 
         Assertions.assertThat(personenHarBostedINorgeIPerioden).isFalse()
     }
