@@ -21,10 +21,6 @@ data class JournalfoeringOpprettRequest(
     var behandlingstypeKode: String? = null,
     val fagsak: Fagsak? = null,
     val arbeidsgiverID: String? = null,
-    val fullmektigID: String? = null,
-    val fullmakter: List<Fullmaktstype>? = null,
-    val fullmektigKontaktperson: String? = null,
-    val fullmektigKontaktOrgnr: String? = null,
 ) : JournalfoeringRequest {
 }
 

@@ -172,17 +172,6 @@ public class FagsakService {
             aktører.add(aktørArbeidsgiver);
         }
 
-        FullmektigDto fullmektig = opprettSakRequest.getFullmektig();
-        if (fullmektig != null) {
-            Aktoer aktørFullmektig = new Aktoer();
-            aktørFullmektig.setOrgnr(fullmektig.getOrgnr());
-            aktørFullmektig.setPersonIdent(fullmektig.getPersonident());
-            aktørFullmektig.setFullmaktstyper(fullmektig.getFullmakter());
-            aktørFullmektig.setRolle(Aktoersroller.FULLMEKTIG);
-            aktørFullmektig.setFagsak(fagsak);
-            aktører.add(aktørFullmektig);
-        }
-
         Instant nå = Instant.now();
 
         fagsak.setType(opprettSakRequest.getSakstype());

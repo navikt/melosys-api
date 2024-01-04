@@ -196,13 +196,6 @@ public class ProsessinstansService {
 
         prosessinstans.setDataHvisIkkeTom(ProsessDataKey.ARBEIDSGIVER, journalfoeringRequest.getArbeidsgiverID());
 
-        prosessinstans.setDataHvisIkkeTom(ProsessDataKey.FULLMEKTIG, journalfoeringRequest.getFullmektigID());
-        prosessinstans.setDataHvisIkkeTom(ProsessDataKey.FULLMEKTIG_KONTAKTPERSON, journalfoeringRequest.getFullmektigKontaktperson());
-        prosessinstans.setDataHvisIkkeTom(ProsessDataKey.FULLMEKTIG_KONTAKT_ORGNR, journalfoeringRequest.getFullmektigKontaktOrgnr());
-        if (!CollectionUtils.isEmpty(journalfoeringRequest.getFullmakter())) {
-            prosessinstans.setData(ProsessDataKey.FULLMAKTER, journalfoeringRequest.getFullmakter());
-        }
-
         lagre(prosessinstans);
     }
 

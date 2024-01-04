@@ -206,10 +206,6 @@ class JournalfoeringServiceTest {
     void journalførOgOpprettSak_medFullmektig_oppretterKorrektProsessinstans() {
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS);
         opprettDto.setFagsak(fagsakDto);
-        opprettDto.setFullmektigID("ID");
-        opprettDto.setFullmakter(List.of(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER));
-        opprettDto.setFullmektigKontaktperson("Ola Nordmann");
-        opprettDto.setFullmektigKontaktOrgnr("000000000");
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
 
@@ -379,7 +375,6 @@ class JournalfoeringServiceTest {
     void journalførOgOpprettSak_fullmektigUtenFullmakt_feiler() {
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS);
         opprettDto.setFagsak(fagsakDto);
-        opprettDto.setFullmektigID("ID");
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
 

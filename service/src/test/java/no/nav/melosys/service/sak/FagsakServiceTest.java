@@ -103,7 +103,6 @@ class FagsakServiceTest {
             .medInitierendeJournalpostId(initierendeJournalpostId)
             .medInitierendeDokumentId(initierendeDokumentId)
             .medArbeidsgiver("arbeidsgiver")
-            .medFullmektig(new FullmektigDto("orgnr", null, List.of(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER)))
             .medBehandlingsårsaktype(Behandlingsaarsaktyper.FRITEKST)
             .medBehandlingsårsakFritekst("Fritekst")
             .build();
@@ -119,11 +118,6 @@ class FagsakServiceTest {
         assertThat(fagsak.getBehandlinger()).isNotEmpty();
         assertThat(fagsak.getType()).isEqualTo(EU_EOS);
         assertThat(fagsak.getTema()).isEqualTo(MEDLEMSKAP_LOVVALG);
-        var lagretFullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
-        assertThat(lagretFullmektig).isPresent().get()
-            .extracting(Aktoer::getFagsak, Aktoer::getRolle, Aktoer::getOrgnr)
-            .containsExactly(fagsak, Aktoersroller.FULLMEKTIG, "orgnr");
-        assertThat(lagretFullmektig.get().getFullmakter()).flatExtracting(Fullmakt::getType).containsExactly(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
     }
 
     @Test
