@@ -1,14 +1,10 @@
 package no.nav.melosys.service.vedtak;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
-import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
-import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Mottakerroller;
-import no.nav.melosys.domain.kodeverk.Saksstatuser;
+import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
@@ -147,7 +143,9 @@ public class FtrlVedtakService {
         log.info("Fjerner vilkårsresultater, fritekstfelt, trygdeavgift, og noen avklarte fakta fra behandlingsresultat med behandlingsid: {} ", behandlingID);
         behandlingsresultat.getAvklartefakta().clear();
         behandlingsresultat.getAvklartefakta().add(fullstendigManglendeInnbetaling);
-        behandlingsresultat.getMedlemAvFolketrygden().setMedlemskapsperioder(Collections.emptyList());
+        var medlemskapsperioder = behandlingsresultat.getMedlemAvFolketrygden().getMedlemskapsperioder();
+        medlemskapsperioder.forEach(it -> it.setInnvilgelsesresultat(InnvilgelsesResultat.OPPHØRT));
+        behandlingsresultat.getMedlemAvFolketrygden().setMedlemskapsperioder(medlemskapsperioder);
         behandlingsresultat.getMedlemAvFolketrygden().setBestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD);
 
         behandlingsresultat.setUtfallRegistreringUnntak(null);
