@@ -36,6 +36,10 @@ class ProsessinstansBehandlerDelegate(
     Settes ikke på vent om
         1. Prosessinstansen ikke har en låsreferanse
         2. Det finnes ingen prosessinstans med samme referanse
+
+        Når det gjelder sed mottak, så settes ikke prosessinstanser med samme låsreferanse på vent
+        siden også subprosesser lages med samme låsreferanse som parent prosessen.
+        Dette må fikses for å løse https://jira.adeo.no/browse/MELOSYS-6365
      */
     private fun skalSettesPåVent(prosessinstans: Prosessinstans): Boolean {
         if (prosessinstans.låsReferanse == null) {

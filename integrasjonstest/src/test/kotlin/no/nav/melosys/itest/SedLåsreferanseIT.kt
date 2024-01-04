@@ -92,6 +92,7 @@ internal class SedLåsreferanseIT(
 
     @Test
     // Test som viser dagens logikk, TODO dette bør også kjøre synkront som testen over
+    // Er laget oppgave for å fikse dette: https://jira.adeo.no/browse/MELOSYS-6365 og da er denne testen grei å ha
     @Disabled("Denne testen feiler noen ganger siden den ikke er synkronisert, så log linjene kan komme i en annen rekkefølge")
     fun `kjør samtidig når sed har samme rinaSaksnummer, sedId og sedVersjon`() {
         val logItems = LoggingTestUtils.captureLog<ProsessinstansBehandler> {
