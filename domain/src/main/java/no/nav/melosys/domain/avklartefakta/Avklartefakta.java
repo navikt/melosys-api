@@ -156,8 +156,4 @@ public class Avklartefakta {
             ", registreringer=" + registreringer +
             '}';
     }
-
-    public static boolean erValgtFakta(Avklartefakta avklartefakta) {
-        return VALGT_FAKTA.equalsIgnoreCase(avklartefakta.getFakta());
-    }
 }
