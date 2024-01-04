@@ -9,9 +9,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Kontaktopplysning;
-import no.nav.melosys.domain.Representant;
 import no.nav.melosys.domain.kodeverk.Fullmaktstype;
-import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
@@ -55,9 +53,6 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
         String aktørID = finnAktørID(prosessinstans).orElse(null);
         String virksomhetOrgnr = prosessinstans.getData(VIRKSOMHET_ORGNR);
         String arbeidsgiver = prosessinstans.getData(ARBEIDSGIVER);
-        String representant = prosessinstans.getData(REPRESENTANT);
-        String representantKontakperson = prosessinstans.getData(REPRESENTANT_KONTAKTPERSON);
-        Representerer representantRepresenterer = prosessinstans.getData(REPRESENTANT_REPRESENTERER, Representerer.class);
         var fullmektig = prosessinstans.getData(FULLMEKTIG);
         List<Fullmaktstype> fullmakter = prosessinstans.getData(FULLMAKTER, new TypeReference<>() {
         }, Collections.emptyList());
@@ -77,9 +72,8 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
             .medAktørID(aktørID)
             .medVirksomhetOrgnr(virksomhetOrgnr)
             .medArbeidsgiver(arbeidsgiver)
-            .medRepresentant(representant != null ? new Representant(representant, representantRepresenterer) : null)
             .medFullmektig(lagFullmektig(fullmektig, fullmakter))
-            .medKontaktopplysninger(lagKontaktopplysning(representant, representantKontakperson, fullmektig, fullmektigKontaktperson, fullmektigKontaktOrgnr))
+            .medKontaktopplysninger(lagKontaktopplysning(fullmektig, fullmektigKontaktperson, fullmektigKontaktOrgnr))
             .medSakstype(sakstype)
             .medSakstema(sakstema)
             .medBehandlingsårsaktype(behandlingsårsaktype)
@@ -125,12 +119,7 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
         return Optional.empty();
     }
 
-    private List<Kontaktopplysning> lagKontaktopplysning(String representant, String kontaktperson, String fullmektig, String fullmektigKontaktperson, String fullmektigKontaktOrgnr) {
-        if (representant != null) {
-            return kontaktperson != null
-                ? Collections.singletonList(Kontaktopplysning.av(representant, kontaktperson, null, null))
-                : Collections.emptyList();
-        }
+    private List<Kontaktopplysning> lagKontaktopplysning(String fullmektig, String fullmektigKontaktperson, String fullmektigKontaktOrgnr) {
         if (fullmektig != null) {
             return fullmektigKontaktperson != null || fullmektigKontaktOrgnr != null
                 ? Collections.singletonList(Kontaktopplysning.av(fullmektig, fullmektigKontaktperson, null, fullmektigKontaktOrgnr))

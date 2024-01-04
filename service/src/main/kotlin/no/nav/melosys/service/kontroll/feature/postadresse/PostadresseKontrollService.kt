@@ -1,8 +1,9 @@
 package no.nav.melosys.service.kontroll.feature.postadresse
 
+import no.nav.melosys.exception.KontrolldataFeilType
 import no.nav.melosys.domain.Behandling
 import no.nav.melosys.domain.kodeverk.Aktoersroller
-import no.nav.melosys.domain.kodeverk.Representerer
+import no.nav.melosys.domain.kodeverk.Fullmaktstype
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser
 import no.nav.melosys.service.behandling.BehandlingService
 import no.nav.melosys.service.kontroll.regler.PersonRegler
@@ -38,12 +39,12 @@ class PostadresseKontrollService(
         return if (harRegistrertAdresse) {
             emptyList()
         } else {
-            listOf(Kontrollfeil(kontrollBegrunnelseFra(kontekst)))
+            listOf(Kontrollfeil(kontrollBegrunnelseFra(kontekst), KontrolldataFeilType.FEIL))
         }
     }
 
     private fun oppdaterKontekstForBehandling(kontekst: PostadressesjekkKontekst, behandling: Behandling) {
-        val fullmektigForBruker = behandling.fagsak.finnRepresentantEllerFullmektig(Representerer.BRUKER)
+        val fullmektigForBruker = behandling.fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD)
         if (fullmektigForBruker.isPresent) {
             kontekst.oppdaterForFullmektigTilBruker(fullmektigForBruker.get())
         } else {
@@ -56,6 +57,7 @@ class PostadresseKontrollService(
             Aktoersroller.REPRESENTANT, Aktoersroller.FULLMEKTIG -> {
                 Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_REPRESENTANT
             }
+
             else -> {
                 Kontroll_begrunnelser.MANGLENDE_REGISTRERTE_ADRESSE_BRUKER
             }

@@ -19,18 +19,17 @@ import no.nav.melosys.domain.brev.DoksysBrevbestilling;
 import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.eessi.melding.MelosysEessiMelding;
 import no.nav.melosys.domain.eessi.melding.UtpekingAvvis;
-import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding;
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstyper;
+import no.nav.melosys.domain.manglendebetaling.ManglendeFakturabetalingMelding;
 import no.nav.melosys.metrics.MetrikkerNavn;
 import no.nav.melosys.saksflytapi.domain.*;
 import no.nav.melosys.saksflytapi.journalfoering.*;
 import no.nav.melosys.sikkerhet.context.SubjectHandler;
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
@@ -197,13 +196,6 @@ public class ProsessinstansService {
         }
 
         prosessinstans.setDataHvisIkkeTom(ProsessDataKey.ARBEIDSGIVER, journalfoeringRequest.getArbeidsgiverID());
-
-        prosessinstans.setDataHvisIkkeTom(ProsessDataKey.REPRESENTANT, journalfoeringRequest.getRepresentantID());
-        prosessinstans.setDataHvisIkkeTom(ProsessDataKey.REPRESENTANT_KONTAKTPERSON, journalfoeringRequest.getRepresentantKontaktPerson());
-        if (StringUtils.isNotEmpty(journalfoeringRequest.getRepresentererKode())) {
-            Representerer representantRepresenterer = Representerer.valueOf(journalfoeringRequest.getRepresentererKode());
-            prosessinstans.setData(ProsessDataKey.REPRESENTANT_REPRESENTERER, representantRepresenterer);
-        }
 
         prosessinstans.setDataHvisIkkeTom(ProsessDataKey.FULLMEKTIG, journalfoeringRequest.getFullmektigID());
         prosessinstans.setDataHvisIkkeTom(ProsessDataKey.FULLMEKTIG_KONTAKTPERSON, journalfoeringRequest.getFullmektigKontaktperson());
@@ -665,11 +657,12 @@ public class ProsessinstansService {
         lagre(prosessinstans);
     }
 
-    public void opprettProsessinstansOppdaterFaktura(String saksnummer) {
+    public void opprettProsessinstansOppdaterFaktura(Behandling behandling) {
         Prosessinstans prosessinstans = new ProsessinstansBuilder()
             .medType(ProsessType.OPPDATER_FAKTURA)
+            .medBehandling(behandling)
             .build();
-        prosessinstans.setData(SAKSNUMMER, saksnummer);
+        prosessinstans.setData(SAKSNUMMER, behandling.getFagsak().getSaksnummer());
 
         lagre(prosessinstans);
     }

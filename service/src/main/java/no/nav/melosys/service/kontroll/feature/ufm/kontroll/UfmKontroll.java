@@ -2,21 +2,24 @@ package no.nav.melosys.service.kontroll.feature.ufm.kontroll;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import no.nav.melosys.domain.dokument.sed.SedDokument;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_883_2004;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysningerData;
 import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag;
+import no.nav.melosys.domain.person.adresse.Bostedsadresse;
 import no.nav.melosys.service.kontroll.feature.ufm.data.UfmKontrollData;
 import no.nav.melosys.service.kontroll.regler.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 import static no.nav.melosys.service.kontroll.regler.OverlappendeMedlemskapsperioderRegler.*;
 import static org.apache.cxf.common.util.StringUtils.isEmpty;
 
-final class UfmKontroll {
+class UfmKontroll {
 
     private static final Logger log = LoggerFactory.getLogger(UfmKontroll.class);
 
@@ -126,6 +129,21 @@ final class UfmKontroll {
     static Kontroll_begrunnelser personBosattINorge(UfmKontrollData kontrollData) {
         return PersonRegler.personBosattINorge(kontrollData.persondata()) ?
             Kontroll_begrunnelser.BOSATT_I_NORGE : null;
+    }
+
+    static Kontroll_begrunnelser personBosattINorgeIPerioden(UfmKontrollData kontrollData) {
+        LocalDate sedFra = kontrollData.sedDokument().getLovvalgsperiode().getFom();
+        LocalDate sedTil = kontrollData.sedDokument().getLovvalgsperiode().getTom();
+
+        var bostedAdressePeriode = kontrollData.personhistorikkDokumenter()
+            .stream()
+            .flatMap(a -> a.bostedsadressePeriodeListe.stream())
+            .collect(Collectors.toList());
+
+        Optional<Bostedsadresse> personBostedsadresse = kontrollData.persondata().finnBostedsadresse();
+
+        return PersonRegler.personBosattINorgeIPeriode(bostedAdressePeriode, personBostedsadresse, sedFra, sedTil) ?
+            Kontroll_begrunnelser.BOSATT_I_NORGE_I_PERIODEN : null;
     }
 
     static Kontroll_begrunnelser arbeidssted(UfmKontrollData kontrollData) {

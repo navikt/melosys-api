@@ -12,7 +12,7 @@ import no.nav.melosys.domain.Lovvalgsperiode;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument;
 import no.nav.melosys.domain.dokument.organisasjon.OrganisasjonDokument;
-import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Kontroll_begrunnelser;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper;
@@ -128,7 +128,7 @@ class Kontroll {
 
     private FerdigbehandlingKontrollData hentKontrollDataForAvslagOgHenleggelse(Behandling behandling) {
         MottatteOpplysningerData mottatteOpplysningerData = null;
-        Aktoer fullmektig = behandling.getFagsak().finnRepresentantEllerFullmektig(Representerer.BRUKER).orElse(null);
+        Aktoer fullmektig = behandling.getFagsak().finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD).orElse(null);
         Persondata persondata = hentPersondata(behandling);
         OrganisasjonDokument organisasjon = null;
         Persondata persondataFullmektig = null;
@@ -149,7 +149,7 @@ class Kontroll {
     }
 
     private FerdigbehandlingKontrollData hentVedtakKontrollData(Behandling behandling) {
-        Aktoer fullmektig = behandling.getFagsak().finnRepresentantEllerFullmektig(Representerer.BRUKER).orElse(null);
+        Aktoer fullmektig = behandling.getFagsak().finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD).orElse(null);
         SaksopplysningerData saksopplysningerData = hentSaksopplysningerData(behandling);
         OrganisasjonDokument organisasjon = null;
         Persondata persondataFullmektig = null;
@@ -172,7 +172,7 @@ class Kontroll {
     }
 
     private FerdigbehandlingKontrollData hentVedtakKontrollDataFTRL(Behandling behandling) {
-        Aktoer fullmektig = behandling.getFagsak().finnRepresentantEllerFullmektig(Representerer.BRUKER).orElse(null);
+        Aktoer fullmektig = behandling.getFagsak().finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD).orElse(null);
         MedlemskapDokument medlemskapDokument = behandling.hentMedlemskapDokument();
 
         List<Medlemskapsperiode> medlemskapsperioder = medlemskapsperiodeService.hentMedlemskapsperioder(behandling.getId()).stream().toList();

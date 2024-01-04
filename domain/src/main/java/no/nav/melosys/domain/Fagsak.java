@@ -1,14 +1,13 @@
 package no.nav.melosys.domain;
 
+import java.util.*;
+import javax.persistence.*;
+
 import no.nav.melosys.domain.kodeverk.*;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.exception.TekniskException;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.util.Assert;
-
-import javax.persistence.*;
-import java.util.*;
 
 import static no.nav.melosys.domain.kodeverk.Aktoersroller.*;
 
@@ -222,28 +221,6 @@ public class Fagsak extends RegistreringsInfo {
         return myndigheter.get(0);
     }
 
-    /**
-     * Henter representanten som representerer angitt {@link Representerer} eller {@code null} hvis ingen finnes.
-     */
-    @Deprecated(since = "Erstattes av funnFullmektig så fort man fjerner toggle melosys.fullmakt.trygdeavgift ")
-    private Optional<Aktoer> finnRepresentant(Representerer representerer) {
-        Assert.notNull(representerer, "Representerer trengs for å hente representant.");
-        return aktører.stream().filter(a -> REPRESENTANT.equals(a.getRolle()))
-            .filter(a -> (representerer.equals(a.getRepresenterer()) || Representerer.BEGGE.equals(a.getRepresenterer())))
-            .findFirst();
-    }
-
-    @Deprecated(since = "Erstattes av finnFullmektig så fort man fjerner toggle melosys.fullmakt.trygdeavgift ")
-    public Optional<Aktoer> finnRepresentantEllerFullmektig(Representerer representerer) {
-        if (representerer == Representerer.BRUKER) {
-            return finnRepresentant(Representerer.BRUKER).or(() -> finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD));
-        } else if (representerer == Representerer.ARBEIDSGIVER) {
-            return finnRepresentant(Representerer.ARBEIDSGIVER).or(() -> finnFullmektig(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER));
-        } else {
-            throw new FunksjonellException("Noe gikk galt. Vi har ikke tatt hensyn til at vi vil finne representant eller fullmektig for representerer = " + representerer);
-        }
-    }
-
     public Optional<Aktoer> finnFullmektig(Fullmaktstype fullmaktstype) {
         return aktører.stream()
             .filter(a -> FULLMEKTIG.equals(a.getRolle()))
@@ -290,12 +267,7 @@ public class Fagsak extends RegistreringsInfo {
     }
 
     public Boolean harBrukerFullmektig() {
-        var harRepresentant = aktører
-            .stream()
-            .filter(a -> a.getRolle() == REPRESENTANT)
-            .anyMatch(aktoer -> aktoer.getRepresenterer() == Representerer.BRUKER || aktoer.getRepresenterer() == Representerer.BEGGE);
-        var harFullmektig = finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD).isPresent();
-        return harRepresentant || harFullmektig;
+        return finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD).isPresent();
     }
 
     @Override

@@ -1,20 +1,9 @@
 package no.nav.melosys.service.altinn;
 
-import java.net.URL;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.List;
-import java.util.Set;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.Kontaktopplysning;
 import no.nav.melosys.domain.kodeverk.Fullmaktstype;
-import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.Sakstemaer;
 import no.nav.melosys.domain.kodeverk.Sakstyper;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper;
@@ -37,6 +26,16 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.JAXBException;
+import java.net.URL;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -140,8 +139,6 @@ class AltinnSoeknadServiceTest {
 
         OpprettSakRequest req = captor.getValue();
         String fullmektigVirksomhetsnummer = søknad.getInnhold().getFullmakt().getFullmektigVirksomhetsnummer();
-        assertThat(req.getRepresentant().getRepresentantID()).isEqualTo(fullmektigVirksomhetsnummer);
-        assertThat(req.getRepresentant().getRepresenterer()).isEqualTo(Representerer.BEGGE);
         assertThat(req.getFullmektig().getOrgnr()).isEqualTo(fullmektigVirksomhetsnummer);
         assertThat(req.getFullmektig().getFullmakter()).containsExactlyInAnyOrder(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
     }
@@ -164,8 +161,6 @@ class AltinnSoeknadServiceTest {
 
         OpprettSakRequest req = captor.getValue();
         String fullmektigVirksomhetsnummer = søknad.getInnhold().getArbeidsgiver().getVirksomhetsnummer();
-        assertThat(req.getRepresentant().getRepresentantID()).isEqualTo(fullmektigVirksomhetsnummer);
-        assertThat(req.getRepresentant().getRepresenterer()).isEqualTo(Representerer.BEGGE);
         assertThat(req.getFullmektig().getOrgnr()).isEqualTo(fullmektigVirksomhetsnummer);
         assertThat(req.getFullmektig().getFullmakter()).containsExactlyInAnyOrder(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
     }

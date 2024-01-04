@@ -66,8 +66,9 @@ class SaksbehandlingRegler(
     ): Boolean {
         if (sakstema == Sakstemaer.TRYGDEAVGIFT) return true
 
-        if(behandlingstype == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT && !unleash.isEnabled
-                (SAKSBEHANDLING_MANGLENDE_INNBETALING)) return true
+        if (behandlingstype == Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
+            && !unleash.isEnabled(SAKSBEHANDLING_MANGLENDE_INNBETALING)
+        ) return true
 
         if (behandlingstype == Behandlingstyper.HENVENDELSE || behandlingstype == Behandlingstyper.KLAGE) return true
 
@@ -142,7 +143,8 @@ class SaksbehandlingRegler(
         val behandlingstyperSomKanReplikeres = listOf(
             Behandlingstyper.NY_VURDERING,
             Behandlingstyper.ENDRET_PERIODE,
-            Behandlingstyper.FØRSTEGANG
+            Behandlingstyper.FØRSTEGANG,
+            Behandlingstyper.MANGLENDE_INNBETALING_TRYGDEAVGIFT
         )
         val behandlingsresultattyperSomIkkeKanReplikeres = listOf(
             Behandlingsresultattyper.HENLEGGELSE,

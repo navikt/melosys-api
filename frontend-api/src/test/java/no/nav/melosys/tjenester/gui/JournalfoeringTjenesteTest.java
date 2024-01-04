@@ -81,7 +81,7 @@ class JournalfoeringTjenesteTest {
         journalføringDto.setBrukerID(SAMPLE_FNR);
         journalføringDto.setBehandlingstemaKode(Behandlingstema.ARBEID_FLERE_LAND.getKode());
         journalføringDto.setArbeidsgiverID(SAMPLE_ORGNR);
-        journalføringDto.setRepresentantID(SAMPLE_ORGNR);
+        journalføringDto.setFullmektigID(SAMPLE_ORGNR);
 
         mockMvc.perform(post(BASE_URL + "/opprett")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -94,13 +94,13 @@ class JournalfoeringTjenesteTest {
     }
 
     @Test
-    void journalføringOpprett_validerKallMedRepresentantIDNull() throws Exception {
+    void journalføringOpprett_validerKallMedFullmektigIDNull() throws Exception {
         JournalfoeringOpprettDto journalføringDto = random.nextObject(JournalfoeringOpprettDto.class);
         journalføringDto.setVirksomhetOrgnr(null);
         journalføringDto.setBrukerID(SAMPLE_FNR);
         journalføringDto.setBehandlingstemaKode(Behandlingstema.ARBEID_FLERE_LAND.getKode());
         journalføringDto.setArbeidsgiverID(SAMPLE_ORGNR);
-        journalføringDto.setRepresentantID(null);
+        journalføringDto.setFullmektigID(null);
 
         mockMvc.perform(post(BASE_URL + "/opprett")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -119,7 +119,7 @@ class JournalfoeringTjenesteTest {
         journalføringDto.setBrukerID(null);
         journalføringDto.setBehandlingstemaKode(Behandlingstema.ARBEID_FLERE_LAND.getKode());
         journalføringDto.setArbeidsgiverID(SAMPLE_ORGNR);
-        journalføringDto.setRepresentantID(SAMPLE_ORGNR);
+        journalføringDto.setFullmektigID(SAMPLE_ORGNR);
 
         mockMvc.perform(post(BASE_URL + "/opprett")
                 .contentType(MediaType.APPLICATION_JSON)

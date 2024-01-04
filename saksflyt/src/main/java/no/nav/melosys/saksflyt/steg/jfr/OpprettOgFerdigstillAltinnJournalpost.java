@@ -7,7 +7,7 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
-import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.msm.AltinnDokument;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.integrasjon.joark.JoarkFasade;
@@ -56,10 +56,10 @@ public class OpprettOgFerdigstillAltinnJournalpost implements StegBehandler {
         Collection<AltinnDokument> dokumenter = altinnSoeknadService
             .hentDokumenterTilknyttetSoknad(prosessinstans.getData(ProsessDataKey.MOTTATT_SOKNAD_ID));
 
-        Optional<Aktoer> representant = fagsak.finnRepresentantEllerFullmektig(Representerer.BRUKER);
+        Optional<Aktoer> fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD);
         String avsenderNavn;
-        if (representant.isPresent()) {
-            avsenderNavn = eregFasade.hentOrganisasjonNavn(representant.get().getOrgnr());
+        if (fullmektig.isPresent()) {
+            avsenderNavn = eregFasade.hentOrganisasjonNavn(fullmektig.get().getOrgnr());
         } else {
             avsenderNavn = eregFasade.hentOrganisasjonNavn(fagsak.hentUnikArbeidsgiver().getOrgnr());
         }

@@ -1,0 +1,43 @@
+BEGIN
+    DECLARE
+        CURSOR REP_BRUKER IS SELECT *
+                             FROM AKTOER
+                             WHERE ROLLE = 'REPRESENTANT'
+                               AND REPRESENTERER = 'BRUKER' FOR UPDATE;
+    BEGIN
+        FOR REP IN REP_BRUKER
+            LOOP
+                INSERT INTO FULLMAKT (TYPE, AKTOER_ID) VALUES ('FULLMEKTIG_SØKNAD', REP.ID);
+                UPDATE AKTOER SET ROLLE = 'FULLMEKTIG' WHERE CURRENT OF REP_BRUKER;
+            END LOOP;
+    END;
+
+
+    DECLARE
+        CURSOR REP_ARBEIDSGIVER IS SELECT *
+                                   FROM AKTOER
+                                   WHERE ROLLE = 'REPRESENTANT'
+                                     AND REPRESENTERER = 'ARBEIDSGIVER' FOR UPDATE;
+    BEGIN
+        FOR REP IN REP_ARBEIDSGIVER
+            LOOP
+                INSERT INTO FULLMAKT (TYPE, AKTOER_ID) VALUES ('FULLMEKTIG_ARBEIDSGIVER', REP.ID);
+                UPDATE AKTOER SET ROLLE = 'FULLMEKTIG' WHERE CURRENT OF REP_ARBEIDSGIVER;
+            END LOOP;
+    END;
+
+
+    DECLARE
+        CURSOR REP_BEGGE IS SELECT *
+                            FROM AKTOER
+                            WHERE ROLLE = 'REPRESENTANT'
+                              AND REPRESENTERER = 'BEGGE' FOR UPDATE;
+    BEGIN
+        FOR REP IN REP_BEGGE
+            LOOP
+                INSERT INTO FULLMAKT (TYPE, AKTOER_ID) VALUES ('FULLMEKTIG_SØKNAD', REP.ID);
+                INSERT INTO FULLMAKT (TYPE, AKTOER_ID) VALUES ('FULLMEKTIG_ARBEIDSGIVER', REP.ID);
+                UPDATE AKTOER SET ROLLE = 'FULLMEKTIG' WHERE CURRENT OF REP_BEGGE;
+            END LOOP;
+    END;
+END;

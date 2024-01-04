@@ -178,7 +178,7 @@ class DokgenServiceTest {
     }
 
     @Test
-    void produserBrevTilRepresentantOrganisasjonOk() {
+    void produserBrevTilFullmektigOrganisasjonOk() {
         when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(false))).thenReturn(expectedPdf);
         when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling());
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysninger());
@@ -187,7 +187,7 @@ class DokgenServiceTest {
         when(mockUtledMottaksdato.getMottaksdato(any(), any())).thenReturn(LocalDate.now());
         when(mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "9990")).thenReturn("Aker");
         when(mockKodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, "NO")).thenReturn("Norge");
-        Mottaker mottaker = lagRepresentant(ORGNR);
+        Mottaker mottaker = lagFullmektig(ORGNR);
 
         DokgenBrevbestilling brevbestilling = new DokgenBrevbestilling.Builder<>()
             .medProduserbartdokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)
@@ -206,7 +206,7 @@ class DokgenServiceTest {
     }
 
     @Test
-    void produserBrevTilRepresentantPersonOk() {
+    void produserBrevTilFullmektigPersonOk() {
         when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(false))).thenReturn(expectedPdf);
         when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling());
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysninger());
@@ -219,7 +219,7 @@ class DokgenServiceTest {
             .medBehandlingId(123)
             .build();
 
-        byte[] pdfResponse = dokgenService.produserBrev(lagRepresentant(FNR), brevbestilling);
+        byte[] pdfResponse = dokgenService.produserBrev(lagFullmektig(FNR), brevbestilling);
 
         assertThat(pdfResponse).isNotNull().isEqualTo(expectedPdf);
 
@@ -228,7 +228,7 @@ class DokgenServiceTest {
     }
 
     @Test
-    void produserUtkastUtenRepresentantForBrukerOk() {
+    void produserUtkastUtenFullmektigForBrukerOk() {
         when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(true))).thenReturn(expectedPdf);
         when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling());
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysninger());
@@ -256,7 +256,7 @@ class DokgenServiceTest {
     }
 
     @Test
-    void produserUtkastTilRepresentantForBrukerOk() {
+    void produserUtkastTilFullmektigForBrukerOk() {
         when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(true))).thenReturn(expectedPdf);
         when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling());
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysninger());
@@ -266,7 +266,7 @@ class DokgenServiceTest {
         when(mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "9990")).thenReturn("Aker");
         when(mockKodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, "NO")).thenReturn("Norge");
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(true), eq(false)))
-            .thenReturn(List.of(lagRepresentant(ORGNR)));
+            .thenReturn(List.of(lagFullmektig(ORGNR)));
 
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
@@ -285,7 +285,7 @@ class DokgenServiceTest {
     }
 
     @Test
-    void produserUtkastTilRepresentantForArbeidsgiverOk() {
+    void produserUtkastTilFullmektigForArbeidsgiverOk() {
         when(mockDokgenConsumer.lagPdf(anyString(), any(), eq(false), eq(true))).thenReturn(expectedPdf);
         when(mockBehandlingsService.hentBehandlingMedSaksopplysninger(anyLong())).thenReturn(lagBehandling());
         when(mockPersondataFasade.hentPerson(anyString())).thenReturn(lagPersonopplysninger());
@@ -295,7 +295,7 @@ class DokgenServiceTest {
         when(mockKodeverkService.dekod(FellesKodeverk.POSTNUMMER, "9990")).thenReturn("Aker");
         when(mockKodeverkService.dekod(FellesKodeverk.LANDKODER_ISO2, "NO")).thenReturn("Norge");
         when(mockBrevMottakerService.avklarMottakere(any(), any(), any(), eq(true), eq(false)))
-            .thenReturn(List.of(lagRepresentant(ORGNR)));
+            .thenReturn(List.of(lagFullmektig(ORGNR)));
 
         var brevbestillingDto = new BrevbestillingDto();
         brevbestillingDto.setProduserbardokument(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD);
@@ -578,7 +578,7 @@ class DokgenServiceTest {
         return mottaker;
     }
 
-    private Mottaker lagRepresentant(String mottakerID) {
+    private Mottaker lagFullmektig(String mottakerID) {
         var mott = Mottaker.medRolle(Mottakerroller.FULLMEKTIG);
         if (mottakerID.equals(ORGNR)) {
             mott.setOrgnr(ORGNR);

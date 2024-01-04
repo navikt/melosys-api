@@ -251,7 +251,7 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    void opprettProsessinstansOpprettOgDistribuerBrevRepresentantPerson() {
+    void opprettProsessinstansOpprettOgDistribuerBrevFullmektigPerson() {
         String saksbehandler = settInnloggetSaksbehandler();
         Behandling behandling = lagBehandling();
         Mottaker mottaker = new Mottaker();
@@ -280,7 +280,7 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    void opprettProsessinstansOpprettOgDistribuerBrevRepresentantOrganisasjon() {
+    void opprettProsessinstansOpprettOgDistribuerBrevFullmektigOrganisasjon() {
         String saksbehandler = settInnloggetSaksbehandler();
         Behandling behandling = lagBehandling();
         Mottaker mottaker = new Mottaker();

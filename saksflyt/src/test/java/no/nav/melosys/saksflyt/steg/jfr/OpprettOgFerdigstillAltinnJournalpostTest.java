@@ -2,6 +2,7 @@ package no.nav.melosys.saksflyt.steg.jfr;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 import no.nav.melosys.domain.Aktoer;
@@ -12,7 +13,7 @@ import no.nav.melosys.domain.arkiv.BrukerIdType;
 import no.nav.melosys.domain.arkiv.Journalpost;
 import no.nav.melosys.domain.arkiv.OpprettJournalpost;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
-import no.nav.melosys.domain.kodeverk.Representerer;
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.mottatteopplysninger.MottatteOpplysninger;
 import no.nav.melosys.domain.msm.AltinnDokument;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
@@ -36,7 +37,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class OpprettOgFerdigstillAltinnJournalpostTest {
+class OpprettOgFerdigstillAltinnJournalpostTest {
     @Mock
     private AltinnSoeknadService altinnSoeknadService;
     @Mock
@@ -76,15 +77,15 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
         bruker.setRolle(Aktoersroller.BRUKER);
         bruker.setAktørId("3321231");
 
-        Aktoer representant = new Aktoer();
-        representant.setRolle(Aktoersroller.REPRESENTANT);
-        representant.setOrgnr("repOrgnr");
-        representant.setRepresenterer(Representerer.BEGGE);
+        Aktoer fullmektig = new Aktoer();
+        fullmektig.setRolle(Aktoersroller.FULLMEKTIG);
+        fullmektig.setOrgnr("fullmektigOrgnr");
+        fullmektig.setFullmaktstyper(List.of(Fullmaktstype.FULLMEKTIG_SØKNAD, Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER));
 
         Fagsak fagsak = new Fagsak();
         fagsak.setSaksnummer(saksnummer);
         fagsak.setGsakSaksnummer(123L);
-        fagsak.setAktører(Set.of(bruker, representant));
+        fagsak.setAktører(Set.of(bruker, fullmektig));
         behandling.setFagsak(fagsak);
         fagsak.getBehandlinger().add(behandling);
         prosessinstans.setBehandling(behandling);
@@ -99,7 +100,7 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
     }
 
     @Test
-    public void utfør_journalpostBlirOpprettet_verifiser() {
+    void utfør_journalpostBlirOpprettet_verifiser() {
         opprettOgFerdigstillAltinnJournalpost.utfør(prosessinstans);
 
         verify(persondataFasade).hentFolkeregisterident(anyString());
@@ -123,7 +124,7 @@ public class OpprettOgFerdigstillAltinnJournalpostTest {
     }
 
     @Test
-    public void utfør_ingenRepresentantForBruker_avsenderNavnErArbeidsgiverOrganisasjonNavn() {
+    void utfør_ingenFullmektigForBruker_avsenderNavnErArbeidsgiverOrganisasjonNavn() {
         Aktoer arbeidsgiver = new Aktoer();
         arbeidsgiver.setRolle(Aktoersroller.ARBEIDSGIVER);
         arbeidsgiver.setOrgnr("arbOrgnr");

@@ -152,9 +152,9 @@ class JournalfoeringBase(
             vedlegg = emptyList()
             mottattDato = LocalDate.now()
             arbeidsgiverID = null
-            representantID = null
-            representantKontaktPerson = null
-            representererKode = null
+            fullmektigID = null
+            fullmektigKontaktOrgnr = null
+            fullmektigKontaktperson = null
             isIkkeSendForvaltingsmelding = false
             avsenderType = Avsendertyper.PERSON
             isSkalTilordnes = true

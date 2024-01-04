@@ -1,9 +1,11 @@
 package no.nav.melosys.service.vedtak;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
+import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
 import no.nav.melosys.domain.kodeverk.Saksstatuser;
@@ -13,16 +15,17 @@ import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.IkkeFunnetException;
 import no.nav.melosys.saksflytapi.ProsessinstansService;
-import no.nav.melosys.service.avklartefakta.AvklartManglendeInnbetalingService;
 import no.nav.melosys.service.behandling.BehandlingService;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.dokument.DokgenService;
 import no.nav.melosys.service.dokument.brev.BrevbestillingDto;
 import no.nav.melosys.service.oppgave.OppgaveService;
+import no.nav.melosys.service.vilkaar.VilkaarsresultatService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import static no.nav.melosys.domain.kodeverk.Avklartefaktatyper.FULLSTENDIG_MANGLENDE_INNBETALING;
 import static no.nav.melosys.service.vedtak.VedtaksfattingFasade.FRIST_KLAGE_UKER;
 
 @Service
@@ -34,20 +37,20 @@ public class FtrlVedtakService {
     private final ProsessinstansService prosessinstansService;
     private final OppgaveService oppgaveService;
     private final DokgenService dokgenService;
-    private final AvklartManglendeInnbetalingService avklartManglendeInnbetalingService;
+    private final VilkaarsresultatService vilkaarsresultatService;
 
     public FtrlVedtakService(BehandlingsresultatService behandlingsresultatService,
                              BehandlingService behandlingService,
                              ProsessinstansService prosessinstansService,
                              OppgaveService oppgaveService,
                              DokgenService dokgenService,
-                             AvklartManglendeInnbetalingService avklartManglendeInnbetalingService) {
+                             VilkaarsresultatService vilkaarsresultatService) {
         this.behandlingsresultatService = behandlingsresultatService;
         this.behandlingService = behandlingService;
         this.prosessinstansService = prosessinstansService;
         this.oppgaveService = oppgaveService;
         this.dokgenService = dokgenService;
-        this.avklartManglendeInnbetalingService = avklartManglendeInnbetalingService;
+        this.vilkaarsresultatService = vilkaarsresultatService;
     }
 
     public void fattVedtak(Behandling behandling, FattVedtakRequest request) {
@@ -61,7 +64,7 @@ public class FtrlVedtakService {
             throw new FunksjonellException("Det finnes allerede en vedtak-prosess for behandling " + behandling);
         }
 
-        behandling.getFagsak().setStatus(Saksstatuser.MEDLEMSKAP_AVKLART);
+        behandling.getFagsak().setStatus(request.getBehandlingsresultatTypeKode() == Behandlingsresultattyper.OPPHØRT ? Saksstatuser.OPPHØRT : Saksstatuser.MEDLEMSKAP_AVKLART);
         behandlingService.endreStatus(behandling, Behandlingsstatus.IVERKSETTER_VEDTAK);
 
         prosessinstansService.opprettProsessinstansIverksettVedtakFTRL(behandling, request.tilVedtakRequest());
@@ -116,20 +119,46 @@ public class FtrlVedtakService {
 
     private void oppdaterBehandlingsresultat(long behandlingID, FattVedtakRequest request) throws IkkeFunnetException {
         if (request.getBehandlingsresultatTypeKode() == Behandlingsresultattyper.OPPHØRT) {
-            var fullstendigManglendeInnbetaling = avklartManglendeInnbetalingService.hentFullstendigManglendeInnbetaling(behandlingID);
-            if (fullstendigManglendeInnbetaling == null) {
-                throw new FunksjonellException("Forventer at fullstendigManglendeInnbetaling er satt ved fatting av vedtak for behandlingstype OPPHØRT");
-            }
-            behandlingsresultatService.tømBehandlingsresultat(behandlingID);
-            avklartManglendeInnbetalingService.lagreFullstendigManglendeInnbetalingSomAvklartFakta(behandlingID, fullstendigManglendeInnbetaling);
+            oppdaterBehandlingsresultatForOpphørt(behandlingID, request);
+        } else {
+            var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
+            behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
+            behandlingsresultat.settVedtakMetadata(request.getVedtakstype(), LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
+            behandlingsresultat.setNyVurderingBakgrunn(request.getNyVurderingBakgrunn());
+            behandlingsresultat.setBegrunnelseFritekst(request.getBegrunnelseFritekst());
+            behandlingsresultat.setInnledningFritekst(request.getInnledningFritekst());
+            behandlingsresultat.setTrygdeavgiftFritekst(request.getTrygdeavgiftFritekst());
+            behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
+
+            behandlingsresultatService.lagre(behandlingsresultat);
         }
+    }
+
+    private void oppdaterBehandlingsresultatForOpphørt(long behandlingID, FattVedtakRequest request) throws IkkeFunnetException {
         var behandlingsresultat = behandlingsresultatService.hentBehandlingsresultat(behandlingID);
-        behandlingsresultat.setType(request.getBehandlingsresultatTypeKode());
+
+        var fullstendigManglendeInnbetaling = behandlingsresultat.getAvklartefakta().stream()
+            .filter(avklartefakta -> FULLSTENDIG_MANGLENDE_INNBETALING.getKode().equals(avklartefakta.getReferanse())
+                && FULLSTENDIG_MANGLENDE_INNBETALING.equals(avklartefakta.getType()))
+            .findFirst()
+            .orElseThrow(() -> new FunksjonellException("Forventer at fullstendigManglendeInnbetaling er satt ved fatting av vedtak for behandlingstype OPPHØRT"));
+
+
+        log.info("Fjerner vilkårsresultater, fritekstfelt, trygdeavgift, og noen avklarte fakta fra behandlingsresultat med behandlingsid: {} ", behandlingID);
+        behandlingsresultat.getAvklartefakta().clear();
+        behandlingsresultat.getAvklartefakta().add(fullstendigManglendeInnbetaling);
+        behandlingsresultat.getMedlemAvFolketrygden().setMedlemskapsperioder(Collections.emptyList());
+        behandlingsresultat.getMedlemAvFolketrygden().setBestemmelse(Folketrygdloven_kap2_bestemmelser.FTRL_KAP2_2_15_ANDRE_LEDD);
+
+        behandlingsresultat.setUtfallRegistreringUnntak(null);
+        behandlingsresultat.setNyVurderingBakgrunn(null);
+        behandlingsresultat.setInnledningFritekst(null);
+        behandlingsresultat.setTrygdeavgiftFritekst(null);
+        vilkaarsresultatService.tømVilkårForBehandlingsresultat(behandlingsresultat);
+
+        behandlingsresultat.setType(Behandlingsresultattyper.OPPHØRT);
         behandlingsresultat.settVedtakMetadata(request.getVedtakstype(), LocalDate.now().plusWeeks(FRIST_KLAGE_UKER));
-        behandlingsresultat.setNyVurderingBakgrunn(request.getNyVurderingBakgrunn());
         behandlingsresultat.setBegrunnelseFritekst(request.getBegrunnelseFritekst());
-        behandlingsresultat.setInnledningFritekst(request.getInnledningFritekst());
-        behandlingsresultat.setTrygdeavgiftFritekst(request.getTrygdeavgiftFritekst());
         behandlingsresultat.setFastsattAvLand(Land_iso2.NO);
 
         behandlingsresultatService.lagre(behandlingsresultat);

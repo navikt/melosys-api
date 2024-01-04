@@ -9,8 +9,8 @@ import no.nav.melosys.domain.brev.Mottaker;
 import no.nav.melosys.domain.brev.Mottakerliste;
 import no.nav.melosys.domain.brev.NorskMyndighet;
 import no.nav.melosys.domain.dokument.arbeidsforhold.ArbeidsforholdDokument;
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
-import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Lovvalgbestemmelser_883_2004;
 import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.trygdeavtale.Lovvalgsbestemmelser_trygdeavtale_gb;
@@ -149,7 +149,7 @@ public class BrevmottakerService {
         }
 
         List<Mottaker> mottakere = new ArrayList<>();
-        Optional<Aktoer> fullmektig = fagsak.finnRepresentantEllerFullmektig(Representerer.BRUKER);
+        Optional<Aktoer> fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD);
         if (fullmektig.isPresent()) {
             boolean erTilBådeBrukerOgFullmektig = erTilBådeBrukerOgFullmektig(produserbartDokument, forhåndsvisning);
             mottakere.add(Mottaker.av(fullmektig.get()));
@@ -176,7 +176,7 @@ public class BrevmottakerService {
     }
 
     private List<Mottaker> avklarMottakereForFullmektig(Fagsak fagsak) {
-        Optional<Aktoer> fullmektig = fagsak.finnRepresentantEllerFullmektig(Representerer.BRUKER);
+        Optional<Aktoer> fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD);
         if (fullmektig.isPresent()) {
             return List.of(Mottaker.av(fullmektig.get()));
         } else {
@@ -194,7 +194,7 @@ public class BrevmottakerService {
 
     private List<Mottaker> avklarMottakereForArbeidsgiver(Behandling behandling, boolean kunAvklarteVirksomheter) {
         Fagsak fagsak = behandling.getFagsak();
-        Optional<Aktoer> fullmektig = fagsak.finnRepresentantEllerFullmektig(Representerer.ARBEIDSGIVER);
+        Optional<Aktoer> fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
         if (fullmektig.isPresent()) {
             return Collections.singletonList(Mottaker.av(fullmektig.get()));
         } else {

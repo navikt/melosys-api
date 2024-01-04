@@ -6,8 +6,8 @@ import no.nav.melosys.domain.Aktoer;
 import no.nav.melosys.domain.Fagsak;
 import no.nav.melosys.domain.dokument.arbeidsforhold.Aktoertype;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
+import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
-import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.integrasjon.ereg.EregFasade;
 import no.nav.melosys.service.behandling.BehandlingsresultatService;
 import no.nav.melosys.service.kodeverk.KodeverkService;
@@ -45,33 +45,33 @@ class DokgenMapperDatahenterTest {
     @Test
     void hentFullmektigNavn_fullmektigPerson_henterSammensattNavnPerson() {
         Fagsak fagsak = new Fagsak();
-        Aktoer representant = new Aktoer();
-        representant.setPersonIdent(FNR_REPRESENTANT);
-        representant.setRolle(Aktoersroller.REPRESENTANT);
-        representant.setRepresenterer(Representerer.BRUKER);
-        fagsak.setAktører(Set.of(representant, new Aktoer()));
+        Aktoer fullmektig = new Aktoer();
+        fullmektig.setPersonIdent(FNR_FULLMEKTIG);
+        fullmektig.setRolle(Aktoersroller.FULLMEKTIG);
+        fullmektig.setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD);
+        fagsak.setAktører(Set.of(fullmektig, new Aktoer()));
 
-        when(persondataFasade.hentSammensattNavn(FNR_REPRESENTANT)).thenReturn("Etternavn, Fornavn");
+        when(persondataFasade.hentSammensattNavn(FNR_FULLMEKTIG)).thenReturn("Etternavn, Fornavn");
 
-        dokgenMapperDatahenter.hentFullmektigNavn(fagsak, Representerer.BRUKER);
+        dokgenMapperDatahenter.hentFullmektigNavn(fagsak, Fullmaktstype.FULLMEKTIG_SØKNAD);
 
-        verify(persondataFasade).hentSammensattNavn(FNR_REPRESENTANT);
+        verify(persondataFasade).hentSammensattNavn(FNR_FULLMEKTIG);
     }
 
     @Test
     void hentFullmektigNavn_fullmektigOrg_henterNavnOrganisasjon() {
         Fagsak fagsak = new Fagsak();
-        Aktoer representant = new Aktoer();
-        representant.setOrgnr(ORGNR_REPRESENTANT);
-        representant.setRolle(Aktoersroller.REPRESENTANT);
-        representant.setRepresenterer(Representerer.BRUKER);
-        fagsak.setAktører(Set.of(representant, new Aktoer()));
+        Aktoer fullmektig = new Aktoer();
+        fullmektig.setOrgnr(ORGNR_FULLMEKTIG);
+        fullmektig.setRolle(Aktoersroller.FULLMEKTIG);
+        fullmektig.setFullmaktstype(Fullmaktstype.FULLMEKTIG_SØKNAD);
+        fagsak.setAktører(Set.of(fullmektig, new Aktoer()));
 
-        when(eregFasade.hentOrganisasjonNavn(ORGNR_REPRESENTANT)).thenReturn("Orgnavn");
+        when(eregFasade.hentOrganisasjonNavn(ORGNR_FULLMEKTIG)).thenReturn("Orgnavn");
 
-        dokgenMapperDatahenter.hentFullmektigNavn(fagsak, Representerer.BRUKER);
+        dokgenMapperDatahenter.hentFullmektigNavn(fagsak, Fullmaktstype.FULLMEKTIG_SØKNAD);
 
-        verify(eregFasade).hentOrganisasjonNavn(ORGNR_REPRESENTANT);
+        verify(eregFasade).hentOrganisasjonNavn(ORGNR_FULLMEKTIG);
     }
 
     @Test
@@ -100,8 +100,8 @@ class DokgenMapperDatahenterTest {
 
     @Test
     void hentPersonMottaker_mottakerPersonIdent_brukerPersonIdent() {
-        dokgenMapperDatahenter.hentPersonMottaker(lagMottakerRepresentant(Aktoertype.PERSON));
+        dokgenMapperDatahenter.hentPersonMottaker(lagMottakerFullmektig(Aktoertype.PERSON));
 
-        verify(persondataFasade).hentPerson(FNR_REPRESENTANT);
+        verify(persondataFasade).hentPerson(FNR_FULLMEKTIG);
     }
 }

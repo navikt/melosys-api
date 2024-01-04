@@ -1,20 +1,19 @@
 package no.nav.melosys.domain.brev;
 
-import java.util.Arrays;
-
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import no.nav.melosys.domain.manglendebetaling.Betalingsstatus;
 import no.nav.melosys.domain.kodeverk.LovvalgBestemmelse;
 import no.nav.melosys.domain.kodeverk.Mottakerroller;
-import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.begrunnelser.Ikkeyrkesaktivsituasjontype;
+import no.nav.melosys.domain.manglendebetaling.Betalingsstatus;
 import no.nav.melosys.domain.serializer.LovvalgBestemmelseDeserializer;
 import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -53,8 +52,6 @@ class DokgenBrevbestillingTest {
                 node.put(a.getName(), Ikkeyrkesaktivsituasjontype.ANNET.name());
             } else if (a.getType().getSimpleName().equals(Betalingsstatus.class.getSimpleName())) {
                 node.put(a.getName(), Betalingsstatus.DELVIS_BETALT.name());
-            } else if (a.getType().getSimpleName().equals(Representerer.class.getSimpleName())) {
-                node.put(a.getName(), Representerer.BRUKER.name());
             } else {
                 node.put(a.getName(), a.getType().getSimpleName());
             }

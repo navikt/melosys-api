@@ -1,5 +1,8 @@
 package no.nav.melosys.service.kontroll.feature.ufm
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equality.shouldBeEqualToComparingFields
 import io.kotest.matchers.shouldBe
@@ -17,6 +20,7 @@ import no.nav.melosys.domain.dokument.medlemskap.MedlemskapDokument
 import no.nav.melosys.domain.dokument.medlemskap.Medlemsperiode
 import no.nav.melosys.domain.dokument.medlemskap.Periode
 import no.nav.melosys.domain.dokument.medlemskap.PeriodeType
+import no.nav.melosys.domain.dokument.person.PersonhistorikkDokument
 import no.nav.melosys.domain.dokument.sed.SedDokument
 import no.nav.melosys.domain.dokument.utbetaling.UtbetalingDokument
 import no.nav.melosys.domain.eessi.SedType
@@ -28,6 +32,7 @@ import no.nav.melosys.domain.kodeverk.lovvalgsbestemmelser.Tilleggsbestemmelser_
 import no.nav.melosys.domain.mottatteopplysninger.SedGrunnlag
 import no.nav.melosys.domain.person.Personopplysninger
 import no.nav.melosys.domain.person.adresse.Bostedsadresse
+import no.nav.melosys.exception.IkkeFunnetException
 import no.nav.melosys.repository.KontrollresultatRepository
 import no.nav.melosys.service.SaksbehandlingDataFactory
 import no.nav.melosys.service.behandling.BehandlingService
@@ -38,12 +43,14 @@ import no.nav.melosys.service.persondata.PersonopplysningerObjectFactory.lagPers
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 import java.util.*
 
 
 @ExtendWith(MockKExtension::class)
 class UfmKontrollServiceTest {
+
     @RelaxedMockK
     lateinit var kontrollresultatRepository: KontrollresultatRepository
 
@@ -69,6 +76,7 @@ class UfmKontrollServiceTest {
     private var medlemskapDokument = MedlemskapDokument()
     private var personopplysninger: Personopplysninger = lagPersonopplysninger()
     private var mottatteOpplysningerData: SedGrunnlag = SedGrunnlag()
+    private val mapper = jacksonObjectMapper().registerModule(JavaTimeModule())
 
     @BeforeEach
     fun setup() {
@@ -438,7 +446,7 @@ class UfmKontrollServiceTest {
 
 
     @Test
-    fun utførKontrollerOgRegistrerFeil_A003_forventKontroll_bosattINorge() {
+    fun utførKontrollerOgRegistrerFeil_A003_forventKontroll_bosattINorgeIPeriode() {
         sedDokument.apply {
             sedType = SedType.A003
             lovvalgslandKode = Landkoder.NO
@@ -454,12 +462,12 @@ class UfmKontrollServiceTest {
                             behandlingsresultat.id.shouldBe(BEHANDLINGSRESULTAT_ID)
                         }
                         last().apply {
-                            begrunnelse.shouldBe(Kontroll_begrunnelser.BOSATT_I_NORGE)
+                            begrunnelse.shouldBe(Kontroll_begrunnelser.BOSATT_I_NORGE_I_PERIODEN)
                             behandlingsresultat.id.shouldBe(BEHANDLINGSRESULTAT_ID)
                         }
                     }
             }
-        setupMockedTestData()
+        setupMockedTestData(medHistorikk = true)
 
 
         ufmKontrollService.utførKontrollerOgRegistrerFeil(BEHANDLING_ID)
@@ -578,11 +586,16 @@ class UfmKontrollServiceTest {
             .first().shouldBeEqualToComparingFields(Kontroll_begrunnelser.FEIL_I_PERIODEN)
     }
 
-    private fun setupMockedTestData() {
+    private fun setupMockedTestData(medHistorikk: Boolean = false) {
+        val personhistorikkDokument = mapper.readValue<PersonhistorikkDokument>(hentRessurs("mock/personHistorikkDokument.json"))
+
         behandling.saksopplysninger.add(lagSaksopplysning(sedDokument, SaksopplysningType.SEDOPPL))
         behandling.saksopplysninger.add(lagSaksopplysning(medlemskapDokument, SaksopplysningType.MEDL))
         behandling.saksopplysninger.add(lagSaksopplysning(InntektDokument(), SaksopplysningType.INNTK))
         behandling.saksopplysninger.add(lagSaksopplysning(UtbetalingDokument(), SaksopplysningType.UTBETAL))
+        if (medHistorikk) {
+            behandling.saksopplysninger.add(lagSaksopplysning(personhistorikkDokument, SaksopplysningType.PERSHIST))
+        }
 
         every { persondataFasade.hentPerson(any()) } returns personopplysninger
         every { behandlingService.hentBehandlingMedSaksopplysninger(BEHANDLING_ID) } returns behandling
@@ -593,6 +606,9 @@ class UfmKontrollServiceTest {
         every { mottatteOpplysningerService.finnMottatteOpplysningerData(BEHANDLING_ID) } returns
             Optional.of(mottatteOpplysningerData)
     }
+
+    private fun hentRessurs(fil: String): String = this::class.java.classLoader.getResource(fil)
+        ?.readText(StandardCharsets.UTF_8) ?: throw IkkeFunnetException("Fant ikke $fil")
 
     private fun lagSaksopplysning(
         saksopplysningDokument: SaksopplysningDokument,

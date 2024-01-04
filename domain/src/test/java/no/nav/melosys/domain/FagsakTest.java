@@ -6,7 +6,6 @@ import java.util.*;
 import no.nav.melosys.domain.kodeverk.Aktoersroller;
 import no.nav.melosys.domain.kodeverk.Fullmaktstype;
 import no.nav.melosys.domain.kodeverk.Land_iso2;
-import no.nav.melosys.domain.kodeverk.Representerer;
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus;
 import no.nav.melosys.exception.FunksjonellException;
 import no.nav.melosys.exception.TekniskException;
@@ -227,27 +226,7 @@ class FagsakTest {
     }
 
     @Test
-    void hentRepresentant_arbeidsgiver_funker() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setAktører(new HashSet<>());
-        Aktoer a1 = new Aktoer();
-        a1.setRolle(Aktoersroller.REPRESENTANT);
-        a1.setRepresenterer(Representerer.BRUKER);
-        a1.setAktørId("123");
-        fagsak.getAktører().add(a1);
-        Aktoer a2 = new Aktoer();
-        a2.setRolle(Aktoersroller.REPRESENTANT);
-        a2.setRepresenterer(Representerer.ARBEIDSGIVER);
-        a2.setAktørId("456");
-        fagsak.getAktører().add(a2);
-
-        Optional<Aktoer> representant = fagsak.finnRepresentantEllerFullmektig(Representerer.ARBEIDSGIVER);
-
-        assertThat(representant).isEqualTo(Optional.of(a2));
-    }
-
-    @Test
-    void finnRepresentantEllerFullmektig_arbeidsgiver_funker() {
+    void finnFullmektig_arbeidsgiver_funker() {
         Fagsak fagsak = new Fagsak();
         fagsak.setAktører(new HashSet<>());
         Aktoer a1 = new Aktoer();
@@ -261,13 +240,13 @@ class FagsakTest {
         a2.setAktørId("456");
         fagsak.getAktører().add(a2);
 
-        Optional<Aktoer> fullmektig = fagsak.finnRepresentantEllerFullmektig(Representerer.ARBEIDSGIVER);
+        Optional<Aktoer> fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_ARBEIDSGIVER);
 
         assertThat(fullmektig).isEqualTo(Optional.of(a2));
     }
 
     @Test
-    void finnRepresentantEllerFullmektig_bruker_funker() {
+    void finnFullmektig_bruker_funker() {
         Fagsak fagsak = new Fagsak();
         fagsak.setAktører(new HashSet<>());
         Aktoer a1 = new Aktoer();
@@ -281,30 +260,9 @@ class FagsakTest {
         a2.setAktørId("456");
         fagsak.getAktører().add(a2);
 
-        Optional<Aktoer> fullmektig = fagsak.finnRepresentantEllerFullmektig(Representerer.BRUKER);
+        Optional<Aktoer> fullmektig = fagsak.finnFullmektig(Fullmaktstype.FULLMEKTIG_SØKNAD);
 
         assertThat(fullmektig).isEqualTo(Optional.of(a1));
-    }
-
-
-    @Test
-    void hentRepresentant_begge_funker() {
-        Fagsak fagsak = new Fagsak();
-        fagsak.setAktører(new HashSet<>());
-        Aktoer a1 = new Aktoer();
-        a1.setRolle(Aktoersroller.REPRESENTANT);
-        a1.setRepresenterer(Representerer.ARBEIDSGIVER);
-        a1.setAktørId("123");
-        fagsak.getAktører().add(a1);
-        Aktoer a2 = new Aktoer();
-        a2.setRolle(Aktoersroller.REPRESENTANT);
-        a2.setRepresenterer(Representerer.BEGGE);
-        a2.setAktørId("456");
-        fagsak.getAktører().add(a2);
-
-        Optional<Aktoer> representant = fagsak.finnRepresentantEllerFullmektig(Representerer.BRUKER);
-
-        assertThat(representant).isEqualTo(Optional.of(a2));
     }
 
     @Test
