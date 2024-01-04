@@ -25,16 +25,15 @@ object LoggingTestUtils {
         return block { iLoggingEventList[i++] }
     }
 
-    inline fun <reified T> withLogAppender(block: (list: List<ILoggingEvent>) -> Unit) {
+    inline fun withLogCapture(block: (logEvents: List<ILoggingEvent>) -> Unit) {
         val listAppender = ListAppender<ILoggingEvent>().apply {
             start()
-            (LoggerFactory.getLogger(T::class.java) as Logger).addAppender(this)
+            (LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger).addAppender(this)
         }
         try {
             block(listAppender.list)
         } finally {
-            (LoggerFactory.getLogger(T::class.java) as Logger).detachAppender(listAppender)
+            (LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME) as Logger).detachAppender(listAppender)
         }
     }
-
 }

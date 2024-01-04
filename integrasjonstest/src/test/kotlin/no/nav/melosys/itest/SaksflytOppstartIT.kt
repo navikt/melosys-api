@@ -25,7 +25,6 @@ import no.nav.melosys.integrasjon.joark.saf.dto.journalpost.*
 import no.nav.melosys.melosysmock.sak.SakRepo
 import no.nav.melosys.repository.BehandlingRepository
 import no.nav.melosys.repository.FagsakRepository
-import no.nav.melosys.saksflyt.ProsessinstansBehandler
 import no.nav.melosys.saksflyt.ProsessinstansRepository
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
@@ -129,14 +128,14 @@ internal class SaksflytOppstartIT(
         every { safConsumer.hentJournalpost(eessiMelding().journalpostId) } returns journalpost()
 
 
-        LoggingTestUtils.withLogAppender<ProsessinstansBehandler> { list ->
+        LoggingTestUtils.withLogCapture { logEvents ->
             applicationEventPublisher.publishEvent(applicationReadyEvent())
             await.timeout(Duration.ofMinutes(1)).pollInterval(Duration.ofSeconds(2)).until {
                 prosessinstansRepository.findAllByStatusIn(
                     ProsessStatus.hentAktiveStatuser(),
-                ).size == 1 || list.none { it.level != Level.ERROR }
+                ).size == 1 || logEvents.none { it.level != Level.ERROR }
             }
-            list.firstOrNull { it.level == Level.ERROR }?.let {
+            logEvents.firstOrNull { it.level == Level.ERROR }?.let {
                 throw TekniskException("ProsessinstansBehandler feilet med melding: ${it.formattedMessage}")
             }
         }
