@@ -208,6 +208,12 @@ class JournalfoeringIT(
                 it.avsenderMottaker.navn.shouldNotBeNull()
                 it.sakId.shouldBe(fagsak.saksnummer)
             }
+        tilKnyttetJournalpost.any {
+            it.tittel == "Tittel til dokument"
+        }
+        tilKnyttetJournalpost.any {
+            it.tittel == "Melding om forventet saksbehandlingstid"
+        }
     }
 
     @Test

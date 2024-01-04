@@ -141,7 +141,7 @@ public class JournalfoeringService {
         var sakstema = Sakstemaer.valueOf(journalfoeringDto.getFagsak().getSakstema());
         var behandlingstema = Behandlingstema.valueOf(journalfoeringDto.getBehandlingstemaKode());
         var behandlingstype = Behandlingstyper.valueOf(journalfoeringDto.getBehandlingstypeKode());
-        Aktoersroller hovedpart = journalføringGjelder(journalfoeringDto);
+        Aktoersroller hovedpart = journalføringGjelder(journalfoeringDto.getBrukerID());
 
         lovligeKombinasjonerService.validerOpprettelseOgEndring(
             hovedpart, sakstype, sakstema, behandlingstema, behandlingstype);
@@ -179,7 +179,7 @@ public class JournalfoeringService {
                 "FØRSTEGANG og NY_VURDERING og sakstema: MEDLEMSKAP_LOVVALG");
         }
 
-        if (!journalføringGjelderBruker(journalfoeringDto)) {
+        if (!journalføringGjelderBruker(journalfoeringDto.getBrukerID())) {
             throw new FunksjonellException("Kan kun sende forvaltningsmelding for Aktoersroller: " +
                 "BRUKER");
         }
@@ -194,7 +194,7 @@ public class JournalfoeringService {
             throw new FunksjonellException("Kan kun sende forvaltningsmelding for behandlingtyper: " +
                 "FØRSTEGANG og NY_VURDERING og sakstema: MEDLEMSKAP_LOVVALG");
         }
-        if (!journalføringGjelderBruker(journalfoeringDto)) {
+        if (!journalføringGjelderBruker(journalfoeringDto.getBrukerID())) {
             throw new FunksjonellException("Kan kun sende forvaltningsmelding for Aktoersroller: " +
                 "BRUKER");
         }
@@ -238,7 +238,7 @@ public class JournalfoeringService {
             validerKanTilknytteJournalpostForSedTilSak(journalpost, saksnummer);
         }
 
-        if(journalfoeringDto.skalSendeForvaltningsmelding()) {
+        if (journalfoeringDto.skalSendeForvaltningsmelding()) {
             validerKanSendeForvaltningsmelding(journalfoeringDto, fagsak.getTema());
         }
 
@@ -423,19 +423,12 @@ public class JournalfoeringService {
         return eessiService.finnBehandlingstemaForSedTilknyttetJournalpost(journalpostID);
     }
 
-    private boolean journalføringGjelderBruker(JournalfoeringOpprettDto journalfoeringDto) {
-        return Aktoersroller.BRUKER.equals(journalføringGjelder(journalfoeringDto));
+    private boolean journalføringGjelderBruker(String brukerID) {
+        return Aktoersroller.BRUKER.equals(journalføringGjelder(brukerID));
     }
 
-    private Aktoersroller journalføringGjelder(JournalfoeringOpprettDto journalfoeringDto) {
-        return journalfoeringDto.getBrukerID() != null ? Aktoersroller.BRUKER : Aktoersroller.VIRKSOMHET;
+    private Aktoersroller journalføringGjelder(String brukerID) {
+        return brukerID != null ? Aktoersroller.BRUKER : Aktoersroller.VIRKSOMHET;
     }
 
-    private boolean journalføringGjelderBruker(JournalfoeringTilordneDto journalfoeringDto) {
-        return Aktoersroller.BRUKER.equals(journalføringGjelder(journalfoeringDto));
-    }
-
-    private Aktoersroller journalføringGjelder(JournalfoeringTilordneDto journalfoeringDto) {
-        return journalfoeringDto.getBrukerID() != null ? Aktoersroller.BRUKER : Aktoersroller.VIRKSOMHET;
-    }
 }
