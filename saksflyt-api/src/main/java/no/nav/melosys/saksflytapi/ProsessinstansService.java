@@ -201,7 +201,7 @@ public class ProsessinstansService {
 
 
     private static boolean skalSendesForvaltningsmelding(JournalfoeringRequest journalfoeringRequest) {
-        return journalfoeringRequest.getIkkeSendForvaltingsmelding() != null && !journalfoeringRequest.getIkkeSendForvaltingsmelding();
+        return journalfoeringRequest.getForvaltningsmeldingMottaker() != null && !journalfoeringRequest.getForvaltningsmeldingMottaker().equals(ForvaltningsmeldingMottaker.INGEN);
     }
 
     private static String getSaksbehandlerIdent() {

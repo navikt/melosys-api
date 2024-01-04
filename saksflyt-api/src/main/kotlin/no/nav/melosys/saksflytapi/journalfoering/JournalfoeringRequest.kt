@@ -1,6 +1,7 @@
 package no.nav.melosys.saksflytapi.journalfoering
 
 import no.nav.melosys.domain.kodeverk.Avsendertyper
+import no.nav.melosys.domain.kodeverk.ForvaltningsmeldingMottaker
 import java.time.LocalDate
 
 interface JournalfoeringRequest {
@@ -15,5 +16,5 @@ interface JournalfoeringRequest {
     val brukerID: String?
     val oppgaveID: String?
     val hoveddokument: DokumentRequest?
-    val ikkeSendForvaltingsmelding: Boolean?
+    val forvaltningsmeldingMottaker: ForvaltningsmeldingMottaker?
 }

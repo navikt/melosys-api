@@ -341,7 +341,7 @@ class ProsessinstansServiceTest {
     void opprettProsessinstansJournalføring_ikkeSendForvaltningsmeldingFalse_settesIProsessinstans() {
         JournalfoeringOpprettRequest journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest();
 
-        journalfoeringOpprettRequest.setIkkeSendForvaltingsmelding(false);
+        journalfoeringOpprettRequest.setForvaltningsmeldingMottaker(ForvaltningsmeldingMottaker.BRUKER);
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringOpprettRequest, null);
 
@@ -352,7 +352,7 @@ class ProsessinstansServiceTest {
     void opprettProsessinstansJournalføring_ikkeSendForvaltningsmeldingTrue_settesIProsessinstans() {
         JournalfoeringOpprettRequest journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest();
 
-        journalfoeringOpprettRequest.setIkkeSendForvaltingsmelding(true);
+        journalfoeringOpprettRequest.setForvaltningsmeldingMottaker(ForvaltningsmeldingMottaker.INGEN);
 
 
         Prosessinstans prosessinstans = prosessinstansService.lagJournalføringProsessinstans(ProsessType.ANMODNING_OM_UNNTAK, journalfoeringOpprettRequest, null);

@@ -41,7 +41,7 @@ public class JournalfoeringOpprettDto extends JournalfoeringDto {
             vedlegg.stream().map(DokumentDto::tilDokumentRequest).toList(),
             skalTilordnes,
             mottattDato,
-            ikkeSendForvaltingsmelding,
+            forvaltningsmeldingMottaker,
             behandlingstemaKode,
             behandlingstypeKode,
             new Fagsak(fagsak.getSakstema(), fagsak.getSakstype(),

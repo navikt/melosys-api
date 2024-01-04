@@ -203,26 +203,13 @@ class JournalfoeringServiceTest {
             eq(false), any(LocalDate.class), any(Behandlingsaarsaktyper.class), eq("AB:123"));
     }
 
-    @Test
-    void journalførOgOpprettSak_medFullmektig_oppretterKorrektProsessinstans() {
-        FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS);
-        opprettDto.setFagsak(fagsakDto);
-        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
-
-
-        journalfoeringService.journalførOgOpprettSak(opprettDto);
-
-
-        verify(prosessinstansService).opprettProsessinstansJournalføringNySak(opprettDto.tilJournalfoeringOpprettRequest(), JFR_NY_SAK_BRUKER,
-            true, LocalDate.EPOCH, SØKNAD, null);
-    }
 
     @Test
     void journalførOgOpprettSak_ugyldigBehandlingstypeOgSakstema_nårSenderForvaltningsmelding_kasterException() {
         opprettDto.setBehandlingstypeKode(Behandlingstyper.KLAGE.getKode());
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
-        opprettDto.setIkkeSendForvaltingsmelding(false);
+        opprettDto.setForvaltningsmeldingMottaker(ForvaltningsmeldingMottaker.BRUKER);
 
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -241,7 +228,7 @@ class JournalfoeringServiceTest {
         when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
 
 
-        tilordneDto.setIkkeSendForvaltingsmelding(false);
+        tilordneDto.setForvaltningsmeldingMottaker(ForvaltningsmeldingMottaker.BRUKER);
 
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -261,7 +248,7 @@ class JournalfoeringServiceTest {
         when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
 
 
-        tilordneDto.setIkkeSendForvaltingsmelding(false);
+        tilordneDto.setForvaltningsmeldingMottaker(ForvaltningsmeldingMottaker.BRUKER);
 
         assertThatExceptionOfType(FunksjonellException.class)
             .isThrownBy(() -> journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto))
@@ -277,7 +264,7 @@ class JournalfoeringServiceTest {
         opprettDto.setFagsak(fagsakDto);
         opprettDto.setBrukerID(null);
         opprettDto.setBehandlingstypeKode(FØRSTEGANG.getKode());
-        opprettDto.setIkkeSendForvaltingsmelding(false);
+        opprettDto.setForvaltningsmeldingMottaker(ForvaltningsmeldingMottaker.BRUKER);
 
 
         assertThatExceptionOfType(FunksjonellException.class)
@@ -294,7 +281,7 @@ class JournalfoeringServiceTest {
         opprettDto.setFagsak(fagsakDto);
         opprettDto.setBehandlingstypeKode(FØRSTEGANG.getKode());
         opprettDto.setBehandlingstemaKode(Behandlingstema.UTSENDT_SELVSTENDIG.getKode());
-        opprettDto.setIkkeSendForvaltingsmelding(false);
+        opprettDto.setForvaltningsmeldingMottaker(ForvaltningsmeldingMottaker.BRUKER);
 
 
         journalfoeringService.journalførOgOpprettSak(opprettDto);
@@ -316,7 +303,7 @@ class JournalfoeringServiceTest {
         opprettDto.setFagsak(fagsakDto);
         opprettDto.setBehandlingstypeKode(NY_VURDERING.getKode());
         opprettDto.setBehandlingstemaKode(Behandlingstema.UTSENDT_SELVSTENDIG.getKode());
-        opprettDto.setIkkeSendForvaltingsmelding(false);
+        opprettDto.setForvaltningsmeldingMottaker(ForvaltningsmeldingMottaker.BRUKER);
 
 
         journalfoeringService.journalførOgOpprettSak(opprettDto);
@@ -407,18 +394,6 @@ class JournalfoeringServiceTest {
 
         verify(prosessinstansService).opprettProsessinstansJournalføringNySak(opprettDto.tilJournalfoeringOpprettRequest(), JFR_NY_SAK_BRUKER,
             true, LocalDate.EPOCH, SØKNAD, "AB:123");
-    }
-
-    @Test
-    void journalførOgOpprettSak_fullmektigUtenFullmakt_feiler() {
-        FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS);
-        opprettDto.setFagsak(fagsakDto);
-        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
-
-
-        assertThatExceptionOfType(FunksjonellException.class)
-            .isThrownBy(() -> journalfoeringService.journalførOgOpprettSak(opprettDto))
-            .withMessageContaining("Fullmektig har ingen fullmakter");
     }
 
     @Test

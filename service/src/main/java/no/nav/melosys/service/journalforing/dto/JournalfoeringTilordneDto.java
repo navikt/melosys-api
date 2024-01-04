@@ -35,7 +35,7 @@ public class JournalfoeringTilordneDto extends JournalfoeringDto {
             vedlegg.stream().map(DokumentDto::tilDokumentRequest).toList(),
             mottattDato,
             skalTilordnes,
-            ikkeSendForvaltingsmelding,
+            forvaltningsmeldingMottaker,
             behandlingstemaKode,
             behandlingstypeKode,
             saksnummer,
