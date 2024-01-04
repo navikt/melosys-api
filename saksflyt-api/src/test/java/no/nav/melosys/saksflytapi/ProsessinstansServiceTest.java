@@ -338,7 +338,7 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    void opprettProsessinstansJournalføring_ikkeSendForvaltningsmeldingFalse_settesIProsessinstans() {
+    void opprettProsessinstansJournalføring_SKAL_SENDES_FORVALTNINGSMELDINGfalse_settesIProsessinstans() {
         JournalfoeringOpprettRequest journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest();
 
         journalfoeringOpprettRequest.setForvaltningsmeldingMottaker(ForvaltningsmeldingMottaker.BRUKER);
@@ -349,7 +349,7 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    void opprettProsessinstansJournalføring_ikkeSendForvaltningsmeldingTrue_settesIProsessinstans() {
+    void opprettProsessinstansJournalføring_SKAL_SENDES_FORVALTNINGSMELDINGtrue_settesIProsessinstans() {
         JournalfoeringOpprettRequest journalfoeringOpprettRequest = lagJournalfoeringOpprettRequest();
 
         journalfoeringOpprettRequest.setForvaltningsmeldingMottaker(ForvaltningsmeldingMottaker.INGEN);
@@ -693,7 +693,7 @@ class ProsessinstansServiceTest {
     }
 
     @Test
-    void opprettProsessinstansSøknadMottatt_mottakEldreEnnNoenDager_ikkeSendForvaltningsmelding() {
+    void opprettProsessinstansSøknadMottatt_mottakEldreEnnNoenDager_SKAL_SENDES_FORVALTNINGSMELDINGfalse() {
         prosessinstansService.opprettProsessinstansSøknadMottatt("søknadID", false, true);
 
 

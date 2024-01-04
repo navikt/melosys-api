@@ -9,10 +9,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import no.nav.melosys.domain.Fagsystem
-import no.nav.melosys.domain.kodeverk.Landkoder
-import no.nav.melosys.domain.kodeverk.Saksstatuser
-import no.nav.melosys.domain.kodeverk.Sakstemaer
-import no.nav.melosys.domain.kodeverk.Sakstyper
+import no.nav.melosys.domain.kodeverk.*
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsresultattyper
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsstatus
 import no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema
@@ -223,7 +220,7 @@ class JournalfoeringIT(
             fagsak.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode
             behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
             behandlingstemaKode = Behandlingstema.UTSENDT_ARBEIDSTAKER.kode
-            isIkkeSendForvaltingsmelding = false
+            forvaltningsmeldingMottaker = ForvaltningsmeldingMottaker.BRUKER
         }
         val prosessinstans = journalførOgVentTilProsesserErFerdige(
             journalfoeringOpprettDto,
@@ -278,7 +275,7 @@ class JournalfoeringIT(
             fagsak.sakstema = Sakstemaer.MEDLEMSKAP_LOVVALG.kode
             behandlingstypeKode = Behandlingstyper.FØRSTEGANG.kode
             behandlingstemaKode = Behandlingstema.ARBEID_KUN_NORGE.kode
-            isIkkeSendForvaltingsmelding = true
+            forvaltningsmeldingMottaker = ForvaltningsmeldingMottaker.INGEN
         }
         val prosessinstans = journalførOgVentTilProsesserErFerdige(
             journalfoeringOpprettDto,
