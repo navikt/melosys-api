@@ -69,10 +69,7 @@ final class FerdigbehandlingKontroll {
             return null;
         }
 
-        KontrolldataFeilType feilType = kontrollPeriode.erAvslått()
-            ? KontrolldataFeilType.ADVARSEL
-            : KontrolldataFeilType.FEIL;
-        return new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_UNNTAK_PERIODER, feilType);
+        return new Kontrollfeil(Kontroll_begrunnelser.OVERLAPPENDE_UNNTAK_PERIODER, KontrolldataFeilType.ADVARSEL);
     }
 
 
