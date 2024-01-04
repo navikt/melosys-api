@@ -55,17 +55,6 @@ internal class SaksflytLåsreferanseIT(
     @Autowired private val prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val prosessinstansService: ProsessinstansService,
 ) : OracleTestContainerBase() {
-    private val processUUID = UUID.randomUUID()
-
-    @BeforeEach
-    fun before() {
-        ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "test", "Z123456", "saksbehandler")
-    }
-
-    @AfterEach
-    fun after() {
-        ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
-    }
 
     @Test
     fun `ikke kjør OpprettManglendeInnbetalingBehandling samtidig`() {

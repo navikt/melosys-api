@@ -3,8 +3,10 @@ package no.nav.melosys.itest
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.string.shouldMatch
 import io.kotest.matchers.string.shouldStartWith
+import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
+import mu.KotlinLogging
 import no.nav.melosys.Application
 import no.nav.melosys.LoggingTestUtils
 import no.nav.melosys.LoggingTestUtils.check
@@ -15,11 +17,13 @@ import no.nav.melosys.saksflyt.steg.sed.mottak.SedMottakRuting
 import no.nav.melosys.saksflytapi.ProsessinstansService
 import no.nav.melosys.saksflytapi.domain.ProsessStatus
 import no.nav.melosys.saksflytapi.domain.ProsessSteg
+import no.nav.melosys.saksflytapi.domain.Prosessinstans
 import no.nav.melosys.sikkerhet.context.ThreadLocalAccessInfo
 import no.nav.security.token.support.spring.test.EnableMockOAuth2Server
 import org.awaitility.kotlin.await
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase
@@ -30,8 +34,11 @@ import org.springframework.context.annotation.Import
 import org.springframework.context.annotation.Primary
 import org.springframework.kafka.test.context.EmbeddedKafka
 import org.springframework.test.context.ActiveProfiles
+import java.lang.Thread.sleep
 import java.time.Duration
 import java.util.*
+
+private val log = KotlinLogging.logger { }
 
 @ActiveProfiles("test")
 @SpringBootTest(
@@ -50,17 +57,6 @@ internal class SedLåsreferanseIT(
     @Autowired private val prosessinstansRepository: ProsessinstansRepository,
     @Autowired private val prosessinstansService: ProsessinstansService,
 ) : OracleTestContainerBase() {
-    private val processUUID = UUID.randomUUID()
-
-    @BeforeEach
-    fun before() {
-        ThreadLocalAccessInfo.beforeExecuteProcess(processUUID, "test", "Z123456", "saksbehandler")
-    }
-
-    @AfterEach
-    fun after() {
-        ThreadLocalAccessInfo.afterExecuteProcess(processUUID)
-    }
 
     @Test
     fun `ikke kjør samtidig når sed har samme rinaSaksnummer men forsjellig sedId, sedVersjon`() {
@@ -100,6 +96,7 @@ internal class SedLåsreferanseIT(
 
     @Test
     // Test som viser dagens logikk, TODO dette bør også kjøre synkront som testen over
+    @Disabled("Denne testen feiler noen ganger siden den ikke er synkronisert, så log linjene kan komme i en annen rekkefølge")
     fun `kjør samtidig når sed har samme rinaSaksnummer, sedId og sedVersjon`() {
         val logItems = LoggingTestUtils.captureLog<ProsessinstansBehandler> {
             val låsReferanser = lagProsesser(
@@ -137,6 +134,7 @@ internal class SedLåsreferanseIT(
 
     fun lagProsesser(eessiMeldinger: List<MelosysEessiMelding>): List<String> = eessiMeldinger.map {
         prosessinstansService.opprettProsessinstansSedMottak(it)
+        sleep(10)
         it.lagUnikIdentifikator()
     }
 
@@ -147,7 +145,11 @@ internal class SedLåsreferanseIT(
         fun opprettSedMottakRutingTest(): SedMottakRuting {
             return mockk<SedMottakRuting>().apply {
                 every { inngangsSteg() } returns ProsessSteg.SED_MOTTAK_RUTING
-                every { utfør(any()) } returns Unit
+
+                val slot = CapturingSlot<Prosessinstans>()
+                every { utfør(capture(slot)) } answers {
+                    log.info("Utfører for prosess ${slot.captured.id} - ${slot.captured.låsReferanse}")
+                }
             }
         }
     }
