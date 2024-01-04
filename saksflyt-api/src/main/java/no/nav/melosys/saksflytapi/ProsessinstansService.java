@@ -125,7 +125,7 @@ public class ProsessinstansService {
         prosessinstans.setData(ProsessDataKey.AVSENDER_NAVN, journalfoeringRequest.getAvsenderNavn());
         prosessinstans.setData(ProsessDataKey.HOVEDDOKUMENT_TITTEL, journalfoeringRequest.getHoveddokument().getTittel());
         prosessinstans.setData(ProsessDataKey.SKAL_TILORDNES, journalfoeringRequest.getSkalTilordnes());
-        prosessinstans.setData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, skalSendesForvaltningsmelding(journalfoeringRequest));
+        prosessinstans.setData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, journalfoeringRequest.getForvaltningsmeldingMottaker());
 
         if (journalfoeringRequest.getMottattDato() != null) {
             prosessinstans.setData(ProsessDataKey.MOTTATT_DATO, journalfoeringRequest.getMottattDato());
@@ -525,7 +525,8 @@ public class ProsessinstansService {
                 .medType(ProsessType.MOTTAK_SOKNAD_ALTINN)
                 .build();
             prosessinstans.setData(ProsessDataKey.MOTTATT_SOKNAD_ID, søknadID);
-            prosessinstans.setData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, !erSøknadForGammelTilForvaltningsmelding);
+            prosessinstans.setData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, erSøknadForGammelTilForvaltningsmelding ?
+                ForvaltningsmeldingMottaker.INGEN : ForvaltningsmeldingMottaker.BRUKER);
 
             lagre(prosessinstans);
         }

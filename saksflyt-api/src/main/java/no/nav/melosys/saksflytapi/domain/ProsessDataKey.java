@@ -60,7 +60,6 @@ public enum ProsessDataKey {
     SAKSTYPE("sakstype"),
     SAKSTEMA("sakstema"),
     SED_DOKUMENT("sedDokument"),
-    SKAL_SENDES_FORVALTNINGSMELDING("skalSendesForvaltningsmelding"),
     SKAL_TILORDNES("skalTilordnes"),
     STATSBORGERSKAP("statsborgerskap"),
     SØKNADSLAND("land"),
@@ -73,7 +72,8 @@ public enum ProsessDataKey {
     VARSLE_UTLAND("varsleUtland"),
     VEDLEGG_SED("vedleggTilSed"),
     VIRKSOMHET_ORGNR("virksomhetOrgnr"),
-    YTTERLIGERE_INFO_SED("ytterligereInformasjonSed");
+    YTTERLIGERE_INFO_SED("ytterligereInformasjonSed"),
+    FORVALTNINGSMELDING_MOTTAKER("forvaltningsmeldingMottaker");
 
     private final String kode;
 

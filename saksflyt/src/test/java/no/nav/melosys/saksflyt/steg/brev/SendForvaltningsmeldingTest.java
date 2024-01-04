@@ -4,6 +4,7 @@ import java.util.List;
 
 import no.nav.melosys.domain.Behandling;
 import no.nav.melosys.domain.brev.Mottaker;
+import no.nav.melosys.domain.kodeverk.ForvaltningsmeldingMottaker;
 import no.nav.melosys.saksflyt.brev.BrevBestiller;
 import no.nav.melosys.saksflytapi.domain.ProsessDataKey;
 import no.nav.melosys.saksflytapi.domain.Prosessinstans;
@@ -35,7 +36,7 @@ class SendForvaltningsmeldingTest {
     }
 
     @Test
-    void utfør_skalSendesForvaltningsmelding_bestillerForvaltningsmelding() {
+    void utfør_forvaltningsMeldingMottakerErBruker_bestillerForvaltningsmelding() {
         final long behandlingID = 21432L;
         var behandling = new Behandling();
         behandling.setTema(null);
@@ -43,7 +44,7 @@ class SendForvaltningsmeldingTest {
         when(behandlingService.hentBehandlingMedSaksopplysninger(behandlingID)).thenReturn(behandling);
         var prosessinstans = new Prosessinstans();
         prosessinstans.setBehandling(behandling);
-        prosessinstans.setData(ProsessDataKey.SKAL_SENDES_FORVALTNINGSMELDING, true);
+        prosessinstans.setData(ProsessDataKey.FORVALTNINGSMELDING_MOTTAKER, ForvaltningsmeldingMottaker.BRUKER);
         prosessinstans.setData(ProsessDataKey.SAKSBEHANDLER, "TEST");
 
 
