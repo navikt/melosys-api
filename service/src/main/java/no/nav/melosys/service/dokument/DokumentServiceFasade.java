@@ -11,6 +11,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static no.nav.melosys.domain.kodeverk.brev.Produserbaredokumenter.MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD;
+
 @Service
 public class DokumentServiceFasade {
 
@@ -54,8 +56,12 @@ public class DokumentServiceFasade {
         brevbestillingDto.setFritekst(fritekst);
         brevbestillingDto.setBegrunnelseKode(begrunnelseKode);
         brevbestillingDto.setBestillersId(avsenderId);
-        brevbestillingDto.setOrgnr(mottaker.getOrgnr());
-        brevbestillingDto.setAnnenMottakerIdent(mottaker.getPersonIdent());
+        // Metoden kalles kun gjennom PIene for forvaltningsmelding og henleggelsesmelding. Overstyringen av mottaker legges inn under en if blokk
+        // for å unngå uønsket funksjonalitet dersom man tar i bruk denne metoden i fremtiden.
+        if (produserbartDokument.equals(MELDING_FORVENTET_SAKSBEHANDLINGSTID_SOKNAD)) {
+            brevbestillingDto.setOrgnr(mottaker.getOrgnr());
+            brevbestillingDto.setAnnenMottakerIdent(mottaker.getPersonIdent());
+        }
 
         dokgenService.produserOgDistribuerBrev(behandlingId, brevbestillingDto);
     }

@@ -46,7 +46,6 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
     public void utfør(Prosessinstans prosessinstans) {
         String aktørID = finnAktørID(prosessinstans).orElse(null);
         String virksomhetOrgnr = prosessinstans.getData(VIRKSOMHET_ORGNR);
-        String arbeidsgiver = prosessinstans.getData(ARBEIDSGIVER);
         String initierendeJournalpostId = prosessinstans.getData(JOURNALPOST_ID);
         String initierendeDokumentId = prosessinstans.getData(DOKUMENT_ID);
         LocalDate mottaksdato = prosessinstans.getData(MOTTATT_DATO, LocalDate.class);
@@ -60,7 +59,6 @@ public class OpprettFagsakOgBehandling implements StegBehandler {
         OpprettSakRequest opprettSakRequest = new OpprettSakRequest.Builder()
             .medAktørID(aktørID)
             .medVirksomhetOrgnr(virksomhetOrgnr)
-            .medArbeidsgiver(arbeidsgiver)
             .medSakstype(sakstype)
             .medSakstema(sakstema)
             .medBehandlingsårsaktype(behandlingsårsaktype)

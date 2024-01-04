@@ -6,8 +6,6 @@ package no.nav.melosys.saksflytapi.domain;
 public enum ProsessDataKey {
 
     AKTØR_ID("aktoerID"),
-    @Deprecated(since = "melosys.fullmektig.trygdeavgift")
-    ARBEIDSGIVER("arbeidsgiver"),
     ARBEIDSGIVER_SKAL_HA_KOPI("arbeidsgiverSkalHaKopi"),
     ARKIVSYSTEM("arkivsystem"),
     ARKIV_ID("arkivId"),

@@ -368,7 +368,21 @@ public final class BrevbestillingDto {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         BrevbestillingDto that = (BrevbestillingDto) o;
-        return kontaktopplysninger == that.kontaktopplysninger && produserbardokument == that.produserbardokument && mottaker == that.mottaker && Objects.equals(orgnr, that.orgnr) && Objects.equals(orgnrNorskMyndighet, that.orgnrNorskMyndighet) && Objects.equals(institusjonId, that.institusjonId) && Objects.equals(innledningFritekst, that.innledningFritekst) && Objects.equals(manglerFritekst, that.manglerFritekst) && Objects.equals(begrunnelseFritekst, that.begrunnelseFritekst) && Objects.equals(ektefelleFritekst, that.ektefelleFritekst) && Objects.equals(barnFritekst, that.barnFritekst) && Objects.equals(trygdeavgiftFritekst, that.trygdeavgiftFritekst) && Objects.equals(kontaktpersonNavn, that.kontaktpersonNavn) && Objects.equals(kopiMottakere, that.kopiMottakere) && Objects.equals(bestillersId, that.bestillersId) && Objects.equals(fritekstTittel, that.fritekstTittel) && Objects.equals(fritekst, that.fritekst) && distribusjonstype == that.distribusjonstype && Objects.equals(nyVurderingBakgrunn, that.nyVurderingBakgrunn) && Objects.equals(saksVedlegg, that.saksVedlegg) && Objects.equals(fritekstvedlegg, that.fritekstvedlegg) && Objects.equals(dokumentTittel, that.dokumentTittel) && Objects.equals(saksbehandlerNrToIdent, that.saksbehandlerNrToIdent) && Objects.equals(begrunnelseKode, that.begrunnelseKode) && Objects.equals(ytterligereInformasjon, that.ytterligereInformasjon) && Objects.equals(fakturanummer, that.fakturanummer) && betalingsstatus == that.betalingsstatus && Objects.equals(fullmektigForBetaling, that.fullmektigForBetaling) && Objects.equals(betalingsfrist, that.betalingsfrist) && Objects.equals(annenMottakerIdent, that.annenMottakerIdent);
+        return kontaktopplysninger == that.kontaktopplysninger && produserbardokument == that.produserbardokument && mottaker == that.mottaker &&
+            Objects.equals(orgnr, that.orgnr) && Objects.equals(orgnrNorskMyndighet, that.orgnrNorskMyndighet) &&
+            Objects.equals(institusjonId, that.institusjonId) && Objects.equals(innledningFritekst, that.innledningFritekst) &&
+            Objects.equals(manglerFritekst, that.manglerFritekst) && Objects.equals(begrunnelseFritekst, that.begrunnelseFritekst) &&
+            Objects.equals(ektefelleFritekst, that.ektefelleFritekst) && Objects.equals(barnFritekst, that.barnFritekst) &&
+            Objects.equals(trygdeavgiftFritekst, that.trygdeavgiftFritekst) && Objects.equals(kontaktpersonNavn, that.kontaktpersonNavn) &&
+            Objects.equals(kopiMottakere, that.kopiMottakere) && Objects.equals(bestillersId, that.bestillersId) &&
+            Objects.equals(fritekstTittel, that.fritekstTittel) && Objects.equals(fritekst, that.fritekst) &&
+            distribusjonstype == that.distribusjonstype && Objects.equals(nyVurderingBakgrunn, that.nyVurderingBakgrunn) &&
+            Objects.equals(saksVedlegg, that.saksVedlegg) && Objects.equals(fritekstvedlegg, that.fritekstvedlegg) &&
+            Objects.equals(dokumentTittel, that.dokumentTittel) && Objects.equals(saksbehandlerNrToIdent, that.saksbehandlerNrToIdent) &&
+            Objects.equals(begrunnelseKode, that.begrunnelseKode) && Objects.equals(ytterligereInformasjon, that.ytterligereInformasjon) &&
+            Objects.equals(fakturanummer, that.fakturanummer) && betalingsstatus == that.betalingsstatus &&
+            Objects.equals(fullmektigForBetaling, that.fullmektigForBetaling) && Objects.equals(betalingsfrist, that.betalingsfrist) &&
+            Objects.equals(annenMottakerIdent, that.annenMottakerIdent);
     }
 
     @Override
