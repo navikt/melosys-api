@@ -70,6 +70,7 @@ class OpprettLovvalgsperiodeService(
     private fun validerRequestForUnntaksregistrering(request: OpprettLovvalgsperiodeRequest) {
         if (request.fomDato == null) throw FunksjonellException("Kan ikke opprette lovvalgsperiode for unntakregistrering uten fom-dato")
         if (request.tomDato != null && request.fomDato.isAfter(request.tomDato)) throw FunksjonellException("Fom-dato ${request.fomDato} er etter tom-dato ${request.tomDato}")
+        if (request.lovvalgsbestemmelse == null) throw FunksjonellException("Kan ikke opprette lovvalgsperiode for unntakregistrering uten bestemmelse")
         if ((request.lovvalgsbestemmelse == Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART11 || request.lovvalgsbestemmelse ==
             Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_9) && request.trygdedekning == null) throw FunksjonellException("Kan ikke opprette " +
             "lovvalgsperiode for unntaksregistrering med lovvalgsbestemmelse: ${request.lovvalgsbestemmelse} uten manuelt registrert trygdedekning")
@@ -110,7 +111,7 @@ class OpprettLovvalgsperiodeService(
         return lovvalgsperiodeRepository.save(lovvalgsperiode)
     }
 
-    private fun utledTrygdedekning(bestemmelse: LovvalgBestemmelse?): Trygdedekninger {
+    private fun utledTrygdedekning(bestemmelse: LovvalgBestemmelse): Trygdedekninger {
         return when (bestemmelse) {
             Lovvalgsbestemmelser_trygdeavtale_ca.CAN_ART7 -> Trygdedekninger.UNNTATT_CAN_7_5_B
             Lovvalgsbestemmelser_trygdeavtale_us.USA_ART5_2 -> Trygdedekninger.UNNTATT_USA_5_2_G
