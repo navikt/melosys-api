@@ -59,6 +59,7 @@ class JournalfoeringIT(
     @AfterEach
     fun afterEach() {
         oAuthMockServer.stop()
+        journalpostRepo.repo.clear()
     }
 
     @Test
@@ -200,11 +201,19 @@ class JournalfoeringIT(
             }
 
         val tilKnyttetJournalpost = journalpostRepo.repo.values.filterNot { it.journalpostId in eksisterendeJournalpostIds }
+
         tilKnyttetJournalpost
-            .single().run {
-                avsenderMottaker.navn.shouldNotBeNull()
-                sakId.shouldBe(fagsak.saksnummer)
+            .shouldHaveSize(2)
+            .onEach {
+                it.avsenderMottaker.navn.shouldNotBeNull()
+                it.sakId.shouldBe(fagsak.saksnummer)
             }
+        tilKnyttetJournalpost.any {
+            it.tittel == "Tittel til dokument"
+        }
+        tilKnyttetJournalpost.any {
+            it.tittel == "Melding om forventet saksbehandlingstid"
+        }
     }
 
     @Test

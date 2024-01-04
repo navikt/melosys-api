@@ -43,6 +43,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static no.nav.melosys.domain.kodeverk.Sakstemaer.MEDLEMSKAP_LOVVALG;
+import static no.nav.melosys.domain.kodeverk.Sakstemaer.UNNTAK;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper.ANNET;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingsaarsaktyper.SØKNAD;
 import static no.nav.melosys.domain.kodeverk.behandlinger.Behandlingstema.*;
@@ -231,6 +232,43 @@ class JournalfoeringServiceTest {
     }
 
     @Test
+    void journalførOgKnyttTilEksisterendeSak_ugyldigBehandlingstypeOgSakstema_nårSenderForvaltningsmelding_kasterException() {
+        tilordneDto.setBehandlingstypeKode(Behandlingstyper.KLAGE.getKode());
+        tilordneDto.setSaksnummer("123");
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+        Fagsak fagsak = lagFagsak(lagBehandling());
+        fagsak.setTema(UNNTAK);
+        when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
+
+
+        tilordneDto.setIkkeSendForvaltingsmelding(false);
+
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.journalførOgKnyttTilEksisterendeSak(tilordneDto))
+            .withMessageContaining("Kan kun sende forvaltningsmelding for behandlingtyper: " +
+                "FØRSTEGANG og NY_VURDERING og sakstema: MEDLEMSKAP_LOVVALG");
+    }
+
+    @Test
+    void journalførOgOpprettAndregangsBehandling_ugyldigAktoersrolle_nårSenderForvaltningsmelding_kasterException() {
+        tilordneDto.setBehandlingstypeKode(NY_VURDERING.getKode());
+        tilordneDto.setSaksnummer("123");
+        tilordneDto.setBrukerID(null);
+        when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
+        Fagsak fagsak = lagFagsak(lagBehandling());
+        fagsak.setTema(MEDLEMSKAP_LOVVALG);
+        when(fagsakService.hentFagsak(anyString())).thenReturn(fagsak);
+
+
+        tilordneDto.setIkkeSendForvaltingsmelding(false);
+
+        assertThatExceptionOfType(FunksjonellException.class)
+            .isThrownBy(() -> journalfoeringService.journalførOgOpprettAndregangsBehandling(tilordneDto))
+            .withMessageContaining("Kan kun sende forvaltningsmelding for Aktoersroller: BRUKER");
+    }
+
+    @Test
     void journalførOgOpprettSak_ugyldigAktoersrolle_nårSenderForvaltningsmelding_kasterException() {
         when(joarkFasade.hentJournalpost(anyString())).thenReturn(journalpost);
 
@@ -294,7 +332,7 @@ class JournalfoeringServiceTest {
     @Test
     void journalførOgOpprettSak_oppretterKorrektProsessinstans() {
         FagsakDto fagsakDto = lagFagsakDto(LocalDate.MIN, LocalDate.MAX, "DK", Sakstyper.EU_EOS);
-        fagsakDto.setSakstema(Sakstemaer.UNNTAK.getKode());
+        fagsakDto.setSakstema(UNNTAK.getKode());
         opprettDto.setFagsak(fagsakDto);
         opprettDto.setBehandlingstypeKode(Behandlingstyper.HENVENDELSE.getKode());
         opprettDto.setBehandlingstemaKode(FORESPØRSEL_TRYGDEMYNDIGHET.getKode());
@@ -616,7 +654,7 @@ class JournalfoeringServiceTest {
         aktoer.setRolle(Aktoersroller.BRUKER);
         fagsak.setAktører(Set.of(aktoer));
         fagsak.setType(Sakstyper.FTRL);
-        fagsak.setTema(Sakstemaer.UNNTAK);
+        fagsak.setTema(UNNTAK);
 
         when(joarkFasade.hentJournalpost(tilordneDto.getJournalpostID())).thenReturn(journalpost);
         when(fagsakService.hentFagsak(MELOSYS_SAKSNUMMER)).thenReturn(fagsak);
