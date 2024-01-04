@@ -96,7 +96,8 @@ public final class ProsessflytDefinisjon {
                 REPLIKER_BEHANDLING,
                 OPPDATER_OG_FERDIGSTILL_JOURNALPOST,
                 OPPDATER_SAKSRELASJON,
-                OPPRETT_OPPGAVE
+                OPPRETT_OPPGAVE,
+                SEND_FORVALTNINGSMELDING
             )
         );
 
@@ -108,7 +109,8 @@ public final class ProsessflytDefinisjon {
                 OPPDATER_SAKSRELASJON,
                 HENT_REGISTEROPPLYSNINGER,
                 VURDER_INNGANGSVILKÅR,
-                OPPRETT_OPPGAVE
+                OPPRETT_OPPGAVE,
+                SEND_FORVALTNINGSMELDING
             )
         );
 
@@ -118,7 +120,8 @@ public final class ProsessflytDefinisjon {
                 OPPDATER_SAKSRELASJON,
                 OPPRETT_TIDLIGERE_JOURNALPOSTER_FOR_SAK,
                 JFR_SETT_VURDER_DOKUMENT,
-                JFR_TILDEL_BEHANDLINGSOPPGAVE
+                JFR_TILDEL_BEHANDLINGSOPPGAVE,
+                SEND_FORVALTNINGSMELDING
             )
         );
 
