@@ -48,7 +48,7 @@ class OpprettLovvalgsperiodeService(
                 eksisterendeLovvalgsperiode,
                 request.fomDato!!,
                 request.tomDato,
-                request.lovvalgsbestemmelse,
+                request.lovvalgsbestemmelse!!,
                 request.trygdedekning,
             )
         }
@@ -84,7 +84,7 @@ class OpprettLovvalgsperiodeService(
         eksisterendeLovvalgsperiode: Lovvalgsperiode?,
         fom: LocalDate,
         tom: LocalDate?,
-        bestemmelse: LovvalgBestemmelse?,
+        bestemmelse: LovvalgBestemmelse,
         trygdedekning: Trygdedekninger?
     ): Lovvalgsperiode {
         val anmodningEllerAttest = behandling.mottatteOpplysninger.mottatteOpplysningerData as AnmodningEllerAttest
