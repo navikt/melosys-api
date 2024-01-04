@@ -16,29 +16,29 @@ class ProsessinstansFerdigListener(
     @EventListener
     fun prosessinstansFerdig(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
         log.info("Prosessinstans {} ferdig", prosessinstansFerdigEvent.uuid)
-        if (prosessinstansFerdigEvent.låsReferanse != null && !finnesAktivReferanse(prosessinstansFerdigEvent)) {
+        if (prosessinstansFerdigEvent.låsReferanse != null && finnesIkkeAktivReferanse(prosessinstansFerdigEvent)) {
             startNesteProsessinstans(prosessinstansFerdigEvent)
         }
     }
 
-    private fun finnesAktivReferanse(prosessinstansFerdigEvent: ProsessinstansFerdigEvent): Boolean {
-        if (prosessinstansRepository.existsByStatusNotInAndLåsReferanse(setOf(ProsessStatus.FERDIG), prosessinstansFerdigEvent.låsReferanse)) {
-            log.info("Det finnes en aktiv prosessinstans med låsreferanse {}", prosessinstansFerdigEvent.låsReferanse)
-            return finnesIkkeProssesserMedSammeReferanseOgForsjelligIdpåVent(prosessinstansFerdigEvent)
+    private fun finnesIkkeAktivReferanse(prosessinstansFerdigEvent: ProsessinstansFerdigEvent): Boolean {
+        if (!prosessinstansRepository.existsByStatusNotInAndLåsReferanse(setOf(ProsessStatus.FERDIG), prosessinstansFerdigEvent.låsReferanse)) {
+            log.info("Det finnes ingen aktiv prosessinstans med låsreferanse {}", prosessinstansFerdigEvent.låsReferanse)
+            return true
         }
-        log.info("Det finnes ingen aktiv prosessinstans med låsreferanse {}", prosessinstansFerdigEvent.låsReferanse)
-        return false
+        log.info("Det finnes en aktiv prosessinstans med låsreferanse {}", prosessinstansFerdigEvent.låsReferanse)
+        return finnesProssesserMedSammeLåsReferanseOgForsjelligIdpåVent(prosessinstansFerdigEvent)
     }
 
-    private fun finnesIkkeProssesserMedSammeReferanseOgForsjelligIdpåVent(prosessinstansFerdigEvent: ProsessinstansFerdigEvent): Boolean =
-        // Mulig vi kan lage en egen spørring for dette
+    private fun finnesProssesserMedSammeLåsReferanseOgForsjelligIdpåVent(prosessinstansFerdigEvent: ProsessinstansFerdigEvent): Boolean =
+        // Dette bør ryddes mer i og det blir lagt en egen oppgave for å fikse sed synkronisering med samme låsreferanser
         prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(
             prosessinstansFerdigEvent.uuid,
             setOf(ProsessStatus.FERDIG),
             prosessinstansFerdigEvent.låsReferanse
         ).filter { it.prosessStatus == ProsessStatus.PÅ_VENT && it.låsReferanse == prosessinstansFerdigEvent.låsReferanse }.apply {
-            log.info("$size prosessinstanser med låsreferanse ${prosessinstansFerdigEvent.låsReferanse} er på vent")
-        }.isEmpty()
+            log.info("$size prosessinstanser med nøyaktig samme låsreferanse ${prosessinstansFerdigEvent.låsReferanse} er på vent")
+        }.isNotEmpty()
 
     private fun startNesteProsessinstans(prosessinstansFerdigEvent: ProsessinstansFerdigEvent) {
         log.info("Forsøker å starte neste prosessinstans, låsreferanse {}", prosessinstansFerdigEvent.låsReferanse)
