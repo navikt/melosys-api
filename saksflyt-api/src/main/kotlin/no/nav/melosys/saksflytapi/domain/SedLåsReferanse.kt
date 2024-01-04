@@ -20,6 +20,9 @@ class SedLåsReferanse(val låsReferanse: String) : LåsReferanse {
     override fun skalSettesPåVent(aktiveLåsReferanser: Collection<String>): Boolean {
         if (aktiveLåsReferanser.isEmpty()) return false
 
+        // Det må nå sjekkes at det ikke finnes prossess med nøyaktig samme låsreferanse siden sed mottak
+        // lager nye prosesser med samme låsreferanse som forelderen
+        // Tenker fiksen blir å legge på postfix på subprosesser som lages. Når det er gjort kan denne sjekken fjernes
         return !aktiveLåsReferanser.contains(låsReferanse)
     }
 
