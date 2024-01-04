@@ -1,16 +1,16 @@
 package no.nav.melosys.domain.folketrygden;
 
-import java.time.LocalDate;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import javax.persistence.*;
-
 import no.nav.melosys.domain.Behandlingsresultat;
 import no.nav.melosys.domain.Medlemskapsperiode;
 import no.nav.melosys.domain.avgift.SkatteforholdTilNorge;
 import no.nav.melosys.domain.kodeverk.Folketrygdloven_kap2_bestemmelser;
 import no.nav.melosys.domain.kodeverk.Skatteplikttype;
+
+import javax.persistence.*;
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
 
 @Entity
 @Table(name = "medlem_av_folketrygden")
@@ -104,4 +104,10 @@ public class MedlemAvFolketrygden {
             .map(Medlemskapsperiode::getTom).orElse(null);
     }
 
+    public LocalDate utledOpphørtDato() {
+        return medlemskapsperioder.stream()
+            .filter(Medlemskapsperiode::erOpphørt)
+            .min(Comparator.comparing(Medlemskapsperiode::getFom))
+            .map(Medlemskapsperiode::getFom).orElse(null);
+    }
 }

@@ -203,8 +203,7 @@ class DokgenMalMapper(
             Produserbaredokumenter.VEDTAK_OPPHOERT_MEDLEMSKAP -> VedtakOpphoertMedlemskap.Builder(brevbestilling as VedtakOpphoertMedlemskapBrevbestilling)
                 .opphoertDato(
                     with(dokgenMapperDatahenter.hentBehandlingsresultat(brevbestilling.behandlingId)) {
-                        if (type === Behandlingsresultattyper.OPPHØRT)
-                            medlemAvFolketrygden.utledMedlemskapsperiodeFom()
+                        if (type == Behandlingsresultattyper.OPPHØRT) medlemAvFolketrygden.utledOpphørtDato()
                         else medlemAvFolketrygden.utledMedlemskapsperiodeTom().plusDays(1)
                     }
                 ).build()
