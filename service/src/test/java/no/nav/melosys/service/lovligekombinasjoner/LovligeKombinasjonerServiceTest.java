@@ -159,12 +159,57 @@ class LovligeKombinasjonerServiceTest {
     }
 
     @Test
-    void hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_returnererLovligKombinasjon() {
+    void hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_ikkeIKnyttTilSakKontekst_returnererLovligKombinasjon() {
         var muligeTyper = lovligeKombinasjonerService
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, MEDLEMSKAP_LOVVALG, YRKESAKTIV, null, null);
 
 
-        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE, MANGLENDE_INNBETALING_TRYGDEAVGIFT);
+        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
+    }
+
+    @Test
+    void hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_iKnyttTilSakKontekstOgSakHarBehandlingMedManglendeInnbetaling_returnererLovligKombinasjon() {
+        var sisteBehandling = sisteBehandling(MANGLENDE_INNBETALING_TRYGDEAVGIFT);
+        when(behandlingService.hentBehandling(sisteBehandling.getId())).thenReturn(sisteBehandling);
+
+
+        var muligeTyper = lovligeKombinasjonerService
+            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, MEDLEMSKAP_LOVVALG, YRKESAKTIV, null, sisteBehandling.getId());
+
+
+        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, HENVENDELSE, KLAGE, MANGLENDE_INNBETALING_TRYGDEAVGIFT);
+    }
+
+    @Test
+    void hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_iKnyttTilSakKontekstMenSakHarIkkeBehandlingMedManglendeInnbetaling_returnererLovligKombinasjon() {
+        var sisteBehandling = sisteBehandling(FØRSTEGANG);
+        when(behandlingService.hentBehandling(sisteBehandling.getId())).thenReturn(sisteBehandling);
+
+
+        var muligeTyper = lovligeKombinasjonerService
+            .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, MEDLEMSKAP_LOVVALG, YRKESAKTIV, null, sisteBehandling.getId());
+
+
+        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, HENVENDELSE, KLAGE);
+    }
+
+    private Behandling sisteBehandling(Behandlingstyper behandlingstype) {
+        var behandling = behandlingMedTemaOgType(YRKESAKTIV, behandlingstype);
+        behandling.setId(1L);
+        behandling.setStatus(AVSLUTTET);
+        var fagsak = new Fagsak();
+        fagsak.getBehandlinger().add(behandling);
+        behandling.setFagsak(fagsak);
+        return behandling;
+    }
+
+    @Test
+    void hentMuligeBehandlingstyper_FTRL_LOVVALG_MEDLEMSKAP_temaYrkesaktiv_toggleAv_returnererLovligKombinasjon() {
+        unleash.enableAllExcept(ToggleName.SAKSBEHANDLING_MANGLENDE_INNBETALING);
+        var muligeTyper = lovligeKombinasjonerService.hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, MEDLEMSKAP_LOVVALG, YRKESAKTIV, null, null);
+
+
+        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
     @Test
@@ -173,7 +218,7 @@ class LovligeKombinasjonerServiceTest {
             .hentMuligeBehandlingstyper(Aktoersroller.BRUKER, FTRL, MEDLEMSKAP_LOVVALG, PENSJONIST, null, null);
 
         // TODO: Gir det mening at pensjonist/ingenflyt får velge alle disse typene?
-        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE, MANGLENDE_INNBETALING_TRYGDEAVGIFT);
+        assertThat(muligeTyper).containsExactlyInAnyOrder(NY_VURDERING, FØRSTEGANG, HENVENDELSE, KLAGE);
     }
 
     @Test

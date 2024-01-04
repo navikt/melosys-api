@@ -149,13 +149,13 @@ public class LovligeKombinasjonerService {
     /**
      * Henter mulige behandlingstemaer
      *
-     * @param hovedpart          Hovedpart knyttet til fagsaken.
-     * @param sakstype           Allerede valgt sakstype.
-     * @param sakstema           Allerede valgt sakstema.
-     * @param behandlingstema    Allerede valgt behandlingstema.
-     * @param aktivBehandlingID  Nåværende behandling i fagsaken. (default = null) Brukt ved endring av sak.
+     * @param hovedpart         Hovedpart knyttet til fagsaken.
+     * @param sakstype          Allerede valgt sakstype.
+     * @param sakstema          Allerede valgt sakstema.
+     * @param behandlingstema   Allerede valgt behandlingstema.
+     * @param aktivBehandlingID Nåværende behandling i fagsaken. (default = null) Brukt ved endring av sak.
      * @param sisteBehandlingID Forrige behandling i fagsaken. (default = null)
-     *                           Brukt ved knytting til eksisterende sak.
+     *                          Brukt ved knytting til eksisterende sak.
      */
     public Set<Behandlingstyper> hentMuligeBehandlingstyper(
         Aktoersroller hovedpart,
@@ -193,7 +193,8 @@ public class LovligeKombinasjonerService {
         }
 
         return switch (hovedpart) {
-            case BRUKER -> behandlingstyperForBruker(sakstype, sakstema, behandlingstema, aktivBehandling, sisteBehandling, sistBehandlingstema, sistSaksstatus);
+            case BRUKER ->
+                behandlingstyperForBruker(sakstype, sakstema, behandlingstema, aktivBehandling, sisteBehandling, sistBehandlingstema, sistSaksstatus);
             case VIRKSOMHET -> LovligeSakskombinasjoner.muligeSaksKombinasjonerVirksomhet.get(sakstype).stream()
                 .filter(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.sakstema() == sakstema)
                 .flatMap(sakstemaBehandlingsKombinasjon -> sakstemaBehandlingsKombinasjon.behandlingstemaBehandlingstyperKombinasjoner().stream())
@@ -232,7 +233,13 @@ public class LovligeKombinasjonerService {
         if (!unleash.isEnabled(ToggleName.BEHANDLINGSTYPE_KLAGE)) {
             behandlingstyper.remove(KLAGE);
         }
-        if (!unleash.isEnabled(ToggleName.SAKSBEHANDLING_MANGLENDE_INNBETALING)) {
+        if (unleash.isEnabled(ToggleName.SAKSBEHANDLING_MANGLENDE_INNBETALING)) {
+            if (aktivBehandling != null && aktivBehandling.erManglendeInnbetalingTrygdeavgift()) {
+                behandlingstyper = new LinkedHashSet<>(List.of(aktivBehandling.getType()));
+            } else if (!(sisteBehandling != null && sisteBehandling.getFagsak().getBehandlinger().stream().anyMatch(Behandling::erManglendeInnbetalingTrygdeavgift))) {
+                behandlingstyper.remove(MANGLENDE_INNBETALING_TRYGDEAVGIFT);
+            }
+        } else {
             behandlingstyper.remove(MANGLENDE_INNBETALING_TRYGDEAVGIFT);
         }
         return behandlingstyper;
