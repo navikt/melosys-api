@@ -27,11 +27,12 @@ class ProsessinstansFerdigListener(
             return true
         }
         log.info("Det finnes en aktiv prosessinstans med låsreferanse {}", prosessinstansFerdigEvent.låsReferanse)
-        return finnesProssesserMedSammeLåsReferanseOgForsjelligIdpåVent(prosessinstansFerdigEvent)
+        return finnesProssesserMedSammeLåsReferanseOgForskjelligIdpåVent(prosessinstansFerdigEvent)
     }
 
-    private fun finnesProssesserMedSammeLåsReferanseOgForsjelligIdpåVent(prosessinstansFerdigEvent: ProsessinstansFerdigEvent): Boolean =
-        // Dette bør ryddes mer i og det blir lagt en egen oppgave for å fikse sed synkronisering med samme låsreferanser
+    private fun finnesProssesserMedSammeLåsReferanseOgForskjelligIdpåVent(prosessinstansFerdigEvent: ProsessinstansFerdigEvent): Boolean =
+        // Dette bør ryddes mer i og det er egen oppgave for å fikse sed synkronisering med samme
+        // låsreferanse: https://jira.adeo.no/browse/MELOSYS-6365
         prosessinstansRepository.findAllByIdNotAndStatusNotInAndLåsReferanseStartingWith(
             prosessinstansFerdigEvent.uuid,
             setOf(ProsessStatus.FERDIG),
