@@ -67,12 +67,12 @@ internal class SaksflytLåsreferanseIT(
         }
 
         logItems.shouldHaveSize(10).check { next ->
-            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås OMIB_01HHFM03YMHHQAVZ4SQF9Y29E4_23004119")
+            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås UBETALT_01HHFM03YMHHQAVZ4SQF9Y29E4_23004119")
             next().formattedMessage shouldStartWith "Utfører steg OPPRETT_MANGLENDE_INNBETALING_BEHANDLING"
             next().formattedMessage shouldStartWith "Utfører steg OPPRETT_OPPGAVE"
             next().formattedMessage shouldStartWith "Utfører steg SEND_MANGLENDE_INNBETALING_VARSELBREV"
             next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
-            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås OMIB_01HHFM03YMHHQAVZ4SQF9Y29E4_23004118")
+            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås UBETALT_01HHFM03YMHHQAVZ4SQF9Y29E4_23004118")
             next().formattedMessage shouldStartWith "Utfører steg OPPRETT_MANGLENDE_INNBETALING_BEHANDLING"
             next().formattedMessage shouldStartWith "Utfører steg OPPRETT_OPPGAVE"
             next().formattedMessage shouldStartWith "Utfører steg SEND_MANGLENDE_INNBETALING_VARSELBREV"
@@ -95,12 +95,12 @@ internal class SaksflytLåsreferanseIT(
         }
 
         logItems.shouldHaveSize(10).check { next ->
-            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås OMIB_01HHFM03YMHHQAVZ4SQF9Y29E4_23004119")
+            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås UBETALT_01HHFM03YMHHQAVZ4SQF9Y29E4_23004119")
             next().formattedMessage shouldStartWith "Utfører steg OPPRETT_MANGLENDE_INNBETALING_BEHANDLING"
             next().formattedMessage shouldStartWith "Utfører steg OPPRETT_OPPGAVE"
             next().formattedMessage shouldStartWith "Utfører steg SEND_MANGLENDE_INNBETALING_VARSELBREV"
             next().message shouldStartWith "Prosessinstans {} behandlet ferdig"
-            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås OMIB_01HHFM03YMHHQAVZ4SQF9Y29E4_23004119")
+            next().formattedMessage shouldMatch Regex("Starter behandling av prosessinstans .*? med lås UBETALT_01HHFM03YMHHQAVZ4SQF9Y29E4_23004119")
             next().formattedMessage shouldStartWith "Utfører steg OPPRETT_MANGLENDE_INNBETALING_BEHANDLING"
             next().formattedMessage shouldStartWith "Utfører steg OPPRETT_OPPGAVE"
             next().formattedMessage shouldStartWith "Utfører steg SEND_MANGLENDE_INNBETALING_VARSELBREV"
