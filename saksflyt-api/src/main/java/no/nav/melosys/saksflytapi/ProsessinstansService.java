@@ -152,7 +152,7 @@ public class ProsessinstansService {
         prosessinstans.setData(FAKTURASERIE_REFERANSE, manglendeFakturabetalingMelding.getFakturaserieReferanse());
         prosessinstans.setData(BETALINGSSTATUS, manglendeFakturabetalingMelding.getBetalingsstatus());
         prosessinstans.setData(FAKTURANUMMER, manglendeFakturabetalingMelding.getFakturanummer());
-        prosessinstans.setLåsReferanse(LåsReferanseFactory.lagStringFraManglendeFakturabetalingMelding(manglendeFakturabetalingMelding));
+        prosessinstans.setLåsReferanse(LåsReferanseFactory.lagString(manglendeFakturabetalingMelding));
 
         lagre(prosessinstans);
     }
